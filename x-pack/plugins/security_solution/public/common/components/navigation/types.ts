@@ -90,7 +90,6 @@ export const securityNavKeys = [
   SecurityPageName.cloudSecurityPostureDashboard,
   SecurityPageName.cloudSecurityPostureFindings,
   SecurityPageName.cloudSecurityPostureBenchmarks,
-  SecurityPageName.cloudSecurityPostureRules,
   SecurityPageName.entityAnalytics,
 ] as const;
 export type SecurityNavKey = typeof securityNavKeys[number];
