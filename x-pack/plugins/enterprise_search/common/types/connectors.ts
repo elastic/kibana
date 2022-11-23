@@ -99,7 +99,7 @@ export interface FilteringConfig {
 }
 
 export enum TriggerMethod {
-  ON_DEMAND = 'on-demand',
+  ON_DEMAND = 'on_demand',
   SCHEDULED = 'scheduled',
 }
 
