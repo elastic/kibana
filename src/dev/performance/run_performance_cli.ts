@@ -48,7 +48,8 @@ run(
       });
     }
 
-    async function startAndWarmupEs() {
+    async function startEs() {
+      process.stdout.write(`--- Starting ES\n`);
       await procRunner.run('es', {
         cmd: 'node',
         args: ['scripts/es', 'snapshot'],
@@ -57,20 +58,28 @@ run(
       });
 
       log.info(`✅ ES is ready and will run in the background`);
+    }
 
-      process.stdout.write(`--- Running warmup\n`);
-      // Set the phase to WARMUP, this will prevent the functional test server from starting Elasticsearch, opt in to telemetry, etc.
-      process.env.TEST_PERFORMANCE_PHASE = 'WARMUP';
-      await runFunctionalTest(warmupJourney);
+    async function runWarmup(journey: string) {
+      try {
+        process.stdout.write(`--- Running warmup ${journey}\n`);
+        // Set the phase to WARMUP, this will prevent the functional test server from starting Elasticsearch, opt in to telemetry, etc.
+        process.env.TEST_PERFORMANCE_PHASE = 'WARMUP';
+        await runFunctionalTest(journey);
+      } catch (e) {
+        log.warning(`Warmup for ${journey} failed`);
+        throw e;
+      }
     }
 
     async function runTest(journey: string) {
       try {
+        process.stdout.write(`--- Running test ${journey}\n`);
         process.env.TEST_PERFORMANCE_PHASE = 'TEST';
-        await runFunctionalTest(warmupJourney);
+        await runFunctionalTest(journey);
       } catch (e) {
         log.warning(`Journey ${journey} failed. Retrying once...`);
-        await runFunctionalTest(warmupJourney);
+        await runFunctionalTest(journey);
       }
     }
 
@@ -78,7 +87,7 @@ run(
     const kibanaInstallDir = flagsReader.requiredPath('kibana-install-dir');
     const journeys = await Fsp.readdir(journeyBasePath);
     const warmupIndex = journeys.indexOf('warmup.ts');
-    const warmupJourney = journeys[warmupIndex];
+    // const warmupJourney = journeys[warmupIndex];
     journeys.splice(warmupIndex, 1);
 
     log.info(`Found ${journeys.length} journeys to run`);
@@ -88,8 +97,8 @@ run(
     log.info(`Setup environent`);
 
     for (const journey of journeys) {
-      await startAndWarmupEs();
-      process.stdout.write(`--- Running journey ${journey}\n`);
+      await startEs();
+      await runWarmup(journey);
       await runTest(journey);
       await procRunner.stop('es');
     }
