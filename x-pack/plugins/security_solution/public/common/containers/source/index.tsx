@@ -9,7 +9,6 @@ import { isEmpty, isEqual, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import type { DataViewBase } from '@kbn/es-query';
 import { Subscription } from 'rxjs';
 
 import type {
@@ -20,10 +19,12 @@ import type {
   IndexFieldsStrategyResponse,
 } from '@kbn/timelines-plugin/common';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import type { SecuritySolutionDataViewBase } from '../../types';
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { getDataViewStateFromIndexFields } from './use_data_view';
+import { DataViewType } from '../../types';
 
 export type { BrowserField, BrowserFields };
 
@@ -42,24 +43,13 @@ export const getAllFieldsByName = (
 ): { [fieldName: string]: Partial<BrowserField> } =>
   keyBy('name', getAllBrowserFields(browserFields));
 
-interface TitleIndexPattern extends DataViewBase {
-  type: string;
-  value: string;
-}
-
-export const getTitleIndexPattern = memoizeOne(
-  (title: string, fields: IndexField[]): TitleIndexPattern =>
+export const getFieldsAsSpec = memoizeOne(
+  (fields: IndexField[]): SecuritySolutionDataViewBase['fields'] =>
     fields && fields.length > 0
-      ? {
-          fields: fields.map((field) =>
-            pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
-          ),
-          title,
-          // need these properties for unified search
-          type: 'title',
-          value: title,
-        }
-      : { fields: [], title, type: 'title', value: title },
+      ? fields.map((field) =>
+          pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
+        )
+      : [],
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 
@@ -92,12 +82,12 @@ export const getBrowserFields = memoizeOne(
 );
 
 const DEFAULT_BROWSER_FIELDS = {};
-const DEFAULT_INDEX_PATTERNS = { fields: [], title: '', type: 'title', value: '' };
+const DEFAULT_INDEX_PATTERNS = { fields: [], title: '', type: DataViewType.title, value: '' };
 interface FetchIndexReturn {
   browserFields: BrowserFields;
   indexes: string[];
   indexExists: boolean;
-  indexPatterns: DataViewBase;
+  indexPatterns: SecuritySolutionDataViewBase;
 }
 
 /**
@@ -152,7 +142,13 @@ export const useFetchIndex = (
                       browserFields,
                       indexes: response.indicesExist,
                       indexExists: response.indicesExist.length > 0,
-                      indexPatterns: getTitleIndexPattern(stringifyIndices, response.indexFields),
+                      indexPatterns: {
+                        fields: getFieldsAsSpec(response.indexFields),
+                        title: stringifyIndices,
+                        // need these properties for unified search
+                        type: DataViewType.title,
+                        value: stringifyIndices,
+                      },
                     });
 
                     searchSubscription$.current.unsubscribe();

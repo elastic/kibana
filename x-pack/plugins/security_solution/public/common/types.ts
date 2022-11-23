@@ -20,9 +20,15 @@ export interface SecuritySolutionUiConfigType {
   enableExperimental: string[];
 }
 
+export enum DataViewType {
+  id = 'id',
+  title = 'title',
+}
 /**
  * DataViewBase with enhanced index fields used in timelines
  */
 export interface SecuritySolutionDataViewBase extends DataViewBase {
   fields: FieldSpec[];
+  type: DataViewType;
+  value: string;
 }

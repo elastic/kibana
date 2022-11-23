@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { matchPath } from 'react-router-dom';
+import { DataViewType } from '../../types';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import type {
   SelectedDataView,
@@ -429,11 +430,11 @@ export const useSourcererDataView = (
         // need these properties for unified search
         ...(sourcererDataView.id != null
           ? {
-              type: 'id',
+              type: DataViewType.id,
               value: sourcererDataView.id,
             }
           : {
-              type: 'title',
+              type: DataViewType.title,
               value: selectedPatterns.join(','),
             }),
       },

@@ -727,7 +727,6 @@ export class DataViewsService {
     id: string,
     displayErrors: boolean = true
   ): Promise<DataView> => {
-    console.log('getSavedObjectAndInit', { DATA_VIEW_SAVED_OBJECT_TYPE, id });
     const savedObject = await this.savedObjectsClient.get<DataViewAttributes>(
       DATA_VIEW_SAVED_OBJECT_TYPE,
       id
