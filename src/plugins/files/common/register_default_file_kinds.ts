@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
-declare module '*/grammar/built_grammar.js' {
-  export const parse: import('./parse').Parse;
+import { getFileKindsRegistry } from './file_kinds_registry';
+import { defaultImageFileKind } from '.';
+
+export function registerDefaultFileKinds() {
+  const registry = getFileKindsRegistry();
+  registry.register(defaultImageFileKind);
 }
