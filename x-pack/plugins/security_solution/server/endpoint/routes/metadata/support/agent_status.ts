@@ -17,6 +17,7 @@ const getStatusQueryMap = (path: string = '') =>
     [HostStatus.UNHEALTHY.toString(), AgentStatusKueryHelper.buildKueryForErrorAgents(path)],
     [HostStatus.UPDATING.toString(), AgentStatusKueryHelper.buildKueryForUpdatingAgents(path)],
     [HostStatus.INACTIVE.toString(), AgentStatusKueryHelper.buildKueryForInactiveAgents(path)],
+    [HostStatus.UNENROLLED.toString(), AgentStatusKueryHelper.buildKueryForUnenrolledAgents(path)],
   ]);
 
 export function buildStatusesKuery(statusesToFilter: string[]): string | undefined {
