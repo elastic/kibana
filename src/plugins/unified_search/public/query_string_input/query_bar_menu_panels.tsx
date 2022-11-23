@@ -7,7 +7,6 @@
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import {
   EuiContextMenuPanelDescriptor,
@@ -34,6 +33,7 @@ import type { IUnifiedSearchPluginServices } from '../types';
 import { fromUser } from './from_user';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { FilterPanelOption } from '../types';
+import { strings } from './i18n';
 
 const MAP_ITEMS_TO_FILTER_OPTION: Record<string, FilterPanelOption> = {
   'filter-sets-pinAllFilters': 'pinFilter',
@@ -226,27 +226,19 @@ export function QueryBarMenuPanels({
     });
   };
 
-  const luceneLabel = i18n.translate('unifiedSearch.query.queryBar.luceneLanguageName', {
-    defaultMessage: 'Lucene',
-  });
-  const kqlLabel = i18n.translate('unifiedSearch.query.queryBar.kqlLanguageName', {
-    defaultMessage: 'KQL',
-  });
+  const luceneLabel = strings.getLuceneLanguageName();
+  const kqlLabel = strings.getKqlLanguageName();
 
   const filtersRelatedPanels = [
     {
-      name: i18n.translate('unifiedSearch.filter.options.addFilterButtonLabel', {
-        defaultMessage: 'Add filter',
-      }),
+      name: strings.getOptionsAddFilterButtonLabel(),
       icon: 'plus',
       onClick: () => {
         setRenderedComponent('addFilter');
       },
     },
     {
-      name: i18n.translate('unifiedSearch.filter.options.applyAllFiltersButtonLabel', {
-        defaultMessage: 'Apply to all',
-      }),
+      name: strings.getOptionsApplyAllFiltersButtonLabel(),
       icon: 'filter',
       panel: 2,
       disabled: !Boolean(filters && filters.length > 0),
@@ -257,12 +249,8 @@ export function QueryBarMenuPanels({
   const queryAndFiltersRelatedPanels = [
     {
       name: savedQuery
-        ? i18n.translate('unifiedSearch.filter.options.loadOtherFilterSetLabel', {
-            defaultMessage: 'Load other saved query',
-          })
-        : i18n.translate('unifiedSearch.filter.options.loadCurrentFilterSetLabel', {
-            defaultMessage: 'Load saved query',
-          }),
+        ? strings.getLoadOtherFilterSetLabel()
+        : strings.getLoadCurrentFilterSetLabel(),
       panel: 4,
       width: 350,
       icon: 'filter',
@@ -270,13 +258,7 @@ export function QueryBarMenuPanels({
       disabled: !savedQueries.length,
     },
     {
-      name: savedQuery
-        ? i18n.translate('unifiedSearch.filter.options.saveAsNewFilterSetLabel', {
-            defaultMessage: 'Save as new',
-          })
-        : i18n.translate('unifiedSearch.filter.options.saveFilterSetLabel', {
-            defaultMessage: 'Save saved query',
-          }),
+      name: savedQuery ? strings.getSaveAsNewFilterSetLabel() : strings.getSaveFilterSetLabel(),
       icon: 'save',
       disabled:
         !Boolean(showSaveQuery) || !hasFiltersOrQuery || (savedQuery && !savedQueryHasChanged),
@@ -295,9 +277,7 @@ export function QueryBarMenuPanels({
   if (showFilterBar || showQueryInput) {
     items.push(
       {
-        name: i18n.translate('unifiedSearch.filter.options.clearllFiltersButtonLabel', {
-          defaultMessage: 'Clear all',
-        }),
+        name: strings.getClearllFiltersButtonLabel(),
         disabled: !hasFiltersOrQuery && !Boolean(savedQuery),
         icon: 'crossInACircleFilled',
         'data-test-subj': 'filter-sets-removeAllFilters',
@@ -341,11 +321,7 @@ export function QueryBarMenuPanels({
                 data-test-subj="savedQueryTitle"
               >
                 <strong>
-                  {savedQuery
-                    ? savedQuery.attributes.title
-                    : i18n.translate('unifiedSearch.search.searchBar.savedQuery', {
-                        defaultMessage: 'Saved query',
-                      })}
+                  {savedQuery ? savedQuery.attributes.title : strings.getSavedQueryLabel()}
                 </strong>
               </EuiText>
             </EuiFlexItem>
@@ -364,41 +340,22 @@ export function QueryBarMenuPanels({
                       size="s"
                       fill
                       onClick={handleSave}
-                      aria-label={i18n.translate(
-                        'unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonAriaLabel',
-                        {
-                          defaultMessage: 'Save changes to {title}',
-                          values: { title: savedQuery?.attributes.title },
-                        }
+                      aria-label={strings.getSavedQueryPopoverSaveChangesButtonAriaLabel(
+                        savedQuery?.attributes.title
                       )}
                       data-test-subj="saved-query-management-save-changes-button"
                     >
-                      {i18n.translate(
-                        'unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonText',
-                        {
-                          defaultMessage: 'Save changes',
-                        }
-                      )}
+                      {strings.getSavedQueryPopoverSaveChangesButtonText()}
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       size="s"
                       onClick={handleSaveAsNew}
-                      aria-label={i18n.translate(
-                        'unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel',
-                        {
-                          defaultMessage: 'Save as new saved query',
-                        }
-                      )}
+                      aria-label={strings.getSavedQueryPopoverSaveAsNewButtonAriaLabel()}
                       data-test-subj="saved-query-management-save-as-new-button"
                     >
-                      {i18n.translate(
-                        'unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonText',
-                        {
-                          defaultMessage: 'Save as new',
-                        }
-                      )}
+                      {strings.getSavedQueryPopoverSaveAsNewButtonText()}
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -411,23 +368,17 @@ export function QueryBarMenuPanels({
     },
     {
       id: 1,
-      title: i18n.translate('unifiedSearch.filter.options.saveCurrentFilterSetLabel', {
-        defaultMessage: 'Save current saved query',
-      }),
+      title: strings.getSaveCurrentFilterSetLabel(),
       disabled: !Boolean(showSaveQuery),
       content: <div style={{ padding: 16 }}>{saveAsNewQueryFormComponent}</div>,
     },
     {
       id: 2,
       initialFocusedItemIndex: 1,
-      title: i18n.translate('unifiedSearch.filter.options.applyAllFiltersButtonLabel', {
-        defaultMessage: 'Apply to all',
-      }),
+      title: strings.getApplyAllFiltersButtonLabel(),
       items: [
         {
-          name: i18n.translate('unifiedSearch.filter.options.enableAllFiltersButtonLabel', {
-            defaultMessage: 'Enable all',
-          }),
+          name: strings.getEnableAllFiltersButtonLabel(),
           icon: 'eye',
           'data-test-subj': 'filter-sets-enableAllFilters',
           onClick: () => {
@@ -436,9 +387,7 @@ export function QueryBarMenuPanels({
           },
         },
         {
-          name: i18n.translate('unifiedSearch.filter.options.disableAllFiltersButtonLabel', {
-            defaultMessage: 'Disable all',
-          }),
+          name: strings.getDisableAllFiltersButtonLabel(),
           'data-test-subj': 'filter-sets-disableAllFilters',
           icon: 'eyeClosed',
           onClick: () => {
@@ -447,9 +396,7 @@ export function QueryBarMenuPanels({
           },
         },
         {
-          name: i18n.translate('unifiedSearch.filter.options.invertNegatedFiltersButtonLabel', {
-            defaultMessage: 'Invert inclusion',
-          }),
+          name: strings.getInvertNegatedFiltersButtonLabel(),
           'data-test-subj': 'filter-sets-invertAllFilters',
           icon: 'invert',
           onClick: () => {
@@ -458,9 +405,7 @@ export function QueryBarMenuPanels({
           },
         },
         {
-          name: i18n.translate('unifiedSearch.filter.options.pinAllFiltersButtonLabel', {
-            defaultMessage: 'Pin all',
-          }),
+          name: strings.getPinAllFiltersButtonLabel(),
           'data-test-subj': 'filter-sets-pinAllFilters',
           icon: 'pin',
           onClick: () => {
@@ -469,9 +414,7 @@ export function QueryBarMenuPanels({
           },
         },
         {
-          name: i18n.translate('unifiedSearch.filter.options.unpinAllFiltersButtonLabel', {
-            defaultMessage: 'Unpin all',
-          }),
+          name: strings.getUnpinAllFiltersButtonLabel(),
           'data-test-subj': 'filter-sets-unpinAllFilters',
           icon: 'pin',
           onClick: () => {
@@ -483,9 +426,7 @@ export function QueryBarMenuPanels({
     },
     {
       id: 3,
-      title: i18n.translate('unifiedSearch.filter.options.filterLanguageLabel', {
-        defaultMessage: 'Filter language',
-      }),
+      title: strings.getFilterLanguageLabel(),
       content: (
         <QueryLanguageSwitcher
           language={language}
@@ -500,9 +441,7 @@ export function QueryBarMenuPanels({
     },
     {
       id: 4,
-      title: i18n.translate('unifiedSearch.filter.options.loadCurrentFilterSetLabel', {
-        defaultMessage: 'Load saved query',
-      }),
+      title: strings.getLoadCurrentFilterSetLabel(),
       width: 400,
       content: <div>{manageFilterSetComponent}</div>,
     },

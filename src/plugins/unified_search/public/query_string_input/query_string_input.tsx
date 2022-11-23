@@ -7,8 +7,6 @@
  */
 
 import React, { PureComponent } from 'react';
-import { i18n } from '@kbn/i18n';
-
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
 
@@ -53,6 +51,7 @@ import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_butt
 import { AutocompleteService, QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
 import { getTheme } from '../services';
 import './query_string_input.scss';
+import { strings } from './i18n';
 
 export interface QueryStringInputDependencies {
   unifiedSearch: {
@@ -488,9 +487,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
 
       if (notifications && docLinks) {
         const toast = notifications.toasts.add({
-          title: i18n.translate('unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoTitle', {
-            defaultMessage: 'KQL nested query syntax',
-          }),
+          title: strings.getKQLNestedQuerySyntaxInfoTitle(),
           text: toMountPoint(
             <div>
               <p>
@@ -711,22 +708,13 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
   };
 
   getSearchInputPlaceholder = () => {
-    let placeholder = '';
     if (!this.props.query.language || this.props.query.language === 'text') {
-      placeholder = i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholderForText', {
-        defaultMessage: 'Filter your data',
-      });
-    } else {
-      const language =
-        this.props.query.language === 'kuery' ? 'KQL' : toSentenceCase(this.props.query.language);
-
-      placeholder = i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholder', {
-        defaultMessage: 'Filter your data using {language} syntax',
-        values: { language },
-      });
+      return strings.getSearchInputPlaceholderForText();
     }
+    const language =
+      this.props.query.language === 'kuery' ? 'KQL' : toSentenceCase(this.props.query.language);
 
-    return placeholder;
+    return strings.getSearchInputPlaceholder(language);
   };
 
   public render() {
@@ -770,10 +758,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
           <div
             {...ariaCombobox}
             style={{ position: 'relative', width: '100%' }}
-            aria-label={i18n.translate('unifiedSearch.query.queryBar.comboboxAriaLabel', {
-              defaultMessage: 'Search and filter the {pageType} page',
-              values: { pageType: this.props.appName },
-            })}
+            aria-label={strings.getQueryBarComboboxAriaLabel(this.props.appName)}
             aria-haspopup="true"
             aria-expanded={this.state.isSuggestionsVisible}
             data-skip-axe="aria-required-children"
@@ -799,10 +784,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 inputRef={this.assignInputRef}
                 autoComplete="off"
                 spellCheck={false}
-                aria-label={i18n.translate('unifiedSearch.query.queryBar.searchInputAriaLabel', {
-                  defaultMessage: 'Start typing to search and filter the {pageType} page',
-                  values: { pageType: this.props.appName },
-                })}
+                aria-label={strings.getQueryBarSearchInputAriaLabel(this.props.appName)}
                 aria-autocomplete="list"
                 aria-controls={this.state.isSuggestionsVisible ? 'kbnTypeahead__items' : undefined}
                 aria-activedescendant={
@@ -830,9 +812,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                   <button
                     type="button"
                     className="euiFormControlLayoutClearButton"
-                    title={i18n.translate('unifiedSearch.query.queryBar.clearInputLabel', {
-                      defaultMessage: 'Clear input',
-                    })}
+                    title={strings.getQueryBarClearInputLabel()}
                     onClick={() => {
                       this.onQueryStringChange('');
                       if (this.props.autoSubmit) {

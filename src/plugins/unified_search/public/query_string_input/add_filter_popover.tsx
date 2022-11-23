@@ -7,7 +7,6 @@
  */
 
 import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiFlexItem,
   EuiButtonIcon,
@@ -20,6 +19,7 @@ import { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 import { popoverDragAndDropCss } from './add_filter_popover.styles';
+import { strings } from './i18n';
 
 interface AddFilterPopoverProps {
   indexPatterns?: Array<DataView | string>;
@@ -41,16 +41,12 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
   const euiTheme = useEuiTheme();
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
 
-  const buttonIconLabel = i18n.translate('unifiedSearch.filter.filterBar.addFilterButtonLabel', {
-    defaultMessage: 'Add filter',
-  });
-
   const button = (
-    <EuiToolTip delay="long" content={buttonIconLabel}>
+    <EuiToolTip delay="long" content={strings.getAddFilterButtonLabel()}>
       <EuiButtonIcon
         display="base"
         iconType="plusInCircleFilled"
-        aria-label={buttonIconLabel}
+        aria-label={strings.getAddFilterButtonLabel()}
         data-test-subj="addFilter"
         onClick={() => setIsAddFilterPopoverOpen((isOpen) => !isOpen)}
         size="m"
