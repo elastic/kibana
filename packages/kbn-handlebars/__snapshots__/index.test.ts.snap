@@ -103,3 +103,7 @@ HandlebarsEnvironment {
   "template": [Function],
 }
 `;
+
+exports[`blocks decorators registration should not be able to call decorators unregistered using the \`unregisterDecorator\` function 1`] = `"lookupProperty(...) is not a function"`;
+
+exports[`blocks decorators registration should not be able to call decorators unregistered using the \`unregisterDecorator\` function 2`] = `"decoratorFn is not a function"`;

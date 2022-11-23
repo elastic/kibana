@@ -91,3 +91,116 @@ it('Only provide options.fn/inverse to block helpers', () => {
   expect(toNotHaveProperties.calls).toEqual(nonBlockTemplates.length * 2 * 2);
   expect(toHaveProperties.calls).toEqual(blockTemplates.length * 2 * 2);
 });
+
+// Extra "blocks" tests
+describe('blocks', () => {
+  describe('decorators', () => {
+    it('should only call decorator once', () => {
+      let calls = 0;
+      const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
+      expectTemplate('{{#helper}}{{*decorator}}{{/helper}}')
+        .withHelper('helper', () => {})
+        .withDecorator('decorator', () => {
+          calls++;
+        })
+        .toCompileTo('');
+      expect(calls).toEqual(callsExpected);
+    });
+
+    it('should pass expected options to nested decorator', () => {
+      expectTemplate('{{#helper}}{{*decorator foo}}{{/helper}}')
+        .withHelper('helper', () => {})
+        .withDecorator('decorator', function (fn, props, container, options) {
+          expect(options).toMatchInlineSnapshot(`
+            Object {
+              "args": Array [
+                "bar",
+              ],
+              "data": Object {
+                "root": Object {
+                  "foo": "bar",
+                },
+              },
+              "hash": Object {},
+              "loc": Object {
+                "end": Object {
+                  "column": 29,
+                  "line": 1,
+                },
+                "start": Object {
+                  "column": 11,
+                  "line": 1,
+                },
+              },
+              "name": "decorator",
+            }
+          `);
+        })
+        .withInput({ foo: 'bar' })
+        .toCompileTo('');
+    });
+
+    it('should pass expected options to root decorator', () => {
+      expectTemplate('{{*decorator foo}}')
+        .withDecorator('decorator', function (fn, props, container, options) {
+          expect(options).toMatchInlineSnapshot(`
+            Object {
+              "args": Array [
+                undefined,
+              ],
+              "data": Object {
+                "root": Object {
+                  "foo": "bar",
+                },
+              },
+              "hash": Object {},
+              "loc": Object {
+                "end": Object {
+                  "column": 18,
+                  "line": 1,
+                },
+                "start": Object {
+                  "column": 0,
+                  "line": 1,
+                },
+              },
+              "name": "decorator",
+            }
+          `);
+        })
+        .withInput({ foo: 'bar' })
+        .toCompileTo('');
+    });
+
+    describe('registration', () => {
+      beforeEach(() => {
+        global.kbnHandlebarsEnv = Handlebars.create();
+      });
+
+      it('should be able to call decorators registered using the `registerDecorator` function', () => {
+        let calls = 0;
+        const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
+
+        kbnHandlebarsEnv!.registerDecorator('decorator', () => {
+          calls++;
+        });
+
+        expectTemplate('{{*decorator}}').toCompileTo('');
+        expect(calls).toEqual(callsExpected);
+      });
+
+      it('should not be able to call decorators unregistered using the `unregisterDecorator` function', () => {
+        let calls = 0;
+
+        kbnHandlebarsEnv!.registerDecorator('decorator', () => {
+          calls++;
+        });
+
+        kbnHandlebarsEnv!.unregisterDecorator('decorator');
+
+        expectTemplate('{{*decorator}}').toThrowErrorMatchingSnapshot();
+        expect(calls).toEqual(0);
+      });
+    });
+  });
+});

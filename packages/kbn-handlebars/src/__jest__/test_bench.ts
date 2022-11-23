@@ -3,7 +3,12 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-import Handlebars, { ExtendedCompileOptions, ExtendedRuntimeOptions } from '../..';
+import Handlebars, {
+  type DecoratorFunction,
+  type DecoratorsHash,
+  type ExtendedCompileOptions,
+  type ExtendedRuntimeOptions,
+} from '../..';
 
 declare global {
   var kbnHandlebarsEnv: typeof Handlebars | null; // eslint-disable-line no-var
@@ -25,6 +30,7 @@ class HandlebarsTestBench {
   private compileOptions?: ExtendedCompileOptions;
   private runtimeOptions?: ExtendedRuntimeOptions;
   private helpers: { [key: string]: Handlebars.HelperDelegate | undefined } = {};
+  private decorators: DecoratorsHash = {};
   private input: any = {};
 
   constructor(template: string, options: TestOptions = {}) {
@@ -55,6 +61,18 @@ class HandlebarsTestBench {
   withHelpers(helperFunctions: { [key: string]: Handlebars.HelperDelegate }) {
     for (const [name, helper] of Object.entries(helperFunctions)) {
       this.withHelper(name, helper);
+    }
+    return this;
+  }
+
+  withDecorator(name: string, decoratorFunction: DecoratorFunction) {
+    this.decorators[name] = decoratorFunction;
+    return this;
+  }
+
+  withDecorators(decoratorFunctions: { [key: string]: DecoratorFunction }) {
+    for (const [name, decoratorFunction] of Object.entries(decoratorFunctions)) {
+      this.withDecorator(name, decoratorFunction);
     }
     return this;
   }
@@ -119,6 +137,7 @@ class HandlebarsTestBench {
     const runtimeOptions: ExtendedRuntimeOptions = Object.assign(
       {
         helpers: this.helpers,
+        decorators: this.decorators,
       },
       this.runtimeOptions
     );
@@ -132,6 +151,7 @@ class HandlebarsTestBench {
     const runtimeOptions: ExtendedRuntimeOptions = Object.assign(
       {
         helpers: this.helpers,
+        decorators: this.decorators,
       },
       this.runtimeOptions
     );
