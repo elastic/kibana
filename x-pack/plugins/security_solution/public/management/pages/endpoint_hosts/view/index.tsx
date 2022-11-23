@@ -178,23 +178,6 @@ export const EndpointList = () => {
     <BackToExternalAppButton {...backLinkOptions} data-test-subj="endpointListBackLink" />
   );
 
-  const missingFleetAccessInfo = useMemo(() => {
-    return (
-      <EuiText size="s" color="subdued" data-test-subj="noFleetAccess">
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.onboarding.enableFleetAccess"
-          defaultMessage="Deploying Agents for the first time requires Fleet access. For more information, "
-        />
-        <EuiLink external href={`${services.docLinks.links.securitySolution.privileges}`}>
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policyList.onboardingDocsLink"
-            defaultMessage="view the Elastic Security documentation"
-          />
-        </EuiLink>
-      </EuiText>
-    );
-  }, [services.docLinks.links.securitySolution.privileges]);
-
   useEffect(() => {
     // if no endpoint policy, skip transform check
     if (!shouldCheckTransforms || !policyItems || !policyItems.length) {
@@ -572,11 +555,7 @@ export const EndpointList = () => {
     } else if (canReadEndpointList && !canAccessFleet) {
       return (
         <ManagementEmptyStateWrapper>
-          <PolicyEmptyState
-            loading={endpointPrivilegesLoading}
-            actionHidden
-            additionalInfo={missingFleetAccessInfo}
-          />
+          <PolicyEmptyState loading={endpointPrivilegesLoading} />
         </ManagementEmptyStateWrapper>
       );
     } else if (!policyItemsLoading && policyItems && policyItems.length > 0) {
@@ -616,7 +595,6 @@ export const EndpointList = () => {
     canAccessFleet,
     canReadEndpointList,
     endpointPrivilegesLoading,
-    missingFleetAccessInfo,
   ]);
 
   const hasListData = listData && listData.length > 0;
