@@ -16,6 +16,7 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { InfraPluginSetup } from '@kbn/infra-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -66,8 +67,6 @@ import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/t
 import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
 
 import { ConfigType } from '.';
-
-import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;

@@ -63,12 +63,15 @@ describe('add analytics collection lib function', () => {
       index: ANALYTICS_COLLECTIONS_INDEX,
     });
 
-    expect(mockDataViewsService.createAndSave).toHaveBeenCalledWith({
-      title: 'elastic_analytics.events-example',
-      namespaces: ['logs-elastic_analytics.events-example'],
-      allowNoIndex: true,
-      timeFieldName: '@timestamp',
-    }, true);
+    expect(mockDataViewsService.createAndSave).toHaveBeenCalledWith(
+      {
+        title: 'elastic_analytics.events-example',
+        namespaces: ['logs-elastic_analytics.events-example'],
+        allowNoIndex: true,
+        timeFieldName: '@timestamp',
+      },
+      true
+    );
   });
 
   it('should reject if index already exists', async () => {
@@ -81,7 +84,8 @@ describe('add analytics collection lib function', () => {
         mockDataViewsService as unknown as DataViewsService,
         {
           name: 'index_name',
-        })
+        }
+      )
     ).rejects.toEqual(new Error(ErrorCode.ANALYTICS_COLLECTION_ALREADY_EXISTS));
     expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
     expect(mockDataViewsService.createAndSave).not.toHaveBeenCalled();
@@ -97,7 +101,8 @@ describe('add analytics collection lib function', () => {
         mockDataViewsService as unknown as DataViewsService,
         {
           name: 'index_name!',
-        })
+        }
+      )
     ).rejects.toEqual(new Error(ErrorCode.ANALYTICS_COLLECTION_NAME_INVALID));
     expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
     expect(mockDataViewsService.createAndSave).not.toHaveBeenCalled();
@@ -116,7 +121,8 @@ describe('add analytics collection lib function', () => {
         mockDataViewsService as unknown as DataViewsService,
         {
           name: 'example',
-        })
+        }
+      )
     ).resolves.toEqual({ event_retention_day_length: 180, id: 'fakeId', name: 'example' });
 
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
@@ -142,7 +148,8 @@ describe('add analytics collection lib function', () => {
         mockDataViewsService as unknown as DataViewsService,
         {
           name: 'example',
-        })
+        }
+      )
     ).rejects.toEqual({ statusCode: 500 });
     expect(setupAnalyticsCollectionIndex).not.toHaveBeenCalled();
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledTimes(1);

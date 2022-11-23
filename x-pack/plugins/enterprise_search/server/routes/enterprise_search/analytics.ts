@@ -42,7 +42,12 @@ interface AnalyticsRouteDependencies extends RouteDependencies {
   savedObjects: SavedObjectsServiceStart;
 }
 
-export function registerAnalyticsRoutes({ router, log, data, savedObjects }: AnalyticsRouteDependencies) {
+export function registerAnalyticsRoutes({
+  router,
+  log,
+  data,
+  savedObjects,
+}: AnalyticsRouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/analytics/collections',
@@ -107,7 +112,11 @@ export function registerAnalyticsRoutes({ router, log, data, savedObjects }: Ana
       );
 
       try {
-        const body = await addAnalyticsCollection(elasticsearchClient, dataViewsService, request.body);
+        const body = await addAnalyticsCollection(
+          elasticsearchClient,
+          dataViewsService,
+          request.body
+        );
         return response.ok({ body });
       } catch (error) {
         if ((error as Error).message === ErrorCode.ANALYTICS_COLLECTION_ALREADY_EXISTS) {
