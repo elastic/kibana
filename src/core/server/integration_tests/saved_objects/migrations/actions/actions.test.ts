@@ -13,7 +13,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { TaskEither } from 'fp-ts/lib/TaskEither';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
+import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   bulkOverwriteTransformedDocuments,
   closePit,
@@ -44,7 +44,7 @@ import {
   MIGRATION_CLIENT_OPTIONS,
 } from '@kbn/core-saved-objects-migration-server-internal';
 
-const { startES } = kbnTestServer.createTestServers({
+const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
   settings: {
     es: {
@@ -54,7 +54,7 @@ const { startES } = kbnTestServer.createTestServers({
     },
   },
 });
-let esServer: kbnTestServer.TestElasticsearchUtils;
+let esServer: TestElasticsearchUtils;
 
 describe('migration actions', () => {
   let client: ElasticsearchClient;
