@@ -7,8 +7,11 @@
  */
 
 import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
+import {
+  createRootWithCorePlugins,
+  createTestServers,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import { Root } from '@kbn/core-root-server-internal';
 
 const { startES } = createTestServers({

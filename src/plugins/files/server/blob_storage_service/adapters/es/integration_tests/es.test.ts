@@ -8,8 +8,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { Readable } from 'stream';
-import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
-import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
+import { createTestServers, type TestElasticsearchUtils, type TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 
 import { ElasticsearchBlobStorageClient, BLOB_STORAGE_SYSTEM_INDEX_NAME } from '../es';
 

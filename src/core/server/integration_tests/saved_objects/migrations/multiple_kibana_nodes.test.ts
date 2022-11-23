@@ -11,10 +11,10 @@ import del from 'del';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   createTestServers,
   createRoot as createkbnTestServerRoot,
+  type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Root } from '@kbn/core-root-server-internal';
