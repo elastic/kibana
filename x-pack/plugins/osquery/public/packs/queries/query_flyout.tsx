@@ -17,7 +17,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider } from 'react-hook-form';
@@ -85,16 +85,14 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     },
     [resetField]
   );
-  /* Avoids accidental closing of the flyout when the user clicks outside of the flyout */
-  const maskProps = useMemo(() => ({ onClick: () => ({}) }), []);
 
   return (
     <EuiFlyout
       size="m"
       onClose={onClose}
       aria-labelledby="flyoutTitle"
+      ownFocus={true}
       outsideClickCloses={false}
-      maskProps={maskProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">

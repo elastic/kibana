@@ -18,7 +18,7 @@ describe('<Toolbar />', () => {
     const children = { primaryButton };
     const component = mountWithIntl(<Toolbar children={children} />);
 
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 
   test('onClick works as expected when the primary button is clicked', () => {

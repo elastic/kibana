@@ -28,7 +28,7 @@ interface UpdatableIntegration {
 
 export const usePackageInstallations = () => {
   const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages({
-    experimental: true,
+    prerelease: true,
   });
 
   const { data: agentPolicyData, isLoading: isLoadingPolicies } = useGetAgentPolicies({

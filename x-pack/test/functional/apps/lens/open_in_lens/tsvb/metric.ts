@@ -25,9 +25,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisualBuilder();
-      await visualBuilder.checkVisualBuilderIsPresent();
       await visualBuilder.resetPage();
       await visualBuilder.clickMetric();
       await visualBuilder.clickDataTab('metric');
@@ -90,7 +87,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should not allow converting of not valid panel', async () => {
       await visualBuilder.selectAggType('Value Count');
+
       await header.waitUntilLoadingHasFinished();
+
       expect(await visualize.hasNavigateToLensButton()).to.be(false);
     });
 
@@ -101,6 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setColorPickerValue('#54B399');
 
       await header.waitUntilLoadingHasFinished();
+
       await visualize.navigateToLensFromAnotherVisulization();
 
       await lens.waitForVisualization('mtrVis');
@@ -116,7 +116,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(1);
 
-        dimensions[0].click();
+        await dimensions[0].click();
 
         await lens.openPalettePanel('lnsMetric');
         const colorStops = await lens.getPaletteColorStops();

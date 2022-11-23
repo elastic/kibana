@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ).click();
       expect(
         await find.existsByCssSelector(
-          '[data-test-subj="lnsXY_textVisibility_name"][class$="isSelected"]'
+          '[data-test-subj="lnsXY_textVisibility_name"][class*="euiButtonGroupButton-isSelected"]'
         )
       ).to.be(true);
       await PageObjects.lens.closeDimensionEditor();

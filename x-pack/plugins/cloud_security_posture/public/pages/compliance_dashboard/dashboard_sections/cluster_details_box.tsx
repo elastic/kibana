@@ -9,11 +9,11 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
-  EuiSpacer,
   EuiText,
+  EuiTitle,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
@@ -30,6 +30,7 @@ const defaultClusterTitle = i18n.translate(
 );
 
 export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
+  const { euiTheme } = useEuiTheme();
   const navToFindings = useNavigateFindings();
 
   const shortId = cluster.meta.clusterId.slice(0, 6);
@@ -40,7 +41,7 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
   };
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+    <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
       <EuiFlexItem grow={false}>
         <EuiToolTip
           position="top"
@@ -64,8 +65,8 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
           }
         >
           <EuiLink onClick={() => handleClusterTitleClick(cluster.meta.clusterId)} color="text">
-            <EuiText size="xs">
-              <h3>
+            <EuiTitle css={{ fontSize: 20 }}>
+              <h5>
                 <FormattedMessage
                   id="xpack.csp.dashboard.benchmarkSection.clusterTitle"
                   defaultMessage="{title} - {shortId}"
@@ -74,31 +75,25 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
                     shortId,
                   }}
                 />
-              </h3>
-            </EuiText>
+              </h5>
+            </EuiTitle>
           </EuiLink>
         </EuiToolTip>
-        <EuiSpacer size="s" />
         <EuiText size="xs" color="subdued">
-          <EuiIcon type="clock" />
           <FormattedMessage
             id="xpack.csp.dashboard.benchmarkSection.lastEvaluatedTitle"
-            defaultMessage=" Last evaluated {dateFromNow}"
+            defaultMessage="Last evaluated {dateFromNow}"
             values={{
               dateFromNow: moment(cluster.meta.lastUpdate).fromNow(),
             }}
           />
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={true}>
-        <CISBenchmarkIcon
-          type={cluster.meta.benchmarkId}
-          name={cluster.meta.benchmarkName}
-          style={{
-            width: 64,
-            height: 64,
-          }}
-        />
+      <EuiFlexItem
+        grow={true}
+        style={{ justifyContent: 'flex-end', paddingBottom: euiTheme.size.m }}
+      >
+        <CISBenchmarkIcon type={cluster.meta.benchmarkId} name={cluster.meta.benchmarkName} />
       </EuiFlexItem>
       {INTERNAL_FEATURE_FLAGS.showManageRulesMock && (
         <EuiFlexItem grow={false}>

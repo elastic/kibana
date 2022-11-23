@@ -14,7 +14,13 @@
           "(theme$?: ",
           "Observable",
           "<",
-          "CoreTheme",
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-common.CoreTheme",
+            "text": "CoreTheme"
+          },
           ">) => () => ",
           {
             "pluginId": "expressions",
@@ -41,7 +47,13 @@
             "signature": [
               "Observable",
               "<",
-              "CoreTheme",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
+                "text": "CoreTheme"
+              },
               ">"
             ],
             "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
@@ -62,7 +74,13 @@
         "description": [],
         "signature": [
           "(core: ",
-          "CoreSetup",
+          {
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreSetup",
+            "text": "CoreSetup"
+          },
           "<object, unknown>) => () => ",
           {
             "pluginId": "expressions",
@@ -87,7 +105,13 @@
             "label": "core",
             "description": [],
             "signature": [
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<object, unknown>"
             ],
             "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",
@@ -156,7 +180,7 @@
         "label": "revealImageFunction",
         "description": [],
         "signature": [
-          "() => { name: \"revealImage\"; aliases: never[]; type: \"render\"; inputTypes: \"number\"[]; help: string; args: { image: { types: (\"null\" | \"string\")[]; help: string; default: null; }; emptyImage: { types: (\"null\" | \"string\")[]; help: string; default: null; }; origin: { types: \"string\"[]; help: string; default: string; options: ",
+          "() => { name: \"revealImage\"; aliases: never[]; type: \"render\"; inputTypes: \"number\"[]; help: any; args: { image: { types: (\"null\" | \"string\")[]; help: any; default: null; }; emptyImage: { types: (\"null\" | \"string\")[]; help: any; default: null; }; origin: { types: \"string\"[]; help: any; default: string; options: ",
           "Origin",
           "[]; }; }; fn: (percent: number, args: Arguments) => Promise<{ type: \"render\"; as: string; value: { image: string; emptyImage: string; origin: ",
           "Origin",

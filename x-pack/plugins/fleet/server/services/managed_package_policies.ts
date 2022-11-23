@@ -118,7 +118,7 @@ async function upgradePackagePolicy(
       soClient,
       esClient,
       [packagePolicy.id],
-      undefined,
+      { force: true },
       packagePolicy,
       installedPackage.version
     );

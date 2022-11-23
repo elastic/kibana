@@ -11,32 +11,13 @@ import noDataResponse from './mock_responses/no_data.json';
 import dataResponse from './mock_responses/data.json';
 import { APMConfig } from '../../..';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 
-const mockIndices: ApmIndicesConfig = {
-  sourcemap: 'myIndex',
-  error: 'myIndex',
-  onboarding: 'myIndex',
-  span: 'myIndex',
-  transaction: 'myIndex',
-  metric: 'myIndex',
-  apmAgentConfigurationIndex: 'myIndex',
-  apmCustomLinkIndex: 'myIndex',
-};
-
-function getMockSetup(esResponse: any) {
-  const clientSpy = jest.fn().mockReturnValueOnce(esResponse);
-  return {
-    internalClient: { search: clientSpy } as any,
-    config: new Proxy(
-      {},
-      {
-        get: () => 'myIndex',
-      }
-    ) as APMConfig,
-    indices: mockIndices,
-  };
-}
+const mockConfig = new Proxy(
+  {},
+  {
+    get: () => 'myIndex',
+  }
+) as APMConfig;
 
 function getMockApmEventClient(esResponse: any) {
   const apmEventClientSpy = jest.fn().mockReturnValueOnce(esResponse);
@@ -45,13 +26,12 @@ function getMockApmEventClient(esResponse: any) {
 
 describe('getTransactionBreakdown', () => {
   describe('when no data is available', () => {
-    const { config } = getMockSetup(noDataResponse);
     const { apmEventClient } = getMockApmEventClient(noDataResponse);
     it('returns an empty array if no data is available', async () => {
       const response = await getTransactionBreakdown({
         serviceName: 'myServiceName',
         transactionType: 'request',
-        config,
+        config: mockConfig,
         apmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
@@ -65,12 +45,11 @@ describe('getTransactionBreakdown', () => {
 
   describe('when data is returned', () => {
     it('returns a timeseries grouped by type and subtype', async () => {
-      const { config } = getMockSetup(dataResponse);
       const { apmEventClient } = getMockApmEventClient(dataResponse);
       const response = await getTransactionBreakdown({
         serviceName: 'myServiceName',
         transactionType: 'request',
-        config,
+        config: mockConfig,
         apmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
@@ -97,7 +76,6 @@ describe('getTransactionBreakdown', () => {
     });
 
     it('should not include more KPIs than MAX_KPIs', async () => {
-      const { config } = getMockSetup(dataResponse);
       const { apmEventClient } = getMockApmEventClient(dataResponse);
       // @ts-expect-error
       constants.MAX_KPIS = 2;
@@ -105,7 +83,7 @@ describe('getTransactionBreakdown', () => {
       const response = await getTransactionBreakdown({
         serviceName: 'myServiceName',
         transactionType: 'request',
-        config,
+        config: mockConfig,
         apmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
@@ -118,12 +96,11 @@ describe('getTransactionBreakdown', () => {
     });
 
     it('fills in gaps for a given timestamp', async () => {
-      const { config } = getMockSetup(dataResponse);
       const { apmEventClient } = getMockApmEventClient(dataResponse);
       const response = await getTransactionBreakdown({
         serviceName: 'myServiceName',
         transactionType: 'request',
-        config,
+        config: mockConfig,
         apmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',

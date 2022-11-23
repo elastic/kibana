@@ -66,7 +66,7 @@ export const testMobileKPIAttr = {
         isVisible: true,
         showSingleSeries: true,
         position: 'right',
-        legendSize: 'large',
+        legendSize: 'auto',
         shouldTruncate: false,
       },
       valueLabels: 'hide',

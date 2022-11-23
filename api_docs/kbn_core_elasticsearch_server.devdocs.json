@@ -641,7 +641,28 @@
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/contracts.ts",
             "deprecated": true,
             "trackAdoption": false,
-            "references": []
+            "references": [
+              {
+                "plugin": "@kbn/core-elasticsearch-server-internal",
+                "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/elasticsearch_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "console",
+                "path": "src/plugins/console/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/core-elasticsearch-server-internal",
+                "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/elasticsearch_service.test.ts"
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -5010,7 +5031,13 @@
             "label": "request",
             "description": [],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/unauthorized_error_handler.ts",
@@ -6405,7 +6432,13 @@
           "\n A user credentials container.\nIt accommodates the necessary auth credentials to impersonate the current user.\n"
         ],
         "signature": [
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any> | ",
           {
             "pluginId": "@kbn/core-elasticsearch-server",
@@ -6447,7 +6480,13 @@
             "text": "UnauthorizedErrorHandlerToolkit"
           },
           ") => ",
-          "MaybePromise",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.MaybePromise",
+            "text": "MaybePromise"
+          },
           "<",
           {
             "pluginId": "@kbn/core-elasticsearch-server",

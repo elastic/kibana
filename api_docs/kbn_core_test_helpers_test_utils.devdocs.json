@@ -20,7 +20,13 @@
         "description": [],
         "signature": [
           "(name: string) => ",
-          "SavedObjectsType",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsType",
+            "text": "SavedObjectsType"
+          },
           "<any>"
         ],
         "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_exportable_type.ts",
@@ -59,23 +65,71 @@
           "; httpSetup: ",
           "InternalHttpServiceSetup",
           "; handlerContext: { savedObjects: { client: jest.Mocked<",
-          "SavedObjectsClientContract",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsClientContract",
+            "text": "SavedObjectsClientContract"
+          },
           ">; typeRegistry: jest.Mocked<",
-          "ISavedObjectTypeRegistry",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.ISavedObjectTypeRegistry",
+            "text": "ISavedObjectTypeRegistry"
+          },
           " & Pick<",
           "SavedObjectTypeRegistry",
           ", \"registerType\">>; getClient: () => jest.Mocked<",
-          "SavedObjectsClientContract",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsClientContract",
+            "text": "SavedObjectsClientContract"
+          },
           ">; getExporter: () => jest.Mocked<",
-          "ISavedObjectsExporter",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.ISavedObjectsExporter",
+            "text": "ISavedObjectsExporter"
+          },
           ">; getImporter: () => jest.Mocked<",
-          "ISavedObjectsImporter",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.ISavedObjectsImporter",
+            "text": "ISavedObjectsImporter"
+          },
           ">; }; elasticsearch: { client: ",
-          "ScopedClusterClientMock",
+          {
+            "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
+            "scope": "server",
+            "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
+            "section": "def-server.ScopedClusterClientMock",
+            "text": "ScopedClusterClientMock"
+          },
           "; }; uiSettings: { client: jest.Mocked<",
-          "IUiSettingsClient",
+          {
+            "pluginId": "@kbn/core-ui-settings-server",
+            "scope": "server",
+            "docId": "kibKbnCoreUiSettingsServerPluginApi",
+            "section": "def-server.IUiSettingsClient",
+            "text": "IUiSettingsClient"
+          },
           ">; }; deprecations: { client: jest.Mocked<",
-          "DeprecationsClient",
+          {
+            "pluginId": "@kbn/core-deprecations-server",
+            "scope": "server",
+            "docId": "kibKbnCoreDeprecationsServerPluginApi",
+            "section": "def-server.DeprecationsClient",
+            "text": "DeprecationsClient"
+          },
           ">; }; }; }>"
         ],
         "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/setup_server.ts",

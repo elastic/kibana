@@ -9,6 +9,8 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
+import { PackagePolicyRestrictionRelatedError } from '../errors';
+
 import type {
   AgentPolicy,
   FullAgentPolicy,
@@ -169,6 +171,30 @@ describe('agent policy', () => {
 
     it('should run package policy delete external callbacks', async () => {
       await agentPolicyService.delete(soClient, esClient, 'mocked');
+      expect(packagePolicyService.runDeleteExternalCallbacks).toHaveBeenCalledWith([
+        { id: 'package-1' },
+      ]);
+    });
+
+    it('should throw error for agent policy which has managed package poolicy', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        {
+          id: 'package-1',
+          is_managed: true,
+        },
+      ] as any);
+      try {
+        await agentPolicyService.delete(soClient, esClient, 'mocked');
+      } catch (e) {
+        expect(e.message).toEqual(
+          new PackagePolicyRestrictionRelatedError(
+            `Cannot delete agent policy mocked that contains managed package policies`
+          ).message
+        );
+      }
+
+      await agentPolicyService.delete(soClient, esClient, 'mocked', { force: true });
+
       expect(packagePolicyService.runDeleteExternalCallbacks).toHaveBeenCalledWith([
         { id: 'package-1' },
       ]);
@@ -391,6 +417,29 @@ describe('agent policy', () => {
       mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
       mockedGetFullAgentPolicy.mockResolvedValue(null);
 
+      const mockFleetServerHost = {
+        id: 'id1',
+        name: 'fleet server 1',
+        host_urls: ['https://host1.fr:8220', 'https://host2-with-a-longer-name.fr:8220'],
+        is_default: false,
+        is_preconfigured: false,
+      };
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'existing-fleet-server-host',
+            type: 'fleet-fleet-server-host',
+            score: 1,
+            references: [],
+            version: '1.0.0',
+            attributes: mockFleetServerHost,
+          },
+        ],
+        page: 0,
+        per_page: 0,
+        total: 0,
+      });
+
       const mockSo = {
         attributes: {},
         id: 'policy123',
@@ -428,6 +477,28 @@ describe('agent policy', () => {
         references: [],
       };
       soClient.get.mockResolvedValue(mockSo);
+      const mockFleetServerHost = {
+        id: 'id1',
+        name: 'fleet server 1',
+        host_urls: ['https://host1.fr:8220', 'https://host2-with-a-longer-name.fr:8220'],
+        is_default: false,
+        is_preconfigured: false,
+      };
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'existing-fleet-server-host',
+            type: 'fleet-fleet-server-host',
+            score: 1,
+            references: [],
+            version: '1.0.0',
+            attributes: mockFleetServerHost,
+          },
+        ],
+        page: 0,
+        per_page: 0,
+        total: 0,
+      });
       soClient.bulkGet.mockResolvedValue({
         saved_objects: [mockSo],
       });

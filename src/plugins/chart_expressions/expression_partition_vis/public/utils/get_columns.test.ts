@@ -7,20 +7,18 @@
  */
 
 import { getColumns } from './get_columns';
-import {
-  LabelPositions,
-  LegendDisplay,
-  PartitionVisParams,
-  ValueFormats,
-} from '../../common/types';
 import { createMockPieParams, createMockVisData } from '../mocks';
 
 const visParams = createMockPieParams();
+const dimensions = {
+  metric: visParams.dimensions.metrics[0],
+  buckets: visParams.dimensions.buckets!,
+};
 const visData = createMockVisData();
 
 describe('getColumns', () => {
   it('should return the correct bucket columns if visParams returns dimensions', () => {
-    const { bucketColumns } = getColumns(visParams, visData);
+    const { bucketColumns } = getColumns(dimensions, visData);
     expect(bucketColumns.length).toEqual(visParams.dimensions.buckets?.length);
     expect(bucketColumns).toEqual([
       {
@@ -115,11 +113,8 @@ describe('getColumns', () => {
   it('should return the correct metric column if visParams returns dimensions', () => {
     const { metricColumn } = getColumns(
       {
-        ...visParams,
-        dimensions: {
-          ...visParams.dimensions,
-          metric: undefined,
-        },
+        ...dimensions,
+        metric: undefined,
       },
       visData
     );
@@ -144,28 +139,8 @@ describe('getColumns', () => {
   });
 
   it('should return the first data column if no buckets specified', () => {
-    const visParamsOnlyMetric: PartitionVisParams = {
-      legendDisplay: LegendDisplay.SHOW,
-      addTooltip: true,
-      labels: {
-        position: LabelPositions.DEFAULT,
-        show: true,
-        truncate: 100,
-        values: true,
-        valuesFormat: ValueFormats.PERCENT,
-        percentDecimals: 2,
-        last_level: false,
-      },
-      legendPosition: 'right',
-      nestedLegend: false,
-      maxLegendLines: 1,
-      truncateLegend: false,
-      distinctColors: false,
-      palette: {
-        name: 'default',
-        type: 'palette',
-      },
-      dimensions: {
+    const { metricColumn } = getColumns(
+      {
         metric: {
           type: 'vis_dimension',
           accessor: 1,
@@ -174,9 +149,10 @@ describe('getColumns', () => {
             params: {},
           },
         },
+        buckets: [],
       },
-    };
-    const { metricColumn } = getColumns(visParamsOnlyMetric, visData);
+      visData
+    );
     expect(metricColumn).toEqual({
       id: 'col-1-1',
       meta: {
@@ -200,29 +176,8 @@ describe('getColumns', () => {
   });
 
   it('should return an object with the name of the metric if no buckets specified', () => {
-    const visParamsOnlyMetric: PartitionVisParams = {
-      legendDisplay: LegendDisplay.SHOW,
-      addTooltip: true,
-      isDonut: true,
-      labels: {
-        position: LabelPositions.DEFAULT,
-        show: true,
-        truncate: 100,
-        values: true,
-        valuesFormat: ValueFormats.PERCENT,
-        percentDecimals: 2,
-        last_level: false,
-      },
-      truncateLegend: false,
-      maxLegendLines: 100,
-      distinctColors: false,
-      legendPosition: 'right',
-      nestedLegend: false,
-      palette: {
-        name: 'default',
-        type: 'palette',
-      },
-      dimensions: {
+    const { bucketColumns, metricColumn } = getColumns(
+      {
         metric: {
           type: 'vis_dimension',
           accessor: 1,
@@ -231,9 +186,10 @@ describe('getColumns', () => {
             params: {},
           },
         },
+        buckets: [],
       },
-    };
-    const { bucketColumns, metricColumn } = getColumns(visParamsOnlyMetric, visData);
+      visData
+    );
     expect(bucketColumns).toEqual([{ name: metricColumn.name }]);
   });
 });

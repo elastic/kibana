@@ -7,13 +7,14 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
-import { EuiPanel, EuiLoadingChart } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { DARK_THEME } from '@elastic/charts';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { useLocationName, useStatusByLocation } from '../../../../hooks';
 import { formatDuration } from '../../../../utils/formatting';
 import { MonitorOverviewItem, Ping } from '../../../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover';
+import { OverviewGridItemLoader } from './overview_grid_item_loader';
 
 export const getColor = (theme: ReturnType<typeof useTheme>, isEnabled: boolean, ping?: Ping) => {
   if (!isEnabled) {
@@ -29,27 +30,26 @@ export const MetricItem = ({
   averageDuration,
   data,
   loaded,
+  onClick,
 }: {
   monitor: MonitorOverviewItem;
   data: Array<{ x: number; y: number }>;
   averageDuration: number;
   loaded: boolean;
+  onClick: (params: { id: string; configId: string; location: string }) => void;
 }) => {
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const locationName = useLocationName({ locationId: monitor.location?.id });
-  const { locations } = useStatusByLocation(monitor.id);
+  const { locations } = useStatusByLocation(monitor.configId);
   const ping = locations.find((loc) => loc.observer?.geo?.name === locationName);
   const theme = useTheme();
 
   return (
-    <div
-      style={{
-        height: '160px',
-      }}
-    >
+    <div data-test-subj={`${monitor.name}-metric-item`} style={{ height: '160px' }}>
       {loaded ? (
         <EuiPanel
+          paddingSize="none"
           onMouseOver={() => {
             if (!isMouseOver) {
               setIsMouseOver(true);
@@ -61,15 +61,21 @@ export const MetricItem = ({
             }
           }}
           style={{
-            padding: '0px',
             height: '100%',
             overflow: 'hidden',
           }}
         >
           <Chart>
-            <Settings baseTheme={DARK_THEME} />
+            <Settings
+              onElementClick={() =>
+                monitor.configId &&
+                locationName &&
+                onClick({ configId: monitor.configId, id: monitor.id, location: locationName })
+              }
+              baseTheme={DARK_THEME}
+            />
             <Metric
-              id={`${monitor.id}-${monitor.location?.id}`}
+              id={`${monitor.configId}-${monitor.location?.id}`}
               data={[
                 [
                   {
@@ -81,7 +87,7 @@ export const MetricItem = ({
                     extra: (
                       <span>
                         {i18n.translate('xpack.synthetics.overview.duration.label', {
-                          defaultMessage: 'Duration',
+                          defaultMessage: 'Duration Avg.',
                         })}
                       </span>
                     ),
@@ -97,11 +103,12 @@ export const MetricItem = ({
               monitor={monitor}
               isPopoverOpen={isPopoverOpen}
               setIsPopoverOpen={setIsPopoverOpen}
+              position="relative"
             />
           )}
         </EuiPanel>
       ) : (
-        <EuiLoadingChart mono />
+        <OverviewGridItemLoader />
       )}
     </div>
   );

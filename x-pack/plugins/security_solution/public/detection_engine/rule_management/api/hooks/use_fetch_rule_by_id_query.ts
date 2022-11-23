@@ -8,12 +8,13 @@
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { transformInput } from '../../../../detections/containers/detection_engine/rules/transforms';
 import type { Rule } from '../../logic';
 import { fetchRuleById } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
-const FIND_ONE_RULE_QUERY_KEY = 'findOneRule';
+const FIND_ONE_RULE_QUERY_KEY = ['GET', DETECTION_ENGINE_RULES_URL];
 
 /**
  * A wrapper around useQuery provides default values to the underlying query,
@@ -23,9 +24,9 @@ const FIND_ONE_RULE_QUERY_KEY = 'findOneRule';
  * @param options - react-query options
  * @returns useQuery result
  */
-export const useFetchRuleByIdQuery = (id: string, options: UseQueryOptions<Rule>) => {
+export const useFetchRuleByIdQuery = (id: string, options?: UseQueryOptions<Rule>) => {
   return useQuery<Rule>(
-    [FIND_ONE_RULE_QUERY_KEY, id],
+    [...FIND_ONE_RULE_QUERY_KEY, id],
     async ({ signal }) => {
       const response = await fetchRuleById({ signal, id });
 
@@ -49,7 +50,7 @@ export const useInvalidateFetchRuleByIdQuery = () => {
   const queryClient = useQueryClient();
 
   return useCallback(() => {
-    queryClient.invalidateQueries([FIND_ONE_RULE_QUERY_KEY], {
+    queryClient.invalidateQueries(FIND_ONE_RULE_QUERY_KEY, {
       refetchType: 'active',
     });
   }, [queryClient]);

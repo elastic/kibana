@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   termQuery,
   kqlQuery,
@@ -14,7 +13,7 @@ import {
   getProcessorEventForTransactions,
   getDocumentTypeFilterForTransactions,
 } from '../../lib/helpers/transactions';
-import { SERVICE_NAME, TIER } from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, TIER } from '../../../common/es_fields/apm';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
@@ -68,7 +67,7 @@ export async function getTotalTransactionsPerService({
                     indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
                   )
                 : []),
-            ] as QueryDslQueryContainer[],
+            ],
           },
         },
         aggs: {

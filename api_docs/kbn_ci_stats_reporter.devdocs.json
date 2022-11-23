@@ -34,7 +34,13 @@
             ],
             "signature": [
               "(log: ",
-              "SomeDevLog",
+              {
+                "pluginId": "@kbn/some-dev-log",
+                "scope": "server",
+                "docId": "kibKbnSomeDevLogPluginApi",
+                "section": "def-server.SomeDevLog",
+                "text": "SomeDevLog"
+              },
               ") => ",
               {
                 "pluginId": "@kbn/ci-stats-reporter",
@@ -56,7 +62,13 @@
                 "label": "log",
                 "description": [],
                 "signature": [
-                  "SomeDevLog"
+                  {
+                    "pluginId": "@kbn/some-dev-log",
+                    "scope": "server",
+                    "docId": "kibKbnSomeDevLogPluginApi",
+                    "section": "def-server.SomeDevLog",
+                    "text": "SomeDevLog"
+                  }
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
@@ -88,7 +100,13 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Config",
+                  {
+                    "pluginId": "@kbn/ci-stats-core",
+                    "scope": "server",
+                    "docId": "kibKbnCiStatsCorePluginApi",
+                    "section": "def-server.Config",
+                    "text": "Config"
+                  },
                   " | undefined"
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
@@ -104,7 +122,13 @@
                 "label": "log",
                 "description": [],
                 "signature": [
-                  "SomeDevLog"
+                  {
+                    "pluginId": "@kbn/some-dev-log",
+                    "scope": "server",
+                    "docId": "kibKbnSomeDevLogPluginApi",
+                    "section": "def-server.SomeDevLog",
+                    "text": "SomeDevLog"
+                  }
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
@@ -373,7 +397,13 @@
         "description": [],
         "signature": [
           "(log: ",
-          "ToolingLog",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "server",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-server.ToolingLog",
+            "text": "ToolingLog"
+          },
           ", group: string) => (startTime: number, id: string, meta: Record<string, any>) => Promise<void>"
         ],
         "path": "packages/kbn-ci-stats-reporter/src/report_time.ts",
@@ -388,7 +418,13 @@
             "label": "log",
             "description": [],
             "signature": [
-              "ToolingLog"
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "server",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-server.ToolingLog",
+                "text": "ToolingLog"
+              }
             ],
             "path": "packages/kbn-ci-stats-reporter/src/report_time.ts",
             "deprecated": false,
@@ -510,7 +546,13 @@
               "Arbitrary key-value pairs which can be used for additional filtering/reporting"
             ],
             "signature": [
-              "CiStatsMetadata",
+              {
+                "pluginId": "@kbn/ci-stats-core",
+                "scope": "server",
+                "docId": "kibKbnCiStatsCorePluginApi",
+                "section": "def-server.CiStatsMetadata",
+                "text": "CiStatsMetadata"
+              },
               " | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
@@ -670,7 +712,13 @@
               "\nArbitrary metadata associated with this group. We currently look for a ciGroup metadata property for highlighting that when appropriate"
             ],
             "signature": [
-              "CiStatsMetadata"
+              {
+                "pluginId": "@kbn/ci-stats-core",
+                "scope": "server",
+                "docId": "kibKbnCiStatsCorePluginApi",
+                "section": "def-server.CiStatsMetadata",
+                "text": "CiStatsMetadata"
+              }
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
@@ -916,7 +964,13 @@
               "hash of key-value pairs which will be stored with the timing for additional filtering and reporting"
             ],
             "signature": [
-              "CiStatsMetadata",
+              {
+                "pluginId": "@kbn/ci-stats-core",
+                "scope": "server",
+                "docId": "kibKbnCiStatsCorePluginApi",
+                "section": "def-server.CiStatsMetadata",
+                "text": "CiStatsMetadata"
+              },
               " | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
@@ -949,7 +1003,13 @@
               "Default metadata to add to each metric"
             ],
             "signature": [
-              "CiStatsMetadata",
+              {
+                "pluginId": "@kbn/ci-stats-core",
+                "scope": "server",
+                "docId": "kibKbnCiStatsCorePluginApi",
+                "section": "def-server.CiStatsMetadata",
+                "text": "CiStatsMetadata"
+              },
               " | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",

@@ -36,6 +36,9 @@ const defaultProps = {
   ruleName: ['Test-rule'],
   ruleActions: [{ action_type_id: 'action1' }, { action_type_id: 'action2' }],
   alertId: 'test-alert-id',
+  ecsData: {
+    _id: 'test',
+  },
 };
 
 const defaultPermissions = {

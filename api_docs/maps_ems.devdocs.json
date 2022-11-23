@@ -434,9 +434,9 @@
           },
           " implements ",
           {
-            "pluginId": "core",
+            "pluginId": "@kbn/core-plugins-server",
             "scope": "server",
-            "docId": "kibCorePluginApi",
+            "docId": "kibKbnCorePluginsServerPluginApi",
             "section": "def-server.Plugin",
             "text": "Plugin"
           },
@@ -463,9 +463,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "core",
+                "pluginId": "@kbn/core-plugins-server",
                 "scope": "server",
-                "docId": "kibCorePluginApi",
+                "docId": "kibKbnCorePluginsServerPluginApi",
                 "section": "def-server.PluginInitializerContext",
                 "text": "PluginInitializerContext"
               },
@@ -498,9 +498,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
+                    "pluginId": "@kbn/core-plugins-server",
                     "scope": "server",
-                    "docId": "kibCorePluginApi",
+                    "docId": "kibKbnCorePluginsServerPluginApi",
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
@@ -524,9 +524,9 @@
             "signature": [
               "(core: ",
               {
-                "pluginId": "core",
+                "pluginId": "@kbn/core-lifecycle-server",
                 "scope": "server",
-                "docId": "kibCorePluginApi",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
                 "section": "def-server.CoreSetup",
                 "text": "CoreSetup"
               },
@@ -553,9 +553,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
+                    "pluginId": "@kbn/core-lifecycle-server",
                     "scope": "server",
-                    "docId": "kibCorePluginApi",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
                     "section": "def-server.CoreSetup",
                     "text": "CoreSetup"
                   },

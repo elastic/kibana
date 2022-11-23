@@ -10,6 +10,8 @@ import { Switch, Route } from 'react-router-dom';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
+import { getPackageReleaseLabel } from '../../../../../../services/package_prerelease';
+
 import { installationStatuses } from '../../../../../../../common/constants';
 
 import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../../constants';
@@ -19,7 +21,10 @@ import { isPackageUnverified } from '../../../../services';
 
 import type { PackageListItem } from '../../../../types';
 
-import type { IntegrationCardItem } from '../../../../../../../common/types/models';
+import type {
+  IntegrationCardItem,
+  IntegrationCardReleaseLabel,
+} from '../../../../../../../common/types/models';
 
 import { useGetPackages } from '../../../../hooks';
 
@@ -65,31 +70,31 @@ export const mapToCard = ({
 
   let isUnverified = false;
 
+  let version = 'version' in item ? item.version || '' : '';
+
   if (item.type === 'ui_link') {
     uiInternalPathUrl = item.id.includes('language_client.')
       ? addBasePath(item.uiInternalPath)
       : item.uiExternalLink || getAbsolutePath(item.uiInternalPath);
   } else {
-    let urlVersion = item.version;
-    if ('savedObject' in item) {
-      urlVersion = item.savedObject.attributes.version || item.version;
+    // installed package
+    if (
+      ['updates_available', 'installed'].includes(selectedCategory ?? '') &&
+      'savedObject' in item
+    ) {
+      version = item.savedObject.attributes.version || item.version;
       isUnverified = isPackageUnverified(item, packageVerificationKeyId);
     }
 
     const url = getHref('integration_details_overview', {
-      pkgkey: `${item.name}-${urlVersion}`,
+      pkgkey: `${item.name}-${version}`,
       ...(item.integration ? { integration: item.integration } : {}),
     });
 
     uiInternalPathUrl = url;
   }
 
-  let release: 'ga' | 'beta' | 'experimental' | undefined;
-  if ('release' in item) {
-    release = item.release;
-  } else if ((item as CustomIntegration).isBeta === true) {
-    release = 'beta';
-  }
+  const release: IntegrationCardReleaseLabel = getPackageReleaseLabel(version);
 
   return {
     id: `${item.type === 'ui_link' ? 'ui_link' : 'epr'}:${item.id}`,
@@ -100,7 +105,7 @@ export const mapToCard = ({
     fromIntegrations: selectedCategory,
     integration: 'integration' in item ? item.integration || '' : '',
     name: 'name' in item ? item.name : item.id,
-    version: 'version' in item ? item.version || '' : '',
+    version,
     release,
     categories: ((item.categories || []) as string[]).filter((c: string) => !!c),
     isUnverified,
@@ -108,8 +113,9 @@ export const mapToCard = ({
 };
 
 export const EPMHomePage: React.FC = () => {
+  // loading packages to find installed ones
   const { data: allPackages, isLoading } = useGetPackages({
-    experimental: true,
+    prerelease: true,
   });
 
   const installedPackages = useMemo(
@@ -132,7 +138,7 @@ export const EPMHomePage: React.FC = () => {
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
         <DefaultLayout section="browse" sectionsWithWarning={sectionsWithWarning}>
-          <AvailablePackages allPackages={allPackages} isLoading={isLoading} />
+          <AvailablePackages />
         </DefaultLayout>
       </Route>
     </Switch>

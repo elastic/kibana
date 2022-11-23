@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIconColor } from '@elastic/eui';
+import { EuiButtonIconProps } from '@elastic/eui';
 
 import { InternalSchemaType, SchemaType } from '../../../shared/schema/types';
 
@@ -33,6 +33,6 @@ export interface ResultAction {
   onClick(): void;
   title: string;
   iconType: string;
-  iconColor?: EuiButtonIconColor;
+  iconColor?: EuiButtonIconProps['color'];
   disabled?: boolean;
 }

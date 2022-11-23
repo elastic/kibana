@@ -7,7 +7,6 @@
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { StaticStyleProperty } from './static_style_property';
-// @ts-expect-error
 import { getMakiSymbolAnchor } from '../symbol_utils';
 import { IconStaticOptions } from '../../../../../common/descriptor_types';
 

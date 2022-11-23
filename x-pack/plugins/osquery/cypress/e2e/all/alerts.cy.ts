@@ -47,7 +47,9 @@ describe('Alert Event Details', () => {
     );
     findAndClickButton('Update pack');
     closeModalIfVisible();
-    cy.contains(PACK_NAME);
+    cy.contains(`Successfully updated "${PACK_NAME}" pack`);
+    cy.getBySel('toastCloseButton').click();
+
     cy.visit('/app/security/rules');
     cy.contains(RULE_NAME);
     cy.wait(2000);
@@ -109,6 +111,7 @@ describe('Alert Event Details', () => {
     cy.get('.euiButtonEmpty--flushLeft').contains('Cancel').click();
     cy.getBySel('add-to-timeline').first().click();
     cy.getBySel('globalToastList').contains('Added');
+    cy.getBySel('toastCloseButton').click();
     cy.getBySel(RESULTS_TABLE).within(() => {
       cy.getBySel(RESULTS_TABLE_BUTTON).should('not.exist');
     });

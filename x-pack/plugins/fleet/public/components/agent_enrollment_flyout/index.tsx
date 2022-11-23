@@ -19,10 +19,16 @@ import {
   EuiFlyoutFooter,
   EuiTab,
   EuiTabs,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useGetSettings, useFleetStatus, useAgentEnrollmentFlyoutData } from '../../hooks';
+import {
+  useStartServices,
+  useFleetStatus,
+  useAgentEnrollmentFlyoutData,
+  useFleetServerHostsForPolicy,
+} from '../../hooks';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 import type { PackagePolicy, AgentPolicy } from '../../types';
 
@@ -51,9 +57,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
     return policies.find((p) => p.id === id);
   };
 
-  const settings = useGetSettings();
   const fleetStatus = useFleetStatus();
-  const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
+  const { docLinks } = useStartServices();
 
   const [selectedPolicyId, setSelectedPolicyId] = useState(agentPolicy?.id);
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
@@ -69,6 +74,10 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   } = useAgentEnrollmentFlyoutData();
 
   const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(selectedPolicyId);
+
+  const { fleetServerHosts, fleetProxy, isLoadingInitialRequest } = useFleetServerHostsForPolicy(
+    agentPolicyWithPackagePolicies
+  );
 
   const selectedPolicy = agentPolicyWithPackagePolicies
     ? agentPolicyWithPackagePolicies
@@ -92,26 +101,55 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
 
   const { isK8s } = useIsK8sPolicy(selectedPolicy ? selectedPolicy : undefined);
 
-  const isLoadingInitialRequest = settings.isLoading && settings.isInitialRequest;
-
   return (
     <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} size="m">
       <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
         <EuiTitle size="m">
           <h2 id="FleetAgentEnrollmentFlyoutTitle">
-            <FormattedMessage
-              id="xpack.fleet.agentEnrollment.flyoutTitle"
-              defaultMessage="Add agent"
-            />
+            {isFleetServerPolicySelected ? (
+              <FormattedMessage
+                id="xpack.fleet.agentEnrollment.flyoutFleetServerTitle"
+                defaultMessage="Add Fleet Server"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.agentEnrollment.flyoutTitle"
+                defaultMessage="Add agent"
+              />
+            )}
           </h2>
         </EuiTitle>
         <EuiSpacer size="l" />
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.agentEnrollment.agentDescription"
-            defaultMessage="Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack."
-          />
-        </EuiText>
+        {isFleetServerPolicySelected ? (
+          <EuiText>
+            <FormattedMessage
+              id="xpack.fleet.agentEnrollment.instructionstFleetServer"
+              defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. Follow the instructions below to set up a Fleet Server. For more information, see the {userGuideLink}"
+              values={{
+                userGuideLink: (
+                  <EuiLink
+                    href={docLinks.links.fleet.fleetServerAddFleetServer}
+                    external
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.agentEnrollment.setupGuideLink"
+                      defaultMessage="Fleet and Elastic Agent Guide"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
+        ) : (
+          <EuiText>
+            <FormattedMessage
+              id="xpack.fleet.agentEnrollment.agentDescription"
+              defaultMessage="Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack."
+            />
+          </EuiText>
+        )}
+
         {selectionType === 'tabs' ? (
           <>
             <EuiSpacer size="l" />
@@ -151,7 +189,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
           <Loading size="l" />
         ) : (
           <Instructions
-            settings={settings.data?.item}
+            fleetServerHosts={fleetServerHosts}
+            fleetProxy={fleetProxy}
             setSelectedPolicyId={setSelectedPolicyId}
             agentPolicy={agentPolicy}
             selectedPolicy={selectedPolicy}

@@ -35,7 +35,16 @@
         "deprecated": true,
         "removeBy": "8.8.0",
         "trackAdoption": false,
-        "references": [],
+        "references": [
+          {
+            "plugin": "@kbn/core-lifecycle-browser",
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts"
+          },
+          {
+            "plugin": "@kbn/core-lifecycle-browser",
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_setup.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-injected-metadata-browser",
@@ -102,7 +111,16 @@
         "deprecated": true,
         "removeBy": "8.8.0",
         "trackAdoption": false,
-        "references": [],
+        "references": [
+          {
+            "plugin": "@kbn/core-lifecycle-browser",
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
+          },
+          {
+            "plugin": "@kbn/core-lifecycle-browser",
+            "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-injected-metadata-browser",

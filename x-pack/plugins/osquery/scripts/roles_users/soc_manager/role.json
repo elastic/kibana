@@ -17,6 +17,7 @@
       "feature": {
         "discover": ["all"],
         "infrastructure": ["read"],
+        "indexPatterns": ["all"],
         "observabilityCases": ["all"],
         "securitySolutionCases": ["all"],
         "ml": ["all"],

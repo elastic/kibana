@@ -7,19 +7,18 @@
 
 import type { NavigateToAppOptions } from '@kbn/core/public';
 import { useCallback } from 'react';
-import type { BulkActionResponse, BulkActionSummary } from '..';
+import type { BulkActionResponse } from '..';
 import { APP_UI_ID } from '../../../../../common/constants';
-import type { BulkActionEditPayload } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkAction } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import type { HTTPError } from '../../../../../common/detection_engine/types';
+import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { SecurityPageName } from '../../../../app/types';
 import { getEditRuleUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
-import type { UseAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
-import type { RulesTableActions } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
+import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
+import type { BulkAction } from '../../api/api';
 import { useBulkActionMutation } from '../../api/hooks/use_bulk_action_mutation';
-import { getErrorToastContent, getSuccessToastContent } from './translations';
+import { useShowBulkErrorToast } from './use_show_bulk_error_toast';
+import { useShowBulkSuccessToast } from './use_show_bulk_success_toast';
+import { useGuessRuleIdsForBulkAction } from './use_guess_rule_ids_for_bulk_action';
 
 export const goToRuleEditPage = (
   ruleId: string,
@@ -31,92 +30,78 @@ export const goToRuleEditPage = (
   });
 };
 
-type OnActionSuccessCallback = (
-  toasts: UseAppToasts,
-  action: BulkAction,
-  summary: BulkActionSummary
-) => void;
-
-type OnActionErrorCallback = (toasts: UseAppToasts, action: BulkAction, error: HTTPError) => void;
-
-interface RulesBulkActionArgs {
-  action: Exclude<BulkAction, BulkAction.export>;
-  visibleRuleIds?: string[];
-  search: { query: string } | { ids: string[] };
-  payload?: { edit?: BulkActionEditPayload[] };
-  onError?: OnActionErrorCallback;
-  onFinish?: () => void;
-  onSuccess?: OnActionSuccessCallback;
-  setLoadingRules?: RulesTableActions['setLoadingRules'];
+interface UseExecuteBulkActionOptions {
+  suppressSuccessToast?: boolean;
 }
 
-export const useExecuteBulkAction = () => {
-  const toasts = useAppToasts();
+export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
   const { mutateAsync } = useBulkActionMutation();
+  const showBulkSuccessToast = useShowBulkSuccessToast();
+  const showBulkErrorToast = useShowBulkErrorToast();
+  const guessRuleIdsForBulkAction = useGuessRuleIdsForBulkAction();
+  const rulesTableContext = useRulesTableContextOptional();
+  const setLoadingRules = rulesTableContext?.actions.setLoadingRules;
 
   const executeBulkAction = useCallback(
-    async ({
-      visibleRuleIds = [],
-      action,
-      setLoadingRules,
-      search,
-      payload,
-      onSuccess = defaultSuccessHandler,
-      onError = defaultErrorHandler,
-      onFinish,
-    }: RulesBulkActionArgs) => {
+    async (bulkAction: BulkAction) => {
       try {
-        setLoadingRules?.({ ids: visibleRuleIds, action });
-        const response = await mutateAsync({ ...search, action, edit: payload?.edit });
-        sendTelemetry(action, response);
-        onSuccess(toasts, action, response.attributes.summary);
+        setLoadingRules?.({
+          ids: bulkAction.ids ?? guessRuleIdsForBulkAction(bulkAction.type),
+          action: bulkAction.type,
+        });
+
+        const response = await mutateAsync({ bulkAction });
+        sendTelemetry(bulkAction.type, response);
+
+        if (!options?.suppressSuccessToast) {
+          showBulkSuccessToast({
+            actionType: bulkAction.type,
+            summary: response.attributes.summary,
+            editPayload:
+              bulkAction.type === BulkActionType.edit ? bulkAction.editPayload : undefined,
+          });
+        }
 
         return response;
       } catch (error) {
-        onError(toasts, action, error);
+        showBulkErrorToast({ actionType: bulkAction.type, error });
       } finally {
         setLoadingRules?.({ ids: [], action: null });
-        onFinish?.();
       }
     },
-    [mutateAsync, toasts]
+    [
+      options?.suppressSuccessToast,
+      guessRuleIdsForBulkAction,
+      setLoadingRules,
+      mutateAsync,
+      showBulkSuccessToast,
+      showBulkErrorToast,
+    ]
   );
 
   return { executeBulkAction };
 };
 
-function defaultErrorHandler(toasts: UseAppToasts, action: BulkAction, error: HTTPError) {
-  const summary = (error?.body as BulkActionResponse)?.attributes?.summary;
-  error.stack = JSON.stringify(error.body, null, 2);
+function sendTelemetry(action: BulkActionType, response: BulkActionResponse): void {
+  if (action !== BulkActionType.disable && action !== BulkActionType.enable) {
+    return;
+  }
 
-  toasts.addError(error, getErrorToastContent(action, summary));
-}
+  if (response.attributes.results.updated.some((rule) => rule.immutable)) {
+    track(
+      METRIC_TYPE.COUNT,
+      action === BulkActionType.enable
+        ? TELEMETRY_EVENT.SIEM_RULE_ENABLED
+        : TELEMETRY_EVENT.SIEM_RULE_DISABLED
+    );
+  }
 
-async function defaultSuccessHandler(
-  toasts: UseAppToasts,
-  action: BulkAction,
-  summary: BulkActionSummary
-) {
-  toasts.addSuccess(getSuccessToastContent(action, summary));
-}
-
-function sendTelemetry(action: BulkAction, response: BulkActionResponse) {
-  if (action === BulkAction.disable || action === BulkAction.enable) {
-    if (response.attributes.results.updated.some((rule) => rule.immutable)) {
-      track(
-        METRIC_TYPE.COUNT,
-        action === BulkAction.enable
-          ? TELEMETRY_EVENT.SIEM_RULE_ENABLED
-          : TELEMETRY_EVENT.SIEM_RULE_DISABLED
-      );
-    }
-    if (response.attributes.results.updated.some((rule) => !rule.immutable)) {
-      track(
-        METRIC_TYPE.COUNT,
-        action === BulkAction.disable
-          ? TELEMETRY_EVENT.CUSTOM_RULE_ENABLED
-          : TELEMETRY_EVENT.CUSTOM_RULE_DISABLED
-      );
-    }
+  if (response.attributes.results.updated.some((rule) => !rule.immutable)) {
+    track(
+      METRIC_TYPE.COUNT,
+      action === BulkActionType.disable
+        ? TELEMETRY_EVENT.CUSTOM_RULE_DISABLED
+        : TELEMETRY_EVENT.CUSTOM_RULE_ENABLED
+    );
   }
 }

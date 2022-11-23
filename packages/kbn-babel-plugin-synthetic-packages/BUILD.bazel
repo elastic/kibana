@@ -44,9 +44,7 @@ js_library(
 
 pkg_npm(
   name = "npm_module",
-  deps = [
-    ":%s" % PKG_DIRNAME,
-  ]
+  deps = [":" + PKG_DIRNAME],
 )
 
 filegroup(

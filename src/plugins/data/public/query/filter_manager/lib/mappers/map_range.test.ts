@@ -22,7 +22,7 @@ describe('filter manager utilities', () => {
       expect(result).toHaveProperty('value', { gt: 1024, lt: 2048 });
     });
 
-    test('should return undefined for none matching', async (done) => {
+    test('should return undefined for none matching', async () => {
       const filter = {
         meta: { index: 'logstash-*' },
         query: { query_string: { query: 'foo:bar' } },
@@ -32,8 +32,6 @@ describe('filter manager utilities', () => {
         mapRange(filter);
       } catch (e) {
         expect(e).toBe(filter);
-
-        done();
       }
     });
   });

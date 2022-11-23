@@ -29,7 +29,7 @@ jest.mock('../utils', () => ({
 }));
 
 const dataView = stubLogstashDataView;
-
+const visType = 'heatmap';
 const field = stubLogstashDataView.fields[0].name;
 const aggs: Array<SchemaConfig<METRIC_TYPES>> = [
   {
@@ -97,7 +97,7 @@ describe('getFormulaForPipelineAgg', () => {
   test.each<[string, Parameters<typeof getFormulaForPipelineAgg>, () => void, string | null]>([
     [
       'null if custom metric is invalid',
-      [{ agg: aggs[0] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>, aggs, dataView }],
+      [{ agg: aggs[0] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>, aggs, dataView, visType }],
       () => {
         mockGetMetricFromParentPipelineAgg.mockReturnValue(null);
       },
@@ -105,7 +105,7 @@ describe('getFormulaForPipelineAgg', () => {
     ],
     [
       'null if custom metric type is not supported',
-      [{ agg: aggs[0] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>, aggs, dataView }],
+      [{ agg: aggs[0] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>, aggs, dataView, visType }],
       () => {
         mockGetMetricFromParentPipelineAgg.mockReturnValue({
           aggType: METRIC_TYPES.GEO_BOUNDS,
@@ -115,7 +115,7 @@ describe('getFormulaForPipelineAgg', () => {
     ],
     [
       'correct formula if agg is parent pipeline agg and custom metric is valid and supported pipeline agg',
-      [{ agg: aggs[0] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>, aggs, dataView }],
+      [{ agg: aggs[0] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>, aggs, dataView, visType }],
       () => {
         mockGetMetricFromParentPipelineAgg
           .mockReturnValueOnce({
@@ -135,7 +135,7 @@ describe('getFormulaForPipelineAgg', () => {
     ],
     [
       'correct formula if agg is parent pipeline agg and custom metric is valid and supported not pipeline agg',
-      [{ agg: aggs[0] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>, aggs, dataView }],
+      [{ agg: aggs[0] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>, aggs, dataView, visType }],
       () => {
         mockGetMetricFromParentPipelineAgg.mockReturnValueOnce({
           aggType: METRIC_TYPES.AVG,
@@ -149,7 +149,7 @@ describe('getFormulaForPipelineAgg', () => {
     ],
     [
       'correct formula if agg is parent pipeline agg and custom metric is valid and supported percentile rank agg',
-      [{ agg: aggs[0] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>, aggs, dataView }],
+      [{ agg: aggs[0] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>, aggs, dataView, visType }],
       () => {
         mockGetMetricFromParentPipelineAgg.mockReturnValueOnce({
           aggType: METRIC_TYPES.PERCENTILE_RANKS,
@@ -163,7 +163,7 @@ describe('getFormulaForPipelineAgg', () => {
     ],
     [
       'correct formula if agg is sibling pipeline agg and custom metric is valid and supported agg',
-      [{ agg: aggs[1] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>, aggs, dataView }],
+      [{ agg: aggs[1] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>, aggs, dataView, visType }],
       () => {
         mockGetMetricFromParentPipelineAgg.mockReturnValueOnce({
           aggType: METRIC_TYPES.AVG,
@@ -212,6 +212,7 @@ describe('getFormulaForPipelineAgg', () => {
       agg: aggs[1] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>,
       aggs,
       dataView,
+      visType,
     });
     expect(agg).toBeNull();
   });
@@ -244,6 +245,7 @@ describe('getFormulaForPipelineAgg', () => {
       agg: aggs[1] as SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>,
       aggs,
       dataView,
+      visType,
     });
     expect(agg).toBeNull();
   });
@@ -270,6 +272,7 @@ describe('getFormulaForAgg', () => {
           agg: { ...aggs[0], aggType: METRIC_TYPES.GEO_BOUNDS, aggParams: { field } },
           aggs,
           dataView,
+          visType,
         },
       ],
       () => {},
@@ -277,7 +280,7 @@ describe('getFormulaForAgg', () => {
     ],
     [
       'correct pipeline formula if agg is valid pipeline agg',
-      [{ agg: aggs[0], aggs, dataView }],
+      [{ agg: aggs[0], aggs, dataView, visType }],
       () => {
         mockIsPipeline.mockReturnValue(true);
         mockGetMetricFromParentPipelineAgg.mockReturnValueOnce({
@@ -292,7 +295,7 @@ describe('getFormulaForAgg', () => {
     ],
     [
       'correct percentile formula if agg is valid percentile agg',
-      [{ agg: aggs[2], aggs, dataView }],
+      [{ agg: aggs[2], aggs, dataView, visType }],
       () => {
         mockIsPercentileAgg.mockReturnValue(true);
       },
@@ -300,7 +303,7 @@ describe('getFormulaForAgg', () => {
     ],
     [
       'correct percentile rank formula if agg is valid percentile rank agg',
-      [{ agg: aggs[3], aggs, dataView }],
+      [{ agg: aggs[3], aggs, dataView, visType }],
       () => {
         mockIsPercentileRankAgg.mockReturnValue(true);
       },
@@ -308,7 +311,7 @@ describe('getFormulaForAgg', () => {
     ],
     [
       'correct standart deviation formula if agg is valid standart deviation agg',
-      [{ agg: aggs[4], aggs, dataView }],
+      [{ agg: aggs[4], aggs, dataView, visType }],
       () => {
         mockIsStdDevAgg.mockReturnValue(true);
       },
@@ -316,7 +319,7 @@ describe('getFormulaForAgg', () => {
     ],
     [
       'correct metric formula if agg is valid other metric agg',
-      [{ agg: aggs[5], aggs, dataView }],
+      [{ agg: aggs[5], aggs, dataView, visType }],
       () => {},
       'average(bytes)',
     ],
@@ -395,6 +398,7 @@ describe('getFormulaForAgg', () => {
       >,
       aggs,
       dataView,
+      visType,
     });
     expect(result).toBeNull();
   });
@@ -467,6 +471,7 @@ describe('getFormulaForAgg', () => {
         >,
         aggs,
         dataView,
+        visType,
       });
       expect(result).toBeNull();
     }

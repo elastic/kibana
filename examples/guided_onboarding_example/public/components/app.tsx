@@ -59,7 +59,7 @@ export const GuidedOnboardingExampleApp = (props: GuidedOnboardingExampleAppDeps
                   <StepOne guidedOnboarding={guidedOnboarding} />
                 </Route>
                 <Route exact path="/stepTwo">
-                  <StepTwo guidedOnboarding={guidedOnboarding} />
+                  <StepTwo />
                 </Route>
                 <Route exact path="/stepThree">
                   <StepThree guidedOnboarding={guidedOnboarding} />

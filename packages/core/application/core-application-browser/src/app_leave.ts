@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ButtonColor } from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
 
 /**
  * A handler that will be executed before leaving the application, either when
@@ -61,7 +61,7 @@ export interface AppLeaveConfirmAction {
   text: string;
   title?: string;
   confirmButtonText?: string;
-  buttonColor?: ButtonColor;
+  buttonColor?: EuiButtonColor;
   callback?: () => void;
 }
 
@@ -95,7 +95,7 @@ export interface AppLeaveActionFactory {
     title?: string,
     callback?: () => void,
     confirmButtonText?: string,
-    buttonColor?: ButtonColor
+    buttonColor?: EuiButtonColor
   ): AppLeaveConfirmAction;
 
   /**

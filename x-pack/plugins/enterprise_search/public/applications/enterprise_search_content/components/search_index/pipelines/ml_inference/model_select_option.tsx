@@ -8,13 +8,19 @@
 import React from 'react';
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiTitle } from '@elastic/eui';
-import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
-import { getMlModelTypesForModelConfig } from '../../../../../../../common/ml_inference_pipeline';
+import {
+  getMlModelTypesForModelConfig,
+  parseModelStateFromStats,
+  parseModelStateReasonFromStats,
+} from '../../../../../../../common/ml_inference_pipeline';
+import { TrainedModel } from '../../../../api/ml_models/ml_trained_models_logic';
 import { getMLType, getModelDisplayTitle } from '../../../shared/ml_inference/utils';
 
+import { TrainedModelHealth } from '../ml_model_health';
+
 export interface MlModelSelectOptionProps {
-  model: TrainedModelConfigResponse;
+  model: TrainedModel;
 }
 export const MlModelSelectOption: React.FC<MlModelSelectOptionProps> = ({ model }) => {
   const type = getMLType(getMlModelTypesForModelConfig(model));
@@ -34,9 +40,19 @@ export const MlModelSelectOption: React.FC<MlModelSelectOptionProps> = ({ model 
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <span>
-              <EuiBadge color="hollow">{type}</EuiBadge>
-            </span>
+            <TrainedModelHealth
+              modelState={parseModelStateFromStats(model)}
+              modelStateReason={parseModelStateReasonFromStats(model)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs">
+              <EuiFlexItem>
+                <span>
+                  <EuiBadge color="hollow">{type}</EuiBadge>
+                </span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

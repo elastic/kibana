@@ -12,10 +12,12 @@ function registerLanguage(language: LangModuleType) {
   const { ID, lexerRules, languageConfiguration } = language;
 
   monaco.languages.register({ id: ID });
-  monaco.languages.setMonarchTokensProvider(ID, lexerRules);
-  if (languageConfiguration) {
-    monaco.languages.setLanguageConfiguration(ID, languageConfiguration);
-  }
+  monaco.languages.onLanguage(ID, () => {
+    monaco.languages.setMonarchTokensProvider(ID, lexerRules);
+    if (languageConfiguration) {
+      monaco.languages.setLanguageConfiguration(ID, languageConfiguration);
+    }
+  });
 }
 
 export { registerLanguage };

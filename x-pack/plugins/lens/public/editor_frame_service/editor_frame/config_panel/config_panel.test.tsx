@@ -257,7 +257,7 @@ describe('ConfigPanel', () => {
       });
 
       act(() => {
-        instance.find('[data-test-subj="lnsLayerAddButton"]').first().simulate('click');
+        instance.find('button[data-test-subj="lnsLayerAddButton"]').first().simulate('click');
       });
       const focusedEl = document.activeElement;
       expect(focusedEl?.children[0].getAttribute('data-test-subj')).toEqual('lns-layerPanel-1');
@@ -270,7 +270,7 @@ describe('ConfigPanel', () => {
       layerType: LayerType = LayerTypes.REFERENCELINE
     ) {
       act(() => {
-        instance.find('[data-test-subj="lnsLayerAddButton"]').first().simulate('click');
+        instance.find('button[data-test-subj="lnsLayerAddButton"]').first().simulate('click');
       });
       instance.update();
       act(() => {

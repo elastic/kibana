@@ -1,0 +1,9 @@
+summary: Set the closure type and default connector for Stack Management cases.
+value: 
+  owner: cases
+  connector:
+    id: 5e656730-e1ca-11ec-be9b-9b1838238ee6
+    name: my-jira-connector
+    type: .jira
+    fields: null
+  closure_type: close-by-user

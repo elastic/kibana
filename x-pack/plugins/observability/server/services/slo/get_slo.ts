@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ErrorBudget, SLO } from '../../types/models';
+import { ErrorBudget, SLO } from '../../domain/models';
 import { GetSLOResponse, getSLOResponseSchema } from '../../types/rest_specs';
 import { SLORepository } from './slo_repository';
 import { SLIClient } from './sli_client';

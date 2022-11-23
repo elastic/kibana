@@ -22,6 +22,7 @@ export type {
   ExistsFilter,
   FieldFilter,
   Filter,
+  FilterItem,
   FilterCompareOptions,
   FilterMeta,
   LatLon,

@@ -33,7 +33,13 @@
             "label": "savedObjects",
             "description": [],
             "signature": [
-              "SavedObjectsRequestHandlerContext"
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsRequestHandlerContext",
+                "text": "SavedObjectsRequestHandlerContext"
+              }
             ],
             "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
             "deprecated": false,
@@ -47,7 +53,13 @@
             "label": "elasticsearch",
             "description": [],
             "signature": [
-              "ElasticsearchRequestHandlerContext"
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchRequestHandlerContext",
+                "text": "ElasticsearchRequestHandlerContext"
+              }
             ],
             "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
             "deprecated": false,
@@ -61,7 +73,13 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              "UiSettingsRequestHandlerContext"
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.UiSettingsRequestHandlerContext",
+                "text": "UiSettingsRequestHandlerContext"
+              }
             ],
             "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
             "deprecated": false,
@@ -75,7 +93,13 @@
             "label": "deprecations",
             "description": [],
             "signature": [
-              "DeprecationsRequestHandlerContext"
+              {
+                "pluginId": "@kbn/core-deprecations-server",
+                "scope": "server",
+                "docId": "kibKbnCoreDeprecationsServerPluginApi",
+                "section": "def-server.DeprecationsRequestHandlerContext",
+                "text": "DeprecationsRequestHandlerContext"
+              }
             ],
             "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
             "deprecated": false,
@@ -134,7 +158,13 @@
             "text": "PrebootRequestHandlerContext"
           },
           " extends ",
-          "RequestHandlerContextBase"
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RequestHandlerContextBase",
+            "text": "RequestHandlerContextBase"
+          }
         ],
         "path": "packages/core/http/core-http-request-handler-context-server/src/preboot_request_handler_context.ts",
         "deprecated": false,
@@ -184,7 +214,13 @@
             "label": "client",
             "description": [],
             "signature": [
-              "IUiSettingsClient"
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-server.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
             ],
             "path": "packages/core/http/core-http-request-handler-context-server/src/preboot_request_handler_context.ts",
             "deprecated": false,
@@ -211,7 +247,13 @@
             "text": "RequestHandlerContext"
           },
           " extends ",
-          "RequestHandlerContextBase"
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RequestHandlerContextBase",
+            "text": "RequestHandlerContextBase"
+          }
         ],
         "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
         "deprecated": false,

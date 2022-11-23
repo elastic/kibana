@@ -48,7 +48,8 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Privilege Escalation"
+    "Privilege Escalation",
+    "has_guide"
   ],
   "threat": [
     {
@@ -69,5 +70,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 101
+  "version": 102
 }

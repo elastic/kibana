@@ -9,7 +9,7 @@
 import { safeDump } from 'js-yaml';
 import { isEmpty } from 'lodash';
 import { interactive } from './interactive';
-import { Logger } from '../cli_plugin/lib/logger';
+import { Logger } from '../cli/logger';
 
 export async function generate(encryptionConfig, command) {
   const logger = new Logger();

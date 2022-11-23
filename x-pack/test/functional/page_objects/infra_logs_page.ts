@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-// import moment from 'moment';
+import { FlyoutOptionsUrlState } from '@kbn/infra-plugin/public/containers/logs/log_flyout';
+import { LogPositionUrlState } from '@kbn/infra-plugin/public/containers/logs/log_position';
 import querystring from 'querystring';
 import { encode, RisonValue } from 'rison-node';
-import { LogPositionUrlState } from '@kbn/infra-plugin/public/containers/logs/log_position/with_log_position_url_state';
-import { FlyoutOptionsUrlState } from '@kbn/infra-plugin/public/containers/logs/log_flyout';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export interface TabsParams {

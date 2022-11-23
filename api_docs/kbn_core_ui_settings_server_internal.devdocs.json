@@ -321,7 +321,13 @@
             "label": "savedObjectsClient",
             "description": [],
             "signature": [
-              "SavedObjectsClientContract"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
             "deprecated": false,
@@ -350,7 +356,13 @@
             "description": [],
             "signature": [
               "Record<string, ",
-              "UiSettingsParams",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UiSettingsParams",
+                "text": "UiSettingsParams"
+              },
               "<unknown>> | undefined"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
@@ -365,7 +377,13 @@
             "label": "log",
             "description": [],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_client.ts",
             "deprecated": false,
@@ -408,9 +426,21 @@
             "label": "schema",
             "description": [],
             "signature": [
-              "ObjectType",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ObjectType",
+                "text": "ObjectType"
+              },
               "<{ overrides: ",
-              "ObjectType",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ObjectType",
+                "text": "ObjectType"
+              },
               "<{}>; }>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_config.ts",
@@ -426,9 +456,21 @@
             "description": [],
             "signature": [
               "(factory: ",
-              "ConfigDeprecationFactory",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.ConfigDeprecationFactory",
+                "text": "ConfigDeprecationFactory"
+              },
               ") => ",
-              "ConfigDeprecation",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.ConfigDeprecation",
+                "text": "ConfigDeprecation"
+              },
               "[]"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/ui_settings_config.ts",
@@ -444,9 +486,15 @@
                 "label": "factory",
                 "description": [],
                 "signature": [
-                  "ConfigDeprecationFactory"
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "server",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-server.ConfigDeprecationFactory",
+                    "text": "ConfigDeprecationFactory"
+                  }
                 ],
-                "path": "node_modules/@types/kbn__config/index.d.ts",
+                "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

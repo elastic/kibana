@@ -9,7 +9,7 @@ import React from 'react';
 import { RulesContainer } from './rules_container';
 import { render, screen } from '@testing-library/react';
 import { QueryClient } from '@tanstack/react-query';
-import { useFindCspRules, useBulkUpdateCspRules, type RuleSavedObject } from './use_csp_rules';
+import { useFindCspRules, type RuleSavedObject } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { Chance } from 'chance';
 import { TestProvider } from '../../test/test_provider';
@@ -106,11 +106,6 @@ describe('<RulesContainer />', () => {
     jest.clearAllMocks();
 
     (useParams as jest.Mock).mockReturnValue(params);
-
-    (useBulkUpdateCspRules as jest.Mock).mockReturnValue({
-      status: 'idle',
-      mutate: jest.fn(),
-    });
   });
 
   it('displays rules with their initial state', async () => {

@@ -1,0 +1,95 @@
+{
+  "id": "@kbn/shared-ux-avatar-solution",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-avatar-solution",
+        "id": "def-common.KibanaSolutionAvatar",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaSolutionAvatar",
+        "description": [
+          "\nApplies extra styling to a typical EuiAvatar.\nThe `name` value will be appended to 'logo' to configure the `iconType` unless `iconType` is provided."
+        ],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/shared-ux-avatar-solution",
+            "scope": "common",
+            "docId": "kibKbnSharedUxAvatarSolutionPluginApi",
+            "section": "def-common.KibanaSolutionAvatarProps",
+            "text": "KibanaSolutionAvatarProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/shared-ux/avatar/solution/src/solution_avatar.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-avatar-solution",
+            "id": "def-common.KibanaSolutionAvatar.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-avatar-solution",
+                "scope": "common",
+                "docId": "kibKbnSharedUxAvatarSolutionPluginApi",
+                "section": "def-common.KibanaSolutionAvatarProps",
+                "text": "KibanaSolutionAvatarProps"
+              }
+            ],
+            "path": "packages/shared-ux/avatar/solution/src/solution_avatar.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-avatar-solution",
+        "id": "def-common.KibanaSolutionAvatarProps",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaSolutionAvatarProps",
+        "description": [],
+        "signature": [
+          "KnownSolutionProps",
+          " | ",
+          "IconTypeProps"
+        ],
+        "path": "packages/shared-ux/avatar/solution/src/solution_avatar.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

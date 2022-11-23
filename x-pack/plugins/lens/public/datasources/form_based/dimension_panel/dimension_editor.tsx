@@ -606,7 +606,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     setIsCloseable,
     paramEditorCustomProps,
     ReferenceEditor,
-    existingFields: props.existingFields,
+    dataSectionExtra: props.dataSectionExtra,
     ...services,
   };
 
@@ -789,7 +789,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 }}
                 validation={validation}
                 currentIndexPattern={currentIndexPattern}
-                existingFields={props.existingFields}
                 selectionStyle={selectedOperationDefinition.selectionStyle}
                 dateRange={dateRange}
                 labelAppend={selectedOperationDefinition?.getHelpMessage?.({
@@ -815,7 +814,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
           selectedColumn={selectedColumn as FieldBasedIndexPatternColumn}
           columnId={columnId}
           indexPattern={currentIndexPattern}
-          existingFields={props.existingFields}
           operationSupportMatrix={operationSupportMatrix}
           updateLayer={(newLayer) => {
             if (temporaryQuickFunction) {
@@ -837,15 +835,28 @@ export function DimensionEditor(props: DimensionEditorProps) {
           operationDefinitionMap={operationDefinitionMap}
         />
       ) : null}
+      {!isFullscreen && !incompleteInfo && !hideGrouping && temporaryState === 'none' && (
+        <BucketNestingEditor
+          layer={state.layers[props.layerId]}
+          columnId={props.columnId}
+          setColumns={(columnOrder) => updateLayer({ columnOrder })}
+          getFieldByName={currentIndexPattern.getFieldByName}
+        />
+      )}
 
       {shouldDisplayExtraOptions && <ParamEditor {...paramEditorProps} />}
+      {!selectedOperationDefinition?.handleDataSectionExtra && (
+        <>
+          <EuiSpacer size="m" />
+          {props.dataSectionExtra}
+        </>
+      )}
     </>
   );
 
   const customParamEditor = ParamEditor ? (
     <>
       <ParamEditor
-        existingFields={props.existingFields}
         layer={state.layers[layerId]}
         activeData={props.activeData}
         paramEditorUpdater={
@@ -1146,15 +1157,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     },
                   });
                 }}
-              />
-            )}
-
-            {!isFullscreen && !incompleteInfo && !hideGrouping && temporaryState === 'none' && (
-              <BucketNestingEditor
-                layer={state.layers[props.layerId]}
-                columnId={props.columnId}
-                setColumns={(columnOrder) => updateLayer({ columnOrder })}
-                getFieldByName={currentIndexPattern.getFieldByName}
               />
             )}
 

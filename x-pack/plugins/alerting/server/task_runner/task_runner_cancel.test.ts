@@ -214,6 +214,32 @@ describe('Task Runner Cancel', () => {
           status: 'error',
           warning: null,
         },
+        lastRun: {
+          alertsCount: {},
+          outcome: 'failed',
+          outcomeMsg:
+            'test:1: execution cancelled due to timeout - exceeded rule type timeout of 5m',
+          warning: 'timeout',
+        },
+        monitoring: {
+          run: {
+            calculated_metrics: {
+              success_ratio: 0,
+            },
+            history: [],
+            last_run: {
+              metrics: {
+                gap_duration_s: null,
+                total_alerts_created: null,
+                total_alerts_detected: null,
+                total_indexing_duration_ms: null,
+                total_search_duration_ms: null,
+              },
+              timestamp: '1970-01-01T00:00:00.000Z',
+            },
+          },
+        },
+        nextRun: '1970-01-01T00:00:10.000Z',
       },
       { refresh: false, namespace: undefined }
     );
@@ -391,7 +417,7 @@ describe('Task Runner Cancel', () => {
   });
 
   function testLogger() {
-    expect(logger.debug).toHaveBeenCalledTimes(7);
+    expect(logger.debug).toHaveBeenCalledTimes(8);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
@@ -411,10 +437,10 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       6,
-      'ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
     expect(logger.debug).nthCalledWith(
-      7,
+      8,
       'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"triggeredActionsStatus":"complete"}'
     );
   }

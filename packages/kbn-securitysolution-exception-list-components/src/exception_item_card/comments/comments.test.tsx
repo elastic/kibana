@@ -13,6 +13,15 @@ import * as i18n from '../translations';
 
 const comments = mockGetFormattedComments();
 describe('ExceptionItemCardComments', () => {
+  it('should not render comments when the length is falsy', () => {
+    const wrapper = render(
+      <ExceptionItemCardComments comments={[]} dataTestSubj="ExceptionItemCardCommentsContainer" />
+    );
+    expect(wrapper).toMatchSnapshot();
+
+    expect(wrapper.queryByTestId('ExceptionItemCardCommentsContainer')).not.toBeInTheDocument();
+  });
+
   it('should render comments panel closed', () => {
     const wrapper = render(
       <ExceptionItemCardComments

@@ -31,6 +31,8 @@
     "unifiedFieldList"
   ],
   "optionalPlugins": [
+    "expressionLegacyMetricVis",
+    "expressionPartitionVis",
     "usageCollection",
     "taskManager",
     "globalSearch",
@@ -51,7 +53,7 @@
   ],
   "owner": {
     "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "githubTeam": "kibana-visualizations"
   },
   "description": "Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads. Exposes components to embed visualizations and link into the Lens editor from within other apps in Kibana."
 }

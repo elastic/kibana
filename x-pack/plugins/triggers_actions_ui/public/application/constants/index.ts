@@ -19,7 +19,6 @@ export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
 export const routeToRules = `/rules`;
 export const routeToLogs = `/logs`;
-export const routeToRuleDetails = `/rule/:ruleId`;
 export const routeToInternalAlerts = `/alerts`;
 export const legacyRouteToRules = `/alerts`;
 export const legacyRouteToRuleDetails = `/alert/:alertId`;
@@ -44,6 +43,7 @@ export const DEFAULT_RULE_INTERVAL = '1m';
 export const RULE_EXECUTION_LOG_COLUMN_IDS = [
   'rule_id',
   'rule_name',
+  'space_ids',
   'id',
   'timestamp',
   'execution_duration',

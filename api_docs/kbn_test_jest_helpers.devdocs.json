@@ -858,7 +858,7 @@
         "signature": [
           "(Component: ",
           "ComponentType",
-          "<any>, config: ",
+          "<P>, config: ",
           {
             "pluginId": "@kbn/test-jest-helpers",
             "scope": "server",
@@ -866,7 +866,7 @@
             "section": "def-server.AsyncTestBedConfig",
             "text": "AsyncTestBedConfig"
           },
-          ") => ",
+          "<P>) => ",
           {
             "pluginId": "@kbn/test-jest-helpers",
             "scope": "server",
@@ -891,7 +891,7 @@
             ],
             "signature": [
               "ComponentType",
-              "<any>"
+              "<P>"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
@@ -914,7 +914,8 @@
                 "docId": "kibKbnTestJestHelpersPluginApi",
                 "section": "def-server.AsyncTestBedConfig",
                 "text": "AsyncTestBedConfig"
-              }
+              },
+              "<P>"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
@@ -935,7 +936,7 @@
         "signature": [
           "(Component: ",
           "ComponentType",
-          "<any>, config: ",
+          "<P>, config: ",
           {
             "pluginId": "@kbn/test-jest-helpers",
             "scope": "server",
@@ -943,7 +944,7 @@
             "section": "def-server.TestBedConfig",
             "text": "TestBedConfig"
           },
-          " | undefined) => ",
+          "<P> | undefined) => ",
           {
             "pluginId": "@kbn/test-jest-helpers",
             "scope": "server",
@@ -966,7 +967,7 @@
             "description": [],
             "signature": [
               "ComponentType",
-              "<any>"
+              "<P>"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
@@ -988,7 +989,7 @@
                 "section": "def-server.TestBedConfig",
                 "text": "TestBedConfig"
               },
-              " | undefined"
+              "<P> | undefined"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
@@ -1009,7 +1010,7 @@
         "signature": [
           "(Component: ",
           "ComponentType",
-          "<any>, config: ",
+          "<P>, config: ",
           {
             "pluginId": "@kbn/test-jest-helpers",
             "scope": "server",
@@ -1017,7 +1018,7 @@
             "section": "def-server.AsyncTestBedConfig",
             "text": "AsyncTestBedConfig"
           },
-          " | ",
+          "<P> | ",
           {
             "pluginId": "@kbn/test-jest-helpers",
             "scope": "server",
@@ -1025,7 +1026,7 @@
             "section": "def-server.TestBedConfig",
             "text": "TestBedConfig"
           },
-          " | undefined) => ",
+          "<P> | undefined) => ",
           {
             "pluginId": "@kbn/test-jest-helpers",
             "scope": "server",
@@ -1048,7 +1049,7 @@
             "description": [],
             "signature": [
               "ComponentType",
-              "<any>"
+              "<P>"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
@@ -1070,7 +1071,7 @@
                 "section": "def-server.AsyncTestBedConfig",
                 "text": "AsyncTestBedConfig"
               },
-              " | ",
+              "<P> | ",
               {
                 "pluginId": "@kbn/test-jest-helpers",
                 "scope": "server",
@@ -1078,7 +1079,7 @@
                 "section": "def-server.TestBedConfig",
                 "text": "TestBedConfig"
               },
-              " | undefined"
+              "<P> | undefined"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
@@ -1598,11 +1599,11 @@
         "label": "WithRoute",
         "description": [],
         "signature": [
-          "(componentRoutePath?: ",
+          "(componentRoutePath: ",
           "LocationDescriptor",
           "<unknown> | ",
           "LocationDescriptor",
-          "<unknown>[], onRouter?: (router: any) => void) => (WrappedComponent: React.ComponentType<{}>) => (props: any) => JSX.Element"
+          "<unknown>[], onRouter: (router: any) => void) => (WrappedComponent: React.ComponentType<T>) => (props: any) => JSX.Element"
         ],
         "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
         "deprecated": false,
@@ -1653,7 +1654,7 @@
         "label": "WithStore",
         "description": [],
         "signature": [
-          "(store: any) => (WrappedComponent: React.ComponentType<{}>) => (props: any) => JSX.Element"
+          "(store: any) => (WrappedComponent: React.ComponentType<T>) => (props: any) => JSX.Element"
         ],
         "path": "packages/kbn-test-jest-helpers/src/redux_helpers.tsx",
         "deprecated": false,
@@ -1695,8 +1696,9 @@
             "section": "def-server.AsyncTestBedConfig",
             "text": "AsyncTestBedConfig"
           },
-          " extends ",
-          "BaseTestBedConfig"
+          "<T> extends ",
+          "BaseTestBedConfig",
+          "<T>"
         ],
         "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,
@@ -2025,8 +2027,9 @@
             "section": "def-server.TestBedConfig",
             "text": "TestBedConfig"
           },
-          " extends ",
-          "BaseTestBedConfig"
+          "<T> extends ",
+          "BaseTestBedConfig",
+          "<T>"
         ],
         "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,

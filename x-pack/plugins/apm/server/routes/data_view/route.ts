@@ -12,7 +12,6 @@ import {
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getApmDataViewTitle } from './get_apm_data_view_title';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
-import { setupRequest } from '../../lib/helpers/setup_request';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const staticDataViewRoute = createApmServerRoute({
@@ -20,10 +19,7 @@ const staticDataViewRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources): CreateDataViewResponse => {
     const { context, plugins, request } = resources;
-    const [setup, apmEventClient] = await Promise.all([
-      setupRequest(resources),
-      getApmEventClient(resources),
-    ]);
+    const apmEventClient = await getApmEventClient(resources);
     const coreContext = await context.core;
 
     const dataViewStart = await plugins.dataViews.start();
@@ -37,7 +33,6 @@ const staticDataViewRoute = createApmServerRoute({
     const res = await createStaticDataView({
       dataViewService,
       resources,
-      setup,
       apmEventClient,
     });
 

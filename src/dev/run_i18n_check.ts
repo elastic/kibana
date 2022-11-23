@@ -132,7 +132,7 @@ run(
       reportTime(runStartTime, 'total', {
         success: true,
       });
-    } catch (error: Error | ErrorReporter) {
+    } catch (error) {
       process.exitCode = 1;
       if (error instanceof ErrorReporter) {
         error.errors.forEach((e: string | Error) => log.error(e));

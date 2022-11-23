@@ -105,10 +105,10 @@ describe('getMlInferencePipelines', () => {
 
     expect(
       (actualPipelines.pipeline1.processors as IngestProcessorContainer[])[1].inference?.model_id
-    ).toBeDefined();
+    ).toEqual('model1');
     expect(
       (actualPipelines.pipeline2.processors as IngestProcessorContainer[])[1].inference?.model_id
-    ).toBeDefined();
+    ).toEqual('model2');
     expect(
       (actualPipelines.pipeline3.processors as IngestProcessorContainer[])[1].inference?.model_id
     ).toEqual(''); // Redacted model ID
@@ -117,7 +117,7 @@ describe('getMlInferencePipelines', () => {
     ).toEqual('');
     expect(
       (actualPipelines.pipeline4.processors as IngestProcessorContainer[])[2].inference?.model_id
-    ).toBeDefined();
+    ).toEqual('model2');
     expect(
       (actualPipelines.pipeline4.processors as IngestProcessorContainer[])[3].inference?.model_id
     ).toEqual('');

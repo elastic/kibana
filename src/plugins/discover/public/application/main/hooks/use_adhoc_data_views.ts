@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
@@ -16,6 +17,7 @@ import {
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
+import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
 import { getUiActions } from '../../../kibana_services';
 import { useConfirmPersistencePrompt } from '../../../hooks/use_confirm_persistence_prompt';
 import { GetStateReturn } from '../services/discover_state';
@@ -29,6 +31,7 @@ export const useAdHocDataViews = ({
   filterManager,
   dataViews,
   toastNotifications,
+  trackUiMetric,
 }: {
   dataView: DataView;
   savedSearch: SavedSearch;
@@ -37,6 +40,7 @@ export const useAdHocDataViews = ({
   dataViews: DataViewsContract;
   filterManager: FilterManager;
   toastNotifications: ToastsStart;
+  trackUiMetric?: (metricType: string, eventName: string | string[], count?: number) => void;
 }) => {
   const [adHocDataViewList, setAdHocDataViewList] = useState<DataView[]>(
     !dataView.isPersisted() ? [dataView] : []
@@ -48,8 +52,9 @@ export const useAdHocDataViews = ({
         const existing = prev.find((prevDataView) => prevDataView.id === dataView.id);
         return existing ? prev : [...prev, dataView];
       });
+      trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
     }
-  }, [dataView]);
+  }, [dataView, trackUiMetric]);
 
   /**
    * Takes care of checking data view id references in filters
@@ -69,11 +74,11 @@ export const useAdHocDataViews = ({
         prev.filter((d) => d.id && dataViewToUpdate.id && d.id !== dataViewToUpdate.id)
       );
 
+      // update filters references
       const uiActions = await getUiActions();
       const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
       const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
 
-      // execute shouldn't be awaited, this is important for pending history push cancellation
       action?.execute({
         trigger,
         fromDataView: dataViewToUpdate.id,
@@ -81,11 +86,12 @@ export const useAdHocDataViews = ({
         usedDataViews: [],
       } as ActionExecutionContext);
 
+      savedSearch.searchSource.setField('index', newDataView);
       stateContainer.replaceUrlAppState({ index: newDataView.id });
       setUrlTracking(newDataView);
       return newDataView;
     },
-    [dataViews, setUrlTracking, stateContainer]
+    [dataViews, setUrlTracking, stateContainer, savedSearch.searchSource]
   );
 
   const { openConfirmSavePrompt, updateSavedSearch } =
@@ -105,5 +111,19 @@ export const useAdHocDataViews = ({
     return currentDataView;
   }, [stateContainer, openConfirmSavePrompt, savedSearch, updateSavedSearch]);
 
-  return { adHocDataViewList, persistDataView, updateAdHocDataViewId };
+  const onAddAdHocDataViews = useCallback((newDataViews: DataView[]) => {
+    setAdHocDataViewList((prev) => {
+      const newAdHocDataViews = newDataViews.filter(
+        (newDataView) => !prev.find((d) => d.id === newDataView.id)
+      );
+      return [...prev, ...newAdHocDataViews];
+    });
+  }, []);
+
+  return {
+    adHocDataViewList,
+    persistDataView,
+    updateAdHocDataViewId,
+    onAddAdHocDataViews,
+  };
 };

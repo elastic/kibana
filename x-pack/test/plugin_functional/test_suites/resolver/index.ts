@@ -11,7 +11,7 @@ import { WebElementWrapper } from '../../../../../test/functional/services/lib/w
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const expectedDifference = 0.09;
+const expectedDifference = 0.096;
 
 const waitForPanAnimationToFinish = () =>
   new Promise((resolve) => setTimeout(resolve, panAnimationDuration + 1));
@@ -28,7 +28,10 @@ export default function ({
   const browser = getService('browser');
 
   // FLAKY: https://github.com/elastic/kibana/issues/87425
-  describe('Resolver test app', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/133907
+  // FLAKY: https://github.com/elastic/kibana/issues/144820
+  // FLAKY: https://github.com/elastic/kibana/issues/144861
+  describe.skip('Resolver test app', function () {
     // Note: these tests are intended to run on the same page in serial.
     before(async function () {
       await pageObjects.common.navigateToApp('resolverTest');

@@ -70,6 +70,8 @@ describe('useHostTable hook', () => {
 
     const items = [
       {
+        name: 'host-0',
+        os: '-',
         rx: {
           name: 'rx',
           avg: 252456.92916666667,
@@ -91,11 +93,10 @@ describe('useHostTable hook', () => {
 
           avg: 34359.738368,
         },
-        value: 'host-0',
-        label: 'host-0',
-        os: null,
       },
       {
+        name: 'host-1',
+        os: 'macOS',
         rx: {
           name: 'rx',
           avg: 95.86339715321859,
@@ -116,10 +117,6 @@ describe('useHostTable hook', () => {
           name: 'memoryTotal',
           avg: 9.194304,
         },
-        value: 'host-1',
-        label: 'host-1',
-        ip: '243.86.94.22',
-        os: 'macOS',
       },
     ];
     const result = renderHook(() => useHostTable(nodes));

@@ -38,6 +38,7 @@ export class ScreenshottingExamplePlugin implements Plugin<void, void> {
         );
 
         return response.ok({
+          headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
             metrics,
             image: results[0]?.screenshots[0]?.data.toString('base64'),

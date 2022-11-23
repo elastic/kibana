@@ -64,7 +64,13 @@
             "description": [],
             "signature": [
               "(esClient: ",
-              "ElasticsearchClient",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              },
               ") => void"
             ],
             "path": "x-pack/plugins/monitoring/server/types.ts",
@@ -79,7 +85,13 @@
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  "ElasticsearchClient"
+                  {
+                    "pluginId": "@kbn/core-elasticsearch-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                    "section": "def-server.ElasticsearchClient",
+                    "text": "ElasticsearchClient"
+                  }
                 ],
                 "path": "x-pack/plugins/monitoring/server/types.ts",
                 "deprecated": false,
@@ -212,7 +224,71 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "monitoring",
+        "id": "def-common.formatTimestampToDuration",
+        "type": "Function",
+        "tags": [],
+        "label": "formatTimestampToDuration",
+        "description": [],
+        "signature": [
+          "(timestamp: any, calculationFlag: any, initialTime: any) => string"
+        ],
+        "path": "x-pack/plugins/monitoring/common/format_timestamp_to_duration.js",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "monitoring",
+            "id": "def-common.formatTimestampToDuration.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "timestamp",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/monitoring/common/format_timestamp_to_duration.js",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "monitoring",
+            "id": "def-common.formatTimestampToDuration.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "calculationFlag",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/monitoring/common/format_timestamp_to_duration.js",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "monitoring",
+            "id": "def-common.formatTimestampToDuration.$3",
+            "type": "Any",
+            "tags": [],
+            "label": "initialTime",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/monitoring/common/format_timestamp_to_duration.js",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],

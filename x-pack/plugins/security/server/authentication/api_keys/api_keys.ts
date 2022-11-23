@@ -18,6 +18,7 @@ import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
 } from '../http_authentication';
+import { getFakeKibanaRequest } from './fake_kibana_request';
 
 /**
  * Represents the options to create an APIKey class instance that will be
@@ -137,6 +138,21 @@ export interface InvalidateAPIKeyResult {
       reason?: string;
     };
   }>;
+}
+
+/**
+ * Represents the parameters for validating API Key credentials.
+ */
+export interface ValidateAPIKeyParams {
+  /**
+   * Unique id for this API key
+   */
+  id: string;
+
+  /**
+   * Generated API Key (secret)
+   */
+  api_key: string;
 }
 
 /**
@@ -333,6 +349,30 @@ export class APIKeys {
     }
 
     return result;
+  }
+
+  /**
+   * Tries to validate an API key.
+   * @param apiKeyPrams ValidateAPIKeyParams.
+   */
+  async validate(apiKeyPrams: ValidateAPIKeyParams): Promise<boolean> {
+    if (!this.license.isEnabled()) {
+      return false;
+    }
+
+    const fakeRequest = getFakeKibanaRequest(apiKeyPrams);
+
+    this.logger.debug(`Trying to validate an API key`);
+
+    try {
+      await this.clusterClient.asScoped(fakeRequest).asCurrentUser.security.authenticate();
+      this.logger.debug(`API key was validated successfully`);
+      return true;
+    } catch (e) {
+      this.logger.info(`Failed to validate API key: ${e.message}`);
+    }
+
+    return false;
   }
 
   private doesErrorIndicateAPIKeysAreDisabled(e: Record<string, any>) {

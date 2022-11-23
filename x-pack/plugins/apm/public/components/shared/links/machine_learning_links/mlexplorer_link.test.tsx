@@ -23,7 +23,7 @@ describe('MLExplorerLink', () => {
     );
 
     expect(href).toMatchInlineSnapshot(
-      `"/app/ml/explorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:!t,value:0),time:(from:now%2Fw,to:now-4h))&_a=(explorer:(mlExplorerFilter:(),mlExplorerSwimlane:()))"`
+      `"/app/ml/explorer?_g=(ml:(jobIds:!(myservicename-mytransactiontype-high_mean_response_time)),refreshInterval:(pause:!t,value:10000),time:(from:now%2Fw,to:now-4h))&_a=(explorer:(mlExplorerFilter:(),mlExplorerSwimlane:()))"`
     );
   });
 

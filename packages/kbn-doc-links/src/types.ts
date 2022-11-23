@@ -35,6 +35,10 @@ export interface DocLinks {
     readonly overview: string;
     readonly tailSamplingPolicies: string;
     readonly elasticAgent: string;
+    readonly storageExplorer: string;
+    readonly spanCompression: string;
+    readonly transactionSampling: string;
+    readonly indexLifecycleManagement: string;
   };
   readonly canvas: {
     readonly guide: string;
@@ -121,6 +125,7 @@ export interface DocLinks {
     readonly licenseManagement: string;
     readonly mailService: string;
     readonly start: string;
+    readonly syncRules: string;
     readonly troubleshootSetup: string;
     readonly usersAccess: string;
   };
@@ -279,6 +284,7 @@ export interface DocLinks {
     readonly exceptions: {
       value_lists: string;
     };
+    readonly privileges: string;
   };
   readonly query: {
     readonly eql: string;

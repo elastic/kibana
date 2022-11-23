@@ -8,131 +8,31 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import {
   ActionParamsProps,
-  TextAreaWithMessageVariables,
-  TextFieldWithMessageVariables,
+  ActionConnectorMode,
+  IErrorObject,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFormRow, EuiSelect, RecursivePartial } from '@elastic/eui';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { isEmpty, unset, cloneDeep } from 'lodash';
 import { OpsgenieSubActions } from '../../../../common';
 import type {
   OpsgenieActionParams,
-  OpsgenieCloseAlertParams,
-  OpsgenieCreateAlertParams,
+  OpsgenieCreateAlertSubActionParams,
 } from '../../../../server/connector_types/stack';
 import * as i18n from './translations';
-
-type SubActionProps<SubActionParams> = Omit<
-  ActionParamsProps<OpsgenieActionParams>,
-  'actionParams' | 'editAction'
-> & {
-  subActionParams?: RecursivePartial<SubActionParams>;
-  editSubAction: ActionParamsProps<OpsgenieActionParams>['editAction'];
-};
-
-const CreateAlertComponent: React.FC<SubActionProps<OpsgenieCreateAlertParams>> = ({
-  editSubAction,
-  errors,
-  index,
-  messageVariables,
-  subActionParams,
-}) => {
-  const isMessageInvalid =
-    errors['subActionParams.message'] !== undefined &&
-    errors['subActionParams.message'].length > 0 &&
-    subActionParams?.message !== undefined;
-
-  return (
-    <>
-      <EuiFormRow
-        data-test-subj="opsgenie-message-row"
-        fullWidth
-        error={errors['subActionParams.message']}
-        label={i18n.MESSAGE_FIELD_LABEL}
-        isInvalid={isMessageInvalid}
-      >
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubAction}
-          messageVariables={messageVariables}
-          paramsProperty={'message'}
-          inputTargetValue={subActionParams?.message}
-          errors={errors['subActionParams.message'] as string[]}
-        />
-      </EuiFormRow>
-      <TextAreaWithMessageVariables
-        index={index}
-        editAction={editSubAction}
-        messageVariables={messageVariables}
-        paramsProperty={'description'}
-        inputTargetValue={subActionParams?.description}
-        label={i18n.DESCRIPTION_FIELD_LABEL}
-      />
-      <EuiFormRow data-test-subj="opsgenie-alias-row" fullWidth label={i18n.ALIAS_FIELD_LABEL}>
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubAction}
-          messageVariables={messageVariables}
-          paramsProperty={'alias'}
-          inputTargetValue={subActionParams?.alias}
-        />
-      </EuiFormRow>
-    </>
-  );
-};
-
-CreateAlertComponent.displayName = 'CreateAlertComponent';
-
-const CloseAlertComponent: React.FC<SubActionProps<OpsgenieCloseAlertParams>> = ({
-  editSubAction,
-  errors,
-  index,
-  messageVariables,
-  subActionParams,
-}) => {
-  const isAliasInvalid =
-    errors['subActionParams.alias'] !== undefined &&
-    errors['subActionParams.alias'].length > 0 &&
-    subActionParams?.alias !== undefined;
-
-  return (
-    <>
-      <EuiFormRow
-        data-test-subj="opsgenie-alias-row"
-        fullWidth
-        error={errors['subActionParams.alias']}
-        isInvalid={isAliasInvalid}
-        label={i18n.ALIAS_FIELD_LABEL}
-      >
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubAction}
-          messageVariables={messageVariables}
-          paramsProperty={'alias'}
-          inputTargetValue={subActionParams?.alias}
-          errors={errors['subActionParams.alias'] as string[]}
-        />
-      </EuiFormRow>
-      <TextAreaWithMessageVariables
-        index={index}
-        editAction={editSubAction}
-        messageVariables={messageVariables}
-        paramsProperty={'note'}
-        inputTargetValue={subActionParams?.note}
-        label={i18n.NOTE_FIELD_LABEL}
-      />
-    </>
-  );
-};
-
-CloseAlertComponent.displayName = 'CloseAlertComponent';
+import { CreateAlert, isPartialCreateAlertSchema } from './create_alert';
+import { CloseAlert } from './close_alert';
+import { isPartialCloseAlertSchema } from './close_alert_schema';
 
 const actionOptions = [
   {
     value: OpsgenieSubActions.CreateAlert,
     text: i18n.CREATE_ALERT_ACTION,
+    'data-test-subj': 'opsgenie-subActionSelect-create-alert',
   },
   {
     value: OpsgenieSubActions.CloseAlert,
     text: i18n.CLOSE_ALERT_ACTION,
+    'data-test-subj': 'opsgenie-subActionSelect-close-alert',
   },
 ];
 
@@ -142,6 +42,7 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
   errors,
   index,
   messageVariables,
+  executionMode,
 }) => {
   const { subAction, subActionParams } = actionParams;
 
@@ -152,6 +53,20 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
       editAction('subAction', event.target.value, index);
     },
     [editAction, index]
+  );
+
+  const editOptionalSubAction = useCallback(
+    (key, value) => {
+      if (isEmpty(value)) {
+        const paramsCopy = cloneDeep(subActionParams);
+        unset(paramsCopy, key);
+        editAction('subActionParams', paramsCopy, index);
+        return;
+      }
+
+      editAction('subActionParams', { ...subActionParams, [key]: value }, index);
+    },
+    [editAction, index, subActionParams]
   );
 
   const editSubAction = useCallback(
@@ -171,39 +86,55 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
   useEffect(() => {
     if (subAction != null && currentSubAction.current !== subAction) {
       currentSubAction.current = subAction;
-      const params = subActionParams?.alias ? { alias: subActionParams.alias } : undefined;
-      editAction('subActionParams', params, index);
+
+      // check for a mismatch in the subAction and params, if the subAction does not match the params then we need to
+      // clear them by calling editAction. We can carry over the alias if it exists
+      if (
+        (subAction === OpsgenieSubActions.CreateAlert &&
+          !isPartialCreateAlertSchema(subActionParams)) ||
+        (subAction === OpsgenieSubActions.CloseAlert && !isPartialCloseAlertSchema(subActionParams))
+      ) {
+        const params = subActionParams?.alias ? { alias: subActionParams.alias } : undefined;
+        editAction('subActionParams', params, index);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subAction, currentSubAction]);
+  }, [subAction, currentSubAction, index, subActionParams]);
 
   return (
     <>
-      <EuiFormRow fullWidth label={i18n.ACTION_LABEL}>
-        <EuiSelect
-          fullWidth
-          data-test-subj="opsgenie-subActionSelect"
-          options={actionOptions}
-          hasNoInitialSelection={subAction == null}
-          value={subAction}
-          onChange={onActionChange}
-        />
-      </EuiFormRow>
+      {executionMode === ActionConnectorMode.Test && (
+        <EuiFormRow fullWidth label={i18n.ACTION_LABEL}>
+          <EuiSelect
+            fullWidth
+            data-test-subj="opsgenie-subActionSelect"
+            options={actionOptions}
+            hasNoInitialSelection={subAction == null}
+            value={subAction}
+            onChange={onActionChange}
+          />
+        </EuiFormRow>
+      )}
 
-      {subAction != null && subAction === OpsgenieSubActions.CreateAlert && (
-        <CreateAlertComponent
+      {subAction === OpsgenieSubActions.CreateAlert && (
+        <CreateAlert
+          showSaveError={showCreateAlertSaveError(actionParams, errors)}
           subActionParams={subActionParams}
+          editAction={editAction}
           editSubAction={editSubAction}
+          editOptionalSubAction={editOptionalSubAction}
           errors={errors}
           index={index}
           messageVariables={messageVariables}
         />
       )}
 
-      {subAction != null && subAction === OpsgenieSubActions.CloseAlert && (
-        <CloseAlertComponent
+      {subAction === OpsgenieSubActions.CloseAlert && (
+        <CloseAlert
+          showSaveError={showCloseAlertSaveError(actionParams, errors)}
           subActionParams={subActionParams}
           editSubAction={editSubAction}
+          editOptionalSubAction={editOptionalSubAction}
           errors={errors}
           index={index}
           messageVariables={messageVariables}
@@ -214,6 +145,45 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
 };
 
 OpsgenieParamFields.displayName = 'OpsgenieParamFields';
+
+/**
+ * The show*AlertSaveError functions are used to cause a rerender when fields are set to `null` when a user attempts to
+ * save the form before providing values for the required fields (message for creating an alert and alias for closing an alert).
+ * If we only passed in subActionParams the child components would not rerender because the objects field is only updated
+ * and not the entire object.
+ */
+
+const showCreateAlertSaveError = (
+  params: Partial<OpsgenieActionParams>,
+  errors: IErrorObject
+): boolean => {
+  const errorArray = errors['subActionParams.message'] as string[] | undefined;
+  const errorsLength = errorArray?.length ?? 0;
+
+  return (
+    isCreateAlertParams(params) && params.subActionParams?.message === null && errorsLength > 0
+  );
+};
+
+const showCloseAlertSaveError = (
+  params: Partial<OpsgenieActionParams>,
+  errors: IErrorObject
+): boolean => {
+  const errorArray = errors['subActionParams.alias'] as string[] | undefined;
+  const errorsLength = errorArray?.length ?? 0;
+
+  return isCloseAlertParams(params) && params.subActionParams?.alias === null && errorsLength > 0;
+};
+
+const isCreateAlertParams = (
+  params: Partial<OpsgenieActionParams>
+): params is Partial<OpsgenieCreateAlertSubActionParams> =>
+  params.subAction === OpsgenieSubActions.CreateAlert;
+
+const isCloseAlertParams = (
+  params: Partial<OpsgenieActionParams>
+): params is OpsgenieCreateAlertSubActionParams =>
+  params.subAction === OpsgenieSubActions.CloseAlert;
 
 // eslint-disable-next-line import/no-default-export
 export { OpsgenieParamFields as default };

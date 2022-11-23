@@ -256,7 +256,7 @@ describe('EventLogStart', () => {
       });
       expect(esContext.esAdapter.aggregateEventsWithAuthFilter).toHaveBeenCalledWith({
         index: esContext.esNames.indexPattern,
-        namespace: undefined,
+        namespaces: [undefined],
         type: 'saved-object-type',
         authFilter: testAuthFilter,
         aggregateOptions: {

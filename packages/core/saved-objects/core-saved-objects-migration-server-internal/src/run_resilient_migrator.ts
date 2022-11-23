@@ -44,6 +44,7 @@ export const MIGRATION_CLIENT_OPTIONS = { maxRetries: 0, requestTimeout: 120_000
 export async function runResilientMigrator({
   client,
   kibanaVersion,
+  waitForMigrationCompletion,
   targetMappings,
   logger,
   preMigrationScript,
@@ -56,6 +57,7 @@ export async function runResilientMigrator({
 }: {
   client: ElasticsearchClient;
   kibanaVersion: string;
+  waitForMigrationCompletion: boolean;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
   logger: Logger;
@@ -68,6 +70,7 @@ export async function runResilientMigrator({
 }): Promise<MigrationResult> {
   const initialState = createInitialState({
     kibanaVersion,
+    waitForMigrationCompletion,
     targetMappings,
     preMigrationScript,
     migrationVersionPerType,

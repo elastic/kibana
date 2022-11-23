@@ -19,11 +19,7 @@ import {
 import { maplibregl, Map as MapboxMap } from '@kbn/mapbox-gl';
 import { i18n } from '@kbn/i18n';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
-import {
-  CUSTOM_ICON_PIXEL_RATIO,
-  createSdfIcon,
-  // @ts-expect-error
-} from '../../symbol_utils';
+import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../symbol_utils';
 
 export interface Props {
   svg: string;
@@ -93,13 +89,15 @@ export class IconPreview extends Component<Props, State> {
         return;
       }
       const imageData = await createSdfIcon({ svg, cutoff, radius });
-      if (map.hasImage(IconPreview.iconId)) {
-        map.updateImage(IconPreview.iconId, imageData);
-      } else {
-        map.addImage(IconPreview.iconId, imageData, {
-          sdf: true,
-          pixelRatio: CUSTOM_ICON_PIXEL_RATIO,
-        });
+      if (imageData) {
+        if (map.hasImage(IconPreview.iconId)) {
+          map.updateImage(IconPreview.iconId, imageData);
+        } else {
+          map.addImage(IconPreview.iconId, imageData, {
+            sdf: true,
+            pixelRatio: CUSTOM_ICON_PIXEL_RATIO,
+          });
+        }
       }
       map.setLayoutProperty('icon-layer', 'icon-image', IconPreview.iconId);
       map.setLayoutProperty('icon-layer', 'icon-size', 6);

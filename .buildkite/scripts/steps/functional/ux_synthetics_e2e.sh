@@ -13,5 +13,4 @@ echo "--- User Experience @elastic/synthetics Tests"
 
 cd "$XPACK_DIR"
 
-checks-reporter-with-killswitch "User Experience plugin @elastic/synthetics Tests" \
-  node plugins/ux/scripts/e2e.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" ${GREP:+--grep \"${GREP}\"}
+node plugins/ux/scripts/e2e.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" ${GREP:+--grep \"${GREP}\"}

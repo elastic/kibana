@@ -192,25 +192,25 @@ tr:hover .c3:focus::before {
 }
 
 <div
-    class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive euiFlexGroup--wrap"
+    class="euiFlexGroup emotion-euiFlexGroup-wrap-none-center-center-column"
     data-test-subj="netflow-rows"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-none-center-stretch-row"
         data-test-subj="netflow-columns"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero c0"
+          class="euiFlexItem c0 emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-none-center-flexStart-column"
             data-test-subj="user-process"
           >
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
                 class=""
@@ -255,25 +255,25 @@ tr:hover .c3:focus::before {
                                 data-test-subj="draggable-content-user.name"
                               >
                                 <span
-                                  class="euiToolTipAnchor"
+                                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                 >
                                   <span
-                                    class="euiBadge euiBadge--hollow euiBadge--iconLeft c5"
+                                    class="euiBadge c5 emotion-euiBadge-hollow"
                                     title=""
                                   >
                                     <span
-                                      class="euiBadge__content"
+                                      class="euiBadge__content emotion-euiBadge__content"
                                     >
                                       <span
-                                        class="euiBadge__text"
-                                      >
-                                        first.last
-                                      </span>
-                                      <span
-                                        class="euiBadge__icon"
+                                        class="euiBadge__icon emotion-euiBadge__icon-left"
                                         color="inherit"
                                         data-euiicon-type="user"
                                       />
+                                      <span
+                                        class="euiBadge__text emotion-euiBadge__text"
+                                      >
+                                        first.last
+                                      </span>
                                     </span>
                                   </span>
                                 </span>
@@ -288,7 +288,7 @@ tr:hover .c3:focus::before {
               </div>
             </div>
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
                 class=""
@@ -333,25 +333,25 @@ tr:hover .c3:focus::before {
                                 data-test-subj="draggable-content-process.name"
                               >
                                 <span
-                                  class="euiToolTipAnchor"
+                                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                 >
                                   <span
-                                    class="euiBadge euiBadge--hollow euiBadge--iconLeft c5"
+                                    class="euiBadge c5 emotion-euiBadge-hollow"
                                     title=""
                                   >
                                     <span
-                                      class="euiBadge__content"
+                                      class="euiBadge__content emotion-euiBadge__content"
                                     >
                                       <span
-                                        class="euiBadge__text"
-                                      >
-                                        rat
-                                      </span>
-                                      <span
-                                        class="euiBadge__icon"
+                                        class="euiBadge__icon emotion-euiBadge__icon-left"
                                         color="inherit"
                                         data-euiicon-type="console"
                                       />
+                                      <span
+                                        class="euiBadge__text emotion-euiBadge__text"
+                                      >
+                                        rat
+                                      </span>
                                     </span>
                                   </span>
                                 </span>
@@ -368,14 +368,14 @@ tr:hover .c3:focus::before {
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero c0"
+          class="euiFlexItem c0 emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-none-center-flexStart-column"
             data-test-subj="duration-and-start-group"
           >
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
                 class=""
@@ -427,7 +427,7 @@ tr:hover .c3:focus::before {
                                     data-euiicon-type="clock"
                                   />
                                   <span
-                                    class="euiToolTipAnchor"
+                                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                   >
                                     <div
                                       data-test-subj="formatted-duration"
@@ -447,7 +447,7 @@ tr:hover .c3:focus::before {
               </div>
             </div>
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
                 class=""
@@ -499,7 +499,7 @@ tr:hover .c3:focus::before {
                                     data-euiicon-type="clock"
                                   />
                                   <span
-                                    class="euiToolTipAnchor"
+                                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                   >
                                     Nov 12, 2018 @ 19:03:25.836
                                   </span>
@@ -515,7 +515,7 @@ tr:hover .c3:focus::before {
               </div>
             </div>
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
                 class=""
@@ -567,7 +567,7 @@ tr:hover .c3:focus::before {
                                     data-euiicon-type="clock"
                                   />
                                   <span
-                                    class="euiToolTipAnchor"
+                                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                   >
                                     Nov 12, 2018 @ 19:03:25.936
                                   </span>
@@ -585,19 +585,19 @@ tr:hover .c3:focus::before {
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-none-center-center-column"
           >
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero c7"
+                  class="euiFlexItem c7 emotion-euiFlexItem-growZero"
                 >
                   <div
                     class=""
@@ -642,25 +642,25 @@ tr:hover .c3:focus::before {
                                     data-test-subj="draggable-content-network.direction"
                                   >
                                     <span
-                                      class="euiToolTipAnchor"
+                                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                     >
                                       <span
-                                        class="euiBadge euiBadge--hollow euiBadge--iconLeft c5"
+                                        class="euiBadge c5 emotion-euiBadge-hollow"
                                         title=""
                                       >
                                         <span
-                                          class="euiBadge__content"
+                                          class="euiBadge__content emotion-euiBadge__content"
                                         >
                                           <span
-                                            class="euiBadge__text"
-                                          >
-                                            outgoing
-                                          </span>
-                                          <span
-                                            class="euiBadge__icon"
+                                            class="euiBadge__icon emotion-euiBadge__icon-left"
                                             color="inherit"
                                             data-euiicon-type="arrowUp"
                                           />
+                                          <span
+                                            class="euiBadge__text emotion-euiBadge__text"
+                                          >
+                                            outgoing
+                                          </span>
                                         </span>
                                       </span>
                                     </span>
@@ -675,7 +675,7 @@ tr:hover .c3:focus::before {
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero c7"
+                  class="euiFlexItem c7 emotion-euiFlexItem-growZero"
                 >
                   <div
                     class=""
@@ -720,17 +720,17 @@ tr:hover .c3:focus::before {
                                     data-test-subj="draggable-content-network.protocol"
                                   >
                                     <span
-                                      class="euiToolTipAnchor"
+                                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                     >
                                       <span
-                                        class="euiBadge euiBadge--hollow euiBadge--iconLeft c5"
+                                        class="euiBadge c5 emotion-euiBadge-hollow"
                                         title=""
                                       >
                                         <span
-                                          class="euiBadge__content"
+                                          class="euiBadge__content emotion-euiBadge__content"
                                         >
                                           <span
-                                            class="euiBadge__text"
+                                            class="euiBadge__text emotion-euiBadge__text"
                                           >
                                             http
                                           </span>
@@ -748,7 +748,7 @@ tr:hover .c3:focus::before {
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero c7"
+                  class="euiFlexItem c7 emotion-euiFlexItem-growZero"
                 >
                   <div
                     class=""
@@ -793,7 +793,7 @@ tr:hover .c3:focus::before {
                                     data-test-subj="draggable-content-network.bytes"
                                   >
                                     <span
-                                      class="euiToolTipAnchor"
+                                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                     >
                                       <div
                                         class="euiText c8 emotion-euiText-xs"
@@ -814,7 +814,7 @@ tr:hover .c3:focus::before {
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero c7"
+                  class="euiFlexItem c7 emotion-euiFlexItem-growZero"
                 >
                   <div
                     class=""
@@ -859,7 +859,7 @@ tr:hover .c3:focus::before {
                                     data-test-subj="draggable-content-network.packets"
                                   >
                                     <span
-                                      class="euiToolTipAnchor"
+                                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                     >
                                       <div
                                         class="euiText c8 emotion-euiText-xs"
@@ -880,7 +880,7 @@ tr:hover .c3:focus::before {
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero c7"
+                  class="euiFlexItem c7 emotion-euiFlexItem-growZero"
                 >
                   <div
                     class=""
@@ -925,17 +925,17 @@ tr:hover .c3:focus::before {
                                     data-test-subj="draggable-content-network.transport"
                                   >
                                     <span
-                                      class="euiToolTipAnchor"
+                                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                     >
                                       <span
-                                        class="euiBadge euiBadge--hollow euiBadge--iconLeft c5"
+                                        class="euiBadge c5 emotion-euiBadge-hollow"
                                         title=""
                                       >
                                         <span
-                                          class="euiBadge__content"
+                                          class="euiBadge__content emotion-euiBadge__content"
                                         >
                                           <span
-                                            class="euiBadge__text"
+                                            class="euiBadge__text emotion-euiBadge__text"
                                           >
                                             tcp
                                           </span>
@@ -953,7 +953,7 @@ tr:hover .c3:focus::before {
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
                     class=""
@@ -998,17 +998,17 @@ tr:hover .c3:focus::before {
                                     data-test-subj="draggable-content-network.community_id"
                                   >
                                     <span
-                                      class="euiToolTipAnchor"
+                                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                     >
                                       <span
-                                        class="euiBadge euiBadge--hollow euiBadge--iconLeft c5"
+                                        class="euiBadge c5 emotion-euiBadge-hollow"
                                         title=""
                                       >
                                         <span
-                                          class="euiBadge__content"
+                                          class="euiBadge__content emotion-euiBadge__content"
                                         >
                                           <span
-                                            class="euiBadge__text"
+                                            class="euiBadge__text emotion-euiBadge__text"
                                           >
                                             we.live.in.a
                                           </span>
@@ -1028,31 +1028,31 @@ tr:hover .c3:focus::before {
               </div>
             </div>
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero c9"
+              class="euiFlexItem c9 emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-stretch-row"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <span
-                    class="euiBadge euiBadge--hollow euiBadge--iconLeft"
+                    class="euiBadge emotion-euiBadge-hollow"
                     data-test-subj="source-ip-badge"
                     title=""
                   >
                     <span
-                      class="euiBadge__content"
+                      class="euiBadge__content emotion-euiBadge__content"
                     >
                       <span
-                        class="euiBadge__text"
+                        class="euiBadge__text emotion-euiBadge__text"
                       >
                         <div
-                          class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                          class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-center-column"
                           data-test-subj="source-ip-group"
                         >
                           <div
-                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                            class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <div
                               class="c10"
@@ -1061,19 +1061,19 @@ tr:hover .c3:focus::before {
                             </div>
                           </div>
                           <div
-                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                            class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <div
-                              class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+                              class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
                             >
                               <div
-                                class="euiFlexItem euiFlexItem--flexGrowZero"
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
                               >
                                 <div
-                                  class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
                                 >
                                   <div
-                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
                                       class=""
@@ -1118,7 +1118,7 @@ tr:hover .c3:focus::before {
                                                       data-test-subj="draggable-truncatable-content"
                                                     >
                                                       <span
-                                                        class="euiToolTipAnchor"
+                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                                       >
                                                         <a
                                                           class="euiLink emotion-euiLink-primary"
@@ -1140,13 +1140,13 @@ tr:hover .c3:focus::before {
                                     </div>
                                   </div>
                                   <div
-                                    class="euiFlexItem"
+                                    class="euiFlexItem emotion-euiFlexItem-grow-1"
                                   >
                                     <div
-                                      class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                      class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
                                     >
                                       <div
-                                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                                        class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <span
                                           class="c12"
@@ -1156,7 +1156,7 @@ tr:hover .c3:focus::before {
                                         </span>
                                       </div>
                                       <div
-                                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                                        class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
                                           class="c13"
@@ -1190,19 +1190,19 @@ tr:hover .c3:focus::before {
                             </div>
                           </div>
                           <div
-                            class="euiFlexItem"
+                            class="euiFlexItem emotion-euiFlexItem-grow-1"
                           >
                             <div
-                              class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                              class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                             >
                               <div
-                                class="euiFlexItem euiFlexItem--flexGrowZero c14"
+                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
                               >
                                 <div
-                                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                                 >
                                   <div
-                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
                                       class=""
@@ -1247,7 +1247,7 @@ tr:hover .c3:focus::before {
                                                       data-test-subj="draggable-content-source.geo.continent_name"
                                                     >
                                                       <span
-                                                        class="euiToolTipAnchor"
+                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                                       >
                                                         North America
                                                       </span>
@@ -1264,13 +1264,13 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem euiFlexItem--flexGrowZero c14"
+                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
                               >
                                 <div
-                                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                                 >
                                   <div
-                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
                                       class=""
@@ -1315,7 +1315,7 @@ tr:hover .c3:focus::before {
                                                       data-test-subj="draggable-content-source.geo.country_name"
                                                     >
                                                       <span
-                                                        class="euiToolTipAnchor"
+                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                                       >
                                                         United States
                                                       </span>
@@ -1332,13 +1332,13 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem euiFlexItem--flexGrowZero c14"
+                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
                               >
                                 <div
-                                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                                 >
                                   <div
-                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <span
                                       class="c15"
@@ -1348,7 +1348,7 @@ tr:hover .c3:focus::before {
                                     </span>
                                   </div>
                                   <div
-                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
                                       class=""
@@ -1393,7 +1393,7 @@ tr:hover .c3:focus::before {
                                                       data-test-subj="draggable-content-source.geo.country_iso_code"
                                                     >
                                                       <span
-                                                        class="euiToolTipAnchor"
+                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                                       >
                                                         US
                                                       </span>
@@ -1410,13 +1410,13 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem euiFlexItem--flexGrowZero c14"
+                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
                               >
                                 <div
-                                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                                 >
                                   <div
-                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
                                       class=""
@@ -1461,7 +1461,7 @@ tr:hover .c3:focus::before {
                                                       data-test-subj="draggable-content-source.geo.region_name"
                                                     >
                                                       <span
-                                                        class="euiToolTipAnchor"
+                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                                       >
                                                         Georgia
                                                       </span>
@@ -1478,13 +1478,13 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem euiFlexItem--flexGrowZero c14"
+                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
                               >
                                 <div
-                                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                                 >
                                   <div
-                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
                                       class=""
@@ -1529,7 +1529,7 @@ tr:hover .c3:focus::before {
                                                       data-test-subj="draggable-content-source.geo.city_name"
                                                     >
                                                       <span
-                                                        class="euiToolTipAnchor"
+                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                                       >
                                                         Atlanta
                                                       </span>
@@ -1553,16 +1553,16 @@ tr:hover .c3:focus::before {
                   </span>
                 </div>
                 <div
-                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive c16"
+                  class="euiFlexGroup c16 emotion-euiFlexGroup-none-center-center-column"
                 >
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
                     >
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
                           class="c17"
@@ -1570,7 +1570,7 @@ tr:hover .c3:focus::before {
                         />
                       </div>
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <div
                           class=""
@@ -1615,7 +1615,7 @@ tr:hover .c3:focus::before {
                                           data-test-subj="draggable-content-source.bytes"
                                         >
                                           <span
-                                            class="euiToolTipAnchor"
+                                            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                           >
                                             <div
                                               class="euiText c18 emotion-euiText-xs"
@@ -1641,7 +1641,7 @@ tr:hover .c3:focus::before {
                         </div>
                       </div>
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
                           class="c17"
@@ -1649,7 +1649,7 @@ tr:hover .c3:focus::before {
                         />
                       </div>
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <div
                           class=""
@@ -1694,7 +1694,7 @@ tr:hover .c3:focus::before {
                                           data-test-subj="draggable-content-source.packets"
                                         >
                                           <span
-                                            class="euiToolTipAnchor"
+                                            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                           >
                                             <div
                                               class="euiText c18 emotion-euiText-xs"
@@ -1715,7 +1715,7 @@ tr:hover .c3:focus::before {
                         </div>
                       </div>
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
                           class="c17"
@@ -1723,7 +1723,7 @@ tr:hover .c3:focus::before {
                         />
                       </div>
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
                           color="subdued"
@@ -1734,13 +1734,13 @@ tr:hover .c3:focus::before {
                     </div>
                   </div>
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
                     >
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
                           color="subdued"
@@ -1749,7 +1749,7 @@ tr:hover .c3:focus::before {
                         />
                       </div>
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
                           class="c20"
@@ -1757,7 +1757,7 @@ tr:hover .c3:focus::before {
                         />
                       </div>
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <div
                           class=""
@@ -1802,7 +1802,7 @@ tr:hover .c3:focus::before {
                                           data-test-subj="draggable-content-destination.bytes"
                                         >
                                           <span
-                                            class="euiToolTipAnchor"
+                                            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                           >
                                             <div
                                               class="euiText c18 emotion-euiText-xs"
@@ -1828,7 +1828,7 @@ tr:hover .c3:focus::before {
                         </div>
                       </div>
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
                           class="c20"
@@ -1836,7 +1836,7 @@ tr:hover .c3:focus::before {
                         />
                       </div>
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <div
                           class=""
@@ -1881,7 +1881,7 @@ tr:hover .c3:focus::before {
                                           data-test-subj="draggable-content-destination.packets"
                                         >
                                           <span
-                                            class="euiToolTipAnchor"
+                                            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                           >
                                             <div
                                               class="euiText c18 emotion-euiText-xs"
@@ -1902,7 +1902,7 @@ tr:hover .c3:focus::before {
                         </div>
                       </div>
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
                           class="c20"
@@ -1913,25 +1913,25 @@ tr:hover .c3:focus::before {
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <span
-                    class="euiBadge euiBadge--hollow euiBadge--iconLeft"
+                    class="euiBadge emotion-euiBadge-hollow"
                     data-test-subj="destination-ip-badge"
                     title=""
                   >
                     <span
-                      class="euiBadge__content"
+                      class="euiBadge__content emotion-euiBadge__content"
                     >
                       <span
-                        class="euiBadge__text"
+                        class="euiBadge__text emotion-euiBadge__text"
                       >
                         <div
-                          class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                          class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-center-column"
                           data-test-subj="destination-ip-group"
                         >
                           <div
-                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                            class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <div
                               class="c10"
@@ -1940,19 +1940,19 @@ tr:hover .c3:focus::before {
                             </div>
                           </div>
                           <div
-                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                            class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <div
-                              class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+                              class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
                             >
                               <div
-                                class="euiFlexItem euiFlexItem--flexGrowZero"
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
                               >
                                 <div
-                                  class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
                                 >
                                   <div
-                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
                                       class=""
@@ -1997,7 +1997,7 @@ tr:hover .c3:focus::before {
                                                       data-test-subj="draggable-truncatable-content"
                                                     >
                                                       <span
-                                                        class="euiToolTipAnchor"
+                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                                       >
                                                         <a
                                                           class="euiLink emotion-euiLink-primary"
@@ -2019,13 +2019,13 @@ tr:hover .c3:focus::before {
                                     </div>
                                   </div>
                                   <div
-                                    class="euiFlexItem"
+                                    class="euiFlexItem emotion-euiFlexItem-grow-1"
                                   >
                                     <div
-                                      class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                      class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
                                     >
                                       <div
-                                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                                        class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <span
                                           class="c12"
@@ -2035,7 +2035,7 @@ tr:hover .c3:focus::before {
                                         </span>
                                       </div>
                                       <div
-                                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                                        class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
                                           class="c13"
@@ -2069,19 +2069,19 @@ tr:hover .c3:focus::before {
                             </div>
                           </div>
                           <div
-                            class="euiFlexItem"
+                            class="euiFlexItem emotion-euiFlexItem-grow-1"
                           >
                             <div
-                              class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                              class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                             >
                               <div
-                                class="euiFlexItem euiFlexItem--flexGrowZero c14"
+                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
                               >
                                 <div
-                                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                                 >
                                   <div
-                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
                                       class=""
@@ -2126,7 +2126,7 @@ tr:hover .c3:focus::before {
                                                       data-test-subj="draggable-content-destination.geo.continent_name"
                                                     >
                                                       <span
-                                                        class="euiToolTipAnchor"
+                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                                       >
                                                         North America
                                                       </span>
@@ -2143,13 +2143,13 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem euiFlexItem--flexGrowZero c14"
+                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
                               >
                                 <div
-                                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                                 >
                                   <div
-                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
                                       class=""
@@ -2194,7 +2194,7 @@ tr:hover .c3:focus::before {
                                                       data-test-subj="draggable-content-destination.geo.country_name"
                                                     >
                                                       <span
-                                                        class="euiToolTipAnchor"
+                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                                       >
                                                         United States
                                                       </span>
@@ -2211,13 +2211,13 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem euiFlexItem--flexGrowZero c14"
+                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
                               >
                                 <div
-                                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                                 >
                                   <div
-                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <span
                                       class="c15"
@@ -2227,7 +2227,7 @@ tr:hover .c3:focus::before {
                                     </span>
                                   </div>
                                   <div
-                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
                                       class=""
@@ -2272,7 +2272,7 @@ tr:hover .c3:focus::before {
                                                       data-test-subj="draggable-content-destination.geo.country_iso_code"
                                                     >
                                                       <span
-                                                        class="euiToolTipAnchor"
+                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                                       >
                                                         US
                                                       </span>
@@ -2289,13 +2289,13 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem euiFlexItem--flexGrowZero c14"
+                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
                               >
                                 <div
-                                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                                 >
                                   <div
-                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
                                       class=""
@@ -2340,7 +2340,7 @@ tr:hover .c3:focus::before {
                                                       data-test-subj="draggable-content-destination.geo.region_name"
                                                     >
                                                       <span
-                                                        class="euiToolTipAnchor"
+                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                                       >
                                                         New York
                                                       </span>
@@ -2357,13 +2357,13 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem euiFlexItem--flexGrowZero c14"
+                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
                               >
                                 <div
-                                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                                  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                                 >
                                   <div
-                                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                                    class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <div
                                       class=""
@@ -2408,7 +2408,7 @@ tr:hover .c3:focus::before {
                                                       data-test-subj="draggable-content-destination.geo.city_name"
                                                     >
                                                       <span
-                                                        class="euiToolTipAnchor"
+                                                        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                                       >
                                                         New York
                                                       </span>
@@ -2438,14 +2438,14 @@ tr:hover .c3:focus::before {
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-none-center-center-column"
         data-test-subj="fingerprints-group"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
             class=""
@@ -2490,17 +2490,22 @@ tr:hover .c3:focus::before {
                             data-test-subj="draggable-content-tls.fingerprints.ja3.hash"
                           >
                             <span
-                              class="euiToolTipAnchor"
+                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                             >
                               <span
-                                class="euiBadge euiBadge--hollow euiBadge--iconLeft c5"
+                                class="euiBadge c5 emotion-euiBadge-hollow"
                                 title=""
                               >
                                 <span
-                                  class="euiBadge__content"
+                                  class="euiBadge__content emotion-euiBadge__content"
                                 >
                                   <span
-                                    class="euiBadge__text"
+                                    class="euiBadge__icon emotion-euiBadge__icon-left"
+                                    color="inherit"
+                                    data-euiicon-type="snowflake"
+                                  />
+                                  <span
+                                    class="euiBadge__text emotion-euiBadge__text"
                                   >
                                     <span
                                       class="c21"
@@ -2528,11 +2533,6 @@ tr:hover .c3:focus::before {
                                       </span>
                                     </a>
                                   </span>
-                                  <span
-                                    class="euiBadge__icon"
-                                    color="inherit"
-                                    data-euiicon-type="snowflake"
-                                  />
                                 </span>
                               </span>
                             </span>
@@ -2547,7 +2547,7 @@ tr:hover .c3:focus::before {
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
             class=""
@@ -2592,17 +2592,22 @@ tr:hover .c3:focus::before {
                             data-test-subj="draggable-content-tls.client_certificate.fingerprint.sha1"
                           >
                             <span
-                              class="euiToolTipAnchor"
+                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                             >
                               <span
-                                class="euiBadge euiBadge--hollow euiBadge--iconLeft c5"
+                                class="euiBadge c5 emotion-euiBadge-hollow"
                                 title=""
                               >
                                 <span
-                                  class="euiBadge__content"
+                                  class="euiBadge__content emotion-euiBadge__content"
                                 >
                                   <span
-                                    class="euiBadge__text"
+                                    class="euiBadge__icon emotion-euiBadge__icon-left"
+                                    color="inherit"
+                                    data-euiicon-type="snowflake"
+                                  />
+                                  <span
+                                    class="euiBadge__text emotion-euiBadge__text"
                                   >
                                     <span
                                       class="c22"
@@ -2630,11 +2635,6 @@ tr:hover .c3:focus::before {
                                       </span>
                                     </a>
                                   </span>
-                                  <span
-                                    class="euiBadge__icon"
-                                    color="inherit"
-                                    data-euiicon-type="snowflake"
-                                  />
                                 </span>
                               </span>
                             </span>
@@ -2649,7 +2649,7 @@ tr:hover .c3:focus::before {
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
             class=""
@@ -2694,17 +2694,22 @@ tr:hover .c3:focus::before {
                             data-test-subj="draggable-content-tls.server_certificate.fingerprint.sha1"
                           >
                             <span
-                              class="euiToolTipAnchor"
+                              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                             >
                               <span
-                                class="euiBadge euiBadge--hollow euiBadge--iconLeft c5"
+                                class="euiBadge c5 emotion-euiBadge-hollow"
                                 title=""
                               >
                                 <span
-                                  class="euiBadge__content"
+                                  class="euiBadge__content emotion-euiBadge__content"
                                 >
                                   <span
-                                    class="euiBadge__text"
+                                    class="euiBadge__icon emotion-euiBadge__icon-left"
+                                    color="inherit"
+                                    data-euiicon-type="snowflake"
+                                  />
+                                  <span
+                                    class="euiBadge__text emotion-euiBadge__text"
                                   >
                                     <span
                                       class="c22"
@@ -2732,11 +2737,6 @@ tr:hover .c3:focus::before {
                                       </span>
                                     </a>
                                   </span>
-                                  <span
-                                    class="euiBadge__icon"
-                                    color="inherit"
-                                    data-euiicon-type="snowflake"
-                                  />
                                 </span>
                               </span>
                             </span>

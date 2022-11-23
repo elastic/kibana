@@ -1,0 +1,12 @@
+{
+  "id": "notifications",
+   "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "version": "kibana",
+  "server": true,
+  "ui": false,
+  "requiredPlugins": ["actions", "licensing"],
+  "optionalPlugins": []
+}

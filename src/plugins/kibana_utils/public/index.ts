@@ -93,6 +93,7 @@ export {
   replaceUrlHashQuery,
 } from './state_management/url';
 export type {
+  IStateStorage,
   IStateSyncConfig,
   ISyncStateRef,
   IKbnUrlStateStorage,

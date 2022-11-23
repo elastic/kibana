@@ -51,7 +51,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../common/elasticsearch_fieldnames';
+} from '../common/es_fields/apm';
 import { tutorialProvider } from './tutorial';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
 
@@ -92,7 +92,7 @@ export class APMPlugin
     ) {
       createApmTelemetry({
         core,
-        config$,
+        config: currentConfig,
         usageCollector: plugins.usageCollection,
         taskManager: plugins.taskManager,
         logger: this.logger,
@@ -190,12 +190,13 @@ export class APMPlugin
 
     if (plugins.alerting) {
       registerApmRuleTypes({
-        ruleDataClient,
         alerting: plugins.alerting,
-        ml: plugins.ml,
+        basePath: core.http.basePath,
         config$,
         logger: this.logger!.get('rule'),
-        basePath: core.http.basePath,
+        ml: plugins.ml,
+        observability: plugins.observability,
+        ruleDataClient,
       });
     }
 
@@ -234,6 +235,7 @@ export class APMPlugin
           indices,
           options: {
             includeFrozen,
+            forceSyntheticSource: currentConfig.forceSyntheticSource,
           },
         });
       },

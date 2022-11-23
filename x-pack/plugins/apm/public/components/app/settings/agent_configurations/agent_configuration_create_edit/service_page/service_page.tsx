@@ -19,7 +19,7 @@ import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { FormRowSelect } from './form_row_select';
 import { LegacyAPMLink } from '../../../../../shared/links/apm/apm_link';
 import { FormRowSuggestionsSelect } from './form_row_suggestions_select';
-import { SERVICE_NAME } from '../../../../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../../../../../common/es_fields/apm';
 interface Props {
   newConfig: AgentConfigurationIntake;
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;

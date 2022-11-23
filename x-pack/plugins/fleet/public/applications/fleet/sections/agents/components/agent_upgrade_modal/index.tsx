@@ -162,15 +162,16 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
 
     try {
       setIsSubmitting(true);
-      const { error } = isSingleAgent
-        ? await sendPostAgentUpgrade((agents[0] as Agent).id, {
-            version,
-          })
-        : await sendPostBulkAgentUpgrade({
-            version,
-            agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
-            ...rolloutOptions,
-          });
+      const { error } =
+        isSingleAgent && !isScheduled
+          ? await sendPostAgentUpgrade((agents[0] as Agent).id, {
+              version,
+            })
+          : await sendPostBulkAgentUpgrade({
+              version,
+              agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
+              ...rolloutOptions,
+            });
       if (error) {
         if (error?.statusCode === 400) {
           setErrors(error?.message);

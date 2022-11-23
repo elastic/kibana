@@ -22,10 +22,10 @@
  *      Otherwise you'd just satisfy TS requirements but might still
  *      run into runtime issues.
  */
-export const isPopulatedObject = <U extends string = string>(
+export const isPopulatedObject = <U extends string = string, T extends unknown = unknown>(
   arg: unknown,
   requiredAttributes: U[] = []
-): arg is Record<U, unknown> => {
+): arg is Record<U, T> => {
   return (
     typeof arg === 'object' &&
     arg !== null &&

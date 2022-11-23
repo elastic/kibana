@@ -173,6 +173,20 @@ Compare your real-time data to the results that are offset by a time increment. 
 For a time shift example, refer to <<compare-time-ranges>>.
 
 [float]
+[[multi-metric-partition-chart]]
+==== Build a partition chart from multiple metrics
+
+By default, partition charts (e.g. pie) are built from one or more "slice-by" dimensions to define the partitions and a single metric dimension to define their size. However, you can also build a partition chart from multiple metric dimensions.
+
+. Open the layer context menu at the top right of the layer panel.
+
+. Click *Layer settings*.
+
+. Click the switch labeled *Multiple metrics*.
+
+Note: this option is not available for mosaic charts.
+
+[float]
 [[add-annotations]]
 ==== Add annotations
 

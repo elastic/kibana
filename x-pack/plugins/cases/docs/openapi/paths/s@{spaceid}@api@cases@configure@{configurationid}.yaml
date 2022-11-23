@@ -25,7 +25,7 @@ patch:
               description: An object that contains the connector configuration.
               type: object
               properties:
-                $ref: '../components/schemas/connector_properties.yaml'
+                $ref: '../components/schemas/case_configure_connector_properties.yaml'
               required:
                 - fields
                 - id
@@ -43,7 +43,7 @@ patch:
     '200':
       description: Indicates a successful call.
       content:
-        application/json; charset=utf-8:
+        application/json:
           schema:
             type: array
             items: 

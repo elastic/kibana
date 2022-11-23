@@ -35,6 +35,16 @@
   font-weight: 300;
 }
 
+.optionsList__existsFilter {
+  font-style: italic;
+}
+
+.optionsList__negateLabel {
+  font-weight: bold;
+  font-size: $euiSizeM;
+  color: $euiColorDanger;
+}
+
 .optionsList__ignoredBadge {
   margin-left: $euiSizeS;
 }

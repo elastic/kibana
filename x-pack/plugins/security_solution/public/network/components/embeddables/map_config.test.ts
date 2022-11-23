@@ -15,6 +15,7 @@ import {
   mockLayerList,
   mockLayerListDouble,
   mockLayerListMixed,
+  mockLayerGroup,
   mockLineLayer,
   mockServerLayer,
   mockSourceLayer,
@@ -50,6 +51,7 @@ describe('map_config', () => {
       const layerList = getSourceLayer(
         mockIndexPatternIds[0].title,
         mockIndexPatternIds[0].id,
+        mockLayerGroup.id,
         lmc.default.source
       );
       expect(layerList).toStrictEqual(mockSourceLayer);
@@ -59,6 +61,7 @@ describe('map_config', () => {
       const layerList = getSourceLayer(
         mockAPMIndexPatternIds[0].title,
         mockAPMIndexPatternIds[0].id,
+        mockLayerGroup.id,
         lmc[mockAPMIndexPatternIds[0].title].source
       );
       expect(layerList).toStrictEqual(mockClientLayer);
@@ -70,6 +73,7 @@ describe('map_config', () => {
       const layerList = getDestinationLayer(
         mockIndexPatternIds[0].title,
         mockIndexPatternIds[0].id,
+        mockLayerGroup.id,
         lmc.default.destination
       );
       expect(layerList).toStrictEqual(mockDestinationLayer);
@@ -79,6 +83,7 @@ describe('map_config', () => {
       const layerList = getDestinationLayer(
         mockAPMIndexPatternIds[0].title,
         mockAPMIndexPatternIds[0].id,
+        mockLayerGroup.id,
         lmc[mockAPMIndexPatternIds[0].title].destination
       );
       expect(layerList).toStrictEqual(mockServerLayer);
@@ -90,6 +95,7 @@ describe('map_config', () => {
       const layerList = getLineLayer(
         mockIndexPatternIds[0].title,
         mockIndexPatternIds[0].id,
+        mockLayerGroup.id,
         lmc.default
       );
       expect(layerList).toStrictEqual(mockLineLayer);
@@ -99,6 +105,7 @@ describe('map_config', () => {
       const layerList = getLineLayer(
         mockAPMIndexPatternIds[0].title,
         mockAPMIndexPatternIds[0].id,
+        mockLayerGroup.id,
         lmc[mockAPMIndexPatternIds[0].title]
       );
       expect(layerList).toStrictEqual(mockClientServerLineLayer);

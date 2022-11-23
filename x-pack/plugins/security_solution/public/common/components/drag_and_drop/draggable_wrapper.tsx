@@ -155,7 +155,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
     openPopover,
     onFocus,
     setContainerRef,
-    showTopN,
+    isShowingTopN,
   } = useHoverActions({
     dataProvider,
     hideTopN,
@@ -307,7 +307,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
 
   return (
     <WithHoverActions
-      alwaysShow={showTopN || hoverActionsOwnFocus}
+      alwaysShow={isShowingTopN || hoverActionsOwnFocus}
       closePopOverTrigger={closePopOverTrigger}
       hoverContent={hoverContent}
       onCloseRequested={onCloseRequested}
@@ -333,7 +333,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     hoverContent,
     onCloseRequested,
     setContainerRef,
-    showTopN,
+    isShowingTopN,
   } = useHoverActions({
     dataProvider,
     hideTopN,
@@ -372,7 +372,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   if (!isDraggable) {
     return (
       <WithHoverActions
-        alwaysShow={showTopN || hoverActionsOwnFocus}
+        alwaysShow={isShowingTopN || hoverActionsOwnFocus}
         closePopOverTrigger={closePopOverTrigger}
         hoverContent={disableHoverActions(scopeId) ? undefined : hoverContent}
         onCloseRequested={onCloseRequested}

@@ -28,14 +28,16 @@ export function defineUpdateUserProfileDataRoute({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const session = await getSession().get(request);
-      if (!session) {
+      if (session.error) {
         logger.warn('User profile requested without valid session.');
         return response.notFound();
       }
 
-      if (!session.userProfileId) {
+      if (!session.value.userProfileId) {
         logger.warn(
-          `User profile missing from current session. (sid: ${getPrintableSessionId(session.sid)})`
+          `User profile missing from current session. (sid: ${getPrintableSessionId(
+            session.value.sid
+          )})`
         );
         return response.notFound();
       }
@@ -44,7 +46,7 @@ export function defineUpdateUserProfileDataRoute({
       if (currentUser?.elastic_cloud_user) {
         logger.warn(
           `Elastic Cloud SSO users aren't allowed to update profiles in Kibana. (sid: ${getPrintableSessionId(
-            session.sid
+            session.value.sid
           )})`
         );
         return response.forbidden();
@@ -52,7 +54,7 @@ export function defineUpdateUserProfileDataRoute({
 
       const userProfileService = getUserProfileService();
       try {
-        await userProfileService.update(session.userProfileId, request.body);
+        await userProfileService.update(session.value.userProfileId, request.body);
         return response.ok();
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));

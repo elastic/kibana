@@ -43,7 +43,7 @@ describe('ConfirmDeleteModal component', () => {
 
   it('calls deleteSelectedPipelines', () => {
     const wrapper = mountWithIntl(<ConfirmDeleteModal {...props} />);
-    wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
     expect(props.deleteSelectedPipelines).toHaveBeenCalled();
   });
 

@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
-import { BulkAction } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 
 import type { DryRunResult, BulkActionForConfirmation } from './types';
 
@@ -122,7 +122,7 @@ const BulkActionRuleErrorsListComponent = ({
         {ruleErrors.map(({ message, errorCode, ruleIds }) => {
           const rulesCount = ruleIds.length;
           switch (bulkAction) {
-            case BulkAction.edit:
+            case BulkActionType.edit:
               return (
                 <BulkEditRuleErrorItem
                   message={message}
@@ -131,7 +131,7 @@ const BulkActionRuleErrorsListComponent = ({
                 />
               );
 
-            case BulkAction.export:
+            case BulkActionType.export:
               return (
                 <BulkExportRuleErrorItem
                   message={message}

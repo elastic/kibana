@@ -25,13 +25,18 @@ filegroup(
   ],
 )
 
-# Grouping target to call all underlying packages build
-# targets so we can build them all at once
-# It will auto build all declared code packages and types packages
+# Grouping target to call all underlying packages js builds
 filegroup(
   name = "build",
   srcs = [
-    ":build_pkg_code",
+    ":build_pkg_code"
+  ],
+)
+
+# Grouping target to call all underlying packages ts builds
+filegroup(
+  name = "build_types",
+  srcs = [
     ":build_pkg_types"
   ],
 )

@@ -1276,7 +1276,13 @@
             "label": "soClient",
             "description": [],
             "signature": [
-              "SavedObjectsClientContract"
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
             ],
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "deprecated": false,
@@ -1315,7 +1321,13 @@
             "label": "logger",
             "description": [],
             "signature": [
-              "Logger",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              },
               " | Console"
             ],
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",

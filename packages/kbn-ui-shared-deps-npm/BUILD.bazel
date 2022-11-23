@@ -3,12 +3,11 @@ load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("@npm//webpack-cli:index.bzl", webpack = "webpack_cli")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-ui-shared-deps-npm"
+PKG_DIRNAME = "kbn-ui-shared-deps-npm"
 PKG_REQUIRE_NAME = "@kbn/ui-shared-deps-npm"
 
 SOURCE_FILES = glob(
   [
-    "**/*.ts",
     "**/*.js",
   ],
   exclude = [
@@ -44,6 +43,8 @@ RUNTIME_DEPS = [
   "@npm//@elastic/numeral",
   "@npm//@emotion/cache",
   "@npm//@emotion/react",
+  "@npm//@tanstack/react-query",
+  "@npm//@tanstack/react-query-devtools",
   "@npm//babel-loader",
   "@npm//core-js",
   "@npm//css-loader",
@@ -129,7 +130,6 @@ ts_project(
   deps = TYPES_DEPS,
   allow_js = True,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   tsconfig = ":tsconfig",
@@ -154,18 +154,24 @@ webpack(
 )
 
 js_library(
-  name = PKG_BASE_NAME,
+  name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node", ":shared_built_assets"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
 
+js_library(
+  name = "npm_module_types",
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node", ":shared_built_assets", ":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
 pkg_npm(
   name = "npm_module",
-  deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
+  deps = [":" + PKG_DIRNAME],
 )
 
 filegroup(
@@ -176,19 +182,8 @@ filegroup(
   visibility = ["//visibility:public"],
 )
 
-pkg_npm_types(
-  name = "npm_module_types",
-  srcs = SRCS,
-  deps = [":tsc_types"],
-  package_name = PKG_REQUIRE_NAME,
-  tsconfig = ":tsconfig",
-  visibility = ["//visibility:public"],
-)
-
-filegroup(
+pkg_npm(
   name = "build_types",
-  srcs = [
-    ":npm_module_types",
-  ],
+  deps = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

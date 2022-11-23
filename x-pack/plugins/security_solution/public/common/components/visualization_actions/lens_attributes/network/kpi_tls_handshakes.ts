@@ -15,6 +15,7 @@ export const kpiTlsHandshakesLensAttributes: LensAttributes = {
       layerId: '1f48a633-8eee-45ae-9471-861227e9ca03',
       accessor: '21052b6b-5504-4084-a2e2-c17f772345cf',
       layerType: 'data',
+      autoScaleMetricAlignment: 'left',
     },
     query: {
       query:

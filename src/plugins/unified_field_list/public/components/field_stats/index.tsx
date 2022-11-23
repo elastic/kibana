@@ -7,11 +7,23 @@
  */
 
 import React, { Fragment } from 'react';
-import type { FieldStatsProps, FieldStatsServices } from './field_stats';
+import type { FieldStatsProps, FieldStatsServices, FieldStatsState } from './field_stats';
+import type {
+  FieldTopValuesBucketProps,
+  FieldTopValuesBucketParams,
+} from './field_top_values_bucket';
 
 const Fallback = () => <Fragment />;
 
+const LazyFieldTopValuesBucket = React.lazy(() => import('./field_top_values_bucket'));
 const LazyFieldStats = React.lazy(() => import('./field_stats'));
+
+const WrappedFieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = (props) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyFieldTopValuesBucket {...props} />
+  </React.Suspense>
+);
+
 const WrappedFieldStats: React.FC<FieldStatsProps> = (props) => (
   <React.Suspense fallback={<Fallback />}>
     <LazyFieldStats {...props} />
@@ -19,4 +31,11 @@ const WrappedFieldStats: React.FC<FieldStatsProps> = (props) => (
 );
 
 export const FieldStats = WrappedFieldStats;
-export type { FieldStatsProps, FieldStatsServices };
+export const FieldTopValuesBucket = WrappedFieldTopValuesBucket;
+export type {
+  FieldStatsProps,
+  FieldStatsServices,
+  FieldStatsState,
+  FieldTopValuesBucketProps,
+  FieldTopValuesBucketParams,
+};

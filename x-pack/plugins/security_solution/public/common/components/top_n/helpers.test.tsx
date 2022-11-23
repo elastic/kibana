@@ -18,25 +18,22 @@ import {
   rawEvents,
   removeIgnoredAlertFilters,
   shouldIgnoreAlertFilters,
+  detectionAlertsTables,
 } from './helpers';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
-/** the following `TimelineId`s are detection alert tables */
-const detectionAlertsTimelines = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
-
-/** the following `TimelineId`s are NOT detection alert tables */
-const otherTimelines = [
+/** the following scopes are NOT detection alert tables */
+const otherScopes = [
   TableId.hostsPageEvents,
   TableId.hostsPageSessions,
   TableId.networkPageEvents,
   TimelineId.active,
-  TimelineId.casePage,
   TimelineId.test,
   TableId.alternateTest,
   TableId.kubernetesPageSessions,
 ];
 
-const othersWithoutActive = otherTimelines.filter((x) => x !== TimelineId.active);
+const othersWithoutActive = otherScopes.filter((x) => x !== TimelineId.active);
 
 const hostNameFilter: Filter = {
   meta: {
@@ -169,13 +166,13 @@ describe('getOptions', () => {
 });
 
 describe('isDetectionsAlertsTable', () => {
-  detectionAlertsTimelines.forEach((tableId) =>
+  detectionAlertsTables.forEach((tableId) =>
     test(`it returns true for detections alerts table '${tableId}'`, () => {
       expect(isDetectionsAlertsTable(tableId)).toEqual(true);
     })
   );
 
-  otherTimelines.forEach((tableId) =>
+  otherScopes.forEach((tableId) =>
     test(`it returns false for (NON alert table) timeline '${tableId}'`, () => {
       expect(isDetectionsAlertsTable(tableId)).toEqual(false);
     })
@@ -183,7 +180,7 @@ describe('isDetectionsAlertsTable', () => {
 });
 
 describe('shouldIgnoreAlertFilters', () => {
-  detectionAlertsTimelines.forEach((tableId) => {
+  detectionAlertsTables.forEach((tableId) => {
     test(`it returns true when the view is 'raw' for detections alerts table '${tableId}'`, () => {
       const view = 'raw';
       expect(shouldIgnoreAlertFilters({ tableId, view })).toEqual(true);
@@ -195,7 +192,7 @@ describe('shouldIgnoreAlertFilters', () => {
     });
   });
 
-  otherTimelines.forEach((tableId) => {
+  otherScopes.forEach((tableId) => {
     test(`it returns false when the view is 'raw' for (NON alert table) timeline'${tableId}'`, () => {
       const view = 'raw';
       expect(shouldIgnoreAlertFilters({ tableId, view })).toEqual(false);
@@ -209,7 +206,7 @@ describe('shouldIgnoreAlertFilters', () => {
 });
 
 describe('removeIgnoredAlertFilters', () => {
-  detectionAlertsTimelines.forEach((tableId) => {
+  detectionAlertsTables.forEach((tableId) => {
     test(`it removes the ignored alert filters when the view is 'raw' for detections alerts table '${tableId}'`, () => {
       const view = 'raw';
       expect(removeIgnoredAlertFilters({ filters: allFilters, tableId, view })).toEqual([
@@ -223,7 +220,7 @@ describe('removeIgnoredAlertFilters', () => {
     });
   });
 
-  otherTimelines.forEach((tableId) => {
+  otherScopes.forEach((tableId) => {
     test(`it does NOT remove any filters when the view is 'raw' for (NON alert table) '${tableId}'`, () => {
       const view = 'alert';
       expect(removeIgnoredAlertFilters({ filters: allFilters, tableId, view })).toEqual(allFilters);
@@ -237,7 +234,7 @@ describe('removeIgnoredAlertFilters', () => {
 });
 
 describe('getSourcererScopeName', () => {
-  detectionAlertsTimelines.forEach((tableId) => {
+  detectionAlertsTables.forEach((tableId) => {
     test(`it returns the 'default' SourcererScopeName when the view is 'raw' for detections alerts table '${tableId}'`, () => {
       const view = 'raw';
       expect(getSourcererScopeName({ scopeId: tableId, view })).toEqual(SourcererScopeName.default);

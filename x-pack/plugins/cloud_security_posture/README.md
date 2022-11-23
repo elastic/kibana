@@ -24,7 +24,7 @@ setting up your development environment.
 Kibana has a pretty long CI process.
 Therefore, we suggest running the following commands locally before creating a PR:
 
-1. Typescript check: `node_modules/.bin/tsc -b x-pack/plugins/cloud_security_posture/tsconfig.json --pretty`
+1. Typescript check: `node scripts/type_check.js --project=x-pack/plugins/cloud_security_posture/tsconfig.json`
 2. Linter check: `yarn lint:es x-pack/plugins/cloud_security_posture`
 3. Unit tests: `yarn jest --config x-pack/plugins/cloud_security_posture/jest.config.js`
 
