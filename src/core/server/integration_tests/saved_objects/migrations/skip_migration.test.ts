@@ -11,7 +11,7 @@ import Fs from 'fs';
 import Util from 'util';
 import { firstValueFrom } from 'rxjs';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import { Root } from '@kbn/core-root-server-internal';
+import { Root } from '../../../root';
 
 const logFilePath = Path.join(__dirname, 'cleanup.log');
 const asyncUnlink = Util.promisify(Fs.unlink);
