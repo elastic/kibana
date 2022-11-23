@@ -7,12 +7,11 @@
  */
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import { Filter, updateFilter } from '@kbn/es-query';
 import { BooleanRelation } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
 import { buildCombinedFilter, isCombinedFilter } from '@kbn/es-query';
 import { getBooleanRelationType } from '../../utils';
-import { updateFilter } from './update_filter';
 import type { Operator } from '../../filter_bar/filter_editor';
 import { FilterLocation, Path } from '../types';
 
@@ -179,7 +178,7 @@ export const updateFilters = (
   const newFilters = [...filters];
   const updatedFilter = updateFilter(
     getFilterByPath(newFilters, dest.path),
-    field,
+    field?.name,
     operator,
     params
   );

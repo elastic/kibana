@@ -6,44 +6,43 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
 import { identity, pickBy } from 'lodash';
-import type { Operator } from '../../filter_bar/filter_editor';
 
-/** @todo: refactor and move into es-query
- *  @internal **/
+import type { Filter, FilterMeta } from '..';
+
+type FilterOperator = Pick<FilterMeta, 'type' | 'negate'>;
+
 export const updateFilter = (
   filter: Filter,
-  field?: DataViewField,
-  operator?: Operator,
+  field?: string,
+  operator?: FilterOperator,
   params?: Filter['meta']['params']
 ) => {
-  if (field && operator) {
-    if (operator.type === 'exists') {
-      return updateWithExistsOperator(filter, operator);
-    }
-    if (operator.type === 'range') {
-      return updateWithRangeOperator(filter, operator, params, field);
-    } else if (Array.isArray(params)) {
-      return updateWithIsOneOfOperator(filter, operator, params);
-    } else {
-      return updateWithIsOperator(filter, operator, params);
-    }
-  } else {
+  if (!field || !operator) {
     return updateField(filter, field);
   }
-  return filter;
+
+  if (operator.type === 'exists') {
+    return updateWithExistsOperator(filter, operator);
+  }
+  if (operator.type === 'range') {
+    return updateWithRangeOperator(filter, operator, params, field);
+  }
+  if (Array.isArray(params)) {
+    return updateWithIsOneOfOperator(filter, operator, params);
+  }
+
+  return updateWithIsOperator(filter, operator, params);
 };
 
-function updateField(filter: Filter, field?: DataViewField) {
+function updateField(filter: Filter, field?: string) {
   return {
     ...filter,
     meta: {
       ...filter.meta,
-      key: field?.name,
+      key: field,
       // @todo: check why we need to pass "key" and "field" with the same data
-      field: field?.name,
+      field,
       params: { query: undefined },
       value: undefined,
       type: undefined,
@@ -52,7 +51,7 @@ function updateField(filter: Filter, field?: DataViewField) {
   };
 }
 
-function updateWithExistsOperator(filter: Filter, operator?: Operator) {
+function updateWithExistsOperator(filter: Filter, operator?: FilterOperator) {
   return {
     ...filter,
     meta: {
@@ -68,7 +67,7 @@ function updateWithExistsOperator(filter: Filter, operator?: Operator) {
 
 function updateWithIsOperator(
   filter: Filter,
-  operator?: Operator,
+  operator?: FilterOperator,
   params?: Filter['meta']['params']
 ) {
   return {
@@ -85,9 +84,9 @@ function updateWithIsOperator(
 
 function updateWithRangeOperator(
   filter: Filter,
-  operator: Operator,
+  operator: FilterOperator,
   rawParams: Array<Filter['meta']['params']>,
-  field: DataViewField
+  field: string
 ) {
   const params = {
     ...filter.meta.params,
@@ -107,7 +106,7 @@ function updateWithRangeOperator(
     },
     query: {
       range: {
-        [field.name]: params,
+        [field]: params,
       },
     },
   };
@@ -117,7 +116,7 @@ function updateWithRangeOperator(
 
 function updateWithIsOneOfOperator(
   filter: Filter,
-  operator?: Operator,
+  operator?: FilterOperator,
   params?: Array<Filter['meta']['params']>
 ) {
   return {
@@ -132,9 +131,7 @@ function updateWithIsOneOfOperator(
       bool: {
         minimum_should_match: 1,
         ...filter!.query?.should,
-        should: params?.map((param) => {
-          return { match_phrase: { [filter.meta.key!]: param } };
-        }),
+        should: params?.map((param) => ({ match_phrase: { [filter.meta.key!]: param } })),
       },
     },
   };
