@@ -38,6 +38,10 @@ export interface ISearchSetup {
   sessionsClient: ISessionsClient;
 }
 
+export interface RequestError extends Error {
+  body?: { attributes?: { error: { caused_by: { type: string; reason: string } } } };
+}
+
 /**
  * search service
  * @public
@@ -58,7 +62,7 @@ export interface ISearchStart {
    * Show toast for caught error
    * @param e Error
    */
-  showError: (e: Error) => void;
+  showError: (e: RequestError) => void;
   /**
    * Show warnings, or customize how they're shown
    * @param inspector IInspectorInfo - an inspector object with requests internally collected

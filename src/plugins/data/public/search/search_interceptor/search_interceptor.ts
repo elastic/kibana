@@ -523,7 +523,7 @@ export class SearchInterceptor {
         title: i18n.translate('data.search.esErrorTitle', {
           defaultMessage: 'Cannot retrieve search results',
         }),
-        text: toMountPoint(e.getErrorMessage(this.application), { theme$: this.deps.theme.theme$ }),
+        text: toMountPoint(e.getErrorMessage(), { theme$: this.deps.theme.theme$ }),
       });
     } else if (e.constructor.name === 'HttpFetchError') {
       this.deps.toasts.addDanger({

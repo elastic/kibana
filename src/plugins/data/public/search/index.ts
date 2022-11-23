@@ -14,6 +14,7 @@ export type {
   ISearchStart,
   ISearchStartSearchSource,
   SearchUsageCollector,
+  RequestError,
 } from './types';
 
 export type {

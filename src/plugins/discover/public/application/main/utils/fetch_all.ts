@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, ISearchSource, RequestError } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import { debounce } from 'lodash';
 import { getRawRecordType } from './get_raw_record_type';
 import {
   sendCompleteMsg,
@@ -64,6 +65,23 @@ export function fetchAll(
 ): Promise<void> {
   const { initialFetchStatus, appStateContainer, services, useNewFieldsApi, data } = fetchDeps;
 
+  const getDebouncedError = () => {
+    const addError = () => {
+      return debounce(data.search.showError, 600000, {
+        leading: true,
+        trailing: false,
+      });
+    };
+    const memory: Record<string, ReturnType<typeof addError>> = {};
+
+    return (debounceKey: string, error: Error) => {
+      memory[debounceKey] = memory[debounceKey] || addError();
+      return memory[debounceKey](error);
+    };
+  };
+
+  const debouncedShowError = getDebouncedError();
+
   /**
    * Method to create an error handler that will forward the received error
    * to the specified subjects. It will ignore AbortErrors and will use the data
@@ -72,12 +90,13 @@ export function fetchAll(
   const sendErrorTo = (
     ...errorSubjects: Array<DataMain$ | DataDocuments$ | DataTotalHits$ | DataCharts$>
   ) => {
-    return (error: Error) => {
+    return (error: RequestError) => {
       if (error instanceof Error && error.name === 'AbortError') {
         return;
       }
 
-      data.search.showError(error);
+      const debounceKey = error.message + error.stack + error?.body;
+      debouncedShowError(debounceKey, error);
       errorSubjects.forEach((subject) => sendErrorMsg(subject, error));
     };
   };

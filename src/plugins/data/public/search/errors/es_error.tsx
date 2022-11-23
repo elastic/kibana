@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-import { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { KbnError } from '@kbn/kibana-utils-plugin/common';
 import { IEsError } from './types';
@@ -27,7 +26,7 @@ export class EsError extends KbnError {
     this.attributes = err.attributes;
   }
 
-  public getErrorMessage(application: ApplicationStart) {
+  public getErrorMessage() {
     const rootCause = getRootCause(this.err)?.reason;
     const topLevelCause = this.attributes?.reason;
     const cause = rootCause ?? topLevelCause;
