@@ -44,6 +44,10 @@ describe('When on the trusted applications page', () => {
     mockUserPrivileges.mockReturnValue({ endpointPrivileges: mockedEndpointPrivileges });
   });
 
+  afterEach(() => {
+    mockUserPrivileges.mockReset();
+  });
+
   it('should search using expected exception item fields', async () => {
     const expectedFilterString = parseQueryFilterToKQL('fooFooFoo', SEARCHABLE_FIELDS);
     const { findAllByTestId } = render();
