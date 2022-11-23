@@ -14,41 +14,41 @@ import { buildCombinedFilter, isCombinedFilter } from '@kbn/es-query';
 import { getBooleanRelationType } from '../../utils';
 import { updateFilter } from './update_filter';
 import type { Operator } from '../../filter_bar/filter_editor';
-import { FilterLocation } from '../types';
+import { FilterLocation, Path } from '../types';
 
 const PATH_SEPARATOR = '.';
 
-export const getPathInArray = (path: string) => path.split(PATH_SEPARATOR).map((i) => +i);
+export const getPathInArray = (path: Path) => path.split(PATH_SEPARATOR).map(Number);
 
 const getGroupedFilters = (filter: Filter): Filter[] =>
   Array.isArray(filter) ? filter : filter?.meta?.params ?? [];
 
-const doForFilterByPath = <T>(filters: Filter[], path: string, action: (filter: Filter) => T) => {
-  const pathArray = getPathInArray(path);
-  let f = filters[pathArray[0]];
-  for (let i = 1, depth = pathArray.length; i < depth; i++) {
-    f = getGroupedFilters(f)[+pathArray[i]];
-  }
-  return action(f);
+const doForFilterByPath = <T>(filters: Filter[], path: Path, action: (filter: Filter) => T) => {
+  const [first, ...restPath] = getPathInArray(path);
+
+  const foundFilter = restPath.reduce((filter, filterLocation) => {
+    return getGroupedFilters(filter)[Number(filterLocation)];
+  }, filters[first]);
+
+  return action(foundFilter);
 };
 
 const getContainerMetaByPath = (filters: Filter[], pathInArray: number[]) => {
-  let targetArray: Filter[] = filters;
-  let parentFilter: Filter | undefined;
-  let parentConditionType = BooleanRelation.AND;
-
-  if (pathInArray.length > 1) {
-    parentFilter = getFilterByPath(filters, getParentFilterPath(pathInArray));
-    parentConditionType = getBooleanRelationType(parentFilter) ?? parentConditionType;
-    targetArray = getGroupedFilters(parentFilter);
-
-    targetArray = Array.isArray(targetArray) ? targetArray : targetArray ? [targetArray] : [];
+  if (pathInArray.length <= 1) {
+    return {
+      parentFilter: undefined,
+      targetArray: filters,
+      parentConditionType: BooleanRelation.AND,
+    };
   }
+
+  const parentFilter = getFilterByPath(filters, getParentFilterPath(pathInArray));
+  const targetArray = getGroupedFilters(parentFilter);
 
   return {
     parentFilter,
-    targetArray,
-    parentConditionType,
+    targetArray: Array.isArray(targetArray) ? targetArray : targetArray ? [targetArray] : [],
+    parentConditionType: getBooleanRelationType(parentFilter) ?? BooleanRelation.AND,
   };
 };
 
@@ -56,7 +56,7 @@ const getParentFilterPath = (pathInArray: number[]) =>
   pathInArray.slice(0, -1).join(PATH_SEPARATOR);
 
 export const normalizeFilters = (filters: Filter[]) => {
-  const doRecursive = (
+  const normalizeRecursively = (
     f: Filter | Filter[],
     parent: Filter[] | Filter
   ): Filter | Filter[] | undefined => {
@@ -71,7 +71,7 @@ export const normalizeFilters = (filters: Filter[]) => {
   const normalizeArray = (filtersArray: Filter[], parent: Filter[] | Filter): Filter[] => {
     const partiallyNormalized = filtersArray
       .map((item: Filter) => {
-        const normalized = doRecursive(item, filtersArray);
+        const normalized = normalizeRecursively(item, filtersArray);
 
         if (Array.isArray(normalized)) {
           if (normalized.length === 1) {
@@ -96,7 +96,7 @@ export const normalizeFilters = (filters: Filter[]) => {
           ...filter,
           meta: {
             ...filter.meta,
-            params: doRecursive(combinedFilters, filter),
+            params: normalizeRecursively(combinedFilters, filter),
           },
         }
       : undefined;
@@ -105,7 +105,7 @@ export const normalizeFilters = (filters: Filter[]) => {
   return normalizeArray(filters, filters) as Filter[];
 };
 
-export const getFilterByPath = (filters: Filter[], path: string) =>
+export const getFilterByPath = (filters: Filter[], path: Path) =>
   doForFilterByPath(filters, path, (f) => f);
 
 export const addFilter = (

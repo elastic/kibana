@@ -11,6 +11,6 @@ export type Path = string;
 
 /** @internal **/
 export interface FilterLocation {
-  path: string;
+  path: Path;
   index: number;
 }
