@@ -332,8 +332,11 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   }, [fieldGroups, scrollToTopResetCounter, fieldsExistInIndex, fieldsExistenceStatus]);
 }
 
+const collator = new Intl.Collator(undefined, {
+  sensitivity: 'base',
+});
 function sortFields<T extends FieldListItem>(fieldA: T, fieldB: T) {
-  return (fieldA.displayName || fieldA.name).localeCompare(fieldB.displayName || fieldB.name);
+  return collator.compare(fieldA.displayName || fieldA.name, fieldB.displayName || fieldB.name);
 }
 
 function hasFieldDataByDefault(): boolean {
