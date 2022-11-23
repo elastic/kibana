@@ -195,7 +195,7 @@ describe('OpsgenieParamFields', () => {
     expect(screen.queryByText('Message')).not.toBeInTheDocument();
   });
 
-  it('preserves the previous alias value when switching between the create and close alert event actions', async () => {
+  it('does not call edit action when a component rerenders with subActionParams that match the new subAction', async () => {
     const { rerender } = render(<OpsgenieParamFields {...defaultCreateAlertProps} />);
 
     expect(screen.getByDisplayValue('hello')).toBeInTheDocument();
@@ -220,17 +220,78 @@ describe('OpsgenieParamFields', () => {
 
     expect(screen.queryByDisplayValue('hello')).not.toBeInTheDocument();
 
-    expect(editAction).toBeCalledTimes(2);
+    expect(editAction).toBeCalledTimes(1);
+  });
 
-    expect(editAction.mock.calls[1]).toMatchInlineSnapshot(`
-    Array [
-      "subActionParams",
-      Object {
-        "alias": "a new alias",
-      },
-      0,
-    ]
-  `);
+  it('calls editAction with only the alias when the component is rerendered with mismatched closeAlert and params', async () => {
+    const { rerender } = render(<OpsgenieParamFields {...defaultCreateAlertProps} />);
+
+    expect(screen.getByDisplayValue('hello')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('123')).toBeInTheDocument();
+
+    rerender(
+      <OpsgenieParamFields
+        {...{
+          ...defaultCloseAlertProps,
+          actionParams: {
+            ...defaultCloseAlertProps.actionParams,
+            subActionParams: {
+              alias: 'a new alias',
+              message: 'a message',
+            },
+          },
+        }}
+      />
+    );
+
+    expect(screen.queryByDisplayValue('hello')).not.toBeInTheDocument();
+
+    expect(editAction).toBeCalledTimes(1);
+    expect(editAction.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "subActionParams",
+        Object {
+          "alias": "a new alias",
+        },
+        0,
+      ]
+    `);
+  });
+
+  it('calls editAction with only the alias when the component is rerendered with mismatched createAlert and params', async () => {
+    const { rerender } = render(<OpsgenieParamFields {...defaultCloseAlertProps} />);
+
+    expect(screen.queryByText('Message')).not.toBeInTheDocument();
+    expect(screen.getByDisplayValue('456')).toBeInTheDocument();
+
+    rerender(
+      <OpsgenieParamFields
+        {...{
+          ...defaultCreateAlertProps,
+          actionParams: {
+            ...defaultCreateAlertProps.actionParams,
+            subActionParams: {
+              message: 'a message',
+              alias: 'a new alias',
+              invalidField: 'a note',
+            },
+          },
+        }}
+      />
+    );
+
+    expect(screen.queryByDisplayValue('456')).not.toBeInTheDocument();
+
+    expect(editAction).toBeCalledTimes(1);
+    expect(editAction.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "subActionParams",
+        Object {
+          "alias": "a new alias",
+        },
+        0,
+      ]
+    `);
   });
 
   it('only preserves the previous alias value when switching between the create and close alert event actions', async () => {
@@ -262,14 +323,14 @@ describe('OpsgenieParamFields', () => {
     expect(editAction).toBeCalledTimes(2);
 
     expect(editAction.mock.calls[1]).toMatchInlineSnapshot(`
-    Array [
-      "subActionParams",
-      Object {
-        "alias": "a new alias",
-      },
-      0,
-    ]
-  `);
+          Array [
+            "subActionParams",
+            Object {
+              "alias": "a new alias",
+            },
+            0,
+          ]
+      `);
   });
 
   it('calls editAction when changing the subAction', async () => {

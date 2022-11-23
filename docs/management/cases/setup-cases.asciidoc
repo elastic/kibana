@@ -13,11 +13,11 @@ privileges:
 | Give full access to manage cases 
 a|
 * `All` for the *Cases* feature under *Management*.
-* `All` for the *Actions and Connectors* feature under *Management*.
+* `All` for the *{connectors-feature}* feature under *Management*.
 
 [NOTE]
 ====
-The *Actions and Connectors* feature privilege is required to create, add,
+The *{connectors-feature}* feature privilege is required to create, add,
 delete, and modify case connectors and to send updates to external systems.
 
 By default, `All` for the *Cases* feature includes authority to delete cases
