@@ -64,7 +64,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//blurhash",
-  "//packages/shared-ux/file/image/types:npm_module_types",
+  "//packages/shared-ux/file/types:npm_module_types",
 ]
 
 jsts_transpiler(
