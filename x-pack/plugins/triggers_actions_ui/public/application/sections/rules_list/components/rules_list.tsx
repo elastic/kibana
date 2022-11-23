@@ -200,7 +200,7 @@ export const RulesList = ({
 
   const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('ruleTagFilter');
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
-  const isRuleLastRunOutcomeEnabled = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
+  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
   const cloneRuleId = useRef<null | string>(null);
 
@@ -590,20 +590,20 @@ export const RulesList = ({
   };
 
   const getRuleOutcomeOrStatusFilter = () => {
-    if (isRuleLastRunOutcomeEnabled) {
+    if (isRuleUsingExecutionStatus) {
       return [
-        <RuleLastRunOutcomeFilter
-          key="rule-last-run-outcome-filter"
-          selectedOutcomes={ruleLastRunOutcomesFilter}
-          onChange={setRuleLastRunOutcomesFilter}
+        <RuleExecutionStatusFilter
+          key="rule-status-filter"
+          selectedStatuses={ruleExecutionStatusesFilter}
+          onChange={setRuleExecutionStatusesFilter}
         />,
       ];
     }
     return [
-      <RuleExecutionStatusFilter
-        key="rule-status-filter"
-        selectedStatuses={ruleExecutionStatusesFilter}
-        onChange={setRuleExecutionStatusesFilter}
+      <RuleLastRunOutcomeFilter
+        key="rule-last-run-outcome-filter"
+        selectedOutcomes={ruleLastRunOutcomesFilter}
+        onChange={setRuleLastRunOutcomesFilter}
       />,
     ];
   };
@@ -648,7 +648,7 @@ export const RulesList = ({
         key="action-type-filter"
         actionTypes={actionTypes}
         onChange={setActionTypesFilter}
-        filters={typesFilter}
+        filters={actionTypesFilter}
       />
     ),
     ...getRuleOutcomeOrStatusFilter(),

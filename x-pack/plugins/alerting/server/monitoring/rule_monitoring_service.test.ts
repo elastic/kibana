@@ -15,7 +15,7 @@ const ONE_HOUR = 60 * ONE_MINUTE;
 
 describe('RuleMonitoringService', () => {
   beforeAll(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(new Date(mockNow).getTime());
   });
 

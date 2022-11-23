@@ -124,7 +124,9 @@ export const ruleRegistrySearchStrategyProvider = (
           };
           const size = request.pagination ? request.pagination.pageSize : MAX_ALERT_SEARCH_SIZE;
           const params = {
+            allow_no_indices: true,
             index: indices,
+            ignore_unavailable: true,
             body: {
               _source: false,
               // TODO the fields need to come from the request
@@ -135,7 +137,11 @@ export const ruleRegistrySearchStrategyProvider = (
               query,
             },
           };
-          return (siemRequest ? requestUserEs : internalUserEs).search({ params }, options, deps);
+          return (siemRequest ? requestUserEs : internalUserEs).search(
+            { id: request.id, params },
+            options,
+            deps
+          );
         }),
         map((response) => {
           // Do we have to loop over each hit? Yes.
