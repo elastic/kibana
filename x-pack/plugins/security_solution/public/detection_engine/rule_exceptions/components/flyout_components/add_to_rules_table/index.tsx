@@ -10,6 +10,7 @@ import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiInMemoryTable, EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { sortBy } from 'lodash';
 import * as myI18n from './translations';
 import type { Rule } from '../../../../rule_management/logic/types';
 import { useFindRulesInMemory } from '../../../../rule_management_ui/components/rules_table/rules_table/use_find_rules_in_memory';
@@ -91,6 +92,15 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
     [rules]
   );
 
+  const sortedRulesBySelection = useMemo(
+    () =>
+      sortBy(rules, [
+        (rule) => {
+          return initiallySelectedRules?.find((initRule) => initRule.id === rule.id);
+        },
+      ]),
+    [initiallySelectedRules, rules]
+  );
   return (
     <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
       <>
@@ -98,8 +108,8 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
         <EuiSpacer size="s" />
         <EuiInMemoryTable<Rule>
           tableCaption="Rules table"
+          items={sortedRulesBySelection}
           itemId="id"
-          items={rules}
           loading={!isFetched}
           columns={getRulesTableColumn()}
           pagination={{
@@ -113,7 +123,6 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
           }
           selection={ruleSelectionValue}
           search={searchOptions}
-          sorting
           isSelectable
           data-test-subj="addExceptionToRulesTable"
         />

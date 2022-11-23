@@ -79,7 +79,7 @@ describe('Discover grid cell rendering', function () {
       dataViewMock,
       rowsSource.map(build),
       false,
-      [],
+      () => false,
       100,
       jest.fn()
     );
@@ -104,7 +104,7 @@ describe('Discover grid cell rendering', function () {
       dataViewMock,
       rowsSource.map(build),
       false,
-      [],
+      () => false,
       100,
       jest.fn()
     );
@@ -130,7 +130,7 @@ describe('Discover grid cell rendering', function () {
       dataViewMock,
       rowsFields.map(build),
       false,
-      [],
+      () => false,
       100,
       closePopoverMockFn
     );
@@ -157,7 +157,7 @@ describe('Discover grid cell rendering', function () {
       dataViewMock,
       rowsSource.map(build),
       false,
-      ['extension', 'bytes'],
+      (fieldName) => ['extension', 'bytes'].includes(fieldName),
       100,
       jest.fn()
     );
@@ -231,7 +231,7 @@ describe('Discover grid cell rendering', function () {
       dataViewMock,
       rowsSource.map(build),
       false,
-      [],
+      () => false,
       100,
       jest.fn()
     );
@@ -248,6 +248,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiFlexGroup
+        className="dscDiscoverGrid__cellPopover"
         direction="column"
         gutterSize="none"
         justifyContent="flexEnd"
@@ -304,7 +305,7 @@ describe('Discover grid cell rendering', function () {
       dataViewMock,
       rowsFields.map(build),
       true,
-      ['extension', 'bytes'],
+      (fieldName) => ['extension', 'bytes'].includes(fieldName),
       100,
       jest.fn()
     );
@@ -382,7 +383,7 @@ describe('Discover grid cell rendering', function () {
       dataViewMock,
       rowsFields.map(build),
       true,
-      ['extension', 'bytes'],
+      (fieldName) => ['extension', 'bytes'].includes(fieldName),
       // this is the number of rendered items
       1,
       jest.fn()
@@ -461,7 +462,7 @@ describe('Discover grid cell rendering', function () {
       dataViewMock,
       rowsFields.map(build),
       true,
-      [],
+      (fieldName) => false,
       100,
       jest.fn()
     );
@@ -478,6 +479,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiFlexGroup
+        className="dscDiscoverGrid__cellPopover"
         direction="column"
         gutterSize="none"
         justifyContent="flexEnd"
@@ -539,7 +541,7 @@ describe('Discover grid cell rendering', function () {
       dataViewMock,
       rowsFieldsWithTopLevelObject.map(build),
       true,
-      ['object.value', 'extension', 'bytes'],
+      (fieldName) => ['object.value', 'extension', 'bytes'].includes(fieldName),
       100,
       jest.fn()
     );
@@ -581,7 +583,7 @@ describe('Discover grid cell rendering', function () {
       dataViewMock,
       rowsFieldsWithTopLevelObject.map(build),
       true,
-      ['extension', 'bytes', 'object.value'],
+      (fieldName) => ['extension', 'bytes', 'object.value'].includes(fieldName),
       100,
       jest.fn()
     );
@@ -623,7 +625,7 @@ describe('Discover grid cell rendering', function () {
       dataViewMock,
       rowsFieldsWithTopLevelObject.map(build),
       true,
-      [],
+      () => false,
       100,
       closePopoverMockFn
     );
@@ -640,6 +642,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiFlexGroup
+        className="dscDiscoverGrid__cellPopover"
         direction="column"
         gutterSize="none"
         justifyContent="flexEnd"
@@ -688,7 +691,7 @@ describe('Discover grid cell rendering', function () {
       dataViewMock,
       rowsFieldsWithTopLevelObject.map(build),
       true,
-      [],
+      () => false,
       100,
       closePopoverMockFn
     );
@@ -716,7 +719,7 @@ describe('Discover grid cell rendering', function () {
       dataViewMock,
       rowsFieldsWithTopLevelObject.map(build),
       true,
-      [],
+      () => false,
       100,
       jest.fn()
     );
@@ -750,7 +753,7 @@ describe('Discover grid cell rendering', function () {
       dataViewMock,
       rowsSource.map(build),
       false,
-      [],
+      () => false,
       100,
       jest.fn()
     );
@@ -775,7 +778,7 @@ describe('Discover grid cell rendering', function () {
       dataViewMock,
       rowsSource.map(build),
       false,
-      [],
+      () => false,
       100,
       jest.fn()
     );
@@ -813,7 +816,7 @@ describe('Discover grid cell rendering', function () {
       dataViewMock,
       rowsFieldsUnmapped.map(build),
       true,
-      ['unmapped'],
+      (fieldName) => ['unmapped'].includes(fieldName),
       100,
       jest.fn()
     );

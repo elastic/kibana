@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-export { CANCEL } from '../../../common/translations';
+export { CANCEL, ADD_TAG_CUSTOM_OPTION_LABEL } from '../../../common/translations';
 
 export const EDIT_TAGS = i18n.translate('xpack.cases.actions.tags.edit', {
   defaultMessage: 'Edit tags',
@@ -51,3 +51,11 @@ export const SELECTED_TAGS = (selectedTags: number) =>
     defaultMessage: 'Selected: {selectedTags}',
     values: { selectedTags },
   });
+
+export const NO_TAGS_AVAILABLE = i18n.translate('xpack.cases.actions.tags.noTagsAvailable', {
+  defaultMessage: 'No tags available. To add a tag, enter it in the query bar',
+});
+
+export const NO_SEARCH_MATCH = i18n.translate('xpack.cases.actions.tags.noTagsMatch', {
+  defaultMessage: 'No tags match your search',
+});

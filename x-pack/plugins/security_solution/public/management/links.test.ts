@@ -32,6 +32,11 @@ describe('links', () => {
   let getPlugins: (roles: string[]) => StartPlugins;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
 
+  const getLinksWithout = (...excludedLinks: SecurityPageName[]) => ({
+    ...links,
+    links: links.links?.filter((link) => !excludedLinks.includes(link.id)),
+  });
+
   beforeAll(() => {
     ExperimentalFeaturesService.init({
       experimentalFeatures: { ...allowedExperimentalValues },
@@ -96,16 +101,14 @@ describe('links', () => {
         canUnIsolateHost: false,
         canAccessEndpointManagement: true,
         canReadActionsLogManagement: true,
+        canReadEndpointList: true,
       });
 
       const filteredLinks = await getManagementFilteredLinks(
         coreMockStarted,
         getPlugins(['superuser'])
       );
-      expect(filteredLinks).toEqual({
-        ...links,
-        links: links.links?.filter((link) => link.id !== SecurityPageName.hostIsolationExceptions),
-      });
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
     });
 
     it('should return all but HIE when NO isolation permission due to license and NO host isolation exceptions entry', async () => {
@@ -114,6 +117,7 @@ describe('links', () => {
         canUnIsolateHost: true,
         canAccessEndpointManagement: true,
         canReadActionsLogManagement: true,
+        canReadEndpointList: true,
       });
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
 
@@ -121,10 +125,7 @@ describe('links', () => {
         coreMockStarted,
         getPlugins(['superuser'])
       );
-      expect(filteredLinks).toEqual({
-        ...links,
-        links: links.links?.filter((link) => link.id !== SecurityPageName.hostIsolationExceptions),
-      });
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
     });
 
     it('should return all but HIE when HAS isolation permission AND has HIE entry but not superuser', async () => {
@@ -133,6 +134,7 @@ describe('links', () => {
         canUnIsolateHost: true,
         canAccessEndpointManagement: false,
         canReadActionsLogManagement: true,
+        canReadEndpointList: true,
       });
       fakeHttpServices.get.mockResolvedValue({ total: 1 });
 
@@ -140,10 +142,7 @@ describe('links', () => {
         coreMockStarted,
         getPlugins(['superuser'])
       );
-      expect(filteredLinks).toEqual({
-        ...links,
-        links: links.links?.filter((link) => link.id !== SecurityPageName.hostIsolationExceptions),
-      });
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
     });
 
     it('should return all when NO isolation permission due to license but HAS at least one host isolation exceptions entry', async () => {
@@ -166,6 +165,7 @@ describe('links', () => {
         canIsolateHost: false,
         canUnIsolateHost: true,
         canReadActionsLogManagement: true,
+        canReadEndpointList: true,
       });
       fakeHttpServices.get.mockRejectedValue(new Error());
 
@@ -173,10 +173,7 @@ describe('links', () => {
         coreMockStarted,
         getPlugins(['superuser'])
       );
-      expect(filteredLinks).toEqual({
-        ...links,
-        links: links.links?.filter((link) => link.id !== SecurityPageName.hostIsolationExceptions),
-      });
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.hostIsolationExceptions));
     });
 
     it('should not affect hiding Action Log if getting from HIE API throws error', async () => {
@@ -184,6 +181,7 @@ describe('links', () => {
         canIsolateHost: false,
         canUnIsolateHost: true,
         canReadActionsLogManagement: false,
+        canReadEndpointList: true,
       });
       fakeHttpServices.get.mockRejectedValue(new Error());
 
@@ -191,13 +189,75 @@ describe('links', () => {
         coreMockStarted,
         getPlugins(['superuser'])
       );
+      expect(filteredLinks).toEqual(
+        getLinksWithout(
+          SecurityPageName.hostIsolationExceptions,
+          SecurityPageName.responseActionsHistory
+        )
+      );
+    });
+  });
+
+  // this can be removed after removing endpointRbacEnabled feature flag
+  describe('without endpointRbacEnabled', () => {
+    beforeAll(() => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: false },
+      });
+    });
+
+    it('shows Trusted Applications for non-superuser, too', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
+
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+
+      expect(filteredLinks).toEqual(links);
+    });
+  });
+
+  // this can be the default after removing endpointRbacEnabled feature flag
+  describe('with endpointRbacEnabled', () => {
+    beforeAll(() => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: true },
+      });
+    });
+
+    it('hides Trusted Applications for user without privilege', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canReadTrustedApplications: false,
+          canReadHostIsolationExceptions: true,
+        })
+      );
+
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.trustedApps));
+    });
+
+    it('shows Trusted Applications for user with privilege', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
+
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+
+      expect(filteredLinks).toEqual(links);
+    });
+  });
+  describe('Endpoint List', () => {
+    it('should return all but endpoints link when no Endpoint List READ access', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canReadEndpointList: false,
+        })
+      );
+      const filteredLinks = await getManagementFilteredLinks(
+        coreMockStarted,
+        getPlugins(['superuser'])
+      );
       expect(filteredLinks).toEqual({
         ...links,
-        links: links.links?.filter(
-          (link) =>
-            link.id !== SecurityPageName.hostIsolationExceptions &&
-            link.id !== SecurityPageName.responseActionsHistory
-        ),
+        links: links.links?.filter((link) => link.id !== SecurityPageName.endpoints),
       });
     });
   });
