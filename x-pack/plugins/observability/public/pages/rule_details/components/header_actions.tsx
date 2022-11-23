@@ -66,7 +66,7 @@ export function HeaderActions({ loading, ruleId, onDeleteRule, onEditRule }: Hea
           closePopover={handleClosePopover}
           isOpen={isRuleEditPopoverOpen}
         >
-          <EuiFlexGroup direction="column" alignItems="flexStart">
+          <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
             <EuiButtonEmpty
               data-test-subj="editRuleButton"
               size="s"
@@ -79,8 +79,6 @@ export function HeaderActions({ loading, ruleId, onDeleteRule, onEditRule }: Hea
                 })}
               </EuiText>
             </EuiButtonEmpty>
-
-            <EuiSpacer size="s" />
 
             <EuiButtonEmpty
               size="s"
