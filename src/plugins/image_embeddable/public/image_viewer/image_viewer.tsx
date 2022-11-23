@@ -7,7 +7,9 @@
  */
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { css } from '@emotion/react';
 import { Image } from '@kbn/files-plugin/public';
+import classNames from 'classnames';
 import { EuiButtonIcon, EuiEmptyPrompt, EuiImage, useEuiTheme } from '@elastic/eui';
 import { ImageConfig } from '../types';
 import notFound from './not_found/not_found_light.png';
@@ -39,8 +41,10 @@ export function ImageViewer({
   onChange,
   onClear,
   onError,
+  className,
 }: {
   imageConfig: ImageConfig;
+  className?: string;
   onChange?: () => void;
   onClear?: () => void;
   onError?: () => void;
@@ -72,16 +76,11 @@ export function ImageViewer({
         backgroundColor: imageConfig.backgroundColor || euiTheme.colors.lightestShade,
         width: '100%',
         height: '100%',
+        borderRadius: euiTheme.border.radius.medium,
       }}
-      css={`
+      css={css`
         .visually-hidden {
-          clip: rect(0 0 0 0);
-          clip-path: inset(50%);
-          height: 1px;
-          overflow: hidden;
-          position: absolute;
-          white-space: nowrap;
-          width: 1px;
+          visibility: hidden;
         }
       `}
     >
@@ -89,20 +88,21 @@ export function ImageViewer({
       {isImageConfigValid && (
         <Image
           src={src}
+          // TODO: to enable the blur hash loading uncomment the line, but not sure if we really need the effect
+          // until https://github.com/elastic/kibana/issues/145567
           // meta={imageConfig.src.type === 'file' ? imageConfig.src.fileImageMeta : undefined}
           alt={imageConfig.altText ?? ''}
-          className={hasFailedToLoad ? `visually-hidden` : ''}
+          className={classNames(className, { 'visually-hidden': hasFailedToLoad })}
           title={onChange ? 'Click to select a different image' : undefined}
           style={{
             width: '100%',
             height: '100%',
-            aspectRatio: '16 / 9',
-            objectFit: imageConfig?.sizing?.objectFit ?? 'cover',
+            objectFit: imageConfig?.sizing?.objectFit ?? 'contain',
             cursor: onChange ? 'pointer' : 'initial',
             display: 'block', // needed to remove gap under the image
           }}
           wrapperProps={{
-            style: { display: 'block', height: '100%', width: '100%', aspectRatio: '16 / 9' },
+            style: { display: 'block', height: '100%', width: '100%' },
           }}
           onClick={() => {
             if (onChange) onChange();

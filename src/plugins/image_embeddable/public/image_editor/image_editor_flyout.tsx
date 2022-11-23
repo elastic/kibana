@@ -28,6 +28,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import { FilePicker, UploadFile } from '@kbn/files-plugin/public';
 import type { FileImageMetadata } from '@kbn/files-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -36,6 +37,17 @@ import { imageEmbeddableFileKind } from '../../common';
 import { ImageViewer } from '../image_viewer';
 import { ValidateUrlFn } from '../utils/validate_url';
 import { validateImageConfig, DraftImageConfig } from '../utils/validate_image_config';
+
+/**
+ * Shared sizing css for image, upload placeholder, empty and not found state
+ * Makes sure the container has not too large height to preserve vertical space for the image configuration in the flyout
+ */
+const CONTAINER_SIZING_CSS = css({
+  aspectRatio: `21 / 9`,
+  width: `100%`,
+  height: `auto`,
+  maxHeight: `max(20vh, 180px)`,
+});
 
 export interface ImageEditorFlyoutProps {
   onCancel: () => void;
@@ -119,6 +131,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
           <>
             {isDraftImageConfigValid ? (
               <ImageViewer
+                css={CONTAINER_SIZING_CSS}
                 imageConfig={draftImageConfig}
                 onChange={() => setIsFilePickerOpen(true)}
                 onClear={() => {
@@ -129,12 +142,12 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             ) : (
               <EuiFormRow
                 fullWidth={true}
-                css={`
+                css={css`
                   .lazy-load-fallback,
                   .euiFilePicker__prompt {
                     // increase upload image prompt size and lazy load fallback container to look nicer with large flyout and reduce layout shift
                     height: auto;
-                    aspect-ratio: 16 / 9;
+                    ${CONTAINER_SIZING_CSS};
                   }
 
                   .lazy-load-fallback {
@@ -171,9 +184,9 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
           <>
             {!isDraftImageConfigValid ? (
               <EuiEmptyPrompt
-                css={`
+                css={css`
                   max-width: none;
-                  aspect-ratio: 16/9;
+                  ${CONTAINER_SIZING_CSS}
                   .euiEmptyPrompt__main {
                     height: 100%;
                   }
@@ -186,6 +199,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
               />
             ) : (
               <ImageViewer
+                css={CONTAINER_SIZING_CSS}
                 imageConfig={draftImageConfig}
                 onError={() => {
                   setSrcUrlError(failedToLoadImageFromURL(srcUrl));
