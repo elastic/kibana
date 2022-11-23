@@ -288,7 +288,7 @@ export function RuleDetailsPage() {
         bottomBorder: false,
         rightSideItems: hasEditButton
           ? [
-              <EuiFlexGroup direction="rowReverse" alignItems="center">
+              <EuiFlexGroup direction="rowReverse" alignItems="flexStart">
                 <EuiFlexItem>
                   <EuiPopover
                     id="contextRuleEditMenu"
