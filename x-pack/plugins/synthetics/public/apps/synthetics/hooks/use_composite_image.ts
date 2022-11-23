@@ -6,7 +6,7 @@
  */
 
 import { useDispatch, useSelector } from 'react-redux';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { composeScreenshotRef } from '../utils/monitor_test_result/compose_screenshot_images';
 import {
   ScreenshotRefImageData,
@@ -84,15 +84,15 @@ export const useCompositeImage = (
   const dispatch = useDispatch();
   const { blocks }: { blocks: ScreenshotBlockCache } = useSelector(selectBrowserJourneyState);
 
-  React.useEffect(() => {
+  useEffect(() => {
     dispatch(
       fetchBlocksAction(imgRef.ref.screenshotRef.screenshot_ref.blocks.map(({ hash }) => hash))
     );
   }, [dispatch, imgRef.ref.screenshotRef.screenshot_ref.blocks]);
 
-  const [curRef, setCurRef] = React.useState<ScreenshotRefImageData>(imgRef);
+  const [curRef, setCurRef] = useState<ScreenshotRefImageData>(imgRef);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const canvas = document.createElement('canvas');
 
     async function compose() {
