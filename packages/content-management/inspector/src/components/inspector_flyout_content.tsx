@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import type { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,6 +27,7 @@ import type { Services } from '../services';
 import type { Item } from '../types';
 import { MetadataForm } from './metadata_form';
 import { useMetadataForm } from './use_metadata_form';
+import type { CustomValidators } from './use_metadata_form';
 
 const getI18nTexts = ({ entityName }: { entityName: string }) => ({
   title: i18n.translate('contentManagement.inspector.flyoutTitle', {
@@ -54,6 +55,7 @@ export interface Props {
     description?: string;
     tags: string[];
   }) => Promise<void>;
+  customValidators?: CustomValidators;
   onCancel: () => void;
 }
 
@@ -64,46 +66,48 @@ export const InspectorFlyoutContent: FC<Props> = ({
   services: { TagSelector, TagList, notifyError },
   onSave,
   onCancel,
+  customValidators,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const i18nTexts = getI18nTexts({ entityName });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const form = useMetadataForm({ item });
+  const i18nTexts = useMemo(() => getI18nTexts({ entityName }), [entityName]);
+  const form = useMetadataForm({ item, customValidators });
 
   const onClickSave = useCallback(async () => {
-    if (form.isValid) {
-      if (onSave) {
-        setIsSubmitting(true);
+    if (form.isValid && onSave && !form.getIsChangingValue()) {
+      const id = item.id;
+      const title = form.title.value;
 
-        try {
-          await onSave({
-            id: item.id,
-            title: form.title.value,
-            description: form.description.value,
-            tags: form.tags.value,
-          });
-        } catch (error) {
-          notifyError(
-            <FormattedMessage
-              id="contentManagement.inspector.metadataForm.unableToSaveDangerMessage"
-              defaultMessage="Unable to save {entityName}"
-              values={{ entityName }}
-            />,
-            error.message
-          );
-        } finally {
-          setIsSubmitting(false);
-        }
+      setIsSubmitting(true);
+
+      try {
+        await onSave({
+          id,
+          title,
+          description: form.description.value,
+          tags: form.tags.value,
+        });
+      } catch (error) {
+        notifyError(
+          <FormattedMessage
+            id="contentManagement.inspector.metadataForm.unableToSaveDangerMessage"
+            defaultMessage="Unable to save {entityName}"
+            values={{ entityName }}
+          />,
+          error.message
+        );
+      } finally {
+        setIsSubmitting(false);
       }
     }
 
     setIsSubmitted(true);
-  }, [form, onSave, item.id, notifyError, entityName]);
+  }, [onSave, item.id, form, notifyError, entityName]);
 
-  const onClickCancel = () => {
+  const onClickCancel = useCallback(() => {
     onCancel();
-  };
+  }, [onCancel]);
 
   const iconCSS = css`
     margin-right: ${euiTheme.size.m};
