@@ -505,6 +505,16 @@ class BrowserService extends FtrService {
   }
 
   /**
+   * Get from the "local storage" by key
+   *
+   * @param {string} key
+   * @return {Promise<string>}
+   */
+  public async getLocalStorageItem(key: string): Promise<string | null> {
+    return await this.driver.executeScript<string>(`return window.localStorage.getItem("${key}");`);
+  }
+
+  /**
    * Closes the currently focused window. In most environments, after the window has been
    * closed, it is necessary to explicitly switch to whatever window is now focused.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#close

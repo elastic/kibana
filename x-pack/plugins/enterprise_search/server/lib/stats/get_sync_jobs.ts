@@ -24,8 +24,14 @@ export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<
   const orphanedJobsCountResponse = await client.asCurrentUser.count({
     index: CONNECTORS_JOBS_INDEX,
     query: {
-      terms: {
-        'connector.id': ids,
+      bool: {
+        must_not: [
+          {
+            terms: {
+              'connector.id': ids,
+            },
+          },
+        ],
       },
     },
   });
@@ -51,7 +57,7 @@ export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<
           },
           {
             range: {
-              last_seen: {
+              started_at: {
                 lt: moment().subtract(1, 'day').toISOString(),
               },
             },
@@ -62,10 +68,10 @@ export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<
   });
 
   const errorResponse = await client.asCurrentUser.count({
-    index: CONNECTORS_JOBS_INDEX,
+    index: CONNECTORS_INDEX,
     query: {
       term: {
-        status: SyncStatus.ERROR,
+        last_sync_status: SyncStatus.ERROR,
       },
     },
   });
@@ -109,7 +115,7 @@ export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<
           {
             range: {
               last_seen: {
-                gt: moment().subtract(30, 'minutes').toISOString(),
+                lt: moment().subtract(30, 'minutes').toISOString(),
               },
             },
           },
