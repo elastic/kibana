@@ -88,6 +88,10 @@ export function buildKueryForUnenrollingAgents(path: string = ''): string {
   return `${path}unenrollment_started_at:*`;
 }
 
+export function buildKueryForUnenrolledAgents(path: string = ''): string {
+  return `${path}unenrolled_at:*`;
+}
+
 export function buildKueryForOnlineAgents(path: string = ''): string {
   return `${path}last_checkin:* ${addExclusiveKueryFilter(
     [buildKueryForOfflineAgents, buildKueryForUpdatingAgents, buildKueryForErrorAgents],
