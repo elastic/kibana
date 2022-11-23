@@ -69,7 +69,10 @@ function updateLastRefresh(timeRange?: OnRefreshProps) {
 }
 
 // FIXME: Consolidate this component with ML and AIOps's component
-export const DatePickerWrapper: FC = () => {
+export const DatePickerWrapper: FC<{ isAutoRefreshOnly?: boolean; showRefresh?: boolean }> = ({
+  isAutoRefreshOnly,
+  showRefresh,
+}) => {
   const {
     services,
     notifications: { toasts },
@@ -246,7 +249,7 @@ export const DatePickerWrapper: FC = () => {
           start={time.from}
           end={time.to}
           isPaused={refreshInterval.pause}
-          isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
+          isAutoRefreshOnly={!isTimeRangeSelectorEnabled || isAutoRefreshOnly}
           refreshInterval={refreshInterval.value || DEFAULT_REFRESH_INTERVAL_MS}
           onTimeChange={updateTimeFilter}
           onRefresh={updateLastRefresh}
@@ -257,7 +260,7 @@ export const DatePickerWrapper: FC = () => {
         />
       </EuiFlexItem>
 
-      {isTimeRangeSelectorEnabled ? null : (
+      {showRefresh === true || !isTimeRangeSelectorEnabled ? (
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
@@ -272,7 +275,7 @@ export const DatePickerWrapper: FC = () => {
             />
           </EuiButton>
         </EuiFlexItem>
-      )}
+      ) : null}
     </EuiFlexGroup>
   ) : null;
 };
