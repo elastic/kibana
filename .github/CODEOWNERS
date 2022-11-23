@@ -1028,7 +1028,6 @@ packages/shared-ux/card/no_data/mocks @elastic/kibana-global-experience
 packages/shared-ux/card/no_data/types @elastic/kibana-global-experience
 packages/shared-ux/file/image/impl @elastic/kibana-global-experience
 packages/shared-ux/file/image/mocks @elastic/kibana-global-experience
-packages/shared-ux/file/image/types @elastic/kibana-global-experience
 packages/shared-ux/file/util @elastic/kibana-global-experience
 packages/shared-ux/link/redirect_app/impl @elastic/kibana-global-experience
 packages/shared-ux/link/redirect_app/mocks @elastic/kibana-global-experience

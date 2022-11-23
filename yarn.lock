@@ -3905,11 +3905,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-image-types@link:bazel-bin/packages/shared-ux/file/image/types":
+"@kbn/shared-ux-file-image@link:bazel-bin/packages/shared-ux/file/image/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-image@link:bazel-bin/packages/shared-ux/file/image/impl":
+"@kbn/shared-ux-file-types@link:bazel-bin/packages/shared-ux/file/types":
   version "0.0.0"
   uid ""
 

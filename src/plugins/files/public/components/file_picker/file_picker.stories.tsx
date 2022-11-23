@@ -10,7 +10,7 @@ import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { base64dLogo } from '@kbn/shared-ux-file-image-mocks';
-import type { FileImageMetadata } from '@kbn/shared-ux-file-image-types';
+import type { FileImageMetadata } from '@kbn/shared-ux-file-types';
 import type { FileJSON } from '../../../common';
 import { FilesClient, FilesClientResponses } from '../../types';
 import { register } from '../stories_shared';
