@@ -22,7 +22,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { fetchFieldValueFieldStats } from './queries/field_stats/fetch_field_value_field_stats';
 import { fetchFieldValuePairs } from './queries/fetch_field_value_pairs';
 import { fetchSignificantCorrelations } from './queries/fetch_significant_correlations';

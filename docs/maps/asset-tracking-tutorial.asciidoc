@@ -442,7 +442,7 @@ image::maps/images/asset-tracking-tutorial/construction_zones.png[]
 
 Create a new alert by defining a rule and a connector. The rule includes the conditions that will trigger the alert, and the connector defines what action takes place once the alert is triggered. In this case, each alert will log a message to the Kibana log.
 
-. Open *Stack Management*, and then click *Rules and Connectors*.
+. Open *{stack-manage-app}*, and then click *{rules-ui}*.
 . Click *Create rule*.
 . Name the rule *Bus Alerts*.
 . Set *Check every* to *5 seconds*.
@@ -481,9 +481,6 @@ image::maps/images/asset-tracking-tutorial/tracking_containment_configuration.pn
 
 . Click *Save*.
 
-The *Bus Alert connector* is added to the *Rules and Connectors* page. For more information on common connectors, refer to the <<slack-action-type, Slack>> and <<email-action-type, Email>> connectors.
-
-[role="screenshot"]
-image::maps/images/asset-tracking-tutorial/rules_and_connectors.png[]
+The *Bus Alert connector* is added to the *{connectors-ui}* page. For more information on common connectors, refer to the <<slack-action-type, Slack>> and <<email-action-type,Email>> connectors.
 
 Congratulations! You have completed the tutorial and have the recipe for tracking assets. You can now try replicating this same analysis with your own data.
