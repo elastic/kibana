@@ -5,7 +5,15 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiBadge,
+  EuiBadgeGroup,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import {
@@ -21,12 +29,10 @@ import {
 } from '@kbn/rule-data-utils';
 import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSummaryProps } from '../types';
-import { useKibana } from '../../../utils/kibana_react';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
 import { DEFAULT_DATE_FORMAT } from '../constants';
 
 export function AlertSummary({ alert }: AlertSummaryProps) {
-  const { triggersActionsUi } = useKibana().services;
   const tags = alert?.fields[ALERT_RULE_TAGS];
 
   return (
@@ -86,6 +92,7 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           <EuiSpacer size="s" />
           {alert?.fields[ALERT_STATUS] ? (
             <AlertStatusIndicator
+              textSize="s"
               alertStatus={
                 alert?.fields[ALERT_STATUS] === ALERT_STATUS_ACTIVE
                   ? ALERT_STATUS_ACTIVE
@@ -97,6 +104,7 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xxs">
@@ -151,13 +159,17 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           </EuiTitle>
           <EuiSpacer size="s" />
           <div>
-            <EuiSpacer size="s" />
-            {tags &&
-              tags.length > 0 &&
-              triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
-                tagsOutPopover: true,
-                tags,
-              })}
+            {tags && tags.length > 0 ? (
+              <EuiBadgeGroup>
+                {tags.map((tag, index) => (
+                  <EuiBadge data-test-subj={`ruleTagBadge-${tag}`} key={index} color="hollow">
+                    <EuiText size="s">{tag}</EuiText>
+                  </EuiBadge>
+                ))}
+              </EuiBadgeGroup>
+            ) : (
+              <div data-test-subj="noRuleTags">-</div>
+            )}
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
