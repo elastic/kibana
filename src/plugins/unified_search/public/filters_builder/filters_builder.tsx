@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useReducer, useCallback, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useReducer, useCallback, useState, useRef } from 'react';
 import { EuiDragDropContext, DragDropContextProps, useEuiPaddingSize } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { type Filter, BooleanRelation } from '@kbn/es-query';
-import { css } from '@emotion/css';
 import { FiltersBuilderContextType } from './context';
 import { FilterGroup } from './filter_group';
 import { FiltersBuilderReducer } from './reducer';
 import { getPathInArray } from './utils';
 import { FilterLocation } from './types';
+import { filtersBuilderCss } from './filters_builder.styles';
 
 export interface FiltersBuilderProps {
   filters: Filter[];
@@ -43,23 +43,6 @@ function FiltersBuilder({
   const [state, dispatch] = useReducer(FiltersBuilderReducer, { filters });
   const [dropTarget, setDropTarget] = useState('');
   const sPaddingSize = useEuiPaddingSize('s');
-
-  const filtersBuilderStyles = useMemo(
-    () => css`
-      .filter-builder__panel {
-        &.filter-builder__panel-nested {
-          padding: ${sPaddingSize} 0;
-        }
-      }
-
-      .filter-builder__item {
-        &.filter-builder__item-nested {
-          padding: 0 ${sPaddingSize};
-        }
-      }
-    `,
-    [sPaddingSize]
-  );
 
   useEffect(() => {
     if (filters !== filtersRef.current) {
@@ -126,7 +109,7 @@ function FiltersBuilder({
   };
 
   return (
-    <div className={filtersBuilderStyles}>
+    <div className={filtersBuilderCss(sPaddingSize)}>
       <FiltersBuilderContextType.Provider
         value={{
           globalParams: { hideOr, maxDepth },
