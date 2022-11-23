@@ -164,11 +164,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await ml.anomaliesTable.assertInfluencersCellsContainFilter(
             `${fieldName}: ${fieldValue}`
           );
+          await ml.testExecution.logTestStep('influencers list and swimlane reflect filter');
+          await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', [fieldValue]);
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 1);
           await ml.testExecution.logTestStep(
             'removes influencer filter by clicking on the influencer remove filter button'
           );
           await ml.anomalyExplorer.removeFilterForInfluencer(fieldName, fieldValue);
+          await ml.testExecution.logTestStep('query bar reflects filter removal');
           await ml.anomalyExplorer.assertQueryBarContent('');
+          await ml.testExecution.logTestStep(
+            'influencers list and swimlane reflect filter removal'
+          );
+          await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', [
+            'AAL',
+            'EGF',
+            'VRD',
+            'SWR',
+            'JZA',
+            'AMX',
+            'TRS',
+            'ACA',
+            'BAW',
+            'ASA',
+          ]);
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 10);
         });
 
         it('has enabled Single Metric Viewer button', async () => {
