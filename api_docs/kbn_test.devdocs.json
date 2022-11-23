@@ -489,6 +489,22 @@
           },
           {
             "parentPluginId": "@kbn/test",
+            "id": "def-server.EsVersion.toJSON",
+            "type": "Function",
+            "tags": [],
+            "label": "toJSON",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/es_version.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
             "id": "def-server.EsVersion.toString",
             "type": "Function",
             "tags": [],
