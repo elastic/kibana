@@ -50,7 +50,6 @@ describe('saved_searches_utils', () => {
           "hideAggregatedPreview": undefined,
           "hideChart": true,
           "id": "id",
-          "usesAdHocDataView": false,
           "isTextBasedQuery": false,
           "refreshInterval": undefined,
           "rowHeight": undefined,
@@ -83,6 +82,7 @@ describe('saved_searches_utils', () => {
           "timeRange": undefined,
           "timeRestore": undefined,
           "title": "saved search",
+          "usesAdHocDataView": false,
           "viewMode": undefined,
         }
       `);
@@ -136,7 +136,6 @@ describe('saved_searches_utils', () => {
           "grid": Object {},
           "hideAggregatedPreview": undefined,
           "hideChart": true,
-          "usesAdHocDataView": false,
           "isTextBasedQuery": true,
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{}",
@@ -153,6 +152,7 @@ describe('saved_searches_utils', () => {
           "timeRange": undefined,
           "timeRestore": false,
           "title": "title",
+          "usesAdHocDataView": false,
           "viewMode": undefined,
         }
       `);

@@ -108,7 +108,6 @@ describe('getSavedSearch', () => {
         "hideAggregatedPreview": undefined,
         "hideChart": false,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
-        "usesAdHocDataView": undefined,
         "isTextBasedQuery": undefined,
         "refreshInterval": undefined,
         "rowHeight": undefined,
@@ -155,6 +154,7 @@ describe('getSavedSearch', () => {
         "timeRange": undefined,
         "timeRestore": undefined,
         "title": "test1",
+        "usesAdHocDataView": undefined,
         "viewMode": undefined,
       }
     `);
@@ -206,7 +206,6 @@ describe('getSavedSearch', () => {
         "hideAggregatedPreview": undefined,
         "hideChart": true,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
-        "usesAdHocDataView": undefined,
         "isTextBasedQuery": true,
         "refreshInterval": undefined,
         "rowHeight": undefined,
@@ -253,6 +252,7 @@ describe('getSavedSearch', () => {
         "timeRange": undefined,
         "timeRestore": undefined,
         "title": "test2",
+        "usesAdHocDataView": undefined,
         "viewMode": undefined,
       }
     `);
