@@ -15,13 +15,13 @@ rm -rf "$KIBANA_BUILD_LOCATION"
 echo "--- Running performance tests"
 node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION"
 
-# echo "--- Upload journey step screenshots"
-# JOURNEY_SCREENSHOTS_DIR="${KIBANA_DIR}/data/journey_screenshots"
-# if [ -d "$JOURNEY_SCREENSHOTS_DIR" ]; then
-#   cd "$JOURNEY_SCREENSHOTS_DIR"
-#   buildkite-agent artifact upload "**/*fullscreen*.png"
-#   cd "$KIBANA_DIR"
-# fi
+echo "--- Upload journey step screenshots"
+JOURNEY_SCREENSHOTS_DIR="${KIBANA_DIR}/data/journey_screenshots"
+if [ -d "$JOURNEY_SCREENSHOTS_DIR" ]; then
+  cd "$JOURNEY_SCREENSHOTS_DIR"
+  buildkite-agent artifact upload "**/*fullscreen*.png"
+  cd "$KIBANA_DIR"
+fi
 
 # echo "--- report/record failed journeys"
 # if [ "${failedJourneys[*]}" != "" ]; then
