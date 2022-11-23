@@ -38,7 +38,7 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
     refetchInterval: false,
   });
 
-  const [pagination, setPagination] = useState({ pageIndex: 0 });
+  // const [pagination, setPagination] = useState({ pageIndex: 0 });
   const [message, setMessage] = useState<JSX.Element | string | undefined>(
     <EuiLoadingContent lines={4} data-test-subj="exceptionItemViewerEmptyPrompts-loading" />
   );
