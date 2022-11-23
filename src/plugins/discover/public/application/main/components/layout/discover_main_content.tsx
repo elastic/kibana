@@ -17,11 +17,9 @@ import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_m
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';
-import { FieldStatisticsTable } from '../field_stats_table';
+import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-
-export const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
 
 export interface DiscoverMainContentProps {
   dataView: DataView;
@@ -100,12 +98,10 @@ export const DiscoverMainContent = ({
           onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
         />
       ) : (
-        <FieldStatisticsTableMemoized
+        <FieldStatisticsTab
           availableFields$={savedSearchData$.availableFields$}
           savedSearch={savedSearch}
           dataView={dataView}
-          query={state.query}
-          filters={state.filters}
           columns={columns}
           stateContainer={stateContainer}
           onAddFilter={!isPlainRecord ? onAddFilter : undefined}
