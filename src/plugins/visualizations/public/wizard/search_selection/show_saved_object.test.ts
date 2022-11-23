@@ -31,7 +31,7 @@ describe('showSavedObject', () => {
 
   it('should return true if the saved object is not of an adhoc data view', () => {
     const savedObject = {
-      attributes: { isOfAdHocDataView: false },
+      attributes: { usesAdHocDataView: false },
     };
     expect(showSavedObject(savedObject as unknown as SimpleSavedObject<FinderAttributes>)).toBe(
       true
@@ -40,7 +40,7 @@ describe('showSavedObject', () => {
 
   it('should return false if the saved object is of an adhoc data view', () => {
     const savedObject = {
-      attributes: { isOfAdHocDataView: true },
+      attributes: { usesAdHocDataView: true },
     };
     expect(showSavedObject(savedObject as unknown as SimpleSavedObject<FinderAttributes>)).toBe(
       false

@@ -28,7 +28,7 @@ describe('saved_searches_utils', () => {
         grid: {},
         hideChart: true,
         isTextBasedQuery: false,
-        isOfAdHocDataView: false,
+        usesAdHocDataView: false,
       };
 
       expect(
@@ -50,7 +50,7 @@ describe('saved_searches_utils', () => {
           "hideAggregatedPreview": undefined,
           "hideChart": true,
           "id": "id",
-          "isOfAdHocDataView": false,
+          "usesAdHocDataView": false,
           "isTextBasedQuery": false,
           "refreshInterval": undefined,
           "rowHeight": undefined,
@@ -123,7 +123,7 @@ describe('saved_searches_utils', () => {
         grid: {},
         hideChart: true,
         isTextBasedQuery: true,
-        isOfAdHocDataView: false,
+        usesAdHocDataView: false,
       };
 
       expect(toSavedSearchAttributes(savedSearch, '{}')).toMatchInlineSnapshot(`
@@ -136,7 +136,7 @@ describe('saved_searches_utils', () => {
           "grid": Object {},
           "hideAggregatedPreview": undefined,
           "hideChart": true,
-          "isOfAdHocDataView": false,
+          "usesAdHocDataView": false,
           "isTextBasedQuery": true,
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{}",

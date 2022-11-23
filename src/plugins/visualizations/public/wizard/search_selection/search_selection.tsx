@@ -68,7 +68,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                   }
                 ),
                 // ignore the saved searches that have text-based languages queries
-                includeFields: ['isTextBasedQuery', 'isOfAdHocDataView'],
+                includeFields: ['isTextBasedQuery', 'usesAdHocDataView'],
                 showSavedObject,
               },
               {

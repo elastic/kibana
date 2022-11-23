@@ -11,10 +11,10 @@ import type { FinderAttributes } from '@kbn/saved-objects-plugin/public';
 
 export interface SavedSearchesAttributes extends SavedObjectAttributes {
   isTextBasedQuery: boolean;
-  isOfAdHocDataView?: boolean;
+  usesAdHocDataView?: boolean;
 }
 
 export const showSavedObject = (savedObject: SimpleSavedObject<FinderAttributes>) => {
   const so = savedObject as unknown as SimpleSavedObject<SavedSearchesAttributes>;
-  return !so.attributes.isTextBasedQuery && !so.attributes.isOfAdHocDataView;
+  return !so.attributes.isTextBasedQuery && !so.attributes.usesAdHocDataView;
 };
