@@ -11,7 +11,7 @@ import {
   FieldStats,
   FieldStatsProps,
   useQuerySubscriber,
-  getResolvedDateRange,
+  hasQuerySubscriberData,
 } from '@kbn/unified-field-list-plugin/public';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -26,9 +26,6 @@ export interface DiscoverFieldStatsProps {
 export const DiscoverFieldStats: React.FC<DiscoverFieldStatsProps> = React.memo(
   ({ field, dataView, multiFields, onAddFilter }) => {
     const services = useDiscoverServices();
-    const dateRange = services.data?.query?.timefilter.timefilter
-      ? getResolvedDateRange(services.data?.query?.timefilter.timefilter)
-      : null;
     const querySubscriberResult = useQuerySubscriber({
       data: services.data,
     });
@@ -41,7 +38,7 @@ export const DiscoverFieldStats: React.FC<DiscoverFieldStatsProps> = React.memo(
       [field, multiFields]
     );
 
-    if (!dateRange || !querySubscriberResult.query || !querySubscriberResult.filters) {
+    if (!hasQuerySubscriberData(querySubscriberResult)) {
       return null;
     }
 
@@ -50,8 +47,8 @@ export const DiscoverFieldStats: React.FC<DiscoverFieldStatsProps> = React.memo(
         services={services}
         query={querySubscriberResult.query}
         filters={querySubscriberResult.filters}
-        fromDate={dateRange.fromDate}
-        toDate={dateRange.toDate}
+        fromDate={querySubscriberResult.fromDate}
+        toDate={querySubscriberResult.toDate}
         dataViewOrDataViewId={dataView}
         field={fieldForStats}
         data-test-subj="dscFieldStats"

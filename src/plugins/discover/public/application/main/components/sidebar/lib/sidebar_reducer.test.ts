@@ -19,15 +19,6 @@ import {
 } from './sidebar_reducer';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 
-const dateRange1 = {
-  fromDate: '2021-08-31T22:00:00.000Z',
-  toDate: '2022-09-01T09:16:29.553Z',
-};
-const dateRange2 = {
-  fromDate: '2021-09-31T22:00:00.000Z',
-  toDate: '2022-10-01T09:16:29.553Z',
-};
-
 describe('sidebar reducer', function () {
   it('should set an initial state', function () {
     expect(getInitialState(dataView)).toEqual(
@@ -35,7 +26,6 @@ describe('sidebar reducer', function () {
         dataView,
         allFields: null,
         fieldCounts: null,
-        dateRange: null,
         status: DiscoverSidebarReducerStatus.INITIAL,
       })
     );
@@ -49,7 +39,6 @@ describe('sidebar reducer', function () {
     const resultForDocuments = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
       payload: {
-        dateRange: dateRange1,
         isPlainRecord: false,
       },
     });
@@ -58,14 +47,12 @@ describe('sidebar reducer', function () {
         dataView,
         allFields: state.allFields,
         fieldCounts: null,
-        dateRange: dateRange1,
         status: DiscoverSidebarReducerStatus.PROCESSING,
       })
     );
     const resultForTextBasedQuery = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
       payload: {
-        dateRange: dateRange1,
         isPlainRecord: true,
       },
     });
@@ -74,7 +61,6 @@ describe('sidebar reducer', function () {
         dataView,
         allFields: null,
         fieldCounts: null,
-        dateRange: dateRange1,
         status: DiscoverSidebarReducerStatus.PROCESSING,
       })
     );
@@ -88,7 +74,6 @@ describe('sidebar reducer', function () {
     const resultForDocuments = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        dateRange: dateRange1,
         isPlainRecord: false,
         dataView: stubDataViewWithoutTimeField,
         fieldCounts,
@@ -106,14 +91,12 @@ describe('sidebar reducer', function () {
         } as DataViewField,
       ],
       fieldCounts,
-      dateRange: dateRange1,
       status: DiscoverSidebarReducerStatus.COMPLETED,
     });
 
     const resultForTextBasedQuery = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        dateRange: dateRange2,
         isPlainRecord: true,
         dataView: stubDataViewWithoutTimeField,
         fieldCounts,
@@ -131,14 +114,12 @@ describe('sidebar reducer', function () {
         } as DataViewField,
       ],
       fieldCounts,
-      dateRange: dateRange2,
       status: DiscoverSidebarReducerStatus.COMPLETED,
     });
 
     const resultForTextBasedQueryWhileLoading = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        dateRange: dateRange2,
         isPlainRecord: true,
         dataView: stubDataViewWithoutTimeField,
         fieldCounts: null,
@@ -148,7 +129,6 @@ describe('sidebar reducer', function () {
       dataView: stubDataViewWithoutTimeField,
       allFields: null,
       fieldCounts: null,
-      dateRange: dateRange2,
       status: DiscoverSidebarReducerStatus.PROCESSING,
     });
   });
@@ -173,7 +153,6 @@ describe('sidebar reducer', function () {
       dataView: stubDataViewWithoutTimeField,
       allFields: null,
       fieldCounts: null,
-      dateRange: state.dateRange,
       status: DiscoverSidebarReducerStatus.INITIAL,
     });
 
@@ -193,7 +172,6 @@ describe('sidebar reducer', function () {
       dataView: stubDataViewWithoutTimeField,
       allFields: null,
       fieldCounts: null,
-      dateRange: state.dateRange,
       status: DiscoverSidebarReducerStatus.PROCESSING,
     });
 
@@ -213,7 +191,6 @@ describe('sidebar reducer', function () {
       dataView: stubDataViewWithoutTimeField,
       allFields: null,
       fieldCounts: null,
-      dateRange: state.dateRange,
       status: DiscoverSidebarReducerStatus.INITIAL,
     });
   });

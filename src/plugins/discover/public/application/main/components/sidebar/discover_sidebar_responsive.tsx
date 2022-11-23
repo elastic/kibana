@@ -25,8 +25,8 @@ import {
 } from '@elastic/eui';
 import type { DataView, DataViewField, DataViewListItem } from '@kbn/data-views-plugin/public';
 import {
-  getResolvedDateRange,
   useExistingFieldsFetcher,
+  useQuerySubscriber,
 } from '@kbn/unified-field-list-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
@@ -123,11 +123,9 @@ export interface DiscoverSidebarResponsiveProps {
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
   const { data, dataViews, core } = services;
-  const [isPlainRecord, query, filters] = useAppStateSelector((state) => [
-    getRawRecordType(state.query) === RecordRawType.PLAIN,
-    state.query,
-    state.filters,
-  ]);
+  const isPlainRecord = useAppStateSelector(
+    (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
+  );
   const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -142,7 +140,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
       const isPlainRecordType = documentState.recordRawType === RecordRawType.PLAIN;
-      const dateRange = getResolvedDateRange(data.query.timefilter.timefilter);
 
       if (documentState?.fetchStatus === FetchStatus.COMPLETE) {
         dispatchSidebarStateAction({
@@ -151,26 +148,19 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             dataView: selectedDataViewRef.current,
             fieldCounts: calcFieldCounts(documentState.result),
             isPlainRecord: isPlainRecordType,
-            dateRange,
           },
         });
       } else if (documentState?.fetchStatus === FetchStatus.LOADING) {
         dispatchSidebarStateAction({
           type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
           payload: {
-            dateRange,
             isPlainRecord: isPlainRecordType,
           },
         });
       }
     });
     return () => subscription.unsubscribe();
-  }, [
-    props.documents$,
-    data.query.timefilter.timefilter,
-    dispatchSidebarStateAction,
-    selectedDataViewRef,
-  ]);
+  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef]);
 
   useEffect(() => {
     if (selectedDataView !== selectedDataViewRef.current) {
@@ -184,13 +174,14 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     }
   }, [selectedDataView, dispatchSidebarStateAction, selectedDataViewRef]);
 
+  const querySubscriberResult = useQuerySubscriber({ data });
   const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
     disableAutoFetching: true,
     dataViews: !isPlainRecord && sidebarState.dataView ? [sidebarState.dataView] : [],
-    query: query!,
-    filters,
-    fromDate: sidebarState.dateRange?.fromDate ?? null, // existence fetching will be skipped if `null`
-    toDate: sidebarState.dateRange?.toDate ?? null,
+    query: querySubscriberResult.query,
+    filters: querySubscriberResult.filters,
+    fromDate: querySubscriberResult.fromDate,
+    toDate: querySubscriberResult.toDate,
     services: {
       data,
       dataViews,
@@ -202,7 +193,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     if (sidebarState.status === DiscoverSidebarReducerStatus.COMPLETED) {
       refetchFieldsExistenceInfo();
     }
-  }, [refetchFieldsExistenceInfo, sidebarState.status]);
+    // refetching only if status changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sidebarState.status]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();

@@ -33,9 +33,9 @@ export interface ExistingFieldsInfo {
 export interface ExistingFieldsFetcherParams {
   disableAutoFetching?: boolean;
   dataViews: DataView[];
-  fromDate: string | null;
-  toDate: string | null;
-  query: Query | AggregateQuery;
+  fromDate: string | undefined; // fetching will be skipped if `undefined`
+  toDate: string | undefined;
+  query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
   services: {
     core: Pick<CoreStart, 'uiSettings'>;

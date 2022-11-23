@@ -25,7 +25,6 @@ type DiscoverSidebarReducerAction =
   | {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING;
       payload: {
-        dateRange: DiscoverSidebarReducerState['dateRange'];
         isPlainRecord: boolean;
       };
     }
@@ -35,7 +34,6 @@ type DiscoverSidebarReducerAction =
         fieldCounts: DiscoverSidebarReducerState['fieldCounts'];
         isPlainRecord: boolean;
         dataView: DataView | null | undefined;
-        dateRange: DiscoverSidebarReducerState['dateRange'];
       };
     };
 
@@ -49,7 +47,6 @@ export interface DiscoverSidebarReducerState {
   dataView: DataView | null | undefined;
   allFields: DataViewField[] | null;
   fieldCounts: Record<string, number> | null;
-  dateRange: { fromDate: string; toDate: string } | null;
   status: DiscoverSidebarReducerStatus;
 }
 
@@ -58,7 +55,6 @@ export function getInitialState(dataView?: DataView): DiscoverSidebarReducerStat
     dataView,
     allFields: null,
     fieldCounts: null,
-    dateRange: null,
     status: DiscoverSidebarReducerStatus.INITIAL,
   };
 }
@@ -84,7 +80,6 @@ export function discoverSidebarReducer(
     case DiscoverSidebarReducerActionType.DOCUMENTS_LOADING:
       return {
         ...state,
-        dateRange: action.payload.dateRange,
         fieldCounts: null,
         allFields: action.payload.isPlainRecord ? null : state.allFields,
         status: DiscoverSidebarReducerStatus.PROCESSING,
@@ -100,7 +95,6 @@ export function discoverSidebarReducer(
         dataView: action.payload.dataView,
         fieldCounts: action.payload.fieldCounts,
         allFields: mappedAndUnmappedFields,
-        dateRange: action.payload.dateRange,
         status:
           mappedAndUnmappedFields === null
             ? DiscoverSidebarReducerStatus.PROCESSING
