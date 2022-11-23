@@ -65,7 +65,6 @@ journey('Overview Sorting', async ({ page, params }) => {
     await page.waitForSelector(`[data-test-subj="syntheticsOverviewGridItem"]`);
     await page.click('[data-test-subj="syntheticsOverviewSortButton"]');
     await page.click('button:has-text("Z -> A")');
-    await page.waitForSelector('text=Loading');
     await page.waitForSelector(`text=${testMonitor1}`);
     await page.waitForSelector(`text=${testMonitor2}`);
     await page.waitForSelector(`text=${testMonitor3}`);
@@ -85,7 +84,6 @@ journey('Overview Sorting', async ({ page, params }) => {
     await page.waitForSelector(`[data-test-subj="syntheticsOverviewGridItem"]`);
     await page.click('[data-test-subj="syntheticsOverviewSortButton"]');
     await page.click('button:has-text("Last modified")');
-    await page.waitForSelector('text=Loading');
     await page.waitForSelector(`text=${testMonitor1}`);
     await page.waitForSelector(`text=${testMonitor2}`);
     await page.waitForSelector(`text=${testMonitor3}`);
@@ -99,14 +97,12 @@ journey('Overview Sorting', async ({ page, params }) => {
     expect(await correctFirstMonitor.count()).toBe(1);
     expect(await correctSecondMonitor.count()).toBe(1);
     expect(await correctThirdMonitor.count()).toBe(1);
-    await page.waitForTimeout(30000);
   });
 
   step('sort last updated desc', async () => {
     await page.waitForSelector(`[data-test-subj="syntheticsOverviewGridItem"]`);
     await page.click('[data-test-subj="syntheticsOverviewSortButton"]');
     await page.click('button:has-text("Oldest first")');
-    await page.waitForSelector('text=Loading');
     await page.waitForSelector(`text=${testMonitor1}`);
     await page.waitForSelector(`text=${testMonitor2}`);
     await page.waitForSelector(`text=${testMonitor3}`);
@@ -120,7 +116,6 @@ journey('Overview Sorting', async ({ page, params }) => {
     expect(await correctFirstMonitor.count()).toBe(1);
     expect(await correctSecondMonitor.count()).toBe(1);
     expect(await correctThirdMonitor.count()).toBe(1);
-    await page.waitForTimeout(30000);
   });
 
   step('delete monitors', async () => {
