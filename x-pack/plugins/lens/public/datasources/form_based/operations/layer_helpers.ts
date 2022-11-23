@@ -10,6 +10,7 @@ import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DateRange } from '../../../../common';
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
@@ -903,8 +904,10 @@ export function canTransition({
   indexPattern,
   filterOperations,
   visualizationGroups,
+  dateRange,
 }: ColumnChange & {
   filterOperations: (meta: OperationMetadata) => boolean;
+  dateRange: DateRange;
 }): boolean {
   const previousColumn = layer.columns[columnId];
   if (!previousColumn) {
@@ -930,7 +933,7 @@ export function canTransition({
       Boolean(newColumn) &&
       !newLayer.incompleteColumns?.[columnId] &&
       filterOperations(newColumn) &&
-      !newDefinition.getErrorMessage?.(newLayer, columnId, indexPattern)?.length
+      !newDefinition.getErrorMessage?.(newLayer, columnId, indexPattern, dateRange)?.length
     );
   } catch (e) {
     return false;

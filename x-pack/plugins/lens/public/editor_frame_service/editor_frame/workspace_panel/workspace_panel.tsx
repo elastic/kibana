@@ -310,7 +310,14 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         framePublicAPI
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeVisualization, visualization.state, activeDatasourceId, datasourceMap, datasourceStates]
+    [
+      activeVisualization,
+      visualization.state,
+      activeDatasourceId,
+      datasourceMap,
+      datasourceStates,
+      framePublicAPI.dateRange,
+    ]
   );
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
