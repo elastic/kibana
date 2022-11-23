@@ -26,7 +26,6 @@ import type {
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeUserBanner,
-  CustomBranding,
 } from '@kbn/core-chrome-browser';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { DocTitleService } from './doc_title';
@@ -300,7 +299,7 @@ export class ChromeService {
       },
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
-    }
+    };
   }
 
   public stop() {

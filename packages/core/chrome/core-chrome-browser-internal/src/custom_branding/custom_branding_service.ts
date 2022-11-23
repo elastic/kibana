@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -22,24 +21,23 @@
  */
 
 export interface CustomBranding {
-    /** Similar to iconType
-     * @example 'logoGithub'
-     * This is refering to the elastic logo in the top left
-     * */
-    logo?: string;
-    /** Set as string
-     * link to a file service
-     * */
-    favicon?: string;
-    /** Instead of elastic, Kibana operators can customize the title */
-    pageTitle?: string;
-    /**
-     * equivalent to Elastic Mark
-     * @link packages/core/chrome/core-chrome-browser-internal/src/ui/header/elastic_mark.tsx
-     */
-    customizedLogo?: string;
+  /** Similar to iconType
+   * @example 'logoGithub'
+   * This is refering to the elastic logo in the top left
+   * */
+  logo?: string;
+  /** Set as string
+   * link to a file service
+   * */
+  favicon?: string;
+  /** Instead of elastic, Kibana operators can customize the title */
+  pageTitle?: string;
+  /**
+   * equivalent to Elastic Mark
+   * @link packages/core/chrome/core-chrome-browser-internal/src/ui/header/elastic_mark.tsx
+   */
+  customizedLogo?: string;
 }
 
-
 /** @internal */
-export class CustomBrandingService {};
+export class CustomBrandingService {}
