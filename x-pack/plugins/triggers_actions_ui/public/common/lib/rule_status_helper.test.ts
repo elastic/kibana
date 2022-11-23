@@ -65,7 +65,7 @@ const licenseErrorRule = {
 } as RuleTableItem;
 
 beforeEach(() => {
-  (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+  (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
 });
 
 describe('getRuleHealthColor', () => {
@@ -73,7 +73,7 @@ describe('getRuleHealthColor', () => {
     let color = getRuleHealthColor(mockRule);
     expect(color).toEqual('success');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
 
     color = getRuleHealthColor(mockRule);
     expect(color).toEqual('success');
@@ -83,7 +83,7 @@ describe('getRuleHealthColor', () => {
     let color = getRuleHealthColor(warningRule);
     expect(color).toEqual('warning');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
 
     color = getRuleHealthColor(warningRule);
     expect(color).toEqual('warning');
@@ -93,7 +93,7 @@ describe('getRuleHealthColor', () => {
     let color = getRuleHealthColor(failedRule);
     expect(color).toEqual('danger');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
 
     color = getRuleHealthColor(failedRule);
     expect(color).toEqual('danger');
@@ -110,7 +110,7 @@ describe('getRuleStatusMessage', () => {
     });
     expect(statusMessage).toEqual('Succeeded');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
     statusMessage = getRuleStatusMessage({
       rule: mockRule,
       licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
@@ -129,7 +129,7 @@ describe('getRuleStatusMessage', () => {
     });
     expect(statusMessage).toEqual('Warning');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
     statusMessage = getRuleStatusMessage({
       rule: warningRule,
       licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
@@ -148,7 +148,7 @@ describe('getRuleStatusMessage', () => {
     });
     expect(statusMessage).toEqual('Failed');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
     statusMessage = getRuleStatusMessage({
       rule: failedRule,
       licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
@@ -167,7 +167,7 @@ describe('getRuleStatusMessage', () => {
     });
     expect(statusMessage).toEqual('License Error');
 
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
     statusMessage = getRuleStatusMessage({
       rule: licenseErrorRule,
       licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
