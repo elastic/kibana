@@ -26,13 +26,23 @@ import {
 } from '../../../common/search_strategy';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 
+export enum DataViewType {
+  id = 'id',
+  title = 'title',
+}
+
+export interface SecuritySolutionDataViewBase extends DataViewBase {
+  type: DataViewType;
+  value: string;
+}
+
 const DEFAULT_BROWSER_FIELDS = {};
-const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
+const DEFAULT_INDEX_PATTERNS = { fields: [], title: '', type: DataViewType.title, value: '' };
 interface FetchIndexReturn {
   browserFields: BrowserFields;
   indexes: string[];
   indexExists: boolean;
-  indexPatterns: DataViewBase;
+  indexPatterns: SecuritySolutionDataViewBase;
 }
 
 /**
@@ -64,17 +74,14 @@ export const getBrowserFields = memoizeOne(
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
 );
 
-export const getIndexFields = memoizeOne(
-  (title: string, fields: IndexField[]): DataViewBase =>
+const getIndexFields = memoizeOne(
+  (fields: IndexField[]): DataViewBase['fields'] =>
     fields && fields.length > 0
-      ? {
-          fields: fields.map((field) =>
-            pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
-          ),
-          title,
-        }
-      : { fields: [], title },
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
+      ? fields.map((field) =>
+          pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
+        )
+      : [],
+  (newArgs, lastArgs) => newArgs.length === lastArgs.length
 );
 
 export const useFetchIndex = (
@@ -120,7 +127,13 @@ export const useFetchIndex = (
                   browserFields: getBrowserFields(stringifyIndices, response.indexFields),
                   indexes: response.indicesExist,
                   indexExists: response.indicesExist.length > 0,
-                  indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
+                  indexPatterns: {
+                    fields: getIndexFields(response.indexFields),
+                    title: stringifyIndices,
+                    // need these properties for unified search
+                    type: DataViewType.title,
+                    value: stringifyIndices,
+                  },
                 });
 
                 searchSubscription$.current.unsubscribe();

@@ -50,7 +50,7 @@ export const getFieldsAsSpec = memoizeOne(
           pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
         )
       : [],
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
+  (newArgs, lastArgs) => newArgs.length === lastArgs.length
 );
 
 /**
