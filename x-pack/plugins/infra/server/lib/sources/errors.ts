@@ -28,3 +28,11 @@ export class SavedObjectReferenceResolutionError extends Error {
     this.name = 'SavedObjectReferenceResolutionError';
   }
 }
+
+export class InvalidMetricIndicesError extends Error {
+  constructor(message?: string) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = 'InvalidMetricIndicesError';
+  }
+}
