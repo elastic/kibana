@@ -188,20 +188,27 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [ruleFromTimelineData, setFieldValue]);
 
   const {
-    index,
-    ruleType,
-    queryBar,
-    dataViewId,
-    threatIndex,
+    index: formIndex,
+    ruleType: formRuleType,
+    queryBar: formQuery,
+    dataViewId: formDataViewId,
+    threatIndex: formThreatIndex,
     threatMapping: formThreatMapping,
-    machineLearningJobId,
-    dataSourceType,
+    machineLearningJobId: formMachineLearningJobId,
+    dataSourceType: formDataSourceType,
     newTermsFields,
     shouldLoadQueryDynamically: formShouldLoadQueryDynamically,
   } = formData;
 
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
+  const index = formIndex || initialState.index;
+  const dataViewId = formDataViewId || initialState.dataViewId;
+  const threatIndex = formThreatIndex || initialState.threatIndex;
+  const ruleType = formRuleType || initialState.ruleType;
+  const dataSourceType = formDataSourceType || initialState.dataSourceType;
+  const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
+  const queryBar = formQuery ?? initialState.queryBar;
 
   const [isPreviewValid, setIsPreviewValid] = useState(false);
   useEffect(() => {
@@ -226,8 +233,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setIsPreviewValid(!isDisabled);
   }, [
     dataSourceType,
-    dataViewId,
+    formDataViewId,
     newTermsFields,
+    formQuery,
+    dataViewId,
     formThreatMapping,
     index,
     queryBar,
