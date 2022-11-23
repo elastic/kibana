@@ -43,12 +43,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           return await testSubjects.isDisplayed('remoteClusterListTable');
         });
         const remotes = await pageObjects.remoteClusters.getRemoteClustersList();
-        expect(remotes.length).to.eql(1);
-        expect(remotes[0].remoteName).to.eql('ftr-remote');
-        expect(remotes[0].remoteAddress).to.contain('localhost');
-        expect(remotes[0].remoteStatus).to.eql('Connected');
-        expect(remotes[0].remoteConnectionCount).to.eql('1');
-        expect(remotes[0].remoteMode).to.eql('default');
+        const filteredRemotes = remotes.filter((remote) => remote.remoteName === 'ftr-remote');
+        expect(filteredRemotes.length).to.eql(1);
+        expect(filteredRemotes[0].remoteAddress).to.contain('localhost');
+        expect(filteredRemotes[0].remoteStatus).to.eql('Connected');
+        expect(filteredRemotes[0].remoteConnectionCount).to.eql('1');
+        expect(filteredRemotes[0].remoteMode).to.eql('default');
       });
     });
 
@@ -93,11 +93,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('indexManagement');
         await retry.waitForWithTimeout('indice table to be visible', 15000, async () => {
           return await testSubjects.isDisplayed('indicesList');
+          const indicesList = await pageObjects.indexManagement.getIndexList();
+          const followerIndex = indicesList.filter(
+            (follower) => follower.indexName === followerName
+          );
+          expect(followerIndex[0].indexDocuments).to.eql('1');
         });
-
-        const indicesList = await pageObjects.indexManagement.getIndexList();
-        const followerIndex = indicesList[0];
-        expect(followerIndex.indexDocuments).to.eql('1');
       });
     });
 

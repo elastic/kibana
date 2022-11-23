@@ -45,7 +45,7 @@ describe('getCaseMetrics', () => {
     ({ mockServices, clientArgs } = createMockClientArgs());
 
     jest.clearAllMocks();
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(currentTime);
   });
 
