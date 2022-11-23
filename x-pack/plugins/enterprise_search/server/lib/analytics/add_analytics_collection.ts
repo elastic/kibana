@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { IScopedClusterClient } from '@kbn/core/server';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 
 import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
 import { AnalyticsCollectionDocument, AnalyticsCollection } from '../../../common/types/analytics';
@@ -47,17 +47,20 @@ const createAnalyticsCollection = async (
   };
 };
 
-const getDataStreamName = ({ name: collectionName }: AnalyticsCollection) => {
+const getDataStreamName = ({ name: collectionName }: AnalyticsCollection): string => {
   return `elastic_analytics-events-${collectionName}`
 };
 
-const createDataView = async(dataViewsService: DataViewsService, dataStreamName: string) => {
+const createDataView = async (
+  dataViewsService: DataViewsService,
+  dataStreamName: string
+): Promise<DataView> => {
   return dataViewsService.createAndSave({
     title: dataStreamName,
     namespaces: [dataStreamName],
     allowNoIndex: true,
     timeFieldName: '@timestamp',
-  });
+  }, true);
 };
 
 export const addAnalyticsCollection = async (
@@ -80,7 +83,6 @@ export const addAnalyticsCollection = async (
 
   const analyticsCollection =  await createAnalyticsCollection(client, document);
 
-  // Creating the data view if it does not exists yet.
   const dataStreamName = getDataStreamName(analyticsCollection);
   await createDataView(dataViewsService, dataStreamName);
 
