@@ -38,7 +38,6 @@ import type { CreateCaseFormFieldsProps } from './form';
 import { CreateCaseFormFields } from './form';
 import { SubmitCaseButton } from './submit_button';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import type { Choice } from '../connectors/servicenow/types';
 import userEvent from '@testing-library/user-event';
 import { connectorsMock } from '../../common/mock/connectors';
 import type { CaseAttachments } from '../../types';
@@ -143,7 +142,6 @@ describe('Create case', () => {
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
   const createAttachments = jest.fn();
-  let onChoicesSuccess: (values: Choice[]) => void;
   let mockedContext: AppMockRenderer;
 
   beforeAll(() => {
@@ -160,12 +158,7 @@ describe('Create case', () => {
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
-    useGetChoicesMock.mockImplementation(
-      ({ onSuccess }: { onSuccess: (values: Choice[]) => void }) => {
-        onChoicesSuccess = onSuccess;
-        return useGetChoicesResponse;
-      }
-    );
+    useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
 
     (useGetTags as jest.Mock).mockImplementation(() => ({
       data: sampleTags,
@@ -605,8 +598,6 @@ describe('Create case', () => {
     await fillFormReactTestingLib({ renderer: screen });
 
     userEvent.click(screen.getByTestId('create-case-submit'));
-
-    await waitForComponentToUpdate();
 
     await waitFor(() => {
       expect(createAttachments).toHaveBeenCalledTimes(1);
