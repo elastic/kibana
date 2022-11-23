@@ -105,7 +105,7 @@ export function RuleDetailsPage() {
         <RuleLoadingError />
       ) : rule ? (
         <ObservabilityPageTemplate
-          data-test-subj="rule-details-page"
+          data-test-subj="ruleDetails"
           pageHeader={{
             pageTitle: <PageTitle rule={rule} />,
             bottomBorder: false,
