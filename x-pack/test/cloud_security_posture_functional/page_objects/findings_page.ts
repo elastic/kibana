@@ -17,7 +17,8 @@ const EUI_PAGINATION_BUTTON = 'tablePaginationPopoverButton';
 // Defined in CSP plugin
 const FINDINGS_ROUTE = 'cloud_security_posture/findings';
 const FINDINGS_TABLE_TESTID = 'findings_table';
-const FILTER_CELL_VALUE_SELECTOR = 'div[data-test-subj="filter_cell_value"]';
+const getCellSelector = (columnIndex: number) =>
+  `tbody tr td:nth-child(${columnIndex + 1}) div[data-test-subj="filter_cell_value"]`;
 
 // Defined in Security Solution plugin
 const SECURITY_SOLUTION_APP_NAME = 'securitySolution';
@@ -26,23 +27,24 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
-  const getColumnIndex = async (tableTestId: string, columnName: string) => {
-    const table = await testSubjects.find(tableTestId);
-    const headers = await table.findAllByCssSelector('thead th');
+  const getColumnIndex = async (columnName: string) => {
+    const table = await testSubjects.find(FINDINGS_TABLE_TESTID);
+    const headers = await table.findAllByCssSelector('thead tr :is(th,td)');
     const headerIndexes = await Promise.all(headers.map((header) => header.getVisibleText()));
     const columnIndex = headerIndexes.findIndex((i) => i === columnName);
+
+    expect(columnIndex).to.be.greaterThan(-1);
+
     return [columnIndex, headers[columnIndex]] as [
       number,
       Awaited<ReturnType<typeof testSubjects.find>>
     ];
   };
 
-  const getFilterColumnValues = async (tableTestId: string, columnName: string) => {
-    const table = await testSubjects.find(tableTestId);
-    const [columnIndex] = await getColumnIndex(tableTestId, columnName);
-    const columnCells = await table.findAllByCssSelector(
-      `tbody tr td:nth-child(${columnIndex + 1}) ${FILTER_CELL_VALUE_SELECTOR}`
-    );
+  const getFilterColumnValues = async (columnName: string) => {
+    const table = await testSubjects.find(FINDINGS_TABLE_TESTID);
+    const [columnIndex] = await getColumnIndex(columnName);
+    const columnCells = await table.findAllByCssSelector(getCellSelector(columnIndex));
     return await Promise.all(columnCells.map((h) => h.getVisibleText()));
   };
 
@@ -75,7 +77,10 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   };
 
   const assertColumnSorting = async (columnName: string, direction: 'asc' | 'desc') => {
-    const values = await getFilterColumnValues(FINDINGS_TABLE_TESTID, columnName);
+    const values = (await getFilterColumnValues(columnName)).filter(Boolean);
+
+    expect(values).to.not.be.empty();
+
     const sorted = values
       .slice()
       .sort((a, b) => (direction === 'asc' ? a.localeCompare(b) : b.localeCompare(a)));
@@ -84,13 +89,19 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   };
 
   const toggleColumnSorting = async (columnName: string, direction: 'asc' | 'desc') => {
-    const [_, element] = await getColumnIndex(FINDINGS_TABLE_TESTID, columnName);
+    const [_, element] = await getColumnIndex(columnName);
+
     const currentSort = await element.getAttribute('aria-sort');
+
     if (currentSort === 'none') {
       // a click is needed to focus on Eui column header
       await element.click();
+
       // default is ascending
-      if (direction === 'asc') return;
+      if (direction === 'desc') {
+        const [, nonStaleElement] = await getColumnIndex(columnName);
+        await nonStaleElement.click();
+      }
     }
 
     if (
@@ -98,7 +109,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       (currentSort === 'descending' && direction === 'asc')
     ) {
       // Without getting the element again, the click throws an error (stale element reference)
-      const [__, nonStaleElement] = await getColumnIndex(FINDINGS_TABLE_TESTID, columnName);
+      const [, nonStaleElement] = await getColumnIndex(columnName);
 
       await nonStaleElement.click();
     }
