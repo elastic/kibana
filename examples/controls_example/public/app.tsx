@@ -13,7 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ControlsExampleStartDeps } from './plugin';
-import { ControlGroupExample } from './control_group_example';
+import { BasicReduxExample } from './basic_redux_example';
 
 interface Props {
   dataView: DataView;
@@ -24,7 +24,7 @@ const ControlsExamples = ({ dataView }: Props) => {
     <KibanaPageTemplate>
       <KibanaPageTemplate.Header pageTitle="Controls as a Building Block" />
       <KibanaPageTemplate.Section>
-        <ControlGroupExample dataView={dataView} />
+        <BasicReduxExample dataView={dataView} />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

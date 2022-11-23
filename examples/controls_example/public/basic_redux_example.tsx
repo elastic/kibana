@@ -33,7 +33,7 @@ interface Props {
 }
 const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
-export const ControlGroupExample = ({ dataView }: Props) => {
+export const BasicReduxExample = ({ dataView }: Props) => {
   const [myControlGroup, setControlGroup] = useState<ControlGroupContainer>();
   const [currentControlStyle, setCurrentControlStyle] = useState<ControlStyle>('oneLine');
 
@@ -67,7 +67,7 @@ export const ControlGroupExample = ({ dataView }: Props) => {
                 },
                 {
                   id: `twoLine`,
-                  label: 'Two Lines',
+                  label: 'Two lines',
                   value: 'twoLine' as ControlStyle,
                 },
               ]}
