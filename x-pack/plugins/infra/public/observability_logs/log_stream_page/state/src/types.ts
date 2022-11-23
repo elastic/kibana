@@ -12,6 +12,7 @@ import {
   LogViewContextWithError,
   LogViewContextWithResolvedLogView,
 } from '../../../log_view_state';
+import { createLogStreamPageStateMachine } from './state_machine';
 
 // if we need any context value in this machine we should turn this into a typestate union
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -56,3 +57,5 @@ export type LogStreamPageTypestate =
     };
 
 export type LogStreamPageStateValue = LogStreamPageTypestate['value'];
+
+export type LogStreamPageStateMachine = ReturnType<typeof createLogStreamPageStateMachine>;

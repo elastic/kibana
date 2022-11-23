@@ -9,7 +9,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
-import { StreamPageContent } from './page_content';
+import { ConnectedStreamPageContent } from './page_content';
 import { LogsPageProviders } from './page_providers';
 import { streamTitle } from '../../../translations';
 
@@ -25,7 +25,7 @@ export const StreamPage = () => {
   return (
     <EuiErrorBoundary>
       <LogsPageProviders>
-        <StreamPageContent />
+        <ConnectedStreamPageContent />
       </LogsPageProviders>
     </EuiErrorBoundary>
   );

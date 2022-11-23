@@ -5,61 +5,74 @@
  * 2.0.
  */
 
-import { useInterpret } from '@xstate/react';
+import { useSelector } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { useSourceId } from '../../../containers/source_id';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { WithMachine } from '../../../observability_logs/log_stream_page/state/src/provider';
 import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { useLogViewContext } from '../../../hooks/use_log_view';
 import { LogsPageTemplate } from '../page_template';
 import { LogsPageLogsContent } from './page_logs_content';
 import { fullHeightContentStyles } from '../../../page_template.styles';
-import { createLogStreamPageStateMachine } from '../../../observability_logs/log_stream_page/state';
 
 const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
   defaultMessage: 'Stream',
 });
 
-export const StreamPageContent: React.FunctionComponent = () => {
-  const {
-    hasFailedLoading,
-    isLoading,
-    isUninitialized,
-    latestLoadLogViewFailures,
-    load,
-    logViewStatus,
-  } = useLogViewContext();
+export const StreamPageContent: React.FunctionComponent = ({
+  machine: logStreamPageStateMachine,
+}) => {
+  const isLoading = useSelector(
+    logStreamPageStateMachine,
+    (state) => state.matches('uninitialized') || state.matches('loadingLogView')
+  );
 
-  const [sourceId] = useSourceId();
+  const hasFailedLoading = useSelector(logStreamPageStateMachine, (state) =>
+    state.matches('loadingLogViewFailed')
+  );
 
-  const {
-    services: {
-      logViews: { client },
-    },
-  } = useKibanaContextForPlugin();
+  const hasIndices = useSelector(logStreamPageStateMachine, (state) =>
+    state.matches('hasLogViewIndices')
+  );
 
-  // TODO: Remove and move to a proper provider
-  const machine = useMemo(() => {
-    return createLogStreamPageStateMachine({ logViews: client, logViewId: sourceId });
-  }, [client, sourceId]);
+  const missingIndices = useSelector(logStreamPageStateMachine, (state) =>
+    state.matches('missingLogViewIndices')
+  );
 
-  const LogStreamPageStateService = useInterpret(machine, undefined, (state) => {
-    console.log(state);
-  });
+  const logViewErrors = useSelector(logStreamPageStateMachine, (state) => [
+    state.context.logViewError,
+  ]);
 
-  if (isLoading || isUninitialized) {
+  if (isLoading) {
     return <SourceLoadingPage />;
   } else if (hasFailedLoading) {
-    return <LogSourceErrorPage errors={latestLoadLogViewFailures} onRetry={load} />;
-  } else {
+    return <LogSourceErrorPage errors={logViewErrors} onRetry={load} />;
+  } else if (missingIndices) {
     return (
       <div className={APP_WRAPPER_CLASS}>
         <LogsPageTemplate
-          hasData={logViewStatus?.index !== 'missing'}
-          isDataLoading={isLoading}
+          hasData={false}
+          isDataLoading={false}
+          pageHeader={{
+            pageTitle: streamTitle,
+          }}
+          pageSectionProps={{
+            contentProps: {
+              css: fullHeightContentStyles,
+            },
+          }}
+        >
+          <LogsPageLogsContent />
+        </LogsPageTemplate>
+      </div>
+    );
+  } else if (hasIndices) {
+    return (
+      <div className={APP_WRAPPER_CLASS}>
+        <LogsPageTemplate
+          hasData={true}
+          isDataLoading={false}
           pageHeader={{
             pageTitle: streamTitle,
           }}
@@ -75,3 +88,5 @@ export const StreamPageContent: React.FunctionComponent = () => {
     );
   }
 };
+
+export const ConnectedStreamPageContent = WithMachine(StreamPageContent);

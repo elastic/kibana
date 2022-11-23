@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { LogStreamPageStateProvider } from '../../../observability_logs/log_stream_page/state/src/provider';
 import {
   LogFilterStateProvider,
   useLogFilterStateContext,
@@ -101,18 +102,20 @@ export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
   }
 
   return (
-    <LogViewConfigurationProvider>
-      <LogEntryFlyoutProvider>
-        <LogPositionStateProvider>
-          <ViewLogInContext>
-            <LogFilterState>
-              <LogEntriesStateProvider>
-                <LogHighlightsState>{children}</LogHighlightsState>
-              </LogEntriesStateProvider>
-            </LogFilterState>
-          </ViewLogInContext>
-        </LogPositionStateProvider>
-      </LogEntryFlyoutProvider>
-    </LogViewConfigurationProvider>
+    <LogStreamPageStateProvider>
+      <LogViewConfigurationProvider>
+        <LogEntryFlyoutProvider>
+          <LogPositionStateProvider>
+            <ViewLogInContext>
+              <LogFilterState>
+                <LogEntriesStateProvider>
+                  <LogHighlightsState>{children}</LogHighlightsState>
+                </LogEntriesStateProvider>
+              </LogFilterState>
+            </ViewLogInContext>
+          </LogPositionStateProvider>
+        </LogEntryFlyoutProvider>
+      </LogViewConfigurationProvider>
+    </LogStreamPageStateProvider>
   );
 };
