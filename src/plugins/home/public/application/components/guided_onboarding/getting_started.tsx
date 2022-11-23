@@ -109,8 +109,13 @@ export const GettingStarted = () => {
     application.navigateToApp('home');
   };
   const { euiTheme } = useEuiTheme();
-  const paddingCss = css`
+  const panelCss = css`
     padding: calc(${euiTheme.size.base}*3) calc(${euiTheme.size.base}*4);
+    // fix the misalignment of the cards
+    // delete if https://github.com/elastic/eui/pull/6424 is backported into 8.6 branch
+    .euiCard__main {
+      flex-grow: 1;
+    }
   `;
 
   const isDarkTheme = uiSettings.get<boolean>('theme:darkMode');
@@ -183,12 +188,7 @@ export const GettingStarted = () => {
   return (
     <KibanaPageTemplate panelled={false} grow>
       <EuiPageTemplate.Section alignment="center">
-        <EuiPanel
-          color="plain"
-          hasShadow
-          css={paddingCss}
-          data-test-subj="onboarding--landing-page"
-        >
+        <EuiPanel color="plain" hasShadow css={panelCss} data-test-subj="onboarding--landing-page">
           <EuiTitle size="l" className="eui-textCenter">
             <h1>{title}</h1>
           </EuiTitle>
