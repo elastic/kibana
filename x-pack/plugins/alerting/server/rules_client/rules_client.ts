@@ -55,6 +55,7 @@ import {
   SAVED_OBJECT_REL_PRIMARY,
 } from '@kbn/event-log-plugin/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
+import { BulkActionSkipResult } from '../../common/bulk_edit';
 import {
   Rule,
   PartialRule,
@@ -320,21 +321,6 @@ export interface BulkEditOptionsIds<Params extends RuleTypeParams> {
 export type BulkEditOptions<Params extends RuleTypeParams> =
   | BulkEditOptionsFilter<Params>
   | BulkEditOptionsIds<Params>;
-
-export type BulkEditSkipReason = 'RULE_NOT_MODIFIED';
-
-export interface BulkActionSkipResult {
-  id: Rule['id'];
-  name?: Rule['name'];
-  skip_reason: BulkEditSkipReason;
-}
-export interface BulkEditActionResults {
-  updated: Rule[];
-  created: Rule[];
-  deleted: Rule[];
-  skipped: BulkActionSkipResult[];
-}
-
 interface BulkOptionsFilter {
   filter?: string | KueryNode;
 }
