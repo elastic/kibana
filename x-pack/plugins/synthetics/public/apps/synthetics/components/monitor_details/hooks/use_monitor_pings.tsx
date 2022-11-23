@@ -13,6 +13,7 @@ import { useSelectedLocation } from './use_selected_location';
 import { getMonitorRecentPingsAction, selectMonitorPingsMetadata } from '../../../state';
 
 interface UseMonitorPingsProps {
+  lastRefresh?: number;
   pageSize?: number;
   pageIndex?: number;
   from?: string;
@@ -45,6 +46,7 @@ export const useMonitorPings = (props?: UseMonitorPingsProps) => {
     dispatch,
     monitorId,
     locationLabel,
+    props?.lastRefresh,
     props?.pageSize,
     props?.pageIndex,
     props?.from,
