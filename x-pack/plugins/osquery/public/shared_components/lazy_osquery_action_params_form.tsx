@@ -26,7 +26,12 @@ export const getLazyOsqueryResponseActionTypeForm =
     return (
       <Suspense fallback={null}>
         <QueryClientProvider client={queryClient}>
-          <OsqueryResponseActionParamsForm item={item} defaultParams={defaultParams} nextIndices={nextIndices} ref={formRef} />
+          <OsqueryResponseActionParamsForm
+            item={item}
+            defaultParams={defaultParams}
+            nextIndices={nextIndices}
+            ref={formRef}
+          />
         </QueryClientProvider>
       </Suspense>
     );

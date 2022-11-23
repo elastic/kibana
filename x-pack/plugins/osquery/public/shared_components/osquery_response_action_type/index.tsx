@@ -40,10 +40,7 @@ interface OsqueryResponseActionsParamsFormFields {
   }>;
 }
 
-const OsqueryResponseActionParamsFormComponent = ({
-  defaultParams,
-  nextIndices,
-}) => {
+const OsqueryResponseActionParamsFormComponent = ({ defaultParams, nextIndices }) => {
   const lastErrors = useRef(null);
   const uniqueId = useMemo(() => uuid.v4(), []);
   const hooksForm = useHookForm<OsqueryResponseActionsParamsFormFields>({

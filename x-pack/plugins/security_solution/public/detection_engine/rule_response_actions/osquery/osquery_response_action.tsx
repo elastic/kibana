@@ -10,7 +10,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
-import type { ArrayItem, ValidationFunc } from '../../../shared_imports';
+import type { ArrayItem } from '../../../shared_imports';
 import { useKibana } from '../../../common/lib/kibana';
 import { NOT_AVAILABLE, PERMISSION_DENIED, SHORT_EMPTY_TITLE } from './translations';
 import { useBehaviorSubject, UseField } from '../../../shared_imports';
@@ -36,7 +36,6 @@ const ResponseActionFormField = (props) => {
     [osquery?.OsqueryResponseActionTypeForm]
   );
 
-
   useEffect(() => {
     indices$.subscribe({
       next(data) {
@@ -48,8 +47,6 @@ const ResponseActionFormField = (props) => {
       },
     });
   }, [setErrors, clearErrors, indices$]);
-
-
 
   return (
     <OsqueryForm defaultParams={props.field.value} nextIndices={nextIndices} formRef={formRef} />
