@@ -13,9 +13,7 @@ import styled from 'styled-components';
 import { FORM_ERRORS_TITLE } from '../../detections/components/rules/rule_actions_field/translations';
 import { ResponseActionsHeader } from './response_actions_header';
 import { ResponseActionsList } from './response_actions_list';
-
-import type { ArrayItem } from '../../shared_imports';
-import { useFormContext } from '../../shared_imports';
+import type { ArrayItem, FormHook } from '../../shared_imports';
 import { useSupportedResponseActionTypes } from './use_supported_response_action_types';
 
 const FieldErrorsContainer = styled.div`
@@ -28,16 +26,21 @@ interface ResponseActionsFormProps {
   items: ArrayItem[];
   addItem: () => void;
   removeItem: (id: number) => void;
+  form: FormHook;
 }
 
-export const ResponseActionsForm = ({ items, addItem, removeItem }: ResponseActionsFormProps) => {
+export const ResponseActionsForm = ({
+  items,
+  addItem,
+  removeItem,
+  form,
+}: ResponseActionsFormProps) => {
   const supportedResponseActionTypes = useSupportedResponseActionTypes();
   const [uiFieldErrors, setUIFieldErrors] = useState<string | null>(null);
-  const { getFields, getErrors } = useFormContext();
-  const fields = getFields();
-  const errors = getErrors();
+  const fields = form.getFields();
+  const errors = form.getErrors();
 
-  const form = useMemo(() => {
+  const formContent = useMemo(() => {
     if (!supportedResponseActionTypes?.length) {
       return null;
     }
@@ -54,12 +57,12 @@ export const ResponseActionsForm = ({ items, addItem, removeItem }: ResponseActi
 
   useEffect(() => {
     setUIFieldErrors(() => {
-      const fieldErrors = reduce(
+      const fieldErrors = reduce<string[], Array<{ type: string; errors: string[] }>>(
         map(items, 'path'),
         (acc, path) => {
           if (fields[`${path}.params`]?.errors?.length) {
             acc.push({
-              type: upperFirst(fields[`${path}.actionTypeId`].value.substring(1)),
+              type: upperFirst((fields[`${path}.actionTypeId`].value as string).substring(1)),
               errors: map(fields[`${path}.params`].errors, 'message'),
             });
             return acc;
@@ -80,7 +83,7 @@ export const ResponseActionsForm = ({ items, addItem, removeItem }: ResponseActi
 
           return acc;
         },
-        []
+        [] as string[]
       ).join('\n');
     });
   }, [fields, errors, items]);
@@ -89,7 +92,7 @@ export const ResponseActionsForm = ({ items, addItem, removeItem }: ResponseActi
     <>
       <EuiSpacer size="xxl" data-test-subj={'response-actions-form'} />
       <ResponseActionsHeader />
-      {uiFieldErrors?.length ? (
+      {uiFieldErrors?.length && form.isSubmitted ? (
         <>
           <FieldErrorsContainer>
             <EuiCallOut
@@ -104,7 +107,7 @@ export const ResponseActionsForm = ({ items, addItem, removeItem }: ResponseActi
           <EuiSpacer />
         </>
       ) : null}
-      {form}
+      {formContent}
     </>
   );
 };
