@@ -24,6 +24,7 @@ export type AgentStatus =
   | 'inactive'
   | 'enrolling'
   | 'unenrolling'
+  | 'unenrolled'
   | 'updating'
   | 'degraded';
 
