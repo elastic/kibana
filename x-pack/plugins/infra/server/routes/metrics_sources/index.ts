@@ -78,7 +78,9 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       const sourceConfigurationPayload = request.body;
 
       try {
-        assertMetricAlias(sourceConfigurationPayload.metricAlias);
+        if (sourceConfigurationPayload.metricAlias) {
+          assertMetricAlias(sourceConfigurationPayload.metricAlias);
+        }
 
         const soClient = (await requestContext.core).savedObjects.client;
         const sourceConfiguration = await sources.getSourceConfiguration(soClient, sourceId);

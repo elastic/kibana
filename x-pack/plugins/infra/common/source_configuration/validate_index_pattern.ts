@@ -6,7 +6,7 @@
  */
 
 export const validateIndexPattern = (indexPattern?: string) => {
-  if (indexPattern === undefined) return false;
+  if (indexPattern === undefined) return true;
 
   return (
     !isEmptyString(indexPattern) &&
