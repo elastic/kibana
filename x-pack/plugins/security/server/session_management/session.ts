@@ -252,7 +252,7 @@ export class Session {
   }
 
   /**
-   * Creates or updates session value for the specified request.
+   * Updates session value for the specified request.
    * @param request Request instance to set session value for.
    * @param sessionValue Session value parameters.
    */
