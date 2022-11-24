@@ -4,11 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexGroupProps,
+  EuiFlexItem,
+  EuiSelect,
+} from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { Environment } from '../../../../../../common/environment_rt';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
+import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
 import { useFetcher } from '../../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { push } from '../../../../shared/links/url_helpers';
@@ -39,6 +45,7 @@ export function MobileFilters({
   filters,
 }: Props) {
   const history = useHistory();
+  const { isSmall, isLarge } = useBreakpoints();
   const { serviceName } = useApmServiceContext();
   const { data = { mobileFilters: [] } } = useFetcher(
     (callApmApi) => {
@@ -68,16 +75,26 @@ export function MobileFilters({
     });
   }
 
+  const groupDirection: EuiFlexGroupProps['direction'] = isLarge
+    ? 'column'
+    : 'row';
+
   return (
-    <EuiFlexGroup justifyContent="flexEnd">
+    <EuiFlexGroup
+      justifyContent="flexEnd"
+      gutterSize="s"
+      responsive={false}
+      direction={groupDirection}
+    >
       {data.mobileFilters.map((filter) => {
         return (
           <EuiFlexItem
             grow={false}
             key={filter.key}
-            style={{ minWidth: '225px' }}
+            style={isLarge ? {} : { width: '225px' }}
           >
             <EuiSelect
+              fullWidth={isSmall}
               prepend={filter.label}
               options={toSelectOptions(filter.options)}
               value={filters[filter.key]}
