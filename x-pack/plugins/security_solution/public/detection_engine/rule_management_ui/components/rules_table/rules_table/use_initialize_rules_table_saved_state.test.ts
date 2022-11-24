@@ -60,8 +60,6 @@ describe('useInitializeRulesTableSavedState', () => {
   let actions: Partial<RulesTableActions>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-
     actions = {
       setFilterOptions: jest.fn(),
       setSortingOptions: jest.fn(),
