@@ -18,6 +18,7 @@ export interface Event {
   ciBuildNumber: number;
   gitRev: string | undefined;
   rpsAtSLA: number;
+  rpsAtResponseTimeWarmupAvg: number;
   rpsAtResponseTime10XAvg: number;
   rpsAtResponseTime100XAvg: number;
   rpsAtRequestsToActiveUsers: number;

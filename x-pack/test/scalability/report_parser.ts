@@ -10,6 +10,7 @@ import fs from 'fs';
 import { ScalabilitySetup } from './runner';
 
 interface CapacityMetrics {
+  rpsAtResponseTimeWarmupAvg: number;
   rpsAtSLA: number;
   rpsAtResponseTime10XAvg: number;
   rpsAtResponseTime100XAvg: number;
@@ -95,20 +96,21 @@ export function getCapacityMetrics(
   const responsePercentiles = findDataSet(htmlContent, RESPONSES_PERCENTILES_REGEXP, log);
 
   const warmupPhase = responsePercentiles.slice(0, 30);
-  const avg75PctResponseTimeDuringWarmup =
+  const rpsAtResponseTimeWarmupAvg = Math.round(
     warmupPhase
       .map((i) => i.values[3])
       .filter((i) => i > 0)
-      .reduce((a, b) => a + b, 0) / warmupPhase.length;
+      .reduce((a, b) => a + b, 0) / warmupPhase.length
+  );
 
-  log.info(`Warmup: Avg 75 percentile response time - ${avg75PctResponseTimeDuringWarmup} ms`);
+  log.info(`Warmup: Avg 75 percentile response time - ${rpsAtResponseTimeWarmupAvg} ms`);
 
   // 1.SLA - constant value per api
   const responseThresholdSLA = scalabilitySetup.thresholdSLA || 3000;
   // 2. x10 increase
-  const responseThresholdX10 = avg75PctResponseTimeDuringWarmup * 10;
+  const responseThresholdX10 = rpsAtResponseTimeWarmupAvg * 10;
   // 3. x100 increase
-  const responseThresholdX100 = avg75PctResponseTimeDuringWarmup * 100;
+  const responseThresholdX100 = rpsAtResponseTimeWarmupAvg * 100;
   // 4. #users/#requests > 1.5-2
   const usersToReqsThreshold = 1.5;
   // 5. abs(response/requests - 1) > 0.1
@@ -128,6 +130,7 @@ export function getCapacityMetrics(
   );
 
   return {
+    rpsAtResponseTimeWarmupAvg,
     rpsAtSLA: getRPS(timeSLA, requests),
     rpsAtResponseTime10XAvg: getRPS(timeX10, requests),
     rpsAtResponseTime100XAvg: getRPS(timeX100, requests),
