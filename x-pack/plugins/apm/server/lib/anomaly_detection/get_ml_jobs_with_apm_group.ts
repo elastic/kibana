@@ -35,18 +35,12 @@ export function getMlJobsWithAPMGroup(
           anomalyDetectors.datafeedStats(`datafeed-${APM_ML_JOB_GROUP}*`),
         ]);
 
-      const datafeedStateMap = datafeedStats.reduce<
-        Record<string, DATAFEED_STATE>
-      >((acc, cur) => {
-        acc[cur.datafeed_id] = cur.state as DATAFEED_STATE;
-        return acc;
-      }, {});
-      const jobStateMap = jobStats.reduce<Record<string, JOB_STATE>>(
-        (acc, cur) => {
-          acc[cur.job_id] = cur.state as JOB_STATE;
-          return acc;
-        },
-        {}
+      const datafeedStateMap = Object.fromEntries(
+        datafeedStats.map((d) => [d.datafeed_id, d.state as DATAFEED_STATE])
+      );
+
+      const jobStateMap = Object.fromEntries(
+        jobStats.map((j) => [j.job_id, j.state as JOB_STATE])
       );
 
       return jobs.map((job): ApmMlJob => {
