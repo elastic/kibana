@@ -11,6 +11,8 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { TestData } from './types';
 import { farequoteDataViewTestData } from './test_data';
 
+const ES_INDEX = 'ft_farequote';
+
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const es = getService('es');
   const headerPage = getPageObject('header');
@@ -137,16 +139,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/140848
   describe('explain log rate spikes', function () {
     this.tags(['aiops']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
 
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createIndexPatternIfNeeded(ES_INDEX, '@timestamp');
 
       await es.updateByQuery({
-        index: 'ft_farequote',
+        index: ES_INDEX,
         body: {
           script: {
             // @ts-expect-error
@@ -156,31 +157,21 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         },
       });
 
-      for (const i of [...Array(100)]) {
-        await es.index({
-          index: 'ft_farequote',
-          body: {
-            '@timestamp': '2016-02-09T16:19:59.000Z',
-            '@version': i,
-            airline: 'UAL',
-            custom_field: 'deviation',
-            responsetime: 10,
-            type: 'farequote',
-          },
-        });
-      }
-
-      await es.index({
-        index: 'ft_farequote',
-        body: {
-          '@timestamp': '2016-02-09T16:19:59.000Z',
-          '@version': 101,
-          airline: 'UAL',
-          custom_field: 'deviation',
-          responsetime: 10,
-          type: 'farequote',
-        },
+      await es.bulk({
         refresh: 'wait_for',
+        body: [...Array(100)].flatMap((i) => {
+          return [
+            { index: { _index: ES_INDEX } },
+            {
+              '@timestamp': '2016-02-09T16:19:59.000Z',
+              '@version': i,
+              airline: 'UAL',
+              custom_field: 'deviation',
+              responsetime: 10,
+              type: 'farequote',
+            },
+          ];
+        }),
       });
 
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -190,7 +181,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     after(async () => {
       await elasticChart.setNewChartUiDebugFlag(false);
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle(ES_INDEX);
     });
 
     describe('with farequote', function () {

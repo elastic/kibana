@@ -19,7 +19,7 @@ import {
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { getServerlessFunctionNameFromId } from '../../../../common/serverless';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { calcMemoryUsed } from './helper';

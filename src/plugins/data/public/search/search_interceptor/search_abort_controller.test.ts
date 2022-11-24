@@ -75,7 +75,7 @@ describe('search abort controller', () => {
 
   describe('timeout abort', () => {
     beforeEach(() => {
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
     });
 
     afterEach(() => {

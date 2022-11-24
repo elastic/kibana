@@ -101,7 +101,7 @@ function wrapper({
 
 describe('useFailedTransactionsCorrelations', () => {
   beforeEach(async () => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
   // Running all pending timers and switching to real timers using Jest
   afterEach(() => {

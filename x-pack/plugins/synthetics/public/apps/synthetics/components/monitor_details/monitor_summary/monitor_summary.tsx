@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { LoadWhenInView } from '@kbn/observability-plugin/public';
 
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { useEarliestStartDate } from '../hooks/use_earliest_start_data';
 import { MonitorErrorSparklines } from './monitor_error_sparklines';
 import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
@@ -35,6 +36,8 @@ import { MonitorErrorsCount } from './monitor_errors_count';
 export const MonitorSummary = () => {
   const { from, loading } = useEarliestStartDate();
   const to = 'now';
+
+  const monitorId = useMonitorQueryId();
 
   if (loading) {
     return <EuiLoadingSpinner size="xl" />;
@@ -77,10 +80,12 @@ export const MonitorSummary = () => {
                 <DurationSparklines from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
-                <MonitorErrorsCount from={from} to={to} />
+                {monitorId && <MonitorErrorsCount from={from} to={to} monitorId={[monitorId]} />}
               </EuiFlexItem>
               <EuiFlexItem>
-                <MonitorErrorSparklines from={from} to={to} />
+                {monitorId && (
+                  <MonitorErrorSparklines from={from} to={to} monitorId={[monitorId]} />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

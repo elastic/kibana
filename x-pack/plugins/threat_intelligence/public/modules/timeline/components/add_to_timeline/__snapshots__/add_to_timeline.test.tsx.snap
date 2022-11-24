@@ -253,7 +253,7 @@ Object {
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <div
-          class="euiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <span
             data-test-subj="test-add-to-timeline"
@@ -269,7 +269,7 @@ Object {
       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <span
           data-test-subj="test-add-to-timeline"
@@ -342,7 +342,7 @@ Object {
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <div
-          class="euiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <span
             data-test-subj="test-add-to-timeline"
@@ -358,7 +358,7 @@ Object {
       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <span
           data-test-subj="test-add-to-timeline"

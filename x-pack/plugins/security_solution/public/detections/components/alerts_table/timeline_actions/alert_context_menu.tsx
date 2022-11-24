@@ -90,11 +90,11 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     isInDetections,
   });
 
-  const { loading: canAccessEndpointManagementLoading, canAccessEndpointManagement } =
+  const { loading: endpointPrivilegesLoading, canWriteEventFilters } =
     useUserPrivileges().endpointPrivileges;
   const canCreateEndpointEventFilters = useMemo(
-    () => !canAccessEndpointManagementLoading && canAccessEndpointManagement,
-    [canAccessEndpointManagement, canAccessEndpointManagementLoading]
+    () => !endpointPrivilegesLoading && canWriteEventFilters,
+    [canWriteEventFilters, endpointPrivilegesLoading]
   );
 
   const alertStatus = get(0, ecsRowData?.kibana?.alert?.workflow_status) as Status | undefined;
@@ -194,8 +194,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   });
   const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,
-    disabled:
-      !isEndpointEvent || !canCreateEndpointEventFilters || !scopeIdAllowsAddEndpointEventFilter,
+    disabled: !isEndpointEvent || !scopeIdAllowsAddEndpointEventFilter,
     tooltipMessage: !scopeIdAllowsAddEndpointEventFilter
       ? i18n.ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP
       : undefined,
@@ -227,7 +226,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
           ]
         : [
             ...addToCaseActionItems,
-            ...eventFilterActionItems,
+            ...(canCreateEndpointEventFilters ? eventFilterActionItems : []),
             ...(agentId ? osqueryActionItems : []),
           ],
     [
@@ -240,6 +239,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       osqueryActionItems,
       alertDetailsActionItems,
       eventFilterActionItems,
+      canCreateEndpointEventFilters,
     ]
   );
 

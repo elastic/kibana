@@ -29,6 +29,8 @@ export const App: FunctionComponent = () => {
   return (
     <>
       <TableListView<FilesUserContentSchema>
+        tableListTitle={i18nTexts.tableListTitle}
+        tableListDescription={i18nTexts.tableListDescription}
         titleColumnName={i18nTexts.titleColumnName}
         emptyPrompt={<EmptyPrompt />}
         entityName={i18nTexts.entityName}
@@ -59,7 +61,6 @@ export const App: FunctionComponent = () => {
         initialFilter=""
         initialPageSize={50}
         listingLimit={1000}
-        tableListTitle={i18nTexts.tableListTitle}
         onClickTitle={({ attributes }) => setSelectedFile(attributes as unknown as FileJSON)}
         deleteItems={async (items) => {
           await filesClient.bulkDelete({ ids: items.map(({ id }) => id) });

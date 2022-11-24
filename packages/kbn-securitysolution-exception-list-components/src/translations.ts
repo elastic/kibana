@@ -11,14 +11,14 @@ import { i18n } from '@kbn/i18n';
 export const EMPTY_VIEWER_STATE_EMPTY_TITLE = i18n.translate(
   'exceptionList-components.empty.viewer.state.empty.title',
   {
-    defaultMessage: 'Add exceptions to this rule',
+    defaultMessage: 'Add exceptions to this list',
   }
 );
 
 export const EMPTY_VIEWER_STATE_EMPTY_BODY = i18n.translate(
   'exceptionList-components.empty.viewer.state.empty.body',
   {
-    defaultMessage: 'There is no exception in your rule. Create your first rule exception.',
+    defaultMessage: 'There is no exception in your list. Create your first exception.',
   }
 );
 export const EMPTY_VIEWER_STATE_EMPTY_SEARCH_TITLE = i18n.translate(

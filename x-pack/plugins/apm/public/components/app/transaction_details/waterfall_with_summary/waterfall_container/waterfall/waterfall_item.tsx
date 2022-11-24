@@ -14,7 +14,7 @@ import { isRumAgentName } from '../../../../../../../common/agent_name';
 import {
   TRACE_ID,
   TRANSACTION_ID,
-} from '../../../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';

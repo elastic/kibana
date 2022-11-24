@@ -51,6 +51,7 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   entityName: string;
   entityNamePlural: string;
   tableListTitle: string;
+  tableListDescription?: string;
   listingLimit: number;
   initialFilter?: string;
   initialPageSize: number;
@@ -133,6 +134,7 @@ const ast = Ast.create([]);
 
 function TableListViewComp<T extends UserContentCommonSchema>({
   tableListTitle,
+  tableListDescription,
   entityName,
   entityNamePlural,
   initialFilter: initialQuery,
@@ -592,6 +594,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     <PageTemplate panelled data-test-subj={pageDataTestSubject}>
       <KibanaPageTemplate.Header
         pageTitle={<span id={headingId}>{tableListTitle}</span>}
+        description={tableListDescription}
         rightSideItems={[
           renderCreateButton() ?? <span />,
           ...additionalRightSideActions?.slice(0, 2),
