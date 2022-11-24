@@ -58,9 +58,9 @@ const getHealthyAgents = async (
 
 const calculateCspStatusCode = (
   indicesStatus: {
-    findingsLatestIndexStatus: IndexStatus;
-    findingsIndexStatus: IndexStatus;
-    scoreIndexStatus: IndexStatus;
+    findingsLatest: IndexStatus;
+    findings: IndexStatus;
+    score: IndexStatus;
   },
   installedCspPackagePolicies: number,
   healthyAgents: number,
