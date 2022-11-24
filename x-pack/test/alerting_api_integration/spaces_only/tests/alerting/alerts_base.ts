@@ -121,7 +121,6 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
               id,
               params,
               actionRef: 'action_0',
-              lastTriggerDate: null,
             };
           }),
           producer: 'alertsFixture',
