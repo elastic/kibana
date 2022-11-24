@@ -14,8 +14,7 @@ import path from 'path';
 run(
   async ({ log, flagsReader, procRunner }) => {
     async function runFunctionalTest(journey: string, phase: 'TEST' | 'WARMUP') {
-      
-      // Pass in a clean APM environemnt, so that FTR can later 
+      // Pass in a clean APM environemnt, so that FTR can later
       // set it's own values.
       const cleanApmEnv = {
         ELASTIC_APM_TRANSACTION_SAMPLE_RATE: undefined,
@@ -24,7 +23,7 @@ run(
         ELASTIC_APM_ACTIVE: undefined,
         ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: undefined,
         ELASTIC_APM_GLOBAL_LABELS: undefined,
-      }
+      };
 
       await procRunner.run('functional-tests', {
         cmd: 'node',
@@ -37,7 +36,7 @@ run(
         ].flat(),
         cwd: REPO_ROOT,
         wait: true,
-        env: {      
+        env: {
           TEST_PERFORMANCE_PHASE: phase,
           TEST_ES_URL: 'http://elastic:changeme@localhost:9200',
           TEST_ES_DISABLE_STARTUP: 'true',
