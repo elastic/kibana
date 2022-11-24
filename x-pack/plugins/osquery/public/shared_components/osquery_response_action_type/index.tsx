@@ -77,10 +77,10 @@ const OsqueryResponseActionParamsFormComponent = ({
 
   const { watch, register, formState } = hooksForm;
 
-  const watchedValues = watch();
+  const [packId, queryType, queries, id] = watch(['packId', 'queryType', 'queries', 'id']);
   const { data: packData } = usePack({
-    packId: watchedValues?.packId?.[0],
-    skip: !watchedValues?.packId?.[0],
+    packId: packId?.[0],
+    skip: !packId?.[0],
   });
 
   useEffect(() => {
@@ -140,11 +140,11 @@ const OsqueryResponseActionParamsFormComponent = ({
 
   const queryDetails = useMemo(
     () => ({
-      queries: watchedValues.queries,
-      action_id: watchedValues.id,
+      queries,
+      action_id: id,
       agents: [],
     }),
-    [watchedValues.id, watchedValues.queries]
+    [id, queries]
   );
 
   return (
@@ -152,11 +152,9 @@ const OsqueryResponseActionParamsFormComponent = ({
       <FormProvider {...hooksForm}>
         <QueryPackSelectable canRunPacks={canRunPacks} canRunSingleQuery={canRunSingleQuery} />
         <EuiSpacer size="m" />
-        {watchedValues.queryType === 'query' && <LiveQueryQueryField />}
-        {watchedValues.queryType === 'pack' && (
-          <PackFieldWrapper
-            liveQueryDetails={watchedValues.queries && !packData ? queryDetails : undefined}
-          />
+        {queryType === 'query' && <LiveQueryQueryField />}
+        {queryType === 'pack' && (
+          <PackFieldWrapper liveQueryDetails={queries && !packData ? queryDetails : undefined} />
         )}
       </FormProvider>
     </>
