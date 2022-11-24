@@ -18,6 +18,7 @@ describe('Overview Grid', () => {
     for (let i = 0; i < 20; i++) {
       data.push({
         id: `${i}`,
+        configId: `${i}`,
         location: {
           id: 'us_central',
           isServiceManaged: true,
@@ -27,6 +28,7 @@ describe('Overview Grid', () => {
       });
       data.push({
         id: `${i}`,
+        configId: `${i}`,
         location: {
           id: 'us_east',
           isServiceManaged: true,

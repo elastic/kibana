@@ -27,6 +27,7 @@ describe('ActionsPopover', () => {
       isEnabled: true,
       name: 'Monitor 1',
       id: 'somelongstring',
+      configId: '1lkjelre',
     };
   });
 
