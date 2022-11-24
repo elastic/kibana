@@ -59,18 +59,19 @@ export class DefaultSLIClient implements SLIClient {
       searches,
     });
 
-    const resultBySlo: Record<SLOId, IndicatorData> = {};
+    const indicatorDataBySlo: Record<SLOId, IndicatorData> = {};
     for (let i = 0; i < result.responses.length; i++) {
       const slo = sloList[i];
       if ('error' in result.responses[i]) {
-        resultBySlo[slo.id] = { date_range: dateRangeBySlo[slo.id], good: 0, total: 0 };
+        // handle errorneous responses with default zero values, and keep going
+        indicatorDataBySlo[slo.id] = { date_range: dateRangeBySlo[slo.id], good: 0, total: 0 };
         continue;
       }
 
-      resultBySlo[slo.id] = handleResult(dateRangeBySlo[slo.id], result.responses[i]);
+      indicatorDataBySlo[slo.id] = handleResult(dateRangeBySlo[slo.id], result.responses[i]);
     }
 
-    return resultBySlo;
+    return indicatorDataBySlo;
   }
 
   async fetchSLIDataFrom(
