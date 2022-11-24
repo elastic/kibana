@@ -7,7 +7,7 @@
  */
 
 import { euiShadowMedium, UseEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 
 /** @todo important style should be remove after fixing elastic/eui/issues/6314. */
 export const popoverDragAndDropCss = (euiTheme: UseEuiTheme) =>
