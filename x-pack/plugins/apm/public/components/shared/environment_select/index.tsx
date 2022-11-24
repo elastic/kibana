@@ -41,11 +41,13 @@ export function EnvironmentSelect({
   environment,
   availableEnvironments,
   status,
+  fullWidth,
   onChange,
 }: {
   environment: Environment;
   availableEnvironments: Environment[];
   status: FETCH_STATUS;
+  fullWidth?: boolean;
   onChange: (value: string) => void;
 }) {
   const [searchValue, setSearchValue] = useState('');
@@ -119,6 +121,7 @@ export function EnvironmentSelect({
       isLoading={
         status === FETCH_STATUS.LOADING || searchStatus === FETCH_STATUS.LOADING
       }
+      fullWidth={fullWidth}
     />
   );
 }

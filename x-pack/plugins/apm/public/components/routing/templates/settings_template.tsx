@@ -102,6 +102,8 @@ function getTabs({
           kuery: '',
           agentLanguage: '',
           serviceName: '',
+          rangeFrom: 'now-24h',
+          rangeTo: 'now',
         },
       }),
       append: <TechnicalPreviewBadge icon="beaker" />,
