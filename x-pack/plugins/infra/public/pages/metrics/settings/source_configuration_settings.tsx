@@ -75,18 +75,12 @@ export const SourceConfigurationSettings = ({
     formStateChanges,
   ]);
 
-  const isWriteable = useMemo(
-    () => shouldAllowEdit && source && source.origin !== 'internal',
-    [shouldAllowEdit, source]
-  );
+  const isWriteable = shouldAllowEdit && (!Boolean(source) || source?.origin !== 'internal');
 
   const { hasInfraMLCapabilities } = useInfraMLCapabilitiesContext();
 
   if ((isLoading || isUninitialized) && !source) {
     return <SourceLoadingPage />;
-  }
-  if (!source?.configuration) {
-    return null;
   }
 
   return (
