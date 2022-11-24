@@ -29,6 +29,7 @@ import { OverviewStatus } from './overview/overview_status';
 import { QuickFilters } from './overview/quick_filters';
 import { SearchField } from '../common/search_field';
 import { NoMonitorsFound } from '../common/no_monitors_found';
+import { OverviewErrors } from './overview/overview_errors/overview_errors';
 
 export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview' });
@@ -37,19 +38,12 @@ export const OverviewPage: React.FC = () => {
 
   const dispatch = useDispatch();
 
-  const { refreshApp, lastRefresh } = useSyntheticsRefreshContext();
+  const { lastRefresh } = useSyntheticsRefreshContext();
   const { query } = useGetUrlParams();
   const { search } = useLocation();
 
   const pageState = useSelector(selectOverviewPageState);
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refreshApp();
-    }, 1000 * 30);
-    return () => clearInterval(interval);
-  }, [refreshApp]);
 
   useEffect(() => {
     if (!locationsLoading && !locationsLoaded) {
@@ -115,9 +109,12 @@ export const OverviewPage: React.FC = () => {
       <EuiSpacer />
       {Boolean(!monitorsLoaded || syntheticsMonitors?.length > 0) && (
         <>
-          <EuiFlexGroup gutterSize="none">
+          <EuiFlexGroup gutterSize="m">
             <EuiFlexItem grow={false}>
               <OverviewStatus />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <OverviewErrors />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />

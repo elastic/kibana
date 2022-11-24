@@ -293,6 +293,7 @@ describe('API Keys', () => {
         id: '123',
         name: 'key-name',
         api_key: 'abc123',
+        encoded: 'utf8',
       });
       const result = await apiKeys.grantAsInternalUser(
         httpServerMock.createKibanaRequest({
@@ -308,6 +309,7 @@ describe('API Keys', () => {
         api_key: 'abc123',
         id: '123',
         name: 'key-name',
+        encoded: 'utf8',
       });
       expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
       expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({

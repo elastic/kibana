@@ -65,30 +65,30 @@ exports[`Authentication User Table Component rendering it renders the user authe
     data-test-subj="header-section"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionColumn"
+      class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-stretch-column"
       data-test-subj="headerSectionOuterFlexGroup"
     >
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
           data-test-subj="headerSectionInnerFlexGroup"
         >
           <div
-            class="euiFlexItem"
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+              class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
             >
               <div
-                class="euiFlexItem"
+                class="euiFlexItem emotion-euiFlexItem-grow-1"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--directionRow header-section-titles"
+                  class="euiFlexGroup header-section-titles emotion-euiFlexGroup-none-flexStart-stretch-row"
                 >
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <button
                       aria-label="Open"
@@ -106,7 +106,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
                     </button>
                   </div>
                   <div
-                    class="euiFlexItem"
+                    class="euiFlexItem emotion-euiFlexItem-grow-1"
                   >
                     <h4
                       class="euiTitle emotion-euiTitle-m"
@@ -122,7 +122,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
                 </div>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <button
                   aria-label="Inspect"
@@ -145,7 +145,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
         </div>
       </div>
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
           class="c2 siemSubtitle"
@@ -169,13 +169,13 @@ exports[`Authentication User Table Component rendering it renders the user authe
         class="euiTableHeaderMobile"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+          class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-baseline-row"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           />
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           />
         </div>
       </div>
@@ -370,10 +370,10 @@ exports[`Authentication User Table Component rendering it renders the user authe
     </div>
   </div>
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c4"
+    class="euiFlexGroup c4 emotion-euiFlexGroup-l-flexStart-center-row"
   >
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <div
         class="euiPopover emotion-euiPopover"
@@ -406,7 +406,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <nav
         class="euiPagination emotion-euiPagination-EuiPagination"
