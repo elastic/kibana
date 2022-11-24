@@ -96,8 +96,8 @@ export const FilterGroup = ({
 
   const color = reverseBackground ? 'plain' : 'subdued';
 
-  const renderedFilters = filters.map((filter, index, acc) => {
-    const showDelimiter = booleanRelation && index + 1 < acc.length;
+  const renderedFilters = filters.map((filter, index, arrayRef) => {
+    const showDelimiter = booleanRelation && index + 1 < arrayRef.length;
     return (
       <EuiFlexGroup
         direction="column"
@@ -107,6 +107,7 @@ export const FilterGroup = ({
         <EuiFlexItem>
           <FilterItem
             filter={filter}
+            draggable={arrayRef.length !== 1}
             path={`${path}${path ? '.' : ''}${index}`}
             reverseBackground={reverseBackground}
             disableOr={orDisabled}

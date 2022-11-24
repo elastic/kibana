@@ -42,6 +42,7 @@ import {
   getGrabIconCss,
   operationCss,
 } from './filter_item.styles';
+import { Tooltip } from './tooltip';
 
 export const strings = {
   getDragFilterAriaLabel: () =>
@@ -68,6 +69,14 @@ export const strings = {
     i18n.translate('unifiedSearch.filter.filtersBuilder.addAndFilterGroupButtonLabel', {
       defaultMessage: 'AND',
     }),
+  getReorderingRequirementsLabel: () =>
+    i18n.translate('unifiedSearch.filter.filtersBuilder.dragHandleDisabled', {
+      defaultMessage: 'Reordering requires more than one item.',
+    }),
+  getDeleteButtonDisabled: () =>
+    i18n.translate('unifiedSearch.filter.filtersBuilder.deleteButtonDisabled', {
+      defaultMessage: 'A minimum of one item is required.',
+    }),
 };
 
 export interface FilterItemProps {
@@ -76,6 +85,7 @@ export interface FilterItemProps {
   disableOr: boolean;
   disableAnd: boolean;
   disableRemove: boolean;
+  draggable?: boolean;
   color: 'plain' | 'subdued';
   index: number;
 
@@ -94,6 +104,7 @@ export function FilterItem({
   color,
   index,
   renderedLevel,
+  draggable = true,
 }: FilterItemProps) {
   const {
     dispatch,
@@ -212,6 +223,7 @@ export function FilterItem({
           <EuiDraggable
             spacing="s"
             index={index}
+            isDragDisabled={!draggable}
             draggableId={`${path}`}
             customDragHandle={true}
             hasInteractiveChildren={true}
@@ -239,7 +251,17 @@ export function FilterItem({
                         aria-label={strings.getDragFilterAriaLabel()}
                         {...provided.dragHandleProps}
                       >
-                        <EuiIcon type="grab" size="s" className={getGrabIconCss(euiTheme)} />
+                        <Tooltip
+                          content={strings.getReorderingRequirementsLabel()}
+                          show={!draggable}
+                        >
+                          <EuiIcon
+                            type="grab"
+                            size="s"
+                            className={getGrabIconCss(euiTheme)}
+                            {...(!draggable ? { color: euiTheme.colors.disabled } : {})}
+                          />
+                        </Tooltip>
                       </EuiFlexItem>
                       <EuiFlexItem grow={true}>
                         <EuiFlexGroup
@@ -293,15 +315,20 @@ export function FilterItem({
                           responsive={false}
                         >
                           <EuiFlexItem grow={false}>
-                            <EuiButtonEmpty
-                              onClick={onRemoveFilter}
-                              iconType="trash"
-                              isDisabled={disableRemove || disabled}
-                              size="s"
-                              color="danger"
-                              aria-label={strings.getDeleteFilterGroupButtonIconLabel()}
-                              {...(isMobile ? { className: actionButtonCss } : {})}
-                            />
+                            <Tooltip
+                              content={strings.getDeleteButtonDisabled()}
+                              show={disableRemove || disabled}
+                            >
+                              <EuiButtonEmpty
+                                onClick={onRemoveFilter}
+                                iconType="trash"
+                                isDisabled={disableRemove || disabled}
+                                size="s"
+                                color="danger"
+                                aria-label={strings.getDeleteFilterGroupButtonIconLabel()}
+                                {...(isMobile ? { className: actionButtonCss } : {})}
+                              />
+                            </Tooltip>
                           </EuiFlexItem>
                           {!hideOr ? (
                             <EuiFlexItem grow={false}>
