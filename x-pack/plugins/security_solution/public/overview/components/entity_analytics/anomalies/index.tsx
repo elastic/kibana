@@ -163,43 +163,49 @@ export const EntityAnalyticsAnomalies = () => {
         </EuiFlexGroup>
       </HeaderSection>
 
-      {incompatibleJobCount > 0 && (
-        <>
-          <EuiCallOut
-            title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
-            data-test-subj="incompatible_jobs_warnings"
-            color="warning"
-            iconType="alert"
-            size="s"
-          >
-            <p>
-              <FormattedMessage
-                defaultMessage="We could not find any data, see {mlDocs} for more information on Machine Learning job requirements."
-                id="xpack.securitySolution.components.mlPopup.moduleNotCompatibleDescription"
-                values={{
-                  mlDocs: (
-                    <a href={`${docLinks.links.siem.ml}`} rel="noopener noreferrer" target="_blank">
-                      {i18n.ANOMALY_DETECTION_DOCS}
-                    </a>
-                  ),
-                }}
-              />
-            </p>
-          </EuiCallOut>
-
-          <EuiSpacer size="m" />
-        </>
-      )}
-      <MLJobsAwaitingNodeWarning jobIds={installedJobsIds} />
       {toggleStatus && (
-        <EuiInMemoryTable
-          responsive={false}
-          items={data}
-          columns={columns}
-          loading={isSearchLoading}
-          id={TABLE_QUERY_ID}
-          sorting={TABLE_SORTING}
-        />
+        <>
+          {incompatibleJobCount > 0 && (
+            <>
+              <EuiCallOut
+                title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
+                data-test-subj="incompatible_jobs_warnings"
+                color="warning"
+                iconType="alert"
+                size="s"
+              >
+                <p>
+                  <FormattedMessage
+                    defaultMessage="We could not find any data, see {mlDocs} for more information on Machine Learning job requirements."
+                    id="xpack.securitySolution.components.mlPopup.moduleNotCompatibleDescription"
+                    values={{
+                      mlDocs: (
+                        <a
+                          href={`${docLinks.links.siem.ml}`}
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          {i18n.ANOMALY_DETECTION_DOCS}
+                        </a>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiCallOut>
+
+              <EuiSpacer size="m" />
+            </>
+          )}
+          <MLJobsAwaitingNodeWarning jobIds={installedJobsIds} />
+          <EuiInMemoryTable
+            responsive={false}
+            items={data}
+            columns={columns}
+            loading={isSearchLoading}
+            id={TABLE_QUERY_ID}
+            sorting={TABLE_SORTING}
+          />
+        </>
       )}
     </EuiPanel>
   );

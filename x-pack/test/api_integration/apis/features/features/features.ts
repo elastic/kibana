@@ -101,6 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
             'actions',
             'enterpriseSearch',
             'filesManagement',
+            'filesSharedImage',
             'advancedSettings',
             'indexPatterns',
             'graph',
