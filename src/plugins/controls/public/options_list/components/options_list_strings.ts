@@ -178,13 +178,13 @@ export const OptionsListStrings = {
     },
     sortOrder: {
       asc: {
-        getSortByLabel: () =>
+        getSortOrderLabel: () =>
           i18n.translate('controls.optionsList.popover.sortOrder.asc', {
             defaultMessage: 'Ascending',
           }),
       },
       desc: {
-        getSortByLabel: () =>
+        getSortOrderLabel: () =>
           i18n.translate('controls.optionsList.popover.sortOrder.desc', {
             defaultMessage: 'Descending',
           }),

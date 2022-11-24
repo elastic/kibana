@@ -91,7 +91,7 @@ export const OptionsListEditorOptions = ({
         value: key,
         iconType: `sort${toSentenceCase(key)}ending`,
         'data-test-subj': `optionsListEditor__sortOrder_${key}`,
-        label: OptionsListStrings.editorAndPopover.sortOrder[key].getSortByLabel(),
+        label: OptionsListStrings.editorAndPopover.sortOrder[key].getSortOrderLabel(),
       };
     });
   }, []);

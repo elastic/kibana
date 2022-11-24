@@ -80,7 +80,7 @@ export const OptionsListPopoverSortingButton = ({
           id: key,
           iconType: `sort${toSentenceCase(key)}ending`,
           'data-test-subj': `optionsList__sortOrder_${key}`,
-          label: OptionsListStrings.editorAndPopover.sortOrder[key].getSortByLabel(),
+          label: OptionsListStrings.editorAndPopover.sortOrder[key].getSortOrderLabel(),
         } as SortOrderItem;
       }),
     []
