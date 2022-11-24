@@ -175,7 +175,7 @@ export const NoFindingsStates = () => {
   const unprivilegedIndices =
     indicesStatus &&
     indicesStatus
-      .filter((idxDetails: IndexDetails) => idxDetails.status === 'unprivileged')
+      .filter((idxDetails) => idxDetails.status === 'unprivileged')
       .map((idxDetails: IndexDetails) => idxDetails.index)
       .sort((a, b) => a.localeCompare(b));
 
