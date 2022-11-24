@@ -140,6 +140,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       licenseManagement: `${ENTERPRISE_SEARCH_DOCS}license-management.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
+      syncRules: `${ENTERPRISE_SEARCH_DOCS}sync-rules.html`,
       troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
     },

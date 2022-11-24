@@ -708,7 +708,7 @@ packages/analytics/shippers/elastic_v3/common @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
 packages/analytics/shippers/fullstory @elastic/kibana-core
 packages/analytics/shippers/gainsight @elastic/kibana-core
-packages/content-management/inspector @elastic/shared-ux
+packages/content-management/inspector @elastic/kibana-global-experience
 packages/content-management/table_list @elastic/kibana-global-experience
 packages/core/analytics/core-analytics-browser @elastic/kibana-core
 packages/core/analytics/core-analytics-browser-internal @elastic/kibana-core
@@ -866,6 +866,7 @@ packages/core/status/core-status-server-internal @elastic/kibana-core
 packages/core/status/core-status-server-mocks @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-deprecations-getters @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-http-setup-browser @elastic/kibana-core
+packages/core/test-helpers/core-test-helpers-kbn-server @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-so-type-serializer @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-test-utils @elastic/kibana-core
 packages/core/theme/core-theme-browser @elastic/kibana-core
@@ -887,6 +888,7 @@ packages/home/sample_data_tab @elastic/kibana-global-experience
 packages/home/sample_data_types @elastic/kibana-global-experience
 packages/kbn-ace @elastic/platform-deployment-management
 packages/kbn-alerts @elastic/security-solution
+packages/kbn-ambient-common-types @elastic/kibana-operations
 packages/kbn-ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
 packages/kbn-analytics @elastic/kibana-core
@@ -958,6 +960,8 @@ packages/kbn-monaco @elastic/kibana-app-services
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 packages/kbn-osquery-io-ts-types @elastic/security-asset-management
+packages/kbn-peggy @elastic/kibana-operations
+packages/kbn-peggy-loader @elastic/kibana-operations
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
 packages/kbn-plugin-discovery @elastic/kibana-operations
 packages/kbn-plugin-generator @elastic/kibana-operations
