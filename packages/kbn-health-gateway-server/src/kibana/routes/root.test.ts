@@ -46,9 +46,14 @@ describe('RootRoute', () => {
     const ok = { status: 200 };
     const noContent = { status: 204 };
     const found = { status: 302 };
-    const unauthorized = { status: 401, headers: { 'www-authenticate': '' } };
     const badRequest = { status: 400 };
+    const unauthorized = { status: 401, headers: { 'www-authenticate': '' } };
+    const forbidden = { status: 403 };
+    const notFound = { status: 404 };
     const serverError = { status: 500 };
+    const badGateway = { status: 502 };
+    const unavailable = { status: 503 };
+    const timeout = { status: 504 };
 
     it.each`
       config          | status         | code
@@ -56,8 +61,13 @@ describe('RootRoute', () => {
       ${noContent}    | ${'healthy'}   | ${200}
       ${found}        | ${'healthy'}   | ${200}
       ${unauthorized} | ${'healthy'}   | ${200}
+      ${forbidden}    | ${'unhealthy'} | ${503}
+      ${notFound}     | ${'unhealthy'} | ${503}
       ${badRequest}   | ${'unhealthy'} | ${503}
       ${serverError}  | ${'unhealthy'} | ${503}
+      ${badGateway}   | ${'unhealthy'} | ${503}
+      ${unavailable}  | ${'unhealthy'} | ${503}
+      ${timeout}      | ${'unhealthy'} | ${503}
     `(
       "should return '$status' with $code when Kibana host returns $config.status",
       async ({ config, status, code }) => {
