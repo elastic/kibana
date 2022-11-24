@@ -39,7 +39,7 @@ export interface BaseFilesClient<M = unknown> {
    * @param args - Bulk delete args
    */
   bulkDelete: (
-    args: { ids?: string[] } & Abortable
+    args: { ids: string[] } & Abortable
   ) => Promise<{ succeeded: string[]; failed?: Array<[id: string, reason: string]> }>;
   /**
    * Create a new file object with the provided metadata.
@@ -47,7 +47,7 @@ export interface BaseFilesClient<M = unknown> {
    * @param args - create file args
    */
   create: (
-    args: { name?: string; meta?: M; alt?: string; mimeType?: string; kind: string } & Abortable
+    args: { name: string; meta?: M; alt?: string; mimeType?: string; kind: string } & Abortable
   ) => Promise<{ file: FileJSON<M> }>;
   /**
    * Delete a file object and all associated share and content objects.

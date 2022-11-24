@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { FilesClient } from '../../../common/files_client';
 import type { FileJSON, FileKind } from '../../../common/types';
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
 import type { FileKindRouter } from './types';
@@ -24,7 +25,11 @@ const rt = {
   }),
 };
 
-export type Endpoint<M = unknown> = CreateRouteDefinition<typeof rt, { file: FileJSON<M> }>;
+export type Endpoint<M = unknown> = CreateRouteDefinition<
+  typeof rt,
+  { file: FileJSON<M> },
+  FilesClient['create']
+>;
 
 export const handler: CreateHandler<Endpoint> = async ({ fileKind, files }, req, res) => {
   const { fileService, security } = await files;

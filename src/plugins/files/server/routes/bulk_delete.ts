@@ -7,8 +7,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { CreateHandler, FilesRouter } from './types';
 import { FILES_MANAGE_PRIVILEGE } from '../../common/constants';
+import { FilesClient } from '../../common/files_client';
+import type { CreateHandler, FilesRouter } from './types';
 import { FILES_API_ROUTES, CreateRouteDefinition } from './api_routes';
 
 const method = 'delete' as const;
@@ -30,7 +31,8 @@ export type Endpoint = CreateRouteDefinition<
      * Any failed deletions. Only included in the response if there were failures.
      */
     failed?: Array<[id: string, reason: string]>;
-  }
+  },
+  FilesClient['bulkDelete']
 >;
 
 const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {

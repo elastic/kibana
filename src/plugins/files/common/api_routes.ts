@@ -27,13 +27,30 @@ export interface EndpointInputs<
   body?: B;
 }
 
-export interface CreateRouteDefinition<Inputs extends EndpointInputs, R> {
+export interface CreateRouteDefinition<
+  Inputs extends EndpointInputs,
+  R,
+  ClientMethod extends (arg: any) => Promise<any> = () => Promise<unknown> // Also ensure that the client is getting expected types
+> {
   inputs: {
-    params: TypeOf<NonNullable<Inputs['params']>>;
-    query: TypeOf<NonNullable<Inputs['query']>>;
-    body: TypeOf<NonNullable<Inputs['body']>>;
+    params: Parameters<ClientMethod>[0] extends TypeOf<NonNullable<Inputs['params']>>
+      ? TypeOf<NonNullable<Inputs['params']>>
+      : unknown;
+    query: Parameters<ClientMethod>[0] extends TypeOf<NonNullable<Inputs['query']>>
+      ? TypeOf<NonNullable<Inputs['query']>>
+      : unknown;
+    body: Parameters<ClientMethod>[0] extends TypeOf<NonNullable<Inputs['body']>>
+      ? TypeOf<NonNullable<Inputs['body']>>
+      : unknown;
   };
-  output: R;
+  output: R extends Awaited<ReturnType<ClientMethod>> ? R : unknown;
 }
 
-export type AnyEndpoint = CreateRouteDefinition<EndpointInputs, unknown>;
+export interface AnyEndpoint {
+  inputs: {
+    params: any;
+    query: any;
+    body: any;
+  };
+  output: any;
+}
