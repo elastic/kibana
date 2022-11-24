@@ -24,9 +24,6 @@ interface ShardsPolicyFieldComponent {
 // prevents too long policy names to break the layout
 const StyledEuiFormRow = styled(EuiFormRow)`
   max-width: 596px;
-  .euiComboBoxPill--plainText {
-    max-width: 510px !important;
-  }
 `;
 
 const ShardsPolicyFieldComponent = ({
@@ -90,7 +87,6 @@ const ShardsPolicyFieldComponent = ({
       }
       error={error?.message}
       isInvalid={hasError}
-      fullWidth
     >
       <EuiComboBox
         fullWidth

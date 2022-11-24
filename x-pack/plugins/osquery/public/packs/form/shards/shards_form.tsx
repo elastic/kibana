@@ -46,16 +46,12 @@ const ShardsFormComponent = ({
     <>
       <EuiFlexGroup data-test-subj="packShardsForm" alignItems="flexStart" gutterSize="s">
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
-            <EuiFlexItem>
-              <ShardsPolicyField
-                index={index}
-                control={control}
-                hideLabel={index !== 0}
-                options={options}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <ShardsPolicyField
+            index={index}
+            control={control}
+            hideLabel={index !== 0}
+            options={options}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="s">
