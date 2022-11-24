@@ -36,18 +36,8 @@ const findDataSet = (str: string, regex: RegExp, log: ToolingLog) => {
         .replaceAll(/^\[/g, '')
         .replaceAll(/\]$/g, '')
         .split('.');
-      let values: number[] = [];
-
-      const arr = pair[1];
-      if (arr !== '[null]') {
-        try {
-          values = JSON.parse(pair[1], (k, v) => {
-            return parseInt(v, 10);
-          });
-        } catch (err) {
-          // log.debug('Failed to parse array');
-        }
-      }
+      const arr = pair[1]?.replaceAll(/^\[/g, '')?.replaceAll(/\]$/g, '');
+      const values: number[] = !arr ? [] : arr.split(',').map(Number);
       return { timestamp: parseInt(pair[0], 10), values };
     });
 };
@@ -99,7 +89,6 @@ export function getCapacityMetrics(
   const requests = findDataSet(htmlContent, REQUESTS_REGEXP, log);
   // [timestamp, [min, 25%, 50%, 75%, 80%, 85%, 90%, 95%, 99%, max]], e.g. 1669026394,[9,11,11,12,13,13,14,15,15,16]
   const responsePercentiles = findDataSet(htmlContent, RESPONSES_PERCENTILES_REGEXP, log);
-
   const responsesWithData = requests.filter((i) => i.values.length > 0);
   const rpsMax = responsesWithData[responsesWithData.length - 1].values[1];
 
