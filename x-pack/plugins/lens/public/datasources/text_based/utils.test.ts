@@ -172,7 +172,7 @@ describe('Text based languages utils', () => {
       const expressionsMock = expressionsPluginMock.createStartContract();
       const updatedState = await getStateFromAggregateQuery(
         state,
-        { sql: 'SELECT * FROM my-fake-index-pattern' },
+        { sql: 'SELECT * FROM my-fake-index-pattern WHERE TIMEFILTER(timeField)' },
         {
           ...dataViewsMock,
           getIdsWithTitle: jest.fn().mockReturnValue(
@@ -187,6 +187,14 @@ describe('Text based languages utils', () => {
               id: '1',
               title: 'my-fake-index-pattern',
               timeFieldName: 'timeField',
+            })
+          ),
+          create: jest.fn().mockReturnValue(
+            Promise.resolve({
+              id: '1',
+              title: 'my-fake-index-pattern',
+              timeFieldName: 'timeField',
+              isPersisted: () => false,
             })
           ),
         },
@@ -274,7 +282,7 @@ describe('Text based languages utils', () => {
             errors: [],
             index: '1',
             query: {
-              sql: 'SELECT * FROM my-fake-index-pattern',
+              sql: 'SELECT * FROM my-fake-index-pattern WHERE TIMEFILTER(timeField)',
             },
             timeField: 'timeField',
           },
