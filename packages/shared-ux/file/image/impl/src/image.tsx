@@ -9,10 +9,10 @@
 import React from 'react';
 import { useState } from 'react';
 import { EuiImage, EuiImageProps } from '@elastic/eui';
+import type { FileImageMetadata } from '@kbn/shared-ux-file-image-types';
+import { getBlurhashSrc } from '@kbn/shared-ux-file-util';
 import classNames from 'classnames';
 import { css } from '@emotion/react';
-import type { FileImageMetadata } from '../../../common';
-import { getBlurhashSrc } from '../util';
 
 export type Props = { meta?: FileImageMetadata } & EuiImageProps;
 
