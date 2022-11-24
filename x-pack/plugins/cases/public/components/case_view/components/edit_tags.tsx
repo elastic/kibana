@@ -147,6 +147,7 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
                       placeholder: '',
                       options,
                       noSuggestions: false,
+                      customOptionText: i18n.ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX,
                     },
                   }}
                 />

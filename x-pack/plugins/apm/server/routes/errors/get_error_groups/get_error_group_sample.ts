@@ -12,7 +12,7 @@ import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
   TRANSACTION_SAMPLED,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getTransaction } from '../../transactions/get_transaction';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
