@@ -28,7 +28,8 @@ function updateEnvironmentUrl(
 }
 
 export function ApmEnvironmentFilter() {
-  const { environment, environments, status } = useEnvironmentsContext();
+  const { environment, environments, status, rangeFrom, rangeTo, serviceName } =
+    useEnvironmentsContext();
   const history = useHistory();
   const location = useLocation();
 
@@ -37,6 +38,9 @@ export function ApmEnvironmentFilter() {
       status={status}
       environment={environment}
       availableEnvironments={environments}
+      serviceName={serviceName}
+      rangeFrom={rangeFrom as string}
+      rangeTo={rangeTo as string}
       onChange={(changeValue: string) =>
         updateEnvironmentUrl(history, location, changeValue)
       }
