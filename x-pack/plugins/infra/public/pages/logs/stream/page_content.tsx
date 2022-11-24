@@ -7,47 +7,81 @@
 
 import { useSelector } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useCallback, useContext } from 'react';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { WithMachine } from '../../../observability_logs/log_stream_page/state/src/provider';
+import { LogStreamPageStateContext } from '../../../observability_logs/log_stream_page/state/src/provider';
 import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { LogsPageTemplate } from '../page_template';
 import { LogsPageLogsContent } from './page_logs_content';
 import { fullHeightContentStyles } from '../../../page_template.styles';
+import { LogsPageContentProviders } from './page_providers';
 
 const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
   defaultMessage: 'Stream',
 });
 
-export const StreamPageContent: React.FunctionComponent = ({
-  machine: logStreamPageStateMachine,
-}) => {
-  const isLoading = useSelector(
-    logStreamPageStateMachine,
-    (state) => state.matches('uninitialized') || state.matches('loadingLogView')
-  );
+interface InjectedProps {
+  isLoading: boolean;
+  hasFailedLoading: boolean;
+  hasIndices: boolean;
+  missingIndices: boolean;
+  logViewErrors: Error[];
+  retry: () => void;
+}
 
-  const hasFailedLoading = useSelector(logStreamPageStateMachine, (state) =>
+export const ConnectedStreamPageContent: React.FC = () => {
+  const { logStreamPageStateService } = useContext(LogStreamPageStateContext);
+
+  const isLoading = useSelector(logStreamPageStateService, (state) => {
+    return state.matches('uninitialized') || state.matches('loadingLogView');
+  });
+
+  const hasFailedLoading = useSelector(logStreamPageStateService, (state) =>
     state.matches('loadingLogViewFailed')
   );
 
-  const hasIndices = useSelector(logStreamPageStateMachine, (state) =>
+  const hasIndices = useSelector(logStreamPageStateService, (state) =>
     state.matches('hasLogViewIndices')
   );
 
-  const missingIndices = useSelector(logStreamPageStateMachine, (state) =>
+  const missingIndices = useSelector(logStreamPageStateService, (state) =>
     state.matches('missingLogViewIndices')
   );
 
-  const logViewErrors = useSelector(logStreamPageStateMachine, (state) => [
-    state.context.logViewError,
-  ]);
+  const logViewErrors = useSelector(logStreamPageStateService, (state) => {
+    return state.matches('loadingLogViewFailed')
+      ? 'error' in state.context.logViewMachineRef.getSnapshot()?.context
+        ? [state.context.logViewMachineRef.getSnapshot()?.context.error]
+        : []
+      : [];
+  });
+
+  const retry = useCallback(() => {
+    logStreamPageStateService.getSnapshot().context.logViewMachineRef.send({
+      type: 'retry',
+    });
+  }, [logStreamPageStateService]);
+
+  return (
+    <StreamPageContent
+      isLoading={isLoading}
+      hasFailedLoading={hasFailedLoading}
+      hasIndices={hasIndices}
+      missingIndices={missingIndices}
+      logViewErrors={logViewErrors}
+      retry={retry}
+    />
+  );
+};
+
+export const StreamPageContent: React.FC<InjectedProps> = (props: InjectedProps) => {
+  const { isLoading, hasFailedLoading, logViewErrors, hasIndices, missingIndices, retry } = props;
 
   if (isLoading) {
     return <SourceLoadingPage />;
   } else if (hasFailedLoading) {
-    return <LogSourceErrorPage errors={logViewErrors} onRetry={load} />;
+    return <LogSourceErrorPage errors={logViewErrors} onRetry={retry} />;
   } else if (missingIndices) {
     return (
       <div className={APP_WRAPPER_CLASS}>
@@ -82,11 +116,13 @@ export const StreamPageContent: React.FunctionComponent = ({
             },
           }}
         >
-          <LogsPageLogsContent />
+          <LogsPageContentProviders>
+            <LogsPageLogsContent />
+          </LogsPageContentProviders>
         </LogsPageTemplate>
       </div>
     );
+  } else {
+    return null;
   }
 };
-
-export const ConnectedStreamPageContent = WithMachine(StreamPageContent);

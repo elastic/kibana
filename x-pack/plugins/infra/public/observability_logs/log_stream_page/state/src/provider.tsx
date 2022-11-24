@@ -7,15 +7,17 @@
 
 import React, { createContext, useState } from 'react';
 import { useInterpret } from '@xstate/react';
-import { InterpreterFrom } from 'xstate';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useSourceId } from '../../../../containers/source_id';
-import { LogStreamPageStateMachine } from './types';
+import { LogStreamPageStateService } from './types';
 import { createLogStreamPageStateMachine } from './state_machine';
-import { connectComponentToProvider } from '../../../react_helpers/connect_component';
 
-export const LogStreamPageStateContext = createContext({
-  logStreamPageStateService: {} as InterpreterFrom<LogStreamPageStateMachine>,
+interface IContext {
+  logStreamPageStateService: LogStreamPageStateService;
+}
+
+export const LogStreamPageStateContext = createContext<IContext>({
+  logStreamPageStateService: {} as LogStreamPageStateService,
 });
 
 export const LogStreamPageStateProvider = ({ children }: { children: React.ReactNode }) => {
@@ -37,18 +39,9 @@ export const LogStreamPageStateProvider = ({ children }: { children: React.React
 
   const logStreamPageStateService = useInterpret(logStreamPageStateMachine);
 
-  logStreamPageStateService.onTransition((state) => {
-    console.log(state);
-  });
   return (
     <LogStreamPageStateContext.Provider value={{ logStreamPageStateService }}>
       {children}
     </LogStreamPageStateContext.Provider>
   );
 };
-
-// HOC
-export const WithMachine = connectComponentToProvider(
-  LogStreamPageStateContext,
-  'logStreamPageStateService'
-);

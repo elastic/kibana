@@ -6,7 +6,7 @@
  */
 
 import { createMachine, assign, spawn, SpecialTargets } from 'xstate';
-import { LogStreamPageEvent, LogStreamPageTypestate } from './types';
+import { LogStreamPageEvent, LogStreamPageStateContext, LogStreamPageTypestate } from './types';
 import { createLogViewStateMachine, logViewListenerEventSelectors } from '../../../log_view_state';
 import { ILogViewsClient } from '../../../../services/log_views';
 import { sendIfDefined } from '../../../xstate_helpers';
@@ -20,7 +20,7 @@ export const createLogStreamPageStateMachine = ({
   logViews: ILogViewsClient;
   logViewId: string;
 }) => {
-  return createMachine<{}, LogStreamPageEvent, LogStreamPageTypestate>(
+  return createMachine<LogStreamPageStateContext, LogStreamPageEvent, LogStreamPageTypestate>(
     {
       id: MACHINE_ID,
       initial: 'uninitialized',
@@ -56,8 +56,6 @@ export const createLogStreamPageStateMachine = ({
           },
         },
         loadingLogViewFailed: {
-          entry: ['assignLogViewError'],
-          exit: ['resetLogViewError'],
           on: {
             loadingLogViewStarted: 'loadingLogView',
           },
@@ -112,12 +110,6 @@ export const createLogStreamPageStateMachine = ({
               }),
               'logViewMachine'
             ),
-        }),
-        assignLogViewError: assign({
-          logViewError: (context, event) => event.error,
-        }),
-        resetLogViewError: assign({
-          logViewError: null,
         }),
       },
     }

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { ActorRef } from 'xstate';
+import { ActorRefFrom } from 'xstate';
 import {
   LogView,
   LogViewAttributes,
   LogViewStatus,
   ResolvedLogView,
 } from '../../../../common/log_views';
+import { createLogViewStateMachine } from './state_machine';
 
 export interface LogViewContextWithId {
   logViewId: string;
@@ -130,4 +131,5 @@ export type LogViewEvent =
       type: 'reloadLogView';
     };
 
-export type LogViewActor = ActorRef<LogViewEvent>;
+export type LogViewMachine = ReturnType<typeof createLogViewStateMachine>;
+export type LogViewActorRef = ActorRefFrom<LogViewMachine>;

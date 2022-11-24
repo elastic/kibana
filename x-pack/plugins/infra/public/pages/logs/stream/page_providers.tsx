@@ -94,28 +94,23 @@ const LogHighlightsState: React.FC = ({ children }) => {
 };
 
 export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
-  const { logViewStatus } = useLogViewContext();
+  return <LogStreamPageStateProvider>{children}</LogStreamPageStateProvider>;
+};
 
-  // The providers assume the source is loaded, so short-circuit them otherwise
-  if (logViewStatus?.index === 'missing') {
-    return <>{children}</>;
-  }
-
+export const LogsPageContentProviders: React.FunctionComponent = ({ children }) => {
   return (
-    <LogStreamPageStateProvider>
-      <LogViewConfigurationProvider>
-        <LogEntryFlyoutProvider>
-          <LogPositionStateProvider>
-            <ViewLogInContext>
-              <LogFilterState>
-                <LogEntriesStateProvider>
-                  <LogHighlightsState>{children}</LogHighlightsState>
-                </LogEntriesStateProvider>
-              </LogFilterState>
-            </ViewLogInContext>
-          </LogPositionStateProvider>
-        </LogEntryFlyoutProvider>
-      </LogViewConfigurationProvider>
-    </LogStreamPageStateProvider>
+    <LogViewConfigurationProvider>
+      <LogEntryFlyoutProvider>
+        <LogPositionStateProvider>
+          <ViewLogInContext>
+            <LogFilterState>
+              <LogEntriesStateProvider>
+                <LogHighlightsState>{children}</LogHighlightsState>
+              </LogEntriesStateProvider>
+            </LogFilterState>
+          </ViewLogInContext>
+        </LogPositionStateProvider>
+      </LogEntryFlyoutProvider>
+    </LogViewConfigurationProvider>
   );
 };
