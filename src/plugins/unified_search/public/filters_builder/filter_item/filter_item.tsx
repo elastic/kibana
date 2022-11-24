@@ -161,12 +161,13 @@ export function FilterItem({
 
   const onHandleParamsUpdate = useCallback(
     (value: Filter['meta']['params']) => {
+      const paramsValues = Array.isArray(params) ? params : [];
       dispatch({
         type: 'updateFilter',
-        payload: { dest: { path, index }, params: [value, ...(params || [])] },
+        payload: { dest: { path, index }, field, operator, params: [...paramsValues, value] },
       });
     },
-    [dispatch, path, index, params]
+    [dispatch, path, index, field, operator, params]
   );
 
   const onRemoveFilter = useCallback(() => {
