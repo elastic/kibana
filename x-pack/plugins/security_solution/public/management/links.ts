@@ -302,11 +302,11 @@ export const getManagementFilteredLinks = async (
     linksToExclude.push(SecurityPageName.hostIsolationExceptions);
   }
 
-  if (endpointRbacEnabled && !canReadTrustedApplications) {
+  if (!canReadTrustedApplications) {
     linksToExclude.push(SecurityPageName.trustedApps);
   }
 
-  if (endpointRbacEnabled && !canReadEventFilters) {
+  if (!canReadEventFilters) {
     linksToExclude.push(SecurityPageName.eventFilters);
   }
 
