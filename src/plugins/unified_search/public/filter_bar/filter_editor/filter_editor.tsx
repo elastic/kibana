@@ -473,7 +473,14 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
 
       this.props.onSubmit(filter);
     } else {
-      this.props.onSubmit(this.state.localFilter);
+      const localFilter = {
+        ...this.state.localFilter,
+        meta: {
+          ...this.state.localFilter.meta,
+          alias: customLabel || null,
+        },
+      };
+      this.props.onSubmit(localFilter);
     }
   };
 }
