@@ -67,12 +67,9 @@ const calculateCspStatusCode = (
   timeSinceInstallationInMinutes: number
 ): CspStatusCode => {
   // We check privileges only for the relevant indices for our pages to appear
-  if (
-    indicesStatus.findingsLatestIndexStatus === 'unprivileged' ||
-    indicesStatus.scoreIndexStatus === 'unprivileged'
-  )
+  if (indicesStatus.findingsLatest === 'unprivileged' || indicesStatus.score === 'unprivileged')
     return 'unprivileged';
-  if (indicesStatus.findingsLatestIndexStatus === 'exists') return 'indexed';
+  if (indicesStatus.findingsLatest === 'exists') return 'indexed';
   if (installedCspPackagePolicies === 0) return 'not-installed';
   if (healthyAgents === 0) return 'not-deployed';
   if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
@@ -120,9 +117,9 @@ const getCspStatus = async ({
 
   const MIN_DATE = 0;
   const indicesStatus = {
-    findingsLatestIndexStatus,
-    findingsIndexStatus,
-    scoreIndexStatus,
+    findingsLatest: findingsLatestIndexStatus,
+    findings: findingsIndexStatus,
+    score: scoreIndexStatus,
   };
   const indicesDetails = [
     {
