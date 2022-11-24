@@ -43,7 +43,7 @@ const keysToOmitFromSessionStorage: Array<keyof DashboardContainerByValueInput> 
 ];
 
 /**
- * Some keys will often have deviated from their last saved state, and should be backed up but should be
+ * Some keys will often have deviated from their last saved state, but should be
  * ignored when calculating whether or not this dashboard has unsaved changes.
  */
 export const keysNotConsideredUnsavedChanges: Array<keyof DashboardContainerByValueInput> = [
