@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { isEmpty, map } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
-import type { ArrayItem, FieldHook } from '../../../shared_imports';
+import { ResponseActionFormField } from './osquery_response_action_form_field';
+import type { ArrayItem } from '../../../shared_imports';
 import { useKibana } from '../../../common/lib/kibana';
 import { NOT_AVAILABLE, PERMISSION_DENIED, SHORT_EMPTY_TITLE } from './translations';
 import { UseField } from '../../../shared_imports';
@@ -20,30 +20,6 @@ interface OsqueryResponseActionProps {
 }
 
 const GhostFormField = () => <></>;
-
-const ResponseActionFormField = ({ field }: { field: FieldHook }) => {
-  const { setErrors, clearErrors, value, setValue } = field;
-  const { osquery } = useKibana().services;
-
-  const OsqueryForm = useMemo(
-    () => osquery?.OsqueryResponseActionTypeForm,
-    [osquery?.OsqueryResponseActionTypeForm]
-  );
-
-  const handleError = useCallback(
-    (newErrors) => {
-      if (isEmpty(newErrors)) {
-        clearErrors();
-      } else {
-        setErrors(map(newErrors, (error) => ({ message: error.message })));
-      }
-    },
-    [setErrors, clearErrors]
-  );
-
-  // @ts-expect-error update types
-  return <OsqueryForm defaultValues={value} onError={handleError} onChange={setValue} />;
-};
 
 export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionProps) => {
   const { osquery, application } = useKibana().services;
