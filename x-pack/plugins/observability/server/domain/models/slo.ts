@@ -6,10 +6,12 @@
  */
 
 import * as t from 'io-ts';
-import { sloSchema } from '../../types/schema';
+import { sloSchema, sloWithSummarySchema } from '../../types/schema';
 
 type SLO = t.TypeOf<typeof sloSchema>;
-type StoredSLO = t.OutputOf<typeof sloSchema>;
 type SLOId = t.TypeOf<typeof sloSchema.props.id>;
+type SLOWithSummary = t.TypeOf<typeof sloWithSummarySchema>;
 
-export type { SLO, SLOId, StoredSLO };
+type StoredSLO = t.OutputOf<typeof sloSchema>;
+
+export type { SLO, SLOWithSummary, SLOId, StoredSLO };
