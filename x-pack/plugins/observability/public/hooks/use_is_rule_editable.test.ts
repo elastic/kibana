@@ -9,8 +9,7 @@ import { Capabilities } from '@kbn/core-capabilities-common';
 import { Rule, RuleAction, RuleType, RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { RecursiveReadonly } from '@kbn/utility-types';
 
-import { useIsRuleEditable } from './use_is_rule_editable';
-import { IsRuleEditableProps } from '../pages/rule_details/helpers/utils';
+import { useIsRuleEditable, UseIsRuleEditableProps } from './use_is_rule_editable';
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 
 const mockConsumer = 'mock-consumerId';
@@ -23,7 +22,7 @@ ruleTypeRegistry.register({
   actions: [],
 } as unknown as RuleTypeModel);
 
-const renderUseIsRuleEditableHook = (props: IsRuleEditableProps) => {
+const renderUseIsRuleEditableHook = (props: UseIsRuleEditableProps) => {
   return renderHook(() => useIsRuleEditable({ ...props }));
 };
 

@@ -9,10 +9,7 @@ import {
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatuses,
 } from '@kbn/alerting-plugin/common';
-import { Capabilities } from '@kbn/core-capabilities-common';
-import { Rule, RuleType, RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
-import { RecursiveReadonly } from '@kbn/utility-types';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from '../translations';
 
@@ -37,40 +34,4 @@ export function getStatusMessage(rule: Rule): string {
     : rule
     ? rulesStatusesTranslationsMapping[rule.executionStatus.status]
     : '';
-}
-
-function hasAllPrivilege(rule: Rule, ruleType?: RuleType): boolean {
-  return ruleType?.authorizedConsumers[rule.consumer]?.all ?? false;
-}
-
-export interface IsRuleEditableProps {
-  capabilities: RecursiveReadonly<Capabilities>;
-  rule: Rule | undefined;
-  ruleType: RuleType<string, string> | undefined;
-  ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
-}
-
-export function isRuleEditable({
-  capabilities,
-  rule,
-  ruleType,
-  ruleTypeRegistry,
-}: IsRuleEditableProps) {
-  if (!rule) {
-    return false;
-  }
-
-  if (!hasAllPrivilege(rule, ruleType)) {
-    return false;
-  }
-
-  if (!capabilities.actions?.execute && rule.actions.length !== 0) {
-    return false;
-  }
-
-  try {
-    return ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext === false;
-  } catch (e) {
-    return false;
-  }
 }
