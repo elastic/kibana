@@ -41,7 +41,7 @@ const findDataSet = (str: string, regex: RegExp, log: ToolingLog) => {
           return typeof v === 'object' || isNaN(v) ? v : parseInt(v, 10);
         });
       } catch (err) {
-        log.debug('Failed to parse array');
+        // log.debug('Failed to parse array');
       }
       return { timestamp: parseInt(pair[0], 10), values };
     });

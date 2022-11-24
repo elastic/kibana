@@ -6,6 +6,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
+import fetch from 'node-fetch';
 
 export interface Event {
   journeyName: string;
@@ -56,7 +57,6 @@ export class EventsShipper {
       method: 'POST',
       body,
       headers: buildHeaders(this.clusterUuid, this.version),
-      keepalive: true,
     });
 
     if (!response.ok) {
