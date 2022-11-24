@@ -19,6 +19,10 @@ You must have `all` privileges for the *Cases* feature in the *Management*,
 <<kibana-feature-privileges,{kib} feature privileges>>, depending on the
 `owner` of the case you're updating.
 
+=== {api-description-title}
+
+NOTE: Each case can have a maximum of 1,000 alerts.
+
 === {api-path-parms-title}
 
 `<case_id>`::
