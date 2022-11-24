@@ -48,8 +48,8 @@ export async function removeOldAssets(options: {
   });
 
   const packageAssetRefs = (
-    packageAssetRefsRes.saved_objects[0].attributes as any
-  ).package_assets.map((ref: any) => ref.id);
+    (packageAssetRefsRes.saved_objects?.[0]?.attributes as any)?.package_assets ?? []
+  ).map((ref: any) => ref.id);
 
   for (const oldVersion of oldVersions) {
     await removeAssetsFromVersion(soClient, pkgName, oldVersion, packageAssetRefs);
