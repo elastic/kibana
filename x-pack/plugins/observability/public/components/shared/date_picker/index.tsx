@@ -25,6 +25,7 @@ export function DatePicker({
   rangeTo,
   refreshPaused,
   refreshInterval,
+  width = 'restricted',
   onTimeRangeRefresh,
   width,
 }: DatePickerProps) {
