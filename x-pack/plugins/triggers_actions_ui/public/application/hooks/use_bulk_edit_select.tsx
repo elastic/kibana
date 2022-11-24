@@ -233,22 +233,6 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
     return getFilterKueryNode();
   }, [state, getFilterKueryNode]);
 
-  const filter = useMemo(() => {
-    const { selectedIds, isAllSelected } = state;
-    const idsArray = [...selectedIds];
-
-    if (isAllSelected) {
-      // Select all but nothing is selected to exclude
-      if (idsArray.length === 0) {
-        return getFilterKueryNode();
-      }
-      // Select all, exclude certain alerts
-      return getFilterKueryNode(idsArray);
-    }
-
-    return getFilterKueryNode();
-  }, [state, getFilterKueryNode]);
-
   return useMemo(() => {
     return {
       selectedIds: [...state.selectedIds],
@@ -261,7 +245,6 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
       onSelectAll,
       onSelectPage,
       onClearSelection,
-      filter,
     };
   }, [
     state,
@@ -273,6 +256,5 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
     onSelectAll,
     onSelectPage,
     onClearSelection,
-    filter,
   ]);
 }

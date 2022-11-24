@@ -666,7 +666,6 @@ export const RulesList = ({
     onSelectAll,
     onSelectPage,
     onClearSelection,
-    filter,
   } = useBulkEditSelect({
     totalItemCount: rulesState.totalItemCount,
     items: tableItems,
@@ -772,7 +771,7 @@ export const RulesList = ({
     setIsEnablingRules(true);
 
     const { errors, total } = await bulkEnableRules({
-      ...(isAllSelected ? { filter } : {}),
+      ...(isAllSelected ? { filter: getFilter() } : {}),
       ids: selectedIds,
       http,
     });
@@ -780,13 +779,13 @@ export const RulesList = ({
     setIsEnablingRules(false);
     showToast({ action: 'ENABLE', errors, total });
     await refreshRules();
-  }, [http, selectedIds, filter, setIsEnablingRules, toasts]);
+  }, [http, selectedIds, getFilter, setIsEnablingRules, toasts]);
 
   const onDisable = useCallback(async () => {
     setIsDisablingRules(true);
 
     const { errors, total } = await bulkDisableRules({
-      ...(isAllSelected ? { filter } : {}),
+      ...(isAllSelected ? { filter: getFilter() } : {}),
       ids: selectedIds,
       http,
     });
@@ -794,7 +793,7 @@ export const RulesList = ({
     setIsDisablingRules(false);
     showToast({ action: 'DISABLE', errors, total });
     await refreshRules();
-  }, [http, selectedIds, filter, setIsDisablingRules, toasts]);
+  }, [http, selectedIds, getFilter, setIsDisablingRules, toasts]);
 
   const table = (
     <>
