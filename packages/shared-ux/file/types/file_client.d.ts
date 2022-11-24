@@ -73,6 +73,13 @@ export interface FilesClient<M = unknown> {
      */
   }>;
   /**
+   * Get a string for downloading a file that can be passed to a button element's
+   * href for download.
+   *
+   * @param args - get download URL args
+   */
+  getDownloadHref: (args: Pick<FileJSON<unknown>, 'id' | 'fileKind'>) => string;
+  /**
    * Get a file kind
    * @param id The id of the file kind
    */
