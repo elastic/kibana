@@ -29,7 +29,7 @@ import {
   getCompatibleSortingTypes,
   sortDirections,
   DEFAULT_SORT,
-  SortBy,
+  OptionsListSortBy,
 } from '../../../common/options_list/suggestions_sorting';
 import { OptionsListStrings } from './options_list_strings';
 import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
@@ -41,7 +41,7 @@ interface OptionsListEditorState {
   hideExclude?: boolean;
   hideExists?: boolean;
   hideSort?: boolean;
-  sortBy: SortBy;
+  sortBy: OptionsListSortBy;
 }
 
 interface SwitchProps {
@@ -49,7 +49,7 @@ interface SwitchProps {
   onChange: (event: EuiSwitchEvent) => void;
 }
 
-type SortItem = EuiSuperSelectOption<SortBy>;
+type SortItem = EuiSuperSelectOption<OptionsListSortBy>;
 
 export const OptionsListEditorOptions = ({
   initialInput,
@@ -75,7 +75,7 @@ export const OptionsListEditorOptions = ({
   }, [fieldType, onChange, state.sortBy]);
 
   const sortByOptions: SortItem[] = useMemo(() => {
-    return getCompatibleSortingTypes(fieldType).map((key: SortBy) => {
+    return getCompatibleSortingTypes(fieldType).map((key: OptionsListSortBy) => {
       return {
         value: key,
         inputDisplay: OptionsListStrings.editorAndPopover.sortBy[key].getSortByLabel(),

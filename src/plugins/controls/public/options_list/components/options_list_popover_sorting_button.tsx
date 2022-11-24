@@ -28,7 +28,7 @@ import {
   getCompatibleSortingTypes,
   DEFAULT_SORT,
   sortDirections,
-  SortBy,
+  OptionsListSortBy,
 } from '../../../common/options_list/suggestions_sorting';
 import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
@@ -38,7 +38,7 @@ interface OptionsListSortingPopoverProps {
   showOnlySelected: boolean;
 }
 type SortByItem = EuiSelectableOption & {
-  data: { sortBy: SortBy };
+  data: { sortBy: OptionsListSortBy };
 };
 type SortOrderItem = EuiButtonGroupOptionProps & {
   value: Direction;

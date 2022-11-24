@@ -18,12 +18,12 @@ import { ControlFactory, ControlOutput } from '../../public/types';
 import { OptionsListEmbeddableInput } from './types';
 
 const mockOptionsListComponentState = {
+  ...getDefaultComponentState(),
   field: undefined,
   totalCardinality: 0,
   availableOptions: ['woof', 'bark', 'meow', 'quack', 'moo'],
   invalidSelections: [],
   validSelections: [],
-  ...getDefaultComponentState(),
 } as OptionsListComponentState;
 
 const mockOptionsListEmbeddableInput = {

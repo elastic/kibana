@@ -8,18 +8,18 @@
 
 import { Direction } from '@elastic/eui';
 
-export type SortBy = '_count' | '_key';
+export type OptionsListSortBy = '_count' | '_key';
 
 export const DEFAULT_SORT: SortingType = { by: '_count', direction: 'desc' };
 
 export const sortDirections: Readonly<Direction[]> = ['asc', 'desc'] as const;
 export type SortDirection = typeof sortDirections[number];
 export interface SortingType {
-  by: SortBy;
+  by: OptionsListSortBy;
   direction: SortDirection;
 }
 
-export const getCompatibleSortingTypes = (type?: string): SortBy[] => {
+export const getCompatibleSortingTypes = (type?: string): OptionsListSortBy[] => {
   switch (type) {
     case 'ip': {
       return ['_count'];
