@@ -80,7 +80,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   });
 
   const deserializer = (payload: PackItem) => {
-    const defaultPolicyIds = filter(payload.policy_ids, (policyId) => !payload.shards?.[policyId]);
+    const defaultPolicyIds = filter(
+      payload.policy_ids,
+      (policyId) => payload.shards?.[policyId] == null
+    );
 
     return {
       ...payload,
