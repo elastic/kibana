@@ -3796,14 +3796,10 @@ export class RulesClient {
     references: SavedObjectReference[]
   ) {
     return actions.map((action) => {
-      const { lastTriggerDate } = action;
-
       if (action.actionRef.startsWith(preconfiguredConnectorActionRefPrefix)) {
         return {
           ...action,
-          ...(lastTriggerDate !== undefined && {
-            lastTriggerDate: lastTriggerDate === null ? null : new Date(lastTriggerDate),
-          }),
+          ...getLastTriggerDate(action.lastTriggerDate),
           id: action.actionRef.replace(preconfiguredConnectorActionRefPrefix, ''),
         };
       }
@@ -3814,9 +3810,7 @@ export class RulesClient {
       }
       return {
         ...action,
-        ...(lastTriggerDate !== undefined && {
-          lastTriggerDate: lastTriggerDate === null ? null : new Date(lastTriggerDate),
-        }),
+        ...getLastTriggerDate(action.lastTriggerDate),
         id: reference.id,
       };
     }) as Rule['actions'];
@@ -4303,4 +4297,16 @@ function verifySnoozeScheduleLimit(attributes: Partial<RawRule>) {
       })
     );
   }
+}
+
+function getLastTriggerDate(
+  lastTriggerDate: undefined | string | null
+): { lastTriggerDate: Date | null } | {} {
+  if (lastTriggerDate === undefined) {
+    return {};
+  }
+  if (lastTriggerDate === null) {
+    return { lastTriggerDate: null };
+  }
+  return { lastTriggerDate: new Date(lastTriggerDate) };
 }
