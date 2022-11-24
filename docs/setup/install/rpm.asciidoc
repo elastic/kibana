@@ -137,7 +137,7 @@ You can then generate an enrollment token for {kib} with the
 bin/elasticsearch-create-enrollment-token -s kibana
 ----
 
-Start {kib} and enter the enrollment token to securely connect {kib} with {es}.
+Start {kib}, open {kib} in a browser and enter the enrollment token to securely connect {kib} with {es}.
 
 [[rpm-running-systemd]]
 include::systemd.asciidoc[]
