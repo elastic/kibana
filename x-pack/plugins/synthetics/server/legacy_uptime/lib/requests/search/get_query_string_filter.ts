@@ -7,7 +7,7 @@
 
 export const getQueryStringFilter = (query: string) => {
   let queryString = query;
-  if (isAlphaNumeric(query) && !includesOperator(query.toLowerCase())) {
+  if (hasReservedCharsF(query) && !includesOperator(query.toLowerCase())) {
     // if user doesn't specify any query string syntax we user wildcard buy default
     queryString = `*${query}*`;
   }
@@ -24,7 +24,8 @@ const includesOperator = (query: string) => {
   return query.includes(' or ') || query.includes(' and ');
 };
 
-export const isAlphaNumeric = (str: string) => {
+// check if it has reserved characters for query string syntax
+const hasReservedCharsF = (str: string) => {
   const format = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
   return !format.test(str);
 };
