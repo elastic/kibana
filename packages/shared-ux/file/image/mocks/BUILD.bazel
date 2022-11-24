@@ -3,7 +3,7 @@ load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
 PKG_DIRNAME = "mocks"
-PKG_REQUIRE_NAME = "@kbn/shared-ux-page-no-data-mocks"
+PKG_REQUIRE_NAME = "@kbn/shared-ux-file-image-mocks"
 
 SOURCE_FILES = glob(
   [
@@ -45,12 +45,7 @@ NPM_MODULE_EXTRA_FILES = [
 #  To reference a NPM package use:
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
-RUNTIME_DEPS = [
-  "@npm//react",
-  "@npm//@storybook/addon-actions",
-  "//packages/shared-ux/card/no_data/mocks",
-  "//packages/shared-ux/storybook/mock",
-]
+RUNTIME_DEPS = [ ]
 
 # In this array place dependencies necessary to build the types, which will include the
 # :npm_module_types target of other packages and packages from NPM, including @types/*
@@ -63,11 +58,6 @@ RUNTIME_DEPS = [
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//@types/node",
-  "@npm//@types/jest",
-  "@npm//@types/react",
-  "//packages/shared-ux/page/no_data/types:npm_module_types",
-  "//packages/shared-ux/card/no_data/mocks:npm_module_types",
-  "//packages/shared-ux/storybook/mock:npm_module_types",
 ]
 
 jsts_transpiler(

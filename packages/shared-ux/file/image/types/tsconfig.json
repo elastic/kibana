@@ -5,12 +5,11 @@
     "emitDeclarationOnly": true,
     "outDir": "target_types",
     "types": [
-      "node",
-      "react",
-      "jest"
+      "rxjs",
+      "@types/react",
     ]
   },
   "include": [
-    "**/*.ts",
+    "*.d.ts"
   ]
 }

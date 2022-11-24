@@ -6,16 +6,5 @@
  * Side Public License, v 1.
  */
 
-export {
-  type FilesClient,
-  type FilesSetup,
-  type FilesStart,
-  UploadFile,
-  FilesContext,
-  type ScopedFilesClient,
-  FilePicker,
-} from '@kbn/files-plugin/public';
-
-export { FileImage as Image } from '@kbn/shared-ux-file-image';
-
-export type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+export { Image as FileImage } from './src/image';
+export type { Props as FileImageProps } from './src/image';

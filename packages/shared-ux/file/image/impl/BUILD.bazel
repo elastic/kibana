@@ -2,12 +2,14 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "mocks"
-PKG_REQUIRE_NAME = "@kbn/shared-ux-page-no-data-mocks"
+PKG_DIRNAME = "impl"
+PKG_REQUIRE_NAME = "@kbn/shared-ux-file-image"
 
 SOURCE_FILES = glob(
   [
     "**/*.ts",
+    "**/*.tsx",
+    "**/*.mdx",
   ],
   exclude = [
     "**/*.config.js",
@@ -46,10 +48,13 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
+  "@npm//@elastic/eui",
   "@npm//react",
-  "@npm//@storybook/addon-actions",
-  "//packages/shared-ux/card/no_data/mocks",
-  "//packages/shared-ux/storybook/mock",
+  "@npm//classnames",
+  "@npm//@emotion/react",
+  "@npm//@emotion/css",
+  "//packages/shared-ux/file/util",
+  "//packages/kbn-shared-ux-utility",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -62,12 +67,14 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
-  "@npm//@types/node",
+  "@npm//@elastic/eui",
   "@npm//@types/jest",
+  "@npm//@types/node",
   "@npm//@types/react",
-  "//packages/shared-ux/page/no_data/types:npm_module_types",
-  "//packages/shared-ux/card/no_data/mocks:npm_module_types",
-  "//packages/shared-ux/storybook/mock:npm_module_types",
+  "@npm//@types/classnames",
+  "//packages/kbn-ambient-ui-types",
+  "//packages/shared-ux/file/util:npm_module_types",
+  "//packages/shared-ux/file/image/types:npm_module_types",
 ]
 
 jsts_transpiler(
@@ -81,6 +88,10 @@ jsts_transpiler(
   srcs = SRCS,
   build_pkg_name = package_name(),
   web = True,
+  additional_args = [
+    "--copy-files",
+    "--quiet"
+  ],
 )
 
 ts_config(

@@ -1,16 +1,16 @@
 {
-  "extends": "../../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.bazel.json",
   "compilerOptions": {
     "declaration": true,
     "emitDeclarationOnly": true,
     "outDir": "target_types",
     "types": [
+      "jest",
       "node",
-      "react",
-      "jest"
     ]
   },
   "include": [
     "**/*.ts",
+    "**/*.tsx",
   ]
 }

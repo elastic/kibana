@@ -6,8 +6,6 @@
     "outDir": "target_types",
     "types": [
       "node",
-      "react",
-      "jest"
     ]
   },
   "include": [
