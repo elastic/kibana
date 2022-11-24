@@ -292,6 +292,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 isDisabled={isLoading}
                 isLoading={isLoading}
                 onClick={() => handleSubmit(false)}
+                data-test-subj="create-enabled-false"
               >
                 {I18n.COMPLETE_WITHOUT_ENABLING}
               </EuiButton>
