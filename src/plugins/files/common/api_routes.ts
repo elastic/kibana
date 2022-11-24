@@ -27,23 +27,39 @@ export interface EndpointInputs<
   body?: B;
 }
 
+type Extends<X, Y> = X extends Y ? Y : unknown;
+
+/**
+ * Use this when creating file service endpoints to ensure that the client methods
+ * are receiving the types they expect as well as providing the expected inputs.
+ *
+ * For example, consider create route:
+ *
+ * const rt = configSchema.object({...});
+ *
+ * export type Endpoint<M = unknown> = CreateRouteDefinition<
+ *   typeof rt,              // We pass in our runtime types
+ *   { file: FileJSON<M> },  // We pass in return type
+ *   FilesClient['create']   // We pass in client method
+ * >;
+ *
+ * This will return `unknown` for param, query or body if client-server types
+ * are out-of-sync.
+ *
+ * The very best would be if the client was auto-generated from the server
+ * endpoint declarations.
+ */
 export interface CreateRouteDefinition<
   Inputs extends EndpointInputs,
   R,
-  ClientMethod extends (arg: any) => Promise<any> = () => Promise<unknown> // Also ensure that the client is getting expected types
+  ClientMethod extends (arg: any) => Promise<any> = () => Promise<unknown>
 > {
   inputs: {
-    params: Parameters<ClientMethod>[0] extends TypeOf<NonNullable<Inputs['params']>>
-      ? TypeOf<NonNullable<Inputs['params']>>
-      : unknown;
-    query: Parameters<ClientMethod>[0] extends TypeOf<NonNullable<Inputs['query']>>
-      ? TypeOf<NonNullable<Inputs['query']>>
-      : unknown;
-    body: Parameters<ClientMethod>[0] extends TypeOf<NonNullable<Inputs['body']>>
-      ? TypeOf<NonNullable<Inputs['body']>>
-      : unknown;
+    params: Extends<Parameters<ClientMethod>[0], TypeOf<NonNullable<Inputs['params']>>>;
+    query: Extends<Parameters<ClientMethod>[0], TypeOf<NonNullable<Inputs['query']>>>;
+    body: Extends<Parameters<ClientMethod>[0], TypeOf<NonNullable<Inputs['body']>>>;
   };
-  output: R extends Awaited<ReturnType<ClientMethod>> ? R : unknown;
+  output: Extends<R, Awaited<ReturnType<ClientMethod>>>;
 }
 
 export interface AnyEndpoint {
