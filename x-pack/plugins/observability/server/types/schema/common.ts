@@ -27,6 +27,7 @@ const errorBudgetSchema = t.type({
   initial: t.number,
   consumed: t.number,
   remaining: t.number,
+  is_estimated: t.boolean,
 });
 
 const summarySchema = t.type({ sli_value: t.number, error_budget: errorBudgetSchema });

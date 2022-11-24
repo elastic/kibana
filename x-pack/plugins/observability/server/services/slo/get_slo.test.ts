@@ -67,6 +67,7 @@ describe('GetSLO', () => {
             initial: 0.001,
             consumed: 0.1,
             remaining: 0.9,
+            is_estimated: false,
           },
         },
         created_at: slo.created_at.toISOString(),

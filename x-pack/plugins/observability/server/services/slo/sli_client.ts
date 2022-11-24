@@ -19,7 +19,7 @@ import { toDateRange } from '../../domain/services/date_range';
 import { InternalQueryError } from '../../errors';
 import { DateRange, Duration, IndicatorData, SLO, SLOId } from '../../domain/models';
 import {
-  occurencesBudgetingMethodSchema,
+  occurrencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
 } from '../../types/schema';
 
@@ -87,7 +87,7 @@ export class DefaultSLIClient implements SLIClient {
       is_rolling: true,
     });
 
-    if (occurencesBudgetingMethodSchema.is(slo.budgeting_method)) {
+    if (occurrencesBudgetingMethodSchema.is(slo.budgeting_method)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
         ...commonQuery(slo, longestDateRange),
         index: `${SLO_DESTINATION_INDEX_NAME}*`,
@@ -112,7 +112,7 @@ export class DefaultSLIClient implements SLIClient {
 }
 
 function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearchBody {
-  if (occurencesBudgetingMethodSchema.is(slo.budgeting_method)) {
+  if (occurrencesBudgetingMethodSchema.is(slo.budgeting_method)) {
     return {
       ...commonQuery(slo, dateRange),
       aggs: {

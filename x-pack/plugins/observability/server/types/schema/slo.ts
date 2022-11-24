@@ -11,11 +11,11 @@ import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
 
-const occurencesBudgetingMethodSchema = t.literal<string>('occurrences');
+const occurrencesBudgetingMethodSchema = t.literal<string>('occurrences');
 const timeslicesBudgetingMethodSchema = t.literal<string>('timeslices');
 
 const budgetingMethodSchema = t.union([
-  occurencesBudgetingMethodSchema,
+  occurrencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
 ]);
 
@@ -42,7 +42,7 @@ const sloWithSummarySchema = t.intersection([sloSchema, t.type({ summary: summar
 export {
   budgetingMethodSchema,
   objectiveSchema,
-  occurencesBudgetingMethodSchema,
+  occurrencesBudgetingMethodSchema,
   sloSchema,
   sloWithSummarySchema,
   timeslicesBudgetingMethodSchema,
