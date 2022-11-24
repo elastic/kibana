@@ -76,7 +76,7 @@ export const FileUpload = React.forwardRef<EuiFilePicker, Props>(
 
     return (
       <div
-        data-test-subj="filesFilesUpload"
+        data-test-subj="filesFileUpload"
         css={[
           css`
             max-width: ${fullWidth ? '100%' : euiFormMaxWidth};

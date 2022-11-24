@@ -78,16 +78,13 @@ describe('FileUpload', () => {
     };
   }
 
-  beforeAll(() => {
+  beforeEach(() => {
+    client = createMockFilesClient();
     client.getFileKind.mockImplementation(() => ({
       id: 'test',
       maxSizeBytes: 10000,
       http: {},
     }));
-  });
-
-  beforeEach(() => {
-    client = createMockFilesClient();
     onDone = jest.fn();
     onError = jest.fn();
   });
