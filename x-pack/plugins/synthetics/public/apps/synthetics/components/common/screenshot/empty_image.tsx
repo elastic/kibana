@@ -65,7 +65,14 @@ export const EmptyImage = ({ size, isLoading = false }: { isLoading: boolean; si
           `}
         />
       ) : (
-        <div>
+        <div
+          css={css({
+            border: 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          })}
+        >
           <EuiIcon
             data-test-subj="stepScreenshotNotAvailable"
             type="eyeClosed"
