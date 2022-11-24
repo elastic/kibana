@@ -6,7 +6,72 @@
  */
 
 import { withProcRunner } from '@kbn/dev-proc-runner';
+import path from 'path';
+import fs from 'fs';
+import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from './ftr_provider_context';
+import { EventsShipper } from './events_shipper';
+import { getCapacityMetrics } from './report_parser';
+
+interface ScalabilityAction {
+  action: string;
+  userCount: number;
+  times?: number;
+  duration: string;
+}
+export interface ScalabilitySetup {
+  maxDuration: string;
+  thresholdSLA?: number;
+  warmup: ScalabilityAction[];
+  test: ScalabilityAction[];
+}
+interface Journey {
+  journeyName: string;
+  kibanaVersion: string;
+  scalabilitySetup: ScalabilitySetup;
+}
+
+const telemetryChannel = 'scalability-metrics';
+
+async function sendReportMetricsToTelemetry(
+  gatlingProjectRootPath: string,
+  scalabilityJsonPath: string,
+  log: ToolingLog
+) {
+  const reportRootPath = path.resolve(gatlingProjectRootPath, 'target', 'gatling');
+  const fileName = path.basename(scalabilityJsonPath, path.extname(scalabilityJsonPath));
+  const journeyReportDir = fs.readdirSync(reportRootPath).filter((f) => f.startsWith(fileName));
+  const lastReportPath = journeyReportDir.pop();
+  if (lastReportPath) {
+    const journeyHtmlReportPath = path.resolve(reportRootPath, lastReportPath, 'index.html');
+
+    const journey: Journey = JSON.parse(fs.readFileSync(scalabilityJsonPath, 'utf8'));
+    const metrics = getCapacityMetrics(journeyHtmlReportPath, journey.scalabilitySetup, log);
+    const events = [
+      {
+        ...metrics,
+        journeyName: journey.journeyName,
+        kibanaVersion: journey.kibanaVersion,
+        branch: process.env.BUILDKITE_BRANCH,
+        ciBuildId: process.env.BUILDKITE_BUILD_ID,
+        ciBuildJobId: process.env.BUILDKITE_JOB_ID,
+        ciBuildNumber: Number(process.env.BUILDKITE_BUILD_NUMBER) || 0,
+        ciBuildName: process.env.BUILDKITE_PIPELINE_SLUG,
+        gitRev: process.env.BUILDKITE_COMMIT,
+      },
+    ];
+    log.info(`Sending event: ${JSON.stringify(events)}`);
+    const shipper = new EventsShipper(
+      `https://telemetry-staging.elastic.co/v3/send/${telemetryChannel}?debug=true`,
+      'scalability-test',
+      '1',
+      log
+    );
+
+    const responseStatus = await shipper.send(events);
+    log.info(`Telemetry events were sent, 'responseStatus' = ${responseStatus}`);
+  }
+}
 
 /**
  * ScalabilityTestRunner is used to run load simulation against local Kibana instance
@@ -22,12 +87,15 @@ export async function ScalabilityTestRunner(
 
   log.info(`Running scalability test with json file: '${scalabilityJsonPath}'`);
 
+  const fileName = path.basename(scalabilityJsonPath, path.extname(scalabilityJsonPath));
+
   await withProcRunner(log, async (procs) => {
     await procs.run('gatling: test', {
       cmd: 'mvn',
       args: [
         'gatling:test',
         '-q',
+        `-Dgatling.core.outputDirectoryBaseName=${fileName}`,
         '-Dgatling.simulationClass=org.kibanaLoadTest.simulation.generic.GenericJourney',
         `-DjourneyPath=${scalabilityJsonPath}`,
       ],
@@ -38,4 +106,6 @@ export async function ScalabilityTestRunner(
       wait: true,
     });
   });
+
+  await sendReportMetricsToTelemetry(gatlingProjectRootPath, scalabilityJsonPath, log);
 }
