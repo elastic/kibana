@@ -171,7 +171,7 @@ export async function getAsset(opts: {
     return storedAsset;
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-      appContextService.getLogger().warn(error);
+      appContextService.getLogger().warn(error.message);
       return;
     }
     throw error;
