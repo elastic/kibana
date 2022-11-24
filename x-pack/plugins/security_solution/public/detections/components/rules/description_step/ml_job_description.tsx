@@ -165,7 +165,7 @@ const MlJobsDescription: React.FC<{ jobIds: string[] }> = ({ jobIds }) => {
   } = useSecurityJobs();
   const relevantJobs = jobs.filter((job) => jobIds.includes(job.id));
 
-  if (isLicensed) {
+  if (!isLicensed) {
     return <EuiTextColor color="subdued">{i18n.ML_JOB_DESCRIPTION_REQUIRED_LICENSE}</EuiTextColor>;
   }
 
