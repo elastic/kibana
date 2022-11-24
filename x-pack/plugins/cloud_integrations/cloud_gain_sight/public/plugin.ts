@@ -58,8 +58,9 @@ export class CloudGainsightPlugin implements Plugin {
     if (!gainsightOrgId) {
       return; // do not load any Gainsight code in the browser if not enabled
     }
-    console.log('basePath.publicBaseUrl', basePath, basePath.publicBaseUrl);
-    
+    // eslint-disable-next-line no-console
+    console.debug('basePath.publicBaseUrl', basePath, basePath.publicBaseUrl);
+
     // Keep this import async so that we do not load any Gainsight code into the browser when it is disabled.
     const { GainsightShipper } = await import('@kbn/analytics-shippers-gainsight');
     analytics.registerShipper(GainsightShipper, {
@@ -75,7 +76,8 @@ export class CloudGainsightPlugin implements Plugin {
         `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}/gainsight_widget.js`
       ),
       contentProxyDomain: basePath.prepend(
-        `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}/`)
+        `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}/`
+      ),
     });
   }
 }

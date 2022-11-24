@@ -22,8 +22,8 @@ export interface GainsightSnippetConfig {
   scriptUrl?: string;
   cssFileEndpoint?: string;
   widgetFileEndpoint?: string;
-  espProxyDomain?: string,
-  contentProxyDomain?: string,
+  espProxyDomain?: string;
+  contentProxyDomain?: string;
 }
 export function loadSnippet({
   gainsightOrgId,

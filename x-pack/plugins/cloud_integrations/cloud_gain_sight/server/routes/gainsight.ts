@@ -157,7 +157,6 @@ export const registerGainsightWidgetRoute = ({
   );
 };
 
-
 export const registerGainsightProxyRoute = ({
   httpResources,
   packageInfo,
@@ -165,11 +164,10 @@ export const registerGainsightProxyRoute = ({
   httpResources: HttpResources;
   packageInfo: Readonly<PackageInfo>;
 }) => {
-
   const renderGainsightEditor = renderGainsightLibraryFactory(
     packageInfo.dist,
     GAINSIGHT_EDITOR_PATH
-    )
+  );
   /**
    * Register a custom JS endpoint in order to achieve best caching possible with `max-age` similar to plugin bundles.
    */
