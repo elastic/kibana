@@ -32,6 +32,24 @@ export interface FilesClient<M = unknown> {
     args: Readonly<{ id?: string } & {}> & { abortSignal?: AbortSignal } & { kind: string }
   ) => Promise<{ ok: true }>;
   /**
+   * List all file objects, of a given {@link FileKind}.
+   *
+   * @param args - list files args
+   */
+  list: (
+    args: Readonly<
+      {
+        name?: string | string[];
+        meta?: Readonly<{} & {}>;
+        status?: string | string[];
+        extension?: string | string[];
+      } & {}
+    > &
+      Readonly<{ page?: number; perPage?: number } & {}> & { abortSignal?: AbortSignal } & {
+        kind: string;
+      }
+  ) => Promise<{ files: Array<FileJSON<M>>; total: number }>;
+  /**
    * Stream the contents of the file to Kibana server for storage.
    *
    * @param args - upload file args

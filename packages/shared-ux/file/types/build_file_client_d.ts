@@ -26,7 +26,7 @@ const program = ts.createProgram([fileClientSourceFilePath], {});
 const sourceFile = program.getSourceFile(fileClientSourceFilePath);
 const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed });
 const checker = program.getTypeChecker();
-const membersToInclude = ['create', 'upload', 'delete', 'getFileKind'];
+const membersToInclude = ['create', 'upload', 'delete', 'getFileKind', 'list'];
 
 ts.forEachChild(sourceFile!, (node) => {
   if (!ts.isInterfaceDeclaration(node) || node.name.text !== 'FilesClient') return;
