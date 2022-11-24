@@ -3937,7 +3937,7 @@
         "label": "InternalCreateExceptionListSchema",
         "description": [],
         "signature": [
-          "{ type: \"endpoint\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { list_id?: \"endpoint_trusted_apps\" | \"endpoint_event_filters\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\" | undefined; } & { description: string; name: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }"
+          "{ type: \"endpoint\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { list_id?: string | undefined; } & { description: string; name: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/internal/create_exception_list_schema/index.ts",
         "deprecated": false,
@@ -9040,7 +9040,7 @@
           "PartialC",
           "<{ list_id: ",
           "KeyofC",
-          "<{ endpoint_trusted_apps: null; endpoint_event_filters: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; }>>, ",
+          "<Record<string, null>>; }>>, ",
           "IntersectionC",
           "<[",
           "ExactC",
