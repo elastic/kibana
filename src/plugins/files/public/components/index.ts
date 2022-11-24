@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { FilePicker, type FilePickerProps } from './file_picker';
 export { FilesContext } from './context';

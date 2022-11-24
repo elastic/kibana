@@ -29,7 +29,7 @@ export interface BaseFilesClient<M = unknown> {
       status?: string | string[];
       extension?: string | string[];
       name?: string | string[];
-      meta?: Readonly<{} & {}>;
+      meta?: M;
     } & Pagination &
       Abortable
   ) => Promise<{ files: Array<FileJSON<unknown>>; total: number }>;
