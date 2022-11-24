@@ -1022,6 +1022,62 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.useQuerySubscriber",
+        "type": "Function",
+        "tags": [],
+        "label": "useQuerySubscriber",
+        "description": [
+          "\nMemorizes current query and filters"
+        ],
+        "signature": [
+          "({ data }: ",
+          {
+            "pluginId": "unifiedFieldList",
+            "scope": "public",
+            "docId": "kibUnifiedFieldListPluginApi",
+            "section": "def-public.QuerySubscriberParams",
+            "text": "QuerySubscriberParams"
+          },
+          ") => ",
+          {
+            "pluginId": "unifiedFieldList",
+            "scope": "public",
+            "docId": "kibUnifiedFieldListPluginApi",
+            "section": "def-public.QuerySubscriberResult",
+            "text": "QuerySubscriberResult"
+          }
+        ],
+        "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.useQuerySubscriber.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ data }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.QuerySubscriberParams",
+                "text": "QuerySubscriberParams"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -3200,6 +3256,108 @@
               "<number>"
             ],
             "path": "src/plugins/unified_field_list/common/types/stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.QuerySubscriberParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "QuerySubscriberParams",
+        "description": [
+          "\nHook params"
+        ],
+        "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.QuerySubscriberParams.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.QuerySubscriberResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "QuerySubscriberResult",
+        "description": [
+          "\nResult from the hook"
+        ],
+        "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.QuerySubscriberResult.query",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.QuerySubscriberResult.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/hooks/use_query_subscriber.ts",
             "deprecated": false,
             "trackAdoption": false
           }

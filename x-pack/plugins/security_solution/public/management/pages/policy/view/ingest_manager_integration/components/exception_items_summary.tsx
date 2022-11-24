@@ -9,9 +9,9 @@ import type { FC } from 'react';
 import React, { memo, useCallback } from 'react';
 import type { EuiBadgeProps } from '@elastic/eui';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import type { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
+import { i18n } from '@kbn/i18n';
+import type { GetExceptionSummaryResponse } from '../../../../../../../common/endpoint/types';
 
 const SUMMARY_KEYS: Readonly<Array<keyof GetExceptionSummaryResponse>> = [
   'windows',
