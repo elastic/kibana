@@ -24,6 +24,24 @@ import {
   MULTIPLE_RULE_TITLE,
 } from '../sections/rules_list/translations';
 
+const actionToToastMapping = {
+  DELETE: {
+    getSuccessfulNotificationText: getSuccessfulDeletionNotificationText,
+    getFailedNotificationText: getFailedDeletionNotificationText,
+    getPartialSuccessNotificationText: getPartialSuccessDeletionNotificationText,
+  },
+  ENABLE: {
+    getSuccessfulNotificationText: getSuccessfulEnablingNotificationText,
+    getFailedNotificationText: getFailedEnablingNotificationText,
+    getPartialSuccessNotificationText: getPartialSuccessEnablingNotificationText,
+  },
+  DISABLE: {
+    getSuccessfulNotificationText: getSuccessfulDisablingNotificationText,
+    getFailedNotificationText: getFailedDisablingNotificationText,
+    getPartialSuccessNotificationText: getPartialSuccessDisablingNotificationText,
+  },
+};
+
 export const useBulkOperationToast = ({
   onSearchPopulate,
 }: {
@@ -79,24 +97,6 @@ export const useBulkOperationToast = ({
       errors: BulkOperationError[];
       total: number;
     }) => {
-      const actionToToastMapping = {
-        DELETE: {
-          getSuccessfulNotificationText: getSuccessfulDeletionNotificationText,
-          getFailedNotificationText: getFailedDeletionNotificationText,
-          getPartialSuccessNotificationText: getPartialSuccessDeletionNotificationText,
-        },
-        ENABLE: {
-          getSuccessfulNotificationText: getSuccessfulEnablingNotificationText,
-          getFailedNotificationText: getFailedEnablingNotificationText,
-          getPartialSuccessNotificationText: getPartialSuccessEnablingNotificationText,
-        },
-        DISABLE: {
-          getSuccessfulNotificationText: getSuccessfulDisablingNotificationText,
-          getFailedNotificationText: getFailedDisablingNotificationText,
-          getPartialSuccessNotificationText: getPartialSuccessDisablingNotificationText,
-        },
-      };
-
       const numberOfSuccess = total - errors.length;
       const numberOfErrors = errors.length;
 
