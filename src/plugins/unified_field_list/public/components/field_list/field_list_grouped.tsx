@@ -14,7 +14,7 @@ import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { NoFieldsCallout } from './no_fields_callout';
 import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './fields_accordion';
 import type { FieldListGroups, FieldListItem } from '../../types';
-import { ExistenceFetchStatus, FieldsGroupNames } from '../../types';
+import { ExistenceFetchStatus, FieldsGroup, FieldsGroupNames } from '../../types';
 import './field_list_grouped.scss';
 
 const PAGINATION_SIZE = 50;
@@ -103,6 +103,8 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
     );
   }, [pageSize, fieldGroupsToShow, accordionState]);
 
+  const hasSpecialFields = Boolean(fieldGroupsToCollapse[0]?.[1]?.fields?.length);
+
   return (
     <div
       className="unifiedFieldList__fieldListGrouped"
@@ -125,9 +127,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
             >
               {hasSyncedExistingFields
                 ? [
-                    fieldGroups.SelectedFields &&
-                      (!fieldGroups.SelectedFields?.hideIfEmpty ||
-                        fieldGroups.SelectedFields?.fields?.length > 0) &&
+                    shouldIncludeGroupDescriptionInAria(fieldGroups.SelectedFields) &&
                       i18n.translate(
                         'unifiedFieldList.fieldListGrouped.fieldSearchForSelectedFieldsLiveRegion',
                         {
@@ -138,9 +138,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                           },
                         }
                       ),
-                    fieldGroups.PopularFields &&
-                      (!fieldGroups.PopularFields?.hideIfEmpty ||
-                        fieldGroups.PopularFields?.fields?.length > 0) &&
+                    shouldIncludeGroupDescriptionInAria(fieldGroups.PopularFields) &&
                       i18n.translate(
                         'unifiedFieldList.fieldListGrouped.fieldSearchForPopularFieldsLiveRegion',
                         {
@@ -162,9 +160,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                           },
                         }
                       ),
-                    fieldGroups.UnmappedFields &&
-                      (!fieldGroups.UnmappedFields?.hideIfEmpty ||
-                        fieldGroups.UnmappedFields?.fields?.length > 0) &&
+                    shouldIncludeGroupDescriptionInAria(fieldGroups.UnmappedFields) &&
                       i18n.translate(
                         'unifiedFieldList.fieldListGrouped.fieldSearchForUnmappedFieldsLiveRegion',
                         {
@@ -175,9 +171,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                           },
                         }
                       ),
-                    fieldGroups.EmptyFields &&
-                      (!fieldGroups.EmptyFields?.hideIfEmpty ||
-                        fieldGroups.EmptyFields?.fields?.length > 0) &&
+                    shouldIncludeGroupDescriptionInAria(fieldGroups.EmptyFields) &&
                       i18n.translate(
                         'unifiedFieldList.fieldListGrouped.fieldSearchForEmptyFieldsLiveRegion',
                         {
@@ -188,9 +182,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                           },
                         }
                       ),
-                    fieldGroups.MetaFields &&
-                      (!fieldGroups.MetaFields?.hideIfEmpty ||
-                        fieldGroups.MetaFields?.fields?.length > 0) &&
+                    shouldIncludeGroupDescriptionInAria(fieldGroups.MetaFields) &&
                       i18n.translate(
                         'unifiedFieldList.fieldListGrouped.fieldSearchForMetaFieldsLiveRegion',
                         {
@@ -208,7 +200,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
             </div>
           </EuiScreenReaderOnly>
         )}
-        {Boolean(fieldGroupsToCollapse[0]?.[1]?.fields.length) && (
+        {hasSpecialFields && (
           <>
             <ul>
               {fieldGroupsToCollapse.flatMap(([key, { fields }]) =>
@@ -292,3 +284,13 @@ const FieldListGrouped = React.memo(InnerFieldListGrouped) as GenericFieldListGr
 // Necessary for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default FieldListGrouped;
+
+function shouldIncludeGroupDescriptionInAria<T extends FieldListItem>(
+  group: FieldsGroup<T> | undefined
+): boolean {
+  if (!group) {
+    return false;
+  }
+  // has some fields or an empty list should be still shown
+  return group.fields?.length > 0 || !group.hideIfEmpty;
+}

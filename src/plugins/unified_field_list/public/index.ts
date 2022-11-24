@@ -43,7 +43,6 @@ export {
 } from './components/field_visualize_button';
 export { loadFieldStats } from './services/field_stats';
 export { loadFieldExisting } from './services/field_existing';
-export { getResolvedDateRange } from './utils/get_resolved_date_range';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
