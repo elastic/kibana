@@ -99,6 +99,7 @@ export interface BaseFilesClient<M = unknown> {
       kind: string;
       abortSignal?: AbortSignal;
       contentType?: string;
+      selfDestructOnAbort?: boolean;
     } & Abortable
   ) => Promise<{
     ok: true;
