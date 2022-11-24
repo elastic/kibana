@@ -6,24 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { Logger } from '@kbn/logging';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
-import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
-import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
+import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { CannotOverrideError } from './ui_settings_errors';
-import { Cache } from './cache';
+import { Cache } from '../cache';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
-
-export interface UiSettingsServiceOptions {
-  type: string;
-  id: string;
-  buildNum: number;
-  savedObjectsClient: SavedObjectsClientContract;
-  overrides?: Record<string, any>;
-  defaults?: Record<string, UiSettingsParams>;
-  log: Logger;
-}
+import { UiSettingsServiceOptions } from '../types';
 
 interface ReadOptions {
   autoCreateOrUpgradeIfMissing?: boolean;
@@ -36,7 +24,7 @@ interface UserProvidedValue<T = unknown> {
 
 type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
 
-export class UiSettingsClient extends BaseUiSettingsClient {
+export class UiSettingsClientCommon extends BaseUiSettingsClient {
   private readonly type: UiSettingsServiceOptions['type'];
   private readonly id: UiSettingsServiceOptions['id'];
   private readonly buildNum: UiSettingsServiceOptions['buildNum'];

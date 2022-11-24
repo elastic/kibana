@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
+import type { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 
 export const mockCreateOrUpgradeSavedConfig = jest.fn() as jest.MockedFunction<
   typeof createOrUpgradeSavedConfig
 >;
-jest.mock('./create_or_upgrade_saved_config', () => ({
+jest.mock('../create_or_upgrade_saved_config', () => ({
   createOrUpgradeSavedConfig: mockCreateOrUpgradeSavedConfig,
 }));

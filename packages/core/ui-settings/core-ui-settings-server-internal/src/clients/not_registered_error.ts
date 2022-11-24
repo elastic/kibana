@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-export type { ConfigAttributes } from './ui_settings';
-export { uiSettingsType, uiSettingsGlobalType } from './ui_settings';
-export type { TransformConfigFn } from './transforms';
-export { transforms } from './transforms';
+export class SettingNotRegisteredError extends Error {
+  constructor(key: string) {
+    super(
+      `Global setting ${key} is not registered. Global settings need to be registered before they can be set`
+    );
+  }
+}
