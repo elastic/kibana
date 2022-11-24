@@ -144,6 +144,9 @@ export function OverviewPage() {
             onTimeRangeRefresh={handleTimeRangeRefresh}
           />,
         ],
+        rightSideGroupProps: {
+          responsive: true,
+        },
       }}
     >
       <ObservabilityHeaderMenu />

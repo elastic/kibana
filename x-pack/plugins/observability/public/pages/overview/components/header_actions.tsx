@@ -42,7 +42,7 @@ export function HeaderActions({
     useObservabilityTourContext();
 
   return (
-    <EuiFlexGroup wrap gutterSize="s" justifyContent="flexEnd">
+    <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
         <DatePicker
           rangeFrom={relativeStart}
@@ -53,7 +53,7 @@ export function HeaderActions({
           onTimeRangeRefresh={onTimeRangeRefresh}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ alignItems: 'flex-end' }}>
+      <EuiFlexItem grow={false}>
         <EuiButton
           // @ts-expect-error the EUI verson that kibana uses right now doesn't have the correct types
           buttonRef={buttonRef}
