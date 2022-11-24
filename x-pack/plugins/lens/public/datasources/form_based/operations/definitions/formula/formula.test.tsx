@@ -27,7 +27,14 @@ jest.mock('../../layer_helpers', () => {
     getColumnOrder: jest.fn(({ columns }: { columns: Record<string, GenericIndexPatternColumn> }) =>
       Object.keys(columns)
     ),
-    getManagedColumnsFrom: jest.fn().mockReturnValue([]),
+    getManagedColumnsFrom: jest
+      .fn()
+      .mockImplementation(
+        (
+          id: string,
+          columns: Record<string, Extract<GenericIndexPatternColumn, { references: string[] }>>
+        ) => columns[id].references?.map((colId) => [colId, {}]) || []
+      ),
   };
 });
 
@@ -893,7 +900,7 @@ describe('formula', () => {
     function getNewLayerWithFormula(
       formula: string,
       isBroken = true,
-      columnParams: Partial<Pick<FormulaIndexPatternColumn, 'filter'>> = {}
+      columnParams: Partial<Pick<FormulaIndexPatternColumn, 'filter' | 'references'>> = {}
     ): FormBasedLayer {
       return {
         columns: {
@@ -1487,9 +1494,11 @@ invalid: "
     });
 
     it('returns an error if the formula is fully static and there is at least one bucket dimension', () => {
-      const formulaLayer = getNewLayerWithFormula('5 + 3 * 7');
+      const formulaLayer = getNewLayerWithFormula('5 + 3 * 7', false, { references: ['col1X'] });
       expect(
         formulaOperation.getErrorMessage!(
+          // this became a little bit more tricker as now it takes into account the number of references
+          // for the error
           {
             ...formulaLayer,
             columns: {
