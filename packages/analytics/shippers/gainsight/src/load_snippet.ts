@@ -22,12 +22,16 @@ export interface GainsightSnippetConfig {
   scriptUrl?: string;
   cssFileEndpoint?: string;
   widgetFileEndpoint?: string;
+  espProxyDomain?: string,
+  contentProxyDomain?: string,
 }
 export function loadSnippet({
   gainsightOrgId,
   scriptUrl = 'web-sdk.aptrinsic.com/api/aptrinsic.js',
   cssFileEndpoint = 'web-sdk.aptrinsic.com/style.css',
   widgetFileEndpoint = 'web-sdk.aptrinsic.com/widget/aptrinsic-widget.js ',
+  espProxyDomain,
+  contentProxyDomain,
 }: GainsightSnippetConfig): GainsightApi {
   /* eslint-disable no-var,dot-notation,prefer-rest-params,@typescript-eslint/no-unused-expressions */
   (function (n, t, a, e, co) {
@@ -52,6 +56,8 @@ export function loadSnippet({
   })(window, document, scriptUrl, gainsightOrgId, {
     cssFileEndpoint,
     widgetFileEndpoint,
+    espProxyDomain,
+    contentProxyDomain,
   });
 
   const gainsightApi = window['aptrinsic'];

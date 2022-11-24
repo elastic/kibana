@@ -13,6 +13,7 @@ import {
   registerGainsightStyleRoute,
   registerGainsightWidgetRoute,
 } from './routes';
+import { registerGainsightProxyRoute } from './routes/gainsight';
 
 interface CloudGainsightSetupDeps {
   cloud: CloudSetup;
@@ -32,6 +33,10 @@ export class CloudGainsightPlugin implements Plugin {
         packageInfo: this.initializerContext.env.packageInfo,
       });
       registerGainsightStyleRoute({
+        httpResources: core.http.resources,
+        packageInfo: this.initializerContext.env.packageInfo,
+      });
+      registerGainsightProxyRoute({
         httpResources: core.http.resources,
         packageInfo: this.initializerContext.env.packageInfo,
       });
