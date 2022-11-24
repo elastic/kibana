@@ -349,7 +349,7 @@ describe('math completion', () => {
       expect(results.list).toEqual(['bytes', 'memory', 'timestamp', 'start_date']);
     });
 
-    it('should autocomplete shift parameter with relative suggestions', async () => {
+    it('should autocomplete shift parameter with relative suggestions and a couple of abs ones', async () => {
       const results = await suggest(
         getSuggestionArgs({
           expression: `count(shift='')`,
@@ -370,6 +370,8 @@ describe('math completion', () => {
         '6M',
         '1y',
         'previous',
+        'startAt(2022-11-01T00:00:00.000Z)',
+        'endAt(2022-11-03T00:00:00.000Z)',
       ]);
     });
 
