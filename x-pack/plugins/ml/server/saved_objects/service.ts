@@ -237,8 +237,6 @@ export function mlSavedObjectServiceFactory(
     };
 
     const jobs = await _savedObjectsClientFindMemo<JobObject>(options);
-    // const jobs = await savedObjectsClient.find<JobObject>(options);
-
     return jobs.saved_objects;
   }
 
@@ -471,7 +469,6 @@ export function mlSavedObjectServiceFactory(
     };
 
     const models = await _savedObjectsClientFindMemo<TrainedModelObject>(options);
-
     return models.saved_objects;
   }
 
