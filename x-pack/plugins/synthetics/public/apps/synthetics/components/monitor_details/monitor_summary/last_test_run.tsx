@@ -30,7 +30,7 @@ import {
 } from '../../../../../../common/runtime_types';
 import { formatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 
-import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
 import { SinglePingResult } from '../../common/monitor_test_result/single_ping_result';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
@@ -43,10 +43,12 @@ import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 export const LastTestRun = () => {
   const { euiTheme } = useEuiTheme();
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
+  const { lastRefresh } = useSyntheticsRefreshContext();
   const { monitor } = useSelectedMonitor();
 
   const { data: stepsData, loading: stepsLoading } = useJourneySteps(
-    latestPing?.monitor?.check_group
+    latestPing?.monitor?.check_group,
+    lastRefresh
   );
 
   const loading = stepsLoading || pingsLoading;

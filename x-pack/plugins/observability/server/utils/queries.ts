@@ -39,7 +39,6 @@ export function termsQuery(
     return [];
   }
 
-  // @ts-expect-error undefined and null aren't assignable
   return [{ terms: { [field]: filtered } }];
 }
 

@@ -31,12 +31,12 @@ export const ESDataViewSelect: React.FunctionComponent<ESDataViewSelectProps> = 
   onFocus,
   onBlur,
 }) => {
-  const selectedDataView = dataViews.find((view) => value === view.title) as DataView;
+  const selectedDataView = dataViews.find((view) => value === view.title) as DataViewOption;
 
   const selectedOption = selectedDataView
-    ? { value: selectedDataView.title, label: selectedDataView.name }
+    ? { value: selectedDataView.title, label: selectedDataView.name || selectedDataView.title }
     : { value, label: value };
-  const options = dataViews.map(({ name, title }) => ({ value: title, label: name }));
+  const options = dataViews.map(({ name, title }) => ({ value: title, label: name || title }));
 
   return (
     <EuiComboBox
