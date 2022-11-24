@@ -119,8 +119,6 @@ describe('Task Runner Cancel', () => {
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
     ruleTypeRegistry,
     kibanaBaseUrl: 'https://localhost:5601',
-    supportsEphemeralTasks: false,
-    maxEphemeralActionsPerRule: 10,
     maxAlerts: 1000,
     cancelAlertsOnRuleTimeout: true,
     usageCounter: mockUsageCounter,

@@ -22,7 +22,6 @@ import {
   Logger,
 } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
-import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
 import {
@@ -101,7 +100,6 @@ interface ConstructorOptions {
   preconfiguredActions: PreConfiguredAction[];
   actionExecutor: ActionExecutorContract;
   executionEnqueuer: ExecutionEnqueuer<void>;
-  ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
@@ -126,7 +124,6 @@ export class ActionsClient {
   private readonly request: KibanaRequest;
   private readonly authorization: ActionsAuthorization;
   private readonly executionEnqueuer: ExecutionEnqueuer<void>;
-  private readonly ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   private readonly bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
   private readonly auditLogger?: AuditLogger;
   private readonly usageCounter?: UsageCounter;
@@ -141,7 +138,6 @@ export class ActionsClient {
     preconfiguredActions,
     actionExecutor,
     executionEnqueuer,
-    ephemeralExecutionEnqueuer,
     bulkExecutionEnqueuer,
     request,
     authorization,
@@ -157,7 +153,6 @@ export class ActionsClient {
     this.preconfiguredActions = preconfiguredActions;
     this.actionExecutor = actionExecutor;
     this.executionEnqueuer = executionEnqueuer;
-    this.ephemeralExecutionEnqueuer = ephemeralExecutionEnqueuer;
     this.bulkExecutionEnqueuer = bulkExecutionEnqueuer;
     this.request = request;
     this.authorization = authorization;
@@ -700,19 +695,6 @@ export class ActionsClient {
       );
     }
     return this.bulkExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
-  }
-
-  public async ephemeralEnqueuedExecution(options: EnqueueExecutionOptions): Promise<RunNowResult> {
-    const { source } = options;
-    if (
-      (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
-      AuthorizationMode.RBAC
-    ) {
-      await this.authorization.ensureAuthorized('execute');
-    } else {
-      trackLegacyRBACExemption('ephemeralEnqueuedExecution', this.usageCounter);
-    }
-    return this.ephemeralExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
   public async listTypes(featureId?: string): Promise<ActionType[]> {

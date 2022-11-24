@@ -46,7 +46,6 @@ import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry, MAX_ATTEMPTS } from './action_type_registry';
 import {
   createExecutionEnqueuerFunction,
-  createEphemeralExecutionEnqueuerFunction,
   createBulkExecutionEnqueuerFunction,
 } from './create_execute_function';
 import { registerActionsUsageCollector } from './usage';
@@ -434,12 +433,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           await getAuthorizationModeBySource(unsecuredSavedObjectsClient, authorizationContext)
         ),
         actionExecutor: actionExecutor!,
-        ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
-          taskManager: plugins.taskManager,
-          actionTypeRegistry: actionTypeRegistry!,
-          isESOCanEncrypt: isESOCanEncrypt!,
-          preconfiguredActions,
-        }),
         executionEnqueuer: createExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
@@ -646,12 +639,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             request,
             authorization: instantiateAuthorization(request),
             actionExecutor: actionExecutor!,
-            ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
-              taskManager,
-              actionTypeRegistry: actionTypeRegistry!,
-              isESOCanEncrypt: isESOCanEncrypt!,
-              preconfiguredActions,
-            }),
             executionEnqueuer: createExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,

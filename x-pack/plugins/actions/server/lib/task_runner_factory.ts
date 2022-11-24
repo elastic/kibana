@@ -29,7 +29,6 @@ import {
   SpaceIdToNamespaceFunction,
   ActionTypeExecutorResult,
   ActionTaskExecutorParams,
-  isPersistedActionTask,
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import { asSavedObjectExecutionSource } from './action_execution_source';
@@ -114,7 +113,6 @@ export class TaskRunnerFactory {
           executorResult = await actionExecutor.execute({
             params,
             actionId: actionId as string,
-            isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
             request,
             ...getSourceFromReferences(references),
             taskInfo,
@@ -163,23 +161,21 @@ export class TaskRunnerFactory {
         }
 
         // Cleanup action_task_params object now that we're done with it
-        if (isPersistedActionTask(actionTaskExecutorParams)) {
-          try {
-            // If the request has reached this far we can assume the user is allowed to run clean up
-            // We would idealy secure every operation but in order to support clean up of legacy alerts
-            // we allow this operation in an unsecured manner
-            // Once support for legacy alert RBAC is dropped, this can be secured
-            await getUnsecuredSavedObjectsClient(request).delete(
-              ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-              actionTaskExecutorParams.actionTaskParamsId,
-              { refresh: false }
-            );
-          } catch (e) {
-            // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
-            logger.error(
-              `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskExecutorParams.actionTaskParamsId}"]: ${e.message}`
-            );
-          }
+        try {
+          // If the request has reached this far we can assume the user is allowed to run clean up
+          // We would idealy secure every operation but in order to support clean up of legacy alerts
+          // we allow this operation in an unsecured manner
+          // Once support for legacy alert RBAC is dropped, this can be secured
+          await getUnsecuredSavedObjectsClient(request).delete(
+            ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+            actionTaskExecutorParams.actionTaskParamsId,
+            { refresh: false }
+          );
+        } catch (e) {
+          // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
+          logger.error(
+            `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskExecutorParams.actionTaskParamsId}"]: ${e.message}`
+          );
         }
       },
       cancel: async () => {
@@ -252,33 +248,28 @@ async function getActionTaskParams(
 ): Promise<Omit<SavedObject<ActionTaskParams>, 'id' | 'type'>> {
   const { spaceId } = executorParams;
   const namespace = spaceIdToNamespace(spaceId);
-  if (isPersistedActionTask(executorParams)) {
-    const actionTask =
-      await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
-        ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-        executorParams.actionTaskParamsId,
-        { namespace }
-      );
+  const actionTask = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
+    ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+    executorParams.actionTaskParamsId,
+    { namespace }
+  );
 
-    const {
-      attributes: { relatedSavedObjects },
-      references,
-    } = actionTask;
+  const {
+    attributes: { relatedSavedObjects },
+    references,
+  } = actionTask;
 
-    const { actionId, relatedSavedObjects: injectedRelatedSavedObjects } =
-      injectSavedObjectReferences(references, relatedSavedObjects as RelatedSavedObjects);
+  const { actionId, relatedSavedObjects: injectedRelatedSavedObjects } =
+    injectSavedObjectReferences(references, relatedSavedObjects as RelatedSavedObjects);
 
-    return {
-      ...actionTask,
-      attributes: {
-        ...actionTask.attributes,
-        ...(actionId ? { actionId } : {}),
-        ...(relatedSavedObjects ? { relatedSavedObjects: injectedRelatedSavedObjects } : {}),
-      },
-    };
-  } else {
-    return { attributes: executorParams.taskParams, references: executorParams.references ?? [] };
-  }
+  return {
+    ...actionTask,
+    attributes: {
+      ...actionTask.attributes,
+      ...(actionId ? { actionId } : {}),
+      ...(relatedSavedObjects ? { relatedSavedObjects: injectedRelatedSavedObjects } : {}),
+    },
+  };
 }
 
 function getSourceFromReferences(references: SavedObjectReference[]) {

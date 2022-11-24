@@ -87,7 +87,6 @@ const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient()
 const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
 const executionEnqueuer = jest.fn();
-const ephemeralExecutionEnqueuer = jest.fn();
 const bulkExecutionEnqueuer = jest.fn();
 const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditLoggerMock.create();
@@ -132,7 +131,6 @@ beforeEach(() => {
     preconfiguredActions: [],
     actionExecutor,
     executionEnqueuer,
-    ephemeralExecutionEnqueuer,
     bulkExecutionEnqueuer,
     request,
     authorization: authorization as unknown as ActionsAuthorization,
@@ -561,7 +559,6 @@ describe('create()', () => {
       preconfiguredActions: [],
       actionExecutor,
       executionEnqueuer,
-      ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
@@ -667,7 +664,6 @@ describe('get()', () => {
         defaultKibanaIndex,
         actionExecutor,
         executionEnqueuer,
-        ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
@@ -727,7 +723,6 @@ describe('get()', () => {
         defaultKibanaIndex,
         actionExecutor,
         executionEnqueuer,
-        ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
@@ -849,7 +844,6 @@ describe('get()', () => {
       defaultKibanaIndex,
       actionExecutor,
       executionEnqueuer,
-      ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
@@ -924,7 +918,6 @@ describe('getAll()', () => {
         defaultKibanaIndex,
         actionExecutor,
         executionEnqueuer,
-        ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
@@ -1066,7 +1059,6 @@ describe('getAll()', () => {
       defaultKibanaIndex,
       actionExecutor,
       executionEnqueuer,
-      ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
@@ -1148,7 +1140,6 @@ describe('getBulk()', () => {
         defaultKibanaIndex,
         actionExecutor,
         executionEnqueuer,
-        ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
@@ -1284,7 +1275,6 @@ describe('getBulk()', () => {
       defaultKibanaIndex,
       actionExecutor,
       executionEnqueuer,
-      ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
@@ -1343,7 +1333,6 @@ describe('getOAuthAccessToken()', () => {
       defaultKibanaIndex,
       actionExecutor,
       executionEnqueuer,
-      ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
@@ -2501,7 +2490,6 @@ describe('isPreconfigured()', () => {
       defaultKibanaIndex,
       actionExecutor,
       executionEnqueuer,
-      ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
@@ -2539,7 +2527,6 @@ describe('isPreconfigured()', () => {
       defaultKibanaIndex,
       actionExecutor,
       executionEnqueuer,
-      ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,

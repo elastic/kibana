@@ -32,7 +32,6 @@ const generateAlertingConfig = (): AlertingConfig => ({
     interval: '5m',
     removalDelay: '1h',
   },
-  maxEphemeralActionsPerAlert: 10,
   cancelAlertsOnRuleTimeout: true,
   rules: {
     minimumScheduleInterval: { value: '1m', enforce: false },

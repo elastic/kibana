@@ -138,7 +138,6 @@ test('executes the task by calling the executor with proper parameters, using gi
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
-    isEphemeral: false,
     params: { baz: true },
     relatedSavedObjects: [],
     executionId: '123abc',
@@ -198,7 +197,6 @@ test('executes the task by calling the executor with proper parameters, using st
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '9',
-    isEphemeral: false,
     params: { baz: true },
     executionId: '123abc',
     relatedSavedObjects: [],
@@ -254,7 +252,6 @@ test('executes the task by calling the executor with proper parameters when cons
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
     consumer: 'test-consumer',
-    isEphemeral: false,
     params: { baz: true },
     relatedSavedObjects: [],
     executionId: '123abc',
@@ -446,7 +443,6 @@ test('uses API key when provided', async () => {
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
-    isEphemeral: false,
     params: { baz: true },
     executionId: '123abc',
     relatedSavedObjects: [],
@@ -504,7 +500,6 @@ test('uses relatedSavedObjects merged with references when provided', async () =
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
-    isEphemeral: false,
     params: { baz: true },
     executionId: '123abc',
     relatedSavedObjects: [
@@ -556,7 +551,6 @@ test('uses relatedSavedObjects as is when references are empty', async () => {
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
-    isEphemeral: false,
     params: { baz: true },
     executionId: '123abc',
     relatedSavedObjects: [
@@ -613,7 +607,6 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
   await taskRunner.run();
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
-    isEphemeral: false,
     params: { baz: true },
     request: expect.objectContaining({
       headers: {
@@ -658,7 +651,6 @@ test(`doesn't use API key when not provided`, async () => {
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
-    isEphemeral: false,
     params: { baz: true },
     executionId: '123abc',
     relatedSavedObjects: [],

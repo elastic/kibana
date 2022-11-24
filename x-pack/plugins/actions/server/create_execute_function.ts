@@ -6,13 +6,8 @@
  */
 
 import { SavedObjectsBulkResponse, SavedObjectsClientContract } from '@kbn/core/server';
-import { RunNowResult, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import {
-  RawAction,
-  ActionTypeRegistryContract,
-  PreConfiguredAction,
-  ActionTaskExecutorParams,
-} from './types';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { RawAction, ActionTypeRegistryContract, PreConfiguredAction } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
@@ -221,46 +216,6 @@ export function createBulkExecutionEnqueuerFunction({
       };
     });
     await taskManager.bulkSchedule(taskInstances);
-  };
-}
-
-export function createEphemeralExecutionEnqueuerFunction({
-  taskManager,
-  actionTypeRegistry,
-  preconfiguredActions,
-}: CreateExecuteFunctionOptions): ExecutionEnqueuer<RunNowResult> {
-  return async function execute(
-    unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    { id, params, spaceId, source, consumer, apiKey, executionId }: ExecuteOptions
-  ): Promise<RunNowResult> {
-    const { action } = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
-    validateCanActionBeUsed(action);
-
-    const { actionTypeId } = action;
-    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
-      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-    }
-
-    const taskParams: ActionTaskExecutorParams = {
-      spaceId,
-      taskParams: {
-        actionId: id,
-        consumer,
-        // Saved Objects won't allow us to enforce unknown rather than any
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        params: params as Record<string, any>,
-        ...(apiKey ? { apiKey } : {}),
-        ...(executionId ? { executionId } : {}),
-      },
-      ...executionSourceAsSavedObjectReferences(source),
-    };
-
-    return taskManager.ephemeralRunNow({
-      taskType: `actions:${action.actionTypeId}`,
-      params: taskParams,
-      state: {},
-      scope: ['actions'],
-    });
   };
 }
 

@@ -51,8 +51,6 @@ export interface TaskRunnerContext {
   internalSavedObjectsRepository: ISavedObjectsRepository;
   ruleTypeRegistry: RuleTypeRegistry;
   kibanaBaseUrl: string | undefined;
-  supportsEphemeralTasks: boolean;
-  maxEphemeralActionsPerRule: number;
   maxAlerts: number;
   actionsConfigMap: ActionsConfigMap;
   cancelAlertsOnRuleTimeout: boolean;

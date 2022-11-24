@@ -96,8 +96,6 @@ describe('Task Runner Factory', () => {
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
     ruleTypeRegistry: ruleTypeRegistryMock.create(),
     kibanaBaseUrl: 'https://localhost:5601',
-    supportsEphemeralTasks: true,
-    maxEphemeralActionsPerRule: 10,
     maxAlerts: 1000,
     cancelAlertsOnRuleTimeout: true,
     executionContext,

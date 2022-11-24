@@ -59,7 +59,6 @@ export interface TaskInfo {
 
 export interface ExecuteOptions<Source = unknown> {
   actionId: string;
-  isEphemeral?: boolean;
   request: KibanaRequest;
   params: Record<string, unknown>;
   source?: ActionExecutionSource<Source>;
@@ -95,7 +94,6 @@ export class ActionExecutor {
     params,
     request,
     source,
-    isEphemeral,
     taskInfo,
     executionId,
     consumer,
@@ -224,7 +222,6 @@ export class ActionExecutor {
             params: validatedParams,
             config: validatedConfig,
             secrets: validatedSecrets,
-            isEphemeral,
             taskInfo,
             configurationUtilities,
             logger,

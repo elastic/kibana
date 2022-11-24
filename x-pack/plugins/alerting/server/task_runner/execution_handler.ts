@@ -9,7 +9,6 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger } from '@kbn/core/server';
 import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
-import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
@@ -66,7 +65,6 @@ export class ExecutionHandler<
   private ruleConsumer: string;
   private executionId: string;
   private ruleLabel: string;
-  private ephemeralActionsToSchedule: number;
   private CHUNK_SIZE = 1000;
   private skippedAlerts: { [key: string]: { reason: string } } = {};
   private actionsClient: PublicMethodsOf<ActionsClient>;
@@ -107,7 +105,6 @@ export class ExecutionHandler<
     this.executionId = executionId;
     this.ruleLabel = ruleLabel;
     this.actionsClient = actionsClient;
-    this.ephemeralActionsToSchedule = taskRunnerContext.maxEphemeralActionsPerRule;
     this.ruleTypeActionGroups = new Map(
       ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
     );
@@ -214,10 +211,7 @@ export class ExecutionHandler<
           }),
         };
 
-        await this.actionRunOrAddToBulk({
-          enqueueOptions: this.getEnqueueOptions(actionToRun),
-          bulkActions,
-        });
+        bulkActions.push(this.getEnqueueOptions(actionToRun));
 
         logActions.push({
           id: action.id,
@@ -303,27 +297,6 @@ export class ExecutionHandler<
         `Rule "${this.rule.id}" encountered an error while constructing the rule.url variable: ${error.message}`
       );
       return;
-    }
-  }
-
-  private async actionRunOrAddToBulk({
-    enqueueOptions,
-    bulkActions,
-  }: {
-    enqueueOptions: EnqueueExecutionOptions;
-    bulkActions: EnqueueExecutionOptions[];
-  }) {
-    if (this.taskRunnerContext.supportsEphemeralTasks && this.ephemeralActionsToSchedule > 0) {
-      this.ephemeralActionsToSchedule--;
-      try {
-        await this.actionsClient!.ephemeralEnqueuedExecution(enqueueOptions);
-      } catch (err) {
-        if (isEphemeralTaskRejectedDueToCapacityError(err)) {
-          bulkActions.push(enqueueOptions);
-        }
-      }
-    } else {
-      bulkActions.push(enqueueOptions);
     }
   }
 
