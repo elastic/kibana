@@ -271,6 +271,8 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       options.decorators as DecoratorsHash
     );
     this.container.hooks = {};
+    this.processedRootDecorators = false;
+    this.processedDecoratorsForProgram.clear();
 
     if (this.compileOptions.data) {
       this.runtimeOptions.data = initData(context, this.runtimeOptions.data);

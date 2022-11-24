@@ -107,6 +107,35 @@ describe('blocks', () => {
       expect(calls).toEqual(callsExpected);
     });
 
+    it('should call decorator again if render function is called again', () => {
+      const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
+
+      global.kbnHandlebarsEnv = Handlebars.create();
+
+      kbnHandlebarsEnv!.registerDecorator('decorator', () => {
+        calls++;
+      });
+
+      let renderAST;
+      let renderEval;
+      if (process.env.AST || !process.env.EVAL) {
+        renderAST = kbnHandlebarsEnv!.compileAST('{{*decorator}}');
+      }
+      if (process.env.EVAL || !process.env.AST) {
+        renderEval = kbnHandlebarsEnv!.compile('{{*decorator}}');
+      }
+
+      let calls = 0;
+      if (renderAST) expect(renderAST({})).toEqual('');
+      if (renderEval) expect(renderEval({})).toEqual('');
+      expect(calls).toEqual(callsExpected);
+
+      calls = 0;
+      if (renderAST) expect(renderAST({})).toEqual('');
+      if (renderEval) expect(renderEval({})).toEqual('');
+      expect(calls).toEqual(callsExpected);
+    });
+
     it('should pass expected options to nested decorator', () => {
       expectTemplate('{{#helper}}{{*decorator foo}}{{/helper}}')
         .withHelper('helper', () => {})
