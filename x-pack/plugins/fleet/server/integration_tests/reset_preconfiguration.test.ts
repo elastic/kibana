@@ -7,7 +7,12 @@
 
 import Path from 'path';
 
-import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
+import {
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+  createRootWithCorePlugins,
+  createTestServers,
+} from '@kbn/core-test-helpers-kbn-server';
 
 import type { AgentPolicySOAttributes } from '../types';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../../common';
@@ -17,13 +22,13 @@ import { useDockerRegistry, waitForFleetSetup, getSupertestWithAdminUser } from 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
 describe('Fleet preconfiguration reset', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
-  let kbnServer: kbnTestServer.TestKibanaUtils;
+  let esServer: TestElasticsearchUtils;
+  let kbnServer: TestKibanaUtils;
 
   const registryUrl = useDockerRegistry();
 
   const startServers = async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t) => jest.setTimeout(t),
       settings: {
         es: {
@@ -35,7 +40,7 @@ describe('Fleet preconfiguration reset', () => {
 
     esServer = await startES();
     const startKibana = async () => {
-      const root = kbnTestServer.createRootWithCorePlugins(
+      const root = createRootWithCorePlugins(
         {
           xpack: {
             fleet: {

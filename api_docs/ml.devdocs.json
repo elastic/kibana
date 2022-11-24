@@ -3961,9 +3961,7 @@
         "signature": [
           "{ [x: string]: ",
           "MappingRuntimeField",
-          " | ",
-          "MappingRuntimeField",
-          "[]; }"
+          "; }"
         ],
         "path": "x-pack/plugins/ml/common/types/fields.ts",
         "deprecated": false,

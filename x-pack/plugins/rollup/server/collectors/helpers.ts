@@ -132,7 +132,6 @@ export async function fetchRollupSavedSearches(
 
     savedSearchesList = await getSavedObjectsList({
       ...searchProps,
-      // @ts-expect-error@elastic/elasticsearch SortResults might contain null
       searchAfter: savedSearchesList.hits.hits[savedSearchesList.hits.hits.length - 1].sort,
     });
   }
@@ -201,7 +200,6 @@ export async function fetchRollupVisualizations(
 
     savedVisualizationsList = await getSavedObjectsList({
       ...searchProps,
-      // @ts-expect-error@elastic/elasticsearch SortResults might contain null
       searchAfter: sort,
     });
   }
