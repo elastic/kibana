@@ -560,7 +560,7 @@ const createThresholdTimeline = async (
   }
 };
 
-const getNewTermsData = (ecsData: Ecs | Ecs[]) => {
+export const getNewTermsData = (ecsData: Ecs | Ecs[]) => {
   const normalizedEcsData: Ecs = Array.isArray(ecsData) ? ecsData[0] : ecsData;
   const originalTimeValue = getField(normalizedEcsData, ALERT_ORIGINAL_TIME);
   const newTermsFields: string[] =
