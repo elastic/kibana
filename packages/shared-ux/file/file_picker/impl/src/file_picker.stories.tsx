@@ -23,7 +23,7 @@ const getFileKind = (id: string) =>
     id: kind,
     http: {},
     allowedMimeTypes: ['*'],
-  }[id] as FileKind);
+  } as FileKind);
 
 const defaultProps: FilePickerProps = {
   kind,
@@ -33,7 +33,7 @@ const defaultProps: FilePickerProps = {
 };
 
 export default {
-  title: 'components/FilePicker',
+  title: 'files/FilePicker',
   component: FilePicker,
   args: defaultProps,
   decorators: [

@@ -80,17 +80,14 @@ describe('FilePicker', () => {
     };
   }
 
-  beforeAll(() => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    client = createMockFilesClient();
     client.getFileKind.mockImplementation(() => ({
       id: 'test',
       maxSizeBytes: 10000,
       http: {},
     }));
-  });
-
-  beforeEach(() => {
-    jest.resetAllMocks();
-    client = createMockFilesClient();
     onDone = jest.fn();
     onClose = jest.fn();
   });

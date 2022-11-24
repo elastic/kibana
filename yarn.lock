@@ -3917,6 +3917,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-file-picker@link:bazel-bin/packages/shared-ux/file/file_picker/impl":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-file-types@link:bazel-bin/packages/shared-ux/file/types":
   version "0.0.0"
   uid ""
