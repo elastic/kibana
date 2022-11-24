@@ -49,8 +49,7 @@ jest.mock('../../hooks/use_fetch_rule', () => ({
   useFetchRule: jest.fn(),
 }));
 
-jest.mock('./utils', () => ({
-  ...jest.requireActual('./utils'),
+jest.mock('../../hooks/use_is_rule_editable', () => ({
   useIsRuleEditable: jest.fn(),
 }));
 
@@ -76,9 +75,9 @@ const { useFetchRule } = jest.requireMock('../../hooks/use_fetch_rule');
 const { useGetRuleTypeDefinitionFromRuleType } = jest.requireMock(
   '../../hooks/use_get_rule_type_definition_from_rule_type'
 );
-const { useIsRuleEditable } = jest.requireMock('./utils');
+const { useIsRuleEditable } = jest.requireMock('../../hooks/use_is_rule_editable');
 
-describe('RulesDetailPage', () => {
+describe('RuleDetailPage', () => {
   async function setup({ ruleLoading, ruleError, ruleLoaded, ruleEditable }: SetupProps) {
     const mockRuleType = {
       actionGroups: [
