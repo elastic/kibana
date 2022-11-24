@@ -7,7 +7,7 @@
 
 export interface KeyValuePair {
   label: string;
-  value: string;
+  value: string | null;
 }
 
 export type ConnectorConfiguration = Record<string, KeyValuePair | null>;
