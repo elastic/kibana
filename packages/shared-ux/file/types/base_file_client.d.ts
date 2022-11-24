@@ -134,7 +134,7 @@ export interface BaseFilesClient<M = unknown> {
    *
    * @param args - File unshare arguments
    */
-  unshare: (args: { id?: string; kind: string } & Abortable) => Promise<{ ok: true }>;
+  unshare: (args: { id: string; kind: string } & Abortable) => Promise<{ ok: true }>;
   /**
    * Get a file share instance.
    *
