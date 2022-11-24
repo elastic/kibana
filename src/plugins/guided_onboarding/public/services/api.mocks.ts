@@ -145,4 +145,3 @@ export const mockPluginStateInProgress: PluginState = {
   isActivePeriod: true,
   activeGuide: testGuideStep1ActiveState,
 };
-
