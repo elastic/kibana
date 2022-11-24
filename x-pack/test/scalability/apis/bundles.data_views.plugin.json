@@ -1,5 +1,5 @@
 {
-  "journeyName": "GET dataViews plugin bundle",
+  "journeyName": "GET /{buildNumber}/bundles/plugin/dataViews/kibana/dataViews.plugin.js",
   "kibanaVersion": "8.6.0-SNAPSHOT",
   "scalabilitySetup": {
     "thresholdSLA": 3000,
@@ -31,7 +31,7 @@
           "date": "2022-11-14T09:31:49.963Z",
           "http": {
             "method": "GET",
-            "path": "/9007199254740991/bundles/plugin/dataViews/kibana/dataViews.plugin.js",
+            "path": "/{buildNumber}/bundles/plugin/dataViews/kibana/dataViews.plugin.js",
             "headers": {
               "Accept-Encoding": "gzip, deflate, br"
             },

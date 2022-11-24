@@ -1,5 +1,5 @@
 {
-  "journeyName": "GET core.entry bundle",
+  "journeyName": "GET /{buildNumber}/bundles/core/core.entry.js",
   "kibanaVersion": "8.6.0-SNAPSHOT",
   "scalabilitySetup": {
     "thresholdSLA": 3000,
@@ -31,7 +31,7 @@
           "date": "2022-11-14T09:31:49.963Z",
           "http": {
             "method": "GET",
-            "path": "/{kibanaBuildNumber}/bundles/core/core.entry.js",
+            "path": "/{buildNumber}/bundles/core/core.entry.js",
             "headers": {
               "Accept-Encoding": "gzip, deflate, br"
             },

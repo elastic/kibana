@@ -1,5 +1,5 @@
 {
-  "journeyName": "POST api/core/capabilities",
+  "journeyName": "POST /api/core/capabilities",
   "kibanaVersion": "8.6.0-SNAPSHOT",
   "scalabilitySetup": {
     "thresholdSLA": 3000,

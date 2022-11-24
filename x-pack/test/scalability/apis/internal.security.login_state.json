@@ -1,5 +1,5 @@
 {
-  "journeyName": "GET internal/security/login_state",
+  "journeyName": "GET /internal/security/login_state",
   "kibanaVersion": "8.6.0-SNAPSHOT",
   "scalabilitySetup": {
     "thresholdSLA": 3000,
