@@ -278,7 +278,7 @@ export const EditConnector = React.memo(
     });
 
     return (
-      <EuiText>
+      <EuiFlexItem grow={false}>
         <MyFlexGroup
           alignItems="center"
           gutterSize="xs"
@@ -287,7 +287,9 @@ export const EditConnector = React.memo(
           data-test-subj="case-view-edit-connector"
         >
           <EuiFlexItem grow={false} data-test-subj="connector-edit-header">
-            <h4>{i18n.CONNECTORS}</h4>
+            <EuiText>
+              <h4>{i18n.CONNECTORS}</h4>
+            </EuiText>
           </EuiFlexItem>
           {isLoading && <EuiLoadingSpinner data-test-subj="connector-loading" />}
           {!isLoading && !editConnector && permissions.push && actionsReadCapabilities && (
@@ -381,7 +383,7 @@ export const EditConnector = React.memo(
               </EuiFlexItem>
             )}
         </MyFlexGroup>
-      </EuiText>
+      </EuiFlexItem>
     );
   }
 );
