@@ -2,6 +2,7 @@
   "journeyName": "GET dataViews plugin bundle",
   "kibanaVersion": "8.6.0-SNAPSHOT",
   "scalabilitySetup": {
+    "thresholdSLA": 3000,
     "warmup": [
       {
         "action": "constantUsersPerSec",
@@ -12,9 +13,9 @@
     "test": [
       {
         "action": "incrementUsersPerSec",
-        "userCount": 30,
-        "times": 50,
-        "duration": "3s"
+        "userCount": 20,
+        "times": 75,
+        "duration": "2s"
       }
     ],
     "maxDuration": "15m"

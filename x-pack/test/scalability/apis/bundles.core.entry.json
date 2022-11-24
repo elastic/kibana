@@ -2,6 +2,7 @@
   "journeyName": "GET core.entry bundle",
   "kibanaVersion": "8.6.0-SNAPSHOT",
   "scalabilitySetup": {
+    "thresholdSLA": 3000,
     "warmup": [
       {
         "action": "constantUsersPerSec",
@@ -12,9 +13,9 @@
     "test": [
       {
         "action": "incrementUsersPerSec",
-        "userCount": 30,
-        "times": 50,
-        "duration": "3s"
+        "userCount": 20,
+        "times": 75,
+        "duration": "2s"
       }
     ],
     "maxDuration": "15m"
@@ -30,7 +31,7 @@
           "date": "2022-11-14T09:31:49.963Z",
           "http": {
             "method": "GET",
-            "path": "/9007199254740991/bundles/core/core.entry.js",
+            "path": "/{kibanaBuildNumber}/bundles/core/core.entry.js",
             "headers": {
               "Accept-Encoding": "gzip, deflate, br"
             },
