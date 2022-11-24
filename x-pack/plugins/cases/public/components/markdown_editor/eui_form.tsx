@@ -67,19 +67,21 @@ export const MarkdownEditorForm = React.memo(
 
       useEffect(() => {
         const storageDraftComment = draftCommentStorageKey && storage.get(draftCommentStorageKey);
-        if( storageDraftComment && storageDraftComment!=='' ) {
+        if (storageDraftComment && storageDraftComment !== '') {
           field.setValue(storageDraftComment);
         }
       }, []);
-      
-      const handleOnChange = useCallback((value: string) => {
-        field.setValue(value);
-        if (draftCommentStorageKey) {
-          storage.set(draftCommentStorageKey, value);
-        }
-      },[field, storage]);
-      
-    
+
+      const handleOnChange = useCallback(
+        (value: string) => {
+          field.setValue(value);
+          if (draftCommentStorageKey) {
+            storage.set(draftCommentStorageKey, value);
+          }
+        },
+        [field, storage]
+      );
+
       return (
         <CommentEditorContext.Provider value={commentEditorContextValue}>
           <EuiFormRow

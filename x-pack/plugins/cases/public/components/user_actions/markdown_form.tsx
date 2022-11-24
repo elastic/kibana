@@ -6,15 +6,15 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
-import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 
 import { Form, useForm, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import * as i18n from '../case_view/translations';
 import type { Content } from './schema';
 import { schema } from './schema';
 import { MarkdownRenderer, MarkdownEditorForm } from '../markdown_editor';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export const ContentWrapper = styled.div`
   padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};
@@ -47,7 +47,7 @@ const UserActionMarkdownComponent = forwardRef<
   });
 
   const fieldName = 'content';
-  const draftCommentStorageKey = `xpack.cases.caseView.${caseId}.${id}.markdownEditor`
+  const draftCommentStorageKey = `xpack.cases.caseView.${caseId}.${id}.markdownEditor`;
   const { setFieldValue, submit } = form;
 
   const handleCancelAction = useCallback(() => {
