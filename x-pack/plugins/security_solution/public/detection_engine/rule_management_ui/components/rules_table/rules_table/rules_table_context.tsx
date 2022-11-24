@@ -23,6 +23,12 @@ import type {
   Rule,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
+import {
+  DEFAULT_PAGE,
+  DEFAULT_RULES_PER_PAGE,
+  DEFAULT_FILTER_OPTIONS,
+  DEFAULT_SORTING_OPTIONS,
+} from './rules_table_defaults';
 import { useFindRulesInMemory } from './use_find_rules_in_memory';
 import { getRulesComparator } from './utils';
 
@@ -97,19 +103,6 @@ export interface RulesTableState {
   sortingOptions: SortingOptions;
 }
 
-export const INITIAL_FILTER_OPTIONS: FilterOptions = {
-  filter: '',
-  tags: [],
-  showCustomRules: false,
-  showElasticRules: false,
-};
-export const INITIAL_SORTING_OPTIONS: SortingOptions = {
-  field: 'enabled',
-  order: 'desc',
-};
-export const DEFAULT_PAGE = 1;
-export const DEFAULT_RULES_PER_PAGE = 20;
-
 export type LoadingRuleAction =
   | 'delete'
   | 'disable'
@@ -175,8 +168,8 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const [isInMemorySorting, setIsInMemorySorting] = useState<boolean>(
     storage.get(IN_MEMORY_STORAGE_KEY) ?? false
   );
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>(INITIAL_FILTER_OPTIONS);
-  const [sortingOptions, setSortingOptions] = useState<SortingOptions>(INITIAL_SORTING_OPTIONS);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
+  const [sortingOptions, setSortingOptions] = useState<SortingOptions>(DEFAULT_SORTING_OPTIONS);
   const [isAllSelected, setIsAllSelected] = useState(false);
   const [isRefreshOn, setIsRefreshOn] = useState(autoRefreshSettings.on);
   const [loadingRules, setLoadingRules] = useState<LoadingRules>({
@@ -196,7 +189,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
       // Reset sorting options when switching to server-side implementation as currently selected sorting might not be supported
       if (value === false) {
-        setSortingOptions(INITIAL_SORTING_OPTIONS);
+        setSortingOptions(DEFAULT_SORTING_OPTIONS);
       }
     },
     [storage]

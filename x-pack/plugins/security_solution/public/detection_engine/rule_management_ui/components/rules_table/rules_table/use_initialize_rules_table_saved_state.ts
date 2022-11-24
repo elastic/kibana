@@ -11,12 +11,9 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { useInitializeUrlParam } from '../../../../../common/utils/global_query_string';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
-import {
-  INITIAL_FILTER_OPTIONS,
-  INITIAL_SORTING_OPTIONS,
-  useRulesTableContext,
-} from './rules_table_context';
+import { useRulesTableContext } from './rules_table_context';
 import type { RulesTableSavedState } from './rules_table_saved_state';
+import { DEFAULT_FILTER_OPTIONS, DEFAULT_SORTING_OPTIONS } from './rules_table_defaults';
 
 export function useInitializeRulesTableSavedState(): void {
   const { actions } = useRulesTableContext();
@@ -41,16 +38,16 @@ export function useInitializeRulesTableSavedState(): void {
       const perPage = urlState?.perPage ?? storageState?.perPage;
 
       actions.setFilterOptions({
-        filter: typeof searchTerm === 'string' ? searchTerm : INITIAL_FILTER_OPTIONS.filter,
+        filter: typeof searchTerm === 'string' ? searchTerm : DEFAULT_FILTER_OPTIONS.filter,
         showElasticRules: showCustomRules === false,
         showCustomRules: showCustomRules === true,
-        tags: Array.isArray(tags) ? tags : INITIAL_FILTER_OPTIONS.tags,
+        tags: Array.isArray(tags) ? tags : DEFAULT_FILTER_OPTIONS.tags,
       });
 
       if (sorting) {
         actions.setSortingOptions({
-          field: sorting.field ?? INITIAL_SORTING_OPTIONS.field,
-          order: sorting.order ?? INITIAL_SORTING_OPTIONS.order,
+          field: sorting.field ?? DEFAULT_SORTING_OPTIONS.field,
+          order: sorting.order ?? DEFAULT_SORTING_OPTIONS.order,
         });
       }
 
