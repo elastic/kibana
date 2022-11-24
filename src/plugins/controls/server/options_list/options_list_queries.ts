@@ -10,12 +10,22 @@ import { get, isEmpty } from 'lodash';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 
-import { DEFAULT_SORT, SortingType } from '../../common/options_list/suggestions_sorting';
-import { OptionsListRequestBody, OptionsListSuggestion } from '../../common/options_list/types';
+import { OptionsListRequestBody, OptionsListSuggestions } from '../../common/options_list/types';
 import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
-export interface OptionsListAggregationBuilder {
+
+export interface OptionsListValidationAggregationBuilder {
   buildAggregation: (req: OptionsListRequestBody) => unknown;
-  parse: (response: SearchResponse) => OptionsListSuggestion[];
+  parse: (response: SearchResponse) => string[];
+}
+
+export interface OptionsListSuggestionAggregationBuilder {
+  buildAggregation: (req: OptionsListRequestBody) => unknown;
+  parse: (response: SearchResponse) => OptionsListSuggestions;
+}
+
+interface EsBucket {
+  key: string;
+  doc_count: number;
 }
 
 const getSortType = (sort?: SortingType) => {
@@ -25,37 +35,36 @@ const getSortType = (sort?: SortingType) => {
 /**
  * Validation aggregations
  */
-export const getValidationAggregationBuilder: () => OptionsListAggregationBuilder = () => ({
-  buildAggregation: ({ selectedOptions, fieldName }: OptionsListRequestBody) => {
-    let selectedOptionsFilters;
-    if (selectedOptions) {
-      selectedOptionsFilters = selectedOptions.reduce((acc, currentOption) => {
-        acc[currentOption] = { match: { [fieldName]: currentOption } };
-        return acc;
-      }, {} as { [key: string]: { match: { [key: string]: string } } });
-    }
-    return selectedOptionsFilters && !isEmpty(selectedOptionsFilters)
-      ? {
-          filters: {
-            filters: selectedOptionsFilters,
-          },
-        }
-      : undefined;
-  },
-  parse: (rawEsResult) => {
-    const rawInvalidSuggestions = get(rawEsResult, 'aggregations.validation.buckets') as {
-      [key: string]: { doc_count: number };
-    };
-
-    return rawInvalidSuggestions && !isEmpty(rawInvalidSuggestions)
-      ? Object.entries(rawInvalidSuggestions)
-          ?.filter(([, value]) => value?.doc_count === 0)
-          ?.map(([key]) => {
-            return { key };
-          })
-      : [];
-  },
-});
+export const getValidationAggregationBuilder: () => OptionsListValidationAggregationBuilder =
+  () => ({
+    buildAggregation: ({ selectedOptions, fieldName }: OptionsListRequestBody) => {
+      let selectedOptionsFilters;
+      if (selectedOptions) {
+        selectedOptionsFilters = selectedOptions.reduce((acc, currentOption) => {
+          acc[currentOption] = { match: { [fieldName]: currentOption } };
+          return acc;
+        }, {} as { [key: string]: { match: { [key: string]: string } } });
+      }
+      return selectedOptionsFilters && !isEmpty(selectedOptionsFilters)
+        ? {
+            filters: {
+              filters: selectedOptionsFilters,
+            },
+          }
+        : undefined;
+    },
+    parse: (rawEsResult) => {
+      const rawInvalidSuggestions = get(
+        rawEsResult,
+        'aggregations.validation.buckets'
+      ) as EsBucket[];
+      return rawInvalidSuggestions && !isEmpty(rawInvalidSuggestions)
+        ? rawInvalidSuggestions
+            .filter((suggestion) => suggestion.doc_count === 0)
+            .map(({ key }) => key)
+        : [];
+    },
+  });
 
 /**
  * Suggestion aggregations
@@ -83,21 +92,17 @@ export const getSuggestionAggregationBuilder = ({
 const getEscapedQuery = (q: string = '') =>
   q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 
-const getIpBuckets = (
-  rawEsResult: any,
-  combinedBuckets: OptionsListSuggestion[],
-  type: 'ipv4' | 'ipv6'
-) => {
+const getIpBuckets = (rawEsResult: any, combinedBuckets: EsBucket[], type: 'ipv4' | 'ipv6') => {
   const results = get(
     rawEsResult,
     `aggregations.suggestions.buckets.${type}.filteredSuggestions.buckets`
   );
   if (results) {
-    results.forEach((suggestion: OptionsListSuggestion) => combinedBuckets.push(suggestion));
+    results.forEach((suggestion: EsBucket) => combinedBuckets.push(suggestion));
   }
 };
 
-const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = {
+const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBuilder } = {
   /**
    * the "Keyword only" query / parser should be used when the options list is built on a field which has only keyword mappings.
    */
@@ -111,7 +116,13 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         order: getSortType(sort),
       },
     }),
-    parse: (rawEsResult) => get(rawEsResult, 'aggregations.suggestions.buckets'),
+    parse: (rawEsResult) =>
+      get(rawEsResult, 'aggregations.suggestions.buckets').reduce(
+        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
+          return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
+        },
+        {}
+      ),
   },
 
   /**
@@ -141,7 +152,13 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         },
       };
     },
-    parse: (rawEsResult) => get(rawEsResult, 'aggregations.suggestions.keywordSuggestions.buckets'),
+    parse: (rawEsResult) =>
+      get(rawEsResult, 'aggregations.suggestions.keywordSuggestions.buckets').reduce(
+        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
+          return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
+        },
+        {}
+      ),
   },
 
   /**
@@ -156,7 +173,13 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         order: getSortType(sort),
       },
     }),
-    parse: (rawEsResult) => get(rawEsResult, 'aggregations.suggestions.buckets'),
+    parse: (rawEsResult) =>
+      get(rawEsResult, 'aggregations.suggestions.buckets')?.reduce(
+        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
+          return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
+        },
+        {}
+      ),
   },
 
   /**
@@ -209,15 +232,17 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         return [];
       }
 
-      const buckets: OptionsListSuggestion[] = [];
+      const buckets: EsBucket[] = [];
       getIpBuckets(rawEsResult, buckets, 'ipv4'); // modifies buckets array directly, i.e. "by reference"
       getIpBuckets(rawEsResult, buckets, 'ipv6');
       return buckets
         .sort(
-          (bucketA: OptionsListSuggestion, bucketB: OptionsListSuggestion) =>
+          (bucketA: EsBucket, bucketB: EsBucket) =>
             (bucketB?.doc_count ?? 0) - (bucketA?.doc_count ?? 0)
         )
-        .slice(0, 10); // only return top 10 results
+        .reduce((suggestions, suggestion: EsBucket) => {
+          return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
+        }, {});
     },
   },
 
@@ -249,6 +274,12 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
         },
       };
     },
-    parse: (rawEsResult) => get(rawEsResult, 'aggregations.suggestions.nestedSuggestions.buckets'),
+    parse: (rawEsResult) =>
+      get(rawEsResult, 'aggregations.suggestions.nestedSuggestions.buckets').reduce(
+        (suggestions: OptionsListSuggestions, suggestion: EsBucket) => {
+          return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
+        },
+        {}
+      ),
   },
 };

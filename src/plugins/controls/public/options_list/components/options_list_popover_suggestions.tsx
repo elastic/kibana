@@ -21,7 +21,6 @@ import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public'
 import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from '../options_list_reducers';
-import { OptionsListSuggestion } from '@kbn/controls-plugin/common/options_list/types';
 
 interface OptionsListPopoverSuggestionsProps {
   showOnlySelected: boolean;
@@ -50,16 +49,12 @@ export const OptionsListPopoverSuggestions = ({
   const loading = select((state) => state.output.loading);
 
   // track selectedOptions and invalidSelections in sets for more efficient lookup
-  const selectedOptionsSet = useMemo(
-    () => new Set<string>(selectedOptions?.map(({ key }) => key)),
-    [selectedOptions]
-  );
+  const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
   const invalidSelectionsSet = useMemo(
-    () => new Set<string>(invalidSelections?.map(({ key }) => key)),
+    () => new Set<string>(invalidSelections),
     [invalidSelections]
   );
-  const suggestions = showOnlySelected ? selectedOptions : availableOptions;
-  console.log(suggestions);
+  const suggestions = showOnlySelected ? selectedOptions : Object.keys(availableOptions ?? {});
 
   if (
     !loading &&
@@ -101,36 +96,36 @@ export const OptionsListPopoverSuggestions = ({
           {OptionsListStrings.controlAndPopover.getExists()}
         </EuiFilterSelectItem>
       )}
-      {suggestions?.map((suggestion, index) => (
+      {suggestions?.map((key: string) => (
         <EuiFilterSelectItem
-          data-test-subj={`optionsList-control-selection-${suggestion.key}`}
-          checked={selectedOptionsSet?.has(suggestion.key) ? 'on' : undefined}
-          key={index}
+          data-test-subj={`optionsList-control-selection-${key}`}
+          checked={selectedOptionsSet?.has(key) ? 'on' : undefined}
+          key={key}
           onClick={() => {
             if (showOnlySelected) {
-              dispatch(deselectOption(suggestion));
+              dispatch(deselectOption(key));
               return;
             }
             if (singleSelect) {
-              dispatch(replaceSelection(suggestion));
+              dispatch(replaceSelection(key));
               return;
             }
-            if (selectedOptionsSet.has(suggestion.key)) {
-              dispatch(deselectOption(suggestion));
+            if (selectedOptionsSet.has(key)) {
+              dispatch(deselectOption(key));
               return;
             }
-            dispatch(selectOption(suggestion));
+            dispatch(selectOption(key));
           }}
           className={
-            showOnlySelected && invalidSelectionsSet.has(suggestion.key)
+            showOnlySelected && invalidSelectionsSet.has(key)
               ? 'optionsList__selectionInvalid'
               : undefined
           }
         >
           <EuiFlexGroup>
-            <EuiFlexItem>{`${suggestion.key}`}</EuiFlexItem>
+            <EuiFlexItem>{`${key}`}</EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {suggestion.doc_count && <EuiBadge>{`${suggestion.doc_count}`}</EuiBadge>}
+              {availableOptions && <EuiBadge>{`${availableOptions[key].doc_count}`}</EuiBadge>}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFilterSelectItem>

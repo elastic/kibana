@@ -10,7 +10,7 @@ import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 import { ControlOutput } from '../types';
 import {
   OptionsListField,
-  OptionsListSuggestion,
+  OptionsListSuggestions,
   OptionsListEmbeddableInput,
 } from '../../common/options_list/types';
 
@@ -23,9 +23,9 @@ interface SearchString {
 export interface OptionsListComponentState {
   field?: OptionsListField;
   totalCardinality?: number;
-  availableOptions?: OptionsListSuggestion[];
-  invalidSelections?: OptionsListSuggestion[];
-  validSelections?: OptionsListSuggestion[];
+  availableOptions?: OptionsListSuggestions;
+  invalidSelections?: string[];
+  validSelections?: string[];
   searchString: SearchString;
 }
 

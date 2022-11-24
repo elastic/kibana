@@ -40,7 +40,7 @@ import { getDefaultComponentState, optionsListReducers } from '../options_list_r
 import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
-import { OptionsListField, OptionsListSuggestion } from '../../../common/options_list/types';
+import { OptionsListField } from '../../../common/options_list/types';
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,
@@ -179,8 +179,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             dispatch(clearValidAndInvalidSelections({}));
           } else {
             const { invalidSelections } = this.reduxEmbeddableTools.getState().componentState ?? {};
-            const newValidSelections: OptionsListSuggestion[] = [];
-            const newInvalidSelections: OptionsListSuggestion[] = [];
+            const newValidSelections: string[] = [];
+            const newInvalidSelections: string[] = [];
             for (const selectedOption of newSelectedOptions) {
               if (invalidSelections?.includes(selectedOption)) {
                 newInvalidSelections.push(selectedOption);
@@ -336,8 +336,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           })
         );
       } else {
-        const valid: OptionsListSuggestion[] = [];
-        const invalid: OptionsListSuggestion[] = [];
+        const valid: string[] = [];
+        const invalid: string[] = [];
         for (const selectedOption of selectedOptions ?? []) {
           if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
           else valid.push(selectedOption);
@@ -362,7 +362,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       batch(() => {
         dispatch(
           updateQueryResults({
-            availableOptions: [],
+            availableOptions: {},
           })
         );
         dispatch(setLoading(false));
@@ -387,13 +387,9 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       newFilter = buildExistsFilter(field, dataView);
     } else if (validSelections) {
       if (validSelections.length === 1) {
-        newFilter = buildPhraseFilter(field, validSelections[0].key, dataView);
+        newFilter = buildPhraseFilter(field, validSelections[0], dataView);
       } else {
-        newFilter = buildPhrasesFilter(
-          field,
-          validSelections.map(({ key }) => key),
-          dataView
-        );
+        newFilter = buildPhrasesFilter(field, validSelections, dataView);
       }
     }
     if (!newFilter) return [];

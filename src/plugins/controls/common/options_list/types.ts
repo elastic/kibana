@@ -15,7 +15,7 @@ import { DataControlInput } from '../types';
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 
 export interface OptionsListEmbeddableInput extends DataControlInput {
-  selectedOptions?: OptionsListSuggestion[];
+  selectedOptions?: string[];
   existsSelected?: boolean;
   runPastTimeout?: boolean;
   singleSelect?: boolean;
@@ -32,18 +32,17 @@ export type OptionsListField = FieldSpec & {
   childFieldName?: string;
 };
 
-export interface OptionsListSuggestion {
-  key: string;
-  doc_count?: number;
+export interface OptionsListSuggestions {
+  [key: string]: { doc_count: number };
 }
 
 /**
  * The Options list response is returned from the serverside Options List route.
  */
 export interface OptionsListResponse {
-  suggestions: OptionsListSuggestion[];
+  suggestions: OptionsListSuggestions;
   totalCardinality: number;
-  invalidSelections?: OptionsListSuggestion[];
+  invalidSelections?: string[];
 }
 
 /**
@@ -67,7 +66,7 @@ export type OptionsListRequest = Omit<
 export interface OptionsListRequestBody {
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
   filters?: Array<{ bool: BoolQuery }>;
-  selectedOptions?: OptionsListSuggestion[];
+  selectedOptions?: string[];
   runPastTimeout?: boolean;
   parentFieldName?: string;
   textFieldName?: string;

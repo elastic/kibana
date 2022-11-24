@@ -93,17 +93,11 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
           ) : (
             <>
               {validSelections && (
-                <span>
-                  {validSelections
-                    ?.map(({ key }) => key)
-                    .join(OptionsListStrings.control.getSeparator())}
-                </span>
+                <span>{validSelections.join(OptionsListStrings.control.getSeparator())}</span>
               )}
               {invalidSelections && (
                 <span className="optionsList__filterInvalid">
-                  {invalidSelections
-                    .map(({ key }) => key)
-                    .join(OptionsListStrings.control.getSeparator())}
+                  {invalidSelections.join(OptionsListStrings.control.getSeparator())}
                 </span>
               )}
             </>
