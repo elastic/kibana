@@ -34,23 +34,29 @@ describe('useSyncRulesTableSavedState', () => {
       total: 100,
     },
   };
-  const expectUrlSync = (state: Partial<RulesTableState>, expected: RulesTableSavedState) => {
+  const expectStateToSyncWithUrl = (
+    rulesTableState: Partial<RulesTableState>,
+    expectedUrlState: RulesTableSavedState
+  ) => {
     (useRulesTableContext as jest.Mock).mockReturnValue({
-      state,
+      state: rulesTableState,
     });
 
     renderHook(() => useSyncRulesTableSavedState());
 
-    expect(updateUrlParam).toHaveBeenCalledWith(expected);
+    expect(updateUrlParam).toHaveBeenCalledWith(expectedUrlState);
   };
-  const expectStorageSync = (state: Partial<RulesTableState>, expected: RulesTableSavedState) => {
+  const expectStateToSyncWithStorage = (
+    rulesTableState: Partial<RulesTableState>,
+    expectedStorageState: RulesTableSavedState
+  ) => {
     (useRulesTableContext as jest.Mock).mockReturnValue({
-      state,
+      state: rulesTableState,
     });
 
     renderHook(() => useSyncRulesTableSavedState());
 
-    expect(setStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY, expected);
+    expect(setStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY, expectedStorageState);
   };
 
   let updateUrlParam: jest.Mock;
@@ -120,14 +126,14 @@ describe('useSyncRulesTableSavedState', () => {
 
   describe('with the url', () => {
     it('syncs only the search term', () => {
-      expectUrlSync(
+      expectStateToSyncWithUrl(
         { ...defaultState, filterOptions: { ...DEFAULT_FILTER_OPTIONS, filter: 'test' } },
         { searchTerm: 'test' }
       );
     });
 
     it('syncs only the show elastic rules filter', () => {
-      expectUrlSync(
+      expectStateToSyncWithUrl(
         {
           ...defaultState,
           filterOptions: { ...defaultState.filterOptions, showElasticRules: true },
@@ -137,7 +143,7 @@ describe('useSyncRulesTableSavedState', () => {
     });
 
     it('syncs only the show custom rules filter', () => {
-      expectUrlSync(
+      expectStateToSyncWithUrl(
         {
           ...defaultState,
           filterOptions: { ...defaultState.filterOptions, showCustomRules: true },
@@ -147,7 +153,7 @@ describe('useSyncRulesTableSavedState', () => {
     });
 
     it('syncs only the tags', () => {
-      expectUrlSync(
+      expectStateToSyncWithUrl(
         {
           ...defaultState,
           filterOptions: { ...defaultState.filterOptions, tags: ['test'] },
@@ -157,7 +163,7 @@ describe('useSyncRulesTableSavedState', () => {
     });
 
     it('syncs only the sorting field', () => {
-      expectUrlSync(
+      expectStateToSyncWithUrl(
         {
           ...defaultState,
           sortingOptions: { ...defaultState.sortingOptions, field: 'name' },
@@ -167,7 +173,7 @@ describe('useSyncRulesTableSavedState', () => {
     });
 
     it('syncs only the sorting order', () => {
-      expectUrlSync(
+      expectStateToSyncWithUrl(
         {
           ...defaultState,
           sortingOptions: { ...defaultState.sortingOptions, order: 'asc' },
@@ -177,7 +183,7 @@ describe('useSyncRulesTableSavedState', () => {
     });
 
     it('syncs only the page number', () => {
-      expectUrlSync(
+      expectStateToSyncWithUrl(
         {
           ...defaultState,
           pagination: {
@@ -190,7 +196,7 @@ describe('useSyncRulesTableSavedState', () => {
     });
 
     it('syncs only the page size', () => {
-      expectUrlSync(
+      expectStateToSyncWithUrl(
         {
           ...defaultState,
           pagination: {
@@ -205,14 +211,14 @@ describe('useSyncRulesTableSavedState', () => {
 
   describe('with the storage', () => {
     it('syncs only the search term', () => {
-      expectStorageSync(
+      expectStateToSyncWithStorage(
         { ...defaultState, filterOptions: { ...defaultState.filterOptions, filter: 'test' } },
         { searchTerm: 'test' }
       );
     });
 
     it('syncs only the show elastic rules filter', () => {
-      expectStorageSync(
+      expectStateToSyncWithStorage(
         {
           ...defaultState,
           filterOptions: { ...defaultState.filterOptions, showElasticRules: true },
@@ -222,7 +228,7 @@ describe('useSyncRulesTableSavedState', () => {
     });
 
     it('syncs only the show custom rules filter', () => {
-      expectStorageSync(
+      expectStateToSyncWithStorage(
         {
           ...defaultState,
           filterOptions: { ...defaultState.filterOptions, showCustomRules: true },
@@ -232,7 +238,7 @@ describe('useSyncRulesTableSavedState', () => {
     });
 
     it('syncs only the tags', () => {
-      expectStorageSync(
+      expectStateToSyncWithStorage(
         {
           ...defaultState,
           filterOptions: { ...defaultState.filterOptions, tags: ['test'] },
@@ -242,7 +248,7 @@ describe('useSyncRulesTableSavedState', () => {
     });
 
     it('syncs only the sorting field', () => {
-      expectStorageSync(
+      expectStateToSyncWithStorage(
         {
           ...defaultState,
           sortingOptions: { ...defaultState.sortingOptions, field: 'name' },
@@ -252,7 +258,7 @@ describe('useSyncRulesTableSavedState', () => {
     });
 
     it('syncs only the sorting order', () => {
-      expectStorageSync(
+      expectStateToSyncWithStorage(
         {
           ...defaultState,
           sortingOptions: { ...defaultState.sortingOptions, order: 'asc' },
@@ -262,7 +268,7 @@ describe('useSyncRulesTableSavedState', () => {
     });
 
     it('syncs only the page number', () => {
-      expectStorageSync(
+      expectStateToSyncWithStorage(
         {
           ...defaultState,
           pagination: {
@@ -275,7 +281,7 @@ describe('useSyncRulesTableSavedState', () => {
     });
 
     it('syncs only the page size', () => {
-      expectStorageSync(
+      expectStateToSyncWithStorage(
         {
           ...defaultState,
           pagination: {
