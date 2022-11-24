@@ -31,3 +31,15 @@ export const operationCss = css`
 export const getGrabIconCss = (euiTheme: EuiThemeComputed) => css`
   margin: 0 ${euiTheme.size.xxs};
 `;
+
+export const actionButtonCss = css`
+  &.euiButtonEmpty .euiButtonEmpty__content {
+    padding: 0 0px;
+    padding-left: 2px;
+
+    &.euiButtonContent > * + * {
+      -webkit-margin-start: 2px;
+      margin-inline-start: 2px;
+    }
+  }
+`;

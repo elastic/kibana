@@ -17,6 +17,7 @@ import {
   EuiIcon,
   EuiPanel,
   useEuiTheme,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
@@ -34,6 +35,7 @@ import type { Path } from '../types';
 import { getFieldFromFilter, getOperatorFromFilter } from '../../filter_bar/filter_editor';
 import { Operator } from '../../filter_bar/filter_editor';
 import {
+  actionButtonCss,
   cursorAddCss,
   cursorOrCss,
   fieldAndParamCss,
@@ -183,6 +185,7 @@ export function FilterItem({
   const onAddButtonClick = useCallback(() => onAddFilter(BooleanRelation.AND), [onAddFilter]);
   const onOrButtonClick = useCallback(() => onAddFilter(BooleanRelation.OR), [onAddFilter]);
 
+  const isMobile = useIsWithinBreakpoints(['xs']);
   return (
     <div
       className={cx({
@@ -297,6 +300,7 @@ export function FilterItem({
                               size="s"
                               color="danger"
                               aria-label={strings.getDeleteFilterGroupButtonIconLabel()}
+                              {...(isMobile ? { className: actionButtonCss } : {})}
                             />
                           </EuiFlexItem>
                           {!hideOr ? (
@@ -308,6 +312,7 @@ export function FilterItem({
                                 size="s"
                                 iconSize="s"
                                 aria-label={strings.getAddOrFilterGroupButtonIconLabel()}
+                                {...(isMobile ? { className: actionButtonCss } : {})}
                               >
                                 {strings.getAddOrFilterGroupButtonLabel()}
                               </EuiButtonEmpty>
@@ -321,6 +326,7 @@ export function FilterItem({
                               size="s"
                               iconSize="s"
                               aria-label={strings.getAddAndFilterGroupButtonIconLabel()}
+                              {...(isMobile ? { className: actionButtonCss } : {})}
                             >
                               {strings.getAddAndFilterGroupButtonLabel()}
                             </EuiButtonEmpty>
