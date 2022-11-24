@@ -262,11 +262,11 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       }
 
       if (canRunSingleQuery) {
-        setValue('queryType', 'query');
+        return setValue('queryType', 'query');
       }
 
       if (canRunPacks) {
-        setValue('queryType', 'pack');
+        return setValue('queryType', 'pack');
       }
     }
   }, [canRunPacks, canRunSingleQuery, defaultValue, isPackDataFetched, packsData?.data, setValue]);
