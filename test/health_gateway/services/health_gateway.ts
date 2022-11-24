@@ -14,6 +14,10 @@ import { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/utils';
 import { FtrService } from '../../functional/ftr_provider_context';
 
+interface HealthGatewayOptions {
+  env?: Record<string, string>;
+}
+
 export class HealthGatewayService extends FtrService {
   private runner = new ProcRunner(this.ctx.getService('log'));
   private kibanaUrl = format(this.ctx.getService('config').get('servers.kibana'));
@@ -26,7 +30,7 @@ export class HealthGatewayService extends FtrService {
     }
   }
 
-  async start(config: string) {
+  async start(config: string, { env = {} }: HealthGatewayOptions = {}) {
     if (this.port) {
       throw new Error('Health gateway is already running');
     }
@@ -45,6 +49,7 @@ export class HealthGatewayService extends FtrService {
       ],
       cwd: REPO_ROOT,
       env: {
+        ...env,
         KIBANA_URL: this.kibanaUrl,
         HOST: this.host,
         PORT: `${this.port}`,

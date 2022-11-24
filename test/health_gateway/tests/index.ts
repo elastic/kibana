@@ -48,6 +48,14 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body).to.have.property('status', 'failure');
     });
 
+    it('returns different status codes on state changes', async () => {
+      await healthGateway.start('fixtures/flaky.yaml', { env: { SESSION: `${Math.random()}` } });
+
+      await healthGateway.poll().expect(200);
+      await healthGateway.poll().expect(503);
+      await healthGateway.poll().expect(200);
+    });
+
     afterEach(async () => {
       await healthGateway.stop();
     });

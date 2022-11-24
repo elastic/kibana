@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
+import { CoreSetup, KibanaRequest, Plugin } from '@kbn/core/server';
 
 export class HealthGatewayStatusPlugin implements Plugin<void, void> {
   public setup(core: CoreSetup) {
@@ -33,6 +34,27 @@ export class HealthGatewayStatusPlugin implements Plugin<void, void> {
 
       return res.ok();
     });
+
+    const sessions = new Set<string>();
+    router.get(
+      {
+        path: '/api/status/flaky',
+        validate: {
+          query: schema.object({ session: schema.string() }),
+        },
+      },
+      async (context, req: KibanaRequest<void, { session: string }>, res) => {
+        if (sessions.has(req.query.session)) {
+          sessions.delete(req.query.session);
+
+          return res.custom({ statusCode: 500, body: 'Flaky' });
+        }
+
+        sessions.add(req.query.session);
+
+        return res.ok();
+      }
+    );
   }
 
   public start() {}
