@@ -48,7 +48,7 @@ export const stringifyKueries = (
     }, '');
 };
 
-export const isAlphaNumeric = (str: string) => {
+const isAlphaNumeric = (str: string) => {
   const format = /[ `!@#$%^&*()_+=\[\]{};':"\\|,.<>\/?~]/;
   return !format.test(str);
 };
