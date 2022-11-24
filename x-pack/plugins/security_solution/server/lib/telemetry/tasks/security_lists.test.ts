@@ -8,10 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTelemetrySecurityListTaskConfig } from './security_lists';
 import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
-import {
-  ENDPOINT_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 describe('security list telemetry task test', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -40,7 +37,7 @@ describe('security list telemetry task test', () => {
     expect(mockTelemetryReceiver.fetchTrustedApplications).toHaveBeenCalled();
     expect(mockTelemetryReceiver.fetchEndpointList).toHaveBeenCalledWith(ENDPOINT_LIST_ID);
     expect(mockTelemetryReceiver.fetchEndpointList).toHaveBeenCalledWith(
-      ENDPOINT_EVENT_FILTERS_LIST_ID
+      ENDPOINT_ARTIFACT_LISTS.eventFilters.id
     );
     expect(mockTelemetryReceiver.fetchValueListMetaData).toHaveBeenCalled();
   });

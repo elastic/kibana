@@ -6,10 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import {
-  ENDPOINT_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import moment from 'moment';
 import {
   LIST_ENDPOINT_EXCEPTION,
@@ -100,7 +97,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         // Lists Telemetry: Endpoint Event Filters
 
         const epFilters = await receiver.fetchEndpointList(
-          ENDPOINT_EVENT_FILTERS_LIST_ID,
+          ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
           searchFromFilter
         );
         if (epFilters?.data) {
@@ -120,6 +117,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         }
 
         // Value list meta data
+
         const valueListMetaData = await receiver.fetchValueListMetaData(
           FETCH_VALUE_LIST_META_DATA_INTERVAL_IN_HOURS
         );
