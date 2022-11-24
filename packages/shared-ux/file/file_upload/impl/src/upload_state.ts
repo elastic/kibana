@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import { ImageMetadataFactory, getImageMetadata, isImage } from '@kbn/shared-ux-file-util';
 import type { FileKind, FileJSON, FilesClient } from '@kbn/shared-ux-file-types';
 import { i18nTexts } from './i18n_texts';

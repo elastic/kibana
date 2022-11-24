@@ -46,7 +46,7 @@ const defaultArgs: Props = {
 };
 
 export default {
-  title: 'stateful/FileUpload',
+  title: 'files/FileUpload',
   component: FileUpload,
   args: defaultArgs,
   decorators: [
@@ -56,6 +56,7 @@ export default {
           {
             create: async () => ({ file: { id: 'test' } }),
             upload: () => sleep(1000),
+            getFileKind,
           } as unknown as FilesClient
         }
       >
