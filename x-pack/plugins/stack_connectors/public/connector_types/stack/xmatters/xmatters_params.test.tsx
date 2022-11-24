@@ -12,7 +12,7 @@ import XmattersParamsFields from './xmatters_params';
 
 describe('XmattersParamsFields renders', () => {
   beforeAll(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(new Date('2022-01-01T12:00:00.000Z'));
   });
 
