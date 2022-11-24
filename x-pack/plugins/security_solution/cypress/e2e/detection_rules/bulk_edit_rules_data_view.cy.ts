@@ -58,10 +58,10 @@ const expectedIndexPatterns = ['index-1-*', 'index-2-*'];
 
 const expectedNumberOfCustomRulesToBeEdited = 6;
 
-const indexDataSource = { dataView: DATA_VIEW_ID, type: 'dataView' } as const;
+const dataViewDataSource = { dataView: DATA_VIEW_ID, type: 'dataView' } as const;
 
-const defaultRuleData = {
-  dataSource: indexDataSource,
+const dataViewRuleData = {
+  dataSource: dataViewDataSource,
 };
 
 describe('Bulk editing index patterns of rules with a data view only', () => {
@@ -75,12 +75,12 @@ describe('Bulk editing index patterns of rules with a data view only', () => {
 
     postDataView(DATA_VIEW_ID);
 
-    createCustomRule({ ...getNewRule(), ...defaultRuleData }, '1');
-    createEventCorrelationRule({ ...getEqlRule(), ...defaultRuleData }, '2');
-    createCustomIndicatorRule({ ...getNewThreatIndicatorRule(), ...defaultRuleData }, '3');
-    createThresholdRule({ ...getNewThresholdRule(), ...defaultRuleData }, '4');
-    createNewTermsRule({ ...getNewTermsRule(), ...defaultRuleData }, '5');
-    createSavedQueryRule({ ...getNewRule(), ...defaultRuleData, savedId: 'mocked' }, '6');
+    createCustomRule({ ...getNewRule(), ...dataViewRuleData }, '1');
+    createEventCorrelationRule({ ...getEqlRule(), ...dataViewRuleData }, '2');
+    createCustomIndicatorRule({ ...getNewThreatIndicatorRule(), ...dataViewRuleData }, '3');
+    createThresholdRule({ ...getNewThresholdRule(), ...dataViewRuleData }, '4');
+    createNewTermsRule({ ...getNewTermsRule(), ...dataViewRuleData }, '5');
+    createSavedQueryRule({ ...getNewRule(), ...dataViewRuleData, savedId: 'mocked' }, '6');
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
@@ -197,7 +197,7 @@ describe('Bulk editing index patterns of rules with index patterns and rules wit
 
     postDataView(DATA_VIEW_ID);
 
-    createCustomRule({ ...getNewRule(), ...defaultRuleData }, '1');
+    createCustomRule({ ...getNewRule(), ...dataViewRuleData }, '1');
     createCustomRule(
       {
         ...getNewRule(),
