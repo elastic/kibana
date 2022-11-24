@@ -185,7 +185,7 @@ export function FilterItem({
   const onAddButtonClick = useCallback(() => onAddFilter(BooleanRelation.AND), [onAddFilter]);
   const onOrButtonClick = useCallback(() => onAddFilter(BooleanRelation.OR), [onAddFilter]);
 
-  const isMobile = useIsWithinBreakpoints(['xs']);
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
   return (
     <div
       className={cx({
