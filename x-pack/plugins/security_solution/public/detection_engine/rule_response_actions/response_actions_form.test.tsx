@@ -22,7 +22,7 @@ describe('ResponseActionsForm', () => {
     const { form } = useForm();
     return (
       <Form form={form}>
-        <ResponseActionsForm addItem={jest.fn()} removeItem={jest.fn()} {...props} />
+        <ResponseActionsForm addItem={jest.fn()} removeItem={jest.fn()} {...props} form={form} />
       </Form>
     );
   };
