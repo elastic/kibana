@@ -59,7 +59,6 @@ const ControlGroupInputBuilder = {
 };
 
 export interface ControlGroupRendererProps {
-  // input?: Partial<Pick<ControlGroupInput, 'viewMode' | 'executionContext'>>;
   onEmbeddableLoad: (controlGroupContainer: ControlGroupContainer) => void;
   getCreationOptions: (
     builder: typeof ControlGroupInputBuilder
