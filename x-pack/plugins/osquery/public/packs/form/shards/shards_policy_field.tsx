@@ -9,6 +9,7 @@ import { useController } from 'react-hook-form';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { useAgentPolicies } from '../../../agent_policies';
 import type { ShardsFormReturn } from './shards_form';
 
@@ -19,6 +20,14 @@ interface ShardsPolicyFieldComponent {
   hideLabel?: boolean;
   options: Array<EuiComboBoxOptionOption<string>>;
 }
+
+// prevents too long policy names to break the layout
+const StyledEuiFormRow = styled(EuiFormRow)`
+  max-width: 596px;
+  .euiComboBoxPill--plainText {
+    max-width: 510px !important;
+  }
+`;
 
 const ShardsPolicyFieldComponent = ({
   index,
@@ -71,7 +80,7 @@ const ShardsPolicyFieldComponent = ({
   const singleSelectionConfig = useMemo(() => ({ asPlainText: true }), []);
 
   return (
-    <EuiFormRow
+    <StyledEuiFormRow
       label={
         hideLabel
           ? ''
@@ -94,7 +103,7 @@ const ShardsPolicyFieldComponent = ({
         rowHeight={32}
         isClearable
       />
-    </EuiFormRow>
+    </StyledEuiFormRow>
   );
 };
 
