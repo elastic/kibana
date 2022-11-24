@@ -6,8 +6,21 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-// import type { CriteriaWithPagination } from '@elastic/eui';
-import { EuiSpacer, EuiPanel, EuiText, EuiInMemoryTable, EuiLoadingContent } from '@elastic/eui';
+
+import type {
+  CriteriaWithPagination,
+  EuiBasicTableColumn,
+  HorizontalAlignment,
+} from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiSwitch,
+  EuiSpacer,
+  EuiPanel,
+  EuiText,
+  EuiInMemoryTable,
+  EuiLoadingContent,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { sortBy } from 'lodash';
@@ -38,10 +51,11 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
     refetchInterval: false,
   });
 
-  // const [pagination, setPagination] = useState({ pageIndex: 0 });
+  const [pagination, setPagination] = useState({ pageIndex: 0 });
   const [message, setMessage] = useState<JSX.Element | string | undefined>(
     <EuiLoadingContent lines={4} data-test-subj="exceptionItemViewerEmptyPrompts-loading" />
   );
+  const [linkedRules, setLinkedRules] = useState<Rule[]>(initiallySelectedRules || []);
 
   useEffect(() => {
     if (!isFetched) {
@@ -54,15 +68,6 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
       setMessage(undefined);
     }
   }, [setMessage, isFetched]);
-
-  const ruleSelectionValue = {
-    onSelectionChange: (selection: Rule[]) => {
-      if (onRuleSelectionChange != null) {
-        onRuleSelectionChange(selection);
-      }
-    },
-    initialSelected: initiallySelectedRules ?? [],
-  };
 
   const searchOptions = useMemo(
     () => ({
@@ -92,7 +97,7 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
     [rules]
   );
 
-  const sortedRulesBySelection = useMemo(
+  const sortedRulesByLinkedRulesOnTop = useMemo(
     () =>
       sortBy(rules, [
         (rule) => {
@@ -101,30 +106,67 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
       ]),
     [initiallySelectedRules, rules]
   );
+
+  const LinkRuleSwitch = ({ rule }: { rule: Rule }) => {
+    // TODO check how to refactor
+
+    const isRuleLinked = linkedRules.find((r) => r.id === rule.id);
+    const [linked, setLinked] = useState(!!isRuleLinked);
+
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiSwitch
+          onChange={({ target: { checked } }) => {
+            setLinked(checked);
+
+            const newLinkedRules = !checked
+              ? linkedRules?.filter((item) => item.id !== rule.id)
+              : [...linkedRules, rule];
+            setLinkedRules(newLinkedRules);
+            if (typeof onRuleSelectionChange === 'function') onRuleSelectionChange(newLinkedRules);
+          }}
+          label=""
+          checked={linked}
+        />
+      </EuiFlexItem>
+    );
+  };
+  const rulesTableColumnsWithLinkSwitch: Array<EuiBasicTableColumn<Rule>> = [
+    {
+      field: 'link',
+      name: 'Link',
+      align: 'left' as HorizontalAlignment,
+      'data-test-subj': 'ruleActionLinkRuleSwitch',
+      render: (_, rule: Rule) => <LinkRuleSwitch rule={rule} />,
+    },
+    ...getRulesTableColumn(),
+  ];
+
   return (
     <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
       <>
         <EuiText size="s">{myI18n.ADD_TO_SELECTED_RULES_DESCRIPTION}</EuiText>
         <EuiSpacer size="s" />
         <EuiInMemoryTable<Rule>
-          tableCaption="Rules table"
-          items={sortedRulesBySelection}
-          itemId="id"
-          loading={!isFetched}
-          columns={getRulesTableColumn()}
-          // pagination={{
-          //   ...pagination,
-          //   itemsPerPage: 5,
-          //   showPerPageOptions: false,
-          // }}
-          message={message}
-          // onTableChange={({ page: { index } }: CriteriaWithPagination<never>) =>
-          //   setPagination({ pageIndex: index })
-          // }
-          selection={ruleSelectionValue}
           search={searchOptions}
-          isSelectable
           data-test-subj="addExceptionToRulesTable"
+          hasActions={true}
+          tableCaption="Rules table"
+          items={sortedRulesByLinkedRulesOnTop}
+          loading={!isFetched}
+          columns={rulesTableColumnsWithLinkSwitch}
+          message={message}
+          pagination={{
+            ...pagination,
+            itemsPerPage: 5,
+            showPerPageOptions: false,
+          }}
+          onTableChange={({ page: { index } }: CriteriaWithPagination<never>) =>
+            setPagination({ pageIndex: index })
+          }
+          cellProps={{}}
+          rowProps={{}}
+          tableLayout="auto"
         />
       </>
     </EuiPanel>
