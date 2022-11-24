@@ -6,33 +6,17 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { useInitializeUrlParam } from '../../../../../common/utils/global_query_string';
 import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../../common/constants';
 import { useInitializeRulesTableSavedState } from './use_initialize_rules_table_saved_state';
 import type { RulesTableSavedState } from './rules_table_saved_state';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_SORTING_OPTIONS } from './rules_table_defaults';
 import type { RulesTableActions } from './rules_table_context';
 import { useRulesTableContext } from './rules_table_context';
+import { mockRulesTablePersistedState } from './__mocks__/mock_rules_table_persistent_state';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/utils/global_query_string');
 jest.mock('./rules_table_context');
-
-function mockState({
-  urlState,
-  storageState,
-}: {
-  urlState: RulesTableSavedState | null;
-  storageState: RulesTableSavedState | null;
-}): void {
-  (useInitializeUrlParam as jest.Mock).mockImplementation(
-    (_, cb: (params: RulesTableSavedState | null) => void) => cb(urlState)
-  );
-  (useKibana as jest.Mock).mockReturnValue({
-    services: { sessionStorage: { get: jest.fn().mockReturnValue(storageState) } },
-  });
-}
 
 describe('useInitializeRulesTableSavedState', () => {
   const urlSavedState: RulesTableSavedState = {
@@ -72,7 +56,7 @@ describe('useInitializeRulesTableSavedState', () => {
 
   describe('when state is not saved', () => {
     beforeEach(() => {
-      mockState({ urlState: null, storageState: null });
+      mockRulesTablePersistedState({ urlState: null, storageState: null });
     });
 
     it('does not restore the state', () => {
@@ -87,7 +71,7 @@ describe('useInitializeRulesTableSavedState', () => {
 
   describe('when state is saved in the url', () => {
     beforeEach(() => {
-      mockState({ urlState: urlSavedState, storageState: null });
+      mockRulesTablePersistedState({ urlState: urlSavedState, storageState: null });
     });
 
     it('restores the state', () => {
@@ -105,7 +89,10 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores the state ignoring negative page size', () => {
-      mockState({ urlState: { ...urlSavedState, perPage: -1 }, storageState: null });
+      mockRulesTablePersistedState({
+        urlState: { ...urlSavedState, perPage: -1 },
+        storageState: null,
+      });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -113,7 +100,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores the state ignoring the page size larger than max allowed', () => {
-      mockState({
+      mockRulesTablePersistedState({
         urlState: { ...urlSavedState, perPage: RULES_TABLE_MAX_PAGE_SIZE + 1 },
         storageState: null,
       });
@@ -126,7 +113,7 @@ describe('useInitializeRulesTableSavedState', () => {
 
   describe('when partial state is saved in the url', () => {
     it('restores only the search term', () => {
-      mockState({ urlState: { searchTerm: 'test' }, storageState: null });
+      mockRulesTablePersistedState({ urlState: { searchTerm: 'test' }, storageState: null });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -140,7 +127,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only show elastic rules filter', () => {
-      mockState({ urlState: { showCustomRules: false }, storageState: null });
+      mockRulesTablePersistedState({ urlState: { showCustomRules: false }, storageState: null });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -154,7 +141,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only show custom rules filter', () => {
-      mockState({ urlState: { showCustomRules: true }, storageState: null });
+      mockRulesTablePersistedState({ urlState: { showCustomRules: true }, storageState: null });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -168,7 +155,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only tags', () => {
-      mockState({ urlState: { tags: ['test'] }, storageState: null });
+      mockRulesTablePersistedState({ urlState: { tags: ['test'] }, storageState: null });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -182,7 +169,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only sorting field', () => {
-      mockState({ urlState: { sort: { field: 'name' } }, storageState: null });
+      mockRulesTablePersistedState({ urlState: { sort: { field: 'name' } }, storageState: null });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -196,7 +183,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only sorting order', () => {
-      mockState({ urlState: { sort: { order: 'asc' } }, storageState: null });
+      mockRulesTablePersistedState({ urlState: { sort: { order: 'asc' } }, storageState: null });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -210,7 +197,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only page number', () => {
-      mockState({ urlState: { page: 10 }, storageState: null });
+      mockRulesTablePersistedState({ urlState: { page: 10 }, storageState: null });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -221,7 +208,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only page size', () => {
-      mockState({ urlState: { perPage: 10 }, storageState: null });
+      mockRulesTablePersistedState({ urlState: { perPage: 10 }, storageState: null });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -234,7 +221,7 @@ describe('useInitializeRulesTableSavedState', () => {
 
   describe('when state is saved in the storage', () => {
     beforeEach(() => {
-      mockState({ urlState: null, storageState: storageSavedState });
+      mockRulesTablePersistedState({ urlState: null, storageState: storageSavedState });
     });
 
     it('restores the state', () => {
@@ -252,7 +239,10 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores the state ignoring negative page size', () => {
-      mockState({ urlState: null, storageState: { ...storageSavedState, perPage: -1 } });
+      mockRulesTablePersistedState({
+        urlState: null,
+        storageState: { ...storageSavedState, perPage: -1 },
+      });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -260,7 +250,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores the state ignoring the page size larger than max allowed', () => {
-      mockState({
+      mockRulesTablePersistedState({
         urlState: null,
         storageState: { ...storageSavedState, perPage: RULES_TABLE_MAX_PAGE_SIZE + 1 },
       });
@@ -273,7 +263,7 @@ describe('useInitializeRulesTableSavedState', () => {
 
   describe('when partial state is saved in the storage', () => {
     it('restores only the search term', () => {
-      mockState({ urlState: null, storageState: { searchTerm: 'test' } });
+      mockRulesTablePersistedState({ urlState: null, storageState: { searchTerm: 'test' } });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -287,7 +277,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only show elastic rules filter', () => {
-      mockState({ urlState: null, storageState: { showCustomRules: false } });
+      mockRulesTablePersistedState({ urlState: null, storageState: { showCustomRules: false } });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -301,7 +291,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only show custom rules filter', () => {
-      mockState({ urlState: null, storageState: { showCustomRules: true } });
+      mockRulesTablePersistedState({ urlState: null, storageState: { showCustomRules: true } });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -315,7 +305,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only tags', () => {
-      mockState({ urlState: null, storageState: { tags: ['test'] } });
+      mockRulesTablePersistedState({ urlState: null, storageState: { tags: ['test'] } });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -329,7 +319,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only sorting field', () => {
-      mockState({ urlState: null, storageState: { sort: { field: 'name' } } });
+      mockRulesTablePersistedState({ urlState: null, storageState: { sort: { field: 'name' } } });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -343,7 +333,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only sorting order', () => {
-      mockState({ urlState: null, storageState: { sort: { order: 'asc' } } });
+      mockRulesTablePersistedState({ urlState: null, storageState: { sort: { order: 'asc' } } });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -357,7 +347,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only page number', () => {
-      mockState({ urlState: null, storageState: { page: 10 } });
+      mockRulesTablePersistedState({ urlState: null, storageState: { page: 10 } });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -368,7 +358,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only page size', () => {
-      mockState({ urlState: null, storageState: { perPage: 10 } });
+      mockRulesTablePersistedState({ urlState: null, storageState: { perPage: 10 } });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -381,7 +371,7 @@ describe('useInitializeRulesTableSavedState', () => {
 
   describe('when state is saved in the url and the storage', () => {
     beforeEach(() => {
-      mockState({ urlState: urlSavedState, storageState: storageSavedState });
+      mockRulesTablePersistedState({ urlState: urlSavedState, storageState: storageSavedState });
     });
 
     it('restores the state from the url', () => {
@@ -401,7 +391,10 @@ describe('useInitializeRulesTableSavedState', () => {
 
   describe('when partial state is saved in the url and in the storage', () => {
     it('restores only the search term', () => {
-      mockState({ urlState: { searchTerm: 'test' }, storageState: { sort: { field: 'name' } } });
+      mockRulesTablePersistedState({
+        urlState: { searchTerm: 'test' },
+        storageState: { sort: { field: 'name' } },
+      });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
