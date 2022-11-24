@@ -96,6 +96,7 @@ function RulesPage() {
           </EuiButtonEmpty>,
         ],
       }}
+      data-test-subj="rulesPage"
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
