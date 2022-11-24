@@ -10,10 +10,19 @@ import type { IHttpSerializedFetchError } from './http_error';
 
 export function createAsyncAction<Payload, SuccessPayload>(actionStr: string) {
   return {
-    get: createAction<Payload>(actionStr),
+    get: createAction(actionStr, (payload: Payload) => prepareForTimestamp(payload)),
     success: createAction<SuccessPayload>(`${actionStr}_SUCCESS`),
     fail: createAction<IHttpSerializedFetchError>(`${actionStr}_FAIL`),
   };
 }
 
 export type Nullable<T> = T | null;
+
+function prepareForTimestamp<Payload>(payload: Payload) {
+  return {
+    payload,
+    meta: {
+      timestamp: Date.now(),
+    },
+  };
+}

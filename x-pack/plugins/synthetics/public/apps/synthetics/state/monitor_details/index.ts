@@ -30,6 +30,7 @@ export interface MonitorDetailsState {
   };
   syntheticsMonitorLoading: boolean;
   syntheticsMonitor: EncryptedSyntheticsSavedMonitor | null;
+  syntheticsMonitorDispatchedAt: number;
   error: IHttpSerializedFetchError | null;
   selectedLocationId: string | null;
 }
@@ -39,6 +40,7 @@ const initialState: MonitorDetailsState = {
   lastRun: { loading: false },
   syntheticsMonitor: null,
   syntheticsMonitorLoading: false,
+  syntheticsMonitorDispatchedAt: 0,
   error: null,
   selectedLocationId: null,
 };
@@ -78,7 +80,8 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
       state.pings.loading = false;
     })
 
-    .addCase(getMonitorAction.get, (state) => {
+    .addCase(getMonitorAction.get, (state, action) => {
+      state.syntheticsMonitorDispatchedAt = action.meta.timestamp;
       state.syntheticsMonitorLoading = true;
     })
     .addCase(getMonitorAction.success, (state, action) => {
