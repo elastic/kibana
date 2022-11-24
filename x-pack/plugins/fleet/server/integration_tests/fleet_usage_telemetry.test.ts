@@ -7,7 +7,12 @@
 
 import path from 'path';
 
-import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
+import {
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+  createTestServers,
+  createRootWithCorePlugins,
+} from '@kbn/core-test-helpers-kbn-server';
 
 import { fetchFleetUsage } from '../collectors/register';
 
@@ -17,12 +22,12 @@ const logFilePath = path.join(__dirname, 'logs.log');
 
 describe('fleet usage telemetry', () => {
   let core: any;
-  let esServer: kbnTestServer.TestElasticsearchUtils;
-  let kbnServer: kbnTestServer.TestKibanaUtils;
+  let esServer: TestElasticsearchUtils;
+  let kbnServer: TestKibanaUtils;
   const registryUrl = 'http://localhost';
 
   const startServers = async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t) => jest.setTimeout(t),
       settings: {
         es: {
@@ -34,7 +39,7 @@ describe('fleet usage telemetry', () => {
 
     esServer = await startES();
     const startKibana = async () => {
-      const root = kbnTestServer.createRootWithCorePlugins(
+      const root = createRootWithCorePlugins(
         {
           xpack: {
             fleet: {
