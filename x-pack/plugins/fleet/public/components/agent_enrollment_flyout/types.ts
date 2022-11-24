@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentPolicy } from '../../types';
+import type { AgentPolicy, FleetProxy } from '../../types';
 
 import type { InstalledIntegrationPolicy } from './use_get_agent_incoming_data';
 
@@ -54,4 +54,5 @@ export interface InstructionProps extends BaseProps {
   selectedApiKeyId?: string;
   setSelectedAPIKeyId: (key?: string) => void;
   fleetServerHosts: string[];
+  fleetProxy?: FleetProxy;
 }

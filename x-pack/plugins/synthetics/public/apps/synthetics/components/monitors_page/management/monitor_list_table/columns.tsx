@@ -137,7 +137,7 @@ export function getMonitorListColumns({
       }),
       render: (_enabled: boolean, monitor: EncryptedSyntheticsSavedMonitor) => (
         <MonitorEnabled
-          id={monitor.id}
+          configId={monitor[ConfigKey.CONFIG_ID]}
           monitor={monitor}
           reloadPage={reloadPage}
           isSwitchable={!loading}
@@ -152,7 +152,7 @@ export function getMonitorListColumns({
       render: (fields: EncryptedSyntheticsSavedMonitor) => (
         <Actions
           euiTheme={euiTheme}
-          id={fields.id}
+          configId={fields[ConfigKey.CONFIG_ID]}
           name={fields[ConfigKey.NAME]}
           canEditSynthetics={canEditSynthetics}
           reloadPage={reloadPage}

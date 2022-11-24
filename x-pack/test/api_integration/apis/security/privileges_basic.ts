@@ -46,6 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
             stackAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
             actions: ['all', 'read', 'minimal_all', 'minimal_read'],
             filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
+            filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
@@ -133,6 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
             advancedSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
             indexPatterns: ['all', 'read', 'minimal_all', 'minimal_read'],
             filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
+            filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
             savedObjectsManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
             osquery: [
               'all',
