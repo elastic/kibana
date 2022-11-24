@@ -220,6 +220,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           actionTypeId: 'test.noop',
           group: 'default',
           params: {},
+          lastTriggerDate: null,
         },
         {
           actionRef: 'preconfigured:my-slack1',
@@ -228,6 +229,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           params: {
             message: 'something important happened!',
           },
+          lastTriggerDate: null,
         },
       ]);
 

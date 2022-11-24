@@ -53,8 +53,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('thresholdAlertTimeFieldSelect');
     await retry.try(async () => {
       const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
-      expect(fieldOptions[1]).not.to.be(undefined);
-      await fieldOptions[1].click();
+      expect(fieldOptions[2]).not.to.be(undefined);
+      await fieldOptions[2].click();
     });
     await testSubjects.click('closePopover');
     // need this two out of popup clicks to close them
