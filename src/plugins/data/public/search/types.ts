@@ -38,6 +38,9 @@ export interface ISearchSetup {
   sessionsClient: ISessionsClient;
 }
 
+/**
+ * Used for handling request errors
+ */
 export interface RequestError extends Error {
   body?: { attributes?: { error: { caused_by: { type: string; reason: string } } } };
 }

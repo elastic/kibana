@@ -212,6 +212,14 @@ describe('test fetchAll', () => {
         recordRawType: 'document',
       },
     ]);
+    expect(deps.data.search.showError).toHaveBeenCalledTimes(1);
+  });
+
+  test('debounce two errors - display only one', async () => {
+    mockFetchDocuments.mockRejectedValue({ msg: 'Oh noes!' });
+    mockFetchChart.mockRejectedValue({ msg: 'Oh noes!' });
+
+    expect(deps.data.search.showError).toHaveBeenCalledTimes(1);
   });
 
   test('should not set COMPLETE if an ERROR has been set on main$', async () => {
