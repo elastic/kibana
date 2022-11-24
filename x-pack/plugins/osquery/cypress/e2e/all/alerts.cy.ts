@@ -91,7 +91,7 @@ describe('Alert Event Details', () => {
       .should('exist');
     cy.contains('Pack is a required field');
     cy.getBySel('response-actions-list-item-1').within(() => {
-      cy.getBySel('comboBoxInput').type('{downArrow}{enter}');
+      cy.getBySel('comboBoxInput').type('testpack{downArrow}{enter}');
     });
 
     cy.getBySel('.osquery-ResponseActionTypeSelectOption').click();
@@ -132,7 +132,7 @@ describe('Alert Event Details', () => {
     cy.getBySel('response-actions-list-item-0').within(() => {
       cy.contains('Search for a pack to run');
       cy.contains('Pack is a required field');
-      cy.getBySel('comboBoxInput').type('{downArrow}{enter}');
+      cy.getBySel('comboBoxInput').type('testpack{downArrow}{enter}');
     });
     cy.getBySel('response-actions-list-item-1').within(() => {
       cy.contains('select * from uptime');
