@@ -25,7 +25,6 @@ interface HostStatus {
   host: string;
   status: Status;
   code?: number;
-  message?: string;
 }
 
 export class RootRoute implements ServerRoute {
@@ -101,7 +100,6 @@ export class RootRoute implements ServerRoute {
         return {
           host,
           status: 'timeout',
-          message: error.message,
         };
       }
 
@@ -110,7 +108,6 @@ export class RootRoute implements ServerRoute {
       return {
         host,
         status: 'failure',
-        message: error.message,
       };
     }
   }

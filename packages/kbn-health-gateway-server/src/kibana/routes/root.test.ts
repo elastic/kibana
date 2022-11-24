@@ -114,7 +114,6 @@ describe('RootRoute', () => {
               expect.objectContaining({
                 status: 'failure',
                 host: 'http://localhost:5601',
-                message: 'Fetch Error',
               }),
             ],
           }),
@@ -152,7 +151,6 @@ describe('RootRoute', () => {
                 expect.objectContaining({
                   status: 'timeout',
                   host: 'http://localhost:5601',
-                  message: 'Fetch Aborted',
                 }),
               ],
             }),
