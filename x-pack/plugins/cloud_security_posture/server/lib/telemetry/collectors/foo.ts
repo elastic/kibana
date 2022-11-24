@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface Weather {
+export interface AccountsBucket {
   accounts: Accounts;
 }
 export interface Accounts {
@@ -20,10 +20,6 @@ export interface AccountEntity {
 export interface ResourceEntity {
   buckets: ResourceType[];
 }
-
-// export interface ResourceType {
-//   buckets?: EvaluationEntity[] | null;
-// }
 
 export interface ResourceType {
   key: string;
@@ -40,4 +36,14 @@ export interface StatsEntity {
 }
 export interface Agents {
   value: number;
+}
+
+export interface Resource1 {
+  [key: string]: Evaluation1;
+}
+
+export interface Evaluation1 {
+  doc_count: number;
+  passed: number;
+  failed: number;
 }

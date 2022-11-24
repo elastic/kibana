@@ -6,14 +6,16 @@
  */
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
+import { calculatePostureScore } from '../../../routes/compliance_dashboard/get_stats';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
-import { ByResourceType, Evaluation, StatsEntity, Weather } from './foo';
-import type { CspmIndicesStats, IndexStats } from './types';
+import { Resource1, ResourceType, StatsEntity, AccountsBucket } from './foo';
+import type { IndexStats } from './types';
 
-// TODO: fetch doc count in finding index per cluster
-// TODO: fetch score per cluster
 // TODO: define returned types
 // TODO: fix schema.ts
+// TODO: understand and reorganized Object.entries etc
+// TODO: test with multiple accounts
+// TODO: naming, naming, naming
 
 export const getAccountsStats = async (
   esClient: ElasticsearchClient,
@@ -35,8 +37,18 @@ export const getAccountsStats = async (
   }
 };
 
+const getClusterScore = (evaluationByResourceType: Resource1) => {
+  let passed = 0;
+  let failed = 0;
+  Object.entries(evaluationByResourceType).forEach(([key, value], index) => {
+    passed += value.passed ? value.passed : 0 + passed;
+    failed += value.failed ? value.failed : 0 + failed;
+  });
+  return calculatePostureScore(passed, failed);
+};
+
 const getAccountStatsByResourceType = async (esClient: ElasticsearchClient, index: string) => {
-  const accountStats = await esClient.search<unknown, Weather>({
+  const accountStats = await esClient.search<unknown, AccountsBucket>({
     index,
     query: {
       match_all: {},
@@ -45,9 +57,6 @@ const getAccountStatsByResourceType = async (esClient: ElasticsearchClient, inde
       accounts: {
         terms: {
           field: 'cluster_id',
-          order: {
-            _count: 'desc',
-          },
           size: 100,
         },
         aggs: {
@@ -88,31 +97,34 @@ const getAccountStatsByResourceType = async (esClient: ElasticsearchClient, inde
   });
 
   const accounts = accountStats.aggregations?.accounts.buckets?.map((account) => {
-    const byResourceType = account.resource_type?.buckets.map((resourceType: ByResourceType) => {
-      const boo = resourceType.evaluation.buckets.map((evaluation: StatsEntity) => {
-        return { [evaluation.key]: evaluation.doc_count };
-      });
-      const allFruits = Object.assign({}, ...boo);
+    const evaluationByResourceType: Resource1[] | undefined = account.resource_type?.buckets.map(
+      (resourceType: ResourceType) => {
+        const byEvaluation = resourceType.evaluation.buckets!.map((evaluation: StatsEntity) => {
+          return { [evaluation.key]: evaluation.doc_count };
+        });
+        return {
+          [resourceType.key]: {
+            doc_count: resourceType.doc_count,
+            ...Object.assign({}, ...byEvaluation),
+          },
+        };
+      }
+    );
 
-      return {
-        [resourceType.key]: {
-          doc_count: resourceType.doc_count,
-          ...allFruits,
-        },
-      };
-    });
-
-    // const entries = Object.fromEntries(byResourceType.map((x) => Object.entries(x)[0]));
-    // const obj = Object.fromEntries(entries);
+    const parsedEvaluationByResourceType = evaluationByResourceType
+      ? Object.fromEntries(evaluationByResourceType.map((x) => Object.entries(x)[0]))
+      : {};
+    const accountScore = getClusterScore(parsedEvaluationByResourceType);
 
     const zoo = {
       account_id: account.key,
       latest_findings_doc_count: account.doc_count,
-      ...Object.fromEntries(byResourceType.map((x) => Object.entries(x)[0])),
+      ...parsedEvaluationByResourceType,
+      account_score: accountScore,
     };
 
     return zoo;
   });
 
-  console.log(JSON.stringify(accounts));
+  return accounts;
 };
