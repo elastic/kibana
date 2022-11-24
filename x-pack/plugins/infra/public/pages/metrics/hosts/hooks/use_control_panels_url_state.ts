@@ -68,7 +68,14 @@ const PanelRT = rt.type({
   width: rt.union([rt.literal('medium'), rt.literal('small'), rt.literal('large')]),
   grow: rt.boolean,
   type: rt.string,
-  explicitInput: rt.any,
+  explicitInput: rt.intersection([
+    rt.type({ id: rt.string }),
+    rt.partial({
+      dataViewId: rt.union([rt.string, rt.undefined]),
+      fieldName: rt.union([rt.string, rt.undefined]),
+      title: rt.union([rt.string, rt.undefined]),
+    }),
+  ]),
 });
 
 const ControlPanelRT = rt.record(rt.string, PanelRT);
