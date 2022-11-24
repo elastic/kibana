@@ -11,7 +11,7 @@ export interface Bucket {
 }
 export type BucketSize = { bucketSize: number; intervalString: string } | undefined;
 
-export interface PageHeaderProps {
+export interface HeaderActionsProps {
   showTour?: boolean;
   onTourDismiss: () => void;
   handleGuidedSetupClick: () => void;
