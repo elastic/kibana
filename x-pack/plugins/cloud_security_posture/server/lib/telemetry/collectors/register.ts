@@ -8,6 +8,7 @@
 import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import { getIndicesStats } from './indices_stats_collector';
+import { getAccountsStats } from './accounts_stats_collector';
 import { cspmUsageSchema } from './schema';
 import { CspmUsage } from './types';
 
@@ -26,6 +27,7 @@ export function registerCspmUsageCollector(
     isReady: () => true,
     fetch: async (collectorFetchContext: CollectorFetchContext) => {
       const indicesStats = await getIndicesStats(collectorFetchContext.esClient, logger);
+      await getAccountsStats(collectorFetchContext.esClient, logger);
       return {
         indices: indicesStats,
       };
