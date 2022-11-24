@@ -28,12 +28,19 @@ export function getMlJobsWithAPMGroup(
 ): Promise<ApmMlJob[]> {
   return withApmSpan('get_ml_jobs_with_apm_group', async () => {
     try {
-      const [{ jobs }, { jobs: jobStats }, { datafeeds: datafeedStats }] =
-        await Promise.all([
-          anomalyDetectors.jobs(APM_ML_JOB_GROUP),
-          anomalyDetectors.jobStats(APM_ML_JOB_GROUP),
-          anomalyDetectors.datafeedStats(`datafeed-${APM_ML_JOB_GROUP}*`),
-        ]);
+      const [jobs, jobStats, datafeedStats] = await Promise.all([
+        anomalyDetectors
+          .jobs(APM_ML_JOB_GROUP)
+          .then((response) => response.jobs),
+        anomalyDetectors
+          .jobStats(APM_ML_JOB_GROUP)
+          .then((response) => response.jobs)
+          .catch(catch404),
+        anomalyDetectors
+          .datafeedStats(`datafeed-${APM_ML_JOB_GROUP}*`)
+          .then((response) => response.datafeeds)
+          .catch(catch404),
+      ]);
 
       const datafeedStateMap = Object.fromEntries(
         datafeedStats.map((d) => [d.datafeed_id, d.state as DATAFEED_STATE])
