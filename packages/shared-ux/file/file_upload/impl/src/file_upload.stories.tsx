@@ -9,7 +9,7 @@
 import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { FileKind, FilesClient } from '@kbn/shared-ux-file-types';
+import { FileKind, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
 import { FileUpload, Props } from './file_upload';

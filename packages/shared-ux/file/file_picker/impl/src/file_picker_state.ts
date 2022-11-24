@@ -7,7 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
-import type { FileJSON, FilesClient } from '@kbn/shared-ux-file-types';
+import type { FileJSON, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 
 function naivelyFuzzify(query: string): string {
   return query.includes('*') ? query : `*${query}*`;

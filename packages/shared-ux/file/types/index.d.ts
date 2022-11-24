@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { FilesClient } from './file_client';
+export type { BaseFilesClient, Abortable, Pagination } from './base_file_client';
 
 /* Status of a file.
  *

@@ -7,7 +7,7 @@
  */
 
 import React, { createContext, useContext, type FunctionComponent } from 'react';
-import type { FilesClient } from '@kbn/shared-ux-file-types';
+import type { BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 
 export interface FilesContextValue {
   /**

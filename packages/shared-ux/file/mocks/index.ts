@@ -7,13 +7,22 @@
  */
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import type { FilesClient } from '@kbn/shared-ux-file-types';
+import type { BaseFilesClient } from '@kbn/shared-ux-file-types';
 
-export const createMockFilesClient = (): DeeplyMockedKeys<FilesClient> => ({
+export const createMockFilesClient = (): DeeplyMockedKeys<BaseFilesClient> => ({
   create: jest.fn(),
   delete: jest.fn(),
   list: jest.fn(),
   upload: jest.fn(),
   getFileKind: jest.fn(),
   getDownloadHref: jest.fn(),
+  bulkDelete: jest.fn(),
+  download: jest.fn(),
+  find: jest.fn(),
+  getById: jest.fn(),
+  getShare: jest.fn(),
+  listShares: jest.fn(),
+  share: jest.fn(),
+  unshare: jest.fn(),
+  update: jest.fn(),
 });
