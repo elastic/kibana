@@ -360,14 +360,6 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
-          },
-          {
-            "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
           },
           {
