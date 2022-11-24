@@ -139,7 +139,7 @@ export function OverviewPage() {
         rightSideItems: [
           <HeaderActions
             showTour={isGuidedSetupTourVisible}
-            handleGuidedSetupClick={handleGuidedSetupClick}
+            onGuidedSetupClick={handleGuidedSetupClick}
             onTourDismiss={handleCloseGuidedSetupTour}
             onTimeRangeRefresh={handleTimeRangeRefresh}
           />,
@@ -187,16 +187,16 @@ export function OverviewPage() {
                   AlertConsumers.LOGS,
                   AlertConsumers.UPTIME,
                 ]}
+                pageSize={ALERTS_PER_PAGE}
                 query={esQuery}
                 showExpandToDetails={false}
-                pageSize={ALERTS_PER_PAGE}
               />
             </CasesContext>
           </SectionContainer>
         </EuiFlexItem>
         <EuiFlexItem>
           {/* Data sections */}
-          {<DataSections bucketSize={bucketSize} />}
+          <DataSections bucketSize={bucketSize} />
           <EmptySections />
         </EuiFlexItem>
         <EuiSpacer size="s" />

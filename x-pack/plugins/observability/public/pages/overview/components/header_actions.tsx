@@ -23,23 +23,22 @@ import { useObservabilityTourContext } from '../../../components/shared/tour';
 
 export interface HeaderActionsProps {
   showTour?: boolean;
-  handleGuidedSetupClick: () => void;
-  onTourDismiss: () => void;
+  onGuidedSetupClick: () => void;
   onTimeRangeRefresh: () => void;
+  onTourDismiss: () => void;
 }
 
 export function HeaderActions({
   showTour = false,
-  handleGuidedSetupClick,
-  onTourDismiss,
+  onGuidedSetupClick,
   onTimeRangeRefresh,
+  onTourDismiss,
 }: HeaderActionsProps) {
   const buttonRef = useRef();
 
   const { relativeStart, relativeEnd, refreshInterval, refreshPaused } = useDatePickerContext();
 
-  const { endTour: endObservabilityTour, isTourVisible: isObservabilityTourVisible } =
-    useObservabilityTourContext();
+  const { endTour, isTourVisible } = useObservabilityTourContext();
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
@@ -62,10 +61,11 @@ export function HeaderActions({
           id="guidedSetupButton"
           iconType="wrench"
           onClick={() => {
-            if (isObservabilityTourVisible) {
-              endObservabilityTour();
+            if (isTourVisible) {
+              endTour();
             }
-            handleGuidedSetupClick();
+
+            onGuidedSetupClick();
           }}
         >
           <FormattedMessage

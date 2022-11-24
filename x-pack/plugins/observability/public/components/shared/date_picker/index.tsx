@@ -27,7 +27,6 @@ export function DatePicker({
   refreshInterval,
   width = 'restricted',
   onTimeRangeRefresh,
-  width,
 }: DatePickerProps) {
   const { updateTimeRange, updateRefreshInterval } = useDatePickerContext();
 
