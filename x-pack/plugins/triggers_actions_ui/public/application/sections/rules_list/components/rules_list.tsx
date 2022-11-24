@@ -12,7 +12,16 @@ import moment from 'moment';
 import { capitalize, isEmpty, sortBy } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState, ReactNode, useCallback, useMemo, useRef } from 'react';
+import React, {
+  lazy,
+  useEffect,
+  useState,
+  ReactNode,
+  useCallback,
+  useMemo,
+  useRef,
+  Suspense,
+} from 'react';
 import {
   EuiButton,
   EuiFieldSearch,
@@ -50,7 +59,6 @@ import {
   TriggersActionsUiConfig,
   SnoozeSchedule,
 } from '../../../../types';
-import { RuleAdd, RuleEdit } from '../../rule_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../common/components/rule_quick_edit_buttons';
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
@@ -73,12 +81,10 @@ import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
-import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
+import { RulesListPrompts } from './rules_list_prompts';
 import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import './rules_list.scss';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
 import { CreateRuleButton } from './create_rule_button';
 import { ManageLicenseModal } from './manage_license_modal';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
@@ -105,11 +111,10 @@ import {
 } from '../translations';
 import { useBulkDeleteResponse } from '../../../hooks/use_bulk_delete_response';
 
-const getIsAuthorizedToCreateRules = (authorizedRuleTypes: Array<RuleType<string, string>>) => {
-  return authorizedRuleTypes.some(
-    (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
-  );
-};
+// Directly lazy import the flyouts because the suspendedComponentWithProps component
+// cause a visual hitch due to the loading spinner
+const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
+const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
 const ENTER_KEY = 13;
 
@@ -123,7 +128,7 @@ export interface RulesListProps {
   showActionFilter?: boolean;
   ruleDetailsRoute?: string;
   showCreateRuleButton?: boolean;
-  setCreateRuleButton?: (component: React.ReactNode) => void;
+  setCreateRuleButton?: (component?: React.ReactNode) => void;
   statusFilter?: RuleStatus[];
   onStatusFilterChange?: (status: RuleStatus[]) => RulesPageContainerState;
   lastResponseFilter?: string[];
@@ -392,12 +397,6 @@ export const RulesList = ({
           );
         }
         setRuleTypesState({ isLoading: false, data: filteredIndex, isInitialized: true });
-        // Update parent component with a create button if able
-        if (getIsAuthorizedToCreateRules([...filteredIndex.values()])) {
-          setCreateRuleButton?.(
-            <CreateRuleButton openFlyout={() => setRuleFlyoutVisibility(true)} />
-          );
-        }
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
@@ -406,12 +405,8 @@ export const RulesList = ({
           ),
         });
         setRuleTypesState({ ...ruleTypesState, isLoading: false });
-        setCreateRuleButton?.(null);
       }
     })();
-
-    // Unset the button when the component unmounts
-    return () => setCreateRuleButton?.(null);
   }, []);
 
   useEffect(() => {
@@ -779,6 +774,10 @@ export const RulesList = ({
     }
   };
 
+  const openFlyout = useCallback(() => {
+    setRuleFlyoutVisibility(true);
+  }, []);
+
   const table = (
     <>
       <RulesListErrorBanner
@@ -789,7 +788,7 @@ export const RulesList = ({
       <EuiFlexGroup gutterSize="s">
         {authorizedToCreateAnyRules && showCreateRuleButton ? (
           <EuiFlexItem grow={false}>
-            <CreateRuleButton openFlyout={() => setRuleFlyoutVisibility(true)} />
+            <CreateRuleButton openFlyout={openFlyout} />
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem>
@@ -1007,31 +1006,21 @@ export const RulesList = ({
   );
 
   const showPrompt = noData && !rulesState.isLoading && !ruleTypesState.isLoading;
-  // Need to render these empty prompts separately from the rules list
-  // since the new EuiPageTemplate.EmptyPrompt must be a direct child of
-  // EuiPageTemplate for the centering to work correctly
-  const renderEmptyPromptsAndSpinner = () => {
-    if (showPrompt) {
-      if (authorizedToCreateAnyRules) {
-        return (
-          <EmptyPrompt
-            showCreateRuleButton={showCreateRuleButton}
-            onCTAClicked={() => setRuleFlyoutVisibility(true)}
-          />
-        );
-      } else {
-        return <NoPermissionPrompt />;
-      }
-    }
+
+  useEffect(() => {
     if (initialLoad) {
-      return (
-        <EuiPageTemplate.Section grow={false} paddingSize="none">
-          <CenterJustifiedSpinner />
-        </EuiPageTemplate.Section>
-      );
+      return;
     }
-    return null;
-  };
+    if (!showPrompt && authorizedToCreateAnyRules) {
+      setCreateRuleButton?.(<CreateRuleButton openFlyout={openFlyout} />);
+    } else {
+      setCreateRuleButton?.();
+    }
+  }, [initialLoad, showPrompt, authorizedToCreateAnyRules]);
+
+  useEffect(() => {
+    return () => setCreateRuleButton?.();
+  }, []);
 
   const renderTable = () => {
     if (!showPrompt && !initialLoad) {
@@ -1072,7 +1061,13 @@ export const RulesList = ({
 
   return (
     <>
-      {renderEmptyPromptsAndSpinner()}
+      <RulesListPrompts
+        showPrompt={showPrompt}
+        showCreateRule={showCreateRuleButton}
+        showSpinner={initialLoad}
+        authorizedToCreateRules={authorizedToCreateAnyRules}
+        onCreateRulesClick={openFlyout}
+      />
       <EuiPageTemplate.Section data-test-subj="rulesList" grow={false} paddingSize="none">
         {isDeleteModalFlyoutVisible && (
           <RulesDeleteModalConfirmation
@@ -1152,30 +1147,34 @@ export const RulesList = ({
         <EuiSpacer size="xs" />
         {renderTable()}
         {ruleFlyoutVisible && (
-          <RuleAdd
-            consumer={ALERTS_FEATURE_ID}
-            onClose={() => {
-              setRuleFlyoutVisibility(false);
-            }}
-            actionTypeRegistry={actionTypeRegistry}
-            ruleTypeRegistry={ruleTypeRegistry}
-            ruleTypeIndex={ruleTypesState.data}
-            onSave={refreshRules}
-          />
+          <Suspense fallback={<div />}>
+            <RuleAdd
+              consumer={ALERTS_FEATURE_ID}
+              onClose={() => {
+                setRuleFlyoutVisibility(false);
+              }}
+              actionTypeRegistry={actionTypeRegistry}
+              ruleTypeRegistry={ruleTypeRegistry}
+              ruleTypeIndex={ruleTypesState.data}
+              onSave={refreshRules}
+            />
+          </Suspense>
         )}
         {editFlyoutVisible && currentRuleToEdit && (
-          <RuleEdit
-            initialRule={currentRuleToEdit}
-            onClose={() => {
-              setEditFlyoutVisibility(false);
-            }}
-            actionTypeRegistry={actionTypeRegistry}
-            ruleTypeRegistry={ruleTypeRegistry}
-            ruleType={
-              ruleTypesState.data.get(currentRuleToEdit.ruleTypeId) as RuleType<string, string>
-            }
-            onSave={refreshRules}
-          />
+          <Suspense fallback={<div />}>
+            <RuleEdit
+              initialRule={currentRuleToEdit}
+              onClose={() => {
+                setEditFlyoutVisibility(false);
+              }}
+              actionTypeRegistry={actionTypeRegistry}
+              ruleTypeRegistry={ruleTypeRegistry}
+              ruleType={
+                ruleTypesState.data.get(currentRuleToEdit.ruleTypeId) as RuleType<string, string>
+              }
+              onSave={refreshRules}
+            />
+          </Suspense>
         )}
       </EuiPageTemplate.Section>
     </>
