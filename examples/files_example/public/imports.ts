@@ -10,12 +10,12 @@ export {
   type FilesClient,
   type FilesSetup,
   type FilesStart,
-  UploadFile,
   FilesContext,
   type ScopedFilesClient,
   FilePicker,
 } from '@kbn/files-plugin/public';
 
 export { FileImage as Image } from '@kbn/shared-ux-file-image';
+export { FileUpload } from '@kbn/shared-ux-file-upload';
 
 export type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';

@@ -10,8 +10,8 @@ import { EuiModalFooter } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FunctionComponent } from 'react';
 import React, { useCallback } from 'react';
+import { FileUpload } from '@kbn/shared-ux-file-upload';
 
-import { UploadFile } from '../../upload_file';
 import type { Props as FilePickerProps } from '../file_picker';
 import { useFilePickerContext } from '../context';
 import { i18nTexts } from '../i18n_texts';
@@ -44,7 +44,7 @@ export const ModalFooter: FunctionComponent<Props> = ({ kind, onDone, onUpload, 
             place-self: stretch;
           `}
         >
-          <UploadFile
+          <FileUpload
             onDone={(n) => {
               state.selectFile(n.map(({ fileJSON }) => fileJSON));
               state.resetFilters();

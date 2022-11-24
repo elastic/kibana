@@ -15,13 +15,7 @@ export type {
   FilesClientFactory,
   FilesClientResponses,
 } from './types';
-export {
-  FilesContext,
-  UploadFile,
-  type UploadFileProps,
-  FilePicker,
-  type FilePickerProps,
-} from './components';
+export { FilesContext, type UploadFileProps, FilePicker, type FilePickerProps } from './components';
 
 export function plugin() {
   return new FilesPlugin();

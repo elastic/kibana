@@ -10,7 +10,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
-import { UploadFile } from '../../upload_file';
+import { FileUpload } from '@kbn/shared-ux-file-upload';
 import { useFilePickerContext } from '../context';
 import { i18nTexts } from '../i18n_texts';
 
@@ -28,7 +28,7 @@ export const EmptyPrompt: FunctionComponent<Props> = ({ kind, multiple }) => {
       title={<h3>{i18nTexts.emptyStatePrompt}</h3>}
       titleSize="s"
       actions={[
-        <UploadFile
+        <FileUpload
           css={css`
             min-width: calc(${euiTheme.size.xxxl} * 6);
           `}
