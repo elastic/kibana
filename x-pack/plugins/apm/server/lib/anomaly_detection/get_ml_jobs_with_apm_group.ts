@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
 import { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
 import { ApmMlJob } from '../../../common/anomaly_detection/apm_ml_job';
 import { Environment } from '../../../common/environment_rt';
@@ -36,14 +36,14 @@ export function getMlJobsWithAPMGroup(
         ]);
 
       const datafeedStateMap = datafeedStats.reduce<
-        Record<string, estypes.MlDatafeedState>
+        Record<string, DATAFEED_STATE>
       >((acc, cur) => {
-        acc[cur.datafeed_id] = cur.state;
+        acc[cur.datafeed_id] = cur.state as DATAFEED_STATE;
         return acc;
       }, {});
-      const jobStateMap = jobStats.reduce<Record<string, estypes.MlJobState>>(
+      const jobStateMap = jobStats.reduce<Record<string, JOB_STATE>>(
         (acc, cur) => {
-          acc[cur.job_id] = cur.state;
+          acc[cur.job_id] = cur.state as JOB_STATE;
           return acc;
         },
         {}

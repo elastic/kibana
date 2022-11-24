@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  MlJobState,
-  MlDatafeedState,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
 
 import { Environment } from '../environment_rt';
 
@@ -16,8 +13,8 @@ export interface ApmMlJob {
   environment: Environment;
   version: number;
   jobId: string;
-  jobState?: MlJobState;
+  jobState?: JOB_STATE;
   datafeedId?: string;
-  datafeedState?: MlDatafeedState;
+  datafeedState?: DATAFEED_STATE;
   bucketSpan?: string;
 }
