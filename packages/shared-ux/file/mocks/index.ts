@@ -15,4 +15,5 @@ export const createMockFilesClient = (): DeeplyMockedKeys<FilesClient> => ({
   list: jest.fn(),
   upload: jest.fn(),
   getFileKind: jest.fn(),
+  getDownloadHref: jest.fn(),
 });
