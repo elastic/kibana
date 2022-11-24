@@ -8,6 +8,10 @@
 import React, { ReactText } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  containsEmptyEntries,
+  containsSpaces,
+} from '../../../../common/source_configuration/validate_index_pattern';
 
 export interface InputFieldProps<
   Value extends string = string,
@@ -22,9 +26,9 @@ export interface InputFieldProps<
 
 export type FieldErrorMessage = string | JSX.Element;
 
-export type ValidationHandler = (value: React.ReactText) => FieldErrorMessage | false;
-
-export type ValidationHandlerList = ValidationHandler[];
+export type ValidationHandlerList<ValueType> = Array<
+  (value: ValueType) => FieldErrorMessage | false
+>;
 
 export const createInputFieldProps = <
   Value extends string = string,
@@ -88,11 +92,13 @@ export const createInputRangeFieldProps = <
 });
 
 export const aggregateValidationErrors =
-  (...validationHandlers: ValidationHandlerList) =>
-  (value: React.ReactText) =>
+  <ValueType extends ReactText = ReactText>(
+    ...validationHandlers: ValidationHandlerList<ValueType>
+  ) =>
+  (value: ValueType) =>
     validationHandlers.map((validator) => validator(value)).filter(Boolean) as FieldErrorMessage[];
 
-export const validateInputFieldNotEmpty = (value: React.ReactText) =>
+export const validateInputFieldNotEmpty = (value: ReactText) =>
   value === '' && (
     <FormattedMessage
       id="xpack.infra.sourceConfiguration.fieldEmptyErrorMessage"
@@ -100,16 +106,16 @@ export const validateInputFieldNotEmpty = (value: React.ReactText) =>
     />
   );
 
-export const validateInputFieldHasNotEmptyEntries = (value: React.ReactText) =>
-  value.toString().includes(',,') && (
+export const validateInputFieldHasNotEmptyEntries = (value: string) =>
+  containsEmptyEntries(value) && (
     <FormattedMessage
       id="xpack.infra.sourceConfiguration.fieldContainEmptyEntryErrorMessage"
       defaultMessage="The field must not include empty comma-separated values."
     />
   );
 
-export const validateInputFieldHasNotEmptySpaces = (value: React.ReactText) =>
-  value.toString().includes(' ') && (
+export const validateInputFieldHasNotEmptySpaces = (value: string) =>
+  containsSpaces(value) && (
     <FormattedMessage
       id="xpack.infra.sourceConfiguration.fieldContainSpacesErrorMessage"
       defaultMessage="The field must not include spaces."

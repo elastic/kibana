@@ -5,28 +5,15 @@
  * 2.0.
  */
 
+import { validateIndexPattern } from '../../../../common/source_configuration/validate_index_pattern';
 import { InvalidMetricIndicesError } from '../../../lib/sources/errors';
 
 export function assertMetricAlias(metricAlias?: string) {
-  const isValidMetricAlias = validateMetricAlias(metricAlias);
+  const isValidMetricAlias = validateIndexPattern(metricAlias);
 
   if (!isValidMetricAlias) {
     throw new InvalidMetricIndicesError(
       'The metric indices value contains invalid characters (empty values, spaces).'
     );
   }
-}
-
-export function validateMetricAlias(metricAlias?: string) {
-  if (metricAlias === undefined) return true;
-
-  return !containEmptyValue(metricAlias) && !containSpaces(metricAlias);
-}
-
-function containEmptyValue(value: string) {
-  return value.includes(',,');
-}
-
-function containSpaces(value: string) {
-  return value.includes(' ');
 }

@@ -44,7 +44,7 @@ export const useIndicesConfigurationFormState = ({
   const nameFieldProps = useMemo(
     () =>
       createInputFieldProps({
-        errors: aggregateValidationErrors(validateInputFieldNotEmpty)(formState.name),
+        errors: aggregateValidationErrors<string>(validateInputFieldNotEmpty)(formState.name),
         name: 'name',
         onChange: (name) => setFormStateChanges((changes) => ({ ...changes, name })),
         value: formState.name,
@@ -54,7 +54,7 @@ export const useIndicesConfigurationFormState = ({
   const metricAliasFieldProps = useMemo(
     () =>
       createInputFieldProps({
-        errors: aggregateValidationErrors(
+        errors: aggregateValidationErrors<string>(
           validateInputFieldNotEmpty,
           validateInputFieldHasNotEmptyEntries,
           validateInputFieldHasNotEmptySpaces
