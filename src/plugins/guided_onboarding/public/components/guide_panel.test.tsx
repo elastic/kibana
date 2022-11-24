@@ -16,7 +16,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
 import type { PluginState } from '../../common/types';
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH, testGuideConfig } from '../../common/constants';
 import { apiService } from '../services/api';
 import type { GuidedOnboardingApi } from '../types';
 import {
@@ -27,7 +27,6 @@ import {
   testGuideStep3ActiveState,
   readyToCompleteGuideState,
   mockPluginStateNotStarted,
-  testGuideConfig,
 } from '../services/api.mocks';
 import { GuidePanel } from './guide_panel';
 

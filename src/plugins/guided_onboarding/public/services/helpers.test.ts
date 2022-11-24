@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { testGuideConfig } from '../../common/constants';
 import { isLastStep } from './helpers';
-import { testGuide, testGuideFirstStep, testGuideLastStep, testGuideConfig } from './api.mocks';
+import { testGuide, testGuideFirstStep, testGuideLastStep } from './api.mocks';
 
 describe('GuidedOnboarding ApiService helpers', () => {
   describe('isLastStepActive', () => {

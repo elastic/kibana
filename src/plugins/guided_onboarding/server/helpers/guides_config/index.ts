@@ -7,10 +7,10 @@
  */
 
 import type { GuidesConfig } from '../../../common/types';
+import { testGuideConfig } from '../../../common/constants';
 import { securityConfig } from './security';
 import { observabilityConfig } from './observability';
 import { searchConfig } from './search';
-import { testGuideConfig } from './test_guide';
 
 export const guidesConfig: GuidesConfig = {
   security: securityConfig,

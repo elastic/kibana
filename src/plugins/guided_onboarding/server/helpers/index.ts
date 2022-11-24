@@ -13,4 +13,3 @@ export {
   updateGuideState,
 } from './guide_state_utils';
 export { updatePluginStatus, calculateIsActivePeriod, getPluginState } from './plugin_state_utils';
-export { getGuideConfig } from './config_utils';

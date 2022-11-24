@@ -11,7 +11,7 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { GuideState } from '@kbn/guided-onboarding';
 import { firstValueFrom, Subscription } from 'rxjs';
 
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH, testGuideConfig } from '../../common/constants';
 import { ApiService } from './api';
 import {
   testGuide,
@@ -29,7 +29,6 @@ import {
   mockPluginStateInProgress,
   mockPluginStateNotStarted,
   testGuideStep3ActiveState,
-  testGuideConfig,
 } from './api.mocks';
 
 describe('GuidedOnboarding ApiService', () => {

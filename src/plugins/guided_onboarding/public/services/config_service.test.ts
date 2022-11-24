@@ -7,8 +7,8 @@
  */
 
 import { HttpSetup } from '@kbn/core-http-browser';
+import { testGuideConfig } from '../../common/constants';
 import {
-  testGuideConfig,
   testGuideNotActiveState,
   testGuideStep1InProgressState,
   testGuideStep2InProgressState,
