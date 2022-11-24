@@ -24,16 +24,16 @@ interface KibanaServiceDependencies {
  * A service to interact with the configured `kibana.hosts`.
  */
 export class KibanaService {
-  private readonly log: Logger;
+  private readonly logger: Logger;
   private readonly config: IConfigService;
 
   constructor({ logger, config }: KibanaServiceDependencies) {
-    this.log = logger.get('kibana-service');
+    this.logger = logger.get('kibana-service');
     this.config = config;
   }
 
   async start({ server }: KibanaServiceStartDependencies) {
-    server.addRoute(createRootRoute({ config: this.config, log: this.log }));
+    server.addRoute(createRootRoute({ config: this.config, logger: this.logger }));
   }
 
   stop() {

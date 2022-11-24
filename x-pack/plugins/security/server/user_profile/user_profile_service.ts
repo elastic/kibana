@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SecurityActivateUserProfileRequest,
-  SecurityUserProfileWithMetadata,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { SecurityActivateUserProfileRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { SecurityUserProfile } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
@@ -330,11 +327,10 @@ export class UserProfileService {
 
     let body;
     try {
-      // @ts-expect-error Invalid response format.
-      body = (await clusterClient.asInternalUser.security.getUserProfile({
+      body = await clusterClient.asInternalUser.security.getUserProfile({
         uid: userSession.value.userProfileId,
         data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
-      })) as { profiles: SecurityUserProfileWithMetadata[] };
+      });
     } catch (error) {
       this.logger.error(
         `Failed to retrieve user profile for the current user [sid=${getPrintableSessionId(
@@ -368,11 +364,10 @@ export class UserProfileService {
     }
 
     try {
-      // @ts-expect-error Invalid response format.
-      const body = (await clusterClient.asInternalUser.security.getUserProfile({
+      const body = await clusterClient.asInternalUser.security.getUserProfile({
         uid: [...uids].join(','),
         data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
-      })) as { profiles: SecurityUserProfileWithMetadata[] };
+      });
 
       return body.profiles.map((rawUserProfile) => parseUserProfile<D>(rawUserProfile));
     } catch (error) {

@@ -55,6 +55,7 @@ export function createUptimeESClient({
 }) {
   return {
     baseESClient: esClient,
+    heartbeatIndices: '',
     async search<DocumentSource extends unknown, TParams extends estypes.SearchRequest>(
       params: TParams,
       operationName?: string,
@@ -62,11 +63,16 @@ export function createUptimeESClient({
     ): Promise<{ body: ESSearchResponse<DocumentSource, TParams> }> {
       let res: any;
       let esError: any;
-      const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
-        savedObjectsClient!
-      );
 
-      const esParams = { index: index ?? dynamicSettings!.heartbeatIndices, ...params };
+      if (!this.heartbeatIndices) {
+        const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
+          savedObjectsClient!
+        );
+
+        this.heartbeatIndices = dynamicSettings?.heartbeatIndices || '';
+      }
+
+      const esParams = { index: index ?? this.heartbeatIndices, ...params };
       const startTime = process.hrtime();
 
       const startTimeNow = Date.now();
@@ -110,11 +116,15 @@ export function createUptimeESClient({
       let res: any;
       let esError: any;
 
-      const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
-        savedObjectsClient!
-      );
+      if (!this.heartbeatIndices) {
+        const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
+          savedObjectsClient!
+        );
 
-      const esParams = { index: dynamicSettings!.heartbeatIndices, ...params };
+        this.heartbeatIndices = dynamicSettings?.heartbeatIndices || '';
+      }
+
+      const esParams = { index: this.heartbeatIndices, ...params };
       const startTime = process.hrtime();
 
       try {
@@ -132,7 +142,7 @@ export function createUptimeESClient({
         throw esError;
       }
 
-      return { result: res, indices: dynamicSettings.heartbeatIndices };
+      return { result: res, indices: this.heartbeatIndices };
     },
     getSavedObjectsClient() {
       return savedObjectsClient;

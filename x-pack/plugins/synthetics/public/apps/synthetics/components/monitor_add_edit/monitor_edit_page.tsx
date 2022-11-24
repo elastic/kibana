@@ -10,6 +10,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useTrackPageview, useFetcher } from '@kbn/observability-plugin/public';
+import { ConfigKey } from '../../../../../common/runtime_types';
 import { getServiceLocations } from '../../state';
 import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
 import { MonitorSteps } from './steps';
@@ -37,7 +38,10 @@ const MonitorEditPage: React.FC = () => {
   return data && !loading && !error ? (
     <MonitorForm defaultValues={data?.attributes}>
       <MonitorSteps stepMap={EDIT_MONITOR_STEPS} isEditFlow={true} />
-      <MonitorDetailsLinkPortal id={data?.id} name={data?.attributes.name} />
+      <MonitorDetailsLinkPortal
+        configId={data?.attributes[ConfigKey.CONFIG_ID]}
+        name={data?.attributes.name}
+      />
     </MonitorForm>
   ) : (
     <EuiLoadingSpinner />

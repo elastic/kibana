@@ -9,20 +9,24 @@
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getMigrationHash } from '@kbn/core-test-helpers-so-type-serializer';
 import { Root } from '@kbn/core-root-server-internal';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+import {
+  createTestServers,
+  createRootWithCorePlugins,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 
 describe('checking migration metadata changes on all registered SO types', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let esServer: TestElasticsearchUtils;
   let root: Root;
   let typeRegistry: ISavedObjectTypeRegistry;
 
   beforeAll(async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
     });
 
     esServer = await startES();
-    root = kbnTestServer.createRootWithCorePlugins({}, { oss: false });
+    root = createRootWithCorePlugins({}, { oss: false });
     await root.preboot();
     await root.setup();
     const coreStart = await root.start();
@@ -132,7 +136,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "siem-ui-timeline-pinned-event": "e2697b38751506c7fce6e8b7207a830483dc4283",
         "space": "c4a0acce1bd4b9cce85154f2a350624a53111c59",
         "spaces-usage-stats": "922d3235bbf519e3fb3b260e27248b1df8249b79",
-        "synthetics-monitor": "111811218f7e34f40980665a4eb99976f457bb23",
+        "synthetics-monitor": "d784b64a3def47d3f3d1f367df71ae41ef33cb3c",
         "synthetics-privates-locations": "dd00385f4a27ef062c3e57312eeb3799872fa4af",
         "tag": "39413f4578cc2128c9a0fda97d0acd1c8862c47a",
         "task": "ef53d0f070bd54957b8fe22fae3b1ff208913f76",
