@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { forwardRef, useEffect, useMemo, useCallback, useState } from 'react';
+import React, { forwardRef, useEffect, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import type { EuiMarkdownEditorProps } from '@elastic/eui';
 import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { MarkdownEditorRef } from './editor';
 import { MarkdownEditor } from './editor';
 import { CommentEditorContext } from './context';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   id: string;
@@ -67,18 +67,18 @@ export const MarkdownEditorForm = React.memo(
 
       useEffect(() => {
         const storageDraftComment = draftCommentStorageKey && storage.get(draftCommentStorageKey);
-        if(storageDraftComment && storageDraftComment!=='') {
+        if( storageDraftComment && storageDraftComment!=='' ) {
           field.setValue(storageDraftComment);
         }
       }, []);
       
-      const onChange = useCallback((value: string) => {
-          field.setValue(value);
-          if (draftCommentStorageKey) {
-            storage.set(draftCommentStorageKey, value);
-          }
+      const handleOnChange = useCallback((value: string) => {
+        field.setValue(value);
+        if (draftCommentStorageKey) {
+          storage.set(draftCommentStorageKey, value);
+        }
       },[field, storage]);
-
+      
     
       return (
         <CommentEditorContext.Provider value={commentEditorContextValue}>
@@ -96,7 +96,7 @@ export const MarkdownEditorForm = React.memo(
               ref={ref}
               ariaLabel={idAria}
               editorId={id}
-              onChange={onChange}
+              onChange={handleOnChange}
               value={field.value}
               disabledUiPlugins={disabledUiPlugins}
               data-test-subj={`${dataTestSubj}-markdown-editor`}
