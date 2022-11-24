@@ -23,7 +23,7 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.enableModelPlotAnnotations.description"
-          defaultMessage="Select to generate annotations when the model changes significantly. For example, when step changes, periodicity or trends are detected."
+          defaultMessage="Generate annotations when the model changes significantly. For example, when step changes, periodicity or trends are detected."
         />
       }
     >

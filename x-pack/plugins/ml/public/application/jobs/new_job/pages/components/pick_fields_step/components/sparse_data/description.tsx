@@ -20,7 +20,7 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.sparseData.description"
-          defaultMessage="Select if you wish to ignore empty buckets from being considered anomalous. Available for count and sum analysis."
+          defaultMessage="Ignore empty buckets from being considered anomalous. Available for count and sum analysis."
         />
       }
     >
