@@ -12,6 +12,7 @@ import type { FilesClient } from '@kbn/shared-ux-file-types';
 export const createMockFilesClient = (): DeeplyMockedKeys<FilesClient> => ({
   create: jest.fn(),
   delete: jest.fn(),
+  list: jest.fn(),
   upload: jest.fn(),
   getFileKind: jest.fn(),
 });
