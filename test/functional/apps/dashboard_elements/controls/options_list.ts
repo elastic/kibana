@@ -479,8 +479,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/146086
-      describe.skip('test data view runtime field', async () => {
+      describe('test data view runtime field', async () => {
         const FIELD_NAME = 'testRuntimeField';
         const FIELD_VALUES = ['G', 'H', 'B', 'R', 'M'];
 
