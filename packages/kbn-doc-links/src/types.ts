@@ -125,6 +125,7 @@ export interface DocLinks {
     readonly licenseManagement: string;
     readonly mailService: string;
     readonly start: string;
+    readonly syncRules: string;
     readonly troubleshootSetup: string;
     readonly usersAccess: string;
   };

@@ -39,6 +39,27 @@ class Duration {
   }
 }
 
+const toDurationUnit = (unit: string): DurationUnit => {
+  switch (unit) {
+    case 'm':
+      return DurationUnit.Minute;
+    case 'h':
+      return DurationUnit.Hour;
+    case 'd':
+      return DurationUnit.Day;
+    case 'w':
+      return DurationUnit.Week;
+    case 'M':
+      return DurationUnit.Month;
+    case 'Q':
+      return DurationUnit.Quarter;
+    case 'y':
+      return DurationUnit.Year;
+    default:
+      throw new Error('invalid duration unit');
+  }
+};
+
 const toMomentUnitOfTime = (unit: DurationUnit): moment.unitOfTime.Diff => {
   switch (unit) {
     case DurationUnit.Minute:
@@ -60,4 +81,4 @@ const toMomentUnitOfTime = (unit: DurationUnit): moment.unitOfTime.Diff => {
   }
 };
 
-export { Duration, DurationUnit, toMomentUnitOfTime };
+export { Duration, DurationUnit, toMomentUnitOfTime, toDurationUnit };

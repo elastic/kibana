@@ -14,7 +14,7 @@ import { mocked } from './mocks_internal';
 
 describe('EventLoopDelaysMonitor', () => {
   beforeAll(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     const mockNow = jest.getRealSystemTime();
     jest.setSystemTime(mockNow);
   });

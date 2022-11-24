@@ -4,7 +4,6 @@ exports[`EMSVectorTileStyleEditor is rendered 1`] = `
 <EuiFormRow
   describedByIds={Array []}
   display="columnCompressed"
-  fullWidth={false}
   hasChildLabel={true}
   hasEmptyLabelSpace={false}
   label="Color blend"

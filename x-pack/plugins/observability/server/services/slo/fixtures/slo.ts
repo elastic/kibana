@@ -7,13 +7,17 @@
 
 import { cloneDeep } from 'lodash';
 import uuid from 'uuid';
+import { SavedObject } from '@kbn/core-saved-objects-common';
 
+import { SO_SLO_TYPE } from '../../../saved_objects';
+import { sloSchema } from '../../../types/schema';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
   Indicator,
   KQLCustomIndicator,
   SLO,
+  StoredSLO,
 } from '../../../domain/models';
 import { CreateSLOParams } from '../../../types/rest_specs';
 import { Paginated } from '../slo_repository';
@@ -76,6 +80,15 @@ export const createSLOParams = (params: Partial<CreateSLOParams> = {}): CreateSL
   ...defaultSLO,
   ...params,
 });
+
+export const aStoredSLO = (slo: SLO): SavedObject<StoredSLO> => {
+  return {
+    id: slo.id,
+    attributes: sloSchema.encode(slo),
+    type: SO_SLO_TYPE,
+    references: [],
+  };
+};
 
 export const createSLO = (params: Partial<SLO> = {}): SLO => {
   const now = new Date();

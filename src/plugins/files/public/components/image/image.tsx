@@ -6,104 +6,102 @@
  * Side Public License, v 1.
  */
 
-import React, { HTMLAttributes } from 'react';
-import { type ImgHTMLAttributes, useState, useEffect } from 'react';
+import React from 'react';
+import { useState } from 'react';
+import { EuiImage, EuiImageProps } from '@elastic/eui';
+import classNames from 'classnames';
 import { css } from '@emotion/react';
 import type { FileImageMetadata } from '../../../common';
-import { useViewportObserver } from './use_viewport_observer';
-import { Img, type ImgProps, Blurhash } from './components';
-import { sizes } from './styles';
+import { getBlurhashSrc } from '../util';
 
-export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
-  src: string;
-  alt: string;
-  /**
-   * Image metadata
-   */
-  meta?: FileImageMetadata;
-
-  /**
-   * @default original
-   */
-  size?: ImgProps['size'];
-  /**
-   * Props to pass to the wrapper element
-   */
-  wrapperProps?: HTMLAttributes<HTMLDivElement>;
-  /**
-   * Emits when the image first becomes visible
-   */
-  onFirstVisible?: () => void;
-}
+export type Props = { meta?: FileImageMetadata } & EuiImageProps;
 
 /**
- * A viewport-aware component that displays an image. This component is a very
- * thin wrapper around the img tag.
+ * A wrapper around the <EuiImage/> that can renders blurhash by the file service while the image is loading
  *
  * @note Intended to be used with files like:
  *
  * ```ts
- * <Image src={file.getDownloadSrc(file)} ... />
+ * <Image src={file.getDownloadSrc(file)} meta={file.meta} ... />
  * ```
  */
-export const Image = React.forwardRef<HTMLImageElement, Props>(
-  (
-    { src, alt, onFirstVisible, onLoad, onError, meta, wrapperProps, size = 'original', ...rest },
-    ref
-  ) => {
-    const [isLoaded, setIsLoaded] = useState<boolean>(false);
-    const [blurDelayExpired, setBlurDelayExpired] = useState(false);
-    const { isVisible, ref: observerRef } = useViewportObserver({ onFirstVisible });
+export const Image = ({ src, url, alt, onLoad, onError, meta, ...rest }: Props) => {
+  const imageSrc = (src || url)!; // <EuiImage/> allows to use either `src` or `url`
 
-    useEffect(() => {
-      const id = window.setTimeout(() => {
-        setBlurDelayExpired(true);
-      }, 200);
-      return () => {
-        window.clearTimeout(id);
-      };
-    }, []);
+  const [isBlurHashLoaded, setIsBlurHashLoaded] = useState<boolean>(false);
+  const { blurhash, width, height } = meta ?? {};
+  const blurhashSrc = React.useMemo(() => {
+    if (blurhash && width && height) {
+      try {
+        return getBlurhashSrc({ hash: blurhash, width, height });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn(`Failed to generate image src from blurhash`, e);
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }, [blurhash, width, height]);
 
-    const knownSize = size ? sizes[size] : undefined;
+  // prettier-ignore
+  const currentSrc = (isBlurHashLoaded || !blurhashSrc) ? imageSrc : blurhashSrc
 
-    return (
-      <div
-        css={[
-          css`
-            position: relative;
-            display: inline-block;
-          `,
-          knownSize,
-        ]}
-        {...wrapperProps}
-      >
-        {blurDelayExpired && meta?.blurhash && (
-          <Blurhash
-            visible={!isLoaded}
-            hash={meta.blurhash}
-            isContainerWidth={size !== 'original' && size !== undefined}
-            width={meta.width}
-            height={meta.height}
-          />
-        )}
-        <Img
-          observerRef={observerRef}
-          ref={ref}
-          size={size}
-          src={isVisible ? src : undefined}
-          alt={alt}
-          hidden={!isLoaded}
-          onLoad={(ev) => {
-            setIsLoaded(true);
-            onLoad?.(ev);
-          }}
-          onError={(ev) => {
-            setIsLoaded(true);
-            onError?.(ev);
-          }}
-          {...rest}
-        />
-      </div>
-    );
-  }
-);
+  return (
+    <EuiImage
+      alt=""
+      loading={'lazy'}
+      {...rest}
+      className={classNames(rest.className, { blurhash: currentSrc === blurhashSrc })}
+      css={css`
+        &.blurhash {
+          // Makes blurhash image visually appear after the .9s delay with a .1s transition duration.
+          // This is needed for a nicer UX when the original image loads fast.
+          animation-name: imageBlurhashFadeIn;
+          animation-duration: 1s;
+          @keyframes imageBlurhashFadeIn {
+            0% {
+              opacity: 0;
+            }
+            90% {
+              opacity: 0;
+            }
+            100% {
+              opacity: 1;
+            }
+          }
+        }
+      `}
+      src={currentSrc}
+      onLoad={(ev) => {
+        // if the `meta.blurhash` is passed, then the component first renders the blurhash and the `onLoad` event fires for the first time,
+        // In the event handler we call `onBlurHashLoaded` so that the `currentSrc` is swapped with the url to the original image.
+        // When the onLoad event fires for the 2nd time (as the original image is finished loading)
+        // we notify the parent component by calling `onLoad` from props
+        if (currentSrc === imageSrc) {
+          onLoad?.(ev);
+        } else {
+          // @ts-ignore
+          if (window?.__image_stories_simulate_slow_load) {
+            // hack for storybook blurhash testing
+            setTimeout(() => {
+              setIsBlurHashLoaded(true);
+            }, 3000);
+          } else {
+            setIsBlurHashLoaded(true);
+          }
+        }
+      }}
+      onError={(ev) => {
+        if (currentSrc === imageSrc) {
+          onError?.(ev);
+        } else {
+          // blurhash failed to load, consider it is loaded to start loading the full image
+          // eslint-disable-next-line no-console
+          console.warn(`Failed to load blurhash src`);
+          setIsBlurHashLoaded(true);
+        }
+      }}
+    />
+  );
+};

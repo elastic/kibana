@@ -597,6 +597,14 @@
               },
               {
                 "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
+              },
+              {
+                "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
               },
               {
@@ -8890,6 +8898,14 @@
               },
               {
                 "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
+              },
+              {
+                "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
               },
               {
@@ -14857,29 +14873,29 @@
                 "ExplainResponse",
                 "<TDocument>>; }; features: ",
                 "default",
-                "; fieldCaps: { (this: That, params: ",
+                "; fieldCaps: { (this: That, params?: ",
                 "FieldCapsRequest",
                 " | ",
                 "FieldCapsRequest",
-                ", options?: ",
+                " | undefined, options?: ",
                 "TransportRequestOptionsWithOutMeta",
                 " | undefined): Promise<",
                 "FieldCapsResponse",
-                ">; (this: That, params: ",
+                ">; (this: That, params?: ",
                 "FieldCapsRequest",
                 " | ",
                 "FieldCapsRequest",
-                ", options?: ",
+                " | undefined, options?: ",
                 "TransportRequestOptionsWithMeta",
                 " | undefined): Promise<",
                 "TransportResult",
                 "<",
                 "FieldCapsResponse",
-                ", unknown>>; (this: That, params: ",
+                ", unknown>>; (this: That, params?: ",
                 "FieldCapsRequest",
                 " | ",
                 "FieldCapsRequest",
-                ", options?: ",
+                " | undefined, options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "FieldCapsResponse",
@@ -16261,6 +16277,14 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
               },
               {
                 "plugin": "canvas",
@@ -24313,7 +24337,9 @@
             "type": "Object",
             "tags": [],
             "label": "error",
-            "description": [],
+            "description": [
+              "Error associated with this object, populated if an operation failed for this object."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
