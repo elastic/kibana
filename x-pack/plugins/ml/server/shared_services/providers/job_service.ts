@@ -19,7 +19,6 @@ export interface JobServiceProvider {
     jobsSummary: OrigJobServiceProvider['jobsSummary'];
     forceStartDatafeeds: OrigJobServiceProvider['forceStartDatafeeds'];
     stopDatafeeds: OrigJobServiceProvider['stopDatafeeds'];
-    getJobsState: OrigJobServiceProvider['getJobsState'];
   };
 }
 
@@ -52,15 +51,6 @@ export function getJobServiceProvider(getGuards: GetGuards): JobServiceProvider 
             .ok(({ scopedClient, mlClient }) => {
               const { stopDatafeeds } = jobServiceProvider(scopedClient, mlClient);
               return stopDatafeeds(...args);
-            });
-        },
-        getJobsState: async (...args) => {
-          return await getGuards(request, savedObjectsClient)
-            .isFullLicense()
-            .hasMlCapabilities(['canGetJobs'])
-            .ok(({ scopedClient, mlClient }) => {
-              const { getJobsState } = jobServiceProvider(scopedClient, mlClient);
-              return getJobsState(...args);
             });
         },
       };

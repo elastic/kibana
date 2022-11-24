@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
 import { uniq } from 'lodash';
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from '@kbn/core/server';
@@ -498,57 +496,6 @@ export function jobsProvider(
     return jobs;
   }
 
-  async function getJobsState(
-    jobIds: string[] = [],
-    includeFullJob = false
-  ): Promise<
-    Array<{
-      jobId: string;
-      datafeedId?: string;
-      jobState: estypes.MlJobState;
-      datafeedState?: estypes.MlDatafeedState;
-      job?: estypes.MlJob;
-    }>
-  > {
-    const jobIdsString = jobIds.join();
-
-    const [
-      jobResults,
-      jobStatsResults,
-      // datafeedResults,
-      datafeedStatsResults,
-    ] = await Promise.all([
-      mlClient.getJobs(jobIds.length > 0 ? { job_id: jobIdsString } : undefined),
-      mlClient.getJobStats(jobIds.length > 0 ? { job_id: jobIdsString } : undefined),
-      // mlClient.getDatafeeds(),
-      mlClient.getDatafeedStats(),
-    ]);
-
-    const datafeedStateMap = datafeedStatsResults.datafeeds.reduce<
-      Record<string, estypes.MlDatafeedState>
-    >((acc, cur) => {
-      acc[cur.datafeed_id] = cur.state;
-      return acc;
-    }, {});
-    const jobStateMap = jobStatsResults.jobs.reduce<Record<string, estypes.MlJobState>>(
-      (acc, cur) => {
-        acc[cur.job_id] = cur.state;
-        return acc;
-      },
-      {}
-    );
-
-    return jobResults.jobs.map((job) => ({
-      jobId: job.job_id,
-      datafeedId: job.datafeed_config?.datafeed_id,
-      jobState: jobStateMap[job.job_id],
-      datafeedState: job.datafeed_config
-        ? datafeedStateMap[job.datafeed_config.datafeed_id]
-        : undefined,
-      ...(includeFullJob ? { job } : {}),
-    }));
-  }
-
   async function blockingJobTasks() {
     const jobs: Array<Record<string, JobAction>> = [];
     try {
@@ -718,7 +665,6 @@ export function jobsProvider(
     jobsWithTimerange,
     getJobForCloning,
     createFullJobsList,
-    getJobsState,
     blockingJobTasks,
     jobsExist,
     getAllJobAndGroupIds,

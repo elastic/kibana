@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { MlJobService } from '@kbn/ml-plugin/server';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
 import { ApmMlJob } from '../../../common/anomaly_detection/apm_ml_job';
 import { Environment } from '../../../common/environment_rt';
 import { withApmSpan } from '../../utils/with_apm_span';
@@ -23,28 +24,46 @@ function catch404(e: any) {
 }
 
 export function getMlJobsWithAPMGroup(
-  jobService: MlJobService
+  anomalyDetectors: MlAnomalyDetectors
 ): Promise<ApmMlJob[]> {
   return withApmSpan('get_ml_jobs_with_apm_group', async () => {
     try {
-      const jobStates = await jobService.getJobsState([APM_ML_JOB_GROUP], true);
-      return jobStates.map(
-        ({ jobId, jobState, datafeedId, datafeedState, job }): ApmMlJob => {
-          return {
-            jobId,
-            jobState,
-            datafeedId,
-            datafeedState,
-            version: Number(
-              job?.custom_settings?.job_tags?.apm_ml_version ?? 1
-            ),
-            environment: String(
-              job?.custom_settings?.job_tags?.environment
-            ) as Environment,
-            bucketSpan: job?.analysis_config.bucket_span as string,
-          };
-        }
+      const [{ jobs }, { jobs: jobStats }, { datafeeds: datafeedStats }] =
+        await Promise.all([
+          anomalyDetectors.jobs(APM_ML_JOB_GROUP),
+          anomalyDetectors.jobStats(APM_ML_JOB_GROUP),
+          anomalyDetectors.datafeedStats(`datafeed-${APM_ML_JOB_GROUP}*`),
+        ]);
+
+      const datafeedStateMap = datafeedStats.reduce<
+        Record<string, estypes.MlDatafeedState>
+      >((acc, cur) => {
+        acc[cur.datafeed_id] = cur.state;
+        return acc;
+      }, {});
+      const jobStateMap = jobStats.reduce<Record<string, estypes.MlJobState>>(
+        (acc, cur) => {
+          acc[cur.job_id] = cur.state;
+          return acc;
+        },
+        {}
       );
+
+      return jobs.map((job): ApmMlJob => {
+        const jobId = job.job_id;
+        const datafeedId = job.datafeed_config?.datafeed_id;
+        return {
+          jobId,
+          jobState: jobStateMap[jobId],
+          datafeedId,
+          datafeedState: datafeedId ? datafeedStateMap[datafeedId] : undefined,
+          version: Number(job?.custom_settings?.job_tags?.apm_ml_version ?? 1),
+          environment: String(
+            job?.custom_settings?.job_tags?.environment
+          ) as Environment,
+          bucketSpan: job?.analysis_config.bucket_span as string,
+        };
+      });
     } catch (e) {
       return catch404(e) as ApmMlJob[];
     }

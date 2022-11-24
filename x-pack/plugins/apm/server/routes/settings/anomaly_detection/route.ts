@@ -48,7 +48,7 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
       throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE);
     }
 
-    const jobs = await getMlJobsWithAPMGroup(mlClient?.jobService);
+    const jobs = await getMlJobsWithAPMGroup(mlClient?.anomalyDetectors);
 
     return {
       jobs,

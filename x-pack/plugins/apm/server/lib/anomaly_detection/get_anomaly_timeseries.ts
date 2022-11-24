@@ -66,7 +66,7 @@ export async function getAnomalyTimeseries({
     return [];
   }
 
-  const mlJobs = await getMlJobsWithAPMGroup(mlClient.jobService);
+  const mlJobs = await getMlJobsWithAPMGroup(mlClient.anomalyDetectors);
 
   if (!mlJobs.length) {
     return [];

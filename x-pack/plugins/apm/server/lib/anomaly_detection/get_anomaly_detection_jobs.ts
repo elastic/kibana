@@ -14,5 +14,5 @@ export function getAnomalyDetectionJobs(mlClient?: MlClient) {
     throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
   }
 
-  return getMlJobsWithAPMGroup(mlClient.jobService);
+  return getMlJobsWithAPMGroup(mlClient.anomalyDetectors);
 }
