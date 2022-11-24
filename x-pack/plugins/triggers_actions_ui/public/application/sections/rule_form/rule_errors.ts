@@ -17,6 +17,7 @@ import {
   TriggersActionsUiConfig,
 } from '../../../types';
 import { InitialRule } from './rule_reducer';
+import { TriggersAndActionsUiServices } from '../../connectors_app';
 
 export function validateBaseProperties(
   ruleObject: InitialRule,
@@ -79,13 +80,14 @@ export function validateBaseProperties(
   return validationResult;
 }
 
-export function getRuleErrors(
+export async function getRuleErrors(
   rule: Rule,
   ruleTypeModel: RuleTypeModel | null,
-  config: TriggersActionsUiConfig
+  config: TriggersActionsUiConfig,
+  services: TriggersAndActionsUiServices
 ) {
   const ruleParamsErrors: IErrorObject = ruleTypeModel
-    ? ruleTypeModel.validate(rule.params).errors
+    ? (await ruleTypeModel.validate(rule.params, services)).errors
     : [];
   const ruleBaseErrors = validateBaseProperties(rule, config).errors as IErrorObject;
   const ruleErrors = {

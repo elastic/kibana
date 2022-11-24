@@ -74,10 +74,12 @@ export const RuleEdit = ({
   const [metadata, setMetadata] = useState(initialMetadata);
   const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
 
+  const services = useKibana().services;
   const {
     http,
     notifications: { toasts },
-  } = useKibana().services;
+  } = services;
+
   const setRule = (value: Rule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
   };
@@ -112,11 +114,19 @@ export const RuleEdit = ({
     }
   }, [props.ruleType, ruleType.id, serverRuleType, http]);
 
-  const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = getRuleErrors(
-    rule as Rule,
-    ruleType,
-    config
-  );
+  const [{ ruleBaseErrors, ruleErrors, ruleParamsErrors }, setErrors] = useState<{
+    ruleBaseErrors: IErrorObject;
+    ruleErrors: IErrorObject;
+    ruleParamsErrors: IErrorObject;
+  }>({
+    ruleBaseErrors: {},
+    ruleErrors: {},
+    ruleParamsErrors: {},
+  });
+
+  useEffect(() => {
+    getRuleErrors(rule as Rule, ruleType, config, services).then(setErrors);
+  }, [config, rule, ruleType, services]);
 
   const checkForChangesAndCloseFlyout = () => {
     if (hasRuleChanged(rule, initialRule, true)) {

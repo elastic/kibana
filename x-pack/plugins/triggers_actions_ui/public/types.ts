@@ -73,6 +73,7 @@ import type {
 } from './application/sections/field_browser/types';
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
+import { TriggersAndActionsUiServices } from './application/app';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -345,7 +346,10 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   description: string;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
-  validate: (ruleParams: Params) => ValidationResult;
+  validate: (
+    ruleParams: Params,
+    services: TriggersAndActionsUiServices
+  ) => Promise<ValidationResult> | ValidationResult;
   ruleParamsExpression:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<RuleTypeParamsExpressionProps<Params>>>;

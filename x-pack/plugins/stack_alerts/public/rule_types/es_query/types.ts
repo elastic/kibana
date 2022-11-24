@@ -8,11 +8,7 @@
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
-import { EXPRESSION_ERRORS } from './constants';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 export interface Comparator {
   text: string;
@@ -56,14 +52,3 @@ export interface OnlySearchSourceRuleParams {
 }
 
 export type DataViewOption = EuiComboBoxOptionOption<string>;
-
-export type ExpressionErrors = typeof EXPRESSION_ERRORS;
-
-export type ErrorKey = keyof ExpressionErrors & unknown;
-
-export interface TriggersAndActionsUiDeps {
-  dataViews: DataViewsPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  data: DataPublicPluginStart;
-  dataViewEditor: DataViewEditorStart;
-}

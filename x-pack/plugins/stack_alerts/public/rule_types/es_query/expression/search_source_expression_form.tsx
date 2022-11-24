@@ -217,6 +217,11 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     return { nrOfDocs: totalHitsToNumber(rawResponse.hits.total), timeWindow };
   }, [timeWindow, createTestSearchSource]);
 
+  const [hasValidationErrors, setHasValidationErrors] = useState(false);
+  useEffect(() => {
+    hasExpressionValidationErrors(ruleParams, services).then(setHasValidationErrors);
+  }, [ruleParams, services]);
+
   return (
     <Fragment>
       <EuiTitle size="xs">
@@ -290,7 +295,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         onChangeWindowUnit={onChangeWindowUnit}
         onChangeSizeValue={onChangeSizeValue}
         errors={errors}
-        hasValidationErrors={hasExpressionValidationErrors(ruleParams) || !dataView}
+        hasValidationErrors={hasValidationErrors}
         onTestFetch={onTestFetch}
         onCopyQuery={onCopyQuery}
         excludeHitsFromPreviousRun={ruleConfiguration.excludeHitsFromPreviousRun}

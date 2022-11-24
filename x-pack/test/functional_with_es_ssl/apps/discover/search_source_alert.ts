@@ -169,7 +169,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       "alert_id": "{{alertId}}",
       "context_message": "{{context.message}}"
     }`);
-    await testSubjects.click('saveRuleButton');
   };
 
   const openDiscoverAlertFlyout = async () => {
@@ -280,15 +279,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       outputDataViewId = outputDataViewResponse.body.data_view.id;
     });
 
-    it('should navigate to alert results via view in app link', async () => {
+    it('should show time field validation error', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.selectIndexPattern(SOURCE_DATA_INDEX);
       await PageObjects.timePicker.setCommonlyUsedTime('Last_15 minutes');
 
-      // create an alert
       await openDiscoverAlertFlyout();
       await defineSearchSourceAlert(RULE_NAME);
+      await testSubjects.click('selectDataViewExpression');
+
+      await testSubjects.click('indexPattern-switcher--input');
+      const input = await find.activeElement();
+      // search-source-alert-output index does not have time field
+      await input.type('search-source-alert-o*');
+      await testSubjects.click('explore-matching-indices-button');
+
+      await testSubjects.click('saveRuleButton');
+
+      const errorElem = await testSubjects.find('esQueryAlertExpressionError');
+      const errorText = await errorElem.getVisibleText();
+      expect(errorText).to.eql('Data view should have a time field.');
+    });
+
+    it('should navigate to alert results via view in app link', async () => {
+      await testSubjects.click('selectDataViewExpression');
+      await testSubjects.click('indexPattern-switcher--input');
+      const dataViewsElem = await testSubjects.find('euiSelectableList');
+      const sourceDataViewOption = await dataViewsElem.findByCssSelector(
+        `[title="${SOURCE_DATA_INDEX}"]`
+      );
+      await sourceDataViewOption.click();
+
+      await testSubjects.click('saveRuleButton');
+
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await openAlertRuleInManagement(RULE_NAME);
@@ -403,6 +427,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // create an alert
       await openDiscoverAlertFlyout();
       await defineSearchSourceAlert('test-adhoc-alert');
+      await testSubjects.click('saveRuleButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       sourceAdHocDataViewId = await PageObjects.discover.getCurrentDataViewId();
 

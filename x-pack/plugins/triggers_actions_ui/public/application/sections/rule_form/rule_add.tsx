@@ -91,11 +91,12 @@ const RuleAdd = ({
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
 
+  const services = useKibana().services;
   const {
     http,
     notifications: { toasts },
     application: { capabilities },
-  } = useKibana().services;
+  } = services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
 
@@ -196,11 +197,19 @@ const RuleAdd = ({
 
   const ruleType = rule.ruleTypeId ? ruleTypeRegistry.get(rule.ruleTypeId) : null;
 
-  const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = getRuleErrors(
-    rule as Rule,
-    ruleType,
-    config
-  );
+  const [{ ruleBaseErrors, ruleErrors, ruleParamsErrors }, setErrors] = useState<{
+    ruleBaseErrors: IErrorObject;
+    ruleErrors: IErrorObject;
+    ruleParamsErrors: IErrorObject;
+  }>({
+    ruleBaseErrors: {},
+    ruleErrors: {},
+    ruleParamsErrors: {},
+  });
+
+  useEffect(() => {
+    getRuleErrors(rule as Rule, ruleType, config, services).then(setErrors);
+  }, [config, rule, ruleType, services]);
 
   // Confirm before saving if user is able to add actions but hasn't added any to this rule
   const shouldConfirmSave = canShowActions && rule.actions?.length === 0;

@@ -11,10 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { DocLinksStart, HttpSetup } from '@kbn/core/public';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { CodeEditor, useKibana } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import { hasExpressionValidationErrors } from '../validation';
@@ -24,13 +23,9 @@ import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
 import { totalHitsToNumber } from '../test_query_row';
+import { useTriggerUiActionServices } from '../util';
 
 const { useXJsonMode } = XJson;
-
-interface KibanaDeps {
-  http: HttpSetup;
-  docLinks: DocLinksStart;
-}
 
 export const EsQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esQuery>, EsQueryRuleMetaData>
@@ -73,7 +68,8 @@ export const EsQueryExpression: React.FC<
     [setRuleParams]
   );
 
-  const { http, docLinks } = useKibana<KibanaDeps>().services;
+  const services = useTriggerUiActionServices();
+  const { http, docLinks } = services;
 
   const [esFields, setEsFields] = useState<
     Array<{
@@ -107,13 +103,15 @@ export const EsQueryExpression: React.FC<
     }
   };
 
-  const hasValidationErrors = useCallback(() => {
-    return hasExpressionValidationErrors(currentRuleParams);
-  }, [currentRuleParams]);
+  const [hasValidationErrors, setHasValidationErrors] = useState(false);
+
+  useEffect(() => {
+    hasExpressionValidationErrors(currentRuleParams, services).then(setHasValidationErrors);
+  }, [currentRuleParams, services]);
 
   const onTestQuery = useCallback(async () => {
     const window = `${timeWindowSize}${timeWindowUnit}`;
-    if (hasValidationErrors()) {
+    if (hasValidationErrors) {
       return { nrOfDocs: 0, timeWindow: window };
     }
     const timeWindow = parseDuration(window);
@@ -251,7 +249,7 @@ export const EsQueryExpression: React.FC<
           setParam('size', updatedValue);
         }}
         errors={errors}
-        hasValidationErrors={hasValidationErrors()}
+        hasValidationErrors={hasValidationErrors}
         onTestFetch={onTestQuery}
         excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={(exclude) => {

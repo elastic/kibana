@@ -46,7 +46,9 @@ export const SearchSourceExpression = ({
   const [paramsError, setParamsError] = useState<Error>();
 
   const setParam = useCallback(
-    (paramField: string, paramValue: unknown) => setRuleParams(paramField, paramValue),
+    (paramField: string, paramValue: unknown) => {
+      setRuleParams(paramField, paramValue);
+    },
     [setRuleParams]
   );
 
