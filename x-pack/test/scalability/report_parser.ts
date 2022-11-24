@@ -36,13 +36,17 @@ const findDataSet = (str: string, regex: RegExp, log: ToolingLog) => {
         .replaceAll(/^\[/g, '')
         .replaceAll(/\]$/g, '')
         .split('.');
-      let values = null;
-      try {
-        values = JSON.parse(pair[1], (k, v) => {
-          return typeof v === 'object' || isNaN(v) ? v : parseInt(v, 10);
-        });
-      } catch (err) {
-        // log.debug('Failed to parse array');
+      let values: number[] = [];
+
+      const arr = pair[1];
+      if (arr !== '[null]') {
+        try {
+          values = JSON.parse(pair[1], (k, v) => {
+            return parseInt(v, 10);
+          });
+        } catch (err) {
+          // log.debug('Failed to parse array');
+        }
       }
       return { timestamp: parseInt(pair[0], 10), values };
     });
@@ -69,7 +73,7 @@ const getTimeActiveUsersToReqCountThreshold = (
   threshold: number
 ) => {
   const resultsAboveThreshold = responses.filter(
-    (i) => i.values && i.values[0] > i.values[1] * threshold
+    (i) => i.values.length > 0 && i.values[0] > i.values[1] * threshold
   );
   if (resultsAboveThreshold.length > 0) {
     return resultsAboveThreshold[0].timestamp;
@@ -81,8 +85,9 @@ const getRPS = (
   dataSet: Array<{
     timestamp: number;
     values: any;
-  }>
-) => (time === -1 ? 'n/a' : dataSet.find((i) => i.timestamp === time)?.values[1]);
+  }>,
+  rpsMax: number
+) => (time === -1 ? rpsMax : dataSet.find((i) => i.timestamp === time)?.values[1]);
 
 export function getCapacityMetrics(
   htmlReportPath: string,
@@ -95,9 +100,13 @@ export function getCapacityMetrics(
   // [timestamp, [min, 25%, 50%, 75%, 80%, 85%, 90%, 95%, 99%, max]], e.g. 1669026394,[9,11,11,12,13,13,14,15,15,16]
   const responsePercentiles = findDataSet(htmlContent, RESPONSES_PERCENTILES_REGEXP, log);
 
+  const responsesWithData = requests.filter((i) => i.values.length > 0);
+  const rpsMax = responsesWithData[responsesWithData.length - 1].values[1];
+
   const warmupPhase = responsePercentiles.slice(0, 30);
   const rpsAtResponseTimeWarmupAvg = Math.round(
     warmupPhase
+      .filter((i) => i.values.length > 0)
       .map((i) => i.values[3])
       .filter((i) => i > 0)
       .reduce((a, b) => a + b, 0) / warmupPhase.length
@@ -112,29 +121,26 @@ export function getCapacityMetrics(
   // 3. x100 increase
   const responseThresholdX100 = rpsAtResponseTimeWarmupAvg * 100;
   // 4. #users/#requests > 1.5-2
-  const usersToReqsThreshold = 1.5;
+  const usersToReqThreshold = 1.5;
   // 5. abs(response/requests - 1) > 0.1
   // 6. time of first error
   // 7. t0 (average during startup)
 
   const maxResponses = responsePercentiles.map((i) => {
-    return { timestamp: i.timestamp, value: i.values ? parseInt(i.values[9], 10) : 0 };
+    return { timestamp: i.timestamp, value: i.values.length > 0 ? i.values[9] : 0 };
   });
 
   const timeSLA = getTimeThresholdFirstPassed(maxResponses, responseThresholdSLA);
   const timeX10 = getTimeThresholdFirstPassed(maxResponses, responseThresholdX10);
   const timeX100 = getTimeThresholdFirstPassed(maxResponses, responseThresholdX100);
-  const timeActiveUsersToReqs = getTimeActiveUsersToReqCountThreshold(
-    requests,
-    usersToReqsThreshold
-  );
+  const timeActiveUsersToReq = getTimeActiveUsersToReqCountThreshold(requests, usersToReqThreshold);
 
   return {
     rpsAtResponseTimeWarmupAvg,
-    rpsAtSLA: getRPS(timeSLA, requests),
-    rpsAtResponseTime10XAvg: getRPS(timeX10, requests),
-    rpsAtResponseTime100XAvg: getRPS(timeX100, requests),
-    rpsAtRequestsToActiveUsers: getRPS(timeActiveUsersToReqs, requests),
+    rpsAtSLA: getRPS(timeSLA, requests, rpsMax),
+    rpsAtResponseTime10XAvg: getRPS(timeX10, requests, rpsMax),
+    rpsAtResponseTime100XAvg: getRPS(timeX100, requests, rpsMax),
+    rpsAtRequestsToActiveUsers: getRPS(timeActiveUsersToReq, requests, rpsMax),
     thresholdSLA: responseThresholdSLA,
   };
 }
