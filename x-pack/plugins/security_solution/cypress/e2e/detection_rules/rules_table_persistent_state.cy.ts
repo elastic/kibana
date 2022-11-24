@@ -7,11 +7,7 @@
 
 import { cleanKibana, resetRulesTableState } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
-import {
-  DETECTIONS_RULE_MANAGEMENT_URL,
-  DASHBOARDS_URL,
-  SECURITY_DETECTIONS_RULES_URL,
-} from '../../urls/navigation';
+import { DASHBOARDS_URL, SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
 import {
   expectNumberOfRules,
@@ -40,12 +36,11 @@ describe('Persistent rules table state', () => {
     createRule('2', 'Test rule 2', ['Custom']);
 
     login();
-
-    visit(SECURITY_DETECTIONS_RULES_URL);
   });
 
   beforeEach(() => {
     resetRulesTableState();
+    visit(SECURITY_DETECTIONS_RULES_URL); // Make sure state isn't persisted in the url
   });
 
   it('reloads the state from the url if the storage was cleared', () => {
@@ -62,7 +57,6 @@ describe('Persistent rules table state', () => {
   });
 
   it('preserved after navigation from the rules details page', () => {
-    visit(DETECTIONS_RULE_MANAGEMENT_URL);
     filterBySearchTerm('rule 1');
 
     expectNumberOfRules(1);
@@ -77,12 +71,10 @@ describe('Persistent rules table state', () => {
   });
 
   it('preserved after navigation from another page', () => {
-    visit(DETECTIONS_RULE_MANAGEMENT_URL);
     filterBySearchTerm('rule 1');
 
     visit(DASHBOARDS_URL);
-    cy.wait(300);
-    visit(DETECTIONS_RULE_MANAGEMENT_URL);
+    visit(SECURITY_DETECTIONS_RULES_URL);
 
     cy.get(RULE_SEARCH_FIELD).should('have.value', 'rule 1');
     expectNumberOfRules(1);
