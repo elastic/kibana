@@ -9,7 +9,7 @@
 import { EuiButton, EuiButtonIcon } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { useBehaviorSubject } from '../../use_behavior_subject';
+import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import { useUploadState } from '../context';
 import { i18nTexts } from '../i18n_texts';
 

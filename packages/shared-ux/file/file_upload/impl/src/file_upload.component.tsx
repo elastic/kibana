@@ -17,9 +17,9 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
-import { useBehaviorSubject } from '../use_behavior_subject';
 import { i18nTexts } from './i18n_texts';
 import { ControlButton, ClearButton } from './components';
 import { useUploadState } from './context';

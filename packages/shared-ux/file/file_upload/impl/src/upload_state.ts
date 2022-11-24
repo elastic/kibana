@@ -8,8 +8,7 @@
 
 import Rx from 'rxjs';
 import { ImageMetadataFactory, getImageMetadata, isImage } from '@kbn/shared-ux-file-util';
-import type { FileKind, FileJSON } from '../../../common/types';
-import type { FilesClient } from '../../types';
+import type { FileKind, FileJSON, FilesClient } from '@kbn/shared-ux-file-types';
 import { i18nTexts } from './i18n_texts';
 
 import { createStateSubject, type SimpleStateSubject, parseFileName } from './util';

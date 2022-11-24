@@ -9,14 +9,35 @@
 import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import { FileKind, FilesClient } from '@kbn/shared-ux-file-types';
+import { FilesContext } from '@kbn/shared-ux-file-context';
 
-import { register } from '../stories_shared';
-import { FilesClient } from '../../types';
-import { FilesContext } from '../context';
 import { FileUpload, Props } from './file_upload';
 
 const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
 const kind = 'test';
+const miniFile = 'miniFile';
+const zipOnly = 'zipOnly';
+const fileKinds = {
+  [kind]: {
+    id: kind,
+    http: {},
+    allowedMimeTypes: ['*'],
+  },
+  [miniFile]: {
+    id: miniFile,
+    http: {},
+    maxSizeBytes: 1,
+    allowedMimeTypes: ['*'],
+  },
+  [zipOnly]: {
+    id: zipOnly,
+    http: {},
+    allowedMimeTypes: ['application/zip'],
+  },
+};
+const getFileKind = (id: string) => (fileKinds as any)[id] as FileKind;
 
 const defaultArgs: Props = {
   kind,
@@ -44,27 +65,6 @@ export default {
   ],
 } as ComponentMeta<typeof FileUpload>;
 
-register({
-  id: kind,
-  http: {},
-  allowedMimeTypes: ['*'],
-});
-
-const miniFile = 'miniFile';
-register({
-  id: miniFile,
-  http: {},
-  maxSizeBytes: 1,
-  allowedMimeTypes: ['*'],
-});
-
-const zipOnly = 'zipOnly';
-register({
-  id: zipOnly,
-  http: {},
-  allowedMimeTypes: ['application/zip'],
-});
-
 const Template: ComponentStory<typeof FileUpload> = (props: Props) => <FileUpload {...props} />;
 
 export const Basic = Template.bind({});
@@ -86,6 +86,7 @@ LongErrorUX.decorators = [
             throw new Error('Something went wrong while uploading! '.repeat(10).trim());
           },
           delete: async () => {},
+          getFileKind,
         } as unknown as FilesClient
       }
     >
@@ -105,6 +106,7 @@ Abort.decorators = [
             await sleep(60000);
           },
           delete: async () => {},
+          getFileKind,
         } as unknown as FilesClient
       }
     >
@@ -148,6 +150,7 @@ ImmediateUploadError.decorators = [
             throw new Error('Something went wrong while uploading!');
           },
           delete: async () => {},
+          getFileKind,
         } as unknown as FilesClient
       }
     >
@@ -167,6 +170,7 @@ ImmediateUploadAbort.decorators = [
             await sleep(60000);
           },
           delete: async () => {},
+          getFileKind,
         } as unknown as FilesClient
       }
     >
@@ -198,6 +202,7 @@ CompressedError.decorators = [
             throw new Error('Something went wrong while uploading! '.repeat(10).trim());
           },
           delete: async () => {},
+          getFileKind,
         } as unknown as FilesClient
       }
     >

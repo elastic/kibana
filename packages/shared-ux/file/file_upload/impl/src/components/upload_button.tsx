@@ -9,10 +9,10 @@
 import { EuiButton } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
+import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import useObservable from 'react-use/lib/useObservable';
 import { i18nTexts } from '../i18n_texts';
 import { useUploadState } from '../context';
-import { useBehaviorSubject } from '../../use_behavior_subject';
 
 interface Props {
   onClick: () => void;

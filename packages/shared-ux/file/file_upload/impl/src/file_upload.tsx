@@ -10,7 +10,7 @@ import { EuiFilePicker } from '@elastic/eui';
 import React, { type FunctionComponent, useRef, useEffect, useMemo } from 'react';
 
 import type { FileJSON } from '@kbn/shared-ux-file-types';
-import { useFilesContext } from '../context';
+import { useFilesContext } from '@kbn/shared-ux-file-context';
 
 import { FileUpload as Component } from './file_upload.component';
 import { createUploadState } from './upload_state';
@@ -135,9 +135,9 @@ export const FileUpload = <Kind extends string = string>({
   allowRepeatedUploads = false,
   className,
 }: Props<Kind>): ReturnType<FunctionComponent> => {
-  const { registry, client } = useFilesContext();
+  const { client } = useFilesContext();
   const ref = useRef<null | EuiFilePicker>(null);
-  const fileKind = registry.get(kindId);
+  const fileKind = client.getFileKind(kindId);
   const repeatedUploads = compressed || allowRepeatedUploads;
   const uploadState = useMemo(
     () =>

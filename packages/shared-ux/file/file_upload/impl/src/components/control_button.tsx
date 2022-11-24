@@ -9,7 +9,7 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { useBehaviorSubject } from '../../use_behavior_subject';
+import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import { useUploadState } from '../context';
 import { UploadButton } from './upload_button';
 import { RetryButton } from './retry_button';

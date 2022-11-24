@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-export {
-  fitToBox,
-  getBlurhashSrc,
-  getImageMetadata,
-  isImage,
-  type ImageMetadataFactory,
-  useBehaviorSubject,
-} from './src';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import type { FilesClient } from '@kbn/shared-ux-file-types';
+
+export const createMockFilesClient = (): DeeplyMockedKeys<FilesClient> => ({
+  create: jest.fn(),
+  delete: jest.fn(),
+  upload: jest.fn(),
+  getFileKind: jest.fn(),
+});

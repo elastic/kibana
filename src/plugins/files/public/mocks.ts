@@ -9,7 +9,6 @@
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { FilesClient } from './types';
 
-// TODO: Remove this once we have access to the shared file client mock
 export const createMockFilesClient = (): DeeplyMockedKeys<FilesClient> => ({
   create: jest.fn(),
   bulkDelete: jest.fn(),

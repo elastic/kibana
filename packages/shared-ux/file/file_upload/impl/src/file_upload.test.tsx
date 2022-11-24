@@ -10,17 +10,9 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import { EuiFilePicker } from '@elastic/eui';
-
-import {
-  FileKindsRegistryImpl,
-  setFileKindsRegistry,
-  getFileKindsRegistry,
-} from '../../../common/file_kinds_registry';
-
-import { createMockFilesClient } from '../../mocks';
-
-import { FileJSON } from '../../../common';
-import { FilesContext } from '../context';
+import { FilesContext } from '@kbn/shared-ux-file-context';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
+import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 import { FileUpload, Props } from './file_upload';
 
 describe('FileUpload', () => {
@@ -87,12 +79,11 @@ describe('FileUpload', () => {
   }
 
   beforeAll(() => {
-    setFileKindsRegistry(new FileKindsRegistryImpl());
-    getFileKindsRegistry().register({
+    client.getFileKind.mockImplementation(() => ({
       id: 'test',
       maxSizeBytes: 10000,
       http: {},
-    });
+    }));
   });
 
   beforeEach(() => {
