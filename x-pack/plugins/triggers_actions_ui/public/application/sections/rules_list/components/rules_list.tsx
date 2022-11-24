@@ -767,34 +767,6 @@ export const RulesList = ({
     }
   };
 
-  const onEnable = useCallback(async () => {
-    setIsEnablingRules(true);
-
-    const { errors, total } = await bulkEnableRules({
-      ...(isAllSelected ? { filter: getFilter() } : {}),
-      ...(isAllSelected ? {} : { ids: selectedIds }),
-      http,
-    });
-
-    setIsEnablingRules(false);
-    showToast({ action: 'ENABLE', errors, total });
-    await refreshRules();
-  }, [http, selectedIds, getFilter, setIsEnablingRules, toasts]);
-
-  const onDisable = useCallback(async () => {
-    setIsDisablingRules(true);
-
-    const { errors, total } = await bulkDisableRules({
-      ...(isAllSelected ? { filter: getFilter() } : {}),
-      ...(isAllSelected ? {} : { ids: selectedIds }),
-      http,
-    });
-
-    setIsDisablingRules(false);
-    showToast({ action: 'DISABLE', errors, total });
-    await refreshRules();
-  }, [http, selectedIds, getFilter, setIsDisablingRules, toasts]);
-
   const table = (
     <>
       <RulesListErrorBanner
@@ -1060,7 +1032,36 @@ export const RulesList = ({
   useEffect(() => {
     setIsDeleteModalVisibility(rulesToDelete.length > 0 || Boolean(rulesToDeleteFilter));
   }, [rulesToDelete, rulesToDeleteFilter]);
+
   const { showToast } = useBulkOperationToast({ onSearchPopulate });
+
+  const onEnable = useCallback(async () => {
+    setIsEnablingRules(true);
+
+    const { errors, total } = await bulkEnableRules({
+      ...(isAllSelected ? { filter: getFilter() } : {}),
+      ...(isAllSelected ? {} : { ids: selectedIds }),
+      http,
+    });
+
+    setIsEnablingRules(false);
+    showToast({ action: 'ENABLE', errors, total });
+    await refreshRules();
+  }, [http, selectedIds, getFilter, setIsEnablingRules, showToast]);
+
+  const onDisable = useCallback(async () => {
+    setIsDisablingRules(true);
+
+    const { errors, total } = await bulkDisableRules({
+      ...(isAllSelected ? { filter: getFilter() } : {}),
+      ...(isAllSelected ? {} : { ids: selectedIds }),
+      http,
+    });
+
+    setIsDisablingRules(false);
+    showToast({ action: 'DISABLE', errors, total });
+    await refreshRules();
+  }, [http, selectedIds, getFilter, setIsDisablingRules, showToast]);
 
   const onDeleteCancel = () => {
     setIsDeleteModalVisibility(false);
