@@ -24,21 +24,21 @@ export function useInitializeRulesTableSavedState(): void {
     services: { sessionStorage },
   } = useKibana();
   const onInitializeRulesTableContextFromUrlParam = useCallback(
-    (params: RulesTableSavedState | null) => {
-      const savedState: Partial<RulesTableSavedState> | null = sessionStorage.get(
+    (urlState: RulesTableSavedState | null) => {
+      const storageState: Partial<RulesTableSavedState> | null = sessionStorage.get(
         RULES_TABLE_STATE_STORAGE_KEY
       );
 
-      if (!params && !savedState) {
+      if (!urlState && !storageState) {
         return;
       }
 
-      const searchTerm = params?.searchTerm ?? savedState?.searchTerm;
-      const showCustomRules = params?.showCustomRules ?? savedState?.showCustomRules;
-      const tags = params?.tags ?? savedState?.tags;
-      const sorting = params?.sort ?? savedState?.sort;
-      const page = params?.page ?? savedState?.page;
-      const perPage = params?.perPage ?? savedState?.perPage;
+      const searchTerm = urlState?.searchTerm ?? storageState?.searchTerm;
+      const showCustomRules = urlState?.showCustomRules ?? storageState?.showCustomRules;
+      const tags = urlState?.tags ?? storageState?.tags;
+      const sorting = urlState?.sort ?? storageState?.sort;
+      const page = urlState?.page ?? storageState?.page;
+      const perPage = urlState?.perPage ?? storageState?.perPage;
 
       actions.setFilterOptions({
         filter: typeof searchTerm === 'string' ? searchTerm : INITIAL_FILTER_OPTIONS.filter,
