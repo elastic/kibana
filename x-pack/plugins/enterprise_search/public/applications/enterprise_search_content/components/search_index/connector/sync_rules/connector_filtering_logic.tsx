@@ -261,7 +261,7 @@ export const ConnectorFilteringLogic = kea<
                   id: uuidv4(),
                   order: 0,
                   policy: FilteringPolicy.INCLUDE,
-                  rule: FilteringRuleRule.EQUALS,
+                  rule: FilteringRuleRule.REGEX,
                   updated_at: new Date().toISOString(),
                   value: '.*',
                 },
@@ -279,7 +279,7 @@ export const ConnectorFilteringLogic = kea<
                 id: uuidv4(),
                 order: 0,
                 policy: FilteringPolicy.INCLUDE,
-                rule: FilteringRuleRule.EQUALS,
+                rule: FilteringRuleRule.REGEX,
                 updated_at: new Date().toISOString(),
                 value: '.*',
               };
