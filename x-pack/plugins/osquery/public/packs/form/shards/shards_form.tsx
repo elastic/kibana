@@ -44,7 +44,11 @@ const ShardsFormComponent = ({
 
   return (
     <>
-      <EuiFlexGroup data-test-subj="packShardsForm" alignItems="flexStart" gutterSize="s">
+      <EuiFlexGroup
+        data-test-subj={`packShardsForm-${index}`}
+        alignItems="flexStart"
+        gutterSize="s"
+      >
         <EuiFlexItem>
           <ShardsPolicyField
             index={index}
