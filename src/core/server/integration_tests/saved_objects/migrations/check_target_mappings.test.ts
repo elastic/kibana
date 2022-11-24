@@ -14,7 +14,11 @@ import { REPO_ROOT } from '@kbn/utils';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { Root } from '@kbn/core-root-server-internal';
 import { LogRecord } from '@kbn/logging';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+import {
+  createRootWithCorePlugins,
+  createTestServers,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 
 const logFilePath = Path.join(__dirname, 'check_target_mappings.log');
 
@@ -39,7 +43,7 @@ function logIncludes(logs: LogRecord[], message: string): boolean {
 }
 
 describe('migration v2 - CHECK_TARGET_MAPPINGS', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let esServer: TestElasticsearchUtils;
   let root: Root;
   let logs: LogRecord[];
 
@@ -52,7 +56,7 @@ describe('migration v2 - CHECK_TARGET_MAPPINGS', () => {
   });
 
   it('is not run for new installations', async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
@@ -74,7 +78,7 @@ describe('migration v2 - CHECK_TARGET_MAPPINGS', () => {
   });
 
   it('skips UPDATE_TARGET_MAPPINGS for up-to-date deployments, when there are no changes in the mappings', async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
@@ -115,7 +119,7 @@ describe('migration v2 - CHECK_TARGET_MAPPINGS', () => {
   it('runs UPDATE_TARGET_MAPPINGS when mappings have changed', async () => {
     const currentVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
@@ -155,7 +159,7 @@ describe('migration v2 - CHECK_TARGET_MAPPINGS', () => {
 });
 
 function createRoot(discardUnknownObjects?: string) {
-  return kbnTestServer.createRootWithCorePlugins(
+  return createRootWithCorePlugins(
     {
       migrations: {
         discardUnknownObjects,
