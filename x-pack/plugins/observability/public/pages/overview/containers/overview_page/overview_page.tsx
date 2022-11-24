@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutSize,
-  EuiHorizontalRule,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -36,19 +30,19 @@ import { SectionContainer } from '../../../../components/app/section';
 import { ObservabilityStatusProgress } from '../../../../components/app/observability_status/observability_status_progress';
 
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useHasData } from '../../../../hooks/use_has_data';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
-import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { useGuidedSetupProgress } from '../../../../hooks/use_guided_setup_progress';
+import { useHasData } from '../../../../hooks/use_has_data';
+import { useOverviewMetrics } from './helpers/use_metrics';
+import { usePluginContext } from '../../../../hooks/use_plugin_context';
 
 import { observabilityFeatureId } from '../../../../../common';
-import { paths } from '../../../../config';
+import { observabilityAlertFeatureIds, paths } from '../../../../config';
 import { ALERTS_PER_PAGE, ALERTS_TABLE_ID } from './constants';
 
 import type { ObservabilityAppServices } from '../../../../application/types';
-import { useOverviewMetrics } from './helpers/use_metrics';
 
 export function OverviewPage() {
   const {
@@ -180,13 +174,8 @@ export function OverviewPage() {
                 alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                 configurationId={AlertConsumers.OBSERVABILITY}
                 id={ALERTS_TABLE_ID}
-                flyoutSize={'s' as EuiFlyoutSize}
-                featureIds={[
-                  AlertConsumers.APM,
-                  AlertConsumers.INFRASTRUCTURE,
-                  AlertConsumers.LOGS,
-                  AlertConsumers.UPTIME,
-                ]}
+                flyoutSize="s"
+                featureIds={observabilityAlertFeatureIds}
                 pageSize={ALERTS_PER_PAGE}
                 query={esQuery}
                 showExpandToDetails={false}
