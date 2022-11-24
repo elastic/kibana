@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { getEnterpriseSearchUrl } from '../../../shared/enterprise_search_url';
@@ -99,15 +100,13 @@ export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrate
 
       <EuiSpacer size="l" />
       <EuiText size="s">
-        <p>
-          {i18n.translate(
-            'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.scriptDescription',
-            {
-              defaultMessage:
-                'Track individual events, like clicks, by calling the <strong>trackEvent</strong> method.',
-            }
-          )}
-        </p>
+        <FormattedMessage
+          id="xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.scriptDescription"
+          defaultMessage="Track individual events, like clicks, by calling the {trackEvent} method."
+          values={{
+            trackEvent: <strong>trackEvent</strong>,
+          }}
+        />
       </EuiText>
       <EuiSpacer size="s" />
       <EuiCodeBlock language="js" isCopyable>
