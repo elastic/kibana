@@ -161,8 +161,6 @@ export const settings = {
               kuery: t.string,
               agentLanguage: t.string,
               serviceName: t.string,
-              rangeFrom: t.string,
-              rangeTo: t.string,
             }),
           ]),
         }),

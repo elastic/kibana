@@ -21,12 +21,10 @@ import {
   SERVICE_LANGUAGE_NAME,
   SERVICE_NAME,
 } from '../../../../../common/es_fields/apm';
-import { EnvironmentsContextProvider } from '../../../../context/environments_context/environments_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
 import { KueryBar } from '../../../shared/kuery_bar';
 import * as urlHelpers from '../../../shared/links/url_helpers';
 import { SuggestionsSelect } from '../../../shared/suggestions_select';
@@ -122,13 +120,6 @@ export function AgentExplorer() {
       <EuiSpacer size="xs" />
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="flexEnd" responsive={true}>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs">
-              <EnvironmentsContextProvider>
-                <ApmEnvironmentFilter />
-              </EnvironmentsContextProvider>
-            </EuiFlexGroup>
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SuggestionsSelect
               prepend={i18n.translate(
