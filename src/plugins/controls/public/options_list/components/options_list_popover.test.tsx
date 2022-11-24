@@ -66,7 +66,7 @@ describe('Options list popover', () => {
   });
 
   test('no available options', async () => {
-    const popover = await mountComponent({ componentState: { availableOptions: [] } });
+    const popover = await mountComponent({ componentState: { availableOptions: {} } });
     const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
     const noOptionsDiv = findTestSubject(
       availableOptionsDiv,
@@ -172,7 +172,7 @@ describe('Options list popover', () => {
 
   test('if existsSelected = false and no suggestions, then "Exists" does not show up', async () => {
     const popover = await mountComponent({
-      componentState: { availableOptions: [] },
+      componentState: { availableOptions: {} },
       explicitInput: { existsSelected: false },
     });
     const existsOption = findTestSubject(popover, 'optionsList-control-selection-exists');

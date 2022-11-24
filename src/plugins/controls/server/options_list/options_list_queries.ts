@@ -11,6 +11,10 @@ import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 
 import { OptionsListRequestBody, OptionsListSuggestions } from '../../common/options_list/types';
+import {
+  OPTIONS_LIST_DEFAULT_SORT,
+  OptionsListSortingType,
+} from '../../common/options_list/suggestions_sorting';
 import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
 
 export interface OptionsListValidationAggregationBuilder {
@@ -28,8 +32,10 @@ interface EsBucket {
   doc_count: number;
 }
 
-const getSortType = (sort?: SortingType) => {
-  return sort ? { [sort.by]: sort.direction } : { [DEFAULT_SORT.by]: DEFAULT_SORT.direction };
+const getSortType = (sort?: OptionsListSortingType) => {
+  return sort
+    ? { [sort.by]: sort.direction }
+    : { [OPTIONS_LIST_DEFAULT_SORT.by]: OPTIONS_LIST_DEFAULT_SORT.direction };
 };
 
 /**
@@ -54,14 +60,11 @@ export const getValidationAggregationBuilder: () => OptionsListValidationAggrega
         : undefined;
     },
     parse: (rawEsResult) => {
-      const rawInvalidSuggestions = get(
-        rawEsResult,
-        'aggregations.validation.buckets'
-      ) as EsBucket[];
+      const rawInvalidSuggestions = get(rawEsResult, 'aggregations.validation.buckets');
       return rawInvalidSuggestions && !isEmpty(rawInvalidSuggestions)
-        ? rawInvalidSuggestions
-            .filter((suggestion) => suggestion.doc_count === 0)
-            .map(({ key }) => key)
+        ? Object.keys(rawInvalidSuggestions).filter(
+            (key) => rawInvalidSuggestions[key].doc_count === 0
+          )
         : [];
     },
   });
@@ -240,6 +243,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
           (bucketA: EsBucket, bucketB: EsBucket) =>
             (bucketB?.doc_count ?? 0) - (bucketA?.doc_count ?? 0)
         )
+        .slice(0, 10) // only return top 10 results
         .reduce((suggestions, suggestion: EsBucket) => {
           return { ...suggestions, [suggestion.key]: { doc_count: suggestion.doc_count } };
         }, {});

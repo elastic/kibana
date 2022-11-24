@@ -26,8 +26,8 @@ import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public'
 
 import {
   getCompatibleSortingTypes,
-  DEFAULT_SORT,
-  sortDirections,
+  optionsListSortDirections,
+  OPTIONS_LIST_DEFAULT_SORT,
   OptionsListSortBy,
 } from '../../../common/options_list/suggestions_sorting';
 import { OptionsListReduxState } from '../types';
@@ -57,7 +57,7 @@ export const OptionsListPopoverSortingButton = ({
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const field = select((state) => state.componentState.field);
-  const sort = select((state) => state.explicitInput.sort ?? DEFAULT_SORT);
+  const sort = select((state) => state.explicitInput.sort ?? OPTIONS_LIST_DEFAULT_SORT);
 
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
 
@@ -75,7 +75,7 @@ export const OptionsListPopoverSortingButton = ({
 
   const sortOrderOptions = useMemo(
     () =>
-      sortDirections.map((key) => {
+      optionsListSortDirections.map((key) => {
         return {
           id: key,
           iconType: `sort${toSentenceCase(key)}ending`,

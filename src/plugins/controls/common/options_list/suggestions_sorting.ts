@@ -10,13 +10,17 @@ import { Direction } from '@elastic/eui';
 
 export type OptionsListSortBy = '_count' | '_key';
 
-export const DEFAULT_SORT: SortingType = { by: '_count', direction: 'desc' };
+export const OPTIONS_LIST_DEFAULT_SORT: OptionsListSortingType = {
+  by: '_count',
+  direction: 'desc',
+};
 
-export const sortDirections: Readonly<Direction[]> = ['asc', 'desc'] as const;
-export type SortDirection = typeof sortDirections[number];
-export interface SortingType {
+export const optionsListSortDirections: Readonly<Direction[]> = ['asc', 'desc'] as const;
+type OptionsListSortDirection = typeof optionsListSortDirections[number];
+
+export interface OptionsListSortingType {
   by: OptionsListSortBy;
-  direction: SortDirection;
+  direction: OptionsListSortDirection;
 }
 
 export const getCompatibleSortingTypes = (type?: string): OptionsListSortBy[] => {

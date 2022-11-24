@@ -13,7 +13,10 @@ import { Filter } from '@kbn/es-query';
 import { OptionsListReduxState, OptionsListComponentState } from './types';
 import { OptionsListField } from '../../common/options_list/types';
 import { getIpRangeQuery } from '../../common/options_list/ip_search';
-import { DEFAULT_SORT, SortingType } from '../../common/options_list/suggestions_sorting';
+import {
+  OPTIONS_LIST_DEFAULT_SORT,
+  OptionsListSortingType,
+} from '../../common/options_list/suggestions_sorting';
 
 export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({
   searchString: { value: '', valid: true },
@@ -52,9 +55,12 @@ export const optionsListReducers = {
   },
   setSort: (
     state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<Partial<SortingType>>
+    action: PayloadAction<Partial<OptionsListSortingType>>
   ) => {
-    state.explicitInput.sort = { ...(state.explicitInput.sort ?? DEFAULT_SORT), ...action.payload };
+    state.explicitInput.sort = {
+      ...(state.explicitInput.sort ?? OPTIONS_LIST_DEFAULT_SORT),
+      ...action.payload,
+    };
   },
   selectExists: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     if (action.payload) {

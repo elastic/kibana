@@ -10,11 +10,12 @@ import React, { useMemo } from 'react';
 
 import {
   EuiFilterSelectItem,
-  EuiSpacer,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
+  EuiSpacer,
   EuiBadge,
+  EuiIcon,
 } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
@@ -47,7 +48,7 @@ export const OptionsListPopoverSuggestions = ({
   const hideExists = select((state) => state.explicitInput.hideExists);
 
   const loading = select((state) => state.output.loading);
-
+  console.log(invalidSelections, availableOptions);
   // track selectedOptions and invalidSelections in sets for more efficient lookup
   const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
   const invalidSelectionsSet = useMemo(
@@ -125,7 +126,18 @@ export const OptionsListPopoverSuggestions = ({
           <EuiFlexGroup>
             <EuiFlexItem>{`${key}`}</EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {availableOptions && <EuiBadge>{`${availableOptions[key].doc_count}`}</EuiBadge>}
+              {availableOptions && availableOptions[key] && (
+                <EuiToolTip
+                  content={OptionsListStrings.popover.getDocumentCountTooltip(
+                    availableOptions[key].doc_count
+                  )}
+                  position={'right'}
+                >
+                  <EuiBadge title={undefined} tabIndex={0} className="eui-textNumber">
+                    {`${availableOptions[key].doc_count}`}
+                  </EuiBadge>
+                </EuiToolTip>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFilterSelectItem>

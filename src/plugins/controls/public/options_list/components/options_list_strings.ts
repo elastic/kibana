@@ -128,6 +128,12 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.sortDisabledTooltip', {
         defaultMessage: 'Ignore sorting when “Show only selected” is true.',
       }),
+    getDocumentCountTooltip: (documentCount: number) =>
+      i18n.translate('controls.optionsList.popover.documentCountTooltip', {
+        defaultMessage:
+          'This value appears in {documentCount} {documentCount, plural, one {document} other {documents}}.',
+        values: { documentCount },
+      }),
   },
   controlAndPopover: {
     getExists: (negate: number = +false) =>
