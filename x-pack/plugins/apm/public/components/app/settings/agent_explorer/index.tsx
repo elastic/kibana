@@ -101,20 +101,18 @@ export function AgentExplorer() {
       <EuiSpacer size="s" />
       <EuiFlexItem grow={false}>
         <EuiTitle>
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <h2>
-                  {i18n.translate('xpack.apm.settings.agentExplorer.title', {
-                    defaultMessage: 'Agent explorer',
-                  })}
-                </h2>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <TechnicalPreviewBadge icon="beaker" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <h2>
+                {i18n.translate('xpack.apm.settings.agentExplorer.title', {
+                  defaultMessage: 'Agent explorer',
+                })}
+              </h2>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <TechnicalPreviewBadge icon="beaker" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiTitle>
       </EuiFlexItem>
       <EuiSpacer />
@@ -125,9 +123,9 @@ export function AgentExplorer() {
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="flexEnd" responsive={true}>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
+            <EuiFlexGroup gutterSize="xs">
               <EnvironmentsContextProvider>
-                <ApmEnvironmentFilter fullWidth={true} />
+                <ApmEnvironmentFilter />
               </EnvironmentsContextProvider>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -155,7 +153,6 @@ export function AgentExplorer() {
               start={start}
               end={end}
               dataTestSubj="agentExplorerServiceNameSelect"
-              fullWidth={true}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -182,7 +179,6 @@ export function AgentExplorer() {
               start={start}
               end={end}
               dataTestSubj="agentExplorerAgentLanguageSelect"
-              fullWidth={true}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

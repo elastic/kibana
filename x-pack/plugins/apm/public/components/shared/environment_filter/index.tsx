@@ -27,7 +27,7 @@ function updateEnvironmentUrl(
   });
 }
 
-export function ApmEnvironmentFilter({ fullWidth }: { fullWidth?: boolean }) {
+export function ApmEnvironmentFilter() {
   const { environment, environments, status } = useEnvironmentsContext();
   const history = useHistory();
   const location = useLocation();
@@ -40,7 +40,6 @@ export function ApmEnvironmentFilter({ fullWidth }: { fullWidth?: boolean }) {
       onChange={(changeValue: string) =>
         updateEnvironmentUrl(history, location, changeValue)
       }
-      fullWidth={fullWidth}
     />
   );
 }

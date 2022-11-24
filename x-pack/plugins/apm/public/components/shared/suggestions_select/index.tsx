@@ -39,7 +39,6 @@ export function SuggestionsSelect({
   dataTestSubj,
   isClearable = true,
   prepend,
-  fullWidth,
 }: SuggestionsSelectProps) {
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
@@ -121,7 +120,6 @@ export function SuggestionsSelect({
       onCreateOption={handleCreateOption}
       data-test-subj={dataTestSubj}
       prepend={prepend}
-      fullWidth={fullWidth}
     />
   );
 }
