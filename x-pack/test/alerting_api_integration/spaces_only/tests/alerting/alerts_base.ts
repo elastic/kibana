@@ -126,6 +126,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
           producer: 'alertsFixture',
           ruleTypeId: 'test.always-firing',
           ruleTypeName: 'Test: Always Firing',
+          lastTriggerDate: null,
         },
       };
       if (expected.alertInfo.namespace === undefined) {

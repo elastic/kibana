@@ -106,6 +106,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                     connector_type_id: createdAction.connector_type_id,
                     group: 'default',
                     params: {},
+                    last_trigger_date: null,
                   },
                 ],
                 enabled: true,

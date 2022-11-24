@@ -94,6 +94,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(actions).to.eql([
         {
           actionTypeId: '.slack',
+          actionRef: 'preconfigured:my-slack1',
+          lastTriggerDate: null,
           group: 'recovered',
           params: {
             message:
@@ -103,6 +105,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         },
         {
           actionTypeId: '.slack',
+          actionRef: 'preconfigured:my-slack1',
+          lastTriggerDate: null,
           group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
           params: {
             message:
