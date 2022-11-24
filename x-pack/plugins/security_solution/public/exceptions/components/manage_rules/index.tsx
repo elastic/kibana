@@ -45,6 +45,7 @@ export const ManageRules: FC<ManageRulesProps> = memo(
     const complicatedFlyoutTitleId = useGeneratedHtmlId({
       prefix: 'complicatedFlyoutTitle',
     });
+
     return (
       <EuiFlyout
         hideCloseButton
