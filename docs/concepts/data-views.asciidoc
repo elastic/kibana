@@ -32,11 +32,16 @@ uploaded a file, or added sample data,
 you get a {data-source} for free, and can start exploring your data.
 If you loaded your own data, follow these steps to create a {data-source}.
 
-. Open the main menu, then click *Stack Management > Data Views*.
+. Open *Lens* or *Discover*, and then open the data view menu.
++
+[role="screenshot"]
+image::images/discover-data-view.png[How to set the {data-source} in Discover, width="40%"]
 
-. Click *Create {data-source}*.
+. Click *Create a {data-source}*.
 
-. Start typing in the *name* field, and {kib} looks for the names of
+. Give your {data-source} a name.
+
+. Start typing in the *Index pattern* field, and {kib} looks for the names of
 indices, data streams, and aliases that match your input.
 +
 [role="screenshot"]
@@ -65,18 +70,30 @@ based on different timestamps.
 
 . To specify your own {data-source} name, click *Show advanced settings*, then enter the name in the *Custom {data-source} ID* field. For example, enter your {es} index alias name.
 
-. [[reload-fields]] To use this data in searches and visualizations that you intend to save, click *Save {data-source} to {kib}*.
-
-. To explore your data without creating a {data-source}, click *Use without saving*.
+. [[reload-fields]] Click *Save {data-source} to {kib}*.
 +
-This allows you to explore your data in *Discover*, *Lens*, and *Maps*
-without making it visible to others in your space. You can save the {data-source} later
-if you create a search or visualization that you want to share.
+You can manage your data view from *Stack Management*.
 
+[float]
+==== Temporary {data-sources}
+
+What if you want to explore your data or create a visualization without first saving it as a data view?
+You can do just that by selecting *Use without saving* in the *Create {data-source}* form in *Discover*
+or *Lens*. With an ad-hoc {data-source}, you can
+do all the normal things you'd do with a saved
+{data-source} in *Discover* and *Lens*,
+including adding fields and creating an {es} query alert. Your work won't be visible to others in your space.
+
+An ad-hoc {data-source} stays around until you change apps, or until you save it.
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte3a4f3994c44c0cc/637eb0c95834861044c21a25/ad-hoc-data-view.gif[how to create an ad-hoc data view]
+
+Ad-hoc {data-sources} are not available in *Stack Management.*
 
 [float]
 [[rollup-data-view]]
-==== Create a data view for rolled up data
+==== Data views for rolled up data
 
 A {data-source} can match one rollup index.  For a combination rollup
 {data-source} with both raw and rolled up data, use the standard notation:
@@ -88,7 +105,7 @@ For an example, refer to <<rollup-data-tutorial,Create and visualize rolled up d
 
 [float]
 [[management-cross-cluster-search]]
-==== Create a data view that searches across clusters
+==== Data views that search across clusters
 
 If your {es} clusters are configured for {ref}/modules-cross-cluster-search.html[{ccs}],
 you can create a {data-source} to search across the clusters of your choosing.
@@ -139,7 +156,7 @@ aggregations using that {data-source} in {kib} take advantage of {ccs}.
 
 [float]
 [[delete-data-view]]
-=== Delete {data-sources}
+=== Delete a {data-sources}
 
 When you delete a {data-source}, you cannot recover the associated field formatters, runtime fields, source filters,
 and field popularity data. Deleting a {data-source} does not remove any indices or data documents from {es}.
