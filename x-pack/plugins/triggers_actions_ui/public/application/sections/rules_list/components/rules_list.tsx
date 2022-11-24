@@ -772,7 +772,7 @@ export const RulesList = ({
 
     const { errors, total } = await bulkEnableRules({
       ...(isAllSelected ? { filter: getFilter() } : {}),
-      ids: selectedIds,
+      ...(isAllSelected ? {} : { ids: selectedIds }),
       http,
     });
 
@@ -786,7 +786,7 @@ export const RulesList = ({
 
     const { errors, total } = await bulkDisableRules({
       ...(isAllSelected ? { filter: getFilter() } : {}),
-      ids: selectedIds,
+      ...(isAllSelected ? {} : { ids: selectedIds }),
       http,
     });
 

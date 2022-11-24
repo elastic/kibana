@@ -15,7 +15,7 @@ export const bulkEnableRules = async ({
   http,
 }: {
   filter?: KueryNode | null;
-  ids: string[];
+  ids?: string[];
   http: HttpSetup;
 }): Promise<BulkEnableResponse> => {
   try {
