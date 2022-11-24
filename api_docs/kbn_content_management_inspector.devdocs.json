@@ -113,7 +113,7 @@
             "section": "def-common.OpenInspectorParams",
             "text": "OpenInspectorParams"
           },
-          ") => void"
+          ") => () => void"
         ],
         "path": "packages/content-management/inspector/src/open_inspector.tsx",
         "deprecated": false,
@@ -136,7 +136,9 @@
         "signature": [
           "{ onSave?: ((args: { id: string; title: string; description?: string | undefined; tags: string[]; }) => Promise<void>) | undefined; item: ",
           "Item",
-          "; isReadonly?: boolean | undefined; entityName: string; }"
+          "; isReadonly?: boolean | undefined; entityName: string; customValidators?: ",
+          "CustomValidators",
+          " | undefined; }"
         ],
         "path": "packages/content-management/inspector/src/open_inspector.tsx",
         "deprecated": false,
