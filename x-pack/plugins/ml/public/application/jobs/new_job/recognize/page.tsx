@@ -21,7 +21,6 @@ import { isEqual, merge } from 'lodash';
 import moment from 'moment';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
-import { ml } from '../../../services/ml_api_service';
 import { useMlContext } from '../../../contexts/ml';
 import {
   DatafeedResponse,
@@ -73,7 +72,12 @@ export enum SAVE_STATE {
 
 export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const {
-    services: { notifications },
+    services: {
+      notifications,
+      mlServices: {
+        mlApiServices: { getTimeFieldRange, setupDataRecognizerConfig, getDataRecognizerModule },
+      },
+    },
   } = useMlKibana();
   const locator = useMlLocator();
 
@@ -111,7 +115,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
    */
   const loadModule = useCallback(async () => {
     try {
-      const response = await ml.getDataRecognizerModule({ moduleId });
+      const response = await getDataRecognizerModule({ moduleId });
       setJobs(response.jobs);
 
       const kibanaObjectsResult = await checkForSavedObjects(response.kibana as KibanaObjects);
@@ -129,13 +133,13 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       // eslint-disable-next-line no-console
       console.error(e);
     }
-  }, [existingGroups, moduleId]);
+  }, [existingGroups, getDataRecognizerModule, moduleId]);
 
   const getTimeRange = useCallback(
     async (useFullIndexData: boolean, timeRange: TimeRange): Promise<TimeRange> => {
       if (useFullIndexData) {
         const runtimeMappings = dataView.getComputedFields().runtimeFields as RuntimeMappings;
-        const { start, end } = await ml.getTimeFieldRange({
+        const { start, end } = await getTimeFieldRange({
           index: dataView.title,
           timeFieldName: dataView.timeFieldName,
           // By default we want to use full non-frozen time range
@@ -150,7 +154,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         return Promise.resolve(timeRange);
       }
     },
-    [combinedQuery, dataView]
+    [combinedQuery, dataView, getTimeFieldRange]
   );
 
   useEffect(() => {
@@ -177,7 +181,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         let jobOverridesPayload: JobOverride[] | null = Object.values(jobOverrides);
         jobOverridesPayload = jobOverridesPayload.length > 0 ? jobOverridesPayload : null;
 
-        const response = await ml.setupDataRecognizerConfig({
+        const response = await setupDataRecognizerConfig({
           moduleId,
           prefix: resultJobPrefix,
           query: tempQuery,
@@ -268,6 +272,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       locator,
       moduleId,
       notifications,
+      setupDataRecognizerConfig,
       tempQuery,
     ]
   );
