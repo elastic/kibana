@@ -8,6 +8,8 @@
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { ConfigKey } from '../../../../../../common/runtime_types';
+import { useSyntheticsRefreshContext } from '../../../contexts';
 import {
   getMonitorAction,
   selectEncryptedSyntheticsSavedMonitors,
@@ -20,16 +22,17 @@ export const useSelectedMonitor = () => {
   const monitorsList = useSelector(selectEncryptedSyntheticsSavedMonitors);
   const { loading: monitorListLoading } = useSelector(selectMonitorListState);
   const monitorFromList = useMemo(
-    () => monitorsList.find((monitor) => monitor.id === monitorId) ?? null,
+    () => monitorsList.find((monitor) => monitor[ConfigKey.CONFIG_ID] === monitorId) ?? null,
     [monitorId, monitorsList]
   );
-
+  const { lastRefresh } = useSyntheticsRefreshContext();
   const { syntheticsMonitor, syntheticsMonitorLoading } = useSelector(selectorMonitorDetailsState);
   const dispatch = useDispatch();
 
-  const isMonitorFromListValid = monitorId && monitorFromList && monitorFromList?.id === monitorId;
+  const isMonitorFromListValid =
+    monitorId && monitorFromList && monitorFromList[ConfigKey.CONFIG_ID] === monitorId;
   const isLoadedSyntheticsMonitorValid =
-    monitorId && syntheticsMonitor && syntheticsMonitor?.id === monitorId;
+    monitorId && syntheticsMonitor && syntheticsMonitor[ConfigKey.CONFIG_ID] === monitorId;
   const availableMonitor = isLoadedSyntheticsMonitorValid
     ? syntheticsMonitor
     : isMonitorFromListValid
@@ -41,6 +44,10 @@ export const useSelectedMonitor = () => {
       dispatch(getMonitorAction.get({ monitorId }));
     }
   }, [dispatch, monitorId, availableMonitor, syntheticsMonitorLoading]);
+
+  useEffect(() => {
+    dispatch(getMonitorAction.get({ monitorId }));
+  }, [dispatch, monitorId, lastRefresh]);
 
   return {
     monitor: availableMonitor,

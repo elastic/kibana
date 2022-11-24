@@ -15,12 +15,12 @@ import type {
   ISearchOptions,
   ISearchStart,
 } from '@kbn/data-plugin/public';
-import { buildSamplerAggregation, getSamplerAggregationsResponsePath } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { SAMPLER_TOP_TERMS_SHARD_SIZE, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
+import { processTopValues } from './utils';
+import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
+import { SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import type {
   Aggs,
-  Bucket,
   Field,
   FieldStatsCommonRequestParams,
   StringFieldStats,
@@ -32,7 +32,7 @@ export const getStringFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
   fields: Field[]
 ) => {
-  const { index, query, runtimeFieldMap, samplerShardSize } = params;
+  const { index, query, runtimeFieldMap } = params;
 
   const size = 0;
 
@@ -49,25 +49,12 @@ export const getStringFieldStatsRequest = (
       } as AggregationsTermsAggregation,
     };
 
-    // If cardinality >= SAMPLE_TOP_TERMS_THRESHOLD, run the top terms aggregation
-    // in a sampler aggregation, even if no sampling has been specified (samplerShardSize < 1).
-    if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-      aggs[`${safeFieldName}_top`] = {
-        sampler: {
-          shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE,
-        },
-        aggs: {
-          top,
-        },
-      };
-    } else {
-      aggs[`${safeFieldName}_top`] = top;
-    }
+    aggs[`${safeFieldName}_top`] = top;
   });
 
   const searchBody = {
     query,
-    aggs: buildSamplerAggregation(aggs, samplerShardSize),
+    aggs: buildAggregationWithSamplingOption(aggs, params.samplingOption),
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
   };
 
@@ -99,7 +86,8 @@ export const fetchStringFieldsStats = (
       map((resp) => {
         if (!isIKibanaSearchResponse(resp)) return resp;
         const aggregations = resp.rawResponse.aggregations;
-        const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+
+        const aggsPath = ['sample'];
         const batchStats: StringFieldStats[] = [];
 
         fields.forEach((field, i) => {
@@ -110,21 +98,18 @@ export const fetchStringFieldsStats = (
             topAggsPath.push('top');
           }
 
-          const topValues: Bucket[] = get(aggregations, [...topAggsPath, 'buckets'], []);
+          const fieldAgg = get(aggregations, [...topAggsPath], {});
 
+          const { topValuesSampleSize, topValues } = processTopValues(
+            fieldAgg,
+            get(aggregations, ['sample', 'doc_count'])
+          );
           const stats = {
             fieldName: field.fieldName,
-            isTopValuesSampled:
-              field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD || samplerShardSize > 0,
+            isTopValuesSampled: true,
             topValues,
-            topValuesSampleSize: topValues.reduce(
-              (acc, curr) => acc + curr.doc_count,
-              get(aggregations, [...topAggsPath, 'sum_other_doc_count'], 0)
-            ),
-            topValuesSamplerShardSize:
-              field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD
-                ? SAMPLER_TOP_TERMS_SHARD_SIZE
-                : samplerShardSize,
+            topValuesSampleSize,
+            topValuesSamplerShardSize: get(aggregations, ['sample', 'doc_count']),
           };
 
           batchStats.push(stats);

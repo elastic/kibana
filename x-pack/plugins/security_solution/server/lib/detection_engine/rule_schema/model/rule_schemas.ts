@@ -39,6 +39,7 @@ import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import {
   AlertsIndex,
   AlertsIndexNamespace,
+  AlertSuppressionGroupBy,
   BuildingBlockType,
   DataViewId,
   EventCategoryOverride,
@@ -84,6 +85,13 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { ResponseActionRuleParamsOrUndefined } from '../../../../../common/detection_engine/rule_response_actions/schemas';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
+
+export type AlertSuppressionCamel = t.TypeOf<typeof AlertSuppressionCamel>;
+const AlertSuppressionCamel = t.exact(
+  t.type({
+    groupBy: AlertSuppressionGroupBy,
+  })
+);
 
 export const baseRuleParams = t.exact(
   t.type({
@@ -168,6 +176,7 @@ const querySpecificRuleParams = t.exact(
     savedId: savedIdOrUndefined,
     dataViewId: t.union([DataViewId, t.undefined]),
     responseActions: ResponseActionRuleParamsOrUndefined,
+    alertSuppression: t.union([AlertSuppressionCamel, t.undefined]),
   })
 );
 export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);
@@ -185,6 +194,7 @@ const savedQuerySpecificRuleParams = t.type({
   filters: t.union([RuleFilterArray, t.undefined]),
   savedId: saved_id,
   responseActions: ResponseActionRuleParamsOrUndefined,
+  alertSuppression: t.union([AlertSuppressionCamel, t.undefined]),
 });
 export const savedQueryRuleParams = t.intersection([baseRuleParams, savedQuerySpecificRuleParams]);
 export type SavedQuerySpecificRuleParams = t.TypeOf<typeof savedQuerySpecificRuleParams>;
@@ -274,7 +284,7 @@ export const allRuleTypes = t.union([
   t.literal(NEW_TERMS_RULE_TYPE_ID),
 ]);
 
-export const internalRuleCreate = t.type({
+const internalRuleCreateRequired = t.type({
   name: RuleName,
   tags: RuleTagArray,
   alertTypeId: allRuleTypes,
@@ -285,12 +295,18 @@ export const internalRuleCreate = t.type({
   enabled: IsRuleEnabled,
   actions: RuleActionArrayCamel,
   params: ruleParams,
+});
+const internalRuleCreateOptional = t.partial({
   throttle: t.union([RuleActionThrottle, t.null]),
   notifyWhen,
 });
+export const internalRuleCreate = t.intersection([
+  internalRuleCreateOptional,
+  internalRuleCreateRequired,
+]);
 export type InternalRuleCreate = t.TypeOf<typeof internalRuleCreate>;
 
-export const internalRuleUpdate = t.type({
+const internalRuleUpdateRequired = t.type({
   name: RuleName,
   tags: RuleTagArray,
   schedule: t.type({
@@ -298,7 +314,13 @@ export const internalRuleUpdate = t.type({
   }),
   actions: RuleActionArrayCamel,
   params: ruleParams,
+});
+const internalRuleUpdateOptional = t.partial({
   throttle: t.union([RuleActionThrottle, t.null]),
   notifyWhen,
 });
+export const internalRuleUpdate = t.intersection([
+  internalRuleUpdateOptional,
+  internalRuleUpdateRequired,
+]);
 export type InternalRuleUpdate = t.TypeOf<typeof internalRuleUpdate>;

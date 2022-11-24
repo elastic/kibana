@@ -8,9 +8,16 @@
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 
-/** @public */
+/**
+ * Options for updating a saved object
+ *
+ * @public
+ */
 export interface SavedObjectsUpdateOptions<Attributes = unknown> {
+  /** version of the saved object */
   version?: string;
+  /** Alternative attributes for the saved object if upserting */
   upsert?: Attributes;
+  /** Array of references to other saved objects */
   references?: SavedObjectReference[];
 }

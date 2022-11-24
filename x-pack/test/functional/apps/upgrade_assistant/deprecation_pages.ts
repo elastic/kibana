@@ -20,7 +20,8 @@ export default function upgradeAssistantFunctionalTests({
   const security = getService('security');
   const log = getService('log');
 
-  describe('Deprecation pages', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/144885
+  describe.skip('Deprecation pages', function () {
     this.tags('skipFirefox');
     this.timeout(32000);
 

@@ -65,7 +65,12 @@ export const MonitorSelector = () => {
   };
 
   const button = (
-    <EuiButtonIcon iconType="arrowDown" onClick={onButtonClick} aria-label={SELECT_MONITOR} />
+    <EuiButtonIcon
+      size="s"
+      iconType="arrowDown"
+      onClick={onButtonClick}
+      aria-label={SELECT_MONITOR}
+    />
   );
 
   return (

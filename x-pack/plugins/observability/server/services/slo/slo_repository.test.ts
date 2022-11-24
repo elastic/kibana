@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core-saved-objects-common';
 import {
   SavedObjectsClientContract,
   SavedObjectsErrorHelpers,
@@ -13,22 +12,14 @@ import {
 } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { SLO, sloSchema, StoredSLO } from '../../types/models';
+import { SLO, StoredSLO } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';
-import { createAPMTransactionDurationIndicator, createSLO } from './fixtures/slo';
+import { createAPMTransactionDurationIndicator, createSLO, aStoredSLO } from './fixtures/slo';
 import { SLONotFound } from '../../errors';
+import { sloSchema } from '../../types/schema';
 
 const SOME_SLO = createSLO({ indicator: createAPMTransactionDurationIndicator() });
-
-function aStoredSLO(slo: SLO): SavedObject<StoredSLO> {
-  return {
-    id: slo.id,
-    attributes: sloSchema.encode(slo),
-    type: SO_SLO_TYPE,
-    references: [],
-  };
-}
 
 function aFindResponse(slo: SLO): SavedObjectsFindResponse<StoredSLO> {
   return {

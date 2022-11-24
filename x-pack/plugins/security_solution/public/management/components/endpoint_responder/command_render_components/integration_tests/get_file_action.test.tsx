@@ -30,6 +30,7 @@ import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 
 jest.mock('../../../../../common/components/user_privileges');
+jest.mock('../../../../../common/experimental_features_service');
 
 describe('When using get-file action from response actions console', () => {
   let render: (
@@ -156,7 +157,7 @@ describe('When using get-file action from response actions console', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('getFileSuccess').textContent).toEqual(
-        'File retrieved from the host.Click here to download(ZIP file passcode: elastic)'
+        'File retrieved from the host.Click here to download(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
       );
     });
   });

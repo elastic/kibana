@@ -25,18 +25,14 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import { ruleDetailsRoute } from '@kbn/rule-data-utils';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
   ActionTypeRegistryContract,
   AlertsTableConfigurationRegistryContract,
   RuleTypeRegistryContract,
 } from '../types';
-import {
-  Section,
-  routeToRuleDetails,
-  legacyRouteToRuleDetails,
-  routeToConnectors,
-} from './constants';
+import { Section, legacyRouteToRuleDetails, routeToConnectors } from './constants';
 
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
@@ -113,7 +109,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
           component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
         />
         <Route
-          path={routeToRuleDetails}
+          path={ruleDetailsRoute}
           component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
         />
         <Route

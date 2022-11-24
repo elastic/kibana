@@ -44,24 +44,29 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const { addTests, createTestDefinitions } = bulkResolveTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
+    bulkResolveTestSuiteFactory(esArchiver, supertest);
   const createTests = (spaceId: string) => {
     const { normalTypes, hiddenType, allTypes } = createTestCases(spaceId);
     // use singleRequest to reduce execution time and/or test combined cases
+    const singleRequest = true;
     return {
-      unauthorized: createTestDefinitions(allTypes, true),
-      authorized: [
-        createTestDefinitions(normalTypes, false),
-        createTestDefinitions(hiddenType, true),
+      unauthorized: [
+        createTestDefinitions(normalTypes, true),
+        createTestDefinitions(hiddenType, false, { singleRequest }), // validation for hidden type returns 400 Bad Request before authZ check
+        createTestDefinitions(allTypes, true, {
+          singleRequest,
+          responseBodyOverride: expectSavedObjectForbidden(['resolvetype']), // 'hiddentype' is not included in the 403 message, it was filtered out before the authZ check
+        }),
       ].flat(),
-      superuser: createTestDefinitions(allTypes, false),
+      authorized: createTestDefinitions(allTypes, false, { singleRequest }),
     };
   };
 
   describe('_bulk_resolve', () => {
     getTestScenarios().securityAndSpaces.forEach(({ spaceId, users }) => {
       const suffix = ` within the ${spaceId} space`;
-      const { unauthorized, authorized, superuser } = createTests(spaceId);
+      const { unauthorized, authorized } = createTests(spaceId);
       const _addTests = (user: TestUser, tests: BulkResolveTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };
@@ -76,10 +81,10 @@ export default function ({ getService }: FtrProviderContext) {
         users.readGlobally,
         users.allAtSpace,
         users.readAtSpace,
+        users.superuser,
       ].forEach((user) => {
         _addTests(user, authorized);
       });
-      _addTests(users.superuser, superuser);
     });
   });
 }

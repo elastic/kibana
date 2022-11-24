@@ -92,7 +92,8 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Lateral Movement"
+    "Lateral Movement",
+    "has_guide"
   ],
   "threat": [
     {
@@ -112,5 +113,5 @@
     }
   ],
   "type": "eql",
-  "version": 101
+  "version": 102
 }

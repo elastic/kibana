@@ -14,7 +14,7 @@ import {
   getSLOTransformId,
 } from '../../../assets/constants';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
-import { SLO, APMTransactionDurationIndicator } from '../../../types/models';
+import { SLO, APMTransactionDurationIndicator } from '../../../domain/models';
 import { TransformGenerator } from '.';
 
 const APM_SOURCE_INDEX = 'metrics-apm*';

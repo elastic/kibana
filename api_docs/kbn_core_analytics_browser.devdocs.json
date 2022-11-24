@@ -19,7 +19,42 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-analytics-browser",
+        "id": "def-common.KbnAnalyticsWindowApi",
+        "type": "Interface",
+        "tags": [],
+        "label": "KbnAnalyticsWindowApi",
+        "description": [
+          "\nAPI exposed through `window.__kbnAnalytics`"
+        ],
+        "path": "packages/core/analytics/core-analytics-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-analytics-browser",
+            "id": "def-common.KbnAnalyticsWindowApi.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nReturns a promise that resolves when all the events in the queue have been sent."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/core/analytics/core-analytics-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {

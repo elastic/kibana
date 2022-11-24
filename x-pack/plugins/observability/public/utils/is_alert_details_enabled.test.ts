@@ -249,7 +249,7 @@ describe('isAlertDetailsEnabled', () => {
           },
         },
       } as ConfigSchema;
-      expect(isAlertDetailsEnabledPerApp(undefined, updatedConfig)).toBeFalsy();
+      expect(isAlertDetailsEnabledPerApp(null, updatedConfig)).toBeFalsy();
     });
     it('returns FALSE when a none-listed rule type is checked', () => {
       const updatedConfig = {

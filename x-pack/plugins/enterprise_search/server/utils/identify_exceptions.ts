@@ -33,3 +33,6 @@ export const isUnauthorizedException = (error: ElasticsearchResponseError) =>
 
 export const isPipelineIsInUseException = (error: Error) =>
   error.message === ErrorCode.PIPELINE_IS_IN_USE;
+
+export const isNotFoundException = (error: ElasticsearchResponseError) =>
+  error.meta?.statusCode === 404;

@@ -12,14 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
-// @ts-expect-error
 import { VectorStyleSymbolizeAsEditor } from './symbol/vector_style_symbolize_as_editor';
 import { VectorStyleIconEditor } from './symbol/vector_style_icon_editor';
 import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
 import { LabelZoomRangeEditor } from './label/label_zoom_range_editor';
-// @ts-expect-error
 import { VectorStyleLabelBorderSizeEditor } from './label/vector_style_label_border_size_editor';
-// @ts-expect-error
 import { OrientationEditor } from './orientation/orientation_editor';
 import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../vector_style_defaults';
 import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_palettes';

@@ -16,7 +16,7 @@ const Text = styled.span`
   -webkit-line-clamp: ${LINE_CLAMP};
   -webkit-box-orient: vertical;
   overflow: hidden;
-  word-break: normal;
+  word-break: break-word;
 `;
 
 interface Props {

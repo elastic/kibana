@@ -35,6 +35,7 @@ const AdditionalOptionsComponent: React.FC<AdditionalOptionsProps> = ({
             data-test-subj="opsgenie-entity-row"
             fullWidth
             label={i18n.ENTITY_FIELD_LABEL}
+            helpText={i18n.OPSGENIE_ENTITY_HELP}
           >
             <TextFieldWithMessageVariables
               index={index}
@@ -50,6 +51,7 @@ const AdditionalOptionsComponent: React.FC<AdditionalOptionsProps> = ({
             data-test-subj="opsgenie-source-row"
             fullWidth
             label={i18n.SOURCE_FIELD_LABEL}
+            helpText={i18n.OPSGENIE_SOURCE_HELP}
           >
             <TextFieldWithMessageVariables
               index={index}
@@ -62,7 +64,12 @@ const AdditionalOptionsComponent: React.FC<AdditionalOptionsProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFormRow data-test-subj="opsgenie-user-row" fullWidth label={i18n.USER_FIELD_LABEL}>
+      <EuiFormRow
+        data-test-subj="opsgenie-user-row"
+        fullWidth
+        label={i18n.USER_FIELD_LABEL}
+        helpText={i18n.OPSGENIE_USER_HELP}
+      >
         <TextFieldWithMessageVariables
           index={index}
           editAction={editOptionalSubAction}

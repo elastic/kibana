@@ -27,6 +27,7 @@ const triggersActionsUiStartMock = {
   createStart() {
     return {
       getAddAlertFlyout: jest.fn(),
+      getAlertsSearchBar: jest.fn(),
       getRuleStatusDropdown: jest.fn(),
       getRuleTagBadge: jest.fn(),
       getRuleStatusFilter: jest.fn(),
@@ -53,6 +54,11 @@ const data = {
     return {
       dataViews: {
         create: jest.fn(),
+      },
+      query: {
+        timefilter: {
+          timefilter: jest.fn(),
+        },
       },
     };
   },

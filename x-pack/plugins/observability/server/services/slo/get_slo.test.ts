@@ -49,7 +49,7 @@ describe('GetSLO', () => {
             transaction_name: 'irrelevant',
             transaction_type: 'irrelevant',
           },
-          type: 'slo.apm.transaction_error_rate',
+          type: 'sli.apm.transaction_error_rate',
         },
         objective: {
           target: 0.999,

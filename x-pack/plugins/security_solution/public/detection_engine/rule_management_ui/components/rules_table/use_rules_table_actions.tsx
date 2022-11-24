@@ -8,6 +8,7 @@
 import type { DefaultItemAction } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
 import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
@@ -23,7 +24,11 @@ import {
 import { useDownloadExportedRules } from '../../../rule_management/logic/bulk_actions/use_download_exported_rules';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 
-export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
+export const useRulesTableActions = ({
+  showExceptionsDuplicateConfirmation,
+}: {
+  showExceptionsDuplicateConfirmation: () => Promise<string | null>;
+}): Array<DefaultItemAction<Rule>> => {
   const { navigateToApp } = useKibana().services.application;
   const hasActionsPrivileges = useHasActionsPrivileges();
   const { startTransaction } = useStartTransaction();
@@ -63,9 +68,17 @@ export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
       // TODO extract those handlers to hooks, like useDuplicateRule
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
+        const modalDuplicationConfirmationResult = await showExceptionsDuplicateConfirmation();
+        if (modalDuplicationConfirmationResult === null) {
+          return;
+        }
         const result = await executeBulkAction({
           type: BulkActionType.duplicate,
           ids: [rule.id],
+          duplicatePayload: {
+            include_exceptions:
+              modalDuplicationConfirmationResult === DuplicateOptions.withExceptions,
+          },
         });
         const createdRules = result?.attributes.results.created;
         if (createdRules?.length) {

@@ -254,6 +254,11 @@ const actionNames: {
     cancelledText: 'update tags',
   },
   CANCEL: { inProgressText: 'Cancelling', completedText: 'cancelled', cancelledText: '' },
+  REQUEST_DIAGNOSTICS: {
+    inProgressText: 'Requesting diagnostics for',
+    completedText: 'requested diagnostics',
+    cancelledText: 'request diagnostics',
+  },
   SETTINGS: {
     inProgressText: 'Updating settings of',
     completedText: 'updated settings',

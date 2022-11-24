@@ -66,10 +66,14 @@ export const mockState: SyntheticsAppState = {
   },
   monitorList: {
     pageState: {
+      query: undefined,
       pageIndex: 0,
       pageSize: 10,
-      sortOrder: 'asc',
       sortField: `${ConfigKey.NAME}.keyword`,
+      sortOrder: 'asc',
+      tags: undefined,
+      monitorType: undefined,
+      locations: undefined,
     },
     monitorUpsertStatuses: {},
     data: {

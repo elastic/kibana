@@ -41,7 +41,6 @@ export class SavedObjectsSyncService {
         description: "This task periodically syncs ML's saved objects",
         timeout: '1m',
         maxAttempts: 3,
-        maxConcurrency: 1,
 
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {

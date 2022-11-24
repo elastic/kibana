@@ -983,7 +983,11 @@ describe('SearchSource', () => {
       },
     ];
 
-    const indexPattern123 = { id: '123', isPersisted: () => true } as DataView;
+    const indexPattern123 = {
+      id: '123',
+      isPersisted: jest.fn(() => true),
+      toSpec: jest.fn(),
+    } as unknown as DataView;
 
     test('should return serialized fields', () => {
       searchSource.setField('index', indexPattern123);
@@ -991,6 +995,7 @@ describe('SearchSource', () => {
         return filter;
       });
       const serializedFields = searchSource.getSerializedFields();
+      expect(indexPattern123.toSpec).toHaveBeenCalledTimes(0);
       expect(serializedFields).toMatchSnapshot();
     });
 
@@ -1000,10 +1005,18 @@ describe('SearchSource', () => {
       const childSearchSource = searchSource.createChild();
       childSearchSource.setField('timeout', '100');
       const serializedFields = childSearchSource.getSerializedFields(true);
+      expect(indexPattern123.toSpec).toHaveBeenCalledTimes(0);
       expect(serializedFields).toMatchObject({
         timeout: '100',
         parent: { index: '123', from: 123 },
       });
+    });
+
+    test('should use spec', () => {
+      indexPattern123.isPersisted = jest.fn(() => false);
+      searchSource.setField('index', indexPattern123);
+      searchSource.getSerializedFields(true, false);
+      expect(indexPattern123.toSpec).toHaveBeenCalledWith(false);
     });
   });
 

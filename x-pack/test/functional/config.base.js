@@ -169,6 +169,9 @@ export default async function ({ readConfigFile }) {
       observability: {
         pathname: '/app/observability',
       },
+      connectors: {
+        pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors/',
+      },
     },
 
     // choose where screenshots should be saved

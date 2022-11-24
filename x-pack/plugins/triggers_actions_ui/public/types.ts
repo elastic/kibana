@@ -40,6 +40,7 @@ import {
   RuleTypeParams,
   ActionVariable,
   RuleType as CommonRuleType,
+  RuleLastRun,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
@@ -106,6 +107,7 @@ export type {
   RuleStatusDropdownProps,
   RuleTagFilterProps,
   RuleStatusFilterProps,
+  RuleLastRun,
   RuleTagBadgeProps,
   RuleTagBadgeOptions,
   RuleEventLogListProps,
@@ -165,6 +167,11 @@ export interface BulkEditResponse {
 export enum ActionConnectorMode {
   Test = 'test',
   ActionForm = 'actionForm',
+}
+
+export interface BulkDeleteResponse {
+  errors: BulkOperationError[];
+  total: number;
 }
 
 export interface ActionParamsProps<TParams> {
@@ -296,7 +303,7 @@ export interface RuleType<
 
 export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
 
-export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus'>;
+export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus' | 'lastRun' | 'nextRun'>;
 
 export interface RuleTableItem extends Rule {
   ruleType: RuleType['name'];
@@ -322,6 +329,7 @@ export interface RuleTypeParamsExpressionProps<
     key: Prop,
     value: SanitizedRule<Params>[Prop] | null
   ) => void;
+  onChangeMetaData: (metadata: MetaData) => void;
   errors: IErrorObject;
   defaultActionGroupId: string;
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
@@ -359,10 +367,10 @@ export interface RuleEditProps<MetaData = Record<string, any>> {
   initialRule: Rule;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: RuleFlyoutCloseReason) => void;
+  onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
-  onSave?: () => Promise<void>;
+  onSave?: (metadata?: MetaData) => Promise<void>;
   metadata?: MetaData;
   ruleType?: RuleType<string, string>;
 }
@@ -371,13 +379,13 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   consumer: string;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  onClose: (reason: RuleFlyoutCloseReason) => void;
+  onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
   ruleTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Rule>;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
-  onSave?: () => Promise<void>;
+  onSave?: (metadata?: MetaData) => Promise<void>;
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
   filteredRuleTypes?: string[];

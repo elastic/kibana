@@ -123,7 +123,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListAggregationBuilder } = 
       return {
         filter: {
           match_phrase_prefix: {
-            [textFieldName]: getEscapedQuery(searchString),
+            [textFieldName]: searchString,
           },
         },
         aggs: {

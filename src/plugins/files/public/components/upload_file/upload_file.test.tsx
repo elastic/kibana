@@ -37,7 +37,6 @@ describe('UploadFile', () => {
     ));
 
     const testBed = await createTestBed({
-      client,
       kind: 'test',
       onDone,
       onError,

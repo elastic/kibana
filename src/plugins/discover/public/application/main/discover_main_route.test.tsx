@@ -14,20 +14,20 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import { DiscoverMainRoute } from './discover_main_route';
 import { MemoryRouter } from 'react-router-dom';
 import { dataViewMock } from '../../__mocks__/data_view';
-import { SavedObject, ScopedHistory } from '@kbn/core/public';
+import { SavedObject } from '@kbn/core/public';
 import { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
 import { DiscoverMainApp } from './discover_main_app';
 import { SearchSource } from '@kbn/data-plugin/common';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { scopedHistoryMock } from '@kbn/core/public/mocks';
 jest.mock('./discover_main_app', () => {
   return {
     DiscoverMainApp: jest.fn().mockReturnValue(<></>),
   };
 });
 
-setScopedHistory({ location: {} } as ScopedHistory);
-
+setScopedHistory(scopedHistoryMock.create());
 describe('DiscoverMainRoute', () => {
   test('renders the main app when hasESData=true & hasUserDataView=true ', async () => {
     const component = mountComponent(true, true);

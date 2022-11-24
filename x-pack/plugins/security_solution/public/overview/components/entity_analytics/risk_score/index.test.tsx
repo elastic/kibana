@@ -52,6 +52,8 @@ jest.mock('../../detection_response/hooks/use_navigate_to_timeline', () => {
   };
 });
 
+jest.mock('../../../../common/components/hover_actions', () => ({ HoverActions: () => null }));
+
 describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
   'EntityAnalyticsRiskScores entityType: %s',
   (riskEntity) => {

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import jestExpect from 'expect';
+import { expect as jestExpect } from 'expect';
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { readFileSync } from 'fs';

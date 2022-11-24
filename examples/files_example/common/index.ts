@@ -17,7 +17,7 @@ const httpTags = {
 
 export const exampleFileKind: FileKind = {
   id: PLUGIN_ID,
-  allowedMimeTypes: ['image/png'],
+  allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'text/plain'],
   http: {
     create: httpTags,
     delete: httpTags,

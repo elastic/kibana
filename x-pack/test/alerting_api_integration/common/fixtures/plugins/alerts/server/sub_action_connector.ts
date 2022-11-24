@@ -80,7 +80,7 @@ export const getTestSubActionConnector = (
     public async noData() {}
   }
   return {
-    id: '.test-sub-action-connector',
+    id: 'test.sub-action-connector',
     name: 'Test: Sub action connector',
     minimumLicenseRequired: 'platinum' as const,
     supportedFeatureIds: ['alerting'],
@@ -101,7 +101,7 @@ export const getTestSubActionConnectorWithoutSubActions = (
   }
 
   return {
-    id: '.test-sub-action-connector-without-sub-actions',
+    id: 'test.sub-action-connector-without-sub-actions',
     name: 'Test: Sub action connector',
     minimumLicenseRequired: 'platinum' as const,
     supportedFeatureIds: ['alerting'],

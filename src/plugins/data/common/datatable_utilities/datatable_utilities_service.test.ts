@@ -73,9 +73,9 @@ describe('DatatableUtilitiesService', () => {
     it('should return a data view field instance', async () => {
       const column = { meta: { field: 'field', index: 'index' } } as DatatableColumn;
       const dataView = createStubDataView({ spec: {} });
-      const field = {};
-      spyOn(datatableUtilitiesService, 'getDataView').and.returnValue(dataView);
-      spyOn(dataView, 'getFieldByName').and.returnValue(field);
+      const field = {} as any;
+      jest.spyOn(datatableUtilitiesService, 'getDataView').mockResolvedValue(dataView);
+      jest.spyOn(dataView, 'getFieldByName').mockReturnValue(field);
 
       await expect(datatableUtilitiesService.getField(column)).resolves.toBe(field);
       expect(dataView.getFieldByName).toHaveBeenCalledWith('field');
