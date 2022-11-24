@@ -81,7 +81,7 @@ export function makeFtrConfigProvider(
 
       kbnTestServer: {
         ...baseConfig.kbnTestServer,
-        // delay shutdown by 2 seconds to ensure that APM can report the data it collects during test execution
+        // delay shutdown to ensure that APM can report the data it collects during test execution
         delayShutdown: process.env.TEST_PERFORMANCE_PHASE === 'TEST' ? 15_000 : 0,
 
         serverArgs: [
