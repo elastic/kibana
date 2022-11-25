@@ -25,7 +25,7 @@ const getMetrics = (): RuleRunMetrics => {
 
 describe('lastRunFromState', () => {
   it('successfuly outcome', () => {
-    const result = lastRunFromState({ metrics: getMetrics(), updatedActions: [] });
+    const result = lastRunFromState({ metrics: getMetrics() });
 
     expect(result.lastRun.outcome).toEqual('succeeded');
     expect(result.lastRun.outcomeMsg).toEqual(null);
@@ -45,7 +45,6 @@ describe('lastRunFromState', () => {
         ...getMetrics(),
         hasReachedAlertLimit: true,
       },
-      updatedActions: [],
     });
 
     expect(result.lastRun.outcome).toEqual('warning');
@@ -68,7 +67,6 @@ describe('lastRunFromState', () => {
         ...getMetrics(),
         triggeredActionsStatus: ActionsCompletion.PARTIAL,
       },
-      updatedActions: [],
     });
 
     expect(result.lastRun.outcome).toEqual('warning');
