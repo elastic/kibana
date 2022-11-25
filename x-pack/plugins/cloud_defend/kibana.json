@@ -1,0 +1,14 @@
+{
+  "id": "cloudDefend",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "awp-viz",
+    "githubTeam": "awp-viz"
+  },
+  "description": "Drift prevention for containers.",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["fleet"],
+  "optionalPlugins": []
+}
