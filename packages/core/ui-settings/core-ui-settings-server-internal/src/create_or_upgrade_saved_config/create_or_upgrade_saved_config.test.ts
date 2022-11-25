@@ -250,4 +250,35 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
       });
     });
   });
+
+  describe('config-global', () => {
+    it('should merge upgraded attributes with current build number in new config', async () => {
+      const { run, savedObjectsClient } = setup();
+
+      const savedAttributes = {
+        buildNum: buildNum - 100,
+        defaultIndex: 'some-index',
+      };
+
+      mockGetUpgradeableConfig.mockResolvedValue({
+        id: prevVersion,
+        attributes: savedAttributes,
+      });
+
+      await run({ type: 'config-global' });
+
+      expect(mockGetUpgradeableConfig).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.create).toHaveBeenCalledWith(
+        'config-global',
+        {
+          ...savedAttributes,
+          buildNum,
+        },
+        {
+          id: version,
+        }
+      );
+    });
+  });
 });

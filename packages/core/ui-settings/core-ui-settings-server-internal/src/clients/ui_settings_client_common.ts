@@ -139,6 +139,7 @@ export class UiSettingsClientCommon extends BaseUiSettingsClient {
         buildNum: this.buildNum,
         log: this.log,
         handleWriteErrors: false,
+        type: this.type,
       });
 
       await this.write({
@@ -162,6 +163,7 @@ export class UiSettingsClientCommon extends BaseUiSettingsClient {
           buildNum: this.buildNum,
           log: this.log,
           handleWriteErrors: true,
+          type: this.type,
         });
 
         if (!failedUpgradeAttributes) {

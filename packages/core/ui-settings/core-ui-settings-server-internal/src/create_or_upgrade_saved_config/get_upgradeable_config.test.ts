@@ -21,6 +21,16 @@ describe('getUpgradeableConfig', () => {
     expect(savedObjectsClient.find.mock.calls[0][0].type).toBe('config');
   });
 
+  it('finds saved objects with type "config-global"', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.find.mockResolvedValue({
+      saved_objects: [{ id: '8.6.0', attributes: 'bar' }],
+    } as SavedObjectsFindResponse);
+
+    await getUpgradeableConfig({ savedObjectsClient, version: '7.5.0', type: 'config-global' });
+    expect(savedObjectsClient.find.mock.calls[0][0].type).toBe('config-global');
+  });
+
   it('finds saved config with version < than Kibana version', async () => {
     const savedConfig = { id: '7.4.0', attributes: 'foo' };
     const savedObjectsClient = savedObjectsClientMock.create();

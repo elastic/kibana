@@ -6,19 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { Scope } from '@kbn/core-ui-settings-common';
 import type { UiSettingsServiceOptions } from '@kbn/core-ui-settings-server-internal';
-import { UiSettingsClient, UiSettingsGlobalClient } from '@kbn/core-ui-settings-server-internal';
+import { UiSettingsClient } from './ui_settings_client';
+import { UiSettingsGlobalClient } from './ui_settings_global_client';
 
 export class UiSettingsClientFactory {
-  public static create = (options: UiSettingsServiceOptions, scope: Scope) => {
-    switch (scope) {
-      case 'namespace':
+  public static create = (options: UiSettingsServiceOptions) => {
+    const { type } = options;
+    switch (type) {
+      case 'config':
         return new UiSettingsClient(options);
-      case 'global':
+      case 'config-global':
         return new UiSettingsGlobalClient(options);
       default:
-        throw new Error('Unsupported client scope');
+        throw new Error('Unsupported client error');
     }
   };
 }

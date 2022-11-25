@@ -29,14 +29,16 @@ export interface UpgradeableConfigAttributes extends ConfigAttributes {
 export async function getUpgradeableConfig({
   savedObjectsClient,
   version,
+  type = 'config',
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   version: string;
+  type?: 'config' | 'config-global';
 }) {
   // attempt to find a config we can upgrade
   const { saved_objects: savedConfigs } =
     await savedObjectsClient.find<UpgradeableConfigAttributes>({
-      type: 'config',
+      type,
       page: 1,
       perPage: 1000,
       sortField: 'buildNum',

@@ -31,7 +31,7 @@ export type InternalUiSettingsServiceStart = UiSettingsServiceStart;
 
 /** @internal */
 export interface UiSettingsServiceOptions {
-  type: string;
+  type: 'config' | 'config-global';
   id: string;
   buildNum: number;
   savedObjectsClient: SavedObjectsClientContract;
