@@ -6,8 +6,63 @@
  * Side Public License, v 1.
  */
 
+import { $Values } from '@kbn/utility-types';
 import classNames from 'classnames';
 import { FtrService } from '../ftr_provider_context';
+
+export const Operation = {
+  IS: 'is',
+  IS_NOT: 'is not',
+  IS_ONE_OF: 'is one of',
+  IS_NOT_ONE_OF: 'is not one of',
+  IS_BETWEEN: 'is between',
+  IS_NOT_BETWEEN: 'is not between',
+  EXISTS: 'exists',
+  DOES_NOT_EXIST: 'does not exist',
+} as const;
+
+export const BooleanRelation = {
+  AND: 'AND',
+  OR: 'OR',
+} as const;
+
+type BooleanRelation = $Values<typeof BooleanRelation>;
+
+interface BasicFilter {
+  field: string;
+}
+
+interface FilterWithMultipleValues extends BasicFilter {
+  operation: typeof Operation.IS_ONE_OF | typeof Operation.IS_NOT_ONE_OF;
+  value: string[];
+}
+
+interface FilterWithRange extends BasicFilter {
+  operation: typeof Operation.IS_BETWEEN | typeof Operation.IS_NOT_BETWEEN;
+  value: { from: number | undefined; to: number | undefined };
+}
+
+interface FilterWithSingleValue extends BasicFilter {
+  operation: typeof Operation.IS | typeof Operation.IS_NOT;
+  value: string;
+}
+
+interface FilterWithoutValue extends BasicFilter {
+  operation: typeof Operation.EXISTS | typeof Operation.DOES_NOT_EXIST;
+}
+
+type FilterLeaf =
+  | FilterWithoutValue
+  | FilterWithSingleValue
+  | FilterWithMultipleValues
+  | FilterWithRange;
+
+interface FilterNode {
+  condition: BooleanRelation;
+  filters: Array<FilterLeaf | FilterNode>;
+}
+
+type Filter = FilterLeaf | FilterNode;
 
 export class FilterBarService extends FtrService {
   private readonly comboBox = this.ctx.getService('comboBox');
@@ -158,6 +213,111 @@ export class FilterBarService extends FtrService {
           await paramFields[i].type(this.browser.keys.TAB);
         }
       }
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('saveFilter');
+    });
+    await this.header.awaitGlobalLoadingIndicatorHidden();
+  }
+
+  private async addOrFilter(path: string) {
+    const filterForm = await this.testSubjects.find(`filter-${path}`);
+    const addOrBtn = await filterForm.findByTestSubject('add-or-filter');
+    await addOrBtn.click();
+  }
+
+  private async addAndFilter(path: string) {
+    const filterForm = await this.testSubjects.find(`filter-${path}`);
+    const addAndBtn = await filterForm.findByTestSubject('add-and-filter');
+    await addAndBtn.click();
+  }
+
+  private async addConditionalFilter(filter: FilterNode, path: string) {
+    if (filter.condition === BooleanRelation.OR) {
+      return await this.addOrFilter(path);
+    }
+    await this.addAndFilter(path);
+  }
+
+  private isFilterLeafWithoutValue(filter: FilterLeaf): filter is FilterWithoutValue {
+    return !('value' in filter);
+  }
+
+  private isFilterWithRange(filter: FilterLeaf): filter is FilterWithRange {
+    return (
+      'value' in filter &&
+      !Array.isArray(filter.value) &&
+      typeof filter.value === 'object' &&
+      'from' in filter.value &&
+      'to' in filter.value
+    );
+  }
+
+  private async pasteFilterData(filter: FilterLeaf, path: string) {
+    const filterForm = await this.testSubjects.find(`filter-${path}`);
+    const fieldInput = await filterForm.findByTestSubject('filterFieldSuggestionList');
+    await this.comboBox.setElement(fieldInput, filter.field);
+
+    const operatorInput = await filterForm.findByTestSubject('filterOperatorList');
+    await this.comboBox.setElement(operatorInput, filter.operation);
+    if (this.isFilterLeafWithoutValue(filter)) {
+      return;
+    }
+
+    if (this.isFilterWithRange(filter)) {
+      const startInput = await filterForm.findByTestSubject('range-start');
+      const endInput = await filterForm.findByTestSubject('range-end');
+
+      await startInput.type(`${filter.value.from ?? ''}`);
+      await endInput.type(`${filter.value.to ?? ''}`);
+      return;
+    }
+
+    const fieldParams = await filterForm.findByTestSubject('filterParams');
+    const filterValueInput = await fieldParams.findByTagName('input');
+
+    if (Array.isArray(filter.value)) {
+      for (const value of filter.value) {
+        await filterValueInput.type(value);
+        await filterValueInput.type(this.browser.keys.ENTER);
+      }
+      return;
+    }
+
+    return await filterValueInput.type(filter.value);
+  }
+
+  private isFilterNode(filter: Filter): filter is FilterNode {
+    return 'filters' in filter && 'condition' in filter;
+  }
+
+  private async createFilter(filter: Filter, path: string = '0'): Promise<unknown> {
+    if (this.isFilterNode(filter)) {
+      let startedAdding = false;
+      for (const [index, f] of filter.filters.entries()) {
+        if (index < filter.filters.length - 1) {
+          await this.addConditionalFilter(filter, startedAdding ? `${path}.${index}` : path);
+        }
+        await this.createFilter(f, `${path}.${index}`);
+        startedAdding = true;
+      }
+      return;
+    }
+
+    return await this.pasteFilterData(filter, path);
+  }
+
+  public async newAddFilterAndSelectDataView(
+    dataViewTitle: string | null,
+    filter: Filter
+  ): Promise<void> {
+    await this.openFilterBuilder();
+
+    await this.retry.tryForTime(this.defaultTryTimeout * 2, async () => {
+      if (dataViewTitle) {
+        await this.comboBox.set('filterIndexPatternsSelect', dataViewTitle);
+      }
+
+      await this.createFilter(filter);
+
       await this.testSubjects.clickWhenNotDisabledWithoutRetry('saveFilter');
     });
     await this.header.awaitGlobalLoadingIndicatorHidden();

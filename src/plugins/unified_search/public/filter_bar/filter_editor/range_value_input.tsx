@@ -88,6 +88,7 @@ function RangeValueInputUI(props: Props) {
               defaultMessage: 'Start',
             })}
             disabled={props.disabled}
+            dataTestSubj="range-start"
           />
         }
         endControl={
@@ -105,6 +106,7 @@ function RangeValueInputUI(props: Props) {
               defaultMessage: 'End',
             })}
             disabled={props.disabled}
+            dataTestSubj="range-end"
           />
         }
       />

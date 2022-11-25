@@ -235,6 +235,7 @@ export function FilterItem({
                 responsive={false}
                 alignItems="center"
                 justifyContent="center"
+                data-test-subj={`filter-${path}`}
               >
                 <EuiFlexItem>
                   <EuiPanel color={color} paddingSize={'none'} hasShadow={false}>
@@ -341,6 +342,7 @@ export function FilterItem({
                                 iconSize="s"
                                 aria-label={strings.getAddOrFilterGroupButtonIconLabel()}
                                 {...(isMobile ? { className: actionButtonCss } : {})}
+                                data-test-subj="add-or-filter"
                               >
                                 {strings.getAddOrFilterGroupButtonLabel()}
                               </EuiButtonEmpty>
@@ -355,6 +357,7 @@ export function FilterItem({
                               iconSize="s"
                               aria-label={strings.getAddAndFilterGroupButtonIconLabel()}
                               {...(isMobile ? { className: actionButtonCss } : {})}
+                              data-test-subj="add-and-filter"
                             >
                               {strings.getAddAndFilterGroupButtonLabel()}
                             </EuiButtonEmpty>
