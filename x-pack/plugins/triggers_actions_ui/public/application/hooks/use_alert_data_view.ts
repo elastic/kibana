@@ -25,7 +25,7 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): AsyncState<DataV
       }
     );
 
-    return dataService.dataViews.create({ title: indexNames.join(',') });
+    return dataService.dataViews.create({ title: indexNames.join(','), allowNoIndex: true });
   }, [features]);
 
   return dataView;

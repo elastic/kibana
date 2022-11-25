@@ -55,7 +55,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleLastRunOutcome: boolean; }"
+              "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
             "deprecated": false,
@@ -4051,7 +4051,7 @@
             "label": "throttle",
             "description": [],
             "signature": [
-              "string | null"
+              "string | null | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
@@ -4634,6 +4634,20 @@
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleAction.frequency",
+            "type": "Object",
+            "tags": [],
+            "label": "frequency",
+            "description": [],
+            "signature": [
+              "{ summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; } | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4719,7 +4733,7 @@
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
-              ">[]; register: (objectType: ",
+              ">[]; has: (id: string) => boolean; register: (objectType: ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -4735,7 +4749,7 @@
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
-              ">) => void; has: (id: string) => boolean; }"
+              ">) => void; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -4765,7 +4779,7 @@
                 "section": "def-public.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
-              "<unknown, unknown, any>[]; register: (objectType: ",
+              "<unknown, unknown, any>[]; has: (id: string) => boolean; register: (objectType: ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -4773,7 +4787,7 @@
                 "section": "def-public.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
-              "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
+              "<unknown, unknown, any>) => void; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -6038,7 +6052,7 @@
                 "section": "def-public.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
-              "<unknown, unknown, any>[]; register: (objectType: ",
+              "<unknown, unknown, any>[]; has: (id: string) => boolean; register: (objectType: ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -6046,7 +6060,7 @@
                 "section": "def-public.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
-              "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
+              "<unknown, unknown, any>) => void; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
@@ -6092,7 +6106,7 @@
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
-              ">[]; register: (objectType: ",
+              ">[]; has: (id: string) => boolean; register: (objectType: ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -6108,7 +6122,7 @@
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
-              ">) => void; has: (id: string) => boolean; }"
+              ">) => void; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
@@ -6126,9 +6140,9 @@
               "AlertsTableConfigurationRegistry",
               "; list: () => ",
               "AlertsTableConfigurationRegistry",
-              "[]; register: (objectType: ",
+              "[]; has: (id: string) => boolean; register: (objectType: ",
               "AlertsTableConfigurationRegistry",
-              ") => void; has: (id: string) => boolean; }"
+              ") => void; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
@@ -6392,7 +6406,7 @@
             "section": "def-public.ActionTypeModel",
             "text": "ActionTypeModel"
           },
-          "<ActionConnector, ActionParams, any>[]; register: (objectType: ",
+          "<ActionConnector, ActionParams, any>[]; has: (id: string) => boolean; register: (objectType: ",
           {
             "pluginId": "triggersActionsUi",
             "scope": "public",
@@ -6400,7 +6414,7 @@
             "section": "def-public.ActionTypeModel",
             "text": "ActionTypeModel"
           },
-          "<ActionConnector, ActionParams, any>) => void; has: (id: string) => boolean; }"
+          "<ActionConnector, ActionParams, any>) => void; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -6491,9 +6505,9 @@
           "AlertsTableConfigurationRegistry",
           "; list: () => ",
           "AlertsTableConfigurationRegistry",
-          "[]; register: (objectType: ",
+          "[]; has: (id: string) => boolean; register: (objectType: ",
           "AlertsTableConfigurationRegistry",
-          ") => void; has: (id: string) => boolean; }"
+          ") => void; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -6681,7 +6695,7 @@
         "label": "RulesListVisibleColumns",
         "description": [],
         "signature": [
-          "\"ruleName\" | \"ruleTags\" | \"ruleExecutionStatusLastDate\" | \"ruleSnoozeNotify\" | \"ruleScheduleInterval\" | \"ruleExecutionStatusLastDuration\" | \"ruleExecutionPercentile\" | \"ruleExecutionSuccessRatio\" | \"ruleExecutionStatus\" | \"ruleExecutionState\" | \"ruleLastRunOutcome\""
+          "\"ruleName\" | \"ruleTags\" | \"ruleExecutionStatusLastDate\" | \"ruleSnoozeNotify\" | \"ruleScheduleInterval\" | \"ruleExecutionStatusLastDuration\" | \"ruleExecutionPercentile\" | \"ruleExecutionSuccessRatio\" | \"ruleExecutionStatus\" | \"ruleExecutionState\""
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rules_list/components/rules_list_column_selector.tsx",
         "deprecated": false,
@@ -6758,7 +6772,7 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          ">[]; register: (objectType: ",
+          ">[]; has: (id: string) => boolean; register: (objectType: ",
           {
             "pluginId": "triggersActionsUi",
             "scope": "public",
@@ -6774,7 +6788,7 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          ">) => void; has: (id: string) => boolean; }"
+          ">) => void; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -9110,7 +9124,7 @@
           "\nParses the string value used in `xpack.trigger_actions_ui.enableExperimental` kibana configuration,\nwhich should be a string of values delimited by a comma (`,`)\n"
         ],
         "signature": [
-          "(configValue: string[]) => Readonly<{ rulesListDatagrid: boolean; internalAlertsTable: boolean; ruleTagFilter: boolean; ruleStatusFilter: boolean; rulesDetailLogs: boolean; ruleLastRunOutcome: boolean; }>"
+          "(configValue: string[]) => Readonly<{ rulesListDatagrid: boolean; internalAlertsTable: boolean; ruleTagFilter: boolean; ruleStatusFilter: boolean; rulesDetailLogs: boolean; ruleUseExecutionStatus: boolean; }>"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
@@ -9288,7 +9302,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleLastRunOutcome: boolean; }"
+          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
@@ -9322,7 +9336,7 @@
           "\nA list of allowed values that can be used in `xpack.trigger_actions_ui.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleLastRunOutcome: boolean; }"
+          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,

@@ -32,7 +32,7 @@ export {
 } from '../common';
 
 export {
-  ControlGroupContainer,
+  type ControlGroupContainer,
   ControlGroupContainerFactory,
   type ControlGroupInput,
   type ControlGroupOutput,
@@ -40,18 +40,22 @@ export {
 
 export {
   OptionsListEmbeddableFactory,
-  OptionsListEmbeddable,
+  type OptionsListEmbeddable,
   type OptionsListEmbeddableInput,
 } from './options_list';
 
 export {
   RangeSliderEmbeddableFactory,
-  RangeSliderEmbeddable,
+  type RangeSliderEmbeddable,
   type RangeSliderEmbeddableInput,
 } from './range_slider';
 
 export { LazyControlsCallout, type CalloutProps } from './controls_callout';
-export { LazyControlGroupRenderer, type ControlGroupRendererProps } from './control_group';
+export {
+  LazyControlGroupRenderer,
+  useControlGroupContainerContext,
+  type ControlGroupRendererProps,
+} from './control_group';
 
 export function plugin() {
   return new ControlsPlugin();

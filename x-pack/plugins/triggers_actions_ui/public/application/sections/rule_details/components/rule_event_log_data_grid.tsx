@@ -175,7 +175,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
 
   const { euiTheme } = useEuiTheme();
 
-  const isRuleLastRunOutcomeEnabled = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
+  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
   const getPaginatedRowIndex = useCallback(
     (rowIndex: number) => {
@@ -624,7 +624,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             dateFormat={dateFormat}
             ruleId={ruleId}
             spaceIds={spaceIds}
-            lastRunOutcomeEnabled={isRuleLastRunOutcomeEnabled}
+            useExecutionStatus={isRuleUsingExecutionStatus}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

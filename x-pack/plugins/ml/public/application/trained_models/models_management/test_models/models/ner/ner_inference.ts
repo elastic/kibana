@@ -7,6 +7,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
+import { trainedModelsApiProvider } from '../../../../../services/ml_api_service/trained_models';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { InferResponse } from '../inference_base';
 import { getGeneralInputComponent } from '../text_input';
@@ -32,11 +33,19 @@ export class NerInference extends InferenceBase<NerResponse> {
     }),
   ];
 
+  constructor(
+    trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
+    model: estypes.MlTrainedModelConfig,
+    inputType: INPUT_TYPE
+  ) {
+    super(trainedModelsApi, model, inputType);
+
+    this.initialize();
+  }
+
   protected async inferText() {
     return this.runInfer<estypes.MlInferTrainedModelResponse>(
-      (inputText: string) => {
-        return { docs: [{ [this.inputField]: inputText }] };
-      },
+      () => {},
       (resp, inputText) => {
         return {
           response: parseResponse(resp),
@@ -52,7 +61,7 @@ export class NerInference extends InferenceBase<NerResponse> {
       return {
         response: parseResponse({ inference_results: [doc._source[this.inferenceType]] }),
         rawResponse: doc._source[this.inferenceType],
-        inputText: doc._source[this.inputField],
+        inputText: doc._source[this.getInputField()],
       };
     });
   }

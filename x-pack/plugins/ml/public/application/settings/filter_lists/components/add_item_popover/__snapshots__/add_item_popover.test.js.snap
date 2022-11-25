@@ -35,7 +35,6 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
       <EuiFormRow
         describedByIds={Array []}
         display="row"
-        fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         id="filter_list_add_item_input_row"
@@ -127,7 +126,6 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
       <EuiFormRow
         describedByIds={Array []}
         display="row"
-        fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         id="filter_list_add_item_input_row"
@@ -219,7 +217,6 @@ exports[`AddItemPopover renders the popover 1`] = `
       <EuiFormRow
         describedByIds={Array []}
         display="row"
-        fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         id="filter_list_add_item_input_row"

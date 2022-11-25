@@ -15,8 +15,8 @@ import { page, pageSize } from './common_schemas';
 
 const method = 'post' as const;
 
-const string64 = schema.string({ maxLength: 64 });
-const string256 = schema.string({ maxLength: 256 });
+const string64 = schema.string({ minLength: 1, maxLength: 64 });
+const string256 = schema.string({ minLength: 1, maxLength: 256 });
 
 export const stringOrArrayOfStrings = schema.oneOf([string64, schema.arrayOf(string64)]);
 export const nameStringOrArrayOfNameStrings = schema.oneOf([string256, schema.arrayOf(string256)]);

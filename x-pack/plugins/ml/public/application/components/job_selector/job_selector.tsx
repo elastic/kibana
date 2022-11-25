@@ -20,7 +20,6 @@ import './_index.scss';
 
 import { Dictionary } from '../../../../common/types/common';
 import { useUrlState } from '../../util/url_state';
-// @ts-ignore
 import { IdBadges } from './id_badges';
 import {
   BADGE_LIMIT,

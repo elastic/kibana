@@ -185,10 +185,6 @@ export const navTabs: SecurityNav = {
     ...getSecuritySolutionCSPNavTab<SecurityPageName>('benchmarks', APP_PATH),
     urlKey: 'administration',
   },
-  [SecurityPageName.cloudSecurityPostureRules]: {
-    ...getSecuritySolutionCSPNavTab<SecurityPageName>('rules', APP_PATH),
-    urlKey: 'administration',
-  },
   [SecurityPageName.entityAnalytics]: {
     id: SecurityPageName.entityAnalytics,
     name: i18n.ENTITY_ANALYTICS,
