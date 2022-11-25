@@ -32,4 +32,27 @@ export function registerGetRoute(router: InternalUiSettingsRouter) {
       }
     }
   );
+
+  router.get(
+    { path: '/api/kibana/settings/global', validate: false },
+    async (context, request, response) => {
+      try {
+        const uiSettingsClient = (await context.core).uiSettings.globalClient;
+        return response.ok({
+          body: {
+            settings: await uiSettingsClient.getUserProvided(),
+          },
+        });
+      } catch (error) {
+        if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
+          return response.customError({
+            body: error,
+            statusCode: error.output.statusCode,
+          });
+        }
+
+        throw error;
+      }
+    }
+  );
 }

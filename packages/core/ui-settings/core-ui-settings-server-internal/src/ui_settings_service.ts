@@ -14,9 +14,9 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
-import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams, Scope } from '@kbn/core-ui-settings-common';
 import { UiSettingsConfigType, uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
-import { UiSettingsClient } from './clients/ui_settings_client';
+import { UiSettingsClient, UiSettingsClientFactory, UiSettingsGlobalClient } from './clients';
 import type {
   InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
@@ -41,6 +41,7 @@ export class UiSettingsService
   private readonly config$: Observable<UiSettingsConfigType>;
   private readonly isDist: boolean;
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
+  private readonly uiSettingsGlobalDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
 
   constructor(private readonly coreContext: CoreContext) {
@@ -78,7 +79,8 @@ export class UiSettingsService
     this.overrides = config.overrides;
 
     return {
-      register: this.register.bind(this),
+      register: this.register,
+      registerGlobal: this.registerGlobal,
     };
   }
 
@@ -87,36 +89,51 @@ export class UiSettingsService
     this.validatesOverrides();
 
     return {
-      asScopedToClient: this.getScopedClientFactory(),
+      asScopedToClient: this.getScopedClientFactory('namespace'),
+      asScopedToGlobalClient: this.getScopedClientFactory('global'),
     };
   }
 
   public async stop() {}
 
-  private getScopedClientFactory(): (
-    savedObjectsClient: SavedObjectsClientContract
-  ) => UiSettingsClient {
+  private getScopedClientFactory(
+    scope: Scope
+  ): (savedObjectsClient: SavedObjectsClientContract) => UiSettingsClient | UiSettingsGlobalClient {
     const { version, buildNum } = this.coreContext.env.packageInfo;
+    const isNamespaceScope = () => {
+      return scope === 'namespace';
+    };
     return (savedObjectsClient: SavedObjectsClientContract) =>
-      new UiSettingsClient({
-        type: 'config',
+      UiSettingsClientFactory.create({
+        type: isNamespaceScope() ? 'config' : 'config-global',
         id: version,
         buildNum,
         savedObjectsClient,
-        defaults: mapToObject(this.uiSettingsDefaults),
-        overrides: this.overrides,
+        defaults: isNamespaceScope()
+          ? mapToObject(this.uiSettingsDefaults)
+          : mapToObject(this.uiSettingsGlobalDefaults),
+        overrides: isNamespaceScope() ? this.overrides : {},
         log: this.log,
       });
   }
 
-  private register(settings: Record<string, UiSettingsParams> = {}) {
+  private register = (settings: Record<string, UiSettingsParams> = {}) => {
     Object.entries(settings).forEach(([key, value]) => {
       if (this.uiSettingsDefaults.has(key)) {
         throw new Error(`uiSettings for the key [${key}] has been already registered`);
       }
       this.uiSettingsDefaults.set(key, value);
     });
-  }
+  };
+
+  private registerGlobal = (settings: Record<string, UiSettingsParams>) => {
+    Object.entries(settings).forEach(([key, value]) => {
+      if (this.uiSettingsGlobalDefaults.has(key)) {
+        throw new Error(`Global uiSettings for the key [${key}] has been already registered`);
+      }
+      this.uiSettingsGlobalDefaults.set(key, value);
+    });
+  };
 
   private validatesDefinitions() {
     for (const [key, definition] of this.uiSettingsDefaults) {
@@ -124,6 +141,12 @@ export class UiSettingsService
         throw new Error(`Validation schema is not provided for [${key}] UI Setting`);
       }
       definition.schema.validate(definition.value, {}, `ui settings defaults [${key}]`);
+    }
+    for (const [key, definition] of this.uiSettingsGlobalDefaults) {
+      if (!definition.schema) {
+        throw new Error(`Validation schema is not provided for [${key}] Global UI Setting`);
+      }
+      definition.schema.validate(definition.value, {});
     }
   }
 
