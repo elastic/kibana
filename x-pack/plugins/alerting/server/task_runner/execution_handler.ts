@@ -32,7 +32,7 @@ import {
   SanitizedRule,
 } from '../../common';
 
-export enum Reasons {
+enum Reasons {
   MUTED = 'muted',
   THROTTLED = 'throttled',
   ACTION_GROUP_NOT_CHANGED = 'actionGroupHasNotChanged',
