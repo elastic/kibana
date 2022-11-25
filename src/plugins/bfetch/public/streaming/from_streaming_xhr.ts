@@ -61,7 +61,11 @@ export const fromStreamingXhr = (
       if (signal) signal.removeEventListener('abort', onBatchAbort);
 
       if (isErrorStatus()) {
-        subject.error(new Error(`Batch request failed with status ${xhr.status}`));
+        const errorMsg =
+          xhr.status === 0
+            ? 'Network connection error'
+            : `Batch request failed with status ${xhr.status}`;
+        subject.error(new Error(errorMsg));
       } else {
         subject.complete();
       }
