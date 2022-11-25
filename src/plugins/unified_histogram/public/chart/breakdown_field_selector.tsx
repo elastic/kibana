@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, useEuiTheme } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { UnifiedHistogramBreakdownContext } from '../types';
 import { fieldSupportsBreakdown } from './field_supports_breakdown';
 
@@ -45,26 +45,42 @@ export const BreakdownFieldSelector = ({
     [dataView.fields, onBreakdownFieldChange]
   );
 
+  const [fieldPopoverDisabled, setFieldPopoverDisabled] = useState(false);
+  const disableFieldPopover = useCallback(() => setFieldPopoverDisabled(true), []);
+  const enableFieldPopover = useCallback(
+    () => setTimeout(() => setFieldPopoverDisabled(false)),
+    []
+  );
+
   const { euiTheme } = useEuiTheme();
   const breakdownCss = css`
+    width: 100%;
     max-width: ${euiTheme.base * 22}px;
   `;
 
   return (
-    <EuiComboBox
-      data-test-subj="unifiedHistogramBreakdownFieldSelector"
-      prepend={i18n.translate('unifiedHistogram.breakdownFieldSelectorLabel', {
-        defaultMessage: 'Break down by',
-      })}
-      placeholder={i18n.translate('unifiedHistogram.breakdownFieldSelectorPlaceholder', {
-        defaultMessage: 'Select field',
-      })}
-      singleSelection={{ asPlainText: true }}
-      options={fieldOptions}
-      selectedOptions={selectedFields}
-      onChange={onFieldChange}
-      compressed
-      css={breakdownCss}
-    />
+    <EuiToolTip
+      position="top"
+      content={fieldPopoverDisabled ? undefined : breakdown.field?.displayName}
+      anchorProps={{ css: breakdownCss }}
+    >
+      <EuiComboBox
+        data-test-subj="unifiedHistogramBreakdownFieldSelector"
+        prepend={i18n.translate('unifiedHistogram.breakdownFieldSelectorLabel', {
+          defaultMessage: 'Break down by',
+        })}
+        placeholder={i18n.translate('unifiedHistogram.breakdownFieldSelectorPlaceholder', {
+          defaultMessage: 'Select field',
+        })}
+        singleSelection={{ asPlainText: true }}
+        options={fieldOptions}
+        selectedOptions={selectedFields}
+        onChange={onFieldChange}
+        compressed
+        fullWidth={true}
+        onFocus={disableFieldPopover}
+        onBlur={enableFieldPopover}
+      />
+    </EuiToolTip>
   );
 };
