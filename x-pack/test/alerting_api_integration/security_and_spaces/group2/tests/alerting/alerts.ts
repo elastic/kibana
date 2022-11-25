@@ -160,14 +160,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   updatedBy: user.fullName,
                   actions: response.body.actions.map((action: any) => {
                     /* eslint-disable @typescript-eslint/naming-convention */
-                    const { connector_type_id, group, id, params, last_trigger_date } = action;
+                    const { connector_type_id, group, id, params } = action;
                     return {
                       actionRef: 'action_0',
                       actionTypeId: connector_type_id,
                       group,
                       id,
                       params,
-                      lastTriggerDate: last_trigger_date,
                     };
                   }),
                   producer: 'alertsFixture',
@@ -314,14 +313,13 @@ instanceStateValue: true
                   updatedBy: user.fullName,
                   actions: response.body.actions.map((action: any) => {
                     /* eslint-disable @typescript-eslint/naming-convention */
-                    const { connector_type_id, group, id, params, last_trigger_date } = action;
+                    const { connector_type_id, group, id, params } = action;
                     return {
                       actionRef: 'preconfigured:preconfigured.test.index-record',
                       actionTypeId: connector_type_id,
                       group,
                       id,
                       params,
-                      lastTriggerDate: last_trigger_date,
                     };
                   }),
                   producer: 'alertsFixture',

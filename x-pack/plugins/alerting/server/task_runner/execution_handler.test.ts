@@ -15,7 +15,13 @@ import {
 import { KibanaRequest } from '@kbn/core/server';
 import { InjectActionParamsOpts, injectActionParams } from './inject_action_params';
 import { NormalizedRuleType } from '../rule_type_registry';
-import { ActionsCompletion, RuleTypeParams, RuleTypeState, SanitizedRule } from '../types';
+import {
+  ActionsCompletion,
+  AlertActions,
+  RuleTypeParams,
+  RuleTypeState,
+  SanitizedRule,
+} from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -24,7 +30,6 @@ import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext } from '../../common';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import sinon from 'sinon';
-import { DATE_1970 } from './fixtures';
 
 jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
@@ -121,14 +126,16 @@ const generateAlert = ({
   context,
   state,
   scheduleActions = true,
-  lastScheduledActions,
+  lastScheduledActions = {},
+  lastScheduledActionsGroup = 'default',
 }: {
   id: number;
-  group?: ActiveActionGroup;
+  group?: ActiveActionGroup | 'recovered';
   context?: AlertInstanceContext;
   state?: AlertInstanceState;
   scheduleActions?: boolean;
-  lastScheduledActions?: ActiveActionGroup | 'recovered';
+  lastScheduledActions?: AlertActions;
+  lastScheduledActionsGroup?: string;
 }) => {
   const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'default' | 'other-group'>(
     String(id),
@@ -137,21 +144,18 @@ const generateAlert = ({
       meta: {
         lastScheduledActions: {
           date: new Date(),
-          group: lastScheduledActions ? lastScheduledActions : group,
+          group: lastScheduledActionsGroup,
+          actions: lastScheduledActions,
         },
       },
     }
   );
   if (scheduleActions) {
-    alert.scheduleActions(group);
+    alert.scheduleActions(group as ActiveActionGroup);
   }
   if (context) {
     alert.setContext(context);
   }
-
-  // this.meta.lastScheduledActions,
-  //   this.scheduledExecutionOptions
-  //
 
   return { [id]: alert };
 };
@@ -163,6 +167,7 @@ const generateRecoveredAlert = ({ id, state }: { id: number; state?: AlertInstan
       lastScheduledActions: {
         date: new Date(),
         group: 'recovered',
+        actions: {},
       },
     },
   });
@@ -177,6 +182,8 @@ const generateExecutionParams = (params = {}) => {
     ruleRunMetricsStore,
   };
 };
+
+const DATE_1970 = new Date('1970-01-01T00:00:00.000Z');
 
 describe('Execution Handler', () => {
   beforeEach(() => {
@@ -200,10 +207,19 @@ describe('Execution Handler', () => {
   afterAll(() => clock.restore());
 
   test('enqueues execution per selected action', async () => {
+    const alerts = generateAlert({ id: 1 });
     const executionHandler = new ExecutionHandler(generateExecutionParams());
-    const triggeredActions = await executionHandler.runActiveAlerts(generateAlert({ id: 1 }));
+    await executionHandler.runActiveAlerts(alerts);
 
-    expect(triggeredActions).toEqual(rule.actions);
+    expect(Object.values(alerts)[0].getLastScheduledActions()).toEqual({
+      actions: {
+        '1': {
+          date: DATE_1970,
+        },
+      },
+      date: DATE_1970,
+      group: 'default',
+    });
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(1);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(1);
@@ -365,9 +381,7 @@ describe('Execution Handler', () => {
       })
     );
 
-    const triggeredActions = await executionHandler.runActiveAlerts(generateAlert({ id: 2 }));
-
-    expect(triggeredActions).toEqual([]);
+    await executionHandler.runActiveAlerts(generateAlert({ id: 2 }));
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(0);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(2);
@@ -379,10 +393,7 @@ describe('Execution Handler', () => {
       ruleRunMetricsStore,
     });
 
-    const triggeredActions2 = await executionHandlerForPreconfiguredAction.runActiveAlerts(
-      generateAlert({ id: 2 })
-    );
-    expect(triggeredActions2).toEqual(rule.actions);
+    await executionHandlerForPreconfiguredAction.runActiveAlerts(generateAlert({ id: 2 }));
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
   });
 
@@ -480,11 +491,10 @@ describe('Execution Handler', () => {
 
   test(`logs an error when action group isn't part of actionGroups available for the ruleType`, async () => {
     const executionHandler = new ExecutionHandler(generateExecutionParams());
-    const triggeredActions = await executionHandler.runActiveAlerts(
+    await executionHandler.runActiveAlerts(
       generateAlert({ id: 2, group: 'invalid-group' as 'default' | 'other-group' })
     );
 
-    expect(triggeredActions).toEqual([]);
     expect(defaultExecutionParams.logger.error).toHaveBeenCalledWith(
       'Invalid action group "invalid-group" for rule "test".'
     );
@@ -544,11 +554,8 @@ describe('Execution Handler', () => {
         },
       })
     );
-    const triggeredActions = await executionHandler.runActiveAlerts(
-      generateAlert({ id: 2, state: { value: 'state-val' } })
-    );
+    await executionHandler.runActiveAlerts(generateAlert({ id: 2, state: { value: 'state-val' } }));
 
-    expect(triggeredActions).toEqual([actions[0], actions[1]]);
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(2);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(3);
     expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.PARTIAL);
@@ -620,11 +627,7 @@ describe('Execution Handler', () => {
         },
       })
     );
-    const triggeredActions = await executionHandler.runActiveAlerts(
-      generateAlert({ id: 2, state: { value: 'state-val' } })
-    );
-
-    expect(triggeredActions).toEqual([actions[0], actions[1], actions[3], actions[4]]);
+    await executionHandler.runActiveAlerts(generateAlert({ id: 2, state: { value: 'state-val' } }));
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(4);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(5);
@@ -664,11 +667,8 @@ describe('Execution Handler', () => {
         },
       })
     );
-    const triggeredActions = await executionHandler.runRecoveredAlerts(
-      generateRecoveredAlert({ id: 1 })
-    );
+    await executionHandler.runRecoveredAlerts(generateRecoveredAlert({ id: 1 }));
 
-    expect(triggeredActions).toEqual(actions);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
@@ -770,7 +770,6 @@ describe('Execution Handler', () => {
           actions: [
             {
               ...defaultExecutionParams.rule.actions[0],
-              lastTriggerDate: new Date(DATE_1970),
               frequency: {
                 summary: false,
                 notifyWhen: 'onThrottleInterval',
@@ -781,7 +780,9 @@ describe('Execution Handler', () => {
         },
       })
     );
-    await executionHandler.runActiveAlerts(generateAlert({ id: 1 }));
+    await executionHandler.runActiveAlerts(
+      generateAlert({ id: 1, lastScheduledActions: { '1': { date: new Date(DATE_1970) } } })
+    );
 
     clock.tick(30000);
 
@@ -801,7 +802,6 @@ describe('Execution Handler', () => {
           actions: [
             {
               ...defaultExecutionParams.rule.actions[0],
-              lastTriggerDate: new Date(DATE_1970),
               frequency: {
                 summary: false,
                 notifyWhen: 'onThrottleInterval',
@@ -813,7 +813,7 @@ describe('Execution Handler', () => {
       })
     );
     await executionHandler.runActiveAlerts(
-      generateAlert({ id: 1, lastScheduledActions: 'recovered' })
+      generateAlert({ id: 1, lastScheduledActionsGroup: 'recovered' })
     );
 
     clock.tick(30000);

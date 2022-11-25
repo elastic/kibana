@@ -75,7 +75,6 @@ export interface RuleAction {
   id: string;
   actionTypeId: string;
   params: RuleActionParams;
-  lastTriggerDate?: Date | null;
   frequency?: {
     summary: boolean;
     notifyWhen: RuleNotifyWhenType;

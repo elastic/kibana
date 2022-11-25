@@ -56,9 +56,6 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           enabled: false,
           type: 'object',
         },
-        lastTriggerDate: {
-          type: 'date',
-        },
         frequency: {
           type: 'nested',
           properties: {

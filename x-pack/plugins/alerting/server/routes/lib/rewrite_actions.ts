@@ -27,6 +27,6 @@ export const rewriteActions: (
       ({
         ...action,
         ...(action.frequency ? { frequency: rewriteFrequency(action.frequency) } : {}),
-      } as unknown as RuleAction)
+      } as RuleAction)
   );
 };

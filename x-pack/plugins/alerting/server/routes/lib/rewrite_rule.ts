@@ -56,12 +56,11 @@ export const rewriteRule = ({
     last_execution_date: executionStatus.lastExecutionDate,
     last_duration: executionStatus.lastDuration,
   },
-  actions: actions.map(({ group, id, actionTypeId, params, frequency, lastTriggerDate }) => ({
+  actions: actions.map(({ group, id, actionTypeId, params, frequency }) => ({
     group,
     id,
     params,
     connector_type_id: actionTypeId,
-    ...(lastTriggerDate && { last_trigger_date: lastTriggerDate }),
     ...(frequency
       ? {
           frequency: {

@@ -51,7 +51,6 @@ describe('createRuleRoute', () => {
         params: {
           foo: true,
         },
-        lastTriggerDate: null,
       },
     ],
     enabled: true,
@@ -101,7 +100,6 @@ describe('createRuleRoute', () => {
       {
         ...ruleToCreate.actions[0],
         connector_type_id: 'test',
-        last_trigger_date: null,
       },
     ],
   };

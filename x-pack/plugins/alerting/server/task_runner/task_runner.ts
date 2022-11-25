@@ -48,7 +48,6 @@ import {
   RuleTypeState,
   parseDuration,
   WithoutReservedActionGroups,
-  RuleAction,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -156,7 +155,6 @@ export class TaskRunner<
       monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
-      actions?: Array<Omit<RuleAction, 'id'>>;
     }
   ) {
     const client = this.context.internalSavedObjectsRepository;
@@ -442,8 +440,6 @@ export class TaskRunner<
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
     });
 
-    let triggeredActions: RuleAction[] = [];
-
     await this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
       await rulesClient.clearExpiredSnoozes({ id: rule.id });
 
@@ -455,10 +451,8 @@ export class TaskRunner<
         );
         this.countUsageOfActionExecutionAfterRuleCancellation();
       } else {
-        const executedActionsActive = await executionHandler.runActiveAlerts(activeAlerts);
-        const executedActionsRecovered = await executionHandler.runRecoveredAlerts(recoveredAlerts);
-
-        triggeredActions = [...executedActionsActive, ...executedActionsRecovered];
+        await executionHandler.runActiveAlerts(activeAlerts);
+        await executionHandler.runRecoveredAlerts(recoveredAlerts);
       }
     });
 
@@ -474,19 +468,6 @@ export class TaskRunner<
       metrics: ruleRunMetricsStore.getMetrics(),
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: alertsToReturn,
-      updatedActions: rule.actions.map((ruleAction) => {
-        const isActionTriggered = triggeredActions.find(
-          (triggeredAction) => triggeredAction.id === ruleAction.id
-        );
-        const action = omit(ruleAction, ['id']);
-        if (isActionTriggered) {
-          return {
-            ...action,
-            lastTriggerDate: new Date(),
-          };
-        }
-        return action;
-      }),
     };
   }
 
@@ -568,11 +549,11 @@ export class TaskRunner<
     );
 
     // New consolidated statuses for lastRun
-    const {
-      lastRun,
-      metrics: executionMetrics,
-      updatedActions,
-    } = map<RuleTaskStateAndMetrics, ElasticsearchError, ILastRun>(
+    const { lastRun, metrics: executionMetrics } = map<
+      RuleTaskStateAndMetrics,
+      ElasticsearchError,
+      ILastRun
+    >(
       stateWithMetrics,
       (ruleRunStateWithMetrics) => lastRunFromState(ruleRunStateWithMetrics),
       (err: ElasticsearchError) => lastRunFromError(err)
@@ -638,7 +619,6 @@ export class TaskRunner<
         nextRun,
         lastRun: lastRunToRaw(lastRun),
         monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
-        ...(updatedActions.length > 0 && { actions: updatedActions }),
       });
     }
 

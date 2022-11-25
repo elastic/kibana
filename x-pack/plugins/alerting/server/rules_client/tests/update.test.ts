@@ -206,7 +206,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            lastTriggerDate: '2020-01-01T12:00:00Z',
           },
           {
             group: 'default',
@@ -215,7 +214,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            lastTriggerDate: '2020-01-01T12:00:00Z',
           },
           {
             group: 'default',
@@ -224,7 +222,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            lastTriggerDate: '2020-01-01T12:00:00Z',
           },
         ],
         notifyWhen: 'onActiveAlert',
@@ -292,31 +289,25 @@ describe('update()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": 2020-01-01T12:00:00.000Z,
             "params": Object {
               "foo": true,
             },
           },
           Object {
-            "actionRef": "action_1",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": 2020-01-01T12:00:00.000Z,
             "params": Object {
               "foo": true,
             },
           },
           Object {
-            "actionRef": "action_2",
             "actionTypeId": "test2",
             "group": "default",
             "id": "2",
-            "lastTriggerDate": 2020-01-01T12:00:00.000Z,
             "params": Object {
               "foo": true,
             },
@@ -635,7 +626,6 @@ describe('update()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -644,7 +634,6 @@ describe('update()', () => {
             },
           },
           Object {
-            "actionRef": "preconfigured:preconfigured",
             "actionTypeId": "test",
             "group": "default",
             "id": "preconfigured",
@@ -653,7 +642,6 @@ describe('update()', () => {
             },
           },
           Object {
-            "actionRef": "preconfigured:preconfigured",
             "actionTypeId": "test",
             "group": "custom",
             "id": "preconfigured",
@@ -738,7 +726,6 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            lastTriggerDate: '2020-01-01T12:00:00Z',
           },
         ],
         notifyWhen: 'onActiveAlert',
@@ -825,11 +812,9 @@ describe('update()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": 2020-01-01T12:00:00.000Z,
             "params": Object {
               "foo": true,
             },
@@ -917,7 +902,6 @@ describe('update()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -1074,7 +1058,6 @@ describe('update()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",

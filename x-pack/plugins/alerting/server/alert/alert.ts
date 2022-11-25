@@ -13,6 +13,7 @@ import {
   rawAlertInstance,
   AlertInstanceContext,
   DefaultActionGroupId,
+  LastScheduledActions,
 } from '../../common';
 
 import { parseDuration } from '../lib';
@@ -62,7 +63,7 @@ export class Alert<
     return this.scheduledExecutionOptions !== undefined;
   }
 
-  isThrottled(throttle: string | null) {
+  isThrottled({ throttle, actionId }: { throttle: string | null; actionId?: string }) {
     if (this.scheduledExecutionOptions === undefined) {
       return false;
     }
@@ -72,10 +73,17 @@ export class Alert<
       this.scheduledActionGroupIsUnchanged(
         this.meta.lastScheduledActions,
         this.scheduledExecutionOptions
-      ) &&
-      this.meta.lastScheduledActions.date.getTime() + throttleMills > Date.now()
+      )
     ) {
-      return true;
+      if (actionId) {
+        if (this.meta.lastScheduledActions.actions) {
+          const lastTriggerDate = this.meta.lastScheduledActions.actions[actionId].date;
+          return !!(lastTriggerDate && lastTriggerDate.getTime() + throttleMills > Date.now());
+        }
+        return false;
+      } else {
+        return this.meta.lastScheduledActions.date.getTime() + throttleMills > Date.now();
+      }
     }
     return false;
   }
@@ -158,7 +166,18 @@ export class Alert<
   }
 
   updateLastScheduledActions(group: ActionGroupIds) {
-    this.meta.lastScheduledActions = { group, date: new Date() };
+    if (!this.meta.lastScheduledActions) {
+      this.meta.lastScheduledActions = {} as LastScheduledActions;
+    }
+    this.meta.lastScheduledActions.group = group;
+    this.meta.lastScheduledActions.date = new Date();
+  }
+
+  addScheduledAction(actionId: string) {
+    if (!this.meta.lastScheduledActions!.actions) {
+      this.meta.lastScheduledActions!.actions = {};
+    }
+    this.meta.lastScheduledActions!.actions[actionId] = { date: new Date() };
   }
 
   /**

@@ -76,7 +76,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             connector_type_id: createdAction.connector_type_id,
             group: 'default',
             params: {},
-            last_trigger_date: null,
           },
         ],
         enabled: true,
@@ -169,7 +168,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             connector_type_id: createdAction.connector_type_id,
             group: 'default',
             params: {},
-            last_trigger_date: null,
           },
           {
             id: 'my-slack1',
@@ -178,7 +176,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             params: {
               message: 'something important happened!',
             },
-            last_trigger_date: null,
           },
         ],
         enabled: true,
@@ -220,7 +217,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           actionTypeId: 'test.noop',
           group: 'default',
           params: {},
-          lastTriggerDate: null,
         },
         {
           actionRef: 'preconfigured:my-slack1',
@@ -229,7 +225,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           params: {
             message: 'something important happened!',
           },
-          lastTriggerDate: null,
         },
       ]);
 
@@ -478,12 +473,10 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           tags: ['foo'],
           actions: [
             {
-              actionRef: 'action_0',
               id: createdAction.id,
               actionTypeId: createdAction.connector_type_id,
               group: 'default',
               params: {},
-              lastTriggerDate: null,
             },
           ],
           enabled: true,

@@ -14,7 +14,7 @@ import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/s
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { parseDuration, RawRule } from '../types';
+import { RawRule } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
 import { ExecutionHandlerOptions, RuleTaskInstance } from './types';
@@ -133,7 +133,7 @@ export class ExecutionHandler<
 
   private async run(
     executables: Array<Executable<ActionGroupIds, RecoveryActionGroupId>>
-  ): Promise<RuleAction[]> {
+  ): Promise<void> {
     const {
       CHUNK_SIZE,
       logger,
@@ -147,7 +147,6 @@ export class ExecutionHandler<
 
     const logActions = [];
     const bulkActions: EnqueueExecutionOptions[] = [];
-    const triggeredActions = [];
 
     this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
 
@@ -240,10 +239,10 @@ export class ExecutionHandler<
         alertGroup: action.group,
       });
 
-      triggeredActions.push(action);
-
       if (this.isRecoveredAlert(actionGroup)) {
         alert.scheduleActions(action.group as ActionGroupIds);
+      } else {
+        alert.addScheduledAction(action.id);
       }
     }
 
@@ -258,8 +257,6 @@ export class ExecutionHandler<
         alertingEventLogger.logAction(action);
       }
     }
-
-    return triggeredActions;
   }
 
   private generateExecutables(
@@ -280,7 +277,7 @@ export class ExecutionHandler<
 
         if (action.group === actionGroup && !this.isAlertMuted(alertId)) {
           if (
-            this.isRecoveredAlert(actionGroup) ||
+            this.isRecoveredAlert(action.group) ||
             this.isExecutableActiveAlert({ alertId, alert, action })
           ) {
             executables.push({
@@ -382,14 +379,6 @@ export class ExecutionHandler<
     };
   }
 
-  private isActionThrottled({ action, throttle }: { action: RuleAction; throttle: string }) {
-    if (!action.lastTriggerDate) {
-      return false;
-    }
-    const throttleMills = throttle ? parseDuration(throttle) : 0;
-    return action.lastTriggerDate.getTime() + throttleMills > Date.now();
-  }
-
   private isAlertMuted(alertId: string) {
     const muted = this.mutedAlertIdsSet.has(alertId);
     if (muted) {
@@ -441,9 +430,8 @@ export class ExecutionHandler<
 
     if (notifyWhen === 'onThrottleInterval') {
       const throttled = action.frequency?.throttle
-        ? this.isActionThrottled({ action, throttle: action.frequency.throttle }) &&
-          !alert.scheduledActionGroupHasChanged()
-        : alert.isThrottled(rule.throttle ?? null);
+        ? alert.isThrottled({ throttle: action.frequency.throttle ?? null, actionId: action.id })
+        : alert.isThrottled({ throttle: rule.throttle ?? null });
 
       if (throttled) {
         if (

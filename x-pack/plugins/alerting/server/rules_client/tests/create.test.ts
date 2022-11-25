@@ -314,7 +314,6 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          lastTriggerDate: null,
         },
       ],
     };
@@ -330,6 +329,21 @@ describe('create()', () => {
         },
       ],
     });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        ...createdAttributes,
+        scheduledTaskId: 'task-123',
+      },
+      references: [
+        {
+          id: '1',
+          name: 'action_0',
+          type: 'action',
+        },
+      ],
+    });
     const result = await rulesClient.create({ data });
     expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
       entity: 'rule',
@@ -341,11 +355,9 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -386,7 +398,6 @@ describe('create()', () => {
             "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -604,7 +615,6 @@ describe('create()', () => {
             "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -747,7 +757,6 @@ describe('create()', () => {
             params: {
               foo: true,
             },
-            lastTriggerDate: null,
           },
           {
             group: 'default',
@@ -756,7 +765,6 @@ describe('create()', () => {
             params: {
               foo: true,
             },
-            lastTriggerDate: null,
           },
           {
             group: 'default',
@@ -765,7 +773,6 @@ describe('create()', () => {
             params: {
               foo: true,
             },
-            lastTriggerDate: null,
           },
         ],
       },
@@ -801,31 +808,25 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
           },
           Object {
-            "actionRef": "action_1",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
           },
           Object {
-            "actionRef": "action_2",
             "actionTypeId": "test2",
             "group": "default",
             "id": "2",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },
@@ -994,7 +995,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -1003,7 +1003,6 @@ describe('create()', () => {
             },
           },
           Object {
-            "actionRef": "preconfigured:preconfigured",
             "actionTypeId": "test",
             "group": "default",
             "id": "preconfigured",
@@ -1012,7 +1011,6 @@ describe('create()', () => {
             },
           },
           Object {
-            "actionRef": "action_2",
             "actionTypeId": "test2",
             "group": "default",
             "id": "2",
@@ -1041,7 +1039,6 @@ describe('create()', () => {
         actions: [
           {
             group: 'default',
-            lastTriggerDate: null,
             actionRef: 'action_0',
             actionTypeId: 'test',
             params: {
@@ -1050,7 +1047,6 @@ describe('create()', () => {
           },
           {
             group: 'default',
-            lastTriggerDate: null,
             actionRef: 'preconfigured:preconfigured',
             actionTypeId: 'test',
             params: {
@@ -1059,7 +1055,6 @@ describe('create()', () => {
           },
           {
             group: 'default',
-            lastTriggerDate: null,
             actionRef: 'action_2',
             actionTypeId: 'test2',
             params: {
@@ -1145,7 +1140,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -1265,13 +1259,7 @@ describe('create()', () => {
       'alert',
       {
         actions: [
-          {
-            actionRef: 'action_0',
-            actionTypeId: 'test',
-            group: 'default',
-            params: { foo: true },
-            lastTriggerDate: null,
-          },
+          { actionRef: 'action_0', actionTypeId: 'test', group: 'default', params: { foo: true } },
         ],
         alertTypeId: '123',
         apiKey: null,
@@ -1321,7 +1309,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -1440,13 +1427,7 @@ describe('create()', () => {
       'alert',
       {
         actions: [
-          {
-            actionRef: 'action_0',
-            actionTypeId: 'test',
-            group: 'default',
-            params: { foo: true },
-            lastTriggerDate: null,
-          },
+          { actionRef: 'action_0', actionTypeId: 'test', group: 'default', params: { foo: true } },
         ],
         alertTypeId: '123',
         apiKey: null,
@@ -1496,7 +1477,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -1609,7 +1589,6 @@ describe('create()', () => {
           {
             actionRef: 'action_0',
             group: 'default',
-            lastTriggerDate: null,
             actionTypeId: 'test',
             params: { foo: true },
           },
@@ -1659,7 +1638,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -1743,7 +1721,6 @@ describe('create()', () => {
           {
             actionRef: 'action_0',
             group: 'default',
-            lastTriggerDate: null,
             actionTypeId: 'test',
             params: { foo: true },
           },
@@ -1793,7 +1770,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -1877,7 +1853,6 @@ describe('create()', () => {
           {
             actionRef: 'action_0',
             group: 'default',
-            lastTriggerDate: null,
             actionTypeId: 'test',
             params: { foo: true },
           },
@@ -1927,7 +1902,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -2035,7 +2009,6 @@ describe('create()', () => {
         actions: [
           {
             group: 'default',
-            lastTriggerDate: null,
             params: {
               foo: true,
             },
@@ -2101,7 +2074,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -2401,7 +2373,6 @@ describe('create()', () => {
           {
             actionRef: 'action_0',
             group: 'default',
-            lastTriggerDate: null,
             actionTypeId: 'test',
             params: { foo: true },
           },
@@ -2504,7 +2475,6 @@ describe('create()', () => {
           {
             actionRef: 'action_0',
             group: 'default',
-            lastTriggerDate: null,
             actionTypeId: 'test',
             params: { foo: true },
           },

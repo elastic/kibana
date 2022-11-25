@@ -73,7 +73,6 @@ describe('get()', () => {
             params: {
               foo: true,
             },
-            lastTriggerDate: '2020-01-01T12:00:00Z',
           },
         ],
         notifyWhen: 'onActiveAlert',
@@ -91,10 +90,8 @@ describe('get()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": 2020-01-01T12:00:00.000Z,
             "params": Object {
               "foo": true,
             },
@@ -167,7 +164,6 @@ describe('get()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "group": "default",
             "id": "1",
             "params": Object {
@@ -175,7 +171,6 @@ describe('get()', () => {
             },
           },
           Object {
-            "actionRef": "preconfigured:preconfigured",
             "group": "default",
             "id": "preconfigured",
             "params": Object {
@@ -246,7 +241,6 @@ describe('get()', () => {
             params: {
               foo: true,
             },
-            lastTriggerDate: null,
           },
         ],
         notifyWhen: 'onActiveAlert',
@@ -277,10 +271,8 @@ describe('get()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": null,
             "params": Object {
               "foo": true,
             },

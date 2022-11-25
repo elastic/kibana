@@ -48,7 +48,6 @@ describe('cloneRuleRoute', () => {
         params: {
           foo: true,
         },
-        lastTriggerDate: new Date('2020-01-01T12:00:00Z'),
       },
     ],
     enabled: true,
@@ -98,7 +97,6 @@ describe('cloneRuleRoute', () => {
       {
         ...ruleToClone.actions[0],
         connector_type_id: 'test',
-        last_trigger_date: new Date('2020-01-01T12:00:00Z'),
       },
     ],
   };

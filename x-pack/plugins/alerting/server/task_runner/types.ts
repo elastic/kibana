@@ -19,7 +19,6 @@ import {
   RuleTaskState,
   SanitizedRule,
   RuleTypeState,
-  RuleAction,
 } from '../../common';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { RawRule, RulesClientApi } from '../types';
@@ -35,7 +34,6 @@ export interface RuleTaskRunResult {
 // This is the state of the alerting task after rule execution, which includes run metrics plus the task state
 export type RuleTaskStateAndMetrics = RuleTaskState & {
   metrics: RuleRunMetrics;
-  updatedActions: Array<Omit<RuleAction, 'id'>>;
 };
 
 export type RuleRunResult = Pick<RuleTaskRunResult, 'monitoring' | 'schedule'> & {

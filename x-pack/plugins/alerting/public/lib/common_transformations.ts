@@ -15,10 +15,9 @@ import {
 } from '../../common';
 
 function transformAction(input: AsApiContract<RuleAction>): RuleAction {
-  const { connector_type_id: actionTypeId, last_trigger_date: lastTriggerDate, ...rest } = input;
+  const { connector_type_id: actionTypeId, ...rest } = input;
   return {
     actionTypeId,
-    ...(lastTriggerDate !== undefined && { lastTriggerDate }),
     ...rest,
   };
 }

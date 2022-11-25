@@ -74,7 +74,6 @@ describe('resolve()', () => {
               params: {
                 foo: true,
               },
-              lastTriggerDate: '2020-01-01T12:00:00Z',
             },
           ],
           notifyWhen: 'onActiveAlert',
@@ -95,10 +94,8 @@ describe('resolve()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "group": "default",
             "id": "1",
-            "lastTriggerDate": 2020-01-01T12:00:00.000Z,
             "params": Object {
               "foo": true,
             },
@@ -171,7 +168,6 @@ describe('resolve()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "group": "default",
             "id": "1",
             "params": Object {
@@ -331,7 +327,6 @@ describe('resolve()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "group": "default",
             "id": "1",
             "params": Object {

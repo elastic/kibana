@@ -48,7 +48,6 @@ describe('updateRuleRoute', () => {
         params: {
           baz: true,
         },
-        lastTriggerDate: new Date('2020-01-01T12:00:00Z'),
       },
     ],
     notifyWhen: 'onActionGroupChange' as RuleNotifyWhenType,
@@ -72,10 +71,9 @@ describe('updateRuleRoute', () => {
     updated_at: mockedAlert.updatedAt,
     created_at: mockedAlert.createdAt,
     rule_type_id: mockedAlert.alertTypeId,
-    actions: mockedAlert.actions.map(({ actionTypeId, lastTriggerDate, ...rest }) => ({
+    actions: mockedAlert.actions.map(({ actionTypeId, ...rest }) => ({
       ...rest,
       connector_type_id: actionTypeId,
-      last_trigger_date: new Date('2020-01-01T12:00:00Z'),
     })),
   };
 

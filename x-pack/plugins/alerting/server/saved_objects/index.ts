@@ -38,7 +38,6 @@ export const AlertAttributesExcludedFromAAD = [
   'isSnoozedUntil',
   'lastRun',
   'nextRun',
-  'actions',
 ];
 
 // useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a

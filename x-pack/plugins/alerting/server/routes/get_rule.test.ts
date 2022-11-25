@@ -44,7 +44,6 @@ describe('getRuleRoute', () => {
         params: {
           foo: true,
         },
-        lastTriggerDate: new Date('2020-01-01T12:00:00Z'),
       },
     ],
     consumer: 'bar',
@@ -86,7 +85,6 @@ describe('getRuleRoute', () => {
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
         connector_type_id: mockedAlert.actions[0].actionTypeId,
-        last_trigger_date: new Date('2020-01-01T12:00:00Z'),
       },
     ],
   };

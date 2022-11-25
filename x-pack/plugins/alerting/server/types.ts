@@ -209,7 +209,6 @@ export interface RawRuleAction extends SavedObjectAttributes {
   actionRef: string;
   actionTypeId: string;
   params: RuleActionParams;
-  lastTriggerDate?: string | null;
   frequency?: {
     summary: boolean;
     notifyWhen: RuleNotifyWhenType;

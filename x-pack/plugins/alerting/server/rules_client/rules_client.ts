@@ -144,7 +144,7 @@ import { isDetectionEngineAADRuleType } from '../saved_objects/migrations/utils'
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
 }
-export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId' | 'lastTriggerDate'>;
+type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
 export type CreateAPIKeyResult =
   | { apiKeysEnabled: false }
   | { apiKeysEnabled: true; result: SecurityPluginGrantAPIKeyResult };
@@ -713,16 +713,12 @@ export class RulesClient {
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
     const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
     const throttle = data.throttle ?? null;
-    const actionsWithDefaultValues = actions.map((action) => ({
-      ...action,
-      lastTriggerDate: null,
-    }));
 
     const rawRule: RawRule = {
       ...data,
       ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
       legacyId,
-      actions: actionsWithDefaultValues,
+      actions,
       createdBy: username,
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
@@ -3798,8 +3794,7 @@ export class RulesClient {
     return actions.map((action) => {
       if (action.actionRef.startsWith(preconfiguredConnectorActionRefPrefix)) {
         return {
-          ...action,
-          ...getLastTriggerDate(action.lastTriggerDate),
+          ...omit(action, 'actionRef'),
           id: action.actionRef.replace(preconfiguredConnectorActionRefPrefix, ''),
         };
       }
@@ -3809,8 +3804,7 @@ export class RulesClient {
         throw new Error(`Action reference "${action.actionRef}" not found in alert id: ${alertId}`);
       }
       return {
-        ...action,
-        ...getLastTriggerDate(action.lastTriggerDate),
+        ...omit(action, 'actionRef'),
         id: reference.id,
       };
     }) as Rule['actions'];
@@ -4297,16 +4291,4 @@ function verifySnoozeScheduleLimit(attributes: Partial<RawRule>) {
       })
     );
   }
-}
-
-function getLastTriggerDate(
-  lastTriggerDate: undefined | string | null
-): { lastTriggerDate: Date | null } | {} {
-  if (lastTriggerDate === undefined) {
-    return {};
-  }
-  if (lastTriggerDate === null) {
-    return { lastTriggerDate: null };
-  }
-  return { lastTriggerDate: new Date(lastTriggerDate) };
 }
