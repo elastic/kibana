@@ -6,28 +6,39 @@
  * Side Public License, v 1.
  */
 
+import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import { UserProvidedValues } from '@kbn/core-ui-settings-common';
 import { UiSettingsClientCommon } from './ui_settings_client_common';
-import { BaseUiSettingsClient } from './base_ui_settings_client';
 import { UiSettingsServiceOptions } from '../types';
 
-interface UserProvidedValue<T = unknown> {
-  userValue?: T;
-  isOverridden?: boolean;
-}
-
-type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
-
-export class UiSettingsClient extends BaseUiSettingsClient {
+export class UiSettingsClient implements IUiSettingsClient {
   private readonly uiSettingsClientCommon;
 
   constructor(options: UiSettingsServiceOptions) {
-    const { log, defaults = {}, overrides = {} } = options;
-    super({ overrides, defaults, log });
-
     this.uiSettingsClientCommon = new UiSettingsClientCommon(options);
   }
 
-  async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
+  getRegistered() {
+    return this.uiSettingsClientCommon.getRegistered();
+  }
+
+  async get(key: string) {
+    return this.uiSettingsClientCommon.get(key);
+  }
+
+  async getAll() {
+    return this.uiSettingsClientCommon.getAll();
+  }
+
+  isOverridden(key: string) {
+    return this.uiSettingsClientCommon.isOverridden(key);
+  }
+
+  isSensitive(key: string) {
+    return this.uiSettingsClientCommon.isSensitive(key);
+  }
+
+  async getUserProvided<T>(): Promise<Record<string, UserProvidedValues<T>>> {
     return this.uiSettingsClientCommon.getUserProvided();
   }
 
