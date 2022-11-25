@@ -39,7 +39,7 @@ interface FilterWithMultipleValues extends BasicFilter {
 
 interface FilterWithRange extends BasicFilter {
   operation: typeof Operation.IS_BETWEEN | typeof Operation.IS_NOT_BETWEEN;
-  value: { from: number | undefined; to: number | undefined };
+  value: { from: string | undefined; to: string | undefined };
 }
 
 interface FilterWithSingleValue extends BasicFilter {
@@ -175,49 +175,6 @@ export class FilterBarService extends FtrService {
     });
   }
 
-  public async addFilterAndSelectDataView(
-    dataViewTitle: string | null,
-    field: string,
-    operator: string,
-    ...values: any
-  ): Promise<void> {
-    await this.openFilterBuilder();
-
-    await this.retry.tryForTime(this.defaultTryTimeout * 2, async () => {
-      if (dataViewTitle) {
-        await this.comboBox.set('filterIndexPatternsSelect', dataViewTitle);
-      }
-
-      await this.comboBox.set('filterFieldSuggestionList', field);
-      await this.comboBox.set('filterOperatorList', operator);
-      const params = await this.testSubjects.find('filterParams');
-      const paramsComboBoxes = await params.findAllByCssSelector(
-        '[data-test-subj~="filterParamsComboBox"]',
-        1000
-      );
-      const paramFields = await params.findAllByTagName('input', 1000);
-      for (let i = 0; i < values.length; i++) {
-        let fieldValues = values[i];
-        if (!Array.isArray(fieldValues)) {
-          fieldValues = [fieldValues];
-        }
-
-        if (paramsComboBoxes && paramsComboBoxes.length > 0) {
-          for (let j = 0; j < fieldValues.length; j++) {
-            await this.comboBox.setElement(paramsComboBoxes[i], fieldValues[j]);
-          }
-        } else if (paramFields && paramFields.length > 0) {
-          for (let j = 0; j < fieldValues.length; j++) {
-            await paramFields[i].type(fieldValues[j]);
-          }
-          await paramFields[i].type(this.browser.keys.TAB);
-        }
-      }
-      await this.testSubjects.clickWhenNotDisabledWithoutRetry('saveFilter');
-    });
-    await this.header.awaitGlobalLoadingIndicatorHidden();
-  }
-
   private async addOrFilter(path: string) {
     const filterForm = await this.testSubjects.find(`filter-${path}`);
     const addOrBtn = await filterForm.findByTestSubject('add-or-filter');
@@ -305,7 +262,7 @@ export class FilterBarService extends FtrService {
     return await this.pasteFilterData(filter, path);
   }
 
-  public async newAddFilterAndSelectDataView(
+  public async addFilterAndSelectDataView(
     dataViewTitle: string | null,
     filter: Filter
   ): Promise<void> {
@@ -323,26 +280,8 @@ export class FilterBarService extends FtrService {
     await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
-  /**
-   * Adds a filter to the filter bar.
-   *
-   * @param {string} field The name of the field the filter should be applied for.
-   * @param {string} operator A valid operator for that fields, e.g. "is one of", "is", "exists", etc.
-   * @param {string[]|string} values The remaining parameters are the values passed into the individual
-   *   value input fields, i.e. the third parameter into the first input field, the fourth into the second, etc.
-   *   Each value itself can be an array, in case you want to enter multiple values into one field (e.g. for "is one of"):
-   * @example
-   * // Add a plain single value
-   * filterBar.addFilter('country', 'is', 'NL');
-   * // Add an exists filter
-   * filterBar.addFilter('country', 'exists');
-   * // Add a range filter for a numeric field
-   * filterBar.addFilter('bytes', 'is between', '500', '1000');
-   * // Add a filter containing multiple values
-   * filterBar.addFilter('extension', 'is one of', ['jpg', 'png']);
-   */
-  public async addFilter(field: string, operator: string, ...values: any): Promise<void> {
-    await this.addFilterAndSelectDataView(null, field, operator, ...values);
+  public async addFilter(filter: Filter): Promise<void> {
+    await this.addFilterAndSelectDataView(null, filter);
   }
 
   /**

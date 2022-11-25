@@ -53,7 +53,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('inclusive filter should be toggleable via the filter bar', async function () {
-      await filterBar.addFilter(TEST_ANCHOR_FILTER_FIELD, 'IS', TEST_ANCHOR_FILTER_VALUE);
+      await filterBar.addFilter({
+        field: TEST_ANCHOR_FILTER_FIELD,
+        operation: 'is',
+        value: TEST_ANCHOR_FILTER_VALUE,
+      });
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       // disable filter
       await filterBar.toggleFilterEnabled(TEST_ANCHOR_FILTER_FIELD);
@@ -82,7 +86,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     const addPinnedFilter = async () => {
-      await filterBar.addFilter(TEST_ANCHOR_FILTER_FIELD, 'IS', TEST_ANCHOR_FILTER_VALUE);
+      await filterBar.addFilter({
+        field: TEST_ANCHOR_FILTER_FIELD,
+        operation: 'is',
+        value: TEST_ANCHOR_FILTER_VALUE,
+      });
       await filterBar.toggleFilterPinned(TEST_ANCHOR_FILTER_FIELD);
     };
 
@@ -117,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should preserve filters when the page is refreshed', async function () {
       await addPinnedFilter();
-      await filterBar.addFilter('extension', 'IS', 'png');
+      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'png' });
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       await expectFiltersToExist();
       await browser.refresh();
@@ -126,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should update filters when navigating forward and backward in history', async () => {
-      await filterBar.addFilter('extension', 'IS', 'png');
+      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'png' });
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       expect(await filterBar.getFilterCount()).to.be(1);
       expect(await filterBar.hasFilter('extension', 'png')).to.be(true);

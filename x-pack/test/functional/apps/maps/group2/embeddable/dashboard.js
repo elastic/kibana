@@ -99,15 +99,18 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should apply new container state (time, query, filters) to embeddable', async () => {
-      await filterBar.addFilterAndSelectDataView('logstash-*', 'machine.os', 'is', 'win 8');
+      await filterBar.addFilterAndSelectDataView('logstash-*', {
+        field: 'machine.os',
+        operation: 'is',
+        value: 'win 8',
+      });
       await PageObjects.maps.waitForLayersToLoad();
 
-      await filterBar.addFilterAndSelectDataView(
-        'meta_for_geo_shapes*',
-        'shape_name',
-        'is',
-        'alpha'
-      );
+      await filterBar.addFilterAndSelectDataView('meta_for_geo_shapes*', {
+        field: 'shape_name',
+        operation: 'is',
+        value: 'alpha',
+      });
       await PageObjects.maps.waitForLayersToLoad();
 
       const { rawResponse: gridResponse } = await PageObjects.maps.getResponseFromDashboardPanel(
