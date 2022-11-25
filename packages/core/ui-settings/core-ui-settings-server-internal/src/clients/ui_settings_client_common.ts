@@ -7,10 +7,11 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { Logger } from '@kbn/logging';
+import { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { CannotOverrideError } from '../ui_settings_errors';
 import { Cache } from '../cache';
-import { BaseUiSettingsClient } from './base_ui_settings_client';
 import { UiSettingsServiceOptions } from '../types';
 
 interface ReadOptions {
@@ -24,20 +25,27 @@ interface UserProvidedValue<T = unknown> {
 
 type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
 
-export class UiSettingsClientCommon extends BaseUiSettingsClient {
+/**
+ * Common logic for setting / removing keys in a {@link IUiSettingsClient} implementation
+ */
+export class UiSettingsClientCommon {
   private readonly type: UiSettingsServiceOptions['type'];
   private readonly id: UiSettingsServiceOptions['id'];
   private readonly buildNum: UiSettingsServiceOptions['buildNum'];
   private readonly savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
+  private readonly overrides: Record<string, any>;
   private readonly cache: Cache;
+  protected readonly log: Logger;
+  private readonly defaults: Record<string, UiSettingsParams>;
 
   constructor(options: UiSettingsServiceOptions) {
     const { type, id, buildNum, savedObjectsClient, log, defaults = {}, overrides = {} } = options;
-    super({ overrides, defaults, log });
-
+    this.overrides = overrides;
     this.type = type;
     this.id = id;
     this.buildNum = buildNum;
+    this.log = log;
+    this.defaults = defaults;
     this.savedObjectsClient = savedObjectsClient;
     this.cache = new Cache();
   }
@@ -85,7 +93,7 @@ export class UiSettingsClientCommon extends BaseUiSettingsClient {
   }
 
   private assertUpdateAllowed(key: string) {
-    if (this.isOverridden(key)) {
+    if (this.overrides.hasOwnProperty(key)) {
       throw new CannotOverrideError(`Unable to update "${key}" because it is overridden`);
     }
   }
@@ -105,7 +113,7 @@ export class UiSettingsClientCommon extends BaseUiSettingsClient {
     // validate value read from saved objects as it can be changed via SO API
     const filteredValues: UserProvided<T> = {};
     for (const [key, userValue] of Object.entries(values)) {
-      if (userValue === null || this.isOverridden(key)) continue;
+      if (userValue === null || this.overrides.hasOwnProperty(key)) continue;
       try {
         this.validateKey(key, userValue);
         filteredValues[key] = {
@@ -178,6 +186,13 @@ export class UiSettingsClientCommon extends BaseUiSettingsClient {
       }
 
       throw error;
+    }
+  }
+  protected validateKey(key: string, value: unknown) {
+    const definition = this.defaults[key];
+    if (value === null || definition === undefined) return;
+    if (definition.schema) {
+      definition.schema.validate(value, {}, `validation [${key}]`);
     }
   }
 

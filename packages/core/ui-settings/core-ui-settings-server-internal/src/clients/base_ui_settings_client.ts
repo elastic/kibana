@@ -76,14 +76,6 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
     return !!definition?.sensitive;
   }
 
-  protected validateKey(key: string, value: unknown) {
-    const definition = this.defaults[key];
-    if (value === null || definition === undefined) return;
-    if (definition.schema) {
-      definition.schema.validate(value, {}, `validation [${key}]`);
-    }
-  }
-
   abstract getUserProvided<T = any>(): Promise<Record<string, UserProvidedValues<T>>>;
 
   abstract setMany(changes: Record<string, any>): Promise<void>;

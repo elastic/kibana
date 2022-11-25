@@ -6,47 +6,36 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import { UserProvidedValues } from '@kbn/core-ui-settings-common';
 import { UiSettingsClientCommon } from './ui_settings_client_common';
 import { UiSettingsServiceOptions } from '../types';
 import { SettingNotRegisteredError } from './not_registered_error';
+import { BaseUiSettingsClient } from './base_ui_settings_client';
+
+interface UserProvidedValue<T = unknown> {
+  userValue?: T;
+  isOverridden?: boolean;
+}
+
+type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
+
 /**
  * Global UiSettingsClient
  */
-export class UiSettingsGlobalClient implements IUiSettingsClient {
+export class UiSettingsGlobalClient extends BaseUiSettingsClient {
   private readonly uiSettingsClientCommon;
 
   constructor(options: UiSettingsServiceOptions) {
+    const { log, defaults = {}, overrides = {} } = options;
+    super({ overrides, defaults, log });
     this.uiSettingsClientCommon = new UiSettingsClientCommon(options);
   }
 
-  getRegistered() {
-    return this.uiSettingsClientCommon.getRegistered();
-  }
-
-  async get(key: string) {
-    return this.uiSettingsClientCommon.get(key);
-  }
-
-  async getAll() {
-    return this.uiSettingsClientCommon.getAll();
-  }
-
-  async getUserProvided<T>(): Promise<Record<string, UserProvidedValues<T>>> {
+  async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
     return this.uiSettingsClientCommon.getUserProvided();
   }
 
-  isOverridden(key: string) {
-    return this.uiSettingsClientCommon.isOverridden(key);
-  }
-
-  isSensitive(key: string) {
-    return this.uiSettingsClientCommon.isSensitive(key);
-  }
-
   async setMany(changes: Record<string, any>) {
-    const registeredSettings = this.uiSettingsClientCommon.getRegistered();
+    const registeredSettings = super.getRegistered();
     Object.keys(changes).forEach((key) => {
       if (!registeredSettings[key]) {
         throw new SettingNotRegisteredError(key);
@@ -56,7 +45,7 @@ export class UiSettingsGlobalClient implements IUiSettingsClient {
   }
 
   async set(key: string, value: any) {
-    const registeredSettings = this.uiSettingsClientCommon.getRegistered();
+    const registeredSettings = super.getRegistered();
     if (!registeredSettings[key]) {
       throw new SettingNotRegisteredError(key);
     }
