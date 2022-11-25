@@ -6,13 +6,7 @@
  */
 
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import {
-  Rule,
-  RuleTypeParams,
-  RecoveredActionGroup,
-  RuleMonitoring,
-  RuleAction,
-} from '../../common';
+import { Rule, RuleTypeParams, RecoveredActionGroup, RuleMonitoring } from '../../common';
 import { getDefaultMonitoring } from '../lib/monitoring';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { EVENT_LOG_ACTIONS } from '../plugin';
@@ -76,7 +70,6 @@ export const generateSavedObjectParams = ({
   successRatio = 1,
   history = defaultHistory,
   alertsCount,
-  actions,
 }: {
   error?: null | { reason: string; message: string };
   warning?: null | { reason: string; message: string };
@@ -86,7 +79,6 @@ export const generateSavedObjectParams = ({
   successRatio?: number;
   history?: RuleMonitoring['run']['history'];
   alertsCount?: Record<string, number>;
-  actions?: Array<Omit<RuleAction, 'id'>>;
 }) => [
   'alert',
   '1',
@@ -129,7 +121,6 @@ export const generateSavedObjectParams = ({
       },
     },
     nextRun,
-    actions,
   },
   { refresh: false, namespace: undefined },
 ];

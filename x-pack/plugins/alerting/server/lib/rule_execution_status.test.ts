@@ -56,9 +56,7 @@ describe('RuleExecutionStatus', () => {
   describe('executionStatusFromState()', () => {
     test('empty task state', () => {
       const emptyRuleRunState = new RuleRunMetricsStore().getMetrics();
-      const { status, metrics } = executionStatusFromState({
-        metrics: emptyRuleRunState,
-      });
+      const { status, metrics } = executionStatusFromState({ metrics: emptyRuleRunState });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);

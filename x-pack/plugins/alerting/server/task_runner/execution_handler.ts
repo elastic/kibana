@@ -17,7 +17,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { RawRule } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
-import { ExecutionHandlerOptions, RuleTaskInstance } from './types';
+import { Executable, ExecutionHandlerOptions, RuleTaskInstance } from './types';
 import { TaskRunnerContext } from './task_runner_factory';
 import { transformActionParams } from './transform_action_params';
 import { Alert } from '../alert';
@@ -32,18 +32,10 @@ import {
   SanitizedRule,
 } from '../../common';
 
-enum Reasons {
+export enum Reasons {
   MUTED = 'muted',
   THROTTLED = 'throttled',
   ACTION_GROUP_NOT_CHANGED = 'actionGroupHasNotChanged',
-}
-
-interface Executable<ActionGroupIds, RecoveryActionGroupId> {
-  action: RuleAction;
-  alert: Alert<AlertInstanceState, AlertInstanceContext, string>;
-  alertId: string;
-  actionGroup: ActionGroupIds | RecoveryActionGroupId;
-  state: AlertInstanceState;
 }
 
 export class ExecutionHandler<

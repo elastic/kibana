@@ -16,10 +16,7 @@ import {
 
 function transformAction(input: AsApiContract<RuleAction>): RuleAction {
   const { connector_type_id: actionTypeId, ...rest } = input;
-  return {
-    actionTypeId,
-    ...rest,
-  };
+  return { actionTypeId, ...rest };
 }
 
 // AsApiContract does not deal with object properties that are dates - the

@@ -457,7 +457,6 @@ export class TaskRunner<
     });
 
     const alertsToReturn: Record<string, RawAlertInstance> = {};
-
     for (const id in activeAlerts) {
       if (activeAlerts.hasOwnProperty(id)) {
         alertsToReturn[id] = activeAlerts[id].toRaw();
@@ -613,7 +612,6 @@ export class TaskRunner<
           executionStatus
         )} - ${JSON.stringify(lastRun)}`
       );
-
       await this.updateRuleSavedObject(ruleId, namespace, {
         executionStatus: ruleExecutionStatusToRaw(executionStatus),
         nextRun,
