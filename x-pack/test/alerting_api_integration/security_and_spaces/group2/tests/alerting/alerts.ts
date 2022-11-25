@@ -162,7 +162,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
                     /* eslint-disable @typescript-eslint/naming-convention */
                     const { connector_type_id, group, id, params } = action;
                     return {
-                      actionRef: 'action_0',
                       actionTypeId: connector_type_id,
                       group,
                       id,
@@ -315,7 +314,6 @@ instanceStateValue: true
                     /* eslint-disable @typescript-eslint/naming-convention */
                     const { connector_type_id, group, id, params } = action;
                     return {
-                      actionRef: 'preconfigured:preconfigured.test.index-record',
                       actionTypeId: connector_type_id,
                       group,
                       id,
@@ -448,7 +446,6 @@ instanceStateValue: true
               /* eslint-disable @typescript-eslint/naming-convention */
               const { connector_type_id, group, id, params } = action;
               return {
-                actionRef: 'action_0',
                 actionTypeId: connector_type_id,
                 group,
                 id,
