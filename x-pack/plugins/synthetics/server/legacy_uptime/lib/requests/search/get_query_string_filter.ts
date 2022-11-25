@@ -9,13 +9,23 @@ export const getQueryStringFilter = (query: string) => {
   let queryString = query;
   if (hasReservedCharsF(query) && !includesOperator(query.toLowerCase())) {
     // if user doesn't specify any query string syntax we user wildcard buy default
-    queryString = `*${query}*`;
+    queryString = `${query}* or tags:${query}*`;
+  }
+
+  if (Number(query)) {
+    queryString = `url.port:${query} or ${query}`;
   }
 
   return {
     query_string: {
       query: queryString,
-      fields: ['monitor.id.text', 'monitor.name.text', 'url.full.text'],
+      fields: [
+        'monitor.id.text',
+        'monitor.name.text',
+        'url.full.text',
+        'synthetics.step.name',
+        'synthetics.journey.name',
+      ],
     },
   };
 };
@@ -26,6 +36,6 @@ const includesOperator = (query: string) => {
 
 // check if it has reserved characters for query string syntax
 const hasReservedCharsF = (str: string) => {
-  const format = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-  return !format.test(str);
+  const format = /^[a-zA-Z]+$/;
+  return format.test(str);
 };
