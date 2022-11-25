@@ -63,7 +63,7 @@ export type HasMlCapabilities = (capabilities: MlCapabilitiesKey[]) => Promise<v
 
 export function hasMlCapabilitiesProvider(resolveMlCapabilities: ResolveMlCapabilities) {
   const resolveMlCapabilitiesMemo = memoize(
-    async (request: KibanaRequest) => await resolveMlCapabilities(request),
+    async (request: KibanaRequest) => resolveMlCapabilities(request),
     (request: KibanaRequest) => request.id
   );
 
