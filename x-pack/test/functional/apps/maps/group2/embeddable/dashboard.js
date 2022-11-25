@@ -134,7 +134,7 @@ export default function ({ getPageObjects, getService }) {
       await dashboardPanelActions.editPanelByTitle('geo grid vector grid example');
       await PageObjects.maps.waitForLayersToLoad();
 
-      await filterBar.addFilter('machine.os', 'is', 'ios');
+      await filterBar.addFilter({ field: 'machine.os', operation: 'is', value: 'ios' });
       await PageObjects.maps.waitForLayersToLoad();
       await testSubjects.click('mapSaveAndReturnButton');
       const { rawResponse: gridResponse } = await PageObjects.maps.getResponseFromDashboardPanel(
