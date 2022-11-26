@@ -243,9 +243,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
         )}
         <Form
           form={form}
-          isInvalid={form.isSubmitted && form.isValid === false}
-          error={form.getErrors()}
           className="indexPatternEditor__form"
+          error={form.getErrors()}
+          isInvalid={form.isSubmitted && !form.isValid}
         >
           <UseField path="isAdHoc" />
           {indexPatternTypeSelect}
