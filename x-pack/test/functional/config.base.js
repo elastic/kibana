@@ -36,7 +36,14 @@ export default async function ({ readConfigFile }) {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: ['path.repo=/tmp/', 'xpack.security.authc.api_key.enabled=true'],
+      serverArgs: [
+        'path.repo=/tmp/',
+        'xpack.security.authc.api_key.enabled=true',
+        // make sure disk thresholds are enabeld for UA cluster testing
+        'cluster.routing.allocation.disk.threshold_enabled=true',
+        // push allocation changes to nodes quickly during tests
+        'cluster.info.update.interval=10s'
+      ],
     },
 
     kbnTestServer: {
