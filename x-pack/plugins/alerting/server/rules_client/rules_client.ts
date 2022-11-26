@@ -3924,13 +3924,12 @@ export class RulesClient {
     const { actions, notifyWhen, throttle } = data;
     const hasNotifyWhen = typeof notifyWhen !== 'undefined';
     const hasThrottle = typeof throttle !== 'undefined';
-    let usesRuleLevelFreqParams = true;
+    let usesRuleLevelFreqParams;
 
-    // i removed the below ` && hasThrottle` check temporarily.
-    // currently ui sends throttle as undefined but schema converts it to null, so they never become both undefined
-    // i changed the schema too
-    // but as the current ui (and tests) sends notifyWhen as string and throttle as undefined, they never become both defined.
-    // we should add it back this when the ui is changed (https://github.com/elastic/kibana/issues/143369)
+    // I removed the below ` && hasThrottle` check temporarily.
+    // Currently the UI sends "throttle" as undefined but schema converts it to null, so they never become both undefined
+    // I changed the schema too, but as the UI (and tests) sends "notifyWhen" as string and "throttle" as undefined, they never become both defined.
+    // We should add it back when the UI is changed (https://github.com/elastic/kibana/issues/143369)
 
     if (hasNotifyWhen) usesRuleLevelFreqParams = true;
     else if (!hasNotifyWhen && !hasThrottle) usesRuleLevelFreqParams = false;
