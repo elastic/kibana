@@ -25,6 +25,8 @@ export interface CreateAlertWithActionOpts {
   overwrites?: Record<string, any>;
   reference: string;
   notifyWhen?: string;
+  summary?: boolean;
+  throttle?: string;
 }
 export interface CreateNoopAlertOpts {
   objectRemover?: ObjectRemover;
@@ -205,6 +207,8 @@ export class AlertUtils {
     indexRecordActionId,
     reference,
     notifyWhen,
+    summary,
+    throttle,
   }: CreateAlertWithActionOpts) {
     const objRemover = objectRemover || this.objectRemover;
     const actionId = indexRecordActionId || this.indexRecordActionId;
@@ -222,7 +226,19 @@ export class AlertUtils {
     if (this.user) {
       request = request.auth(this.user.username, this.user.password);
     }
-    const alertBody = getDefaultAlwaysFiringAlertData(reference, actionId, notifyWhen);
+    let alertBody;
+    if (summary !== undefined) {
+      alertBody = getAlwaysFiringAlertWithThrottledActionData(
+        reference,
+        actionId,
+        notifyWhen,
+        throttle,
+        summary
+      );
+    } else {
+      alertBody = getDefaultAlwaysFiringAlertData(reference, actionId, notifyWhen);
+    }
+
     const response = await request.send({ ...alertBody, ...overwrites });
     if (response.statusCode === 200) {
       objRemover.add(this.space.id, response.body.id, 'rule', 'alerting');
@@ -389,6 +405,53 @@ instanceStateValue: {{state.instanceStateValue}}
           index: ES_TEST_INDEX_NAME,
           reference,
           message: messageTemplate,
+        },
+      },
+    ],
+  };
+}
+
+function getAlwaysFiringAlertWithThrottledActionData(
+  reference: string,
+  actionId: string,
+  notifyWhen = 'onActiveAlert',
+  throttle = '1m',
+  summary = false
+) {
+  const messageTemplate = `
+alertId: {{alertId}},
+alertName: {{alertName}},
+spaceId: {{spaceId}},
+tags: {{tags}},
+alertInstanceId: {{alertInstanceId}},
+alertActionGroup: {{alertActionGroup}},
+instanceContextValue: {{context.instanceContextValue}},
+instanceStateValue: {{state.instanceStateValue}}
+`.trim();
+  return {
+    enabled: true,
+    name: 'abc',
+    schedule: { interval: '1m' },
+    tags: ['tag-A', 'tag-B'],
+    rule_type_id: 'test.always-firing',
+    consumer: 'alertsFixture',
+    params: {
+      index: ES_TEST_INDEX_NAME,
+      reference,
+    },
+    actions: [
+      {
+        group: 'default',
+        id: actionId,
+        params: {
+          index: ES_TEST_INDEX_NAME,
+          reference,
+          message: messageTemplate,
+        },
+        frequency: {
+          summary,
+          notify_when: notifyWhen,
+          throttle,
         },
       },
     ],
