@@ -17,7 +17,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { RawRule } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
-import { Executable, ExecutionHandlerOptions, RuleTaskInstance } from './types';
+import { ExecutionHandlerOptions, RuleTaskInstance } from './types';
 import { TaskRunnerContext } from './task_runner_factory';
 import { transformActionParams } from './transform_action_params';
 import { Alert } from '../alert';
@@ -119,134 +119,132 @@ export class ExecutionHandler<
       string,
       Alert<State, Context, ActionGroupIds> | Alert<State, Context, RecoveryActionGroupId>
     >
-  ) {
-    return this.runExecutables(this.generateExecutables(alerts));
-  }
-
-  private async runExecutables(
-    executables: Array<Executable<ActionGroupIds, RecoveryActionGroupId>>
   ): Promise<void> {
-    const {
-      CHUNK_SIZE,
-      logger,
-      alertingEventLogger,
-      ruleRunMetricsStore,
-      taskRunnerContext: { actionsConfigMap, actionsPlugin },
-      taskInstance: {
-        params: { spaceId, alertId: ruleId },
-      },
-    } = this;
+    const executables = this.generateExecutables(alerts);
 
-    const logActions = [];
-    const bulkActions: EnqueueExecutionOptions[] = [];
+    if (!!executables.length) {
+      const {
+        CHUNK_SIZE,
+        logger,
+        alertingEventLogger,
+        ruleRunMetricsStore,
+        taskRunnerContext: { actionsConfigMap, actionsPlugin },
+        taskInstance: {
+          params: { spaceId, alertId: ruleId },
+        },
+      } = this;
 
-    this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
+      const logActions = [];
+      const bulkActions: EnqueueExecutionOptions[] = [];
 
-    for (const { action, alert, alertId, actionGroup, state } of executables) {
-      const { actionTypeId } = action;
+      this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
 
-      if (!this.isRecoveredAlert(actionGroup)) {
-        alert.updateLastScheduledActions(action.group as ActionGroupIds);
-        alert.unscheduleActions();
-      }
+      for (const { action, alert, alertId, actionGroup, state } of executables) {
+        const { actionTypeId } = action;
 
-      ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
-
-      if (ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
-        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
-          actionTypeId,
-          status: ActionsCompletion.PARTIAL,
-        });
-        logger.debug(
-          `Rule "${this.rule.id}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
-        );
-        break;
-      }
-
-      if (
-        ruleRunMetricsStore.hasReachedTheExecutableActionsLimitByConnectorType({
-          actionTypeId,
-          actionsConfigMap,
-        })
-      ) {
-        if (!ruleRunMetricsStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
-          logger.debug(
-            `Rule "${this.rule.id}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${actionTypeId} has been reached.`
-          );
+        if (!this.isRecoveredAlert(actionGroup)) {
+          alert.updateLastScheduledActions(action.group as ActionGroupIds);
+          alert.unscheduleActions();
         }
-        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
-          actionTypeId,
-          status: ActionsCompletion.PARTIAL,
-        });
-        continue;
-      }
 
-      if (!this.isExecutableAction(action)) {
-        this.logger.warn(
-          `Rule "${this.taskInstance.params.alertId}" skipped scheduling action "${action.id}" because it is disabled`
-        );
-        continue;
-      }
+        ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
 
-      ruleRunMetricsStore.incrementNumberOfTriggeredActions();
-      ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
-
-      const actionToRun = {
-        ...action,
-        params: injectActionParams({
-          ruleId,
-          spaceId,
-          actionTypeId,
-          actionParams: transformActionParams({
-            actionsPlugin,
-            alertId: ruleId,
-            alertType: this.ruleType.id,
+        if (ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
+          ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
             actionTypeId,
-            alertName: this.rule.name,
+            status: ActionsCompletion.PARTIAL,
+          });
+          logger.debug(
+            `Rule "${this.rule.id}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
+          );
+          break;
+        }
+
+        if (
+          ruleRunMetricsStore.hasReachedTheExecutableActionsLimitByConnectorType({
+            actionTypeId,
+            actionsConfigMap,
+          })
+        ) {
+          if (!ruleRunMetricsStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
+            logger.debug(
+              `Rule "${this.rule.id}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${actionTypeId} has been reached.`
+            );
+          }
+          ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+            actionTypeId,
+            status: ActionsCompletion.PARTIAL,
+          });
+          continue;
+        }
+
+        if (!this.isExecutableAction(action)) {
+          this.logger.warn(
+            `Rule "${this.taskInstance.params.alertId}" skipped scheduling action "${action.id}" because it is disabled`
+          );
+          continue;
+        }
+
+        ruleRunMetricsStore.incrementNumberOfTriggeredActions();
+        ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
+
+        const actionToRun = {
+          ...action,
+          params: injectActionParams({
+            ruleId,
             spaceId,
-            tags: this.rule.tags,
-            alertInstanceId: alertId,
-            alertActionGroup: actionGroup,
-            alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
-            context: alert.getContext(),
-            actionId: action.id,
-            state,
-            kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-            alertParams: this.rule.params,
-            actionParams: action.params,
-            ruleUrl: this.buildRuleUrl(spaceId),
+            actionTypeId,
+            actionParams: transformActionParams({
+              actionsPlugin,
+              alertId: ruleId,
+              alertType: this.ruleType.id,
+              actionTypeId,
+              alertName: this.rule.name,
+              spaceId,
+              tags: this.rule.tags,
+              alertInstanceId: alertId,
+              alertActionGroup: actionGroup,
+              alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
+              context: alert.getContext(),
+              actionId: action.id,
+              state,
+              kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+              alertParams: this.rule.params,
+              actionParams: action.params,
+              ruleUrl: this.buildRuleUrl(spaceId),
+            }),
           }),
-        }),
-      };
+        };
 
-      await this.actionRunOrAddToBulk({
-        enqueueOptions: this.getEnqueueOptions(actionToRun),
-        bulkActions,
-      });
+        await this.actionRunOrAddToBulk({
+          enqueueOptions: this.getEnqueueOptions(actionToRun),
+          bulkActions,
+        });
 
-      logActions.push({
-        id: action.id,
-        typeId: action.actionTypeId,
-        alertId,
-        alertGroup: action.group,
-      });
+        logActions.push({
+          id: action.id,
+          typeId: action.actionTypeId,
+          alertId,
+          alertGroup: action.group,
+        });
 
-      if (this.isRecoveredAlert(actionGroup)) {
-        alert.scheduleActions(action.group as ActionGroupIds);
-      } else {
-        alert.addScheduledAction(action.id);
+        if (this.isRecoveredAlert(actionGroup)) {
+          alert.scheduleActions(action.group as ActionGroupIds);
+        } else {
+          alert.addScheduledAction(action.id);
+        }
       }
-    }
 
-    if (!!bulkActions.length) {
-      for (const c of chunk(bulkActions, CHUNK_SIZE)) {
-        await this.actionsClient!.bulkEnqueueExecution(c);
+      if (!!bulkActions.length) {
+        for (const c of chunk(bulkActions, CHUNK_SIZE)) {
+          await this.actionsClient!.bulkEnqueueExecution(c);
+        }
       }
-    }
 
-    if (!!logActions.length) {
-      for (const action of logActions) {
-        alertingEventLogger.logAction(action);
+      if (!!logActions.length) {
+        for (const action of logActions) {
+          alertingEventLogger.logAction(action);
+        }
       }
     }
   }

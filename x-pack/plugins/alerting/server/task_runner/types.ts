@@ -9,7 +9,6 @@ import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
-import { Alert } from '../alert';
 import { TaskRunnerContext } from './task_runner_factory';
 import {
   AlertInstanceContext,
@@ -20,7 +19,6 @@ import {
   RuleTaskState,
   SanitizedRule,
   RuleTypeState,
-  RuleAction,
 } from '../../common';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { RawRule, RulesClientApi } from '../types';
@@ -86,12 +84,4 @@ export interface ExecutionHandlerOptions<
   executionId: string;
   ruleLabel: string;
   actionsClient: PublicMethodsOf<ActionsClient>;
-}
-
-export interface Executable<ActionGroupIds, RecoveryActionGroupId> {
-  action: RuleAction;
-  alert: Alert<AlertInstanceState, AlertInstanceContext, string>;
-  alertId: string;
-  actionGroup: ActionGroupIds | RecoveryActionGroupId;
-  state: AlertInstanceState;
 }
