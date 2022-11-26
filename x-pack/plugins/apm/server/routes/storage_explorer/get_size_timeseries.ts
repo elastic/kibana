@@ -11,11 +11,7 @@ import {
   termQuery,
 } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  TIER,
-  SERVICE_NAME,
-  INDEX,
-} from '../../../common/elasticsearch_fieldnames';
+import { TIER, SERVICE_NAME, INDEX } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
