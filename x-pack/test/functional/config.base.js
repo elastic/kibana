@@ -39,7 +39,7 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         'path.repo=/tmp/',
         'xpack.security.authc.api_key.enabled=true',
-        'cluster.routing.allocation.disk.threshold_enabled=true', // make sure disk thresholds are enabeld for UA cluster testing
+        'cluster.routing.allocation.disk.threshold_enabled=true', // make sure disk thresholds are enabled for UA cluster testing
       ],
     },
 
