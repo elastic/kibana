@@ -36,6 +36,7 @@ const previouslyRegisteredTypes = [
   'cases-user-actions',
   'cases-telemetry',
   'config',
+  'config-global',
   'connector_token',
   'core-usage-stats',
   'csp-rule-template',
