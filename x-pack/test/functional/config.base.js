@@ -42,7 +42,7 @@ export default async function ({ readConfigFile }) {
         // make sure disk thresholds are enabeld for UA cluster testing
         'cluster.routing.allocation.disk.threshold_enabled=true',
         // push allocation changes to nodes quickly during tests
-        'cluster.info.update.interval=10s'
+        'cluster.info.update.interval=10s',
       ],
     },
 
