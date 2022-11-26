@@ -9,16 +9,15 @@ import type { EuiSelectableOption, IconType } from '@elastic/eui';
 import { assertNever } from '@elastic/eui';
 import { useCallback, useReducer, useMemo } from 'react';
 import type { Case } from '../../../common';
-import type { ItemsSelectionState } from './types';
+import type { ItemSelectableOption, ItemsSelectionState } from './types';
 
 interface UseItemsStateProps {
   items: string[];
   selectedCases: Case[];
+  toSelectableOption: <T>(item: string) => EuiSelectableOption<T>;
   fieldSelector: (theCase: Case) => string[];
   onChangeItems: (args: ItemsSelectionState) => void;
 }
-
-export type ItemSelectableOption = EuiSelectableOption<{ itemIcon: IconType; newItem?: boolean }>;
 
 enum ItemState {
   CHECKED = 'checked',
@@ -184,26 +183,12 @@ const createItemsCounterMapping = ({
   return counterMap;
 };
 
-const stateToOptions = (itemsState: State['items']): ItemSelectableOption[] => {
-  const items = Object.keys(itemsState);
-
-  return items.map((item): EuiSelectableOption => {
-    return {
-      key: item,
-      label: item,
-      ...(itemsState[item].itemState === ItemState.CHECKED ? { checked: 'on' } : {}),
-      'data-test-subj': `cases-actions-items-edit-selectable-item-${item}`,
-      data: { itemIcon: itemsState[item].icon },
-    };
-  }) as ItemSelectableOption[];
-};
-
 const getSelectionIcon = (itemState: ItemState): ICONS => {
   return stateToIconMap[itemState];
 };
 
 export const getSelectedAndUnselectedItems = (
-  newOptions: EuiSelectableOption[],
+  newOptions: ItemSelectableOption[],
   items: State['items']
 ) => {
   const selectedItems: string[] = [];
@@ -211,20 +196,15 @@ export const getSelectedAndUnselectedItems = (
 
   for (const option of newOptions) {
     if (option.checked === 'on') {
-      selectedItems.push(option.label);
+      selectedItems.push(option.key);
     }
 
     /**
      * User can only select the "Add new item" item. Because a new item do not have a state yet
      * we need to ensure that state access is done only by options with state.
      */
-    if (
-      !option.data?.newItem &&
-      !option.checked &&
-      items[option.label] &&
-      items[option.label].dirty
-    ) {
-      unSelectedItems.push(option.label);
+    if (!option.data?.newItem && !option.checked && items[option.key] && items[option.key].dirty) {
+      unSelectedItems.push(option.key);
     }
   }
 
@@ -235,6 +215,7 @@ export const useItemsState = ({
   items,
   selectedCases,
   fieldSelector,
+  toSelectableOption,
   onChangeItems,
 }: UseItemsStateProps) => {
   /**
@@ -250,8 +231,25 @@ export const useItemsState = ({
     (args) => getInitialItemsState(args)
   );
 
+  const stateToOptions = useCallback((): ItemSelectableOption[] => {
+    const itemsKeys = Object.keys(state.items);
+
+    return itemsKeys.map((item): EuiSelectableOption => {
+      const convertedItem = toSelectableOption(item);
+
+      return {
+        key: item,
+        ...(state.items[item].itemState === ItemState.CHECKED ? { checked: 'on' } : {}),
+        'data-test-subj': `cases-actions-items-edit-selectable-item-${item}`,
+        ...convertedItem,
+        label: convertedItem.label ?? item,
+        data: { ...convertedItem?.data, itemIcon: state.items[item].icon },
+      };
+    }) as ItemSelectableOption[];
+  }, [state.items, toSelectableOption]);
+
   const onChange = useCallback(
-    (newOptions: EuiSelectableOption[]) => {
+    (newOptions: ItemSelectableOption[]) => {
       /**
        * In this function the user has selected and deselected some items. If the user
        * pressed the "add new item" option it means that needs to add the new item to the list.
@@ -290,9 +288,9 @@ export const useItemsState = ({
   const onSelectNone = useCallback(() => {
     const unSelectedItems = [];
 
-    for (const [label, item] of Object.entries(state.items)) {
+    for (const [id, item] of Object.entries(state.items)) {
       if (item.itemState === ItemState.CHECKED || item.itemState === ItemState.PARTIAL) {
-        unSelectedItems.push(label);
+        unSelectedItems.push(id);
       }
     }
 
@@ -300,7 +298,7 @@ export const useItemsState = ({
     onChangeItems({ selectedItems: [], unSelectedItems });
   }, [state.items, onChangeItems]);
 
-  const options: ItemSelectableOption[] = useMemo(() => stateToOptions(state.items), [state.items]);
+  const options: ItemSelectableOption[] = useMemo(() => stateToOptions(), [stateToOptions]);
 
   const totalSelectedItems = Object.values(state.items).filter(
     (item) => item.itemState === ItemState.CHECKED || item.itemState === ItemState.PARTIAL

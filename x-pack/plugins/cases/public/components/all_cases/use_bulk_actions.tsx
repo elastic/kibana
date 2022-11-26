@@ -18,6 +18,8 @@ import { useStatusAction } from '../actions/status/use_status_action';
 import { EditTagsFlyout } from '../actions/tags/edit_tags_flyout';
 import { useTagsAction } from '../actions/tags/use_tags_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
+import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
+import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
 import * as i18n from './translations';
 
 interface UseBulkActionsProps {
@@ -58,6 +60,12 @@ export const useBulkActions = ({
 
   const tagsAction = useTagsAction({
     isDisabled,
+    onAction,
+    onActionSuccess,
+  });
+
+  const assigneesAction = useAssigneesAction({
+    isDisabled: false,
     onAction,
     onActionSuccess,
   });
@@ -104,6 +112,7 @@ export const useBulkActions = ({
 
     if (canUpdate) {
       mainPanelItems.push(tagsAction.getAction(selectedCases));
+      mainPanelItems.push(assigneesAction.getAction(selectedCases));
     }
 
     if (canDelete) {
@@ -134,6 +143,7 @@ export const useBulkActions = ({
     severityAction,
     statusAction,
     tagsAction,
+    assigneesAction,
   ]);
 
   return {
@@ -151,6 +161,13 @@ export const useBulkActions = ({
             onClose={tagsAction.onFlyoutClosed}
             selectedCases={selectedCases}
             onSaveTags={tagsAction.onSaveTags}
+          />
+        ) : null}
+        {assigneesAction.isFlyoutOpen ? (
+          <EditAssigneesFlyout
+            onClose={assigneesAction.onFlyoutClosed}
+            selectedCases={selectedCases}
+            onSaveAssignees={assigneesAction.onSaveAssignees}
           />
         ) : null}
       </>

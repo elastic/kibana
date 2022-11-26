@@ -22,9 +22,8 @@ import {
 import { isEmpty } from 'lodash';
 import type { Case } from '../../../../common';
 import * as i18n from './translations';
-import type { ItemSelectableOption } from '../use_items_state';
 import { useItemsState } from '../use_items_state';
-import type { ItemsSelectionState } from '../types';
+import type { ItemSelectableOption, ItemsSelectionState } from '../types';
 
 interface Props {
   selectedCases: Case[];
@@ -41,6 +40,13 @@ const hasPartialMatch = (searchValue: string, options: ItemSelectableOption[]) =
   return options.some((option) => option.key?.includes(searchValue));
 };
 
+const toSelectableOption = (item: string): ItemSelectableOption => {
+  return {
+    key: item,
+    label: item,
+  } as ItemSelectableOption;
+};
+
 const EditTagsSelectableComponent: React.FC<Props> = ({
   selectedCases,
   tags,
@@ -51,6 +57,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
     {
       items: tags,
       selectedCases,
+      toSelectableOption,
       fieldSelector: (theCase) => theCase.tags,
       onChangeItems: onChangeTags,
     }

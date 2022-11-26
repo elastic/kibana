@@ -25,6 +25,8 @@ import { useSeverityAction } from '../actions/severity/use_severity_action';
 import { severities } from '../severity/config';
 import { useTagsAction } from '../actions/tags/use_tags_action';
 import { EditTagsFlyout } from '../actions/tags/edit_tags_flyout';
+import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
+import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
 
 const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }> = ({
   theCase,
@@ -56,6 +58,12 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
   });
 
   const tagsAction = useTagsAction({
+    isDisabled: false,
+    onAction: closePopover,
+    onActionSuccess: refreshCases,
+  });
+
+  const assigneesAction = useAssigneesAction({
     isDisabled: false,
     onAction: closePopover,
     onActionSuccess: refreshCases,
@@ -115,6 +123,7 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
 
     if (canUpdate) {
       mainPanelItems.push(tagsAction.getAction([theCase]));
+      mainPanelItems.push(assigneesAction.getAction([theCase]));
     }
 
     if (canDelete) {
@@ -136,7 +145,16 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
     }
 
     return panelsToBuild;
-  }, [canDelete, canUpdate, deleteAction, severityAction, statusAction, tagsAction, theCase]);
+  }, [
+    canDelete,
+    canUpdate,
+    deleteAction,
+    severityAction,
+    statusAction,
+    tagsAction,
+    assigneesAction,
+    theCase,
+  ]);
 
   return (
     <>
@@ -174,6 +192,13 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
           onClose={tagsAction.onFlyoutClosed}
           selectedCases={[theCase]}
           onSaveTags={tagsAction.onSaveTags}
+        />
+      ) : null}
+      {assigneesAction.isFlyoutOpen ? (
+        <EditAssigneesFlyout
+          onClose={assigneesAction.onFlyoutClosed}
+          selectedCases={[theCase]}
+          onSaveAssignees={assigneesAction.onSaveAssignees}
         />
       ) : null}
     </>
