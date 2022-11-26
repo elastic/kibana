@@ -282,13 +282,24 @@ export const generateRunnerResult = ({
   };
 };
 
-export const generateEnqueueFunctionInput = (isArray: boolean = false) => {
+export const generateEnqueueFunctionInput = ({
+  id = '1',
+  isBulk = false,
+  isResolved,
+  foo,
+}: {
+  id: string;
+  isBulk?: boolean;
+  isResolved?: boolean;
+  foo?: boolean;
+}) => {
   const input = {
     apiKey: 'MTIzOmFiYw==',
     executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-    id: '1',
+    id,
     params: {
-      foo: true,
+      ...(isResolved !== undefined ? { isResolved } : {}),
+      ...(foo !== undefined ? { foo } : {}),
     },
     consumer: 'bar',
     relatedSavedObjects: [
@@ -308,7 +319,7 @@ export const generateEnqueueFunctionInput = (isArray: boolean = false) => {
     },
     spaceId: 'default',
   };
-  return isArray ? [input] : input;
+  return isBulk ? [input] : input;
 };
 
 export const generateAlertInstance = (

@@ -209,7 +209,7 @@ describe('Execution Handler', () => {
   test('enqueues execution per selected action', async () => {
     const alerts = generateAlert({ id: 1 });
     const executionHandler = new ExecutionHandler(generateExecutionParams());
-    await executionHandler.runActiveAlerts(alerts);
+    await executionHandler.run(alerts);
 
     expect(Object.values(alerts)[0].getLastScheduledActions()).toEqual({
       actions: {
@@ -317,7 +317,7 @@ describe('Execution Handler', () => {
       })
     );
 
-    await executionHandler.runActiveAlerts(generateAlert({ id: 1 }));
+    await executionHandler.run(generateAlert({ id: 1 }));
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(1);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(2);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
@@ -381,7 +381,7 @@ describe('Execution Handler', () => {
       })
     );
 
-    await executionHandler.runActiveAlerts(generateAlert({ id: 2 }));
+    await executionHandler.run(generateAlert({ id: 2 }));
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(0);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(2);
@@ -393,13 +393,13 @@ describe('Execution Handler', () => {
       ruleRunMetricsStore,
     });
 
-    await executionHandlerForPreconfiguredAction.runActiveAlerts(generateAlert({ id: 2 }));
+    await executionHandlerForPreconfiguredAction.run(generateAlert({ id: 2 }));
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
   });
 
   test('limits actionsPlugin.execute per action group', async () => {
     const executionHandler = new ExecutionHandler(generateExecutionParams());
-    await executionHandler.runActiveAlerts(generateAlert({ id: 2, group: 'other-group' }));
+    await executionHandler.run(generateAlert({ id: 2, group: 'other-group' }));
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(0);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(0);
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
@@ -407,9 +407,7 @@ describe('Execution Handler', () => {
 
   test('context attribute gets parameterized', async () => {
     const executionHandler = new ExecutionHandler(generateExecutionParams());
-    await executionHandler.runActiveAlerts(
-      generateAlert({ id: 2, context: { value: 'context-val' } })
-    );
+    await executionHandler.run(generateAlert({ id: 2, context: { value: 'context-val' } }));
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(1);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(1);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
@@ -451,7 +449,7 @@ describe('Execution Handler', () => {
 
   test('state attribute gets parameterized', async () => {
     const executionHandler = new ExecutionHandler(generateExecutionParams());
-    await executionHandler.runActiveAlerts(generateAlert({ id: 2, state: { value: 'state-val' } }));
+    await executionHandler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
@@ -491,7 +489,7 @@ describe('Execution Handler', () => {
 
   test(`logs an error when action group isn't part of actionGroups available for the ruleType`, async () => {
     const executionHandler = new ExecutionHandler(generateExecutionParams());
-    await executionHandler.runActiveAlerts(
+    await executionHandler.run(
       generateAlert({ id: 2, group: 'invalid-group' as 'default' | 'other-group' })
     );
 
@@ -554,7 +552,7 @@ describe('Execution Handler', () => {
         },
       })
     );
-    await executionHandler.runActiveAlerts(generateAlert({ id: 2, state: { value: 'state-val' } }));
+    await executionHandler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(2);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(3);
@@ -627,7 +625,7 @@ describe('Execution Handler', () => {
         },
       })
     );
-    await executionHandler.runActiveAlerts(generateAlert({ id: 2, state: { value: 'state-val' } }));
+    await executionHandler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(4);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(5);
@@ -667,7 +665,7 @@ describe('Execution Handler', () => {
         },
       })
     );
-    await executionHandler.runRecoveredAlerts(generateRecoveredAlert({ id: 1 }));
+    await executionHandler.run(generateRecoveredAlert({ id: 1 }));
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
@@ -730,7 +728,7 @@ describe('Execution Handler', () => {
         },
       })
     );
-    await executionHandler.runRecoveredAlerts(generateRecoveredAlert({ id: 1 }));
+    await executionHandler.run(generateRecoveredAlert({ id: 1 }));
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
     expect(defaultExecutionParams.logger.debug).nthCalledWith(
@@ -750,7 +748,7 @@ describe('Execution Handler', () => {
         },
       })
     );
-    await executionHandler.runActiveAlerts(generateAlert({ id: 1 }));
+    await executionHandler.run(generateAlert({ id: 1 }));
 
     clock.tick(30000);
 
@@ -780,7 +778,7 @@ describe('Execution Handler', () => {
         },
       })
     );
-    await executionHandler.runActiveAlerts(
+    await executionHandler.run(
       generateAlert({ id: 1, lastScheduledActions: { '1': { date: new Date(DATE_1970) } } })
     );
 
@@ -812,9 +810,7 @@ describe('Execution Handler', () => {
         },
       })
     );
-    await executionHandler.runActiveAlerts(
-      generateAlert({ id: 1, lastScheduledActionsGroup: 'recovered' })
-    );
+    await executionHandler.run(generateAlert({ id: 1, lastScheduledActionsGroup: 'recovered' }));
 
     clock.tick(30000);
 
@@ -832,7 +828,7 @@ describe('Execution Handler', () => {
         },
       })
     );
-    await executionHandler.runActiveAlerts(generateAlert({ id: 1 }));
+    await executionHandler.run(generateAlert({ id: 1 }));
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
     expect(defaultExecutionParams.logger.debug).nthCalledWith(
@@ -867,7 +863,7 @@ describe('Execution Handler', () => {
       };
 
       const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.runActiveAlerts(generateAlert({ id: 1 }));
+      await executionHandler.run(generateAlert({ id: 1 }));
 
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -897,7 +893,7 @@ describe('Execution Handler', () => {
       };
 
       const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.runActiveAlerts(generateAlert({ id: 1 }));
+      await executionHandler.run(generateAlert({ id: 1 }));
 
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -924,7 +920,7 @@ describe('Execution Handler', () => {
       };
 
       const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.runActiveAlerts(generateAlert({ id: 1 }));
+      await executionHandler.run(generateAlert({ id: 1 }));
 
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -951,7 +947,7 @@ describe('Execution Handler', () => {
       };
 
       const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.runActiveAlerts(generateAlert({ id: 1 }));
+      await executionHandler.run(generateAlert({ id: 1 }));
 
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -981,7 +977,7 @@ describe('Execution Handler', () => {
       };
 
       const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.runActiveAlerts(generateAlert({ id: 1 }));
+      await executionHandler.run(generateAlert({ id: 1 }));
 
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -1011,7 +1007,7 @@ describe('Execution Handler', () => {
       };
 
       const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.runActiveAlerts(generateAlert({ id: 1 }));
+      await executionHandler.run(generateAlert({ id: 1 }));
 
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [

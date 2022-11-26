@@ -451,8 +451,7 @@ export class TaskRunner<
         );
         this.countUsageOfActionExecutionAfterRuleCancellation();
       } else {
-        await executionHandler.runActiveAlerts(activeAlerts);
-        await executionHandler.runRecoveredAlerts(recoveredAlerts);
+        await executionHandler.run({ ...activeAlerts, ...recoveredAlerts });
       }
     });
 

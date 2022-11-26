@@ -114,16 +114,16 @@ export class ExecutionHandler<
     this.mutedAlertIdsSet = new Set(rule.mutedInstanceIds);
   }
 
-  public async runActiveAlerts(alerts: Record<string, Alert<State, Context, ActionGroupIds>>) {
-    return this.run(this.generateExecutables(alerts));
-  }
-  public async runRecoveredAlerts(
-    alerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>
+  public async run(
+    alerts: Record<
+      string,
+      Alert<State, Context, ActionGroupIds> | Alert<State, Context, RecoveryActionGroupId>
+    >
   ) {
-    return this.run(this.generateExecutables(alerts));
+    return this.runExecutables(this.generateExecutables(alerts));
   }
 
-  private async run(
+  private async runExecutables(
     executables: Array<Executable<ActionGroupIds, RecoveryActionGroupId>>
   ): Promise<void> {
     const {
@@ -273,6 +273,7 @@ export class ExecutionHandler<
             this.isExecutableActiveAlert({ alertId, alert, action })
           ) {
             executables.push({
+              summary: false,
               action,
               alert,
               alertId,
