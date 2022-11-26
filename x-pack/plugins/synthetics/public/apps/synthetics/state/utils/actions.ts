@@ -22,7 +22,7 @@ function prepareForTimestamp<Payload>(payload: Payload) {
   return {
     payload,
     meta: {
-      timestamp: Date.now(),
+      dispatchedAt: Date.now(),
     },
   };
 }

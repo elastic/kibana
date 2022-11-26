@@ -81,7 +81,7 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
     })
 
     .addCase(getMonitorAction.get, (state, action) => {
-      state.syntheticsMonitorDispatchedAt = action.meta.timestamp;
+      state.syntheticsMonitorDispatchedAt = action.meta.dispatchedAt;
       state.syntheticsMonitorLoading = true;
     })
     .addCase(getMonitorAction.success, (state, action) => {
