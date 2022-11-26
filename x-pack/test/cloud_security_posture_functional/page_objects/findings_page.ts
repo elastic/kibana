@@ -16,6 +16,21 @@ const FINDINGS_TABLE_TESTID = 'findings_table';
 const getFilterValueSelector = (columnIndex: number) =>
   `tbody tr td:nth-child(${columnIndex + 1}) div[data-test-subj="filter_cell_value"]`;
 
+const getFilterCellSelector = (rowIndex: number, columnIndex: number) =>
+  `tbody tr:nth-child(${rowIndex + 1}) td:nth-child(${columnIndex + 1})`;
+
+const getFilterAddSelector = (rowIndex: number, columnIndex: number) =>
+  `${getFilterCellSelector(
+    rowIndex,
+    columnIndex
+  )} button[data-test-subj="findings_table_cell_add_filter"]`;
+
+const getFilterAddNegatedSelector = (rowIndex: number, columnIndex: number) =>
+  `${getFilterCellSelector(
+    rowIndex,
+    columnIndex
+  )} button[data-test-subj="findings_table_cell_add_negated_filter"]`;
+
 // Defined in Security Solution plugin
 const SECURITY_SOLUTION_APP_NAME = 'securitySolution';
 
@@ -66,6 +81,30 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
         number,
         Awaited<ReturnType<typeof testSubjects.find>>
       ];
+    },
+
+    addFilter: async (columnName: string, cellValue: string, negated = false) => {
+      const tableElement = await table.getTableElement();
+      const [columnIndex] = await table.getColumnIndex(columnName);
+      const values = await table.getFilterColumnValues(columnName);
+      const rowIndex = values.findIndex((value) => value === cellValue);
+      const filterElement = await tableElement.findByCssSelector(
+        negated
+          ? getFilterAddNegatedSelector(rowIndex, columnIndex)
+          : getFilterAddSelector(rowIndex, columnIndex)
+      );
+
+      await filterElement.click();
+    },
+
+    columnCellExistsOrFail: async (columnName: string, cellValue: string) => {
+      const values = await table.getFilterColumnValues(columnName);
+      expect(values.some((i) => i === cellValue)).to.be(true);
+    },
+
+    columnCellMissingOrFail: async (columnName: string, cellValue: string) => {
+      const values = await table.getFilterColumnValues(columnName);
+      expect(values.every((i) => i !== cellValue)).to.be(true);
     },
 
     getFilterColumnValues: async (columnName: string) => {

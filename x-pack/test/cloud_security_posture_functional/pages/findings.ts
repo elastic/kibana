@@ -7,9 +7,15 @@
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
+const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
+const STATUS_API_PATH = '/internal/cloud_security_posture/status?check=init';
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const queryBar = getService('queryBar');
+  const filterBar = getService('filterBar');
   const pageObjects = getPageObjects(['common', 'findings']);
+
   const FINDINGS_SIZE = 2;
   const findingsMock = Array.from({ length: FINDINGS_SIZE }, (_, id) => {
     return {
@@ -23,6 +29,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       },
     };
   });
+
+  const firstRuleName = findingsMock[0].rule.name;
+  const secondRuleName = findingsMock[1].rule.name;
 
   describe('Findings Page', () => {
     before(async () => {
@@ -41,6 +50,42 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('Sorts by resource name', async () => {
         await pageObjects.findings.table.toggleColumnSortOrFail('Resource Name', 'desc');
+      });
+    });
+
+    describe('Search', () => {
+      it('add filter', async () => {
+        await filterBar.addFilter('rule.name', 'is', firstRuleName);
+        await pageObjects.findings.table.columnCellExistsOrFail('Rule', firstRuleName);
+        await pageObjects.findings.table.columnCellMissingOrFail('Rule', secondRuleName);
+      });
+
+      it('remove filter', async () => {
+        await filterBar.removeFilter('rule.name');
+        await pageObjects.findings.table.columnCellExistsOrFail('Rule', firstRuleName);
+        await pageObjects.findings.table.columnCellExistsOrFail('Rule', secondRuleName);
+      });
+
+      it('add cell value filter', async () => {
+        await pageObjects.findings.table.addFilter('Rule', firstRuleName, false);
+        await filterBar.hasFilter('rule.name', firstRuleName);
+        await pageObjects.findings.table.columnCellExistsOrFail('Rule', firstRuleName);
+        await pageObjects.findings.table.columnCellMissingOrFail('Rule', secondRuleName);
+      });
+
+      it('add negated cell value filter', async () => {
+        await pageObjects.findings.table.addFilter('Rule', firstRuleName, true);
+        await filterBar.hasFilter('rule.name', firstRuleName, true, false, true);
+        await pageObjects.findings.table.columnCellExistsOrFail('Rule', secondRuleName);
+        await pageObjects.findings.table.columnCellMissingOrFail('Rule', firstRuleName);
+
+        await filterBar.removeFilter('rule.name');
+      });
+
+      it('set search query', async () => {
+        await queryBar.setQuery(firstRuleName);
+        await queryBar.submitQuery();
+        await pageObjects.findings.table.columnCellExistsOrFail('Rule', firstRuleName);
       });
     });
   });
