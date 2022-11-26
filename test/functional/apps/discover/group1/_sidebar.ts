@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.clickFieldListItem('extension');
         expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be(allTermsResult);
 
-        await filterBar.addFilter('extension', 'is', 'jpg');
+        await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'jpg' });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const onlyJpgResult = 'jpg\n100%';
