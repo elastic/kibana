@@ -22,7 +22,6 @@ export default function upgradeAssistantFunctionalTests({
 
   describe('Deprecation pages', function () {
     this.tags('skipFirefox');
-    this.timeout(30000);
 
     before(async () => {
       await security.testUser.setRoles(['superuser']);
