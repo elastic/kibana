@@ -140,6 +140,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       licenseManagement: `${ENTERPRISE_SEARCH_DOCS}license-management.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
+      syncRules: `${ENTERPRISE_SEARCH_DOCS}sync-rules.html`,
       troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
     },
@@ -381,6 +382,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       exceptions: {
         value_lists: `${SECURITY_SOLUTION_DOCS}detections-ui-exceptions.html#manage-value-lists`,
       },
+      privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,

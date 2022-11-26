@@ -315,7 +315,7 @@ export function DimensionEditor(
   }
 
   const firstNonCollapsedColumnId = currentLayer.primaryGroups.find(
-    (columnId) => !isCollapsed(columnId, currentLayer)
+    (id) => !isCollapsed(id, currentLayer)
   );
 
   return (
@@ -346,25 +346,29 @@ export function DimensionDataExtraEditor(
 
   return (
     <>
-      <CollapseSetting
-        value={currentLayer?.collapseFns?.[props.accessor] || ''}
-        onChange={(collapseFn) => {
-          props.setState({
-            ...props.state,
-            layers: props.state.layers.map((layer) =>
-              layer.layerId !== props.layerId
-                ? layer
-                : {
-                    ...layer,
-                    collapseFns: {
-                      ...layer.collapseFns,
-                      [props.accessor]: collapseFn,
-                    },
-                  }
-            ),
-          });
-        }}
-      />
+      {[...currentLayer.primaryGroups, ...(currentLayer.secondaryGroups ?? [])].includes(
+        props.accessor
+      ) && (
+        <CollapseSetting
+          value={currentLayer?.collapseFns?.[props.accessor] || ''}
+          onChange={(collapseFn) => {
+            props.setState({
+              ...props.state,
+              layers: props.state.layers.map((layer) =>
+                layer.layerId !== props.layerId
+                  ? layer
+                  : {
+                      ...layer,
+                      collapseFns: {
+                        ...layer.collapseFns,
+                        [props.accessor]: collapseFn,
+                      },
+                    }
+              ),
+            });
+          }}
+        />
+      )}
     </>
   );
 }

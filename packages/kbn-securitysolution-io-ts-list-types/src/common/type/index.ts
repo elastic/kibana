@@ -36,6 +36,8 @@ export const type = t.keyof({
   shape: null,
   short: null,
   text: null,
+  version: null,
+  version_range: null,
 });
 
 export const typeOrUndefined = t.union([type, t.undefined]);

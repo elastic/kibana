@@ -27,7 +27,6 @@ export interface PackSOQueryFormData {
   platform?: string | undefined;
   version?: string | undefined;
   ecs_mapping?: ECSMapping;
-  is_global?: boolean;
   shards: Shard;
 }
 

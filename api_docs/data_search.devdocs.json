@@ -826,6 +826,9 @@
             "tags": [],
             "label": "reason",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/data/public/search/errors/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -31391,7 +31394,7 @@
         "label": "AggGroupName",
         "description": [],
         "signature": [
-          "\"none\" | \"buckets\" | \"metrics\""
+          "\"none\" | \"metrics\" | \"buckets\""
         ],
         "path": "src/plugins/data/common/search/aggs/agg_groups.ts",
         "deprecated": false,

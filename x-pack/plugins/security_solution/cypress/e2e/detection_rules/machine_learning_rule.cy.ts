@@ -26,7 +26,7 @@ import {
   FALSE_POSITIVES_DETAILS,
   removeExternalLinkText,
   MACHINE_LEARNING_JOB_ID,
-  MACHINE_LEARNING_JOB_STATUS,
+  // MACHINE_LEARNING_JOB_STATUS,
   MITRE_ATTACK_DETAILS,
   REFERENCE_URLS_DETAILS,
   RISK_SCORE_DETAILS,
@@ -107,7 +107,11 @@ describe('Detection rules, machine learning', () => {
       );
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Machine Learning');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
-      cy.get(MACHINE_LEARNING_JOB_STATUS).should('have.text', 'StoppedStopped');
+      // With the #1912 ML rule improvement changes we enable jobs on rule creation.
+      // Though, in cypress jobs enabling does not work reliably and job can be started or stopped.
+      // Thus, we disable next check till we fix the issue with enabling jobs in cypress.
+      // Relevant ticket: https://github.com/elastic/security-team/issues/5389
+      // cy.get(MACHINE_LEARNING_JOB_STATUS).should('have.text', 'StoppedStopped');
       cy.get(MACHINE_LEARNING_JOB_ID).should(
         'have.text',
         getMachineLearningRule().machineLearningJobs.join('')

@@ -17,6 +17,7 @@ import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 export const typeMatch = (type: Type, esType: string): boolean => {
   return (
     type === esType ||
+    (type === 'version_range' && esType === 'version') ||
     (type === 'ip_range' && esType === 'ip') ||
     (type === 'date_range' && esType === 'date') ||
     (type === 'double_range' && esType === 'double') ||

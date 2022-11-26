@@ -70,6 +70,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     overlays,
     savedObjectsTagging,
     settings: { uiSettings },
+    http,
   } = pluginServices.getServices();
 
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
@@ -172,6 +173,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
                 core: {
                   application: application as TableListViewApplicationService,
                   notifications,
+                  http,
                   overlays,
                 },
                 toMountPoint,

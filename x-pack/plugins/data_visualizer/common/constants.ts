@@ -47,6 +47,7 @@ export const SUPPORTED_FIELD_TYPES = {
   STRING: 'string',
   TEXT: 'text',
   VERSION: 'version',
+  VERSION_RANGE: 'version_range',
   UNKNOWN: 'unknown',
 } as const;
 
@@ -171,6 +172,10 @@ export function getFieldTypeDescription(type: string, docLinks: DocLinksStart) {
             ) +
             '</a>',
         },
+      });
+    case SUPPORTED_FIELD_TYPES.VERSION_RANGE:
+      return i18n.translate('xpack.dataVisualizer.index.fieldNameDescription.versionRangeField', {
+        defaultMessage: 'Range of version values',
       });
     default:
       return UNKNOWN_FIELD_TYPE_DESC;

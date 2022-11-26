@@ -38,7 +38,7 @@ const defaultState: AlertSearchBarContainerState = {
   rangeFrom: 'now-15m',
   rangeTo: 'now',
   kuery: '',
-  status: ALL_ALERTS.status as AlertStatus,
+  status: ALL_ALERTS.status,
 };
 
 const transitions: AlertSearchBarStateTransitions = {

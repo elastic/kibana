@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import isString from 'lodash/isString';
 import get from 'lodash/fp/get';
 import type { Filter } from '@kbn/es-query';
 import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -27,6 +28,7 @@ export const buildThreatMappingFilter = ({
   chunkSize,
   entryKey = 'value',
 }: BuildThreatMappingFilterOptions): Filter => {
+  console.log('currentThreatList', JSON.stringify(threatList, null, 2));
   const computedChunkSize = chunkSize ?? MAX_CHUNK_SIZE;
   if (computedChunkSize > 1024) {
     throw new TypeError('chunk sizes cannot exceed 1024 in size');
@@ -77,28 +79,47 @@ export const createInnerAndClauses = ({
 }: CreateInnerAndClausesOptions): BooleanFilter[] => {
   return threatMappingEntries.reduce<BooleanFilter[]>((accum, threatMappingEntry) => {
     const value = get(threatMappingEntry[entryKey], threatListItem.fields);
+    console.log('value', value, entryKey);
     if (value != null && value.length === 1) {
-      // These values could be potentially 10k+ large so mutating the array intentionally
-      accum.push({
-        bool: {
-          should: [
-            {
-              match: {
-                [threatMappingEntry[entryKey === 'field' ? 'value' : 'field']]: {
-                  query: value[0],
-                  _name: encodeThreatMatchNamedQuery({
-                    id: threatListItem._id,
-                    index: threatListItem._index,
-                    field: threatMappingEntry.field,
-                    value: threatMappingEntry.value,
-                  }),
+      if (isString(value[0]) || entryKey === 'field') {
+        // These values could be potentially 10k+ large so mutating the array intentionally
+        accum.push({
+          bool: {
+            should: [
+              {
+                match: {
+                  [threatMappingEntry[entryKey === 'field' ? 'value' : 'field']]: {
+                    query: value[0],
+                    _name: encodeThreatMatchNamedQuery({
+                      id: threatListItem._id,
+                      index: threatListItem._index,
+                      field: threatMappingEntry.field,
+                      value: threatMappingEntry.value,
+                    }),
+                  },
                 },
               },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      });
+            ],
+            minimum_should_match: 1,
+          },
+        });
+      } else {
+        accum.push({
+          bool: {
+            should: [
+              {
+                range: {
+                  [threatMappingEntry.field]: get(
+                    threatMappingEntry[entryKey],
+                    threatListItem._source
+                  ),
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        });
+      }
     }
     return accum;
   }, []);

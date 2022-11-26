@@ -44,6 +44,7 @@ import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
 import { fetchExistingAlerts } from './fetch_existing_alerts';
 import { getCommonAlertFields } from './get_common_alert_fields';
+import { fetchAlertByAlertUUID } from './fetch_alert_by_uuid';
 
 type ImplicitTechnicalFieldName = CommonAlertFieldNameLatest | CommonAlertIdFieldNameLatest;
 
@@ -70,7 +71,8 @@ export interface LifecycleAlertServices<
 > {
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
   getAlertStartedDate: (alertInstanceId: string) => string | null;
-  getAlertUuid: (alertInstanceId: string) => string | null;
+  getAlertUuid: (alertInstanceId: string) => string;
+  getAlertByAlertUuid: (alertUuid: string) => { [x: string]: any } | null;
 }
 
 export type LifecycleRuleExecutor<
@@ -174,13 +176,21 @@ export const createLifecycleExecutor =
       },
       getAlertStartedDate: (alertId: string) => state.trackedAlerts[alertId]?.started ?? null,
       getAlertUuid: (alertId: string) => {
-        if (!state.trackedAlerts[alertId]) {
-          const alertUuid = v4();
-          newAlertUuids[alertId] = alertUuid;
-          return alertUuid;
+        let existingUuid = state.trackedAlerts[alertId]?.alertUuid || newAlertUuids[alertId];
+
+        if (!existingUuid) {
+          existingUuid = v4();
+          newAlertUuids[alertId] = existingUuid;
         }
 
-        return state.trackedAlerts[alertId].alertUuid;
+        return existingUuid;
+      },
+      getAlertByAlertUuid: async (alertUuid: string) => {
+        try {
+          return await fetchAlertByAlertUUID(ruleDataClient, alertUuid);
+        } catch (err) {
+          return null;
+        }
       },
     };
 
@@ -242,7 +252,7 @@ export const createLifecycleExecutor =
         const { alertUuid, started } = !isNew
           ? state.trackedAlerts[alertId]
           : {
-              alertUuid: newAlertUuids[alertId] || v4(),
+              alertUuid: lifecycleAlertServices.getAlertUuid(alertId),
               started: commonRuleFields[TIMESTAMP],
             };
 

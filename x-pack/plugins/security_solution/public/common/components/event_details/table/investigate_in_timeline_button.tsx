@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 
 import { sourcererSelectors } from '../../../store';
 import { InputsModelId } from '../../../store/inputs/constants';
+import type { TimeRange } from '../../../store/inputs/model';
 import { inputsActions } from '../../../store/inputs';
 import { updateProviders, setFilters } from '../../../../timelines/store/timeline/actions';
 import { sourcererActions } from '../../../store/actions';
@@ -26,7 +27,10 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
   asEmptyButton: boolean;
   dataProviders: DataProvider[] | null;
   filters?: Filter[] | null;
-}> = ({ asEmptyButton, children, dataProviders, filters, ...rest }) => {
+  timeRange?: TimeRange;
+  keepDataView?: boolean;
+  isDisabled?: boolean;
+}> = ({ asEmptyButton, children, dataProviders, filters, timeRange, keepDataView, ...rest }) => {
   const dispatch = useDispatch();
 
   const getDataViewsSelector = useMemo(
@@ -37,15 +41,24 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
     getDataViewsSelector(state)
   );
 
+  const hasTemplateProviders =
+    dataProviders && dataProviders.find((provider) => provider.type === 'template');
+
   const clearTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: TimelineType.default,
+    timelineType: hasTemplateProviders ? TimelineType.template : TimelineType.default,
   });
 
-  const configureAndOpenTimeline = React.useCallback(() => {
+  const configureAndOpenTimeline = useCallback(() => {
     if (dataProviders || filters) {
       // Reset the current timeline
-      clearTimeline();
+      if (timeRange) {
+        clearTimeline({
+          timeRange,
+        });
+      } else {
+        clearTimeline();
+      }
       if (dataProviders) {
         // Update the timeline's providers to match the current prevalence field query
         dispatch(
@@ -66,17 +79,28 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
       }
       // Only show detection alerts
       // (This is required so the timeline event count matches the prevalence count)
-      dispatch(
-        sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.timeline,
-          selectedDataViewId: defaultDataView.id,
-          selectedPatterns: [signalIndexName || ''],
-        })
-      );
+      if (!keepDataView) {
+        dispatch(
+          sourcererActions.setSelectedDataView({
+            id: SourcererScopeName.timeline,
+            selectedDataViewId: defaultDataView.id,
+            selectedPatterns: [signalIndexName || ''],
+          })
+        );
+      }
       // Unlock the time range from the global time range
       dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
     }
-  }, [dataProviders, clearTimeline, dispatch, defaultDataView.id, signalIndexName, filters]);
+  }, [
+    dataProviders,
+    clearTimeline,
+    dispatch,
+    defaultDataView.id,
+    signalIndexName,
+    filters,
+    timeRange,
+    keepDataView,
+  ]);
 
   return asEmptyButton ? (
     <EuiButtonEmpty

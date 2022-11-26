@@ -20,6 +20,7 @@ export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
     | 'geo_shape'
     | 'ip'
     | 'ip_range'
+    | 'version_range'
     | 'match_only_text'
     | 'murmur3'
     | 'number'
@@ -62,6 +63,7 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   counter: { iconType: 'tokenMetricCounter' },
   nested: { iconType: 'tokenNested' },
   version: { iconType: 'tokenTag' },
+  version_range: { iconType: 'tokenTag' },
 };
 
 /**

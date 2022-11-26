@@ -54,6 +54,7 @@ const iconMap: Record<string, string> = {
   text: 'tokenString',
   token_count: 'tokenTokenCount',
   unsigned_long: 'tokenNumber',
+  version_range: 'tokenTag',
 };
 const defaultToken = 'questionInCircle';
 

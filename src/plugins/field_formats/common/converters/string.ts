@@ -84,6 +84,7 @@ export class StringFormat extends FieldFormat {
     KBN_FIELD_TYPES.MURMUR3,
     KBN_FIELD_TYPES.UNKNOWN,
     KBN_FIELD_TYPES.CONFLICT,
+    KBN_FIELD_TYPES.VERSION_RANGE,
   ];
   static transformOptions = TRANSFORM_OPTIONS;
 

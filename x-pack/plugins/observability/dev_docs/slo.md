@@ -57,7 +57,7 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "slo.apm.transaction_error_rate",
+		"type": "sli.apm.transaction_error_rate",
 		"params": {
 			"environment": "production",
 			"service": "o11y-app",
@@ -91,7 +91,7 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "slo.apm.transaction_error_rate",
+		"type": "sli.apm.transaction_error_rate",
 		"params": {
 			"environment": "production",
 			"service": "o11y-app",
@@ -127,7 +127,7 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "slo.apm.transaction_error_rate",
+		"type": "sli.apm.transaction_error_rate",
 		"params": {
             "environment": "production",
 			"service": "o11y-app",
@@ -165,7 +165,7 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "slo.apm.transaction_duration",
+		"type": "sli.apm.transaction_duration",
 		"params": {
 			"environment": "production",
 			"service": "o11y-app",
@@ -199,7 +199,7 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "slo.apm.transaction_duration",
+		"type": "sli.apm.transaction_duration",
 		"params": {
 			"environment": "production",
 			"service": "o11y-app",
@@ -236,7 +236,7 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "slo.apm.transaction_duration",
+		"type": "sli.apm.transaction_duration",
 		"params": {
 			"environment": "production",
 			"service": "o11y-app",
@@ -278,7 +278,7 @@ curl --request POST \
 	"name": "My SLO Name",
 	"description": "My SLO Description",
 	"indicator": {
-		"type": "slo.kql.custom",
+		"type": "sli.kql.custom",
 		"params": {
 			"index": "high-cardinality-data-fake_logs*",
 			"numerator": "latency < 300",

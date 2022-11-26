@@ -299,13 +299,13 @@
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
-            "id": "def-common.Dimensions.metric",
-            "type": "CompoundType",
+            "id": "def-common.Dimensions.metrics",
+            "type": "Array",
             "tags": [],
-            "label": "metric",
+            "label": "metrics",
             "description": [],
             "signature": [
-              "string | ",
+              "(string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
@@ -313,7 +313,7 @@
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
               },
-              " | undefined"
+              ")[]"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": false,
@@ -542,7 +542,7 @@
             "section": "def-common.MosaicVisConfig",
             "text": "MosaicVisConfig"
           },
-          " extends VisCommonConfig"
+          " extends Omit<VisCommonConfig, \"metrics\" | \"metricsToLabels\">"
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,
@@ -550,21 +550,20 @@
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
-            "id": "def-common.MosaicVisConfig.buckets",
-            "type": "Array",
+            "id": "def-common.MosaicVisConfig.metric",
+            "type": "CompoundType",
             "tags": [],
-            "label": "buckets",
+            "label": "metric",
             "description": [],
             "signature": [
-              "(string | ",
+              "string | ",
               {
                 "pluginId": "visualizations",
                 "scope": "common",
                 "docId": "kibVisualizationsPluginApi",
                 "section": "def-common.ExpressionValueVisDimension",
                 "text": "ExpressionValueVisDimension"
-              },
-              ")[] | undefined"
+              }
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": false,
@@ -620,6 +619,20 @@
                 "section": "def-common.Dimensions",
                 "text": "Dimensions"
               }
+            ],
+            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionPartitionVis",
+            "id": "def-common.PartitionVisParams.metricsToLabels",
+            "type": "Object",
+            "tags": [],
+            "label": "metricsToLabels",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string; }"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": false,
@@ -797,21 +810,13 @@
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
-            "id": "def-common.PieVisConfig.buckets",
-            "type": "Array",
+            "id": "def-common.PieVisConfig.partitionByColumn",
+            "type": "CompoundType",
             "tags": [],
-            "label": "buckets",
+            "label": "partitionByColumn",
             "description": [],
             "signature": [
-              "(string | ",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.ExpressionValueVisDimension",
-                "text": "ExpressionValueVisDimension"
-              },
-              ")[] | undefined"
+              "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
             "deprecated": false,
@@ -928,28 +933,6 @@
         "children": [
           {
             "parentPluginId": "expressionPartitionVis",
-            "id": "def-common.TreemapVisConfig.buckets",
-            "type": "Array",
-            "tags": [],
-            "label": "buckets",
-            "description": [],
-            "signature": [
-              "(string | ",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.ExpressionValueVisDimension",
-                "text": "ExpressionValueVisDimension"
-              },
-              ")[] | undefined"
-            ],
-            "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "expressionPartitionVis",
             "id": "def-common.TreemapVisConfig.nestedLegend",
             "type": "boolean",
             "tags": [],
@@ -977,7 +960,7 @@
             "section": "def-common.WaffleVisConfig",
             "text": "WaffleVisConfig"
           },
-          " extends VisCommonConfig"
+          " extends Omit<VisCommonConfig, \"buckets\">"
         ],
         "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_renderers.ts",
         "deprecated": false,

@@ -91,7 +91,32 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         }),
         metricStateOptions: {
           titlePosition: 'bottom',
+          textAlign: 'center',
         },
+      },
+      {
+        id: 'monitor_total_runs',
+        label: i18n.translate('xpack.observability.expView.totalRuns', {
+          defaultMessage: 'Total Runs',
+        }),
+        metricStateOptions: {
+          titlePosition: 'bottom',
+        },
+        columnType: FORMULA_COLUMN,
+        formula: 'unique_count(monitor.check_group)',
+        format: 'number',
+      },
+      {
+        id: 'monitor_complete',
+        label: i18n.translate('xpack.observability.expView.complete', {
+          defaultMessage: 'Complete',
+        }),
+        metricStateOptions: {
+          titlePosition: 'bottom',
+        },
+        columnType: FORMULA_COLUMN,
+        formula: 'unique_count(monitor.check_group, kql=\'monitor.status: "up"\')',
+        format: 'number',
       },
       {
         id: 'monitor_errors',
@@ -104,7 +129,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           palette: getColorPalette('danger'),
         },
         columnType: FORMULA_COLUMN,
-        formula: 'unique_count(state.id, kql=\'monitor.status: "down"\')',
+        formula: 'unique_count(monitor.check_group, kql=\'monitor.status: "down"\')',
         format: 'number',
       },
       {

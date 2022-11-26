@@ -59,6 +59,7 @@ class ValueInputTypeUI extends Component<Props> {
         break;
       case 'number':
       case 'number_range':
+      case 'version_range':
         inputElement = (
           <EuiFieldNumber
             compressed={this.props.compressed}

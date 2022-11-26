@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { InternalFieldErrors } from 'react-hook-form';
 import { useFieldArray, useForm, useFormContext } from 'react-hook-form';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSpacer } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, last, reject } from 'lodash';
 import { useAgentPolicies } from '../../../agent_policies';
@@ -30,7 +29,7 @@ interface PackShardsFieldProps {
   options: Array<EuiComboBoxOptionOption<string>>;
 }
 
-export const PackShardsField = React.memo(({ options }: PackShardsFieldProps) => {
+const PackShardsFieldComponent = ({ options }: PackShardsFieldProps) => {
   const {
     watch: watchRoot,
     register: registerRoot,
@@ -41,15 +40,26 @@ export const PackShardsField = React.memo(({ options }: PackShardsFieldProps) =>
 
   const rootShards = watchRoot('shards');
 
+  const initialShardsArray = useMemo(() => {
+    const initialConvertedShards = convertShardsToArray(rootShards, agentPoliciesById);
+    if (!isEmpty(initialConvertedShards)) {
+      if (initialConvertedShards[initialConvertedShards.length - 1].policy.key) {
+        return [...initialConvertedShards, defaultShardData];
+      }
+
+      return initialConvertedShards;
+    }
+
+    return [defaultShardData];
+  }, [agentPoliciesById, rootShards]);
+
   const { control, watch, getFieldState, formState, resetField, setValue } = useForm<{
     shardsArray: ShardsArray;
   }>({
     mode: 'all',
     shouldUnregister: true,
     defaultValues: {
-      shardsArray: !isEmpty(convertShardsToArray(rootShards, agentPoliciesById))
-        ? [...convertShardsToArray(rootShards, agentPoliciesById), defaultShardData]
-        : [defaultShardData],
+      shardsArray: initialShardsArray,
     },
   });
   const { fields, remove, append } = useFieldArray({
@@ -98,24 +108,6 @@ export const PackShardsField = React.memo(({ options }: PackShardsFieldProps) =>
 
   return (
     <>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h5>
-              <FormattedMessage
-                id="xpack.osquery.pack.form.shardsSection.title"
-                defaultMessage="Shards"
-              />
-            </h5>
-          </EuiTitle>
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.osquery.pack.form.shardsSection.description"
-              defaultMessage="Use the fields to set shards per policy."
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiSpacer size="s" />
 
       {fields.map((item, index, array) => (
@@ -127,8 +119,11 @@ export const PackShardsField = React.memo(({ options }: PackShardsFieldProps) =>
             control={control}
             options={options}
           />
+          <EuiSpacer size="xs" />
         </div>
       ))}
     </>
   );
-});
+};
+
+export const PackShardsField = React.memo(PackShardsFieldComponent);

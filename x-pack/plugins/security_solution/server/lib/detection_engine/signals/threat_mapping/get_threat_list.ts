@@ -66,6 +66,8 @@ export const getThreatList = async ({
         listItemIndex: listClient.getListItemIndex(),
       }),
     },
+    // Because version_range stores the version as hash
+    _source: true,
     track_total_hits: false,
     size: calculatedPerPage,
     pit: { id: pitId },

@@ -24,7 +24,7 @@ import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 
 import styled from 'styled-components';
 import { PackShardsField } from './shards/pack_shards_field';
-import { useKibana, useRouterNavigate } from '../../common/lib/kibana';
+import { useRouterNavigate } from '../../common/lib/kibana';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
 import { QueriesField } from './queries_field';
 import { ConfirmDeployAgentPolicyModal } from './confirmation_modal';
@@ -58,20 +58,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   editMode = false,
   isReadOnly = false,
 }) => {
-  const {
-    services: { spaces },
-  } = useKibana();
-
-  const [currentSpace, setSpace] = useState<string | null>(null);
-  useEffect(() => {
-    async function getSpaces() {
-      const response = await spaces.getActiveSpace();
-      setSpace(response.id);
-    }
-
-    getSpaces();
-  }, [spaces]);
-
   const [shardsToggleState, setShardsToggleState] =
     useState<EuiAccordionProps['forceState']>('closed');
   const handleToggle = useCallback((isOpen) => {
@@ -93,12 +79,16 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     withRedirect: true,
   });
 
-  const deserializer = (payload: PackItem) => ({
-    ...payload,
-    policy_ids: payload.policy_ids ?? [],
-    queries: convertPackQueriesToSO(payload.queries),
-    shards: omit(payload.shards, '*') ?? {},
-  });
+  const deserializer = (payload: PackItem) => {
+    const defaultPolicyIds = filter(payload.policy_ids, (policyId) => !payload.shards?.[policyId]);
+
+    return {
+      ...payload,
+      policy_ids: defaultPolicyIds ?? [],
+      queries: convertPackQueriesToSO(payload.queries),
+      shards: omit(payload.shards, '*') ?? {},
+    };
+  };
 
   const hooksForm = useHookForm({
     defaultValues: defaultValue
@@ -187,7 +177,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   );
   const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
 
-  const isDefaultNamespace = useMemo(() => currentSpace === 'default', [currentSpace]);
   const agentCount = useMemo(
     () =>
       reduce(
@@ -252,20 +241,19 @@ const PackFormComponent: React.FC<PackFormProps> = ({
             <NameField euiFieldProps={euiFieldProps} />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
 
         <EuiFlexGroup>
           <EuiFlexItem>
             <DescriptionField euiFieldProps={euiFieldProps} />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
 
         <EuiFlexGroup>
-          <PackTypeSelectable
-            packType={packType}
-            setPackType={changePackType}
-            isGlobalDisabled={!isDefaultNamespace}
-          />
+          <PackTypeSelectable packType={packType} setPackType={changePackType} />
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
 
         {packType === 'policy' && (
           <>
@@ -274,6 +262,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                 <PolicyIdComboBoxField options={availableOptions} />
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiSpacer size="m" />
 
             <EuiFlexGroup>
               <EuiFlexItem>
@@ -288,9 +277,11 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                 </StyledEuiAccordion>
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiSpacer size="m" />
           </>
         )}
-        <EuiSpacer size="xxl" />
+
+        <EuiSpacer size="xl" />
 
         <EuiHorizontalRule />
 

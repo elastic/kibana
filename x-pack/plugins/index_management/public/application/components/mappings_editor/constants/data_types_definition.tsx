@@ -386,6 +386,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
         'float_range',
         'integer_range',
         'ip_range',
+        'version_range',
         'long_range',
       ],
     },
@@ -603,6 +604,20 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.dataType.ipRangeLongDescription"
           defaultMessage="IP range fields accept an IPv4 or IPV6 address."
+        />
+      </p>
+    ),
+  },
+  version_range: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.versionRangeDescription', {
+      defaultMessage: 'Version range',
+    }),
+    value: 'version_range',
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.ipRangeLongDescription"
+          defaultMessage="Version range fields accept a version range number."
         />
       </p>
     ),

@@ -14,11 +14,12 @@ import { useFilesContext } from '../context';
 import { UploadFile as Component } from './upload_file.component';
 import { createUploadState } from './upload_state';
 import { context } from './context';
+import type { FileJSON } from '../../../common';
 
 /**
- * An object representing an uploadded file
+ * An object representing an uploaded file
  */
-interface UploadedFile {
+interface UploadedFile<Meta = unknown> {
   /**
    * The ID that was generated for the uploaded file
    */
@@ -27,6 +28,10 @@ interface UploadedFile {
    * The kind of the file that was passed in to this component
    */
   kind: string;
+  /**
+   * Attributes of a file that represent a serialised version of the file.
+   */
+  fileJSON: FileJSON<Meta>;
 }
 
 /**
@@ -102,6 +107,10 @@ export interface Props<Kind extends string = string> {
    * @default false
    */
   multiple?: boolean;
+  /**
+   * Class name that is passed to the container element
+   */
+  className?: string;
 }
 
 /**
@@ -124,6 +133,7 @@ export const UploadFile = <Kind extends string = string>({
   initialPromptText,
   immediate = false,
   allowRepeatedUploads = false,
+  className,
 }: Props<Kind>): ReturnType<FunctionComponent> => {
   const { registry, client } = useFilesContext();
   const ref = useRef<null | EuiFilePicker>(null);
@@ -170,6 +180,7 @@ export const UploadFile = <Kind extends string = string>({
         fullWidth={fullWidth}
         initialFilePromptText={initialPromptText}
         multiple={multiple}
+        className={className}
       />
     </context.Provider>
   );

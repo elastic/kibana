@@ -110,6 +110,10 @@ export function getFieldTypeDescription(type: string, docLinks: DocLinksStart) {
             '</a>',
         },
       });
+    case KNOWN_FIELD_TYPES.VERSION_RANGE:
+      return i18n.translate('discover.fieldNameDescription.versionRangeField', {
+        defaultMessage: 'Range of versions',
+      });
     default:
       // If you see a typescript error here, that's a sign that there are missing switch cases ^^
       const _exhaustiveCheck: never = knownType;

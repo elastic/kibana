@@ -53,7 +53,10 @@ export interface DashboardSavedObjectService {
   ) => Promise<SaveDashboardReturn>;
   findDashboards: {
     findSavedObjects: (
-      props: Pick<FindDashboardSavedObjectsArgs, 'hasReference' | 'search' | 'size'>
+      props: Pick<
+        FindDashboardSavedObjectsArgs,
+        'hasReference' | 'hasNoReference' | 'search' | 'size'
+      >
     ) => Promise<FindDashboardSavedObjectsResponse>;
     findByIds: (ids: string[]) => Promise<FindDashboardBySavedObjectIdsResult[]>;
     findByTitle: (title: string) => Promise<{ id: string } | undefined>;

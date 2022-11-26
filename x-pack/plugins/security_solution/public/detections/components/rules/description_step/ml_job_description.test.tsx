@@ -8,14 +8,16 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { mockOpenedJob } from '../../../../common/components/ml_popover/api.mock';
+import { mockOpenedJob, mockSecurityJobs } from '../../../../common/components/ml_popover/api.mock';
 import { MlJobDescription, AuditIcon, JobStatusBadge } from './ml_job_description';
 
 jest.mock('../../../../common/lib/kibana');
 
 describe('MlJobDescription', () => {
   it('renders correctly', () => {
-    const wrapper = shallow(<MlJobDescription jobId={'myJobId'} />);
+    const wrapper = shallow(
+      <MlJobDescription job={mockSecurityJobs[0]} loading={false} refreshJob={() => {}} />
+    );
 
     expect(wrapper.find('[data-test-subj="machineLearningJobId"]')).toHaveLength(1);
   });

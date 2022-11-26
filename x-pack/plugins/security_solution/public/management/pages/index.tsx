@@ -84,6 +84,7 @@ export const ManagementContainer = memo(() => {
     canReadEventFilters,
     canReadActionsLogManagement,
     canReadEndpointList,
+    canReadHostIsolationExceptions,
   } = useUserPrivileges().endpointPrivileges;
 
   // Lets wait until we can verify permissions
@@ -113,9 +114,10 @@ export const ManagementContainer = memo(() => {
         component={EventFilterTelemetry}
         hasPrivilege={canReadEventFilters}
       />
-      <Route
+      <PrivilegedRoute
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         component={HostIsolationExceptionsTelemetry}
+        hasPrivilege={canReadHostIsolationExceptions}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_BLOCKLIST_PATH}

@@ -74,6 +74,8 @@ export class AnalyticsPluginA implements Plugin {
       setOptIn(optIn: boolean) {
         analytics.optIn({ global: { enabled: optIn } });
       },
+      getFlushAction: async () =>
+        firstValueFrom(this.actions$.pipe(filter(({ action }) => action === 'flush'))),
     };
 
     registerContextProvider({

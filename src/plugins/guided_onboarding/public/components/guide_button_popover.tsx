@@ -39,6 +39,7 @@ export const GuideButtonPopover = ({
       data-test-subj="manualCompletionPopover"
       button={button}
       isOpen={isPopoverShown}
+      repositionOnScroll
       closePopover={() => {
         /* do nothing, the popover is closed once the panel is opened */
       }}

@@ -25,7 +25,12 @@ import { LoadingObservability } from '../../../overview';
 import './styles.scss';
 import { renderRuleStats } from '../../components/rule_stats';
 import { ObservabilityAppServices } from '../../../../application/types';
-import { ALERTS_PER_PAGE, ALERTS_SEARCH_BAR_ID, ALERTS_TABLE_ID } from './constants';
+import {
+  ALERTS_PER_PAGE,
+  ALERTS_SEARCH_BAR_ID,
+  ALERTS_TABLE_ID,
+  URL_STORAGE_KEY,
+} from './constants';
 import { RuleStatsState } from './types';
 
 export function AlertsPage() {
@@ -132,6 +137,7 @@ export function AlertsPage() {
           <ObservabilityAlertSearchbarWithUrlSync
             appName={ALERTS_SEARCH_BAR_ID}
             setEsQuery={setEsQuery}
+            urlStorageKey={URL_STORAGE_KEY}
           />
         </EuiFlexItem>
 

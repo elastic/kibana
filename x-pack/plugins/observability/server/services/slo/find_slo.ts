@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SLO } from '../../types/models';
+import { SLO } from '../../domain/models';
 import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '../../types/rest_specs';
 import { Criteria, Paginated, Pagination, SLORepository } from './slo_repository';
 
