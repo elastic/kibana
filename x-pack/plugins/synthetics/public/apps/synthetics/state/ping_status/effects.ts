@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-import { PayloadAction } from '@reduxjs/toolkit';
 import { takeEvery } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import { fetchMonitorPingStatuses } from './api';
 
 import { getMonitorPingStatusesAction } from './actions';
-
-export function* fetchPingStatusesEffect2() {
-  yield takeEvery(
-    getMonitorPingStatusesAction.get,
-    function* (action: PayloadAction<any>): Generator {}
-  );
-}
 
 export function* fetchPingStatusesEffect() {
   yield takeEvery(
