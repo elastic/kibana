@@ -13,6 +13,7 @@ import { IHttpSerializedFetchError } from '../utils/http_error';
 
 import {
   getMonitorLastRunAction,
+  updateMonitorLastRunAction,
   getMonitorRecentPingsAction,
   setMonitorDetailsLocationAction,
   getMonitorAction,
@@ -63,6 +64,9 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
     .addCase(getMonitorLastRunAction.fail, (state, action) => {
       state.lastRun.loading = false;
       state.error = action.payload;
+    })
+    .addCase(updateMonitorLastRunAction, (state, action) => {
+      state.lastRun.data = action.payload.data;
     })
     .addCase(getMonitorRecentPingsAction.get, (state, action) => {
       state.pings.loading = true;
