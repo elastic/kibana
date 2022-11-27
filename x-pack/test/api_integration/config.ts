@@ -36,7 +36,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--xpack.uptime.service.devUrl=mockDevUrl',
         '--monitoring_collection.opentelemetry.metrics.prometheus.enabled=true',
         '--monitoring_collection.opentelemetry.metrics.prometheus.enabled=true',
-        '--xpack.fleet.developer.bundledPackageLocation=./x-pack/test/functional/fleet_bundled_packages',
+        `--xpack.fleet.developer.bundledPackageLocation=${__dirname}/fleet_bundled_packages`,
         `--xpack.fleet.packages.0.name=elasticsearch`,
         `--xpack.fleet.packages.0.version=1.2.0-preview1`,
       ],
