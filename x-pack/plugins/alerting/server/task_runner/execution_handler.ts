@@ -142,7 +142,6 @@ export class ExecutionHandler<
       for (const { action, alert } of executables) {
         const { actionTypeId } = action;
         const actionGroup = action.group as ActionGroupIds;
-        const state = alert.getScheduledActionOptions()?.state || {};
 
         ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
 
@@ -204,7 +203,7 @@ export class ExecutionHandler<
               alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
               context: alert.getContext(),
               actionId: action.id,
-              state,
+              state: alert.getScheduledActionOptions()?.state || {},
               kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
               alertParams: this.rule.params,
               actionParams: action.params,
@@ -281,10 +280,6 @@ export class ExecutionHandler<
   private getActionGroup(alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>) {
     return alert.getScheduledActionOptions()?.actionGroup || this.ruleType.recoveryActionGroup.id;
   }
-
-  // private isSummaryAction(action: RuleAction) {
-  //   return action.frequency?.summary || false;
-  // }
 
   private isRecoveredAlert(actionGroup: string) {
     return actionGroup === this.ruleType.recoveryActionGroup.id;
