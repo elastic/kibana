@@ -273,13 +273,7 @@ describe('SecurityTourStep', () => {
       },
     };
     const { storage } = createSecuritySolutionStorageMock();
-    const mockStore = createStore(
-      mockstate,
-      SUB_PLUGINS_REDUCER,
-
-      kibanaObservable,
-      storage
-    );
+    const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
     render(
       <TestProviders store={mockStore}>

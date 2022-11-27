@@ -36,17 +36,19 @@ jest.mock('../../../timelines/components/fields_browser', () => ({
 }));
 
 const eventRenderedProps: EventRenderedViewProps = {
-  alertToolbar: <></>,
   events: mockTimelineData,
   leadingControlColumns: [],
   onChangePage: () => null,
   onChangeItemsPerPage: () => null,
-  pageIndex: 0,
-  pageSize: 10,
-  pageSizeOptions: [10, 25, 50, 100],
+  pagination: {
+    pageIndex: 0,
+    pageSize: 10,
+    pageSizeOptions: [10, 25, 50, 100],
+    totalItemCount: 100,
+  },
   rowRenderers: [],
   scopeId: TableId.alertsOnAlertsPage,
-  totalItemCount: 100,
+  unitCountText: '10 events',
 };
 
 describe('event_rendered_view', () => {

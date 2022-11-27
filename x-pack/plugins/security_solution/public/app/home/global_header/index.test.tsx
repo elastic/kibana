@@ -169,13 +169,7 @@ describe('global header', () => {
         },
       },
     };
-    const mockStore = createStore(
-      mockstate,
-      SUB_PLUGINS_REDUCER,
-
-      kibanaObservable,
-      storage
-    );
+    const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
     (useLocation as jest.Mock).mockReturnValue({ pathname: sourcererPaths[2] });
 

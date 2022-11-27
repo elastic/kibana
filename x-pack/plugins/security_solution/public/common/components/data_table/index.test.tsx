@@ -114,6 +114,7 @@ describe('DataTable', () => {
     refetch: jest.fn(),
     indexNames: [''],
     defaultColumns: defaultHeaders,
+    unitCountText: '10 events',
   };
 
   beforeEach(() => {
