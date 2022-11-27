@@ -8,20 +8,18 @@
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import type { TestDataGenerated } from './types';
-import { artificialLogDataViewTestData } from './test_data';
+import type { TestData } from './types';
+import { explainLogRateSpikesTestData } from './test_data';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
-  const es = getService('es');
   const headerPage = getPageObject('header');
   const elasticChart = getService('elasticChart');
   const aiops = getService('aiops');
-  const log = getService('log');
 
   // aiops / Explain Log Rate Spikes lives in the ML UI so we need some related services.
   const ml = getService('ml');
 
-  function runTests(testData: TestDataGenerated) {
+  function runTests(testData: TestData) {
     it(`${testData.suiteTitle} loads the source data in explain log rate spikes`, async () => {
       await elasticChart.setNewChartUiDebugFlag(true);
 
@@ -93,7 +91,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await aiops.explainLogRateSpikesPage.adjustBrushHandler(
         'aiopsBrushDeviation',
         'handle--w',
-        targetPx - intervalPx * testData.brushIntervalFactor
+        targetPx - intervalPx * (testData.brushIntervalFactor - 1)
       );
 
       if (testData.brushBaselineTargetTimestamp) {
@@ -114,9 +112,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         await aiops.explainLogRateSpikesPage.adjustBrushHandler(
           'aiopsBrushBaseline',
           'handle--w',
-          targetBaselinePx - intervalPx * testData.brushIntervalFactor
+          targetBaselinePx - intervalPx * (testData.brushIntervalFactor - 1)
         );
       }
+
       // Get the new brush selection width for later comparison.
       const brushSelectionWidthAfter = await aiops.explainLogRateSpikesPage.getBrushSelectionWidth(
         'aiopsBrushDeviation'
@@ -127,7 +126,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // Finally, the adjusted brush should trigger
       // a warning on the "Rerun analysis" button.
       expect(brushSelectionWidthBefore).not.to.be(brushSelectionWidthAfter);
-      expect(brushSelectionWidthAfter).not.to.be.greaterThan(intervalPx * 21);
+      expect(brushSelectionWidthAfter).not.to.be.greaterThan(
+        intervalPx * 2 * testData.brushIntervalFactor
+      );
 
       await aiops.explainLogRateSpikesPage.assertRerunAnalysisButtonExists(true);
 
@@ -146,6 +147,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       const analysisGroupsTable =
         await aiops.explainLogRateSpikesAnalysisGroupsTable.parseAnalysisTable();
+
       expect(analysisGroupsTable).to.be.eql(testData.expected.analysisGroupsTable);
 
       await ml.testExecution.logTestStep('expand table row');
@@ -157,69 +159,37 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
   }
 
-  describe('explain log rate spikes - artificial log data', function () {
-    this.tags(['aiops']);
+  describe('explain log rate spikes', async function () {
+    for (const testData of explainLogRateSpikesTestData) {
+      describe(`with '${testData.sourceIndexOrSavedSearch}'`, function () {
+        before(async () => {
+          await aiops.explainLogRateSpikesDataGenerator.generateData(testData.dataGenerator);
 
-    before(async () => {
-      try {
-        await es.indices.delete({ index: artificialLogDataViewTestData.sourceIndexOrSavedSearch });
-      } catch (e) {
-        log.error(
-          `Error deleting index '${artificialLogDataViewTestData.sourceIndexOrSavedSearch}' in before() callback`
-        );
-      }
-      // Create index with mapping
-      await es.indices.create({
-        index: artificialLogDataViewTestData.sourceIndexOrSavedSearch,
-        mappings: {
-          properties: {
-            user: { type: 'keyword' },
-            response_code: { type: 'keyword' },
-            url: { type: 'keyword' },
-            version: { type: 'keyword' },
-            '@timestamp': { type: 'date' },
-          },
-        },
+          await ml.testResources.createIndexPatternIfNeeded(
+            testData.sourceIndexOrSavedSearch,
+            '@timestamp'
+          );
+
+          await ml.testResources.setKibanaTimeZoneToUTC();
+
+          await ml.securityUI.loginAsMlPowerUser();
+        });
+
+        after(async () => {
+          await elasticChart.setNewChartUiDebugFlag(false);
+          await ml.testResources.deleteIndexPatternByTitle(testData.sourceIndexOrSavedSearch);
+
+          await aiops.explainLogRateSpikesDataGenerator.removeGeneratedData(testData.dataGenerator);
+        });
+
+        it(`${testData.suiteTitle} loads the explain log rate spikes page`, async () => {
+          // Start navigation from the base of the ML app.
+          await ml.navigation.navigateToMl();
+          await elasticChart.setNewChartUiDebugFlag(true);
+        });
+
+        runTests(testData);
       });
-
-      await es.bulk({
-        refresh: 'wait_for',
-        body: artificialLogDataViewTestData.bulkBody,
-      });
-
-      await ml.testResources.createIndexPatternIfNeeded(
-        artificialLogDataViewTestData.sourceIndexOrSavedSearch,
-        '@timestamp'
-      );
-
-      await ml.testResources.setKibanaTimeZoneToUTC();
-
-      await ml.securityUI.loginAsMlPowerUser();
-    });
-
-    after(async () => {
-      await elasticChart.setNewChartUiDebugFlag(false);
-      await ml.testResources.deleteIndexPatternByTitle(
-        artificialLogDataViewTestData.sourceIndexOrSavedSearch
-      );
-      try {
-        await es.indices.delete({ index: artificialLogDataViewTestData.sourceIndexOrSavedSearch });
-      } catch (e) {
-        log.error(
-          `Error deleting index '${artificialLogDataViewTestData.sourceIndexOrSavedSearch}' in after() callback`
-        );
-      }
-    });
-
-    describe('with artificial logs', function () {
-      // Run tests on full farequote index.
-      it(`${artificialLogDataViewTestData.suiteTitle} loads the explain log rate spikes page`, async () => {
-        // Start navigation from the base of the ML app.
-        await ml.navigation.navigateToMl();
-        await elasticChart.setNewChartUiDebugFlag(true);
-      });
-
-      runTests(artificialLogDataViewTestData);
-    });
+    }
   });
 }
