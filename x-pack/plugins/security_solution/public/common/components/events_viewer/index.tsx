@@ -8,7 +8,8 @@
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useRef, useCallback, useMemo, useEffect, useState, useContext } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import type { ConnectedProps } from 'react-redux';
+import { connect, useDispatch, useSelector } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import type { Direction, EntityType, RowRenderer } from '@kbn/timelines-plugin/common';
@@ -101,7 +102,7 @@ export interface Props {
  * timeline is used BESIDES the flyout. The flyout makes use of the `EventsViewer` component which is a subcomponent here
  * NOTE: As of writting, it is not used in the Case_View component
  */
-const StatefulEventsViewerComponent: React.FC<Props> = ({
+const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
   defaultCellActions,
   defaultModel,
   end,
@@ -120,6 +121,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   unit,
   indexNames,
   bulkActions,
+  setSelected,
+  clearSelected,
 }) => {
   const dispatch = useDispatch();
   const theme: EuiTheme = useContext(ThemeContext);
@@ -383,8 +386,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const onRowSelected: OnRowSelected = useCallback(
     ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
-      console.log(isSelected)
-      dataTableActions.setSelected({
+      console.log(isSelected);
+      setSelected({
         id: tableId,
         eventIds: getEventIdToDataMapping(
           nonDeletedEvents,
@@ -396,13 +399,13 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         isSelectAllChecked: isSelected && selectedCount + 1 === nonDeletedEvents.length,
       });
     },
-    [tableId, nonDeletedEvents, queryFields, hasAlertsCrud, selectedCount]
+    [setSelected, tableId, nonDeletedEvents, queryFields, hasAlertsCrud, selectedCount]
   );
 
   const onSelectPage: OnSelectAll = useCallback(
     ({ isSelected }: { isSelected: boolean }) =>
       isSelected
-        ? dataTableActions.setSelected({
+        ? setSelected({
             id: tableId,
             eventIds: getEventIdToDataMapping(
               nonDeletedEvents,
@@ -413,8 +416,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             isSelected,
             isSelectAllChecked: isSelected,
           })
-        : dataTableActions.clearSelected({ id: tableId }),
-    [tableId, nonDeletedEvents, queryFields, hasAlertsCrud]
+        : clearSelected({ id: tableId }),
+    [setSelected, tableId, nonDeletedEvents, queryFields, hasAlertsCrud, clearSelected]
   );
 
   // Sync to selectAll so parent components can select all events
@@ -591,4 +594,17 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   );
 };
 
-export const StatefulEventsViewer = React.memo(StatefulEventsViewerComponent);
+// export const StatefulEventsViewer = React.memo(StatefulEventsViewerComponent);
+
+const mapDispatchToProps = {
+  clearSelected: dataTableActions.clearSelected,
+  setSelected: dataTableActions.setSelected,
+};
+
+const connector = connect(undefined, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const StatefulEventsViewer: React.FunctionComponent<Props> = connector(
+  StatefulEventsViewerComponent
+);

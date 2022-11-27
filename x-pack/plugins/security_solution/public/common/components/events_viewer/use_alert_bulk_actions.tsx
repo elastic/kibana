@@ -101,7 +101,7 @@ export const useAlertBulkActions = ({
     () => (
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
-          <AlertCount>{alertCountText}</AlertCount>
+          <AlertCount data-test-subj="server-side-event-count">{alertCountText}</AlertCount>
         </EuiFlexItem>
         {showBulkActions && (
           <Suspense fallback={<EuiLoadingSpinner />}>

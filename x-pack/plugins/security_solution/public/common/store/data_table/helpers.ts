@@ -152,15 +152,7 @@ export const setInitializeDataTableSettings = ({
           initialized: true,
         },
       }
-    : {
-        ...tableById,
-        [id]: {
-          ...dataTable,
-          ...tableDefaults,
-          ...dataTableSettingsProps,
-          isLoading: false,
-        },
-      };
+    : tableById;
 };
 
 interface ApplyDeltaToTableColumnWidth {
