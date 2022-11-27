@@ -6,52 +6,37 @@
  * Side Public License, v 1.
  */
 
-import { connectToQueryState, QueryState } from '@kbn/data-plugin/public';
-import { createStateContainer, useContainerState } from '@kbn/kibana-utils-plugin/public';
-import { useEffect, useMemo, useRef } from 'react';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { useMemo } from 'react';
 import type { UnifiedHistogramRequestContext, UnifiedHistogramServices } from '../types';
 
 export const useRequestParams = ({
   services,
+  query: originalQuery,
+  filters: originalFilters,
+  timeRange,
   lastReloadRequestTime,
   request,
 }: {
   services: UnifiedHistogramServices;
+  query?: Query | AggregateQuery;
+  filters?: Filter[];
+  timeRange?: TimeRange;
   lastReloadRequestTime: number | undefined;
   request?: UnifiedHistogramRequestContext;
 }) => {
   const { data } = services;
 
-  const queryStateContainer = useRef(
-    createStateContainer<QueryState>({
-      filters: data.query.filterManager.getFilters(),
-      query: data.query.queryString.getQuery(),
-      refreshInterval: data.query.timefilter.timefilter.getRefreshInterval(),
-      time: data.query.timefilter.timefilter.getTime(),
-    })
-  ).current;
-
-  const queryState = useContainerState(queryStateContainer);
-
-  useEffect(() => {
-    return connectToQueryState(data.query, queryStateContainer, {
-      time: true,
-      query: true,
-      filters: true,
-      refreshInterval: true,
-    });
-  }, [data.query, queryStateContainer]);
-
-  const filters = useMemo(() => queryState.filters ?? [], [queryState.filters]);
+  const filters = useMemo(() => originalFilters ?? [], [originalFilters]);
 
   const query = useMemo(
-    () => queryState.query ?? data.query.queryString.getDefaultQuery(),
-    [data.query.queryString, queryState.query]
+    () => originalQuery ?? data.query.queryString.getDefaultQuery(),
+    [data.query.queryString, originalQuery]
   );
 
   const relativeTimeRange = useMemo(
-    () => queryState.time ?? data.query.timefilter.timefilter.getTimeDefaults(),
-    [data.query.timefilter.timefilter, queryState.time]
+    () => timeRange ?? data.query.timefilter.timefilter.getTimeDefaults(),
+    [data.query.timefilter.timefilter, timeRange]
   );
 
   return { filters, query, relativeTimeRange };

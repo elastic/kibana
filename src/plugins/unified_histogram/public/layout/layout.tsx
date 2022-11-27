@@ -13,6 +13,7 @@ import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal'
 import { css } from '@emotion/css';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Chart } from '../chart';
 import { Panels, PANELS_MODE } from '../panels';
 import type {
@@ -38,6 +39,18 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * The current data view
    */
   dataView: DataView;
+  /**
+   * The current query
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * The current filters
+   */
+  filters?: Filter[];
+  /**
+   * The current time range
+   */
+  timeRange?: TimeRange;
   /**
    * Can be updated to `Date.now()` to force a refresh
    */
@@ -105,6 +118,9 @@ export const UnifiedHistogramLayout = ({
   className,
   services,
   dataView,
+  query,
+  filters,
+  timeRange,
   lastReloadRequestTime,
   request,
   hits,
@@ -167,6 +183,9 @@ export const UnifiedHistogramLayout = ({
           className={chartClassName}
           services={services}
           dataView={dataView}
+          query={query}
+          filters={filters}
+          timeRange={timeRange}
           lastReloadRequestTime={lastReloadRequestTime}
           request={request}
           hits={hits}

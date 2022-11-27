@@ -19,6 +19,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
 import { useChartPanels } from './use_chart_panels';
@@ -43,6 +45,9 @@ export interface ChartProps {
   className?: string;
   services: UnifiedHistogramServices;
   dataView: DataView;
+  query?: Query | AggregateQuery;
+  filters?: Filter[];
+  timeRange?: TimeRange;
   lastReloadRequestTime?: number;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
@@ -65,6 +70,9 @@ export function Chart({
   className,
   services,
   dataView,
+  query: originalQuery,
+  filters: originalFilters,
+  timeRange: originalTimeRange,
   lastReloadRequestTime,
   request,
   hits,
@@ -109,6 +117,9 @@ export function Chart({
 
   const { filters, query, relativeTimeRange } = useRequestParams({
     services,
+    query: originalQuery,
+    filters: originalFilters,
+    timeRange: originalTimeRange,
     lastReloadRequestTime,
     request,
   });
@@ -127,11 +138,8 @@ export function Chart({
   });
 
   // We need to update the absolute time range whenever the refetchId changes
-  const timeRange = useMemo(
-    () => services.data.query.timefilter.timefilter.getAbsoluteTime(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [services.data.query.timefilter.timefilter, refetchId]
-  );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const timeRange = useMemo(() => getAbsoluteTimeRange(relativeTimeRange), [refetchId]);
 
   useTotalHits({
     services,

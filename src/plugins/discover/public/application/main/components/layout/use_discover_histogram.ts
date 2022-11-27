@@ -264,6 +264,25 @@ export const useDiscoverHistogram = ({
     [field, isPlainRecord, isTimeBased]
   );
 
+  /**
+   * Search params
+   */
+
+  const [searchParams, setSearchParams] = useState({
+    query: data.query.queryString.getQuery(),
+    filters: data.query.filterManager.getFilters(),
+    timeRange: data.query.timefilter.timefilter.getTime(),
+  });
+
+  useEffect(() => {
+    setSearchParams({
+      query: data.query.queryString.getQuery(),
+      filters: data.query.filterManager.getFilters(),
+      timeRange: data.query.timefilter.timefilter.getTime(),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchSessionId]);
+
   // Initialized when the first search has been requested or
   // when in SQL mode since search sessions are not supported
   const isInitialized = Boolean(searchSessionId) || isPlainRecord;
@@ -271,6 +290,7 @@ export const useDiscoverHistogram = ({
   // Don't render the unified histogram layout until initialized
   return isInitialized
     ? {
+        ...searchParams,
         topPanelHeight,
         request,
         hits,
