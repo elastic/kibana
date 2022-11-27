@@ -38,7 +38,7 @@ export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
 export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
-
+export type DataFetch$ = ReturnType<typeof getFetch$>;
 export type DataRefetch$ = Subject<DataRefetchMsg>;
 
 export interface UseSavedSearch {
@@ -151,36 +151,54 @@ export const useSavedSearch = ({
   }>({});
 
   /**
-   * This part takes care of triggering the data fetching by creating and subscribing
-   * to an observable of various possible changes in state
+   * handler emitted by `timefilter.getAutoRefreshFetch$()`
+   * to notify when data completed loading and to start a new autorefresh loop
    */
-  useEffect(() => {
-    /**
-     * handler emitted by `timefilter.getAutoRefreshFetch$()`
-     * to notify when data completed loading and to start a new autorefresh loop
-     */
-    const setAutoRefreshDone = (fn: AutoRefreshDoneFn | undefined) => {
-      refs.current.autoRefreshDone = fn;
-    };
-    const fetch$ = getFetch$({
-      setAutoRefreshDone,
+  const setAutoRefreshDone = useCallback((fn: AutoRefreshDoneFn | undefined) => {
+    refs.current.autoRefreshDone = fn;
+  }, []);
+
+  /**
+   * Observable that allows listening for when fetches are triggered
+   */
+  const fetch$ = useMemo(
+    () =>
+      getFetch$({
+        setAutoRefreshDone,
+        data,
+        main$,
+        refetch$,
+        searchSessionManager,
+        searchSource,
+        initialFetchStatus,
+      }),
+    [
       data,
+      initialFetchStatus,
       main$,
       refetch$,
       searchSessionManager,
       searchSource,
-      initialFetchStatus,
-    });
+      setAutoRefreshDone,
+    ]
+  );
+
+  /**
+   * This part takes care of triggering the data fetching by creating and subscribing
+   * to an observable of various possible changes in state
+   */
+  useEffect(() => {
     let abortController: AbortController;
 
     const subscription = fetch$.subscribe(async (val) => {
       if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
         return;
       }
-      inspectorAdapters.requests.reset();
 
+      inspectorAdapters.requests.reset();
       abortController?.abort();
       abortController = new AbortController();
+
       const autoRefreshDone = refs.current.autoRefreshDone;
 
       await fetchAll(dataSubjects, searchSource, val === 'reset', {
@@ -213,6 +231,7 @@ export const useSavedSearch = ({
     data,
     data.query.queryString,
     dataSubjects,
+    fetch$,
     filterManager,
     initialFetchStatus,
     inspectorAdapters,
@@ -235,6 +254,7 @@ export const useSavedSearch = ({
   );
 
   return {
+    fetch$,
     refetch$,
     data$: dataSubjects,
     reset,

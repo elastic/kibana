@@ -109,7 +109,7 @@ export function Histogram({
         setBucketInterval(newBucketInterval);
       }
 
-      onChartLoad?.({ complete: !isLoading, adapters: adapters ?? {} });
+      onChartLoad?.({ adapters: adapters ?? {} });
     },
     [data, dataView, onChartLoad, onTotalHitsChange, timeInterval, timeRange]
   );

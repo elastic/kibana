@@ -13,15 +13,17 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
+  UnifiedHistogramInputMessage,
 } from '@kbn/unified-histogram-plugin/public';
 import type { UnifiedHistogramChartLoadEvent } from '@kbn/unified-histogram-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { Subject } from 'rxjs';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { getUiActions } from '../../../../kibana_services';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDataState } from '../../hooks/use_data_state';
-import type { SavedSearchData } from '../../hooks/use_saved_search';
+import type { DataFetch$, SavedSearchData } from '../../hooks/use_saved_search';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 import { FetchStatus } from '../../../types';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
@@ -41,6 +43,7 @@ export interface UseDiscoverHistogramProps {
   isPlainRecord: boolean;
   inspectorAdapters: InspectorAdapters;
   searchSessionManager: DiscoverSearchSessionManager;
+  savedSearchFetch$: DataFetch$;
 }
 
 export const useDiscoverHistogram = ({
@@ -52,6 +55,7 @@ export const useDiscoverHistogram = ({
   isPlainRecord,
   inspectorAdapters,
   searchSessionManager,
+  savedSearchFetch$,
 }: UseDiscoverHistogramProps) => {
   const { storage, data, lens } = useDiscoverServices();
   const [hideChart, interval, breakdownField] = useAppStateSelector((state) => [
@@ -283,6 +287,21 @@ export const useDiscoverHistogram = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchSessionId]);
 
+  const input$ = useMemo(() => new Subject<UnifiedHistogramInputMessage>(), []);
+
+  useEffect(() => {
+    const subscription = savedSearchFetch$.subscribe(() => {
+      debugger;
+      input$.next({
+        type: 'refetch',
+      });
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [input$, savedSearchFetch$]);
+
   // Initialized when the first search has been requested or
   // when in SQL mode since search sessions are not supported
   const isInitialized = Boolean(searchSessionId) || isPlainRecord;
@@ -296,6 +315,7 @@ export const useDiscoverHistogram = ({
         hits,
         chart,
         breakdown,
+        input$,
         onEditVisualization: canVisualize ? onEditVisualization : undefined,
         onTopPanelHeightChange,
         onChartHiddenChange,

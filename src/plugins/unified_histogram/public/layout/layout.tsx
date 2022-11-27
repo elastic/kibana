@@ -24,6 +24,7 @@ import type {
   UnifiedHistogramFetchStatus,
   UnifiedHistogramRequestContext,
   UnifiedHistogramChartLoadEvent,
+  UnifiedHistogramInput$,
 } from '../types';
 
 export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> {
@@ -84,6 +85,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   appendHitsCounter?: ReactElement;
   /**
+   * Input observable
+   */
+  input$?: UnifiedHistogramInput$;
+  /**
    * Callback to update the topPanelHeight prop when a resize is triggered
    */
   onTopPanelHeightChange?: (topPanelHeight: number | undefined) => void;
@@ -129,6 +134,7 @@ export const UnifiedHistogramLayout = ({
   resizeRef,
   topPanelHeight,
   appendHitsCounter,
+  input$,
   onTopPanelHeightChange,
   onEditVisualization,
   onChartHiddenChange,
@@ -193,6 +199,7 @@ export const UnifiedHistogramLayout = ({
           breakdown={breakdown}
           appendHitsCounter={appendHitsCounter}
           appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="l" />}
+          input$={input$}
           onEditVisualization={onEditVisualization}
           onResetChartHeight={onResetChartHeight}
           onChartHiddenChange={onChartHiddenChange}

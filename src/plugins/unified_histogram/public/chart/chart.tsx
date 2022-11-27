@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ReactElement, useMemo } from 'react';
+import { ReactElement, useEffect, useMemo } from 'react';
 import React, { memo } from 'react';
 import {
   EuiButtonIcon,
@@ -32,6 +32,7 @@ import type {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
+  UnifiedHistogramInput$,
 } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { useTotalHits } from './use_total_hits';
@@ -55,6 +56,7 @@ export interface ChartProps {
   breakdown?: UnifiedHistogramBreakdownContext;
   appendHitsCounter?: ReactElement;
   appendHistogram?: ReactElement;
+  input$?: UnifiedHistogramInput$;
   onEditVisualization?: (lensAttributes: TypedLensByValueInput['attributes']) => void;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
@@ -80,6 +82,7 @@ export function Chart({
   breakdown,
   appendHitsCounter,
   appendHistogram,
+  input$,
   onEditVisualization: originalOnEditVisualization,
   onResetChartHeight,
   onChartHiddenChange,
@@ -88,6 +91,16 @@ export function Chart({
   onTotalHitsChange,
   onChartLoad,
 }: ChartProps) {
+  useEffect(() => {
+    const subscription = input$?.subscribe(({ type }) => {
+      debugger;
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, [input$]);
+
   const {
     showChartOptionsPopover,
     chartRef,
