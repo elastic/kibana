@@ -70,6 +70,7 @@ import { RightTopMenu } from './right_top_menu';
 import { useAlertBulkActions } from './use_alert_bulk_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { StatefulEventContext } from './stateful_event_context';
+import { defaultUnit } from '../toolbar/unit';
 
 const storage = new Storage(localStorage);
 
@@ -118,7 +119,7 @@ const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
   sourcererScope,
   additionalFilters,
   hasAlertsCrud = false,
-  unit,
+  unit = defaultUnit,
   indexNames,
   bulkActions,
   setSelected,
@@ -386,7 +387,6 @@ const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
 
   const onRowSelected: OnRowSelected = useCallback(
     ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
-      console.log(isSelected);
       setSelected({
         id: tableId,
         eventIds: getEventIdToDataMapping(
@@ -475,7 +475,7 @@ const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
     pageInfo.querySize,
   ]);
 
-  const alertToolbar = useAlertBulkActions({
+  const alertBulkActions = useAlertBulkActions({
     tableId,
     data: nonDeletedEvents,
     totalItems: totalCountMinusDeleted,
@@ -487,7 +487,6 @@ const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
     filterQuery,
     bulkActions,
     selectedCount,
-    unit,
   });
 
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
@@ -497,6 +496,11 @@ const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
     enableHostDetailsFlyout: true,
     enableIpDetailsFlyout: true,
   });
+
+  const unitCountText = useMemo(
+    () => `${totalCountMinusDeleted.toLocaleString()} ${unit(totalCountMinusDeleted)}`,
+    [totalCountMinusDeleted, unit]
+  );
 
   return (
     <>
@@ -538,14 +542,15 @@ const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
                         <StatefulEventContext.Provider value={activeStatefulEventContext}>
                           {tableView === 'gridView' && (
                             <StatefulDataTableComponent
-                              alertToolbar={alertToolbar}
-                              activePage={pageInfo.activePage}
+                              additionalControls={alertBulkActions}
+                              unitCountText={unitCountText}
                               browserFields={browserFields}
                               data={nonDeletedEvents}
                               disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
                               id={tableId}
                               indexNames={selectedPatterns}
                               itemsPerPageOptions={itemsPerPageOptions}
+                              activePage={pageInfo.activePage}
                               loadPage={loadPage}
                               pageSize={pageInfo.querySize}
                               refetch={refetch}
@@ -568,15 +573,19 @@ const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
                             <EventRenderedView
                               events={nonDeletedEvents}
                               leadingControlColumns={transformedLeadingControlColumns}
-                              pageIndex={pageInfo.activePage}
-                              pageSize={pageInfo.querySize}
-                              pageSizeOptions={itemsPerPageOptions}
+                              pagination={{
+                                pageIndex: pageInfo.activePage,
+                                pageSize: pageInfo.querySize,
+                                totalItemCount: totalCountMinusDeleted,
+                                pageSizeOptions: itemsPerPageOptions,
+                                showPerPageOptions: true,
+                              }}
                               rowRenderers={rowRenderers}
                               scopeId={tableId}
-                              totalItemCount={totalCountMinusDeleted}
                               onChangePage={onChangePage}
                               onChangeItemsPerPage={onChangeItemsPerPage}
-                              alertToolbar={alertToolbar}
+                              additionalControls={alertBulkActions}
+                              unitCountText={unitCountText}
                             />
                           )}
                         </StatefulEventContext.Provider>

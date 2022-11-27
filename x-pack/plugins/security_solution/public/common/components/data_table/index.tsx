@@ -50,13 +50,13 @@ import type { DataTableState, DataTableModel } from '../../store/data_table/type
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { useKibana } from '../../lib/kibana';
 import { getPageRowIndex } from './pagination';
+import { UnitCount } from '../toolbar/unit';
 
 const DATA_TABLE_ARIA_LABEL = i18n.translate('xpack.securitySolution.dataTable.ariaLabel', {
   defaultMessage: 'Alerts',
 });
 
 interface OwnProps {
-  alertToolbar?: React.ReactNode;
   activePage: number;
   additionalControls?: React.ReactNode;
   browserFields: BrowserFields;
@@ -81,6 +81,7 @@ interface OwnProps {
   tabType: string;
   totalItems: number;
   hasAlertsCrud?: boolean;
+  unitCountText: string;
 }
 
 const ES_LIMIT_COUNT = 9999;
@@ -104,7 +105,6 @@ export type StatefulDataTableProps = OwnProps & PropsFromRedux;
 
 export const DataTableComponent = React.memo<StatefulDataTableProps>(
   ({
-    alertToolbar,
     activePage,
     additionalControls,
     browserFields,
@@ -129,6 +129,7 @@ export const DataTableComponent = React.memo<StatefulDataTableProps>(
     sort,
     totalItems,
     defaultColumns,
+    unitCountText,
   }) => {
     const {
       triggersActionsUi: { getFieldBrowser },
@@ -183,20 +184,24 @@ export const DataTableComponent = React.memo<StatefulDataTableProps>(
 
     const toolbarVisibility: EuiDataGridToolBarVisibilityOptions = useMemo(
       () => ({
-        additionalControls: (
-          <>
-            {isLoading && <EuiProgress size="xs" position="absolute" color="accent" />}
-            {alertToolbar}
-            {additionalControls ?? null}
-            {getFieldBrowser({
-              browserFields,
-              options: fieldBrowserOptions,
-              columnIds: columnHeaders.map(({ id: columnId }) => columnId),
-              onResetColumns,
-              onToggleColumn,
-            })}
-          </>
-        ),
+        additionalControls: {
+          left: {
+            append: (
+              <>
+                {isLoading && <EuiProgress size="xs" position="absolute" color="accent" />}
+                <UnitCount data-test-subj="server-side-event-count">{unitCountText}</UnitCount>
+                {additionalControls ?? null}
+                {getFieldBrowser({
+                  browserFields,
+                  options: fieldBrowserOptions,
+                  columnIds: columnHeaders.map(({ id: columnId }) => columnId),
+                  onResetColumns,
+                  onToggleColumn,
+                })}
+              </>
+            ),
+          },
+        },
         ...(showBulkActions
           ? {
               showColumnSelector: false,
@@ -212,7 +217,7 @@ export const DataTableComponent = React.memo<StatefulDataTableProps>(
       }),
       [
         isLoading,
-        alertToolbar,
+        unitCountText,
         additionalControls,
         getFieldBrowser,
         browserFields,

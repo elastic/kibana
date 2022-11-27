@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense, useMemo } from 'react';
 import type { TimelineItem } from '../../../../common/search_strategy';
 import type { AlertWorkflowStatus, Refetch } from '../../types';
-import { AlertCount, defaultUnit } from '../toolbar/alert';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 
 const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
@@ -26,7 +25,6 @@ interface OwnProps {
   filterQuery?: string;
   bulkActions?: BulkActionsProp;
   selectedCount?: number;
-  unit?: (total: number) => React.ReactNode;
 }
 export const useAlertBulkActions = ({
   tableId,
@@ -40,12 +38,7 @@ export const useAlertBulkActions = ({
   filterQuery,
   bulkActions,
   selectedCount,
-  unit = defaultUnit,
 }: OwnProps) => {
-  const alertCountText = useMemo(
-    () => `${totalItems.toLocaleString()} ${unit(totalItems)}`,
-    [totalItems, unit]
-  );
   const showBulkActions = useMemo(() => {
     if (!hasAlertsCrud) {
       return false;
@@ -97,12 +90,9 @@ export const useAlertBulkActions = ({
       });
     }
   }, [bulkActions, data]);
-  const alertToolbar = useMemo(
+  const alertBulkActions = useMemo(
     () => (
-      <EuiFlexGroup gutterSize="m" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <AlertCount data-test-subj="server-side-event-count">{alertCountText}</AlertCount>
-        </EuiFlexItem>
+      <>
         {showBulkActions && (
           <Suspense fallback={<EuiLoadingSpinner />}>
             <StatefulAlertBulkActions
@@ -120,11 +110,10 @@ export const useAlertBulkActions = ({
             />
           </Suspense>
         )}
-      </EuiFlexGroup>
+      </>
     ),
     [
       additionalBulkActions,
-      alertCountText,
       filterQuery,
       filterStatus,
       indexNames,
@@ -137,5 +126,5 @@ export const useAlertBulkActions = ({
       totalItems,
     ]
   );
-  return alertToolbar;
+  return alertBulkActions;
 };

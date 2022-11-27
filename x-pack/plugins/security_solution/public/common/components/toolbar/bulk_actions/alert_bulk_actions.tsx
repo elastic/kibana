@@ -150,7 +150,6 @@ const makeMapStateToProps = () => {
   const getTGrid = dataTableSelectors.getTableByIdSelector();
   const mapStateToProps = (state: DataTableState, { id }: OwnProps) => {
     const dataTable: DataTableModel = getTGrid(state, id);
-    console.log(dataTable);
     const { selectedEventIds, isSelectAllChecked } = dataTable;
 
     return {

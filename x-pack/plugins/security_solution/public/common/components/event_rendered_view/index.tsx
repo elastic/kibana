@@ -9,6 +9,7 @@ import type {
   EuiBasicTableProps,
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
+  Pagination,
 } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +28,7 @@ import type { TimelineItem } from '../../../../common/search_strategy';
 import type { RowRenderer } from '../../../../common/types';
 import { RuleName } from '../rule_name';
 import { isEventBuildingBlockType } from './helpers';
+import { UnitCount } from '../toolbar/unit';
 
 const EventRenderedFlexItem = styled(EuiFlexItem)`
   div:first-child {
@@ -68,8 +70,15 @@ const StyledEuiBasicTable = styled(EuiBasicTable as BasicTableType)`
 `;
 
 export interface EventRenderedViewProps {
-  alertToolbar: React.ReactNode;
   events: TimelineItem[];
+  leadingControlColumns: EuiDataGridControlColumn[];
+  onChangePage: (newActivePage: number) => void;
+  onChangeItemsPerPage: (newItemsPerPage: number) => void;
+  rowRenderers: RowRenderer[];
+  scopeId: string;
+  pagination: Pagination;
+  unitCountText: string;
+  additionalControls?: React.ReactNode;
   getRowRenderer?: ({
     data,
     rowRenderers,
@@ -77,15 +86,6 @@ export interface EventRenderedViewProps {
     data: Ecs;
     rowRenderers: RowRenderer[];
   }) => RowRenderer | null;
-  leadingControlColumns: EuiDataGridControlColumn[];
-  onChangePage: (newActivePage: number) => void;
-  onChangeItemsPerPage: (newItemsPerPage: number) => void;
-  pageIndex: number;
-  pageSize: number;
-  pageSizeOptions: number[];
-  rowRenderers: RowRenderer[];
-  scopeId: string;
-  totalItemCount: number;
 }
 
 const PreferenceFormattedDateComponent = ({ value }: { value: Date }) => {
@@ -98,18 +98,16 @@ const PreferenceFormattedDateComponent = ({ value }: { value: Date }) => {
 export const PreferenceFormattedDate = React.memo(PreferenceFormattedDateComponent);
 
 const EventRenderedViewComponent = ({
-  alertToolbar,
+  additionalControls,
   events,
   getRowRenderer,
   leadingControlColumns,
   onChangePage,
   onChangeItemsPerPage,
-  pageIndex,
-  pageSize,
-  pageSizeOptions,
   rowRenderers,
   scopeId,
-  totalItemCount,
+  pagination,
+  unitCountText,
 }: EventRenderedViewProps) => {
   const ActionTitle = useMemo(
     () => (
@@ -228,30 +226,31 @@ const EventRenderedViewComponent = ({
 
   const handleTableChange = useCallback(
     (pageChange: CriteriaWithPagination<TimelineItem>) => {
-      if (pageChange.page.index !== pageIndex) {
+      if (pageChange.page.index !== pagination.pageIndex) {
         onChangePage(pageChange.page.index);
       }
-      if (pageChange.page.size !== pageSize) {
+      if (pageChange.page.size !== pagination.pageSize) {
         onChangeItemsPerPage(pageChange.page.size);
       }
     },
-    [onChangePage, pageIndex, pageSize, onChangeItemsPerPage]
+    [pagination.pageIndex, pagination.pageSize, onChangePage, onChangeItemsPerPage]
   );
 
-  const pagination = useMemo(
-    () => ({
-      pageIndex,
-      pageSize,
-      totalItemCount,
-      pageSizeOptions,
-      showPerPageOptions: true,
-    }),
-    [pageIndex, pageSize, pageSizeOptions, totalItemCount]
+  const toolbar = useMemo(
+    () => (
+      <EuiFlexGroup gutterSize="m" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <UnitCount data-test-subj="server-side-event-count">{unitCountText}</UnitCount>
+        </EuiFlexItem>
+        {additionalControls}
+      </EuiFlexGroup>
+    ),
+    [additionalControls, unitCountText]
   );
 
   return (
     <>
-      {alertToolbar}
+      {toolbar}
       <StyledEuiBasicTable
         compressed
         items={events}

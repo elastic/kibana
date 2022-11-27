@@ -7,7 +7,7 @@
 
 import styled from 'styled-components';
 
-export const AlertCount = styled.span`
+export const UnitCount = styled.span`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
   border-right: ${({ theme }) => theme.eui.euiBorderThin};
