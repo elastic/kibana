@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SERVICE_ENVIRONMENT } from '../elasticsearch_fieldnames';
+import { SERVICE_ENVIRONMENT } from '../es_fields/apm';
 import { ENVIRONMENT_NOT_DEFINED } from '../environment_filter_values';
 import { environmentQuery } from './environment_query';
 

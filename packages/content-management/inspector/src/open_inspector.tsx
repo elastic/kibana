@@ -15,7 +15,7 @@ import type { InspectorFlyoutContentContainerProps } from './components';
 
 export type OpenInspectorParams = Pick<
   InspectorFlyoutContentContainerProps,
-  'item' | 'onSave' | 'isReadonly' | 'entityName'
+  'item' | 'onSave' | 'isReadonly' | 'entityName' | 'customValidators'
 >;
 
 export function useOpenInspector() {
@@ -30,8 +30,12 @@ export function useOpenInspector() {
         throw new Error(`A value for [onSave()] must be provided when [isReadonly] is false.`);
       }
 
+      const closeFlyout = () => {
+        flyout.current?.close();
+      };
+
       flyout.current = openFlyout(
-        <InspectorLoader {...args} onCancel={() => flyout.current?.close()} services={services} />,
+        <InspectorLoader {...args} onCancel={closeFlyout} services={services} />,
         {
           maxWidth: 600,
           size: 'm',
@@ -39,6 +43,8 @@ export function useOpenInspector() {
           hideCloseButton: true,
         }
       );
+
+      return closeFlyout;
     },
     [openFlyout, services]
   );

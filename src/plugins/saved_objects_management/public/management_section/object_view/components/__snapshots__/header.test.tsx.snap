@@ -8,10 +8,10 @@ exports[`Intro component renders correctly 1`] = `
     class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+      class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
     >
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <h1
           class="euiTitle emotion-euiTitle-l"
@@ -20,16 +20,16 @@ exports[`Intro component renders correctly 1`] = `
         </h1>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRowReverse euiFlexGroup--wrap"
+          class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <a
-              class="euiButton emotion-euiButtonDisplay-s-s-base-primary"
+              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-primary"
               data-test-subj="savedObjectEditViewInApp"
               href="/some-url"
               rel="noreferrer"
@@ -46,10 +46,10 @@ exports[`Intro component renders correctly 1`] = `
             </a>
           </div>
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <button
-              class="euiButton emotion-euiButtonDisplay-s-s-base-danger"
+              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-danger"
               data-test-subj="savedObjectEditDelete"
               type="button"
             >

@@ -13,7 +13,7 @@ import {
   CONTAINER_ID,
   HOST_HOSTNAME,
   KUBERNETES_POD_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const getInfrastructureData = async ({

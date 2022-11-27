@@ -143,6 +143,7 @@ describe('When using useEndpointPrivileges hook', () => {
         getEndpointPrivilegesInitialStateMock({
           canCreateArtifactsByPolicy: false,
           canIsolateHost: false,
+          canAccessEndpointActionsLogManagement: false,
           canWriteHostIsolationExceptions: false,
           canReadHostIsolationExceptions: hasHIE,
           canDeleteHostIsolationExceptions: hasHIE,
