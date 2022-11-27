@@ -78,7 +78,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       return await Promise.all(columnCells.map((h) => h.getVisibleText()));
     },
 
-    assertColumnSorting: async (columnName: string, direction: 'asc' | 'desc') => {
+    assertColumnSort: async (columnName: string, direction: 'asc' | 'desc') => {
       const values = (await table.getFilterColumnValues(columnName)).filter(Boolean);
       expect(values).to.not.be.empty();
       const sorted = values
@@ -87,7 +87,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       values.every((value, i) => expect(value).to.be(sorted[i]));
     },
 
-    toggleColumnSorting: async (columnName: string, direction: 'asc' | 'desc') => {
+    toggleColumnSortOrFail: async (columnName: string, direction: 'asc' | 'desc') => {
       const getColumnElement = async () => (await table.getColumnIndex(columnName))[1];
       const element = await getColumnElement();
       const currentSort = await element.getAttribute('aria-sort');
@@ -109,6 +109,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
         const nonStaleElement = await getColumnElement();
         await nonStaleElement.click();
       }
+      await table.assertColumnSort(columnName, direction);
     },
   };
 

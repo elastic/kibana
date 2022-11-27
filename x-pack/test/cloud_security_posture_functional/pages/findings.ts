@@ -36,13 +36,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Sort', () => {
       it('Sorts by rule name', async () => {
-        await pageObjects.findings.table.toggleColumnSorting('Rule', 'asc');
-        await pageObjects.findings.table.assertColumnSorting('Rule', 'asc');
+        await pageObjects.findings.table.toggleColumnSortOrFail('Rule', 'asc');
       });
 
       it('Sorts by resource name', async () => {
-        await pageObjects.findings.table.toggleColumnSorting('Resource Name', 'desc');
-        await pageObjects.findings.table.assertColumnSorting('Resource Name', 'desc');
+        await pageObjects.findings.table.toggleColumnSortOrFail('Resource Name', 'desc');
       });
     });
   });
