@@ -37,7 +37,6 @@ import { postSourcererDataView } from './api';
 import * as source from '../source/use_data_view';
 import { sourcererActions } from '../../store/sourcerer';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
-import { dataTableReducer } from '../../store/data_table/reducer';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -115,7 +114,7 @@ describe('Sourcerer Hooks', () => {
     store = createStore(
       mockGlobalState,
       SUB_PLUGINS_REDUCER,
-      { dataTable: dataTableReducer },
+
       kibanaObservable,
       storage
     );
@@ -164,7 +163,7 @@ describe('Sourcerer Hooks', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      { dataTable: dataTableReducer },
+
       kibanaObservable,
       storage
     );
@@ -267,7 +266,7 @@ describe('Sourcerer Hooks', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      { dataTable: dataTableReducer },
+
       kibanaObservable,
       storage
     );
@@ -338,7 +337,7 @@ describe('Sourcerer Hooks', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      { dataTable: dataTableReducer },
+
       kibanaObservable,
       storage
     );
@@ -397,7 +396,7 @@ describe('Sourcerer Hooks', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-        { dataTable: dataTableReducer },
+
         kibanaObservable,
         storage
       );
@@ -439,7 +438,7 @@ describe('Sourcerer Hooks', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-        { dataTable: dataTableReducer },
+
         kibanaObservable,
         storage
       );
@@ -482,7 +481,7 @@ describe('Sourcerer Hooks', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-        { dataTable: dataTableReducer },
+
         kibanaObservable,
         storage
       );
@@ -529,7 +528,7 @@ describe('Sourcerer Hooks', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-        { dataTable: dataTableReducer },
+
         kibanaObservable,
         storage
       );
@@ -578,7 +577,7 @@ describe('Sourcerer Hooks', () => {
             },
           },
           SUB_PLUGINS_REDUCER,
-          { dataTable: dataTableReducer },
+
           kibanaObservable,
           storage
         );

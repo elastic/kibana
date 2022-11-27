@@ -27,7 +27,6 @@ import { networkModel } from '../../store';
 
 import { NetworkTopCountriesTable } from '.';
 import { mockData } from './mock';
-import { dataTableReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -58,7 +57,7 @@ describe('NetworkTopCountries Table Component', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: dataTableReducer },
+
     kibanaObservable,
     storage
   );
@@ -67,7 +66,7 @@ describe('NetworkTopCountries Table Component', () => {
     store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
-      { dataTable: dataTableReducer },
+
       kibanaObservable,
       storage
     );

@@ -23,7 +23,6 @@ import {
 import { mockTheme, mockProps, mockTiDataSources, mockCtiLinksResponse } from './mock';
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
 import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
-import { dataTableReducer } from '../../../common/store/data_table/reducer';
 import { createKibanaContextProviderMock } from '../../../common/lib/kibana/kibana_react.mock';
 
 const MockKibanaContextProvider = createKibanaContextProviderMock();
@@ -45,7 +44,7 @@ describe('CtiEnabledModule', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: dataTableReducer },
+
     kibanaObservable,
     storage
   );
@@ -55,7 +54,7 @@ describe('CtiEnabledModule', () => {
     store = createStore(
       myState,
       SUB_PLUGINS_REDUCER,
-      { dataTable: dataTableReducer },
+
       kibanaObservable,
       storage
     );

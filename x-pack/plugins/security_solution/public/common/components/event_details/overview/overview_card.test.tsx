@@ -19,7 +19,6 @@ import { SeverityBadge } from '../../../../detections/components/rules/severity_
 import type { State } from '../../../store';
 import { createStore } from '../../../store';
 import { TimelineId } from '../../../../../common/types';
-import { dataTableReducer } from '../../../store/data_table/reducer';
 
 const state: State = {
   ...mockGlobalState,
@@ -38,7 +37,7 @@ const { storage } = createSecuritySolutionStorageMock();
 const store = createStore(
   state,
   SUB_PLUGINS_REDUCER,
-  { dataTable: dataTableReducer },
+
   kibanaObservable,
   storage
 );

@@ -21,7 +21,6 @@ import {
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
 import { mockTheme } from './mock';
-import { dataTableReducer } from '../../../common/store/data_table/reducer';
 import { createKibanaContextProviderMock } from '../../../common/lib/kibana/kibana_react.mock';
 
 const MockKibanaContextProvider = createKibanaContextProviderMock();
@@ -35,7 +34,7 @@ describe('CtiDisabledModule', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: dataTableReducer },
+
     kibanaObservable,
     storage
   );
@@ -45,7 +44,7 @@ describe('CtiDisabledModule', () => {
     store = createStore(
       myState,
       SUB_PLUGINS_REDUCER,
-      { dataTable: dataTableReducer },
+
       kibanaObservable,
       storage
     );

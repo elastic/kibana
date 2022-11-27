@@ -24,7 +24,6 @@ import { HostsTableType } from '../../store/model';
 import { HostsTable } from '.';
 import { mockData } from './mock';
 import { render } from '@testing-library/react';
-import { dataTableReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -59,7 +58,7 @@ describe('Hosts Table', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: dataTableReducer },
+
     kibanaObservable,
     storage
   );
@@ -69,7 +68,7 @@ describe('Hosts Table', () => {
     store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
-      { dataTable: dataTableReducer },
+
       kibanaObservable,
       storage
     );

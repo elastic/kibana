@@ -26,7 +26,6 @@ import { networkModel } from '../../store';
 import { UsersTable } from '.';
 import { mockUsersData } from './mock';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
-import { dataTableReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -38,7 +37,7 @@ describe('Users Table Component', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: dataTableReducer },
+
     kibanaObservable,
     storage
   );
@@ -48,7 +47,7 @@ describe('Users Table Component', () => {
     store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
-      { dataTable: dataTableReducer },
+
       kibanaObservable,
       storage
     );

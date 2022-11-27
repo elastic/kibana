@@ -45,7 +45,6 @@ import { EntityType } from '@kbn/timelines-plugin/common';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { SourcererScopeName } from '../sourcerer/model';
 import { TableId } from '../../../../common/types';
-import { dataTableReducer } from './reducer';
 
 jest.mock('../../../timelines/containers/local_storage');
 
@@ -57,7 +56,7 @@ describe('epicLocalStorage', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: dataTableReducer },
+
     kibanaObservable,
     storage
   );
@@ -68,7 +67,7 @@ describe('epicLocalStorage', () => {
     store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
-      { dataTable: dataTableReducer },
+
       kibanaObservable,
       storage
     );

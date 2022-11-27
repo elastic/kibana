@@ -27,7 +27,6 @@ import { createStore } from '../../../common/store';
 import { useStateSyncingActions } from '../../../resolver/view/use_state_syncing_actions';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { TableId } from '../../../../common/types';
-import { dataTableReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/containers/use_full_screen', () => ({
   useGlobalFullScreen: jest.fn(),
@@ -136,7 +135,7 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-            { dataTable: dataTableReducer },
+
             kibanaObservable,
             storage
           )}
@@ -220,7 +219,7 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-            { dataTable: dataTableReducer },
+
             kibanaObservable,
             storage
           )}
@@ -263,7 +262,7 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-            { dataTable: dataTableReducer },
+
             kibanaObservable,
             storage
           )}
@@ -305,7 +304,7 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-            { dataTable: dataTableReducer },
+
             kibanaObservable,
             storage
           )}

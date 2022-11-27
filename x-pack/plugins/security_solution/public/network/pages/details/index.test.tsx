@@ -23,7 +23,6 @@ import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
 import { NetworkDetails } from '.';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
-import { dataTableReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn().mockReturnValue({
@@ -156,7 +155,7 @@ describe('Network Details', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: dataTableReducer },
+
     kibanaObservable,
     storage
   );
@@ -165,7 +164,7 @@ describe('Network Details', () => {
     store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
-      { dataTable: dataTableReducer },
+
       kibanaObservable,
       storage
     );

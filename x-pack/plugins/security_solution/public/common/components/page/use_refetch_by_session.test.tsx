@@ -21,7 +21,6 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { useRefetchByRestartingSession } from './use_refetch_by_session';
 import { inputsActions } from '../../store/actions';
 import type { Refetch } from '../../store/inputs/model';
-import { dataTableReducer } from '../../store/data_table/reducer';
 
 const state: State = mockGlobalState;
 
@@ -29,7 +28,7 @@ const { storage } = createSecuritySolutionStorageMock();
 const store = createStore(
   state,
   SUB_PLUGINS_REDUCER,
-  { dataTable: dataTableReducer },
+
   kibanaObservable,
   storage
 );

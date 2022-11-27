@@ -35,7 +35,6 @@ import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
 import { mount } from 'enzyme';
 import type { UseFieldBrowserOptionsProps } from '../../fields_browser';
-import { dataTableReducer } from '../../../../common/store/data_table/reducer';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/components/user_privileges', () => {
@@ -257,7 +256,7 @@ describe('Body', () => {
       const store = createStore(
         state,
         SUB_PLUGINS_REDUCER,
-        { dataTable: dataTableReducer },
+
         kibanaObservable,
         storage
       );
@@ -339,7 +338,7 @@ describe('Body', () => {
       const store = createStore(
         state,
         SUB_PLUGINS_REDUCER,
-        { dataTable: dataTableReducer },
+
         kibanaObservable,
         storage
       );

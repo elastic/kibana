@@ -19,7 +19,6 @@ import '../../../common/mock/match_media';
 import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
 import { NetworkKpiComponent } from '.';
-import { dataTableReducer } from '../../../common/store/data_table/reducer';
 
 describe('NetworkKpiComponent', () => {
   const state: State = mockGlobalState;
@@ -37,7 +36,7 @@ describe('NetworkKpiComponent', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: dataTableReducer },
+
     kibanaObservable,
     storage
   );
@@ -46,7 +45,7 @@ describe('NetworkKpiComponent', () => {
     store = createStore(
       state,
       SUB_PLUGINS_REDUCER,
-      { dataTable: dataTableReducer },
+
       kibanaObservable,
       storage
     );

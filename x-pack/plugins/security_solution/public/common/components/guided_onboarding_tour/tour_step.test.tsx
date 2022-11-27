@@ -15,7 +15,6 @@ import { TimelineId } from '../../../../common/types';
 import { createStore } from '../../store';
 import { kibanaObservable } from '@kbn/timelines-plugin/public/mock';
 import { createSecuritySolutionStorageMock } from '@kbn/timelines-plugin/public/mock/mock_local_storage';
-import { dataTableReducer } from '../../store/data_table/reducer';
 
 jest.mock('./tour');
 const mockTourStep = jest
@@ -277,7 +276,7 @@ describe('SecurityTourStep', () => {
     const mockStore = createStore(
       mockstate,
       SUB_PLUGINS_REDUCER,
-      { dataTable: dataTableReducer },
+
       kibanaObservable,
       storage
     );

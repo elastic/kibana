@@ -16,7 +16,6 @@ import {
 } from '../../mock';
 import type { State } from '../../store';
 import { createStore } from '../../store';
-import { dataTableReducer } from '../../store/data_table/reducer';
 import type { LensAttributes } from './types';
 
 export const queryFromSearchBar = {
@@ -62,7 +61,7 @@ export const mockCreateStoreWithQueryFilters = () => {
   return createStore(
     myState,
     SUB_PLUGINS_REDUCER,
-    { dataTable: dataTableReducer },
+
     kibanaObservable,
     storage
   );

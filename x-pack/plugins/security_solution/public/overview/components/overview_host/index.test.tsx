@@ -24,7 +24,6 @@ import { createStore } from '../../../common/store';
 import { useHostOverview } from '../../containers/overview_host';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { render } from '@testing-library/react';
-import { dataTableReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to');
@@ -71,7 +70,7 @@ describe('OverviewHost', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: dataTableReducer },
+
     kibanaObservable,
     storage
   );
@@ -84,7 +83,7 @@ describe('OverviewHost', () => {
     store = createStore(
       myState,
       SUB_PLUGINS_REDUCER,
-      { dataTable: dataTableReducer },
+
       kibanaObservable,
       storage
     );

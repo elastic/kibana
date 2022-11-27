@@ -27,7 +27,6 @@ import { ALL_VALUES_ZEROS_TITLE } from '../../../../common/components/charts/tra
 import { useGetUserCasesPermissions } from '../../../../common/lib/kibana';
 import { useTimelineEvents } from '../../../../common/components/events_viewer/use_timelines_events';
 import { TableId } from '../../../../../common/types';
-import { dataTableReducer } from '../../../../common/store/data_table/reducer';
 import { createStore } from '../../../../common/store';
 
 jest.mock('../../../../common/lib/kibana');
@@ -83,7 +82,7 @@ describe('PreviewHistogram', () => {
       },
     },
     SUB_PLUGINS_REDUCER,
-    { dataTable: dataTableReducer },
+
     kibanaObservable,
     storage
   );

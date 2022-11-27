@@ -25,7 +25,6 @@ import { CASES_FEATURE_ID } from '../../../../common/constants';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { allCasesCapabilities, allCasesPermissions } from '../../../cases_test_utils';
 import { InputsModelId } from '../../store/inputs/constants';
-import { dataTableReducer } from '../../store/data_table/reducer';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -61,7 +60,7 @@ describe('VisualizationActions', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: dataTableReducer },
+
     kibanaObservable,
     storage
   );
@@ -128,7 +127,7 @@ describe('VisualizationActions', () => {
     store = createStore(
       myState,
       SUB_PLUGINS_REDUCER,
-      { dataTable: dataTableReducer },
+
       kibanaObservable,
       storage
     );

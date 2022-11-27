@@ -23,7 +23,6 @@ import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { EventDetailsPanel } from './event_details';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
-import { dataTableReducer } from '../../../common/store/data_table/reducer';
 import type { ExpandedDetailTimeline } from '../../../../common/types';
 
 jest.mock('../../../common/containers/use_search_strategy', () => ({
@@ -46,7 +45,7 @@ describe('Details Panel Component', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-    { dataTable: dataTableReducer },
+
     kibanaObservable,
     storage
   );
@@ -113,7 +112,7 @@ describe('Details Panel Component', () => {
       store = createStore(
         state,
         SUB_PLUGINS_REDUCER,
-        { dataTable: dataTableReducer },
+
         kibanaObservable,
         storage
       );
@@ -168,7 +167,7 @@ describe('Details Panel Component', () => {
       store = createStore(
         mockState,
         SUB_PLUGINS_REDUCER,
-        { dataTable: dataTableReducer },
+
         kibanaObservable,
         storage
       );
@@ -238,7 +237,7 @@ describe('Details Panel Component', () => {
       store = createStore(
         newState,
         SUB_PLUGINS_REDUCER,
-        { dataTable: dataTableReducer },
+
         kibanaObservable,
         storage
       );
@@ -270,7 +269,7 @@ describe('Details Panel Component', () => {
       store = createStore(
         mockState,
         SUB_PLUGINS_REDUCER,
-        { dataTable: dataTableReducer },
+
         kibanaObservable,
         storage
       );
@@ -330,7 +329,7 @@ describe('Details Panel Component', () => {
       store = createStore(
         mockState,
         SUB_PLUGINS_REDUCER,
-        { dataTable: dataTableReducer },
+
         kibanaObservable,
         storage
       );
@@ -377,7 +376,7 @@ describe('Details Panel Component', () => {
       store = createStore(
         mockState,
         SUB_PLUGINS_REDUCER,
-        { dataTable: dataTableReducer },
+
         kibanaObservable,
         storage
       );
