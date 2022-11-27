@@ -46,7 +46,7 @@ exports[`guide card snapshots should render use case card component for security
     />
   }
   isDarkTheme={false}
-  title="Defend my environment"
+  title="Protect my environment"
   useCase="security"
 />
 `;

@@ -56,7 +56,7 @@ const constants: GuideCardConstants = {
   security: {
     i18nTexts: {
       title: i18n.translate('guidedOnboardingPackage.gettingStarted.guideCard.security.cardTitle', {
-        defaultMessage: 'Defend my environment',
+        defaultMessage: 'Protect my environment',
       }),
       description: i18n.translate(
         'guidedOnboardingPackage.gettingStarted.guideCard.security.cardDescription',
