@@ -19,7 +19,7 @@ export const securityConfig: GuideConfig = {
     path: '/dashboards',
   },
   description: i18n.translate('guidedOnboarding.securityGuide.description', {
-    defaultMessage: `We'll help you get set up quickly, using Elastic's out-of-the-box integrations.`,
+    defaultMessage: `We'll help you get set up quickly, using Elastic Defend.`,
   }),
   steps: [
     {
@@ -29,16 +29,17 @@ export const securityConfig: GuideConfig = {
       }),
       descriptionList: [
         i18n.translate('guidedOnboarding.securityGuide.addDataStep.description1', {
-          defaultMessage: 'Select the Elastic Defend integration to add your data.',
+          defaultMessage: 'Use Elastic Defend to add your data.',
         }),
         i18n.translate('guidedOnboarding.securityGuide.addDataStep.description2', {
-          defaultMessage: 'Confirm your incoming data.',
+          defaultMessage: 'See data coming in to your SIEM.',
         }),
       ],
       integration: 'endpoint',
       location: {
         appID: 'integrations',
-        path: '/browse/security',
+        // path: '/browse/security', Skipping strait to the Elastic Defend page - GW
+        path: 'detail/endpoint-8.5.0/overview', 
       },
     },
     {
@@ -48,20 +49,20 @@ export const securityConfig: GuideConfig = {
       }),
       descriptionList: [
         i18n.translate('guidedOnboarding.securityGuide.rulesStep.description1', {
-          defaultMessage: 'Load the prebuilt rules.',
+          defaultMessage: 'Load the Elastic prebuilt rules.',
         }),
         i18n.translate('guidedOnboarding.securityGuide.rulesStep.description2', {
-          defaultMessage: 'Select and enable rules to generate alerts.',
+          defaultMessage: 'Select and enable rules.',
         }),
       ],
       manualCompletion: {
         title: i18n.translate('guidedOnboarding.securityGuide.rulesStep.manualCompletion.title', {
-          defaultMessage: 'Continue with the tour',
+          defaultMessage: 'Continue with the guide',
         }),
         description: i18n.translate(
           'guidedOnboarding.securityGuide.rulesStep.manualCompletion.description',
           {
-            defaultMessage: 'After you’ve enabled the rules you want, click here to continue.',
+            defaultMessage: 'After you’ve enabled the rules you need, continue.',
           }
         ),
       },
@@ -89,12 +90,12 @@ export const securityConfig: GuideConfig = {
       },
       manualCompletion: {
         title: i18n.translate('guidedOnboarding.securityGuide.alertsStep.manualCompletion.title', {
-          defaultMessage: 'Continue with the tour',
+          defaultMessage: 'Continue the guide',
         }),
         description: i18n.translate(
           'guidedOnboarding.securityGuide.alertsStep.manualCompletion.description',
           {
-            defaultMessage: `After you've explored the case you created, click here to continue.`,
+            defaultMessage: `After you've explored the case, continue.`,
           }
         ),
       },
