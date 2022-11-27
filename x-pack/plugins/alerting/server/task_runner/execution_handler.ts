@@ -139,13 +139,10 @@ export class ExecutionHandler<
 
       this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
 
-      for (const { action, alert, alertId, actionGroup, state } of executables) {
+      for (const { action, alert } of executables) {
         const { actionTypeId } = action;
-
-        if (!this.isRecoveredAlert(actionGroup)) {
-          alert.updateLastScheduledActions(action.group as ActionGroupIds);
-          alert.unscheduleActions();
-        }
+        const actionGroup = action.group as ActionGroupIds;
+        const state = alert.getScheduledActionOptions()?.state || {};
 
         ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
 
@@ -202,7 +199,7 @@ export class ExecutionHandler<
               alertName: this.rule.name,
               spaceId,
               tags: this.rule.tags,
-              alertInstanceId: alertId,
+              alertInstanceId: alert.getId(),
               alertActionGroup: actionGroup,
               alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
               context: alert.getContext(),
@@ -224,13 +221,15 @@ export class ExecutionHandler<
         logActions.push({
           id: action.id,
           typeId: action.actionTypeId,
-          alertId,
+          alertId: alert.getId(),
           alertGroup: action.group,
         });
 
         if (this.isRecoveredAlert(actionGroup)) {
           alert.scheduleActions(action.group as ActionGroupIds);
         } else {
+          alert.updateLastScheduledActions(action.group as ActionGroupIds);
+          alert.unscheduleActions();
           alert.addScheduledAction(action.id);
         }
       }
@@ -268,16 +267,9 @@ export class ExecutionHandler<
         if (action.group === actionGroup && !this.isAlertMuted(alertId)) {
           if (
             this.isRecoveredAlert(action.group) ||
-            this.isExecutableActiveAlert({ alertId, alert, action })
+            this.isExecutableActiveAlert({ alert, action })
           ) {
-            executables.push({
-              summary: false,
-              action,
-              alert,
-              alertId,
-              actionGroup,
-              state: alert.getScheduledActionOptions()?.state || {},
-            });
+            executables.push({ action, alert });
           }
         }
       }
@@ -289,6 +281,10 @@ export class ExecutionHandler<
   private getActionGroup(alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>) {
     return alert.getScheduledActionOptions()?.actionGroup || this.ruleType.recoveryActionGroup.id;
   }
+
+  // private isSummaryAction(action: RuleAction) {
+  //   return action.frequency?.summary || false;
+  // }
 
   private isRecoveredAlert(actionGroup: string) {
     return actionGroup === this.ruleType.recoveryActionGroup.id;
@@ -394,14 +390,13 @@ export class ExecutionHandler<
   }
 
   private isExecutableActiveAlert({
-    alertId,
     alert,
     action,
   }: {
-    alertId: string;
     alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
     action: RuleAction;
   }) {
+    const alertId = alert.getId();
     const { rule, ruleLabel, logger } = this;
     const notifyWhen = action.frequency?.notifyWhen || rule.notifyWhen;
 
