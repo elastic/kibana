@@ -9,10 +9,11 @@
 import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import type { FileJSON, FileImageMetadata } from '../../../common';
+import { base64dLogo } from '@kbn/shared-ux-file-image-mocks';
+import type { FileImageMetadata } from '@kbn/shared-ux-file-image-types';
+import type { FileJSON } from '../../../common';
 import { FilesClient, FilesClientResponses } from '../../types';
 import { register } from '../stories_shared';
-import { base64dLogo } from '../image/image.constants.stories';
 import { FilesContext } from '../context';
 import { FilePicker, Props as FilePickerProps } from './file_picker';
 
