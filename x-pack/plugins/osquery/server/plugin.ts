@@ -11,7 +11,6 @@ import type {
   CoreStart,
   Plugin,
   Logger,
-  SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
