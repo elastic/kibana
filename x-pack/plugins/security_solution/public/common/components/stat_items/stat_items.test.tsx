@@ -57,13 +57,7 @@ describe('Stat Items Component', () => {
   const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-
-    kibanaObservable,
-    storage
-  );
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const testProps = {
     description: 'HOSTS',
     fields: [{ key: 'hosts', value: null, color: '#6092C0', icon: 'cross' }],

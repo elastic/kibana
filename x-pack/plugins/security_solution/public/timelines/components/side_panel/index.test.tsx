@@ -45,7 +45,6 @@ describe('Details Panel Component', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-
     kibanaObservable,
     storage
   );

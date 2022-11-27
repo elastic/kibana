@@ -82,7 +82,6 @@ describe('PreviewHistogram', () => {
       },
     },
     SUB_PLUGINS_REDUCER,
-
     kibanaObservable,
     storage
   );

@@ -57,13 +57,7 @@ describe('VisualizationActions', () => {
     state: state.inputs,
   };
 
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const props = {
     lensAttributes: dnsTopDomainsLensAttributes,
     queryId: 'networkDnsHistogramQuery',

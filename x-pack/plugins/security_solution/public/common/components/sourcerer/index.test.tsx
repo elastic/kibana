@@ -719,13 +719,7 @@ describe('Sourcerer component', () => {
 describe('sourcerer on alerts page or rules details page', () => {
   let wrapper: ReactWrapper;
   const { storage } = createSecuritySolutionStorageMock();
-  store = createStore(
-    mockGlobalState,
-    SUB_PLUGINS_REDUCER,
-
-    kibanaObservable,
-    storage
-  );
+  store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const testProps = {
     scope: sourcererModel.SourcererScopeName.detections,
   };
@@ -794,13 +788,7 @@ describe('sourcerer on alerts page or rules details page', () => {
 describe('timeline sourcerer', () => {
   let wrapper: ReactWrapper;
   const { storage } = createSecuritySolutionStorageMock();
-  store = createStore(
-    mockGlobalState,
-    SUB_PLUGINS_REDUCER,
-
-    kibanaObservable,
-    storage
-  );
+  store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const testProps = {
     scope: sourcererModel.SourcererScopeName.timeline,
   };

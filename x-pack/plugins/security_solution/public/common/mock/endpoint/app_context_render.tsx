@@ -204,14 +204,10 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     app: experimentalFeaturesReducer,
   };
 
-  const store = createStore(
-    mockGlobalState,
-    storeReducer,
-
-    kibanaObservable,
-    storage,
-    [...managementMiddlewareFactory(coreStart, depsStart), middlewareSpy.actionSpyMiddleware]
-  );
+  const store = createStore(mockGlobalState, storeReducer, kibanaObservable, storage, [
+    ...managementMiddlewareFactory(coreStart, depsStart),
+    middlewareSpy.actionSpyMiddleware,
+  ]);
 
   const queryClient = new QueryClient({
     defaultOptions: {

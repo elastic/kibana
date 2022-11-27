@@ -89,7 +89,6 @@ describe('OverviewNetwork', () => {
   let store = createStore(
     state,
     SUB_PLUGINS_REDUCER,
-
     kibanaObservable,
     storage
   );

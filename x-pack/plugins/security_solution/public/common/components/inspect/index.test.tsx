@@ -41,13 +41,7 @@ describe('Inspect Button', () => {
     state: state.inputs,
   };
 
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   describe('Render', () => {
     beforeEach(() => {

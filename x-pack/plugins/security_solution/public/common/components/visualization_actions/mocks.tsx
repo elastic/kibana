@@ -58,13 +58,7 @@ export const mockCreateStoreWithQueryFilters = () => {
       filters: filterFromSearchBar,
     },
   };
-  return createStore(
-    myState,
-    SUB_PLUGINS_REDUCER,
-
-    kibanaObservable,
-    storage
-  );
+  return createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 };
 
 export const wrapper = ({ children }: { children: React.ReactElement }) => (
