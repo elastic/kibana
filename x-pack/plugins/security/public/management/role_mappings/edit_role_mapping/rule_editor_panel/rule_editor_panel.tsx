@@ -120,8 +120,8 @@ export class RuleEditorPanel extends Component<Props, State> {
               <EuiErrorBoundary>
                 <Fragment>
                   {validationWarning}
-                  {this.getEditor()}
                   {this.conditionallyRenderEditModeToggle()}
+                  {this.getEditor()}
                   {this.getConfirmModeChangePrompt()}
                 </Fragment>
               </EuiErrorBoundary>
@@ -136,8 +136,8 @@ export class RuleEditorPanel extends Component<Props, State> {
     if (!this.props.readOnly) {
       return (
         <>
-          <EuiSpacer size="xl" />
           {this.getModeToggle()}
+          <EuiSpacer size="m" />
         </>
       );
     }
