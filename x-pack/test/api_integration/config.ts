@@ -41,6 +41,8 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         `--xpack.fleet.packages.0.version=1.2.0-preview1`,
         `--xpack.fleet.packages.1.name=kibana`,
         `--xpack.fleet.packages.1.version=2.1.0-preview1`,
+        `--xpack.fleet.packages.2.name=logstash`,
+        `--xpack.fleet.packages.2.version=2.1.1-preview1`,
       ],
     },
     esTestCluster: {
