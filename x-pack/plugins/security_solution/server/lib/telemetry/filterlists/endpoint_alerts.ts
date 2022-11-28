@@ -53,12 +53,14 @@ const allowlistBaseEventFields: AllowlistFields = {
     hash: true,
     malware_signature: true,
     pe: true,
-    device: {
-      volume_device_type: true,
+    Ext: {
+      device: {
+        volume_device_type: true,
+      },
+      load_index: true,
+      relative_file_creation_time: true,
+      relative_file_name_modify_time: true,
     },
-    load_index: true,
-    relative_file_creation_time: true,
-    relative_file_name_modify_time: true,
   },
   dns: true,
   event: true,
