@@ -37,7 +37,7 @@ import {
   HOST_OS_VERSION,
   NETWORK_CONNECTION_TYPE,
   SERVICE_VERSION,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 interface Props {
   latencyChartHeight: number;
   rowDirection: 'column' | 'row';

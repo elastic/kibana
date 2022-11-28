@@ -5,7 +5,6 @@ exports[`render 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="rowCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Geometry label"
@@ -20,7 +19,6 @@ exports[`render 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="rowCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Spatial relation"
@@ -76,7 +74,6 @@ exports[`should render error message 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="rowCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Geometry label"
@@ -91,7 +88,6 @@ exports[`should render error message 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="rowCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Spatial relation"

@@ -10,10 +10,13 @@ import { FileStatus } from '@kbn/files-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
+  tableListTitle: i18n.translate('filesManagement.table.title', { defaultMessage: 'Files' }),
+  tableListDescription: i18n.translate('filesManagement.table.description', {
+    defaultMessage: 'Manage files stored in Kibana.',
+  }),
   titleColumnName: i18n.translate('filesManagement.table.titleColumnName', {
     defaultMessage: 'Name',
   }),
-  tableListTitle: i18n.translate('filesManagement.table.title', { defaultMessage: 'Files' }),
   entityName: i18n.translate('filesManagement.entityName.title', { defaultMessage: 'file' }),
   retry: i18n.translate('filesManagement.button.retry', {
     defaultMessage: 'Retry',

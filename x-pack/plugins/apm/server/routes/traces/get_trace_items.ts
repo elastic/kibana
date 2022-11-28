@@ -17,7 +17,7 @@ import {
   SPAN_DURATION,
   TRACE_ID,
   TRANSACTION_DURATION,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { getLinkedChildrenCountBySpanId } from '../span_links/get_linked_children';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { APMConfig } from '../..';

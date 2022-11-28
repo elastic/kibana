@@ -9,7 +9,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
-import { getElasticLogo } from '@kbn/presentation-util-plugin/common/lib';
+import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
 import { getImageRenderer } from '../image_renderer';
 import { ImageMode } from '../../../common';
 

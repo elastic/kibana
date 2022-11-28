@@ -29,6 +29,7 @@ import type {
 import { FleetServerHostUnauthorizedError } from '../errors';
 
 import { agentPolicyService } from './agent_policy';
+import { escapeSearchQueryPhrase } from './saved_object';
 
 function savedObjectToFleetServerHost(so: SavedObject<FleetServerHostSOAttributes>) {
   const data = { ...so.attributes };
@@ -86,6 +87,25 @@ export async function listFleetServerHosts(soClient: SavedObjectsClientContract)
   const res = await soClient.find<FleetServerHostSOAttributes>({
     type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
     perPage: SO_SEARCH_LIMIT,
+  });
+
+  return {
+    items: res.saved_objects.map<FleetServerHost>(savedObjectToFleetServerHost),
+    total: res.total,
+    page: res.page,
+    perPage: res.per_page,
+  };
+}
+
+export async function listFleetServerHostsForProxyId(
+  soClient: SavedObjectsClientContract,
+  proxyId: string
+) {
+  const res = await soClient.find<FleetServerHostSOAttributes>({
+    type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+    perPage: SO_SEARCH_LIMIT,
+    searchFields: ['proxy_id'],
+    search: escapeSearchQueryPhrase(proxyId),
   });
 
   return {
