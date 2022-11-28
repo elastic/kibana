@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ReactElement, useMemo } from 'react';
+import { ReactElement, useMemo, useEffect, useState } from 'react';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import React, { memo } from 'react';
 import {
   EuiButtonIcon,
@@ -18,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { TypedLensByValueInput, Suggestion } from '@kbn/lens-plugin/public';
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
 import { useChartPanels } from './use_chart_panels';
@@ -47,6 +48,8 @@ export interface ChartProps {
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
+  setChartInfo?: (chart: UnifiedHistogramChartContext | undefined) => void;
+  columns?: string[];
   breakdown?: UnifiedHistogramBreakdownContext;
   appendHitsCounter?: ReactElement;
   appendHistogram?: ReactElement;
@@ -69,6 +72,8 @@ export function Chart({
   request,
   hits,
   chart,
+  setChartInfo,
+  columns,
   breakdown,
   appendHitsCounter,
   appendHistogram,
@@ -80,6 +85,8 @@ export function Chart({
   onTotalHitsChange,
   onChartLoad,
 }: ChartProps) {
+  const [suggestion, setSuggestion] = useState<Suggestion | undefined>(undefined);
+
   const {
     showChartOptionsPopover,
     chartRef,
@@ -167,9 +174,40 @@ export function Chart({
         dataView,
         timeInterval: chart?.timeInterval,
         breakdownField: breakdown?.field,
+        suggestion,
       }),
-    [breakdown?.field, chart?.timeInterval, dataView, filters, query]
+    [breakdown?.field, chart?.timeInterval, dataView, filters, query, suggestion]
   );
+
+  useEffect(() => {
+    const getSuggestions = async () => {
+      const { suggestionsApi } = await services.lens.stateHelperApi();
+      const context = {
+        dataViewSpec: dataView.toSpec(),
+        fieldName: '',
+        contextualFields: columns,
+        originatingApp: 'discover',
+        query: isOfAggregateQueryType(query) ? query : undefined,
+      };
+      const currentDataViewId = dataView.id ?? '';
+      const dataViews = {
+        indexPatterns: {
+          [currentDataViewId]: dataView,
+        },
+        indexPatternRefs: [],
+      };
+      const lensSuggestion = isOfAggregateQueryType(query)
+        ? suggestionsApi(context, dataViews)
+        : undefined;
+      if (lensSuggestion?.visualizationId !== 'lnsDatatable') {
+        setSuggestion(lensSuggestion);
+        setChartInfo?.(chart);
+      } else {
+        setChartInfo?.(undefined);
+      }
+    };
+    getSuggestions();
+  }, [chart, columns, dataView, query, services.lens, setChartInfo]);
 
   const onEditVisualization = useMemo(
     () =>

@@ -218,13 +218,13 @@ export const useDiscoverHistogram = ({
   const [chartHidden, setChartHidden] = useState(state.hideChart);
   const chart = useMemo(
     () =>
-      isPlainRecord || !isTimeBased
+      !isTimeBased
         ? undefined
         : {
             hidden: chartHidden,
             timeInterval: state.interval,
           },
-    [chartHidden, isPlainRecord, isTimeBased, state.interval]
+    [chartHidden, isTimeBased, state.interval]
   );
 
   // state.chartHidden is updated before searchSessionId, which can trigger duplicate
@@ -264,6 +264,7 @@ export const useDiscoverHistogram = ({
         hits,
         chart,
         breakdown,
+        columns: state.columns,
         onEditVisualization: canVisualize ? onEditVisualization : undefined,
         onTopPanelHeightChange,
         onChartHiddenChange,

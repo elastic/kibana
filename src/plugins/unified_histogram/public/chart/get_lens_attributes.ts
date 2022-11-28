@@ -15,6 +15,7 @@ import type {
   GenericIndexPatternColumn,
   TermsIndexPatternColumn,
   TypedLensByValueInput,
+  Suggestion,
 } from '@kbn/lens-plugin/public';
 import { fieldSupportsBreakdown } from './field_supports_breakdown';
 
@@ -24,12 +25,14 @@ export const getLensAttributes = ({
   dataView,
   timeInterval,
   breakdownField,
+  suggestion,
 }: {
   filters: Filter[];
   query: Query | AggregateQuery;
   dataView: DataView;
   timeInterval: string | undefined;
   breakdownField: DataViewField | undefined;
+  suggestion: Suggestion | undefined;
 }) => {
   const showBreakdown = breakdownField && fieldSupportsBreakdown(breakdownField);
 
@@ -100,32 +103,28 @@ export const getLensAttributes = ({
       } as TermsIndexPatternColumn,
     };
   }
-
-  return {
-    title: '',
-    references: [
-      {
-        id: dataView.id ?? '',
-        name: 'indexpattern-datasource-current-indexpattern',
-        type: 'index-pattern',
-      },
-      {
-        id: dataView.id ?? '',
-        name: 'indexpattern-datasource-layer-unifiedHistogram',
-        type: 'index-pattern',
-      },
-    ],
-    state: {
-      datasourceStates: {
-        formBased: {
-          layers: {
-            unifiedHistogram: { columnOrder, columns },
+  const suggestionDatasourceState = Object.assign({}, suggestion?.datasourceState);
+  const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
+  const datasourceStates =
+    suggestion && suggestion.datasourceState
+      ? {
+          [suggestion.datasourceId!]: {
+            ...suggestionDatasourceState,
           },
-        },
-      },
-      filters,
-      query: 'language' in query ? query : { language: 'kuery', query: '' },
-      visualization: {
+        }
+      : {
+          formBased: {
+            layers: {
+              unifiedHistogram: { columnOrder, columns },
+            },
+          },
+        };
+
+  const visualization = suggestion
+    ? {
+        ...suggestionVisualizationState,
+      }
+    : {
         layers: [
           {
             accessors: ['count_column'],
@@ -167,8 +166,28 @@ export const getLensAttributes = ({
           yLeft: true,
           yRight: false,
         },
+      };
+
+  return {
+    title: 'Edit visualization',
+    references: [
+      {
+        id: dataView.id ?? '',
+        name: 'indexpattern-datasource-current-indexpattern',
+        type: 'index-pattern',
       },
+      {
+        id: dataView.id ?? '',
+        name: 'indexpattern-datasource-layer-unifiedHistogram',
+        type: 'index-pattern',
+      },
+    ],
+    state: {
+      datasourceStates,
+      filters,
+      query,
+      visualization,
     },
-    visualizationType: 'lnsXY',
+    visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
   } as TypedLensByValueInput['attributes'];
 };
