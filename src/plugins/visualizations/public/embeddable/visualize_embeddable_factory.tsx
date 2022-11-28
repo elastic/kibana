@@ -280,7 +280,6 @@ export class VisualizeEmbeddableFactory
         title: props.newTitle,
         lastSavedTitle: '',
         getEsType: () => this.type,
-        getDisplayName: this.getDisplayName || (() => this.type),
       },
       false,
       props.isTitleDuplicateConfirmed,

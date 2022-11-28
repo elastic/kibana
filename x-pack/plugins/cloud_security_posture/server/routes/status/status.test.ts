@@ -191,6 +191,7 @@ describe('CspSetupStatus route', () => {
       installedPackagePolicies: 0,
       healthyAgents: 0,
       installedPackageVersion: undefined,
+      isPluginInitialized: false,
     });
   });
 
@@ -231,6 +232,7 @@ describe('CspSetupStatus route', () => {
       installedPackagePolicies: 3,
       healthyAgents: 0,
       installedPackageVersion: '0.0.14',
+      isPluginInitialized: false,
     });
   });
 
@@ -280,6 +282,7 @@ describe('CspSetupStatus route', () => {
       installedPackagePolicies: 3,
       healthyAgents: 1,
       installedPackageVersion: '0.0.14',
+      isPluginInitialized: false,
     });
   });
 
@@ -317,6 +320,7 @@ describe('CspSetupStatus route', () => {
       latestPackageVersion: '0.0.14',
       installedPackagePolicies: 0,
       healthyAgents: 0,
+      isPluginInitialized: false,
     });
   });
 
@@ -367,6 +371,7 @@ describe('CspSetupStatus route', () => {
       installedPackagePolicies: 1,
       healthyAgents: 0,
       installedPackageVersion: '0.0.14',
+      isPluginInitialized: false,
     });
   });
 
@@ -424,6 +429,7 @@ describe('CspSetupStatus route', () => {
       installedPackagePolicies: 1,
       healthyAgents: 1,
       installedPackageVersion: '0.0.14',
+      isPluginInitialized: false,
     });
   });
 
@@ -480,6 +486,7 @@ describe('CspSetupStatus route', () => {
       installedPackagePolicies: 1,
       healthyAgents: 1,
       installedPackageVersion: '0.0.14',
+      isPluginInitialized: false,
     });
   });
 });
