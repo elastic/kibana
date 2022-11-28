@@ -22,17 +22,14 @@ export const checkIndexStatus = async (
       size: 1,
     });
 
-    if (queryResult.hits.hits.length) {
-      return 'exists';
-    }
-
-    return 'empty';
+    return queryResult.hits.hits.length ? 'not-empty' : 'empty';
   } catch (e) {
     logger.debug(e);
     if (e?.meta?.body?.error?.type === 'security_exception') {
       return 'unprivileged';
     }
 
+    // Assuming index doesn't exist
     return 'empty';
   }
 };

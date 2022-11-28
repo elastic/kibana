@@ -70,7 +70,7 @@ const calculateCspStatusCode = (
   // We check privileges only for the relevant indices for our pages to appear
   if (indicesStatus.findingsLatest === 'unprivileged' || indicesStatus.score === 'unprivileged')
     return 'unprivileged';
-  if (indicesStatus.findingsLatest === 'exists') return 'indexed';
+  if (indicesStatus.findingsLatest === 'not-empty') return 'indexed';
   if (installedCspPackagePolicies === 0) return 'not-installed';
   if (healthyAgents === 0) return 'not-deployed';
   if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
@@ -118,11 +118,6 @@ const getCspStatus = async ({
   const latestCspPackageVersion = latestCspPackage.version;
 
   const MIN_DATE = 0;
-  const indicesStatus = {
-    findingsLatest: findingsLatestIndexStatus,
-    findings: findingsIndexStatus,
-    score: scoreIndexStatus,
-  };
   const indicesDetails = [
     {
       index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -139,7 +134,11 @@ const getCspStatus = async ({
   ];
 
   const status = calculateCspStatusCode(
-    indicesStatus,
+    {
+      findingsLatest: findingsLatestIndexStatus,
+      findings: findingsIndexStatus,
+      score: scoreIndexStatus,
+    },
     installedPackagePoliciesTotal,
     healthyAgents,
     calculateDiffFromNowInMinutes(installation?.install_started_at || MIN_DATE)

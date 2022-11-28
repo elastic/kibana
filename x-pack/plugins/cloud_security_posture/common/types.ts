@@ -59,7 +59,11 @@ export type CspStatusCode =
   | 'not-deployed' // no healthy agents were deployed
   | 'not-installed'; // number of installed csp integrations is 0;
 
-export type IndexStatus = 'exists' | 'empty' | 'unprivileged';
+export type IndexStatus =
+  | 'not-empty' // Index contains documents
+  | 'empty' // Index doesn't contain documents (or doesn't exists)
+  | 'unprivileged'; // User doesn't have access to query the index
+
 export interface IndexDetails {
   index: string;
   status: IndexStatus;
