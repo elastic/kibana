@@ -1499,10 +1499,10 @@
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@8.4.0-canary.1":
-  version "8.4.0-canary.1"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.4.0-canary.1.tgz#af951826a67eb8a97562014e90447087c3bccee9"
-  integrity sha512-BWC3u2SfNBZBPUB/M7Qt6jl/8QcnG1+tzYto4pTZW/AaQn6raTyKtdta78Vi9Tj83MzA2skz7Y0FfCmPudwPsQ==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@8.5.0-canary.1":
+  version "8.5.0-canary.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.5.0-canary.1.tgz#3e2f40bc2e58d4f1c1cc391b2d594db59c5e0cd8"
+  integrity sha512-WmiK5A04tUwpAdbPeLo9ONV/T6foYYa1EjGQFxTPmEPLyY9s0B14o1JAJ7OnzQe9qmDahSJksSA1xLr0LdutmA==
   dependencies:
     "@elastic/transport" "^8.2.0"
     tslib "^2.4.0"
@@ -3457,6 +3457,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-test-helpers-kbn-server@link:bazel-bin/packages/core/test-helpers/core-test-helpers-kbn-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-test-helpers-so-type-serializer@link:bazel-bin/packages/core/test-helpers/core-test-helpers-so-type-serializer":
   version "0.0.0"
   uid ""
@@ -3894,6 +3898,22 @@
   uid ""
 
 "@kbn/shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-file-image-mocks@link:bazel-bin/packages/shared-ux/file/image/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-file-image-types@link:bazel-bin/packages/shared-ux/file/image/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-file-image@link:bazel-bin/packages/shared-ux/file/image/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-file-util@link:bazel-bin/packages/shared-ux/file/util":
   version "0.0.0"
   uid ""
 
