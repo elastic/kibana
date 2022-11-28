@@ -3921,6 +3921,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-file-types@link:bazel-bin/packages/shared-ux/file/types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-file-upload@link:bazel-bin/packages/shared-ux/file/file_upload/impl":
   version "0.0.0"
   uid ""
@@ -3931,9 +3935,17 @@
 
 "@kbn/shared-ux-link-redirect-app-mocks@link:bazel-bin/packages/shared-ux/link/redirect_app/mocks":
   version "0.0.0"
-"@kbn/shared-ux-link-redirect-app-types@link:bazel-bin/packages/shared-ux/link/redirect_app/types":
-
   uid ""
+
+"@kbn/shared-ux-link-redirect-app-types@link:bazel-bin/packages/shared-ux/link/redirect_app/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-markdown-mocks@link:bazel-bin/packages/shared-ux/markdown/mocks":
   version "0.0.0"
   uid ""
 

@@ -9,42 +9,45 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
-  title: i18n.translate('files.filePicker.title', {
+  title: i18n.translate('sharedUXPackages.filePicker.title', {
     defaultMessage: 'Select a file',
   }),
-  titleMultiple: i18n.translate('files.filePicker.titleMultiple', {
+  titleMultiple: i18n.translate('sharedUXPackages.filePicker.titleMultiple', {
     defaultMessage: 'Select files',
   }),
-  loadingFilesErrorTitle: i18n.translate('files.filePicker.error.loadingTitle', {
+  loadingFilesErrorTitle: i18n.translate('sharedUXPackages.filePicker.error.loadingTitle', {
     defaultMessage: 'Could not load files',
   }),
-  retryButtonLabel: i18n.translate('files.filePicker.error.retryButtonLabel', {
+  retryButtonLabel: i18n.translate('sharedUXPackages.filePicker.error.retryButtonLabel', {
     defaultMessage: 'Retry',
   }),
-  emptyStatePrompt: i18n.translate('files.filePicker.emptyStatePromptTitle', {
+  emptyStatePrompt: i18n.translate('sharedUXPackages.filePicker.emptyStatePromptTitle', {
     defaultMessage: 'Upload your first file',
   }),
-  selectFileLabel: i18n.translate('files.filePicker.selectFileButtonLable', {
+  selectFileLabel: i18n.translate('sharedUXPackages.filePicker.selectFileButtonLable', {
     defaultMessage: 'Select file',
   }),
   selectFilesLabel: (nrOfFiles: number) =>
-    i18n.translate('files.filePicker.selectFilesButtonLable', {
+    i18n.translate('sharedUXPackages.filePicker.selectFilesButtonLable', {
       defaultMessage: 'Select {nrOfFiles} files',
       values: { nrOfFiles },
     }),
-  searchFieldPlaceholder: i18n.translate('files.filePicker.searchFieldPlaceholder', {
+  searchFieldPlaceholder: i18n.translate('sharedUXPackages.filePicker.searchFieldPlaceholder', {
     defaultMessage: 'my-file-*',
   }),
-  emptyFileGridPrompt: i18n.translate('files.filePicker.emptyGridPrompt', {
+  emptyFileGridPrompt: i18n.translate('sharedUXPackages.filePicker.emptyGridPrompt', {
     defaultMessage: 'No files match your filter',
   }),
-  loadMoreButtonLabel: i18n.translate('files.filePicker.loadMoreButtonLabel', {
+  loadMoreButtonLabel: i18n.translate('sharedUXPackages.filePicker.loadMoreButtonLabel', {
     defaultMessage: 'Load more',
   }),
-  clearFilterButton: i18n.translate('files.filePicker.clearFilterButtonLabel', {
+  clearFilterButton: i18n.translate('sharedUXPackages.filePicker.clearFilterButtonLabel', {
     defaultMessage: 'Clear filter',
   }),
-  uploadFilePlaceholderText: i18n.translate('files.filePicker.uploadFilePlaceholderText', {
-    defaultMessage: 'Drag and drop to upload new files',
-  }),
+  uploadFilePlaceholderText: i18n.translate(
+    'sharedUXPackages.filePicker.uploadFilePlaceholderText',
+    {
+      defaultMessage: 'Drag and drop to upload new files',
+    }
+  ),
 };

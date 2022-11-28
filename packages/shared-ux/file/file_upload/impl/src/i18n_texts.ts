@@ -9,32 +9,32 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
-  defaultPickerLabel: i18n.translate('files.fileUpload.defaultFilePickerLabel', {
+  defaultPickerLabel: i18n.translate('sharedUXPackages.fileUpload.defaultFilePickerLabel', {
     defaultMessage: 'Upload a file',
   }),
-  upload: i18n.translate('files.fileUpload.uploadButtonLabel', {
+  upload: i18n.translate('sharedUXPackages.fileUpload.uploadButtonLabel', {
     defaultMessage: 'Upload',
   }),
-  uploading: i18n.translate('files.fileUpload.uploadingButtonLabel', {
+  uploading: i18n.translate('sharedUXPackages.fileUpload.uploadingButtonLabel', {
     defaultMessage: 'Uploading',
   }),
-  uploadComplete: i18n.translate('files.fileUpload.uploadCompleteButtonLabel', {
+  uploadComplete: i18n.translate('sharedUXPackages.fileUpload.uploadCompleteButtonLabel', {
     defaultMessage: 'Upload complete',
   }),
-  retry: i18n.translate('files.fileUpload.retryButtonLabel', {
+  retry: i18n.translate('sharedUXPackages.fileUpload.retryButtonLabel', {
     defaultMessage: 'Retry',
   }),
-  clear: i18n.translate('files.fileUpload.clearButtonLabel', {
+  clear: i18n.translate('sharedUXPackages.fileUpload.clearButtonLabel', {
     defaultMessage: 'Clear',
   }),
-  cancel: i18n.translate('files.fileUpload.cancelButtonLabel', {
+  cancel: i18n.translate('sharedUXPackages.fileUpload.cancelButtonLabel', {
     defaultMessage: 'Cancel',
   }),
-  uploadDone: i18n.translate('files.fileUpload.uploadDoneToolTipContent', {
+  uploadDone: i18n.translate('sharedUXPackages.fileUpload.uploadDoneToolTipContent', {
     defaultMessage: 'Your file was successfully uploaded!',
   }),
   fileTooLarge: (expectedSize: string) =>
-    i18n.translate('files.fileUpload.fileTooLargeErrorMessage', {
+    i18n.translate('sharedUXPackages.fileUpload.fileTooLargeErrorMessage', {
       defaultMessage:
         'File is too large. Maximum size is {expectedSize, plural, one {# byte} other {# bytes} }.',
       values: { expectedSize },

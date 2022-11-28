@@ -16,7 +16,7 @@ import { CreateHandler } from './types';
 
 export const method = 'post' as const;
 
-const rt = {
+export const rt = {
   body: schema.object({
     name: commonSchemas.fileName,
     alt: commonSchemas.fileAlt,

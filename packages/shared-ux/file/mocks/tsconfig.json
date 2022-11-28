@@ -4,11 +4,7 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "outDir": "target_types",
-    "types": [
-      "node",
-      "react",
-      "jest"
-    ]
+    "types": [ ]
   },
   "include": [
     "**/*.ts",
