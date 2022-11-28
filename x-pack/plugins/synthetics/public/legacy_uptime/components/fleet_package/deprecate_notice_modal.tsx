@@ -85,7 +85,7 @@ export const ManageMonitorDocsLink = ({ label }: { label?: string }) => (
 export const ProjectMonitorDocsLink = ({ label }: { label?: string }) => (
   <FormattedMessage
     id="xpack.synthetics.deprecateNoticeModal.automateMonitors"
-    defaultMessage="Automate adding monitors via {link}"
+    defaultMessage="Automate the creation of your monitors using project monitors"
     values={{
       link: (
         <EuiLink
