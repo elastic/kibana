@@ -17,6 +17,7 @@ import {
 import type { UnifiedHistogramChartLoadEvent } from '@kbn/unified-histogram-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { getUiActions } from '../../../../kibana_services';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDataState } from '../../hooks/use_data_state';
@@ -196,15 +197,10 @@ export const useDiscoverHistogram = ({
 
   const onChartHiddenChange = useCallback(
     (chartHidden: boolean) => {
-      // Clear the Lens request adapter when the chart is hidden
-      if (chartHidden) {
-        inspectorAdapters.lensRequests = undefined;
-      }
-
       storage.set(CHART_HIDDEN_KEY, chartHidden);
       stateContainer.setAppState({ hideChart: chartHidden });
     },
-    [inspectorAdapters, stateContainer, storage]
+    [stateContainer, storage]
   );
 
   const onChartLoad = useCallback(
@@ -221,11 +217,21 @@ export const useDiscoverHistogram = ({
       isPlainRecord || !isTimeBased
         ? undefined
         : {
+            title: i18n.translate('discover.histogramTitle', {
+              defaultMessage: 'Discover histogram',
+            }),
             hidden: chartHidden,
             timeInterval: state.interval,
           },
     [chartHidden, isPlainRecord, isTimeBased, state.interval]
   );
+
+  // Clear the Lens request adapter when the chart is hidden
+  useEffect(() => {
+    if (chartHidden || !chart) {
+      inspectorAdapters.lensRequests = undefined;
+    }
+  }, [chart, chartHidden, inspectorAdapters]);
 
   // state.chartHidden is updated before searchSessionId, which can trigger duplicate
   // requests, so instead of using state.chartHidden directly, we update chartHidden

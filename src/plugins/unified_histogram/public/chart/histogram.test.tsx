@@ -24,6 +24,7 @@ jest.spyOn(useTimeRange, 'useTimeRange');
 
 const getMockLensAttributes = () =>
   getLensAttributes({
+    title: 'test',
     filters: [],
     query: {
       language: 'kuery',

@@ -44,8 +44,9 @@ describe('getLensAttributes', () => {
 
   it('should return correct attributes', () => {
     const breakdownField: DataViewField | undefined = undefined;
-    expect(getLensAttributes({ filters, query, dataView, timeInterval, breakdownField }))
-      .toMatchInlineSnapshot(`
+    expect(
+      getLensAttributes({ title: 'test', filters, query, dataView, timeInterval, breakdownField })
+    ).toMatchInlineSnapshot(`
       Object {
         "references": Array [
           Object {
@@ -173,7 +174,7 @@ describe('getLensAttributes', () => {
             "valueLabels": "hide",
           },
         },
-        "title": "",
+        "title": "test",
         "visualizationType": "lnsXY",
       }
     `);
@@ -183,8 +184,9 @@ describe('getLensAttributes', () => {
     const breakdownField: DataViewField | undefined = dataView.fields.find(
       (f) => f.name === 'extension'
     );
-    expect(getLensAttributes({ filters, query, dataView, timeInterval, breakdownField }))
-      .toMatchInlineSnapshot(`
+    expect(
+      getLensAttributes({ title: 'test', filters, query, dataView, timeInterval, breakdownField })
+    ).toMatchInlineSnapshot(`
       Object {
         "references": Array [
           Object {
@@ -330,7 +332,7 @@ describe('getLensAttributes', () => {
             "valueLabels": "hide",
           },
         },
-        "title": "",
+        "title": "test",
         "visualizationType": "lnsXY",
       }
     `);
@@ -340,8 +342,9 @@ describe('getLensAttributes', () => {
     const breakdownField: DataViewField | undefined = dataView.fields.find(
       (f) => f.name === 'scripted'
     );
-    expect(getLensAttributes({ filters, query, dataView, timeInterval, breakdownField }))
-      .toMatchInlineSnapshot(`
+    expect(
+      getLensAttributes({ title: 'test', filters, query, dataView, timeInterval, breakdownField })
+    ).toMatchInlineSnapshot(`
       Object {
         "references": Array [
           Object {
@@ -469,7 +472,7 @@ describe('getLensAttributes', () => {
             "valueLabels": "hide",
           },
         },
-        "title": "",
+        "title": "test",
         "visualizationType": "lnsXY",
       }
     `);

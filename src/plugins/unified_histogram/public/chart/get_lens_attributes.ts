@@ -19,12 +19,14 @@ import type {
 import { fieldSupportsBreakdown } from './field_supports_breakdown';
 
 export const getLensAttributes = ({
+  title,
   filters,
   query,
   dataView,
   timeInterval,
   breakdownField,
 }: {
+  title?: string;
   filters: Filter[];
   query: Query | AggregateQuery;
   dataView: DataView;
@@ -102,7 +104,7 @@ export const getLensAttributes = ({
   }
 
   return {
-    title: '',
+    title,
     references: [
       {
         id: dataView.id ?? '',

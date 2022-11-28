@@ -162,13 +162,14 @@ export function Chart({
   const lensAttributes = useMemo(
     () =>
       getLensAttributes({
+        title: chart?.title,
         filters,
         query,
         dataView,
         timeInterval: chart?.timeInterval,
         breakdownField: breakdown?.field,
       }),
-    [breakdown?.field, chart?.timeInterval, dataView, filters, query]
+    [breakdown?.field, chart?.timeInterval, chart?.title, dataView, filters, query]
   );
 
   const onEditVisualization = useMemo(
