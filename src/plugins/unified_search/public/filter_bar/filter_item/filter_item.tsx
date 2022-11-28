@@ -152,7 +152,7 @@ export function FilterItem(props: FilterItemProps) {
   function getDataTestSubj(labelConfig: LabelOptions) {
     const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
     const valueLabel = isValidLabel(labelConfig) ? labelConfig.title : labelConfig.status;
-    const dataTestSubjValue = valueLabel ? `filter-value-${valueLabel}` : '';
+    const dataTestSubjValue = valueLabel ? `filter-value-${valueLabel.replace(/\s/g, '')}` : '';
     const dataTestSubjNegated = filter.meta.negate ? 'filter-negated' : '';
     const dataTestSubjDisabled = `filter-${isDisabled(labelConfig) ? 'disabled' : 'enabled'}`;
     const dataTestSubjPinned = `filter-${isFilterPinned(filter) ? 'pinned' : 'unpinned'}`;
