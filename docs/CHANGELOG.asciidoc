@@ -211,7 +211,7 @@ Lens & Visualizations::
 * Adds a reduced time range option for formula in *Lens* {kibana-pull}142709[#142709]
 * Adds the ability to open aggregation-based metric visualization in *Lens* {kibana-pull}142561[#142561]
 * Adds the ability to edit data views in the *Lens* flyout {kibana-pull}142362[#142362]
-* Adds conditional operations in the *Lens* Formula {kibana-pull}142325[#142325]
+* Adds conditional operations in the *Lens* formula {kibana-pull}142325[#142325]
 * Adds the ability to explore fields in Discover from *Lens* {kibana-pull}142199[#142199]
 * Adds the ability to open *TSVB* Gauge visualizations in *Lens* {kibana-pull}142187[#142187]
 * Adds new defaults function in *Lens* {kibana-pull}142087[#142087]
