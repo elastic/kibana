@@ -437,7 +437,7 @@ describe('Textbased Data Source', () => {
                 },
               },
             ],
-            index: 'foo',
+            index: '1',
             query: {
               sql: 'SELECT * FROM "foo"',
             },

@@ -125,7 +125,7 @@ export const UnifiedHistogramLayout = ({
   onChartLoad,
   children,
 }: UnifiedHistogramLayoutProps) => {
-  const [chartInfo, setChartInfo] = useState(chart);
+  const [chartVisible, setChartVisible] = useState(true);
   const topPanelNode = useMemo(
     () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
     []
@@ -137,20 +137,20 @@ export const UnifiedHistogramLayout = ({
   );
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
-  const showFixedPanels = isMobile || !chartInfo || chartInfo.hidden;
+  const showFixedPanels = isMobile || !chart || chart.hidden || !chartVisible;
   const { euiTheme } = useEuiTheme();
   const defaultTopPanelHeight = euiTheme.base * 12;
   const minMainPanelHeight = euiTheme.base * 10;
 
   const chartClassName =
-    isMobile && chartInfo && !chartInfo.hidden
+    isMobile && chart && !chart.hidden
       ? css`
           height: ${defaultTopPanelHeight}px;
         `
       : 'eui-fullHeight';
 
   const panelsMode =
-    chartInfo || hits
+    chart || hits
       ? showFixedPanels
         ? PANELS_MODE.FIXED
         : PANELS_MODE.RESIZABLE
@@ -168,14 +168,15 @@ export const UnifiedHistogramLayout = ({
     <>
       <InPortal node={topPanelNode}>
         <Chart
-          className={chartClassName}
+          className={chartVisible ? chartClassName : undefined}
           services={services}
           dataView={dataView}
           lastReloadRequestTime={lastReloadRequestTime}
           request={request}
           hits={hits}
           chart={chart}
-          setChartInfo={setChartInfo}
+          setChartVisible={setChartVisible}
+          chartVisible={chartVisible}
           columns={columns}
           breakdown={breakdown}
           appendHitsCounter={appendHitsCounter}

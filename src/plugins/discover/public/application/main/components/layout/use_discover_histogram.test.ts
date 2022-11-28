@@ -187,13 +187,6 @@ describe('useDiscoverHistogram', () => {
       expect(result.current?.request.searchSessionId).toBe('321');
     });
 
-    it('should output undefined for hits and chart and breakdown if isPlainRecord is true', async () => {
-      const { result } = await renderUseDiscoverHistogram({ isPlainRecord: true });
-      expect(result.current?.hits).toBeUndefined();
-      expect(result.current?.chart).toBeUndefined();
-      expect(result.current?.breakdown).toBeUndefined();
-    });
-
     it('should output undefined for chart and breakdown if isTimeBased is false', async () => {
       const { result } = await renderUseDiscoverHistogram({ isTimeBased: false });
       expect(result.current?.hits).not.toBeUndefined();

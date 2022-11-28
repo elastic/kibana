@@ -48,7 +48,8 @@ export interface ChartProps {
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
-  setChartInfo?: (chart: UnifiedHistogramChartContext | undefined) => void;
+  chartVisible: boolean;
+  setChartVisible: (flag: boolean) => void;
   columns?: string[];
   breakdown?: UnifiedHistogramBreakdownContext;
   appendHitsCounter?: ReactElement;
@@ -72,7 +73,8 @@ export function Chart({
   request,
   hits,
   chart,
-  setChartInfo,
+  chartVisible,
+  setChartVisible,
   columns,
   breakdown,
   appendHitsCounter,
@@ -86,6 +88,7 @@ export function Chart({
   onChartLoad,
 }: ChartProps) {
   const [suggestion, setSuggestion] = useState<Suggestion | undefined>(undefined);
+  // const [chartVisible, setChartVisible] = useState(true);
 
   const {
     showChartOptionsPopover,
@@ -106,13 +109,16 @@ export function Chart({
     onResetChartHeight,
   });
 
-  const chartVisible = !!(
-    chart &&
-    !chart.hidden &&
-    dataView.id &&
-    dataView.type !== DataViewType.ROLLUP &&
-    dataView.isTimeBased()
-  );
+  useEffect(() => {
+    const visible = !!(
+      chart &&
+      !chart.hidden &&
+      dataView.id &&
+      dataView.type !== DataViewType.ROLLUP &&
+      dataView.isTimeBased()
+    );
+    setChartVisible(visible);
+  }, [chart, dataView, setChartVisible]);
 
   const { filters, query, relativeTimeRange } = useRequestParams({
     services,
@@ -199,15 +205,15 @@ export function Chart({
       const lensSuggestion = isOfAggregateQueryType(query)
         ? suggestionsApi(context, dataViews)
         : undefined;
+      setSuggestion(lensSuggestion);
       if (lensSuggestion?.visualizationId !== 'lnsDatatable') {
-        setSuggestion(lensSuggestion);
-        setChartInfo?.(chart);
+        setChartVisible(true);
       } else {
-        setChartInfo?.(undefined);
+        setChartVisible(false);
       }
     };
     getSuggestions();
-  }, [chart, columns, dataView, query, services.lens, setChartInfo]);
+  }, [chart, columns, dataView, query, services.lens, setChartVisible]);
 
   const onEditVisualization = useMemo(
     () =>
@@ -273,40 +279,42 @@ export function Chart({
                     </EuiToolTip>
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem grow={false} css={chartToolButtonCss}>
-                  <EuiPopover
-                    id="unifiedHistogramChartOptions"
-                    button={
-                      <EuiToolTip
-                        content={i18n.translate('unifiedHistogram.chartOptionsButton', {
-                          defaultMessage: 'Chart options',
-                        })}
-                      >
-                        <EuiButtonIcon
-                          size="xs"
-                          iconType="gear"
-                          onClick={toggleChartOptions}
-                          data-test-subj="unifiedHistogramChartOptionsToggle"
-                          aria-label={i18n.translate('unifiedHistogram.chartOptionsButton', {
+                {chartVisible && (
+                  <EuiFlexItem grow={false} css={chartToolButtonCss}>
+                    <EuiPopover
+                      id="unifiedHistogramChartOptions"
+                      button={
+                        <EuiToolTip
+                          content={i18n.translate('unifiedHistogram.chartOptionsButton', {
                             defaultMessage: 'Chart options',
                           })}
-                        />
-                      </EuiToolTip>
-                    }
-                    isOpen={showChartOptionsPopover}
-                    closePopover={closeChartOptions}
-                    panelPaddingSize="none"
-                    anchorPosition="downLeft"
-                  >
-                    <EuiContextMenu initialPanelId={0} panels={panels} />
-                  </EuiPopover>
-                </EuiFlexItem>
+                        >
+                          <EuiButtonIcon
+                            size="xs"
+                            iconType="gear"
+                            onClick={toggleChartOptions}
+                            data-test-subj="unifiedHistogramChartOptionsToggle"
+                            aria-label={i18n.translate('unifiedHistogram.chartOptionsButton', {
+                              defaultMessage: 'Chart options',
+                            })}
+                          />
+                        </EuiToolTip>
+                      }
+                      isOpen={showChartOptionsPopover}
+                      closePopover={closeChartOptions}
+                      panelPaddingSize="none"
+                      anchorPosition="downLeft"
+                    >
+                      <EuiContextMenu initialPanelId={0} panels={panels} />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {chartVisible && (
+      {chartVisible && chart && (
         <EuiFlexItem>
           <section
             ref={(element) => (chartRef.current.element = element)}

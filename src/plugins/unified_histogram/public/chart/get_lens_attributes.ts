@@ -169,7 +169,7 @@ export const getLensAttributes = ({
       };
 
   return {
-    title: '',
+    title: 'Edit visualization',
     references: [
       {
         id: dataView.id ?? '',
