@@ -6,11 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -64,8 +60,8 @@ export default ({ getService }: FtrProviderContext) => {
               value: 'ae27a4b4821b13cad2a17a75d219853e',
             },
           ],
-          list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
-          name: ENDPOINT_TRUSTED_APPS_LIST_ID,
+          list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+          name: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
           os_types: ['linux'],
           type: 'simple',
           namespace_type: 'agnostic',
@@ -89,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               id: trustedApplication[0].id,
-              name: ENDPOINT_TRUSTED_APPS_LIST_ID,
+              name: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
               os_types: ['linux'],
               scope: {
                 type: 'policy',
@@ -116,7 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
               value: 'ae27a4b4821b13cad2a17a75d219853e',
             },
           ],
-          list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+          list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
           name: 'something 1',
           os_types: ['linux'],
           type: 'simple',
@@ -134,7 +130,7 @@ export default ({ getService }: FtrProviderContext) => {
               value: '437b930db84b8079c2dd804a71936b5f',
             },
           ],
-          list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+          list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
           name: 'something 2',
           os_types: ['macos'],
           type: 'simple',
@@ -337,8 +333,8 @@ export default ({ getService }: FtrProviderContext) => {
         // like there is an auto-create for it within Kibana. It must exist somewhere else.
         await createExceptionList(supertest, log, {
           description: 'endpoint description',
-          list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
-          name: ENDPOINT_EVENT_FILTERS_LIST_ID,
+          list_id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+          name: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
           type: 'detection',
           namespace_type: 'agnostic',
         });
@@ -356,8 +352,8 @@ export default ({ getService }: FtrProviderContext) => {
               value: 'something',
             },
           ],
-          list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
-          name: ENDPOINT_EVENT_FILTERS_LIST_ID,
+          list_id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+          name: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
           os_types: ['linux'],
           type: 'simple',
           namespace_type: 'agnostic',
@@ -382,7 +378,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               id: endPointEventFilter[0].id,
-              name: ENDPOINT_EVENT_FILTERS_LIST_ID,
+              name: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
               os_types: ['linux'],
             },
             {
@@ -405,8 +401,8 @@ export default ({ getService }: FtrProviderContext) => {
               value: 'something 1',
             },
           ],
-          list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
-          name: ENDPOINT_EVENT_FILTERS_LIST_ID,
+          list_id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+          name: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
           os_types: ['linux'],
           type: 'simple',
           namespace_type: 'agnostic',
@@ -423,8 +419,8 @@ export default ({ getService }: FtrProviderContext) => {
               value: 'something 2',
             },
           ],
-          list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
-          name: ENDPOINT_EVENT_FILTERS_LIST_ID,
+          list_id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+          name: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
           os_types: ['macos'],
           type: 'simple',
           namespace_type: 'agnostic',
@@ -452,7 +448,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               id: endPointEventFilter[0].id,
-              name: ENDPOINT_EVENT_FILTERS_LIST_ID,
+              name: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
               os_types: ['linux'],
             },
             {
@@ -466,7 +462,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               id: endPointEventFilter[1].id,
-              name: ENDPOINT_EVENT_FILTERS_LIST_ID,
+              name: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
               os_types: ['macos'],
             },
             {

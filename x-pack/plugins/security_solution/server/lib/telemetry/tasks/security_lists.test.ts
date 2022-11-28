@@ -25,6 +25,7 @@ describe('security list telemetry task test', () => {
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const telemetrySecurityListTaskConfig = createTelemetrySecurityListTaskConfig(1);
+    const stubFilter = '';
 
     await telemetrySecurityListTaskConfig.runTask(
       'test-id',
@@ -35,9 +36,13 @@ describe('security list telemetry task test', () => {
     );
 
     expect(mockTelemetryReceiver.fetchTrustedApplications).toHaveBeenCalled();
-    expect(mockTelemetryReceiver.fetchEndpointList).toHaveBeenCalledWith(ENDPOINT_LIST_ID);
     expect(mockTelemetryReceiver.fetchEndpointList).toHaveBeenCalledWith(
-      ENDPOINT_ARTIFACT_LISTS.eventFilters.id
+      ENDPOINT_LIST_ID,
+      stubFilter
+    );
+    expect(mockTelemetryReceiver.fetchEndpointList).toHaveBeenCalledWith(
+      ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
+      stubFilter
     );
     expect(mockTelemetryReceiver.fetchValueListMetaData).toHaveBeenCalled();
   });
