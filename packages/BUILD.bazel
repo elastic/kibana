@@ -338,6 +338,7 @@ filegroup(
     "//packages/shared-ux/file/file_upload/impl:build",
     "//packages/shared-ux/file/image/impl:build",
     "//packages/shared-ux/file/image/mocks:build",
+    "//packages/shared-ux/file/image/types:build",
     "//packages/shared-ux/file/mocks:build",
     "//packages/shared-ux/file/types:build",
     "//packages/shared-ux/file/util:build",
