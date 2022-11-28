@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ReactElement, useEffect, useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import React, { memo } from 'react';
 import {
   EuiButtonIcon,
@@ -91,16 +91,6 @@ export function Chart({
   onTotalHitsChange,
   onChartLoad,
 }: ChartProps) {
-  useEffect(() => {
-    const subscription = input$?.subscribe(({ type }) => {
-      debugger;
-    });
-
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, [input$]);
-
   const {
     showChartOptionsPopover,
     chartRef,
@@ -148,6 +138,7 @@ export function Chart({
     filters,
     query,
     relativeTimeRange,
+    input$,
   });
 
   // We need to update the absolute time range whenever the refetchId changes

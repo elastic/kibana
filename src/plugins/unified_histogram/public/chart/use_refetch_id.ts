@@ -9,11 +9,13 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { cloneDeep, isEqual } from 'lodash';
-import { useEffect, useRef, useState } from 'react';
-import type {
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useMessage } from '../messaging';
+import {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
   UnifiedHistogramHitsContext,
+  UnifiedHistogramInput$,
   UnifiedHistogramRequestContext,
 } from '../types';
 
@@ -27,7 +29,8 @@ export const useRefetchId = ({
   breakdown,
   filters,
   query,
-  relativeTimeRange: relativeTimeRange,
+  relativeTimeRange,
+  input$,
 }: {
   dataView: DataView;
   lastReloadRequestTime: number | undefined;
@@ -39,6 +42,7 @@ export const useRefetchId = ({
   filters: Filter[];
   query: Query | AggregateQuery;
   relativeTimeRange: TimeRange;
+  input$?: UnifiedHistogramInput$;
 }) => {
   const refetchDeps = useRef<ReturnType<typeof getRefetchDeps>>();
   const [refetchId, setRefetchId] = useState(0);
@@ -79,6 +83,13 @@ export const useRefetchId = ({
     request,
     relativeTimeRange,
   ]);
+
+  const incrementRefetchId = useCallback(() => {
+    debugger;
+    setRefetchId((id) => id + 1);
+  }, []);
+
+  useMessage(input$, 'refetch', incrementRefetchId);
 
   return refetchId;
 };

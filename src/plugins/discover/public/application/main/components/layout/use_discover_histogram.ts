@@ -292,9 +292,7 @@ export const useDiscoverHistogram = ({
   useEffect(() => {
     const subscription = savedSearchFetch$.subscribe(() => {
       debugger;
-      input$.next({
-        type: 'refetch',
-      });
+      input$.next({ type: 'refetch' });
     });
 
     return () => {

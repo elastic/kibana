@@ -18,6 +18,7 @@ export type {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramAdapters,
+  UnifiedHistogramRefetchMessage,
   UnifiedHistogramInputMessage,
   UnifiedHistogramInput$,
 } from './types';

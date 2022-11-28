@@ -15,7 +15,7 @@ import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { Observable } from 'rxjs';
-import { useEffect, useState } from 'react';
+import { UnifiedMessage } from './messaging';
 
 /**
  * The fetch status of a unified histogram request
@@ -116,93 +116,19 @@ export interface UnifiedHistogramBreakdownContext {
   field?: DataViewField;
 }
 
-type UnifiedMessagePlain<TType extends string> = { type: TType };
-
-type UnifiedMessagePayload<TType extends string, TPayload> = UnifiedMessagePlain<TType> & {
-  payload: TPayload;
-};
-
-type UnifiedMessage<TType extends string, TPayload = void> = TPayload extends void
-  ? UnifiedMessagePlain<TType>
-  : UnifiedMessagePayload<TType, TPayload>;
-
-const messageIsType = <
-  TMessageCombined extends UnifiedMessagePlain<string>,
-  TType extends TMessageCombined['type'],
-  TMessage extends Extract<TMessageCombined, { type: TType }>,
-  TPayload extends TMessage extends UnifiedMessagePayload<TType, any> ? TMessage['payload'] : never
->(
-  message: TMessageCombined,
-  type: TType
-): message is TMessage & { payload: TPayload } => {
-  return message.type === type;
-};
-
-const msg2 = {
-  type: 'makeCoffee',
-  payload: { temperature: 'hot' },
-} as UnifiedHistogramInputMessage;
-
-if (messageIsType(msg2, 'makeCoffee')) {
-  msg2.payload.temperature = 'cold';
+/**
+ * Message to refetch the chart and total hits
+ */
+export interface UnifiedHistogramRefetchMessage extends UnifiedMessage {
+  type: 'refetch';
 }
 
-if (messageIsType(msg2, 'refetch')) {
-  msg2.payload.temperature = 'cold';
-}
+/**
+ * Unified histogram input message
+ */
+export type UnifiedHistogramInputMessage = UnifiedHistogramRefetchMessage;
 
-if (messageIsType(msg2, 'fetch')) {
-  msg2.payload.temperature = 'cold';
-}
-
-export const useMessage = <
-  TMessageCombined extends UnifiedMessagePlain<string>,
-  TType extends TMessageCombined['type'],
-  TMessage extends Extract<TMessageCombined, { type: TType }>,
-  TPayload extends TMessage extends UnifiedMessagePayload<TType, any> ? TMessage['payload'] : never
->(
-  message$: Observable<TMessageCombined> | undefined,
-  type: TType,
-  callback: (payload: TPayload) => void
-) => {
-  useEffect(() => {
-    const subscription = message$?.subscribe((message) => {
-      if (messageIsType(message, type)) {
-        callback(message.payload);
-      }
-    });
-
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, [message$, type, callback]);
-};
-
-export const useMessageData = <TType extends string, TPayLoad = void>(
-  message$: Observable<UnifiedMessage<TType, TPayLoad>> | undefined,
-  type: TType
-): TPayLoad | undefined => {
-  const [data, setData] = useState<TPayLoad>();
-  useMessage(message$, type, setData);
-  return data;
-};
-
-useMessage(new Observable<UnifiedHistogramInputMessage>(), 'makeCoffee', (a) => {});
-useMessage(new Observable<UnifiedHistogramInputMessage>(), 'refetch', (a) => {});
-useMessage(new Observable<UnifiedHistogramInputMessage>(), 'bleh', (a) => {});
-
-export type UnifiedHistogramRefetchMessage = UnifiedMessage<'refetch'>;
-
-export type UnifiedHistogramCofeeMessage = UnifiedMessage<
-  'makeCoffee',
-  { temperature: 'cold' | 'warm' | 'hot' }
->;
-
-export type UnifiedHistogramEndMessage = UnifiedMessage<'end', { time: number }>;
-
-export type UnifiedHistogramInputMessage =
-  | UnifiedHistogramRefetchMessage
-  | UnifiedHistogramCofeeMessage
-  | UnifiedHistogramEndMessage;
-
+/**
+ * Unified histogram input observable
+ */
 export type UnifiedHistogramInput$ = Observable<UnifiedHistogramInputMessage>;
