@@ -33,7 +33,6 @@ export interface Props {
 
 export class Timeslider extends Component<Props, {}> {
   private _isMounted: boolean = false;
-  private _isRendered: boolean = false;
   private _controlGroup?: ControlGroupContainer | undefined;
   private readonly _controlGroupRef: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
   private readonly _subscriptions = new Subscription();
@@ -44,11 +43,6 @@ export class Timeslider extends Component<Props, {}> {
   }
 
   componentDidUpdate() {
-    if (!this._isRendered && this._controlGroup && this._controlGroupRef.current) {
-      this._isRendered = true;
-      this._controlGroup.render(this._controlGroupRef.current);
-    }
-
     if (this._controlGroup && !_.isEqual(this._controlGroup.getInput().timeRange, this.props.timeRange)) {
       this._controlGroup.updateInput({
         timeRange: this.props.timeRange
