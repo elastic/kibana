@@ -7,4 +7,16 @@ tags: ['shared-ux', 'context', 'files']
 date: 2022-11-22
 ---
 
-TODO
+## Description
+
+Context in which the Global Experience files components should live to access files client and more.
+
+## Example
+
+```tsx
+const client = files.filesClientFactory.asUnscoped<MyImageMetadata>()
+...
+<FilesClient client={client}>
+  <MyApp />
+</FilesClient>
+```
