@@ -30,6 +30,7 @@ export interface ParsedSearchParams {
     /**
      * All unknown field clauses
      */
+    docs?: FilterValues<string>;
     unknowns: Record<string, FilterValues>;
   };
 }

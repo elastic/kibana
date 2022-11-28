@@ -7,7 +7,7 @@
 
 import { CoreSetup, Plugin } from '@kbn/core/server';
 import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
-import { createSavedObjectsResultProvider } from './providers';
+import { createDocsResultProvider, createSavedObjectsResultProvider } from './providers';
 
 export interface GlobalSearchProvidersPluginSetupDeps {
   globalSearch: GlobalSearchPluginSetup;
@@ -21,6 +21,8 @@ export class GlobalSearchProvidersPlugin
     { globalSearch }: GlobalSearchProvidersPluginSetupDeps
   ) {
     globalSearch.registerResultProvider(createSavedObjectsResultProvider());
+    globalSearch.registerResultProvider(createDocsResultProvider());
+
     return {};
   }
 

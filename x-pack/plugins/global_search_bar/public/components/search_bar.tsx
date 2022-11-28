@@ -31,7 +31,7 @@ import type {
   GlobalSearchFindParams,
 } from '@kbn/global-search-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { parseSearchParams } from '../search_syntax';
+import { FilterValues, parseSearchParams } from '../search_syntax';
 import { getSuggestions, SearchSuggestion } from '../suggestions';
 import { resultToOption, suggestionToOption } from '../lib';
 import { PopoverFooter } from './popover_footer';
@@ -99,11 +99,12 @@ export const SearchBar: FC<SearchBarProps> = ({
   }, [globalSearch, initialLoad]);
 
   const loadSuggestions = useCallback(
-    (term: string) => {
+    (term: string, docs?: FilterValues<string>) => {
       return getSuggestions({
         searchTerm: term,
         searchableTypes,
         tagCache: taggingApi?.cache,
+        docs,
       });
     },
     [taggingApi, searchableTypes]
@@ -118,7 +119,6 @@ export const SearchBar: FC<SearchBarProps> = ({
       if (!isMounted()) {
         return;
       }
-
       _setOptions([
         ...suggestions.map(suggestionToOption),
         ..._options.map((option) =>
@@ -143,6 +143,7 @@ export const SearchBar: FC<SearchBarProps> = ({
         }
 
         const suggestions = loadSuggestions(searchValue);
+        // console.log('seachValue', searchValue);
 
         let aggregatedResults: GlobalSearchResult[] = [];
         if (searchValue.length !== 0) {
@@ -157,8 +158,9 @@ export const SearchBar: FC<SearchBarProps> = ({
               )
             : undefined;
         const searchParams: GlobalSearchFindParams = {
-          term: rawParams.term,
           types: rawParams.filters.types,
+          docs: rawParams.filters.docs,
+          term: rawParams.term,
           tags: tagIds,
         };
         // TODO technically a subtle bug here

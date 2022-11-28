@@ -172,19 +172,21 @@ export class SearchService {
     const processResult = (result: GlobalSearchProviderResult) =>
       processProviderResult(result, basePath);
 
-    const providersResults$ = [...this.providers.values()].map((provider) =>
-      provider.find(params, findOptions, context).pipe(
+    const providersResults$ = [...this.providers.values()].map((provider) => {
+      return provider.find(params, findOptions, context).pipe(
         catchError(() => EMPTY),
         takeInArray(this.maxProviderResults),
         takeUntil(aborted$),
         map((results) => results.map((r) => processResult(r)))
-      )
-    );
+      );
+    });
 
     return merge(...providersResults$).pipe(
-      map((results) => ({
-        results,
-      }))
+      map((results) => {
+        return {
+          results,
+        };
+      })
     );
   }
 }

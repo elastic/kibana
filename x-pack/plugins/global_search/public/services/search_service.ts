@@ -187,10 +187,13 @@ export class SearchService {
         map((results) => results.map((r) => processResult(r)))
       )
     );
+
     return merge(...providersResults$, serverResults$).pipe(
-      map((results) => ({
-        results,
-      }))
+      map((results) => {
+        return {
+          results,
+        };
+      })
     );
   }
 }

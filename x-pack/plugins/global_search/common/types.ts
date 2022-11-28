@@ -107,6 +107,7 @@ export interface GlobalSearchFindParams {
    * The tag ids to filter search by.
    */
   tags?: string[];
+  docs?: string[];
 }
 
 /**

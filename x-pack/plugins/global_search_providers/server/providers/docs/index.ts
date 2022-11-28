@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { createSavedObjectsResultProvider } from './saved_objects';
-export { createDocsResultProvider } from './docs';
+export { createDocsResultProvider } from './provider';

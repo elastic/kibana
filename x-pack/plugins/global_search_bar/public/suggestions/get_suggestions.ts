@@ -7,11 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { ITagsCache } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { FilterValues } from '../search_syntax';
 
 interface GetSuggestionOptions {
   searchTerm: string;
   searchableTypes: string[];
   tagCache?: ITagsCache;
+  docs?: FilterValues<string>;
 }
 
 export interface SearchSuggestion {

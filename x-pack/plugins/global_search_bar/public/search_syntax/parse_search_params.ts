@@ -45,12 +45,14 @@ export const parseSearchParams = (term: string): ParsedSearchParams => {
 
   const tags = filterValues.get('tag');
   const types = filterValues.get('type');
+  const docs = filterValues.get('docs');
 
   return {
     term: searchTerm,
     filters: {
       tags: tags ? valuesToString(tags) : undefined,
       types: types ? valuesToString(types) : undefined,
+      docs: docs ? valuesToString(docs) : undefined,
       unknowns: unknownFilters,
     },
   };

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { EuiSelectableTemplateSitewideOption } from '@elastic/eui';
+import { EuiSelectableTemplateSitewideOption } from '@elastic/eui';
 import type { GlobalSearchResult } from '@kbn/global-search-plugin/common/types';
 import type { SavedObjectTaggingPluginStart, Tag } from '@kbn/saved-objects-tagging-plugin/public';
 import { ResultTagList } from '../components/result_tag_list';
@@ -21,7 +21,7 @@ export const resultToOption = (
   const { id, title, url, icon, type, meta = {} } = result;
   const { tagIds = [], categoryLabel = '' } = meta as { tagIds: string[]; categoryLabel: string };
   // only displaying icons for applications and integrations
-  const useIcon = type === 'application' || type === 'integration';
+  const useIcon = type === 'application' || type === 'integration' || type === 'documentation';
   const option: EuiSelectableTemplateSitewideOption = {
     key: id,
     label: title,
