@@ -19,7 +19,6 @@ import {
   IBasePath,
   SavedObject,
 } from '@kbn/core/server';
-import { RunContext } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
@@ -27,7 +26,6 @@ import {
   ActionTaskParams,
   ActionTypeRegistryContract,
   SpaceIdToNamespaceFunction,
-  ActionTypeExecutorResult,
   ActionTaskExecutorParams,
   isPersistedActionTask,
 } from '../types';
@@ -65,7 +63,7 @@ export class TaskRunnerFactory {
     this.taskRunnerContext = taskRunnerContext;
   }
 
-  public create({ taskInstance }: RunContext, maxAttempts: number = 1) {
+  public create(actionTaskExecutorParams: ActionTaskExecutorParams) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
     }
@@ -79,14 +77,8 @@ export class TaskRunnerFactory {
       getUnsecuredSavedObjectsClient,
     } = this.taskRunnerContext!;
 
-    const taskInfo = {
-      scheduled: taskInstance.runAt,
-      attempts: taskInstance.attempts,
-    };
-
     return {
       async run() {
-        const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
         const { spaceId } = actionTaskExecutorParams;
 
         const {
@@ -102,52 +94,25 @@ export class TaskRunnerFactory {
         const request = getFakeRequest(apiKey);
         basePathService.set(request, path);
 
-        // Throwing an executor error means we will attempt to retry the task
-        // TM will treat a task as a failure if `attempts >= maxAttempts`
-        // so we need to handle that here to avoid TM persisting the failed task
-        const isRetryableBasedOnAttempts = taskInfo.attempts < (maxAttempts ?? 1);
-        const willRetryMessage = `and will retry`;
-        const willNotRetryMessage = `and will not retry`;
-
-        let executorResult: ActionTypeExecutorResult<unknown> | undefined;
-        try {
-          executorResult = await actionExecutor.execute({
-            params,
-            actionId: actionId as string,
-            isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
-            request,
-            ...getSourceFromReferences(references),
-            taskInfo,
-            executionId,
-            consumer,
-            relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
-          });
-        } catch (e) {
-          logger.error(
-            `Action '${actionId}' failed ${
-              isRetryableBasedOnAttempts ? willRetryMessage : willNotRetryMessage
-            }: ${e.message}`
-          );
-          if (isRetryableBasedOnAttempts) {
-            // In order for retry to work, we need to indicate to task manager this task
-            // failed
-            throw new ExecutorError(e.message, {}, true);
-          }
-        }
+        const executorResult = await actionExecutor.execute({
+          params,
+          actionId: actionId as string,
+          isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
+          request,
+          ...getSourceFromReferences(references),
+          executionId,
+          consumer,
+          relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
+        });
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
         if (
           executorResult &&
           executorResult?.status === 'error' &&
-          executorResult?.retry !== undefined &&
-          isRetryableBasedOnAttempts
+          executorResult?.retry !== undefined
         ) {
           inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_FAILURES);
-          logger.error(
-            `Action '${actionId}' failed ${
-              !!executorResult.retry ? willRetryMessage : willNotRetryMessage
-            }: ${executorResult.message}`
-          );
+          logger.error(`Action '${actionId}' failed: ${executorResult.message}`);
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
           throw new ExecutorError(
@@ -157,9 +122,7 @@ export class TaskRunnerFactory {
           );
         } else if (executorResult && executorResult?.status === 'error') {
           inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_FAILURES);
-          logger.error(
-            `Action '${actionId}' failed ${willNotRetryMessage}: ${executorResult.message}`
-          );
+          logger.error(`Action '${actionId}' failed: ${executorResult.message}`);
         }
 
         // Cleanup action_task_params object now that we're done with it
@@ -184,7 +147,6 @@ export class TaskRunnerFactory {
       },
       cancel: async () => {
         // Write event log entry
-        const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
         const { spaceId } = actionTaskExecutorParams;
 
         const {

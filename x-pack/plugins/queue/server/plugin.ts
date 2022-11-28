@@ -27,6 +27,7 @@ interface PluginSetupDeps {
 
 export interface PluginStart {
   enqueue(job: Job<unknown>): Promise<void>;
+  bulkEnqueue(jobs: Array<Job<unknown>>): Promise<void>;
 }
 interface PluginStartDeps {
   taskManager: TaskManagerStartContract;
@@ -44,6 +45,7 @@ export class QueuePlugin
         plugins.taskManager.registerTaskDefinitions({
           [`plugin:queue:${worker.id}`]: {
             title: `Worker: ${worker.id}`,
+            maxAttempts: 3,
             createTaskRunner: ({ taskInstance }: RunContext) => {
               const params = taskInstance.params;
               const abortController = new AbortController();
@@ -66,10 +68,19 @@ export class QueuePlugin
     return {
       enqueue: async (job: Job<unknown>) => {
         await plugins.taskManager.schedule({
-          taskType: `plugin:scheduler:${job.workerId}`,
+          taskType: `plugin:queue:${job.workerId}`,
           params: job.params as Record<string, any>,
           state: {},
         });
+      },
+      bulkEnqueue: async (jobs: Array<Job<unknown>>) => {
+        await plugins.taskManager.bulkSchedule(
+          jobs.map((job) => ({
+            taskType: `plugin:queue:${job.workerId}`,
+            params: job.params as Record<string, any>,
+            state: {},
+          }))
+        );
       },
     };
   }

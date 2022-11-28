@@ -313,18 +313,7 @@ export class ExecutionHandler<
     enqueueOptions: EnqueueExecutionOptions;
     bulkActions: EnqueueExecutionOptions[];
   }) {
-    if (this.taskRunnerContext.supportsEphemeralTasks && this.ephemeralActionsToSchedule > 0) {
-      this.ephemeralActionsToSchedule--;
-      try {
-        await this.actionsClient!.ephemeralEnqueuedExecution(enqueueOptions);
-      } catch (err) {
-        if (isEphemeralTaskRejectedDueToCapacityError(err)) {
-          bulkActions.push(enqueueOptions);
-        }
-      }
-    } else {
-      bulkActions.push(enqueueOptions);
-    }
+    bulkActions.push(enqueueOptions);
   }
 
   private getEnqueueOptions(action: RuleAction): EnqueueExecutionOptions {

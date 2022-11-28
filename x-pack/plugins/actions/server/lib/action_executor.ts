@@ -63,7 +63,6 @@ export interface ExecuteOptions<Source = unknown> {
   request: KibanaRequest;
   params: Record<string, unknown>;
   source?: ActionExecutionSource<Source>;
-  taskInfo?: TaskInfo;
   executionId?: string;
   consumer?: string;
   relatedSavedObjects?: RelatedSavedObjects;
@@ -96,7 +95,6 @@ export class ActionExecutor {
     request,
     source,
     isEphemeral,
-    taskInfo,
     executionId,
     consumer,
     relatedSavedObjects,
@@ -163,21 +161,11 @@ export class ActionExecutor {
         const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
         logger.debug(`executing action ${actionLabel}`);
 
-        const task = taskInfo
-          ? {
-              task: {
-                scheduled: taskInfo.scheduled.toISOString(),
-                scheduleDelay: Millis2Nanos * (Date.now() - taskInfo.scheduled.getTime()),
-              },
-            }
-          : {};
-
         const event = createActionEventLogRecordObject({
           actionId,
           action: EVENT_LOG_ACTIONS.execute,
           consumer,
           ...namespace,
-          ...task,
           executionId,
           spaceId,
           savedObjects: [
@@ -225,7 +213,6 @@ export class ActionExecutor {
             config: validatedConfig,
             secrets: validatedSecrets,
             isEphemeral,
-            taskInfo,
             configurationUtilities,
             logger,
           });

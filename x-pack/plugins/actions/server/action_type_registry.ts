@@ -7,29 +7,25 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { QueuePluginSetup } from '@kbn/queue-plugin/server';
 import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
-import {
-  ExecutorError,
-  getActionTypeFeatureUsageName,
-  TaskRunnerFactory,
-  ILicenseState,
-} from './lib';
+import { getActionTypeFeatureUsageName, TaskRunnerFactory, ILicenseState } from './lib';
 import {
   ActionType,
   PreConfiguredAction,
   ActionTypeConfig,
   ActionTypeSecrets,
   ActionTypeParams,
+  ActionTaskExecutorParams,
 } from './types';
 
 export const MAX_ATTEMPTS: number = 3;
 
 export interface ActionTypeRegistryOpts {
   licensing: LicensingPluginSetup;
-  taskManager: TaskManagerSetupContract;
+  queuePluginSetup: QueuePluginSetup;
   taskRunnerFactory: TaskRunnerFactory;
   actionsConfigUtils: ActionsConfigurationUtilities;
   licenseState: ILicenseState;
@@ -37,7 +33,7 @@ export interface ActionTypeRegistryOpts {
 }
 
 export class ActionTypeRegistry {
-  private readonly taskManager: TaskManagerSetupContract;
+  private readonly queuePluginSetup: QueuePluginSetup;
   private readonly actionTypes: Map<string, ActionType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly actionsConfigUtils: ActionsConfigurationUtilities;
@@ -46,7 +42,7 @@ export class ActionTypeRegistry {
   private readonly licensing: LicensingPluginSetup;
 
   constructor(constructorParams: ActionTypeRegistryOpts) {
-    this.taskManager = constructorParams.taskManager;
+    this.queuePluginSetup = constructorParams.queuePluginSetup;
     this.taskRunnerFactory = constructorParams.taskRunnerFactory;
     this.actionsConfigUtils = constructorParams.actionsConfigUtils;
     this.licenseState = constructorParams.licenseState;
@@ -150,19 +146,14 @@ export class ActionTypeRegistry {
     }
 
     this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
-    this.taskManager.registerTaskDefinitions({
-      [`actions:${actionType.id}`]: {
-        title: actionType.name,
-        maxAttempts: actionType.maxAttempts || MAX_ATTEMPTS,
-        getRetry(attempts: number, error: unknown) {
-          if (error instanceof ExecutorError) {
-            return error.retry == null ? false : error.retry;
-          }
-          // Only retry other kinds of errors based on attempts
-          return attempts < (actionType.maxAttempts ?? 0);
-        },
-        createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create(context, actionType.maxAttempts),
+    this.queuePluginSetup.registerWorker({
+      id: `actions:${actionType.id}`,
+      run: async (params, abortSignal) => {
+        const taskRunner = this.taskRunnerFactory.create(params as ActionTaskExecutorParams);
+        await taskRunner.run();
+        abortSignal.addEventListener('abort', () => {
+          taskRunner.cancel();
+        });
       },
     });
     // No need to notify usage on basic action types

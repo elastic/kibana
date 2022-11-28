@@ -6,19 +6,14 @@
  */
 
 import { SavedObjectsBulkResponse, SavedObjectsClientContract } from '@kbn/core/server';
-import { RunNowResult, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import {
-  RawAction,
-  ActionTypeRegistryContract,
-  PreConfiguredAction,
-  ActionTaskExecutorParams,
-} from './types';
+import { QueuePluginStart } from '@kbn/queue-plugin/server';
+import { RawAction, ActionTypeRegistryContract, PreConfiguredAction } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
 
 interface CreateExecuteFunctionOptions {
-  taskManager: TaskManagerStartContract;
+  queue: QueuePluginStart;
   isESOCanEncrypt: boolean;
   actionTypeRegistry: ActionTypeRegistryContract;
   preconfiguredActions: PreConfiguredAction[];
@@ -55,7 +50,7 @@ export type BulkExecutionEnqueuer<T> = (
 ) => Promise<T>;
 
 export function createExecutionEnqueuerFunction({
-  taskManager,
+  queue,
   actionTypeRegistry,
   isESOCanEncrypt,
   preconfiguredActions,
@@ -122,20 +117,18 @@ export function createExecutionEnqueuerFunction({
       }
     );
 
-    await taskManager.schedule({
-      taskType: `actions:${action.actionTypeId}`,
+    await queue.enqueue({
+      workerId: `actions:${action.actionTypeId}`,
       params: {
         spaceId,
         actionTaskParamsId: actionTaskParamsRecord.id,
       },
-      state: {},
-      scope: ['actions'],
     });
   };
 }
 
 export function createBulkExecutionEnqueuerFunction({
-  taskManager,
+  queue,
   actionTypeRegistry,
   isESOCanEncrypt,
   preconfiguredActions,
@@ -208,59 +201,15 @@ export function createBulkExecutionEnqueuerFunction({
     });
     const actionTaskParamsRecords: SavedObjectsBulkResponse<ActionTaskParams> =
       await unsecuredSavedObjectsClient.bulkCreate(actions);
-    const taskInstances = actionTaskParamsRecords.saved_objects.map((so) => {
-      const actionId = so.attributes.actionId;
-      return {
-        taskType: `actions:${actionTypeIds[actionId]}`,
+    await queue.bulkEnqueue(
+      actionTaskParamsRecords.saved_objects.map((so) => ({
+        workerId: `actions:${actionTypeIds[so.attributes.actionId]}`,
         params: {
-          spaceId: spaceIds[actionId],
+          spaceId: spaceIds[so.attributes.actionId],
           actionTaskParamsId: so.id,
         },
-        state: {},
-        scope: ['actions'],
-      };
-    });
-    await taskManager.bulkSchedule(taskInstances);
-  };
-}
-
-export function createEphemeralExecutionEnqueuerFunction({
-  taskManager,
-  actionTypeRegistry,
-  preconfiguredActions,
-}: CreateExecuteFunctionOptions): ExecutionEnqueuer<RunNowResult> {
-  return async function execute(
-    unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    { id, params, spaceId, source, consumer, apiKey, executionId }: ExecuteOptions
-  ): Promise<RunNowResult> {
-    const { action } = await getAction(unsecuredSavedObjectsClient, preconfiguredActions, id);
-    validateCanActionBeUsed(action);
-
-    const { actionTypeId } = action;
-    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
-      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
-    }
-
-    const taskParams: ActionTaskExecutorParams = {
-      spaceId,
-      taskParams: {
-        actionId: id,
-        consumer,
-        // Saved Objects won't allow us to enforce unknown rather than any
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        params: params as Record<string, any>,
-        ...(apiKey ? { apiKey } : {}),
-        ...(executionId ? { executionId } : {}),
-      },
-      ...executionSourceAsSavedObjectReferences(source),
-    };
-
-    return taskManager.ephemeralRunNow({
-      taskType: `actions:${action.actionTypeId}`,
-      params: taskParams,
-      state: {},
-      scope: ['actions'],
-    });
+      }))
+    );
   };
 }
 

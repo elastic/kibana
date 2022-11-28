@@ -29,6 +29,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { QueuePluginSetup, QueuePluginStart } from '@kbn/queue-plugin/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -46,7 +47,6 @@ import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry, MAX_ATTEMPTS } from './action_type_registry';
 import {
   createExecutionEnqueuerFunction,
-  createEphemeralExecutionEnqueuerFunction,
   createBulkExecutionEnqueuerFunction,
 } from './create_execute_function';
 import { registerActionsUsageCollector } from './usage';
@@ -156,6 +156,7 @@ export interface PluginStartContract {
 }
 
 export interface ActionsPluginsSetup {
+  queue: QueuePluginSetup;
   taskManager: TaskManagerSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   licensing: LicensingPluginSetup;
@@ -168,6 +169,7 @@ export interface ActionsPluginsSetup {
 }
 
 export interface ActionsPluginsStart {
+  queue: QueuePluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
   licensing: LicensingPluginStart;
@@ -265,7 +267,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     const actionTypeRegistry = new ActionTypeRegistry({
       licensing: plugins.licensing,
       taskRunnerFactory,
-      taskManager: plugins.taskManager,
+      queuePluginSetup: plugins.queue,
       actionsConfigUtils,
       licenseState: this.licenseState,
       preconfiguredActions: this.preconfiguredActions,
@@ -434,20 +436,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           await getAuthorizationModeBySource(unsecuredSavedObjectsClient, authorizationContext)
         ),
         actionExecutor: actionExecutor!,
-        ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
-          taskManager: plugins.taskManager,
-          actionTypeRegistry: actionTypeRegistry!,
-          isESOCanEncrypt: isESOCanEncrypt!,
-          preconfiguredActions,
-        }),
         executionEnqueuer: createExecutionEnqueuerFunction({
-          taskManager: plugins.taskManager,
+          queue: plugins.queue,
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
           preconfiguredActions,
         }),
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
-          taskManager: plugins.taskManager,
+          queue: plugins.queue,
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
           preconfiguredActions,
@@ -621,8 +617,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
-      const [{ savedObjects }, { taskManager, encryptedSavedObjects }] =
-        await core.getStartServices();
+      const [{ savedObjects }, { queue, encryptedSavedObjects }] = await core.getStartServices();
       const coreContext = await context.core;
 
       return {
@@ -646,20 +641,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             request,
             authorization: instantiateAuthorization(request),
             actionExecutor: actionExecutor!,
-            ephemeralExecutionEnqueuer: createEphemeralExecutionEnqueuerFunction({
-              taskManager,
-              actionTypeRegistry: actionTypeRegistry!,
-              isESOCanEncrypt: isESOCanEncrypt!,
-              preconfiguredActions,
-            }),
             executionEnqueuer: createExecutionEnqueuerFunction({
-              taskManager,
+              queue,
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,
               preconfiguredActions,
             }),
             bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
-              taskManager,
+              queue,
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,
               preconfiguredActions,

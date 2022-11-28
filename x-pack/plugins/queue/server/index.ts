@@ -9,6 +9,7 @@ import { PluginConfigDescriptor } from '@kbn/core/server';
 import { QueuePlugin, PluginSetup, PluginStart } from './plugin';
 import { QueueConfig, configSchema } from './config';
 
+export type { Worker } from './worker_registry';
 export type { PluginSetup as QueuePluginSetup, PluginStart as QueuePluginStart };
 
 export const plugin = () => new QueuePlugin();

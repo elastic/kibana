@@ -20,7 +20,6 @@ import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
 import { ActionTypeExecutorResult } from '../common';
-import { TaskInfo } from './lib/action_executor';
 import { ConnectorTokenClient } from './lib/connector_token_client';
 import { ActionsConfigurationUtilities } from './actions_config';
 
@@ -63,7 +62,6 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   params: Params;
   logger: Logger;
   isEphemeral?: boolean;
-  taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
