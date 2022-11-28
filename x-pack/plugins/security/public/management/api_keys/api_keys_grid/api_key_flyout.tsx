@@ -179,15 +179,16 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   return (
     <FormFlyout
       title={i18n.translate('xpack.security.accountManagement.apiKeyFlyout.title', {
-        defaultMessage: formTitle,
+        defaultMessage: `{formTitle}`,
+        values: { formTitle },
       })}
       onCancel={onCancel}
       onSubmit={form.submit}
       submitButtonText={i18n.translate(
         'xpack.security.accountManagement.apiKeyFlyout.submitButton',
         {
-          defaultMessage: `{isSubmitting, select, true{${inProgressButtonText}} other{${formTitle}}}`,
-          values: { isSubmitting: form.isSubmitting },
+          defaultMessage: `{isSubmitting, select, true{inProgressButtonText} other{{formTitle}}}`,
+          values: { isSubmitting: form.isSubmitting, inProgressButtonText, formTitle },
         }
       )}
       isLoading={form.isSubmitting}

@@ -107,7 +107,8 @@ export class APIKeysGridPage extends Component<Props, State> {
         <Route path="/flyout">
           <Breadcrumb
             text={i18n.translate('xpack.security.management.apiKeys.createBreadcrumb', {
-              defaultMessage: `${breadcrumb}`,
+              defaultMessage: `{breadcrumb}`,
+              values: { breadcrumb },
             })}
             href="/flyout"
           >
