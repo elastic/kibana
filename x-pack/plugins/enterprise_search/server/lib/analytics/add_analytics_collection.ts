@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { IScopedClusterClient } from '@kbn/core/server';
+import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 
 import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
 import { AnalyticsCollectionDocument, AnalyticsCollection } from '../../../common/types/analytics';
@@ -13,6 +14,10 @@ import { isAlphaNumericOrUnderscore } from '../../../common/utils/is_alphanumeri
 
 import { fetchAnalyticsCollectionByName } from './fetch_analytics_collection';
 import { setupAnalyticsCollectionIndex } from './setup_indices';
+
+interface AddAnalyticsCollectionRequestBody {
+  name: string;
+}
 
 const createAnalyticsCollection = async (
   client: IScopedClusterClient,
@@ -42,13 +47,37 @@ const createAnalyticsCollection = async (
   };
 };
 
+const getDataViewName = ({ name: collectionName }: AnalyticsCollection): string => {
+  return `elastic_analytics.events-${collectionName}`;
+};
+
+const getDataStreamName = ({ name: collectionName }: AnalyticsCollection): string => {
+  return `logs-elastic_analytics.events-${collectionName}`;
+};
+
+const createDataView = async (
+  dataViewsService: DataViewsService,
+  analytcisCollection: AnalyticsCollection
+): Promise<DataView> => {
+  return dataViewsService.createAndSave(
+    {
+      title: getDataViewName(analytcisCollection),
+      namespaces: [getDataStreamName(analytcisCollection)],
+      allowNoIndex: true,
+      timeFieldName: '@timestamp',
+    },
+    true
+  );
+};
+
 export const addAnalyticsCollection = async (
   client: IScopedClusterClient,
-  input: { name: string }
+  dataViewsService: DataViewsService,
+  { name: collectionName }: AddAnalyticsCollectionRequestBody
 ): Promise<AnalyticsCollection> => {
   const document: AnalyticsCollectionDocument = {
     event_retention_day_length: 180,
-    name: input.name,
+    name: collectionName,
   };
 
   const analyticsCollectionIndexExists = await client.asCurrentUser.indices.exists({
@@ -59,5 +88,9 @@ export const addAnalyticsCollection = async (
     await setupAnalyticsCollectionIndex(client.asCurrentUser);
   }
 
-  return await createAnalyticsCollection(client, document);
+  const analyticsCollection = await createAnalyticsCollection(client, document);
+
+  await createDataView(dataViewsService, analyticsCollection);
+
+  return analyticsCollection;
 };
