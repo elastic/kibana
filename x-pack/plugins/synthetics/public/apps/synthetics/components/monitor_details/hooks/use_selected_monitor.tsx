@@ -9,6 +9,7 @@ import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { ConfigKey } from '../../../../../../common/runtime_types';
+import { useSyntheticsRefreshContext } from '../../../contexts';
 import {
   getMonitorAction,
   selectEncryptedSyntheticsSavedMonitors,
@@ -25,6 +26,7 @@ export const useSelectedMonitor = () => {
     () => monitorsList.find((monitor) => monitor[ConfigKey.CONFIG_ID] === monitorId) ?? null,
     [monitorId, monitorsList]
   );
+  const { lastRefresh } = useSyntheticsRefreshContext();
   const { syntheticsMonitor, syntheticsMonitorLoading } = useSelector(selectorMonitorDetailsState);
   const dispatch = useDispatch();
 
@@ -43,6 +45,10 @@ export const useSelectedMonitor = () => {
       dispatch(getMonitorAction.get({ monitorId }));
     }
   }, [dispatch, monitorId, availableMonitor, syntheticsMonitorLoading]);
+
+  useEffect(() => {
+    dispatch(getMonitorAction.get({ monitorId }));
+  }, [dispatch, monitorId, lastRefresh]);
 
   return {
     monitor: availableMonitor,

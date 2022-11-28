@@ -61,6 +61,19 @@ We keep state internally in the `ElasticHandlebarsVisitor` object using the foll
 - `scopes`: An array (stack) of `context` objects. In a simple template this array will always only contain a single element: The main `context` object. In more complicated scenarios, new `context` objects will be pushed and popped to and from the `scopes` stack as needed.
 - `output`: An array containing the "rendered" output of each node (normally just one element per node). In the most simple template, this is simply joined together into a the final output string after the AST has been traversed. In more complicated templates, we use this array temporarily to collect parameters to give to helper functions (see the `getParams` function).
 
+## Testing
+
+The tests for `@kbn/handlebars` are integrated into the regular test suite of Kibana and are all jest tests. To run them all, simply do:
+
+```sh
+node scripts/jest packages/kbn-handlebars
+```
+
+By default, each test will run both the original `handlebars` code and the modified `@kbn/handlebars` code to compare if the output of the two are identical. To isolate a test run to just one or the other, you can use the following environment variables:
+
+- `EVAL=1` - Set to only run the original `handlebars` implementation that uses `eval`.
+- `AST=1` - Set to only run the modified `@kbn/handlebars` implementation that doesn't use `eval`.
+
 ## Development
 
 Some of the tests have been copied from the upstream `handlebars` project and modified to fit our use-case, test-suite, and coding conventions. They are all located under the `packages/kbn-handlebars/src/upstream` directory. To check if any of the copied files have received updates upstream that we might want to include in our copies, you can run the following script:
@@ -70,6 +83,8 @@ Some of the tests have been copied from the upstream `handlebars` project and mo
 ```
 
 If the script outputs a diff for a given file, it means that this file has been updated.
+
+_Note: that this will look for changes in the `4.x` branch of the `handlebars.js` repo only. Changes in the `master` branch are ignored._
 
 Once all updates have been manually merged with our versions of the files, run the following script to "lock" us into the new updates:
 
@@ -156,13 +171,6 @@ Output:
 }
 ```
 
-### Environment variables
-
-By default each test will run both the original `handlebars` code and the modified `@kbn/handlebars` code to compare if the output of the two are identical. When debugging, it can be beneficial to isolate a test run to just one or the other. To control this, you can use the following environment variables:
-
-- `EVAL=1` - Set to only run the original `handlebars` implementation that uses `eval`.
-- `AST=1` - Set to only run the modified `@kbn/handlebars` implementation that doesn't use `eval`.
-
 ### Print generated code
 
 It's possible to see the generated JavaScript code that `handlebars` create for a given template using the following command line tool:
@@ -181,12 +189,11 @@ Example:
 ./node_modules/handlebars/print-script '{{value}}' -v
 ```
 
-You can pretty print just the generated function using this command:
+You can pretty print just the generated code using this command:
 
 ```sh
 ./node_modules/handlebars/print-script '{{value}}' | \
-  node -e 'process.stdin.on(`data`, c => console.log(`x=${eval(`(${eval(`(${c})`).code})`).main}`))' | \
+  node -e 'process.stdin.on(`data`, c => console.log(`(${eval(`(${c})`).code})`))' | \
   npx prettier --write --stdin-filepath template.js | \
-  tail -c +5 | \
   npx cli-highlight -l javascript
 ```
