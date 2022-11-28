@@ -39,7 +39,7 @@ describe('<FindingsFlyout/>', () => {
   });
 
   describe('Rule Tab', () => {
-    it('displays the rule', () => {
+    it('displays rule benchmark name and section', () => {
       const { getByText, getAllByText } = render(
         <TestProvider>
           <FindingsRuleFlyout onClose={jest.fn} findings={mockFindingsHit} />
@@ -54,7 +54,7 @@ describe('<FindingsFlyout/>', () => {
   });
 
   describe('Resource Tab', () => {
-    it('displays the resource', () => {
+    it('displays resource name and id', () => {
       const { getAllByText } = render(
         <TestProvider>
           <FindingsRuleFlyout onClose={jest.fn} findings={mockFindingsHit} />
@@ -69,7 +69,7 @@ describe('<FindingsFlyout/>', () => {
   });
 
   describe('JSON Tab', () => {
-    it('displays the JSON', () => {
+    it('displays JSON', () => {
       render(
         <TestProvider>
           <FindingsRuleFlyout onClose={jest.fn} findings={mockFindingsHit} />

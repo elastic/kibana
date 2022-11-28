@@ -18,7 +18,7 @@ import React, { useMemo } from 'react';
 import moment from 'moment';
 import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isNonNullable, truthy } from '../../../../common/utils/helpers';
+import { truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import {
   INTERNAL_FEATURE_FLAGS,
