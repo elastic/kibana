@@ -8,17 +8,41 @@ import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { useKibana } from '../../common/lib/kibana';
-import { BulkDeleteResponse } from '../../types';
 import {
   getSuccessfulDeletionNotificationText,
   getFailedDeletionNotificationText,
   getPartialSuccessDeletionNotificationText,
+  getPartialSuccessEnablingNotificationText,
+  getPartialSuccessDisablingNotificationText,
+  getFailedEnablingNotificationText,
+  getFailedDisablingNotificationText,
+  getSuccessfulEnablingNotificationText,
+  getSuccessfulDisablingNotificationText,
   SINGLE_RULE_TITLE,
   MULTIPLE_RULE_TITLE,
 } from '../sections/rules_list/translations';
 
-export const useBulkDeleteResponse = ({
+const actionToToastMapping = {
+  DELETE: {
+    getSuccessfulNotificationText: getSuccessfulDeletionNotificationText,
+    getFailedNotificationText: getFailedDeletionNotificationText,
+    getPartialSuccessNotificationText: getPartialSuccessDeletionNotificationText,
+  },
+  ENABLE: {
+    getSuccessfulNotificationText: getSuccessfulEnablingNotificationText,
+    getFailedNotificationText: getFailedEnablingNotificationText,
+    getPartialSuccessNotificationText: getPartialSuccessEnablingNotificationText,
+  },
+  DISABLE: {
+    getSuccessfulNotificationText: getSuccessfulDisablingNotificationText,
+    getFailedNotificationText: getFailedDisablingNotificationText,
+    getPartialSuccessNotificationText: getPartialSuccessDisablingNotificationText,
+  },
+};
+
+export const useBulkOperationToast = ({
   onSearchPopulate,
 }: {
   onSearchPopulate?: (filter: string) => void;
@@ -28,18 +52,18 @@ export const useBulkDeleteResponse = ({
   } = useKibana().services;
 
   const onSearchPopulateInternal = useCallback(
-    (response: BulkDeleteResponse) => {
+    (errors: BulkOperationError[]) => {
       if (!onSearchPopulate) {
         return;
       }
-      const filter = response.errors.map((error) => error.rule.name).join(',');
+      const filter = errors.map((error) => error.rule.name).join(',');
       onSearchPopulate(filter);
     },
     [onSearchPopulate]
   );
 
   const renderToastErrorBody = useCallback(
-    (response: BulkDeleteResponse, messageType: 'warning' | 'danger') => {
+    (errors: BulkOperationError[], messageType: 'warning' | 'danger') => {
       return (
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
           {onSearchPopulate && (
@@ -47,7 +71,7 @@ export const useBulkDeleteResponse = ({
               <EuiButton
                 color={messageType}
                 size="s"
-                onClick={() => onSearchPopulateInternal(response)}
+                onClick={() => onSearchPopulateInternal(errors)}
                 data-test-subj="bulkDeleteResponseFilterErrors"
               >
                 <FormattedMessage
@@ -64,16 +88,22 @@ export const useBulkDeleteResponse = ({
   );
 
   const showToast = useCallback(
-    (response: BulkDeleteResponse) => {
-      const { errors, total } = response;
-
+    ({
+      action,
+      errors,
+      total,
+    }: {
+      action: 'DELETE' | 'ENABLE' | 'DISABLE';
+      errors: BulkOperationError[];
+      total: number;
+    }) => {
       const numberOfSuccess = total - errors.length;
       const numberOfErrors = errors.length;
 
       // All success
       if (!numberOfErrors) {
         toasts.addSuccess(
-          getSuccessfulDeletionNotificationText(
+          actionToToastMapping[action].getSuccessfulNotificationText(
             numberOfSuccess,
             SINGLE_RULE_TITLE,
             MULTIPLE_RULE_TITLE
@@ -85,25 +115,25 @@ export const useBulkDeleteResponse = ({
       // All failure
       if (numberOfErrors === total) {
         toasts.addDanger({
-          title: getFailedDeletionNotificationText(
+          title: actionToToastMapping[action].getFailedNotificationText(
             numberOfErrors,
             SINGLE_RULE_TITLE,
             MULTIPLE_RULE_TITLE
           ),
-          text: toMountPoint(renderToastErrorBody(response, 'danger')),
+          text: toMountPoint(renderToastErrorBody(errors, 'danger')),
         });
         return;
       }
 
       // Some failure
       toasts.addWarning({
-        title: getPartialSuccessDeletionNotificationText(
+        title: actionToToastMapping[action].getPartialSuccessNotificationText(
           numberOfSuccess,
           numberOfErrors,
           SINGLE_RULE_TITLE,
           MULTIPLE_RULE_TITLE
         ),
-        text: toMountPoint(renderToastErrorBody(response, 'warning')),
+        text: toMountPoint(renderToastErrorBody(errors, 'warning')),
       });
     },
     [toasts, renderToastErrorBody]
