@@ -82,6 +82,7 @@ const updateSLOParamsSchema = t.type({
     time_window: timeWindowSchema,
     budgeting_method: budgetingMethodSchema,
     objective: objectiveSchema,
+    settings: settingsSchema,
   }),
 });
 

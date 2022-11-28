@@ -52,6 +52,10 @@ export class UpdateSLO {
       hasBreakingChange = true;
     }
 
+    if (!deepEqual(originalSlo.settings, updatedSlo.settings)) {
+      hasBreakingChange = true;
+    }
+
     if (hasBreakingChange) {
       updatedSlo.revision++;
     }
