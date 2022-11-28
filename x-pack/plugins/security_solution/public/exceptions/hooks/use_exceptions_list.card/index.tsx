@@ -10,6 +10,8 @@ import type {
   ExceptionListItemSchema,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+
 import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import { useGeneratedHtmlId } from '@elastic/eui';
 import { useGetSecuritySolutionLinkProps } from '../../../common/components/links';
@@ -85,6 +87,22 @@ export const useExceptionsListCard = ({
 
   const listCannotBeEdited = checkIfListCannotBeEdited(exceptionsList);
 
+  const emptyViewerTitle = useMemo(() => {
+    return viewerStatus === ViewerStatus.EMPTY ? i18n.EXCEPTION_LIST_EMPTY_VIEWER_TITLE : '';
+  }, [viewerStatus]);
+
+  const emptyViewerBody = useMemo(() => {
+    return viewerStatus === ViewerStatus.EMPTY
+      ? i18n.EXCEPTION_LIST_EMPTY_VIEWER_BODY(exceptionsList.name)
+      : '';
+  }, [exceptionsList.name, viewerStatus]);
+
+  const emptyViewerButtonText = useMemo(() => {
+    return exceptionsList.type === ExceptionListTypeEnum.ENDPOINT
+      ? i18n.EXCEPTION_LIST_EMPTY_VIEWER_BUTTON_ENDPOINT
+      : i18n.EXCEPTION_LIST_EMPTY_VIEWER_BUTTON;
+  }, [exceptionsList.type]);
+
   const menuActionItems = useMemo(
     () => [
       {
@@ -145,8 +163,8 @@ export const useExceptionsListCard = ({
 
   // routes to x-pack/plugins/security_solution/public/exceptions/routes.tsx
   const { onClick: goToExceptionDetail } = useGetSecuritySolutionLinkProps()({
-    deepLinkId: SecurityPageName.sharedExceptionListDetails,
-    path: `/exceptions/shared/${exceptionsList.list_id}`,
+    deepLinkId: SecurityPageName.exceptions,
+    path: `/details/${exceptionsList.list_id}`,
   });
   return {
     listId,
@@ -177,5 +195,8 @@ export const useExceptionsListCard = ({
     handleConfirmExceptionFlyout,
     handleCancelExceptionItemFlyout,
     goToExceptionDetail,
+    emptyViewerTitle,
+    emptyViewerBody,
+    emptyViewerButtonText,
   };
 };

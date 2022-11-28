@@ -10,7 +10,7 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
+import { TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
