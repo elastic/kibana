@@ -44,6 +44,8 @@ export default function ({
       await PageObjects.common.sleep(3000000);
     });
     it('dashboard auto refresh finished successfully', async function () {
+      // This is a trivial assertion to ensure that we made it to the last test without
+      // errors.
       expect(0).to.be.lessThan(1);
     });
   });
