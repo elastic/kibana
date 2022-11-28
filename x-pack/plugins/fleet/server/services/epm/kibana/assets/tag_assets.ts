@@ -9,6 +9,7 @@ import { taggableTypes } from '@kbn/saved-objects-tagging-plugin/common/constant
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import type { KibanaAssetType } from '../../../../../common';
+import { appContextService } from '../../../app_context';
 
 import type { ArchiveAsset } from './install';
 import { KibanaSavedObjectTypeMapping } from './install';
@@ -44,12 +45,20 @@ export async function tagKibanaAssets(opts: TagAssetsParams) {
     ensurePackageTag(opts),
   ]);
 
-  await savedObjectTagAssignmentService.updateTagAssignments({
-    tags: [managedTagId, packageTagId],
-    assign: taggableAssets,
-    unassign: [],
-    refresh: false,
-  });
+  try {
+    await savedObjectTagAssignmentService.updateTagAssignments({
+      tags: [managedTagId, packageTagId],
+      assign: taggableAssets,
+      unassign: [],
+      refresh: false,
+    });
+  } catch (error) {
+    if (error.status === 404) {
+      appContextService.getLogger().warn(error.message);
+      return;
+    }
+    throw error;
+  }
 }
 
 function getTaggableAssets(kibanaAssets: TagAssetsParams['kibanaAssets']) {

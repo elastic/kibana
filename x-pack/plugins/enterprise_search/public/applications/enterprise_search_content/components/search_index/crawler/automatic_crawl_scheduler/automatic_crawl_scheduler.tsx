@@ -154,7 +154,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
                       {i18n.translate(
                         'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.intervalSchedulingDescription',
                         {
-                          defaultMessage: 'Define the frequency and time for scheduled crawls',
+                          defaultMessage: 'Define the frequency for scheduled crawls',
                         }
                       )}
                     </EuiText>
