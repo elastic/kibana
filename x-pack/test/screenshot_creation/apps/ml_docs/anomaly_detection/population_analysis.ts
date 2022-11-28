@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
   const cellSize = 15;
   const viewBySwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneViewBy';
 
-  describe.only('population analysis', function () {
+  describe('population analysis', function () {
     before(async () => {
       await ml.api.createAndRunAnomalyDetectionLookbackJob(
         populationJobConfig as Job,
