@@ -31,10 +31,13 @@ import { AvailabilitySparklines } from './availability_sparklines';
 import { LastTestRun } from './last_test_run';
 import { LAST_10_TEST_RUNS, TestRunsTable } from './test_runs_table';
 import { MonitorErrorsCount } from './monitor_errors_count';
+import { useAbsoluteDate } from '../../../hooks';
 
 export const MonitorSummary = () => {
-  const { from, loading } = useEarliestStartDate();
-  const to = 'now';
+  const { from: fromRelative, loading } = useEarliestStartDate();
+  const toRelative = 'now';
+
+  const { from, to } = useAbsoluteDate({ from: fromRelative, to: toRelative });
 
   if (loading) {
     return <EuiLoadingSpinner size="xl" />;

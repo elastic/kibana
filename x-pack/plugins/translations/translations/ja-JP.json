@@ -30869,7 +30869,6 @@
     "xpack.synthetics.keyValuePairsField.value.ariaLabel": "値",
     "xpack.synthetics.keyValuePairsField.value.label": "値",
     "xpack.synthetics.kueryBar.searchPlaceholder.kql": "KQL構文を使用して、モニターID、名前、タイプ（例：monitor.type: \"http\" AND tags: \"dev\"）などを検索",
-    "xpack.synthetics.kueryBar.searchPlaceholder.simple": "モニターID、名前、またはURL（例：http://）で検索",
     "xpack.synthetics.locationName.helpLinkAnnotation": "場所を追加",
     "xpack.synthetics.management.confirmDescriptionLabel": "このアクションにより、モニターが削除されますが、収集されたデータはすべて保持されます。この操作は元に戻すことができません。",
     "xpack.synthetics.management.deleteLabel": "削除",
