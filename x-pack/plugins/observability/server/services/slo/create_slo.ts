@@ -56,9 +56,9 @@ export class CreateSLO {
       ...params,
       id: uuid.v1(),
       settings: {
-        timestamp_field: '@timestamp',
-        sync_delay: new Duration(1, DurationUnit.Minute),
-        frequency: new Duration(1, DurationUnit.Minute),
+        timestamp_field: params.settings?.timestamp_field ?? '@timestamp',
+        sync_delay: params.settings?.sync_delay ?? new Duration(1, DurationUnit.Minute),
+        frequency: params.settings?.frequency ?? new Duration(1, DurationUnit.Minute),
       },
       revision: 1,
       created_at: now,
