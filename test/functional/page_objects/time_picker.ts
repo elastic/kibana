@@ -124,7 +124,7 @@ export class TimePickerPageObject extends FtrService {
    * @param {String} fromTime MMM D, YYYY @ HH:mm:ss.SSS
    * @param {String} toTime MMM D, YYYY @ HH:mm:ss.SSS
    */
-   public async setAbsoluteRange(fromTime: string, toTime: string) {
+  public async setAbsoluteRange(fromTime: string, toTime: string) {
     // get the current URL and check if it already contains the desired times, return
     const currentUrl = await this.browser.getCurrentUrl();
     const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
