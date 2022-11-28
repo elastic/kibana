@@ -100,7 +100,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       validate: {
         body: schema.recordOf(
           schema.string(),
-          schema.object({ label: schema.string(), value: schema.string() })
+          schema.object({ label: schema.string(), value: schema.nullable(schema.string()) })
         ),
         params: schema.object({
           connectorId: schema.string(),
