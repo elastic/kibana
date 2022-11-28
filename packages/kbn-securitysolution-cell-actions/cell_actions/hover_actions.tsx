@@ -8,10 +8,9 @@
 
 import { EuiFocusTrap, EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useCallback } from 'react';
-// import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import styled from 'styled-components';
 import { HoverActionsPopover } from './hover_actions_popover';
 import { ActionItem } from './cell_action_item';
 import { CellActionConfig } from '.';
@@ -30,11 +29,9 @@ export const YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS = (fieldName: string) =>
     }
   );
 
-export const AdditionalContent = styled.div`
+export const additionalContentCSS = css`
   padding: 2px;
 `;
-
-AdditionalContent.displayName = 'AdditionalContent';
 
 // const StyledHoverActionsContainer = styled.div<{
 //   $showTopN: boolean;
@@ -219,9 +216,7 @@ export const HoverActions: React.FC<Props> = React.memo(
               <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(config.field)}</p>
             </EuiScreenReaderOnly>
 
-            {additionalContent != null && (
-              <AdditionalContent>{additionalContent}</AdditionalContent>
-            )}
+            {additionalContent != null && <div css={additionalContentCSS}>{additionalContent}</div>}
 
             {/* {enableOverflowButton && !isCaseView ? overflowActionItems : {allActionItems} */}
 

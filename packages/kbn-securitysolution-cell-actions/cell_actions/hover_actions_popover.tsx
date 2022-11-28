@@ -9,8 +9,7 @@
 import { EuiPopover } from '@elastic/eui';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import styled from 'styled-components';
-
+import { css } from '@emotion/react';
 // TODO move it to another package? security-solution-ui??
 
 /** This class is added to the document body while dragging */
@@ -23,11 +22,11 @@ const HOVER_ACTIONS_ALWAYS_SHOW_CLASS_NAME = 'always-show-cell-actions';
  */
 const HOVER_INTENT_DELAY = 100; // ms
 
-const StyledEuiPopover = styled(EuiPopover as any)`
+const euiPopoverCSS = css`
   .euiPopover__anchor {
     width: 100%;
   }
-` as unknown as typeof EuiPopover;
+`;
 
 interface Props {
   children: React.ReactNode;
@@ -171,7 +170,8 @@ export const HoverActionsPopover = React.memo<Props>(
         className={alwaysShow ? HOVER_ACTIONS_ALWAYS_SHOW_CLASS_NAME : ''}
         onMouseLeave={onMouseLeave}
       >
-        <StyledEuiPopover
+        <EuiPopover
+          css={euiPopoverCSS}
           ref={popoverRef}
           anchorPosition={'downCenter'}
           button={content}
@@ -184,7 +184,7 @@ export const HoverActionsPopover = React.memo<Props>(
           repositionOnScroll={true}
         >
           {isOpen ? <div onKeyDown={onKeyDown}>{hoverContent}</div> : null}
-        </StyledEuiPopover>
+        </EuiPopover>
       </div>
     );
   }
