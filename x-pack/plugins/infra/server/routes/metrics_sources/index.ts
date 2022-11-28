@@ -16,6 +16,7 @@ import {
   partialMetricsSourceConfigurationPropertiesRT,
   metricsSourceConfigurationResponseRT,
   MetricsSourceStatus,
+  partialMetricsSourceConfigurationReqPayloadRT,
 } from '../../../common/metrics_sources';
 
 export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => {
@@ -73,7 +74,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         params: schema.object({
           sourceId: schema.string(),
         }),
-        body: createValidationFunction(partialMetricsSourceConfigurationPropertiesRT),
+        body: createValidationFunction(partialMetricsSourceConfigurationReqPayloadRT),
       },
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {

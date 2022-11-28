@@ -29,9 +29,13 @@ export type MetricsSourceConfigurationProperties = rt.TypeOf<
   typeof metricsSourceConfigurationPropertiesRT
 >;
 
-export const partialMetricsSourceConfigurationPropertiesRT = rt.partial({
+export const partialMetricsSourceConfigurationReqPayloadRT = rt.partial({
   ...metricsSourceConfigurationPropertiesRT.type.props,
   metricAlias: indexPatternRt,
+});
+
+export const partialMetricsSourceConfigurationPropertiesRT = rt.partial({
+  ...metricsSourceConfigurationPropertiesRT.type.props,
 });
 
 export type PartialMetricsSourceConfigurationProperties = rt.TypeOf<
