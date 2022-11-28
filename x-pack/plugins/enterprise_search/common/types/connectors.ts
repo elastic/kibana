@@ -7,7 +7,7 @@
 
 export interface KeyValuePair {
   label: string;
-  value: string;
+  value: string | null;
 }
 
 export type ConnectorConfiguration = Record<string, KeyValuePair | null>;
@@ -99,7 +99,7 @@ export interface FilteringConfig {
 }
 
 export enum TriggerMethod {
-  ON_DEMAND = 'on-demand',
+  ON_DEMAND = 'on_demand',
   SCHEDULED = 'scheduled',
 }
 
