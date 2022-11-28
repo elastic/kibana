@@ -13,7 +13,6 @@ import { hasData } from '../../lib/sources/has_data';
 import { createSearchClient } from '../../lib/create_search_client';
 import { AnomalyThresholdRangeError } from '../../lib/sources/errors';
 import {
-  partialMetricsSourceConfigurationPropertiesRT,
   metricsSourceConfigurationResponseRT,
   MetricsSourceStatus,
   partialMetricsSourceConfigurationReqPayloadRT,
