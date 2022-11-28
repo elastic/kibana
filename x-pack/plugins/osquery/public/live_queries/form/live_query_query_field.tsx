@@ -14,7 +14,6 @@ import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { OsqueryEditor } from '../../editor';
 import { useKibana } from '../../common/lib/kibana';
-import { MAX_QUERY_LENGTH } from '../../packs/queries/validations';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import type { SavedQueriesDropdownProps } from '../../saved_queries/saved_queries_dropdown';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
@@ -56,13 +55,6 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
           defaultMessage: 'Query is a required field',
         }),
         value: queryType !== 'pack',
-      },
-      maxLength: {
-        message: i18n.translate('xpack.osquery.liveQuery.queryForm.largeQueryError', {
-          defaultMessage: 'Query is too large (max {maxLength} characters)',
-          values: { maxLength: MAX_QUERY_LENGTH },
-        }),
-        value: MAX_QUERY_LENGTH,
       },
     },
     defaultValue: '',
