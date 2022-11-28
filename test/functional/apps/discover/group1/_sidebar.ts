@@ -118,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('renders field groups', function () {
-      it('should show field list groups excluding multifields', async function () {
+      it('should show field list groups excluding subfields', async function () {
         await PageObjects.discover.waitUntilSidebarHasLoaded();
         expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
 
@@ -157,7 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      it('should show field list groups including multifields when searched from source', async function () {
+      it('should show field list groups excluding subfields when searched from source', async function () {
         await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': true });
         await browser.refresh();
 
@@ -171,7 +171,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           availableFields
             .join(', ')
             .startsWith(
-              '@message, @message.raw, @tags, @tags.raw, @timestamp, agent, agent.raw, bytes, clientip, extension, extension.raw'
+              '@message, @tags, @timestamp, agent, bytes, clientip, extension, geo.coordinates'
             )
         ).to.be(true);
 
@@ -181,7 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await emptySectionButton.scrollIntoViewIfNecessary();
         availableFields = await PageObjects.discover.getSidebarSectionFieldNames('available');
-        expect(availableFields.length).to.be(75);
+        expect(availableFields.length).to.be(53);
 
         // Expand Empty section
         await PageObjects.discover.toggleSidebarSection('empty');
@@ -202,7 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).to.be('relatedContent');
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '83 available fields. 1 unmapped field. 0 empty fields. 3 meta fields.'
+          '53 available fields. 1 unmapped field. 0 empty fields. 3 meta fields.'
         );
       });
 
