@@ -64,7 +64,7 @@ Before you upgrade to 8.6.0, review the breaking changes, then mitigate the impa
 To configure higher resolution data histogram aggregations without changing the *Advanced Settings*, the default histogram:maxBars setting is now 1000 instead of 100. For more information, refer to {kibana-pull}143081[#143081].
 
 *Impact* +
-For each <<xpack-spaces,space>>, complete the following to change *histogram:maxBars* to the previous default setting:
+For each {kibana-ref}/xpack-spaces.html[space], complete the following to change *histogram:maxBars* to the previous default setting:
 
 . Open the main menu, then click *Stack Management > Advanced Settings*.
 . Scroll or search for *histogram:maxBars*.
