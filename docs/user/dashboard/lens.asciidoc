@@ -56,6 +56,8 @@ TIP: You can manually apply the changes you make, which is helpful when creating
 Change the fields list to display a different {data-source}, different time range, or add your own fields.
 
 * To create a visualization with fields in a different {data-source}, open the {data-source} dropdown, then select the {data-source}. 
++
+For more information about {data-sources}, refer to <<data-views>>.
 
 * If the fields list is empty, change the <<set-time-filter,time filter>>.
 
@@ -201,7 +203,7 @@ image::images/lens_annotations_8.2.0.png[Lens annotations]
 
 . Select the {data-source}.
 
-. To open the annotation options, click *Event*.
+. Click *Event*, or drag a field to the *Add an annotation* field in the *Annotations* layer pane.
 
 . Specify the *Annotation date*.
 
@@ -211,7 +213,11 @@ image::images/lens_annotations_8.2.0.png[Lens annotations]
 
 . Change the *Appearance* options for how you want the annotation to display.
 
+. To add a field to the tooltip, click *Add field*, then select the field you want to display.
+
 . To close, click *X*.
+
+. To use global filters in the annotation, click image:dashboard/images/lens_layerActions_8.5.0.png[Actions menu for the annotations layer] in the *Annotations* layer pane, then select *Keep global filters* from the dropdown.
 
 [float]
 [[add-reference-lines]]
@@ -240,7 +246,7 @@ image::images/lens_referenceLine_7.16.png[Lens drag and drop focus state]
 [[filter-the-data]]
 ==== Apply filters
 
-You can use the <<semi-structured-search, KQL query bar>> to focus on a known set of data for the entire visualization, or use the filter options from the layer pane or legend.
+You can use the <<semi-structured-search, query bar>> to focus on a data set for the entire visualization, or use the filter options from the layer pane or legend.
 
 [float]
 [[filter-with-the-function]]
