@@ -12,6 +12,7 @@ import {
   dateType,
   indicatorSchema,
   objectiveSchema,
+  settingsSchema,
   summarySchema,
   timeWindowSchema,
 } from '../schema';
@@ -59,6 +60,7 @@ const getSLOResponseSchema = t.type({
   time_window: timeWindowSchema,
   budgeting_method: budgetingMethodSchema,
   objective: objectiveSchema,
+  settings: settingsSchema,
   summary: summarySchema,
   revision: t.number,
   created_at: dateType,
@@ -87,6 +89,7 @@ const updateSLOResponseSchema = t.type({
   time_window: timeWindowSchema,
   budgeting_method: budgetingMethodSchema,
   objective: objectiveSchema,
+  settings: settingsSchema,
   created_at: dateType,
   updated_at: dateType,
 });
@@ -105,6 +108,7 @@ const findSLOResponseSchema = t.type({
       budgeting_method: budgetingMethodSchema,
       objective: objectiveSchema,
       summary: summarySchema,
+      settings: settingsSchema,
       revision: t.number,
       created_at: dateType,
       updated_at: dateType,
