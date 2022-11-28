@@ -21,16 +21,16 @@ import type {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '../../../common/search_strategy';
+import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 
 /**
  * EventFiltersFieldProvider mimics indexField provider from timeline plugin: x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts
  * but it uses ES internalUser instead to avoid adding extra index privileges for users with event filters permissions.
  * It is used to retrieve index patterns for event filters form.
  */
-export const eventFiltersFieldsProvider = (): ISearchStrategy<
-  IndexFieldsStrategyRequest<'indices'>,
-  IndexFieldsStrategyResponse
-> => {
+export const eventFiltersFieldsProvider = (
+  context: EndpointAppContextService
+): ISearchStrategy<IndexFieldsStrategyRequest<'indices'>, IndexFieldsStrategyResponse> => {
   // require the fields once we actually need them, rather than ahead of time, and pass
   // them to createFieldItem to reduce the amount of work done as much as possible
   const beatFields: BeatFields =
@@ -38,16 +38,27 @@ export const eventFiltersFieldsProvider = (): ISearchStrategy<
     require('@kbn/timelines-plugin/server/utils/beat_schema/fields').fieldsBeat;
 
   return {
-    search: (request, _, deps) => from(requestEventFiltersFieldsSearch(request, deps, beatFields)),
+    search: (request, _, deps) =>
+      from(requestEventFiltersFieldsSearch(request, deps, beatFields, context)),
   };
 };
 
 export const requestEventFiltersFieldsSearch = async (
   request: IndexFieldsStrategyRequest<'indices'>,
-  { esClient }: SearchStrategyDependencies,
-  beatFields: BeatFields
+  { esClient, request: kibanaRequest }: SearchStrategyDependencies,
+  beatFields: BeatFields,
+  context: EndpointAppContextService
 ): Promise<IndexFieldsStrategyResponse> => {
-  // TODO: Add event filteres RBAC checks
+  const { canWriteEventFilters } = await context.getEndpointAuthz(kibanaRequest);
+
+  if (!canWriteEventFilters) {
+    throw new Error('Endpoint authz error');
+  }
+
+  if (request.indices.length > 1 || request.indices[0] !== 'logs-endpoint.events.*') {
+    throw new Error(`Invalid indices request ${request.indices.join(', ')}`);
+  }
+
   const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
 
   let indicesExist: string[] = [];

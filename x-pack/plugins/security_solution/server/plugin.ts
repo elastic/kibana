@@ -56,7 +56,7 @@ import {
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
-import { registerEventFiltersFieldsSuggestionsRoutes } from './endpoint/routes/event_filters_fields_suggestions';
+import { registerEndpointSuggestionsRoutes } from './endpoint/routes/suggestions';
 import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import type { EndpointAppContext } from './endpoint/types';
@@ -305,9 +305,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     registerEndpointRoutes(router, endpointContext);
-    registerEventFiltersFieldsSuggestionsRoutes(
+    registerEndpointSuggestionsRoutes(
       router,
-      plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create()
+      plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
+      endpointContext
     );
     registerLimitedConcurrencyRoutes(core);
     registerPolicyRoutes(router, endpointContext);
@@ -356,9 +357,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         config,
       });
 
-      const eventFiltersFieldsStrategy = eventFiltersFieldsProvider();
-
-      // TODO: Should we move this inside the securitySolutionSearchStrategy?
+      const eventFiltersFieldsStrategy = eventFiltersFieldsProvider(this.endpointAppContextService);
       plugins.data.search.registerSearchStrategy('eventFiltersFields', eventFiltersFieldsStrategy);
 
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(

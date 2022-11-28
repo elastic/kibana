@@ -27,8 +27,8 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
-import type { QuerySuggestionGetFn } from '@kbn/unified-search-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
+import { useSuggestions } from '../../../../hooks/use_suggestions';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { useFetchIndex } from '../../../../../common/containers/source';
@@ -59,6 +59,7 @@ import { EffectedPolicySelect } from '../../../../components/effected_policy_sel
 import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
 import { filterIndexPatterns } from '../../../../../detection_engine/rule_exceptions/utils/helpers';
+import { EventFiltersApiClient } from '../../service/api_client';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -105,12 +106,6 @@ const cleanupEntries = (
   );
 };
 
-interface EventFiltersAutocompleteService {
-  getQuerySuggestions: QuerySuggestionGetFn;
-  hasQuerySuggestions: (language: string) => boolean;
-  getValueSuggestions: ValueSuggestionsGetFn;
-}
-
 type EventFilterItemEntries = Array<{
   field: string;
   value: string;
@@ -123,21 +118,15 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const getTestId = useTestIdGenerator('eventFilters-form');
     const { http } = useKibana().services;
 
-    const autocomplete: EventFiltersAutocompleteService = useMemo(
-      () => ({
-        getQuerySuggestions: () => undefined,
-        hasQuerySuggestions: (_) => false,
-        getValueSuggestions: ({ field, query }) => {
-          // TODO: Move this to the artifacts api client
-          const res: Promise<string[]> = http.post('/api/endpoint/eventFiltersFieldsSuggestions', {
-            body: JSON.stringify({ field: field.name, query }),
-          });
-          return Promise.resolve(res);
-        },
-      }),
+    const getSuggestionsFn = useCallback<ValueSuggestionsGetFn>(
+      ({ field, query }) => {
+        const eventFiltersAPIClient = new EventFiltersApiClient(http);
+        return eventFiltersAPIClient.suggestions(field.name, query);
+      },
       [http]
     );
 
+    const autocompleteSuggestions = useSuggestions(getSuggestionsFn);
     const [hasFormChanged, setHasFormChanged] = useState(false);
     const [hasNameError, toggleHasNameError] = useState<boolean>(!exception.name);
     const [newComment, setNewComment] = useState('');
@@ -444,7 +433,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         getExceptionBuilderComponentLazy({
           allowLargeValueLists: false,
           httpService: http,
-          autocompleteService: autocomplete,
+          autocompleteService: autocompleteSuggestions,
           exceptionListItems: [eventFilterItem as ExceptionListItemSchema],
           listType: EVENT_FILTER_LIST_TYPE,
           listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -462,7 +451,14 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           operatorsList: EVENT_FILTERS_OPERATORS,
           osTypes: exception.os_types,
         }),
-      [autocomplete, handleOnBuilderChange, http, indexPatterns, exception, eventFilterItem]
+      [
+        autocompleteSuggestions,
+        handleOnBuilderChange,
+        http,
+        indexPatterns,
+        exception,
+        eventFilterItem,
+      ]
     );
 
     // conditions

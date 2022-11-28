@@ -56,7 +56,6 @@ export interface SecuritySolutionPluginSetupDependencies {
   usageCollection?: UsageCollectionPluginSetup;
   licensing: LicensingPluginSetup;
   osquery: OsqueryPluginSetup;
-  // TODO: Should this be conditional?
   unifiedSearch: UnifiedSearchServerPluginSetup;
 }
 
