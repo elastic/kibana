@@ -10,7 +10,6 @@ import React, { Component } from 'react';
 import uuid from 'uuid/v4';
 import { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
-import { EuiButtonIcon, EuiDualRange, EuiText } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 import {
@@ -19,10 +18,9 @@ import {
   ControlGroupOutput,
   CONTROL_GROUP_TYPE,
 } from '@kbn/controls-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
 import type { TimeRange } from '@kbn/es-query';
-import { getEmbeddableService, getTimeFilter } from '../../kibana_services';
+import { getEmbeddableService } from '../../kibana_services';
 import { Timeslice } from '../../../common/descriptor_types';
 
 export interface Props {
@@ -43,9 +41,12 @@ export class Timeslider extends Component<Props, {}> {
   }
 
   componentDidUpdate() {
-    if (this._controlGroup && !_.isEqual(this._controlGroup.getInput().timeRange, this.props.timeRange)) {
+    if (
+      this._controlGroup &&
+      !_.isEqual(this._controlGroup.getInput().timeRange, this.props.timeRange)
+    ) {
       this._controlGroup.updateInput({
-        timeRange: this.props.timeRange
+        timeRange: this.props.timeRange,
       });
     }
   }
@@ -70,13 +71,13 @@ export class Timeslider extends Component<Props, {}> {
         [timesliderId]: {
           explicitInput: {
             id: timesliderId,
-            title: 'timeslider'
+            title: 'timeslider',
           },
           grow: true,
           order: 0,
           type: 'timeSlider',
-          width: 'large'
-        }
+          width: 'large',
+        },
       },
       viewMode: ViewMode.VIEW,
       timeRange: this.props.timeRange,
@@ -101,13 +102,14 @@ export class Timeslider extends Component<Props, {}> {
             this._controlGroup.anyControlOutputConsumerLoading$.next(false);
           });
 
-          this.props.setTimeslice(timeslice === undefined 
-            ?  undefined
-            :
-              {
-                from: timeslice[0],
-                to: timeslice[1],
-              });
+          this.props.setTimeslice(
+            timeslice === undefined
+              ? undefined
+              : {
+                  from: timeslice[0],
+                  to: timeslice[1],
+                }
+          );
         })
     );
 
@@ -117,6 +119,6 @@ export class Timeslider extends Component<Props, {}> {
   }
 
   render() {
-    return <div className="mapTimeslider mapTimeslider--animation" ref={this._controlGroupRef}/>;
+    return <div className="mapTimeslider mapTimeslider--animation" ref={this._controlGroupRef} />;
   }
 }
