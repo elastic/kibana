@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { forwardRef, useEffect, useMemo, useCallback } from 'react';
+import React, { forwardRef, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import type { EuiMarkdownEditorProps } from '@elastic/eui';
 import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import useDebounce from 'react-use/lib/useDebounce';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -52,6 +53,7 @@ export const MarkdownEditorForm = React.memo(
       ref
     ) => {
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+      const storage = useMemo(() => new Storage(window.sessionStorage), []);
 
       const commentEditorContextValue = useMemo(
         () => ({
@@ -63,23 +65,22 @@ export const MarkdownEditorForm = React.memo(
         [id, field.value, caseTitle, caseTags]
       );
 
-      const storage = useMemo(() => new Storage(window.sessionStorage), []);
-
       useEffect(() => {
         const storageDraftComment = draftCommentStorageKey && storage.get(draftCommentStorageKey);
-        if( storageDraftComment && storageDraftComment!=='' ) {
+        if (storageDraftComment && storageDraftComment !== '') {
           field.setValue(storageDraftComment);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);
-      
-      const handleOnChange = useCallback((value: string) => {
-        field.setValue(value);
-        if (draftCommentStorageKey) {
-          storage.set(draftCommentStorageKey, value);
-        }
-      },[field, storage]);
-      
-    
+
+      useDebounce(
+        () => {
+          if (draftCommentStorageKey) storage.set(draftCommentStorageKey, field.value);
+        },
+        500,
+        [field.value]
+      );
+
       return (
         <CommentEditorContext.Provider value={commentEditorContextValue}>
           <EuiFormRow
@@ -96,7 +97,7 @@ export const MarkdownEditorForm = React.memo(
               ref={ref}
               ariaLabel={idAria}
               editorId={id}
-              onChange={handleOnChange}
+              onChange={field.setValue}
               value={field.value}
               disabledUiPlugins={disabledUiPlugins}
               data-test-subj={`${dataTestSubj}-markdown-editor`}

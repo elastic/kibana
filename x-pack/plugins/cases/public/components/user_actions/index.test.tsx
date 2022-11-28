@@ -434,24 +434,24 @@ describe(`UserActions`, () => {
       .first()
       .simulate('click');
 
-      await waitFor(() => {
-        wrapper.update();
-        expect(
-          wrapper
-            .find(
-              `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
-            )
-            .exists()
-        ).toEqual(false);
-        expect(patchComment).toBeCalledWith({
-          commentUpdate: editedComment,
-          caseId: 'case-id',
-          commentId: props.data.comments[0].id,
-          version: props.data.comments[0].version,
-        });
+    await waitFor(() => {
+      wrapper.update();
+      expect(
+        wrapper
+          .find(
+            `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
+          )
+          .exists()
+      ).toEqual(false);
+      expect(patchComment).toBeCalledWith({
+        commentUpdate: editedComment,
+        caseId: 'case-id',
+        commentId: props.data.comments[0].id,
+        version: props.data.comments[0].version,
       });
+    });
 
-      expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe(newComment);
+    expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe(newComment);
   });
 
   it('it should persist the draft comment while description is updated', async () => {
@@ -464,9 +464,9 @@ describe(`UserActions`, () => {
 
     // type new comment in text area
     wrapper
-    .find(`[data-test-subj="add-comment"] textarea`)
-    .first()
-    .simulate('change', { target: { value: newComment } });
+      .find(`[data-test-subj="add-comment"] textarea`)
+      .first()
+      .simulate('change', { target: { value: newComment } });
 
     wrapper
       .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-ellipses"]`)
@@ -504,7 +504,7 @@ describe(`UserActions`, () => {
       expect(onUpdateField).toBeCalledWith({ key: 'description', value: sampleData.content });
     });
 
-      expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe(newComment);
+    expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe(newComment);
   });
 
   describe('Host isolation action', () => {

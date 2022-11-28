@@ -52,6 +52,10 @@ describe('AddComment ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useCreateAttachmentsMock.mockImplementation(() => defaultResponse);
+    Object.defineProperty(window, 'sessionStorage', {
+      value: { clear: jest.fn(), removeItem: jest.fn(), getItem: jest.fn(), setItem: jest.fn() },
+      writable: true,
+    });
   });
 
   it('should post comment on submit click', async () => {
@@ -206,6 +210,35 @@ describe('AddComment ', () => {
 
     await waitFor(() => {
       expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe('[title](url)');
+    });
+  });
+
+  it('should clear session storage on submit', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AddComment {...addCommentProps} />
+      </TestProviders>
+    );
+
+    wrapper
+      .find(`[data-test-subj="add-comment"] textarea`)
+      .first()
+      .simulate('change', { target: { value: sampleData.comment } });
+
+    expect(wrapper.find(`[data-test-subj="add-comment"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="loading-spinner"]`).exists()).toBeFalsy();
+
+    wrapper.find(`button[data-test-subj="submit-comment"]`).first().simulate('click');
+    await waitFor(() => {
+      expect(onCommentSaving).toBeCalled();
+      expect(createAttachments).toBeCalledWith({
+        caseId: addCommentProps.caseId,
+        caseOwner: SECURITY_SOLUTION_OWNER,
+        data: [sampleData],
+        updateCase: onCommentPosted,
+      });
+      expect(window.sessionStorage.removeItem).toHaveBeenCalled();
+      expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe('');
     });
   });
 });

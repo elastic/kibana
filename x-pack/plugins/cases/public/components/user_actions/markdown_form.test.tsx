@@ -17,10 +17,13 @@ const onSaveContent = jest.fn();
 
 const newValue = 'Hello from Tehas';
 const hyperlink = `[hyperlink](http://elastic.co)`;
+const draftCommentStorageKey = `xpack.cases.caseView.caseId.markdown-id.markdownEditor`;
 const defaultProps = {
   content: `A link to a timeline ${hyperlink}`,
   id: 'markdown-id',
+  caseId: 'caseId',
   isEditable: true,
+  draftCommentStorageKey,
   onChangeEditable,
   onSaveContent,
 };
@@ -195,6 +198,48 @@ describe('UserActionMarkdown ', () => {
       // this is the correct behaviour. The textarea holds the new content
       expect(result.container.querySelector('textarea')!.value).toEqual(newContent);
       expect(result.container.querySelector('textarea')!.value).not.toEqual(oldContent);
+    });
+  });
+  describe('draft comment ', () => {
+    beforeEach(() => {
+      Object.defineProperty(window, 'sessionStorage', {
+        value: { clear: jest.fn(), removeItem: jest.fn(), getItem: jest.fn(), setItem: jest.fn() },
+        writable: true,
+      });
+    });
+
+    it('Save button click clears session storage', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <UserActionMarkdown {...defaultProps} />
+        </TestProviders>
+      );
+
+      wrapper
+        .find(`.euiMarkdownEditorTextArea`)
+        .first()
+        .simulate('change', {
+          target: { value: newValue },
+        });
+
+      wrapper.find(`button[data-test-subj="user-action-save-markdown"]`).first().simulate('click');
+
+      await waitFor(() => {
+        expect(onSaveContent).toHaveBeenCalledWith(newValue);
+        expect(window.sessionStorage.removeItem).toHaveBeenCalled();
+        expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
+      });
+    });
+
+    it('Cancel button click calls storage remove', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <UserActionMarkdown {...defaultProps} />
+        </TestProviders>
+      );
+      wrapper.find(`[data-test-subj="user-action-cancel-markdown"]`).first().simulate('click');
+
+      expect(window.sessionStorage.removeItem).toHaveBeenCalled();
     });
   });
 });

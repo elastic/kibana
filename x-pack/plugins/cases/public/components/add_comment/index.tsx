@@ -24,12 +24,12 @@ import {
   UseField,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { CommentType } from '../../../common/api';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import type { Case } from '../../containers/types';
 import type { EuiMarkdownEditorRef } from '../markdown_editor';
 import { MarkdownEditorForm } from '../markdown_editor';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import * as i18n from './translations';
 import type { AddCommentFormSchema } from './schema';
@@ -73,7 +73,7 @@ export const AddComment = React.memo(
       const [focusOnContext, setFocusOnContext] = useState(false);
       const { permissions, owner } = useCasesContext();
       const { isLoading, createAttachments } = useCreateAttachments();
-      const draftCommentStorageKey = `xpack.cases.caseView.${caseId}.${id}.markdownEditor`
+      const draftCommentStorageKey = `xpack.cases.caseView.${caseId}.${id}.markdownEditor`;
 
       const { form } = useForm<AddCommentFormSchema>({
         defaultValue: initialCommentValue,
@@ -123,7 +123,17 @@ export const AddComment = React.memo(
           storage.remove(draftCommentStorageKey);
           reset();
         }
-      }, [submit, onCommentSaving, createAttachments, caseId, owner, onCommentPosted, reset]);
+      }, [
+        submit,
+        onCommentSaving,
+        createAttachments,
+        caseId,
+        owner,
+        onCommentPosted,
+        reset,
+        storage,
+        draftCommentStorageKey,
+      ]);
 
       /**
        * Focus on the text area when a quote has been added.
