@@ -29,6 +29,8 @@ interface ShardsFormProps {
   options: Array<EuiComboBoxOptionOption<string>>;
 }
 
+const overFlowCss = { overflow: 'auto' };
+
 const ShardsFormComponent = ({
   onDelete,
   index,
@@ -49,7 +51,7 @@ const ShardsFormComponent = ({
         alignItems="flexStart"
         gutterSize="s"
       >
-        <EuiFlexItem>
+        <EuiFlexItem css={overFlowCss}>
           <ShardsPolicyField
             index={index}
             control={control}

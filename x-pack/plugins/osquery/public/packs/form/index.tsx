@@ -53,6 +53,8 @@ interface PackFormProps {
   isReadOnly?: boolean;
 }
 
+const overFlowCss = { overflow: 'auto' };
+
 const PackFormComponent: React.FC<PackFormProps> = ({
   defaultValue,
   editMode = false,
@@ -269,7 +271,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
             <EuiSpacer size="m" />
 
             <EuiFlexGroup>
-              <EuiFlexItem>
+              <EuiFlexItem css={overFlowCss}>
                 <StyledEuiAccordion
                   id="shardsToggle"
                   forceState={shardsToggleState}
