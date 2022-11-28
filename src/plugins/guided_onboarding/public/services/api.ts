@@ -428,6 +428,10 @@ export class ApiService implements GuidedOnboardingApi {
     return await this.updatePluginState({ status: 'skipped' }, false);
   }
 
+  /**
+   * Gets the config for the guide.
+   * @return {Promise} a promise with the guide config or undefined if the config is not found
+   */
   public async getGuideConfig(guideId: GuideId): Promise<GuideConfig | undefined> {
     if (!this.isCloudEnabled) {
       return undefined;

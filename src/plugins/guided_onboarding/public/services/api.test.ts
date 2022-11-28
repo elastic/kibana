@@ -504,6 +504,26 @@ describe('GuidedOnboarding ApiService', () => {
     });
   });
 
+  describe('skipGuidedOnboarding', () => {
+    it(`sends a request to the put state API`, async () => {
+      await apiService.skipGuidedOnboarding();
+      expect(httpClient.put).toHaveBeenCalledTimes(1);
+      // this assertion depends on the guides config
+      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
+        body: JSON.stringify({ status: 'skipped' }),
+      });
+    });
+  });
+
+  describe('getGuideConfig', () => {
+    it('sends a request to the get config API', async () => {
+      apiService.setup(httpClient, true);
+      await apiService.getGuideConfig(testGuide);
+      expect(httpClient.get).toHaveBeenCalledTimes(1);
+      expect(httpClient.get).toHaveBeenCalledWith(`${API_BASE_PATH}/configs`);
+    });
+  });
+
   describe('no API requests are sent on self-managed deployments', () => {
     beforeEach(() => {
       apiService.setup(httpClient, false);
@@ -522,6 +542,11 @@ describe('GuidedOnboarding ApiService', () => {
     it('updatePluginState', async () => {
       await apiService.updatePluginState({}, false);
       expect(httpClient.put).not.toHaveBeenCalled();
+    });
+
+    it('getGuideConfig', async () => {
+      await apiService.getGuideConfig(testGuide);
+      expect(httpClient.get).not.toHaveBeenCalled();
     });
   });
 });
