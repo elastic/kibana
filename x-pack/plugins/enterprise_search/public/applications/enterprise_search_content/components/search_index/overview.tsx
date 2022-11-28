@@ -21,16 +21,18 @@ import { CrawlDetailsFlyout } from './crawler/crawl_details_flyout/crawl_details
 import { CrawlRequestsPanel } from './crawler/crawl_requests_panel/crawl_requests_panel';
 import { CrawlerTotalStats } from './crawler_total_stats';
 import { GenerateApiKeyPanel } from './generate_api_key_panel';
+import { IndexViewLogic } from './index_view_logic';
 import { OverviewLogic } from './overview.logic';
 import { SyncJobs } from './sync_jobs/sync_jobs';
 
 export const SearchIndexOverview: React.FC = () => {
   const { indexData } = useValues(OverviewLogic);
+  const { error } = useValues(IndexViewLogic);
 
   return (
     <>
       <EuiSpacer />
-      {isConnectorIndex(indexData) && indexData.connector.error && (
+      {isConnectorIndex(indexData) && error && (
         <>
           <EuiCallOut
             iconType="alert"
@@ -43,7 +45,7 @@ export const SearchIndexOverview: React.FC = () => {
             )}
           >
             <EuiSpacer size="s" />
-            <EuiText size="s">{indexData.connector.error}</EuiText>
+            <EuiText size="s">{error}</EuiText>
           </EuiCallOut>
           <EuiSpacer />
         </>
