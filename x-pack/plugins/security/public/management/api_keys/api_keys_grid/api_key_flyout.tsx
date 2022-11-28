@@ -199,7 +199,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
       {form.submitError && (
         <>
           <EuiCallOut
-            title={i18n.translate('xpack.security.accountManagement.createApiKey.errorMessage', {
+            title={i18n.translate('xpack.security.accountManagement.apiKeyFlyout.errorMessage', {
               defaultMessage: 'Could not create API key',
             })}
             color="danger"
@@ -249,10 +249,10 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
           </EuiFormRow>
 
           <EuiFormRow
-            label={i18n.translate('xpack.security.accountManagement.createApiKey.nameLabel', {
+            label={i18n.translate('xpack.security.accountManagement.apiKeyFlyout.nameLabel', {
               defaultMessage: 'Name',
             })}
-            helpText={i18n.translate('xpack.security.accountManagement.createApiKey.nameHelpText', {
+            helpText={i18n.translate('xpack.security.accountManagement.apiKeyFlyout.nameHelpText', {
               defaultMessage: 'What is this key used for?',
             })}
             error={form.errors.name}
@@ -273,7 +273,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
           <EuiFormFieldset>
             <EuiSwitch
               label={i18n.translate(
-                'xpack.security.accountManagement.createApiKey.customPrivilegesLabel',
+                'xpack.security.accountManagement.apiKeyFlyout.customPrivilegesLabel',
                 {
                   defaultMessage: 'Restrict privileges',
                 }
@@ -294,7 +294,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       doc="security-api-create-api-key.html#security-api-create-api-key-request-body"
                     >
                       <FormattedMessage
-                        id="xpack.security.accountManagement.createApiKey.roleDescriptorsHelpText"
+                        id="xpack.security.accountManagement.apiKeyFlyout.roleDescriptorsHelpText"
                         defaultMessage="Learn how to structure role descriptors."
                       />
                     </DocLink>
@@ -319,7 +319,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
           <EuiFormFieldset>
             <EuiSwitch
               label={i18n.translate(
-                'xpack.security.accountManagement.createApiKey.customExpirationLabel',
+                'xpack.security.accountManagement.apiKeyFlyout.customExpirationLabel',
                 {
                   defaultMessage: 'Expire after time',
                 }
@@ -336,7 +336,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                   error={form.errors.expiration}
                   isInvalid={form.touched.expiration && !!form.errors.expiration && !selectedApiKey}
                   label={i18n.translate(
-                    'xpack.security.accountManagement.createApiKey.customExpirationInputLabel',
+                    'xpack.security.accountManagement.apiKeyFlyout.customExpirationInputLabel',
                     {
                       defaultMessage: 'Lifetime (days)',
                     }
@@ -344,7 +344,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                 >
                   <EuiFieldNumber
                     append={i18n.translate(
-                      'xpack.security.accountManagement.createApiKey.expirationUnit',
+                      'xpack.security.accountManagement.apiKeyFlyout.expirationUnit',
                       {
                         defaultMessage: 'days',
                       }
@@ -369,7 +369,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
           <EuiFormFieldset>
             <EuiSwitch
               label={i18n.translate(
-                'xpack.security.accountManagement.createApiKey.includeMetadataLabel',
+                'xpack.security.accountManagement.apiKeyFlyout.includeMetadataLabel',
                 {
                   defaultMessage: 'Include metadata',
                 }
@@ -390,7 +390,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       doc="security-api-create-api-key.html#security-api-create-api-key-request-body"
                     >
                       <FormattedMessage
-                        id="xpack.security.accountManagement.createApiKey.metadataHelpText"
+                        id="xpack.security.accountManagement.apiKeyFlyout.metadataHelpText"
                         defaultMessage="Learn how to structure metadata."
                       />
                     </DocLink>
@@ -423,7 +423,7 @@ export function validate(values: ApiKeyFormValues, isEdit: boolean = false) {
   const errors: ValidationErrors<ApiKeyFormValues> = {};
 
   if (!values.name) {
-    errors.name = i18n.translate('xpack.security.management.apiKeys.createApiKey.nameRequired', {
+    errors.name = i18n.translate('xpack.security.management.apiKeys.apiKeyFlyout.nameRequired', {
       defaultMessage: 'Enter a name.',
     });
   }
@@ -432,7 +432,7 @@ export function validate(values: ApiKeyFormValues, isEdit: boolean = false) {
     const parsedExpiration = parseFloat(values.expiration);
     if (isNaN(parsedExpiration) || parsedExpiration <= 0) {
       errors.expiration = i18n.translate(
-        'xpack.security.management.apiKeys.createApiKey.expirationRequired',
+        'xpack.security.management.apiKeys.apiKeyFlyout.expirationRequired',
         {
           defaultMessage: 'Enter a valid duration or disable this option.',
         }
@@ -443,7 +443,7 @@ export function validate(values: ApiKeyFormValues, isEdit: boolean = false) {
   if (values.customPrivileges) {
     if (!values.role_descriptors) {
       errors.role_descriptors = i18n.translate(
-        'xpack.security.management.apiKeys.createApiKey.roleDescriptorsRequired',
+        'xpack.security.management.apiKeys.apiKeyFlyout.roleDescriptorsRequired',
         {
           defaultMessage: 'Enter role descriptors or disable this option.',
         }
@@ -453,7 +453,7 @@ export function validate(values: ApiKeyFormValues, isEdit: boolean = false) {
         JSON.parse(values.role_descriptors);
       } catch (e) {
         errors.role_descriptors = i18n.translate(
-          'xpack.security.management.apiKeys.createApiKey.invalidJsonError',
+          'xpack.security.management.apiKeys.apiKeyFlyout.invalidJsonError',
           {
             defaultMessage: 'Enter valid JSON.',
           }
@@ -465,7 +465,7 @@ export function validate(values: ApiKeyFormValues, isEdit: boolean = false) {
   if (values.includeMetadata) {
     if (!values.metadata) {
       errors.metadata = i18n.translate(
-        'xpack.security.management.apiKeys.createApiKey.metadataRequired',
+        'xpack.security.management.apiKeys.apiKeyFlyout.metadataRequired',
         {
           defaultMessage: 'Enter metadata or disable this option.',
         }
@@ -475,7 +475,7 @@ export function validate(values: ApiKeyFormValues, isEdit: boolean = false) {
         JSON.parse(values.metadata);
       } catch (e) {
         errors.metadata = i18n.translate(
-          'xpack.security.management.apiKeys.createApiKey.invalidJsonError',
+          'xpack.security.management.apiKeys.apiKeyFlyout.invalidJsonError',
           {
             defaultMessage: 'Enter valid JSON.',
           }
