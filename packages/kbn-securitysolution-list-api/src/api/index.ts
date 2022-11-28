@@ -231,14 +231,15 @@ const fetchExceptionLists = async ({
   namespaceTypes,
   pagination,
   signal,
+  sort,
 }: ApiCallFetchExceptionListsProps): Promise<FoundExceptionListSchema> => {
   const query = {
     filter: filters || undefined,
     namespace_type: namespaceTypes,
     page: pagination.page ? `${pagination.page}` : '1',
     per_page: pagination.perPage ? `${pagination.perPage}` : '20',
-    sort_field: 'exception-list.created_at',
-    sort_order: 'desc',
+    sort_field: sort?.field ? sort?.field : 'exception-list.created_at',
+    sort_order: sort?.order ? sort?.order : 'desc',
   };
 
   return http.fetch<FoundExceptionListSchema>(`${EXCEPTION_LIST_URL}/_find`, {
@@ -254,6 +255,7 @@ const fetchExceptionListsWithValidation = async ({
   namespaceTypes,
   pagination,
   signal,
+  sort,
 }: ApiCallFetchExceptionListsProps): Promise<FoundExceptionListSchema> =>
   flow(
     () =>
@@ -265,6 +267,7 @@ const fetchExceptionListsWithValidation = async ({
             namespaceTypes,
             pagination,
             signal,
+            sort,
           }),
         toError
       ),

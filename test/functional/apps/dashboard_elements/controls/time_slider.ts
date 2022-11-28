@@ -16,8 +16,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const { dashboardControls, timePicker, common, dashboard } = getPageObjects([
+  const { dashboardControls, discover, timePicker, common, dashboard } = getPageObjects([
     'dashboardControls',
+    'discover',
     'timePicker',
     'dashboard',
     'common',
@@ -40,18 +41,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await common.navigateToApp('dashboard');
-      await dashboard.preserveCrossAppState();
-      await dashboard.gotoDashboardLandingPage();
-      await dashboard.clickNewDashboard();
-      await timePicker.setAbsoluteRange(
-        'Oct 22, 2018 @ 00:00:00.000',
-        'Dec 3, 2018 @ 00:00:00.000'
-      );
     });
 
     after(async () => {
-      await dashboardControls.clearAllControls();
       await kibanaServer.importExport.unload(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
@@ -61,6 +53,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('create and delete', async () => {
+      before(async () => {
+        await common.navigateToApp('dashboard');
+        await dashboard.preserveCrossAppState();
+        await dashboard.gotoDashboardLandingPage();
+        await dashboard.clickNewDashboard();
+        await timePicker.setAbsoluteRange(
+          'Oct 22, 2018 @ 00:00:00.000',
+          'Dec 3, 2018 @ 00:00:00.000'
+        );
+      });
+
       it('can create a new time slider control from a blank state', async () => {
         await dashboardControls.createTimeSliderControl();
         expect(await dashboardControls.getControlsCount()).to.be(1);
@@ -95,6 +98,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.removeExistingControl(firstId);
         expect(await dashboardControls.getControlsCount()).to.be(1);
+      });
+
+      after(async () => {
+        await dashboardControls.clearAllControls();
+      });
+    });
+
+    describe('panel interactions', async () => {
+      describe('saved search', async () => {
+        before(async () => {
+          await common.navigateToApp('dashboard');
+          await dashboard.loadSavedDashboard('timeslider and saved search');
+          await dashboard.waitForRenderComplete();
+        });
+
+        it('should display document count for global time range when no timeslice is set', async () => {
+          expect(await discover.getSavedSearchDocumentCount()).to.be('14005 documents');
+        });
+
+        it('should display document count for timeslice when timeslice is selected', async () => {
+          await dashboardControls.gotoNextTimeSlice(); // first slice is just partial slice with no data
+          await dashboardControls.gotoNextTimeSlice();
+          await dashboardControls.closeTimeSliderPopover(); // close popover so its not blocking panel
+          await dashboard.waitForRenderComplete();
+          expect(await discover.getSavedSearchDocumentCount()).to.be('16 documents');
+        });
       });
     });
   });

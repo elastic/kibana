@@ -10,6 +10,7 @@ import { act } from 'react-dom/test-utils';
 import React from 'react';
 
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
@@ -30,6 +31,7 @@ import {
 import { GuidePanel } from './guide_panel';
 
 const applicationMock = applicationServiceMock.createStartContract();
+const notificationsMock = notificationServiceMock.createStartContract();
 
 const setupComponentWithPluginStateMock = async (
   httpClient: jest.Mocked<HttpSetup>,
@@ -44,7 +46,9 @@ const setupComponentWithPluginStateMock = async (
 
 const setupGuidePanelComponent = async (api: GuidedOnboardingApi) => {
   let testBed: TestBed;
-  const GuidePanelComponent = () => <GuidePanel application={applicationMock} api={api} />;
+  const GuidePanelComponent = () => (
+    <GuidePanel application={applicationMock} api={api} notifications={notificationsMock} />
+  );
   await act(async () => {
     testBed = registerTestBed(GuidePanelComponent)();
   });
@@ -425,6 +429,12 @@ describe('Guided setup', () => {
 
     describe('Quit guide modal', () => {
       beforeEach(async () => {
+        httpClient.put.mockResolvedValueOnce({
+          pluginState: {
+            status: 'quit',
+            isActivePeriod: true,
+          },
+        });
         testBed = await setupComponentWithPluginStateMock(httpClient, {
           status: 'in_progress',
           isActivePeriod: true,
@@ -457,12 +467,6 @@ describe('Guided setup', () => {
       });
 
       test('cancels out of the quit guide confirmation modal', async () => {
-        httpClient.put.mockResolvedValueOnce({
-          pluginState: {
-            status: 'quit',
-            isActivePeriod: true,
-          },
-        });
         const { component, find, exists } = testBed;
 
         await act(async () => {

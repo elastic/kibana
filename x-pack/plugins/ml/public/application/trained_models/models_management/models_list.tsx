@@ -115,7 +115,7 @@ export const ModelsList: FC<Props> = ({
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
-  const [showTestFlyout, setShowTestFlyout] = useState<ModelItem | null>(null);
+  const [showTestFlyout, setShowTestFlyout] = useState<string | null>(null);
 
   const isBuiltInModel = useCallback(
     (item: ModelItem) => item.tags.includes(BUILT_IN_MODEL_TAG),
@@ -530,7 +530,7 @@ export const ModelsList: FC<Props> = ({
       )}
       {showTestFlyout === null ? null : (
         <TestTrainedModelFlyout
-          model={showTestFlyout}
+          modelId={showTestFlyout}
           onClose={setShowTestFlyout.bind(null, null)}
         />
       )}

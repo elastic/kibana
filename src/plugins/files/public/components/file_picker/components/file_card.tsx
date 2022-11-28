@@ -12,8 +12,9 @@ import numeral from '@elastic/numeral';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiCard, EuiText, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FileImageMetadata, FileJSON } from '../../../../common';
-import { Image } from '../../image';
+import { FileImage as Image } from '@kbn/shared-ux-file-image';
+import type { FileImageMetadata } from '@kbn/shared-ux-file-image-types';
+import { FileJSON } from '../../../../common';
 import { isImage } from '../../util';
 import { useFilePickerContext } from '../context';
 
@@ -36,6 +37,10 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
       title=""
       css={css`
         place-self: stretch;
+        > * {
+          // TODO: Once content no longer overflows card remove, i.e. once on @elastic/eui ^70.3.0
+          width: 100%;
+        }
       `}
       paddingSize="s"
       selectable={{
@@ -59,6 +64,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
               `}
               meta={file.meta as FileImageMetadata}
               src={client.getDownloadHref({ id: file.id, fileKind: kind })}
+              loading={'lazy'}
             />
           ) : (
             <div

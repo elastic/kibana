@@ -5,76 +5,36 @@
  * 2.0.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
-import {
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiConfirmModal,
-} from '@elastic/eui';
-import { kibanaService } from '../../../../../../utils/kibana_service';
-import { fetchDeleteMonitor } from '../../../../state';
+import { EuiContextMenuPanel, EuiContextMenuItem, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
+import { DeleteMonitor } from './delete_monitor';
 import { SyntheticsSettingsContext } from '../../../../contexts/synthetics_settings_context';
 
 import * as labels from './labels';
 
 interface Props {
   euiTheme: EuiThemeComputed;
-  id: string;
+  configId: string;
   name: string;
   canEditSynthetics: boolean;
+  isProjectMonitor?: boolean;
   reloadPage: () => void;
 }
 
-export const Actions = ({ euiTheme, id, name, reloadPage, canEditSynthetics }: Props) => {
+export const Actions = ({
+  euiTheme,
+  configId,
+  name,
+  reloadPage,
+  canEditSynthetics,
+  isProjectMonitor,
+}: Props) => {
   const { basePath } = useContext(SyntheticsSettingsContext);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
-  const { status: monitorDeleteStatus } = useFetcher(() => {
-    if (isDeleting) {
-      return fetchDeleteMonitor({ id });
-    }
-  }, [id, isDeleting]);
-
   // TODO: Move deletion logic to redux state
-  useEffect(() => {
-    if (!isDeleting) {
-      return;
-    }
-    if (
-      monitorDeleteStatus === FETCH_STATUS.SUCCESS ||
-      monitorDeleteStatus === FETCH_STATUS.FAILURE
-    ) {
-      setIsDeleting(false);
-      setIsDeleteModalVisible(false);
-    }
-    if (monitorDeleteStatus === FETCH_STATUS.FAILURE) {
-      kibanaService.toasts.addDanger(
-        {
-          title: toMountPoint(
-            <p data-test-subj="uptimeDeleteMonitorFailure">{labels.MONITOR_DELETE_FAILURE_LABEL}</p>
-          ),
-        },
-        { toastLifeTimeMs: 3000 }
-      );
-    } else if (monitorDeleteStatus === FETCH_STATUS.SUCCESS) {
-      reloadPage();
-      kibanaService.toasts.addSuccess(
-        {
-          title: toMountPoint(
-            <p data-test-subj="uptimeDeleteMonitorSuccess">{labels.MONITOR_DELETE_SUCCESS_LABEL}</p>
-          ),
-        },
-        { toastLifeTimeMs: 3000 }
-      );
-    }
-  }, [setIsDeleting, isDeleting, reloadPage, monitorDeleteStatus]);
 
   const openPopover = () => {
     setIsPopoverOpen(true);
@@ -87,10 +47,6 @@ export const Actions = ({ euiTheme, id, name, reloadPage, canEditSynthetics }: P
   const handleDeleteMonitor = () => {
     setIsDeleteModalVisible(true);
     closePopover();
-  };
-
-  const handleConfirmDelete = () => {
-    setIsDeleting(true);
   };
 
   const menuButton = (
@@ -140,7 +96,7 @@ export const Actions = ({ euiTheme, id, name, reloadPage, canEditSynthetics }: P
       key="xpack.synthetics.editMonitor"
       icon="pencil"
       onClick={closePopover}
-      href={`${basePath}/app/synthetics/edit-monitor/${id}`}
+      href={`${basePath}/app/synthetics/edit-monitor/${configId}`}
       disabled={!canEditSynthetics}
     >
       {labels.EDIT_LABEL}
@@ -159,7 +115,7 @@ export const Actions = ({ euiTheme, id, name, reloadPage, canEditSynthetics }: P
   return (
     <>
       <EuiPopover
-        id={`xpack.synthetics.${id}`}
+        id={`xpack.synthetics.${configId}`}
         button={menuButton}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
@@ -169,20 +125,15 @@ export const Actions = ({ euiTheme, id, name, reloadPage, canEditSynthetics }: P
         <EuiContextMenuPanel size="s" items={menuItems} />
       </EuiPopover>
 
-      {isDeleteModalVisible ? (
-        <EuiConfirmModal
-          title={`${labels.DELETE_MONITOR_LABEL} ${name}`}
-          onCancel={() => setIsDeleteModalVisible(false)}
-          onConfirm={handleConfirmDelete}
-          cancelButtonText={labels.NO_LABEL}
-          confirmButtonText={labels.YES_LABEL}
-          buttonColor="danger"
-          defaultFocusedButton="confirm"
-          isLoading={isDeleting}
-        >
-          <p>{labels.DELETE_DESCRIPTION_LABEL}</p>
-        </EuiConfirmModal>
-      ) : null}
+      {isDeleteModalVisible && (
+        <DeleteMonitor
+          configId={configId}
+          name={name}
+          reloadPage={reloadPage}
+          isProjectMonitor={isProjectMonitor}
+          setIsDeleteModalVisible={setIsDeleteModalVisible}
+        />
+      )}
     </>
   );
 };

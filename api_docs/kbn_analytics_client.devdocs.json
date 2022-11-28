@@ -687,16 +687,12 @@
                 "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
               },
               {
-                "plugin": "core",
-                "path": "src/core/server/server.ts"
+                "plugin": "@kbn/core-root-server-internal",
+                "path": "packages/core/root/core-root-server-internal/src/server.ts"
               },
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/fleet_usage_sender.ts"
               },
               {
                 "plugin": "dashboard",
@@ -705,6 +701,10 @@
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/services/analytics/analytics_service.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
                 "plugin": "osquery",
@@ -1408,15 +1408,33 @@
           },
           {
             "parentPluginId": "@kbn/analytics-client",
+            "id": "def-common.IAnalyticsClient.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nForces all shippers to send all their enqueued events and fulfills the returned promise."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-common.IAnalyticsClient.shutdown",
             "type": "Function",
             "tags": [],
             "label": "shutdown",
             "description": [
-              "\nStops the client."
+              "\nStops the client. Flushing any pending events in the process."
             ],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
@@ -1601,6 +1619,24 @@
             "path": "packages/analytics/client/src/shippers/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-client",
+            "id": "def-common.IShipper.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nSends all the enqueued events and fulfills the returned promise."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/analytics/client/src/shippers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/analytics-client",

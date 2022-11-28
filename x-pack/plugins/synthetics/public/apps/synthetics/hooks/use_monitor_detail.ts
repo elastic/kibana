@@ -11,7 +11,7 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 import { Ping } from '../../../../common/runtime_types';
 
 export const useMonitorDetail = (
-  monitorId: string,
+  configId: string,
   location: string
 ): { data?: Ping; loading?: boolean } => {
   const params = {
@@ -23,7 +23,7 @@ export const useMonitorDetail = (
           filter: [
             {
               term: {
-                config_id: monitorId,
+                config_id: configId,
               },
             },
             {
@@ -44,7 +44,7 @@ export const useMonitorDetail = (
   };
   const { data: result, loading } = useEsSearch<Ping & { '@timestamp': string }, SearchRequest>(
     params,
-    [monitorId, location],
+    [configId, location],
     {
       name: 'getMonitorStatusByLocation',
     }

@@ -13,8 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Privileges', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/145134
-    describe.skip('GET /api/security/privileges', () => {
+    describe('GET /api/security/privileges', () => {
       it('should return a privilege map with all known privileges, without actions', async () => {
         // If you're adding a privilege to the following, that's great!
         // If you're removing a privilege, this breaks backwards compatibility
@@ -46,6 +45,8 @@ export default function ({ getService }: FtrProviderContext) {
             fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
             stackAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
             actions: ['all', 'read', 'minimal_all', 'minimal_read'],
+            filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
+            filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
@@ -101,7 +102,6 @@ export default function ({ getService }: FtrProviderContext) {
               'actions_log_management_all',
               'actions_log_management_read',
               'all',
-              'file_operations_all',
               'host_isolation_all',
               'minimal_all',
               'minimal_read',
@@ -133,6 +133,8 @@ export default function ({ getService }: FtrProviderContext) {
             dev_tools: ['all', 'read', 'minimal_all', 'minimal_read'],
             advancedSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
             indexPatterns: ['all', 'read', 'minimal_all', 'minimal_read'],
+            filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
+            filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
             savedObjectsManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
             osquery: [
               'all',

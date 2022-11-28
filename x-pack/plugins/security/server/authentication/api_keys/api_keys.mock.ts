@@ -15,6 +15,7 @@ export const apiKeysMock = {
     create: jest.fn(),
     update: jest.fn(),
     grantAsInternalUser: jest.fn(),
+    validate: jest.fn(),
     invalidate: jest.fn(),
     invalidateAsInternalUser: jest.fn(),
   }),

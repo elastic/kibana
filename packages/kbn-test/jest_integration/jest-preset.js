@@ -8,6 +8,8 @@
 
 const preset = require('../jest-preset');
 
+/** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
+/** @type {JestConfig} */
 module.exports = {
   ...preset,
   testMatch: ['**/integration_tests**/*.test.{js,mjs,ts,tsx}'],

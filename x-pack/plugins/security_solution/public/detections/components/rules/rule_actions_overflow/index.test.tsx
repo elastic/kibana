@@ -15,6 +15,8 @@ import { RuleActionsOverflow } from '.';
 import { mockRule } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { TestProviders } from '../../../../common/mock';
 
+const showBulkDuplicateExceptionsConfirmation = () => Promise.resolve(null);
+
 jest.mock(
   '../../../../detection_engine/rule_management/logic/bulk_actions/use_execute_bulk_action'
 );
@@ -50,6 +52,7 @@ describe('RuleActionsOverflow', () => {
     test('menu items rendered when a rule is passed to the component', () => {
       const { getByTestId } = render(
         <RuleActionsOverflow
+          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           rule={mockRule('id')}
           userHasPermissions
           canDuplicateRuleWithActions={true}
@@ -64,7 +67,12 @@ describe('RuleActionsOverflow', () => {
 
     test('menu is empty when no rule is passed to the component', () => {
       const { getByTestId } = render(
-        <RuleActionsOverflow rule={null} userHasPermissions canDuplicateRuleWithActions={true} />,
+        <RuleActionsOverflow
+          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
+          rule={null}
+          userHasPermissions
+          canDuplicateRuleWithActions={true}
+        />,
         { wrapper: TestProviders }
       );
       fireEvent.click(getByTestId('rules-details-popover-button-icon'));
@@ -76,6 +84,7 @@ describe('RuleActionsOverflow', () => {
     test('it does not open the popover when rules-details-popover-button-icon is clicked when the user does not have permission', () => {
       const { getByTestId } = render(
         <RuleActionsOverflow
+          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           rule={mockRule('id')}
           userHasPermissions={false}
           canDuplicateRuleWithActions={true}
@@ -92,6 +101,7 @@ describe('RuleActionsOverflow', () => {
     test('it closes the popover when rules-details-duplicate-rule is clicked', () => {
       const { getByTestId } = render(
         <RuleActionsOverflow
+          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           rule={mockRule('id')}
           userHasPermissions
           canDuplicateRuleWithActions={true}
@@ -103,44 +113,6 @@ describe('RuleActionsOverflow', () => {
 
       expect(getByTestId('rules-details-popover')).not.toHaveTextContent(/.+/);
     });
-
-    test('it calls duplicate action when rules-details-duplicate-rule is clicked', () => {
-      const executeBulkAction = jest.fn();
-      useExecuteBulkActionMock.mockReturnValue({ executeBulkAction });
-
-      const { getByTestId } = render(
-        <RuleActionsOverflow
-          rule={mockRule('id')}
-          userHasPermissions
-          canDuplicateRuleWithActions={true}
-        />,
-        { wrapper: TestProviders }
-      );
-      fireEvent.click(getByTestId('rules-details-popover-button-icon'));
-      fireEvent.click(getByTestId('rules-details-duplicate-rule'));
-
-      expect(executeBulkAction).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'duplicate' })
-      );
-    });
-
-    test('it calls duplicate action with the rule and rule.id when rules-details-duplicate-rule is clicked', () => {
-      const executeBulkAction = jest.fn();
-      useExecuteBulkActionMock.mockReturnValue({ executeBulkAction });
-
-      const { getByTestId } = render(
-        <RuleActionsOverflow
-          rule={mockRule('id')}
-          userHasPermissions
-          canDuplicateRuleWithActions={true}
-        />,
-        { wrapper: TestProviders }
-      );
-      fireEvent.click(getByTestId('rules-details-popover-button-icon'));
-      fireEvent.click(getByTestId('rules-details-duplicate-rule'));
-
-      expect(executeBulkAction).toHaveBeenCalledWith({ type: 'duplicate', ids: ['id'] });
-    });
   });
 
   describe('rules details export rule', () => {
@@ -150,6 +122,7 @@ describe('RuleActionsOverflow', () => {
 
       const { getByTestId } = render(
         <RuleActionsOverflow
+          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           rule={mockRule('id')}
           userHasPermissions
           canDuplicateRuleWithActions={true}
@@ -165,6 +138,7 @@ describe('RuleActionsOverflow', () => {
     test('it closes the popover when rules-details-export-rule is clicked', () => {
       const { getByTestId } = render(
         <RuleActionsOverflow
+          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           rule={mockRule('id')}
           userHasPermissions
           canDuplicateRuleWithActions={true}
@@ -183,6 +157,7 @@ describe('RuleActionsOverflow', () => {
     test('it closes the popover when rules-details-delete-rule is clicked', () => {
       const { getByTestId } = render(
         <RuleActionsOverflow
+          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           rule={mockRule('id')}
           userHasPermissions
           canDuplicateRuleWithActions={true}
@@ -202,6 +177,7 @@ describe('RuleActionsOverflow', () => {
 
       const { getByTestId } = render(
         <RuleActionsOverflow
+          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
           rule={mockRule('id')}
           userHasPermissions
           canDuplicateRuleWithActions={true}
@@ -220,7 +196,12 @@ describe('RuleActionsOverflow', () => {
 
       const rule = mockRule('id');
       const { getByTestId } = render(
-        <RuleActionsOverflow rule={rule} userHasPermissions canDuplicateRuleWithActions={true} />,
+        <RuleActionsOverflow
+          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
+          rule={rule}
+          userHasPermissions
+          canDuplicateRuleWithActions={true}
+        />,
         { wrapper: TestProviders }
       );
       fireEvent.click(getByTestId('rules-details-popover-button-icon'));

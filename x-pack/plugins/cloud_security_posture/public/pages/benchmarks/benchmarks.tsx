@@ -6,7 +6,6 @@
  */
 
 import React, { useState } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiFieldSearch,
   EuiFieldSearchProps,
@@ -31,7 +30,8 @@ import {
 } from './use_csp_benchmark_integrations';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
-import { LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY } from '../../../common/constants';
+import { LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY } from '../../common/constants';
+import { usePageSize } from '../../common/hooks/use_page_size';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -128,14 +128,11 @@ const BenchmarkSearchField = ({
 };
 
 export const Benchmarks = () => {
-  const [pageSize, setPageSize] = useLocalStorage<number>(
-    LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY,
-    10
-  );
+  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY);
   const [query, setQuery] = useState<UseCspBenchmarkIntegrationsProps>({
     name: '',
     page: 1,
-    perPage: pageSize || 10,
+    perPage: pageSize,
     sortField: 'package_policy.name',
     sortOrder: 'asc',
   });

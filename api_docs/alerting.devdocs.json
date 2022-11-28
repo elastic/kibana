@@ -66,7 +66,7 @@
                 "section": "def-common.RuleAction",
                 "text": "RuleAction"
               },
-              "[]; throttle: string | null; consumer: string; alertTypeId: string; schedule: ",
+              "[]; throttle?: string | null | undefined; consumer: string; alertTypeId: string; schedule: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -82,7 +82,7 @@
                 "section": "def-common.MappedParams",
                 "text": "MappedParams"
               },
-              " | undefined; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; muteAll: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; mutedInstanceIds: string[]; executionStatus: ",
+              " | undefined; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; muteAll: boolean; notifyWhen?: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null | undefined; mutedInstanceIds: string[]; executionStatus: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -2761,7 +2761,7 @@
             "section": "def-common.IntervalSchedule",
             "text": "IntervalSchedule"
           },
-          "; } | { operation: \"set\"; field: \"throttle\"; value: string | null; } | { operation: \"set\"; field: \"notifyWhen\"; value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; } | { operation: \"set\"; field: \"snoozeSchedule\"; value: ",
+          "; } | { operation: \"set\"; field: \"throttle\"; value: string | null | undefined; } | { operation: \"set\"; field: \"notifyWhen\"; value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null | undefined; } | { operation: \"set\"; field: \"snoozeSchedule\"; value: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2994,7 +2994,23 @@
             "section": "def-common.ResolvedSanitizedRule",
             "text": "ResolvedSanitizedRule"
           },
-          "<Params>>; enable: ({ id }: { id: string; }) => Promise<void>; disable: ({ id }: { id: string; }) => Promise<void>; muteAll: ({ id }: { id: string; }) => Promise<void>; getAlertState: ({ id }: { id: string; }) => Promise<void | { alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }>; getAlertSummary: ({ id, dateStart, numberOfExecutions, }: ",
+          "<Params>>; enable: ({ id }: { id: string; }) => Promise<void>; disable: ({ id }: { id: string; }) => Promise<void>; clone: <Params extends ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
+          },
+          " = never>(id: string, { newId }: { newId?: string | undefined; }) => Promise<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.SanitizedRule",
+            "text": "SanitizedRule"
+          },
+          "<Params>>; muteAll: ({ id }: { id: string; }) => Promise<void>; getAlertState: ({ id }: { id: string; }) => Promise<void | { alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }>; getAlertSummary: ({ id, dateStart, numberOfExecutions, }: ",
           "GetAlertSummaryParams",
           ") => Promise<",
           {
@@ -3049,7 +3065,7 @@
           ") => Promise<{ success: number; unknown: number; failure: number; warning: number; activeAlerts: number; newAlerts: number; recoveredAlerts: number; erroredActions: number; triggeredActions: number; }>; getRuleExecutionKPI: ({ id, dateStart, dateEnd, filter }: ",
           "GetRuleExecutionKPIParams",
           ") => Promise<{ success: number; unknown: number; failure: number; warning: number; activeAlerts: number; newAlerts: number; recoveredAlerts: number; erroredActions: number; triggeredActions: number; }>; bulkDeleteRules: (options: ",
-          "BulkDeleteOptions",
+          "BulkOptions",
           ") => Promise<{ errors: ",
           {
             "pluginId": "alerting",
@@ -3090,7 +3106,47 @@
             "section": "def-server.BulkOperationError",
             "text": "BulkOperationError"
           },
-          "[]; total: number; }>; updateApiKey: ({ id }: { id: string; }) => Promise<void>; snooze: ({ id, snoozeSchedule, }: { id: string; snoozeSchedule: ",
+          "[]; total: number; }>; bulkEnableRules: (options: ",
+          "BulkOptions",
+          ") => Promise<{ errors: ",
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.BulkOperationError",
+            "text": "BulkOperationError"
+          },
+          "[]; rules: (",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.Rule",
+            "text": "Rule"
+          },
+          "<never> | ",
+          "RuleWithLegacyId",
+          "<never>)[]; total: number; taskIdsFailedToBeEnabled: string[]; }>; bulkDisableRules: (options: ",
+          "BulkOptions",
+          ") => Promise<{ errors: ",
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.BulkOperationError",
+            "text": "BulkOperationError"
+          },
+          "[]; rules: (",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.Rule",
+            "text": "Rule"
+          },
+          "<never> | ",
+          "RuleWithLegacyId",
+          "<never>)[]; total: number; }>; updateApiKey: ({ id }: { id: string; }) => Promise<void>; snooze: ({ id, snoozeSchedule, }: { id: string; snoozeSchedule: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -3897,7 +3953,7 @@
             "label": "throttle",
             "description": [],
             "signature": [
-              "string | null"
+              "string | null | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
@@ -5038,7 +5094,7 @@
             "label": "throttle",
             "description": [],
             "signature": [
-              "string | null"
+              "string | null | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -5063,7 +5119,7 @@
             "label": "notifyWhen",
             "description": [],
             "signature": [
-              "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null"
+              "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -5270,6 +5326,20 @@
                 "section": "def-common.SavedObjectAttributes",
                 "text": "SavedObjectAttributes"
               }
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleAction.frequency",
+            "type": "Object",
+            "tags": [],
+            "label": "frequency",
+            "description": [],
+            "signature": [
+              "{ summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; } | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -6967,7 +7037,7 @@
             "section": "def-common.RuleAction",
             "text": "RuleAction"
           },
-          "[]; throttle: string | null; consumer: string; alertTypeId: string; schedule: ",
+          "[]; throttle?: string | null | undefined; consumer: string; alertTypeId: string; schedule: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -6983,7 +7053,7 @@
             "section": "def-common.MappedParams",
             "text": "MappedParams"
           },
-          " | undefined; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; muteAll: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null; mutedInstanceIds: string[]; executionStatus: ",
+          " | undefined; scheduledTaskId?: string | undefined; createdBy: string | null; updatedBy: string | null; createdAt: Date; updatedAt: Date; apiKeyOwner: string | null; muteAll: boolean; notifyWhen?: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\" | null | undefined; mutedInstanceIds: string[]; executionStatus: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -7282,6 +7352,21 @@
           "readonly [\"succeeded\", \"warning\", \"failed\"]"
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RuleNotifyWhenTypeValues",
+        "type": "Object",
+        "tags": [],
+        "label": "RuleNotifyWhenTypeValues",
+        "description": [],
+        "signature": [
+          "readonly [\"onActionGroupChange\", \"onActiveAlert\", \"onThrottleInterval\"]"
+        ],
+        "path": "x-pack/plugins/alerting/common/rule_notify_when_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

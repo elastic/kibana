@@ -13,11 +13,16 @@
   "license": "Elastic License v2",
   "name": "Potential Application Shimming via Sdbinst",
   "note": "",
-  "query": "process where event.type == \"start\" and process.name : \"sdbinst.exe\"\n",
+  "query": "process where event.type == \"start\" and process.name : \"sdbinst.exe\" and \n  not (process.args : \"-m\" and process.args : \"-bg\") and \n  not process.args : \"-mm\"\n",
   "required_fields": [
     {
       "ecs": true,
       "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
       "type": "keyword"
     },
     {
@@ -85,5 +90,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 101
+  "version": 102
 }

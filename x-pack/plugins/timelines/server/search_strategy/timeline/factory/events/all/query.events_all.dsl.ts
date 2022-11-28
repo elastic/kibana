@@ -28,7 +28,6 @@ export const buildTimelineEventsAllQuery = ({
   timerange,
 }: Omit<TimelineEventsAllRequestOptions, 'fieldRequested'>) => {
   const filterClause = [...createQueryFilterClauses(filterQuery)];
-
   const getTimerangeFilter = (timerangeOption: TimerangeInput | undefined): TimerangeFilter[] => {
     if (timerangeOption) {
       const { to, from } = timerangeOption;

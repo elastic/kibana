@@ -51,9 +51,10 @@ const requiredProps: TableListViewProps = {
   getDetailViewLink: () => 'http://elastic.co',
 };
 
-describe('TableListView', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/145267
+describe.skip('TableListView', () => {
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
