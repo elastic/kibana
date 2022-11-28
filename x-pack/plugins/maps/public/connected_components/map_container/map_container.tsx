@@ -41,6 +41,7 @@ export interface Props {
   exitFullScreen: () => void;
   flyoutDisplay: FLYOUT_STATE;
   isFullScreen: boolean;
+  isTimesliderOpen: boolean;
   indexPatternIds: string[];
   mapInitError: string | null | undefined;
   renderTooltipContent?: RenderToolTipContent;
@@ -241,10 +242,12 @@ export class MapContainer extends Component<Props, State> {
             />
           )}
           <RightSideControls />
-          <Timeslider
-            waitForTimesliceToLoad$={this.props.waitUntilTimeLayersLoad$}
-            updateGlobalTimeRange={this._updateGlobalTimeRange.bind(this)}
-          />
+          {this.props.isTimesliderOpen && (
+            <Timeslider
+              waitForTimesliceToLoad$={this.props.waitUntilTimeLayersLoad$}
+              updateGlobalTimeRange={this._updateGlobalTimeRange.bind(this)}
+            />
+          )}
         </EuiFlexItem>
         <EuiFlexItem
           className={classNames('mapMapLayerPanel', {

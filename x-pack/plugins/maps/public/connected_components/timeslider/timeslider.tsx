@@ -26,9 +26,7 @@ import { getEmbeddableService, getTimeFilter } from '../../kibana_services';
 import { Timeslice } from '../../../common/descriptor_types';
 
 export interface Props {
-  closeTimeslider: () => void;
   setTimeslice: (timeslice: Timeslice) => void;
-  isTimesliderOpen: boolean;
   timeRange: TimeRange;
   waitForTimesliceToLoad$: Observable<void>;
 }
@@ -109,10 +107,13 @@ export class Timeslider extends Component<Props, {}> {
             this._controlGroup.anyControlOutputConsumerLoading$.next(false);
           });
 
-          this.props.setTimeslice({
-            from: timeslice[0],
-            to: timeslice[1],
-          });
+          this.props.setTimeslice(timeslice === undefined 
+            ?  undefined
+            :
+              {
+                from: timeslice[0],
+                to: timeslice[1],
+              });
         })
     );
 
@@ -121,15 +122,7 @@ export class Timeslider extends Component<Props, {}> {
     }
   }
 
-  _propagateChange = _.debounce((value: [number, number]) => {
-    if (this._isMounted) {
-      this.props.setTimeslice({ from: value[0], to: value[1] });
-    }
-  }, 300);
-
   render() {
-    return this.props.isTimesliderOpen
-      ? <div className="mapTimeslider mapTimeslider--animation" ref={this._controlGroupRef}/>
-      : null;
+    return <div className="mapTimeslider mapTimeslider--animation" ref={this._controlGroupRef}/>;
   }
 }
