@@ -24,6 +24,12 @@ const objectiveSchema = t.intersection([
   t.partial({ timeslice_target: t.number, timeslice_window: durationType }),
 ]);
 
+const settingsSchema = t.type({
+  timestamp_field: t.string,
+  sync_delay: durationType,
+  frequency: durationType,
+});
+
 const sloSchema = t.type({
   id: t.string,
   name: t.string,
