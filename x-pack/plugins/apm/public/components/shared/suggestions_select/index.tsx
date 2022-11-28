@@ -23,7 +23,6 @@ interface SuggestionsSelectProps {
   placeholder: string;
   dataTestSubj?: string;
   prepend?: string;
-  fullWidth?: boolean;
 }
 
 export function SuggestionsSelect({
