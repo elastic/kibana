@@ -18,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { LoadWhenInView } from '@kbn/observability-plugin/public';
 
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { useEarliestStartDate } from '../hooks/use_earliest_start_date';
 import { MonitorErrorSparklines } from './monitor_error_sparklines';
 import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
@@ -39,8 +38,6 @@ export const MonitorSummary = () => {
   const toRelative = 'now';
 
   const { from, to } = useAbsoluteDate({ from: fromRelative, to: toRelative });
-
-  const monitorId = useMonitorQueryId();
 
   if (loading) {
     return <LoadingState />;
@@ -83,12 +80,10 @@ export const MonitorSummary = () => {
                 <DurationSparklines from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
-                {monitorId && <MonitorErrorsCount from={from} to={to} monitorId={[monitorId]} />}
+                <MonitorErrorsCount from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
-                {monitorId && (
-                  <MonitorErrorSparklines from={from} to={to} monitorId={[monitorId]} />
-                )}
+                <MonitorErrorSparklines from={from} to={to} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
