@@ -35,7 +35,7 @@ There are three types of controls:
 For example, if you are using the *[Logs] Web Traffic* dashboard from the sample web logs data, you can add an options list for the `machine.os.keyword` field that allows you to display only the logs generated from `osx` and `ios` operating systems.
 +
 [role="screenshot"]
-image::images/dashboard_controlsOptionsList_8.3.0.png[Options list control for the `machine.os.keyword` field with the `osx` and `ios` options selected]
+image::images/dashboard_controlsOptionsList_8.6.0.png[Options list control for the `machine.os.keyword` field with the `osx` and `ios` options selected]
 
 * *Range slider* &mdash; Adds a slider that allows you to filter the data within a specified range of values. 
 +
@@ -76,15 +76,15 @@ The *Control type* is automatically applied for the field you selected.
 
 * To expand the width of the control to fit the available space on the dashboard, select *Expand width to fit available space*.
 
-. If you are creating an *Options list*, specify the additional settings.
+. If you are creating an *Options list*, specify the additional settings:
 
-.. To select multiple options in the dropdown, select *Allow multiple selections in dropdown*.
+* To allow multiple options to be selected in the dropdown, select *Allow multiple selections in dropdown*.
 
-.. To exclude options from appearing on the dashboard, select *Allow selections to be excluded*.
+* To allow options to be inlcluded or excluded on the dashboard, select *Allow selections to be excluded*.
 
-.. To create an exists query, select *Allow exists query*.
+* To allow an exists query to be created, select *Allow exists query*.
 
-.. To populate the entire list of options, even when the Options list takes longer to populate than expected, select *Ignore timeout for results*.
+* To populate the entire list of options, even when the list takes longer to populate than expected, select *Ignore timeout for results*.
 
 . Click *Save and close*.
 
