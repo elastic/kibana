@@ -12,20 +12,24 @@ import {
   dateType,
   indicatorSchema,
   objectiveSchema,
+  optionalSettingsSchema,
   settingsSchema,
   summarySchema,
   timeWindowSchema,
 } from '../schema';
 
 const createSLOParamsSchema = t.type({
-  body: t.type({
-    name: t.string,
-    description: t.string,
-    indicator: indicatorSchema,
-    time_window: timeWindowSchema,
-    budgeting_method: budgetingMethodSchema,
-    objective: objectiveSchema,
-  }),
+  body: t.intersection([
+    t.type({
+      name: t.string,
+      description: t.string,
+      indicator: indicatorSchema,
+      time_window: timeWindowSchema,
+      budgeting_method: budgetingMethodSchema,
+      objective: objectiveSchema,
+    }),
+    t.partial({ settings: optionalSettingsSchema }),
+  ]),
 });
 
 const createSLOResponseSchema = t.type({

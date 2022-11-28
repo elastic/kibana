@@ -30,6 +30,8 @@ const settingsSchema = t.type({
   frequency: durationType,
 });
 
+const optionalSettingsSchema = t.partial({ ...settingsSchema.props });
+
 const sloSchema = t.type({
   id: t.string,
   name: t.string,
@@ -50,6 +52,7 @@ export {
   budgetingMethodSchema,
   objectiveSchema,
   occurrencesBudgetingMethodSchema,
+  optionalSettingsSchema,
   settingsSchema,
   sloSchema,
   sloWithSummarySchema,
