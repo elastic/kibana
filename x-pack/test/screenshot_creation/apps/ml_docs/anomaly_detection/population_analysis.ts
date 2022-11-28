@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
   const cellSize = 15;
   const viewBySwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneViewBy';
 
-  describe('population analysis', function () {
+  describe.only('population analysis', function () {
     before(async () => {
       await ml.api.createAndRunAnomalyDetectionLookbackJob(
         populationJobConfig as Job,
@@ -85,22 +85,12 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobTable.filterWithSearchString(populationJobConfig.job_id, 1);
       await ml.jobTable.clickOpenJobInAnomalyExplorerButton(populationJobConfig.job_id);
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
-
-      await ml.testExecution.logTestStep('open tooltip and take screenshot');
-      const viewBySwimLanes = await testSubjects.find(viewBySwimLaneTestSubj);
-      const cells = await ml.swimLane.getCells(viewBySwimLaneTestSubj);
-      const sampleCell = cells[0];
-
-      await viewBySwimLanes.moveMouseTo({
-        xOffset: Math.floor(cellSize / 2.0),
-        yOffset: Math.floor(cellSize / 2.0),
-      });
-
       await commonScreenshots.takeScreenshot('ml-population-results', screenshotDirectories);
-
       await ml.testExecution.logTestStep(
         'select swim lane tile, expand anomaly row and take screenshot'
       );
+      const cells = await ml.swimLane.getCells(viewBySwimLaneTestSubj);
+      const sampleCell = cells[0];
       await ml.swimLane.selectSingleCell(viewBySwimLaneTestSubj, {
         x: sampleCell.x + cellSize,
         y: sampleCell.y + cellSize,
