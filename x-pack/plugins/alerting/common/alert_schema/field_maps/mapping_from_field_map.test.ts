@@ -6,6 +6,7 @@
  */
 import { mappingFromFieldMap } from './mapping_from_field_map';
 import { FieldMap } from './types';
+import { alertFieldMap } from './alert_field_map';
 
 describe('mappingFromFieldMap', () => {
   const fieldMap: FieldMap = {
@@ -180,6 +181,323 @@ describe('mappingFromFieldMap', () => {
   };
   it('correctly creates mapping from field map', () => {
     expect(mappingFromFieldMap(fieldMap)).toEqual({ dynamic: 'strict', ...expectedMapping });
+    expect(mappingFromFieldMap(alertFieldMap)).toEqual({
+      dynamic: 'strict',
+      properties: {
+        anomaly: {
+          properties: {
+            bucket_span: {
+              properties: {
+                minutes: {
+                  type: 'keyword',
+                },
+              },
+            },
+            start: {
+              type: 'keyword',
+            },
+          },
+        },
+        kibana: {
+          properties: {
+            alert: {
+              properties: {
+                action_group: {
+                  type: 'keyword',
+                },
+                ancestors: {
+                  type: 'object',
+                  properties: {
+                    depth: {
+                      type: 'long',
+                    },
+                    id: {
+                      type: 'keyword',
+                    },
+                    index: {
+                      type: 'keyword',
+                    },
+                    rule: {
+                      type: 'keyword',
+                    },
+                    type: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+                depth: {
+                  type: 'long',
+                },
+                duration: {
+                  properties: {
+                    us: {
+                      type: 'long',
+                    },
+                  },
+                },
+                end: {
+                  type: 'date',
+                },
+                evaluation_results: {
+                  type: 'object',
+                  properties: {
+                    thresholds: {
+                      properties: {
+                        comparator: {
+                          type: 'keyword',
+                        },
+                        type: {
+                          type: 'keyword',
+                        },
+                        value: {
+                          type: 'keyword',
+                        },
+                      },
+                    },
+                    value: {
+                      type: 'float',
+                    },
+                  },
+                },
+                flapping: {
+                  type: 'boolean',
+                },
+                group: {
+                  properties: {
+                    id: {
+                      type: 'keyword',
+                    },
+                    index: {
+                      type: 'integer',
+                    },
+                  },
+                },
+                id: {
+                  type: 'keyword',
+                },
+                new_terms: {
+                  type: 'keyword',
+                },
+                original_event: {
+                  properties: {
+                    action: {
+                      type: 'keyword',
+                    },
+                    agent_id_status: {
+                      type: 'keyword',
+                    },
+                    category: {
+                      type: 'keyword',
+                    },
+                    code: {
+                      type: 'keyword',
+                    },
+                    created: {
+                      type: 'date',
+                    },
+                    dataset: {
+                      type: 'keyword',
+                    },
+                    duration: {
+                      type: 'keyword',
+                    },
+                    end: {
+                      type: 'date',
+                    },
+                    hash: {
+                      type: 'keyword',
+                    },
+                    id: {
+                      type: 'keyword',
+                    },
+                    ingested: {
+                      type: 'date',
+                    },
+                    kind: {
+                      type: 'keyword',
+                    },
+                    module: {
+                      type: 'keyword',
+                    },
+                    original: {
+                      type: 'keyword',
+                    },
+                    outcome: {
+                      type: 'keyword',
+                    },
+                    provider: {
+                      type: 'keyword',
+                    },
+                    reason: {
+                      type: 'keyword',
+                    },
+                    reference: {
+                      type: 'keyword',
+                    },
+                    risk_score: {
+                      type: 'float',
+                    },
+                    risk_score_norm: {
+                      type: 'float',
+                    },
+                    sequence: {
+                      type: 'long',
+                    },
+                    severity: {
+                      type: 'long',
+                    },
+                    start: {
+                      type: 'date',
+                    },
+                    timezone: {
+                      type: 'keyword',
+                    },
+                    type: {
+                      type: 'keyword',
+                    },
+                    url: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+                original_time: {
+                  type: 'date',
+                },
+                reason: {
+                  type: 'keyword',
+                },
+                risk_score: {
+                  type: 'float',
+                },
+                rule: {
+                  properties: {
+                    category: {
+                      type: 'keyword',
+                    },
+                    consumer: {
+                      type: 'keyword',
+                    },
+                    execution: {
+                      properties: {
+                        uuid: {
+                          type: 'keyword',
+                        },
+                      },
+                    },
+                    name: {
+                      type: 'keyword',
+                    },
+                    parameters: {
+                      type: 'object',
+                      enabled: false,
+                    },
+                    producer: {
+                      type: 'keyword',
+                    },
+                    rule_type_id: {
+                      type: 'keyword',
+                    },
+                    tags: {
+                      type: 'keyword',
+                    },
+                    uuid: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+                severity: {
+                  type: 'keyword',
+                },
+                start: {
+                  type: 'date',
+                },
+                status: {
+                  type: 'keyword',
+                },
+                threshold_result: {
+                  properties: {
+                    cardinality: {
+                      type: 'object',
+                      properties: {
+                        field: {
+                          type: 'keyword',
+                        },
+                        value: {
+                          type: 'long',
+                        },
+                      },
+                    },
+                    count: {
+                      type: 'long',
+                    },
+                    from: {
+                      type: 'date',
+                    },
+                    terms: {
+                      type: 'object',
+                      properties: {
+                        field: {
+                          type: 'keyword',
+                        },
+                        value: {
+                          type: 'keyword',
+                        },
+                      },
+                    },
+                  },
+                },
+                time_range: {
+                  type: 'date_range',
+                  format: 'epoch_millis||strict_date_optional_time',
+                },
+                uuid: {
+                  type: 'keyword',
+                },
+                workflow_status: {
+                  type: 'keyword',
+                },
+              },
+            },
+            space_ids: {
+              type: 'keyword',
+            },
+            version: {
+              type: 'version',
+            },
+          },
+        },
+        monitor: {
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+            name: {
+              type: 'keyword',
+            },
+            type: {
+              type: 'keyword',
+            },
+          },
+        },
+        processor: {
+          properties: {
+            event: {
+              type: 'keyword',
+            },
+          },
+        },
+        transaction: {
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+            type: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    });
   });
 
   it('uses dynamic setting if specified', () => {
