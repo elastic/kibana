@@ -17,7 +17,7 @@ import { CspFinding } from '../../../../common/schemas/csp_finding';
 
 const chance = new Chance();
 
-export const getFakeFindings = (name: string): CspFinding & { id: string } => ({
+const getFakeFindings = (name: string): CspFinding & { id: string } => ({
   cluster_id: chance.guid(),
   id: chance.word(),
   result: {

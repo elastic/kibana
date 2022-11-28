@@ -7,7 +7,7 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { FindingsRuleFlyout } from './findings_flyout';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../../test/test_provider';
 import { mockFindingsHit } from '../__mocks__/findings';
 
