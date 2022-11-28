@@ -525,6 +525,7 @@ export const performBulkActionRoute = (
                     })
                   : [];
 
+                // TODO: add try/catch and remove excpetion
                 const updatedRule = await rulesClient.update({
                   id: createdRule.id,
                   data: {
@@ -535,6 +536,7 @@ export const performBulkActionRoute = (
                     },
                   },
                 });
+
 
                 // TODO: figureout why types can't return just updatedRule
                 return { ...createdRule, ...updatedRule };

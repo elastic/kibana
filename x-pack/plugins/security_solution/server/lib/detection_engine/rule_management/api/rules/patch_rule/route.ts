@@ -23,6 +23,7 @@ import { buildSiemResponse } from '../../../../routes/utils';
 import { readRules } from '../../../logic/crud/read_rules';
 import { patchRules } from '../../../logic/crud/patch_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
+import { isValidExceptionList } from '../../../logic/exceptions/is_valid_exceptions_list';
 // eslint-disable-next-line no-restricted-imports
 import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 import { getIdError } from '../../../utils/utils';
@@ -76,7 +77,17 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
         }
 
         checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });
-
+        const isExceptionListValid = await isValidExceptionList({
+          exceptionsList: params.exceptions_list,
+          rulesClient,
+          ruleId: params.id,
+        });
+        if (!isExceptionListValid) {
+          return siemResponse.error({
+            statusCode: 409,
+            body: `default exception list already exists`,
+          });
+        }
         const migratedRule = await legacyMigrate({
           rulesClient,
           savedObjectsClient,

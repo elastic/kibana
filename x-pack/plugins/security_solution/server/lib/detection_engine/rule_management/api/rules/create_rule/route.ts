@@ -21,6 +21,7 @@ import { buildSiemResponse } from '../../../../routes/utils';
 
 import { createRules } from '../../../logic/crud/create_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
+import { isValidExceptionList } from '../../../logic/exceptions/is_valid_exceptions_list';
 import { transformValidate } from '../../../utils/validate';
 
 export const createRuleRoute = (
@@ -56,6 +57,7 @@ export const createRuleRoute = (
         const rulesClient = ctx.alerting.getRulesClient();
         const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
         const savedObjectsClient = ctx.core.savedObjects.client;
+        const exceptionsClient = ctx.lists?.getExceptionListClient();
 
         if (request.body.rule_id != null) {
           const rule = await readRules({
@@ -80,10 +82,21 @@ export const createRuleRoute = (
         throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
 
         // This will create the endpoint list if it does not exist yet
-        await ctx.lists?.getExceptionListClient().createEndpointList();
+        await exceptionsClient?.createEndpointList();
         checkDefaultRuleExceptionListReferences({
           exceptionLists: request.body.exceptions_list,
         });
+        const isExceptionListValid = await isValidExceptionList({
+          exceptionsList: request.body.exceptions_list,
+          rulesClient,
+          ruleId: undefined,
+        });
+        if (!isExceptionListValid) {
+          return siemResponse.error({
+            statusCode: 409,
+            body: `default exception list already exists`,
+          });
+        }
         const createdRule = await createRules({
           rulesClient,
           params: request.body,
