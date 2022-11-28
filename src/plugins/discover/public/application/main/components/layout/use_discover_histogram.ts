@@ -17,7 +17,6 @@ import {
 import type { UnifiedHistogramChartLoadEvent } from '@kbn/unified-histogram-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { getUiActions } from '../../../../kibana_services';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDataState } from '../../hooks/use_data_state';
@@ -217,9 +216,6 @@ export const useDiscoverHistogram = ({
       isPlainRecord || !isTimeBased
         ? undefined
         : {
-            title: i18n.translate('discover.histogramTitle', {
-              defaultMessage: 'Discover histogram',
-            }),
             hidden: chartHidden,
             timeInterval: state.interval,
           },
