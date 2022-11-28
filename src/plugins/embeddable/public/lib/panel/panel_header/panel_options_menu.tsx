@@ -15,9 +15,13 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiPopover,
 } from '@elastic/eui';
+import { Action } from '@kbn/ui-actions-plugin/public';
 
 export interface PanelOptionsMenuProps {
-  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor[]>;
+  getActionContextMenuPanel: () => Promise<{
+    panels: EuiContextMenuPanelDescriptor[];
+    actions: Action[];
+  }>;
   isViewMode: boolean;
   closeContextMenu: boolean;
   title?: string;
@@ -25,7 +29,10 @@ export interface PanelOptionsMenuProps {
 }
 
 interface State {
-  actionContextMenuPanel?: EuiContextMenuPanelDescriptor[];
+  actionContextMenuPanel?: {
+    panels: EuiContextMenuPanelDescriptor[];
+    actions: Action[];
+  };
   isPopoverOpen: boolean;
 }
 
@@ -93,9 +100,16 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
       />
     );
 
+    const showNotification = this.state.actionContextMenuPanel?.actions.some(
+      (action) => action.showNotification
+    );
+
     return (
       <EuiPopover
-        className="embPanel__optionsMenuPopover"
+        className={
+          'embPanel__optionsMenuPopover' +
+          (showNotification ? ' embPanel__optionsMenuPopover-notification' : '')
+        }
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
@@ -109,7 +123,7 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
       >
         <EuiContextMenu
           initialPanelId="mainMenu"
-          panels={this.state.actionContextMenuPanel || []}
+          panels={this.state.actionContextMenuPanel?.panels || []}
         />
       </EuiPopover>
     );

@@ -55,6 +55,7 @@ function getLensTopNavConfig(options: {
   savingToDashboardPermitted: boolean;
   contextOriginatingApp?: string;
   isSaveable: boolean;
+  initialContextAppId?: string;
 }): TopNavMenuData[] {
   const {
     actions,
@@ -68,6 +69,7 @@ function getLensTopNavConfig(options: {
     tooltips,
     contextOriginatingApp,
     isSaveable,
+    initialContextAppId,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -90,7 +92,7 @@ function getLensTopNavConfig(options: {
         defaultMessage: 'Save',
       });
 
-  if (contextOriginatingApp) {
+  if (contextOriginatingApp && initialContextAppId !== 'dashboards') {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.goBackLabel', {
         defaultMessage: `Go back to {contextOriginatingApp}`,
@@ -175,8 +177,10 @@ function getLensTopNavConfig(options: {
 
   topNavMenu.push({
     label: saveButtonLabel,
-    iconType: !showSaveAndReturn ? 'save' : undefined,
-    emphasize: !showSaveAndReturn,
+    iconType: (initialContextAppId === 'dashboards' ? false : !showSaveAndReturn)
+      ? 'save'
+      : undefined,
+    emphasize: initialContextAppId === 'dashboards' ? false : !showSaveAndReturn,
     run: actions.showSaveModal,
     testId: 'lnsApp_saveButton',
     description: i18n.translate('xpack.lens.app.saveButtonAriaLabel', {
@@ -197,6 +201,23 @@ function getLensTopNavConfig(options: {
       disableButton: !isSaveable,
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
+      }),
+    });
+  }
+
+  if (initialContextAppId === 'dashboards') {
+    topNavMenu.push({
+      label: i18n.translate('xpack.lens.app.saveAndReturn', {
+        defaultMessage: 'Replace in dashboard',
+      }),
+      emphasize: true,
+      iconType: 'checkInCircleFilled',
+      run: actions.saveAndReturn,
+      testId: 'lnsApp_replaceInDashboardButton',
+      disableButton: !isSaveable,
+      description: i18n.translate('xpack.lens.app.replaceInDashboardButtonAriaLabel', {
+        defaultMessage:
+          'Replace legacy visualization with lens visualization and return to the dashboard',
       }),
     });
   }
@@ -452,11 +473,13 @@ export const LensTopNavMenu = ({
   const topNavConfig = useMemo(() => {
     const baseMenuEntries = getLensTopNavConfig({
       showSaveAndReturn:
-        Boolean(
+        initialContext?.originatingApp !== 'dashboards' &&
+        (Boolean(
           isLinkedToOriginatingApp &&
             // Temporarily required until the 'by value' paradigm is default.
             (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
-        ) || Boolean(initialContextIsEmbedded),
+        ) ||
+          Boolean(initialContextIsEmbedded)),
       enableExportToCSV: Boolean(isSaveable && activeData && Object.keys(activeData).length),
       showOpenInDiscover: Boolean(layerMetaInfo?.isVisible),
       isByValueMode: getIsByValueMode(),
@@ -466,6 +489,7 @@ export const LensTopNavMenu = ({
       savingToDashboardPermitted,
       isSaveable,
       contextOriginatingApp,
+      initialContextAppId: initialContext?.originatingApp,
       tooltips: {
         showExportWarning: () => {
           if (activeData) {
@@ -620,6 +644,7 @@ export const LensTopNavMenu = ({
     isOnTextBasedMode,
     lensStore,
     theme$,
+    initialContext,
   ]);
 
   const onQuerySubmitWrapped = useCallback(

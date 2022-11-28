@@ -57,7 +57,11 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
-import { aggBasedVisualizationTrigger, visualizeEditorTrigger } from './triggers';
+import {
+  aggBasedVisualizationTrigger,
+  dashboardVisualizationPanelTrigger,
+  visualizeEditorTrigger,
+} from './triggers';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
 import { showNewVisModal } from './wizard';
 import { VisualizeLocatorDefinition } from '../common/locator';
@@ -93,6 +97,7 @@ import {
   setSavedObjectTagging,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
+import { EditInLensAction } from './actions/edit_in_lens_action';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -340,6 +345,9 @@ export class VisualizationsPlugin
     expressions.registerFunction(xyDimensionExpressionFunction);
     uiActions.registerTrigger(aggBasedVisualizationTrigger);
     uiActions.registerTrigger(visualizeEditorTrigger);
+    uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
+    const editInLensAction = new EditInLensAction(data.query.timefilter.timefilter);
+    uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 

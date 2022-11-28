@@ -455,7 +455,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       sortedActions = sortedActions.filter(({ id }) => this.props.actionPredicate!(id));
     }
 
-    return await buildContextMenuForActions({
+    const panels = await buildContextMenuForActions({
       actions: sortedActions.map((action) => ({
         action,
         context: { embeddable: this.props.embeddable },
@@ -463,5 +463,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       })),
       closeMenu: this.closeMyContextMenuPanel,
     });
+
+    return {
+      panels,
+      actions: sortedActions,
+    };
   };
 }

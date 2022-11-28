@@ -250,6 +250,17 @@ export function App({
         ? i18n.translate('xpack.lens.breadcrumbsByValue', { defaultMessage: 'Edit visualization' })
         : persistedDoc.title;
     }
+    if (
+      !persistedDoc?.title &&
+      initialContext &&
+      initialContext.originatingApp === 'dashboards' &&
+      'title' in initialContext
+    ) {
+      currentDocTitle = i18n.translate('xpack.lens.breadcrumbsEditInLensFromDashboard', {
+        defaultMessage: 'Converting "{title}"',
+        values: { title: initialContext.title },
+      });
+    }
     breadcrumbs.push({ text: currentDocTitle });
     chrome.setBreadcrumbs(breadcrumbs);
   }, [
@@ -413,6 +424,13 @@ export function App({
     };
   }, []);
 
+  const returnToOriginSwitchLabelForContext =
+    initialContext?.originatingApp === 'dashboards' && !persistedDoc
+      ? i18n.translate('xpack.lens.app.replacePanel', {
+          defaultMessage: 'Replace panel on dashboard',
+        })
+      : undefined;
+
   return (
     <>
       <div className="lnsApp" data-test-subj="lnsApp" role="main">
@@ -452,7 +470,11 @@ export function App({
       {isSaveModalVisible && (
         <SaveModalContainer
           lensServices={lensAppServices}
-          originatingApp={isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
+          originatingApp={
+            isLinkedToOriginatingApp
+              ? incomingState?.originatingApp ?? initialContext?.originatingApp
+              : undefined
+          }
           isSaveable={isSaveable}
           runSave={runSave}
           onClose={() => {
@@ -465,13 +487,15 @@ export function App({
           initialInput={initialInput}
           redirectTo={redirectTo}
           redirectToOrigin={redirectToOrigin}
+          initialContext={initialContext}
           returnToOriginSwitchLabel={
-            getIsByValueMode() && initialInput
+            returnToOriginSwitchLabelForContext ??
+            (getIsByValueMode() && initialInput
               ? i18n.translate('xpack.lens.app.updatePanel', {
                   defaultMessage: 'Update panel on {originatingAppName}',
                   values: { originatingAppName: getOriginatingAppName() },
                 })
-              : undefined
+              : undefined)
           }
         />
       )}
@@ -494,7 +518,7 @@ export function App({
         >
           {i18n.translate('xpack.lens.app.goBackModalMessage', {
             defaultMessage:
-              'The changes you have made here are not backwards compatible with your original {contextOriginatingApp} visualization. Are you sure you want to discard these unsaved changes and return to {contextOriginatingApp}?',
+              'The changes you have made here are not backwards compatible with your original {contextOriginatingApp}. Are you sure you want to discard these unsaved changes and return to {contextOriginatingApp}?',
             values: { contextOriginatingApp },
           })}
         </EuiConfirmModal>

@@ -24,14 +24,14 @@ import {
   AnalyticsNoDataPage,
 } from '@kbn/shared-ux-page-analytics-no-data';
 
-import { ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
+import { ACTION_VISUALIZE_LENS_FIELD, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 
 import { App } from './app';
-import { EditorFrameStart, LensTopNavMenuEntryGenerator } from '../types';
+import { EditorFrameStart, LensTopNavMenuEntryGenerator, VisualizeEditorContext } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensPluginStartDependencies } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common';
@@ -56,7 +56,8 @@ import { getLensInspectorService } from '../lens_inspector_service';
 export async function getLensServices(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
-  attributeService: LensAttributeService
+  attributeService: LensAttributeService,
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext
 ): Promise<LensAppServices> {
   const {
     data,
@@ -100,9 +101,9 @@ export async function getLensServices(
     dashboard: startDependencies.dashboard,
     charts: startDependencies.charts,
     getOriginatingAppName: () => {
-      return embeddableEditorIncomingState?.originatingApp
-        ? stateTransfer?.getAppNameFromId(embeddableEditorIncomingState.originatingApp)
-        : undefined;
+      const originatingApp =
+        embeddableEditorIncomingState?.originatingApp ?? initialContext?.originatingApp;
+      return originatingApp ? stateTransfer?.getAppNameFromId(originatingApp) : undefined;
     },
     dataViews: startDependencies.dataViews,
     // Temporarily required until the 'by value' paradigm is default.
@@ -136,7 +137,20 @@ export async function mountApp(
   ]);
   const historyLocationState = params.history.location.state as HistoryLocationState;
 
-  const lensServices = await getLensServices(coreStart, startDependencies, attributeService);
+  // get state from location, used for navigating from Visualize/Discover to Lens
+  const initialContext =
+    historyLocationState &&
+    (historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD ||
+      historyLocationState.type === ACTION_CONVERT_TO_LENS)
+      ? historyLocationState.payload
+      : undefined;
+
+  const lensServices = await getLensServices(
+    coreStart,
+    startDependencies,
+    attributeService,
+    initialContext
+  );
 
   const { stateTransfer, data } = lensServices;
 
@@ -206,13 +220,6 @@ export async function mountApp(
       });
     }
   };
-  // get state from location, used for navigating from Visualize/Discover to Lens
-  const initialContext =
-    historyLocationState &&
-    (historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD ||
-      historyLocationState.type === ACTION_CONVERT_TO_LENS)
-      ? historyLocationState.payload
-      : undefined;
 
   if (historyLocationState && historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD) {
     // remove originatingApp from context when visualizing a field in Lens

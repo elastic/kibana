@@ -1,0 +1,105 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import React from 'react';
+import { take } from 'rxjs/operators';
+import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import { reactToUiComponent } from '@kbn/kibana-react-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { TimefilterContract } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import { Action } from '@kbn/ui-actions-plugin/public';
+import { VisualizeEmbeddable } from '../embeddable';
+import { DASHBOARD_VISUALIZATION_PANEL_TRIGGER } from '../triggers';
+import { getUiActions, getApplication } from '../services';
+
+export const ACTION_EDIT_IN_LENS = 'ACTION_EDIT_IN_LENS';
+
+export interface EditInLensContext {
+  embeddable: IEmbeddable;
+}
+
+const displayName = i18n.translate('visulizations.action.editInLens.displayName', {
+  defaultMessage: 'Convert to Lens',
+});
+
+const ReactMenuItem: React.FC = () => {
+  return (
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem>{displayName}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBadge color={'accent'}>
+          {i18n.translate('visualizations.tonNavMenu.tryItBadgeText', {
+            defaultMessage: 'Try it',
+          })}
+        </EuiBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const UiMenuItem = reactToUiComponent(ReactMenuItem);
+
+export class EditInLensAction implements Action<EditInLensContext> {
+  public id = ACTION_EDIT_IN_LENS;
+  public readonly type = ACTION_EDIT_IN_LENS;
+  public order = 80;
+  public showNotification = true;
+  public currentAppId: string | undefined;
+
+  constructor(private readonly timefilter: TimefilterContract) {}
+
+  async execute(context: ActionExecutionContext<EditInLensContext>): Promise<void> {
+    const application = getApplication();
+    if (application?.currentAppId$) {
+      application.currentAppId$
+        .pipe(take(1))
+        .subscribe((appId: string | undefined) => (this.currentAppId = appId));
+    }
+    const { embeddable } = context;
+    const vis = (embeddable as VisualizeEmbeddable).getVis();
+    const navigateToLensConfig = await vis.type.navigateToLens?.(vis, this.timefilter);
+    const searchFilters = vis.data.searchSource?.getField('filter');
+    const searchQuery = vis.data.searchSource?.getField('query');
+    const updatedWithMeta = {
+      ...navigateToLensConfig,
+      title: embeddable.getOutput().title,
+      savedObjectId: vis.id,
+      embeddableId: embeddable.id,
+      originatingApp: this.currentAppId,
+      searchFilters,
+      searchQuery,
+    };
+    if (navigateToLensConfig) {
+      getUiActions().getTrigger(DASHBOARD_VISUALIZATION_PANEL_TRIGGER).exec(updatedWithMeta);
+    }
+  }
+
+  getDisplayName(context: ActionExecutionContext<EditInLensContext>): string {
+    return displayName;
+  }
+
+  MenuItem = UiMenuItem;
+
+  getIconType(context: ActionExecutionContext<EditInLensContext>): string | undefined {
+    return 'merge';
+  }
+
+  async isCompatible(context: ActionExecutionContext<EditInLensContext>) {
+    const { embeddable } = context;
+    const vis = (embeddable as VisualizeEmbeddable).getVis?.();
+    if (!vis) {
+      return false;
+    }
+    const canNavigateToLens =
+      (embeddable as VisualizeEmbeddable).getExpressionVariables?.()?.canNavigateToLens ??
+      (await vis.type.navigateToLens?.(vis, this.timefilter));
+    return Boolean(canNavigateToLens && embeddable.getInput().viewMode === ViewMode.EDIT);
+  }
+}

@@ -126,6 +126,7 @@ export class VisualizeEmbeddable
     VisualizeByValueInput,
     VisualizeByReferenceInput
   >;
+  private expressionVariables: Record<string, unknown> | undefined;
   private readonly expressionVariablesSubject = new ReplaySubject<
     Record<string, unknown> | undefined
   >(1);
@@ -584,12 +585,12 @@ export class VisualizeEmbeddable
   private async updateHandler() {
     const context = this.getExecutionContext();
 
-    const expressionVariables = await this.vis.type.getExpressionVariables?.(
+    this.expressionVariables = await this.vis.type.getExpressionVariables?.(
       this.vis,
       this.timefilter
     );
 
-    this.expressionVariablesSubject.next(expressionVariables);
+    this.expressionVariablesSubject.next(this.expressionVariables);
 
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
@@ -600,7 +601,7 @@ export class VisualizeEmbeddable
       },
       variables: {
         embeddableTitle: this.getTitle(),
-        ...expressionVariables,
+        ...this.expressionVariables,
       },
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,
@@ -649,6 +650,10 @@ export class VisualizeEmbeddable
 
   public getExpressionVariables$() {
     return this.expressionVariablesSubject.asObservable();
+  }
+
+  public getExpressionVariables() {
+    return this.expressionVariables;
   }
 
   inputIsRefType = (input: VisualizeInput): input is VisualizeByReferenceInput => {
