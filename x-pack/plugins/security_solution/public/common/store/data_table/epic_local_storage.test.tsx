@@ -33,7 +33,7 @@ import {
   updateSort,
 } from './actions';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import type { Props as StatefulEventsViewerProps } from '../../components/events_viewer';
+import type { EventsViewerProps } from '../../components/events_viewer';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 
 import { addTableInStorage } from '../../../timelines/containers/local_storage';
@@ -55,7 +55,7 @@ describe('epicLocalStorage', () => {
   const { storage } = createSecuritySolutionStorageMock();
   let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
-  let testProps = {} as StatefulEventsViewerProps;
+  let testProps = {} as EventsViewerProps;
 
   beforeEach(() => {
     store = createStore(

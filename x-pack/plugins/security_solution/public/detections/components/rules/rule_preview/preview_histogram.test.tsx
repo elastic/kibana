@@ -28,6 +28,7 @@ import { useGetUserCasesPermissions } from '../../../../common/lib/kibana';
 import { useTimelineEvents } from '../../../../common/components/events_viewer/use_timelines_events';
 import { TableId } from '../../../../../common/types';
 import { createStore } from '../../../../common/store';
+import { mockEventViewerResponse } from '../../../../common/components/events_viewer/mock';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/use_global_time');
@@ -54,6 +55,8 @@ const getLastMonthTimeframe = () => ({
   interval: '5m',
   lookback: '1m',
 });
+
+(useTimelineEvents as jest.Mock).mockReturnValue([false, mockEventViewerResponse]);
 
 describe('PreviewHistogram', () => {
   const mockSetQuery = jest.fn();
@@ -106,12 +109,8 @@ describe('PreviewHistogram', () => {
       (useTimelineEvents as jest.Mock).mockReturnValue([
         false,
         {
+          ...mockEventViewerResponse,
           totalCount: 1,
-          pageInfo: {
-            activePage: 0,
-            fakeTotalCount: 1,
-          },
-          events: [],
         },
       ]);
       const wrapper = render(
@@ -126,8 +125,9 @@ describe('PreviewHistogram', () => {
           />
         </TestProviders>
       );
+      // expect(await wrapper).toMatchSnapshot();
 
-      expect(await wrapper.findByText('hello grid')).toBeTruthy();
+      expect(await wrapper.findByText('1 alert')).toBeTruthy();
       expect(await wrapper.findByText(ALL_VALUES_ZEROS_TITLE)).toBeTruthy();
     });
   });
@@ -167,7 +167,13 @@ describe('PreviewHistogram', () => {
       const format = 'YYYY-MM-DD HH:mm:ss';
       const start = '2015-03-12 05:17:10';
       const end = '2020-03-12 05:17:10';
-
+      (useTimelineEvents as jest.Mock).mockReturnValue([
+        false,
+        {
+          ...mockEventViewerResponse,
+          totalCount: 0,
+        },
+      ]);
       const usePreviewHistogramMock = usePreviewHistogram as jest.Mock;
       usePreviewHistogramMock.mockReturnValue([
         true,

@@ -88,7 +88,6 @@ export const TestCellRenderer: React.FC<CellValueElementProps> = ({ columnId, da
 describe('DataTable', () => {
   const mount = useMountAppended();
   const props: StatefulDataTableProps = {
-    activePage: 0,
     browserFields: mockBrowserFields,
     clearSelected: jest.fn() as unknown as StatefulDataTableProps['clearSelected'],
     columnHeaders: defaultHeaders,
@@ -97,24 +96,23 @@ describe('DataTable', () => {
     disabledCellActions: ['signal.rule.risk_score', 'signal.reason'],
     id: 'timeline-test',
     isLoading: false,
-    itemsPerPageOptions: [],
     loadPage: jest.fn(),
-    pageSize: 25,
     renderCellValue: TestCellRenderer,
     rowRenderers: [],
     selectedEventIds: {},
     setSelected: jest.fn() as unknown as StatefulDataTableProps['setSelected'],
     sort: mockSort,
     showCheckboxes: false,
-    tabType: 'query',
     totalItems: 1,
     leadingControlColumns: [],
-    filterStatus: 'open',
-    filterQuery: '',
-    refetch: jest.fn(),
-    indexNames: [''],
     defaultColumns: defaultHeaders,
     unitCountText: '10 events',
+    pagination: {
+      pageSize: 25,
+      pageIndex: 0,
+      onChangeItemsPerPage: jest.fn(),
+      onChangePage: jest.fn(),
+    },
   };
 
   beforeEach(() => {

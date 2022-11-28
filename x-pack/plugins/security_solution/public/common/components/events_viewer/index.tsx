@@ -602,8 +602,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   );
 };
 
-// export const StatefulEventsViewer = React.memo(StatefulEventsViewerComponent);
-
 const mapDispatchToProps = {
   clearSelected: dataTableActions.clearSelected,
   setSelected: dataTableActions.setSelected,
