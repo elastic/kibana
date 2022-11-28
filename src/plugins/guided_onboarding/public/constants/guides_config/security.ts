@@ -53,6 +53,9 @@ export const securityConfig: GuideConfig = {
         i18n.translate('guidedOnboarding.securityGuide.rulesStep.description2', {
           defaultMessage: 'Select and enable rules to generate alerts.',
         }),
+        i18n.translate('guidedOnboarding.securityGuide.rulesStep.description3', {
+          defaultMessage: 'Enable rules to generate alerts.',
+        }),
       ],
       manualCompletion: {
         title: i18n.translate('guidedOnboarding.securityGuide.rulesStep.manualCompletion.title', {
