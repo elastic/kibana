@@ -54,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_and_network'));
 
 
-      it('should return correct calculations', async () => {
+      it('should return correct sorted calculations', async () => {
         const { min, max } = DATES['8.0.0'].hosts_and_netowrk;
         const response = await supertest
           .post('/api/metrics/overview/top')
@@ -70,6 +70,8 @@ export default function ({ getService }: FtrProviderContext) {
                 from: min,
                 to: max,
               },
+              sort: 'rx',
+              sortDirection: 'asc'
             })
           )
           .expect(200);
@@ -82,8 +84,8 @@ export default function ({ getService }: FtrProviderContext) {
         }));
 
         expect(hosts.length).to.be(3);
-        expect(hosts[0]).to.eql({ name: 'metricbeat-1', rx: 11250, tx: 25290.5 });
-        expect(hosts[1]).to.eql({ name: 'metricbeat-2', rx: 8000, tx: 16860 });
+        expect(hosts[0]).to.eql({ name: 'metricbeat-2', rx: 8000, tx: 16860 });
+        expect(hosts[1]).to.eql({ name: 'metricbeat-1', rx: 11250, tx: 25290.5 });
         expect(hosts[2]).to.eql({ name: 'metricbeat-3', rx: null, tx: null });
       });
     })
