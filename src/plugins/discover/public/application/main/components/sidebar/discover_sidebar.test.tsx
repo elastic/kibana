@@ -217,16 +217,4 @@ describe('discover sidebar', function () {
     const createDataViewButton = findTestSubject(compWithPickerInViewerMode, 'dataview-create-new');
     expect(createDataViewButton.length).toBe(0);
   });
-
-  it('should render the Visualize in Lens button in text based languages mode', () => {
-    const compInViewerMode = mountWithIntl(
-      <KibanaContextProvider services={mockDiscoverServices}>
-        <DiscoverAppStateProvider value={getAppStateContainer()}>
-          <DiscoverSidebar {...props} onAddFilter={undefined} />
-        </DiscoverAppStateProvider>
-      </KibanaContextProvider>
-    );
-    const visualizeField = findTestSubject(compInViewerMode, 'textBased-visualize');
-    expect(visualizeField.length).toBe(1);
-  });
 });

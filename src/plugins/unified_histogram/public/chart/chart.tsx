@@ -88,7 +88,6 @@ export function Chart({
   onChartLoad,
 }: ChartProps) {
   const [suggestion, setSuggestion] = useState<Suggestion | undefined>(undefined);
-  // const [chartVisible, setChartVisible] = useState(true);
 
   const {
     showChartOptionsPopover,
@@ -206,10 +205,10 @@ export function Chart({
         ? suggestionsApi(context, dataViews)
         : undefined;
       setSuggestion(lensSuggestion);
-      if (lensSuggestion?.visualizationId !== 'lnsDatatable') {
-        setChartVisible(true);
-      } else {
+      if (lensSuggestion?.visualizationId === 'lnsDatatable') {
         setChartVisible(false);
+      } else {
+        setChartVisible(true);
       }
     };
     getSuggestions();
