@@ -203,7 +203,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
               <EuiFlexGroup
                 alignItems="center"
                 justifyContent="flexEnd"
-                gutterSize="xs"
+                gutterSize="l"
                 responsive={false}
               >
                 <EuiFlexItem grow={false}>
