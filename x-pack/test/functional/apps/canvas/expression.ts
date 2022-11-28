@@ -17,8 +17,7 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
   const kibanaServer = getService('kibanaServer');
   const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/115883
-  describe.skip('expression editor', function () {
+  describe('expression editor', function () {
     // there is an issue with FF not properly clicking on workpad elements
     this.tags('skipFirefox');
 
