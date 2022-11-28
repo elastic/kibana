@@ -27,16 +27,13 @@ import { useGetLinkTo } from '../empty/use_policy_artifacts_empty_hooks';
 import type { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { useListArtifact } from '../../../../../hooks/artifacts';
 import type { POLICY_ARTIFACT_LIST_LABELS } from './translations';
-import type { EventFiltersPageLocation } from '../../../../event_filters/types';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 interface PolicyArtifactsListProps {
   policy: ImmutableObject<PolicyData>;
   apiClient: ExceptionsListApiClient;
   searchableFields: string[];
-  getArtifactPath: (
-    location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
-  ) => string;
+  getArtifactPath: (location?: Partial<ArtifactListPageUrlParams>) => string;
   getPolicyArtifactsPath: (policyId: string) => string;
   labels: typeof POLICY_ARTIFACT_LIST_LABELS;
   onDeleteActionCallback: (item: ExceptionListItemSchema) => void;
