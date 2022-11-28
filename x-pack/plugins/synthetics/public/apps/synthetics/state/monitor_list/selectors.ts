@@ -18,6 +18,7 @@ export const selectEncryptedSyntheticsSavedMonitors = createSelector(
       ...monitor.attributes,
       id: monitor.attributes[ConfigKey.MONITOR_QUERY_ID],
       updated_at: monitor.updated_at,
+      created_at: monitor.created_at,
     })) as EncryptedSyntheticsSavedMonitor[]
 );
 export const selectMonitorUpsertStatuses = (state: SyntheticsAppState) =>
