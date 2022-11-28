@@ -49,7 +49,8 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('bulkDisableRules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/146115
+  describe.skip('bulkDisableRules', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
