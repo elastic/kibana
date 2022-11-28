@@ -89,8 +89,8 @@ export interface EventRenderedViewProps {
 }
 
 const PreferenceFormattedDateComponent = ({ value }: { value: Date }) => {
-  const tz = useUiSetting<string>('dateFormat:tz');
-  const dateFormat = useUiSetting<string>('dateFormat');
+  const tz = useUiSetting<string>('format:number:defaultPattern:tz');
+  const dateFormat = useUiSetting<string>('format:number:defaultPattern');
   const zone: string = moment.tz.zone(tz)?.name ?? moment.tz.guess();
 
   return <span data-test-subj="moment-date">{moment.tz(value, zone).format(dateFormat)}</span>;

@@ -76,7 +76,7 @@ const storage = new Storage(localStorage);
 
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
-export interface Props {
+export interface EventsViewerProps {
   defaultCellActions?: DataTableCellAction[];
   defaultModel: SubsetDataTableModel;
   end: string;
@@ -103,7 +103,7 @@ export interface Props {
  * timeline is used BESIDES the flyout. The flyout makes use of the `EventsViewer` component which is a subcomponent here
  * NOTE: As of writting, it is not used in the Case_View component
  */
-const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
+const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux> = ({
   defaultCellActions,
   defaultModel,
   end,
@@ -451,7 +451,7 @@ const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
         theme,
         setEventsLoading,
         setEventsDeleted,
-        pageSize: pageInfo.querySize,
+        pageSize: itemsPerPage,
       })
     );
   }, [
@@ -472,7 +472,7 @@ const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
     theme,
     setEventsLoading,
     setEventsDeleted,
-    pageInfo.querySize,
+    itemsPerPage,
   ]);
 
   const alertBulkActions = useAlertBulkActions({
@@ -549,25 +549,23 @@ const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
                               data={nonDeletedEvents}
                               disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
                               id={tableId}
-                              indexNames={selectedPatterns}
-                              itemsPerPageOptions={itemsPerPageOptions}
-                              activePage={pageInfo.activePage}
                               loadPage={loadPage}
-                              pageSize={pageInfo.querySize}
-                              refetch={refetch}
                               renderCellValue={renderCellValue}
                               rowRenderers={rowRenderers}
-                              tabType={'query'}
                               totalItems={totalCountMinusDeleted}
                               bulkActions={bulkActions}
                               fieldBrowserOptions={fieldBrowserOptions}
                               defaultCellActions={defaultCellActions}
-                              filterQuery={filterQuery}
                               hasAlertsCrud={hasCrudPermissions}
                               filters={filters}
-                              filterStatus={currentFilter}
-                              onRuleChange={onRuleChange}
                               leadingControlColumns={transformedLeadingControlColumns}
+                              pagination={{
+                                pageIndex: pageInfo.activePage,
+                                pageSize: itemsPerPage,
+                                pageSizeOptions: itemsPerPageOptions,
+                                onChangeItemsPerPage,
+                                onChangePage,
+                              }}
                             />
                           )}
                           {tableView === 'eventRenderedView' && (
@@ -576,7 +574,7 @@ const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
                               leadingControlColumns={transformedLeadingControlColumns}
                               pagination={{
                                 pageIndex: pageInfo.activePage,
-                                pageSize: pageInfo.querySize,
+                                pageSize: itemsPerPage,
                                 totalItemCount: totalCountMinusDeleted,
                                 pageSizeOptions: itemsPerPageOptions,
                                 showPerPageOptions: true,
@@ -615,6 +613,6 @@ const connector = connect(undefined, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-export const StatefulEventsViewer: React.FunctionComponent<Props> = connector(
+export const StatefulEventsViewer: React.FunctionComponent<EventsViewerProps> = connector(
   StatefulEventsViewerComponent
 );

@@ -9,18 +9,20 @@ import { draggableKeyDownHandler } from './helpers';
 
 jest.mock('../../../lib/kibana');
 describe('draggableKeyDownHandler', () => {
-  test('it renders against the snapshot', () => {
+  test('it calles the proper function cancelDragActions when Escape key was pressed', () => {
     const mockElement = document.createElement('div');
     const keyboardEvent = new KeyboardEvent('keydown', {
       ctrlKey: false,
       key: 'Escape',
       metaKey: false,
     }) as unknown as React.KeyboardEvent;
-    const res = draggableKeyDownHandler({
+
+    const cancelDragActions = jest.fn();
+    draggableKeyDownHandler({
       closePopover: jest.fn(),
       openPopover: jest.fn(),
       beginDrag: jest.fn(),
-      cancelDragActions: jest.fn(),
+      cancelDragActions,
       draggableElement: mockElement,
       dragActions: null,
       dragToLocation: jest.fn(),
@@ -28,6 +30,6 @@ describe('draggableKeyDownHandler', () => {
       keyboardEvent,
       setDragActions: jest.fn(),
     });
-    expect(res).toBe({});
+    expect(cancelDragActions).toBeCalled();
   });
 });

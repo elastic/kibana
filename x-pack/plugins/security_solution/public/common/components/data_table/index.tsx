@@ -12,6 +12,7 @@ import type {
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
   EuiDataGridControlColumn,
+  EuiDataGridPaginationProps,
 } from '@elastic/eui';
 import { EuiDataGrid, EuiProgress } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
@@ -45,7 +46,6 @@ import {
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import { REMOVE_COLUMN } from './column_headers/translations';
 import { dataTableActions, dataTableSelectors } from '../../store/data_table';
-import type { AlertWorkflowStatus, Refetch } from '../../types';
 import type { DataTableState, DataTableModel } from '../../store/data_table/types';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { useKibana } from '../../lib/kibana';
@@ -57,7 +57,6 @@ const DATA_TABLE_ARIA_LABEL = i18n.translate('xpack.securitySolution.dataTable.a
 });
 
 interface OwnProps {
-  activePage: number;
   additionalControls?: React.ReactNode;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
@@ -66,22 +65,15 @@ interface OwnProps {
   disabledCellActions: string[];
   fieldBrowserOptions?: FieldBrowserOptions;
   filters?: Filter[];
-  filterQuery?: string;
-  filterStatus?: AlertWorkflowStatus;
   id: string;
-  indexNames: string[];
-  itemsPerPageOptions: number[];
   leadingControlColumns: EuiDataGridControlColumn[];
   loadPage: (newActivePage: number) => void;
-  onRuleChange?: () => void;
-  pageSize: number;
-  refetch: Refetch;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
-  tabType: string;
-  totalItems: number;
   hasAlertsCrud?: boolean;
   unitCountText: string;
+  pagination: EuiDataGridPaginationProps;
+  totalItems: number;
 }
 
 const ES_LIMIT_COUNT = 9999;
@@ -105,7 +97,6 @@ export type StatefulDataTableProps = OwnProps & PropsFromRedux;
 
 export const DataTableComponent = React.memo<StatefulDataTableProps>(
   ({
-    activePage,
     additionalControls,
     browserFields,
     bulkActions = true,
@@ -118,18 +109,17 @@ export const DataTableComponent = React.memo<StatefulDataTableProps>(
     hasAlertsCrud,
     id,
     isLoading,
-    itemsPerPageOptions,
     leadingControlColumns,
     loadPage,
-    pageSize,
     renderCellValue,
     rowRenderers,
     selectedEventIds,
     showCheckboxes,
     sort,
-    totalItems,
+    pagination,
     defaultColumns,
     unitCountText,
+    totalItems,
   }) => {
     const {
       triggersActionsUi: { getFieldBrowser },
@@ -302,7 +292,7 @@ export const DataTableComponent = React.memo<StatefulDataTableProps>(
               data: data.map((row) => row.data),
               ecsData: data.map((row) => row.ecs),
               header: columnHeaders.find((h) => h.id === header.id),
-              pageSize,
+              pageSize: pagination.pageSize,
               scopeId: id,
               closeCellPopover: dataGridRef.current?.closeCellPopover,
             });
@@ -342,7 +332,7 @@ export const DataTableComponent = React.memo<StatefulDataTableProps>(
         disabledCellActions,
         dispatch,
         id,
-        pageSize,
+        pagination.pageSize,
       ]
     );
 
@@ -354,7 +344,7 @@ export const DataTableComponent = React.memo<StatefulDataTableProps>(
         setCellProps,
         isDetails,
       }): React.ReactElement | null => {
-        const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+        const pageRowIndex = getPageRowIndex(rowIndex, pagination.pageSize);
         const rowData = pageRowIndex < data.length ? data[pageRowIndex].data : null;
         const header = columnHeaders.find((h) => h.id === columnId);
         const eventId = pageRowIndex < data.length ? data[pageRowIndex]._id : null;
@@ -403,25 +393,11 @@ export const DataTableComponent = React.memo<StatefulDataTableProps>(
       data,
       filters,
       id,
-      pageSize,
+      pagination.pageSize,
       renderCellValue,
       rowRenderers,
       theme,
     ]);
-
-    const onChangeItemsPerPage = useCallback(
-      (itemsChangedPerPage) => {
-        dispatch(dataTableActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }));
-      },
-      [id, dispatch]
-    );
-
-    const onChangePage = useCallback(
-      (page) => {
-        loadPage(page);
-      },
-      [loadPage]
-    );
 
     return (
       <>
@@ -439,13 +415,7 @@ export const DataTableComponent = React.memo<StatefulDataTableProps>(
             renderCellValue={renderTGridCellValue}
             sorting={{ columns: sortingColumns, onSort }}
             onColumnResize={onColumnResize}
-            pagination={{
-              pageIndex: activePage,
-              pageSize,
-              pageSizeOptions: itemsPerPageOptions,
-              onChangeItemsPerPage,
-              onChangePage,
-            }}
+            pagination={pagination}
             ref={dataGridRef}
           />
         </EuiDataGridContainer>
