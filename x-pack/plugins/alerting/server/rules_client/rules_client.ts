@@ -54,6 +54,7 @@ import {
   SAVED_OBJECT_REL_PRIMARY,
 } from '@kbn/event-log-plugin/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
+import { withSpan } from '@kbn/apm-utils';
 import {
   Rule,
   PartialRule,
@@ -2025,25 +2026,26 @@ export class RulesClient {
         RuleAuditAction: RuleAuditAction.DISABLE,
       },
     };
-    const { aggregations, total } = await this.unsecuredSavedObjectsClient.find<
-      RawRule,
-      RuleBulkOperationAggregation
-    >({
-      filter,
-      page: 1,
-      perPage: 0,
-      type: 'alert',
-      aggs: {
-        alertTypeId: {
-          multi_terms: {
-            terms: [
-              { field: 'alert.attributes.alertTypeId' },
-              { field: 'alert.attributes.consumer' },
-            ],
+    const { aggregations, total } = await withSpan(
+      { name: 'UnsecuredSavedObjectsClient.find', type: 'rules' },
+      () =>
+        this.unsecuredSavedObjectsClient.find<RawRule, RuleBulkOperationAggregation>({
+          filter,
+          page: 1,
+          perPage: 0,
+          type: 'alert',
+          aggs: {
+            alertTypeId: {
+              multi_terms: {
+                terms: [
+                  { field: 'alert.attributes.alertTypeId' },
+                  { field: 'alert.attributes.consumer' },
+                ],
+              },
+            },
           },
-        },
-      },
-    });
+        })
+    );
 
     if (total > MAX_RULES_NUMBER_FOR_BULK_OPERATION) {
       throw Boom.badRequest(
@@ -2057,28 +2059,30 @@ export class RulesClient {
       throw Boom.badRequest(`No rules found for bulk ${action.toLocaleLowerCase()}`);
     }
 
-    await pMap(
-      buckets,
-      async ({ key: [ruleType, consumer, actions] }) => {
-        this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
-        try {
-          await this.authorization.ensureAuthorized({
-            ruleTypeId: ruleType,
-            consumer,
-            operation: actionToConstantsMapping[action].WriteOperation,
-            entity: AlertingAuthorizationEntity.Rule,
-          });
-        } catch (error) {
-          this.auditLogger?.log(
-            ruleAuditEvent({
-              action: actionToConstantsMapping[action].RuleAuditAction,
-              error,
-            })
-          );
-          throw error;
-        }
-      },
-      { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
+    await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, () =>
+      pMap(
+        buckets,
+        async ({ key: [ruleType, consumer, actions] }) => {
+          this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
+          try {
+            await this.authorization.ensureAuthorized({
+              ruleTypeId: ruleType,
+              consumer,
+              operation: actionToConstantsMapping[action].WriteOperation,
+              entity: AlertingAuthorizationEntity.Rule,
+            });
+          } catch (error) {
+            this.auditLogger?.log(
+              ruleAuditEvent({
+                action: actionToConstantsMapping[action].RuleAuditAction,
+                error,
+              })
+            );
+            throw error;
+          }
+        },
+        { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
+      )
     );
     return { total };
   };
@@ -2087,63 +2091,77 @@ export class RulesClient {
     const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
 
     const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
-    const authorizationFilter = await this.getAuthorizationFilter({ action: 'DELETE' });
+    const authorizationFilter = await withSpan(
+      { name: 'getAuthorizationFilter', type: 'rules' },
+      () => this.getAuthorizationFilter({ action: 'DELETE' })
+    );
 
     const kueryNodeFilterWithAuth =
       authorizationFilter && kueryNodeFilter
         ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
         : kueryNodeFilter;
 
-    const { total } = await this.checkAuthorizationAndGetTotal({
-      filter: kueryNodeFilterWithAuth,
-      action: 'DELETE',
-    });
+    const { total } = await withSpan({ name: 'checkAuthorizationAndGetTotal', type: 'rules' }, () =>
+      this.checkAuthorizationAndGetTotal({
+        filter: kueryNodeFilterWithAuth,
+        action: 'DELETE',
+      })
+    );
 
-    const { apiKeysToInvalidate, errors, taskIdsToDelete } = await retryIfBulkDeleteConflicts(
-      this.logger,
-      (filterKueryNode: KueryNode | null) => this.bulkDeleteWithOCC({ filter: filterKueryNode }),
-      kueryNodeFilterWithAuth
+    const { apiKeysToInvalidate, errors, taskIdsToDelete } = await withSpan(
+      { name: 'retryIfBulkDeleteConflicts', type: 'rules' },
+      () =>
+        retryIfBulkDeleteConflicts(
+          this.logger,
+          (filterKueryNode: KueryNode | null) =>
+            this.bulkDeleteWithOCC({ filter: filterKueryNode }),
+          kueryNodeFilterWithAuth
+        )
     );
 
     const taskIdsFailedToBeDeleted: string[] = [];
     const taskIdsSuccessfullyDeleted: string[] = [];
-    if (taskIdsToDelete.length > 0) {
-      try {
-        const resultFromDeletingTasks = await this.taskManager.bulkRemoveIfExist(taskIdsToDelete);
-        resultFromDeletingTasks?.statuses.forEach((status) => {
-          if (status.success) {
-            taskIdsSuccessfullyDeleted.push(status.id);
-          } else {
-            taskIdsFailedToBeDeleted.push(status.id);
+    await withSpan({ name: 'taskManager.bulkRemoveIfExist', type: 'rules' }, async () => {
+      if (taskIdsToDelete.length > 0) {
+        try {
+          const resultFromDeletingTasks = await this.taskManager.bulkRemoveIfExist(taskIdsToDelete);
+          resultFromDeletingTasks?.statuses.forEach((status) => {
+            if (status.success) {
+              taskIdsSuccessfullyDeleted.push(status.id);
+            } else {
+              taskIdsFailedToBeDeleted.push(status.id);
+            }
+          });
+          if (taskIdsSuccessfullyDeleted.length) {
+            this.logger.debug(
+              `Successfully deleted schedules for underlying tasks: ${taskIdsSuccessfullyDeleted.join(
+                ', '
+              )}`
+            );
           }
-        });
-        if (taskIdsSuccessfullyDeleted.length) {
-          this.logger.debug(
-            `Successfully deleted schedules for underlying tasks: ${taskIdsSuccessfullyDeleted.join(
-              ', '
-            )}`
-          );
-        }
-        if (taskIdsFailedToBeDeleted.length) {
+          if (taskIdsFailedToBeDeleted.length) {
+            this.logger.error(
+              `Failure to delete schedules for underlying tasks: ${taskIdsFailedToBeDeleted.join(
+                ', '
+              )}`
+            );
+          }
+        } catch (error) {
           this.logger.error(
-            `Failure to delete schedules for underlying tasks: ${taskIdsFailedToBeDeleted.join(
+            `Failure to delete schedules for underlying tasks: ${taskIdsToDelete.join(
               ', '
-            )}`
+            )}. TaskManager bulkRemoveIfExist failed with Error: ${error.message}`
           );
         }
-      } catch (error) {
-        this.logger.error(
-          `Failure to delete schedules for underlying tasks: ${taskIdsToDelete.join(
-            ', '
-          )}. TaskManager bulkRemoveIfExist failed with Error: ${error.message}`
-        );
       }
-    }
+    });
 
-    await bulkMarkApiKeysForInvalidation(
-      { apiKeys: apiKeysToInvalidate },
-      this.logger,
-      this.unsecuredSavedObjectsClient
+    await withSpan({ name: 'bulkMarkApiKeysForInvalidation', type: 'rules' }, () =>
+      bulkMarkApiKeysForInvalidation(
+        { apiKeys: apiKeysToInvalidate },
+        this.logger,
+        this.unsecuredSavedObjectsClient
+      )
     );
 
     return { errors, total, taskIdsFailedToBeDeleted };
@@ -2168,50 +2186,57 @@ export class RulesClient {
     const taskIdToRuleIdMapping: Record<string, string> = {};
     const ruleNameToRuleIdMapping: Record<string, string> = {};
 
-    for await (const response of rulesFinder.find()) {
-      for (const rule of response.saved_objects) {
-        if (rule.attributes.apiKey) {
-          apiKeyToRuleIdMapping[rule.id] = rule.attributes.apiKey;
-        }
-        if (rule.attributes.name) {
-          ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
-        }
-        if (rule.attributes.scheduledTaskId) {
-          taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
-        }
-        rules.push(rule);
+    await withSpan({ name: 'Collect rules', type: 'rules' }, async () => {
+      for await (const response of rulesFinder.find()) {
+        for (const rule of response.saved_objects) {
+          if (rule.attributes.apiKey) {
+            apiKeyToRuleIdMapping[rule.id] = rule.attributes.apiKey;
+          }
+          if (rule.attributes.name) {
+            ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+          }
+          if (rule.attributes.scheduledTaskId) {
+            taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
+          }
+          rules.push(rule);
 
-        this.auditLogger?.log(
-          ruleAuditEvent({
-            action: RuleAuditAction.DELETE,
-            outcome: 'unknown',
-            savedObject: { type: 'alert', id: rule.id },
-          })
-        );
-      }
-    }
-
-    const result = await this.unsecuredSavedObjectsClient.bulkDelete(rules);
-
-    result.statuses.forEach((status) => {
-      if (status.error === undefined) {
-        if (apiKeyToRuleIdMapping[status.id]) {
-          apiKeysToInvalidate.push(apiKeyToRuleIdMapping[status.id]);
+          this.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.DELETE,
+              outcome: 'unknown',
+              savedObject: { type: 'alert', id: rule.id },
+            })
+          );
         }
-        if (taskIdToRuleIdMapping[status.id]) {
-          taskIdsToDelete.push(taskIdToRuleIdMapping[status.id]);
-        }
-      } else {
-        errors.push({
-          message: status.error.message ?? 'n/a',
-          status: status.error.statusCode,
-          rule: {
-            id: status.id,
-            name: ruleNameToRuleIdMapping[status.id] ?? 'n/a',
-          },
-        });
       }
     });
+
+    const result = await withSpan({ name: 'bulkDelete', type: 'rules' }, () =>
+      this.unsecuredSavedObjectsClient.bulkDelete(rules)
+    );
+
+    withSpan({ name: 'Calculations', type: 'rules' }, async () => {
+      result.statuses.forEach((status) => {
+        if (status.error === undefined) {
+          if (apiKeyToRuleIdMapping[status.id]) {
+            apiKeysToInvalidate.push(apiKeyToRuleIdMapping[status.id]);
+          }
+          if (taskIdToRuleIdMapping[status.id]) {
+            taskIdsToDelete.push(taskIdToRuleIdMapping[status.id]);
+          }
+        } else {
+          errors.push({
+            message: status.error.message ?? 'n/a',
+            status: status.error.statusCode,
+            rule: {
+              id: status.id,
+              name: ruleNameToRuleIdMapping[status.id] ?? 'n/a',
+            },
+          });
+        }
+      });
+    });
+
     return { apiKeysToInvalidate, errors, taskIdsToDelete };
   };
 
