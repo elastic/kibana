@@ -36,7 +36,12 @@ export const ESDataViewSelect: FC<ESDataViewSelectProps> = (props) => {
       }
 
       setLoading(false);
-      setDataViews(sortBy(newDataViews, 'name'));
+      setDataViews(
+        sortBy(newDataViews, ({ name, title }) => {
+          return name || title || '';
+        })
+      );
+
       if (!value && newDataViews.length) {
         onChange(newDataViews[0].title);
       }
