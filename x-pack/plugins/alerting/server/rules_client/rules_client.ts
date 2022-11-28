@@ -105,7 +105,7 @@ import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { ruleAuditEvent, RuleAuditAction } from './audit_events';
+import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
 import {
   mapSortField,
   validateOperationOnAttributes,
@@ -115,7 +115,7 @@ import {
   retryIfBulkOperationConflicts,
   applyBulkEditOperation,
   buildKueryNodeFilter,
-} from './lib';
+} from './common';
 import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { Alert } from '../alert';
 import { EVENT_LOG_ACTIONS } from '../plugin';
@@ -126,7 +126,7 @@ import {
   getModifiedSearchFields,
   getModifiedSearch,
   modifyFilterKueryNode,
-} from './lib/mapped_params_utils';
+} from './common/mapped_params_utils';
 import { AlertingRulesConfig } from '../config';
 import {
   formatExecutionLogResult,
@@ -141,6 +141,8 @@ import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors'
 import { getActiveScheduledSnoozes } from '../lib/is_rule_snoozed';
 import { isSnoozeExpired } from '../lib';
 import { isDetectionEngineAADRuleType } from '../saved_objects/migrations/utils';
+
+import { create, CreateOptions } from './create';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -367,28 +369,6 @@ interface SavedObjectOptions {
   migrationVersion?: Record<string, string>;
 }
 
-export interface CreateOptions<Params extends RuleTypeParams> {
-  data: Omit<
-    Rule<Params>,
-    | 'id'
-    | 'createdBy'
-    | 'updatedBy'
-    | 'createdAt'
-    | 'updatedAt'
-    | 'apiKey'
-    | 'apiKeyOwner'
-    | 'muteAll'
-    | 'mutedInstanceIds'
-    | 'actions'
-    | 'executionStatus'
-    | 'snoozeSchedule'
-    | 'isSnoozedUntil'
-    | 'lastRun'
-    | 'nextRun'
-  > & { actions: NormalizedAlertAction[] };
-  options?: SavedObjectOptions;
-}
-
 export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
   data: {
@@ -480,6 +460,36 @@ const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.KQL,
   fieldNames: { ruleTypeId: 'alert.attributes.alertTypeId', consumer: 'alert.attributes.consumer' },
 };
+
+export interface RulesClientContext {
+  readonly logger: Logger;
+  readonly getUserName: () => Promise<string | null>;
+  readonly spaceId: string;
+  readonly namespace?: string;
+  readonly taskManager: TaskManagerStartContract;
+  readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  readonly authorization: AlertingAuthorization;
+  readonly ruleTypeRegistry: RuleTypeRegistry;
+  readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
+  readonly minimumScheduleIntervalInMs: number;
+  readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
+  readonly getActionsClient: () => Promise<ActionsClient>;
+  readonly actionsAuthorization: ActionsAuthorization;
+  readonly getEventLogClient: () => Promise<IEventLogClient>;
+  readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  readonly auditLogger?: AuditLogger;
+  readonly eventLogger?: IEventLogger;
+  readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule>;
+}
+
+const fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
+  'monitoring',
+  'mapped_params',
+  'snoozeSchedule',
+  'activeSnoozes',
+];
+
 export class RulesClient {
   private readonly logger: Logger;
   private readonly getUserName: () => Promise<string | null>;
@@ -505,6 +515,7 @@ export class RulesClient {
     'snoozeSchedule',
     'activeSnoozes',
   ];
+  private readonly context: RulesClientContext;
 
   constructor({
     ruleTypeRegistry,
@@ -543,6 +554,28 @@ export class RulesClient {
     this.kibanaVersion = kibanaVersion;
     this.auditLogger = auditLogger;
     this.eventLogger = eventLogger;
+
+    this.context = {
+      logger,
+      getUserName,
+      spaceId,
+      namespace,
+      taskManager,
+      ruleTypeRegistry,
+      minimumScheduleInterval,
+      minimumScheduleIntervalInMs: parseDuration(minimumScheduleInterval.value),
+      unsecuredSavedObjectsClient,
+      authorization,
+      createAPIKey,
+      encryptedSavedObjectsClient,
+      getActionsClient,
+      actionsAuthorization,
+      getEventLogClient,
+      kibanaVersion,
+      auditLogger,
+      eventLogger,
+      fieldsToExcludeFromPublicApi,
+    };
   }
 
   public async clone<Params extends RuleTypeParams = never>(
@@ -651,103 +684,7 @@ export class RulesClient {
     });
   }
 
-  public async create<Params extends RuleTypeParams = never>({
-    data,
-    options,
-  }: CreateOptions<Params>): Promise<SanitizedRule<Params>> {
-    const id = options?.id || SavedObjectsUtils.generateId();
-
-    try {
-      await this.authorization.ensureAuthorized({
-        ruleTypeId: data.alertTypeId,
-        consumer: data.consumer,
-        operation: WriteOperations.Create,
-        entity: AlertingAuthorizationEntity.Rule,
-      });
-    } catch (error) {
-      this.auditLogger?.log(
-        ruleAuditEvent({
-          action: RuleAuditAction.CREATE,
-          savedObject: { type: 'alert', id },
-          error,
-        })
-      );
-      throw error;
-    }
-
-    this.ruleTypeRegistry.ensureRuleTypeEnabled(data.alertTypeId);
-
-    // Throws an error if alert type isn't registered
-    const ruleType = this.ruleTypeRegistry.get(data.alertTypeId);
-
-    const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
-    const username = await this.getUserName();
-
-    let createdAPIKey = null;
-    try {
-      createdAPIKey = data.enabled
-        ? await this.createAPIKey(this.generateAPIKeyName(ruleType.id, data.name))
-        : null;
-    } catch (error) {
-      throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
-    }
-
-    await this.validateActions(ruleType, data);
-
-    // Throw error if schedule interval is less than the minimum and we are enforcing it
-    const intervalInMs = parseDuration(data.schedule.interval);
-    if (intervalInMs < this.minimumScheduleIntervalInMs && this.minimumScheduleInterval.enforce) {
-      throw Boom.badRequest(
-        `Error creating rule: the interval is less than the allowed minimum interval of ${this.minimumScheduleInterval.value}`
-      );
-    }
-
-    // Extract saved object references for this rule
-    const {
-      references,
-      params: updatedParams,
-      actions,
-    } = await this.extractReferences(ruleType, data.actions, validatedAlertTypeParams);
-
-    const createTime = Date.now();
-    const lastRunTimestamp = new Date();
-    const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
-    const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
-    const throttle = data.throttle ?? null;
-
-    const rawRule: RawRule = {
-      ...data,
-      ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
-      legacyId,
-      actions,
-      createdBy: username,
-      updatedBy: username,
-      createdAt: new Date(createTime).toISOString(),
-      updatedAt: new Date(createTime).toISOString(),
-      snoozeSchedule: [],
-      params: updatedParams as RawRule['params'],
-      muteAll: false,
-      mutedInstanceIds: [],
-      notifyWhen,
-      throttle,
-      executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
-      monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
-    };
-
-    const mappedParams = getMappedParams(updatedParams);
-
-    if (Object.keys(mappedParams).length) {
-      rawRule.mapped_params = mappedParams;
-    }
-
-    return await this.createRuleSavedObject({
-      intervalInMs,
-      rawRule,
-      references,
-      ruleId: id,
-      options,
-    });
-  }
+  public create = (params: CreateOptions<RuleTypeParams>) => create(this.context, params);
 
   private async createRuleSavedObject<Params extends RuleTypeParams = never>({
     intervalInMs,

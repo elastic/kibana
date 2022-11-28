@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { createRuleSavedObject } from './create_rule_saved_object';
-export { extractReferences } from './extract_references';
-export { validateActions } from './validate_actions';
+import { truncate, trim } from 'lodash';
+
+export function generateAPIKeyName(alertTypeId: string, alertName: string) {
+  return truncate(`Alerting: ${alertTypeId}/${trim(alertName)}`, { length: 256 });
+}
