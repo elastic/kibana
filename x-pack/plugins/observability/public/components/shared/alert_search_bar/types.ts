@@ -21,23 +21,23 @@ interface AlertSearchBarContainerState {
 }
 
 interface AlertSearchBarStateTransitions {
-  setRangeFrom: (rangeFrom: string) => void;
-  setRangeTo: (rangeTo: string) => void;
-  setKuery: (kuery: string) => void;
-  setStatus: (status: AlertStatus) => void;
+  onRangeFromChange: (rangeFrom: string) => void;
+  onRangeToChange: (rangeTo: string) => void;
+  onKueryChange: (kuery: string) => void;
+  onStatusChange: (status: AlertStatus) => void;
 }
 
 export interface CommonAlertSearchBarProps {
   appName: string;
-  setEsQuery: (query: { bool: BoolQuery }) => void;
-  queries?: Query[];
+  onEsQueryChange: (query: { bool: BoolQuery }) => void;
+  defaultSearchQueries?: Query[];
 }
 
 export interface AlertSearchBarWithUrlSyncProps extends CommonAlertSearchBarProps {
   urlStorageKey: string;
 }
 
-export interface AlertSearchBarProps
+export interface ObservabilityAlertSearchBarProps
   extends AlertSearchBarContainerState,
     AlertSearchBarStateTransitions,
     CommonAlertSearchBarProps {}

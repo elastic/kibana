@@ -15,8 +15,8 @@ export interface AlertsSearchBarProps {
   rangeFrom?: string;
   rangeTo?: string;
   query?: string;
-  onQueryChange: ({}: {
+  onQueryChange: (query: {
     dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
-    query?: string;
+    query: string;
   }) => void;
 }

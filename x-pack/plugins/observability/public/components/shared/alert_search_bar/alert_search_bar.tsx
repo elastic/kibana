@@ -15,7 +15,7 @@ import { observabilityAlertFeatureIds } from '../../../config';
 import { ObservabilityAppServices } from '../../../application/types';
 import { AlertsStatusFilter } from './components';
 import { ALERT_STATUS_QUERY, DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';
-import { AlertSearchBarProps } from './types';
+import { ObservabilityAlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../../utils/build_es_query';
 import { AlertStatus } from '../../../../common/typings';
 
@@ -27,17 +27,17 @@ const getAlertStatusQuery = (status: string): Query[] => {
 
 export function ObservabilityAlertSearchBar({
   appName,
-  rangeFrom,
-  setRangeFrom,
-  rangeTo,
-  setRangeTo,
+  defaultSearchQueries = DEFAULT_QUERIES,
+  onEsQueryChange,
+  onKueryChange,
+  onRangeFromChange,
+  onRangeToChange,
+  onStatusChange,
   kuery,
-  setKuery,
+  rangeFrom,
+  rangeTo,
   status,
-  setStatus,
-  setEsQuery,
-  queries = DEFAULT_QUERIES,
-}: AlertSearchBarProps) {
+}: ObservabilityAlertSearchBarProps) {
   const {
     data: {
       query: {
@@ -48,62 +48,66 @@ export function ObservabilityAlertSearchBar({
     triggersActionsUi: { getAlertsSearchBar: AlertsSearchBar },
   } = useKibana<ObservabilityAppServices>().services;
 
-  const onStatusChange = useCallback(
+  const onAlertStatusChange = useCallback(
     (alertStatus: AlertStatus) => {
-      setEsQuery(
+      onEsQueryChange(
         buildEsQuery(
           {
             to: rangeTo,
             from: rangeFrom,
           },
           kuery,
-          [...getAlertStatusQuery(alertStatus), ...queries]
+          [...getAlertStatusQuery(alertStatus), ...defaultSearchQueries]
         )
       );
     },
-    [kuery, queries, rangeFrom, rangeTo, setEsQuery]
+    [kuery, defaultSearchQueries, rangeFrom, rangeTo, onEsQueryChange]
   );
 
   useEffect(() => {
-    onStatusChange(status);
-  }, [onStatusChange, status]);
+    onAlertStatusChange(status);
+  }, [onAlertStatusChange, status]);
 
-  const onSearchBarParamsChange = useCallback(
+  const onSearchBarParamsChange = useCallback<
+    (query: {
+      dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
+      query: string;
+    }) => void
+  >(
     ({ dateRange, query }) => {
+      console.log('query:', { dateRange, query });
       try {
         // First try to create es query to make sure query is valid, then save it in state
         const esQuery = buildEsQuery(
           {
-            to: rangeTo,
-            from: rangeFrom,
+            to: dateRange.to,
+            from: dateRange.from,
           },
           query,
-          [...getAlertStatusQuery(status), ...queries]
+          [...getAlertStatusQuery(status), ...defaultSearchQueries]
         );
-        setKuery(query);
+        onKueryChange(query);
         timeFilterService.setTime(dateRange);
-        setRangeFrom(dateRange.from);
-        setRangeTo(dateRange.to);
-        setEsQuery(esQuery);
+        onRangeFromChange(dateRange.from);
+        onRangeToChange(dateRange.to);
+        onEsQueryChange(esQuery);
       } catch (error) {
         toasts.addError(error, {
           title: i18n.translate('xpack.observability.alerts.searchBar.invalidQueryTitle', {
             defaultMessage: 'Invalid query string',
           }),
         });
-        setKuery(DEFAULT_QUERY_STRING);
+        onKueryChange(DEFAULT_QUERY_STRING);
       }
     },
     [
+      defaultSearchQueries,
       timeFilterService,
-      setRangeFrom,
-      setRangeTo,
-      setKuery,
-      setEsQuery,
-      rangeTo,
-      rangeFrom,
+      onRangeFromChange,
+      onRangeToChange,
+      onKueryChange,
+      onEsQueryChange,
       status,
-      queries,
       toasts,
     ]
   );
@@ -126,9 +130,7 @@ export function ObservabilityAlertSearchBar({
           <EuiFlexItem grow={false}>
             <AlertsStatusFilter
               status={status}
-              onChange={(id) => {
-                setStatus(id as AlertStatus);
-              }}
+              onChange={(id) => onStatusChange(id as AlertStatus)}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -136,3 +138,6 @@ export function ObservabilityAlertSearchBar({
     </EuiFlexGroup>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default ObservabilityAlertSearchBar;

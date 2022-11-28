@@ -8,7 +8,7 @@
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import React from 'react';
 import { act, waitFor } from '@testing-library/react';
-import { AlertSearchBarProps } from './types';
+import { ObservabilityAlertSearchBarProps } from './types';
 import { ObservabilityAlertSearchBar } from './alert_search_bar';
 import { observabilityAlertFeatureIds } from '../../../config';
 import { useKibana } from '../../../utils/kibana_react';
@@ -18,7 +18,6 @@ import { render } from '../../../utils/test_helper';
 const useKibanaMock = useKibana as jest.Mock;
 const getAlertsSearchBarMock = jest.fn();
 const ALERT_SEARCH_BAR_DATA_TEST_SUBJ = 'alerts-search-bar';
-const ACTIVE_BUTTON_DATA_TEST_SUBJ = 'alert-status-filter-active-button';
 
 jest.mock('../../../utils/kibana_react');
 
@@ -37,21 +36,21 @@ const mockKibana = () => {
 };
 
 describe('ObservabilityAlertSearchBar', () => {
-  const renderComponent = (props: Partial<AlertSearchBarProps> = {}) => {
-    const alertSearchBarProps: AlertSearchBarProps = {
+  const renderComponent = (props: Partial<ObservabilityAlertSearchBarProps> = {}) => {
+    const observabilityAlertSearchBarProps: ObservabilityAlertSearchBarProps = {
       appName: 'testAppName',
-      rangeFrom: 'now-15m',
-      setRangeFrom: jest.fn(),
-      rangeTo: 'now',
-      setRangeTo: jest.fn(),
       kuery: '',
-      setKuery: jest.fn(),
-      status: 'active',
-      setStatus: jest.fn(),
-      setEsQuery: jest.fn(),
+      onRangeFromChange: jest.fn(),
+      onRangeToChange: jest.fn(),
+      onKueryChange: jest.fn(),
+      onStatusChange: jest.fn(),
+      onEsQueryChange: jest.fn(),
+      rangeTo: 'now',
+      rangeFrom: 'now-15m',
+      status: 'all',
       ...props,
     };
-    return render(<ObservabilityAlertSearchBar {...alertSearchBarProps} />);
+    return render(<ObservabilityAlertSearchBar {...observabilityAlertSearchBarProps} />);
   };
 
   beforeAll(() => {
@@ -88,27 +87,75 @@ describe('ObservabilityAlertSearchBar', () => {
   });
 
   it('should filter active alerts', async () => {
-    const mockedSetEsQuery = jest.fn();
+    const mockedOnEsQueryChange = jest.fn();
     const mockedFrom = '2022-11-15T09:38:13.604Z';
     const mockedTo = '2022-11-15T09:53:13.604Z';
-    const { getByTestId } = renderComponent({
-      setEsQuery: mockedSetEsQuery,
-      rangeFrom: mockedFrom,
-      rangeTo: mockedTo,
+
+    act(() => {
+      renderComponent({
+        onEsQueryChange: mockedOnEsQueryChange,
+        rangeFrom: mockedFrom,
+        rangeTo: mockedTo,
+        status: 'active',
+      });
     });
 
-    await act(async () => {
-      const activeButton = getByTestId(ACTIVE_BUTTON_DATA_TEST_SUBJ);
-      activeButton.click();
-    });
-
-    expect(mockedSetEsQuery).toHaveBeenCalledWith({
+    expect(mockedOnEsQueryChange).toHaveBeenCalledWith({
       bool: {
         filter: [
           {
             bool: {
               minimum_should_match: 1,
               should: [{ match_phrase: { 'kibana.alert.status': 'active' } }],
+            },
+          },
+          {
+            range: {
+              '@timestamp': expect.objectContaining({
+                format: 'strict_date_optional_time',
+                gte: mockedFrom,
+                lte: mockedTo,
+              }),
+            },
+          },
+        ],
+        must: [],
+        must_not: [],
+        should: [],
+      },
+    });
+  });
+
+  it('should include defaultSearchQueries in es query', async () => {
+    const mockedOnEsQueryChange = jest.fn();
+    const mockedFrom = '2022-11-15T09:38:13.604Z';
+    const mockedTo = '2022-11-15T09:53:13.604Z';
+    const defaultSearchQueries = [
+      {
+        query: 'kibana.alert.rule.uuid: 413a9631-1a29-4344-a8b4-9a1dc23421ee',
+        language: 'kuery',
+      },
+    ];
+
+    act(() => {
+      renderComponent({
+        onEsQueryChange: mockedOnEsQueryChange,
+        rangeFrom: mockedFrom,
+        rangeTo: mockedTo,
+        defaultSearchQueries,
+        status: 'all',
+      });
+    });
+
+    expect(mockedOnEsQueryChange).toHaveBeenCalledWith({
+      bool: {
+        filter: [
+          {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                { match: { 'kibana.alert.rule.uuid': '413a9631-1a29-4344-a8b4-9a1dc23421ee' } },
+              ],
             },
           },
           {
