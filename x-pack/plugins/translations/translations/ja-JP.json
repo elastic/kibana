@@ -23747,7 +23747,6 @@
     "xpack.osquery.fleetIntegration.osqueryConfig.packConfigFilesErrorMessage": "パック構成ファイルはサポートされていません。これらのパックを削除する必要があります：{packNames}。",
     "xpack.osquery.fleetIntegration.osqueryConfig.restrictedOptionsErrorMessage": "次のosqueryオプションはサポートされていないため、削除する必要があります：{restrictedFlags}。",
     "xpack.osquery.liveQuery.permissionDeniedPromptBody": "クエリ結果を表示するには、ユーザーロールを更新して、{logs}インデックスに対する{read}権限を付与するように、管理者に依頼してください。",
-    "xpack.osquery.liveQuery.queryForm.largeQueryError": "クエリが大きすぎます（最大{maxLength}文字）",
     "xpack.osquery.newPack.successToastMessageText": "\"{packName}\"パックが正常に作成されました",
     "xpack.osquery.newSavedQuery.successToastMessageText": "\"{savedQueryId}\"クエリが正常に保存されました",
     "xpack.osquery.pack.queriesTable.deleteActionAriaLabel": "{queryName}を削除",
