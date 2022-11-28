@@ -1,0 +1,216 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Connectors",
+    "description": "OpenAPI schema for Connectors endpoints",
+    "version": "0.1",
+    "contact": {
+      "name": "Connectors Team"
+    },
+    "license": {
+      "name": "Elastic License 2.0",
+      "url": "https://www.elastic.co/licensing/elastic-license"
+    }
+  },
+  "tags": [
+    {
+      "name": "connectors",
+      "description": "Connector APIs enable you to create and manage connectors."
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://localhost:5601",
+      "description": "local"
+    }
+  ],
+  "paths": {
+    "/s/{spaceId}/api/actions/connector_types": {
+      "get": {
+        "summary": "Retrieves a list of all connector types.",
+        "operationId": "getConnectorTypes",
+        "description": "You do not need any Kibana feature privileges to run this API.\n",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "query",
+            "name": "feature_id",
+            "description": "A filter to limit the retrieved connector types to those that support a specific feature (such as alerting or cases).",
+            "schema": {
+              "$ref": "#/components/schemas/features"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector type is enabled in Kibana.",
+                        "example": true
+                      },
+                      "enabled_in_config": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector type is enabled in the Kibana `.yml` file.",
+                        "example": true
+                      },
+                      "enabled_in_license": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector is enabled in the license.",
+                        "example": true
+                      },
+                      "id": {
+                        "type": "string",
+                        "description": "The unique identifier for the connector type.",
+                        "example": ".index"
+                      },
+                      "minimum_license_required": {
+                        "type": "string",
+                        "description": "The license that is required to use the connector type.",
+                        "example": "basic"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the connector type.",
+                        "example": "Index"
+                      },
+                      "supported_feature_ids": {
+                        "type": "array",
+                        "description": "The Kibana features that are supported by the connector type.",
+                        "items": {
+                          "$ref": "#/components/schemas/features"
+                        },
+                        "example": [
+                          "alerting",
+                          "uptime",
+                          "siem"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "getConnectorTypesResponse": {
+                    "$ref": "#/components/examples/get_connector_types_response"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "ApiKey"
+      }
+    },
+    "parameters": {
+      "space_id": {
+        "in": "path",
+        "name": "spaceId",
+        "description": "An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "default"
+        }
+      }
+    },
+    "schemas": {
+      "features": {
+        "type": "string",
+        "description": "The feature that uses the connector. Valid values are `alerting`, `cases`, `uptime`, and `siem`.\n",
+        "enum": [
+          "alerting",
+          "cases",
+          "uptime",
+          "siem"
+        ]
+      }
+    },
+    "examples": {
+      "get_connector_types_response": {
+        "summary": "A list of connector types",
+        "value": [
+          {
+            "id": ".swimlane",
+            "name": "Swimlane",
+            "enabled": true,
+            "enabled_in_config": true,
+            "enabled_in_license": true,
+            "minimum_license_required": "gold",
+            "supported_feature_ids": [
+              "alerting",
+              "cases",
+              "siem"
+            ]
+          },
+          {
+            "id": ".index",
+            "name": "Index",
+            "enabled": true,
+            "enabled_in_config": true,
+            "enabled_in_license": true,
+            "minimum_license_required": "basic",
+            "supported_feature_ids": [
+              "alerting",
+              "uptime",
+              "siem"
+            ]
+          },
+          {
+            "id": ".server-log",
+            "name": "Server log",
+            "enabled": true,
+            "enabled_in_config": true,
+            "enabled_in_license": true,
+            "minimum_license_required": "basic",
+            "supported_feature_ids": [
+              "alerting",
+              "uptime"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "basicAuth": []
+    },
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

@@ -10,9 +10,9 @@ import * as t from 'io-ts';
 import {
   budgetingMethodSchema,
   dateType,
-  errorBudgetSchema,
   indicatorSchema,
   objectiveSchema,
+  summarySchema,
   timeWindowSchema,
 } from '../schema';
 
@@ -59,10 +59,7 @@ const getSLOResponseSchema = t.type({
   time_window: timeWindowSchema,
   budgeting_method: budgetingMethodSchema,
   objective: objectiveSchema,
-  summary: t.type({
-    sli_value: t.number,
-    error_budget: errorBudgetSchema,
-  }),
+  summary: summarySchema,
   revision: t.number,
   created_at: dateType,
   updated_at: dateType,
@@ -107,6 +104,7 @@ const findSLOResponseSchema = t.type({
       time_window: timeWindowSchema,
       budgeting_method: budgetingMethodSchema,
       objective: objectiveSchema,
+      summary: summarySchema,
       revision: t.number,
       created_at: dateType,
       updated_at: dateType,
