@@ -41,6 +41,10 @@ export function validateSLO(slo: SLO) {
       throw new IllegalArgumentError('Invalid objective.timeslice_window');
     }
   }
+
+  if (!isValidFrequencySettings(slo.settings.frequency)) {
+    throw new IllegalArgumentError('Invalid settings.frequency');
+  }
 }
 
 function isValidTargetNumber(value: number): boolean {
@@ -61,5 +65,12 @@ function isValidTimesliceWindowDuration(timesliceWindow: Duration, timeWindow: D
   return (
     [DurationUnit.Minute, DurationUnit.Hour].includes(timesliceWindow.unit) &&
     timesliceWindow.isShorterThan(timeWindow)
+  );
+}
+
+function isValidFrequencySettings(frequency: Duration): boolean {
+  return (
+    frequency.isLongerOrEqualThan(new Duration(1, DurationUnit.Minute)) &&
+    frequency.isShorterThan(new Duration(1, DurationUnit.Hour))
   );
 }
