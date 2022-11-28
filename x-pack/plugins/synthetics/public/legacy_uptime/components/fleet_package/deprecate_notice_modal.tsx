@@ -103,7 +103,7 @@ export const ProjectMonitorDocsLink = ({ label }: { label?: string }) => (
 );
 
 const HEADER_TEXT = i18n.translate('xpack.synthetics.deprecateNoticeModal.headerText', {
-  defaultMessage: 'Better way to add monitors',
+  defaultMessage: 'Synthetic Monitoring is now available out of the box in Uptime',
 });
 
 const POLICIES_TEXT = i18n.translate('xpack.synthetics.deprecateNoticeModal.againstPolicies', {
