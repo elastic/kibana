@@ -165,19 +165,17 @@ export class Alert<
     return this;
   }
 
-  updateLastScheduledActions(group: ActionGroupIds) {
+  updateLastScheduledActions(group: ActionGroupIds, actionId: string) {
     if (!this.meta.lastScheduledActions) {
       this.meta.lastScheduledActions = {} as LastScheduledActions;
     }
-    this.meta.lastScheduledActions.group = group;
-    this.meta.lastScheduledActions.date = new Date();
-  }
-
-  addScheduledAction(actionId: string) {
-    if (!this.meta.lastScheduledActions!.actions) {
+    if (!this.meta.lastScheduledActions.actions) {
       this.meta.lastScheduledActions!.actions = {};
     }
-    this.meta.lastScheduledActions!.actions[actionId] = { date: new Date() };
+    const date = new Date();
+    this.meta.lastScheduledActions.group = group;
+    this.meta.lastScheduledActions.date = date;
+    this.meta.lastScheduledActions.actions[actionId] = { date };
   }
 
   /**

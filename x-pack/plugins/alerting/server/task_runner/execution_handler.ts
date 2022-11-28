@@ -227,9 +227,8 @@ export class ExecutionHandler<
         if (this.isRecoveredAlert(actionGroup)) {
           alert.scheduleActions(action.group as ActionGroupIds);
         } else {
-          alert.updateLastScheduledActions(action.group as ActionGroupIds);
+          alert.updateLastScheduledActions(action.group as ActionGroupIds, action.id);
           alert.unscheduleActions();
-          alert.addScheduledAction(action.id);
         }
       }
 
