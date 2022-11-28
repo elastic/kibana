@@ -20,7 +20,7 @@ const getTourConfig = (packageKey: string, tourType: TourType) => {
       }),
       description: i18n.translate('xpack.fleet.guidedOnboardingTour.endpointButton.description', {
         defaultMessage:
-          'In just a few steps, configure your data with our recommended defaults. You can change this later.',
+          'In just a few steps, add your data with our recommended defaults. You can change this later.',
       }),
     };
   }

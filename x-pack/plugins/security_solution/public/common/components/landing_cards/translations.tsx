@@ -33,6 +33,18 @@ export const SIEM_CTA = i18n.translate(
     defaultMessage: 'Add security integrations',
   }
 );
+export const SIEM_GET_STARTED_TITLE = i18n.translate(
+  'xpack.securitySolution.overview.landingCards.box.siem.cta',
+  {
+    defaultMessage: 'Get started with Elastic SIEM',
+  }
+);
+export const SIEM_GET_STARTED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.overview.landingCards.box.siem.cta',
+  {
+    defaultMessage: 'Follow these steps to setup your SIEM.',
+  }
+);
 export const ENDPOINT_TITLE = i18n.translate(
   'xpack.securitySolution.overview.landingCards.box.endpoint.title',
   {

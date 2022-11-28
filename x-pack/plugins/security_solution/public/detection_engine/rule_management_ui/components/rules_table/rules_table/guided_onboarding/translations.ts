@@ -25,7 +25,7 @@ export const SEARCH_FIRST_RULE_TITLE = (name: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.guidedOnboarding.searchFirstRule.title',
     {
-      defaultMessage: 'Using the search, type "{name}" to find the rule.',
+      defaultMessage: 'Find your first rule',
       values: { name },
     }
   );
@@ -34,7 +34,7 @@ export const SEARCH_FIRST_RULE_CONTENT = (name: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.guidedOnboarding.searchFirstRule.content',
     {
-      defaultMessage: 'Find the "{name}" rule.',
+      defaultMessage: 'Search for "{name}" or click next.',
       values: { name },
     }
   );
@@ -43,7 +43,7 @@ export const ENABLE_FIRST_RULE_TITLE = (name: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.guidedOnboarding.enableFirstRule.title',
     {
-      defaultMessage: 'Click the toggle to enable the "{name}" rule',
+      defaultMessage: 'Enable the rule',
       values: { name },
     }
   );
@@ -52,7 +52,7 @@ export const ENABLE_FIRST_RULE_CONTENT = (name: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.guidedOnboarding.enableFirstRule.content',
     {
-      defaultMessage: 'Enable the "{name}" rule.',
+      defaultMessage: 'Enable "{name}" or click next.',
       values: { name },
     }
   );
