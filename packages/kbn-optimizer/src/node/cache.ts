@@ -10,7 +10,7 @@ import Path from 'path';
 import { Writable } from 'stream';
 
 import chalk from 'chalk';
-import * as LmdbStore from 'lmdb-store';
+import * as LmdbStore from 'lmdb';
 
 const GLOBAL_ATIME = `${Date.now()}`;
 const MINUTE = 1000 * 60;
@@ -44,6 +44,10 @@ export class Cache {
       name: 'codes',
       encoding: 'string',
       maxReaders: 500,
+      overlappingSync: false,
+      noSync: true,
+      noMetaSync: true,
+      noMemInit: true,
     });
 
     // TODO: redundant 'name' syntax is necessary because of a bug that I have yet to fix
@@ -66,8 +70,8 @@ export class Cache {
     // keys which haven't been used in 30 days. We use `unref()` to
     // make sure this timer doesn't hold other processes open
     // unexpectedly
-    this.timer = setTimeout(() => {
-      this.pruneOldKeys();
+    this.timer = setTimeout(async () => {
+      await this.pruneOldKeys();
     }, 30 * MINUTE);
 
     // timer.unref is not defined in jest which emulates the dom by default
@@ -104,12 +108,10 @@ export class Cache {
   async update(path: string, file: { mtime: string; code: string; map: any }) {
     const key = this.getKey(path);
 
-    await Promise.all([
-      this.safePut(this.atimes, key, GLOBAL_ATIME),
-      this.safePut(this.mtimes, key, file.mtime),
-      this.safePut(this.codes, key, file.code),
-      this.safePut(this.sourceMaps, key, JSON.stringify(file.map)),
-    ]);
+    this.safePut(this.atimes, key, GLOBAL_ATIME);
+    this.safePut(this.mtimes, key, file.mtime);
+    this.safePut(this.codes, key, file.code);
+    this.safePut(this.sourceMaps, key, JSON.stringify(file.map));
   }
 
   close() {
@@ -135,9 +137,9 @@ export class Cache {
     }
   }
 
-  private async safePut<V>(db: LmdbStore.Database<V, string>, key: string, value: V) {
+  private safePut<V>(db: LmdbStore.Database<V, string>, key: string, value: V) {
     try {
-      await db.put(key, value);
+      db.putSync(key, value);
       this.debug('PUT', db, key);
     } catch (error) {
       this.logError('PUT', db, key, error);
@@ -167,7 +169,6 @@ export class Cache {
       const validKeys: string[] = [];
       const invalidKeys: string[] = [];
 
-      // @ts-expect-error See https://github.com/DoctorEvidence/lmdb-store/pull/18
       for (const { key, value } of this.atimes.getRange()) {
         const atime = parseInt(`${value}`, 10);
         if (Number.isNaN(atime) || atime < ATIME_LIMIT) {
