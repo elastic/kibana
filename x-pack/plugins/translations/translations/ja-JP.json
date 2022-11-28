@@ -32367,8 +32367,6 @@
     "xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.disableAllTitle": "無効にする",
     "xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.enableAllTitle": "有効にする",
     "xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToDeleteRulesMessage": "ルールを削除できませんでした",
-    "xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToDisableRulesMessage": "ルールを無効にできませんでした",
-    "xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToEnableRulesMessage": "ルールを有効にできませんでした",
     "xpack.triggersActionsUI.sections.rulesList.cancelSnooze": "スヌーズをキャンセル",
     "xpack.triggersActionsUI.sections.rulesList.cancelSnoozeConfirmCallout": "スケジュールの最新の発生のみがキャンセルされます。",
     "xpack.triggersActionsUI.sections.rulesList.cancelSnoozeConfirmText": "ルールアクションの定義に従ってアラートが生成されるときに通知を再開します。",
