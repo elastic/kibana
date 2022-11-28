@@ -128,7 +128,7 @@ Platform::
 Adds notifications plugin, offering basic email service {kibana-pull}143303[#143303]
 
 Security::
-The API Keys screen can be accessed in a Read Only view with the the cluster privilege `read_security` {kibana-pull}144923[#144923]
+Adds the ability to show sub-feature privileges when using the Basic license {kibana-pull}142020[#142020]
 
 Uptime::
 Adds `created_at` field in saved objects {kibana-pull}143507[#143507]
