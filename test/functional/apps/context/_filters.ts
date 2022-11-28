@@ -169,5 +169,51 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'extension: png OR bytes: 1,000B to 2KB'
       );
     });
+
+    it('should add and filter', async () => {
+      await filterBar.addFilter({
+        condition: 'AND',
+        filters: [
+          { field: 'extension', operation: 'is one of', value: ['png', 'jpeg'] },
+          { field: 'bytes', operation: 'is between', value: { from: '1000', to: '2000' } },
+        ],
+      });
+
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      expect(await filterBar.hasFilterWithId('0')).to.be(true);
+
+      await filterBar.clickEditFilterById('0');
+
+      expect(await filterBar.getFilterEditorPreview()).to.equal(
+        'extension: is one of png, jpeg AND bytes: 1,000B to 2KB'
+      );
+    });
+
+    it('should add nested filters', async () => {
+      await filterBar.addFilter({
+        condition: 'AND',
+        filters: [
+          {
+            condition: 'OR',
+            filters: [
+              { field: 'clientip', operation: 'does not exist' },
+              { field: 'extension', operation: 'is one of', value: ['png', 'jpeg'] },
+            ],
+          },
+          { field: 'bytes', operation: 'is between', value: { from: '1000', to: '2000' } },
+        ],
+      });
+
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      expect(await filterBar.hasFilterWithId('0')).to.be(true);
+
+      await filterBar.clickEditFilterById('0');
+
+      expect(await filterBar.getFilterEditorPreview()).to.equal(
+        '(NOT clientip: exists OR extension: is one of png, jpeg) AND bytes: 1,000B to 2KB'
+      );
+    });
   });
 }
