@@ -96,13 +96,11 @@ describe('links', () => {
 
   describe('Host Isolation Exception', () => {
     it('should return all but HIE when NO isolation permission due to privilege', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue({
-        canIsolateHost: false,
-        canUnIsolateHost: false,
-        canAccessEndpointManagement: true,
-        canReadActionsLogManagement: true,
-        canReadEndpointList: true,
-      });
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canReadHostIsolationExceptions: false,
+        })
+      );
 
       const filteredLinks = await getManagementFilteredLinks(
         coreMockStarted,
@@ -112,13 +110,11 @@ describe('links', () => {
     });
 
     it('should return all but HIE when NO isolation permission due to license and NO host isolation exceptions entry', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue({
-        canIsolateHost: false,
-        canUnIsolateHost: true,
-        canAccessEndpointManagement: true,
-        canReadActionsLogManagement: true,
-        canReadEndpointList: true,
-      });
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canIsolateHost: false,
+        })
+      );
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
 
       const filteredLinks = await getManagementFilteredLinks(
@@ -129,13 +125,12 @@ describe('links', () => {
     });
 
     it('should return all but HIE when HAS isolation permission AND has HIE entry but not superuser', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue({
-        canIsolateHost: false,
-        canUnIsolateHost: true,
-        canAccessEndpointManagement: false,
-        canReadActionsLogManagement: true,
-        canReadEndpointList: true,
-      });
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canIsolateHost: false,
+          canAccessEndpointManagement: false,
+        })
+      );
       fakeHttpServices.get.mockResolvedValue({ total: 1 });
 
       const filteredLinks = await getManagementFilteredLinks(
@@ -161,12 +156,11 @@ describe('links', () => {
     });
 
     it('should not affect showing Action Log if getting from HIE API throws error', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue({
-        canIsolateHost: false,
-        canUnIsolateHost: true,
-        canReadActionsLogManagement: true,
-        canReadEndpointList: true,
-      });
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canIsolateHost: false,
+        })
+      );
       fakeHttpServices.get.mockRejectedValue(new Error());
 
       const filteredLinks = await getManagementFilteredLinks(
@@ -177,12 +171,12 @@ describe('links', () => {
     });
 
     it('should not affect hiding Action Log if getting from HIE API throws error', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue({
-        canIsolateHost: false,
-        canUnIsolateHost: true,
-        canReadActionsLogManagement: false,
-        canReadEndpointList: true,
-      });
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canIsolateHost: false,
+          canReadActionsLogManagement: false,
+        })
+      );
       fakeHttpServices.get.mockRejectedValue(new Error());
 
       const filteredLinks = await getManagementFilteredLinks(
@@ -227,7 +221,6 @@ describe('links', () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
         getEndpointAuthzInitialStateMock({
           canReadTrustedApplications: false,
-          canReadHostIsolationExceptions: true,
         })
       );
 
