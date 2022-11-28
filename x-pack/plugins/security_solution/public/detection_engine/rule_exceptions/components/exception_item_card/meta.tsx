@@ -135,7 +135,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
                         data-test-subj="ruleName"
                         deepLinkId={SecurityPageName.exceptions}
                         // TODO: Update to list details URL once available
-                        path={`/details/${listAndReferences?.id}`}
+                        path={`/details/${listAndReferences?.list_id}`}
                         external
                       >
                         {listAndReferences.name}
