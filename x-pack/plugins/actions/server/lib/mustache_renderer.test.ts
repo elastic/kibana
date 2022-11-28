@@ -411,4 +411,15 @@ describe('mustache_renderer', () => {
       expect(renderMustacheString('{{a}}', { a: 1, 'a.b': 2 }, 'none')).toEqual('{"b":2}');
     });
   });
+
+  describe('using handlebars', () => {
+    it('is supported with a format comment directive', () => {
+      const template = `
+{{!@ format: handlebars}}
+{{#if x}}{{x}}{{/if}}
+      `.trim();
+
+      expect(renderMustacheString(template, { x: 1 }, 'none')).toEqual('1');
+    });
+  });
 });

@@ -8,6 +8,8 @@
 import Mustache from 'mustache';
 import { isString, isPlainObject, cloneDeepWith, merge } from 'lodash';
 
+import { renderTemplate } from './template_renderer';
+
 export type Escape = 'markdown' | 'slack' | 'json' | 'none';
 type Variables = Record<string, unknown>;
 
@@ -25,16 +27,12 @@ export function renderMustacheStringNoEscape(string: string, variables: Variable
 // return a rendered mustache template given the specified variables and escape
 export function renderMustacheString(string: string, variables: Variables, escape: Escape): string {
   const augmentedVariables = augmentObjectVariables(variables);
-  const previousMustacheEscape = Mustache.escape;
-  Mustache.escape = getEscape(escape);
 
   try {
-    return Mustache.render(`${string}`, augmentedVariables);
+    return renderTemplate(`${string}`, augmentedVariables, escape);
   } catch (err) {
     // log error; the mustache code does not currently leak variables
     return `error rendering mustache template "${string}": ${err.message}`;
-  } finally {
-    Mustache.escape = previousMustacheEscape;
   }
 }
 
@@ -110,7 +108,7 @@ function isNonNullObject(object: unknown): object is Record<string, unknown> {
   return true;
 }
 
-function getEscape(escape: Escape): (value: unknown) => string {
+export function getEscape(escape: Escape): (value: unknown) => string {
   if (escape === 'markdown') return escapeMarkdown;
   if (escape === 'slack') return escapeSlack;
   if (escape === 'json') return escapeJSON;
