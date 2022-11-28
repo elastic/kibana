@@ -24,7 +24,7 @@ interface MlJobEditorProps {
   syntaxChecking?: boolean;
   theme?: string;
   onChange?: EuiCodeEditorProps['onChange'];
-  'data-test-subj': string;
+  'data-test-subj'?: string;
 }
 export const MLJobEditor: FC<MlJobEditorProps> = ({
   value,
