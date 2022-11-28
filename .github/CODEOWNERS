@@ -662,6 +662,8 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 /x-pack/plugins/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 /x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 /x-pack/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
+/x-pack/test/cloud_security_posture_functional/ @elastic/kibana-cloud-security-posture
+
 
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
@@ -1026,6 +1028,10 @@ packages/shared-ux/button/exit_full_screen/types @elastic/kibana-global-experien
 packages/shared-ux/card/no_data/impl @elastic/kibana-global-experience
 packages/shared-ux/card/no_data/mocks @elastic/kibana-global-experience
 packages/shared-ux/card/no_data/types @elastic/kibana-global-experience
+packages/shared-ux/file/image/impl @elastic/kibana-global-experience
+packages/shared-ux/file/image/mocks @elastic/kibana-global-experience
+packages/shared-ux/file/image/types @elastic/kibana-global-experience
+packages/shared-ux/file/util @elastic/kibana-global-experience
 packages/shared-ux/link/redirect_app/impl @elastic/kibana-global-experience
 packages/shared-ux/link/redirect_app/mocks @elastic/kibana-global-experience
 packages/shared-ux/link/redirect_app/types @elastic/kibana-global-experience
