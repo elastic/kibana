@@ -50,9 +50,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Runtime fields calculation', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_and_network'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_and_network'));
-
+      before(() =>
+        esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_and_network')
+      );
+      after(() =>
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_and_network')
+      );
 
       it('should return correct calculations', async () => {
         const { min, max } = DATES['8.0.0'].hosts_and_netowrk;
@@ -75,10 +78,10 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const { series } = decodeOrThrow(TopNodesResponseRT)(response.body);
 
-        const hosts = series.map(s => ({
+        const hosts = series.map((s) => ({
           name: s.name,
           rx: s.rx,
-          tx: s.tx
+          tx: s.tx,
         }));
 
         expect(hosts.length).to.be(3);
@@ -86,6 +89,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(hosts[1]).to.eql({ name: 'metricbeat-2', rx: 8000, tx: 16860 });
         expect(hosts[2]).to.eql({ name: 'metricbeat-3', rx: null, tx: null });
       });
-    })
+    });
   });
 }
