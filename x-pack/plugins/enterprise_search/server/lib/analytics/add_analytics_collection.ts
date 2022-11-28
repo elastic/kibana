@@ -49,20 +49,20 @@ const getDataViewName = ({ name: collectionName }: AnalyticsCollection): string 
   return `elastic_analytics.events-${collectionName}`;
 };
 
-const getDataStreamName = ({ name: collectionName }: AnalyticsCollection): string => {
-  return `logs-elastic_analytics.events-${collectionName}`;
+const getDataStreamName = (id: string): string => {
+  return `elastic_analytics-events-${id}`;
 };
 
 const createDataView = async (
   dataViewsService: DataViewsService,
-  analytcisCollection: AnalyticsCollection
+  analyticsCollection: AnalyticsCollection
 ): Promise<DataView> => {
   return dataViewsService.createAndSave(
     {
-      title: getDataViewName(analytcisCollection),
-      namespaces: [getDataStreamName(analytcisCollection)],
       allowNoIndex: true,
+      namespaces: [getDataStreamName(analyticsCollection.id)],
       timeFieldName: '@timestamp',
+      title: getDataViewName(analyticsCollection),
     },
     true
   );
@@ -74,7 +74,7 @@ export const addAnalyticsCollection = async (
   { name: collectionName }: AddAnalyticsCollectionRequestBody
 ): Promise<AnalyticsCollection> => {
   const id = toAlphanumeric(collectionName);
-  const eventsDataStreamName = `elastic_analytics-events-${id}`;
+  const eventsDataStreamName = getDataStreamName(id);
 
   const document: AnalyticsCollectionDocument = {
     event_retention_day_length: 180,
