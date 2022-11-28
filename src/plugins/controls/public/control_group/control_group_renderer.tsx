@@ -11,7 +11,7 @@ import useLifecycles from 'react-use/lib/useLifecycles';
 import React, { useMemo, useRef, useState } from 'react';
 
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { pluginServices } from '../services';
 import { ControlPanelState, getDefaultControlGroupInput } from '../../common';
@@ -106,7 +106,7 @@ export const ControlGroupRenderer = ({
 };
 
 export const useControlGroupContainerContext = () =>
-  useReduxContainerContext<ControlGroupReduxState, typeof controlGroupReducers>();
+  useReduxEmbeddableContext<ControlGroupReduxState, typeof controlGroupReducers>();
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export
