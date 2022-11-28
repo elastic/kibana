@@ -177,7 +177,7 @@ export const AddComment = React.memo(
                           data-test-subj="submit-comment"
                           fill
                           iconType="plusInCircle"
-                          isDisabled={isLoading}
+                          isDisabled={!comment || isLoading}
                           isLoading={isLoading}
                           onClick={onSubmit}
                         >

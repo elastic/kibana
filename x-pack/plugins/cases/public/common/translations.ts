@@ -70,10 +70,6 @@ export const ARIA_KEYPAD_LEGEND = i18n.translate(
   }
 );
 
-export const COMMENT_REQUIRED = i18n.translate('xpack.cases.caseView.commentFieldRequiredError', {
-  defaultMessage: 'A comment is required.',
-});
-
 export const REQUIRED_FIELD = i18n.translate('xpack.cases.caseView.fieldRequiredError', {
   defaultMessage: 'Required field',
 });
