@@ -21,8 +21,8 @@ export class TitleUserActionBuilder extends UserActionBuilder {
       type: ActionTypes.title,
     });
 
-    const createMessage = (id: string) =>
-      `Case id: ${args.caseId} title updated - user action id: ${id}`;
+    const createMessage = (id?: string) =>
+      `User updated the title for case id: ${args.caseId} - user action id: ${id}`;
 
     const loggerFields: UserActionLogBody = {
       createMessage,

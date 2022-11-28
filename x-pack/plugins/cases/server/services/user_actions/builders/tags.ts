@@ -6,10 +6,12 @@
  */
 
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
+import type { UserAction } from '../../../../common/api';
 import { ActionTypes, Actions } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
 import type { PersistableUserAction } from '../persistable_user_action';
 import type { UserActionLogBody, UserActionParameters } from '../types';
+import { actionToPastTenseVerb } from './audit_logger_utils';
 
 export class TagsUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'tags'>): PersistableUserAction {
@@ -23,8 +25,11 @@ export class TagsUserActionBuilder extends UserActionBuilder {
       type: ActionTypes.tags,
     });
 
-    const createMessage = (id: string) =>
-      `Case id: ${args.caseId} tags ${action} - user action id: ${id}`;
+    const verb = actionToPastTenseVerb(action);
+    const preposition = getPreposition(action);
+
+    const createMessage = (id?: string) =>
+      `User ${verb} tags ${preposition} case id: ${args.caseId} - user action id: ${id}`;
 
     const loggerFields: UserActionLogBody = {
       createMessage,
@@ -36,3 +41,14 @@ export class TagsUserActionBuilder extends UserActionBuilder {
     return this.createPersistableUserAction(loggerFields, fields);
   }
 }
+
+const getPreposition = (action: UserAction): string => {
+  switch (action) {
+    case Actions.add:
+      return 'to';
+    case Actions.delete:
+      return 'in';
+    default:
+      return 'for';
+  }
+};

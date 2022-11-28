@@ -105,7 +105,7 @@ export interface PersistableUserActionFields {
 }
 
 export interface UserActionLogBody {
-  createMessage: (storedUserActionId: string) => string;
+  createMessage: (storedUserActionId?: string) => string;
   eventAction: string;
   // TODO: think about renaming these
   entityId: string;
@@ -113,7 +113,7 @@ export interface UserActionLogBody {
 }
 
 export interface LoggerCommonFields {
-  auditLogger?: AuditLogger;
+  auditLogger: AuditLogger;
 }
 
 export type CommonBuilderArguments = CommonArguments & {
@@ -125,5 +125,5 @@ export type CommonBuilderArguments = CommonArguments & {
 
 export interface BuilderDeps {
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  auditLogger?: AuditLogger;
+  auditLogger: AuditLogger;
 }

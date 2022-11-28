@@ -21,8 +21,8 @@ export class SettingsUserActionBuilder extends UserActionBuilder {
       type: ActionTypes.settings,
     });
 
-    const createMessage = (id: string) =>
-      `Case id: ${args.caseId} settings updated - user action id: ${id}`;
+    const createMessage = (id?: string) =>
+      `User updated the settings for case id: ${args.caseId} - user action id: ${id}`;
 
     const loggerFields: UserActionLogBody = {
       createMessage,

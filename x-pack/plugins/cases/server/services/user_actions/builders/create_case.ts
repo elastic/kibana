@@ -28,7 +28,8 @@ export class CreateCaseUserActionBuilder extends UserActionBuilder {
       ],
     };
 
-    const createMessage = (id: string) => `Case id: ${caseId} created - user action id: ${id}`;
+    const createMessage = (id?: string) =>
+      `User created case id: ${caseId} - user action id: ${id}`;
 
     const loggerFields: UserActionLogBody = {
       createMessage,

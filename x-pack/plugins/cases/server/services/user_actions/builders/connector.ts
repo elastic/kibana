@@ -22,8 +22,8 @@ export class ConnectorUserActionBuilder extends UserActionBuilder {
       connectorId: args.payload.connector.id,
     });
 
-    const createMessage = (id: string) =>
-      `Case id: ${args.caseId} connector changed to id: ${args.payload.connector.id} - user action id: ${id}`;
+    const createMessage = (id?: string) =>
+      `User changed the case connector to id: ${args.payload.connector.id} for case id: ${args.caseId} - user action id: ${id}`;
 
     const loggerFields: UserActionLogBody = {
       createMessage,

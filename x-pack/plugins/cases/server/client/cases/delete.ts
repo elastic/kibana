@@ -110,7 +110,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
       options: { refresh: 'wait_for' },
     });
 
-    await userActionService.bulkCreateCaseDeletion({
+    await userActionService.bulkAuditLogCaseDeletion({
       cases: cases.saved_objects.map((caseInfo) => ({
         id: caseInfo.id,
         owner: caseInfo.attributes.owner,

@@ -21,8 +21,8 @@ export class SeverityUserActionBuilder extends UserActionBuilder {
       type: ActionTypes.severity,
     });
 
-    const createMessage = (id: string) =>
-      `Case id: ${args.caseId} severity updated - user action id: ${id}`;
+    const createMessage = (id?: string) =>
+      `User updated the severity for case id: ${args.caseId} - user action id: ${id}`;
 
     const loggerFields: UserActionLogBody = {
       createMessage,

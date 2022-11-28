@@ -21,8 +21,8 @@ export class DescriptionUserActionBuilder extends UserActionBuilder {
       value: args.payload.description,
     });
 
-    const createMessage = (id: string) =>
-      `Case id: ${args.caseId} description updated - user action id: ${id}`;
+    const createMessage = (id?: string) =>
+      `User updated the description for case id: ${args.caseId} - user action id: ${id}`;
 
     const loggerFields: UserActionLogBody = {
       createMessage,

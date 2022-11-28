@@ -14,6 +14,7 @@ import { UserActionBuilder } from '../abstract_builder';
 import type { PersistableUserAction } from '../persistable_user_action';
 import type { UserActionLogBody, UserActionParameters } from '../types';
 import { getAttachmentSOExtractor } from '../../so_references';
+import { actionToPastTenseVerb } from './audit_logger_utils';
 
 export class CommentUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'comment'>): PersistableUserAction {
@@ -46,10 +47,12 @@ export class CommentUserActionBuilder extends UserActionBuilder {
       ),
     };
 
-    const createMessage = (id: string) =>
-      `Case id: ${args.caseId} comment id: ${commentId(
-        args.attachmentId
-      )} ${action} - user action id: ${id}`;
+    const verb = actionToPastTenseVerb(action);
+
+    const createMessage = (id?: string) =>
+      `User ${verb} comment id: ${commentId(args.attachmentId)} for case id: ${
+        args.caseId
+      } - user action id: ${id}`;
 
     const loggerFields: UserActionLogBody = {
       createMessage,

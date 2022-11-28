@@ -32,8 +32,7 @@ export class DeleteCaseUserActionBuilder extends UserActionBuilder {
       ],
     };
 
-    const createMessage = (userActionId: string) =>
-      `Case id: ${caseId} deleted - user action id: ${userActionId}`;
+    const createMessage = () => `User deleted case id: ${caseId}`;
 
     const loggerFields: UserActionLogBody = {
       createMessage,

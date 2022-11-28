@@ -22,8 +22,8 @@ export class PushedUserActionBuilder extends UserActionBuilder {
       connectorId: args.payload.externalService.connector_id,
     });
 
-    const createMessage = (id: string) =>
-      `Case id: ${args.caseId} pushed to external service with connector id: ${args.payload.externalService.connector_id} - user action id: ${id}`;
+    const createMessage = (id?: string) =>
+      `User pushed case id: ${args.caseId} to an external service with connector id: ${args.payload.externalService.connector_id} - user action id: ${id}`;
 
     const loggerFields: UserActionLogBody = {
       createMessage,

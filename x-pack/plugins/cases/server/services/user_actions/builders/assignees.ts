@@ -25,10 +25,10 @@ export class AssigneesUserActionBuilder extends UserActionBuilder {
     });
 
     const uids = args.payload.assignees.map((assignee) => assignee.uid);
-    const verb = getAuditLogActionVerb(action);
+    const verbMessage = getVerbMessage(action, uids);
 
-    const createMessage = (id: string) =>
-      `Case id: ${args.caseId} ${verb} uids: [${uids}] - user action id: ${id}`;
+    const createMessage = (id?: string) =>
+      `User ${verbMessage} case id: ${args.caseId} - user action id: ${id}`;
 
     const loggerFields: UserActionLogBody = {
       createMessage,
@@ -41,13 +41,15 @@ export class AssigneesUserActionBuilder extends UserActionBuilder {
   }
 }
 
-const getAuditLogActionVerb = (action: UserAction) => {
+const getVerbMessage = (action: UserAction, uids: string[]) => {
+  const uidText = `uids: [${uids}]`;
+
   switch (action) {
     case 'add':
-      return 'assigned';
+      return `assigned ${uidText} to`;
     case 'delete':
-      return 'unassigned';
+      return `unassigned ${uidText} from`;
     default:
-      return 'changed';
+      return `changed ${uidText} for`;
   }
 };

@@ -21,8 +21,8 @@ export class StatusUserActionBuilder extends UserActionBuilder {
       type: ActionTypes.status,
     });
 
-    const createMessage = (id: string) =>
-      `Case id: ${args.caseId} status updated - user action id: ${id}`;
+    const createMessage = (id?: string) =>
+      `User updated the status for case id: ${args.caseId} - user action id: ${id}`;
 
     const loggerFields: UserActionLogBody = {
       createMessage,

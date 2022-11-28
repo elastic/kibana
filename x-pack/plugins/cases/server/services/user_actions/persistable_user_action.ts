@@ -40,7 +40,7 @@ export class PersistableUserAction {
     return this._persistableFields;
   }
 
-  public log(storedUserActionId: string) {
+  public log(storedUserActionId?: string) {
     this.commonFields.auditLogger?.log({
       message: this.logBody.createMessage(storedUserActionId),
       event: {

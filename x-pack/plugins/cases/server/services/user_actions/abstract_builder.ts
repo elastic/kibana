@@ -30,7 +30,7 @@ import { PersistableUserAction } from './persistable_user_action';
 
 export abstract class UserActionBuilder {
   protected readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  private readonly auditLogger?: AuditLogger;
+  private readonly auditLogger: AuditLogger;
 
   constructor(deps: BuilderDeps) {
     this.persistableStateAttachmentTypeRegistry = deps.persistableStateAttachmentTypeRegistry;

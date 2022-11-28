@@ -29,7 +29,7 @@ describe('PersistableUserAction', () => {
       commonFields: { auditLogger: mockLogger },
       _persistableFields: { attributes: { action } as Attributes, references: [] },
       logBody: {
-        createMessage: (id: string) => `id: ${id}`,
+        createMessage: (id?: string) => `id: ${id}`,
         entityId: '123',
         entityType: 'type',
         eventAction: 'action',

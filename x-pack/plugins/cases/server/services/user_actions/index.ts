@@ -19,6 +19,7 @@ import type {
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
+import type { AuditLogger } from '@kbn/security-plugin/server';
 import { isCommentRequestTypePersistableState } from '../../../common/utils/attachments';
 import {
   isConnectorUserAction,
@@ -87,7 +88,7 @@ interface CreateUserActionES<T> extends IndexRefresh {
 
 type CommonUserActionArgs = CommonArguments;
 
-interface BulkCreateCaseDeletionUserAction extends IndexRefresh {
+interface BulkAuditLogCaseDeletion {
   cases: Array<{ id: string; owner: string; connectorId: string }>;
   user: User;
 }
@@ -133,10 +134,12 @@ export class CaseUserActionService {
     log,
     persistableStateAttachmentTypeRegistry,
     unsecuredSavedObjectsClient,
+    auditLogger,
   }: {
     log: Logger;
     persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
+    auditLogger: AuditLogger;
   }) {
     this.log = log;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
@@ -144,6 +147,7 @@ export class CaseUserActionService {
 
     this.builderFactory = new BuilderFactory({
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+      auditLogger,
     });
   }
 
@@ -260,16 +264,11 @@ export class CaseUserActionService {
     return userAction;
   }
 
-  public async bulkCreateCaseDeletionAuditLog({ cases, user }: BulkCreateCaseDeletionUserAction) {}
+  public async bulkAuditLogCaseDeletion({ cases, user }: BulkAuditLogCaseDeletion) {
+    this.log.debug(`Attempting to log bulk case deletion`);
+    const userActionBuilder = this.builderFactory.getBuilder(ActionTypes.delete_case);
 
-  public async bulkCreateCaseDeletion({
-    cases,
-    user,
-    refresh,
-  }: BulkCreateCaseDeletionUserAction): Promise<void> {
-    this.log.debug(`Attempting to create a create case user action`);
-    const userActions = cases.reduce<PersistableUserAction[]>((acc, caseInfo) => {
-      const userActionBuilder = this.builderFactory.getBuilder(ActionTypes.delete_case);
+    for (const caseInfo of cases) {
       const deleteCaseUserAction = userActionBuilder?.build({
         action: Actions.delete,
         caseId: caseInfo.id,
@@ -279,17 +278,8 @@ export class CaseUserActionService {
         payload: {},
       });
 
-      if (deleteCaseUserAction == null) {
-        return acc;
-      }
-
-      return [...acc, deleteCaseUserAction];
-    }, []);
-
-    await this.bulkCreateAndLog({
-      userActions,
-      refresh,
-    });
+      deleteCaseUserAction?.log();
+    }
   }
 
   public async bulkCreateUpdateCase({

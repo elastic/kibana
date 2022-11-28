@@ -75,7 +75,7 @@ export const connectorMappingsServiceMock = (): ConnectorMappingsServiceMock => 
 
 export const createUserActionServiceMock = (): CaseUserActionServiceMock => {
   const service: PublicMethodsOf<CaseUserActionService> = {
-    bulkCreateCaseDeletion: jest.fn(),
+    bulkAuditLogCaseDeletion: jest.fn(),
     bulkCreateUpdateCase: jest.fn(),
     bulkCreateAttachmentDeletion: jest.fn(),
     bulkCreateAttachmentCreation: jest.fn(),
@@ -84,7 +84,6 @@ export const createUserActionServiceMock = (): CaseUserActionServiceMock => {
     findStatusChanges: jest.fn(),
     getUniqueConnectors: jest.fn(),
     getUserActionIdsForCases: jest.fn(),
-    bulkCreateCaseDeletionAuditLog: jest.fn(),
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
