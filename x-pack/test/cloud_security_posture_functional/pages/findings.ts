@@ -7,9 +7,6 @@
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
-const STATUS_API_PATH = '/internal/cloud_security_posture/status?check=init';
-
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
