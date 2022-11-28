@@ -9,4 +9,4 @@
 import { LangModuleType } from '../types';
 import { ID } from './constants';
 
-export const ES_QLLang: LangModuleType = { ID,  };
+export const ES_QLLang: LangModuleType = { ID };
