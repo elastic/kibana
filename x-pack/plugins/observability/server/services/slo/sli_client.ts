@@ -17,7 +17,7 @@ import { toDateRange } from '../../domain/services/date_range';
 import { InternalQueryError } from '../../errors';
 import { DateRange, Duration, IndicatorData, SLO } from '../../domain/models';
 import {
-  occurencesBudgetingMethodSchema,
+  occurrencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
 } from '../../types/schema';
 
@@ -44,7 +44,7 @@ export class DefaultSLIClient implements SLIClient {
 
   async fetchCurrentSLIData(slo: SLO): Promise<IndicatorData> {
     const dateRange = toDateRange(slo.time_window);
-    if (occurencesBudgetingMethodSchema.is(slo.budgeting_method)) {
+    if (occurrencesBudgetingMethodSchema.is(slo.budgeting_method)) {
       const result = await this.esClient.search<unknown, Record<AggKey, AggregationsSumAggregate>>({
         ...commonQuery(slo, dateRange),
         aggs: {
@@ -117,7 +117,7 @@ export class DefaultSLIClient implements SLIClient {
       is_rolling: true,
     });
 
-    if (occurencesBudgetingMethodSchema.is(slo.budgeting_method)) {
+    if (occurrencesBudgetingMethodSchema.is(slo.budgeting_method)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
         ...commonQuery(slo, longestDateRange),
         aggs: toLookbackWindowsAggregationsQuery(sortedLookbackWindows),
