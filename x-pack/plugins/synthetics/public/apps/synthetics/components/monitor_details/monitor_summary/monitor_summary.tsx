@@ -69,13 +69,9 @@ export const MonitorSummary = () => {
               <EuiFlexItem>
                 <DurationSparklines from={from} to={to} />
               </EuiFlexItem>
+              <EuiFlexItem>{monitorId && <MonitorErrorsCount from={from} to={to} />}</EuiFlexItem>
               <EuiFlexItem>
-                {monitorId && <MonitorErrorsCount from={from} to={to} monitorId={[monitorId]} />}
-              </EuiFlexItem>
-              <EuiFlexItem>
-                {monitorId && (
-                  <MonitorErrorSparklines from={from} to={to} monitorId={[monitorId]} />
-                )}
+                {monitorId && <MonitorErrorSparklines from={from} to={to} />}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
