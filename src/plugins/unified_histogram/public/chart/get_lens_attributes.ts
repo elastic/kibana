@@ -32,7 +32,7 @@ export const getLensAttributes = ({
   dataView: DataView;
   timeInterval: string | undefined;
   breakdownField: DataViewField | undefined;
-  suggestion: Suggestion | undefined;
+  suggestion?: Suggestion | undefined;
 }) => {
   const showBreakdown = breakdownField && fieldSupportsBreakdown(breakdownField);
 
@@ -169,7 +169,7 @@ export const getLensAttributes = ({
       };
 
   return {
-    title: 'Edit visualization',
+    title: '',
     references: [
       {
         id: dataView.id ?? '',
