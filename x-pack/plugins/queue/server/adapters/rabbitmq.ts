@@ -10,7 +10,7 @@
 
 import amqp from 'amqplib';
 import type { Worker } from '../worker_registry';
-import type { PluginSetupDeps, PluginStartDeps, Job } from '../plugin';
+import type { Adapter, PluginSetupDeps, PluginStartDeps, Job } from '../plugin';
 
 const queueName = 'kibana';
 const channelPromise = (async () => {
@@ -20,38 +20,38 @@ const channelPromise = (async () => {
   return channel;
 })();
 
-export function registerWorkerAdapter(worker: Worker<unknown>, plugins: PluginSetupDeps) {
-  (async () => {
-    const channel = await channelPromise;
-    // channel.prefetch(10); // max workers
-    channel.consume(
-      queueName,
-      async (msg) => {
-        if (!msg) return;
-        const params = JSON.parse(msg.content.toString());
-        const abortController = new AbortController();
-        await worker.run(params, abortController.signal);
-        channel.ack(msg);
-      },
-      { noAck: false }
-    );
-  })();
-}
-
-export async function enqueueAdater(job: Job<unknown>, plugins: PluginStartDeps) {
-  const message = Buffer.from(JSON.stringify(job.params));
-  const channel = await channelPromise;
-  // Both lines below in one shot?
-  channel.sendToQueue(queueName, message);
-  await channel.waitForConfirms();
-}
-
-export async function bulkEnqueueAdapter(jobs: Array<Job<unknown>>, plugins: PluginStartDeps) {
-  const channel = await channelPromise;
-  jobs.forEach((job) => {
+export const rabbitmqAdapter: Adapter = {
+  registerWorkerAdapter: (worker: Worker<unknown>, plugins: PluginSetupDeps) => {
+    (async () => {
+      const channel = await channelPromise;
+      // channel.prefetch(10); // max workers
+      channel.consume(
+        queueName,
+        async (msg) => {
+          if (!msg) return;
+          const params = JSON.parse(msg.content.toString());
+          const abortController = new AbortController();
+          await worker.run(params, abortController.signal);
+          channel.ack(msg);
+        },
+        { noAck: false }
+      );
+    })();
+  },
+  enqueueAdater: async (job: Job<unknown>, plugins: PluginStartDeps) => {
     const message = Buffer.from(JSON.stringify(job.params));
+    const channel = await channelPromise;
     // Both lines below in one shot?
     channel.sendToQueue(queueName, message);
-  });
-  await channel.waitForConfirms();
-}
+    await channel.waitForConfirms();
+  },
+  bulkEnqueueAdapter: async (jobs: Array<Job<unknown>>, plugins: PluginStartDeps) => {
+    const channel = await channelPromise;
+    jobs.forEach((job) => {
+      const message = Buffer.from(JSON.stringify(job.params));
+      // Both lines below in one shot?
+      channel.sendToQueue(queueName, message);
+    });
+    await channel.waitForConfirms();
+  },
+};

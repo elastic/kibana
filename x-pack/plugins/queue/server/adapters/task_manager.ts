@@ -8,42 +8,43 @@
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import type { Worker } from '../worker_registry';
 import type { PluginSetupDeps, PluginStartDeps, Job } from '../plugin';
+import type { Adapter } from './types';
 
-export function registerWorkerAdapter(worker: Worker<unknown>, plugins: PluginSetupDeps) {
-  plugins.taskManager.registerTaskDefinitions({
-    [`plugin:queue:${worker.id}`]: {
-      title: `Worker: ${worker.id}`,
-      maxAttempts: 3,
-      createTaskRunner: ({ taskInstance }: RunContext) => {
-        const params = taskInstance.params;
-        const abortController = new AbortController();
-        return {
-          run: async () => {
-            await worker.run(params, abortController.signal);
-          },
-          cancel: async () => {
-            abortController.abort();
-          },
-        };
+export const taskManagerAdapter: Adapter = {
+  registerWorkerAdapter: (worker: Worker<unknown>, plugins: PluginSetupDeps) => {
+    plugins.taskManager.registerTaskDefinitions({
+      [`plugin:queue:${worker.id}`]: {
+        title: `Worker: ${worker.id}`,
+        maxAttempts: 3,
+        createTaskRunner: ({ taskInstance }: RunContext) => {
+          const params = taskInstance.params;
+          const abortController = new AbortController();
+          return {
+            run: async () => {
+              await worker.run(params, abortController.signal);
+            },
+            cancel: async () => {
+              abortController.abort();
+            },
+          };
+        },
       },
-    },
-  });
-}
-
-export async function enqueueAdater(job: Job<unknown>, plugins: PluginStartDeps) {
-  await plugins.taskManager.schedule({
-    taskType: `plugin:queue:${job.workerId}`,
-    params: job.params as Record<string, any>,
-    state: {},
-  });
-}
-
-export async function bulkEnqueueAdapter(jobs: Array<Job<unknown>>, plugins: PluginStartDeps) {
-  await plugins.taskManager.bulkSchedule(
-    jobs.map((job) => ({
+    });
+  },
+  enqueueAdater: async (job: Job<unknown>, plugins: PluginStartDeps) => {
+    await plugins.taskManager.schedule({
       taskType: `plugin:queue:${job.workerId}`,
       params: job.params as Record<string, any>,
       state: {},
-    }))
-  );
-}
+    });
+  },
+  bulkEnqueueAdapter: async (jobs: Array<Job<unknown>>, plugins: PluginStartDeps) => {
+    await plugins.taskManager.bulkSchedule(
+      jobs.map((job) => ({
+        taskType: `plugin:queue:${job.workerId}`,
+        params: job.params as Record<string, any>,
+        state: {},
+      }))
+    );
+  },
+};

@@ -11,7 +11,14 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { Worker, WorkerRegistry } from './worker_registry';
-import { registerWorkerAdapter, enqueueAdater, bulkEnqueueAdapter } from './adapters';
+import { taskManagerAdapter, rabbitmqAdapter } from './adapters';
+
+// Set this to whatever one you want to use!
+const CONFIGURED_ADAPTER = 'taskManager';
+const availableAdapters = {
+  taskManager: taskManagerAdapter,
+  rabbitmq: rabbitmqAdapter,
+};
 
 export interface Job<T> {
   workerId: string;
@@ -33,16 +40,27 @@ export interface PluginStartDeps {
   taskManager: TaskManagerStartContract;
 }
 
+export interface Adapter {
+  registerWorkerAdapter(worker: Worker<unknown>, plugins: PluginSetupDeps): void;
+  enqueueAdater(job: Job<unknown>, plugins: PluginStartDeps): Promise<void>;
+  bulkEnqueueAdapter(jobs: Array<Job<unknown>>, plugins: PluginStartDeps): Promise<void>;
+}
+
 export class QueuePlugin
   implements Plugin<PluginSetup, PluginStart, PluginSetupDeps, PluginStartDeps>
 {
+  private readonly adapter: Adapter;
   private readonly workerRegistry = new WorkerRegistry();
+
+  constructor() {
+    this.adapter = availableAdapters[CONFIGURED_ADAPTER];
+  }
 
   public setup(core: CoreSetup, plugins: PluginSetupDeps) {
     return {
       registerWorker: (worker: Worker<unknown>) => {
         this.workerRegistry.register(worker);
-        registerWorkerAdapter(worker, plugins);
+        this.adapter.registerWorkerAdapter(worker, plugins);
       },
     };
   }
@@ -50,10 +68,10 @@ export class QueuePlugin
   public start(coreStart: CoreStart, plugins: PluginStartDeps) {
     return {
       enqueue: async (job: Job<unknown>) => {
-        await enqueueAdater(job, plugins);
+        await this.adapter.enqueueAdater(job, plugins);
       },
       bulkEnqueue: async (jobs: Array<Job<unknown>>) => {
-        await bulkEnqueueAdapter(jobs, plugins);
+        await this.adapter.bulkEnqueueAdapter(jobs, plugins);
       },
     };
   }
