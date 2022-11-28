@@ -170,6 +170,7 @@ export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetDa
       sortDirection: 'desc',
     },
   ],
+  showCheckboxes: false,
 });
 
 export const requiredFieldsForActions = [

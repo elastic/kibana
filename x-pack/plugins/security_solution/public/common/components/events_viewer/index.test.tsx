@@ -84,6 +84,7 @@ const testProps = {
   sourcererScope: SourcererScopeName.default,
   start: from,
   bulkActions: false,
+  hasCrudPermissions: true,
 };
 describe('StatefulEventsViewer', () => {
   (useTimelineEvents as jest.Mock).mockReturnValue([false, mockEventViewerResponse]);

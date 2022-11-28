@@ -92,7 +92,7 @@ export interface Props {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   additionalFilters?: React.ReactNode;
-  hasAlertsCrud?: boolean;
+  hasCrudPermissions?: boolean;
   unit?: (n: number) => string;
   indexNames?: string[];
   bulkActions: boolean | BulkActionsProp;
@@ -118,7 +118,7 @@ const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
   start,
   sourcererScope,
   additionalFilters,
-  hasAlertsCrud = false,
+  hasCrudPermissions = false,
   unit = defaultUnit,
   indexNames,
   bulkActions,
@@ -393,13 +393,13 @@ const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
           nonDeletedEvents,
           eventIds,
           queryFields,
-          hasAlertsCrud ?? false
+          hasCrudPermissions
         ),
         isSelected,
         isSelectAllChecked: isSelected && selectedCount + 1 === nonDeletedEvents.length,
       });
     },
-    [setSelected, tableId, nonDeletedEvents, queryFields, hasAlertsCrud, selectedCount]
+    [setSelected, tableId, nonDeletedEvents, queryFields, hasCrudPermissions, selectedCount]
   );
 
   const onSelectPage: OnSelectAll = useCallback(
@@ -411,13 +411,13 @@ const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
               nonDeletedEvents,
               nonDeletedEvents.map((event) => event._id),
               queryFields,
-              hasAlertsCrud ?? false
+              hasCrudPermissions
             ),
             isSelected,
             isSelectAllChecked: isSelected,
           })
         : clearSelected({ id: tableId }),
-    [setSelected, tableId, nonDeletedEvents, queryFields, hasAlertsCrud, clearSelected]
+    [setSelected, tableId, nonDeletedEvents, queryFields, hasCrudPermissions, clearSelected]
   );
 
   // Sync to selectAll so parent components can select all events
@@ -481,7 +481,7 @@ const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
     totalItems: totalCountMinusDeleted,
     refetch,
     indexNames: selectedPatterns,
-    hasAlertsCrud,
+    hasAlertsCrud: hasCrudPermissions,
     showCheckboxes,
     filterStatus: currentFilter,
     filterQuery,
@@ -563,7 +563,7 @@ const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
                               fieldBrowserOptions={fieldBrowserOptions}
                               defaultCellActions={defaultCellActions}
                               filterQuery={filterQuery}
-                              hasAlertsCrud={hasAlertsCrud}
+                              hasAlertsCrud={hasCrudPermissions}
                               filters={filters}
                               filterStatus={currentFilter}
                               onRuleChange={onRuleChange}

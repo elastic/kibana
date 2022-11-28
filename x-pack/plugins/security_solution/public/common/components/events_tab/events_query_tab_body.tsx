@@ -197,6 +197,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         defaultModel={defaultModel}
         pageFilters={composedPageFilters}
         bulkActions={bulkActions}
+        hasCrudPermissions={true}
       />
     </>
   );

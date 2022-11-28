@@ -81,6 +81,7 @@ describe('epicLocalStorage', () => {
       sourcererScope: SourcererScopeName.default,
       start: from,
       bulkActions: false,
+      hasCrudPermissions: true,
     };
   });
 

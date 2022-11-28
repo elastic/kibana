@@ -170,6 +170,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
         sourcererScope={SourcererScopeName.default}
         start={startDate}
         unit={unit}
+        hasCrudPermissions={true}
       />
     </div>
   );
