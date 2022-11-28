@@ -15,7 +15,7 @@ import * as labels from './labels';
 import { useMonitorEnableHandler } from '../../../../hooks/use_monitor_enable_handler';
 
 interface Props {
-  id: string;
+  configId: string;
   monitor: EncryptedSyntheticsMonitor;
   reloadPage: () => void;
   initialLoading?: boolean;
@@ -23,7 +23,7 @@ interface Props {
 }
 
 export const MonitorEnabled = ({
-  id,
+  configId,
   monitor,
   reloadPage,
   initialLoading = false,
@@ -41,7 +41,7 @@ export const MonitorEnabled = ({
   }, [monitorName]);
 
   const { isEnabled, updateMonitorEnabledState, status } = useMonitorEnableHandler({
-    id,
+    configId,
     isEnabled: monitor[ConfigKey.ENABLED],
     reloadPage,
     labels: statusLabels,
