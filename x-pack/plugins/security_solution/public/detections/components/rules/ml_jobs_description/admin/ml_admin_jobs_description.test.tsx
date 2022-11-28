@@ -8,37 +8,38 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 
-import { MlUserJobsDescription } from './ml_user_jobs_description';
+import { MlAdminJobsDescription } from './ml_admin_jobs_description';
 
-import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
+import { useSecurityJobs } from '../../../../../common/components/ml_popover/hooks/use_security_jobs';
 
 jest.mock(
-  './ml_user_job_description',
+  './ml_admin_job_description',
   () =>
     ({
-      MlUserJobDescription: (props) => {
+      MlAdminJobDescription: (props) => {
         return <div data-test-subj={props['data-test-subj']}>{props.job.id}</div>;
       },
     } as Record<string, React.FC<{ job: MlSummaryJob; 'data-test-subj': string }>>)
 );
 
-jest.mock('../../../../../common/components/ml/hooks/use_installed_security_jobs');
+jest.mock('../../../../../common/components/ml_popover/hooks/use_security_jobs');
 
 describe('MlUsersJobDescription', () => {
-  it('should render null if user permissions absent', () => {
-    (useInstalledSecurityJobs as jest.Mock).mockReturnValueOnce({ jobs: [], isMlUser: false });
-    const { container } = render(<MlUserJobsDescription jobIds={['mock-1']} />);
+  it('should render null if admin permissions absent', () => {
+    (useSecurityJobs as jest.Mock).mockReturnValueOnce({ jobs: [], isMlAdmin: false });
+    const { container } = render(<MlAdminJobsDescription jobIds={['mock-1']} />);
 
     expect(container.firstChild).toBeNull();
   });
 
   it('should render only jobs with job ids passed as props', () => {
-    (useInstalledSecurityJobs as jest.Mock).mockReturnValueOnce({
+    (useSecurityJobs as jest.Mock).mockReturnValueOnce({
       jobs: [{ id: 'mock-1' }, { id: 'mock-2' }, { id: 'mock-3' }],
-      isMlUser: true,
+      isMlAdmin: true,
     });
-    render(<MlUserJobsDescription jobIds={['mock-1', 'mock-2', 'mock-4']} />);
-    const expectedJobs = screen.getAllByTestId('ml-user-job-description');
+    render(<MlAdminJobsDescription jobIds={['mock-1', 'mock-2', 'mock-4']} />);
+    const expectedJobs = screen.getAllByTestId('ml-admin-job-description');
+
     expect(expectedJobs).toHaveLength(2);
     expect(expectedJobs[0]).toHaveTextContent('mock-1');
     expect(expectedJobs[1]).toHaveTextContent('mock-2');
