@@ -189,7 +189,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           );
           await commentArea.focus();
           await commentArea.type('Test comment from automation');
-              
+
           await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
           // validate user action
           await find.byCssSelector(
@@ -202,7 +202,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           await testSubjects.click('submit-comment');
 
-           // validate user action
+          // validate user action
           const newComment = await find.byCssSelector(
             '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
           );
@@ -239,13 +239,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           await testSubjects.click('submit-comment');
 
-           // validate user action
+          // validate user action
           const newComment = await find.byCssSelector(
             '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
           );
           expect(await newComment.getVisibleText()).equal('Test comment from automation');
         });
-        
+
         it('persists new comment to the case when user goes to case list table and comes back to the case', async () => {
           const commentArea = await find.byCssSelector(
             '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
@@ -261,7 +261,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           await testSubjects.click('submit-comment');
 
-           // validate user action
+          // validate user action
           const newComment = await find.byCssSelector(
             '[data-test-subj*="comment-create-action"] [data-test-subj="user-action-markdown"]'
           );
