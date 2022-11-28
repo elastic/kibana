@@ -10,73 +10,60 @@ import { FindingsRuleFlyout } from './findings_flyout';
 import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../../test/test_provider';
 import { mockFindingsHit } from '../__mocks__/findings';
+import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
+
+const TestComponent = () => (
+  <TestProvider>
+    <FindingsRuleFlyout onClose={jest.fn} findings={mockFindingsHit} />
+  </TestProvider>
+);
 
 describe('<FindingsFlyout/>', () => {
   describe('Overview Tab', () => {
     it('details and remediation accordions are open', () => {
-      const { getAllByRole } = render(
-        <TestProvider>
-          <FindingsRuleFlyout onClose={jest.fn} findings={mockFindingsHit} />
-        </TestProvider>
-      );
+      const { getAllByRole } = render(<TestComponent />);
 
       getAllByRole('button', { expanded: true, name: 'Details' });
       getAllByRole('button', { expanded: true, name: 'Remediation' });
     });
 
-    it('displays details', () => {
-      const { getAllByText, getByText } = render(
-        <TestProvider>
-          <FindingsRuleFlyout onClose={jest.fn} findings={mockFindingsHit} />
-        </TestProvider>
-      );
+    it('displays details summary info', () => {
+      const { getAllByText, getByText } = render(<TestComponent />);
 
       getAllByText(mockFindingsHit.rule.name);
-      getAllByText(mockFindingsHit.rule.section);
       getByText(mockFindingsHit.resource.id);
       getByText(mockFindingsHit.resource.name);
+      getAllByText(mockFindingsHit.rule.section);
+      getByText(LATEST_FINDINGS_INDEX_DEFAULT_NS);
+      mockFindingsHit.rule.tags.forEach((tag) => {
+        getAllByText(tag);
+      });
     });
   });
 
   describe('Rule Tab', () => {
-    it('displays rule benchmark name and section', () => {
-      const { getByText, getAllByText } = render(
-        <TestProvider>
-          <FindingsRuleFlyout onClose={jest.fn} findings={mockFindingsHit} />
-        </TestProvider>
-      );
+    it('displays rule details', () => {
+      const { getByText, getAllByText } = render(<TestComponent />);
 
       userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
 
+      getAllByText(mockFindingsHit.rule.name);
       getByText(mockFindingsHit.rule.benchmark.name);
       getAllByText(mockFindingsHit.rule.section);
+      mockFindingsHit.rule.tags.forEach((tag) => {
+        getAllByText(tag);
+      });
     });
   });
 
   describe('Resource Tab', () => {
     it('displays resource name and id', () => {
-      const { getAllByText } = render(
-        <TestProvider>
-          <FindingsRuleFlyout onClose={jest.fn} findings={mockFindingsHit} />
-        </TestProvider>
-      );
+      const { getAllByText } = render(<TestComponent />);
 
       userEvent.click(screen.getByTestId('findings_flyout_tab_resource'));
 
       getAllByText(mockFindingsHit.resource.name);
       getAllByText(mockFindingsHit.resource.id);
-    });
-  });
-
-  describe('JSON Tab', () => {
-    it('displays JSON', () => {
-      render(
-        <TestProvider>
-          <FindingsRuleFlyout onClose={jest.fn} findings={mockFindingsHit} />
-        </TestProvider>
-      );
-
-      userEvent.click(screen.getByTestId('findings_flyout_tab_json'));
     });
   });
 });

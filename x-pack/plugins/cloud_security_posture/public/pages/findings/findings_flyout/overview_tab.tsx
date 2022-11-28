@@ -46,7 +46,7 @@ const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined)
     description: (
       <>
         {data.rule.tags.map((tag) => (
-          <EuiBadge>{tag}</EuiBadge>
+          <EuiBadge key={tag}>{tag}</EuiBadge>
         ))}
       </>
     ),
@@ -197,13 +197,10 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
     <>
       {accordions.map((accordion) => (
         <React.Fragment key={accordion.id}>
-          <EuiPanel
-            hasShadow={false}
-            hasBorder
-            data-test-subj={`findings_flyout_overview_${accordion.id}_panel`}
-          >
+          <EuiPanel hasShadow={false} hasBorder>
             <EuiAccordion
               id={accordion.id}
+              data-test-subj={`findings_flyout_overview_accordion_${accordion.id}`}
               buttonContent={
                 <EuiText>
                   <strong>{accordion.title}</strong>
