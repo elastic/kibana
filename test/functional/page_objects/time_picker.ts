@@ -124,8 +124,21 @@ export class TimePickerPageObject extends FtrService {
    * @param {String} fromTime MMM D, YYYY @ HH:mm:ss.SSS
    * @param {String} toTime MMM D, YYYY @ HH:mm:ss.SSS
    */
-  public async setAbsoluteRange(fromTime: string, toTime: string) {
-    this.log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
+   public async setAbsoluteRange(fromTime: string, toTime: string) {
+    // get the current URL and check if it already contains the desired times, return
+    const currentUrl = await this.browser.getCurrentUrl();
+    const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+    const startMoment = moment.utc(fromTime, DEFAULT_DATE_FORMAT).toISOString();
+    const endMoment = moment.utc(toTime, DEFAULT_DATE_FORMAT).toISOString();
+    if (currentUrl.includes(startMoment) && currentUrl.includes(endMoment)) {
+      this.log.debug(
+        `We already have the desired start (${fromTime}) and end (${toTime}) in the URL, returning from setAbsoluteRange`
+      );
+      return;
+    } else {
+      this.log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
+    }
+
     await this.showStartEndTimes();
     let panel!: WebElementWrapper;
 
