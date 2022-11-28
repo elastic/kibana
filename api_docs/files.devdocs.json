@@ -86,57 +86,6 @@
       },
       {
         "parentPluginId": "files",
-        "id": "def-public.Image",
-        "type": "Function",
-        "tags": [
-          "note"
-        ],
-        "label": "Image",
-        "description": [
-          "\nA wrapper around the <EuiImage/> that can renders blurhash by the file service while the image is loading\n"
-        ],
-        "signature": [
-          "({ src, url, alt, onLoad, onError, meta, ...rest }: ",
-          {
-            "pluginId": "files",
-            "scope": "public",
-            "docId": "kibFilesPluginApi",
-            "section": "def-public.Props",
-            "text": "Props"
-          },
-          ") => JSX.Element"
-        ],
-        "path": "src/plugins/files/public/components/image/image.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Image.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{ src, url, alt, onLoad, onError, meta, ...rest }",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "files",
-                "scope": "public",
-                "docId": "kibFilesPluginApi",
-                "section": "def-public.Props",
-                "text": "Props"
-              }
-            ],
-            "path": "src/plugins/files/public/components/image/image.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "files",
         "id": "def-public.UploadFile",
         "type": "Function",
         "tags": [],
@@ -1056,30 +1005,6 @@
           "<unknown>[]; total: number; }; bulkDelete: Result; }"
         ],
         "path": "src/plugins/files/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "files",
-        "id": "def-public.Props",
-        "type": "Type",
-        "tags": [],
-        "label": "Props",
-        "description": [],
-        "signature": [
-          "{ meta?: ",
-          {
-            "pluginId": "files",
-            "scope": "common",
-            "docId": "kibFilesPluginApi",
-            "section": "def-common.FileImageMetadata",
-            "text": "FileImageMetadata"
-          },
-          " | undefined; } & ",
-          "EuiImageProps"
-        ],
-        "path": "src/plugins/files/public/components/image/image.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6002,64 +5927,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "files",
-        "id": "def-common.FileImageMetadata",
-        "type": "Interface",
-        "tags": [],
-        "label": "FileImageMetadata",
-        "description": [
-          "\nSet of metadata captured for every image uploaded via the file services'\npublic components."
-        ],
-        "path": "src/plugins/files/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "files",
-            "id": "def-common.FileImageMetadata.blurhash",
-            "type": "string",
-            "tags": [],
-            "label": "blurhash",
-            "description": [
-              "\nThe blurhash that can be displayed while the image is loading"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/files/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-common.FileImageMetadata.width",
-            "type": "number",
-            "tags": [],
-            "label": "width",
-            "description": [
-              "\nWidth, in px, of the original image"
-            ],
-            "path": "src/plugins/files/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-common.FileImageMetadata.height",
-            "type": "number",
-            "tags": [],
-            "label": "height",
-            "description": [
-              "\nHeight, in px, of the original image"
-            ],
-            "path": "src/plugins/files/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
