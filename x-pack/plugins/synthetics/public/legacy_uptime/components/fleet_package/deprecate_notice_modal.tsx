@@ -65,7 +65,7 @@ export const DeprecateNoticeModal = () => {
 export const ManageMonitorDocsLink = ({ label }: { label?: string }) => (
   <FormattedMessage
     id="xpack.synthetics.deprecateNoticeModal.manageMonitors"
-    defaultMessage="Manage lightweight or browser monitors via {link}"
+    defaultMessage="Manage lightweight and browser monitors from a single place"
     values={{
       link: (
         <EuiLink
