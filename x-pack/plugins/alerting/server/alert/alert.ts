@@ -165,17 +165,19 @@ export class Alert<
     return this;
   }
 
-  updateLastScheduledActions(group: ActionGroupIds, actionId: string) {
+  updateLastScheduledActions(group: ActionGroupIds, actionId?: string) {
     if (!this.meta.lastScheduledActions) {
       this.meta.lastScheduledActions = {} as LastScheduledActions;
-    }
-    if (!this.meta.lastScheduledActions.actions) {
-      this.meta.lastScheduledActions!.actions = {};
     }
     const date = new Date();
     this.meta.lastScheduledActions.group = group;
     this.meta.lastScheduledActions.date = date;
-    this.meta.lastScheduledActions.actions[actionId] = { date };
+    if (actionId) {
+      if (!this.meta.lastScheduledActions.actions) {
+        this.meta.lastScheduledActions!.actions = {};
+      }
+      this.meta.lastScheduledActions.actions[actionId] = { date };
+    }
   }
 
   /**

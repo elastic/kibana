@@ -306,6 +306,25 @@ describe('updateLastScheduledActions()', () => {
       },
     });
   });
+
+  test('replaces previous lastScheduledActions with a scheduled action', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: {},
+    });
+    alert.updateLastScheduledActions('default', 'actionId1');
+    expect(alert.toJSON()).toEqual({
+      state: {},
+      meta: {
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {
+            actionId1: { date: new Date().toISOString() },
+          },
+        },
+      },
+    });
+  });
 });
 
 describe('getContext()', () => {
