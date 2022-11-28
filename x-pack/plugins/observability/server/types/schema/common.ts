@@ -27,6 +27,7 @@ const errorBudgetSchema = t.type({
   initial: t.number,
   consumed: t.number,
   remaining: t.number,
+  is_estimated: t.boolean,
 });
 
 const dateRangeSchema = t.type({ from: dateType, to: dateType });
