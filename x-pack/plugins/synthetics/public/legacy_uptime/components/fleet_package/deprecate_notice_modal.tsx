@@ -51,7 +51,7 @@ export const DeprecateNoticeModal = () => {
         <li>
           <FormattedMessage
             id="xpack.synthetics.deprecateNoticeModal.elasticManagedLocations"
-            defaultMessage="In Elastic cloud run your monitors against Elastic managed global locations"
+            defaultMessage="Run monitors in multiple locations managed by Elastic, or from your own private locations"
           />
         </li>
         <li>
