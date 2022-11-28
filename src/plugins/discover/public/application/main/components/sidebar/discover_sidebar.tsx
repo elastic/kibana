@@ -249,9 +249,9 @@ export function DiscoverSidebarComponent({
   const onSupportedFieldFilter: GroupedFieldsParams<DataViewField>['onSupportedFieldFilter'] =
     useCallback(
       (field) => {
-        return shouldShowField(field, useNewFieldsApi, isPlainRecord);
+        return shouldShowField(field, isPlainRecord);
       },
-      [useNewFieldsApi, isPlainRecord]
+      [isPlainRecord]
     );
   const onOverrideFieldGroupDetails: GroupedFieldsParams<DataViewField>['onOverrideFieldGroupDetails'] =
     useCallback((groupName) => {

@@ -13,11 +13,7 @@ import {
   getFieldSubtypeMulti,
 } from '@kbn/data-views-plugin/public';
 
-export function shouldShowField(
-  field: DataViewField | undefined,
-  useNewFieldsApi: boolean,
-  isPlainRecord: boolean
-): boolean {
+export function shouldShowField(field: DataViewField | undefined, isPlainRecord: boolean): boolean {
   if (!field?.type || field.type === '_source') {
     return false;
   }
@@ -25,8 +21,8 @@ export function shouldShowField(
     // exclude only `_source` for plain records
     return true;
   }
-  // exclude multifields unless searching from source
-  return useNewFieldsApi ? !getFieldSubtypeMulti(field?.spec) : true;
+  // exclude subfields
+  return !getFieldSubtypeMulti(field?.spec);
 }
 
 // to avoid rerenderings for empty state

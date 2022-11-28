@@ -82,38 +82,30 @@ describe('group_fields', function () {
   });
 
   it('should show any fields if for text-based searches', function () {
-    expect(shouldShowField(dataView.getFieldByName('bytes'), true, true)).toBe(true);
-    expect(shouldShowField(dataView.getFieldByName('bytes'), false, true)).toBe(true);
-    expect(shouldShowField({ type: 'unknown', name: 'unknown' } as DataViewField, true, true)).toBe(
+    expect(shouldShowField(dataView.getFieldByName('bytes'), true)).toBe(true);
+    expect(shouldShowField({ type: 'unknown', name: 'unknown' } as DataViewField, true)).toBe(true);
+    expect(shouldShowField({ type: '_source', name: 'source' } as DataViewField, true)).toBe(false);
+  });
+
+  it('should show fields excluding subfields when searched from source', function () {
+    expect(shouldShowField(dataView.getFieldByName('extension'), false)).toBe(true);
+    expect(shouldShowField(dataView.getFieldByName('extension.keyword'), false)).toBe(false);
+    expect(shouldShowField({ type: 'unknown', name: 'unknown' } as DataViewField, false)).toBe(
       true
     );
-    expect(
-      shouldShowField({ type: 'unknown', name: 'unknown' } as DataViewField, false, true)
-    ).toBe(true);
-    expect(shouldShowField({ type: '_source', name: 'source' } as DataViewField, false, true)).toBe(
+    expect(shouldShowField({ type: '_source', name: 'source' } as DataViewField, false)).toBe(
       false
     );
   });
 
-  it('should show any fields when searched from source', function () {
-    expect(shouldShowField(dataView.getFieldByName('extension'), false, false)).toBe(true);
-    expect(shouldShowField(dataView.getFieldByName('extension.keyword'), false, false)).toBe(true);
-    expect(
-      shouldShowField({ type: 'unknown', name: 'unknown' } as DataViewField, false, false)
-    ).toBe(true);
-    expect(
-      shouldShowField({ type: '_source', name: 'source' } as DataViewField, false, false)
-    ).toBe(false);
-  });
-
-  it('should exclude multifields when fields api is used', function () {
-    expect(shouldShowField(dataView.getFieldByName('extension'), true, false)).toBe(true);
-    expect(shouldShowField(dataView.getFieldByName('extension.keyword'), true, false)).toBe(false);
-    expect(
-      shouldShowField({ type: 'unknown', name: 'unknown' } as DataViewField, true, false)
-    ).toBe(true);
-    expect(
-      shouldShowField({ type: '_source', name: 'source' } as DataViewField, false, false)
-    ).toBe(false);
+  it('should show fields excluding subfields when fields api is used', function () {
+    expect(shouldShowField(dataView.getFieldByName('extension'), false)).toBe(true);
+    expect(shouldShowField(dataView.getFieldByName('extension.keyword'), false)).toBe(false);
+    expect(shouldShowField({ type: 'unknown', name: 'unknown' } as DataViewField, false)).toBe(
+      true
+    );
+    expect(shouldShowField({ type: '_source', name: 'source' } as DataViewField, false)).toBe(
+      false
+    );
   });
 });
