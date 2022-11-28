@@ -15,6 +15,6 @@ export const KQL_PLACE_HOLDER = i18n.translate('xpack.synthetics.kueryBar.search
 export const SIMPLE_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.synthetics.kueryBar.searchPlaceholder.simpleText',
   {
-    defaultMessage: 'Search by monitor ID, name, or URL',
+    defaultMessage: 'Search by monitor ID, name, URL, port or tags',
   }
 );
