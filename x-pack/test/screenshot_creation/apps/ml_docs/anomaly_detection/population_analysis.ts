@@ -14,7 +14,6 @@ export default function ({ getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const ml = getService('ml');
   const commonScreenshots = getService('commonScreenshots');
-  const testSubjects = getService('testSubjects');
 
   const screenshotDirectories = ['ml_docs', 'anomaly_detection'];
 
