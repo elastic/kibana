@@ -11,11 +11,11 @@ import { i18n } from '@kbn/i18n';
 
 import type { Item } from '../types';
 
-interface Field<T = string> {
-  value: T;
-  isValid: boolean;
+export interface Field<TValueType = unknown> {
+  value: TValueType;
   isChangingValue: boolean;
-  errorMessage?: string;
+  errors?: string[];
+  warnings?: string[];
 }
 
 interface Fields {
@@ -24,45 +24,99 @@ interface Fields {
   tags: Field<string[]>;
 }
 
-const validators: { [key in keyof Fields]: ((value: unknown) => string | null) | null } = {
-  title: (value) => {
-    if (typeof value === 'string' && value.trim() === '') {
-      return i18n.translate('contentManagement.inspector.metadataForm.nameIsEmptyError', {
-        defaultMessage: 'A name is required.',
-      });
-    }
-    return null;
-  },
-  description: null,
-  tags: null,
+interface Validator<TValueType = unknown> {
+  type: 'warning' | 'error';
+  fn: (value: TValueType, id: Item['id']) => undefined | string | Promise<undefined | string>;
+}
+
+type BasicValidators = Partial<{
+  [key in keyof Fields]: Array<Validator<Fields[key]['value']>> | undefined;
+}>;
+
+export type CustomValidators = Pick<BasicValidators, 'title' | 'description'>;
+
+type SetFieldValueFn<TField extends keyof Fields> = (value: Fields[TField]['value']) => void;
+
+type SetFieldValueGetter<TField extends keyof Fields = keyof Fields> = (
+  fieldName: TField
+) => SetFieldValueFn<TField>;
+
+const basicValidators: BasicValidators = {
+  title: [
+    {
+      type: 'error',
+      fn: (value) => {
+        if (!value || !value.trim()) {
+          return i18n.translate('contentManagement.inspector.metadataForm.nameIsEmptyError', {
+            defaultMessage: 'A name is required.',
+          });
+        }
+      },
+    },
+  ],
 };
 
-type SetFieldValueFn<T = unknown> = (value: T) => void;
-type SetFieldValueGetter<T = unknown> = (fieldName: keyof Fields) => SetFieldValueFn<T>;
+function getCustomValidation<TField extends keyof Fields>(
+  field: TField,
+  customValidators?: CustomValidators
+): Array<Validator<Fields[TField]['value']>> {
+  if (customValidators && ['title', 'description'].includes(field)) {
+    return (customValidators[field] as Array<Validator<Fields[TField]['value']>>) ?? [];
+  }
+  return [];
+}
 
-export const useMetadataForm = ({ item }: { item: Item }) => {
+const executeValidation = async <TField extends keyof Fields>(
+  field: TField,
+  id: string,
+  value: Fields[TField]['value'],
+  customValidators?: CustomValidators
+) => {
+  const results: Pick<Field, 'errors' | 'warnings'> = {
+    warnings: [],
+    errors: [],
+  };
+
+  for (const validator of [
+    ...(basicValidators[field] ?? []),
+    ...getCustomValidation(field, customValidators),
+  ]) {
+    const result = await validator.fn(value, id);
+
+    if (result) {
+      const key = validator.type === 'error' ? 'errors' : 'warnings';
+      if (Array.isArray(results[key])) {
+        results[key]!.push(result);
+      } else {
+        results[key] = [result];
+      }
+    }
+  }
+  return results;
+};
+
+export const useMetadataForm = ({
+  item,
+  customValidators,
+}: {
+  item: Item;
+  customValidators?: CustomValidators;
+}) => {
   const changingValueTimeout = useRef<{ [key in keyof Fields]?: NodeJS.Timeout | null }>({});
   const [fields, setFields] = useState<Fields>({
-    title: { value: item.title, isValid: true, isChangingValue: false },
-    description: { value: item.description ?? '', isValid: true, isChangingValue: false },
+    title: { value: item.title, isChangingValue: false },
+    description: {
+      value: item.description ?? '',
+      isChangingValue: false,
+    },
     tags: {
       value: item.tags ? item.tags.map(({ id }) => id) : [],
-      isValid: true,
       isChangingValue: false,
     },
   });
 
-  const setFieldValue = useCallback<SetFieldValueGetter>(
+  const setFieldValue: SetFieldValueGetter = useCallback(
     (fieldName) => (value) => {
-      const validator = validators[fieldName];
-      let isValid = true;
-      let errorMessage: string | null = null;
-
-      if (validator) {
-        errorMessage = validator(value);
-        isValid = errorMessage === null;
-      }
-
       const timeoutId = changingValueTimeout.current[fieldName];
       if (timeoutId) {
         clearTimeout(timeoutId);
@@ -75,51 +129,69 @@ export const useMetadataForm = ({ item }: { item: Item }) => {
           ...prev,
           [fieldName]: {
             ...field,
-            isValid,
-            isChangingValue: true,
-            errorMessage,
             value,
+            errors: undefined,
+            warnings: undefined,
+            isChangingValue: true,
           },
         };
       });
 
       // We add a 500s delay so possible errors of the field don't show up
-      // _immediately_ as the user writes and we avoid flickering of error message.
-      changingValueTimeout.current[fieldName] = setTimeout(() => {
+      // _immediately_ as the user writes, we avoid flickering of error message.
+      changingValueTimeout.current[fieldName] = setTimeout(async () => {
+        const { errors, warnings } = await executeValidation(
+          fieldName,
+          item.id,
+          value,
+          customValidators
+        );
+
         setFields((prev) => {
           return {
             ...prev,
             [fieldName]: {
               ...prev[fieldName],
+              errors,
+              warnings,
               isChangingValue: false,
             },
           };
         });
       }, 500);
     },
-    []
+    [customValidators, item.id]
   );
 
-  const setTitle: SetFieldValueFn<string> = useMemo(() => setFieldValue('title'), [setFieldValue]);
+  const setTitle: SetFieldValueFn<'title'> = useMemo(() => setFieldValue('title'), [setFieldValue]);
 
-  const setDescription: SetFieldValueFn<string> = useMemo(
+  const setDescription: SetFieldValueFn<'description'> = useMemo(
     () => setFieldValue('description'),
     [setFieldValue]
   );
 
-  const setTags: SetFieldValueFn<string[]> = useMemo(() => setFieldValue('tags'), [setFieldValue]);
+  const setTags: SetFieldValueFn<'tags'> = useMemo(() => setFieldValue('tags'), [setFieldValue]);
 
-  const validate = useCallback(() => {
-    return Object.values(fields).every((field: Field) => field.isValid);
-  }, [fields]);
-
-  const getErrors = useCallback(() => {
-    return Object.values(fields)
-      .map(({ errorMessage }: Field) => errorMessage)
-      .filter(Boolean) as string[];
-  }, [fields]);
-
-  const isValid = validate();
+  const { errors, warnings, isChangingValue } = useMemo(
+    () =>
+      Object.values(fields).reduce<
+        Pick<Field, 'errors' | 'warnings'> & { isChangingValue: boolean }
+      >(
+        (acc, field: Field) => {
+          return {
+            errors: [...(acc.errors ?? []), ...(field.errors ?? [])],
+            warnings: [...(acc.warnings ?? []), ...(field.warnings ?? [])],
+            isChangingValue: acc.isChangingValue || field.isChangingValue,
+          };
+        },
+        {
+          errors: [],
+          warnings: [],
+          isChangingValue: false,
+        }
+      ),
+    [fields]
+  );
 
   return {
     title: fields.title,
@@ -128,8 +200,11 @@ export const useMetadataForm = ({ item }: { item: Item }) => {
     setDescription,
     tags: fields.tags,
     setTags,
-    isValid,
-    getErrors,
+
+    isValid: errors?.length === 0,
+    getErrors: () => errors,
+    getWarnings: () => warnings,
+    getIsChangingValue: () => isChangingValue,
   };
 };
 

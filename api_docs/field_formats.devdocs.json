@@ -352,7 +352,7 @@
       "label": "FieldFormatsSetup",
       "description": [],
       "signature": [
-        "{ register: (fieldFormats: ",
+        "{ has: (id: string) => boolean; register: (fieldFormats: ",
         {
           "pluginId": "fieldFormats",
           "scope": "common",
@@ -360,7 +360,7 @@
           "section": "def-common.FieldFormatInstanceType",
           "text": "FieldFormatInstanceType"
         },
-        "[]) => void; has: (id: string) => boolean; }"
+        "[]) => void; }"
       ],
       "path": "src/plugins/field_formats/public/plugin.ts",
       "deprecated": false,
@@ -5748,7 +5748,7 @@
         "label": "FieldFormatsStartCommon",
         "description": [],
         "signature": [
-          "{ deserialize: ",
+          "{ has: (id: string) => boolean; deserialize: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
@@ -5988,7 +5988,7 @@
             "section": "def-common.FieldFormatConfig",
             "text": "FieldFormatConfig"
           },
-          ">) => void; has: (id: string) => boolean; }"
+          ">) => void; }"
         ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
@@ -6204,7 +6204,7 @@
             "section": "def-common.FieldFormatInstanceType",
             "text": "FieldFormatInstanceType"
           },
-          "[]) => void; deserialize: ",
+          "[]) => void; has: (id: string) => boolean; deserialize: ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
@@ -6452,7 +6452,7 @@
             "section": "def-common.FieldFormatConfig",
             "text": "FieldFormatConfig"
           },
-          ">) => void; has: (id: string) => boolean; }"
+          ">) => void; }"
         ],
         "path": "src/plugins/field_formats/common/index.ts",
         "deprecated": false,
