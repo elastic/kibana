@@ -104,7 +104,7 @@ export function AgentExplorer() {
       <EuiSpacer size="s" />
       <EuiFlexItem grow={false}>
         <EuiTitle>
-          <EuiFlexGroup gutterSize="s">
+          <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <h2>
                 {i18n.translate('xpack.apm.settings.agentExplorer.title', {
@@ -122,9 +122,9 @@ export function AgentExplorer() {
       <EuiFlexItem grow={false}>
         <KueryBar />
       </EuiFlexItem>
-      <EuiSpacer />
+      <EuiSpacer size="xs" />
       <EuiFlexItem>
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="flexEnd" responsive={true}>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs">
               <EnvironmentsContextProvider
