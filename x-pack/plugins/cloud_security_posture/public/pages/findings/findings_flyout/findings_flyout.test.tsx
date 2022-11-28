@@ -27,7 +27,7 @@ describe('<FindingsFlyout/>', () => {
       getAllByRole('button', { expanded: true, name: 'Remediation' });
     });
 
-    it('displays details summary info', () => {
+    it('displays text details summary info', () => {
       const { getAllByText, getByText } = render(<TestComponent />);
 
       getAllByText(mockFindingsHit.rule.name);
@@ -42,7 +42,7 @@ describe('<FindingsFlyout/>', () => {
   });
 
   describe('Rule Tab', () => {
-    it('displays rule details', () => {
+    it('displays rule text details', () => {
       const { getByText, getAllByText } = render(<TestComponent />);
 
       userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));

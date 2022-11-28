@@ -200,7 +200,6 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
           <EuiPanel hasShadow={false} hasBorder>
             <EuiAccordion
               id={accordion.id}
-              data-test-subj={`findings_flyout_overview_accordion_${accordion.id}`}
               buttonContent={
                 <EuiText>
                   <strong>{accordion.title}</strong>
