@@ -24,7 +24,7 @@ import { PluginState, PluginStatus, GuideConfig } from '../../common/types';
 import { GuidedOnboardingApi } from '../types';
 import {
   getInProgressStepId,
-  getUpdatedSteps,
+  getCompletedSteps,
   isStepInProgress,
   isStepReadyToComplete,
   isGuideActive,
@@ -250,8 +250,7 @@ export class ApiService implements GuidedOnboardingApi {
 
     // All steps should be complete at this point
     // However, we do a final check here as a safeguard
-    const allStepsComplete =
-      Boolean(activeGuide!.steps.find((step) => step.status !== 'complete')) === false;
+    const allStepsComplete = Boolean(activeGuide!.steps.find((step) => step.status === 'complete'));
 
     if (allStepsComplete) {
       const updatedGuide: GuideState = {
@@ -347,7 +346,7 @@ export class ApiService implements GuidedOnboardingApi {
     const isManualCompletion = stepConfig ? !!stepConfig.manualCompletion : false;
 
     if (isCurrentStepInProgress || isCurrentStepReadyToComplete) {
-      const updatedSteps = getUpdatedSteps(
+      const updatedSteps = getCompletedSteps(
         activeGuide!,
         stepId,
         // if current step is in progress and configured for manual completion,

@@ -87,7 +87,7 @@ export const testGuideStep2ReadyToCompleteState: GuideState = {
       status: 'complete',
     },
     {
-      id: testGuideStep1ActiveState.steps[1].id,
+      ...testGuideStep1ActiveState.steps[1],
       status: 'ready_to_complete',
     },
     testGuideStep1ActiveState.steps[2],

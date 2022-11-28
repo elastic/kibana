@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { GuideId, GuideStepIds, GuideState, GuideStep } from '@kbn/guided-onboarding';
+import type {
+  GuideId,
+  GuideStepIds,
+  GuideState,
+  GuideStep,
+  StepStatus,
+} from '@kbn/guided-onboarding';
 import type { GuidesConfig, PluginState, GuideConfig, StepConfig } from '../../common/types';
 
 export const findGuideConfigByGuideId = (
@@ -73,16 +79,24 @@ export const isGuideActive = (pluginState?: PluginState, guideId?: GuideId): boo
   return true;
 };
 
+const isStepStatus = (
+  guideState: GuideState | undefined,
+  status: StepStatus,
+  guideId: GuideId,
+  stepId: GuideStepIds
+): boolean => {
+  if (!guideState || !guideState.isActive || guideState.guideId !== guideId) return false;
+
+  // false if the step is not 'in_progress'
+  const selectedStep = guideState.steps.find((step) => step.id === stepId);
+  return selectedStep ? selectedStep.status === status : false;
+};
 export const isStepInProgress = (
   guideState: GuideState | undefined,
   guideId: GuideId,
   stepId: GuideStepIds
 ): boolean => {
-  if (!guideState || !guideState.isActive) return false;
-
-  // false if the step is not 'in_progress'
-  const selectedStep = guideState.steps.find((step) => step.id === stepId);
-  return selectedStep ? selectedStep.status === 'in_progress' : false;
+  return isStepStatus(guideState, 'in_progress', guideId, stepId);
 };
 
 export const isStepReadyToComplete = (
@@ -90,13 +104,10 @@ export const isStepReadyToComplete = (
   guideId: GuideId,
   stepId: GuideStepIds
 ): boolean => {
-  if (!guideState || !guideState.isActive) return false;
-  // false if the step is not 'ready_to_complete'
-  const selectedStep = guideState!.steps.find((step) => step.id === stepId);
-  return selectedStep ? selectedStep.status === 'ready_to_complete' : false;
+  return isStepStatus(guideState, 'ready_to_complete', guideId, stepId);
 };
 
-export const getUpdatedSteps = (
+export const getCompletedSteps = (
   guideState: GuideState,
   stepId: GuideStepIds,
   setToReadyToComplete?: boolean
