@@ -68,7 +68,6 @@ export const MarkdownEditorForm = React.memo(
       useEffect(() => {
         const storageDraftComment = draftCommentStorageKey && storage.get(draftCommentStorageKey);
         if (storageDraftComment && storageDraftComment !== '') {
-        if (storageDraftComment && storageDraftComment !== '') {
           field.setValue(storageDraftComment);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
