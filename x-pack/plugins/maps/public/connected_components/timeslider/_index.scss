@@ -1,11 +1,7 @@
-$timesliderWidth: 800px;
-
 .mapTimeslider {
-  position: fixed;
-  left: 50%;
+  position: absolute;
+  left: calc(50% - 400px);
   bottom: $euiSize;
-  // we could center with translateX but this would impact the animation
-  margin-left: -($timesliderWidth / 2);
   z-index: 99999;
 }
 

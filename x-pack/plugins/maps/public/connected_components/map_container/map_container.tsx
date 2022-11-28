@@ -241,13 +241,11 @@ export class MapContainer extends Component<Props, State> {
             />
           )}
           <RightSideControls />
+          <Timeslider
+            waitForTimesliceToLoad$={this.props.waitUntilTimeLayersLoad$}
+            updateGlobalTimeRange={this._updateGlobalTimeRange.bind(this)}
+          />
         </EuiFlexItem>
-
-        <Timeslider
-          waitForTimesliceToLoad$={this.props.waitUntilTimeLayersLoad$}
-          updateGlobalTimeRange={this._updateGlobalTimeRange.bind(this)}
-        />
-
         <EuiFlexItem
           className={classNames('mapMapLayerPanel', {
             'mapMapLayerPanel-isVisible': !!flyoutPanel,
