@@ -24,7 +24,7 @@ export const isValidExceptionList = async ({
   ruleId: string | undefined;
   rulesClient: RulesClient;
 }): Promise<boolean> => {
-  if (!exceptionsList || !rulesClient) {
+  if (!exceptionsList) {
     return true;
   }
 
