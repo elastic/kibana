@@ -8,10 +8,11 @@
 
 import uuid from 'uuid';
 import useLifecycles from 'react-use/lib/useLifecycles';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
+import { ControlStyle } from '../types';
 
 import { pluginServices } from '../services';
 import { ControlPanelState, getDefaultControlGroupInput } from '../../common';
@@ -59,7 +60,8 @@ const ControlGroupInputBuilder = {
 };
 
 export interface ControlGroupRendererProps {
-  onEmbeddableLoad: (controlGroupContainer: ControlGroupContainer) => void;
+  controlStyle?: ControlStyle;
+  onEmbeddableLoad?: (controlGroupContainer: ControlGroupContainer) => void;
   getCreationOptions: (
     builder: typeof ControlGroupInputBuilder
   ) => Promise<Partial<ControlGroupInput>>;
@@ -68,9 +70,10 @@ export interface ControlGroupRendererProps {
 export const ControlGroupRenderer = ({
   onEmbeddableLoad,
   getCreationOptions,
+  controlStyle = 'oneLine',
 }: ControlGroupRendererProps) => {
-  const controlsRoot = useRef(null);
-  const [controlGroupContainer, setControlGroupContainer] = useState<ControlGroupContainer>();
+  const controlGroupRef = useRef(null);
+  const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
   const id = useMemo(() => uuid.v4(), []);
   /**
    * Use Lifecycles to load initial control group container
@@ -88,21 +91,32 @@ export const ControlGroupRenderer = ({
           id,
           ...getDefaultControlGroupInput(),
           ...(await getCreationOptions(ControlGroupInputBuilder)),
+          controlStyle,
         })) as ControlGroupContainer;
-
-        if (controlsRoot.current) {
-          container.render(controlsRoot.current);
+        if (controlGroupRef.current) {
+          container.render(controlGroupRef.current);
         }
-        setControlGroupContainer(container);
-        onEmbeddableLoad(container);
+        setControlGroup(container);
+        if (onEmbeddableLoad) {
+          onEmbeddableLoad(container);
+        }
       })();
     },
     () => {
-      controlGroupContainer?.destroy();
+      controlGroup?.destroy();
     }
   );
 
-  return <div ref={controlsRoot} />;
+  useEffect(() => {
+    if (!controlGroup) {
+      return;
+    }
+
+    const { actions, dispatch } = controlGroup.getReduxEmbeddableTools();
+    dispatch(actions.setControlStyle(controlStyle));
+  }, [controlGroup, controlStyle]);
+
+  return <div ref={controlGroupRef} />;
 };
 
 export const useControlGroupContainerContext = () =>

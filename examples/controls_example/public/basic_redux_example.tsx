@@ -12,7 +12,6 @@ import {
   LazyControlGroupRenderer,
   ControlGroupContainer,
   ControlGroupInput,
-  useControlGroupContainerContext,
   ControlStyle,
 } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
@@ -34,56 +33,7 @@ interface Props {
 const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 export const BasicReduxExample = ({ dataView }: Props) => {
-  const [myControlGroup, setControlGroup] = useState<ControlGroupContainer>();
-  const [currentControlStyle, setCurrentControlStyle] = useState<ControlStyle>('oneLine');
-
-  const ControlGroupReduxWrapper = useMemo(() => {
-    if (myControlGroup) return myControlGroup.getReduxEmbeddableTools().Wrapper;
-  }, [myControlGroup]);
-
-  const ButtonControls = () => {
-    const {
-      useEmbeddableDispatch,
-      actions: { setControlStyle },
-    } = useControlGroupContainerContext();
-    const dispatch = useEmbeddableDispatch();
-
-    return (
-      <>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <p>Choose a style for your control group:</p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiButtonGroup
-              legend="Text style"
-              options={[
-                {
-                  id: `oneLine`,
-                  label: 'One line',
-                  value: 'oneLine' as ControlStyle,
-                },
-                {
-                  id: `twoLine`,
-                  label: 'Two lines',
-                  value: 'twoLine' as ControlStyle,
-                },
-              ]}
-              idSelected={currentControlStyle}
-              onChange={(id, value) => {
-                setCurrentControlStyle(value);
-                dispatch(setControlStyle(value));
-              }}
-              type="single"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-      </>
-    );
-  };
+  const [controlStyle, setControlStyle] = useState<ControlStyle>('oneLine');
 
   return (
     <>
@@ -98,16 +48,41 @@ export const BasicReduxExample = ({ dataView }: Props) => {
       </EuiText>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>
-        {ControlGroupReduxWrapper && (
-          <ControlGroupReduxWrapper>
-            <ButtonControls />
-          </ControlGroupReduxWrapper>
-        )}
+        <>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <p>Choose a style for your control group:</p>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButtonGroup
+                legend="Text style"
+                options={[
+                  {
+                    id: `oneLine`,
+                    label: 'One line',
+                    value: 'oneLine' as ControlStyle,
+                  },
+                  {
+                    id: `twoLine`,
+                    label: 'Two lines',
+                    value: 'twoLine' as ControlStyle,
+                  },
+                ]}
+                idSelected={controlStyle}
+                onChange={(id, value) => {
+                  setControlStyle(value);
+                }}
+                type="single"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
 
         <ControlGroupRenderer
-          onEmbeddableLoad={async (controlGroup) => {
-            setControlGroup(controlGroup);
-          }}
+          controlStyle={controlStyle}
           getCreationOptions={async (controlGroupInputBuilder) => {
             const initialInput: Partial<ControlGroupInput> = {
               ...getDefaultControlGroupInput(),
