@@ -6,6 +6,7 @@
  */
 
 import useAsync from 'react-use/lib/useAsync';
+import { useQuery } from '@tanstack/react-query';
 
 import { useEffect, useState } from 'react';
 
@@ -62,6 +63,10 @@ export const useGetPackages = (query: GetPackagesRequest['query'] = {}) => {
     method: 'get',
     query,
   });
+};
+
+export const useGetPackagesQuery = (query: GetPackagesRequest['query']) => {
+  return useQuery(['get-packages', query.prerelease], () => sendGetPackages(query));
 };
 
 export const sendGetPackages = (query: GetPackagesRequest['query'] = {}) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
@@ -26,7 +26,7 @@ import type {
   IntegrationCardReleaseLabel,
 } from '../../../../../../../common/types/models';
 
-import { useGetPackages } from '../../../../hooks';
+import { useGetPackagesQuery } from '../../../../hooks';
 
 import type { Section } from '../../..';
 
@@ -114,14 +114,12 @@ export const mapToCard = ({
 
 export const EPMHomePage: React.FC = () => {
   // loading packages to find installed ones
-  const { data: allPackages, isLoading } = useGetPackages({
+  const { data: allPackages, isLoading } = useGetPackagesQuery({
     prerelease: true,
   });
 
-  const installedPackages = useMemo(
-    () =>
-      (allPackages?.response || []).filter((pkg) => pkg.status === installationStatuses.Installed),
-    [allPackages?.response]
+  const installedPackages = (allPackages?.data?.items || []).filter(
+    (pkg) => pkg.status === installationStatuses.Installed
   );
 
   const atLeastOneUnverifiedPackageInstalled = installedPackages.some(

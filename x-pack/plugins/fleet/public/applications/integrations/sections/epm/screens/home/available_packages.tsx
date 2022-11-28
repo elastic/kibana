@@ -20,7 +20,7 @@ import {
   isIntegrationPolicyTemplate,
 } from '../../../../../../../common/services';
 
-import { useCategories, usePackages, useStartServices } from '../../../../hooks';
+import { useCategoriesQuery, useGetPackagesQuery, useStartServices } from '../../../../hooks';
 
 import { pagePathGetters } from '../../../../constants';
 import {
@@ -216,15 +216,13 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
     history.replace(pagePathGetters.integrations_all({ searchTerm: search, category })[1]);
   }
 
-  const {
-    data: eprPackages,
-    isLoading: isLoadingAllPackages,
-    error: eprPackageLoadingError,
-  } = usePackages(prereleaseIntegrationsEnabled);
+  const { data: eprPackages, isLoading: isLoadingAllPackages } = useGetPackagesQuery({
+    prerelease: prereleaseIntegrationsEnabled,
+  });
 
   // Remove Kubernetes package granularity
-  if (eprPackages?.items) {
-    eprPackages.items.forEach(function (element) {
+  if (eprPackages?.data?.items) {
+    eprPackages?.data?.items.forEach(function (element) {
       if (element.id === 'kubernetes') {
         element.policy_templates = [];
       }
@@ -232,7 +230,7 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
   }
 
   const eprIntegrationList = useMemo(
-    () => packageListToIntegrationsList(eprPackages?.items || []),
+    () => packageListToIntegrationsList(eprPackages?.data?.items || []),
     [eprPackages]
   );
   const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
@@ -267,18 +265,16 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
     [cards, category]
   );
 
-  const {
-    data: eprCategories,
-    isLoading: isLoadingCategories,
-    error: eprCategoryLoadingError,
-  } = useCategories(prereleaseIntegrationsEnabled);
+  const { data: eprCategories, isLoading: isLoadingCategories } = useCategoriesQuery(
+    prereleaseIntegrationsEnabled
+  );
 
   const categories: CategoryFacet[] = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories
       ? []
       : mergeCategoriesAndCount(
           eprCategories
-            ? (eprCategories.items as Array<{ id: string; title: string; count: number }>)
+            ? (eprCategories?.data?.items as Array<{ id: string; title: string; count: number }>)
             : [],
           cards
         );
@@ -328,8 +324,8 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
   }
 
   let noEprCallout;
-  if (eprPackageLoadingError || eprCategoryLoadingError) {
-    const error = eprPackageLoadingError || eprCategoryLoadingError;
+  if (eprPackages?.error || eprCategories?.error) {
+    const error = eprPackages?.error || eprCategories?.error;
     noEprCallout = <NoEprCallout statusCode={error?.statusCode} />;
   }
 
