@@ -33,6 +33,7 @@ import { IndexViewLogic } from '../../index_view_logic';
 import { EMPTY_PIPELINE_CONFIGURATION, MLInferenceLogic } from './ml_inference_logic';
 import { MlModelSelectOption } from './model_select_option';
 import { PipelineSelectOption } from './pipeline_select_option';
+import { TargetFieldHelpText } from './target_field_help_text';
 import { MODEL_REDACTED_VALUE, MODEL_SELECT_PLACEHOLDER } from './utils';
 
 const MODEL_SELECT_PLACEHOLDER_VALUE = 'model_placeholder$$';
@@ -117,6 +118,7 @@ export const ConfigurePipeline: React.FC = () => {
   ];
 
   const inputsDisabled = configuration.existingPipeline !== false;
+  const selectedModel = supportedMLModels.find((model) => model.model_id === modelID);
 
   return (
     <>
@@ -173,6 +175,7 @@ export const ConfigurePipeline: React.FC = () => {
                     existingPipeline: e.target.value === 'true',
                   })
                 }
+                value={configuration.existingPipeline?.toString() ?? ''}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -209,12 +212,21 @@ export const ConfigurePipeline: React.FC = () => {
                 )}
                 helpText={
                   !nameError &&
-                  i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.name.helpText',
-                    {
-                      defaultMessage:
-                        'Pipeline names are unique within a deployment and can only contain letters, numbers, underscores, and hyphens.',
-                    }
+                  configuration.existingPipeline === false && (
+                    <EuiText size="xs">
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.name.helpText',
+                        {
+                          defaultMessage:
+                            'Pipeline names are unique within a deployment and can only contain letters, numbers, underscores, and hyphens. This will create a pipeline named {pipelineName}.',
+                          values: {
+                            pipelineName: `ml-inference-${
+                              pipelineName.length > 0 ? pipelineName : '<name>'
+                            }`,
+                          },
+                        }
+                      )}
+                    </EuiText>
                   )
                 }
                 error={nameError && formErrors.pipelineName}
@@ -312,29 +324,26 @@ export const ConfigurePipeline: React.FC = () => {
           <EuiFlexItem>
             <EuiFormRow
               label={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.destinationField.label',
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.targetField.label',
                 {
-                  defaultMessage: 'Destination field (optional)',
+                  defaultMessage: 'Target field (optional)',
                 }
               )}
               helpText={
                 formErrors.destinationField === undefined &&
-                i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.destinationField.helpText',
-                  {
-                    defaultMessage:
-                      'Your field name will be prefixed with "ml.inference.", if not set it will be defaulted to "ml.inference.{pipelineName}"',
-                    values: {
-                      pipelineName,
-                    },
-                  }
+                configuration.existingPipeline !== true && (
+                  <TargetFieldHelpText
+                    pipelineName={pipelineName}
+                    targetField={destinationField}
+                    model={selectedModel}
+                  />
                 )
               }
               error={formErrors.destinationField}
               isInvalid={formErrors.destinationField !== undefined}
             >
               <EuiFieldText
-                data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-destionationField`}
+                data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-targetField`}
                 disabled={inputsDisabled}
                 placeholder="custom_field_name"
                 value={destinationField}
