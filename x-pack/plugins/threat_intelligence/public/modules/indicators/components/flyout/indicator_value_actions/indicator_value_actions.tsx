@@ -59,7 +59,7 @@ export const IndicatorValueActions: VFC<IndicatorValueActions> = ({
   field,
   'data-test-subj': dataTestSubj,
 }) => {
-  const { readOnly } = useIndicatorsFlyoutContext();
+  const { kqlBarIntegration } = useIndicatorsFlyoutContext();
 
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -74,9 +74,9 @@ export const IndicatorValueActions: VFC<IndicatorValueActions> = ({
   const copyToClipboardTestId = `${dataTestSubj}${COPY_TO_CLIPBOARD_BUTTON_TEST_ID}`;
   const popoverTestId = `${dataTestSubj}${POPOVER_BUTTON_TEST_ID}`;
 
-  if (readOnly) {
+  if (kqlBarIntegration) {
     return (
-      <EuiFlexGroup justifyContent="center" alignItems="center">
+      <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="none">
         <AddToTimelineButtonIcon data={indicator} field={field} data-test-subj={timelineTestId} />
         <CopyToClipboardButtonIcon value={value as string} data-test-subj={copyToClipboardTestId} />
       </EuiFlexGroup>
@@ -89,7 +89,7 @@ export const IndicatorValueActions: VFC<IndicatorValueActions> = ({
   ];
 
   return (
-    <EuiFlexGroup justifyContent="center" alignItems="center">
+    <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="none">
       <FilterInButtonIcon data={indicator} field={field} data-test-subj={filterInTestId} />
       <FilterOutButtonIcon data={indicator} field={field} data-test-subj={filterOutTestId} />
       <EuiPopover

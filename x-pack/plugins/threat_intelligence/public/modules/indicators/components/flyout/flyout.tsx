@@ -54,7 +54,7 @@ export interface IndicatorsFlyoutProps {
    * Boolean deciding if we show or hide the filter in/out feature in the flyout.
    * We should be showing the filter in and out buttons when the flyout is used in the cases view.
    */
-  readOnly?: boolean;
+  kqlBarIntegration?: boolean;
 }
 
 /**
@@ -63,7 +63,7 @@ export interface IndicatorsFlyoutProps {
 export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
   indicator,
   closeFlyout,
-  readOnly = false,
+  kqlBarIntegration = false,
 }) => {
   const [selectedTabId, setSelectedTabId] = useState(TAB_IDS.overview);
 
@@ -157,7 +157,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <IndicatorsFlyoutContext.Provider value={{ readOnly }}>
+        <IndicatorsFlyoutContext.Provider value={{ kqlBarIntegration }}>
           {selectedTabContent}
         </IndicatorsFlyoutContext.Provider>
       </EuiFlyoutBody>

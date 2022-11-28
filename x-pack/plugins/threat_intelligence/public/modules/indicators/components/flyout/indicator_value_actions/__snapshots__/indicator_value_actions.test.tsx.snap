@@ -6,13 +6,13 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
       >
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <div
-            class="euiFlexItem"
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
             data-test-subj="undefinedTimelineButton"
           >
             <span
@@ -44,13 +44,13 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <div
-          class="euiFlexItem"
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
           data-test-subj="undefinedTimelineButton"
         >
           <span
@@ -139,7 +139,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
       >
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
@@ -206,7 +206,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"

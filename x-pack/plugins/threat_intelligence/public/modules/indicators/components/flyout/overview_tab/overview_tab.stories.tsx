@@ -26,14 +26,14 @@ export default {
 
 export const Default: Story<void> = () => {
   const mockIndicator: Indicator = generateMockIndicator();
-  const readOnly = {
-    readOnly: false,
+  const kqlBarIntegration = {
+    kqlBarIntegration: false,
   };
 
   return (
     <StoryProvidersComponent>
       <IndicatorsFiltersContext.Provider value={{} as any}>
-        <IndicatorsFlyoutContext.Provider value={readOnly}>
+        <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
           <IndicatorsFlyoutOverview onViewAllFieldsInTable={() => {}} indicator={mockIndicator} />
         </IndicatorsFlyoutContext.Provider>
       </IndicatorsFiltersContext.Provider>

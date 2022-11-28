@@ -8,7 +8,7 @@
 import { createContext } from 'react';
 
 export interface IndicatorsFlyoutContextValue {
-  readOnly: boolean;
+  kqlBarIntegration: boolean;
 }
 
 export const IndicatorsFlyoutContext = createContext<IndicatorsFlyoutContextValue | undefined>(

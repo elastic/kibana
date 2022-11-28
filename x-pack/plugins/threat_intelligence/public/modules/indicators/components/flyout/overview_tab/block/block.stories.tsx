@@ -21,14 +21,14 @@ const mockIndicator = generateMockIndicator();
 
 export function Default() {
   const mockField = 'threat.indicator.ip';
-  const readOnly = {
-    readOnly: false,
+  const kqlBarIntegration = {
+    kqlBarIntegration: false,
   };
 
   return (
     <StoryProvidersComponent>
       <IndicatorsFiltersContext.Provider value={{} as any}>
-        <IndicatorsFlyoutContext.Provider value={readOnly}>
+        <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
           <IndicatorBlock indicator={mockIndicator} field={mockField} />
         </IndicatorsFlyoutContext.Provider>
       </IndicatorsFiltersContext.Provider>
@@ -38,14 +38,14 @@ export function Default() {
 
 export function NoFilterButtons() {
   const mockField = 'threat.indicator.ip';
-  const readOnly = {
-    readOnly: true,
+  const kqlBarIntegration = {
+    kqlBarIntegration: true,
   };
 
   return (
     <StoryProvidersComponent>
       <IndicatorsFiltersContext.Provider value={{} as any}>
-        <IndicatorsFlyoutContext.Provider value={readOnly}>
+        <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
           <IndicatorBlock indicator={mockIndicator} field={mockField} />
         </IndicatorsFlyoutContext.Provider>
       </IndicatorsFiltersContext.Provider>

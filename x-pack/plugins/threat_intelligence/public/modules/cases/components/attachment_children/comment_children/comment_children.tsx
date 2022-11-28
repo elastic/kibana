@@ -47,7 +47,7 @@ export const CommentChildren: VFC<CommentChildrenProps> = ({ id, metadata }) => 
         <IndicatorsFlyout
           indicator={indicator as Indicator}
           closeFlyout={() => setExpanded(false)}
-          readOnly={true}
+          kqlBarIntegration={true}
         />
       ) : null,
     [expanded, indicator]

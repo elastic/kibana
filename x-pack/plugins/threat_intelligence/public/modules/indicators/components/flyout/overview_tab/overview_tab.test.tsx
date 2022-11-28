@@ -34,13 +34,13 @@ describe('<IndicatorsFlyoutOverview />', () => {
   });
 
   it('should render the highlighted blocks and table when valid indicator is passed', () => {
-    const readOnly = {
-      readOnly: false,
+    const kqlBarIntegration = {
+      kqlBarIntegration: false,
     };
 
     render(
       <TestProvidersComponent>
-        <IndicatorsFlyoutContext.Provider value={readOnly}>
+        <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
           <IndicatorsFlyoutOverview
             onViewAllFieldsInTable={() => {}}
             indicator={generateMockIndicator()}
