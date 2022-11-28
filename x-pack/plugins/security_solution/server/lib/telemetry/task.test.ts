@@ -68,7 +68,8 @@ describe('test security telemetry task', () => {
       {
         last: testLastTimestamp,
         current: testResult.state.lastExecutionTimestamp,
-      }
+      },
+      {}
     );
   });
 
@@ -114,7 +115,6 @@ describe('test security telemetry task', () => {
 
     expect(testResult).not.toBeNull();
     expect(testResult).toHaveProperty('state.lastExecutionTimestamp');
-
     return {
       testLastTimestamp,
       testResult,
@@ -122,6 +122,29 @@ describe('test security telemetry task', () => {
       mockTelemetryTaskConfig,
       mockTelemetryEventsSender,
       mockTelemetryReceiver,
+      taskRunner,
     };
   }
+
+  test('security telemetry tasks should correctly handle custom state in subsequent runs', async () => {
+    const { mockTelemetryTaskConfig, taskRunner } = await testTelemetryTaskRun(true, true);
+    mockTelemetryTaskConfig.runTask = jest.fn().mockResolvedValue({
+      hits: 1,
+      etag: 'test etag1',
+    });
+    const testResult1 = (await taskRunner.run()) as SuccessfulRunResult;
+    expect(testResult1).toHaveProperty('state.hits');
+    expect(testResult1).toHaveProperty('state.etag');
+    expect(testResult1.state.hits).toBe(1);
+    expect(testResult1.state.etag).toBe('test etag1');
+    mockTelemetryTaskConfig.runTask = jest.fn().mockResolvedValue({
+      hits: 3,
+      etag: 'test etag2',
+    });
+    const testResult2 = (await taskRunner.run()) as SuccessfulRunResult;
+    expect(testResult2).toHaveProperty('state.hits');
+    expect(testResult2).toHaveProperty('state.etag');
+    expect(testResult2.state.hits).toBe(3);
+    expect(testResult2.state.etag).toBe('test etag2');
+  });
 });

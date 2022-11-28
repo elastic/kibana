@@ -31,6 +31,9 @@ describe('telemetry artifact test', () => {
     const artifactService = new Artifact();
     await artifactService.start(mockTelemetryReceiver);
     const axiosResponse = {
+      headers: {
+        etag: 'test',
+      },
       data: 'x-pack/plugins/security_solution/server/lib/telemetry/__mocks__/kibana-artifacts.zip',
     };
     mockedAxios.get.mockImplementationOnce(() => Promise.resolve(axiosResponse));
@@ -44,12 +47,18 @@ describe('telemetry artifact test', () => {
     const artifactService = new Artifact();
     await artifactService.start(mockTelemetryReceiver);
     const axiosResponse = {
+      headers: {
+        etag: 'test',
+      },
       data: 'x-pack/plugins/security_solution/server/lib/telemetry/__mocks__/kibana-artifacts.zip',
     };
     mockedAxios.get
       .mockImplementationOnce(() => Promise.resolve(axiosResponse))
       .mockImplementationOnce(() =>
         Promise.resolve({
+          headers: {
+            etag: 'test',
+          },
           data: {
             telemetry_max_buffer_size: 100,
             max_security_list_telemetry_batch: 100,
@@ -59,10 +68,9 @@ describe('telemetry artifact test', () => {
           },
         })
       );
-    const { artifact }: { artifact?: TelemetryConfiguration } = await artifactService.getArtifact(
-      'telemetry-buffer-and-batch-sizes-v1',
-      ''
-    );
+    const { artifact, etag }: { artifact?: TelemetryConfiguration; etag: string } =
+      await artifactService.getArtifact('telemetry-buffer-and-batch-sizes-v1', '');
+    expect(etag).toEqual('test');
     expect(artifact?.telemetry_max_buffer_size).toEqual(100);
     expect(artifact?.max_security_list_telemetry_batch).toEqual(100);
     expect(artifact?.max_endpoint_telemetry_batch).toEqual(300);
