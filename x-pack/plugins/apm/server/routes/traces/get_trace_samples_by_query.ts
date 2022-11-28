@@ -89,19 +89,17 @@ export async function getTraceSamplesByQuery({
               ProcessorEvent.error,
             ],
           },
-          body: {
-            size: 1000,
-            filter: {
-              bool: {
-                filter: [
-                  ...rangeQuery(start, end),
-                  ...environmentQuery(environment),
-                ],
-              },
+          size: 1000,
+          filter: {
+            bool: {
+              filter: [
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
+              ],
             },
-            event_category_field: PROCESSOR_EVENT,
-            query,
           },
+          event_category_field: PROCESSOR_EVENT,
+          query,
           filter_path: 'hits.sequences.events._source.trace.id',
         })
       ).hits?.sequences?.flatMap((sequence) =>
