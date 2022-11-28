@@ -42,6 +42,10 @@ export function validateSLO(slo: SLO) {
     }
   }
 
+  validateSettings(slo);
+}
+
+function validateSettings(slo: SLO) {
   if (!isValidFrequencySettings(slo.settings.frequency)) {
     throw new IllegalArgumentError('Invalid settings.frequency');
   }
