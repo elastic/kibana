@@ -326,7 +326,7 @@ Object {
                       for="generated-id"
                       id="generated-id-label"
                     >
-                      Description
+                      Description (optional)
                     </label>
                   </div>
                   <div

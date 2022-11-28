@@ -31245,7 +31245,6 @@
     "xpack.synthetics.page_header.manageMonitors": "监测管理",
     "xpack.synthetics.page_header.settingsLink": "设置",
     "xpack.synthetics.page_header.settingsLink.label": "导航到 Uptime 设置页面",
-    "xpack.synthetics.pingHistogram.analyze": "分析",
     "xpack.synthetics.pingList.checkHistoryTitle": "历史记录",
     "xpack.synthetics.pingList.collapseRow": "折叠",
     "xpack.synthetics.pingList.columns.failedStep": "失败的步骤",

@@ -31234,7 +31234,6 @@
     "xpack.synthetics.page_header.manageMonitors": "Gestion des moniteurs",
     "xpack.synthetics.page_header.settingsLink": "Paramètres",
     "xpack.synthetics.page_header.settingsLink.label": "Accédez à la page de paramètres Uptime",
-    "xpack.synthetics.pingHistogram.analyze": "Analyser",
     "xpack.synthetics.pingList.checkHistoryTitle": "Historique",
     "xpack.synthetics.pingList.collapseRow": "Réduire",
     "xpack.synthetics.pingList.columns.failedStep": "Étape ayant échoué",

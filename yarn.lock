@@ -1527,10 +1527,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@67.1.9":
-  version "67.1.9"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-67.1.9.tgz#7d84ed27288d08e30110506a4e3177ad4c6f9520"
-  integrity sha512-VvMNhXMVBzMNXPCES0gF1K4xmT9uawrx5sdEjgeB8LNODVMSRFXT2jiUMZPF5mdRh23ZJrAVcy0BSAY7Tu/LJA==
+"@elastic/eui@67.1.10":
+  version "67.1.10"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-67.1.10.tgz#05ba7b35c937532b8455936b025330b383155224"
+  integrity sha512-QLuhtuMsSalTI0y2kcrCOJdDUv6Amk8qkfp5Zs/a4f8lNnZbG2PORleYGf1EiaVjKRuppo5VDYlXwgCMgQcP1g==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -23811,10 +23811,10 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.5.0:
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.6.0.tgz#b4e27959e94618b398358b26efe2e64debb22dfd"
-  integrity sha512-HIH/+J+V7l/lbSRSOwyLcpjezg9CV4DLo1pBhP9aphuMlf/PJXEDwC/A/Ht2bFc1AqQppFBGvClYcuMzyO6tRw==
+selenium-webdriver@^4.6.1:
+  version "4.6.1"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.6.1.tgz#ac66867206542a40c24b5a44f4ccbae992e962dc"
+  integrity sha512-FT8Dw0tbzaTp8YYLuwhaCnve/nw03HKrOJrA3aUmTKmxaIFSP4kT2R5fN3K0RpV5kbR0ZnM4FGVI2vANBvekaA==
   dependencies:
     jszip "^3.10.0"
     tmp "^0.2.1"
