@@ -139,7 +139,7 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
     () => [
       {
         field: 'link',
-        name: 'Link',
+        name: myI18n.LINK_COLUMN,
         align: 'left' as HorizontalAlignment,
         'data-test-subj': 'ruleActionLinkRuleSwitch',
         render: (_, rule: Rule) => <LinkRuleSwitch rule={rule} />,
