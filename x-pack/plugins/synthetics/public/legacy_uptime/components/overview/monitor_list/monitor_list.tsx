@@ -44,6 +44,7 @@ interface Props extends MonitorListProps {
   setPageSize: (val: number) => void;
   monitorList: MonitorList;
   refreshedMonitorIds: string[];
+  isPending?: boolean;
 }
 
 export const MonitorListComponent: ({
@@ -52,12 +53,14 @@ export const MonitorListComponent: ({
   pageSize,
   refreshedMonitorIds,
   setPageSize,
+  isPending,
 }: Props) => any = ({
   filters,
   refreshedMonitorIds = [],
   monitorList: { list, error, loading },
   pageSize,
   setPageSize,
+  isPending,
 }) => {
   const [expandedDrawerIds, updateExpandedDrawerIds] = useState<string[]>([]);
   const currentBreakpoint = useCurrentEuiBreakpoint();
@@ -247,13 +250,15 @@ export const MonitorListComponent: ({
       <EuiBasicTable
         aria-label={labels.getDescriptionLabel(items.length)}
         error={error?.body?.message || error?.message}
-        loading={loading}
+        loading={loading || isPending}
         isExpandable={true}
         hasActions={true}
         itemId="monitor_id"
         itemIdToExpandedRowMap={getExpandedRowMap()}
         items={items}
-        noItemsMessage={<NoItemsMessage loading={loading} filters={filters} />}
+        noItemsMessage={
+          <NoItemsMessage loading={Boolean(loading || isPending)} filters={filters} />
+        }
         columns={columns}
         tableLayout={'auto'}
         rowProps={
