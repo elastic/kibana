@@ -37,6 +37,7 @@ interface SavedQueryFormProps {
   idSet?: Set<string>;
 }
 
+const overflowCss = { overflow: 'auto' };
 const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
   viewMode,
   hasPlayground,
@@ -90,7 +91,7 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
       <CodeEditorField euiFieldProps={euiFieldProps} />
       <EuiSpacer size="xl" />
       <EuiFlexGroup>
-        <EuiFlexItem>
+        <EuiFlexItem css={overflowCss}>
           <ECSMappingEditorField euiFieldProps={euiFieldProps} />
         </EuiFlexItem>
       </EuiFlexGroup>

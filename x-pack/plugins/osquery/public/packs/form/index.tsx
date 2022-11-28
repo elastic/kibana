@@ -264,7 +264,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         {packType === 'policy' && (
           <>
             <EuiFlexGroup>
-              <EuiFlexItem>
+              <EuiFlexItem css={overFlowCss}>
                 <PolicyIdComboBoxField options={availableOptions} />
               </EuiFlexItem>
             </EuiFlexGroup>

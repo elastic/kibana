@@ -131,6 +131,7 @@ const StyledButtonWrapper = styled.div`
 const ECSFieldWrapper = styled(EuiFlexItem)`
   max-width: 100%;
 `;
+const overflowCss = { overflow: 'auto' };
 
 const SINGLE_SELECTION = { asPlainText: true };
 
@@ -573,7 +574,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
     >
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem grow={false}>{Prepend}</EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={overflowCss}>
           <ResultComboBox
             error={resultFieldState.error?.message}
             // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
@@ -643,9 +644,9 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
   return (
     <>
       <EuiFlexGroup data-test-subj="ECSMappingEditorForm" alignItems="flexStart" gutterSize="s">
-        <EuiFlexItem>
+        <EuiFlexItem css={overflowCss}>
           <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
-            <EuiFlexItem>
+            <EuiFlexItem css={overflowCss}>
               <ECSComboboxField
                 control={control}
                 watch={watch}
@@ -663,7 +664,7 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={overflowCss}>
           <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
             <ECSFieldWrapper>
               <OsqueryColumnField
