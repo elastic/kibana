@@ -22,6 +22,7 @@ import * as rt from 'io-ts';
 import moment from 'moment';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { chain } from 'fp-ts/lib/Either';
+import { indexPatternRt } from '@kbn/io-ts-utils';
 
 export const TimestampFromString = new rt.Type<number, string>(
   'TimestampFromString',
@@ -138,7 +139,7 @@ const SourceConfigurationFieldsRT = rt.type({
 export const SourceConfigurationRT = rt.type({
   name: rt.string,
   description: rt.string,
-  metricAlias: rt.string,
+  metricAlias: indexPatternRt,
   logIndices: logIndexReferenceRT,
   inventoryDefaultView: rt.string,
   metricsExplorerDefaultView: rt.string,

@@ -8,10 +8,6 @@
 import React, { ReactText } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  containsEmptyEntries,
-  containsSpaces,
-} from '../../../../common/source_configuration/validate_index_pattern';
 
 export interface InputFieldProps<
   Value extends string = string,
@@ -98,8 +94,14 @@ export const aggregateValidationErrors =
   (value: ValueType) =>
     validationHandlers.map((validator) => validator(value)).filter(Boolean) as FieldErrorMessage[];
 
+const isEmptyString = (value: ReactText) => value === '';
+
+const containsSpaces = (value: string) => value.includes(' ');
+
+const containsEmptyEntries = (value: string) => value.split(',').some(isEmptyString);
+
 export const validateInputFieldNotEmpty = (value: ReactText) =>
-  value === '' && (
+  isEmptyString(value) && (
     <FormattedMessage
       id="xpack.infra.sourceConfiguration.fieldEmptyErrorMessage"
       defaultMessage="The field must not be empty."

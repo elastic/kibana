@@ -11,13 +11,12 @@ import { createValidationFunction } from '../../../common/runtime_types';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { hasData } from '../../lib/sources/has_data';
 import { createSearchClient } from '../../lib/create_search_client';
-import { AnomalyThresholdRangeError, InvalidMetricIndicesError } from '../../lib/sources/errors';
+import { AnomalyThresholdRangeError } from '../../lib/sources/errors';
 import {
   partialMetricsSourceConfigurationPropertiesRT,
   metricsSourceConfigurationResponseRT,
   MetricsSourceStatus,
 } from '../../../common/metrics_sources';
-import { assertMetricAlias } from './lib/validate_metric_alias';
 
 export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => {
   const { framework } = libs;
@@ -55,8 +54,13 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         return response.ok({
           body: metricsSourceConfigurationResponseRT.encode({ source: { ...source, status } }),
         });
-      } catch (err) {
-        return response.notFound();
+      } catch (error) {
+        return response.customError({
+          statusCode: error.statusCode ?? 500,
+          body: {
+            message: error.message ?? 'An unexpected error occurred',
+          },
+        });
       }
     }
   );
@@ -78,10 +82,6 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       const sourceConfigurationPayload = request.body;
 
       try {
-        if (sourceConfigurationPayload.metricAlias) {
-          assertMetricAlias(sourceConfigurationPayload.metricAlias);
-        }
-
         const soClient = (await requestContext.core).savedObjects.client;
         const sourceConfiguration = await sources.getSourceConfiguration(soClient, sourceId);
 
@@ -114,10 +114,6 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       } catch (error) {
         if (Boom.isBoom(error)) {
           throw error;
-        }
-
-        if (error instanceof InvalidMetricIndicesError) {
-          return response.badRequest({ body: error.message });
         }
 
         if (error instanceof AnomalyThresholdRangeError) {
