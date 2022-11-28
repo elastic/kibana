@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { indexPatternRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 import {
   SourceConfigurationRT,
@@ -30,6 +31,7 @@ export type MetricsSourceConfigurationProperties = rt.TypeOf<
 
 export const partialMetricsSourceConfigurationPropertiesRT = rt.partial({
   ...metricsSourceConfigurationPropertiesRT.type.props,
+  metricAlias: indexPatternRt,
 });
 
 export type PartialMetricsSourceConfigurationProperties = rt.TypeOf<

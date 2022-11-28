@@ -7,8 +7,6 @@
 
 import { ReactNode, useCallback, useMemo, useState } from 'react';
 
-import { IndexPatternType } from '@kbn/io-ts-utils';
-
 import {
   aggregateValidationErrors,
   createInputFieldProps,
@@ -21,7 +19,7 @@ import {
 interface FormState {
   name: string;
   description: string;
-  metricAlias: IndexPatternType;
+  metricAlias: string;
   anomalyThreshold: number;
 }
 
@@ -117,6 +115,6 @@ export const useIndicesConfigurationFormState = ({
 const defaultFormState: FormState = {
   name: '',
   description: '',
-  metricAlias: '' as IndexPatternType,
+  metricAlias: '',
   anomalyThreshold: 0,
 };

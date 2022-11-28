@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { IndexPatternType } from '@kbn/io-ts-utils';
 import { LOGS_INDEX_PATTERN, METRICS_INDEX_PATTERN } from '../constants';
 import { InfraSourceConfiguration } from './source_configuration';
 
 export const defaultSourceConfiguration: InfraSourceConfiguration = {
   name: 'Default',
   description: '',
-  metricAlias: METRICS_INDEX_PATTERN as IndexPatternType,
+  metricAlias: METRICS_INDEX_PATTERN,
   logIndices: {
     type: 'index_name',
     indexName: LOGS_INDEX_PATTERN,
