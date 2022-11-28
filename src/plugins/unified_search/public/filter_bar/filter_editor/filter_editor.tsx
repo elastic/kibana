@@ -320,7 +320,7 @@ export class FilterEditor extends Component<FilterEditorProps, State> {
               </strong>
             }
           >
-            <EuiText size="xs">
+            <EuiText size="xs" data-test-subj="filter-preview">
               <FilterBadgeGroup
                 filters={[localFilter]}
                 dataViews={this.props.indexPatterns}

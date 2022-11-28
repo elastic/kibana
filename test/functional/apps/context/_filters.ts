@@ -149,5 +149,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await filterBar.hasFilter('extension', 'png')).to.be(true);
       expect(await everyFieldMatches((field) => field[1] === 'png')).to.be(true);
     });
+
+    it('should add or filter', async () => {
+      await filterBar.addFilter({
+        condition: 'OR',
+        filters: [
+          { field: 'extension', operation: 'is', value: 'png' },
+          { field: 'bytes', operation: 'is between', value: { from: '1000', to: '2000' } },
+        ],
+      });
+
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+      expect(await filterBar.getFilterCount()).to.be(1);
+      expect(await filterBar.hasFilterWithId('0')).to.be(true);
+
+      await filterBar.clickEditFilterById('0');
+
+      expect(await filterBar.getFilterEditorPreview()).to.equal(
+        'extension: png OR bytes: 1,000B to 2KB'
+      );
+    });
   });
 }

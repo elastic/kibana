@@ -156,13 +156,15 @@ export function FilterItem(props: FilterItemProps) {
     const dataTestSubjNegated = filter.meta.negate ? 'filter-negated' : '';
     const dataTestSubjDisabled = `filter-${isDisabled(labelConfig) ? 'disabled' : 'enabled'}`;
     const dataTestSubjPinned = `filter-${isFilterPinned(filter) ? 'pinned' : 'unpinned'}`;
+    const dataTestSubjId = `filter-id-${id}`;
     return classNames(
       'filter',
       dataTestSubjDisabled,
       dataTestSubjKey,
       dataTestSubjValue,
       dataTestSubjPinned,
-      dataTestSubjNegated
+      dataTestSubjNegated,
+      dataTestSubjId
     );
   }
 

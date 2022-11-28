@@ -7,7 +7,6 @@
  */
 
 import { $Values } from '@kbn/utility-types';
-import classNames from 'classnames';
 import { FtrService } from '../ftr_provider_context';
 
 export const Operation = {
@@ -91,20 +90,40 @@ export class FilterBarService extends FtrService {
   ): Promise<boolean> {
     const filterActivationState = enabled ? 'enabled' : 'disabled';
     const filterPinnedState = pinned ? 'pinned' : 'unpinned';
-    const filterNegatedState = negated ? 'filter-negated' : '';
-    return this.testSubjects.exists(
-      classNames(
-        'filter',
-        `filter-${filterActivationState}`,
-        key !== '' && `filter-key-${key}`,
-        value !== '' && `filter-value-${value}`,
-        `filter-${filterPinnedState}`,
-        filterNegatedState
-      ),
-      {
-        allowHidden: true,
-      }
-    );
+    const filterNegatedState = negated ? '~filter-negated' : '';
+    const dataSubj = [
+      '~filter',
+      `~filter-${filterActivationState}`,
+      key !== '' && `~filter-key-${key}`,
+      value !== '' && `~filter-value-${value}`,
+      `~filter-${filterPinnedState}`,
+      filterNegatedState,
+    ]
+      .filter(Boolean)
+      .join(' & ');
+
+    return this.testSubjects.exists(dataSubj, { allowHidden: true });
+  }
+
+  public async hasFilterWithId(
+    id: string,
+    enabled: boolean = true,
+    pinned: boolean = false,
+    negated: boolean = false
+  ): Promise<boolean> {
+    const filterActivationState = enabled ? 'enabled' : 'disabled';
+    const filterPinnedState = pinned ? 'pinned' : 'unpinned';
+    const filterNegatedState = negated ? '~filter-negated' : '';
+    const dataSubj = [
+      '~filter',
+      `~filter-${filterActivationState}`,
+      `~filter-${filterPinnedState}`,
+      filterNegatedState,
+      `~filter-id-${id}`,
+    ]
+      .filter(Boolean)
+      .join(' & ');
+    return this.testSubjects.exists(dataSubj, { allowHidden: true });
   }
 
   /**
@@ -295,6 +314,12 @@ export class FilterBarService extends FtrService {
     await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
+  public async clickEditFilterById(id: string): Promise<void> {
+    await this.testSubjects.click(`~filter & ~filter-id-${id}`);
+    await this.testSubjects.click(`editFilter`);
+    await this.header.awaitGlobalLoadingIndicatorHidden();
+  }
+
   /**
    * Returns available phrases in the filter
    */
@@ -308,6 +333,11 @@ export class FilterBarService extends FtrService {
   public async getFilterEditorFields(): Promise<string[]> {
     const optionsString = await this.comboBox.getOptionsList('filterFieldSuggestionList');
     return optionsString.split('\n');
+  }
+
+  public async getFilterEditorPreview(): Promise<string> {
+    const filterPreview = await this.testSubjects.find('filter-preview');
+    return await filterPreview.getVisibleText();
   }
 
   /**
