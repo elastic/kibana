@@ -45,6 +45,10 @@ export function validateSLO(slo: SLO) {
   if (!isValidFrequencySettings(slo.settings.frequency)) {
     throw new IllegalArgumentError('Invalid settings.frequency');
   }
+
+  if (!isValidSyncDelaySettings(slo.settings.sync_delay)) {
+    throw new IllegalArgumentError('Invalid settings.sync_delay');
+  }
 }
 
 function isValidTargetNumber(value: number): boolean {
@@ -72,5 +76,12 @@ function isValidFrequencySettings(frequency: Duration): boolean {
   return (
     frequency.isLongerOrEqualThan(new Duration(1, DurationUnit.Minute)) &&
     frequency.isShorterThan(new Duration(1, DurationUnit.Hour))
+  );
+}
+
+function isValidSyncDelaySettings(frequency: Duration): boolean {
+  return (
+    frequency.isLongerOrEqualThan(new Duration(1, DurationUnit.Minute)) &&
+    frequency.isShorterThan(new Duration(6, DurationUnit.Hour))
   );
 }

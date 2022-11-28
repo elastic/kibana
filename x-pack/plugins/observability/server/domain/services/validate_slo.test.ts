@@ -47,6 +47,17 @@ describe('validateSLO', () => {
         });
         expect(() => validateSLO(slo)).toThrowError('Invalid settings.frequency');
       });
+
+      it("throws when sync_delay is longer or equal than '6h'", () => {
+        const slo = createSLO({
+          settings: {
+            frequency: oneMinute(),
+            timestamp_field: '@timestamp',
+            sync_delay: sixHours(),
+          },
+        });
+        expect(() => validateSLO(slo)).toThrowError('Invalid settings.sync_delay');
+      });
     });
   });
 
