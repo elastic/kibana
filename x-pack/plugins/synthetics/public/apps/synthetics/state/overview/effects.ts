@@ -34,6 +34,6 @@ export function* fetchOverviewStatusEffect() {
       fetchOverviewStatus,
       fetchOverviewStatusAction.success,
       fetchOverviewStatusAction.fail
-    )
+    ) as ReturnType<typeof fetchEffectFactory>
   );
 }
