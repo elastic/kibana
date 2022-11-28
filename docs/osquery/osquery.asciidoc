@@ -86,14 +86,14 @@ You can run packs as live queries or schedule packs to run for one or more agent
 . Schedule the pack to run on a policy basis (*Policy*) or across all policies (*Global*).
 +
 
-If you choose the *Policy* option, you must also define policies to run the pack. To do this, configure one or both of the following settings: 
+If you choose the *Policy* option, you must also define policies to run the pack. To do this, configure _one or both_ of the following fields: 
 
-** *Scheduled {agent} policies (optional)*: Enter the names of policies to run the pack. By default, all {agents} registered to these policies will run the pack. 
+** *Scheduled {agent} policies (optional)*: Enter the names of policies to run the pack. By default, all {agents} registered to these policies will run the pack.  
 +
 
-NOTE: If you only want _some_ {agents} within a policy to run the pack, configure these details in the *Partial deployment (shards)* field. 
+TIP: If you want to configure the number of {agents} to run the pack, enter the policy name in the *Partial deployment (shards)* field instead.
 +
-** *Partial deployment (shards)*: In the *Policy* field, enter the name of a policy to run the pack. Next, use the *Shard* slider to specify a percentage of {agents} to run pack. For example, if you choose 50% on the slider, the pack will be scheduled to run on half of the policy's registered agents.
+** *Partial deployment (shards)*: In the *Policy* field, enter the name of a policy to run the pack. Next, use the *Shard* slider to specify a percentage of {agents} to run pack. For example, if you specify 50% on the slider, you're configuring the pack to only run on half of the policy's registered agents.
 
 . If you are creating a new pack, add queries to schedule:
 
