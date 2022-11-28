@@ -525,7 +525,6 @@ export const performBulkActionRoute = (
                     })
                   : [];
 
-                // TODO: add try/catch and remove excpetion
                 const updatedRule = await rulesClient.update({
                   id: createdRule.id,
                   data: {
