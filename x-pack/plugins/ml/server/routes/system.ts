@@ -231,6 +231,7 @@ export function systemRoutes(
           indices.map(async (index) =>
             client.asCurrentUser.indices.exists({
               index,
+              allow_no_indices: false,
             })
           )
         );

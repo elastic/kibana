@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('system', function () {
     loadTestFile(require.resolve('./capabilities'));
     loadTestFile(require.resolve('./space_capabilities'));
+    loadTestFile(require.resolve('./index_exists'));
   });
 }
