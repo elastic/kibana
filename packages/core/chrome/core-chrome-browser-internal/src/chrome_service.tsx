@@ -32,9 +32,9 @@ import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
 import { RecentlyAccessedService } from './recently_accessed';
-import { CustomBrandingService } from './custom_branding';
 import { Header } from './ui';
 import type { InternalChromeStart } from './types';
+import { CustomBrandingService } from './custom_branding';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
 const SNAPSHOT_REGEX = /-snapshot/i;

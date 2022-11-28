@@ -16,8 +16,8 @@ import type {
   ApplicationSetup,
   ApplicationStart,
 } from '@kbn/core-application-browser';
-import { CustomBranding } from '@kbn/core-chrome-browser';
 import { BehaviorSubject } from 'rxjs';
+import { CustomBranding } from '@kbn/core-chrome-browser-internal';
 
 /** @internal */
 export interface Mounter {

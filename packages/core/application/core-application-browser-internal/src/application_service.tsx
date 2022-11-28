@@ -29,7 +29,7 @@ import type {
 } from '@kbn/core-application-browser';
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
 import { AppStatus, AppNavLinkStatus } from '@kbn/core-application-browser';
-import { CustomBranding } from '@kbn/core-chrome-browser';
+import { CustomBranding } from '@kbn/core-chrome-browser-internal';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 
