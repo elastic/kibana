@@ -112,8 +112,6 @@ Machine Learning::
 * Trained model testing with index data {kibana-pull}144629[#144629]
 * Adding anomaly score explanations {kibana-pull}142999[#142999]
 
-Management::
-Adds the ability to show sub-feature privileges when using the Basic license {kibana-pull}142020[#142020]
 
 Monitoring::
 Collect metrics about the active/idle connections to ES nodes {kibana-pull}141434[#141434]
