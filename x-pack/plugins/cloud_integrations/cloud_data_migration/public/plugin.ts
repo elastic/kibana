@@ -11,38 +11,32 @@ import { CloudDataMigrationPluginSetup, CloudDataMigrationPluginStart } from './
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { BreadcrumbService } from './application/services/breadcrumbs';
 
-export class CloudDataMigrationPlugin
-  implements Plugin<CloudDataMigrationPluginSetup, CloudDataMigrationPluginStart>
-{
+export class CloudDataMigrationPlugin implements Plugin<void, CloudDataMigrationPluginStart> {
   private breadcrumbService = new BreadcrumbService();
 
-  public setup(core: CoreSetup, { management }: CloudDataMigrationPluginSetup) {
-    management.sections.section.data.registerApp({
-      id: PLUGIN_ID,
-      title: PLUGIN_NAME,
-      order: 8,
-      mount: async (params: ManagementAppMountParams) => {
-        const [coreStart] = await core.getStartServices();
-        const { setBreadcrumbs } = params;
+  public setup(core: CoreSetup, { cloud, management }: CloudDataMigrationPluginSetup) {
+    if (!cloud.isCloudEnabled) {
+      management.sections.section.data.registerApp({
+        id: PLUGIN_ID,
+        title: PLUGIN_NAME,
+        order: 8,
+        mount: async (params: ManagementAppMountParams) => {
+          const [coreStart] = await core.getStartServices();
+          const { setBreadcrumbs } = params;
 
-        // Initialize services
-        this.breadcrumbService.setup(setBreadcrumbs);
+          // Initialize services
+          this.breadcrumbService.setup(setBreadcrumbs);
 
-        const { renderApp } = await import('./application');
-        // Render the application
-        const unmountAppCallback = renderApp(coreStart, this.breadcrumbService, params);
+          const { renderApp } = await import('./application');
+          // Render the application
+          const unmountAppCallback = renderApp(coreStart, this.breadcrumbService, params);
 
-        return () => {
-          unmountAppCallback();
-        };
-      },
-    });
-
-    // Return methods that should be available to other plugins
-    return {
-      management,
-      breadcrumbService: this.breadcrumbService,
-    };
+          return () => {
+            unmountAppCallback();
+          };
+        },
+      });
+    }
   }
 
   public start(core: CoreStart): CloudDataMigrationPluginStart {

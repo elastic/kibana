@@ -16,10 +16,7 @@
     { "path": "../../cloud/tsconfig.json" },
     { "path": "../../../../src/plugins/management/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
-    // optional plugins
-    { "path": "../../../../src/plugins/home/tsconfig.json" },
     // required bundles
     { "path": "../../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../../src/plugins/es_ui_shared/tsconfig.json" }
   ]
 }

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { BreadcrumbService } from './breadcrumbs';
 
-export const PLUGIN_ID = 'migrate_data';
-export const PLUGIN_NAME = i18n.translate('migrateData.name', {
-  defaultMessage: 'Migrate',
-});
+export const createBreadcrumbsMock = () => {
+  const breadcrumbService = new BreadcrumbService();
+  breadcrumbService.setup(jest.fn());
+  return breadcrumbService;
+};

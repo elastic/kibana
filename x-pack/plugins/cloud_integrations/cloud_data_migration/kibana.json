@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "owner": {
-    "name": "Kibana Core",
-    "githubTeam": "kibana-core"
+    "name": "Platform Onboarding",
+    "githubTeam": "platform-onboarding"
   },
   "description": "Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud",
   "server": false,
   "ui": true,
   "configPath": ["xpack", "cloud_integrations", "data_migration"],
-  "requiredPlugins": ["navigation", "management", "kibanaReact"]
+  "requiredPlugins": ["cloud", "management", "kibanaReact"]
 }

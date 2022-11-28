@@ -7,9 +7,11 @@
 
 import { ManagementSetup } from '@kbn/management-plugin/public';
 
+import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { BreadcrumbService } from './application/services/breadcrumbs';
 
 export interface CloudDataMigrationPluginSetup {
+  cloud: CloudSetup;
   management: ManagementSetup;
   breadcrumbService: BreadcrumbService;
 }

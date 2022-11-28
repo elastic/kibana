@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import './index.scss';
-
-import { PluginInitializerContext } from '@kbn/core-plugins-server';
 import { CloudDataMigrationPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new CloudDataMigrationPlugin(initializerContext);
+export function plugin() {
+  return new CloudDataMigrationPlugin();
 }
 
-export { CloudDataMigrationPluginSetup, CloudDataMigrationPluginStart } from './types';
+export type { CloudDataMigrationPluginSetup, CloudDataMigrationPluginStart } from './types';

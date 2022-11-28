@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -17,6 +18,7 @@ import {
   EuiListGroupItem,
   EuiPanel,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -24,11 +26,7 @@ import {
 import { CoreStart, CoreTheme } from '@kbn/core/public';
 
 import { css } from '@emotion/react';
-import {
-  useKibana,
-  KibanaThemeProvider,
-  KibanaContextProvider,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Observable } from 'rxjs';
 import { BreadcrumbService } from '../services/breadcrumbs';
 
@@ -44,18 +42,20 @@ export const CloudDataMigrationApp = ({
   theme$,
 }: CloudDataMigrationAppDeps) => {
   const basePath = http.basePath.get() ?? '';
-  const {
-    services: { uiSettings },
-  } = useKibana();
-  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
   const { euiTheme } = useEuiTheme();
   const listItemProps = {
     iconType: 'checkInCircleFilled',
     iconProps: { color: 'success' },
     wrapText: true,
   };
-  const paddingCss = css`
-    padding: calc(${euiTheme.size.base} * 6);
+  const listItemCss = css`
+    font-weight: 300;
+  `;
+  const panelPaddingCss = css`
+    padding: calc(${euiTheme.size.xxxl});
+    margin: ${euiTheme.size.l} auto;
+    width: 100%;
+    max-width: 875px;
   `;
 
   useEffect(() => {
@@ -69,33 +69,36 @@ export const CloudDataMigrationApp = ({
           breadcrumbService,
         }}
       >
-        <EuiPanel hasShadow css={paddingCss}>
+        <EuiPanel css={panelPaddingCss} color="subdued">
           <EuiFlexGroup
-            className="cloudMigration__panel"
+            direction="column"
             alignItems="center"
             gutterSize="xl"
             justifyContent="spaceBetween"
+            css={css`
+              max-width: 500px;
+              margin: 0 auto;
+            `}
           >
             <EuiFlexItem>
               <EuiImage
-                alt="Illustration of Elastic data integrations"
-                className="cloudMigration__illustration"
-                src={
-                  `${basePath}/plugins/kibanaReact/assets/` +
-                  (isDarkMode
-                    ? 'illustration-cloud-migration.svg'
-                    : 'illustration-cloud-migration.svg')
-                }
+                alt={i18n.translate('cloudMigration.illustration.alt.text', {
+                  defaultMessage: 'Illustration for cloud data migration',
+                })}
+                css={css`
+                  max-width: 75%;
+                `}
+                src={`${basePath}/plugins/kibanaReact/assets/` + 'illustration-cloud-migration.png'}
               />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="s">
-                <h3>
+                <h4>
                   <FormattedMessage
                     id="cloudMigration.migrateToCloudTitle"
                     defaultMessage="Save time & money by moving your deployment to Elastic Cloud."
                   />
-                </h3>
+                </h4>
               </EuiTitle>
 
               <EuiSpacer size="xl" />
@@ -104,10 +107,12 @@ export const CloudDataMigrationApp = ({
                 <EuiListGroupItem
                   {...listItemProps}
                   label={
-                    <FormattedMessage
-                      id="cloudMigration.deployInSeconds.text"
-                      defaultMessage="Deploy in seconds and scale with a click."
-                    />
+                    <EuiText css={listItemCss} size="s" color="subdued">
+                      <FormattedMessage
+                        id="cloudMigration.deployInSeconds.text"
+                        defaultMessage="Deploy Elastic quickly and scale up to petabytes of data with a click."
+                      />
+                    </EuiText>
                   }
                 />
 
@@ -116,10 +121,12 @@ export const CloudDataMigrationApp = ({
                 <EuiListGroupItem
                   {...listItemProps}
                   label={
-                    <FormattedMessage
-                      id="cloudMigration.freeUpEngineering.text"
-                      defaultMessage="Free up your engineering teams from managing the stack."
-                    />
+                    <EuiText css={listItemCss} size="s" color="subdued">
+                      <FormattedMessage
+                        id="cloudMigration.freeUpEngineering.text"
+                        defaultMessage="Streamline your Elastic workflow and free up your team. Manage multiple deployments from a single view and centralize your monitoring data."
+                      />
+                    </EuiText>
                   }
                 />
 
@@ -128,10 +135,12 @@ export const CloudDataMigrationApp = ({
                 <EuiListGroupItem
                   {...listItemProps}
                   label={
-                    <FormattedMessage
-                      id="cloudMigration.getHelpFromCreators.text"
-                      defaultMessage="Get help from the creators of the stack to help you set up your workload, tune for performance, or scale up to petabytes of data."
-                    />
+                    <EuiText css={listItemCss} size="s" color="subdued">
+                      <FormattedMessage
+                        id="cloudMigration.getHelpFromCreators.text"
+                        defaultMessage="Get support from the creators of Elastic to help you ingest all sorts of data and tune your performance."
+                      />
+                    </EuiText>
                   }
                 />
 
@@ -140,10 +149,12 @@ export const CloudDataMigrationApp = ({
                 <EuiListGroupItem
                   {...listItemProps}
                   label={
-                    <FormattedMessage
-                      id="cloudMigration.getInstantAccess.text"
-                      defaultMessage="Get instant access to the latest version of the Elastic Stack with premium features like anomaly detection, searchable snapshots, advanced prevent and protection capabilities, and more."
-                    />
+                    <EuiText css={listItemCss} size="s" color="subdued">
+                      <FormattedMessage
+                        id="cloudMigration.getInstantAccess.text"
+                        defaultMessage="Access the latest version of Elastic with features you want, like anomaly detection, searchable snapshots, advanced security, and so much more."
+                      />
+                    </EuiText>
                   }
                 />
               </EuiListGroup>
