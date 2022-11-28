@@ -22,6 +22,7 @@ import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import type { ApplicationStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import {
   policyDetails,
@@ -50,6 +51,7 @@ export const PolicyFormLayout = React.memo(() => {
   } = useKibana();
   const toasts = useToasts();
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
+  const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
 
   // Store values
   const policyItem = usePolicyDetailsSelector(policyDetails);
@@ -167,20 +169,22 @@ export const PolicyFormLayout = React.memo(() => {
               </EuiButtonEmpty>
             </EuiThemeProvider>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill={true}
-              iconType="save"
-              data-test-subj="policyDetailsSaveButton"
-              onClick={handleSaveOnClick}
-              isLoading={isPolicyLoading}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.details.save"
-                defaultMessage="Save"
-              />
-            </EuiButton>
-          </EuiFlexItem>
+          {canWritePolicyManagement && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill={true}
+                iconType="save"
+                data-test-subj="policyDetailsSaveButton"
+                onClick={handleSaveOnClick}
+                isLoading={isPolicyLoading}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policy.details.save"
+                  defaultMessage="Save"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiBottomBar>
     </>
