@@ -179,7 +179,7 @@ const alertsCasesConfig: StepConfig[] = [
     content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.viewCase.tourContent', {
       defaultMessage: 'Cases are shown under Insights, in the alert details.',
     }),
-    anchorPosition: 'leftUp',
+    anchorPosition: 'rightUp',
     dataTestSubj: getTourAnchor(AlertsCasesTourSteps.viewCase, SecurityStepId.alertsCases),
   },
 ];
