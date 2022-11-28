@@ -74,16 +74,16 @@ export default function ({ getService }: FtrProviderContext) {
                 to: max,
               },
               sort: 'rx',
-              sortDirection: 'asc'
+              sortDirection: 'asc',
             })
           )
           .expect(200);
         const { series } = decodeOrThrow(TopNodesResponseRT)(response.body);
 
-        const hosts = series.map(s => ({
+        const hosts = series.map((s) => ({
           name: s.name,
           rx: s.rx,
-          tx: s.tx
+          tx: s.tx,
         }));
 
         expect(hosts.length).to.be(3);
@@ -91,6 +91,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(hosts[1]).to.eql({ name: 'metricbeat-1', rx: 11250, tx: 25290.5 });
         expect(hosts[2]).to.eql({ name: 'metricbeat-3', rx: null, tx: null });
       });
-    })
+    });
   });
 }
