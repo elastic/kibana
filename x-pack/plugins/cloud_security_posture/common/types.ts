@@ -61,7 +61,7 @@ export type CspStatusCode =
 
 export type IndexStatus =
   | 'not-empty' // Index contains documents
-  | 'empty' // Index doesn't contain documents (or doesn't exists)
+  | 'empty' // Index doesn't contain documents (or doesn't exist)
   | 'unprivileged'; // User doesn't have access to query the index
 
 export interface IndexDetails {
