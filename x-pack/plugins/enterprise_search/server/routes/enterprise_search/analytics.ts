@@ -8,6 +8,8 @@
 import { schema } from '@kbn/config-schema';
 
 import { KibanaResponseFactory } from '@kbn/core-http-server';
+import { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../../common/types/error_codes';
@@ -35,7 +37,17 @@ const createIndexNotFoundError = (error: Error, response: KibanaResponseFactory)
   });
 };
 
-export function registerAnalyticsRoutes({ router, log }: RouteDependencies) {
+interface AnalyticsRouteDependencies extends RouteDependencies {
+  data: DataPluginStart;
+  savedObjects: SavedObjectsServiceStart;
+}
+
+export function registerAnalyticsRoutes({
+  router,
+  log,
+  data,
+  savedObjects,
+}: AnalyticsRouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/analytics/collections',
@@ -91,9 +103,20 @@ export function registerAnalyticsRoutes({ router, log }: RouteDependencies) {
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      const { client } = (await context.core).elasticsearch;
+      const { client: elasticsearchClient } = (await context.core).elasticsearch;
+
+      const dataViewsService = await data.indexPatterns.dataViewsServiceFactory(
+        savedObjects.getScopedClient(request),
+        elasticsearchClient.asCurrentUser,
+        request
+      );
+
       try {
-        const body = await addAnalyticsCollection(client, request.body);
+        const body = await addAnalyticsCollection(
+          elasticsearchClient,
+          dataViewsService,
+          request.body
+        );
         return response.ok({ body });
       } catch (error) {
         if ((error as Error).message === ErrorCode.ANALYTICS_COLLECTION_ALREADY_EXISTS) {
