@@ -86,57 +86,6 @@
       },
       {
         "parentPluginId": "files",
-        "id": "def-public.Image",
-        "type": "Function",
-        "tags": [
-          "note"
-        ],
-        "label": "Image",
-        "description": [
-          "\nA wrapper around the <EuiImage/> that can renders blurhash by the file service while the image is loading\n"
-        ],
-        "signature": [
-          "({ src, url, alt, onLoad, onError, meta, ...rest }: ",
-          {
-            "pluginId": "files",
-            "scope": "public",
-            "docId": "kibFilesPluginApi",
-            "section": "def-public.Props",
-            "text": "Props"
-          },
-          ") => JSX.Element"
-        ],
-        "path": "src/plugins/files/public/components/image/image.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Image.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{ src, url, alt, onLoad, onError, meta, ...rest }",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "files",
-                "scope": "public",
-                "docId": "kibFilesPluginApi",
-                "section": "def-public.Props",
-                "text": "Props"
-              }
-            ],
-            "path": "src/plugins/files/public/components/image/image.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "files",
         "id": "def-public.UploadFile",
         "type": "Function",
         "tags": [],
@@ -1062,30 +1011,6 @@
       },
       {
         "parentPluginId": "files",
-        "id": "def-public.Props",
-        "type": "Type",
-        "tags": [],
-        "label": "Props",
-        "description": [],
-        "signature": [
-          "{ meta?: ",
-          {
-            "pluginId": "files",
-            "scope": "common",
-            "docId": "kibFilesPluginApi",
-            "section": "def-common.FileImageMetadata",
-            "text": "FileImageMetadata"
-          },
-          " | undefined; } & ",
-          "EuiImageProps"
-        ],
-        "path": "src/plugins/files/public/components/image/image.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "files",
         "id": "def-public.ScopedFilesClient",
         "type": "Type",
         "tags": [],
@@ -1204,7 +1129,279 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "files",
+        "id": "def-public.defaultImageFileKind",
+        "type": "Object",
+        "tags": [],
+        "label": "defaultImageFileKind",
+        "description": [
+          "\nA file kind that is available to all plugins to use for uploading images\nintended to be reused across Kibana."
+        ],
+        "path": "src/plugins/files/common/default_image_file_kind.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "files",
+            "id": "def-public.defaultImageFileKind.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"defaultImage\""
+            ],
+            "path": "src/plugins/files/common/default_image_file_kind.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.defaultImageFileKind.maxSizeBytes",
+            "type": "number",
+            "tags": [],
+            "label": "maxSizeBytes",
+            "description": [],
+            "path": "src/plugins/files/common/default_image_file_kind.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.defaultImageFileKind.blobStoreSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "blobStoreSettings",
+            "description": [],
+            "path": "src/plugins/files/common/default_image_file_kind.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": []
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.defaultImageFileKind.allowedMimeTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "allowedMimeTypes",
+            "description": [
+              "// tried using \"image/*\" but it did not work with the HTTP endpoint (got 415 Unsupported Media Type)"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/files/common/default_image_file_kind.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.defaultImageFileKind.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "path": "src/plugins/files/common/default_image_file_kind.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.defaultImageFileKind.http.create",
+                "type": "Object",
+                "tags": [],
+                "label": "create",
+                "description": [],
+                "path": "src/plugins/files/common/default_image_file_kind.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "files",
+                    "id": "def-public.defaultImageFileKind.http.create.tags",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "tags",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/plugins/files/common/default_image_file_kind.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-public.defaultImageFileKind.http.delete",
+                "type": "Object",
+                "tags": [],
+                "label": "delete",
+                "description": [],
+                "path": "src/plugins/files/common/default_image_file_kind.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "files",
+                    "id": "def-public.defaultImageFileKind.http.delete.tags",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "tags",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/plugins/files/common/default_image_file_kind.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-public.defaultImageFileKind.http.download",
+                "type": "Object",
+                "tags": [],
+                "label": "download",
+                "description": [],
+                "path": "src/plugins/files/common/default_image_file_kind.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "files",
+                    "id": "def-public.defaultImageFileKind.http.download.tags",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "tags",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/plugins/files/common/default_image_file_kind.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-public.defaultImageFileKind.http.getById",
+                "type": "Object",
+                "tags": [],
+                "label": "getById",
+                "description": [],
+                "path": "src/plugins/files/common/default_image_file_kind.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "files",
+                    "id": "def-public.defaultImageFileKind.http.getById.tags",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "tags",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/plugins/files/common/default_image_file_kind.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-public.defaultImageFileKind.http.list",
+                "type": "Object",
+                "tags": [],
+                "label": "list",
+                "description": [],
+                "path": "src/plugins/files/common/default_image_file_kind.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "files",
+                    "id": "def-public.defaultImageFileKind.http.list.tags",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "tags",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/plugins/files/common/default_image_file_kind.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-public.defaultImageFileKind.http.share",
+                "type": "Object",
+                "tags": [],
+                "label": "share",
+                "description": [],
+                "path": "src/plugins/files/common/default_image_file_kind.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "files",
+                    "id": "def-public.defaultImageFileKind.http.share.tags",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "tags",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/plugins/files/common/default_image_file_kind.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-public.defaultImageFileKind.http.update",
+                "type": "Object",
+                "tags": [],
+                "label": "update",
+                "description": [],
+                "path": "src/plugins/files/common/default_image_file_kind.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "files",
+                    "id": "def-public.defaultImageFileKind.http.update.tags",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "tags",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/plugins/files/common/default_image_file_kind.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "files",
       "id": "def-public.FilesSetup",
@@ -1881,29 +2078,29 @@
               "ExplainResponse",
               "<TDocument>>; }; features: ",
               "default",
-              "; fieldCaps: { (this: That, params: ",
+              "; fieldCaps: { (this: That, params?: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              ", options?: ",
+              " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "FieldCapsResponse",
-              ">; (this: That, params: ",
+              ">; (this: That, params?: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              ", options?: ",
+              " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
               "FieldCapsResponse",
-              ", unknown>>; (this: That, params: ",
+              ", unknown>>; (this: That, params?: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              ", options?: ",
+              " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "FieldCapsResponse",
@@ -5736,64 +5933,6 @@
       },
       {
         "parentPluginId": "files",
-        "id": "def-common.FileImageMetadata",
-        "type": "Interface",
-        "tags": [],
-        "label": "FileImageMetadata",
-        "description": [
-          "\nSet of metadata captured for every image uploaded via the file services'\npublic components."
-        ],
-        "path": "src/plugins/files/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "files",
-            "id": "def-common.FileImageMetadata.blurhash",
-            "type": "string",
-            "tags": [],
-            "label": "blurhash",
-            "description": [
-              "\nThe blurhash that can be displayed while the image is loading"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/files/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-common.FileImageMetadata.width",
-            "type": "number",
-            "tags": [],
-            "label": "width",
-            "description": [
-              "\nWidth, in px, of the original image"
-            ],
-            "path": "src/plugins/files/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-common.FileImageMetadata.height",
-            "type": "number",
-            "tags": [],
-            "label": "height",
-            "description": [
-              "\nHeight, in px, of the original image"
-            ],
-            "path": "src/plugins/files/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "files",
         "id": "def-common.FileJSON",
         "type": "Interface",
         "tags": [],
@@ -6665,6 +6804,278 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "files",
+        "id": "def-common.defaultImageFileKind",
+        "type": "Object",
+        "tags": [],
+        "label": "defaultImageFileKind",
+        "description": [
+          "\nA file kind that is available to all plugins to use for uploading images\nintended to be reused across Kibana."
+        ],
+        "path": "src/plugins/files/common/default_image_file_kind.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "files",
+            "id": "def-common.defaultImageFileKind.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"defaultImage\""
+            ],
+            "path": "src/plugins/files/common/default_image_file_kind.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-common.defaultImageFileKind.maxSizeBytes",
+            "type": "number",
+            "tags": [],
+            "label": "maxSizeBytes",
+            "description": [],
+            "path": "src/plugins/files/common/default_image_file_kind.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-common.defaultImageFileKind.blobStoreSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "blobStoreSettings",
+            "description": [],
+            "path": "src/plugins/files/common/default_image_file_kind.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": []
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-common.defaultImageFileKind.allowedMimeTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "allowedMimeTypes",
+            "description": [
+              "// tried using \"image/*\" but it did not work with the HTTP endpoint (got 415 Unsupported Media Type)"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/files/common/default_image_file_kind.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-common.defaultImageFileKind.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "path": "src/plugins/files/common/default_image_file_kind.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-common.defaultImageFileKind.http.create",
+                "type": "Object",
+                "tags": [],
+                "label": "create",
+                "description": [],
+                "path": "src/plugins/files/common/default_image_file_kind.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "files",
+                    "id": "def-common.defaultImageFileKind.http.create.tags",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "tags",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/plugins/files/common/default_image_file_kind.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-common.defaultImageFileKind.http.delete",
+                "type": "Object",
+                "tags": [],
+                "label": "delete",
+                "description": [],
+                "path": "src/plugins/files/common/default_image_file_kind.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "files",
+                    "id": "def-common.defaultImageFileKind.http.delete.tags",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "tags",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/plugins/files/common/default_image_file_kind.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-common.defaultImageFileKind.http.download",
+                "type": "Object",
+                "tags": [],
+                "label": "download",
+                "description": [],
+                "path": "src/plugins/files/common/default_image_file_kind.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "files",
+                    "id": "def-common.defaultImageFileKind.http.download.tags",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "tags",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/plugins/files/common/default_image_file_kind.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-common.defaultImageFileKind.http.getById",
+                "type": "Object",
+                "tags": [],
+                "label": "getById",
+                "description": [],
+                "path": "src/plugins/files/common/default_image_file_kind.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "files",
+                    "id": "def-common.defaultImageFileKind.http.getById.tags",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "tags",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/plugins/files/common/default_image_file_kind.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-common.defaultImageFileKind.http.list",
+                "type": "Object",
+                "tags": [],
+                "label": "list",
+                "description": [],
+                "path": "src/plugins/files/common/default_image_file_kind.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "files",
+                    "id": "def-common.defaultImageFileKind.http.list.tags",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "tags",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/plugins/files/common/default_image_file_kind.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-common.defaultImageFileKind.http.share",
+                "type": "Object",
+                "tags": [],
+                "label": "share",
+                "description": [],
+                "path": "src/plugins/files/common/default_image_file_kind.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "files",
+                    "id": "def-common.defaultImageFileKind.http.share.tags",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "tags",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/plugins/files/common/default_image_file_kind.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-common.defaultImageFileKind.http.update",
+                "type": "Object",
+                "tags": [],
+                "label": "update",
+                "description": [],
+                "path": "src/plugins/files/common/default_image_file_kind.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "files",
+                    "id": "def-common.defaultImageFileKind.http.update.tags",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "tags",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/plugins/files/common/default_image_file_kind.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }
