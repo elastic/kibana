@@ -350,7 +350,6 @@ describe('TelemetryEventsSender', () => {
               },
             },
           },
-          },
           Responses: '{ "result": 0 }',
           Target: {
             process: {
