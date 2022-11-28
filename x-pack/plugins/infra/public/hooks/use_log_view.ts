@@ -35,6 +35,7 @@ export const useLogView = ({
           logViewId,
         },
         logViews,
+        notificationChannel: logViewStateNotifications,
       }),
     {
       devTools: useDevTools,

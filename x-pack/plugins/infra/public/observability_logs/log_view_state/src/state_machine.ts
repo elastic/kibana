@@ -169,7 +169,6 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         storeStatus: assign((context, event) =>
           'status' in event
             ? ({
-                ...context,
                 status: event.status,
               } as LogViewContextWithStatus)
             : {}

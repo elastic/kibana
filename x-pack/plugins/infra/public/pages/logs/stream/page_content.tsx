@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { useSelector } from '@xstate/react';
-import { i18n } from '@kbn/i18n';
-import React, { useCallback, useContext } from 'react';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { LogStreamPageStateContext } from '../../../observability_logs/log_stream_page/state/src/provider';
-import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
+import { i18n } from '@kbn/i18n';
+import { useSelector } from '@xstate/react';
+import React from 'react';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { LogsPageTemplate } from '../page_template';
-import { LogsPageLogsContent } from './page_logs_content';
+import { useLogStreamPageStateContext } from '../../../observability_logs/log_stream_page/state/src/provider';
 import { fullHeightContentStyles } from '../../../page_template.styles';
+import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
+import { LogsPageTemplate } from '../shared/page_template';
+import { LogsPageLogsContent } from './page_logs_content';
 import { LogsPageContentProviders } from './page_providers';
 
 const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
@@ -26,12 +26,10 @@ interface InjectedProps {
   hasFailedLoading: boolean;
   hasIndices: boolean;
   missingIndices: boolean;
-  logViewErrors: Error[];
-  retry: () => void;
 }
 
 export const ConnectedStreamPageContent: React.FC = () => {
-  const { logStreamPageStateService } = useContext(LogStreamPageStateContext);
+  const logStreamPageStateService = useLogStreamPageStateContext();
 
   const isLoading = useSelector(logStreamPageStateService, (state) => {
     return state.matches('uninitialized') || state.matches('loadingLogView');
@@ -49,39 +47,23 @@ export const ConnectedStreamPageContent: React.FC = () => {
     state.matches('missingLogViewIndices')
   );
 
-  const logViewErrors = useSelector(logStreamPageStateService, (state) => {
-    return state.matches('loadingLogViewFailed')
-      ? 'error' in state.context.logViewMachineRef.getSnapshot()?.context
-        ? [state.context.logViewMachineRef.getSnapshot()?.context.error]
-        : []
-      : [];
-  });
-
-  const retry = useCallback(() => {
-    logStreamPageStateService.getSnapshot().context.logViewMachineRef.send({
-      type: 'retry',
-    });
-  }, [logStreamPageStateService]);
-
   return (
     <StreamPageContent
       isLoading={isLoading}
       hasFailedLoading={hasFailedLoading}
       hasIndices={hasIndices}
       missingIndices={missingIndices}
-      logViewErrors={logViewErrors}
-      retry={retry}
     />
   );
 };
 
 export const StreamPageContent: React.FC<InjectedProps> = (props: InjectedProps) => {
-  const { isLoading, hasFailedLoading, logViewErrors, hasIndices, missingIndices, retry } = props;
+  const { isLoading, hasFailedLoading, hasIndices, missingIndices } = props;
 
   if (isLoading) {
     return <SourceLoadingPage />;
   } else if (hasFailedLoading) {
-    return <LogSourceErrorPage errors={logViewErrors} onRetry={retry} />;
+    return <ConnectedLogViewErrorPage />;
   } else if (missingIndices) {
     return (
       <div className={APP_WRAPPER_CLASS}>
@@ -96,9 +78,7 @@ export const StreamPageContent: React.FC<InjectedProps> = (props: InjectedProps)
               css: fullHeightContentStyles,
             },
           }}
-        >
-          <LogsPageLogsContent />
-        </LogsPageTemplate>
+        />
       </div>
     );
   } else if (hasIndices) {

@@ -6,31 +6,28 @@
  */
 
 import { useInterpret } from '@xstate/react';
-import React, { createContext } from 'react';
+import createContainer from 'constate';
+import { isDevMode } from '../../../../utils/dev_mode';
 import { type LogViewNotificationChannel } from '../../../log_view_state';
 import { createLogStreamPageStateMachine } from './state_machine';
-import { type LogStreamPageStateService } from './types';
 
-interface IContext {
-  logStreamPageStateService: LogStreamPageStateService;
-}
-
-export const LogStreamPageStateContext = createContext<IContext>({
-  logStreamPageStateService: {} as LogStreamPageStateService,
-});
-
-export const LogStreamPageStateProvider: React.FC<{
+export const useLogStreamPageState = ({
+  logViewStateNotifications,
+  useDevTools = isDevMode(),
+}: {
   logViewStateNotifications: LogViewNotificationChannel;
-}> = ({ children, logViewStateNotifications }) => {
-  const logStreamPageStateService = useInterpret(() =>
-    createLogStreamPageStateMachine({
-      logViewStateNotifications,
-    })
+  useDevTools?: boolean;
+}) => {
+  const logStreamPageStateService = useInterpret(
+    () =>
+      createLogStreamPageStateMachine({
+        logViewStateNotifications,
+      }),
+    { devTools: useDevTools }
   );
 
-  return (
-    <LogStreamPageStateContext.Provider value={{ logStreamPageStateService }}>
-      {children}
-    </LogStreamPageStateContext.Provider>
-  );
+  return logStreamPageStateService;
 };
+
+export const [LogStreamPageStateProvider, useLogStreamPageStateContext] =
+  createContainer(useLogStreamPageState);

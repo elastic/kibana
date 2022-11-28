@@ -24,11 +24,11 @@ export const StreamPage = () => {
     },
   ]);
 
-  const { logViewStateService } = useLogViewContext();
+  const { logViewStateNotifications } = useLogViewContext();
 
   return (
     <EuiErrorBoundary>
-      <LogStreamPageProviders logViewStateService={logViewStateService}>
+      <LogStreamPageProviders logViewStateNotifications={logViewStateNotifications}>
         <ConnectedStreamPageContent />
       </LogStreamPageProviders>
     </EuiErrorBoundary>

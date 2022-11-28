@@ -5,56 +5,49 @@
  * 2.0.
  */
 
-import { InterpreterFrom } from 'xstate';
-import { LogViewStatus } from '../../../../../common/log_views';
-import {
-  ListenerEvents as LogViewListenerEvents,
+import type { LogViewStatus } from '../../../../../common/log_views';
+import type {
   LogViewContextWithError,
   LogViewContextWithResolvedLogView,
-  LogViewActorRef,
+  LogViewNotificationEvent,
 } from '../../../log_view_state';
-import { createLogStreamPageStateMachine } from './state_machine';
 
 export type LogStreamPageEvent =
-  | LogViewListenerEvents
+  | LogViewNotificationEvent
   | {
       type: 'receivedAllParameters';
     };
 
-export interface LogStreamPageContext {
-  logViewMachineRef: LogViewActorRef;
+export interface LogStreamPageContextWithLogView {
+  logViewStatus: LogViewStatus;
+  resolvedLogView: LogViewContextWithResolvedLogView['resolvedLogView'];
+}
+
+export interface LogStreamPageContextWithLogViewError {
+  logViewError: LogViewContextWithError['error'];
 }
 
 export type LogStreamPageTypestate =
   | {
       value: 'uninitialized';
-      context: LogStreamPageContext;
+      context: {};
     }
   | {
       value: 'loadingLogView';
-      context: LogStreamPageContext;
+      context: {};
     }
   | {
       value: 'loadingLogViewFailed';
-      context: LogStreamPageContext & { logViewError: LogViewContextWithError['error'] };
+      context: LogStreamPageContextWithLogViewError;
     }
   | {
       value: 'hasLogViewIndices';
-      context: LogStreamPageContext & {
-        resolvedLogView: LogViewContextWithResolvedLogView['resolvedLogView'];
-        logViewStatus: LogViewStatus;
-      };
+      context: LogStreamPageContextWithLogView;
     }
   | {
       value: 'missingLogViewIndices';
-      context: LogStreamPageContext & {
-        resolvedLogView: LogViewContextWithResolvedLogView['resolvedLogView'];
-        logViewStatus: LogViewStatus;
-      };
+      context: LogStreamPageContextWithLogView;
     };
 
 export type LogStreamPageStateValue = LogStreamPageTypestate['value'];
-export type LogStreamPageStateContext = LogStreamPageTypestate['context'];
-
-export type LogStreamPageStateMachine = ReturnType<typeof createLogStreamPageStateMachine>;
-export type LogStreamPageStateService = InterpreterFrom<LogStreamPageStateMachine>;
+export type LogStreamPageContext = LogStreamPageTypestate['context'];

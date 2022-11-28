@@ -22,7 +22,7 @@ import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
 import { useLogViewContext } from '../../../hooks/use_log_view';
 import { settingsTitle } from '../../../translations';
-import { LogsPageTemplate } from '../page_template';
+import { LogsPageTemplate } from '../shared/page_template';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
