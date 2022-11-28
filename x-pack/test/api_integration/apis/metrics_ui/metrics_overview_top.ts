@@ -50,11 +50,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Runtime fields calculation', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_and_network'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_and_network'));
+      before(() =>
+        esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_and_network')
+      );
+      after(() =>
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_and_network')
+      );
 
-
-      it('should return correct sorted calculations', async () => {
+      it('should return correct calculations', async () => {
         const { min, max } = DATES['8.0.0'].hosts_and_netowrk;
         const response = await supertest
           .post('/api/metrics/overview/top')
