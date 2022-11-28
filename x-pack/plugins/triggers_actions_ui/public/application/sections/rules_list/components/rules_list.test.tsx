@@ -727,13 +727,13 @@ describe('rules_list component with items', () => {
     );
   });
 
-  it('renders edit and delete buttons when user can manage rules', async () => {
+  it.skip('renders edit and delete buttons when user can manage rules', async () => {
     await setup();
     expect(wrapper.find('[data-test-subj="ruleSidebarEditAction"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="ruleSidebarDeleteAction"]').exists()).toBeTruthy();
   });
 
-  it.skip('does not render edit and delete button when rule type does not allow editing in rules management', async () => {
+  it('does not render edit and delete button when rule type does not allow editing in rules management', async () => {
     await setup(false);
     expect(wrapper.find('[data-test-subj="ruleSidebarEditAction"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="ruleSidebarDeleteAction"]').exists()).toBeTruthy();
