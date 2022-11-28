@@ -1025,18 +1025,22 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     }
   } else if (stateP.controlState === 'CHECK_TARGET_MAPPINGS') {
     const res = resW as ResponseType<typeof stateP.controlState>;
-    if (Either.isLeft(res) || !res.right.match) {
+    if (Either.isRight(res)) {
+      if (!res.right.match) {
+        return {
+          ...stateP,
+          controlState: 'UPDATE_TARGET_MAPPINGS',
+        };
+      }
+
+      // The md5 of the mappings match, so there's no need to update target mappings
       return {
         ...stateP,
-        controlState: 'UPDATE_TARGET_MAPPINGS',
+        controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
       };
+    } else {
+      throwBadResponse(stateP, res as never);
     }
-
-    // The md5 of the mappings match, so there's no need to update target mappings
-    return {
-      ...stateP,
-      controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
-    };
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
