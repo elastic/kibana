@@ -50,7 +50,7 @@ export const DeprecateNoticeModal = () => {
         </li>
         <li>
           <FormattedMessage
-            id="xpack.synthetics.deprecateNoticeModal.runYourMonitors"
+            id="xpack.synthetics.deprecateNoticeModal.elasticManagedLocations"
             defaultMessage="In Elastic cloud run your monitors against Elastic managed global locations"
           />
         </li>
@@ -84,7 +84,7 @@ export const ManageMonitorDocsLink = ({ label }: { label?: string }) => (
 
 export const ProjectMonitorDocsLink = ({ label }: { label?: string }) => (
   <FormattedMessage
-    id="xpack.synthetics.deprecateNoticeModal.runYourMonitors"
+    id="xpack.synthetics.deprecateNoticeModal.automateMonitors"
     defaultMessage="Automate adding monitors via {link}"
     values={{
       link: (
