@@ -108,9 +108,6 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
           options: tagOptions,
         },
       ],
-      // onChange: ({ queryText }: EuiSearchBarOnChangeArgs) => {
-      //   if (queryText) console.log('here');
-      // },
     }),
     [tagOptions]
   );
