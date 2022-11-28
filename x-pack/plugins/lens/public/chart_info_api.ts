@@ -44,8 +44,10 @@ export const createChartInfoApi = async (
   dataViews: DataViewsPublicPluginStart,
   editorFrameService?: EditorFrameServiceType
 ): ChartInfoApi => {
-  const visualizationMap = await editorFrameService!.loadVisualizations();
-  const datasourceMap = await editorFrameService!.loadDatasources();
+  const [visualizationMap, datasourceMap] = await Promise.all([
+    editorFrameService!.loadVisualizations(),
+    editorFrameService!.loadDatasources(),
+  ]);
   return {
     async getChartInfo(vis: LensSavedObjectAttributes): Promise<ChartInfo | undefined> {
       const lensVis = vis;

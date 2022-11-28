@@ -77,6 +77,7 @@ import { LayerPanel } from './layerpanel';
 import {
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
+  getCurrentFieldsForOperation,
   getErrorMessages,
   insertNewColumn,
   operationDefinitionMap,
@@ -985,16 +986,7 @@ export function getFormBasedDatasource({
         );
 
         const columns = Object.entries(layer.columns).map(([colId, col]) => {
-          let fields;
-          if (hasField(col)) {
-            fields = [col.sourceField];
-            if (
-              isColumnOfType<TermsIndexPatternColumn>('terms', col) &&
-              col.params.secondaryFields
-            ) {
-              fields = fields.concat(col.params.secondaryFields);
-            }
-          }
+          const fields = hasField(col) ? getCurrentFieldsForOperation(col) : undefined;
           return {
             id: colId,
             role: col.isBucketed ? ('split' as const) : ('metric' as const),
