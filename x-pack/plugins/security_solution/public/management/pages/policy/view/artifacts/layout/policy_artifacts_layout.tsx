@@ -32,7 +32,6 @@ import { PolicyArtifactsFlyout } from '../flyout';
 import type { PolicyArtifactsPageLabels } from '../translations';
 import { policyArtifactsPageLabels } from '../translations';
 import { PolicyArtifactsDeleteModal } from '../delete_modal';
-import type { EventFiltersPageLocation } from '../../../../event_filters/types';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 interface PolicyArtifactsLayoutProps {
@@ -41,9 +40,7 @@ interface PolicyArtifactsLayoutProps {
   labels: PolicyArtifactsPageLabels;
   getExceptionsListApiClient: () => ExceptionsListApiClient;
   searchableFields: readonly string[];
-  getArtifactPath: (
-    location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
-  ) => string;
+  getArtifactPath: (location?: Partial<ArtifactListPageUrlParams>) => string;
   getPolicyArtifactsPath: (policyId: string) => string;
   /** A boolean to check extra privileges for restricted actions, true when it's allowed, false when not */
   externalPrivileges?: boolean;

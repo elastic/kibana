@@ -1560,7 +1560,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           // @ts-expect-error @elastic/elasticsearch _source is optional
           ...this._rawToSavedObject(hit),
           score: hit._score!,
-          // @ts-expect-error @elastic/elasticsearch _source is optional
           sort: hit.sort,
         })
       ),
