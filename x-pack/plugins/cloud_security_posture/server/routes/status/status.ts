@@ -79,6 +79,15 @@ const calculateCspStatusCode = (
   throw new Error('Could not determine csp status');
 };
 
+const assertResponse = (resp: CspSetupStatus, logger: CspApiRequestHandlerContext['logger']) => {
+  if (
+    resp.status === 'unprivileged' &&
+    !resp.indicesDetails.some((idxDetails) => idxDetails.status === 'unprivileged')
+  ) {
+    logger.warn('Returned status in `unprivileged` but response is missing the unprivileged index');
+  }
+};
+
 const getCspStatus = async ({
   logger,
   esClient,
@@ -154,7 +163,7 @@ const getCspStatus = async ({
       isPluginInitialized: isPluginInitialized(),
     };
 
-  return {
+  const response = {
     status,
     indicesDetails,
     latestPackageVersion: latestCspPackageVersion,
@@ -163,6 +172,9 @@ const getCspStatus = async ({
     installedPackageVersion: installation?.install_version,
     isPluginInitialized: isPluginInitialized(),
   };
+
+  assertResponse(response, logger);
+  return response;
 };
 
 export const statusQueryParamsSchema = schema.object({
