@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getQueryStringFilter } from './search/get_query_string_filter';
 import { getFilterClause } from '../helper';
 import { GetPingHistogramParams, HistogramResult } from '../../../../common/runtime_types';
 import { QUERY } from '../../../../common/constants';
@@ -38,6 +39,10 @@ export const getPingHistogram: UMElasticsearchQueryFn<
 
   const minInterval = getHistogramInterval(from, to, QUERY.DEFAULT_BUCKET_COUNT);
 
+  if (query) {
+    filter.push(getQueryStringFilter(query));
+  }
+
   const params = createEsQuery({
     body: {
       query: {
@@ -51,20 +56,6 @@ export const getPingHistogram: UMElasticsearchQueryFn<
             },
             EXCLUDE_RUN_ONCE_FILTER,
           ],
-          ...(query
-            ? {
-                minimum_should_match: 1,
-                should: [
-                  {
-                    multi_match: {
-                      query: escape(query),
-                      type: 'phrase_prefix' as const,
-                      fields: ['monitor.id.text', 'monitor.name.text', 'url.full.text'],
-                    },
-                  },
-                ],
-              }
-            : {}),
         },
       },
       size: 0,
