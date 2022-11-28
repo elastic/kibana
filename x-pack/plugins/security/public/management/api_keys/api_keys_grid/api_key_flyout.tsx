@@ -86,6 +86,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
 }) => {
   let formTitle = 'Create API Key';
   let inProgressButtonText = 'Creating API Key…';
+  let errorTitle = 'create API key';
 
   if (selectedApiKey) {
     // Collect data from the selected API key to pre-populate the form
@@ -110,9 +111,11 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
     if (readonly) {
       formTitle = 'View API Key';
       inProgressButtonText = ''; // This won't be seen since Submit will be disabled
+      errorTitle = '';
     } else {
       formTitle = 'Update API Key';
       inProgressButtonText = 'Updating API Key…';
+      errorTitle = 'update API key';
     }
   }
 
@@ -200,7 +203,8 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
         <>
           <EuiCallOut
             title={i18n.translate('xpack.security.accountManagement.apiKeyFlyout.errorMessage', {
-              defaultMessage: 'Could not create API key',
+              defaultMessage: 'Could not {errorTitle}',
+              values: { errorTitle },
             })}
             color="danger"
           >

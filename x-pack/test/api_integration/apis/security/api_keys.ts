@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const es = getService('es');
 
   describe('API Keys', () => {
     describe('GET /internal/security/api_key/_enabled', () => {
@@ -63,6 +64,32 @@ export default function ({ getService }: FtrProviderContext) {
           .then((response: Record<string, any>) => {
             const { name } = response.body;
             expect(name).to.eql('test_api_key_with_metadata');
+          });
+      });
+    });
+
+    describe('PUT /internal/security/api_key', () => {
+      it('should allow an API Key to be updated', async () => {
+        const { id } = await es.security.createApiKey({ name: 'test_key' });
+
+        await supertest
+          .put('/internal/security/api_key')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            id,
+            metadata: {
+              foo: 'bar',
+            },
+            role_descriptors: {
+              role_1: {
+                cluster: ['monitor'],
+              },
+            },
+          })
+          .expect(200)
+          .then((response: Record<string, any>) => {
+            const { updated } = response.body;
+            expect(updated).to.eql(true);
           });
       });
     });
