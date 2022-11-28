@@ -10,7 +10,6 @@ import { useEffect, useRef, useState } from 'react';
 import { noop } from 'lodash/fp';
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
-import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useUiSetting$, useHttp } from '../../../lib/kibana';
@@ -26,7 +25,6 @@ export interface UseSecurityJobsReturn {
   loading: boolean;
   jobs: SecurityJob[];
   isMlAdmin: boolean;
-  isMlUser: boolean;
   isLicensed: boolean;
   refetch: inputsModel.Refetch;
 }
@@ -51,7 +49,6 @@ export const useSecurityJobs = (): UseSecurityJobsReturn => {
   const refetch = useRef<inputsModel.Refetch>(noop);
   const isMlAdmin = hasMlAdminPermissions(mlCapabilities);
   const isLicensed = hasMlLicense(mlCapabilities);
-  const isMlUser = hasMlUserPermissions(mlCapabilities);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -100,5 +97,5 @@ export const useSecurityJobs = (): UseSecurityJobsReturn => {
     };
   }, [isMlAdmin, isLicensed, securitySolutionDefaultIndex, addError, http]);
 
-  return { isLicensed, isMlAdmin, isMlUser, jobs, loading, refetch: refetch.current };
+  return { isLicensed, isMlAdmin, jobs, loading, refetch: refetch.current };
 };
