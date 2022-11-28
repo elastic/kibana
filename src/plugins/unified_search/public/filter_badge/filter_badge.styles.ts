@@ -20,3 +20,12 @@ export const marginLeftLabelCss = (euiTheme: EuiThemeComputed) => css`
 export const bracketColorCss = css`
   color: ${euiThemeVars.euiColorPrimary};
 `;
+
+export const conditionSpacesCss = (euiTheme: EuiThemeComputed) => css`
+  margin-inline: -${euiTheme.size.xs};
+`;
+
+export const conditionCss = (euiTheme: EuiThemeComputed) => css`
+  ${bracketColorCss}
+  ${conditionSpacesCss(euiTheme)}
+`;

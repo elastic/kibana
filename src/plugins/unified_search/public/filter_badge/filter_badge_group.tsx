@@ -8,11 +8,11 @@
 
 import React from 'react';
 import type { Filter, BooleanRelation } from '@kbn/es-query';
-import { EuiTextColor } from '@elastic/eui';
+import { EuiTextColor, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FilterBadgeErrorBoundary } from './filter_badge_error_boundary';
 import { FilterExpressionBadge } from './filter_badge_expression';
-import { bracketColorCss } from './filter_badge.styles';
+import { conditionCss } from './filter_badge.styles';
 
 export interface FilterBadgeGroupProps {
   filters: Filter[];
@@ -23,7 +23,12 @@ export interface FilterBadgeGroupProps {
 }
 
 const BooleanRelationDelimiter = ({ conditional }: { conditional: BooleanRelation }) => {
-  return <EuiTextColor className={bracketColorCss}>{conditional}</EuiTextColor>;
+  const { euiTheme } = useEuiTheme();
+  /**
+   *  Spaces have been added to make the title readable.
+   *  To eliminate the extra paddings of the text around it, margin-inline with a negative value was added.
+   */
+  return <EuiTextColor className={conditionCss(euiTheme)}>{` ${conditional} `}</EuiTextColor>;
 };
 
 export function FilterBadgeGroup({
