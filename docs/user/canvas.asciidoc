@@ -111,7 +111,7 @@ By default, most of the elements you create use the demo data until you change t
 * *{es} SQL* &mdash; Access your data in {es} using {ref}/sql-spec.html[SQL syntax].
 
 * *{es} documents* &mdash; Access your data in {es} without using aggregations. To use, select a {data-source} and fields. 
-Use *{es} documents* when you have low volume datasets, to view raw documents, or to plot exact, non-aggregated values on a chart.
+Use *{es} documents* when you have low-volume datasets, and you want to view raw documents or to plot exact, non-aggregated values on a chart.
 
 * *Timelion* &mdash; Access your time series data using <<timelion,*Timelion*>> queries. To use *Timelion* queries, you can enter a query using the <<lucene-query,Lucene Query Syntax>>.
 +
