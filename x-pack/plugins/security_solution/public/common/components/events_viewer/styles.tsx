@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
-import type { ViewSelection } from './summary_view_select';
 export const SELECTOR_TIMELINE_GLOBAL_CONTAINER = 'securitySolutionTimeline__container';
 export const EVENTS_TABLE_CLASS_NAME = 'siemEventsTable';
 
@@ -35,11 +34,17 @@ export const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible?: boolean }>`
   display: ${({ $visible = true }) => ($visible ? 'flex' : 'none')};
 `;
 
-export const UpdatedFlexGroup = styled(EuiFlexGroup)<{ $view?: ViewSelection }>`
-  ${({ $view, theme }) => ($view === 'gridView' ? `margin-right: ${theme.eui.euiSizeXL};` : '')}
+export const UpdatedFlexGroup = styled(EuiFlexGroup)<{
+  $hasRightOffset?: boolean;
+}>`
+  ${({ $hasRightOffset, theme }) =>
+    $hasRightOffset
+      ? `margin-right: ${theme.eui.euiSizeXL};`
+      : `margin-right: ${theme.eui.euiSizeXS};`}
   position: absolute;
   z-index: ${({ theme }) => theme.eui.euiZLevel1 - 3};
-  right: 0px;
+  ${({ $hasRightOffset, theme }) =>
+    $hasRightOffset ? `right: ${theme.eui.euiSizeXL};` : `right: ${theme.eui.euiSizeXS};`}
 `;
 
 export const UpdatedFlexItem = styled(EuiFlexItem)<{ $show: boolean }>`

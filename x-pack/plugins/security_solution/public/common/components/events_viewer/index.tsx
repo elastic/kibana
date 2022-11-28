@@ -530,6 +530,7 @@ const StatefulEventsViewerComponent: React.FC<Props & PropsFromRedux> = ({
                     title={title}
                     onViewChange={(selectedView) => setTableView(selectedView)}
                     additionalFilters={additionalFilters}
+                    hasRightOffset={tableView === 'gridView' && nonDeletedEvents.length > 0}
                   />
 
                   {!hasAlerts && !loading && !graphOverlay && <EmptyTable height="short" />}

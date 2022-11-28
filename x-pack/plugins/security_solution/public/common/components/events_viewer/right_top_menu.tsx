@@ -24,6 +24,7 @@ interface Props {
   title: string;
   onViewChange: (viewSelection: ViewSelection) => void;
   additionalFilters?: React.ReactNode;
+  hasRightOffset?: boolean;
 }
 
 export const RightTopMenu = ({
@@ -33,6 +34,7 @@ export const RightTopMenu = ({
   title,
   onViewChange,
   additionalFilters,
+  hasRightOffset,
 }: Props) => {
   const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
@@ -46,7 +48,7 @@ export const RightTopMenu = ({
       data-test-subj="events-viewer-updated"
       gutterSize="m"
       justifyContent="flexEnd"
-      $view={tableView}
+      $hasRightOffset={hasRightOffset}
     >
       <UpdatedFlexItem grow={false} $show={!loading}>
         <InspectButton title={justTitle} queryId={tableId} />
