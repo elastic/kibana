@@ -57,6 +57,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   'kibana.alert.rule.name',
   'kibana.alert.rule.to',
   'kibana.alert.rule.uuid',
+  'kibana.alert.rule.rule_id',
   'kibana.alert.rule.type',
   'kibana.alert.original_event.kind',
   'kibana.alert.original_event.module',

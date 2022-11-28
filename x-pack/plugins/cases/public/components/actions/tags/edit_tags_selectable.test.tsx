@@ -237,7 +237,7 @@ describe('EditTagsSelectable', () => {
     });
   });
 
-  it('adds a partial match correctly', async () => {
+  it('adds a partial match correctly and does not show the no match label', async () => {
     const result = appMock.render(<EditTagsSelectable {...props} />);
 
     /**
@@ -251,6 +251,10 @@ describe('EditTagsSelectable', () => {
         result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag')
       ).toBeInTheDocument();
     });
+
+    expect(
+      result.queryByTestId('cases-actions-tags-edit-selectable-no-match-label')
+    ).not.toBeInTheDocument();
 
     const addNewTagButton = result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag');
 
@@ -274,5 +278,44 @@ describe('EditTagsSelectable', () => {
     expect(
       result.queryByTestId('cases-actions-tags-edit-selectable-add-new-tag')
     ).not.toBeInTheDocument();
+  });
+
+  it('does not show the no match label when the initial tags are empty', async () => {
+    const result = appMock.render(<EditTagsSelectable {...props} tags={[]} />);
+
+    await waitForComponentToUpdate();
+
+    expect(
+      result.queryByTestId('cases-actions-tags-edit-selectable-no-match-label')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the no match label when there is no match', async () => {
+    const result = appMock.render(<EditTagsSelectable {...props} />);
+
+    await userEvent.type(result.getByPlaceholderText('Search'), 'not-exist', { delay: 1 });
+    await waitForComponentToUpdate();
+
+    expect(
+      result.getByTestId('cases-actions-tags-edit-selectable-no-match-label')
+    ).toBeInTheDocument();
+  });
+
+  it('shows the no match label and the add new item when there is space in the search term', async () => {
+    const result = appMock.render(<EditTagsSelectable {...props} />);
+
+    await userEvent.type(result.getByPlaceholderText('Search'), 'test tag', { delay: 1 });
+
+    await waitFor(() => {
+      expect(
+        result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag')
+      ).toBeInTheDocument();
+    });
+
+    await waitForComponentToUpdate();
+
+    expect(
+      result.getByTestId('cases-actions-tags-edit-selectable-no-match-label')
+    ).toBeInTheDocument();
   });
 });
