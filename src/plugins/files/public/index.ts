@@ -17,8 +17,6 @@ export type {
 } from './types';
 export {
   FilesContext,
-  Image,
-  type ImageProps,
   UploadFile,
   type UploadFileProps,
   FilePicker,
