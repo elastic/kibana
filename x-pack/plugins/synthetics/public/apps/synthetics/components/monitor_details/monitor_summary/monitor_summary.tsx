@@ -6,19 +6,12 @@
  */
 
 import React from 'react';
-import {
-  EuiTitle,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiSpacer,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiTitle, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LoadWhenInView } from '@kbn/observability-plugin/public';
 
-import { useEarliestStartDate } from '../hooks/use_earliest_start_data';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useEarliestStartDate } from '../hooks/use_earliest_start_date';
 import { MonitorErrorSparklines } from './monitor_error_sparklines';
 import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
 import { DurationSparklines } from './duration_sparklines';
@@ -34,14 +27,12 @@ import { MonitorErrorsCount } from './monitor_errors_count';
 import { useAbsoluteDate } from '../../../hooks';
 
 export const MonitorSummary = () => {
-  const { from: fromRelative, loading } = useEarliestStartDate();
+  const { from: fromRelative } = useEarliestStartDate();
   const toRelative = 'now';
 
   const { from, to } = useAbsoluteDate({ from: fromRelative, to: toRelative });
 
-  if (loading) {
-    return <EuiLoadingSpinner size="xl" />;
-  }
+  const monitorId = useMonitorQueryId();
 
   const dateLabel = from === 'now-30d/d' ? LAST_30_DAYS_LABEL : TO_DATE_LABEL;
 
@@ -65,7 +56,6 @@ export const MonitorSummary = () => {
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
-
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
                 <AvailabilityPanel from={from} to={to} />
@@ -80,10 +70,12 @@ export const MonitorSummary = () => {
                 <DurationSparklines from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
-                <MonitorErrorsCount from={from} to={to} />
+                {monitorId && <MonitorErrorsCount from={from} to={to} monitorId={[monitorId]} />}
               </EuiFlexItem>
               <EuiFlexItem>
-                <MonitorErrorSparklines from={from} to={to} />
+                {monitorId && (
+                  <MonitorErrorSparklines from={from} to={to} monitorId={[monitorId]} />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

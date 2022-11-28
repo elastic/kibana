@@ -418,6 +418,7 @@ function getMonitorDetailsMockSlice() {
       updated_at: '2022-07-24T17:15:46.342Z',
     },
     syntheticsMonitorLoading: false,
+    syntheticsMonitorDispatchedAt: 0,
     error: null,
     selectedLocationId: 'us_central',
   };
