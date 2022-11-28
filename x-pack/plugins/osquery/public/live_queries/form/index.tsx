@@ -286,10 +286,12 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     }
   }, [queryType, cleanupLiveQuery, resetField, setValue, clearErrors, defaultValue]);
 
+  const groupStyles = useMemo(() => ({ gap: 16 }), []);
+
   return (
     <>
       <FormProvider {...hooksForm}>
-        <EuiFlexGroup direction="column">
+        <EuiFlexGroup direction="column" css={groupStyles}>
           {queryField && (
             <QueryPackSelectable
               queryType={queryType}
