@@ -23,14 +23,14 @@ export function PageTitle({ rule }: PageHeaderProps) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem grow={false}>
-        <EuiSpacer size="xs" />
+        <EuiSpacer size="m" />
         <EuiText size="xs">
           <EuiBadge color={getHealthColor(rule.executionStatus.status)}>
             {rule.executionStatus.status.charAt(0).toUpperCase() +
               rule.executionStatus.status.slice(1)}
           </EuiBadge>
         </EuiText>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
       </EuiFlexItem>
       <EuiFlexGroup direction="column" alignItems="flexStart">
         <EuiFlexItem component="span" grow={false}>
