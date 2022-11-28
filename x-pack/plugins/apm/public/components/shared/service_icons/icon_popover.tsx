@@ -11,9 +11,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import { rgba } from 'polished';
 import React from 'react';
-import styled from 'styled-components';
 import { PopoverItem } from '.';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
