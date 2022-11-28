@@ -143,7 +143,7 @@ export const RulesManagementTour = () => {
       )}
       {isSearchFirstRuleAnchorMounted && demoRule && (
         <EuiTourStep
-          title={i18n.SEARCH_FIRST_RULE_TITLE(demoRule.name)}
+          title={i18n.SEARCH_FIRST_RULE_TITLE}
           content={i18n.SEARCH_FIRST_RULE_CONTENT(demoRule.name)}
           onFinish={noop}
           step={2}
@@ -160,7 +160,7 @@ export const RulesManagementTour = () => {
       )}
       {isActivateFirstRuleAnchorMounted && demoRule && (
         <EuiTourStep
-          title={i18n.ENABLE_FIRST_RULE_TITLE(demoRule.name)}
+          title={i18n.ENABLE_FIRST_RULE_TITLE}
           content={i18n.ENABLE_FIRST_RULE_CONTENT(demoRule.name)}
           onFinish={noop}
           step={3}

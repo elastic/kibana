@@ -21,14 +21,12 @@ export const INSTALL_PREBUILT_RULES_CONTENT = i18n.translate(
   }
 );
 
-export const SEARCH_FIRST_RULE_TITLE = (name: string) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.guidedOnboarding.searchFirstRule.title',
-    {
-      defaultMessage: 'Find your first rule',
-      values: { name },
-    }
-  );
+export const SEARCH_FIRST_RULE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.guidedOnboarding.searchFirstRule.title',
+  {
+    defaultMessage: 'Find your first rule',
+  }
+);
 
 export const SEARCH_FIRST_RULE_CONTENT = (name: string) =>
   i18n.translate(
@@ -39,14 +37,12 @@ export const SEARCH_FIRST_RULE_CONTENT = (name: string) =>
     }
   );
 
-export const ENABLE_FIRST_RULE_TITLE = (name: string) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.guidedOnboarding.enableFirstRule.title',
-    {
-      defaultMessage: 'Enable the rule',
-      values: { name },
-    }
-  );
+export const ENABLE_FIRST_RULE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.guidedOnboarding.enableFirstRule.title',
+  {
+    defaultMessage: 'Enable the rule',
+  }
+);
 
 export const ENABLE_FIRST_RULE_CONTENT = (name: string) =>
   i18n.translate(
