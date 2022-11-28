@@ -103,26 +103,26 @@ describe('TelemetryEventsSender', () => {
                 dotnet: true,
                 streams: [
                   {
-                    name: "#~",
+                    name: '#~',
                     hash: {
-                      md5: "debf08c09d49337fbe7acde4d3749242",
-                      sha256: "90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53",
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
                     },
                   },
                   {
-                    name: "#Blob",
+                    name: '#Blob',
                     hash: {
-                      md5: "debf08c09d49337fbe7acde4d3749242",
-                      sha256: "90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53",
-                    }
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
+                    },
                   },
                 ],
                 sections: [
                   {
-                    name: ".reloc",
+                    name: '.reloc',
                     hash: {
-                      md5: "debf08c09d49337fbe7acde4d3749242",
-                      sha256: "90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53",
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
                     },
                   },
                 ],
@@ -168,17 +168,13 @@ describe('TelemetryEventsSender', () => {
               relative_file_creation_time: 48628704.4029488,
               relative_file_name_modify_time: 48628704.4029488,
               session_info: {
-                "logon_type": "Interactive",
-                "client_address": "127.0.0.1",
-                "id": 1,
-                "authentication_package": "NTLM",
-                "relative_logon_time": 0.1,
-                "relative_password_age": 2592000.123,
-                "user_flags": [
-                  "LOGON_EXTRA_SIDS",
-                  "LOGON_NTLMV2_ENABLED",
-                  "LOGON_WINLOGON"
-                ],
+                logon_type: 'Interactive',
+                client_address: '127.0.0.1',
+                id: 1,
+                authentication_package: 'NTLM',
+                relative_logon_time: 0.1,
+                relative_password_age: 2592000.123,
+                user_flags: ['LOGON_EXTRA_SIDS', 'LOGON_NTLMV2_ENABLED', 'LOGON_WINLOGON'],
               },
             },
           },
@@ -275,26 +271,26 @@ describe('TelemetryEventsSender', () => {
                 dotnet: true,
                 streams: [
                   {
-                    name: "#~",
+                    name: '#~',
                     hash: {
-                      md5: "debf08c09d49337fbe7acde4d3749242",
-                      sha256: "90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53",
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
                     },
                   },
                   {
-                    name: "#Blob",
+                    name: '#Blob',
                     hash: {
-                      md5: "debf08c09d49337fbe7acde4d3749242",
-                      sha256: "90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53",
-                    }
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
+                    },
                   },
                 ],
                 sections: [
                   {
-                    name: ".reloc",
+                    name: '.reloc',
                     hash: {
-                      md5: "debf08c09d49337fbe7acde4d3749242",
-                      sha256: "90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53",
+                      md5: 'debf08c09d49337fbe7acde4d3749242',
+                      sha256: '90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53',
                     },
                   },
                 ],
@@ -336,17 +332,13 @@ describe('TelemetryEventsSender', () => {
               relative_file_creation_time: 48628704.4029488,
               relative_file_name_modify_time: 48628704.4029488,
               session_info: {
-                "logon_type": "Interactive",
-                "client_address": "127.0.0.1",
-                "id": 1,
-                "authentication_package": "NTLM",
-                "relative_logon_time": 0.1,
-                "relative_password_age": 2592000.123,
-                "user_flags": [
-                  "LOGON_EXTRA_SIDS",
-                  "LOGON_NTLMV2_ENABLED",
-                  "LOGON_WINLOGON"
-                ],
+                logon_type: 'Interactive',
+                client_address: '127.0.0.1',
+                id: 1,
+                authentication_package: 'NTLM',
+                relative_logon_time: 0.1,
+                relative_password_age: 2592000.123,
+                user_flags: ['LOGON_EXTRA_SIDS', 'LOGON_NTLMV2_ENABLED', 'LOGON_WINLOGON'],
               },
             },
           },
