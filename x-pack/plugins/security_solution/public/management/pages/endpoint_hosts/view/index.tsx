@@ -135,6 +135,7 @@ export const EndpointList = () => {
   const {
     canReadEndpointList,
     canAccessFleet,
+    canReadPolicyManagement,
     loading: endpointPrivilegesLoading,
   } = useUserPrivileges().endpointPrivileges;
   const { search } = useFormatUrl(SecurityPageName.administration);
@@ -406,14 +407,18 @@ export const EndpointList = () => {
           return (
             <>
               <EuiToolTip content={policy.name} anchorClassName="eui-textTruncate">
-                <EndpointPolicyLink
-                  policyId={policy.id}
-                  className="eui-textTruncate"
-                  data-test-subj="policyNameCellLink"
-                  backLink={backToEndpointList}
-                >
-                  {policy.name}
-                </EndpointPolicyLink>
+                {canReadPolicyManagement ? (
+                  <EndpointPolicyLink
+                    policyId={policy.id}
+                    className="eui-textTruncate"
+                    data-test-subj="policyNameCellLink"
+                    backLink={backToEndpointList}
+                  >
+                    {policy.name}
+                  </EndpointPolicyLink>
+                ) : (
+                  <>{policy.name}</>
+                )}
               </EuiToolTip>
               {policy.endpoint_policy_version && (
                 <EuiText
@@ -553,7 +558,7 @@ export const EndpointList = () => {
         ],
       },
     ];
-  }, [queryParams, search, getAppUrl, backToEndpointList, PAD_LEFT]);
+  }, [queryParams, search, getAppUrl, canReadPolicyManagement, backToEndpointList, PAD_LEFT]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist || areEndpointsEnrolling) {
