@@ -52,9 +52,13 @@ import {
   METADATA_UNITED_TRANSFORM,
 } from '../../../../../common/endpoint/constants';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
+import {
+  initialUserPrivilegesState,
+  initialUserPrivilegesState as mockInitialUserPrivilegesState,
+} from '../../../../common/components/user_privileges/user_privileges_context';
 import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
 import { ENDPOINT_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
@@ -820,6 +824,8 @@ describe('when on the endpoint list page', () => {
             endpointPrivileges: {
               ...mockInitialUserPrivilegesState().endpointPrivileges,
               canReadActionsLogManagement: false,
+              canReadEndpointList: true,
+              canAccessFleet: true,
             },
           });
           const renderResult = await renderAndWaitForData();
@@ -839,6 +845,8 @@ describe('when on the endpoint list page', () => {
             endpointPrivileges: {
               ...mockInitialUserPrivilegesState().endpointPrivileges,
               canReadActionsLogManagement: false,
+              canReadEndpointList: true,
+              canAccessFleet: true,
             },
           });
           reactTestingLibrary.act(() => {
@@ -1231,6 +1239,14 @@ describe('when on the endpoint list page', () => {
   });
 
   describe('required transform failed banner', () => {
+    beforeEach(() => {
+      mockUserPrivileges.mockReturnValue(getUserPrivilegesMockDefaultValue());
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+      mockUserPrivileges.mockReset();
+    });
     it('is not displayed when transform state is not failed', () => {
       const transforms: TransformStats[] = [
         {
@@ -1313,6 +1329,66 @@ describe('when on the endpoint list page', () => {
       const banner = await screen.findByTestId('callout-endpoints-list-transform-failed');
       expect(banner).not.toHaveTextContent(transforms[0].id);
       expect(banner).toHaveTextContent(transforms[1].id);
+    });
+  });
+  describe('endpoint list onboarding screens with RBAC', () => {
+    beforeEach(() => {
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: [],
+        endpointPackagePolicies: mockPolicyResultList({ total: 3 }).items,
+      });
+    });
+    afterEach(() => {
+      mockUserPrivileges.mockReset();
+    });
+    it('user has endpoint list ALL and fleet All and can view entire onboarding screen', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...initialUserPrivilegesState(),
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+          canWriteEndpointList: true,
+          canAccessFleet: true,
+        }),
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
+      });
+      const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
+      expect(onboardingSteps).not.toBeNull();
+    });
+    it('user has endpoint list READ and fleet All and can view entire onboarding screen', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...initialUserPrivilegesState(),
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+          canReadEndpointList: true,
+          canAccessFleet: true,
+        }),
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
+      });
+      const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
+      expect(onboardingSteps).not.toBeNull();
+    });
+    it('user has endpoint list ALL/READ and fleet NONE and can view a modified onboarding screen with no actions link to fleet', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...initialUserPrivilegesState(),
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+          canReadEndpointList: true,
+          canAccessFleet: false,
+        }),
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
+      });
+      const onboardingSteps = await renderResult.findByTestId('policyOnboardingInstructions');
+      expect(onboardingSteps).not.toBeNull();
+      const noPrivilegesPage = await renderResult.findByTestId('noFleetAccess');
+      expect(noPrivilegesPage).not.toBeNull();
+      const startButton = renderResult.queryByTestId('onboardingStartButton');
+      expect(startButton).toBeNull();
     });
   });
 });

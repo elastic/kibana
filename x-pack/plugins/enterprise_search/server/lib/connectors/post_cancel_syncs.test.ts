@@ -39,7 +39,7 @@ describe('addConnector lib function', () => {
           must: [
             {
               term: {
-                connector_id: 'connectorId',
+                'connector.id': 'connectorId',
               },
             },
             {
@@ -63,7 +63,7 @@ describe('addConnector lib function', () => {
           must: [
             {
               term: {
-                connector_id: 'connectorId',
+                'connector.id': 'connectorId',
               },
             },
             {

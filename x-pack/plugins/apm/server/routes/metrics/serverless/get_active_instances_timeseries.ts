@@ -16,7 +16,7 @@ import {
   METRICSET_NAME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { Coordinate } from '../../../../typings/timeseries';
 import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
