@@ -72,6 +72,7 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
     value,
     globalFilters,
   }) => {
+    // TODO check for Cases
     const activeScope: SourcererScopeName = isActiveTimeline(scopeId ?? '')
       ? SourcererScopeName.timeline
       : scopeId != null && isDetectionsAlertsTable(scopeId)

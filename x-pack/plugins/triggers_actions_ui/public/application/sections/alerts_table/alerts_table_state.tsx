@@ -167,6 +167,8 @@ const AlertsTableState = ({
     isLoading,
     {
       alerts,
+      oldAlertsData,
+      ecsAlertsData,
       isInitializing,
       getInspectQuery,
       refetch: refresh,
@@ -226,13 +228,17 @@ const AlertsTableState = ({
       refresh,
       sort,
       updatedAt,
+      oldAlertsData,
+      ecsAlertsData,
     };
   }, [
     alerts,
     alertsCount,
+    ecsAlertsData,
     getInspectQuery,
     isInitializing,
     isLoading,
+    oldAlertsData,
     onPageChange,
     onSortChange,
     pagination.pageIndex,

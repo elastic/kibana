@@ -6,7 +6,7 @@
  */
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect, useRef } from 'react';
 import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
@@ -16,6 +16,7 @@ import {
   EuiButtonIcon,
   EuiDataGridStyle,
   EuiLoadingContent,
+  EuiDataGridRefProps,
 } from '@elastic/eui';
 import { useSorting, usePagination, useBulkActions } from './hooks';
 import { AlertsTableProps } from '../../../types';
@@ -37,11 +38,14 @@ const GridStyles: EuiDataGridStyle = {
 };
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
+  const dataGridRef = useRef<EuiDataGridRefProps>();
   const [rowClasses, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
   const alertsData = props.useFetchAlertsData();
   const {
     activePage,
     alerts,
+    oldAlertsData,
+    ecsAlertsData,
     alertsCount,
     isLoading,
     onPageChange,
@@ -208,9 +212,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const basicRenderCellValue = ({
     data,
     columnId,
+    ecsData,
   }: {
     data: Array<{ field: string; value: string[] }>;
     columnId: string;
+    ecsData?: unknown;
   }) => {
     const value = data.find((d) => d.field === columnId)?.value ?? [];
     if (Array.isArray(value)) {
@@ -232,23 +238,59 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const handleRenderCellValue = useCallback(
     (_props: EuiDataGridCellValueElementProps) => {
       // https://github.com/elastic/eui/issues/5811
-      const alert = alerts[_props.rowIndex - pagination.pageSize * pagination.pageIndex];
-      if (alert) {
-        const data: Array<{ field: string; value: string[] }> = [];
-        Object.entries(alert ?? {}).forEach(([key, value]) => {
-          data.push({ field: key, value: value as string[] });
-        });
-        return renderCellValue({
-          ..._props,
-          data,
-        });
+      const alertIndex = _props.rowIndex - pagination.pageSize * pagination.pageIndex;
+      const data = oldAlertsData[alertIndex];
+      const ecsAlert = ecsAlertsData[alertIndex];
+      if (data) {
+        try {
+          return renderCellValue({
+            ..._props,
+            data,
+            ecsData: ecsAlert,
+          });
+        } catch {
+          // TODO i118n
+          return <>{'something went wrong'}</>;
+        }
       } else if (isLoading) {
         return <EuiLoadingContent lines={1} />;
       }
       return null;
     },
-    [alerts, isLoading, pagination.pageIndex, pagination.pageSize, renderCellValue]
+    [
+      ecsAlertsData,
+      isLoading,
+      oldAlertsData,
+      pagination.pageIndex,
+      pagination.pageSize,
+      renderCellValue,
+    ]
   );
+
+  const { cellActions, visibleCellActions, disabledCellActions } = props.alertsTableConfiguration
+    ?.useCellActions
+    ? props.alertsTableConfiguration?.useCellActions({
+        columns: props.columns,
+        data: oldAlertsData,
+        ecsData: ecsAlertsData,
+        dataGridRef: dataGridRef.current,
+        pageSize: pagination.pageSize,
+      })
+    : { cellActions: null, visibleCellActions: 2, disabledCellActions: [] };
+  const columnsWithCellActions = useMemo(() => {
+    if (cellActions) {
+      return props.columns.map((col) => ({
+        ...col,
+        ...(!(disabledCellActions ?? []).includes(col.id)
+          ? {
+              cellActions,
+              visibleCellActions,
+            }
+          : {}),
+      }));
+    }
+    return props.columns;
+  }, [cellActions, disabledCellActions, props.columns, visibleCellActions]);
 
   return (
     <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
@@ -270,7 +312,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         <EuiDataGrid
           aria-label="Alerts table"
           data-test-subj="alertsTable"
-          columns={props.columns}
+          columns={columnsWithCellActions}
           columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
           trailingControlColumns={props.trailingControlColumns}
           leadingControlColumns={leadingControlColumns}

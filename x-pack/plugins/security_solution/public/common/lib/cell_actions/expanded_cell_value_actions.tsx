@@ -11,6 +11,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common/types';
+import { TimelineId } from '../../../../common/types/timeline';
 import { allowTopN } from '../../components/drag_and_drop/helpers';
 import { ShowTopNButton } from '../../components/hover_actions/actions/show_top_n';
 import { useKibana } from '../kibana';
@@ -62,7 +63,6 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
 
   const [showTopN, setShowTopN] = useState(false);
   const onClick = useCallback(() => setShowTopN(!showTopN), [showTopN]);
-
   return (
     <>
       <StyledContent $isDetails data-test-subj="data-grid-expanded-cell-value-actions">
@@ -90,34 +90,34 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
           />
         ) : null}
       </StyledContent>
-      <StyledFlexGroup gutterSize="s">
-        <EuiFlexItem>
-          {timelines.getHoverActions().getFilterForValueButton({
-            Component: EuiButtonEmpty,
-            field: field.id,
-            filterManager,
-            onFilterAdded,
-            ownFocus: false,
-            size: 's',
-            showTooltip: false,
-            value,
-            onClick: closeCellPopover,
-          })}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {timelines.getHoverActions().getFilterOutValueButton({
-            Component: EuiButtonEmpty,
-            field: field.id,
-            filterManager,
-            onFilterAdded,
-            ownFocus: false,
-            size: 's',
-            showTooltip: false,
-            value,
-            onClick: closeCellPopover,
-          })}
-        </EuiFlexItem>
-      </StyledFlexGroup>
+      {timelineId !== TimelineId.casePage && (
+        <StyledFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            {timelines.getHoverActions().getFilterForValueButton({
+              Component: EuiButtonEmpty,
+              field: field.id,
+              filterManager,
+              onFilterAdded,
+              ownFocus: false,
+              size: 's',
+              showTooltip: false,
+              value,
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {timelines.getHoverActions().getFilterOutValueButton({
+              Component: EuiButtonEmpty,
+              field: field.id,
+              filterManager,
+              onFilterAdded,
+              ownFocus: false,
+              size: 's',
+              showTooltip: false,
+              value,
+            })}
+          </EuiFlexItem>
+        </StyledFlexGroup>
+      )}
     </>
   );
 };
