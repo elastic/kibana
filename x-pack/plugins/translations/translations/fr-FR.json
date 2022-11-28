@@ -30883,7 +30883,6 @@
     "xpack.synthetics.keyValuePairsField.value.ariaLabel": "Valeur",
     "xpack.synthetics.keyValuePairsField.value.label": "Valeur",
     "xpack.synthetics.kueryBar.searchPlaceholder.kql": "Rechercher à l'aide de la syntaxe KQL des ID, noms et types etc. de moniteurs (par ex. monitor.type: \"http\" AND tags: \"dev\")",
-    "xpack.synthetics.kueryBar.searchPlaceholder.simple": "Rechercher par ID, nom ou URL de moniteur (par ex. http:// )",
     "xpack.synthetics.locationName.helpLinkAnnotation": "Ajouter un emplacement",
     "xpack.synthetics.management.confirmDescriptionLabel": "Cette action supprimera le moniteur mais conservera toute donnée collectée. Cette action ne peut pas être annulée.",
     "xpack.synthetics.management.deleteLabel": "Supprimer",
