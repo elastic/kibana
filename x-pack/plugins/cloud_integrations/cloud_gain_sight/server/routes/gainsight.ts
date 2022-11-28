@@ -19,7 +19,7 @@ const DAY = 24 * HOUR;
 export const GAINSIGHT_LIBRARY_PATH = path.join(__dirname, '..', 'assets', 'gainsight_library.js');
 export const GAINSIGHT_WIDGET_PATH = path.join(__dirname, '..', 'assets', 'gainsight_widget.js');
 export const GAINSIGHT_STYLE_PATH = path.join(__dirname, '..', 'assets', 'gainsight_style.css');
-export const GAINSIGHT_EDITOR_PATH = path.join(__dirname, '..', 'assets', 'guide-editor.min.js');
+export const GAINSIGHT_EDITOR_PATH = path.join(__dirname, '..', 'assets', 'guide_editor.js');
 
 /** @internal exported for testing */
 export const renderGainsightLibraryFactory = (dist = true, filePath = GAINSIGHT_LIBRARY_PATH) =>
