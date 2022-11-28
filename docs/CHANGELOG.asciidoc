@@ -256,8 +256,9 @@ Platform::
 * Adds maxIdleSockets and idleSocketTimeout to Elasticsearch config {kibana-pull}142019[#142019]
 
 Security::
-* Adds readonly view to user management {kibana-pull}143438[#143438]
-* Adds `user.id` field to audit log {kibana-pull}141092[#141092]
+* Adds a read-only mode to the User management screen for users with `read_security` cluster privilege {kibana-pull}143438[#143438]
+* Adds a read-only mode to the API keys management screen for users with `read_security` cluster privilege {kibana-pull}144923[#144923]
+* Adds `user.id` field to Kibana audit log {kibana-pull}141092[#141092]
 
 Uptime::
 * Allow using AND for tags filtering {kibana-pull}145079[#145079]
