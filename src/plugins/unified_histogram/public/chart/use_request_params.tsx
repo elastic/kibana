@@ -15,14 +15,12 @@ export const useRequestParams = ({
   query: originalQuery,
   filters: originalFilters,
   timeRange,
-  lastReloadRequestTime,
   request,
 }: {
   services: UnifiedHistogramServices;
   query?: Query | AggregateQuery;
   filters?: Filter[];
   timeRange?: TimeRange;
-  lastReloadRequestTime: number | undefined;
   request?: UnifiedHistogramRequestContext;
 }) => {
   const { data } = services;

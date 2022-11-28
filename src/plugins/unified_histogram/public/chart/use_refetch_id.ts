@@ -21,7 +21,6 @@ import {
 
 export const useRefetchId = ({
   dataView,
-  lastReloadRequestTime,
   request,
   hits,
   chart,
@@ -33,7 +32,6 @@ export const useRefetchId = ({
   input$,
 }: {
   dataView: DataView;
-  lastReloadRequestTime: number | undefined;
   request: UnifiedHistogramRequestContext | undefined;
   hits: UnifiedHistogramHitsContext | undefined;
   chart: UnifiedHistogramChartContext | undefined;
@@ -53,7 +51,6 @@ export const useRefetchId = ({
   useEffect(() => {
     const newRefetchDeps = getRefetchDeps({
       dataView,
-      lastReloadRequestTime,
       request,
       hits,
       chart,
@@ -71,21 +68,9 @@ export const useRefetchId = ({
 
       refetchDeps.current = newRefetchDeps;
     }
-  }, [
-    breakdown,
-    chart,
-    chartVisible,
-    dataView,
-    filters,
-    hits,
-    lastReloadRequestTime,
-    query,
-    request,
-    relativeTimeRange,
-  ]);
+  }, [breakdown, chart, chartVisible, dataView, filters, hits, query, request, relativeTimeRange]);
 
   const incrementRefetchId = useCallback(() => {
-    debugger;
     setRefetchId((id) => id + 1);
   }, []);
 
@@ -96,7 +81,6 @@ export const useRefetchId = ({
 
 const getRefetchDeps = ({
   dataView,
-  lastReloadRequestTime,
   request,
   hits,
   chart,
@@ -107,7 +91,6 @@ const getRefetchDeps = ({
   relativeTimeRange,
 }: {
   dataView: DataView;
-  lastReloadRequestTime: number | undefined;
   request: UnifiedHistogramRequestContext | undefined;
   hits: UnifiedHistogramHitsContext | undefined;
   chart: UnifiedHistogramChartContext | undefined;
@@ -119,7 +102,6 @@ const getRefetchDeps = ({
 }) =>
   cloneDeep([
     dataView.id,
-    lastReloadRequestTime,
     request?.searchSessionId,
     Boolean(hits),
     chartVisible,

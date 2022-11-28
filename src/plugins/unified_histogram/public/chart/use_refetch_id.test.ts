@@ -21,7 +21,6 @@ import { useRefetchId } from './use_refetch_id';
 describe('useRefetchId', () => {
   const getDeps: () => {
     dataView: DataView;
-    lastReloadRequestTime: number | undefined;
     request: UnifiedHistogramRequestContext | undefined;
     hits: UnifiedHistogramHitsContext | undefined;
     chart: UnifiedHistogramChartContext | undefined;
@@ -32,7 +31,6 @@ describe('useRefetchId', () => {
     relativeTimeRange: TimeRange;
   } = () => ({
     dataView: dataViewWithTimefieldMock,
-    lastReloadRequestTime: 0,
     request: undefined,
     hits: undefined,
     chart: undefined,
@@ -50,18 +48,18 @@ describe('useRefetchId', () => {
     expect(hook.result.current).toBe(0);
     hook.rerender({
       ...getDeps(),
-      lastReloadRequestTime: 1,
-    });
-    expect(hook.result.current).toBe(1);
-    hook.rerender({
-      ...getDeps(),
-      lastReloadRequestTime: 1,
-    });
-    expect(hook.result.current).toBe(1);
-    hook.rerender({
-      ...getDeps(),
-      lastReloadRequestTime: 1,
       query: { language: 'kuery', query: 'foo' },
+    });
+    expect(hook.result.current).toBe(1);
+    hook.rerender({
+      ...getDeps(),
+      query: { language: 'kuery', query: 'foo' },
+    });
+    expect(hook.result.current).toBe(1);
+    hook.rerender({
+      ...getDeps(),
+      query: { language: 'kuery', query: 'foo' },
+      relativeTimeRange: { from: 'now-30m', to: 'now' },
     });
     expect(hook.result.current).toBe(2);
   });

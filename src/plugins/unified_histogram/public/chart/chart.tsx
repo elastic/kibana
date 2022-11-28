@@ -49,7 +49,6 @@ export interface ChartProps {
   query?: Query | AggregateQuery;
   filters?: Filter[];
   timeRange?: TimeRange;
-  lastReloadRequestTime?: number;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
@@ -75,7 +74,6 @@ export function Chart({
   query: originalQuery,
   filters: originalFilters,
   timeRange: originalTimeRange,
-  lastReloadRequestTime,
   request,
   hits,
   chart,
@@ -123,13 +121,11 @@ export function Chart({
     query: originalQuery,
     filters: originalFilters,
     timeRange: originalTimeRange,
-    lastReloadRequestTime,
     request,
   });
 
   const refetchId = useRefetchId({
     dataView,
-    lastReloadRequestTime,
     request,
     hits,
     chart,
@@ -148,7 +144,6 @@ export function Chart({
   useTotalHits({
     services,
     dataView,
-    lastReloadRequestTime,
     request,
     hits,
     chart,
@@ -300,7 +295,6 @@ export function Chart({
             <HistogramMemoized
               services={services}
               dataView={dataView}
-              lastReloadRequestTime={lastReloadRequestTime}
               request={request}
               hits={hits}
               chart={chart}

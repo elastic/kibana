@@ -26,7 +26,6 @@ import { REQUEST_DEBOUNCE_MS } from './consts';
 export const useTotalHits = ({
   services,
   dataView,
-  lastReloadRequestTime,
   request,
   hits,
   chart,
@@ -40,7 +39,6 @@ export const useTotalHits = ({
 }: {
   services: UnifiedHistogramServices;
   dataView: DataView;
-  lastReloadRequestTime: number | undefined;
   request: UnifiedHistogramRequestContext | undefined;
   hits: UnifiedHistogramHitsContext | undefined;
   chart: UnifiedHistogramChartContext | undefined;

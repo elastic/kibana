@@ -29,7 +29,6 @@ describe('useTotalHits', () => {
   const getDeps = () => ({
     services: { data: dataPluginMock.createStartContract() } as any,
     dataView: dataViewWithTimefieldMock,
-    lastReloadRequestTime: undefined,
     request: undefined,
     hits: {
       status: UnifiedHistogramFetchStatus.uninitialized,

@@ -53,10 +53,6 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   timeRange?: TimeRange;
   /**
-   * Can be updated to `Date.now()` to force a refresh
-   */
-  lastReloadRequestTime?: number;
-  /**
    * Context object for requests made by unified histogram components -- optional
    */
   request?: UnifiedHistogramRequestContext;
@@ -126,7 +122,6 @@ export const UnifiedHistogramLayout = ({
   query,
   filters,
   timeRange,
-  lastReloadRequestTime,
   request,
   hits,
   chart,
@@ -192,7 +187,6 @@ export const UnifiedHistogramLayout = ({
           query={query}
           filters={filters}
           timeRange={timeRange}
-          lastReloadRequestTime={lastReloadRequestTime}
           request={request}
           hits={hits}
           chart={chart}

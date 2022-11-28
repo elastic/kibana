@@ -34,7 +34,6 @@ import { REQUEST_DEBOUNCE_MS } from './consts';
 export interface HistogramProps {
   services: UnifiedHistogramServices;
   dataView: DataView;
-  lastReloadRequestTime: number | undefined;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart: UnifiedHistogramChartContext;
@@ -47,7 +46,6 @@ export interface HistogramProps {
 export function Histogram({
   services: { data, lens, uiSettings },
   dataView,
-  lastReloadRequestTime,
   request,
   hits,
   chart: { timeInterval },
@@ -140,19 +138,16 @@ export function Histogram({
       timeRange,
       attributes,
       request,
-      lastReloadRequestTime,
       onLoad,
     })
   );
 
   useDebounce(
     () => {
-      setDebouncedProps(
-        getLensProps({ timeRange, attributes, request, lastReloadRequestTime, onLoad })
-      );
+      setDebouncedProps(getLensProps({ timeRange, attributes, request, onLoad }));
     },
     REQUEST_DEBOUNCE_MS,
-    [attributes, lastReloadRequestTime, onLoad, request, timeRange]
+    [attributes, onLoad, request, timeRange]
   );
 
   return (
@@ -169,13 +164,11 @@ export const getLensProps = ({
   timeRange,
   attributes,
   request,
-  lastReloadRequestTime,
   onLoad,
 }: {
   timeRange: TimeRange;
   attributes: TypedLensByValueInput['attributes'];
   request: UnifiedHistogramRequestContext | undefined;
-  lastReloadRequestTime: number | undefined;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
 }) => ({
   id: 'unifiedHistogramLensComponent',
@@ -187,6 +180,5 @@ export const getLensProps = ({
   executionContext: {
     description: 'fetch chart data and total hits',
   },
-  lastReloadRequestTime,
   onLoad,
 });

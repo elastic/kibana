@@ -63,7 +63,6 @@ function mountComponent() {
       from: '2020-05-14T11:05:13.590',
       to: '2020-05-14T11:20:13.590',
     },
-    lastReloadRequestTime: 42,
     lensAttributes: getMockLensAttributes(),
     onTotalHitsChange: jest.fn(),
     onChartLoad: jest.fn(),
@@ -90,11 +89,10 @@ describe('Histogram', () => {
       timeRange: props.timeRange,
       attributes: getMockLensAttributes(),
       request: props.request,
-      lastReloadRequestTime: props.lastReloadRequestTime,
       onLoad: lensProps.onLoad,
     });
     expect(lensProps).toEqual(originalProps);
-    component.setProps({ lastReloadRequestTime: 43 }).update();
+    component.setProps({ request: { ...props.request, searchSessionId: '321' } }).update();
     lensProps = component.find(embeddable).props();
     expect(lensProps).toEqual(originalProps);
     await act(async () => {
@@ -102,7 +100,7 @@ describe('Histogram', () => {
     });
     component.update();
     lensProps = component.find(embeddable).props();
-    expect(lensProps).toEqual({ ...originalProps, lastReloadRequestTime: 43 });
+    expect(lensProps).toEqual({ ...originalProps, searchSessionId: '321' });
   });
 
   it('should execute onLoad correctly', async () => {
@@ -165,7 +163,7 @@ describe('Histogram', () => {
       UnifiedHistogramFetchStatus.loading,
       undefined
     );
-    expect(props.onChartLoad).toHaveBeenLastCalledWith({ complete: false, adapters: {} });
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters: {} });
     expect(buildBucketInterval.buildBucketInterval).not.toHaveBeenCalled();
     expect(useTimeRange.useTimeRange).toHaveBeenLastCalledWith(
       expect.objectContaining({ bucketInterval: undefined })
@@ -177,7 +175,7 @@ describe('Histogram', () => {
       UnifiedHistogramFetchStatus.complete,
       100
     );
-    expect(props.onChartLoad).toHaveBeenLastCalledWith({ complete: true, adapters });
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters });
     expect(buildBucketInterval.buildBucketInterval).toHaveBeenCalled();
     expect(useTimeRange.useTimeRange).toHaveBeenLastCalledWith(
       expect.objectContaining({ bucketInterval: mockBucketInterval })
