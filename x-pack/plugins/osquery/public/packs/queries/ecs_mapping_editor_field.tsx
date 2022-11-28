@@ -55,6 +55,7 @@ import osquerySchema from '../../common/schemas/osquery/v5.5.1.json';
 import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
+import { overflowCss } from '../utils';
 
 export type ECSMappingFormReturn = UseFormReturn<{ ecsMappingArray: ECSMappingArray }>;
 
@@ -572,8 +573,10 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
       isDisabled={euiFieldProps.isDisabled}
     >
       <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem grow={false}>{Prepend}</EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={overflowCss} grow={false}>
+          {Prepend}
+        </EuiFlexItem>
+        <EuiFlexItem css={overflowCss}>
           <ResultComboBox
             error={resultFieldState.error?.message}
             // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
@@ -643,9 +646,9 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
   return (
     <>
       <EuiFlexGroup data-test-subj="ECSMappingEditorForm" alignItems="flexStart" gutterSize="s">
-        <EuiFlexItem>
+        <EuiFlexItem css={overflowCss}>
           <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
-            <EuiFlexItem>
+            <EuiFlexItem css={overflowCss}>
               <ECSComboboxField
                 control={control}
                 watch={watch}
@@ -663,7 +666,7 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={overflowCss}>
           <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
             <ECSFieldWrapper>
               <OsqueryColumnField
