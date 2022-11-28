@@ -14,6 +14,7 @@ import type { UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
 import type { ShardsArray } from '../../../../common/schemas/common/utils';
 import { ShardsPolicyField } from './shards_policy_field';
 import { ShardsPercentageField } from './shards_percentage_field';
+import { overflowCss } from '../../utils';
 
 const StyledButtonWrapper = styled.div`
   margin-top: ${(props: { index: number }) => props.index === 0 && '16px'};
@@ -28,8 +29,6 @@ interface ShardsFormProps {
   onDelete?: UseFieldArrayRemove;
   options: Array<EuiComboBoxOptionOption<string>>;
 }
-
-const overFlowCss = { overflow: 'auto' };
 
 const ShardsFormComponent = ({
   onDelete,
@@ -51,7 +50,7 @@ const ShardsFormComponent = ({
         alignItems="flexStart"
         gutterSize="s"
       >
-        <EuiFlexItem css={overFlowCss}>
+        <EuiFlexItem css={overflowCss}>
           <ShardsPolicyField
             index={index}
             control={control}

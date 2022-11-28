@@ -29,6 +29,7 @@ import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../packs/queries/constants';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import { PlaygroundFlyout } from './playground_flyout';
 import { CodeEditorField } from './code_editor_field';
+import { overflowCss } from '../../packs/utils';
 
 interface SavedQueryFormProps {
   viewMode?: boolean;
@@ -37,7 +38,6 @@ interface SavedQueryFormProps {
   idSet?: Set<string>;
 }
 
-const overflowCss = { overflow: 'auto' };
 const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
   viewMode,
   hasPlayground,

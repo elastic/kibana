@@ -55,6 +55,7 @@ import osquerySchema from '../../common/schemas/osquery/v5.5.1.json';
 import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
+import { overflowCss } from '../utils';
 
 export type ECSMappingFormReturn = UseFormReturn<{ ecsMappingArray: ECSMappingArray }>;
 
@@ -131,7 +132,6 @@ const StyledButtonWrapper = styled.div`
 const ECSFieldWrapper = styled(EuiFlexItem)`
   max-width: 100%;
 `;
-const overflowCss = { overflow: 'auto' };
 
 const SINGLE_SELECTION = { asPlainText: true };
 
@@ -573,7 +573,9 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
       isDisabled={euiFieldProps.isDisabled}
     >
       <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem grow={false}>{Prepend}</EuiFlexItem>
+        <EuiFlexItem css={overflowCss} grow={false}>
+          {Prepend}
+        </EuiFlexItem>
         <EuiFlexItem css={overflowCss}>
           <ResultComboBox
             error={resultFieldState.error?.message}

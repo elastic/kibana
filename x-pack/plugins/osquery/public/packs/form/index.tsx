@@ -37,6 +37,7 @@ import { NameField } from './name_field';
 import { DescriptionField } from './description_field';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
 import { PackTypeSelectable } from './shards/pack_type_selectable';
+import { overflowCss } from '../utils';
 
 type PackFormData = Omit<PackItem, 'id' | 'queries'> & { queries: PackQueryFormData[] };
 
@@ -52,8 +53,6 @@ interface PackFormProps {
   editMode?: boolean;
   isReadOnly?: boolean;
 }
-
-const overFlowCss = { overflow: 'auto' };
 
 const PackFormComponent: React.FC<PackFormProps> = ({
   defaultValue,
@@ -264,14 +263,14 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         {packType === 'policy' && (
           <>
             <EuiFlexGroup>
-              <EuiFlexItem css={overFlowCss}>
+              <EuiFlexItem css={overflowCss}>
                 <PolicyIdComboBoxField options={availableOptions} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
 
             <EuiFlexGroup>
-              <EuiFlexItem css={overFlowCss}>
+              <EuiFlexItem css={overflowCss}>
                 <StyledEuiAccordion
                   id="shardsToggle"
                   forceState={shardsToggleState}
