@@ -23,7 +23,7 @@ import {
   SERVICE_VERSION,
   TRANSACTION_RESULT,
   PROCESSOR_EVENT,
-} from '../../common/elasticsearch_fieldnames';
+} from '../../common/es_fields/apm';
 import { createOrUpdateIndex } from '../shared/create_or_update_index';
 import { parseIndexUrl } from '../shared/parse_index_url';
 import { ESClient, getEsClient } from '../shared/get_es_client';

@@ -22,7 +22,7 @@ interface RuleEventLogListStatusFilterProps {
 export const RuleEventLogListStatusFilter = (props: RuleEventLogListStatusFilterProps) => {
   const { selectedOptions = [], onChange = () => {} } = props;
 
-  const isRuleLastRunOutcomeEnabled = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
+  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
@@ -73,7 +73,7 @@ export const RuleEventLogListStatusFilter = (props: RuleEventLogListStatusFilter
               >
                 <RuleEventLogListStatus
                   status={status}
-                  lastRunOutcomeEnabled={isRuleLastRunOutcomeEnabled}
+                  useExecutionStatus={isRuleUsingExecutionStatus}
                 />
               </EuiFilterSelectItem>
             );

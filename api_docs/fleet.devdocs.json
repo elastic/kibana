@@ -10590,7 +10590,7 @@
             "label": "fleet",
             "description": [],
             "signature": [
-              "{ hosts: string[]; } | { kibana: ",
+              "{ hosts: string[]; proxy_url?: string | undefined; proxy_headers?: any; ssl?: { verification_mode?: string | undefined; certificate_authorities?: string[] | undefined; renegotiation?: string | undefined; } | undefined; } | { kibana: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -13409,7 +13409,7 @@
             "label": "release",
             "description": [],
             "signature": [
-              "\"experimental\" | \"beta\" | \"ga\" | undefined"
+              "\"beta\" | \"experimental\" | \"ga\" | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
             "deprecated": false,
@@ -13770,7 +13770,7 @@
             "label": "[RegistryDataStreamKeys.release]",
             "description": [],
             "signature": [
-              "\"experimental\" | \"beta\" | \"ga\""
+              "\"beta\" | \"experimental\" | \"ga\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -15315,7 +15315,7 @@
             "section": "def-common.Output",
             "text": "Output"
           },
-          ", \"type\" | \"hosts\" | \"ca_sha256\"> & { [key: string]: any; }"
+          ", \"type\" | \"hosts\" | \"ca_sha256\"> & { [key: string]: any; proxy_url?: string | undefined; proxy_headers?: any; }"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
         "deprecated": false,
@@ -16151,7 +16151,7 @@
             "section": "def-common.PackageSpecCategory",
             "text": "PackageSpecCategory"
           },
-          " | undefined)[] | undefined; version: string; internal?: boolean | undefined; release?: \"experimental\" | \"beta\" | \"ga\" | undefined; policy_templates?: ",
+          " | undefined)[] | undefined; version: string; internal?: boolean | undefined; release?: \"beta\" | \"experimental\" | \"ga\" | undefined; policy_templates?: ",
           {
             "pluginId": "fleet",
             "scope": "common",

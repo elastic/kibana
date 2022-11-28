@@ -17,7 +17,8 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { CoreSetup } from '@kbn/core/public';
-import { withSuspense, defaultTheme$ } from '@kbn/presentation-util-plugin/public';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { ProgressRendererConfig } from '../../common/types';
 import { LazyProgressComponent } from '../components/progress';
 

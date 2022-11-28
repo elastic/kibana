@@ -13,9 +13,10 @@ import { MlCommonUI } from './common_ui';
 export type MlDataVisualizerTable = ProvidedType<typeof MachineLearningDataVisualizerTableProvider>;
 
 export function MachineLearningDataVisualizerTableProvider(
-  { getService }: FtrProviderContext,
+  { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI
 ) {
+  const headerPage = getPageObject('header');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -391,6 +392,7 @@ export function MachineLearningDataVisualizerTableProvider(
       hasActionMenu = false,
       checkDistributionPreviewExist = true
     ) {
+      await headerPage.waitUntilLoadingHasFinished();
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
       await this.ensureDetailsOpen(fieldName);
@@ -421,6 +423,7 @@ export function MachineLearningDataVisualizerTableProvider(
     }
 
     public async assertDateFieldContents(fieldName: string, docCountFormatted: string) {
+      await headerPage.waitUntilLoadingHasFinished();
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
       await this.ensureDetailsOpen(fieldName);
@@ -437,6 +440,7 @@ export function MachineLearningDataVisualizerTableProvider(
       topValuesCount: number,
       exampleContent?: string[]
     ) {
+      await headerPage.waitUntilLoadingHasFinished();
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
       await this.ensureDetailsOpen(fieldName);
@@ -467,6 +471,7 @@ export function MachineLearningDataVisualizerTableProvider(
       docCountFormatted: string,
       expectedExamplesCount: number
     ) {
+      await headerPage.waitUntilLoadingHasFinished();
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
 
@@ -481,6 +486,7 @@ export function MachineLearningDataVisualizerTableProvider(
       docCountFormatted: string,
       expectedExamplesCount: number
     ) {
+      await headerPage.waitUntilLoadingHasFinished();
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
 
@@ -496,6 +502,7 @@ export function MachineLearningDataVisualizerTableProvider(
     }
 
     public async assertUnknownFieldContents(fieldName: string, docCountFormatted: string) {
+      await headerPage.waitUntilLoadingHasFinished();
       await this.assertRowExists(fieldName);
       await this.assertFieldDocCount(fieldName, docCountFormatted);
 

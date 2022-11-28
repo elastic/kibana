@@ -40,7 +40,7 @@ describe('ElasticV3ServerShipper', () => {
   const setLastBatchSent = (ms: number) => (shipper['lastBatchSent'] = ms);
 
   beforeEach(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     shipper = new ElasticV3ServerShipper(
       { version: '1.2.3', channelName: 'test-channel', debug: true },
