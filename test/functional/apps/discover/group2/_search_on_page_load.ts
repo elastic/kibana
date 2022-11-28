@@ -25,6 +25,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
+  const savedSearchName = 'saved-search-with-on-page-load';
+
   const initSearchOnPageLoad = async (searchOnPageLoad: boolean) => {
     await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': searchOnPageLoad });
     await PageObjects.common.navigateToApp('discover');
@@ -60,6 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/date_nested');
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe(`when it's false`, () => {
@@ -117,6 +120,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
         expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
+      });
+
+      it('should fetch data when a search is saved', async function () {
+        await PageObjects.discover.selectIndexPattern('logstash-*');
+
+        await retry.waitFor('number of fetches to be 0', waitForFetches(0));
+        expect(await PageObjects.discover.doesSidebarShowFields()).to.be(false);
+
+        await PageObjects.discover.saveSearch(savedSearchName);
+
+        await retry.waitFor('number of fetches to be 1', waitForFetches(1));
+        expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
+      });
+
+      it('should reset state after opening a saved search and pressing New', async function () {
+        await PageObjects.discover.loadSavedSearch(savedSearchName);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.waitFor('number of fetches to be 1', waitForFetches(1));
+        expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
+
+        await testSubjects.click('discoverNewButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.waitFor('number of fetches to be 0', waitForFetches(1));
+        expect(await PageObjects.discover.doesSidebarShowFields()).to.be(false);
       });
     });
 

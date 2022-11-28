@@ -10,12 +10,19 @@ import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common
 import { getDataViewFieldList } from './get_data_view_field_list';
 
 export enum DiscoverSidebarReducerActionType {
+  RESET = 'RESET',
   DATA_VIEW_SWITCHED = 'DATA_VIEW_SWITCHED',
   DOCUMENTS_LOADED = 'DOCUMENTS_LOADED',
   DOCUMENTS_LOADING = 'DOCUMENTS_LOADING',
 }
 
 type DiscoverSidebarReducerAction =
+  | {
+      type: DiscoverSidebarReducerActionType.RESET;
+      payload: {
+        dataView: DataView | null | undefined;
+      };
+    }
   | {
       type: DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED;
       payload: {
@@ -50,7 +57,7 @@ export interface DiscoverSidebarReducerState {
   status: DiscoverSidebarReducerStatus;
 }
 
-export function getInitialState(dataView?: DataView): DiscoverSidebarReducerState {
+export function getInitialState(dataView?: DataView | null): DiscoverSidebarReducerState {
   return {
     dataView,
     allFields: null,
@@ -64,6 +71,8 @@ export function discoverSidebarReducer(
   action: DiscoverSidebarReducerAction
 ): DiscoverSidebarReducerState {
   switch (action.type) {
+    case DiscoverSidebarReducerActionType.RESET:
+      return getInitialState(action.payload.dataView);
     case DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED:
       return state.dataView === action.payload.dataView
         ? state // already updated in `DOCUMENTS_LOADED`

@@ -194,4 +194,27 @@ describe('sidebar reducer', function () {
       status: DiscoverSidebarReducerStatus.INITIAL,
     });
   });
+
+  it('should handle "reset" action', function () {
+    const state: DiscoverSidebarReducerState = {
+      ...getInitialState(dataView),
+      allFields: [dataView.fields[0]],
+      fieldCounts: {},
+      status: DiscoverSidebarReducerStatus.COMPLETED,
+    };
+    const resultForDocuments = discoverSidebarReducer(state, {
+      type: DiscoverSidebarReducerActionType.RESET,
+      payload: {
+        dataView: stubDataViewWithoutTimeField,
+      },
+    });
+    expect(resultForDocuments).toEqual(
+      expect.objectContaining({
+        dataView: stubDataViewWithoutTimeField,
+        allFields: null,
+        fieldCounts: null,
+        status: DiscoverSidebarReducerStatus.INITIAL,
+      })
+    );
+  });
 });

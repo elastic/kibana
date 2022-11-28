@@ -141,22 +141,35 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     const subscription = props.documents$.subscribe((documentState) => {
       const isPlainRecordType = documentState.recordRawType === RecordRawType.PLAIN;
 
-      if (documentState?.fetchStatus === FetchStatus.COMPLETE) {
-        dispatchSidebarStateAction({
-          type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
-          payload: {
-            dataView: selectedDataViewRef.current,
-            fieldCounts: calcFieldCounts(documentState.result),
-            isPlainRecord: isPlainRecordType,
-          },
-        });
-      } else if (documentState?.fetchStatus === FetchStatus.LOADING) {
-        dispatchSidebarStateAction({
-          type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
-          payload: {
-            isPlainRecord: isPlainRecordType,
-          },
-        });
+      switch (documentState?.fetchStatus) {
+        case FetchStatus.UNINITIALIZED:
+          dispatchSidebarStateAction({
+            type: DiscoverSidebarReducerActionType.RESET,
+            payload: {
+              dataView: selectedDataViewRef.current,
+            },
+          });
+          break;
+        case FetchStatus.LOADING:
+          dispatchSidebarStateAction({
+            type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
+            payload: {
+              isPlainRecord: isPlainRecordType,
+            },
+          });
+          break;
+        case FetchStatus.COMPLETE:
+          dispatchSidebarStateAction({
+            type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
+            payload: {
+              dataView: selectedDataViewRef.current,
+              fieldCounts: calcFieldCounts(documentState.result),
+              isPlainRecord: isPlainRecordType,
+            },
+          });
+          break;
+        default:
+          break;
       }
     });
     return () => subscription.unsubscribe();
