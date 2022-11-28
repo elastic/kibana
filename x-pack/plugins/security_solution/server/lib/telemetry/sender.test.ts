@@ -99,6 +99,34 @@ describe('TelemetryEventsSender', () => {
             test: 'me',
             another: 'nope',
             pe: {
+              Ext: {
+                dotnet: true,
+                streams: [
+                  {
+                    name: "#~",
+                    hash: {
+                      md5: "debf08c09d49337fbe7acde4d3749242",
+                      sha256: "90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53",
+                    },
+                  },
+                  {
+                    name: "#Blob",
+                    hash: {
+                      md5: "debf08c09d49337fbe7acde4d3749242",
+                      sha256: "90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53",
+                    }
+                  },
+                ],
+                sections: [
+                  {
+                    name: ".reloc",
+                    hash: {
+                      md5: "debf08c09d49337fbe7acde4d3749242",
+                      sha256: "90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53",
+                    },
+                  },
+                ],
+              },
               original_file_name: 'malware.exe',
             },
             Ext: {
@@ -117,6 +145,8 @@ describe('TelemetryEventsSender', () => {
               header_bytes: 'data in here',
               quarantine_result: true,
               quarantine_message: 'this file is bad',
+              relative_file_creation_time: 48628704.4029488,
+              relative_file_name_modify_time: 48628704.4029488,
               something_else: 'nope',
             },
           },
@@ -135,6 +165,21 @@ describe('TelemetryEventsSender', () => {
             entity_id: 'some_entity_id',
             Ext: {
               protection: 'PsProtectedSignerAntimalware-Light',
+              relative_file_creation_time: 48628704.4029488,
+              relative_file_name_modify_time: 48628704.4029488,
+              session_info: {
+                "logon_type": "Interactive",
+                "client_address": "127.0.0.1",
+                "id": 1,
+                "authentication_package": "NTLM",
+                "relative_logon_time": 0.1,
+                "relative_password_age": 2592000.123,
+                "user_flags": [
+                  "LOGON_EXTRA_SIDS",
+                  "LOGON_NTLMV2_ENABLED",
+                  "LOGON_WINLOGON"
+                ],
+              },
             },
           },
           Responses: '{ "result": 0 }', // >= 7.15
@@ -226,6 +271,34 @@ describe('TelemetryEventsSender', () => {
             created: 0,
             path: 'X',
             pe: {
+              Ext: {
+                dotnet: true,
+                streams: [
+                  {
+                    name: "#~",
+                    hash: {
+                      md5: "debf08c09d49337fbe7acde4d3749242",
+                      sha256: "90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53",
+                    },
+                  },
+                  {
+                    name: "#Blob",
+                    hash: {
+                      md5: "debf08c09d49337fbe7acde4d3749242",
+                      sha256: "90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53",
+                    }
+                  },
+                ],
+                sections: [
+                  {
+                    name: ".reloc",
+                    hash: {
+                      md5: "debf08c09d49337fbe7acde4d3749242",
+                      sha256: "90143dfb2e3210f18e1bcc50eb6c3961d11071e3ec024215b8835e468fa63e53",
+                    },
+                  },
+                ],
+              },
               original_file_name: 'malware.exe',
             },
             Ext: {
@@ -244,6 +317,8 @@ describe('TelemetryEventsSender', () => {
               },
               quarantine_result: true,
               quarantine_message: 'this file is bad',
+              relative_file_creation_time: 48628704.4029488,
+              relative_file_name_modify_time: 48628704.4029488,
             },
           },
           host: {
@@ -258,7 +333,23 @@ describe('TelemetryEventsSender', () => {
             entity_id: 'some_entity_id',
             Ext: {
               protection: 'PsProtectedSignerAntimalware-Light',
+              relative_file_creation_time: 48628704.4029488,
+              relative_file_name_modify_time: 48628704.4029488,
+              session_info: {
+                "logon_type": "Interactive",
+                "client_address": "127.0.0.1",
+                "id": 1,
+                "authentication_package": "NTLM",
+                "relative_logon_time": 0.1,
+                "relative_password_age": 2592000.123,
+                "user_flags": [
+                  "LOGON_EXTRA_SIDS",
+                  "LOGON_NTLMV2_ENABLED",
+                  "LOGON_WINLOGON"
+                ],
+              },
             },
+          },
           },
           Responses: '{ "result": 0 }',
           Target: {
