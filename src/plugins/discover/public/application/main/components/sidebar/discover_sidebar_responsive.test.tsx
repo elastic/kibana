@@ -110,6 +110,10 @@ const mockServices = {
           }),
         },
       },
+      getState: () => ({
+        query: { query: '', language: 'lucene' },
+        filters: [],
+      }),
     },
   },
   dataViews: dataViewPluginMocks.createStartContract(),
