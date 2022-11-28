@@ -61,11 +61,12 @@ import { fetchSyntheticsMonitor } from '../../../../state/overview/api';
 import { MonitorStatus } from '../../../common/components/monitor_status';
 
 interface Props {
+  configId: string;
   id: string;
   location: string;
   onClose: () => void;
   onEnabledChange: () => void;
-  onLocationChange: (id: string, location: string) => void;
+  onLocationChange: (params: { configId: string; id: string; location: string }) => void;
   currentDurationChartFrom?: string;
   currentDurationChartTo?: string;
   previousDurationChartFrom?: string;
@@ -162,14 +163,14 @@ function DetailFlyoutDurationChart({
 function LocationSelect({
   locations,
   currentLocation,
-  id,
+  configId,
   setCurrentLocation,
   monitor,
   onEnabledChange,
 }: {
   locations: ReturnType<typeof useStatusByLocation>['locations'];
   currentLocation: string;
-  id: string;
+  configId: string;
   monitor: EncryptedSyntheticsMonitor;
   onEnabledChange: () => void;
   setCurrentLocation: (location: string) => void;
@@ -235,7 +236,7 @@ function LocationSelect({
         <EuiDescriptionList align="left" compressed>
           <EuiDescriptionListTitle>{ENABLED_ITEM_TEXT}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-            <MonitorEnabled id={id} monitor={monitor} reloadPage={onEnabledChange} />
+            <MonitorEnabled configId={configId} monitor={monitor} reloadPage={onEnabledChange} />
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
       </EuiFlexItem>
@@ -254,7 +255,7 @@ function LoadingState() {
 }
 
 export function MonitorDetailFlyout(props: Props) {
-  const { id, onLocationChange } = props;
+  const { id, configId, onLocationChange } = props;
   const {
     data: { monitors },
   } = useSelector(selectOverviewState);
@@ -265,12 +266,12 @@ export function MonitorDetailFlyout(props: Props) {
   }, [id, monitors]);
 
   const setLocation = useCallback(
-    (location: string) => onLocationChange(id, location),
-    [id, onLocationChange]
+    (location: string) => onLocationChange({ id, configId, location }),
+    [id, configId, onLocationChange]
   );
 
   const detailLink = useMonitorDetailLocator({
-    monitorId: id,
+    configId: id,
   });
 
   const {
@@ -278,14 +279,14 @@ export function MonitorDetailFlyout(props: Props) {
     error,
     status,
   }: FetcherResult<SavedObject<SyntheticsMonitor>> = useFetcher(
-    () => fetchSyntheticsMonitor(id),
-    [id]
+    () => fetchSyntheticsMonitor(configId),
+    [configId]
   );
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
-  const monitorDetail = useMonitorDetail(id, props.location);
-  const locationStatuses = useStatusByLocation(id);
+  const monitorDetail = useMonitorDetail(configId, props.location);
+  const locationStatuses = useStatusByLocation(configId);
   const locations = locationStatuses.locations?.filter((l: any) => !!l?.observer?.geo?.name) ?? [];
 
   const isOverlay = useIsWithinMaxBreakpoint('xl');
@@ -328,7 +329,7 @@ export function MonitorDetailFlyout(props: Props) {
                 currentLocation={props.location}
                 locations={locations}
                 setCurrentLocation={setLocation}
-                id={id}
+                configId={configId}
                 monitor={monitorSavedObject.attributes}
                 onEnabledChange={props.onEnabledChange}
               />

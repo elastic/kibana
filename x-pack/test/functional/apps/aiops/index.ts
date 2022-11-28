@@ -33,6 +33,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./explain_log_rate_spikes'));
+    loadTestFile(require.resolve('./explain_log_rate_spikes_farequote'));
+    loadTestFile(require.resolve('./explain_log_rate_spikes_logs'));
   });
 }

@@ -104,14 +104,16 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
       /* collect all monitor ids for use
        * in filtering overview requests */
       result.saved_objects.forEach((monitor) => {
-        const id = monitor.id;
-        allMonitorIds.push(id);
+        const id = monitor.attributes[ConfigKey.MONITOR_QUERY_ID];
+        const configId = monitor.attributes[ConfigKey.CONFIG_ID];
+        allMonitorIds.push(configId);
 
-        /* for reach location, add a config item */
+        /* for each location, add a config item */
         const locations = monitor.attributes[ConfigKey.LOCATIONS];
         locations.forEach((location) => {
           const config = {
             id,
+            configId,
             name: monitor.attributes[ConfigKey.NAME],
             location,
             isEnabled: monitor.attributes[ConfigKey.ENABLED],
