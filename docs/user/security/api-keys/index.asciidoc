@@ -45,10 +45,19 @@ curl --location --request GET 'http://localhost:5601/api/security/role' \
 --header 'kbn-xsrf: true' \
 --header 'Authorization: ApiKey aVZlLUMzSUJuYndxdDJvN0k1bU46aGxlYUpNS2lTa2FKeVZua1FnY1VEdw==' \
 
+
 [IMPORTANT]
 ============================================================================
 API keys are intended for programmatic access to {kib} and {es}. Do not use API keys to authenticate access via a web browser.
 ============================================================================
+
+[float]
+[[udpate-api-key]]
+=== Update an API key
+
+To update an API key, open the main menu, then click *Stack Management > API Keys*, then click on the name of an existing API key.
+
+Only the `Restrict privileges` and `metadata` fields can be updated.
 
 [float]
 [[view-api-keys]]
@@ -62,6 +71,3 @@ created by which user in which realm.
 If you have only the `manage_own_api_key` permission, you see only a list of your own keys.
 
 You can delete API keys individually or in bulk.
-
-You cannot modify an API key. If you need additional privileges,
-you must create a new key with the desired configuration and invalidate the old key.
