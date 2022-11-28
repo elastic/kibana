@@ -1033,7 +1033,6 @@ packages/shared-ux/file/file_picker/impl @elastic/kibana-global-experience
 packages/shared-ux/file/file_upload/impl @elastic/kibana-global-experience
 packages/shared-ux/file/image/impl @elastic/kibana-global-experience
 packages/shared-ux/file/image/mocks @elastic/kibana-global-experience
-packages/shared-ux/file/image/types @elastic/kibana-global-experience
 packages/shared-ux/file/mocks @elastic/kibana-global-experience
 packages/shared-ux/file/types @elastic/kibana-global-experience
 packages/shared-ux/file/util @elastic/kibana-global-experience
