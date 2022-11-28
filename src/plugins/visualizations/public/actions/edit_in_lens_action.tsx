@@ -25,7 +25,7 @@ export interface EditInLensContext {
   embeddable: IEmbeddable;
 }
 
-const displayName = i18n.translate('visulizations.action.editInLens.displayName', {
+const displayName = i18n.translate('visualizations.actions.editInLens.displayName', {
   defaultMessage: 'Convert to Lens',
 });
 
