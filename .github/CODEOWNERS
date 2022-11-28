@@ -151,7 +151,7 @@
 # Home/Overview/Landing Pages
 /x-pack/plugins/observability/public/pages/home @elastic/observability-design
 /x-pack/plugins/observability/public/pages/landing @elastic/observability-design
-/x-pack/plugins/observability/public/pages/overview @elastic/observability-design
+/x-pack/plugins/observability/public/pages/overview @elastic/observability-design @elastic/actionable-observability
 
 # Actionable Observability
 /x-pack/plugins/observability/common/rules @elastic/actionable-observability
@@ -662,6 +662,8 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 /x-pack/plugins/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 /x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 /x-pack/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
+/x-pack/test/cloud_security_posture_functional/ @elastic/kibana-cloud-security-posture
+
 
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
