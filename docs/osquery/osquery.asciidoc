@@ -82,23 +82,27 @@ You can run packs as live queries or schedule packs to run for one or more agent
 
 . Click the **Packs** tab.
 . Click **Add pack** to create a new pack, or click the name of an existing pack, then **Edit** to add queries to an existing pack.
+. Provide a name for the pack. A short description is optional. 
+. Schedule the pack to run on a policy basis (*Policy*) or across all policies (*Global).
++
 
-. Provide the following fields:
+If you choose the *Policy* option, you must also define policies to run the pack. To do this, configure one or both of the following settings: 
 
-* The name of the pack.
+** *Scheduled {agent} policies (optional)*: Enter the names of policies to run the pack. By default, all {agents} registered to these policies will run the pack. 
++
 
-* A short description of the pack.
+NOTE: If you only want _some_ {agents} within a policy to run the pack, configure these details in the *Partial deployment (shards) field. 
++
+** *Partial deployment (shards): In the *Policy* field, enter the name of a policy to run the pack. Next, use the *Shard* slider to specify a percentage of policy {agents} to run pack. 
 
-* The agent policies where this pack should run. If no agent policies are set, the pack is not scheduled.
+. If you are creating a new pack, add queries to schedule:
 
-. Add queries to schedule:
-
-* To add a query to the pack, click *Add query*, and then either add a saved query or enter a new query.
+ ** Click *Add query* and then add a saved query or enter a new query.
 Each query must include a unique query ID and the interval at which it should run.
 Optionally, set the minimum Osquery version and platform,
 or <<osquery-map-fields,map ECS fields>>. When you add a saved query to a pack, this adds a copy of the query. A connection is not maintained between saved queries and packs.
 
-* To upload queries from a `.conf` query pack, drag the pack to the drop zone under the query table. To explore the community packs that Osquery publishes, click *Example packs*.
+* Upload queries from a `.conf` query pack by dragging the pack to the drop zone under the query table. To explore the community packs that Osquery publishes, click *Example packs*.
 
 . Click *Save pack*. The queries run when the policy receives the update.
 
