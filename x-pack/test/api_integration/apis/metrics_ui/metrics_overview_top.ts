@@ -18,13 +18,12 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  const { min, max } = DATES['7.0.0'].hosts;
-
   describe('API /metrics/overview/top', () => {
     before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
 
     it('works', async () => {
+      const { min, max } = DATES['7.0.0'].hosts;
       const response = await supertest
         .post('/api/metrics/overview/top')
         .set({
