@@ -11,7 +11,7 @@ import * as taskManager from './task_manager';
 import * as rabbitmq from './rabbitmq';
 
 const ADAPTERS = ['taskManager', 'rabbitmq'] as const;
-const CONFIGURED_ADAPTER: typeof ADAPTERS[number] = 'rabbitmq';
+const CONFIGURED_ADAPTER: typeof ADAPTERS[number] = 'taskManager';
 
 export function registerWorkerAdapter(worker: Worker<unknown>, plugins: PluginSetupDeps) {
   switch (CONFIGURED_ADAPTER) {
