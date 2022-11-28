@@ -49,7 +49,7 @@ const UiMenuItem = reactToUiComponent(ReactMenuItem);
 export class EditInLensAction implements Action<EditInLensContext> {
   public id = ACTION_EDIT_IN_LENS;
   public readonly type = ACTION_EDIT_IN_LENS;
-  public order = 80;
+  public order = 30;
   public showNotification = true;
   public currentAppId: string | undefined;
 

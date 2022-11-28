@@ -207,7 +207,7 @@ function getLensTopNavConfig(options: {
 
   if (initialContextAppId === 'dashboards') {
     topNavMenu.push({
-      label: i18n.translate('xpack.lens.app.saveAndReturn', {
+      label: i18n.translate('xpack.lens.app.replaceInDashboard', {
         defaultMessage: 'Replace in dashboard',
       }),
       emphasize: true,
