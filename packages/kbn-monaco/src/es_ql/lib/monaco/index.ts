@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { LangModuleType } from '../types';
-import { ID } from './constants';
-
-import { ESQLTokensProvider } from './lib/monaco/esql_tokens_provider';
-
-export const ESQLLang: LangModuleType = { ID, tokensProvider: new ESQLTokensProvider() };
+export { ESQLTokensProvider } from './esql_tokens_provider';

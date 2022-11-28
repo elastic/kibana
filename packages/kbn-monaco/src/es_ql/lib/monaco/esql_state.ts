@@ -6,9 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { LangModuleType } from '../types';
-import { ID } from './constants';
+import { monaco } from '../../../monaco_imports';
 
-import { ESQLTokensProvider } from './lib/monaco/esql_tokens_provider';
+/** @internal **/
+export class ESQLState implements monaco.languages.IState {
+  clone(): monaco.languages.IState {
+    return new ESQLState();
+  }
 
-export const ESQLLang: LangModuleType = { ID, tokensProvider: new ESQLTokensProvider() };
+  equals(other: monaco.languages.IState): boolean {
+    return true;
+  }
+}
