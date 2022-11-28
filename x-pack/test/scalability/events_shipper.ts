@@ -9,6 +9,8 @@ import { ToolingLog } from '@kbn/tooling-log';
 import fetch from 'node-fetch';
 
 export interface Event {
+  eventName: string;
+  eventType: string;
   journeyName: string;
   kibanaVersion: string;
   branch: string | undefined;

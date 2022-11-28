@@ -50,6 +50,8 @@ async function sendReportMetricsToTelemetry(
     const events = [
       {
         ...metrics,
+        eventType: 'scalability_metric',
+        eventName: 'capacity_test_summary',
         journeyName: journey.journeyName,
         kibanaVersion: journey.kibanaVersion,
         branch: process.env.BUILDKITE_BRANCH,
