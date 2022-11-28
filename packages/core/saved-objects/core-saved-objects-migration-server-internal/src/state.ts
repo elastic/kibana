@@ -286,6 +286,11 @@ export interface RefreshTarget extends PostInitState {
   readonly targetIndex: string;
 }
 
+export interface CheckTargetMappingsState extends PostInitState {
+  readonly controlState: 'CHECK_TARGET_MAPPINGS';
+  readonly sourceIndexMappings?: IndexMapping;
+}
+
 export interface UpdateTargetMappingsState extends PostInitState {
   /** Update the mappings of the target index */
   readonly controlState: 'UPDATE_TARGET_MAPPINGS';
@@ -297,9 +302,19 @@ export interface UpdateTargetMappingsWaitForTaskState extends PostInitState {
   readonly updateTargetMappingsTaskId: string;
 }
 
+export interface UpdateTargetMappingsMeta extends PostInitState {
+  /** Update the mapping _meta information with the hashes of the mappings for each plugin */
+  readonly controlState: 'UPDATE_TARGET_MAPPINGS_META';
+}
+
+export interface CheckVersionIndexReadyActions extends PostInitState {
+  readonly controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS';
+}
+
 export interface OutdatedDocumentsSearchOpenPit extends PostInitState {
   /** Open PiT for target index to search for outdated documents */
   readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT';
+  readonly sourceIndexMappings?: IndexMapping;
 }
 
 export interface OutdatedDocumentsSearchRead extends PostInitState {
@@ -451,8 +466,11 @@ export type State = Readonly<
   | ReindexSourceToTempIndexBulk
   | SetTempWriteBlock
   | CloneTempToSource
+  | CheckTargetMappingsState
   | UpdateTargetMappingsState
   | UpdateTargetMappingsWaitForTaskState
+  | UpdateTargetMappingsMeta
+  | CheckVersionIndexReadyActions
   | OutdatedDocumentsSearchOpenPit
   | OutdatedDocumentsSearchRead
   | OutdatedDocumentsSearchClosePit

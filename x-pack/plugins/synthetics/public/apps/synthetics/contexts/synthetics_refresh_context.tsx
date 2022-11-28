@@ -9,11 +9,15 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 
 interface SyntheticsRefreshContext {
   lastRefresh: number;
+  refreshInterval: number;
   refreshApp: () => void;
 }
 
+export const APP_DEFAULT_REFRESH_INTERVAL = 1000 * 30;
+
 const defaultContext: SyntheticsRefreshContext = {
   lastRefresh: 0,
+  refreshInterval: APP_DEFAULT_REFRESH_INTERVAL,
   refreshApp: () => {
     throw new Error('App refresh was not initialized, set it when you invoke the context');
   },
@@ -30,15 +34,15 @@ export const SyntheticsRefreshContextProvider: React.FC = ({ children }) => {
   }, [setLastRefresh]);
 
   const value = useMemo(() => {
-    return { lastRefresh, refreshApp };
+    return { lastRefresh, refreshApp, refreshInterval: APP_DEFAULT_REFRESH_INTERVAL };
   }, [lastRefresh, refreshApp]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       refreshApp();
-    }, 1000 * 30);
+    }, value.refreshInterval);
     return () => clearInterval(interval);
-  }, [refreshApp]);
+  }, [refreshApp, value.refreshInterval]);
 
   return <SyntheticsRefreshContext.Provider value={value} children={children} />;
 };
