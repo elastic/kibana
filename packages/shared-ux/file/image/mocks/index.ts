@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
+<<<<<<<< HEAD:packages/shared-ux/file/image/mocks/index.ts
 export { base64dLogo, getImageData } from './src';
+========
+export { UploadFile, type UploadFileProps } from './upload_file';
+export { FilePicker, type FilePickerProps } from './file_picker';
+export { FilesContext } from './context';
+>>>>>>>> main:src/plugins/files/public/components/index.ts
