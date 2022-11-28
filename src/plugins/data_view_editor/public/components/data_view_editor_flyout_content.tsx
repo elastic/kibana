@@ -339,7 +339,12 @@ const IndexPatternEditorFlyoutContentComponent = ({
             })}
           </EuiLink>
         )}
-        <Form form={form} className="indexPatternEditor__form">
+        <Form
+          form={form}
+          className="indexPatternEditor__form"
+          error={form.getErrors()}
+          isInvalid={form.isSubmitted && !form.isValid}
+        >
           <UseField path="isAdHoc" />
           {indexPatternTypeSelect}
           <EuiSpacer size="l" />
