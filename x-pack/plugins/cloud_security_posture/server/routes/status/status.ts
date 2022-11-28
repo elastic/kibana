@@ -10,6 +10,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { AgentPolicyServiceInterface, AgentService } from '@kbn/fleet-plugin/server';
 import moment from 'moment';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { schema } from '@kbn/config-schema';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME, STATUS_ROUTE_PATH } from '../../../common/constants';
 import type { CspApiRequestHandlerContext, CspRouter } from '../../types';
 import type { CspSetupStatus, CspStatusCode } from '../../../common/types';
@@ -73,6 +74,7 @@ const getCspStatus = async ({
   packagePolicyService,
   agentPolicyService,
   agentService,
+  isPluginInitialized,
 }: CspApiRequestHandlerContext): Promise<CspSetupStatus> => {
   const [hasFindings, installation, latestCspPackage, installedPackagePolicies] = await Promise.all(
     [
@@ -109,6 +111,7 @@ const getCspStatus = async ({
       latestPackageVersion: latestCspPackageVersion,
       healthyAgents,
       installedPackagePolicies: installedPackagePoliciesTotal,
+      isPluginInitialized: isPluginInitialized(),
     };
 
   return {
@@ -117,21 +120,37 @@ const getCspStatus = async ({
     healthyAgents,
     installedPackagePolicies: installedPackagePoliciesTotal,
     installedPackageVersion: installation?.install_version,
+    isPluginInitialized: isPluginInitialized(),
   };
 };
+
+export const statusQueryParamsSchema = schema.object({
+  /**
+   * CSP Plugin initialization includes creating indices/transforms/tasks.
+   * Prior to this initialization, the plugin is not ready to index findings.
+   */
+  check: schema.oneOf([schema.literal('all'), schema.literal('init')], { defaultValue: 'all' }),
+});
 
 export const defineGetCspStatusRoute = (router: CspRouter): void =>
   router.get(
     {
       path: STATUS_ROUTE_PATH,
-      validate: false,
+      validate: { query: statusQueryParamsSchema },
       options: {
         tags: ['access:cloud-security-posture-read'],
       },
     },
-    async (context, _, response) => {
+    async (context, request, response) => {
       const cspContext = await context.csp;
       try {
+        if (request.query.check === 'init') {
+          return response.ok({
+            body: {
+              isPluginInitialized: cspContext.isPluginInitialized(),
+            },
+          });
+        }
         const status = await getCspStatus(cspContext);
         return response.ok({
           body: status,

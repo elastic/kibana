@@ -6637,7 +6637,7 @@
               "\nField formats"
             ],
             "signature": [
-              "{ register: (fieldFormats: ",
+              "{ has: (id: string) => boolean; register: (fieldFormats: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -6645,7 +6645,7 @@
                 "section": "def-common.FieldFormatInstanceType",
                 "text": "FieldFormatInstanceType"
               },
-              "[]) => void; has: (id: string) => boolean; }"
+              "[]) => void; }"
             ],
             "path": "src/plugins/data_views/public/types.ts",
             "deprecated": false,
@@ -21455,7 +21455,7 @@
               "\nField formats service"
             ],
             "signature": [
-              "{ deserialize: ",
+              "{ has: (id: string) => boolean; deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -21695,7 +21695,7 @@
                 "section": "def-common.FieldFormatConfig",
                 "text": "FieldFormatConfig"
               },
-              ">) => void; has: (id: string) => boolean; }"
+              ">) => void; }"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,

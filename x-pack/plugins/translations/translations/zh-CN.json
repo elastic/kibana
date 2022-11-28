@@ -30889,7 +30889,6 @@
     "xpack.synthetics.keyValuePairsField.value.ariaLabel": "值",
     "xpack.synthetics.keyValuePairsField.value.label": "值",
     "xpack.synthetics.kueryBar.searchPlaceholder.kql": "使用 kql 语法搜索监测 ID、名称和类型等（例如 monitor.type: \"http\" AND tags: \"dev\"）",
-    "xpack.synthetics.kueryBar.searchPlaceholder.simple": "按监测 ID、名称或 url（例如 http://）搜索",
     "xpack.synthetics.locationName.helpLinkAnnotation": "添加位置",
     "xpack.synthetics.management.confirmDescriptionLabel": "此操作将删除监测，但会保留收集的任何数据。此操作无法撤消。",
     "xpack.synthetics.management.deleteLabel": "删除",
