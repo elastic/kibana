@@ -98,6 +98,13 @@ export const ML_RUN_JOB_LABEL = i18n.translate(
   }
 );
 
+export const ML_STOP_JOB_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.mlStopJobLabel',
+  {
+    defaultMessage: 'Stop job',
+  }
+);
+
 export const ML_JOB_STARTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStartedDescription',
   {
