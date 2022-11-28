@@ -713,9 +713,10 @@ const getSuppressedAlertData = (ecsData: Ecs | Ecs[]) => {
   );
   const dataProviderPartials = terms.map((term) => {
     const fieldId = term.field.replace('.', '-');
+    const id = `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${fieldId}-${term.value}`;
     return term.value == null
       ? {
-          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${fieldId}-${term.value}`,
+          id,
           name: fieldId,
           enabled: true,
           excluded: true,
@@ -727,7 +728,7 @@ const getSuppressedAlertData = (ecsData: Ecs | Ecs[]) => {
           },
         }
       : {
-          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${fieldId}-${term.value}`,
+          id,
           name: fieldId,
           enabled: true,
           excluded: false,
