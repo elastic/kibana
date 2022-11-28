@@ -15,11 +15,6 @@ import type { PluginSetupDeps, PluginStartDeps, Job } from '../plugin';
 const queueName = 'kibana';
 const channelPromise = (async () => {
   const connection = await amqp.connect('amqp://guest:guest@localhost', {});
-  const channel = await connection.createChannel();
-  return channel;
-})();
-const confirmChannelPromise = (async () => {
-  const connection = await amqp.connect('amqp://guest:guest@localhost', {});
   const channel = await connection.createConfirmChannel();
   await channel.assertQueue(queueName, { durable: false });
   return channel;
@@ -27,7 +22,6 @@ const confirmChannelPromise = (async () => {
 
 export function registerWorkerAdapter(worker: Worker<unknown>, plugins: PluginSetupDeps) {
   (async () => {
-    await new Promise((resolve) => setTimeout(resolve, 10000));
     const channel = await channelPromise;
     // channel.prefetch(10); // max workers
     channel.consume(
@@ -46,14 +40,14 @@ export function registerWorkerAdapter(worker: Worker<unknown>, plugins: PluginSe
 
 export async function enqueueAdater(job: Job<unknown>, plugins: PluginStartDeps) {
   const message = Buffer.from(JSON.stringify(job.params));
-  const channel = await confirmChannelPromise;
+  const channel = await channelPromise;
   // Both lines below in one shot?
   channel.sendToQueue(queueName, message);
   await channel.waitForConfirms();
 }
 
 export async function bulkEnqueueAdapter(jobs: Array<Job<unknown>>, plugins: PluginStartDeps) {
-  const channel = await confirmChannelPromise;
+  const channel = await channelPromise;
   jobs.forEach((job) => {
     const message = Buffer.from(JSON.stringify(job.params));
     // Both lines below in one shot?
