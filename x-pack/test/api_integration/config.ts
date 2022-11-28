@@ -39,6 +39,8 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         `--xpack.fleet.developer.bundledPackageLocation=${__dirname}/fleet_bundled_packages`,
         `--xpack.fleet.packages.0.name=elasticsearch`,
         `--xpack.fleet.packages.0.version=1.2.0-preview1`,
+        `--xpack.fleet.packages.1.name=kibana`,
+        `--xpack.fleet.packages.1.version=2.1.0-preview1`,
       ],
     },
     esTestCluster: {
