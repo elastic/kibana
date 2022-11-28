@@ -9,11 +9,17 @@ import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-  RunContext,
 } from '@kbn/task-manager-plugin/server';
 import { Worker, WorkerRegistry } from './worker_registry';
+import { taskManagerAdapter } from './adapters';
 
-interface Job<T> {
+// Set this to whatever one you want to use!
+const CONFIGURED_ADAPTER = 'taskManager';
+const availableAdapters = {
+  taskManager: taskManagerAdapter,
+};
+
+export interface Job<T> {
   id?: string;
   workerId: string;
   interval: number; // milliseconds
@@ -23,7 +29,7 @@ interface Job<T> {
 export interface PluginSetup {
   registerWorker(worker: Worker<unknown>): void;
 }
-interface PluginSetupDeps {
+export interface PluginSetupDeps {
   taskManager: TaskManagerSetupContract;
 }
 
@@ -31,36 +37,31 @@ export interface PluginStart {
   schedule(job: Job<unknown>): Promise<void>;
   unschedule(jobId: Job<unknown>['id']): Promise<void>;
 }
-interface PluginStartDeps {
+export interface PluginStartDeps {
   taskManager: TaskManagerStartContract;
+}
+
+export interface Adapter {
+  registerWorkerAdapter(worker: Worker<unknown>, plugins: PluginSetupDeps): void;
+  scheduleAdapter(job: Job<unknown>, plugins: PluginStartDeps): Promise<void>;
+  unscheduleAdapter(jobId: Job<unknown>['id'], plugins: PluginStartDeps): Promise<void>;
 }
 
 export class SchedulerPlugin
   implements Plugin<PluginSetup, PluginStart, PluginSetupDeps, PluginStartDeps>
 {
+  private readonly adapter: Adapter;
   private readonly workerRegistry = new WorkerRegistry();
+
+  constructor() {
+    this.adapter = availableAdapters[CONFIGURED_ADAPTER];
+  }
 
   public setup(core: CoreSetup, plugins: PluginSetupDeps) {
     return {
       registerWorker: (worker: Worker<unknown>) => {
         this.workerRegistry.register(worker);
-        plugins.taskManager.registerTaskDefinitions({
-          [`plugin:scheduler:${worker.id}`]: {
-            title: `Worker: ${worker.id}`,
-            createTaskRunner: ({ taskInstance }: RunContext) => {
-              const params = taskInstance.params;
-              const abortController = new AbortController();
-              return {
-                run: async () => {
-                  await worker.run(params, abortController.signal);
-                },
-                cancel: async () => {
-                  abortController.abort();
-                },
-              };
-            },
-          },
-        });
+        this.adapter.registerWorkerAdapter(worker, plugins);
       },
     };
   }
@@ -68,15 +69,10 @@ export class SchedulerPlugin
   public start(coreStart: CoreStart, plugins: PluginStartDeps) {
     return {
       schedule: async (job: Job<unknown>) => {
-        await plugins.taskManager.schedule({
-          id: job.id && `plugin:scheduler:${job.id}`,
-          taskType: `plugin:scheduler:${job.workerId}`,
-          params: job.params as Record<string, any>,
-          state: {},
-        });
+        await this.adapter.scheduleAdapter(job, plugins);
       },
       unschedule: async (jobId: Job<unknown>['id']) => {
-        await plugins.taskManager.remove(`plugin:scheduler:${jobId}`);
+        await this.adapter.unscheduleAdapter(jobId, plugins);
       },
     };
   }

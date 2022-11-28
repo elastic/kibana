@@ -7,14 +7,13 @@
 
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import type { Worker } from '../worker_registry';
-import type { PluginSetupDeps, PluginStartDeps, Job, Adapter } from '../plugin';
+import { PluginSetupDeps, PluginStartDeps, Job, Adapter } from '../plugin';
 
 export const taskManagerAdapter: Adapter = {
   registerWorkerAdapter: (worker: Worker<unknown>, plugins: PluginSetupDeps) => {
     plugins.taskManager.registerTaskDefinitions({
-      [`plugin:queue:${worker.id}`]: {
+      [`plugin:scheduler:${worker.id}`]: {
         title: `Worker: ${worker.id}`,
-        maxAttempts: 3,
         createTaskRunner: ({ taskInstance }: RunContext) => {
           const params = taskInstance.params;
           const abortController = new AbortController();
@@ -30,20 +29,15 @@ export const taskManagerAdapter: Adapter = {
       },
     });
   },
-  enqueueAdater: async (job: Job<unknown>, plugins: PluginStartDeps) => {
+  scheduleAdapter: async (job: Job<unknown>, plugins: PluginStartDeps) => {
     await plugins.taskManager.schedule({
-      taskType: `plugin:queue:${job.workerId}`,
+      id: job.id && `plugin:scheduler:${job.id}`,
+      taskType: `plugin:scheduler:${job.workerId}`,
       params: job.params as Record<string, any>,
       state: {},
     });
   },
-  bulkEnqueueAdapter: async (jobs: Array<Job<unknown>>, plugins: PluginStartDeps) => {
-    await plugins.taskManager.bulkSchedule(
-      jobs.map((job) => ({
-        taskType: `plugin:queue:${job.workerId}`,
-        params: job.params as Record<string, any>,
-        state: {},
-      }))
-    );
+  unscheduleAdapter: async (jobId: Job<unknown>['id'], plugins: PluginStartDeps) => {
+    await plugins.taskManager.remove(`plugin:scheduler:${jobId}`);
   },
 };
