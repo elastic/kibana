@@ -89,8 +89,6 @@ export {
   getStatesFromKbnUrl,
   setStateToKbnUrl,
   withNotifyOnErrors,
-  replaceUrlQuery,
-  replaceUrlHashQuery,
 } from './state_management/url';
 export type {
   IStateStorage,

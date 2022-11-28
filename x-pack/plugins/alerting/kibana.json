@@ -12,6 +12,7 @@
   "requiredPlugins": [
     "actions",
     "data",
+    "share",
     "encryptedSavedObjects",
     "eventLog",
     "features",

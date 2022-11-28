@@ -6,7 +6,8 @@
  */
 
 import { Action } from '@kbn/ui-actions-plugin/public';
-import { DiscoverAppLocatorParams, SearchInput } from '@kbn/discover-plugin/public';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { SearchInput } from '@kbn/discover-plugin/public';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { KibanaLocation } from '@kbn/share-plugin/public';

@@ -49,6 +49,7 @@ import {
 import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
@@ -156,6 +157,7 @@ export interface AlertingPluginsStart {
   spaces: SpacesPluginStart;
   security?: SecurityPluginStart;
   data: DataPluginStart;
+  share: SharePluginStart;
 }
 
 export class AlertingPlugin {
@@ -428,6 +430,7 @@ export class AlertingPlugin {
     taskRunnerFactory.initialize({
       logger,
       data: plugins.data,
+      share: plugins.share,
       savedObjects: core.savedObjects,
       uiSettings: core.uiSettings,
       elasticsearch: core.elasticsearch,

@@ -46,11 +46,11 @@ import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-action
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DiscoverAppLocator } from './locator';
 import { getHistory } from './kibana_services';
 import { DiscoverStartPlugins } from './plugin';
 import { DiscoverContextAppLocator } from './application/context/services/locator';
 import { DiscoverSingleDocLocator } from './application/doc/locator';
+import { DiscoverAppLocator } from '../common';
 
 /**
  * Location state of internal Discover history instance

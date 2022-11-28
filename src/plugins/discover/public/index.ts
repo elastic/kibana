@@ -18,9 +18,6 @@ export type { ISearchEmbeddable, SearchInput } from './embeddable';
 export { SEARCH_EMBEDDABLE_TYPE } from './embeddable';
 export { loadSharingDataHelpers } from './utils';
 
-export { DISCOVER_APP_LOCATOR } from './locator';
-export type { DiscoverAppLocator, DiscoverAppLocatorParams } from './locator';
-
 // re-export types and static functions to give other plugins time to migrate away
 export {
   type SavedSearch,

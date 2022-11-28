@@ -9,9 +9,10 @@
 import { format as formatUrl } from 'url';
 import { stringify } from 'query-string';
 import { createBrowserHistory, History } from 'history';
+import { parseUrl, parseUrlHash } from '../../../common/state_management/parse';
+import { replaceUrlHashQuery, replaceUrlQuery } from '../../../common/state_management/format';
 import { decodeState, encodeState } from '../state_encoder';
-import { getCurrentUrl, parseUrl, parseUrlHash } from './parse';
-import { replaceUrlHashQuery, replaceUrlQuery } from './format';
+import { getCurrentUrl } from './get_current_url';
 import { url as urlUtils } from '../../../common';
 
 /**
@@ -90,17 +91,17 @@ export function getStateFromKbnUrl<State>(
  * By default due to Kibana legacy reasons assumed that state is stored in a query inside a hash part of the URL:
  * http://localhost:5601/oxf/app/kibana#/yourApp?_a={STATE}
  *
- * { storeInHashQuery: false } option should be used in you want to store you state in a main query (not in a hash):
+ * { storeInHashQuery: false } option should be used in you want to store your state in a main query (not in a hash):
  * http://localhost:5601/oxf/app/kibana?_a={STATE}#/yourApp
  */
 export function setStateToKbnUrl<State>(
   key: string,
   state: State,
+  rawUrl: string,
   { useHash = false, storeInHashQuery = true }: { useHash: boolean; storeInHashQuery?: boolean } = {
     useHash: false,
     storeInHashQuery: true,
-  },
-  rawUrl = window.location.href
+  }
 ): string {
   const replacer = storeInHashQuery ? replaceUrlHashQuery : replaceUrlQuery;
   return replacer(rawUrl, (query) => {

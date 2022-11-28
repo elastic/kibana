@@ -20,7 +20,7 @@ export function formatEditCalendarUrl(
       url = `${url}/${calendarId}`;
     }
     if (globalState) {
-      url = setStateToKbnUrl('_g', globalState, { useHash: false, storeInHashQuery: false }, url);
+      url = setStateToKbnUrl('_g', globalState, url, { useHash: false, storeInHashQuery: false });
     }
   }
 
@@ -38,7 +38,7 @@ export function formatEditFilterUrl(
       url = `${url}/${filterId}`;
     }
     if (globalState) {
-      url = setStateToKbnUrl('_g', globalState, { useHash: false, storeInHashQuery: false }, url);
+      url = setStateToKbnUrl('_g', globalState, url, { useHash: false, storeInHashQuery: false });
     }
   }
 

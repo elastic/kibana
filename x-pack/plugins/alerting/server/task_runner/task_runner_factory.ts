@@ -21,6 +21,7 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 import {
   RuleTypeParams,
   RuleTypeRegistry,
@@ -38,6 +39,7 @@ import { ActionsConfigMap } from '../lib/get_actions_config_map';
 export interface TaskRunnerContext {
   logger: Logger;
   data: DataPluginStart;
+  share: SharePluginStart;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   elasticsearch: ElasticsearchServiceStart;

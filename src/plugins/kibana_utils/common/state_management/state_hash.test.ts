@@ -7,14 +7,9 @@
  */
 
 import { encode as encodeRison } from 'rison-node';
-import { mockStorage } from '../../storage/hashed_item_store/mock';
 import { createStateHash, isStateHash } from './state_hash';
 
 describe('stateHash', () => {
-  beforeEach(() => {
-    mockStorage.clear();
-  });
-
   describe('#createStateHash', () => {
     it('returns a hash', () => {
       const json = JSON.stringify({ a: 'a' });

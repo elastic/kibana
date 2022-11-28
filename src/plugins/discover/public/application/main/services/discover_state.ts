@@ -36,12 +36,12 @@ import {
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { VIEW_MODE } from '../../../../common/constants';
+import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '../../../../common';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
-import { VIEW_MODE } from '../../../components/view_mode_toggle';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
 import { getValidFilters } from '../../../utils/get_valid_filters';
 

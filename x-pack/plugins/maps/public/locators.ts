@@ -93,8 +93,8 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
 
     let path = `/map#/${mapId || ''}`;
-    path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
-    path = setStateToKbnUrl('_a', appState, { useHash }, path);
+    path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, path, { useHash });
+    path = setStateToKbnUrl('_a', appState, path, { useHash });
 
     if (initialLayers && initialLayers.length) {
       const risonEncodedInitialLayers = (

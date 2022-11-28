@@ -22,7 +22,6 @@ import { DiscoverServices } from '../../../../build_services';
 import { FetchStatus } from '../../../types';
 import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
-import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -30,6 +29,7 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
+import { VIEW_MODE } from '../../../../../common/constants';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({

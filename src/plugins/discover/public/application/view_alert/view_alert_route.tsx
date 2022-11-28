@@ -13,7 +13,7 @@ import type { Rule } from '@kbn/alerting-plugin/common';
 import { getTime } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import { DiscoverAppLocatorParams } from '../../locator';
+import { DiscoverAppLocatorParams } from '../../../common';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAlertUtils, QueryParams, SearchThresholdAlertParams } from './view_alert_utils';
 

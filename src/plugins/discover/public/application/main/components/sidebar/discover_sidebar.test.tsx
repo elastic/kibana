@@ -18,13 +18,13 @@ import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../__mocks__/services';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
-import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import { AvailableFields$ } from '../../hooks/use_saved_search';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
+import { VIEW_MODE } from '../../../../../common/constants';
 
 const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
   () => Promise.resolve([])

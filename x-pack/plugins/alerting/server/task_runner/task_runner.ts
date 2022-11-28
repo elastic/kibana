@@ -325,6 +325,7 @@ export class TaskRunner<
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,
                 ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
+                share: this.context.share,
               },
               params,
               state: ruleTypeState as RuleState,

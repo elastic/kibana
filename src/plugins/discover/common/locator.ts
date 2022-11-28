@@ -10,9 +10,8 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { VIEW_MODE } from './components/view_mode_toggle';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { VIEW_MODE } from './constants';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
@@ -97,6 +96,12 @@ export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
 
 export interface DiscoverAppLocatorDependencies {
   useHash: boolean;
+  setStateToKbnUrl: <State>(
+    key: string,
+    state: State,
+    rawUrl: string,
+    options: { useHash: boolean; storeInHashQuery?: boolean }
+  ) => string;
 }
 
 /**
@@ -166,8 +171,8 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     }
 
     let path = `#/${savedSearchPath}`;
-    path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
-    path = setStateToKbnUrl('_a', appState, { useHash }, path);
+    path = this.deps.setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, path, { useHash });
+    path = this.deps.setStateToKbnUrl('_a', appState, path, { useHash });
 
     if (searchSessionId) {
       path = `${path}&searchSessionId=${searchSessionId}`;

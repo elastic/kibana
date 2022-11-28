@@ -31,6 +31,7 @@ export type {
   PureTransition,
   CreateStateContainerOptions,
 } from './state_containers';
+export { setStateToKbnUrl } from './state_management/set_state_to_kbn_url';
 export {
   createStateContainerReactHelpers,
   useContainerSelector,

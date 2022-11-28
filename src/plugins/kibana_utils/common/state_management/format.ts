@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { ParsedQuery, stringify } from 'query-string';
 import { format as formatUrl } from 'url';
-import { stringify, ParsedQuery } from 'query-string';
 import { parseUrl, parseUrlHash } from './parse';
-import { url as urlUtils } from '../../../common';
+import { url as urlUtils } from '..';
 
 export function replaceUrlQuery(
   rawUrl: string,

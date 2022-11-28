@@ -29,10 +29,10 @@ export function formatNotificationsUrl(
     }
 
     if (isPopulatedObject(globalState)) {
-      url = setStateToKbnUrl('_g', globalState, { useHash: false, storeInHashQuery: false }, url);
+      url = setStateToKbnUrl('_g', globalState, url, { useHash: false, storeInHashQuery: false });
     }
     if (isPopulatedObject(appState)) {
-      url = setStateToKbnUrl('_a', appState, { useHash: false, storeInHashQuery: false }, url);
+      url = setStateToKbnUrl('_a', appState, url, { useHash: false, storeInHashQuery: false });
     }
   }
 
