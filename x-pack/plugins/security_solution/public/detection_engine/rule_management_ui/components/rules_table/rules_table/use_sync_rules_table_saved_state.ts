@@ -6,9 +6,12 @@
  */
 
 import { useEffect } from 'react';
+import {
+  encodeRisonUrlState,
+  useReplaceUrlParams,
+} from '../../../../../common/utils/global_query_string/helpers';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
-import { useUpdateUrlParam } from '../../../../../common/utils/global_query_string';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import { useRulesTableContext } from './rules_table_context';
 import type { RulesTableSavedState } from './rules_table_saved_state';
@@ -23,7 +26,7 @@ export function useSyncRulesTableSavedState(): void {
   const {
     services: { sessionStorage },
   } = useKibana();
-  const updateUrlParam = useUpdateUrlParam<RulesTableSavedState>(URL_PARAM_KEY.rulesTable);
+  const replaceUrlParams = useReplaceUrlParams();
 
   useEffect(() => {
     const savedState: RulesTableSavedState = {};
@@ -57,13 +60,13 @@ export function useSyncRulesTableSavedState(): void {
     }
 
     if (Object.keys(savedState).length === 0) {
-      updateUrlParam(null);
+      replaceUrlParams([{ key: URL_PARAM_KEY.rulesTable, value: null }]);
       sessionStorage.remove(RULES_TABLE_STATE_STORAGE_KEY);
 
       return;
     }
 
-    updateUrlParam(savedState);
+    replaceUrlParams([{ key: URL_PARAM_KEY.rulesTable, value: encodeRisonUrlState(savedState) }]);
     sessionStorage.set(RULES_TABLE_STATE_STORAGE_KEY, savedState);
-  }, [updateUrlParam, sessionStorage, state]);
+  }, [replaceUrlParams, sessionStorage, state]);
 }

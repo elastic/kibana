@@ -248,6 +248,37 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     ? rules.sort(getRulesComparator(sortingOptions)).slice((page - 1) * perPage, page * perPage)
     : rules;
 
+  const actions = useMemo(
+    () => ({
+      reFetchRules: refetch,
+      setFilterOptions: handleFilterOptionsChange,
+      setIsAllSelected,
+      setIsInMemorySorting: toggleInMemorySorting,
+      setIsRefreshOn,
+      setLoadingRules,
+      setPage,
+      setPerPage,
+      setSelectedRuleIds,
+      setSortingOptions,
+      clearRulesSelection,
+      setIsPreflightInProgress,
+    }),
+    [
+      refetch,
+      handleFilterOptionsChange,
+      setIsAllSelected,
+      toggleInMemorySorting,
+      setIsRefreshOn,
+      setLoadingRules,
+      setPage,
+      setPerPage,
+      setSelectedRuleIds,
+      setSortingOptions,
+      clearRulesSelection,
+      setIsPreflightInProgress,
+    ]
+  );
+
   const providerValue = useMemo(
     () => ({
       state: {
@@ -273,20 +304,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         selectedRuleIds,
         sortingOptions,
       },
-      actions: {
-        reFetchRules: refetch,
-        setFilterOptions: handleFilterOptionsChange,
-        setIsAllSelected,
-        setIsInMemorySorting: toggleInMemorySorting,
-        setIsRefreshOn,
-        setLoadingRules,
-        setPage,
-        setPerPage,
-        setSelectedRuleIds,
-        setSortingOptions,
-        setIsPreflightInProgress,
-        clearRulesSelection,
-      },
+      actions,
     }),
     [
       rulesToDisplay,
@@ -309,10 +327,14 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       loadingRules.action,
       selectedRuleIds,
       sortingOptions,
-      refetch,
-      handleFilterOptionsChange,
-      toggleInMemorySorting,
-      clearRulesSelection,
+      page,
+      perPage,
+      rules.length,
+      rulesToDisplay,
+      selectedRuleIds,
+      sortingOptions,
+      total,
+      actions,
     ]
   );
 

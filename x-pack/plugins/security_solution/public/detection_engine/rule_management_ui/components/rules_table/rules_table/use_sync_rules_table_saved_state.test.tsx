@@ -6,8 +6,9 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { useReplaceUrlParams } from '../../../../../common/utils/global_query_string/helpers';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useUpdateUrlParam } from '../../../../../common/utils/global_query_string';
+import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import {
   DEFAULT_PAGE,
@@ -21,7 +22,10 @@ import type { RulesTableSavedState } from './rules_table_saved_state';
 import { useSyncRulesTableSavedState } from './use_sync_rules_table_saved_state';
 
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/utils/global_query_string');
+jest.mock('../../../../../common/utils/global_query_string/helpers', () => ({
+  useReplaceUrlParams: jest.fn(),
+  encodeRisonUrlState: jest.fn().mockImplementation((value) => value),
+}));
 jest.mock('./rules_table_context');
 
 describe('useSyncRulesTableSavedState', () => {
@@ -44,7 +48,12 @@ describe('useSyncRulesTableSavedState', () => {
 
     renderHook(() => useSyncRulesTableSavedState());
 
-    expect(updateUrlParam).toHaveBeenCalledWith(expectedUrlState);
+    expect(replaceUrlParams).toHaveBeenCalledWith([
+      {
+        key: URL_PARAM_KEY.rulesTable,
+        value: expectedUrlState,
+      },
+    ]);
   };
   const expectStateToSyncWithStorage = (
     rulesTableState: Partial<RulesTableState>,
@@ -59,16 +68,16 @@ describe('useSyncRulesTableSavedState', () => {
     expect(setStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY, expectedStorageState);
   };
 
-  let updateUrlParam: jest.Mock;
+  let replaceUrlParams: jest.Mock;
   let setStorage: jest.Mock;
   let removeStorage: jest.Mock;
 
   beforeEach(() => {
-    updateUrlParam = jest.fn();
+    replaceUrlParams = jest.fn();
     setStorage = jest.fn();
     removeStorage = jest.fn();
 
-    (useUpdateUrlParam as jest.Mock).mockReturnValue(updateUrlParam);
+    (useReplaceUrlParams as jest.Mock).mockReturnValue(replaceUrlParams);
     (useKibana as jest.Mock).mockReturnValue({
       services: { sessionStorage: { set: setStorage, remove: removeStorage } },
     });
@@ -79,7 +88,7 @@ describe('useSyncRulesTableSavedState', () => {
 
     renderHook(() => useSyncRulesTableSavedState());
 
-    expect(updateUrlParam).toHaveBeenCalledWith(null);
+    expect(replaceUrlParams).toHaveBeenCalledWith([{ key: URL_PARAM_KEY.rulesTable, value: null }]);
     expect(setStorage).not.toHaveBeenCalled();
     expect(removeStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY);
   });
@@ -120,7 +129,9 @@ describe('useSyncRulesTableSavedState', () => {
 
     renderHook(() => useSyncRulesTableSavedState());
 
-    expect(updateUrlParam).toHaveBeenCalledWith(expected);
+    expect(replaceUrlParams).toHaveBeenCalledWith([
+      { key: URL_PARAM_KEY.rulesTable, value: expected },
+    ]);
     expect(setStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY, expected);
   });
 

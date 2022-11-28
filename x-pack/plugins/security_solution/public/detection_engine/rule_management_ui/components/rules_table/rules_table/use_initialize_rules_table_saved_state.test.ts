@@ -7,6 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../../common/constants';
+
 import { useInitializeRulesTableSavedState } from './use_initialize_rules_table_saved_state';
 import type { RulesTableSavedState } from './rules_table_saved_state';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_SORTING_OPTIONS } from './rules_table_defaults';
@@ -15,7 +16,7 @@ import { useRulesTableContext } from './rules_table_context';
 import { mockRulesTablePersistedState } from './__mocks__/mock_rules_table_persistent_state';
 
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/utils/global_query_string');
+jest.mock('../../../../../common/utils/global_query_string/helpers');
 jest.mock('./rules_table_context');
 
 describe('useInitializeRulesTableSavedState', () => {
