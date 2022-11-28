@@ -56,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
 
 
       it('should return correct calculations', async () => {
+        const { min, max } = DATES['8.0.0'].hosts_and_netowrk;
         const response = await supertest
           .post('/api/metrics/overview/top')
           .set({
@@ -67,8 +68,8 @@ export default function ({ getService }: FtrProviderContext) {
               bucketSize: '300s',
               size: 5,
               timerange: {
-                from: new Date('2022-11-23T14:13:19.534Z').getTime(),
-                to: new Date('2022-11-25T14:13:19.534Z').getTime(),
+                from: min,
+                to: max,
               },
             })
           )
