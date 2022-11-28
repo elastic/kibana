@@ -26,7 +26,6 @@ import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navig
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { render } from '@testing-library/react';
-import { useFindingsEsPit } from './es_pit/use_findings_es_pit';
 import { expectIdsInDoc } from '../../test/utils';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -36,19 +35,10 @@ jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration');
-jest.mock('./es_pit/use_findings_es_pit');
 const chance = new Chance();
 
 beforeEach(() => {
   jest.restoreAllMocks();
-  (useFindingsEsPit as jest.Mock).mockImplementation(() => ({
-    pitQuery: createReactQueryResponse({
-      status: 'success',
-      data: [],
-    }),
-    setPitId: () => {},
-    pitIdRef: chance.guid(),
-  }));
 
   (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
     createReactQueryResponse({
@@ -94,6 +84,7 @@ describe('<Findings />', () => {
         TEST_SUBJECTS.FINDINGS_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });
   });
@@ -115,6 +106,7 @@ describe('<Findings />', () => {
         TEST_SUBJECTS.FINDINGS_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });
   });
@@ -136,6 +128,29 @@ describe('<Findings />', () => {
         TEST_SUBJECTS.FINDINGS_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('no findings state: unprivileged - shows Unprivileged instead of findings', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'unprivileged' },
+      })
+    );
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+
+    renderFindingsPage();
+
+    expectIdsInDoc({
+      be: [NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED],
+      notToBe: [
+        TEST_SUBJECTS.FINDINGS_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
       ],
     });
   });
@@ -166,6 +181,7 @@ describe('<Findings />', () => {
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });
   });

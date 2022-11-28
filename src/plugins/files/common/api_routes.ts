@@ -72,3 +72,4 @@ export type { Endpoint as FileUnshareHttpEndpoint } from '../server/routes/file_
 export type { Endpoint as FileGetShareHttpEndpoint } from '../server/routes/file_kind/share/get';
 export type { Endpoint as FileListSharesHttpEndpoint } from '../server/routes/file_kind/share/list';
 export type { Endpoint as FilePublicDownloadHttpEndpoint } from '../server/routes/public_facing/download';
+export type { Endpoint as BulkDeleteHttpEndpoint } from '../server/routes/bulk_delete';

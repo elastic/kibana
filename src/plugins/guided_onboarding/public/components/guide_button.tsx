@@ -46,8 +46,8 @@ export const GuideButton = ({
   isGuidePanelOpen,
   navigateToLandingPage,
 }: GuideButtonProps) => {
-  // TODO handle loading, error state
-  // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
+  // TODO handle loading state
+  // https://github.com/elastic/kibana/issues/139799
 
   // if there is no active guide
   if (!pluginState || !pluginState.activeGuide || !pluginState.activeGuide.isActive) {
@@ -70,7 +70,7 @@ export const GuideButton = ({
           data-test-subj="guideButtonRedirect"
         >
           {i18n.translate('guidedOnboarding.guidedSetupRedirectButtonLabel', {
-            defaultMessage: 'Setup guide',
+            defaultMessage: 'Setup guides',
           })}
         </EuiButton>
       );

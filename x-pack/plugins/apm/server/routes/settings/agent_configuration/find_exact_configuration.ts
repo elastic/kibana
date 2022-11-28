@@ -10,7 +10,7 @@ import { AgentConfiguration } from '../../../../common/agent_configuration/confi
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
 import { getConfigsAppliedToAgentsThroughFleet } from './get_config_applied_to_agent_through_fleet';

@@ -27,16 +27,25 @@ import * as i18n from '../../translations';
 interface ManageRulesProps {
   linkedRules: Rule[];
   showButtonLoader?: boolean;
+  saveIsDisabled?: boolean;
   onSave: () => void;
   onCancel: () => void;
   onRuleSelectionChange: (rulesSelectedToAdd: Rule[]) => void;
 }
 
 export const ManageRules: FC<ManageRulesProps> = memo(
-  ({ linkedRules, showButtonLoader, onSave, onCancel, onRuleSelectionChange }) => {
+  ({
+    linkedRules,
+    showButtonLoader,
+    saveIsDisabled = true,
+    onSave,
+    onCancel,
+    onRuleSelectionChange,
+  }) => {
     const complicatedFlyoutTitleId = useGeneratedHtmlId({
       prefix: 'complicatedFlyoutTitle',
     });
+
     return (
       <EuiFlyout
         hideCloseButton
@@ -67,7 +76,12 @@ export const ManageRules: FC<ManageRulesProps> = memo(
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton isLoading={showButtonLoader} onClick={onSave} fill>
+              <EuiButton
+                isLoading={showButtonLoader}
+                disabled={saveIsDisabled}
+                onClick={onSave}
+                fill
+              >
                 {i18n.MANAGE_RULES_SAVE}
               </EuiButton>
             </EuiFlexItem>

@@ -135,6 +135,7 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     ? convertHistoryStartToSize(rule.history_window_start)
     : '7d',
   shouldLoadQueryDynamically: Boolean(rule.type === 'saved_query' && rule.saved_id),
+  groupByFields: rule.alert_suppression?.group_by ?? [],
 });
 
 const convertHistoryStartToSize = (relativeTime: string) => {

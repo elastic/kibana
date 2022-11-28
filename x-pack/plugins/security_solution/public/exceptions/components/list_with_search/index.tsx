@@ -26,9 +26,14 @@ import { ListExceptionItems } from '..';
 interface ListWithSearchComponentProps {
   list: ExceptionListSchema;
   isReadOnly: boolean;
+  refreshExceptions?: boolean;
 }
 
-const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list, isReadOnly }) => {
+const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
+  list,
+  isReadOnly,
+  refreshExceptions,
+}) => {
   const {
     listName,
     exceptions,
@@ -37,6 +42,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list, isRea
     pagination,
     emptyViewerTitle,
     emptyViewerBody,
+    emptyViewerButtonText,
     viewerStatus,
     ruleReferences,
     showAddExceptionFlyout,
@@ -50,7 +56,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list, isRea
     onPaginationChange,
     handleCancelExceptionItemFlyout,
     handleConfirmExceptionFlyout,
-  } = useListWithSearchComponent(list);
+  } = useListWithSearchComponent(list, refreshExceptions);
   return (
     <>
       {showAddExceptionFlyout ? (
@@ -89,7 +95,11 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list, isRea
               />
             )}
             <SearchBar
-              addExceptionButtonText={i18n.EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON}
+              addExceptionButtonText={
+                listType === ExceptionListTypeEnum.ENDPOINT
+                  ? i18n.EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON_ENDPOINT
+                  : i18n.EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON
+              }
               listType={listType as ExceptionListTypeEnum}
               onSearch={onSearch}
               onAddExceptionClick={onAddExceptionClick}
@@ -105,6 +115,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list, isRea
               exceptions={exceptions}
               emptyViewerTitle={emptyViewerTitle}
               emptyViewerBody={emptyViewerBody}
+              emptyViewerButtonText={emptyViewerButtonText}
               pagination={pagination}
               lastUpdated={lastUpdated}
               onPaginationChange={onPaginationChange}

@@ -1,5 +1,9 @@
 /* eslint-disable @kbn/eslint/require-license-header */
 
+// TODO(jbudz): should be removed when upgrading to TS@4.8
+// this is a skip for the errors created when typechecking with isolatedModules
+export {};
+
 /* @notice
  * Detection Rules
  * Copyright 2021 Elasticsearch B.V.

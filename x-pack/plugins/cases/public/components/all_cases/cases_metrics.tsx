@@ -24,16 +24,10 @@ import { ATTC_DESCRIPTION, ATTC_STAT } from './translations';
 
 const MetricsFlexGroup = styled.div`
   ${({ theme }) => css`
-    .euiFlexGroup {
-      border: ${theme.eui.euiBorderThin};
-      border-radius: ${theme.eui.euiBorderRadius};
-      margin: 0 0 ${theme.eui.euiSizeL} 0;
-    }
-    @media only screen and (max-width: ${theme.eui.euiBreakpoints.s}) {
-      .euiFlexGroup {
-        padding: ${theme.eui.euiSizeM};
-      }
-    }
+    border: ${theme.eui.euiBorderThin};
+    border-radius: ${theme.eui.euiBorderRadius};
+    padding: ${theme.eui.euiSizeM};
+    margin-bottom: ${theme.eui.euiSizeL};
   `}
 `;
 

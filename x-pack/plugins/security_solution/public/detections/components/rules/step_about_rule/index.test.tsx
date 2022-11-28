@@ -56,6 +56,7 @@ export const stepDefineStepMLRule: DefineStepRule = {
   timeline: { id: null, title: null },
   eqlOptions: {},
   dataSourceType: DataSourceType.IndexPatterns,
+  groupByFields: ['host.name'],
   newTermsFields: ['host.ip'],
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,
