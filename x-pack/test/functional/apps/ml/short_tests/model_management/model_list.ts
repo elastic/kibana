@@ -123,6 +123,26 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
+      it('tests the built-in lang_ident model', async () => {
+        await ml.testExecution.logTestStep('should filter the table content');
+        await ml.trainedModelsTable.filterWithSearchString(builtInModelData.modelId, 1);
+
+        await ml.testExecution.logTestStep('should have enabled the button that opens Test flyout');
+        await ml.trainedModelsTable.assertModelTestButtonExists(builtInModelData.modelId, true);
+
+        await ml.trainedModelsTable.testModel(
+          'lang_ident',
+          builtInModelData.modelId,
+          {
+            inputText: 'Goedemorgen! Ik ben een appel.',
+          },
+          {
+            title: 'This looks like Dutch,Flemish',
+            topLang: { code: 'nl', minProbability: 0.9 },
+          }
+        );
+      });
+
       it('displays a model with an ingest pipeline and delete action is disabled', async () => {
         await ml.testExecution.logTestStep('should display the model in the table');
         await ml.trainedModelsTable.filterWithSearchString(modelWithPipelineData.modelId, 1);

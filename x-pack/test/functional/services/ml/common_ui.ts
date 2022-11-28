@@ -402,17 +402,28 @@ export function MachineLearningCommonUIProvider({
       });
     },
 
-    async invokeTableRowAction(rowSelector: string, actionTestSubject: string) {
+    async invokeTableRowAction(
+      rowSelector: string,
+      actionTestSubject: string,
+      fromContextMenu: boolean = true
+    ) {
+      await this.ensureAllMenuPopoversClosed();
+
       await retry.tryForTime(30 * 1000, async () => {
-        await this.ensureAllMenuPopoversClosed();
-        await testSubjects.click(`${rowSelector} > euiCollapsedItemActionsButton`);
-        await find.existsByCssSelector('euiContextMenuPanel');
+        if (fromContextMenu) {
+          await testSubjects.click(`${rowSelector} > euiCollapsedItemActionsButton`);
+          await find.existsByCssSelector('euiContextMenuPanel');
 
-        const isEnabled = await testSubjects.isEnabled(actionTestSubject);
+          const isEnabled = await testSubjects.isEnabled(actionTestSubject);
 
-        expect(isEnabled).to.eql(true, `Expected action "${actionTestSubject}" to be enabled.`);
+          expect(isEnabled).to.eql(true, `Expected action "${actionTestSubject}" to be enabled.`);
 
-        await testSubjects.click(actionTestSubject);
+          await testSubjects.click(actionTestSubject);
+        } else {
+          const isEnabled = await testSubjects.isEnabled(`${rowSelector} > ${actionTestSubject}`);
+          expect(isEnabled).to.eql(true, `Expected action "${actionTestSubject}" to be enabled.`);
+          await testSubjects.click(`${rowSelector} > ${actionTestSubject}`);
+        }
       });
     },
   };
