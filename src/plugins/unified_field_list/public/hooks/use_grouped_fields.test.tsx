@@ -422,12 +422,16 @@ describe('UnifiedFieldList useGroupedFields()', () => {
   });
 
   it('should work correctly when popular fields limit is present', async () => {
+    // `bytes` is popular, but we are skipping it here to test that it would not be shown under Popular and Available
+    const onSupportedFieldFilter = jest.fn((field) => field.name !== 'bytes');
+
     const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
       initialProps: {
         dataViewId: dataView.id!,
         allFields,
         popularFieldsLimit: 10,
         services: mockedServices,
+        onSupportedFieldFilter,
       },
     });
 
@@ -442,12 +446,16 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     ).toStrictEqual([
       'SpecialFields-0',
       'SelectedFields-0',
-      'PopularFields-4',
-      'AvailableFields-25',
+      'PopularFields-3',
+      'AvailableFields-24',
       'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-3',
     ]);
+
+    expect(fieldGroups.PopularFields?.fields.map((field) => field.name).join(',')).toBe(
+      '@timestamp,time,ssl'
+    );
   });
 
   it('should work correctly when global filters are set', async () => {
