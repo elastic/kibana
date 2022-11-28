@@ -6,7 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
+import { AGENT_NAME } from '../../../common/es_fields/apm';
 import { RUM_AGENT_NAMES } from '../../../common/agent_name';
 
 // exclude RUM exit spans, as they're high cardinality and don't usually

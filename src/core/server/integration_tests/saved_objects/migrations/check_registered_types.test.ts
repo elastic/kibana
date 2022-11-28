@@ -9,20 +9,24 @@
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getMigrationHash } from '@kbn/core-test-helpers-so-type-serializer';
 import { Root } from '@kbn/core-root-server-internal';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+import {
+  createTestServers,
+  createRootWithCorePlugins,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 
 describe('checking migration metadata changes on all registered SO types', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let esServer: TestElasticsearchUtils;
   let root: Root;
   let typeRegistry: ISavedObjectTypeRegistry;
 
   beforeAll(async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
     });
 
     esServer = await startES();
-    root = kbnTestServer.createRootWithCorePlugins({}, { oss: false });
+    root = createRootWithCorePlugins({}, { oss: false });
     await root.preboot();
     await root.setup();
     const coreStart = await root.start();
@@ -120,7 +124,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "osquery-saved-query": "7b213b4b7a3e59350e99c50e8df9948662ed493a",
         "query": "4640ef356321500a678869f24117b7091a911cb6",
         "sample-data-telemetry": "8b10336d9efae6f3d5593c4cc89fb4abcdf84e04",
-        "search": "e7ba25ea37cb36b622db42c9590c6d8dfc838801",
+        "search": "d26771bcf7cd271162aab3a610b75249631ef6b1",
         "search-session": "ba383309da68a15be3765977f7a44c84f0ec7964",
         "search-telemetry": "beb3fc25488c753f2a6dcff1845d667558712b66",
         "security-rule": "e0dfdba5d66139d0300723b2e6672993cd4a11f3",
@@ -132,7 +136,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "siem-ui-timeline-pinned-event": "e2697b38751506c7fce6e8b7207a830483dc4283",
         "space": "c4a0acce1bd4b9cce85154f2a350624a53111c59",
         "spaces-usage-stats": "922d3235bbf519e3fb3b260e27248b1df8249b79",
-        "synthetics-monitor": "111811218f7e34f40980665a4eb99976f457bb23",
+        "synthetics-monitor": "d784b64a3def47d3f3d1f367df71ae41ef33cb3c",
         "synthetics-privates-locations": "dd00385f4a27ef062c3e57312eeb3799872fa4af",
         "tag": "39413f4578cc2128c9a0fda97d0acd1c8862c47a",
         "task": "ef53d0f070bd54957b8fe22fae3b1ff208913f76",
