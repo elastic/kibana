@@ -152,7 +152,7 @@ export const RulesManagementTour = () => {
           anchor={`#${SEARCH_FIRST_RULE_ANCHOR}`}
           anchorPosition="upCenter"
           footerAction={
-            <EuiButton size="s" color="success" fill onClick={findDemoRule}>
+            <EuiButton size="s" color="success" onClick={findDemoRule}>
               {i18n.NEXT_BUTTON}
             </EuiButton>
           }
@@ -169,7 +169,7 @@ export const RulesManagementTour = () => {
           anchor={`#${ruleSwitchAnchor}`}
           anchorPosition="upCenter"
           footerAction={
-            <EuiButton size="s" color="success" fill onClick={enableDemoRule}>
+            <EuiButton size="s" color="success" onClick={enableDemoRule}>
               {i18n.NEXT_BUTTON}
             </EuiButton>
           }

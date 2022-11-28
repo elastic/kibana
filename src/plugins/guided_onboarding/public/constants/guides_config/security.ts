@@ -38,8 +38,7 @@ export const securityConfig: GuideConfig = {
       integration: 'endpoint',
       location: {
         appID: 'integrations',
-        // path: '/browse/security', Skipping strait to the Elastic Defend page - GW
-        path: 'detail/endpoint-8.5.0/overview', 
+        path: '/browse/security',
       },
     },
     {
