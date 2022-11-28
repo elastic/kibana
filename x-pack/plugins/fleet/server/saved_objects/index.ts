@@ -48,7 +48,11 @@ import {
   migratePackagePolicyToV840,
 } from './migrations/to_v8_4_0';
 import { migratePackagePolicyToV850, migrateAgentPolicyToV850 } from './migrations/to_v8_5_0';
-import { migrateSettingsToV860, migrateInstallationToV860, migratePackagePolicyToV860 } from './migrations/to_v8_6_0';
+import {
+  migrateSettingsToV860,
+  migrateInstallationToV860,
+  migratePackagePolicyToV860,
+} from './migrations/to_v8_6_0';
 
 /*
  * Saved object types and mappings
