@@ -105,8 +105,7 @@ const alertsCasesConfig: StepConfig[] = [
     content: i18n.translate(
       'xpack.securitySolution.guided_onboarding.tour.flyoutOverview.tourContent',
       {
-        defaultMessage:
-          'Learn more about alerts by checking out all the information available.',
+        defaultMessage: 'Learn more about alerts by checking out all the information available.',
       }
     ),
     // needs to use anchor to properly place tour step
