@@ -6,12 +6,12 @@
  */
 
 import { PluginConfigDescriptor } from '@kbn/core/server';
-import { SchedulerPlugin, PluginSetup, PluginStart } from './plugin';
-import { SchedulerConfig, configSchema } from './config';
+import { QueuePlugin, PluginSetup, PluginStart } from './plugin';
+import { QueueConfig, configSchema } from './config';
 
-export type { PluginSetup as SchedulerPluginSetup, PluginStart as SchedulerPluginStart };
+export type { PluginSetup as QueuePluginSetup, PluginStart as QueuePluginStart };
 
-export const plugin = () => new SchedulerPlugin();
-export const config: PluginConfigDescriptor<SchedulerConfig> = {
+export const plugin = () => new QueuePlugin();
+export const config: PluginConfigDescriptor<QueueConfig> = {
   schema: configSchema,
 };

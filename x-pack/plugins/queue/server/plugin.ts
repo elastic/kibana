@@ -14,9 +14,7 @@ import {
 import { Worker, WorkerRegistry } from './worker_registry';
 
 interface Job<T> {
-  id?: string;
   workerId: string;
-  interval: number; // milliseconds
   params: T;
 }
 
@@ -28,14 +26,13 @@ interface PluginSetupDeps {
 }
 
 export interface PluginStart {
-  schedule(job: Job<unknown>): Promise<void>;
-  unschedule(jobId: Job<unknown>['id']): Promise<void>;
+  enqueue(job: Job<unknown>): Promise<void>;
 }
 interface PluginStartDeps {
   taskManager: TaskManagerStartContract;
 }
 
-export class SchedulerPlugin
+export class QueuePlugin
   implements Plugin<PluginSetup, PluginStart, PluginSetupDeps, PluginStartDeps>
 {
   private readonly workerRegistry = new WorkerRegistry();
@@ -45,7 +42,7 @@ export class SchedulerPlugin
       registerWorker: (worker: Worker<unknown>) => {
         this.workerRegistry.register(worker);
         plugins.taskManager.registerTaskDefinitions({
-          [`plugin:scheduler:${worker.id}`]: {
+          [`plugin:queue:${worker.id}`]: {
             title: `Worker: ${worker.id}`,
             createTaskRunner: ({ taskInstance }: RunContext) => {
               const params = taskInstance.params;
@@ -67,16 +64,12 @@ export class SchedulerPlugin
 
   public start(coreStart: CoreStart, plugins: PluginStartDeps) {
     return {
-      schedule: async (job: Job<unknown>) => {
+      enqueue: async (job: Job<unknown>) => {
         await plugins.taskManager.schedule({
-          id: job.id && `plugin:scheduler:${job.id}`,
           taskType: `plugin:scheduler:${job.workerId}`,
           params: job.params as Record<string, any>,
           state: {},
         });
-      },
-      unschedule: async (jobId: Job<unknown>['id']) => {
-        await plugins.taskManager.remove(`plugin:scheduler:${jobId}`);
       },
     };
   }
