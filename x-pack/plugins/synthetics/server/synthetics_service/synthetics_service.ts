@@ -93,7 +93,6 @@ export class SyntheticsService {
     if (this.config?.manifestUrl) {
       this.scheduleSyncTask(taskManager);
     }
-    this.setupIndexTemplates();
   }
 
   public async setupIndexTemplates() {
@@ -157,6 +156,7 @@ export class SyntheticsService {
             async run() {
               const { state } = taskInstance;
               try {
+                service.setupIndexTemplates();
                 await service.registerServiceLocations();
 
                 const { allowed, signupUrl } = await service.apiClient.checkAccountAccessStatus();
@@ -164,7 +164,6 @@ export class SyntheticsService {
                 service.signupUrl = signupUrl;
 
                 if (service.isAllowed) {
-                  service.setupIndexTemplates();
                   await service.pushConfigs();
                 }
               } catch (e) {
