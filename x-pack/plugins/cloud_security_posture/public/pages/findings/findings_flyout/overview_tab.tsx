@@ -18,7 +18,7 @@ import React, { useMemo } from 'react';
 import moment from 'moment';
 import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { truthy } from '../../../../common/utils/helpers';
+import { isNonNullable, truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import {
   INTERNAL_FEATURE_FLAGS,
@@ -197,7 +197,11 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
     <>
       {accordions.map((accordion) => (
         <React.Fragment key={accordion.id}>
-          <EuiPanel hasShadow={false} hasBorder>
+          <EuiPanel
+            hasShadow={false}
+            hasBorder
+            data-test-subj={`findings_flyout_overview_${accordion.id}_panel`}
+          >
             <EuiAccordion
               id={accordion.id}
               buttonContent={
