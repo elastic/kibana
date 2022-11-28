@@ -57,6 +57,7 @@ export interface AutomaticCrawlSchedulerLogicActions {
   };
   submitConnectorSchedule(scheduling: ConnectorScheduling): { scheduling: ConnectorScheduling };
   submitCrawlSchedule(): void;
+  updateConnectorSchedulingApiError: Actions<{}, UpdateConnectorSchedulingArgs>['apiError'];
 }
 
 export const AutomaticCrawlSchedulerLogic = kea<
@@ -66,7 +67,10 @@ export const AutomaticCrawlSchedulerLogic = kea<
   connect: {
     actions: [
       UpdateConnectorSchedulingApiLogic,
-      ['makeRequest as makeUpdateConnectorSchedulingRequest'],
+      [
+        'makeRequest as makeUpdateConnectorSchedulingRequest',
+        'apiError as updateConnectorSchedulingApiError',
+      ],
     ],
     values: [IndexViewLogic, ['index']],
   },
@@ -183,15 +187,11 @@ export const AutomaticCrawlSchedulerLogic = kea<
     setCrawlFrequency: actions.saveChanges,
     setCrawlUnit: actions.saveChanges,
     setUseConnectorSchedule: actions.saveChanges,
-    submitConnectorSchedule: async ({ scheduling }) => {
-      try {
-        await actions.makeUpdateConnectorSchedulingRequest({
-          connectorId: values.index.connector.id,
-          scheduling,
-        });
-      } catch (e) {
-        flashAPIErrors(e);
-      }
+    submitConnectorSchedule: ({ scheduling }) => {
+      actions.makeUpdateConnectorSchedulingRequest({
+        connectorId: values.index.connector.id,
+        scheduling,
+      });
     },
     submitCrawlSchedule: async () => {
       const { http } = HttpLogic.values;
@@ -219,6 +219,7 @@ export const AutomaticCrawlSchedulerLogic = kea<
         actions.onDoneSubmitting();
       }
     },
+    updateConnectorSchedulingApiError: (e) => flashAPIErrors(e),
   }),
   events: ({ actions }) => ({
     afterMount: () => {
