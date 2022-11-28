@@ -126,13 +126,11 @@ export function AgentExplorer() {
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="flexEnd" responsive={true}>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs">
-              <EnvironmentsContextProvider
-                customTimeRange={{ rangeFrom, rangeTo }}
-              >
-                <ApmEnvironmentFilter />
-              </EnvironmentsContextProvider>
-            </EuiFlexGroup>
+            <EnvironmentsContextProvider
+              customTimeRange={{ rangeFrom, rangeTo }}
+            >
+              <ApmEnvironmentFilter />
+            </EnvironmentsContextProvider>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SuggestionsSelect

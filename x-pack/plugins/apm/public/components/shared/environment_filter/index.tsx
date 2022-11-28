@@ -33,14 +33,18 @@ export function ApmEnvironmentFilter() {
   const history = useHistory();
   const location = useLocation();
 
+  if (!rangeFrom || !rangeTo) {
+    return null;
+  }
+
   return (
     <EnvironmentSelect
       status={status}
       environment={environment}
       availableEnvironments={environments}
       serviceName={serviceName}
-      rangeFrom={rangeFrom as string}
-      rangeTo={rangeTo as string}
+      rangeFrom={rangeFrom}
+      rangeTo={rangeTo}
       onChange={(changeValue: string) =>
         updateEnvironmentUrl(history, location, changeValue)
       }

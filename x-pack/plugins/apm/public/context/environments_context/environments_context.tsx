@@ -41,14 +41,11 @@ export function EnvironmentsContextProvider({
     ('environment' in query && (query.environment as Environment)) ||
     ENVIRONMENT_ALL.value;
 
-  /* eslint-disable prettier/prettier */
-  const rangeFrom = customTimeRange
-    ? customTimeRange.rangeFrom
-    : 'rangeFrom' in query ? query.rangeFrom : undefined;
-  const rangeTo = customTimeRange
-    ? customTimeRange.rangeTo
-    : 'rangeTo' in query ? query.rangeTo : undefined;
-  /* eslint-enable prettier/prettier */
+  const queryRangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
+  const queryRangeTo = 'rangeTo' in query ? query.rangeTo : undefined;
+
+  const rangeFrom = customTimeRange?.rangeFrom || queryRangeFrom;
+  const rangeTo = customTimeRange?.rangeTo || queryRangeTo;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
 
