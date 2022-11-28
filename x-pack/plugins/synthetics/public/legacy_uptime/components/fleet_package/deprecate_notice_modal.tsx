@@ -37,8 +37,8 @@ export const DeprecateNoticeModal = () => {
       <p>
         <FormattedMessage
           id="xpack.synthetics.deprecateNoticeModal.description"
-          defaultMessage="We no longer support adding synthetics monitors via synthetics integration. We have a new
-        and a better way to add monitors via uptime app, where you can"
+          defaultMessage="The Elastic Synthetics integration is deprecated. Instead, you can now monitor endpoints, 
+        pages, and user journeys directly from Uptime much more efficiently:"
         />
       </p>
       <p>
