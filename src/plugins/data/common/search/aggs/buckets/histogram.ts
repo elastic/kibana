@@ -149,6 +149,9 @@ export const getHistogramBucketAgg = ({
             })
             .catch((e: Error) => {
               if (e.name === 'AbortError') return;
+              if (e.name === 'KQLSyntaxError') {
+                throw e;
+              }
               throw new Error(
                 i18n.translate('data.search.aggs.histogram.missingMaxMinValuesWarning', {
                   defaultMessage:

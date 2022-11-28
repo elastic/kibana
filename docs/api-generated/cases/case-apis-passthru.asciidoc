@@ -48,7 +48,7 @@ Any modifications made to this file will be overwritten.
     <a class="up" href="#__Methods">Up</a>
     <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/cases/{caseId}/comments</code></pre></div>
     <div class="method-summary">Adds a comment or alert to a case. (<span class="nickname">addCaseComment</span>)</div>
-    <div class="method-notes">You must have <code>all</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the case you're creating.</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the case you're creating. NOTE: Each case can have a maximum of 1,000 alerts.</div>
 
     <h3 class="field-label">Path parameters</h3>
     <div class="field-items">
