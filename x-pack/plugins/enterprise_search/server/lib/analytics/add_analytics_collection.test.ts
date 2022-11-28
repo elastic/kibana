@@ -6,6 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 
 import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
 import { ErrorCode } from '../../../common/types/error_codes';
@@ -32,6 +33,10 @@ describe('add analytics collection lib function', () => {
     asInternalUser: {},
   };
 
+  const mockDataViewsService = {
+    createAndSave: jest.fn(),
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -41,9 +46,13 @@ describe('add analytics collection lib function', () => {
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
 
     await expect(
-      addAnalyticsCollection(mockClient as unknown as IScopedClusterClient, {
-        name: 'example',
-      })
+      addAnalyticsCollection(
+        mockClient as unknown as IScopedClusterClient,
+        mockDataViewsService as unknown as DataViewsService,
+        {
+          name: 'example',
+        }
+      )
     ).resolves.toEqual({
       event_retention_day_length: 180,
       events_datastream: 'elastic_analytics-events-example',
@@ -60,6 +69,16 @@ describe('add analytics collection lib function', () => {
       id: 'example',
       index: ANALYTICS_COLLECTIONS_INDEX,
     });
+
+    expect(mockDataViewsService.createAndSave).toHaveBeenCalledWith(
+      {
+        title: 'elastic_analytics.events-example',
+        namespaces: ['logs-elastic_analytics.events-example'],
+        allowNoIndex: true,
+        timeFieldName: '@timestamp',
+      },
+      true
+    );
   });
 
   it('should reject if index already exists', async () => {
@@ -67,11 +86,16 @@ describe('add analytics collection lib function', () => {
     (fetchAnalyticsCollectionById as jest.Mock).mockImplementation(() => true);
 
     await expect(
-      addAnalyticsCollection(mockClient as unknown as IScopedClusterClient, {
-        name: 'index_name',
-      })
+      addAnalyticsCollection(
+        mockClient as unknown as IScopedClusterClient,
+        mockDataViewsService as unknown as DataViewsService,
+        {
+          name: 'index_name',
+        }
+      )
     ).rejects.toEqual(new Error(ErrorCode.ANALYTICS_COLLECTION_ALREADY_EXISTS));
     expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
+    expect(mockDataViewsService.createAndSave).not.toHaveBeenCalled();
   });
 
   it('should create index if no analytics collection index exists', async () => {
@@ -82,9 +106,13 @@ describe('add analytics collection lib function', () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'example' }));
 
     await expect(
-      addAnalyticsCollection(mockClient as unknown as IScopedClusterClient, {
-        name: 'example',
-      })
+      addAnalyticsCollection(
+        mockClient as unknown as IScopedClusterClient,
+        mockDataViewsService as unknown as DataViewsService,
+        {
+          name: 'example',
+        }
+      )
     ).resolves.toEqual({
       event_retention_day_length: 180,
       events_datastream: 'elastic_analytics-events-example',
@@ -112,11 +140,16 @@ describe('add analytics collection lib function', () => {
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => true);
     (fetchAnalyticsCollectionById as jest.Mock).mockImplementation(() => false);
     await expect(
-      addAnalyticsCollection(mockClient as unknown as IScopedClusterClient, {
-        name: 'example',
-      })
+      addAnalyticsCollection(
+        mockClient as unknown as IScopedClusterClient,
+        mockDataViewsService as unknown as DataViewsService,
+        {
+          name: 'example',
+        }
+      )
     ).rejects.toEqual({ statusCode: 500 });
     expect(setupAnalyticsCollectionIndex).not.toHaveBeenCalled();
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledTimes(1);
+    expect(mockDataViewsService.createAndSave).not.toHaveBeenCalled();
   });
 });
