@@ -101,9 +101,8 @@ export const AutomaticCrawlSchedulerLogic = kea<
         clearCrawlSchedule: () => DEFAULT_VALUES.crawlFrequency,
         setCrawlSchedule: (_, { crawlSchedule: { frequency } }) => frequency,
         setCrawlFrequency: (_, { crawlFrequency }) => crawlFrequency,
-        // TODO Enable this reducer once BE allows
-        // setUseConnectorSchedule: (crawlFrequency) =>
-        //   crawlFrequency || DEFAULT_VALUES.crawlFrequency,
+        setUseConnectorSchedule: (crawlFrequency) =>
+          crawlFrequency || DEFAULT_VALUES.crawlFrequency,
       },
     ],
     crawlUnit: [
@@ -112,7 +111,7 @@ export const AutomaticCrawlSchedulerLogic = kea<
         clearCrawlSchedule: () => DEFAULT_VALUES.crawlUnit,
         setCrawlSchedule: (_, { crawlSchedule: { unit } }) => unit,
         setCrawlUnit: (_, { crawlUnit }) => crawlUnit,
-        // setUseConnectorSchedule: (crawlUnit) => crawlUnit || DEFAULT_VALUES.crawlUnit,
+        setUseConnectorSchedule: (crawlUnit) => crawlUnit || DEFAULT_VALUES.crawlUnit,
       },
     ],
     isSubmitting: [
@@ -126,8 +125,8 @@ export const AutomaticCrawlSchedulerLogic = kea<
     useConnectorSchedule: [
       false,
       {
-        // setCrawlAutomatically: (useConnectorSchedule, { crawlAutomatically }) =>
-        //   crawlAutomatically || useConnectorSchedule,
+        setCrawlAutomatically: (useConnectorSchedule, { crawlAutomatically }) =>
+          crawlAutomatically || useConnectorSchedule,
         setCrawlSchedule: (_, { crawlSchedule: { useConnectorSchedule = false } }) =>
           useConnectorSchedule,
         setUseConnectorSchedule: (_, { useConnectorSchedule }) => useConnectorSchedule,
