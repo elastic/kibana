@@ -7,10 +7,13 @@
 
 import { useInterpret, useSelector } from '@xstate/react';
 import createContainer from 'constate';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { waitFor } from 'xstate/lib/waitFor';
 import { LogViewAttributes } from '../../common/log_views';
-import { createLogViewStateMachine } from '../observability_logs/log_view_state';
+import {
+  createLogViewNotificationChannel,
+  createLogViewStateMachine,
+} from '../observability_logs/log_view_state';
 import type { ILogViewsClient } from '../services/log_views';
 import { isDevMode } from '../utils/dev_mode';
 
@@ -23,6 +26,8 @@ export const useLogView = ({
   logViews: ILogViewsClient;
   useDevTools?: boolean;
 }) => {
+  const [logViewStateNotifications] = useState(() => createLogViewNotificationChannel());
+
   const logViewStateService = useInterpret(
     () =>
       createLogViewStateMachine({
@@ -118,6 +123,7 @@ export const useLogView = ({
   return {
     // underlying state machine
     logViewStateService,
+    logViewStateNotifications,
 
     // Failure states
     hasFailedLoading,

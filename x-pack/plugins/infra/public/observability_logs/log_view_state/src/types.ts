@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { ActorRefFrom } from 'xstate';
-import {
+import { type ActorRefFrom } from 'xstate';
+import type {
   LogView,
   LogViewAttributes,
   LogViewStatus,
   ResolvedLogView,
 } from '../../../../common/log_views';
+import { type NotificationChannel } from '../../xstate_helpers';
+import { type LogViewNotificationEvent } from './notifications';
 import { createLogViewStateMachine } from './state_machine';
 
 export interface LogViewContextWithId {
@@ -133,3 +135,8 @@ export type LogViewEvent =
 
 export type LogViewMachine = ReturnType<typeof createLogViewStateMachine>;
 export type LogViewActorRef = ActorRefFrom<LogViewMachine>;
+export type LogViewNotificationChannel = NotificationChannel<
+  LogViewContext,
+  LogViewEvent,
+  LogViewNotificationEvent
+>;

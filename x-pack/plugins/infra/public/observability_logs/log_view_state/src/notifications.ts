@@ -6,9 +6,10 @@
  */
 
 import { LogViewStatus, ResolvedLogView } from '../../../../common/log_views';
-import { LogViewContext } from './types';
+import { createNotificationChannel } from '../../xstate_helpers';
+import { LogViewContext, LogViewEvent } from './types';
 
-export type ListenerEvent =
+export type LogViewNotificationEvent =
   | {
       type: 'loadingLogViewStarted';
       logViewId: string;
@@ -23,30 +24,30 @@ export type ListenerEvent =
       error: Error;
     };
 
-export const logViewListenerEventSelectors: Record<
-  string,
-  (context: LogViewContext) => ListenerEvent | undefined
-> = {
+export const createLogViewNotificationChannel = () =>
+  createNotificationChannel<LogViewContext, LogViewEvent, LogViewNotificationEvent>();
+
+export const logViewNotificationEventSelectors = {
   loadingLogViewStarted: (context: LogViewContext) =>
     'logViewId' in context
-      ? {
+      ? ({
           type: 'loadingLogViewStarted',
           logViewId: context.logViewId,
-        }
+        } as LogViewNotificationEvent)
       : undefined,
   loadingLogViewSucceeded: (context: LogViewContext) =>
     'resolvedLogView' in context && 'status' in context
-      ? {
+      ? ({
           type: 'loadingLogViewSucceeded',
           resolvedLogView: context.resolvedLogView,
           status: context.status,
-        }
+        } as LogViewNotificationEvent)
       : undefined,
   loadingLogViewFailed: (context: LogViewContext) =>
     'error' in context
-      ? {
+      ? ({
           type: 'loadingLogViewFailed',
           error: context.error,
-        }
+        } as LogViewNotificationEvent)
       : undefined,
 };

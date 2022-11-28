@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { createContext, useState } from 'react';
 import { useInterpret } from '@xstate/react';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { useSourceId } from '../../../../containers/source_id';
-import { LogStreamPageStateService } from './types';
+import React, { createContext } from 'react';
+import { type LogViewNotificationChannel } from '../../../log_view_state';
 import { createLogStreamPageStateMachine } from './state_machine';
+import { type LogStreamPageStateService } from './types';
 
 interface IContext {
   logStreamPageStateService: LogStreamPageStateService;
@@ -20,24 +19,14 @@ export const LogStreamPageStateContext = createContext<IContext>({
   logStreamPageStateService: {} as LogStreamPageStateService,
 });
 
-export const LogStreamPageStateProvider = ({ children }: { children: React.ReactNode }) => {
-  // NOTE: Remove sourceId and retrieving client directly from here once possible.
-  const [sourceId] = useSourceId();
-
-  const {
-    services: {
-      logViews: { client },
-    },
-  } = useKibanaContextForPlugin();
-
-  const [logStreamPageStateMachine] = useState(() =>
+export const LogStreamPageStateProvider: React.FC<{
+  logViewStateNotifications: LogViewNotificationChannel;
+}> = ({ children, logViewStateNotifications }) => {
+  const logStreamPageStateService = useInterpret(() =>
     createLogStreamPageStateMachine({
-      logViews: client,
-      logViewId: sourceId,
+      logViewStateNotifications,
     })
   );
-
-  const logStreamPageStateService = useInterpret(logStreamPageStateMachine);
 
   return (
     <LogStreamPageStateContext.Provider value={{ logStreamPageStateService }}>

@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import { createMachine, assign, spawn, SpecialTargets } from 'xstate';
+import { createMachine } from 'xstate';
+import { LogViewNotificationChannel } from '../../../log_view_state';
 import { LogStreamPageEvent, LogStreamPageStateContext, LogStreamPageTypestate } from './types';
-import { createLogViewStateMachine, logViewListenerEventSelectors } from '../../../log_view_state';
-import { ILogViewsClient } from '../../../../services/log_views';
-import { sendIfDefined } from '../../../xstate_helpers';
 
 const MACHINE_ID = 'logStreamPageState';
 
 export const createLogStreamPageStateMachine = ({
-  logViews,
-  logViewId,
+  logViewStateNotifications,
 }: {
-  logViews: ILogViewsClient;
-  logViewId: string;
+  logViewStateNotifications: LogViewNotificationChannel;
 }) => {
   return createMachine<LogStreamPageStateContext, LogStreamPageEvent, LogStreamPageTypestate>(
     {
@@ -76,42 +72,47 @@ export const createLogStreamPageStateMachine = ({
         },
         missingLogViewIndices: {},
       },
+      invoke: {
+        src: 'logViewNotifications',
+      },
       predictableActionArguments: true,
     },
     {
-      services: {},
+      services: {
+        logViewNotifications: () => logViewStateNotifications.createService(),
+      },
       guards: {
         hasLogViewIndices: (context, event) =>
           event.type === 'loadingLogViewSucceeded' &&
           ['empty', 'available'].includes(event.status.index),
       },
-      actions: {
-        spawnLogViewMachine: assign({
-          // Assigned to context for the lifetime of this machine
-          logViewMachineRef: () =>
-            spawn(
-              createLogViewStateMachine({
-                initialContext: {
-                  logViewId,
-                },
-                logViews,
-              }).withConfig({
-                actions: {
-                  notifyLoadingStarted: sendIfDefined(SpecialTargets.Parent)(
-                    logViewListenerEventSelectors.loadingLogViewStarted
-                  ),
-                  notifyLoadingSucceeded: sendIfDefined(SpecialTargets.Parent)(
-                    logViewListenerEventSelectors.loadingLogViewSucceeded
-                  ),
-                  notifyLoadingFailed: sendIfDefined(SpecialTargets.Parent)(
-                    logViewListenerEventSelectors.loadingLogViewFailed
-                  ),
-                },
-              }),
-              'logViewMachine'
-            ),
-        }),
-      },
+      // actions: {
+      //   spawnLogViewMachine: assign({
+      //     // Assigned to context for the lifetime of this machine
+      //     logViewMachineRef: () =>
+      //       spawn(
+      //         createLogViewStateMachine({
+      //           initialContext: {
+      //             logViewId,
+      //           },
+      //           logViews,
+      //         }).withConfig({
+      //           actions: {
+      //             notifyLoadingStarted: sendIfDefined(SpecialTargets.Parent)(
+      //               logViewListenerEventSelectors.loadingLogViewStarted
+      //             ),
+      //             notifyLoadingSucceeded: sendIfDefined(SpecialTargets.Parent)(
+      //               logViewListenerEventSelectors.loadingLogViewSucceeded
+      //             ),
+      //             notifyLoadingFailed: sendIfDefined(SpecialTargets.Parent)(
+      //               logViewListenerEventSelectors.loadingLogViewFailed
+      //             ),
+      //           },
+      //         }),
+      //         'logViewMachine'
+      //       ),
+      //   }),
+      // },
     }
   );
 };

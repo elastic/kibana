@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { type LogViewNotificationChannel } from '../../../observability_logs/log_view_state';
 import { LogStreamPageStateProvider } from '../../../observability_logs/log_stream_page/state/src/provider';
 import {
   LogFilterStateProvider,
@@ -93,8 +94,14 @@ const LogHighlightsState: React.FC = ({ children }) => {
   return <LogHighlightsStateProvider {...highlightsProps}>{children}</LogHighlightsStateProvider>;
 };
 
-export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
-  return <LogStreamPageStateProvider>{children}</LogStreamPageStateProvider>;
+export const LogStreamPageProviders: React.FunctionComponent<{
+  logViewStateNotifications: LogViewNotificationChannel;
+}> = ({ children, logViewStateNotifications }) => {
+  return (
+    <LogStreamPageStateProvider logViewStateNotifications={logViewStateNotifications}>
+      {children}
+    </LogStreamPageStateProvider>
+  );
 };
 
 export const LogsPageContentProviders: React.FunctionComponent = ({ children }) => {

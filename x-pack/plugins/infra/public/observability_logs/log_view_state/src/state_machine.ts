@@ -8,6 +8,8 @@
 import { catchError, from, map, of, throwError } from 'rxjs';
 import { createMachine, actions, assign } from 'xstate';
 import { ILogViewsClient } from '../../../services/log_views';
+import { NotificationChannel } from '../../xstate_helpers';
+import { LogViewNotificationEvent, logViewNotificationEventSelectors } from './notifications';
 import {
   LogViewContext,
   LogViewContextWithError,
@@ -20,8 +22,12 @@ import {
 } from './types';
 
 export const createPureLogViewStateMachine = (initialContext: LogViewContextWithId) =>
+  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UBqBLMB3AxADbrZ4CSEAwgBYCGAdjBANoAMAuoqAA6qxYAXLKnpcQAD0QAWAEwAaEAE9EADgDMAOikBOXdplq12lQFYZrKQF9LCtJhwEArtwi0BYNpyQhe-ISLFJBFkFZQR9bQ1WXVYARikANh1WBNY1a1sSBw1Heiw8oVpCLAAvSHxPMV9BYVFvINMTDRM1WNj1ExUAdgSVGVjQxBkZBI1tHpMTYylYk1jddJsQO1JcDWJaCHyoIlRN7YBlRwBjY7BISErvav860CDYmW1Nada2hK6phITBhBkulRjCYmFIJbSPFTdDLLLJ4dZ7LaMXb7RgAMVoWEIlw4VT4NQC9VUHw0I0mKikXRGsVYMikv3+gPGCUmoPBMkhXWhK2yACc4KhCAA3bb4PmwAWOW5HU7nCDYrw8PG3QKIR7PMbkt6xD5fH5KRBdQwaNR9dQM74LLmwtZigXCpG2wiS2rozHy3F+WoqhCxQwyEk6cHRE1SFLyfU+2JdDTai3a1gpeYJRaZexw47UMDHADWhwEbkcsHwGazucYB3zAkL0rOFxYOOuSq9hIQrWjrRkZhpn3+aiSvykUk0UhaEKm2raKZhabWJZzeYLRbnZagFcXrqx9YVPibBPuiDbxseXf+ZkN-YjnUi2jDzPZINaViW3LhjsF5T5GwgL9wV0Vnr3CRVEmZo3g6bpen6AdvhjLptDBMwpD6PttBMK0Z3hFEoA3D8wAEHlFD-HcALuICEEaUC2nAno+gGCM1C6KQxieXoTA+WkkiSdDVg0R1nREHCIFFPCCKIm5m33H0nheTU2m1T54L1MJ+k0NpjBGVIjEmJ9Ux45cFyrWBBOE-DCIbf98VIoIKWjUcRhUBJqXiVgVF+FpIlDBIRjUKYdApWJuOyZxXCEJFgrcQ4TlrOUtw9SzvTVGShzknVFN+PpIkML4ujghMfJkQK4XC0KdmK7ZBLE3crNVaSNWS94FO+X59Cadkg3+Z4GIC6F6FQOV4G8H84uVFsAFolMQUamj0YxtBmLt6sKtZcnyGoilKSBhoksiuhcjRdrUFJwRUOJzFciNhmjYZmWZHLehNTln2tTDESgLbAIeNJ20eBifKjOImoupJ9rSWYGI+YwToSJbeP5IVtne6qfTMWJmlmMwHM6ey1HpHKQcO-QvJMAE+xh-Ty0rQtEe9EII120YfLmk1HJHEdut03k4ffCBqZbYmmmJlR4kMcEvMhAdZFg+DdpMJCNJhr9yoxTdeckzSojA54QUSdpfkMJiIa6doRymSE1B06ceL425BNVsi5MBI3TGmPpk1p5SLBJUHGKFpzmQtn8NHJ1dKaM5XNsbEjvX55oAWFoxtXZc6wlSUZ+lSJDZijcx2ctoKXAixg7c+hijwMQ05l22N0v0KIYjmaJEsejmioLkrbcj+KW1mfo0cmdlmVd9RmopPvehc7VJkMaxrCAA */
   createMachine<LogViewContext, LogViewEvent, LogViewTypestate>(
     {
+      context: initialContext,
+      preserveActionOrder: true,
+      predictableActionArguments: true,
       id: 'LogView',
       initial: 'uninitialized',
       states: {
@@ -31,10 +37,10 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
           },
         },
         loading: {
+          entry: 'notifyLoadingStarted',
           invoke: {
             src: 'loadLogView',
           },
-          entry: 'notifyLoadingStarted',
           on: {
             loadingSucceeded: {
               target: 'resolving',
@@ -107,10 +113,10 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
           },
         },
         updating: {
+          entry: 'notifyLoadingStarted',
           invoke: {
             src: 'updateLogView',
           },
-          entry: 'notifyLoadingStarted',
           on: {
             updatingSucceeded: {
               target: 'resolving',
@@ -133,9 +139,6 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
           target: '.updating',
         },
       },
-      context: initialContext,
-      predictableActionArguments: true,
-      preserveActionOrder: true,
     },
     {
       actions: {
@@ -185,13 +188,29 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
 export interface LogViewStateMachineDependencies {
   initialContext: LogViewContextWithId;
   logViews: ILogViewsClient;
+  notificationChannel?: NotificationChannel<LogViewContext, LogViewEvent, LogViewNotificationEvent>;
 }
 
 export const createLogViewStateMachine = ({
   initialContext,
   logViews,
+  notificationChannel,
 }: LogViewStateMachineDependencies) =>
   createPureLogViewStateMachine(initialContext).withConfig({
+    actions:
+      notificationChannel != null
+        ? {
+            notifyLoadingStarted: notificationChannel.notify(
+              logViewNotificationEventSelectors.loadingLogViewStarted
+            ),
+            notifyLoadingSucceeded: notificationChannel.notify(
+              logViewNotificationEventSelectors.loadingLogViewSucceeded
+            ),
+            notifyLoadingFailed: notificationChannel.notify(
+              logViewNotificationEventSelectors.loadingLogViewFailed
+            ),
+          }
+        : {},
     services: {
       loadLogView: (context) =>
         from(

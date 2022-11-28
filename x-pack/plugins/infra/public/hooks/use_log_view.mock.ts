@@ -8,7 +8,10 @@
 import { interpret } from 'xstate';
 import { createLogViewMock } from '../../common/log_views/log_view.mock';
 import { createResolvedLogViewMockFromAttributes } from '../../common/log_views/resolved_log_view.mock';
-import { createPureLogViewStateMachine } from '../observability_logs/log_view_state/src';
+import {
+  createLogViewNotificationChannel,
+  createPureLogViewStateMachine,
+} from '../observability_logs/log_view_state/src';
 import { useLogView } from './use_log_view';
 
 type UseLogView = typeof useLogView;
@@ -38,6 +41,7 @@ export const createUninitializedUseLogViewMock =
     resolvedLogView: undefined,
     update: jest.fn(),
     logViewStateService: interpret(createPureLogViewStateMachine({ logViewId })),
+    logViewStateNotifications: createLogViewNotificationChannel(),
   });
 
 export const createLoadingUseLogViewMock =
