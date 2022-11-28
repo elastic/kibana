@@ -32404,8 +32404,6 @@
     "xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.disableAllTitle": "禁用",
     "xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.enableAllTitle": "启用",
     "xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToDeleteRulesMessage": "无法删除规则",
-    "xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToDisableRulesMessage": "无法禁用规则",
-    "xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.failedToEnableRulesMessage": "无法启用规则",
     "xpack.triggersActionsUI.sections.rulesList.cancelSnooze": "取消暂停",
     "xpack.triggersActionsUI.sections.rulesList.cancelSnoozeConfirmCallout": "只会取消当前发生的计划。",
     "xpack.triggersActionsUI.sections.rulesList.cancelSnoozeConfirmText": "根据规则操作中的定义生成告警时恢复通知。",
