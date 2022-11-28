@@ -55,6 +55,7 @@ export interface ChartProps {
   breakdown?: UnifiedHistogramBreakdownContext;
   appendHitsCounter?: ReactElement;
   appendHistogram?: ReactElement;
+  disableAutoFetching?: boolean;
   input$?: UnifiedHistogramInput$;
   onEditVisualization?: (lensAttributes: TypedLensByValueInput['attributes']) => void;
   onResetChartHeight?: () => void;
@@ -80,6 +81,7 @@ export function Chart({
   breakdown,
   appendHitsCounter,
   appendHistogram,
+  disableAutoFetching,
   input$,
   onEditVisualization: originalOnEditVisualization,
   onResetChartHeight,
@@ -134,6 +136,7 @@ export function Chart({
     filters,
     query,
     relativeTimeRange,
+    disableAutoFetching,
     input$,
   });
 
@@ -299,6 +302,7 @@ export function Chart({
               hits={hits}
               chart={chart}
               timeRange={timeRange}
+              refetchId={refetchId}
               lensAttributes={lensAttributes}
               onTotalHitsChange={onTotalHitsChange}
               onChartLoad={onChartLoad}

@@ -29,6 +29,7 @@ export const useRefetchId = ({
   filters,
   query,
   relativeTimeRange,
+  disableAutoFetching,
   input$,
 }: {
   dataView: DataView;
@@ -40,6 +41,7 @@ export const useRefetchId = ({
   filters: Filter[];
   query: Query | AggregateQuery;
   relativeTimeRange: TimeRange;
+  disableAutoFetching?: boolean;
   input$?: UnifiedHistogramInput$;
 }) => {
   const refetchDeps = useRef<ReturnType<typeof getRefetchDeps>>();
@@ -49,6 +51,10 @@ export const useRefetchId = ({
   // that should trigger a histogram refetch against the previous subset. If they
   // are different, we must refetch the histogram to ensure it's up to date.
   useEffect(() => {
+    if (disableAutoFetching) {
+      return;
+    }
+
     const newRefetchDeps = getRefetchDeps({
       dataView,
       request,
@@ -68,11 +74,25 @@ export const useRefetchId = ({
 
       refetchDeps.current = newRefetchDeps;
     }
-  }, [breakdown, chart, chartVisible, dataView, filters, hits, query, request, relativeTimeRange]);
+  }, [
+    breakdown,
+    chart,
+    chartVisible,
+    dataView,
+    filters,
+    hits,
+    query,
+    request,
+    relativeTimeRange,
+    disableAutoFetching,
+  ]);
 
+  // Manual refetching is triggered by the input$ observable
   const incrementRefetchId = useCallback(() => {
-    setRefetchId((id) => id + 1);
-  }, []);
+    if (disableAutoFetching) {
+      setRefetchId((id) => id + 1);
+    }
+  }, [disableAutoFetching]);
 
   useMessage(input$, 'refetch', incrementRefetchId);
 

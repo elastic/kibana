@@ -288,16 +288,21 @@ export const useDiscoverHistogram = ({
   }, [searchSessionId]);
 
   const input$ = useMemo(() => new Subject<UnifiedHistogramInputMessage>(), []);
+  const [isRendered, setIsRendered] = useState(false);
 
   useEffect(() => {
     const subscription = savedSearchFetch$.subscribe(() => {
-      input$.next({ type: 'refetch' });
+      if (isRendered) {
+        input$.next({ type: 'refetch' });
+      } else {
+        setIsRendered(true);
+      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [input$, savedSearchFetch$]);
+  }, [input$, isRendered, savedSearchFetch$]);
 
   // Initialized when the first search has been requested or
   // when in SQL mode since search sessions are not supported
@@ -312,6 +317,7 @@ export const useDiscoverHistogram = ({
         hits,
         chart,
         breakdown,
+        disableAutoFetching: true,
         input$,
         onEditVisualization: canVisualize ? onEditVisualization : undefined,
         onTopPanelHeightChange,

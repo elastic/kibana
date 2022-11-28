@@ -10,7 +10,7 @@ import { isCompleteResponse } from '@kbn/data-plugin/public';
 import { DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { MutableRefObject, useRef } from 'react';
+import { MutableRefObject, useEffect, useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 import {
@@ -22,6 +22,20 @@ import {
   UnifiedHistogramServices,
 } from '../types';
 import { REQUEST_DEBOUNCE_MS } from './consts';
+
+/**
+ * Takes a callback and syncs it to a ref as it changes, then returns a function
+ * that calls the current ref so it can be exluded from effect dependencies
+ */
+const useRefCallback = <T extends (...args: any[]) => any>(fn: T | undefined) => {
+  const ref = useRef(fn);
+
+  useEffect(() => {
+    ref.current = fn;
+  }, [fn]);
+
+  return (...args: Parameters<T>) => ref.current?.(...args);
+};
 
 export const useTotalHits = ({
   services,
@@ -51,9 +65,17 @@ export const useTotalHits = ({
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
 }) => {
   const abortController = useRef<AbortController>();
+  const previousRefetchId = useRef<number>();
 
   useDebounce(
     () => {
+      debugger;
+      if (refetchId === previousRefetchId.current) {
+        return;
+      }
+
+      previousRefetchId.current = refetchId;
+
       fetchTotalHits({
         services,
         abortController,
@@ -68,7 +90,18 @@ export const useTotalHits = ({
       });
     },
     REQUEST_DEBOUNCE_MS,
-    [onTotalHitsChange, refetchId, services]
+    [
+      chartVisible,
+      dataView,
+      filters,
+      hits,
+      onTotalHitsChange,
+      query,
+      refetchId,
+      request,
+      services,
+      timeRange,
+    ]
   );
 };
 

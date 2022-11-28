@@ -38,10 +38,25 @@ export interface HistogramProps {
   hits?: UnifiedHistogramHitsContext;
   chart: UnifiedHistogramChartContext;
   timeRange: TimeRange;
+  refetchId: number;
   lensAttributes: TypedLensByValueInput['attributes'];
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
 }
+
+/**
+ * Takes a callback and syncs it to a ref as it changes, then returns a function
+ * that calls the current ref so it can be exluded from effect dependencies
+ */
+const useRefCallback = <T extends (...args: any[]) => any>(fn: T | undefined) => {
+  const ref = useRef(fn);
+
+  useEffect(() => {
+    ref.current = fn;
+  }, [fn]);
+
+  return (...args: Parameters<T>) => ref.current?.(...args);
+};
 
 export function Histogram({
   services: { data, lens, uiSettings },
@@ -50,6 +65,7 @@ export function Histogram({
   hits,
   chart: { timeInterval },
   timeRange,
+  refetchId,
   lensAttributes: attributes,
   onTotalHitsChange,
   onChartLoad,
@@ -112,6 +128,39 @@ export function Histogram({
     [data, dataView, onChartLoad, onTotalHitsChange, timeInterval, timeRange]
   );
 
+  const [debouncedProps, setDebouncedProps] = useState(
+    getLensProps({
+      timeRange,
+      attributes,
+      request,
+      onLoad,
+    })
+  );
+
+  const previousRefetchId = useRef<number>();
+
+  useDebounce(
+    () => {
+      debugger;
+      if (refetchId === previousRefetchId.current) {
+        return;
+      }
+
+      previousRefetchId.current = refetchId;
+
+      setDebouncedProps(
+        getLensProps({
+          timeRange,
+          attributes,
+          request,
+          onLoad,
+        })
+      );
+    },
+    REQUEST_DEBOUNCE_MS,
+    [attributes, onLoad, refetchId, request, timeRange]
+  );
+
   const { euiTheme } = useEuiTheme();
   const chartCss = css`
     position: relative;
@@ -132,23 +181,6 @@ export function Histogram({
       transform: translate(-50%, -50%);
     }
   `;
-
-  const [debouncedProps, setDebouncedProps] = useState(
-    getLensProps({
-      timeRange,
-      attributes,
-      request,
-      onLoad,
-    })
-  );
-
-  useDebounce(
-    () => {
-      setDebouncedProps(getLensProps({ timeRange, attributes, request, onLoad }));
-    },
-    REQUEST_DEBOUNCE_MS,
-    [attributes, onLoad, request, timeRange]
-  );
 
   return (
     <>

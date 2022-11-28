@@ -81,6 +81,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   appendHitsCounter?: ReactElement;
   /**
+   * Disable automatic refetching based on props changes, and instead wait for a `refetch` message
+   */
+  disableAutoFetching?: boolean;
+  /**
    * Input observable
    */
   input$?: UnifiedHistogramInput$;
@@ -129,6 +133,7 @@ export const UnifiedHistogramLayout = ({
   resizeRef,
   topPanelHeight,
   appendHitsCounter,
+  disableAutoFetching,
   input$,
   onTopPanelHeightChange,
   onEditVisualization,
@@ -193,6 +198,7 @@ export const UnifiedHistogramLayout = ({
           breakdown={breakdown}
           appendHitsCounter={appendHitsCounter}
           appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="l" />}
+          disableAutoFetching={disableAutoFetching}
           input$={input$}
           onEditVisualization={onEditVisualization}
           onResetChartHeight={onResetChartHeight}
