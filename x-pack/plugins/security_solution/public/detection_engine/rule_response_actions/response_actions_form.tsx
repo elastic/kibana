@@ -9,17 +9,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { map, reduce, upperFirst } from 'lodash';
 import ReactMarkdown from 'react-markdown';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { FORM_ERRORS_TITLE } from '../../detections/components/rules/rule_actions_field/translations';
 import { ResponseActionsHeader } from './response_actions_header';
 import { ResponseActionsList } from './response_actions_list';
 import type { ArrayItem, FormHook } from '../../shared_imports';
 import { useSupportedResponseActionTypes } from './use_supported_response_action_types';
 
-const FieldErrorsContainer = styled.div`
-  p {
-    margin-bottom: 0;
-  }
+const FieldErrorsContainer = css`
+  margin-bottom: 0;
 `;
 
 interface ResponseActionsFormProps {
@@ -94,7 +92,7 @@ export const ResponseActionsForm = ({
       <ResponseActionsHeader />
       {uiFieldErrors?.length && form.isSubmitted ? (
         <>
-          <FieldErrorsContainer>
+          <p css={FieldErrorsContainer}>
             <EuiCallOut
               data-test-subj="response-actions-error"
               title={FORM_ERRORS_TITLE}
@@ -103,7 +101,7 @@ export const ResponseActionsForm = ({
             >
               <ReactMarkdown>{uiFieldErrors}</ReactMarkdown>
             </EuiCallOut>
-          </FieldErrorsContainer>
+          </p>
           <EuiSpacer />
         </>
       ) : null}

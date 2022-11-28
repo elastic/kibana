@@ -69,10 +69,8 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
   });
 
   useEffect(() => {
-    if (!isEmpty(ecsMapping)) {
-      if (advancedContentState === 'closed') {
-        setAdvancedContentState('open');
-      }
+    if (!isEmpty(ecsMapping) && advancedContentState === 'closed') {
+      setAdvancedContentState('open');
     }
   }, [advancedContentState, ecsMapping]);
 

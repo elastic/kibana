@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 import type { FieldErrors } from 'react-hook-form';
@@ -57,7 +57,6 @@ const OsqueryResponseActionParamsFormComponent = ({
   onError,
   onChange,
 }: OsqueryResponseActionsParamsFormProps) => {
-  const lastErrors = useRef<FieldErrors<OsqueryResponseActionsParamsFormFields>>(null);
   const uniqueId = useMemo(() => uuid.v4(), []);
   const hooksForm = useHookForm<OsqueryResponseActionsParamsFormFields>({
     mode: 'all',
@@ -84,8 +83,6 @@ const OsqueryResponseActionParamsFormComponent = ({
   });
 
   useEffect(() => {
-    // @ts-expect-error update types
-    lastErrors.current = formState.errors;
     onError(formState.errors);
   }, [onError, formState]);
 

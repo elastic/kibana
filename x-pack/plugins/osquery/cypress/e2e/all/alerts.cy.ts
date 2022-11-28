@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  RESPONSE_ACTIONS_ITEM_0,
+  RESPONSE_ACTIONS_ITEM_1,
+  RESPONSE_ACTIONS_ITEM_2,
+  OSQUERY_RESPONSE_ACTION_ADD_BUTTON,
+} from '../../tasks/response_actions';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import {
@@ -61,26 +67,25 @@ describe('Alert Event Details', () => {
     cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
   });
 
-  it('enables to add detection action with osquery', () => {
+  it('adds response actations with osquery with proper validation and form values', () => {
     cy.visit('/app/security/rules');
     cy.contains(RULE_NAME).click();
     cy.contains('Edit rule settings').click();
     cy.getBySel('edit-rule-actions-tab').wait(500).click();
     cy.contains('Response actions are run on each rule execution');
-    cy.getBySel('.osquery-ResponseActionTypeSelectOption').click();
-    cy.getBySel('response-actions-list-item-0').within(() => {
+    cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.get(LIVE_QUERY_EDITOR);
     });
     cy.contains('Save changes').click();
-    cy.getBySel('response-actions-list-item-0').within(() => {
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('Query is a required field');
       inputQuery('select * from uptime1');
-      cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
     });
 
-    cy.getBySel('.osquery-ResponseActionTypeSelectOption').click();
+    cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
 
-    cy.getBySel('response-actions-list-item-1').within(() => {
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('Run a set of queries in a pack').click();
     });
     cy.contains('Save changes').click();
@@ -90,13 +95,13 @@ describe('Alert Event Details', () => {
       })
       .should('exist');
     cy.contains('Pack is a required field');
-    cy.getBySel('response-actions-list-item-1').within(() => {
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.getBySel('comboBoxInput').type('testpack{downArrow}{enter}');
     });
 
-    cy.getBySel('.osquery-ResponseActionTypeSelectOption').click();
+    cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
 
-    cy.getBySel('response-actions-list-item-2').within(() => {
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_2).within(() => {
       cy.get(LIVE_QUERY_EDITOR);
       cy.contains('Query is a required field');
       inputQuery('select * from uptime');
@@ -113,28 +118,28 @@ describe('Alert Event Details', () => {
     cy.contains('Edit rule settings').click();
     cy.getBySel('edit-rule-actions-tab').wait(500).click();
     cy.contains('select * from uptime');
-    cy.getBySel('response-actions-list-item-0').within(() => {
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('select * from uptime1');
     });
-    cy.getBySel('response-actions-list-item-2').within(() => {
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_2).within(() => {
       cy.contains('select * from uptime');
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
     });
-    cy.getBySel('response-actions-list-item-1').within(() => {
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('testpack');
       cy.getBySel('comboBoxInput').type('{backspace}{enter}');
     });
-    cy.getBySel('response-actions-list-item-0').within(() => {
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('select * from uptime1');
       cy.getBySel('remove-response-action').click();
     });
-    cy.getBySel('response-actions-list-item-0').within(() => {
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('Search for a pack to run');
       cy.contains('Pack is a required field');
       cy.getBySel('comboBoxInput').type('testpack{downArrow}{enter}');
     });
-    cy.getBySel('response-actions-list-item-1').within(() => {
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('select * from uptime');
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
@@ -144,10 +149,10 @@ describe('Alert Event Details', () => {
     cy.getBySel('toastCloseButton').click();
     cy.contains('Edit rule settings').click();
     cy.getBySel('edit-rule-actions-tab').wait(500).click();
-    cy.getBySel('response-actions-list-item-0').within(() => {
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('testpack');
     });
-    cy.getBySel('response-actions-list-item-1').within(() => {
+    cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('select * from uptime');
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
