@@ -10,14 +10,16 @@ import React, { useMemo } from 'react';
 
 // FIXME can't import plugin from package
 import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { EuiButtonIcon, IconType } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, IconType } from '@elastic/eui';
 
 export const ActionItem = ({
   action,
   actionContext,
+  showTooltip,
 }: {
   action: Action;
   actionContext: ActionExecutionContext;
+  showTooltip: boolean;
 }) => {
   const actionProps = useMemo(
     () => ({
@@ -25,15 +27,34 @@ export const ActionItem = ({
       onClick: () => action.execute(actionContext),
       'data-test-subj': `actionItem-${action.id}`,
       'aria-label': action.getDisplayName(actionContext),
-      // toolTipContent: action.getDisplayNameTooltip ? action.getDisplayNameTooltip(context) : '',
       // component: action.MenuItem ? React.createElement(uiToReactComponent(action.MenuItem), { context }) : action.getDisplayName(context),
       // href: action.getHref ? await action.getHref(context) : undefined,
-      // _order: action.order || 0,
       // _title: action.getDisplayName(context),
       // disabled: action.disabled,
     }),
     [action, actionContext]
   );
 
-  return <>{actionProps.iconType ? <EuiButtonIcon {...actionProps} iconSize="s" /> : null}</>;
+  if (!actionProps.iconType) return null;
+
+  return showTooltip ? (
+    <EuiToolTip
+      content={
+        // <TooltipWithKeyboardShortcut
+        //   additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
+        //     field,
+        //     value,
+        //   })}
+        // content={FILTER_FOR_VALUE}
+        // shortcut={FILTER_FOR_VALUE_KEYBOARD_SHORTCUT}
+        // showShortcut={ownFocus}
+        // />
+        action.getDisplayNameTooltip ? action.getDisplayNameTooltip(actionContext) : ''
+      }
+    >
+      <EuiButtonIcon {...actionProps} iconSize="s" />
+    </EuiToolTip>
+  ) : (
+    <EuiButtonIcon {...actionProps} iconSize="s" />
+  );
 };

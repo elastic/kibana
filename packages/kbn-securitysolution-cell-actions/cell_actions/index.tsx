@@ -7,43 +7,106 @@
  */
 
 import { orderBy } from 'lodash/fp';
-import React, { useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { CellActionsContext } from './cell_actions_context';
+import { HoverActions } from './hover_actions';
 import { ActionItem } from './cell_action_item';
 
 // TODO Define an shared interface for all actions configuration
-interface CellActionConfig {
+export interface CellActionConfig {
   field: string;
+  fieldType: string;
   value: string;
 }
 
-interface CellActionsProps {
-  config: CellActionConfig;
-  triggerId: string;
+export enum CellActionsMode {
+  HOVER_POPUP = 'hover-popup',
+  HOVER_INLINE = 'hover-inline',
+  INLINE = 'inline',
 }
 
-export const CellActions = ({ config, triggerId }: CellActionsProps) => {
+export interface CellActionsProps {
+  config: CellActionConfig;
+  triggerId: string;
+  mode: CellActionsMode;
+  showTooltip?: boolean;
+}
+
+export const CellActions: React.FC<CellActionsProps> = ({
+  config,
+  triggerId,
+  children,
+  mode,
+  showTooltip = true,
+}) => {
   const context = useContext(CellActionsContext);
 
-  if (!context.getCompatibleActions) {
-    throw new Error(
-      'No CellActionsContext found. Please wrap the application with CellActionsContextProvider'
-    );
-  }
+  const getActions = useCallback(() => {
+    if (!context.getCompatibleActions) {
+      // eslint-disable-next-line no-console
+      console.error(
+        'No CellActionsContext found. Please wrap the application with CellActionsContextProvider'
+      );
+      return [];
+    } else {
+      return orderBy(
+        ['order', 'title'],
+        ['desc', 'asc'],
+        context.getCompatibleActions(triggerId, config)
+      );
+    }
+  }, [config, triggerId, context]);
 
-  // TODO wait for hover before calling getActions
-  const actions = context.getCompatibleActions(triggerId, config);
   const actionContext = useMemo(
     () => ({ ...config, trigger: { id: triggerId } }),
     [config, triggerId]
   );
 
-  const sortedActions = orderBy(['order', 'title'], ['desc', 'asc'], actions);
+  if (mode === CellActionsMode.HOVER_POPUP) {
+    return (
+      <HoverActions
+        config={config}
+        getActions={getActions}
+        actionContext={actionContext}
+        showTooltip={showTooltip}
+      >
+        {children}
+      </HoverActions>
+    );
+  } else {
+    return (
+      <>
+        {children}
+        <InlineActions
+          getActions={getActions}
+          actionContext={actionContext}
+          showTooltip={showTooltip}
+        />
+      </>
+    );
+  }
+};
 
-  const actionItems = sortedActions.map((action) => {
-    return <ActionItem action={action} actionContext={actionContext} />;
-  });
+interface InlineActionsProps {
+  getActions: () => Action[];
+  actionContext: ActionExecutionContext;
+  showTooltip: boolean;
+}
 
-  return <>{actionItems}</>;
+const InlineActions: React.FC<InlineActionsProps> = ({
+  getActions,
+  actionContext,
+  showTooltip,
+}) => {
+  const actions = useMemo(() => getActions(), [getActions]);
+
+  return (
+    <>
+      {actions.map((action) => (
+        <ActionItem action={action} actionContext={actionContext} showTooltip={showTooltip} />
+      ))}
+    </>
+  );
 };

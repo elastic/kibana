@@ -50,6 +50,7 @@ RUNTIME_DEPS = [
   "@npm//react",
   "@npm//@elastic/eui",
   "@npm//lodash",
+  "@npm//styled-components",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -67,6 +68,7 @@ TYPES_DEPS = [
   "@npm//@types/react",
   "@npm//@elastic/eui",
   "@npm//@types/lodash",
+  "@npm//styled-components",
 ]
 
 jsts_transpiler(
