@@ -220,7 +220,7 @@ Lens & Visualizations::
 * Adds control in the *Lens* annotations layer menu for global filters {kibana-pull}141615[#141615]
 * Adds field filter to popover in *Lens* {kibana-pull}141582[#141582]
 * Improves the performance for large formulas in *Lens* {kibana-pull}141456[#141456]
-* Improves the Quickfunction in-product assistance in *Lens* {kibana-pull}141399[#141399]
+* Improves the Quick function in-product assistance in *Lens* {kibana-pull}141399[#141399]
 * Adds bit formatter in *Lens* {kibana-pull}141372[#141372]
 * Adds the ability to open aggregation-based pie visualizations in *Lens* {kibana-pull}140879[#140879]
 * Adds the ability to open *TSVB* metric visualizations in *Lens* {kibana-pull}140878[#140878]
