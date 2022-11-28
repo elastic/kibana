@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 
-import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
+import { useSecurityJobs } from '../../../../../common/components/ml_popover/hooks/use_security_jobs';
 
 import { MlAdminJobDescription } from './ml_admin_job_description';
 

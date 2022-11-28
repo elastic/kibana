@@ -13,16 +13,9 @@ export const ML_RUN_JOB_LABEL = i18n.translate(
   }
 );
 
-export const ML_JOB_STARTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStartedDescription',
+export const ML_ADMIN_REQUIRED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.mlAdminPermissionsRequiredDescription',
   {
-    defaultMessage: 'Started',
-  }
-);
-
-export const ML_JOB_STOPPED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStoppedDescription',
-  {
-    defaultMessage: 'Stopped',
+    defaultMessage: 'ML Admin Permissions required to perform this action',
   }
 );

@@ -17,10 +17,11 @@ enum MessageLevels {
   error = 'error',
 }
 
-interface AuditIconProps {
+interface MlAuditIconProps {
   message: MlSummaryJob['auditMessage'];
 }
-const AuditIconComponent: FC<AuditIconProps> = ({ message }) => {
+
+const MlAuditIconComponent: FC<MlAuditIconProps> = ({ message }) => {
   if (!message) {
     return null;
   }
@@ -38,9 +39,9 @@ const AuditIconComponent: FC<AuditIconProps> = ({ message }) => {
 
   return (
     <EuiToolTip content={message.text}>
-      <EuiIcon type={icon} color={color} />
+      <EuiIcon data-test-subj="mlJobAuditIcon" type={icon} color={color} />
     </EuiToolTip>
   );
 };
 
-export const AuditIcon = React.memo(AuditIconComponent);
+export const MlAuditIcon = React.memo(MlAuditIconComponent);

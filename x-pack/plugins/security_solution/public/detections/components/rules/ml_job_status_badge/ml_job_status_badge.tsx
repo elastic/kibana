@@ -18,7 +18,7 @@ interface JobStatusBadgeProps {
   job: MlSummaryJob;
 }
 
-const JobStatusBadgeComponent: FC<JobStatusBadgeProps> = ({ job }) => {
+const MlJobStatusBadgeComponent: FC<JobStatusBadgeProps> = ({ job }) => {
   const isStarted = isJobStarted(job.jobState, job.datafeedState);
   const color = isStarted ? 'success' : 'danger';
   const text = isStarted ? i18n.ML_JOB_STARTED : i18n.ML_JOB_STOPPED;
@@ -30,4 +30,4 @@ const JobStatusBadgeComponent: FC<JobStatusBadgeProps> = ({ job }) => {
   );
 };
 
-export const JobStatusBadge = React.memo(JobStatusBadgeComponent);
+export const MlJobStatusBadge = React.memo(MlJobStatusBadgeComponent);

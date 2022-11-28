@@ -8,11 +8,11 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo, memo } from 'react';
 
-import { useEnableDataFeed } from '../../../../common/components/ml_popover/hooks/use_enable_data_feed';
-import type { SecurityJob } from '../../../../common/components/ml_popover/types';
-import { JobSwitch } from '../../../../common/components/ml_popover/jobs_table/job_switch';
+import { useEnableDataFeed } from '../../../../../common/components/ml_popover/hooks/use_enable_data_feed';
+import type { SecurityJob } from '../../../../../common/components/ml_popover/types';
+import { JobSwitch } from '../../../../../common/components/ml_popover/jobs_table/job_switch';
 
-import { MlJobItem } from './ml_job_item';
+import { MlJobItem } from '../ml_job_item';
 
 interface MlAdminJobDescriptionProps {
   job: SecurityJob;
@@ -46,7 +46,13 @@ const MlAdminJobDescriptionComponent: FC<MlAdminJobDescriptionProps> = ({
     [handleJobStateChange, isLoadingEnableDataFeed, job, loading]
   );
 
-  return <MlJobItem job={job} switchComponent={switchComponent} />;
+  return (
+    <MlJobItem
+      job={job}
+      switchComponent={switchComponent}
+      data-test-subj="ml-admin-job-description"
+    />
+  );
 };
 
 export const MlAdminJobDescription = memo(MlAdminJobDescriptionComponent);

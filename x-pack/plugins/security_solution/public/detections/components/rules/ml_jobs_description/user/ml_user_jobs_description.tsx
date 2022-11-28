@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 
-import { useInstalledSecurityJobs } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
+import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 
 import { MlUserJobDescription } from './ml_user_job_description';
 
@@ -28,7 +28,7 @@ const MlUserJobsDescriptionComponent: FC<MlUserJobsDescriptionProps> = ({ jobIds
   return (
     <>
       {relevantJobs.map((job) => (
-        <MlUserJobDescription key={job.id} job={job} />
+        <MlUserJobDescription key={job.id} job={job} data-test-subj="ml-user-job-description" />
       ))}
     </>
   );

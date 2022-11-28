@@ -12,8 +12,8 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 
-import { MlAdminJobsDescription } from './ml_admin_jobs_description';
-import { MlUserJobsDescription } from './ml_user_jobs_description';
+import { MlAdminJobsDescription } from './admin/ml_admin_jobs_description';
+import { MlUserJobsDescription } from './user/ml_user_jobs_description';
 
 interface MlJobsDescriptionProps {
   jobIds: string[];

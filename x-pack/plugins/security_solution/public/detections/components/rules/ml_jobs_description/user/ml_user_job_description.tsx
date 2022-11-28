@@ -6,27 +6,34 @@
  */
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiSwitch } from '@elastic/eui';
+import { EuiSwitch, EuiToolTip } from '@elastic/eui';
+import noop from 'lodash/noop';
 
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 
-import { MlJobItem } from './ml_job_item';
+import * as i18n from '../translations';
+
+import { isJobStarted } from '../../../../../../common/machine_learning/helpers';
+
+import { MlJobItem } from '../ml_job_item';
 
 const MlUserJobDescriptionComponent: FC<{
   job: MlSummaryJob;
 }> = ({ job }) => {
   const switchComponent = useMemo(
     () => (
-      <EuiSwitch
-        disabled
-        data-test-subj="job-switch"
-        showLabel={false}
-        label=""
-        checked
-        onChange={() => {}}
-      />
+      <EuiToolTip content={i18n.ML_ADMIN_REQUIRED}>
+        <EuiSwitch
+          disabled
+          data-test-subj="ml-user-job-switch"
+          showLabel={false}
+          label=""
+          checked={isJobStarted(job.jobState, job.datafeedState)}
+          onChange={noop}
+        />
+      </EuiToolTip>
     ),
-    []
+    [job]
   );
 
   return <MlJobItem job={job} switchComponent={switchComponent} />;

@@ -13,9 +13,9 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 import * as i18n from './translations';
 
-import { MlJobLink } from './ml_job_link';
-import { AuditIcon } from './audit_icon';
-import { JobStatusBadge } from './ml_job_status';
+import { MlJobLink } from '../ml_job_link/ml_job_link';
+import { MlAuditIcon } from '../ml_audit_icon';
+import { MlJobStatusBadge } from '../ml_job_status_badge';
 
 const Wrapper = styled.div`
   overflow: hidden;
@@ -24,16 +24,16 @@ const Wrapper = styled.div`
 const MlJobItemComponent: FC<{
   job: MlSummaryJob;
   switchComponent: ReactNode;
-}> = ({ job, switchComponent }) => {
+}> = ({ job, switchComponent, ...props }) => {
   return (
-    <Wrapper>
+    <Wrapper {...props}>
       <div>
         <MlJobLink jobId={job.id} />
-        <AuditIcon message={job.auditMessage} />
+        <MlAuditIcon message={job.auditMessage} />
       </div>
       <EuiFlexGroup justifyContent="flexStart">
         <EuiFlexItem grow={false} style={{ marginRight: '0' }}>
-          <JobStatusBadge job={job} />
+          <MlJobStatusBadge job={job} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{switchComponent}</EuiFlexItem>
         <EuiFlexItem grow={false} style={{ marginLeft: '0' }}>
