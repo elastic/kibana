@@ -16,6 +16,7 @@ import {
 import { AttachmentMetadata } from '../../../utils';
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
 import { useIndicatorById } from '../../../hooks';
+import { generateMockFileIndicator, Indicator } from '../../../../../../common/types/indicator';
 
 jest.mock('../../../hooks/use_indicator_by_id');
 
@@ -26,14 +27,10 @@ describe('attachment_children initComponent', () => {
       indicatorName: 'indicatorName',
       indicatorFeedName: 'indicatorFeedName',
       indicatorType: 'indicatorType',
-      indicatorFirstSeen: 'indicatorFirstSeen',
     };
 
     (useIndicatorById as jest.MockedFunction<typeof useIndicatorById>).mockReturnValue({
-      indicator: {
-        prop1: 'prop1',
-        prop2: 'prop2',
-      },
+      indicator: generateMockFileIndicator(),
       isLoading: false,
     });
 
@@ -53,11 +50,10 @@ describe('attachment_children initComponent', () => {
       indicatorName: 'indicatorName',
       indicatorFeedName: 'indicatorFeedName',
       indicatorType: 'indicatorType',
-      indicatorFirstSeen: 'indicatorFirstSeen',
     };
 
     (useIndicatorById as jest.MockedFunction<typeof useIndicatorById>).mockReturnValue({
-      indicator: {},
+      indicator: {} as Indicator,
       isLoading: true,
     });
 
