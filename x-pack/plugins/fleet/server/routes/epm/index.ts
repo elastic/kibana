@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 
+import type { FleetAuthz } from '../../../common';
 import type {
   DeletePackageResponse,
   GetInfoResponse,
@@ -32,7 +33,7 @@ import {
   UpdatePackageRequestSchema,
   UpdatePackageRequestSchemaDeprecated,
 } from '../../types';
-import type { FleetAuthzRouter } from '../security';
+import { type FleetAuthzRouter, validateSecurityRbac } from '../security';
 
 import {
   getCategoriesHandler,
@@ -66,9 +67,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.LIST_PATTERN,
       validate: GetPackagesRequestSchema,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
-      },
+      fleetAuthz: ({ packagePrivileges, ...rest }: FleetAuthz): boolean =>
+        validateSecurityRbac(rest.integrations.readPackageInfo, packagePrivileges),
     },
     getListHandler
   );

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FleetAuthz } from '../../../common';
 import { AGENT_POLICY_API_ROUTES } from '../../constants';
 import {
   GetAgentPoliciesRequestSchema,
@@ -17,7 +18,7 @@ import {
   GetK8sManifestRequestSchema,
   BulkGetAgentPoliciesRequestSchema,
 } from '../../types';
-import type { FleetAuthzRouter } from '../security';
+import { type FleetAuthzRouter, validateSecurityRbac } from '../security';
 
 import { K8S_API_ROUTES } from '../../../common/constants';
 
@@ -41,9 +42,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: AGENT_POLICY_API_ROUTES.LIST_PATTERN,
       validate: GetAgentPoliciesRequestSchema,
-      fleetAuthz: {
-        fleet: { readAgentPolicies: true },
-      },
+      fleetAuthz: ({ packagePrivileges, ...rest }: FleetAuthz): boolean =>
+        validateSecurityRbac(rest.fleet.readAgentPolicies, packagePrivileges),
     },
     getAgentPoliciesHandler
   );
@@ -53,9 +53,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: AGENT_POLICY_API_ROUTES.BULK_GET_PATTERN,
       validate: BulkGetAgentPoliciesRequestSchema,
-      fleetAuthz: {
-        fleet: { readAgentPolicies: true },
-      },
+      fleetAuthz: ({ packagePrivileges, ...rest }: FleetAuthz): boolean =>
+        validateSecurityRbac(rest.fleet.readAgentPolicies, packagePrivileges),
     },
     bulkGetAgentPoliciesHandler
   );

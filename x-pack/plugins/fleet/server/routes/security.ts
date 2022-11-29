@@ -110,6 +110,36 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
   });
 }
 
+export function validateSecurityRbac(
+  hasFleetPrivilege: boolean,
+  userPackagePrivileges: FleetAuthz['packagePrivileges']
+): boolean {
+  const endpointActions = userPackagePrivileges?.endpoint?.actions;
+
+  if (!endpointActions) {
+    return hasFleetPrivilege;
+  }
+
+  const {
+    readEndpointList: { executePackageAction: canReadEndpointList },
+    readPolicyManagement: { executePackageAction: canReadPolicyManagement },
+    readTrustedApplications: { executePackageAction: canReadTrustedApplications },
+    readEventFilters: { executePackageAction: canReadEventFilters },
+    readHostIsolationExceptions: { executePackageAction: canReadHostIsolationExceptions },
+    readBlocklist: { executePackageAction: canReadBlocklist },
+  } = endpointActions;
+
+  // either given fleet privilege or one of the security RBAC privileges are toggled on
+  return (
+    hasFleetPrivilege ||
+    canReadEndpointList ||
+    canReadPolicyManagement ||
+    canReadTrustedApplications ||
+    canReadEventFilters ||
+    canReadHostIsolationExceptions ||
+    canReadBlocklist
+  );
+}
 interface Authz {
   [k: string]: Authz | boolean;
 }
@@ -150,7 +180,7 @@ type DeepPartialTruthy<T> = {
   [P in keyof T]?: T[P] extends boolean ? true : DeepPartialTruthy<T[P]>;
 };
 
-type FleetAuthzRequirements = DeepPartialTruthy<FleetAuthz>;
+export type FleetAuthzRequirements = DeepPartialTruthy<FleetAuthz>;
 
 type FleetAuthzRouteRegistrar<
   Method extends RouteMethod,
@@ -160,12 +190,12 @@ type FleetAuthzRouteRegistrar<
   handler: RequestHandler<P, Q, B, Context, Method>
 ) => void;
 
-export interface FleetAuthzRouteConfig {
-  fleetAuthz?: FleetAuthzRequirements;
+export interface FleetAuthzRouteConfig<T extends FleetAuthzRequirements | Function> {
+  fleetAuthz?: T extends Function ? (userAuthz: FleetAuthz) => boolean : FleetAuthzRequirements;
 }
 
 type FleetRouteConfig<P, Q, B, Method extends RouteMethod> = RouteConfig<P, Q, B, Method> &
-  FleetAuthzRouteConfig;
+  FleetAuthzRouteConfig<FleetAuthzRequirements | Function>;
 
 // Fleet router that allow to add required access when registering route
 export interface FleetAuthzRouter<
@@ -185,7 +215,9 @@ function shouldHandlePostAuthRequest(req: KibanaRequest) {
   return false;
 }
 // Exported for test only
-export function deserializeAuthzConfig(tags: readonly string[]): FleetAuthzRouteConfig {
+export function deserializeAuthzConfig(
+  tags: readonly string[]
+): FleetAuthzRouteConfig<FleetAuthzRequirements> {
   let fleetAuthz: FleetAuthzRequirements | undefined;
   for (const tag of tags) {
     if (!tag.match(/^fleet:authz/)) {
@@ -218,10 +250,11 @@ export function deserializeAuthzConfig(tags: readonly string[]): FleetAuthzRoute
 }
 
 // Exported for test only
-export function serializeAuthzConfig(config: FleetAuthzRouteConfig): string[] {
+export function serializeAuthzConfig(
+  config: FleetAuthzRouteConfig<FleetAuthzRequirements>
+): string[] {
   const tags: string[] = [];
-
-  if (config.fleetAuthz) {
+  if (config.fleetAuthz && typeof config.fleetAuthz !== 'function') {
     function fleetAuthzToTags(requirements: DeepPartialTruthy<Authz>, prefix: string = '') {
       for (const key of Object.keys(requirements)) {
         if (typeof requirements[key] === 'boolean') {
@@ -252,7 +285,7 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
         tags: [
           ...(routeConfig?.options?.tags ?? []),
           ...serializeAuthzConfig({
-            fleetAuthz,
+            fleetAuthz: typeof fleetAuthz !== 'function' ? fleetAuthz : undefined,
           }),
         ],
       },
@@ -282,7 +315,19 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
   };
 
   const fleetAuthzRouter: FleetAuthzRouter<TContext> = {
-    get: (routeConfig, handler) => router.get(buildFleetAuthzRouteConfig(routeConfig), handler),
+    get: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {
+      router.get(options, async (context, req, res) => {
+        const requestedAuthz = await getAuthzFromRequest(req);
+        if (
+          hasRequiredAuthz &&
+          typeof hasRequiredAuthz === 'function' &&
+          hasRequiredAuthz(requestedAuthz)
+        ) {
+          return handler(context, req, res);
+        }
+        return res.forbidden();
+      });
+    },
     delete: (routeConfig, handler) =>
       router.delete(buildFleetAuthzRouteConfig(routeConfig), handler),
     post: (routeConfig, handler) => router.post(buildFleetAuthzRouteConfig(routeConfig), handler),
