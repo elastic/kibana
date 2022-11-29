@@ -16,8 +16,8 @@ import { FieldTypesProvider } from '../../../containers/field_types_provider';
 import { InspectorProvider } from '../../../containers/inspector';
 import { useColumnSettings } from '../components/table/hooks';
 import { IndicatorsFilters } from '../containers/filters';
-import { useSecurityContext } from '../../../hooks';
 import { UpdateStatus } from '../../../components/update_status';
+import { QueryBar } from '../../query_bar/query_bar';
 
 const IndicatorsPageProviders: FC = ({ children }) => (
   <IndicatorsFilters>
@@ -43,6 +43,7 @@ const IndicatorsPageContent: VFC = () => {
     isLoading: isLoadingIndicators,
     isFetching: isFetchingIndicators,
     dataUpdatedAt,
+    query: indicatorListQuery,
   } = useIndicators({
     filters,
     filterQuery,
@@ -57,13 +58,12 @@ const IndicatorsPageContent: VFC = () => {
     onFieldChange,
     isLoading: isLoadingAggregatedIndicators,
     isFetching: isFetchingAggregatedIndicators,
+    query: indicatorChartQuery,
   } = useAggregatedIndicators({
     timeRange,
     filters,
     filterQuery,
   });
-
-  const { SiemSearchBar } = useSecurityContext();
 
   return (
     <FieldTypesProvider>
@@ -72,7 +72,10 @@ const IndicatorsPageContent: VFC = () => {
         subHeader={<UpdateStatus isUpdating={isFetchingIndicators} updatedAt={dataUpdatedAt} />}
       >
         <FiltersGlobal>
-          <SiemSearchBar indexPattern={indexPattern} id="global" />
+          <QueryBar
+            queries={[indicatorChartQuery, indicatorListQuery]}
+            indexPattern={indexPattern}
+          />
         </FiltersGlobal>
 
         <IndicatorsBarChartWrapper

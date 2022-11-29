@@ -32,7 +32,7 @@ const LazyIndicatorsPageWrapper = React.lazy(() => import('./containers/indicato
 
 /**
  * This is used here:
- * x-pack/plugins/security_solution/public/threat_intelligence/pages/threat_intelligence.tsx
+ * x-pack/plugins/security_solution/public/threat_intelligence/routes.tsx
  */
 export const createApp =
   (services: Services) =>
@@ -40,7 +40,7 @@ export const createApp =
   ({ securitySolutionContext }: AppProps) =>
     (
       <IntlProvider>
-        <ReduxStoreProvider store={securitySolutionContext.getSecuritySolutionStore}>
+        <ReduxStoreProvider store={securitySolutionContext.securitySolutionStore}>
           <SecuritySolutionContext.Provider value={securitySolutionContext}>
             <KibanaContextProvider services={services}>
               <EnterpriseGuard>

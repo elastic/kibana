@@ -24,6 +24,8 @@ import { useSourcererDataView } from '../common/containers/sourcerer';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { SiemSearchBar } from '../common/components/search_bar';
 import { useGlobalTime } from '../common/containers/use_global_time';
+import { deleteOneQuery, setQuery } from '../common/store/inputs/actions';
+import { InputsModelId } from '../common/store/inputs/constants';
 
 const ThreatIntelligence = memo(() => {
   const { threatIntelligence } = useKibana().services;
@@ -34,16 +36,35 @@ const ThreatIntelligence = memo(() => {
   const securitySolutionStore = getStore() as Store;
 
   const securitySolutionContext: SecuritySolutionPluginContext = {
+    securitySolutionStore,
+
     getFiltersGlobalComponent: () => FiltersGlobal,
     getPageWrapper: () => SecuritySolutionPageWrapper,
     licenseService,
     sourcererDataView: sourcererDataView as unknown as SourcererDataView,
-    getSecuritySolutionStore: securitySolutionStore,
     getUseInvestigateInTimeline: useInvestigateInTimeline,
 
     useQuery: () => useSelector(inputsSelectors.globalQuerySelector()),
     useFilters: () => useSelector(inputsSelectors.globalFiltersQuerySelector()),
     useGlobalTime,
+
+    registerQuery: (query) =>
+      securitySolutionStore.dispatch(
+        setQuery({
+          inputId: InputsModelId.global,
+          id: query.id,
+          refetch: query.refetch,
+          inspect: null,
+          loading: query.loading,
+        })
+      ),
+    deregisterQuery: (query) =>
+      securitySolutionStore.dispatch(
+        deleteOneQuery({
+          inputId: InputsModelId.global,
+          id: query.id,
+        })
+      ),
 
     SiemSearchBar,
   };
