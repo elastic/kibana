@@ -12,7 +12,11 @@ import { distinctUntilChanged } from 'rxjs/operators';
 import uuid from 'uuid';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
-import { ControlGroupContainer, type ControlGroupInputBuilder, LazyControlGroupRenderer } from '@kbn/controls-plugin/public';
+import {
+  ControlGroupContainer,
+  type ControlGroupInputBuilder,
+  LazyControlGroupRenderer,
+} from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { first } from 'rxjs/operators';
 import type { TimeRange } from '@kbn/es-query';
@@ -54,7 +58,7 @@ export class Timeslider extends Component<Props, {}> {
   _getInitialInput = async (builder: typeof ControlGroupInputBuilder) => {
     const input = {
       id: uuid(),
-      ...getDefaultControlGroupInput()
+      ...getDefaultControlGroupInput(),
     };
     if (!this._isMounted) {
       return input;
