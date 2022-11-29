@@ -20,7 +20,7 @@ const getTourConfig = (packageKey: string, tourType: TourType) => {
       }),
       description: i18n.translate('xpack.fleet.guidedOnboardingTour.endpointButton.description', {
         defaultMessage:
-          'In just a few steps, configure your data with our recommended defaults. You can change this later.',
+          'In just a few steps, add your data with our recommended defaults. You can change this later.',
       }),
     };
   }
@@ -31,7 +31,7 @@ const getTourConfig = (packageKey: string, tourType: TourType) => {
         defaultMessage: 'Select Elastic Defend',
       }),
       description: i18n.translate('xpack.fleet.guidedOnboardingTour.endpointCard.description', {
-        defaultMessage: 'The best way to get data quickly in to your SIEM.',
+        defaultMessage: 'The best way to get data quickly into your SIEM.',
       }),
     };
   }
@@ -45,7 +45,7 @@ const getTourConfig = (packageKey: string, tourType: TourType) => {
         'xpack.fleet.guidedOnboardingTour.kubernetesButton.tourDescription',
         {
           defaultMessage:
-            'In just a few steps, configure your data with our recommended defaults. You can change this later.',
+            'In just a few steps, add your data with our recommended defaults. You can change this later.',
         }
       ),
     };
@@ -97,7 +97,7 @@ export const WithGuidedOnboardingTour: FunctionComponent<{
       footerAction={
         <EuiButton onClick={() => setIsGuidedOnboardingTourOpen(false)} size="s" color="success">
           {i18n.translate('xpack.fleet.guidedOnboardingTour.nextButtonLabel', {
-            defaultMessage: 'Got it',
+            defaultMessage: 'Continue',
           })}
         </EuiButton>
       }
