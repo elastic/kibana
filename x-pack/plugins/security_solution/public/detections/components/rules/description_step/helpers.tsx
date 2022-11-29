@@ -544,6 +544,7 @@ export const buildAlertSuppressionDescription = (
       <EuiBetaBadge
         label={i18n.ALERT_SUPPRESSION_TECHNICAL_PREVIEW}
         style={{ verticalAlign: 'middle', marginLeft: '8px' }}
+        size="s"
       />
       {!license.isAtLeast(minimumLicenseForSuppression) && (
         <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
