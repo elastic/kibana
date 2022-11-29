@@ -7,7 +7,6 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import uuid from 'uuid/v4';
 import { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -57,27 +56,14 @@ export class Timeslider extends Component<Props, {}> {
     this._isMounted = true;
   }
 
-  _getCreationOptions = () => {
+  _getCreationOptions = (builder) => {
     if (!this._isMounted) {
       return;
     }
-
-    const timesliderId = uuid();
+    const input = getDefaultControlGroupInput();
+    builder.addTimesliderControl(input);
     return {
-      id: uuid(),
-      ...getDefaultControlGroupInput(),
-      panels: {
-        [timesliderId]: {
-          explicitInput: {
-            id: timesliderId,
-            title: 'timeslider',
-          },
-          grow: true,
-          order: 0,
-          type: 'timeSlider',
-          width: 'large',
-        },
-      },
+      ...input,
       viewMode: ViewMode.VIEW,
       timeRange: this.props.timeRange,
     };

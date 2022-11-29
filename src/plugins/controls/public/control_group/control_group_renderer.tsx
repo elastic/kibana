@@ -22,7 +22,7 @@ import {
   CONTROL_GROUP_TYPE,
 } from './types';
 import { ControlGroupContainer } from './embeddable/control_group_container';
-import { DataControlInput } from '../types';
+import { DataControlInput, ControlInput } from '../types';
 import { getCompatibleControlType, getNextPanelOrder } from './embeddable/control_group_helpers';
 import { controlGroupReducers } from './state/control_group_reducers';
 
@@ -42,13 +42,12 @@ const ControlGroupInputBuilder = {
 
     const { panelId, dataViewId, fieldName, title, grow, width } = newPanelInput;
     const newPanelId = panelId || uuid.v4();
-    const nextOrder = getNextPanelOrder(initialInput);
     const controlType = await getCompatibleControlType({ dataViewId, fieldName });
 
     initialInput.panels = {
       ...initialInput.panels,
       [newPanelId]: {
-        order: nextOrder,
+        order: getNextPanelOrder(initialInput),
         type: controlType,
         grow: grow ?? controlGrow,
         width: width ?? controlWidth,
@@ -56,6 +55,22 @@ const ControlGroupInputBuilder = {
       } as ControlPanelState<DataControlInput>,
     };
   },
+  addTimesliderControl: (initialInput: Partial<ControlGroupInput>) => {
+    const newPanelId = uuid.v4();
+    initialInput.panels = {
+      ...initialInput.panels,
+      [newPanelId]: {
+        order: getNextPanelOrder(initialInput),
+        type: 'timeSlider',
+        grow: true,
+        width: 'large',
+        explicitInput: {
+          id: newPanelId,
+          title: 'timeslider',
+        },
+      } as ControlPanelState<ControlInput>,
+    };
+  }
 };
 
 export interface ControlGroupRendererProps {
