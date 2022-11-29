@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { ObservabilityAppServices } from '../../application/types';
 import { paths } from '../../config';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -15,6 +14,7 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
 import { isSloFeatureEnabled } from './helpers';
 import PageNotFound from '../404';
+import { SLOS_BREADCRUMB_TEXT, SLOS_PAGE_TITLE } from './translations';
 
 export function SlosPage() {
   const { http } = useKibana<ObservabilityAppServices>().services;
@@ -23,9 +23,7 @@ export function SlosPage() {
   useBreadcrumbs([
     {
       href: http.basePath.prepend(paths.observability.slos),
-      text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
-        defaultMessage: 'SLOs',
-      }),
+      text: SLOS_BREADCRUMB_TEXT,
     },
   ]);
 
@@ -36,7 +34,7 @@ export function SlosPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <div>SLOs</div>,
+        pageTitle: <>{SLOS_PAGE_TITLE}</>,
         rightSideItems: [],
         bottomBorder: true,
       }}
