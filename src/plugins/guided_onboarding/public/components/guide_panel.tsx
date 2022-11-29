@@ -188,7 +188,7 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
         navigateToLandingPage={navigateToLandingPage}
       />
 
-      {isGuideOpen && (
+      {isGuideOpen && guideConfig && (
         <EuiFlyout
           ownFocus
           onClose={toggleGuide}
