@@ -71,8 +71,8 @@ const PanelRT = rt.type({
   explicitInput: rt.intersection([
     rt.type({ id: rt.string }),
     rt.partial({
-      dataViewId: rt.union([rt.string, rt.undefined]),
-      fieldName: rt.union([rt.string, rt.undefined]),
+      dataViewId: rt.string,
+      fieldName: rt.string,
       title: rt.union([rt.string, rt.undefined]),
     }),
   ]),
