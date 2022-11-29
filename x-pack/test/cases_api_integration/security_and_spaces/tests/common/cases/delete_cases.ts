@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { defaultUser, getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
+import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   deleteCasesByESQuery,
   deleteCasesUserActions,
@@ -17,7 +17,6 @@ import {
   deleteCases,
   createComment,
   getComment,
-  removeServerGeneratedPropertiesFromUserAction,
   getCase,
   superUserSpace1Auth,
   getCaseUserActions,
@@ -53,7 +52,22 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body).to.eql({});
     });
 
-    it(`should delete a case's comments when that case gets deleted`, async () => {
+    it('should delete multiple cases and their user actions', async () => {
+      const [case1, case2] = await Promise.all([
+        createCase(supertest, getPostCaseRequest()),
+        createCase(supertest, getPostCaseRequest()),
+      ]);
+
+      await deleteCases({ supertest, caseIDs: [case1.id, case2.id] });
+
+      const userActionsCase1 = await getCaseUserActions({ supertest, caseID: case1.id });
+      expect(userActionsCase1.length).to.be(0);
+
+      const userActionsCase2 = await getCaseUserActions({ supertest, caseID: case2.id });
+      expect(userActionsCase2.length).to.be(0);
+    });
+
+    it(`should delete a case's comments and user actions when that case gets deleted`, async () => {
       const postedCase = await createCase(supertest, getPostCaseRequest());
       const patchedCase = await createComment({
         supertest,
@@ -76,23 +90,16 @@ export default ({ getService }: FtrProviderContext): void => {
         commentId: patchedCase.comments![0].id,
         expectedHttpCode: 404,
       });
+
+      const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+      expect(userActions.length).to.be(0);
     });
 
-    it('should create a user action when deleting a case', async () => {
+    it('should delete all user actions when deleting a case', async () => {
       const postedCase = await createCase(supertest, getPostCaseRequest());
       await deleteCases({ supertest, caseIDs: [postedCase.id] });
       const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
-      const creationUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
-
-      expect(creationUserAction).to.eql({
-        action: 'delete',
-        type: 'delete_case',
-        created_by: defaultUser,
-        case_id: postedCase.id,
-        comment_id: null,
-        payload: {},
-        owner: 'securitySolutionFixture',
-      });
+      expect(userActions.length).to.be(0);
     });
 
     it('unhappy path - 404s when case is not there', async () => {
