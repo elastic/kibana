@@ -74,7 +74,7 @@ TYPES_DEPS = [
   "@npm//@types/classnames",
   "//packages/kbn-ambient-ui-types",
   "//packages/shared-ux/file/util:npm_module_types",
-  "//packages/shared-ux/file/image/types:npm_module_types",
+  "//packages/shared-ux/file/types:npm_module_types",
 ]
 
 jsts_transpiler(
