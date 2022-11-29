@@ -487,7 +487,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return a 200 ok but have a 409 conflict if we attempt to update the rule, which use existing attached rule defult list', async () => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
-        await createRule(supertest, log, {
+        const ruleWithException = await createRule(supertest, log, {
           ...getSimpleRule('rule-2'),
           exceptions_list: [
             {
@@ -523,7 +523,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body).to.eql([
           {
             error: {
-              message: 'default exception list already exists',
+              message: `default exception list already exists in rule(s): ${ruleWithException.id}`,
               status_code: 409,
             },
             rule_id: 'rule-1',
@@ -573,14 +573,14 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body).to.eql([
           {
             error: {
-              message: 'default exception list is duplicated in "rule-1"',
+              message: 'default exceptions list 2 for rule rule-1 is duplicated',
               status_code: 409,
             },
             rule_id: 'rule-1',
           },
           {
             error: {
-              message: 'default exception list is duplicated in "rule-2"',
+              message: 'default exceptions list 2 for rule rule-2 is duplicated',
               status_code: 409,
             },
             rule_id: 'rule-2',

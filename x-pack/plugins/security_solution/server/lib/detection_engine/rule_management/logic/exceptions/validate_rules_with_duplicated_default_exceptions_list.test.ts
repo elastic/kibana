@@ -25,6 +25,7 @@ const defaultExceptionList: List = {
 describe('validateRulesWithDuplicatedDefaultExceptionsList.test', () => {
   it('is valid array if there no rules', () => {
     const result = validateRulesWithDuplicatedDefaultExceptionsList({
+      ruleId: undefined,
       exceptionsList: undefined,
       allRules: [],
     });
@@ -33,6 +34,7 @@ describe('validateRulesWithDuplicatedDefaultExceptionsList.test', () => {
 
   it('is valid if there no default exceptions list duplicated', () => {
     const result = validateRulesWithDuplicatedDefaultExceptionsList({
+      ruleId: undefined,
       exceptionsList: [defaultExceptionList],
       allRules: [
         {
@@ -46,9 +48,10 @@ describe('validateRulesWithDuplicatedDefaultExceptionsList.test', () => {
     expect(result).toBeUndefined();
   });
 
-  it('throw error if there the same deafult exceptions list', () => {
+  it('throw error if there the same default exceptions list', () => {
     expect(() =>
       validateRulesWithDuplicatedDefaultExceptionsList({
+        ruleId: undefined,
         exceptionsList: [defaultExceptionList],
         allRules: [
           {
@@ -63,5 +66,25 @@ describe('validateRulesWithDuplicatedDefaultExceptionsList.test', () => {
         ],
       })
     ).toThrow(`default exceptions list 2 is duplicated`);
+  });
+
+  it('throw error with ruleId if there the same default exceptions list', () => {
+    expect(() =>
+      validateRulesWithDuplicatedDefaultExceptionsList({
+        ruleId: '1',
+        exceptionsList: [defaultExceptionList],
+        allRules: [
+          {
+            exceptions_list: [defaultExceptionList],
+          },
+          {
+            exceptions_list: [notDefaultExceptionList],
+          },
+          {
+            exceptions_list: [defaultExceptionList],
+          },
+        ],
+      })
+    ).toThrow(`default exceptions list 2 for rule 1 is duplicated`);
   });
 });

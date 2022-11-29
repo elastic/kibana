@@ -95,6 +95,7 @@ export const bulkUpdateRulesRoute = (
             validateRulesWithDuplicatedDefaultExceptionsList({
               allRules: request.body,
               exceptionsList: payloadRule.exceptions_list,
+              ruleId: idOrRuleIdOrUnknown,
             });
             await validateRuleDefaultExceptionList({
               exceptionsList: payloadRule.exceptions_list,

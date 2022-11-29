@@ -331,7 +331,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           };
 
-          await supertest
+          const { body: ruleWithException } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
             .send(rule)
@@ -344,7 +344,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(409);
 
           expect(body).to.eql({
-            message: 'default exception list already exists',
+            message: `default exception list already exists in rule(s): ${ruleWithException.id}`,
             status_code: 409,
           });
         });

@@ -95,12 +95,13 @@ export const bulkCreateRulesRoute = (
               validateRulesWithDuplicatedDefaultExceptionsList({
                 allRules: request.body,
                 exceptionsList: payloadRule.exceptions_list,
+                ruleId: payloadRule.rule_id,
               });
 
               await validateRuleDefaultExceptionList({
                 exceptionsList: payloadRule.exceptions_list,
                 rulesClient,
-                ruleId: undefined,
+                ruleId: payloadRule.rule_id,
               });
 
               const validationErrors = validateCreateRuleProps(payloadRule);

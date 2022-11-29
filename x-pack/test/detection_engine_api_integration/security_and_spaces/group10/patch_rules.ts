@@ -265,7 +265,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not patch a rule if trying to add default rule exception list which attached to another', async () => {
-        await createRule(supertest, log, {
+        const ruleWithException = await createRule(supertest, log, {
           ...getSimpleRule('rule-1'),
           exceptions_list: [
             {
@@ -295,7 +295,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(409);
 
         expect(body).to.eql({
-          message: 'default exception list already exists',
+          message: `default exception list already exists in rule(s): ${ruleWithException.id}`,
           status_code: 409,
         });
       });

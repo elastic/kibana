@@ -166,7 +166,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should return a 200 ok but have a 409 conflict if we attempt to create the rule, which use existing attached rule defult list', async () => {
-        await supertest
+        const { body: ruleWithException } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .send({
@@ -203,7 +203,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body).to.eql([
           {
             error: {
-              message: 'default exception list already exists',
+              message: `default exception list for rule: rule-1 already exists in rule(s): ${ruleWithException.id}`,
               status_code: 409,
             },
             rule_id: 'rule-1',
@@ -255,17 +255,24 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body).to.eql([
           {
             error: {
-              message: 'default exception list is duplicated in "rule-1"',
+              message: 'default exceptions list 2 for rule rule-1 is duplicated',
               status_code: 409,
             },
             rule_id: 'rule-1',
           },
           {
             error: {
-              message: 'default exception list is duplicated in "rule-2"',
+              message: 'default exceptions list 2 for rule rule-2 is duplicated',
               status_code: 409,
             },
             rule_id: 'rule-2',
+          },
+          {
+            error: {
+              message: 'default exceptions list 2 is duplicated',
+              status_code: 409,
+            },
+            rule_id: '(unknown id)',
           },
         ]);
       });

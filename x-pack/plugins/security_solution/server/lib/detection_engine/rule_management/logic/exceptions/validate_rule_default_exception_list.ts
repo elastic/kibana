@@ -76,6 +76,12 @@ export const validateRuleDefaultExceptionList = async ({
   }
 
   if (isExceptionsExistInOtherRule || !isExceptionAttachToThisRule) {
-    throw new CustomHttpRequestError('default exception list already exists', 409);
+    const ids = rulesWithDefaultExceptionList.data.map((rule) => rule.id);
+    throw new CustomHttpRequestError(
+      `default exception list${ruleId ? ` for rule: ${ruleId}` : ''} already exists ${
+        ids ? `in rule(s): ${ids}` : ''
+      }`,
+      409
+    );
   }
 };

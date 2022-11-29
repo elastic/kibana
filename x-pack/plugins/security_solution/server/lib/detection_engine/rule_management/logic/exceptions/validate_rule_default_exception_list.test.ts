@@ -96,7 +96,9 @@ describe('validateRuleDefaultExceptionList', () => {
         exceptionsList: [defaultExceptionList],
         rulesClient: clients.rulesClient,
       })
-    ).rejects.toThrow('default exception list already exists');
+    ).rejects.toThrow(
+      'default exception list for rule: 1 already exists in rule(s): 04128c15-0d1b-4716-a4c5-46997ac7f3bd,04128c15-0d1b-4716-a4c5-46997ac7f3bd'
+    );
   });
 
   it('is valid if there rule default list in this rule', async () => {
@@ -138,6 +140,31 @@ describe('validateRuleDefaultExceptionList', () => {
         exceptionsList: [defaultExceptionList],
         rulesClient: clients.rulesClient,
       })
-    ).rejects.toThrow('default exception list already exists');
+    ).rejects.toThrow(
+      'default exception list for rule: 1 already exists in rule(s): 04128c15-0d1b-4716-a4c5-46997ac7f3bd'
+    );
+  });
+
+  it('throw error if there rule default list in other rule and ruleID undefined', async () => {
+    clients.rulesClient.find.mockResolvedValue({
+      ...getFindResultWithSingleHit(),
+      data: [
+        {
+          ...getRuleMock({
+            ...getQueryRuleParams(),
+          }),
+        },
+      ],
+    });
+
+    await expect(
+      validateRuleDefaultExceptionList({
+        ruleId: undefined,
+        exceptionsList: [defaultExceptionList],
+        rulesClient: clients.rulesClient,
+      })
+    ).rejects.toThrow(
+      'default exception list already exists in rule(s): 04128c15-0d1b-4716-a4c5-46997ac7f3bd'
+    );
   });
 });

@@ -19,9 +19,11 @@ import { CustomHttpRequestError } from '../../../../../utils/custom_http_request
 export const validateRulesWithDuplicatedDefaultExceptionsList = ({
   exceptionsList,
   allRules,
+  ruleId,
 }: {
   allRules: BulkCreateRulesRequestBody | BulkPatchRulesRequestBody | BulkUpdateRulesRequestBody;
   exceptionsList: ListArray | undefined;
+  ruleId: string | undefined;
 }): void => {
   if (!exceptionsList) return;
   const defaultExceptionToTuRulesMap: { [key: string]: number[] } = {};
@@ -42,6 +44,9 @@ export const validateRulesWithDuplicatedDefaultExceptionsList = ({
 
   if (duplicatedExceptionsList.length > 0) {
     const ids = duplicatedExceptionsList?.map((list) => list.id).join(', ');
-    throw new CustomHttpRequestError(`default exceptions list ${ids} is duplicated`, 409);
+    throw new CustomHttpRequestError(
+      `default exceptions list ${ids}${ruleId ? ` for rule ${ruleId}` : ''} is duplicated`,
+      409
+    );
   }
 };
