@@ -8,7 +8,7 @@
 import useAsync from 'react-use/lib/useAsync';
 import { useQuery } from '@tanstack/react-query';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { epmRouteService, isVerificationError } from '../../services';
 import type {
@@ -97,30 +97,31 @@ export const useGetPackageInfoByKey = (
   const [ignoreUnverifiedQueryParam, setIgnoreUnverifiedQueryParam] = useState(
     options?.ignoreUnverified
   );
-  const res = useRequest<GetInfoResponse>({
-    path: epmRouteService.getInfoPath(pkgName, pkgVersion),
-    method: 'get',
-    query: {
-      ...options,
-      ...(ignoreUnverifiedQueryParam && { ignoreUnverified: ignoreUnverifiedQueryParam }),
-    },
-  });
 
-  useEffect(() => {
-    const confirm = async () => {
-      const forceInstall = await confirmOpenUnverified(pkgName);
+  const { data: packageData } = useQuery([pkgName, pkgVersion, options], () =>
+    sendRequest({
+      path: epmRouteService.getInfoPath(pkgName, pkgVersion),
+      method: 'get',
+      query: {
+        ...options,
+        ...(ignoreUnverifiedQueryParam && { ignoreUnverified: ignoreUnverifiedQueryParam }),
+      },
+    })
+  );
 
-      if (forceInstall) {
-        setIgnoreUnverifiedQueryParam(true);
-      }
-    };
+  const confirm = async () => {
+    const forceInstall = await confirmOpenUnverified(pkgName);
 
-    if (res.error && isVerificationError(res.error)) {
-      confirm();
+    if (forceInstall) {
+      setIgnoreUnverifiedQueryParam(true);
     }
-  }, [res.error, pkgName, pkgVersion, confirmOpenUnverified]);
+  };
 
-  return res;
+  if (packageData?.error && isVerificationError(packageData?.error)) {
+    confirm();
+  }
+
+  return packageData;
 };
 
 export const useGetPackageStats = (pkgName: string) => {

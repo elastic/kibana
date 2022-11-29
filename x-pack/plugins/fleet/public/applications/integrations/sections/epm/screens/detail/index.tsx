@@ -39,7 +39,7 @@ import {
   useAuthz,
   usePermissionCheck,
   useIntegrationsStateContext,
-  useGetSettings,
+  useGetSettingsQuery,
 } from '../../../../hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { ExperimentalFeaturesService, isPackagePrerelease } from '../../../../services';
@@ -61,7 +61,7 @@ import {
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 
-import { useIsFirstTimeAgentUser } from './hooks';
+import { useIsFirstTimeAgentUserQuery } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
 import {
   IntegrationAgentPolicyCount,
@@ -161,12 +161,12 @@ export function Detail() {
     boolean | undefined
   >();
 
-  const { data: settings } = useGetSettings();
+  const { data: settings } = useGetSettingsQuery();
 
   useEffect(() => {
-    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
+    const isEnabled = Boolean(settings?.data?.item.prerelease_integrations_enabled);
     setPrereleaseIntegrationsEnabled(isEnabled);
-  }, [settings?.item.prerelease_integrations_enabled]);
+  }, [settings?.data?.item.prerelease_integrations_enabled]);
 
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
@@ -206,7 +206,7 @@ export function Detail() {
   }, [packageInfoLatestPrereleaseData?.item.version]);
 
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
-    useIsFirstTimeAgentUser();
+    useIsFirstTimeAgentUserQuery();
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(pkgName);
 
   // Refresh package info when status change

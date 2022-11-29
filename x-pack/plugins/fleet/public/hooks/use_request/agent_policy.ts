@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useQuery } from '@tanstack/react-query';
 
 import { agentPolicyRouteService } from '../../services';
 
@@ -31,6 +32,10 @@ export const useGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) =>
     method: 'get',
     query,
   });
+};
+
+export const useGetAgentPoliciesQuery = (query?: GetAgentPoliciesRequest['query']) => {
+  return useQuery(['agentPolicies', query], () => sendGetAgentPolicies(query));
 };
 
 export const sendGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) => {
