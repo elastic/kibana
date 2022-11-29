@@ -37,7 +37,7 @@ interface NotFoundProps {
 /**
  * Predefined `EuiEmptyPrompt` for 404 pages.
  */
-export function NotFoundPrompt({ actions }: NotFoundProps) {
+export const NotFoundPrompt = ({ actions }: NotFoundProps) => {
   const { colorMode } = useEuiTheme();
   const [errorImage, setErrorImage] = useState<string>();
   const goBack = useCallback(() => history.back(), []);
@@ -70,4 +70,4 @@ export function NotFoundPrompt({ actions }: NotFoundProps) {
       }
     />
   );
-}
+};
