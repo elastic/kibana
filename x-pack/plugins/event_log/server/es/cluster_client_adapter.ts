@@ -568,7 +568,6 @@ export function getQueryBodyWithAuthFilter(
     },
     {
       bool: {
-        // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
         should: namespaceQuery,
       },
     },
@@ -714,7 +713,6 @@ export function getQueryBody(
         },
       },
     },
-    // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
     namespaceQuery,
   ];
 
