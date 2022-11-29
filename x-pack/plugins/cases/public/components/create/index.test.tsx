@@ -9,7 +9,6 @@ import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
