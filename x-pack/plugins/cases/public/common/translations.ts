@@ -312,7 +312,7 @@ export const COMMENT_VERSION_CONFLICT_ERROR = i18n.translate(
   'xpack.cases.configure.commentVersionConflictError',
   {
     defaultMessage:
-      'You do not have permission to view connectors. If you would like to view connectors, contact your Kibana administrator.',
+      'This case has been updated. Please refresh before saving additional updates.',
   }
 );
 
