@@ -84,6 +84,58 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('with aggregation templates', async () => {
+      const AGGREGATION_TEMPLATES = [
+        {
+          prompt: 'geoti',
+          aggregation: 'geotile_grid',
+        },
+        {
+          prompt: 'geoha',
+          aggregation: 'geohash_grid',
+        },
+        {
+          prompt: 'geohe',
+          aggregation: 'geohex_grid',
+        },
+      ];
+      beforeEach(async () => {
+        await PageObjects.console.clearTextArea();
+        await PageObjects.console.enterRequest('\n POST _search');
+        await PageObjects.console.pressEnter();
+      });
+
+      it('should autocomplete the aggregation template', async () => {
+        await PageObjects.console.enterText(`{\n\t`);
+        await PageObjects.console.promptAutocomplete('ag');
+        await retry.waitFor('autocomplete to be visible', () =>
+          PageObjects.console.isAutocompleteVisible()
+        );
+        await PageObjects.console.pressEnter();
+        await retry.try(async () => {
+          const request = await PageObjects.console.getRequest();
+          log.debug(request);
+          expect(request).to.contain(`AGG_TYPE`);
+        });
+      });
+
+      await asyncForEach(AGGREGATION_TEMPLATES, async ({ prompt, aggregation }) => {
+        it('should autocomplete template for aggregation types', async () => {
+          await PageObjects.console.enterText(`{\n\t"aggs": {\n\t"foo": {\n\t`);
+          await PageObjects.console.promptAutocomplete(prompt);
+          await retry.waitFor('autocomplete to be visible', () =>
+            PageObjects.console.isAutocompleteVisible()
+          );
+          await PageObjects.console.pressEnter();
+          await retry.try(async () => {
+            const request = await PageObjects.console.getRequestAtLine(5);
+            log.debug(request);
+            expect(request).to.contain(aggregation);
+          });
+        });
+      });
+    });
+
     describe('with conditional templates', async () => {
       const CONDITIONAL_TEMPLATES = [
         {
