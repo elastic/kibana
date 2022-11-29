@@ -28,11 +28,11 @@ import sThreeIcon from './icons/s3.svg';
 import snsIcon from './icons/sns.svg';
 import sqsIcon from './icons/sqs.svg';
 import cosmosDbIcon from './icons/cosmosDB.svg';
-import blobStorageIcon from './icons/blob-storage.svg';
-import fileShareStorageIcon from './icons/file-share-storage.svg';
-import serviceBusIcon from './icons/service-bus.svg';
-import storageQueueIcon from './icons/storage-queue.svg';
-import tableStorageIcon from './icons/table-storage.svg';
+import blobStorageIcon from './icons/blob_storage.svg';
+import fileShareStorageIcon from './icons/file_share_storage.svg';
+import serviceBusIcon from './icons/service_bus.svg';
+import storageQueueIcon from './icons/storage_queue.svg';
+import tableStorageIcon from './icons/table_storage.svg';
 
 const defaultSpanTypeIcons: { [key: string]: string } = {
   cache: databaseIcon,
