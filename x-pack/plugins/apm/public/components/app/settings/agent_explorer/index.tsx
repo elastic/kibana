@@ -20,7 +20,7 @@ import { useHistory } from 'react-router-dom';
 import {
   SERVICE_LANGUAGE_NAME,
   SERVICE_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
@@ -99,7 +99,7 @@ export function AgentExplorer() {
       <EuiSpacer size="s" />
       <EuiFlexItem grow={false}>
         <EuiTitle>
-          <EuiFlexGroup gutterSize="s">
+          <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <h2>
                 {i18n.translate('xpack.apm.settings.agentExplorer.title', {
@@ -117,9 +117,9 @@ export function AgentExplorer() {
       <EuiFlexItem grow={false}>
         <KueryBar />
       </EuiFlexItem>
-      <EuiSpacer />
+      <EuiSpacer size="xs" />
       <EuiFlexItem>
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="flexEnd" responsive={true}>
           <EuiFlexItem grow={false}>
             <SuggestionsSelect
               prepend={i18n.translate(

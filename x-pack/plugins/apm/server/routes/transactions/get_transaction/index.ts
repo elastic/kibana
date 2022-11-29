@@ -7,10 +7,7 @@
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  TRACE_ID,
-  TRANSACTION_ID,
-} from '../../../../common/elasticsearch_fieldnames';
+import { TRACE_ID, TRANSACTION_ID } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 

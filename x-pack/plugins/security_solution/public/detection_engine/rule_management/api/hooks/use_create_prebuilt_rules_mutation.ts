@@ -25,15 +25,15 @@ export const useCreatePrebuiltRulesMutation = (
   return useMutation(() => createPrepackagedRules(), {
     ...options,
     mutationKey: CREATE_PREBUILT_RULES_MUTATION_KEY,
-    onSuccess: (...args) => {
+    onSettled: (...args) => {
       // Always invalidate all rules and the prepackaged rules status cache as
       // the number of rules might change after the installation
       invalidatePrePackagedRulesStatus();
       invalidateFindRulesQuery();
       invalidateFetchTagsQuery();
 
-      if (options?.onSuccess) {
-        options.onSuccess(...args);
+      if (options?.onSettled) {
+        options.onSettled(...args);
       }
     },
   });

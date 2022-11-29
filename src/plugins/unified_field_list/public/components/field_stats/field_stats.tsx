@@ -186,7 +186,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         toDate,
         dslQuery:
           dslQuery ??
-          buildEsQuery(loadedDataView, query ?? [], filters, getEsQueryConfig(uiSettings)),
+          buildEsQuery(loadedDataView, query ?? [], filters ?? [], getEsQueryConfig(uiSettings)),
         abortController: abortControllerRef.current,
       });
 
