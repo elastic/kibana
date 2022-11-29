@@ -31,11 +31,11 @@ const CancelCreationConfirmationModalComponent: React.FC<Props> = ({
       confirmButtonText={confirmButtonText}
       buttonColor="danger"
       defaultFocusedButton="confirm"
-      data-test-subj="property-actions-confirm-modal"
+      data-test-subj="cancel-creation-confirmation-modal"
     />
   );
 };
 
-CancelCreationConfirmationModalComponent.displayName = 'DeleteAttachmentConfirmationModal';
+CancelCreationConfirmationModalComponent.displayName = 'CancelCreationConfirmationModal';
 
 export const CancelCreationConfirmationModal = React.memo(CancelCreationConfirmationModalComponent);
