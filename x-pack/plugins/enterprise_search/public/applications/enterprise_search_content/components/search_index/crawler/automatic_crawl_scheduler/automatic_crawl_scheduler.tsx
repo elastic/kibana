@@ -27,7 +27,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { CrawlerIndex } from '../../../../../../../common/types/indices';
 import {
   HOURS_UNIT_LABEL,
   DAYS_UNIT_LABEL,
@@ -36,23 +35,21 @@ import {
 } from '../../../../../shared/constants';
 import { EnterpriseSearchCronEditor } from '../../../../../shared/cron_editor/enterprise_search_cron_editor';
 import { docLinks } from '../../../../../shared/doc_links/doc_links';
-import { UpdateConnectorSchedulingApiLogic } from '../../../../api/connector/update_connector_scheduling_api_logic';
 import { CrawlUnits } from '../../../../api/crawler/types';
 import { isCrawlerIndex } from '../../../../utils/indices';
-import { IndexViewLogic } from '../../index_view_logic';
 
 import { AutomaticCrawlSchedulerLogic } from './automatic_crawl_scheduler_logic';
 
 export const AutomaticCrawlScheduler: React.FC = () => {
-  const { index } = useValues(IndexViewLogic);
-  const { makeRequest } = useActions(UpdateConnectorSchedulingApiLogic);
+  const {
+    setCrawlAutomatically,
+    setCrawlFrequency,
+    setCrawlUnit,
+    setUseConnectorSchedule,
+    submitConnectorSchedule,
+  } = useActions(AutomaticCrawlSchedulerLogic);
 
-  const scheduling = (index as CrawlerIndex)?.connector?.scheduling;
-
-  const { setCrawlFrequency, setCrawlUnit, setUseConnectorSchedule, toggleCrawlAutomatically } =
-    useActions(AutomaticCrawlSchedulerLogic);
-
-  const { crawlAutomatically, crawlFrequency, crawlUnit, useConnectorSchedule } = useValues(
+  const { index, crawlAutomatically, crawlFrequency, crawlUnit, useConnectorSchedule } = useValues(
     AutomaticCrawlSchedulerLogic
   );
 
@@ -84,7 +81,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
                   defaultMessage: 'Enable recurring crawls with the following schedule',
                 }
               )}
-              onChange={toggleCrawlAutomatically}
+              onChange={(e) => setCrawlAutomatically(e.target.checked)}
               compressed
             />
           </EuiFormRow>
@@ -124,11 +121,11 @@ export const AutomaticCrawlScheduler: React.FC = () => {
               >
                 <EnterpriseSearchCronEditor
                   disabled={!crawlAutomatically || !useConnectorSchedule}
-                  scheduling={scheduling}
+                  scheduling={index.connector.scheduling}
                   onChange={(newScheduling) =>
-                    makeRequest({
-                      connectorId: index.connector.id,
-                      scheduling: { ...newScheduling },
+                    submitConnectorSchedule({
+                      ...newScheduling,
+                      enabled: true,
                     })
                   }
                 />
@@ -154,7 +151,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
                       {i18n.translate(
                         'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.intervalSchedulingDescription',
                         {
-                          defaultMessage: 'Define the frequency and time for scheduled crawls',
+                          defaultMessage: 'Define the frequency for scheduled crawls',
                         }
                       )}
                     </EuiText>
