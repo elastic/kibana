@@ -63,7 +63,7 @@ export const DeprecateNoticeModal = ({ onCancel }: { onCancel: () => void }) => 
       </p>
       <p>
         <FormattedMessage
-          id="xpack.synthetics.deprecateNoticeModal.automateMonitors"
+          id="xpack.synthetics.deprecateNoticeModal.forMoreInformation"
           defaultMessage="For more information, {docsLink}"
           values={{
             docsLink: (
