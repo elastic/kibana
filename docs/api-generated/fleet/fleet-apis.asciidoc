@@ -1,0 +1,13 @@
+[[fleet-apis]]
+== Fleet APIs
+
+preview::[]
+
+////
+This file includes content that has been generated from https://github.com/elastic/kibana/tree/main/x-pack/plugins/fleet/common/openapi. Any modifications required must be done in that open API specification.
+////
+
+include::fleet-apis-passthru.asciidoc[]
+
+
+/Users/dedemorton/go/src/github.com/elastic/kibana/x-pack/plugins/fleet/common/openapi
