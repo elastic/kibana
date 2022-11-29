@@ -327,13 +327,6 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       loadingRules.action,
       selectedRuleIds,
       sortingOptions,
-      page,
-      perPage,
-      rules.length,
-      rulesToDisplay,
-      selectedRuleIds,
-      sortingOptions,
-      total,
       actions,
     ]
   );
