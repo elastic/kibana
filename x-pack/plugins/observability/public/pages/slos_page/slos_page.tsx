@@ -15,6 +15,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { isSloFeatureEnabled } from './helpers';
 import PageNotFound from '../404';
 import { SLOS_BREADCRUMB_TEXT, SLOS_PAGE_TITLE } from './translations';
+import { SloList } from './components/slo_list';
 
 export function SlosPage() {
   const { http } = useKibana<ObservabilityAppServices>().services;
@@ -40,7 +41,7 @@ export function SlosPage() {
       }}
       data-test-subj="slosPage"
     >
-      <h1>SLOs</h1>
+      <SloList />
     </ObservabilityPageTemplate>
   );
 }
