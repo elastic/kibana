@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export const TIMESTAMP = '@timestamp';
 
 export const AGENT = 'agent';
 export const AGENT_NAME = 'agent.name';
@@ -84,6 +85,7 @@ export const SPAN_LINKS_SPAN_ID = 'span.links.span.id';
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';
 
+export const ERROR = 'error';
 export const ERROR_ID = 'error.id';
 export const ERROR_GROUP_ID = 'error.grouping_key';
 export const ERROR_CULPRIT = 'error.culprit';

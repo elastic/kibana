@@ -9,9 +9,9 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
-import type { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import { WaterfallErrorDoc } from '../../../../../../../../common/watefall';
 
 type TraceAPIResponse = APIReturnType<'GET /internal/apm/traces/{traceId}'>;
 
@@ -74,7 +74,7 @@ interface IWaterfallItemBase<TDocument, TDoctype> {
   skew: number;
 }
 
-export type IWaterfallError = IWaterfallItemBase<APMError, 'error'>;
+export type IWaterfallError = IWaterfallItemBase<WaterfallErrorDoc, 'error'>;
 
 export type IWaterfallTransaction = IWaterfallSpanItemBase<
   Transaction,
@@ -150,22 +150,22 @@ function getSpanItem(
 }
 
 function getErrorItem(
-  error: APMError,
+  waterfallErrorDoc: WaterfallErrorDoc,
   items: IWaterfallItem[],
   entryWaterfallTransaction?: IWaterfallTransaction
 ): IWaterfallError {
   const entryTimestamp = entryWaterfallTransaction?.doc.timestamp.us ?? 0;
   const parent = items.find(
-    (waterfallItem) => waterfallItem.id === error.parent?.id
+    (waterfallItem) => waterfallItem.id === waterfallErrorDoc.parent?.id
   ) as IWaterfallSpanOrTransaction | undefined;
 
   const errorItem: IWaterfallError = {
     docType: 'error',
-    doc: error,
-    id: error.error.id,
+    doc: waterfallErrorDoc,
+    id: waterfallErrorDoc.error.id,
     parent,
     parentId: parent?.id,
-    offset: error.timestamp.us - entryTimestamp,
+    offset: waterfallErrorDoc.timestamp.us - entryTimestamp,
     skew: 0,
     color: '',
   };
@@ -367,7 +367,7 @@ function isInEntryTransaction(
 }
 
 function getWaterfallErrors(
-  errorDocs: TraceAPIResponse['errorDocs'],
+  errorDocs: WaterfallErrorDoc[],
   items: IWaterfallItem[],
   entryWaterfallTransaction?: IWaterfallTransaction
 ) {

@@ -17,7 +17,7 @@ import {
   IWaterfallError,
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers';
-import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
+import { WaterfallErrorDoc } from '../../../../../../../../common/watefall';
 
 describe('waterfall_helpers', () => {
   describe('getWaterfall', () => {
@@ -107,7 +107,6 @@ describe('waterfall_helpers', () => {
     ];
     const errorDocs = [
       {
-        processor: { event: 'error' },
         parent: { id: 'myTransactionId1' },
         timestamp: { us: 1549324795810000 },
         trace: { id: 'myTraceId' },
@@ -120,11 +119,7 @@ describe('waterfall_helpers', () => {
           },
         },
         service: { name: 'opbeans-ruby' },
-        agent: {
-          name: 'ruby',
-          version: '2',
-        },
-      } as unknown as APMError,
+      } as WaterfallErrorDoc,
     ];
 
     it('should return full waterfall', () => {

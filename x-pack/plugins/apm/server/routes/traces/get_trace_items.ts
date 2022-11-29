@@ -12,7 +12,6 @@ import {
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
-  ERROR_LOG_LEVEL,
   PARENT_ID,
   SPAN_DURATION,
   TRACE_ID,
@@ -21,6 +20,7 @@ import {
 import { getLinkedChildrenCountBySpanId } from '../span_links/get_linked_children';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { APMConfig } from '../..';
+import { getErrorDocs } from './get_error_docs';
 
 export async function getTraceItems(
   traceId: string,
@@ -30,26 +30,6 @@ export async function getTraceItems(
   end: number
 ) {
   const maxTraceItems = config.ui.maxTraceItems;
-  const excludedLogLevels = ['debug', 'info', 'warning'];
-
-  const errorResponsePromise = apmEventClient.search('get_errors_docs', {
-    apm: {
-      events: [ProcessorEvent.error],
-    },
-    body: {
-      track_total_hits: false,
-      size: maxTraceItems,
-      query: {
-        bool: {
-          filter: [
-            { term: { [TRACE_ID]: traceId } },
-            ...rangeQuery(start, end),
-          ],
-          must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
-        },
-      },
-    },
-  });
 
   const traceResponsePromise = apmEventClient.search('get_trace_docs', {
     apm: {
@@ -77,16 +57,15 @@ export async function getTraceItems(
     },
   });
 
-  const [errorResponse, traceResponse, linkedChildrenOfSpanCountBySpanId] =
+  const [errorDocs, traceResponse, linkedChildrenOfSpanCountBySpanId] =
     await Promise.all([
-      errorResponsePromise,
+      getErrorDocs(traceId, config, apmEventClient, start, end),
       traceResponsePromise,
       getLinkedChildrenCountBySpanId({ traceId, apmEventClient, start, end }),
     ]);
 
   const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
   const traceDocs = traceResponse.hits.hits.map((hit) => hit._source);
-  const errorDocs = errorResponse.hits.hits.map((hit) => hit._source);
 
   return {
     exceedsMax,

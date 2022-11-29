@@ -6,13 +6,13 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ErrorRaw } from '../../../../../../../typings/es_schemas/raw/error_raw';
 import { IWaterfallError } from '../waterfall/waterfall_helpers/waterfall_helpers';
 import { Mark } from '.';
+import { WaterfallErrorDoc } from '../../../../../../../common/watefall';
 
 export interface ErrorMark extends Mark {
   type: 'errorMark';
-  error: ErrorRaw;
+  error: WaterfallErrorDoc;
   serviceColor: string;
 }
 
@@ -25,7 +25,7 @@ export const getErrorMarks = (errorItems: IWaterfallError[]): ErrorMark[] => {
     type: 'errorMark',
     offset: Math.max(error.offset + error.skew, 0),
     verticalLine: false,
-    id: error.doc.error.id,
+    id: error.id,
     error: error.doc,
     serviceColor: error.color,
   }));

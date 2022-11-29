@@ -27,6 +27,7 @@ import {
   CriticalPathResponse,
   getAggregatedCriticalPath,
 } from './get_aggregated_critical_path';
+import { WaterfallErrorDoc } from '../../../common/watefall';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -99,9 +100,7 @@ const tracesByIdRoute = createApmServerRoute({
       | import('./../../../typings/es_schemas/ui/transaction').Transaction
       | import('./../../../typings/es_schemas/ui/span').Span
     >;
-    errorDocs: Array<
-      import('./../../../typings/es_schemas/ui/apm_error').APMError
-    >;
+    errorDocs: WaterfallErrorDoc[];
     linkedChildrenOfSpanCountBySpanId: Record<string, number>;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
