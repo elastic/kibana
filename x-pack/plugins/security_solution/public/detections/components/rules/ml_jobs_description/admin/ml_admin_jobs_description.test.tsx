@@ -26,7 +26,7 @@ jest.mock('../../../../../common/components/ml_popover/hooks/use_security_jobs')
 
 const useSecurityJobsMock = useSecurityJobs as jest.Mock;
 
-describe('MlUsersJobDescription', () => {
+describe('MlAdminJobsDescription', () => {
   it('should render null if admin permissions absent', () => {
     useSecurityJobsMock.mockReturnValueOnce({ jobs: [], isMlAdmin: false });
     const { container } = render(<MlAdminJobsDescription jobIds={['mock-1']} />);
