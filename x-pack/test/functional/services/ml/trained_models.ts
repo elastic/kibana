@@ -26,6 +26,7 @@ export interface MappedOutput {
 export function TrainedModelsProvider({ getService }: FtrProviderContext, mlCommonUI: MlCommonUI) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const browser = getService('browser');
 
   class TestModelFactory {
     public static createAssertionInstance(modelType: ModelType) {
@@ -135,6 +136,15 @@ export function TrainedModelsProvider({ getService }: FtrProviderContext, mlComm
       await this.waitForResultsToLoad();
 
       await modelTest.assertModelOutput(expectedOutput);
+
+      await this.ensureTestFlyoutClosed();
+    },
+
+    async ensureTestFlyoutClosed() {
+      await retry.tryForTime(5000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await testSubjects.missingOrFail('mlTestModelsFlyout');
+      });
     },
   };
 }

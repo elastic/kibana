@@ -407,10 +407,10 @@ export function MachineLearningCommonUIProvider({
       actionTestSubject: string,
       fromContextMenu: boolean = true
     ) {
-      await this.ensureAllMenuPopoversClosed();
-
       await retry.tryForTime(30 * 1000, async () => {
         if (fromContextMenu) {
+          await this.ensureAllMenuPopoversClosed();
+
           await testSubjects.click(`${rowSelector} > euiCollapsedItemActionsButton`);
           await find.existsByCssSelector('euiContextMenuPanel');
 

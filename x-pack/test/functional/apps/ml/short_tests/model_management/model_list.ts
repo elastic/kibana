@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsTable.assertPipelinesTabContent(false);
       });
 
-      it('displays the built-in model and no actions are enabled', async () => {
+      it('displays the built-in model with only Test action enabled', async () => {
         await ml.testExecution.logTestStep('should display the model in the table');
         await ml.trainedModelsTable.filterWithSearchString(builtInModelData.modelId, 1);
 
@@ -121,11 +121,6 @@ export default function ({ getService }: FtrProviderContext) {
           builtInModelData.modelId,
           false
         );
-      });
-
-      it('tests the built-in lang_ident model', async () => {
-        await ml.testExecution.logTestStep('should filter the table content');
-        await ml.trainedModelsTable.filterWithSearchString(builtInModelData.modelId, 1);
 
         await ml.testExecution.logTestStep('should have enabled the button that opens Test flyout');
         await ml.trainedModelsTable.assertModelTestButtonExists(builtInModelData.modelId, true);
