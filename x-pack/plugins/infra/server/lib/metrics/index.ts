@@ -60,14 +60,10 @@ export const query = async (
     index: options.indexPattern,
     body: {
       size: 0,
-      query: { bool: { filter } },
+      query: { bool: { filter: [...filter, ...(options.filters ?? [])] } },
       aggs: hasGroupBy ? createCompositeAggregations(options) : createAggregations(options),
     },
   };
-
-  if (options.filters) {
-    params.body.query.bool.filter = [...params.body.query.bool.filter, ...options.filters];
-  }
 
   const response = await search<{}, MetricsESResponse>(params);
 
@@ -91,11 +87,7 @@ export const query = async (
         const afterKey = returnAfterKey ? groupings.after_key : null;
 
         return {
-          series: getSeriesFromCompositeAggregations(
-            aggregations.groupings,
-            options,
-            bucketSize * 1000
-          ),
+          series: getSeriesFromCompositeAggregations(groupings, options, bucketSize * 1000),
           info: {
             afterKey,
             interval: rawOptions.includeTimeseries ? bucketSize : undefined,
