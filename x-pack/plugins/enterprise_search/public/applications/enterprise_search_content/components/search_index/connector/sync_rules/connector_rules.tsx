@@ -37,13 +37,14 @@ export const ConnectorSyncRules: React.FC = () => {
     useValues(IndexViewLogic);
   const { applyDraft, setLocalFilteringRules, setLocalAdvancedSnippet, setIsEditing } =
     useActions(ConnectorFilteringLogic);
-  const { advancedSnippet, draftState, filteringRules, hasDraft, isEditing } =
+  const { advancedSnippet, draftErrors, draftState, filteringRules, hasDraft, isEditing } =
     useValues(ConnectorFilteringLogic);
 
   return (
     <>
       {isEditing && (
         <EditSyncRulesFlyout
+          errors={draftErrors}
           hasAdvancedFilteringFeature={hasAdvancedFilteringFeature}
           hasBasicFilteringFeature={hasBasicFilteringFeature}
           revertLocalFilteringRules={() => setLocalFilteringRules(filteringRules)}

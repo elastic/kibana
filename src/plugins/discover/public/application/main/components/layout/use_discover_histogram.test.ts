@@ -33,6 +33,7 @@ import {
 } from './use_discover_histogram';
 import { setTimeout } from 'timers/promises';
 import { calculateBounds } from '@kbn/data-plugin/public';
+import { buildChartData } from '@kbn/unified-histogram-plugin/public';
 
 const mockData = dataPluginMock.createStartContract();
 
@@ -59,6 +60,16 @@ jest.mock('@kbn/unified-field-list-plugin/public', () => {
   return {
     ...originalModule,
     getVisualizeInformation: jest.fn(() => Promise.resolve(mockCanVisualize)),
+  };
+});
+
+const mockBuildChartData = buildChartData as jest.MockedFunction<typeof buildChartData>;
+
+jest.mock('@kbn/unified-histogram-plugin/public', () => {
+  const originalModule = jest.requireActual('@kbn/unified-histogram-plugin/public');
+  return {
+    ...originalModule,
+    buildChartData: jest.fn(originalModule.buildChartData),
   };
 });
 
@@ -292,6 +303,26 @@ describe('useDiscoverHistogram', () => {
         result.current.onTimeIntervalChange('auto');
       });
       expect(stateContainer.setAppState).toHaveBeenCalledWith({ interval: 'auto' });
+    });
+  });
+
+  describe('buildChartData', () => {
+    it('should call buildChartData when isPlainRecord is false and isTimeBased is true', async () => {
+      mockBuildChartData.mockClear();
+      await renderUseDiscoverHistogram();
+      expect(mockBuildChartData).toHaveBeenCalled();
+    });
+
+    it('should not call buildChartData when isPlainRecord is true', async () => {
+      mockBuildChartData.mockClear();
+      await renderUseDiscoverHistogram({ isPlainRecord: true });
+      expect(mockBuildChartData).not.toHaveBeenCalled();
+    });
+
+    it('should not call buildChartData when isTimeBased is false', async () => {
+      mockBuildChartData.mockClear();
+      await renderUseDiscoverHistogram({ isTimeBased: false });
+      expect(mockBuildChartData).not.toHaveBeenCalled();
     });
   });
 });
