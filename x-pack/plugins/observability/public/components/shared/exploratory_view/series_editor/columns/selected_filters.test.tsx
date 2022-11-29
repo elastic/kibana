@@ -24,7 +24,7 @@ describe('SelectedFilters', function () {
   });
 
   it('should render properly', async function () {
-    const filters = [{ field: USER_AGENT_NAME, value: 'Chrome' }];
+    const filters = [{ field: USER_AGENT_NAME, values: ['Chrome'] }];
     const initSeries = { filters };
 
     render(
