@@ -7,7 +7,11 @@
 
 import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
@@ -43,32 +47,34 @@ export async function getTraceSampleIds({
 }) {
   const query = {
     bool: {
-      filter: [...rangeQuery(start, end), ...kqlQuery(serviceGroupKuery)],
+      filter: [
+        ...rangeQuery(start, end),
+        ...environmentQuery(environment),
+        ...kqlQuery(serviceGroupKuery),
+        ...termQuery(SERVICE_NAME, serviceName),
+      ],
     },
   };
 
-  let events: ProcessorEvent[];
+  const isGlobalServiceMap = !serviceName && !serviceGroupKuery;
+  let events = [ProcessorEvent.span, ProcessorEvent.transaction];
 
-  if (serviceName) {
-    query.bool.filter.push({ term: { [SERVICE_NAME]: serviceName } });
-    events = [ProcessorEvent.span, ProcessorEvent.transaction];
-  } else {
+  // perf optimization that is only possible on the global service map with no filters
+  if (isGlobalServiceMap) {
     events = [ProcessorEvent.span];
     query.bool.filter.push({
-      exists: {
-        field: SPAN_DESTINATION_SERVICE_RESOURCE,
-      },
+      exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
     });
   }
 
-  query.bool.filter.push(...environmentQuery(environment));
+  const fingerprintBucketSize = isGlobalServiceMap
+    ? config.serviceMapFingerprintGlobalBucketSize
+    : config.serviceMapFingerprintBucketSize;
 
-  const fingerprintBucketSize = serviceName
-    ? config.serviceMapFingerprintBucketSize
-    : config.serviceMapFingerprintGlobalBucketSize;
-  const traceIdBucketSize = serviceName
-    ? config.serviceMapTraceIdBucketSize
-    : config.serviceMapTraceIdGlobalBucketSize;
+  const traceIdBucketSize = isGlobalServiceMap
+    ? config.serviceMapTraceIdGlobalBucketSize
+    : config.serviceMapTraceIdBucketSize;
+
   const samplerShardSize = traceIdBucketSize * 10;
 
   const params = {
