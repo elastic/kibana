@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './src/not_found';
+export * from './src/not_found_prompt';

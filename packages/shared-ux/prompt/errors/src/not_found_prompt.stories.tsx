@@ -11,7 +11,7 @@ import React from 'react';
 import { Meta, Story } from '@storybook/react';
 import mdx from '../README.mdx';
 
-import { NotFound } from './not_found';
+import { NotFoundPrompt } from './not_found_prompt';
 
 export default {
   title: 'Not found/Not found',
@@ -31,7 +31,7 @@ export const EmptyPage: Story = () => {
   return (
     <EuiPageTemplate>
       <EuiPageTemplate.Section alignment="center">
-        <NotFound />
+        <NotFoundPrompt />
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );
@@ -41,7 +41,7 @@ export const PageWithSidebar: Story = () => {
   return (
     <EuiPageTemplate panelled>
       <EuiPageTemplate.Sidebar>sidebar</EuiPageTemplate.Sidebar>
-      <NotFound />
+      <NotFoundPrompt />
     </EuiPageTemplate>
   );
 };
@@ -50,7 +50,7 @@ export const CustomActions: Story = (args) => {
   return (
     <EuiPageTemplate>
       <EuiPageTemplate.Section alignment="center">
-        <NotFound
+        <NotFoundPrompt
           actions={[
             <EuiButton fill color="primary" onClick={args.onClick}>
               Go home
