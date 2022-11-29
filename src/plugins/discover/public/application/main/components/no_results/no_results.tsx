@@ -16,7 +16,9 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { NoResultsSuggestions } from './no_results_suggestions';
 import './_no_results.scss';
 import { NoResultsIllustration } from './assets/no_results_illustration';
@@ -25,8 +27,9 @@ export interface DiscoverNoResultsProps {
   isTimeBased?: boolean;
   error?: Error;
   data?: DataPublicPluginStart;
-  hasQuery?: boolean;
-  hasFilters?: boolean;
+  dataView: DataView;
+  query?: Query | AggregateQuery;
+  filters?: Filter[];
   onDisableFilters: () => void;
 }
 
@@ -34,8 +37,9 @@ export function DiscoverNoResults({
   isTimeBased,
   error,
   data,
-  hasFilters,
-  hasQuery,
+  dataView,
+  query,
+  filters,
   onDisableFilters,
 }: DiscoverNoResultsProps) {
   const callOut = !error ? (
@@ -56,8 +60,9 @@ export function DiscoverNoResults({
         <EuiFlexItem grow={2}>
           <NoResultsSuggestions
             isTimeBased={isTimeBased}
-            hasFilters={hasFilters}
-            hasQuery={hasQuery}
+            dataView={dataView}
+            query={query}
+            filters={filters}
             onDisableFilters={onDisableFilters}
           />
         </EuiFlexItem>

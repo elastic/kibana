@@ -8,6 +8,9 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { isOfQueryType } from '@kbn/es-query';
 import { NoResultsSuggestionDefault } from './no_results_suggestion_default';
 import {
   NoResultsSuggestionWhenFilters,
@@ -15,26 +18,31 @@ import {
 } from './no_results_suggestion_when_filters';
 import { NoResultsSuggestionWhenQuery } from './no_results_suggestion_when_query';
 import { NoResultsSuggestionWhenTimeRange } from './no_results_suggestion_when_time_range';
+import { NoResultsSuggestionOccurrences } from './no_results_suggestion_occurrences';
+import { hasActiveFilter } from '../../layout/utils';
 
 interface NoResultsSuggestionProps {
-  hasFilters?: boolean;
-  hasQuery?: boolean;
+  dataView: DataView;
+  query?: Query | AggregateQuery;
+  filters?: Filter[];
   isTimeBased?: boolean;
   onDisableFilters: NoResultsSuggestionWhenFiltersProps['onDisableFilters'];
 }
 
 export function NoResultsSuggestions({
+  dataView,
+  query,
+  filters,
   isTimeBased,
-  hasFilters,
-  hasQuery,
   onDisableFilters,
 }: NoResultsSuggestionProps) {
+  const hasQuery = isOfQueryType(query) && !!query?.query;
+  const hasFilters = hasActiveFilter(filters);
   const canAdjustSearchCriteria = isTimeBased || hasFilters || hasQuery;
 
   if (canAdjustSearchCriteria) {
     return (
       <>
-        {isTimeBased && <NoResultsSuggestionWhenTimeRange />}
         {hasQuery && (
           <>
             <EuiSpacer size="s" />
@@ -45,6 +53,14 @@ export function NoResultsSuggestions({
           <>
             <EuiSpacer size="s" />
             <NoResultsSuggestionWhenFilters onDisableFilters={onDisableFilters} />
+          </>
+        )}
+        {isTimeBased && (
+          <>
+            <EuiSpacer size="s" />
+            <NoResultsSuggestionWhenTimeRange />
+            <EuiSpacer size="s" />
+            <NoResultsSuggestionOccurrences dataView={dataView} query={query} filters={filters} />
           </>
         )}
       </>
