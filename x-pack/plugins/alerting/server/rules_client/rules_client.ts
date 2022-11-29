@@ -27,6 +27,7 @@ import {
   getActionErrorLogWithAuth,
 } from './get_action_error_log';
 import {
+  GetGlobalExecutionKPIParams,
   getGlobalExecutionKpiWithAuth,
   getRuleExecutionKPI,
   GetRuleExecutionKPIParams,
@@ -99,7 +100,7 @@ export class RulesClient {
     getGlobalExecutionLogWithAuth(this.context, params);
   public getRuleExecutionKPI = (params: GetRuleExecutionKPIParams) =>
     getRuleExecutionKPI(this.context, params);
-  public getGlobalExecutionKpiWithAuth = (params: GetRuleExecutionKPIParams) =>
+  public getGlobalExecutionKpiWithAuth = (params: GetGlobalExecutionKPIParams) =>
     getGlobalExecutionKpiWithAuth(this.context, params);
   public getActionErrorLog = (params: GetActionErrorLogByIdParams) =>
     getActionErrorLog(this.context, params);
@@ -107,7 +108,7 @@ export class RulesClient {
     getActionErrorLogWithAuth(this.context, params);
 
   public bulkDeleteRules = (options: BulkOptions) => bulkDeleteRules(this.context, options);
-  public bulkEdit = <Params extends RuleTypeParams = never>(options: BulkEditOptions<Params>) =>
+  public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
     bulkEdit<Params>(this.context, options);
   public bulkEnableRules = (options: BulkOptions) => bulkEnableRules(this.context, options);
   public bulkDisableRules = (options: BulkOptions) => bulkDisableRules(this.context, options);
