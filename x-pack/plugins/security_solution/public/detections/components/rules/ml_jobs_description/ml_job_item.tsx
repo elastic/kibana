@@ -40,8 +40,8 @@ const MlJobItemComponent: FC<{
           <MlJobStatusBadge job={job} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{switchComponent}</EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ marginLeft: '0' }}>
-          {isStarted ? i18n.ML_RUN_JOB_LABEL : i18n.ML_JOB_STOPPED}
+        <EuiFlexItem grow={false} style={{ marginLeft: '0' }} data-test-subj="mlJobActionLabel">
+          {isStarted ? i18n.ML_STOP_JOB_LABEL : i18n.ML_RUN_JOB_LABEL}
         </EuiFlexItem>
       </EuiFlexGroup>
     </Wrapper>

@@ -32,7 +32,7 @@ const MlJobLinkComponent: React.FC<MlJobLinkProps> = ({ jobId }) => {
   });
 
   return (
-    <StyledJobEuiLInk href={jobUrl} target="_blank">
+    <StyledJobEuiLInk data-test-subj="machineLearningJobLink" href={jobUrl} target="_blank">
       <span data-test-subj="machineLearningJobId">{jobId}</span>
     </StyledJobEuiLInk>
   );

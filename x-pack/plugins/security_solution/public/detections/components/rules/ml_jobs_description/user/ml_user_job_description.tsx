@@ -25,7 +25,7 @@ const MlUserJobDescriptionComponent: FC<{
       <EuiToolTip content={i18n.ML_ADMIN_REQUIRED}>
         <EuiSwitch
           disabled
-          data-test-subj="ml-user-job-switch"
+          data-test-subj="mlUserJobSwitch"
           showLabel={false}
           label=""
           checked={isJobStarted(job.jobState, job.datafeedState)}

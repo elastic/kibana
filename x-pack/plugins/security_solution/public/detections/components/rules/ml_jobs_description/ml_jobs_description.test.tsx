@@ -13,10 +13,10 @@ import { hasMlAdminPermissions } from '../../../../../common/machine_learning/ha
 import { MlJobsDescription } from './ml_jobs_description';
 
 jest.mock('./admin/ml_admin_jobs_description', () => ({
-  MlAdminJobsDescription: () => <div data-test-subj="admin-jobs" />,
+  MlAdminJobsDescription: () => <div data-test-subj="adminJobs" />,
 }));
 jest.mock('./user/ml_user_jobs_description', () => ({
-  MlUserJobsDescription: () => <div data-test-subj="user-jobs" />,
+  MlUserJobsDescription: () => <div data-test-subj="userJobs" />,
 }));
 jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
 jest.mock('../../../../../common/machine_learning/has_ml_admin_permissions');
@@ -33,15 +33,15 @@ describe('MlUserJobDescription', () => {
     (hasMlUserPermissions as jest.Mock).mockReturnValueOnce(true);
     render(<MlJobsDescription jobIds={[]} />);
 
-    expect(screen.getByTestId('user-jobs')).toBeInTheDocument();
-    expect(screen.queryByTestId('admin-jobs')).not.toBeInTheDocument();
+    expect(screen.getByTestId('userJobs')).toBeInTheDocument();
+    expect(screen.queryByTestId('adminJobs')).not.toBeInTheDocument();
   });
 
   it('should render admin jobs component if ML permissions is for admin', () => {
     (hasMlAdminPermissions as jest.Mock).mockReturnValueOnce(true);
     render(<MlJobsDescription jobIds={[]} />);
 
-    expect(screen.getByTestId('admin-jobs')).toBeInTheDocument();
-    expect(screen.queryByTestId('user-jobs')).not.toBeInTheDocument();
+    expect(screen.getByTestId('adminJobs')).toBeInTheDocument();
+    expect(screen.queryByTestId('userJobs')).not.toBeInTheDocument();
   });
 });

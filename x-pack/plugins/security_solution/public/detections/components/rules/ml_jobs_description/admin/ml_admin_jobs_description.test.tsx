@@ -17,7 +17,7 @@ jest.mock(
   () =>
     ({
       MlAdminJobDescription: (props) => {
-        return <div data-test-subj="admin-mock">{props.job.id}</div>;
+        return <div data-test-subj="adminMock">{props.job.id}</div>;
       },
     } as Record<string, React.FC<{ job: MlSummaryJob }>>)
 );
@@ -38,7 +38,7 @@ describe('MlUsersJobDescription', () => {
       isMlAdmin: true,
     });
     render(<MlAdminJobsDescription jobIds={['mock-1', 'mock-2', 'mock-4']} />);
-    const expectedJobs = screen.getAllByTestId('admin-mock');
+    const expectedJobs = screen.getAllByTestId('adminMock');
 
     expect(expectedJobs).toHaveLength(2);
     expect(expectedJobs[0]).toHaveTextContent('mock-1');

@@ -46,13 +46,7 @@ const MlAdminJobDescriptionComponent: FC<MlAdminJobDescriptionProps> = ({
     [handleJobStateChange, isLoadingEnableDataFeed, job, loading]
   );
 
-  return (
-    <MlJobItem
-      job={job}
-      switchComponent={switchComponent}
-      data-test-subj="ml-admin-job-description"
-    />
-  );
+  return <MlJobItem job={job} switchComponent={switchComponent} />;
 };
 
 export const MlAdminJobDescription = memo(MlAdminJobDescriptionComponent);
