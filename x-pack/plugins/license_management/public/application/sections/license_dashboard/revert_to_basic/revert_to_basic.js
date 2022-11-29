@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiFlexItem, EuiCard, EuiButton, EuiLink, EuiConfirmModal, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EXTERNAL_LINKS } from '../../../../../common/constants';
+import { i18n } from '@kbn/i18n';
 
 export class RevertToBasic extends React.PureComponent {
   cancel = () => {
@@ -29,14 +30,10 @@ export class RevertToBasic extends React.PureComponent {
     }
     return (
       <EuiConfirmModal
-        title={
-          <div>
-            <FormattedMessage
-              id="xpack.licenseMgmt.licenseDashboard.revertToBasic.confirmModalTitle"
-              defaultMessage="Confirm Revert to Basic License"
-            />
-          </div>
-        }
+        title={i18n.translate(
+          'xpack.licenseMgmt.licenseDashboard.revertToBasic.confirmModalTitle',
+          { defaultMessage: 'Confirm Revert to Basic License' }
+        )}
         onCancel={cancelStartBasicLicense}
         onConfirm={() => startBasicLicense(licenseType, true)}
         cancelButtonText={
