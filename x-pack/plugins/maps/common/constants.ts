@@ -220,6 +220,12 @@ export enum LABEL_BORDER_SIZES {
   LARGE = 'LARGE',
 }
 
+export enum LABEL_POSITIONS {
+  BOTTOM = 'BOTTOM',
+  CENTER = 'CENTER',
+  TOP = 'TOP',
+}
+
 export const DEFAULT_ICON = 'marker';
 export const DEFAULT_CUSTOM_ICON_CUTOFF = 0.25;
 export const DEFAULT_CUSTOM_ICON_RADIUS = 0.25;
@@ -247,6 +253,7 @@ export enum VECTOR_STYLES {
   LABEL_SIZE = 'labelSize',
   LABEL_BORDER_COLOR = 'labelBorderColor',
   LABEL_BORDER_SIZE = 'labelBorderSize',
+  LABEL_POSITION = 'labelPosition',
 }
 
 export enum SCALING_TYPES {
