@@ -84,7 +84,7 @@ export const mapToCard = ({
     }
 
     const url = getHref('integration_details_overview', {
-      pkgkey: `${item.name}-${version}`,
+      pkgkey: `${item.name}-${urlVersion}`,
       ...(item.integration ? { integration: item.integration } : {}),
     });
 
