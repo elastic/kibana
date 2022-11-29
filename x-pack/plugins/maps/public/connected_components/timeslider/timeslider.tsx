@@ -11,13 +11,7 @@ import { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
-import {
-  LazyControlGroupRenderer,
-  ControlGroupContainer,
-  ControlGroupInput,
-  ControlGroupOutput,
-  CONTROL_GROUP_TYPE,
-} from '@kbn/controls-plugin/public';
+import { LazyControlGroupRenderer, ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { first } from 'rxjs/operators';
 import type { TimeRange } from '@kbn/es-query';
@@ -67,7 +61,7 @@ export class Timeslider extends Component<Props, {}> {
       viewMode: ViewMode.VIEW,
       timeRange: this.props.timeRange,
     };
-  }
+  };
 
   _onLoadComplete = (controlGroup) => {
     if (!this._isMounted) {
@@ -100,7 +94,7 @@ export class Timeslider extends Component<Props, {}> {
           );
         })
     );
-  }
+  };
 
   render() {
     return (

@@ -70,7 +70,7 @@ const ControlGroupInputBuilder = {
         },
       } as ControlPanelState<ControlInput>,
     };
-  }
+  },
 };
 
 export interface ControlGroupRendererProps {
