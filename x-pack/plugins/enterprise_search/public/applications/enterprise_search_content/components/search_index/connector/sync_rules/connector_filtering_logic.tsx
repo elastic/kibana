@@ -20,6 +20,7 @@ import {
   FilteringPolicy,
   FilteringRule,
   FilteringRuleRule,
+  FilteringValidation,
   FilteringValidationState,
 } from '../../../../../../../common/types/connectors';
 import { Actions } from '../../../../../shared/api_logic/create_api_logic';
@@ -79,6 +80,7 @@ type ConnectorFilteringActions = Pick<
 
 interface ConnectorFilteringValues {
   advancedSnippet: string;
+  draftErrors: FilteringValidation[];
   draftState: FilteringValidationState;
   editableFilteringRules: FilteringRule[];
   filteringConfig: FilteringConfig | null;

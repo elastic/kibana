@@ -30,6 +30,8 @@ const errorBudgetSchema = t.type({
   is_estimated: t.boolean,
 });
 
+const summarySchema = t.type({ sli_value: t.number, error_budget: errorBudgetSchema });
+
 const dateRangeSchema = t.type({ from: dateType, to: dateType });
 
-export { allOrAnyString, ALL_VALUE, dateType, errorBudgetSchema, dateRangeSchema };
+export { ALL_VALUE, allOrAnyString, dateRangeSchema, dateType, errorBudgetSchema, summarySchema };
