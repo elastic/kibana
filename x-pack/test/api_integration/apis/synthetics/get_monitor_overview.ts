@@ -18,7 +18,7 @@ import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/146014
-  describe.skip('GetMonitorsOverview', function () {
+  describe('GetMonitorsOverview', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -172,72 +172,74 @@ export default function ({ getService }: FtrProviderContext) {
           const apiResponse = await supertest.get(
             `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW}`
           );
-          expect(apiResponse.body.monitors).eql([
-            {
-              id: savedMonitors[0].attributes[ConfigKey.MONITOR_QUERY_ID],
-              configId: savedMonitors[0].id,
-              name: 'test-monitor-name 0',
-              location: {
-                id: 'eu-west-01',
-                label: 'Europe West',
-                geo: {
-                  lat: 33.2343132435,
-                  lon: 73.2342343434,
+          expect(apiResponse.body.monitors.sort((a: any, b: any) => a.id - b.id)).eql(
+            [
+              {
+                id: savedMonitors[0].attributes[ConfigKey.MONITOR_QUERY_ID],
+                configId: savedMonitors[0].id,
+                name: 'test-monitor-name 0',
+                location: {
+                  id: 'eu-west-01',
+                  label: 'Europe West',
+                  geo: {
+                    lat: 33.2343132435,
+                    lon: 73.2342343434,
+                  },
+                  url: 'https://example-url.com',
+                  isServiceManaged: true,
                 },
-                url: 'https://example-url.com',
-                isServiceManaged: true,
+                isEnabled: true,
               },
-              isEnabled: true,
-            },
-            {
-              id: savedMonitors[0].attributes[ConfigKey.MONITOR_QUERY_ID],
-              configId: savedMonitors[0].id,
-              name: 'test-monitor-name 0',
-              location: {
-                id: 'eu-west-02',
-                label: 'Europe West',
-                geo: {
-                  lat: 33.2343132435,
-                  lon: 73.2342343434,
+              {
+                id: savedMonitors[0].attributes[ConfigKey.MONITOR_QUERY_ID],
+                configId: savedMonitors[0].id,
+                name: 'test-monitor-name 0',
+                location: {
+                  id: 'eu-west-02',
+                  label: 'Europe West',
+                  geo: {
+                    lat: 33.2343132435,
+                    lon: 73.2342343434,
+                  },
+                  url: 'https://example-url.com',
+                  isServiceManaged: true,
                 },
-                url: 'https://example-url.com',
-                isServiceManaged: true,
+                isEnabled: true,
               },
-              isEnabled: true,
-            },
-            {
-              id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
-              configId: savedMonitors[1].id,
-              name: 'test-monitor-name 1',
-              location: {
-                id: 'eu-west-01',
-                label: 'Europe West',
-                geo: {
-                  lat: 33.2343132435,
-                  lon: 73.2342343434,
+              {
+                id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
+                configId: savedMonitors[1].id,
+                name: 'test-monitor-name 1',
+                location: {
+                  id: 'eu-west-01',
+                  label: 'Europe West',
+                  geo: {
+                    lat: 33.2343132435,
+                    lon: 73.2342343434,
+                  },
+                  url: 'https://example-url.com',
+                  isServiceManaged: true,
                 },
-                url: 'https://example-url.com',
-                isServiceManaged: true,
+                isEnabled: true,
               },
-              isEnabled: true,
-            },
-            {
-              id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
-              configId: savedMonitors[1].id,
-              name: 'test-monitor-name 1',
-              location: {
-                id: 'eu-west-02',
-                label: 'Europe West',
-                geo: {
-                  lat: 33.2343132435,
-                  lon: 73.2342343434,
+              {
+                id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
+                configId: savedMonitors[1].id,
+                name: 'test-monitor-name 1',
+                location: {
+                  id: 'eu-west-02',
+                  label: 'Europe West',
+                  geo: {
+                    lat: 33.2343132435,
+                    lon: 73.2342343434,
+                  },
+                  url: 'https://example-url.com',
+                  isServiceManaged: true,
                 },
-                url: 'https://example-url.com',
-                isServiceManaged: true,
+                isEnabled: true,
               },
-              isEnabled: true,
-            },
-          ]);
+            ].sort((a: any, b: any) => a.id - b.id)
+          );
           expect(savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID]).eql(customHeartbeatId);
         } finally {
           await Promise.all(
