@@ -185,7 +185,9 @@ export const TIMELINE_FIELDS_BUTTON =
   '[data-test-subj="timeline"] [data-test-subj="show-field-browser"]';
 
 export const TIMELINE_FILTER = (filter: TimelineFilter) =>
-  `[data-test-subj="filter filter-enabled filter-key-${filter.field} filter-value-${filter.value} filter-unpinned"]`;
+  `[data-test-subj="~filter & ~filter-enabled & ~filter-key-${filter.field} & ~filter-value-${(
+    filter.value ?? ''
+  ).replace(/\s/g, '')} & ~filter-unpinned"]`;
 
 export const TIMELINE_FILTER_FIELD = '[data-test-subj="filterFieldSuggestionList"]';
 
