@@ -77,17 +77,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         );
       const normalizedPreviousMonitor = normalizeSecrets(decryptedPreviousMonitor).attributes;
 
-      const editedMonitor = mergeWith(
-        normalizedPreviousMonitor,
-        {
-          ...monitor,
-          /* reset config hash to empty string. Ensures that the synthetics agent is able
-           * to update project monitors on when next pushed after they are edited via the UI,
-           * through the enable/disable monitor toggle */
-          [ConfigKey.CONFIG_HASH]: '',
-        },
-        customizer
-      );
+      const editedMonitor = mergeWith(normalizedPreviousMonitor, monitor, customizer);
 
       const validationResult = validateMonitor(editedMonitor as MonitorFields);
 
@@ -98,6 +88,10 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
 
       const monitorWithRevision = {
         ...validationResult.decodedMonitor,
+        /* reset config hash to empty string. Ensures that the synthetics agent is able
+         * to update project monitors on when next pushed after they are edited via the UI,
+         * through the enable/disable monitor toggle */
+        [ConfigKey.CONFIG_HASH]: '',
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
       };
 
