@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
@@ -18,44 +18,39 @@ import {
 } from '../../../common/es_fields/apm';
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { serviceGroupQuery } from '../../lib/service_group_query';
-import { ServiceGroup } from '../../../common/service_groups';
+
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { APMConfig } from '../..';
 
 const MAX_TRACES_TO_INSPECT = 1000;
 
 export async function getTraceSampleIds({
-  serviceNames,
+  serviceName,
   environment,
   config,
   apmEventClient,
   start,
   end,
-  serviceGroup,
+  serviceGroupKuery,
 }: {
-  serviceNames?: string[];
+  serviceName?: string;
   environment: string;
   config: APMConfig;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-  serviceGroup: ServiceGroup | null;
+  serviceGroupKuery?: string;
 }) {
   const query = {
     bool: {
-      filter: [...rangeQuery(start, end), ...serviceGroupQuery(serviceGroup)],
+      filter: [...rangeQuery(start, end), ...kqlQuery(serviceGroupKuery)],
     },
   };
 
   let events: ProcessorEvent[];
 
-  const hasServiceNamesFilter = (serviceNames?.length ?? 0) > 0;
-
-  if (hasServiceNamesFilter) {
-    query.bool.filter.push({
-      terms: { [SERVICE_NAME]: serviceNames as string[] },
-    });
+  if (serviceName) {
+    query.bool.filter.push({ term: { [SERVICE_NAME]: serviceName } });
     events = [ProcessorEvent.span, ProcessorEvent.transaction];
   } else {
     events = [ProcessorEvent.span];
@@ -68,10 +63,10 @@ export async function getTraceSampleIds({
 
   query.bool.filter.push(...environmentQuery(environment));
 
-  const fingerprintBucketSize = hasServiceNamesFilter
+  const fingerprintBucketSize = serviceName
     ? config.serviceMapFingerprintBucketSize
     : config.serviceMapFingerprintGlobalBucketSize;
-  const traceIdBucketSize = hasServiceNamesFilter
+  const traceIdBucketSize = serviceName
     ? config.serviceMapTraceIdBucketSize
     : config.serviceMapTraceIdGlobalBucketSize;
   const samplerShardSize = traceIdBucketSize * 10;
