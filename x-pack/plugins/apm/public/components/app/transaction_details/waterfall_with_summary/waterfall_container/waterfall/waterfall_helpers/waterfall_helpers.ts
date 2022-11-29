@@ -289,8 +289,8 @@ const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
   );
 
 const getWaterfallItems = (
-  items: TraceAPIResponse['traceDocs'],
-  linkedChildrenOfSpanCountBySpanId: TraceAPIResponse['linkedChildrenOfSpanCountBySpanId']
+  items: Array<Transaction | Span>,
+  linkedChildrenOfSpanCountBySpanId: Record<string, number>
 ) =>
   items.map((item) => {
     const docType: 'span' | 'transaction' = item.processor.event;
@@ -398,8 +398,8 @@ function getWaterfallErrors(
 /*
   { 'parentId': 2 }
   */
-function getErrorCountByParentId(errorDocs: TraceAPIResponse['errorDocs']) {
-  return errorDocs.reduce<Record<string, number>>((acc, doc) => {
+function getErrorCountByParentId(waterfalErrorDocs: WaterfallErrorDoc[]) {
+  return waterfalErrorDocs.reduce<Record<string, number>>((acc, doc) => {
     const parentId = doc.parent?.id;
 
     if (!parentId) {
