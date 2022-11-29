@@ -6,7 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -66,10 +65,10 @@ function createTestJobAndDatafeed() {
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
- // const pageObjects = getPageObjects(['triggersActionsUI']);
+  // const pageObjects = getPageObjects(['triggersActionsUI']);
   const commonScreenshots = getService('commonScreenshots');
 
-  const screenshotDirectories = ['ml_docs', 'anomaly_detection']
+  const screenshotDirectories = ['ml_docs', 'anomaly_detection'];
 
   let testJobId = '';
 
@@ -101,7 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe.only('overview page alert flyout controls', () => {
       it('can create an anomaly detection alert', async () => {
         await ml.navigation.navigateToAlertsAndAction();
-      //  await pageObjects.triggersActionsUI.clickCreateAlertButton();
+        //  await pageObjects.triggersActionsUI.clickCreateAlertButton();
         await ml.alerting.selectAnomalyDetectionAlertType();
         await ml.testExecution.logTestStep('should have correct default values');
         await ml.alerting.assertSeverity(75);
