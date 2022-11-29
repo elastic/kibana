@@ -1095,7 +1095,7 @@ export class RulesClient {
     const execLogTransformClient = this.getExecLogTransformClient();
 
     try {
-      const aggResult = await execLogTransformClient!.getByRuleIds([id], {
+      const result = await execLogTransformClient!.getByRuleIds([id], {
         start: start.toISOString(),
         end: end.toISOString(),
         filter,
@@ -1104,7 +1104,7 @@ export class RulesClient {
         sort,
       });
 
-      return formatExecLogTransformResults(aggResult);
+      return formatExecLogTransformResults(result);
     } catch (err) {
       this.logger.debug(
         `rulesClient.getExecutionLogForRule(): error searching event log for rule ${id}: ${err.message}`
@@ -1155,29 +1155,119 @@ export class RulesClient {
     const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
     const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
 
-    const execLogTransformClient = this.getExecLogTransformClient();
-    if (execLogTransformClient) {
-      return await this.getExecutionLogForRuleFromExecLogTransform({
-        id,
-        start: parsedDateStart,
-        end: parsedDateEnd,
-        filter,
-        page,
-        perPage,
-        sort,
-      });
-    }
+    const useExecLogTransformClient = null != this.getExecLogTransformClient();
 
-    return await this.getExecutionLogForRuleFromEventLog({
-      id,
-      start: parsedDateStart,
-      end: parsedDateEnd,
-      filter,
-      page,
-      perPage,
-      sort,
-      legacyId: rule.legacyId,
-    });
+    return useExecLogTransformClient
+      ? await this.getExecutionLogForRuleFromExecLogTransform({
+          id,
+          start: parsedDateStart,
+          end: parsedDateEnd,
+          filter,
+          page,
+          perPage,
+          sort,
+        })
+      : await this.getExecutionLogForRuleFromEventLog({
+          id,
+          start: parsedDateStart,
+          end: parsedDateEnd,
+          filter,
+          page,
+          perPage,
+          sort,
+          legacyId: rule.legacyId,
+        });
+  }
+
+  private async getGlobalExecutionLogWithAuthFromEventLog({
+    filter,
+    authFilter,
+    start,
+    end,
+    page,
+    perPage,
+    sort,
+    namespaces,
+  }: {
+    filter?: string;
+    authFilter?: KueryNode;
+    start: Date;
+    end: Date;
+    page: number;
+    perPage: number;
+    sort: estypes.Sort;
+    namespaces?: Array<string | undefined>;
+  }): Promise<IExecutionLogResult> {
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
+        'alert',
+        authFilter as KueryNode,
+        {
+          start: start.toISOString(),
+          end: end.toISOString(),
+          aggs: getExecutionLogAggregation({
+            filter,
+            page,
+            perPage,
+            sort,
+          }),
+        },
+        namespaces
+      );
+
+      return formatExecutionLogResult(aggResult);
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getGlobalExecutionLogWithAuth(): error searching global event log: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  private async getGlobalExecutionLogWithAuthFromExecLogTransform({
+    filter,
+    authFilter,
+    start,
+    end,
+    page,
+    perPage,
+    sort,
+    namespaces,
+  }: {
+    filter?: string;
+    authFilter?: KueryNode;
+    start: Date;
+    end: Date;
+    page: number;
+    perPage: number;
+    sort: estypes.Sort;
+    namespaces?: Array<string | undefined>;
+  }): Promise<IExecutionLogResult> {
+    const execLogTransformClient = this.getExecLogTransformClient();
+
+    try {
+      const result = await execLogTransformClient!.getByAuthFilter(
+        authFilter as KueryNode,
+        {
+          start: start.toISOString(),
+          end: end.toISOString(),
+          filter,
+          page,
+          per_page: perPage,
+          sort,
+        },
+        namespaces
+      );
+
+      return formatExecLogTransformResults(result);
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getGlobalExecutionLogWithAuthFromExecLogTransform(): error searching exec log with auth filter: ${err.message}`
+      );
+      throw err;
+    }
   }
 
   public async getGlobalExecutionLogWithAuth({
@@ -1191,16 +1281,22 @@ export class RulesClient {
   }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
     this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
+    const useExecLogTransformClient = null != this.getExecLogTransformClient();
+
+    const authorizationFieldNames = useExecLogTransformClient
+      ? {
+          ruleTypeId: 'alerting.doc.kibana.alert.rule.rule_type_id',
+          consumer: 'alerting.doc.kibana.alert.rule.consumer',
+        }
+      : { ruleTypeId: 'kibana.alert.rule.rule_type_id', consumer: 'kibana.alert.rule.consumer' };
+
     let authorizationTuple;
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter(
         AlertingAuthorizationEntity.Alert,
         {
           type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'kibana.alert.rule.rule_type_id',
-            consumer: 'kibana.alert.rule.consumer',
-          },
+          fieldNames: authorizationFieldNames,
         }
       );
     } catch (error) {
@@ -1223,32 +1319,27 @@ export class RulesClient {
     const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
     const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
 
-    const eventLogClient = await this.getEventLogClient();
-
-    try {
-      const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
-        'alert',
-        authorizationTuple.filter as KueryNode,
-        {
-          start: parsedDateStart.toISOString(),
-          end: parsedDateEnd.toISOString(),
-          aggs: getExecutionLogAggregation({
-            filter,
-            page,
-            perPage,
-            sort,
-          }),
-        },
-        namespaces
-      );
-
-      return formatExecutionLogResult(aggResult);
-    } catch (err) {
-      this.logger.debug(
-        `rulesClient.getGlobalExecutionLogWithAuth(): error searching global event log: ${err.message}`
-      );
-      throw err;
-    }
+    return useExecLogTransformClient
+      ? await this.getGlobalExecutionLogWithAuthFromExecLogTransform({
+          authFilter: authorizationTuple.filter as KueryNode,
+          filter,
+          start: parsedDateStart,
+          end: parsedDateEnd,
+          page,
+          perPage,
+          sort,
+          namespaces,
+        })
+      : await this.getGlobalExecutionLogWithAuthFromEventLog({
+          authFilter: authorizationTuple.filter as KueryNode,
+          filter,
+          start: parsedDateStart,
+          end: parsedDateEnd,
+          page,
+          perPage,
+          sort,
+          namespaces,
+        });
   }
 
   public async getActionErrorLog({

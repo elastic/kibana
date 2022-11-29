@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { flatMap, get, isNumber } from 'lodash';
+import { flatMap, get, isNumber, omit } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { ElasticsearchClient, Logger, KibanaRequest } from '@kbn/core/server';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { fromKueryExpression, KueryNode, nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
 import { DESTINATION_INDEX } from './install_transform';
 
 const optionalDateFieldSchema = schema.maybe(
@@ -97,21 +97,29 @@ export class ExecLogTransformClient {
   }
 
   public async getByRuleIds(ids: string[], options: GetByRuleIdsOptionsType) {
+    if (!ids || !ids.length) {
+      throw new Error(`No rule ids specified!`);
+    }
+
+    const validatedOpts = GetByRuleIdsOptionsSchema.validate(omit(options, 'sort') ?? {});
+
+    const sortFields = flatMap(options.sort as estypes.SortCombinations[], (s) => Object.keys(s));
+    for (const field of sortFields) {
+      if (!Object.keys(ExecLogTransformFields).includes(field)) {
+        throw new Error(
+          `Invalid sort field "${field}" - must be one of [${Object.keys(
+            ExecLogTransformFields
+          ).join(',')}]`
+        );
+      }
+    }
+
     try {
-      const { page, per_page: perPage, start, end, sort, filter } = options;
+      const { sort } = options;
+      const { page, per_page: perPage, start, end, filter } = validatedOpts;
       const namespace = await this.getNamespace();
       const namespaceQuery = getNamespaceQuery(namespace);
 
-      const sortFields = flatMap(sort as estypes.SortCombinations[], (s) => Object.keys(s));
-      for (const field of sortFields) {
-        if (!Object.keys(ExecLogTransformFields).includes(field)) {
-          throw new Error(
-            `Invalid sort field "${field}" - must be one of [${Object.keys(
-              ExecLogTransformFields
-            ).join(',')}]`
-          );
-        }
-      }
       let filterKueryNode;
       try {
         filterKueryNode = JSON.parse(filter ?? '');
@@ -188,28 +196,112 @@ export class ExecLogTransformClient {
     }
   }
 
-  // public async getByAuthFilter(
-  //   authFilter: KueryNode,
-  //   namespace: string | undefined,
-  //   options: GetByRuleIdsOptionsType
-  // ) {
-  //   if (!authFilter) {
-  //     throw new Error('No authorization filter defined!');
-  //   }
+  public async getByAuthFilter(
+    authFilter: KueryNode,
+    options: GetByRuleIdsOptionsType,
+    namespaces?: Array<string | undefined>
+  ) {
+    if (!authFilter) {
+      throw new Error('No authorization filter defined!');
+    }
 
-  //   const findOptions = queryOptionsSchema.validate(options ?? {});
+    const validatedOpts = GetByRuleIdsOptionsSchema.validate(omit(options, 'sort') ?? {});
 
-  //   return await this.esContext.esAdapter.queryEventsWithAuthFilter({
-  //     index: this.esContext.esNames.indexPattern,
-  //     namespace: namespace
-  //       ? this.spacesService?.spaceIdToNamespace(namespace)
-  //       : await this.getNamespace(),
-  //     type,
-  //     ids,
-  //     findOptions,
-  //     authFilter,
-  //   });
-  // }
+    const sortFields = flatMap(options.sort as estypes.SortCombinations[], (s) => Object.keys(s));
+    for (const field of sortFields) {
+      if (!Object.keys(ExecLogTransformFields).includes(field)) {
+        throw new Error(
+          `Invalid sort field "${field}" - must be one of [${Object.keys(
+            ExecLogTransformFields
+          ).join(',')}]`
+        );
+      }
+    }
+
+    try {
+      const { sort } = options;
+      const { page, per_page: perPage, start, end, filter } = validatedOpts;
+      const namespacesToUse = namespaces ?? [await this.getNamespace()];
+
+      const namespaceQuery = (namespacesToUse ?? [undefined]).map((n) => getNamespaceQuery(n));
+
+      let filterKueryNode;
+      try {
+        filterKueryNode = JSON.parse(filter ?? '');
+      } catch (e) {
+        filterKueryNode = filter ? fromKueryExpression(filter) : null;
+      }
+      let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
+      try {
+        const queryFilter = filterKueryNode
+          ? nodeBuilder.and([filterKueryNode, authFilter as KueryNode])
+          : authFilter;
+        dslFilterQuery = queryFilter ? toElasticsearchQuery(queryFilter) : undefined;
+      } catch (err) {
+        this.logger.debug(
+          `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
+            message: err.message,
+            statusCode: err.statusCode,
+          })}`
+        );
+        throw err;
+      }
+
+      const musts: estypes.QueryDslQueryContainer[] = [
+        {
+          bool: {
+            should: namespaceQuery,
+          },
+        },
+      ];
+
+      if (start) {
+        musts.push({
+          range: {
+            '@timestamp.min': {
+              gte: start,
+            },
+          },
+        });
+      }
+      if (end) {
+        musts.push({
+          range: {
+            '@timestamp.min': {
+              lte: end,
+            },
+          },
+        });
+      }
+
+      const body: estypes.SearchRequest['body'] = {
+        size: perPage,
+        from: (page - 1) * perPage,
+        query: {
+          bool: {
+            ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
+            must: musts,
+          },
+        },
+        ...(sort ? { sort: formatSortForBucketSort(sort) } : {}),
+      };
+      const {
+        hits: { hits, total },
+      } = await this.esClient.search({
+        index: DESTINATION_INDEX,
+        track_total_hits: true,
+        body,
+      });
+      return {
+        page,
+        per_page: perPage,
+        total: isNumber(total) ? total : total!.value,
+        data: hits.map((hit) => hit._source),
+      };
+    } catch (err) {
+      throw new Error(`querying for exec log with authFilter failed with: ${err.message}`);
+    }
+  }
 
   private async getNamespace() {
     const space = await this.spacesService?.getActiveSpace(this.request);
