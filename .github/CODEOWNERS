@@ -813,6 +813,8 @@ packages/core/metrics/core-metrics-server-internal @elastic/kibana-core
 packages/core/metrics/core-metrics-server-mocks @elastic/kibana-core
 packages/core/mount-utils/core-mount-utils-browser @elastic/kibana-core
 packages/core/mount-utils/core-mount-utils-browser-internal @elastic/kibana-core
+packages/core/multitenancy/core-multitenancy-server @elastic/kibana-core
+packages/core/multitenancy/core-multitenancy-server-internal @elastic/kibana-core
 packages/core/node/core-node-server @elastic/kibana-core
 packages/core/node/core-node-server-internal @elastic/kibana-core
 packages/core/node/core-node-server-mocks @elastic/kibana-core
