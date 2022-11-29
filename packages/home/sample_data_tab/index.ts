@@ -13,3 +13,4 @@ export {
   DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON,
   DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_ACCORDION,
 } from './src/constants';
+export type { LargeDataSetParams } from './src/services';

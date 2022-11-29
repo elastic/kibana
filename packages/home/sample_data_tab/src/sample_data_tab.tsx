@@ -12,6 +12,7 @@ import { EuiAccordion, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { DemoEnvironmentPanel } from './demo_env_panel';
 import { SampleDataCards } from './sample_data_cards';
+import { LargeDatasetPanel } from './large_data_set_panel';
 
 // TODO: clintandrewhall - pull from config.
 import {
@@ -31,7 +32,7 @@ const sampleDataLabel = i18n.translate('homePackages.tutorials.sampleData.sample
  * The content for the Sample Data Tab in the `home` plugin.
  */
 export const SampleDataTab = () => {
-  const { logClick } = useServices();
+  const { logClick, installLargeDataset, checkLargeDatasetInstalled } = useServices();
   const onClick = () => {
     logClick(METRIC_CLICK_DEMO_ENV_BUTTON);
   };
@@ -46,6 +47,10 @@ export const SampleDataTab = () => {
     <>
       <DemoEnvironmentPanel demoUrl={URL_DEMO_ENV} {...{ onClick }} />
       <EuiSpacer />
+      <LargeDatasetPanel
+        install={installLargeDataset}
+        checkInstalled={checkLargeDatasetInstalled}
+      />
       <EuiAccordion
         id="sampleDataTab"
         buttonContent={sampleDataLabel}

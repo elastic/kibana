@@ -42,3 +42,7 @@ export async function uninstallSampleDataSet(id: string, sampleDataDefaultIndex:
 
   clearIndexPatternsCache();
 }
+
+export async function installLargeDataSet() {
+  await getServices().http.post(`${sampleDataUrl}/large_dataset`);
+}

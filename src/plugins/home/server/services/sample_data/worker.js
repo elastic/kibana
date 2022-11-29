@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { createListRoute } from './list';
-export { createInstallRoute } from './install';
-export { createUninstallRoute } from './uninstall';
-export {
-  createInstallLargeDatasetRoute,
-  createIsLargeDataSetInstalledRoute,
-} from './large_dataset';
+/* eslint-disable @typescript-eslint/no-var-requires*/
+require('@babel/register')({
+  extensions: ['.ts', '.js'],
+  presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
+});
+
+require('./generate_dataset');

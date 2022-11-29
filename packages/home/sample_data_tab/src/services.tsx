@@ -16,6 +16,7 @@ import {
   SampleDataCardKibanaProvider,
 } from '@kbn/home-sample-data-card';
 
+import { HttpFetchOptions } from '@kbn/core-http-browser';
 import { URL_SAMPLE_DATA_API } from './constants';
 
 type UnmountCallback = () => void;
@@ -34,6 +35,8 @@ interface Services {
   fetchSampleDataSets: () => Promise<SampleDataSet[]>;
   notifyError: NotifyFn;
   logClick: (metric: string) => void;
+  installLargeDataset: (params: LargeDataSetParams) => Promise<void>;
+  checkLargeDatasetInstalled: () => Promise<boolean>;
 }
 
 /**
@@ -43,18 +46,30 @@ export type SampleDataTabServices = Services & SampleDataCardServices;
 
 const Context = React.createContext<Services | null>(null);
 
+export interface LargeDataSetParams {
+  nrOfDocuments: number;
+  indexName: string;
+}
+
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
 export const SampleDataTabProvider: FC<SampleDataTabServices> = ({ children, ...services }) => {
-  const { fetchSampleDataSets, notifyError, logClick } = services;
-
+  const {
+    fetchSampleDataSets,
+    notifyError,
+    logClick,
+    installLargeDataset,
+    checkLargeDatasetInstalled,
+  } = services;
   return (
     <Context.Provider
       value={{
         fetchSampleDataSets,
         notifyError,
         logClick,
+        installLargeDataset,
+        checkLargeDatasetInstalled,
       }}
     >
       <SampleDataCardProvider {...services}>{children}</SampleDataCardProvider>
@@ -66,6 +81,7 @@ interface KibanaDependencies {
   coreStart: {
     http: {
       get: (path: string) => Promise<unknown>;
+      post: (path: string, options: HttpFetchOptions) => Promise<unknown>;
     };
     notifications: {
       toasts: {
@@ -93,10 +109,26 @@ export const SampleDataTabKibanaProvider: FC<SampleDataTabKibanaDependencies> = 
   const { coreStart, trackUiMetric } = dependencies;
   const { http, notifications } = coreStart;
 
+  const installLargeDataset = async (params: LargeDataSetParams) => {
+    const { indexName, nrOfDocuments } = params;
+    await http.post(`${URL_SAMPLE_DATA_API}/large_dataset`, {
+      body: JSON.stringify({ indexName, nrOfDocuments }),
+    });
+  };
+
+  const checkLargeDatasetInstalled = async () => {
+    const status = (await http.get(`${URL_SAMPLE_DATA_API}/large_dataset/installed`)) as {
+      status: string;
+    };
+    return status.status === 'installed';
+  };
+
   const value: Services = {
     fetchSampleDataSets: async () => (await http.get(URL_SAMPLE_DATA_API)) as SampleDataSet[],
     notifyError: (input) => notifications.toasts.addDanger(input),
     logClick: (eventName) => trackUiMetric('click', eventName),
+    installLargeDataset,
+    checkLargeDatasetInstalled,
   };
 
   return (

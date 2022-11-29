@@ -10,6 +10,7 @@ import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 import type { SavedObject } from '@kbn/core/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+
 import {
   SampleDatasetProvider,
   SampleDatasetSchema,
@@ -19,7 +20,12 @@ import {
 import { sampleDataSchema } from './lib/sample_dataset_schema';
 
 import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data_sets';
-import { createListRoute, createInstallRoute } from './routes';
+import {
+  createListRoute,
+  createInstallRoute,
+  createIsLargeDataSetInstalledRoute,
+  createInstallLargeDatasetRoute,
+} from './routes';
 import { makeSampleDataUsageCollector, usage } from './usage';
 import { createUninstallRoute } from './routes/uninstall';
 import { registerSampleDatasetWithIntegration } from './lib/register_with_integrations';
@@ -74,6 +80,8 @@ export class SampleDataRegistry {
     createListRoute(router, this.sampleDatasets, this.appLinksMap, logger);
     createInstallRoute(router, this.sampleDatasets, logger, usageTracker, core.analytics);
     createUninstallRoute(router, this.sampleDatasets, logger, usageTracker, core.analytics);
+    createIsLargeDataSetInstalledRoute(router, core);
+    createInstallLargeDatasetRoute(router, logger, core);
 
     this.registerSampleDataSet(flightsSpecProvider);
     this.registerSampleDataSet(logsSpecProvider);

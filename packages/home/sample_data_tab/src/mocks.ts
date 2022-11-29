@@ -37,6 +37,8 @@ export const getStoryServices = (params: Params) => {
     },
     logClick: () => {},
     ...getSampleDataCardStoryServices(params),
+    installLargeDataset: () => new Promise(() => {}),
+    checkLargeDatasetInstalled: () => new Promise(() => false),
   };
 
   return services;
