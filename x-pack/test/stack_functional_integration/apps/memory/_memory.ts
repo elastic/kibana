@@ -11,7 +11,15 @@ export default function ({
   getService,
   getPageObjects,
 }: FtrProviderContext & { updateBaselines: boolean }) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker', 'header', 'home', 'discover', 'maps']);
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'timePicker',
+    'header',
+    'home',
+    'discover',
+    'maps',
+  ]);
   const browser = getService('browser');
   const renderable = getService('renderable');
 
@@ -51,8 +59,6 @@ export default function ({
       await PageObjects.maps.loadSavedMap('[eCommerce] Orders by Country');
       await PageObjects.timePicker.startAutoRefresh();
       await PageObjects.common.sleep(900000);
-
-
     });
     it('dashboard auto refresh finished successfully', async function () {
       // This is a trivial assertion to ensure that we made it to the last test without
