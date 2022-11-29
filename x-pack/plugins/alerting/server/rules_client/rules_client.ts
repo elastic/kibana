@@ -77,13 +77,19 @@ export class RulesClient {
   }
 
   public aggregate = (params?: { options?: AggregateOptions }) => aggregate(this.context, params);
-  public clone = (...args: CloneArguments) => clone(this.context, ...args);
-  public create = (params: CreateOptions<RuleTypeParams>) => create(this.context, params);
+  public clone = <Params extends RuleTypeParams = never>(...args: CloneArguments) =>
+    clone<Params>(this.context, ...args);
+  public create = <Params extends RuleTypeParams = never>(params: CreateOptions<Params>) =>
+    create<Params>(this.context, params);
   public delete = (params: { id: string }) => deleteRule(this.context, params);
-  public find = (params?: FindParams) => find(this.context, params);
-  public get = (params: GetParams) => get(this.context, params);
-  public resolve = (params: ResolveParams) => resolve(this.context, params);
-  public update = (params: UpdateOptions<RuleTypeParams>) => update(this.context, params);
+  public find = <Params extends RuleTypeParams = never>(params?: FindParams) =>
+    find<Params>(this.context, params);
+  public get = <Params extends RuleTypeParams = never>(params: GetParams) =>
+    get<Params>(this.context, params);
+  public resolve = <Params extends RuleTypeParams = never>(params: ResolveParams) =>
+    resolve<Params>(this.context, params);
+  public update = <Params extends RuleTypeParams = never>(params: UpdateOptions<Params>) =>
+    update<Params>(this.context, params);
 
   public getAlertState = (params: GetAlertStateParams) => getAlertState(this.context, params);
   public getAlertSummary = (params: GetAlertSummaryParams) => getAlertSummary(this.context, params);
@@ -101,7 +107,8 @@ export class RulesClient {
     getActionErrorLogWithAuth(this.context, params);
 
   public bulkDeleteRules = (options: BulkOptions) => bulkDeleteRules(this.context, options);
-  public bulkEdit = (options: BulkEditOptions<RuleTypeParams>) => bulkEdit(this.context, options);
+  public bulkEdit = <Params extends RuleTypeParams = never>(options: BulkEditOptions<Params>) =>
+    bulkEdit<Params>(this.context, options);
   public bulkEnableRules = (options: BulkOptions) => bulkEnableRules(this.context, options);
   public bulkDisableRules = (options: BulkOptions) => bulkDisableRules(this.context, options);
 
