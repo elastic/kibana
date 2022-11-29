@@ -111,7 +111,7 @@ describe('useSyncRulesTableSavedState', () => {
         total: 100,
       },
     };
-    const expected = {
+    const expectedUrlState = {
       searchTerm: 'test',
       showCustomRules: true,
       tags: ['test'],
@@ -122,6 +122,8 @@ describe('useSyncRulesTableSavedState', () => {
       page: 3,
       perPage: 10,
     };
+    const expectedStorageState = { ...expectedUrlState };
+    delete expectedStorageState.page;
 
     (useRulesTableContext as jest.Mock).mockReturnValue({
       state,
@@ -130,9 +132,9 @@ describe('useSyncRulesTableSavedState', () => {
     renderHook(() => useSyncRulesTableSavedState());
 
     expect(replaceUrlParams).toHaveBeenCalledWith([
-      { key: URL_PARAM_KEY.rulesTable, value: expected },
+      { key: URL_PARAM_KEY.rulesTable, value: expectedUrlState },
     ]);
-    expect(setStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY, expected);
+    expect(setStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY, expectedStorageState);
   });
 
   describe('with the url', () => {
@@ -278,7 +280,7 @@ describe('useSyncRulesTableSavedState', () => {
       );
     });
 
-    it('syncs only the page number', () => {
+    it('does not sync the page number', () => {
       expectStateToSyncWithStorage(
         {
           ...defaultState,
@@ -287,7 +289,7 @@ describe('useSyncRulesTableSavedState', () => {
             page: 10,
           },
         },
-        { page: 10 }
+        {}
       );
     });
 

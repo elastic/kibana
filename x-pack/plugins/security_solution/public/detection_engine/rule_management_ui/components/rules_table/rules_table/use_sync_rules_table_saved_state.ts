@@ -66,7 +66,10 @@ export function useSyncRulesTableSavedState(): void {
       return;
     }
 
+    const sessionSavedState = { ...savedState };
+    delete sessionSavedState.page;
+
     replaceUrlParams([{ key: URL_PARAM_KEY.rulesTable, value: encodeRisonUrlState(savedState) }]);
-    sessionStorage.set(RULES_TABLE_STATE_STORAGE_KEY, savedState);
+    sessionStorage.set(RULES_TABLE_STATE_STORAGE_KEY, sessionSavedState);
   }, [replaceUrlParams, sessionStorage, state]);
 }
