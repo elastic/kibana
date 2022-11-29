@@ -33,7 +33,7 @@ export interface KibanaDependencies {
   };
 }
 
-export type ObservabilityAlertSearchBarKibanaDependencies = KibanaDependencies;
+export type ObservabilityAlertSearchBarDependencies = KibanaDependencies;
 
 export interface Services {
   timeFilterService: TimefilterContract;

@@ -6,13 +6,14 @@
  */
 
 import React, { FC, useContext } from 'react';
-import { ObservabilityAlertSearchBarKibanaDependencies, Services } from './types';
+import { ObservabilityAlertSearchBarDependencies, Services } from './types';
 
 const ObservabilityAlertSearchBarContext = React.createContext<Services | null>(null);
 
-export const ObservabilityAlertSearchBarKibanaProvider: FC<
-  ObservabilityAlertSearchBarKibanaDependencies
-> = ({ children, ...services }) => {
+export const ObservabilityAlertSearchBarProvider: FC<ObservabilityAlertSearchBarDependencies> = ({
+  children,
+  ...services
+}) => {
   return (
     <ObservabilityAlertSearchBarContext.Provider
       value={{
