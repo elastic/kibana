@@ -83,17 +83,14 @@ You can run packs as live queries or schedule packs to run for one or more agent
 . Click the **Packs** tab.
 . Click **Add pack** to create a new pack, or click the name of an existing pack, then **Edit** to add queries to an existing pack.
 . Provide a name for the pack. The short description is optional. 
-. Schedule the pack to run on a policy basis (*Policy*) or across all policies (*Global*).
+. Schedule the pack to be deployed on specified agent policies (*Policy*) or on all agent policies (*Global*).
 +
-
-If you choose the *Policy* option, you must also define policies to run the pack. To do this, configure _one or both_ of the following fields: 
-
-** *Scheduled {agent} policies (optional)*: Enter the names of policies to run the pack. By default, all {agents} registered to these policies will run the pack.  
+If you choose the *Policy* option, you must also configure one or both of the following fields: 
 +
+NOTE: When defining pack deployment details, you cannot configure the same policy multiple times. In other words, after specifying a policy, you can either choose to deploy the pack to all of the policy's agents or only a subset. You cannot choose both.
 
-TIP: If you want to configure the number of {agents} to run the pack, enter the policy name in the *Partial deployment (shards)* field instead.
-+
-** *Partial deployment (shards)*: In the *Policy* field, enter the name of a policy to run the pack. Next, use the *Shard* slider to specify a percentage of {agents} to run pack. For example, if you specify 50% on the slider, you're configuring the pack to only run on half of the policy's registered agents.
+** *Scheduled {agent} policies (optional)*: Allows you to deploy the pack to specific agent policies. By default, the pack is deployed to all {agents} that are registered to the policies you define.  
+** *Partial deployment (shards)*: Allows you to partially deploy the pack to specified agent policies. After defining a policy, use the *Shard* slider to limit the number of agents to which the pack is deployed. For example, after specifying a policy, you can choose to deploy the pack to half of the policy's agents by selecting 50% on the slider.
 
 . If you are creating a new pack, add queries to schedule:
 
