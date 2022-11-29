@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiSelectableTemplateSitewideOption } from '@elastic/eui';
+import { EuiSelectableTemplateSitewideOption } from '@elastic/eui';
 import type { GlobalSearchResult } from '@kbn/global-search-plugin/common/types';
 import type { SavedObjectTaggingPluginStart, Tag } from '@kbn/saved-objects-tagging-plugin/public';
 import { ResultTagList } from '../components/result_tag_list';
