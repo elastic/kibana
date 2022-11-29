@@ -38,7 +38,7 @@ describe('event_rendered_view', () => {
       </TestProviders>
     );
     expect(screen.queryAllByTestId('moment-date')[0].textContent).toEqual(
-      '2018-11-05T14:03:25-05:00'
+      'Nov 5, 2018 @ 19:03:25.937'
     );
   });
 
