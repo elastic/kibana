@@ -38,6 +38,7 @@ export class DataViewTableController {
 
     this.state$ = this.stateInternal$.asObservable();
 
+    this.loadHasData();
     this.loadDataViews();
   }
 
@@ -55,11 +56,17 @@ export class DataViewTableController {
   private dataViews: DataViewsPublicPluginStart;
   private defaultDataView: string;
 
-  loadDataViews = async () => {
-    this.state.isLoadingDataViews = true;
+  private async loadHasData() {
     this.state.hasDataView = await this.dataViews.hasData.hasDataView();
     this.state.hasEsData = await this.dataViews.hasData.hasESData();
     this.state.isLoadingHasData = false;
+    this.stateInternal$.next(this.state);
+  }
+
+  loadDataViews = async () => {
+    this.state.isLoadingDataViews = true;
+    this.stateInternal$.next(this.state);
+
     this.state.dataViews = await getIndexPatterns(this.defaultDataView, this.dataViews);
     this.state.isLoadingDataViews = false;
     this.stateInternal$.next(this.state);
