@@ -78,9 +78,7 @@ export class CloudGainsightPlugin implements Plugin {
       widgetFileEndpoint: basePath.prepend(
         `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}/gainsight_widget.js`
       ),
-      contentProxyDomain: basePath.prepend(
-        `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}`
-      ),
+      contentProxyDomain: `${basePath.publicBaseUrl}/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}`,
     });
   }
 }
