@@ -7,7 +7,7 @@
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { isValidExceptionList } from './is_valid_exceptions_list';
+import { validateRuleDefaultExceptionList } from './validate_rule_default_exception_list';
 import { requestContextMock } from '../../../routes/__mocks__';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import {
@@ -29,34 +29,34 @@ const defaultExceptionList: List = {
   type: ExceptionListTypeEnum.RULE_DEFAULT,
 };
 
-describe('isValidExceptionList', () => {
+describe('validateRuleDefaultExceptionList', () => {
   const { clients } = requestContextMock.createTools();
 
   beforeEach(() => {
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
   });
 
-  it('returns true if there no exceptionsList', async () => {
-    const result = await isValidExceptionList({
+  it('is valid if there no exceptionsList', async () => {
+    const result = await validateRuleDefaultExceptionList({
       ruleId: '1',
       exceptionsList: undefined,
       rulesClient: clients.rulesClient,
     });
-    expect(result).toEqual(true);
+    expect(result).toBeUndefined();
   });
 
-  it('returns true if there default exceptions list', async () => {
-    const result = await isValidExceptionList({
+  it('is valid if there default exceptions list', async () => {
+    const result = await validateRuleDefaultExceptionList({
       ruleId: '1',
       exceptionsList: [notDefaultExceptionList],
       rulesClient: clients.rulesClient,
     });
-    expect(result).toEqual(true);
+    expect(result).toBeUndefined();
   });
 
   it('throw error if there more than one rule default exeptions', async () => {
     await expect(
-      isValidExceptionList({
+      validateRuleDefaultExceptionList({
         ruleId: '1',
         exceptionsList: [defaultExceptionList, defaultExceptionList],
         rulesClient: clients.rulesClient,
@@ -64,16 +64,16 @@ describe('isValidExceptionList', () => {
     ).rejects.toThrow('More than one default exception list found on rule');
   });
 
-  it('return true if there no rules with this exceptions', async () => {
-    const result = await isValidExceptionList({
+  it('is valid if there no rules with this exceptions', async () => {
+    const result = await validateRuleDefaultExceptionList({
       ruleId: '1',
       exceptionsList: [defaultExceptionList],
       rulesClient: clients.rulesClient,
     });
-    expect(result).toEqual(true);
+    expect(result).toBeUndefined();
   });
 
-  it('return false if there more than 1 rule with exceptions', async () => {
+  it('throw error if there more than 1 rule with exceptions', async () => {
     clients.rulesClient.find.mockResolvedValue({
       ...getFindResultWithSingleHit(),
       data: [
@@ -90,15 +90,16 @@ describe('isValidExceptionList', () => {
       ],
     });
 
-    const result = await isValidExceptionList({
-      ruleId: '1',
-      exceptionsList: [defaultExceptionList],
-      rulesClient: clients.rulesClient,
-    });
-    expect(result).toEqual(false);
+    await expect(
+      validateRuleDefaultExceptionList({
+        ruleId: '1',
+        exceptionsList: [defaultExceptionList],
+        rulesClient: clients.rulesClient,
+      })
+    ).rejects.toThrow('default exception list already exists');
   });
 
-  it('return true if there rule default list in this rule', async () => {
+  it('is valid if there rule default list in this rule', async () => {
     clients.rulesClient.find.mockResolvedValue({
       ...getFindResultWithSingleHit(),
       data: [
@@ -111,15 +112,15 @@ describe('isValidExceptionList', () => {
       ],
     });
 
-    const result = await isValidExceptionList({
+    const result = await validateRuleDefaultExceptionList({
       ruleId: '1',
       exceptionsList: [defaultExceptionList],
       rulesClient: clients.rulesClient,
     });
-    expect(result).toEqual(true);
+    expect(result).toBeUndefined();
   });
 
-  it('return false if there rule default list in other rule', async () => {
+  it('throw error if there rule default list in other rule', async () => {
     clients.rulesClient.find.mockResolvedValue({
       ...getFindResultWithSingleHit(),
       data: [
@@ -131,11 +132,12 @@ describe('isValidExceptionList', () => {
       ],
     });
 
-    const result = await isValidExceptionList({
-      ruleId: '1',
-      exceptionsList: [defaultExceptionList],
-      rulesClient: clients.rulesClient,
-    });
-    expect(result).toEqual(false);
+    await expect(
+      validateRuleDefaultExceptionList({
+        ruleId: '1',
+        exceptionsList: [defaultExceptionList],
+        rulesClient: clients.rulesClient,
+      })
+    ).rejects.toThrow('default exception list already exists');
   });
 });

@@ -24,7 +24,7 @@ import { readRules } from '../../../logic/crud/read_rules';
 import { getDuplicates } from './get_duplicates';
 import { transformValidateBulkError } from '../../../utils/validate';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
-import { isValidExceptionList } from '../../../logic/exceptions/is_valid_exceptions_list';
+import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getRulesIndexesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/get_rules_indexes_with_duplicated_default_exceptions_list';
 
 import {
@@ -94,20 +94,14 @@ export const bulkCreateRulesRoute = (
                 });
               }
             }
-            const isExceptionListValid = await isValidExceptionList({
-              exceptionsList: payloadRule.exceptions_list,
-              rulesClient,
-              ruleId: undefined,
-            });
-            if (!isExceptionListValid) {
-              return createBulkErrorObject({
-                ruleId: payloadRule.rule_id,
-                statusCode: 409,
-                message: `default exception list already exists`,
-              });
-            }
 
             try {
+              await validateRuleDefaultExceptionList({
+                exceptionsList: payloadRule.exceptions_list,
+                rulesClient,
+                ruleId: undefined,
+              });
+
               const validationErrors = validateCreateRuleProps(payloadRule);
               if (validationErrors.length) {
                 return createBulkErrorObject({

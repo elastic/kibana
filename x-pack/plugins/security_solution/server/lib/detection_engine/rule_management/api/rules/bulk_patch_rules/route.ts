@@ -31,7 +31,7 @@ import { readRules } from '../../../logic/crud/read_rules';
 // eslint-disable-next-line no-restricted-imports
 import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
-import { isValidExceptionList } from '../../../logic/exceptions/is_valid_exceptions_list';
+import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getRulesIndexesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/get_rules_indexes_with_duplicated_default_exceptions_list';
 
 /**
@@ -96,18 +96,11 @@ export const bulkPatchRulesRoute = (
                 throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));
               }
 
-              const isExceptionListValid = await isValidExceptionList({
+              await validateRuleDefaultExceptionList({
                 exceptionsList: payloadRule.exceptions_list,
                 rulesClient,
                 ruleId: payloadRule.id,
               });
-              if (!isExceptionListValid) {
-                return createBulkErrorObject({
-                  ruleId: idOrRuleIdOrUnknown,
-                  statusCode: 409,
-                  message: `default exception list already exists`,
-                });
-              }
 
               const migratedRule = await legacyMigrate({
                 rulesClient,

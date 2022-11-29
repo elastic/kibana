@@ -21,7 +21,7 @@ import { buildSiemResponse } from '../../../../routes/utils';
 
 import { createRules } from '../../../logic/crud/create_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
-import { isValidExceptionList } from '../../../logic/exceptions/is_valid_exceptions_list';
+import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { transformValidate } from '../../../utils/validate';
 
 export const createRuleRoute = (
@@ -86,17 +86,13 @@ export const createRuleRoute = (
         checkDefaultRuleExceptionListReferences({
           exceptionLists: request.body.exceptions_list,
         });
-        const isExceptionListValid = await isValidExceptionList({
+
+        await validateRuleDefaultExceptionList({
           exceptionsList: request.body.exceptions_list,
           rulesClient,
           ruleId: undefined,
         });
-        if (!isExceptionListValid) {
-          return siemResponse.error({
-            statusCode: 409,
-            body: `default exception list already exists`,
-          });
-        }
+
         const createdRule = await createRules({
           rulesClient,
           params: request.body,

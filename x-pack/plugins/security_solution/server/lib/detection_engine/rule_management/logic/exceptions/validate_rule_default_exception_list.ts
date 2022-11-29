@@ -9,13 +9,22 @@ import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { findRules } from '../search/find_rules';
+import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
+
+export class ExceptionListError extends Error {
+  public readonly statusCode: number;
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.statusCode = statusCode;
+  }
+}
 
 /**
  * Util to check if linked exceptions exist already the system
  * @param exceptionLists {array} - exception lists and items to import
  * @returns {Promise} exception lists or error if more than one default list found
  */
-export const isValidExceptionList = async ({
+export const validateRuleDefaultExceptionList = async ({
   exceptionsList,
   rulesClient,
   ruleId,
@@ -23,24 +32,24 @@ export const isValidExceptionList = async ({
   exceptionsList: ListArray | undefined;
   ruleId: string | undefined;
   rulesClient: RulesClient;
-}): Promise<boolean> => {
+}): Promise<undefined> => {
   if (!exceptionsList) {
-    return true;
+    return;
   }
 
   const newDefaultExceptionsLists = exceptionsList.filter(
     (list) => list.type === ExceptionListTypeEnum.RULE_DEFAULT
   );
 
-  if (newDefaultExceptionsLists.length === 0) return true;
+  if (newDefaultExceptionsLists.length === 0) return;
 
   if (newDefaultExceptionsLists.length > 1) {
-    throw new Error('More than one default exception list found on rule');
+    throw new CustomHttpRequestError('More than one default exception list found on rule', 400);
   }
 
   const newDefaultExceptionsList = newDefaultExceptionsLists[0];
 
-  const rulesWithDefaulExceptionList = await findRules({
+  const rulesWithDefaultExceptionList = await findRules({
     rulesClient,
     filter: `alert.attributes.params.exceptionsList.list_id: "${newDefaultExceptionsList.list_id}"`,
     page: 1,
@@ -50,16 +59,23 @@ export const isValidExceptionList = async ({
     sortOrder: undefined,
   });
 
-  if (!rulesWithDefaulExceptionList || rulesWithDefaulExceptionList?.data?.length === 0)
-    return true;
+  if (!rulesWithDefaultExceptionList || rulesWithDefaultExceptionList?.data?.length === 0) return;
 
+  let isExceptionsExistInOtherRule = false;
   // exceptions exists in other rules
-  if (!ruleId && rulesWithDefaulExceptionList.data.length > 0) return false;
-
-  // check if exceptions in this rule
-  if (ruleId) {
-    return rulesWithDefaulExceptionList.data.some((rule) => ruleId === rule.id);
+  if (!ruleId && rulesWithDefaultExceptionList.data.length > 0) {
+    isExceptionsExistInOtherRule = true;
   }
 
-  return true;
+  let isExceptionAttachToThisRule = false;
+  // check if exceptions in this rule
+  if (ruleId) {
+    isExceptionAttachToThisRule = rulesWithDefaultExceptionList.data.some(
+      (rule) => ruleId === rule.id
+    );
+  }
+
+  if (isExceptionsExistInOtherRule || !isExceptionAttachToThisRule) {
+    throw new CustomHttpRequestError('default exception list already exists', 409);
+  }
 };

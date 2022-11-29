@@ -32,7 +32,7 @@ import { updateRules } from '../../../logic/crud/update_rules';
 import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 import { readRules } from '../../../logic/crud/read_rules';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
-import { isValidExceptionList } from '../../../logic/exceptions/is_valid_exceptions_list';
+import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getRulesIndexesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/get_rules_indexes_with_duplicated_default_exceptions_list';
 
 /**
@@ -99,18 +99,11 @@ export const bulkUpdateRulesRoute = (
                 id: payloadRule.id,
               });
 
-              const isExceptionListValid = await isValidExceptionList({
+              await validateRuleDefaultExceptionList({
                 exceptionsList: payloadRule.exceptions_list,
                 rulesClient,
                 ruleId: payloadRule.id,
               });
-              if (!isExceptionListValid) {
-                return createBulkErrorObject({
-                  ruleId: idOrRuleIdOrUnknown,
-                  statusCode: 409,
-                  message: `default exception list already exists`,
-                });
-              }
 
               const migratedRule = await legacyMigrate({
                 rulesClient,
