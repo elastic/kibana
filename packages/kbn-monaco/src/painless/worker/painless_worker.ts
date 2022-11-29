@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { BaseWorkerDefinition } from '@kbn/monaco';
 import { monaco } from '../../monaco_imports';
 import type {
   PainlessCompletionResult,
   PainlessContext,
   PainlessAutocompleteField,
 } from '../types';
+import type { BaseWorkerDefinition } from '../../types';
 
 import { getAutocompleteSuggestions, parseAndGetSyntaxErrors } from './lib';
 

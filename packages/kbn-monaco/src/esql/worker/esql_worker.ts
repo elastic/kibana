@@ -7,7 +7,7 @@
  */
 
 import { monaco } from '../../monaco_imports';
-import { BaseWorkerDefinition } from '../../types';
+import type { BaseWorkerDefinition } from '../../types';
 
 export class ESQLWorker implements BaseWorkerDefinition {
   private _ctx: monaco.worker.IWorkerContext;
