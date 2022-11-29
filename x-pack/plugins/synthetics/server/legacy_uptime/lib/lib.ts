@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
+import {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  KibanaRequest,
+  CoreRequestHandlerContext,
+} from '@kbn/core/server';
 import chalk from 'chalk';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ESSearchResponse } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
 import { getInspectResponse } from '@kbn/observability-plugin/server';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
+import { API_URLS } from '../../../common/constants';
+import { UptimeServerSetup } from './adapters';
 import { UMLicenseCheck } from './domains';
 import { UptimeRequests } from './requests';
 import { savedObjectsAdapter } from './saved_objects/saved_objects';
@@ -40,22 +48,40 @@ export interface CountResponse {
 
 export type UptimeEsClient = ReturnType<typeof createUptimeESClient>;
 
-export const inspectableEsQueriesMap = new WeakMap<KibanaRequest, InspectResponse>();
-
 export function createUptimeESClient({
+  isDev,
+  uiSettings,
   esClient,
   request,
   savedObjectsClient,
-  isInspectorEnabled,
 }: {
-  isInspectorEnabled?: boolean;
+  isDev?: boolean;
+  uiSettings?: CoreRequestHandlerContext['uiSettings'];
   esClient: ElasticsearchClient;
   request?: KibanaRequest;
   savedObjectsClient: SavedObjectsClientContract;
 }) {
+  const initSettings = async (self: UptimeEsClient) => {
+    if (!self.heartbeatIndices) {
+      const [isInspectorEnabled, dynamicSettings] = await Promise.all([
+        getInspectEnabled(uiSettings),
+        savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient),
+      ]);
+
+      self.heartbeatIndices = dynamicSettings?.heartbeatIndices || '';
+      self.isInspectorEnabled = isInspectorEnabled;
+
+      if (self.isInspectorEnabled || isDev) {
+        self.inspectableEsQueriesMap.set(request!, []);
+      }
+    }
+  };
+
   return {
+    inspectableEsQueriesMap: new WeakMap<KibanaRequest, InspectResponse>(),
     baseESClient: esClient,
     heartbeatIndices: '',
+    isInspectorEnabled: undefined as boolean | undefined,
     async search<DocumentSource extends unknown, TParams extends estypes.SearchRequest>(
       params: TParams,
       operationName?: string,
@@ -64,13 +90,7 @@ export function createUptimeESClient({
       let res: any;
       let esError: any;
 
-      if (!this.heartbeatIndices) {
-        const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
-          savedObjectsClient!
-        );
-
-        this.heartbeatIndices = dynamicSettings?.heartbeatIndices || '';
-      }
+      await initSettings(this);
 
       const esParams = { index: index ?? this.heartbeatIndices, ...params };
       const startTime = process.hrtime();
@@ -87,7 +107,7 @@ export function createUptimeESClient({
         esRequestStatus = RequestStatus.ERROR;
       }
 
-      const inspectableEsQueries = inspectableEsQueriesMap.get(request!);
+      const inspectableEsQueries = this.inspectableEsQueriesMap.get(request!);
 
       if (inspectableEsQueries) {
         inspectableEsQueries.push(
@@ -101,7 +121,7 @@ export function createUptimeESClient({
             startTime: startTimeNow,
           })
         );
-        if (request && isInspectorEnabled) {
+        if (request && this.isInspectorEnabled) {
           debugESCall({ startTime, request, esError, operationName: 'search', params: esParams });
         }
       }
@@ -116,13 +136,7 @@ export function createUptimeESClient({
       let res: any;
       let esError: any;
 
-      if (!this.heartbeatIndices) {
-        const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
-          savedObjectsClient!
-        );
-
-        this.heartbeatIndices = dynamicSettings?.heartbeatIndices || '';
-      }
+      await initSettings(this);
 
       const esParams = { index: this.heartbeatIndices, ...params };
       const startTime = process.hrtime();
@@ -132,9 +146,9 @@ export function createUptimeESClient({
       } catch (e) {
         esError = e;
       }
-      const inspectableEsQueries = inspectableEsQueriesMap.get(request!);
+      const inspectableEsQueries = this.inspectableEsQueriesMap.get(request!);
 
-      if (inspectableEsQueries && request && isInspectorEnabled) {
+      if (inspectableEsQueries && request && this.isInspectorEnabled) {
         debugESCall({ startTime, request, esError, operationName: 'count', params: esParams });
       }
 
@@ -147,7 +161,25 @@ export function createUptimeESClient({
     getSavedObjectsClient() {
       return savedObjectsClient;
     },
+
+    getInspectData(path: string) {
+      const isInspectorEnabled =
+        (this.isInspectorEnabled || isDev) && path !== API_URLS.DYNAMIC_SETTINGS;
+
+      if (isInspectorEnabled) {
+        return { _inspect: this.inspectableEsQueriesMap.get(request!) };
+      }
+      return {};
+    },
   };
+}
+
+function getInspectEnabled(uiSettings?: CoreRequestHandlerContext['uiSettings']) {
+  if (!uiSettings) {
+    return false;
+  }
+
+  return uiSettings.client.get<boolean>(enableInspectEsQueries);
 }
 
 /* eslint-disable no-console */
@@ -187,3 +219,7 @@ export function debugESCall({
   }
   console.log(`\n`);
 }
+
+export const isTestUser = (server: UptimeServerSetup) => {
+  return server.config.service?.username === 'localKibanaIntegrationTestsUser';
+};

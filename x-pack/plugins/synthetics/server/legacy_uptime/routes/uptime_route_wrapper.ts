@@ -6,11 +6,8 @@
  */
 
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
-import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { UMKibanaRouteWrapper } from './types';
-import { createUptimeESClient, inspectableEsQueriesMap } from '../lib/lib';
-
-import { API_URLS } from '../../../common/constants';
+import { createUptimeESClient, isTestUser } from '../lib/lib';
 
 export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) => ({
   ...uptimeRoute,
@@ -23,25 +20,15 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
 
     server.authSavedObjectsClient = coreContext.savedObjects.client;
 
-    const isInspectorEnabled = await coreContext.uiSettings.client.get<boolean>(
-      enableInspectEsQueries
-    );
-
     const uptimeEsClient = createUptimeESClient({
       request,
+      isDev: server.isDev && !isTestUser(server),
       savedObjectsClient: coreContext.savedObjects.client,
-      isInspectorEnabled,
       esClient: esClient.asCurrentUser,
+      uiSettings: coreContext.uiSettings,
     });
 
     server.uptimeEsClient = uptimeEsClient;
-
-    if (
-      (isInspectorEnabled || server.isDev) &&
-      server.config.service?.username !== 'localKibanaIntegrationTestsUser'
-    ) {
-      inspectableEsQueriesMap.set(request, []);
-    }
 
     const res = await uptimeRoute.handler({
       uptimeEsClient,
@@ -59,9 +46,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
     return response.ok({
       body: {
         ...res,
-        ...((isInspectorEnabled || server.isDev) && uptimeRoute.path !== API_URLS.DYNAMIC_SETTINGS
-          ? { _inspect: inspectableEsQueriesMap.get(request) }
-          : {}),
+        ...uptimeEsClient.getInspectData(uptimeRoute.path),
       },
     });
   },
