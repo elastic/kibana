@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
@@ -42,6 +42,15 @@ export const NotFoundPrompt = ({ actions }: NotFoundProps) => {
   const [imageSrc, setImageSrc] = useState<string>();
   const goBack = useCallback(() => history.back(), []);
 
+  const DEFAULT_ACTIONS = useMemo(
+    () => [
+      <EuiButtonEmpty iconType="arrowLeft" flush="both" onClick={goBack}>
+        {NOT_FOUND_GO_BACK}
+      </EuiButtonEmpty>,
+    ],
+    [goBack]
+  );
+
   useEffect(() => {
     const loadImage = async () => {
       const { default: imgSrc } = await import(
@@ -61,13 +70,7 @@ export const NotFoundPrompt = ({ actions }: NotFoundProps) => {
       icon={icon}
       title={<h2>{NOT_FOUND_TITLE}</h2>}
       body={NOT_FOUND_BODY}
-      actions={
-        actions ?? [
-          <EuiButtonEmpty iconType="arrowLeft" flush="both" onClick={goBack}>
-            {NOT_FOUND_GO_BACK}
-          </EuiButtonEmpty>,
-        ]
-      }
+      actions={actions ?? DEFAULT_ACTIONS}
     />
   );
 };
