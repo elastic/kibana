@@ -1761,7 +1761,7 @@ exports[`SessionsView renders correctly against snapshot 1`] = `
                               <div
                                 data-test-subj="security_solution:sessions_viewer:sessions_view"
                               >
-                                <SessionsViewerTGrid
+                                <SessionsViewerEventsViewer
                                   bulkActions={
                                     Object {
                                       "alertStatusActions": false,
@@ -3012,7 +3012,7 @@ exports[`SessionsView renders correctly against snapshot 1`] = `
                                       Source IP
                                     </div>
                                   </div>
-                                </SessionsViewerTGrid>
+                                </SessionsViewerEventsViewer>
                               </div>
                             </Memo(SessionsViewComponent)>
                           </Provider>

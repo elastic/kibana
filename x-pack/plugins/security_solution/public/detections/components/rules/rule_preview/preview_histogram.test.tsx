@@ -125,7 +125,6 @@ describe('PreviewHistogram', () => {
           />
         </TestProviders>
       );
-      // expect(await wrapper).toMatchSnapshot();
 
       expect(await wrapper.findByText('1 alert')).toBeTruthy();
       expect(await wrapper.findByText(ALL_VALUES_ZEROS_TITLE)).toBeTruthy();
