@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { EuiFlexGroupProps } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexGroupProps,
+  EuiFlexItem,
+  EuiLoadingLogo,
+  EuiSpacer,
+} from '@elastic/eui';
 import { isMobileAgentName } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -16,6 +22,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { ServiceOverviewCharts } from './service_overview_charts/service_overview_charts';
 import { ServiceOverviewMobileCharts } from './service_overview_charts/service_oveview_mobile_charts';
+import { isPending } from '../../../hooks/use_fetcher';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -24,7 +31,7 @@ import { ServiceOverviewMobileCharts } from './service_overview_charts/service_o
 export const chartHeight = 288;
 
 export function ServiceOverview() {
-  const { agentName, serviceName } = useApmServiceContext();
+  const { agentName, serviceName, serviceAgentStatus } = useApmServiceContext();
 
   const {
     query: { environment, rangeFrom, rangeTo },
@@ -54,6 +61,8 @@ export function ServiceOverview() {
     isSingleColumn,
   };
 
+  const isPendingServiceAgent = !agentName && isPending(serviceAgentStatus);
+
   return (
     <AnnotationsContextProvider
       serviceName={serviceName}
@@ -62,10 +71,21 @@ export function ServiceOverview() {
       end={end}
     >
       <ChartPointerEventContextProvider>
-        {isMobileAgent ? (
-          <ServiceOverviewMobileCharts {...serviceOverviewProps} />
+        {isPendingServiceAgent ? (
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="l" />
+              <EuiLoadingLogo logo="logoObservability" size="l" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ) : (
-          <ServiceOverviewCharts {...serviceOverviewProps} />
+          <>
+            {isMobileAgent ? (
+              <ServiceOverviewMobileCharts {...serviceOverviewProps} />
+            ) : (
+              <ServiceOverviewCharts {...serviceOverviewProps} />
+            )}
+          </>
         )}
       </ChartPointerEventContextProvider>
     </AnnotationsContextProvider>
