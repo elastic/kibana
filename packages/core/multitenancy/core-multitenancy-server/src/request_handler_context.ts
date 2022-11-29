@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-export type { MultitenancyConfig, TenantConfig, TenantCustomConfig } from './src/config_types';
-export type {
-  MultitenancyApi,
-  MultitenancyServiceSetup,
-  MultitenancyServiceStart,
-  TenantResolver,
-} from './src/contracts';
-export type { MultitenancyRequestHandlerContext } from './src/request_handler_context';
+/*
+ * @public
+ */
+export interface MultitenancyRequestHandlerContext {
+  /**
+   * Returns the tenantId associated with this request.
+   * Will throw if called for unauthenticated requests.
+   */
+  getTenantId(): string;
+}

@@ -11,6 +11,7 @@ import type {
   IScopedClusterClient,
   ElasticsearchRequestHandlerContext,
 } from '@kbn/core-elasticsearch-server';
+import type { MultitenancyRequestHandlerContext } from '@kbn/core-multitenancy-server';
 import type { InternalElasticsearchServiceStart } from './types';
 
 /**
@@ -22,12 +23,14 @@ export class CoreElasticsearchRouteHandlerContext implements ElasticsearchReques
 
   constructor(
     private readonly elasticsearchStart: InternalElasticsearchServiceStart,
+    private readonly multitenancyContext: MultitenancyRequestHandlerContext,
     private readonly request: KibanaRequest
   ) {}
 
   public get client() {
     if (this.#client == null) {
-      this.#client = this.elasticsearchStart.client.asScoped(this.request);
+      const tenantId = this.multitenancyContext.getTenantId();
+      this.#client = this.elasticsearchStart.getTenantClient(tenantId).asScoped(this.request);
     }
     return this.#client;
   }

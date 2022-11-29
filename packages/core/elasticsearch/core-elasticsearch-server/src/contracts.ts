@@ -105,6 +105,13 @@ export interface ElasticsearchServiceStart {
    * ```
    */
   readonly client: IClusterClient;
+
+  /**
+   * Returns a client bound to the specified tenant.
+   * Throws if the tenantId doesn't match any known tenant.
+   */
+  readonly getTenantClient: (tenantId: string) => IClusterClient;
+
   /**
    * Create application specific Elasticsearch cluster API client with customized config. See {@link IClusterClient}.
    *

@@ -6,13 +6,31 @@
  * Side Public License, v 1.
  */
 
-import { TenantConfig } from './types';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import { TenantConfig } from './config_types';
 
 /** @public **/
-export interface MultitenancyServiceSetup {
+export interface MultitenancyApi {
+  /** */
   getTenantIds(): string[];
+
+  /** */
   getTenantConfig(tenantId: string): TenantConfig;
+
+  /** */
+  getTenantIdFromRequest(request: KibanaRequest): string;
 }
 
 /** @public **/
-export type MultitenancyServiceStart = MultitenancyServiceSetup;
+export type MultitenancyServiceSetup = MultitenancyApi & {
+  registerTenantResolver(resolver: TenantResolver): void;
+};
+
+/** @public **/
+export type MultitenancyServiceStart = MultitenancyApi;
+
+/**
+ * Function returning the tenant bound to a given request.
+ * @public
+ **/
+export type TenantResolver = (request: KibanaRequest) => string | undefined;

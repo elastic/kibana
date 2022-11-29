@@ -290,6 +290,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     elasticsearch: {
       client: deps.elasticsearch.client,
       createClient: deps.elasticsearch.createClient,
+      getTenantClient: deps.elasticsearch.getTenantClient,
     },
     executionContext: deps.executionContext,
     http: {

@@ -12,3 +12,4 @@ export type {
   InternalMultitenancyServiceStart,
 } from './src/internal_contracts';
 export { MultitenancyService } from './src/multitenancy_service';
+export { CoreMultitenancyRequestHandlerContext } from './src/multitenancy_route_handler_context';

@@ -46,6 +46,7 @@ TYPES_DEPS = [
   "//packages/core/saved-objects/core-saved-objects-server:npm_module_types",
   "//packages/core/deprecations/core-deprecations-server:npm_module_types",
   "//packages/core/ui-settings/core-ui-settings-server:npm_module_types",
+  "//packages/core/multitenancy/core-multitenancy-server:npm_module_types",
 ]
 
 jsts_transpiler(

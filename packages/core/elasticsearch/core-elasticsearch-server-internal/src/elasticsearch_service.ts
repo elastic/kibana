@@ -23,6 +23,7 @@ import type {
   ElasticsearchClientConfig,
 } from '@kbn/core-elasticsearch-server';
 import { ClusterClient, AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
+import { InternalMultitenancyServiceSetup } from '@kbn/core-multitenancy-server-internal';
 
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
@@ -38,11 +39,13 @@ import { isValidConnection } from './is_valid_connection';
 import { isInlineScriptingEnabled } from './is_scripting_enabled';
 import { mergeConfig } from './merge_config';
 import { getClusterInfo$ } from './get_cluster_info';
+import { createTenantConfig } from './create_tenant_config';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
   http: InternalHttpServiceSetup;
   executionContext: InternalExecutionContextSetup;
+  multitenancy: InternalMultitenancyServiceSetup;
 }
 
 /** @internal */
@@ -59,6 +62,8 @@ export class ElasticsearchService
   private client?: ClusterClient;
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
   private agentManager: AgentManager;
+  private multitenancyApi?: InternalMultitenancyServiceSetup;
+  private readonly tenantClients: Map<string, ClusterClient> = new Map();
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
@@ -92,6 +97,7 @@ export class ElasticsearchService
 
     this.authHeaders = deps.http.authRequestHeaders;
     this.executionContextClient = deps.executionContext;
+    this.multitenancyApi = deps.multitenancy;
     this.client = this.createClusterClient('data', config);
 
     const esNodesCompatibility$ = pollEsNodesVersion({
@@ -158,6 +164,7 @@ export class ElasticsearchService
     return {
       client: this.client!,
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
+      getTenantClient: (tenantId) => this.getTenantClient(tenantId, config),
     };
   }
 
@@ -167,6 +174,25 @@ export class ElasticsearchService
     if (this.client) {
       await this.client.close();
     }
+  }
+
+  private getTenantClient(tenantId: string, baseConfig: ElasticsearchClientConfig): ClusterClient {
+    if (!this.tenantClients.has(tenantId)) {
+      const tenant = this.multitenancyApi!.getTenantConfig(tenantId);
+      const tenantClientConfig = createTenantConfig(tenant.config.elasticsearch, baseConfig);
+      const tenantClient = new ClusterClient({
+        config: tenantClientConfig,
+        logger: this.coreContext.logger.get('elasticsearch'),
+        type: `tenant-${tenantId}`,
+        authHeaders: this.authHeaders,
+        getExecutionContext: () => this.executionContextClient?.getAsHeader(),
+        getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
+        agentFactoryProvider: this.agentManager,
+        kibanaVersion: this.kibanaVersion,
+      });
+      this.tenantClients.set(tenantId, tenantClient);
+    }
+    return this.tenantClients.get(tenantId)!;
   }
 
   private createClusterClient(

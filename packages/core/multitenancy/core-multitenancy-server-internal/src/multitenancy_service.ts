@@ -10,7 +10,8 @@ import { firstValueFrom } from 'rxjs';
 import type { IConfigService } from '@kbn/config';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import type { MultitenancyConfig } from '@kbn/core-multitenancy-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { MultitenancyConfig, TenantResolver } from '@kbn/core-multitenancy-server';
 import { multitenancyConfig } from './multitenancy_config';
 import type {
   InternalMultitenancyServiceStart,
@@ -25,8 +26,10 @@ const configPath = multitenancyConfig.path;
 export class MultitenancyService {
   private readonly configService: IConfigService;
   private readonly log: Logger;
+
   private config?: MultitenancyConfig;
   private contract?: InternalMultitenancyServiceSetup;
+  private resolver?: TenantResolver;
 
   constructor(core: CoreContext) {
     this.configService = core.configService;
@@ -35,8 +38,6 @@ export class MultitenancyService {
 
   public async setup(): Promise<InternalMultitenancyServiceSetup> {
     this.config = await firstValueFrom(this.configService.atPath<MultitenancyConfig>(configPath));
-
-    this.log.warn('**** multitenancy config: ' + JSON.stringify(this.config));
 
     this.contract = {
       getTenantIds: () => {
@@ -48,6 +49,18 @@ export class MultitenancyService {
           throw new Error(`No tenant for id ${tenantId}`);
         }
         return tenant;
+      },
+      getTenantIdFromRequest: (request: KibanaRequest) => {
+        if (!this.resolver) {
+          throw new Error('No resolver registered');
+        }
+        return this.resolver(request);
+      },
+      registerTenantResolver: (resolver: TenantResolver) => {
+        if (this.resolver) {
+          throw new Error('Cannot register tenant resolver twice');
+        }
+        this.resolver = resolver;
       },
     };
     return this.contract;
