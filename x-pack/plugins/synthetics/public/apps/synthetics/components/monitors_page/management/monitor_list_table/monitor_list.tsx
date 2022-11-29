@@ -98,7 +98,7 @@ export const MonitorList = ({
   };
 
   const recordRangeLabel = labels.getRecordRangeLabel({
-    rangeStart: pageSize * pageIndex + 1,
+    rangeStart: total === 0 ? 0 : pageSize * pageIndex + 1,
     rangeEnd: pageSize * pageIndex + pageSize,
     total,
   });
