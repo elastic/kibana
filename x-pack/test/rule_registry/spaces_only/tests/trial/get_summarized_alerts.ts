@@ -180,7 +180,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
       const getState = (
         shouldTriggerAlert: boolean,
         alerts: Record<string, TrackedLifecycleAlertState>
-      ) => ({ wrapped: { shouldTriggerAlert }, trackedAlerts: alerts });
+      ) => ({ wrapped: { shouldTriggerAlert }, trackedAlerts: alerts, trackedAlertsRecovered: {} });
 
       // Execute the rule the first time - this creates a new alert
       const preExecution1Start = new Date();
