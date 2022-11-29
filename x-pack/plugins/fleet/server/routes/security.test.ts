@@ -15,7 +15,12 @@ import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from '../services';
 import type { FleetRequestHandlerContext } from '../types';
 
-import { deserializeAuthzConfig, makeRouterWithFleetAuthz, serializeAuthzConfig } from './security';
+import {
+  buildPathsFromRequiredAuthz,
+  deserializeAuthzConfig,
+  makeRouterWithFleetAuthz,
+  serializeAuthzConfig,
+} from './security';
 
 function getCheckPrivilegesMockedImplementation(kibanaRoles: string[]) {
   return (checkPrivileges: CheckPrivilegesPayload) => {
@@ -272,5 +277,41 @@ describe('deserializeAuthzConfig', () => {
         },
       },
     });
+  });
+});
+
+describe('buildPathsFromRequiredAuthz', () => {
+  it('should build paths from given authz', () => {
+    const res = buildPathsFromRequiredAuthz({
+      fleet: {
+        readEnrollmentTokens: true,
+        setup: true,
+      },
+      integrations: {
+        readPackageInfo: true,
+        removePackages: true,
+      },
+      packagePrivileges: {
+        endpoint: {
+          actions: {
+            readPolicyManagement: {
+              executePackageAction: true,
+            },
+            readBlocklist: {
+              executePackageAction: true,
+            },
+          },
+        },
+      },
+    });
+
+    expect(res).toEqual([
+      'fleet.readEnrollmentTokens',
+      'fleet.setup',
+      'integrations.readPackageInfo',
+      'integrations.removePackages',
+      'packagePrivileges.endpoint.actions.readPolicyManagement.executePackageAction',
+      'packagePrivileges.endpoint.actions.readBlocklist.executePackageAction',
+    ]);
   });
 });
