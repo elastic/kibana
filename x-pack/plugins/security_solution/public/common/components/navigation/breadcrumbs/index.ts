@@ -13,6 +13,7 @@ import type { StartServices } from '../../../../types';
 import { getTrailingBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../hosts/pages/details/utils';
 import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/pages/details';
 import { getTrailingBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
+import { getTrailingBreadcrumbs as geExceptionsBreadcrumbs } from '../../../../exceptions/utils/pages.utils';
 import { getTrailingBreadcrumbs as getUsersBreadcrumbs } from '../../../../users/pages/details/utils';
 import { getTrailingBreadcrumbs as getKubernetesBreadcrumbs } from '../../../../kubernetes/pages/utils/breadcrumbs';
 import { getTrailingBreadcrumbs as getAlertDetailBreadcrumbs } from '../../../../detections/pages/alert_details/utils/breadcrumbs';
@@ -131,6 +132,8 @@ const getTrailingBreadcrumbsForRoutes = (
     return getDetectionRulesBreadcrumbs(spyState, getSecuritySolutionUrl);
   }
 
+  if (isExceptionRoutes(spyState)) return geExceptionsBreadcrumbs(spyState, getSecuritySolutionUrl);
+
   if (isKubernetesRoutes(spyState)) {
     return getKubernetesBreadcrumbs(spyState, getSecuritySolutionUrl);
   }
@@ -161,6 +164,9 @@ const isAlertRoutes = (spyState: RouteSpyState): spyState is AlertDetailRouteSpy
 const isRulesRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
   spyState.pageName === SecurityPageName.rules ||
   spyState.pageName === SecurityPageName.rulesCreate;
+
+const isExceptionRoutes = (spyState: RouteSpyState) =>
+  spyState.pageName === SecurityPageName.exceptions;
 
 const isCloudSecurityPostureManagedRoutes = (spyState: RouteSpyState) =>
   spyState.pageName === SecurityPageName.cloudSecurityPostureRules;

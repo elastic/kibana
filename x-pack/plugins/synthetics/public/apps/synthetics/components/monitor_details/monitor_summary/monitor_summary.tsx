@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { LoadWhenInView } from '@kbn/observability-plugin/public';
 
-import { useEarliestStartDate } from '../hooks/use_earliest_start_data';
+import { useEarliestStartDate } from '../hooks/use_earliest_start_date';
 import { MonitorErrorSparklines } from './monitor_error_sparklines';
 import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
 import { DurationSparklines } from './duration_sparklines';
@@ -31,13 +31,16 @@ import { AvailabilitySparklines } from './availability_sparklines';
 import { LastTestRun } from './last_test_run';
 import { LAST_10_TEST_RUNS, TestRunsTable } from './test_runs_table';
 import { MonitorErrorsCount } from './monitor_errors_count';
+import { useAbsoluteDate } from '../../../hooks';
 
 export const MonitorSummary = () => {
-  const { from, loading } = useEarliestStartDate();
-  const to = 'now';
+  const { from: fromRelative, loading } = useEarliestStartDate();
+  const toRelative = 'now';
+
+  const { from, to } = useAbsoluteDate({ from: fromRelative, to: toRelative });
 
   if (loading) {
-    return <EuiLoadingSpinner size="xl" />;
+    return <LoadingState />;
   }
 
   const dateLabel = from === 'now-30d/d' ? LAST_30_DAYS_LABEL : TO_DATE_LABEL;
@@ -129,6 +132,16 @@ export const MonitorSummary = () => {
     </>
   );
 };
+
+function LoadingState({ height }: { height?: string }) {
+  return (
+    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: height ?? '100%' }}>
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size="xl" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
 
 const SUMMARY_LABEL = i18n.translate('xpack.synthetics.detailsPanel.summary', {
   defaultMessage: 'Summary',

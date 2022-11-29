@@ -248,6 +248,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiFlexGroup
+        className="dscDiscoverGrid__cellPopover"
         direction="column"
         gutterSize="none"
         justifyContent="flexEnd"
@@ -478,6 +479,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiFlexGroup
+        className="dscDiscoverGrid__cellPopover"
         direction="column"
         gutterSize="none"
         justifyContent="flexEnd"
@@ -640,6 +642,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiFlexGroup
+        className="dscDiscoverGrid__cellPopover"
         direction="column"
         gutterSize="none"
         justifyContent="flexEnd"

@@ -103,7 +103,7 @@ Object {
                       for="generated-id"
                       id="generated-id-label"
                     >
-                      Description
+                      Description (optional)
                     </label>
                   </div>
                   <div
@@ -142,7 +142,7 @@ Object {
               </span>
             </button>
             <button
-              class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
               data-test-subj="editModalSaveBtn"
               form="modalForm_generated-id"
               type="submit"

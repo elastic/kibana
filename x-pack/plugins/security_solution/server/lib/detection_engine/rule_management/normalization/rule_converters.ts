@@ -467,10 +467,10 @@ export const convertPatchAPIToInternalSchema = (
       : existingRule.actions,
     throttle: nextParams.throttle
       ? transformToAlertThrottle(nextParams.throttle)
-      : existingRule.throttle,
+      : existingRule.throttle ?? null,
     notifyWhen: nextParams.throttle
       ? transformToNotifyWhen(nextParams.throttle)
-      : existingRule.notifyWhen,
+      : existingRule.notifyWhen ?? null,
   };
 };
 

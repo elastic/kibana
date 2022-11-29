@@ -33,6 +33,7 @@ interface ListExceptionItemsProps {
   pagination: Pagination;
   emptyViewerTitle?: string;
   emptyViewerBody?: string;
+  emptyViewerButtonText?: string;
   viewerStatus: ViewerStatus | '';
   ruleReferences: RuleReferences;
   hideUtility?: boolean;
@@ -50,6 +51,7 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
   pagination,
   emptyViewerTitle,
   emptyViewerBody,
+  emptyViewerButtonText,
   viewerStatus,
   ruleReferences,
   hideUtility = false,
@@ -68,6 +70,7 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
         exceptions={exceptions}
         emptyViewerTitle={emptyViewerTitle}
         emptyViewerBody={emptyViewerBody}
+        emptyViewerButtonText={emptyViewerButtonText}
         pagination={pagination}
         lastUpdated={lastUpdated}
         editActionLabel={i18n.EXCEPTION_ITEM_CARD_EDIT_LABEL}

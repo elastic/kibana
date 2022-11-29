@@ -47,6 +47,8 @@ function hasPermission(
  * @param fleetAuthz
  * @param userRoles
  */
+
+// eslint-disable-next-line complexity
 export const calculateEndpointAuthz = (
   licenseService: LicenseService,
   fleetAuthz: FleetAuthz,
@@ -182,6 +184,7 @@ export const calculateEndpointAuthz = (
     canReadPolicyManagement,
     canWriteActionsLogManagement,
     canReadActionsLogManagement: canReadActionsLogManagement && isEnterpriseLicense,
+    canAccessEndpointActionsLogManagement: canReadActionsLogManagement && isPlatinumPlusLicense,
     // Response Actions
     canIsolateHost: canIsolateHost && isPlatinumPlusLicense,
     canUnIsolateHost: canIsolateHost,
@@ -208,6 +211,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
   return {
     ...defaultEndpointPermissions(),
     canAccessFleet: false,
+    canAccessEndpointActionsLogManagement: false,
     canAccessEndpointManagement: false,
     canCreateArtifactsByPolicy: false,
     canWriteEndpointList: false,

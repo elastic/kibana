@@ -12,6 +12,8 @@ import {
   ProfilingRequestHandlerContext,
 } from '../types';
 
+import { registerCacheExecutablesRoute, registerCacheStackFramesRoute } from './cache';
+
 import { registerFlameChartSearchRoute } from './flamechart';
 import { registerTopNFunctionsSearchRoute } from './functions';
 
@@ -33,6 +35,8 @@ export interface RouteRegisterParameters {
 }
 
 export function registerRoutes(params: RouteRegisterParameters) {
+  registerCacheExecutablesRoute(params);
+  registerCacheStackFramesRoute(params);
   registerFlameChartSearchRoute(params);
   registerTopNFunctionsSearchRoute(params);
   registerTraceEventsTopNContainersSearchRoute(params);
