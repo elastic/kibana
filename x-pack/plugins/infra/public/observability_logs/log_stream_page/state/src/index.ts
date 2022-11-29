@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export * from './provider';
 export * from './state_machine';
 export * from './types';

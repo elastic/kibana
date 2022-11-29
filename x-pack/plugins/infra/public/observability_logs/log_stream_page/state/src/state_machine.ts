@@ -15,15 +15,11 @@ import type {
   LogStreamPageTypestate,
 } from './types';
 
-export const createLogStreamPageStateMachine = ({
-  logViewStateNotifications,
-}: {
-  logViewStateNotifications: LogViewNotificationChannel;
-}) =>
+export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPageContext = {}) =>
   /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKAXATmAhgLYAK+M2+WYAdAK4B2Alk1o-sowF6QDEa+EZlAAy6AGqMwAdwo4qEANoAGALqJQAB1SxGrVPXUgAHogC0ARmoA2ACwAOGzYCsATgDMNt3adWA7L4AaEABPRAAmP2obMPslOzCw3zdfcysAXzSgtExcAhIyMAoqOiYWNg5uCD5UASFRKAlpADF8RmRIZTUkEC0dPQNukwRTMPMw6zc3c1SE1yclGyDQhDcrK2srFycnG18I1aVUjKz0bDwiUnIsShoGZl1yrl5+QXoRcUkZWgBjb7BIDqqQy9B76QxDFK+ahKfzbSZuOLmbZLRBjJRRMIeLzmOIuHG+GzHEDZM55S6Fa7FO5ldhPKovOofaQYH5-AGKcxdTTaUEDUAQxzQmExGzuRYhRBOSbUVwwqwLcx4ra+Ikk3IXApFGgMt71RpSaq1XVMqQtNqArk9Hn9cHhNzjOxKHy+HxKeUubxuFEIeYuai+Ozy7wxJQuaKEzLE07q-JXG7UHXvBqfQ2vJP6lm-f4QC3A62MMGDRCeP02N1hPEVpQxVLeg7UdyjXzysILVyq6PnWMU+OJvUpvsmzNsnMcy0gm1FhA2NbUSauWypMvbZEShBWLzQ-Fh5xOJFIjs5LvkrUJmpp-vNVrtennxnJ5nXOS57oTgt84xmSy2BxOXwuJQ3TsBEHDCb0pXGPcIisOwCSsJwIjCQ9SQ1ONigAC3wWBLykABJehBD+WASnuVhaUqHg8D+RgADdIAAQWQZBSBwIgwCoHBYE6PM+nfW0EHMe0bDnHFHUVf8XF8atvWcP0K3sFxFLEtwwwySN6FQHN4G6NVj01SkwB43l+JGeUJimGYwjmBZvQsdY5R8NYnWSbYkMjXSyX0+NqQecjICMyd+WLMC13MaJqCRQC4m8PF4IWZCYxPAyzyNdNPgCvip0SGUdjWQNvH8LYbLXLw7DnFwrDGPxMQQqyEr0tDtTvY0H1Na9-NffNCyCn1qDsMZRX2Pw8Ri714L9JICUOHFog9erPMa6hMOwk18MIuAMu6z8BME4T7H2cwXRiRC602ah5Ng+ZYKdBx5tQnsMKwnC1sYIiSJpCoOu5XitqGaZ4iieIN0OhDoisELlmcMr-3sV1gydFV3M7BaHpoZbnoI164GoUjHkqTaPz+1zzvsUrFS2MJAxkpxobDbwgwQhG7u7U9CEYWAdBa-UXqIgn+ME1JztDBItiu50xtcf1kmSSFDqUSY1LSIA */
   createMachine<LogStreamPageContext, LogStreamPageEvent, LogStreamPageTypestate>(
     {
-      context: {},
+      context: initialContext,
       predictableActionArguments: true,
       invoke: {
         src: 'logViewNotifications',
@@ -111,9 +107,6 @@ export const createLogStreamPageStateMachine = ({
             : {}
         ),
       },
-      services: {
-        logViewNotifications: () => logViewStateNotifications.createService(),
-      },
       guards: {
         hasLogViewIndices: (_context, event) =>
           event.type === 'loadingLogViewSucceeded' &&
@@ -121,3 +114,14 @@ export const createLogStreamPageStateMachine = ({
       },
     }
   );
+
+export const createLogStreamPageStateMachine = ({
+  logViewStateNotifications,
+}: {
+  logViewStateNotifications: LogViewNotificationChannel;
+}) =>
+  createPureLogStreamPageStateMachine().withConfig({
+    services: {
+      logViewNotifications: () => logViewStateNotifications.createService(),
+    },
+  });

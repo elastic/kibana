@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export type { LogStreamPageContext, LogStreamPageEvent } from './src';
-
-export { createLogStreamPageStateMachine } from './src';
+export {
+  createLogStreamPageStateMachine,
+  LogStreamPageStateProvider,
+  useLogStreamPageState,
+  useLogStreamPageStateContext,
+  type LogStreamPageContext,
+  type LogStreamPageEvent,
+} from './src';
