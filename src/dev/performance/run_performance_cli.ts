@@ -83,8 +83,6 @@ run(
     const journeys = await Fsp.readdir(journeyBasePath);
     log.info(`Found ${journeys.length} journeys to run`);
 
-    log.info(`Setup environent`);
-
     for (const journey of journeys) {
       await startEs();
       await runWarmup(journey);
