@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  IngestPipelineProcessor,
+  IngestPutPipelineRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import { PauseMlInferencePipelineResponse } from '../../../../../../common/types/pipelines';
@@ -18,7 +21,7 @@ export const pauseInferencePipeline = async (
   pause: boolean,
   client: ElasticsearchClient
 ) => {
-  const response: PauseMlInferencePipelineResponse = {};
+  const response: PauseMlInferencePipelineResponse = { paused: undefined, pipelineName };
   const mlInferencePipelineId = getInferencePipelineNameFromIndexName(indexName);
 
   const mlInferencePipelineResponse = await client.ingest.getPipeline({
@@ -29,37 +32,51 @@ export const pauseInferencePipeline = async (
 
   if (!mlInferencePipeline?.processors?.length) return response;
 
-  const pipelineProcessor = mlInferencePipeline.processors.find(
+  const pipelineProcessorContainer = mlInferencePipeline.processors.find(
     (p) => !(p.pipeline !== undefined && p.pipeline.name === pipelineName)
   );
 
-  if (pipelineProcessor?.pipeline?.if) {
-    const currentIf = pipelineProcessor.pipeline.if;
+  if (!pipelineProcessorContainer?.pipeline) return response;
+  const pipelineProcessor = pipelineProcessorContainer.pipeline;
 
-    if (pause) {
-      pipelineProcessor.pipeline.if = `false && ${currentIf}`;
-    } else if (pipelineProcessor.pipeline.if.startsWith('false &&')) {
-      pipelineProcessor.pipeline.if = currentIf.replace(/^false && /, '');
-    } else if (pipelineProcessor.pipeline.if === 'false') {
-      delete pipelineProcessor.pipeline.if;
+  const currentIf = pipelineProcessor.if;
+  const paused = pipelineProcessorIsPaused(pipelineProcessor);
+
+  if (pause) {
+    if (paused) {
+      response.paused = true; // it's already paused, no need to update anything
+    } else if (!currentIf) {
+      pipelineProcessor.if = 'false'; // no if key, so just set it
     } else {
-      return response;
+      pipelineProcessor.if = `false && ${currentIf}`; // prepend the if key with false &&
     }
-  } else if (pause && pipelineProcessor?.pipeline) {
-    pipelineProcessor.pipeline.if = 'false';
+  } else if (!paused || !currentIf) {
+    response.paused = false;
+  } else if (currentIf === 'false') {
+    delete pipelineProcessor.if; // the if key is just false, so remove it entirely
   } else {
-    return response;
+    // the if key has more conditionals that need to be preserved, so remove the false && prefix
+    pipelineProcessor.if = currentIf.replace(/^false && /, '');
   }
 
-  const updatedPipeline: IngestPutPipelineRequest = {
-    ...mlInferencePipeline,
-    id: mlInferencePipelineId,
-  };
+  // only update the pipelineProcessor if it needs updating
+  if (response.paused === undefined) {
+    const updatedPipeline: IngestPutPipelineRequest = {
+      ...mlInferencePipeline,
+      id: mlInferencePipelineId,
+    };
 
-  const updateResponse = await client.ingest.putPipeline(updatedPipeline);
-  if (updateResponse.acknowledged === true) {
-    response.updated = mlInferencePipelineId;
+    const updateResponse = await client.ingest.putPipeline(updatedPipeline);
+    if (!updateResponse.acknowledged) {
+      throw Error; // need to throw something specific
+    }
   }
+
+  response.paused = pipelineProcessorIsPaused(pipelineProcessor);
 
   return response;
+};
+
+export const pipelineProcessorIsPaused = (pipelineProcessor: IngestPipelineProcessor): boolean => {
+  return !!pipelineProcessor?.if?.startsWith('false');
 };

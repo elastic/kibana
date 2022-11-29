@@ -11,6 +11,7 @@ export interface InferencePipeline {
   modelId: string | undefined;
   modelState: TrainedModelState;
   modelStateReason?: string;
+  // paused: boolean;
   pipelineName: string;
   pipelineReferences: string[];
   types: string[];
@@ -67,10 +68,10 @@ export interface DeleteMlInferencePipelineResponse {
 
 /**
  * Response for pausing and unpausing sub-pipeline within @ml-inference pipeline.
- * If sub-pipeline was updated successfully, 'paused' field contains its name.
  */
 export interface PauseMlInferencePipelineResponse {
-  updated?: string;
+  paused: boolean | undefined;
+  pipelineName: string;
 }
 
 export interface CreateMlInferencePipelineParameters {

@@ -96,6 +96,7 @@ export const fetchPipelineProcessorInferenceData = async (
         pipelineProcessorData.push({
           modelId: trainedModelName,
           modelState: TrainedModelState.NotDeployed,
+          // paused: false,
           pipelineName: pipelineProcessorName,
           pipelineReferences: pipelineProcessorsMap?.[pipelineProcessorName] ?? [],
           trainedModelName,
@@ -132,6 +133,7 @@ export const getMlModelConfigsForModelIds = async (
       modelConfigs[trainedModelName] = {
         modelId: modelNamesInCurrentSpace.includes(trainedModelName) ? trainedModelName : undefined,
         modelState: TrainedModelState.NotDeployed,
+        // paused: false,
         pipelineName: '',
         pipelineReferences: [],
         trainedModelName,
