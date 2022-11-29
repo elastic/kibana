@@ -80,6 +80,7 @@ import {
   config as pluginsConfig,
 } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
+import { MultitenancyService, multitenancyConfig } from '@kbn/core-multitenancy-server-internal';
 import { elasticApmConfig } from './root/elastic_config';
 
 const coreId = Symbol('core');
@@ -125,6 +126,7 @@ export class Server {
   private readonly executionContext: ExecutionContextService;
   private readonly prebootService: PrebootService;
   private readonly docLinks: DocLinksService;
+  private readonly multitenancy: MultitenancyService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -148,6 +150,7 @@ export class Server {
     this.configService = new ConfigService(rawConfigProvider, env, this.logger);
 
     const core = { coreId, configService: this.configService, env, logger: this.logger };
+    this.multitenancy = new MultitenancyService(core);
     this.analytics = new AnalyticsService(core);
     this.context = new ContextService(core);
     this.http = new HttpService(core);
@@ -184,6 +187,8 @@ export class Server {
     const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
 
     const analyticsPreboot = this.analytics.preboot();
+
+    // TODO: add preboot to multitenancy? shouldn't be needed for MKI
 
     const environmentPreboot = await this.environment.preboot({ analytics: analyticsPreboot });
     const nodePreboot = await this.node.preboot({ loggingSystem: this.loggingSystem });
@@ -253,6 +258,8 @@ export class Server {
     const setupTransaction = apm.startTransaction('server-setup', 'kibana-platform');
 
     const analyticsSetup = this.analytics.setup();
+
+    const multitenancySetup = await this.multitenancy.setup();
 
     this.registerKibanaStartedEventType(analyticsSetup);
 
@@ -356,6 +363,7 @@ export class Server {
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
+      multitenancy: multitenancySetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -374,6 +382,7 @@ export class Server {
     const startStartUptime = performance.now();
     const startTransaction = apm.startTransaction('server-start', 'kibana-platform');
 
+    const multitenancyStart = await this.multitenancy.start();
     const analyticsStart = this.analytics.start();
     const executionContextStart = this.executionContext.start();
     const docLinkStart = this.docLinks.start();
@@ -413,6 +422,7 @@ export class Server {
       uiSettings: uiSettingsStart,
       coreUsageData: coreUsageDataStart,
       deprecations: deprecationsStart,
+      multitenancy: multitenancyStart,
     };
 
     await this.plugins.start(this.coreStart);
@@ -474,6 +484,7 @@ export class Server {
       savedObjectsMigrationConfig,
       statusConfig,
       uiSettingsConfig,
+      multitenancyConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);

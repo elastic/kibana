@@ -61,6 +61,7 @@ TYPES_DEPS = [
   "//packages/core/status/core-status-server-internal:npm_module_types",
   "//packages/core/usage-data/core-usage-data-base-server-internal:npm_module_types",
   "//packages/core/usage-data/core-usage-data-server:npm_module_types",
+  "//packages/core/multitenancy/core-multitenancy-server-internal:npm_module_types",
 ]
 
 jsts_transpiler(

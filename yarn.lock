@@ -3198,6 +3198,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-multitenancy-server-internal@link:bazel-bin/packages/core/multitenancy/core-multitenancy-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-multitenancy-server@link:bazel-bin/packages/core/multitenancy/core-multitenancy-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-node-server-internal@link:bazel-bin/packages/core/node/core-node-server-internal":
   version "0.0.0"
   uid ""

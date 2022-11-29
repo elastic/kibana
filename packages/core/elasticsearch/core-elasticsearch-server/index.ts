@@ -30,5 +30,10 @@ export type {
   ElasticsearchServiceStart,
   ElasticsearchServiceSetup,
 } from './src/contracts';
-export type { IElasticsearchConfig, ElasticsearchSslConfig } from './src/elasticsearch_config';
+export type {
+  IElasticsearchConfig,
+  TenantElasticsearchConfig,
+  GlobalElasticsearchConfig,
+  ElasticsearchSslConfig,
+} from './src/elasticsearch_config';
 export type { ElasticsearchRequestHandlerContext } from './src/request_handler_context';

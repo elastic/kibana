@@ -22,6 +22,7 @@ import { SavedObjectsServiceSetup } from '@kbn/core-saved-objects-server';
 import { StatusServiceSetup } from '@kbn/core-status-server';
 import { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { CoreUsageDataSetup } from '@kbn/core-usage-data-server';
+import type { MultitenancyServiceSetup } from '@kbn/core-multitenancy-server';
 import { CoreStart } from './core_start';
 
 /**
@@ -67,6 +68,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
   /** @internal {@link CoreUsageDataSetup} */
   coreUsageData: CoreUsageDataSetup;
+  /** {@link MultitenancyServiceSetup} */
+  multitenancy: MultitenancyServiceSetup;
 }
 
 /**

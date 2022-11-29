@@ -11,7 +11,50 @@ import type { Duration } from 'moment';
 /**
  * @public
  */
-export interface IElasticsearchConfig {
+export type IElasticsearchConfig = TenantElasticsearchConfig & GlobalElasticsearchConfig;
+
+/**
+ * @public
+ */
+export interface TenantElasticsearchConfig {
+  /**
+   * Hosts that the client will connect to. If sniffing is enabled, this list will
+   * be used as seeds to discover the rest of your cluster.
+   */
+  readonly hosts: string[];
+  /**
+   * If Elasticsearch is protected with basic authentication, this setting provides
+   * the username that the Kibana server uses to perform its administrative functions.
+   * Cannot be used in conjunction with serviceAccountToken.
+   */
+  readonly username?: string;
+
+  /**
+   * If Elasticsearch is protected with basic authentication, this setting provides
+   * the password that the Kibana server uses to perform its administrative functions.
+   */
+  readonly password?: string;
+
+  /**
+   * If Elasticsearch security features are enabled, this setting provides the service account
+   * token that the Kibana server users to perform its administrative functions.
+   *
+   * This is an alternative to specifying a username and password.
+   */
+  readonly serviceAccountToken?: string;
+
+  /**
+   * Header names and values to send to Elasticsearch with every request. These
+   * headers cannot be overwritten by client-side headers and aren't affected by
+   * `requestHeadersWhitelist` configuration.
+   */
+  readonly customHeaders: Record<string, string>;
+}
+
+/**
+ * @public
+ */
+export interface GlobalElasticsearchConfig {
   /**
    * The interval between health check requests Kibana sends to the Elasticsearch.
    */
@@ -46,12 +89,6 @@ export interface IElasticsearchConfig {
    * Whether to use compression for communications with elasticsearch.
    */
   readonly compression: boolean;
-
-  /**
-   * Hosts that the client will connect to. If sniffing is enabled, this list will
-   * be used as seeds to discover the rest of your cluster.
-   */
-  readonly hosts: string[];
 
   /**
    * List of Kibana client-side headers to send to Elasticsearch when request
@@ -92,34 +129,6 @@ export interface IElasticsearchConfig {
    * of nodes when a connection dies.
    */
   readonly sniffOnConnectionFault: boolean;
-
-  /**
-   * If Elasticsearch is protected with basic authentication, this setting provides
-   * the username that the Kibana server uses to perform its administrative functions.
-   * Cannot be used in conjunction with serviceAccountToken.
-   */
-  readonly username?: string;
-
-  /**
-   * If Elasticsearch is protected with basic authentication, this setting provides
-   * the password that the Kibana server uses to perform its administrative functions.
-   */
-  readonly password?: string;
-
-  /**
-   * If Elasticsearch security features are enabled, this setting provides the service account
-   * token that the Kibana server users to perform its administrative functions.
-   *
-   * This is an alternative to specifying a username and password.
-   */
-  readonly serviceAccountToken?: string;
-
-  /**
-   * Header names and values to send to Elasticsearch with every request. These
-   * headers cannot be overwritten by client-side headers and aren't affected by
-   * `requestHeadersWhitelist` configuration.
-   */
-  readonly customHeaders: Record<string, string>;
 
   /**
    * @internal

@@ -16,6 +16,7 @@ import { MetricsServiceStart } from '@kbn/core-metrics-server';
 import { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import { CoreUsageDataStart } from '@kbn/core-usage-data-server';
+import type { MultitenancyServiceStart } from '@kbn/core-multitenancy-server';
 
 /**
  * Context passed to the plugins `start` method.
@@ -43,4 +44,6 @@ export interface CoreStart {
   uiSettings: UiSettingsServiceStart;
   /** @internal {@link CoreUsageDataStart} */
   coreUsageData: CoreUsageDataStart;
+  /** {@link MultitenancyServiceStart} */
+  multitenancy: MultitenancyServiceStart;
 }

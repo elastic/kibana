@@ -258,6 +258,8 @@
     "@kbn/core-metrics-server-mocks": "link:bazel-bin/packages/core/metrics/core-metrics-server-mocks",
     "@kbn/core-mount-utils-browser": "link:bazel-bin/packages/core/mount-utils/core-mount-utils-browser",
     "@kbn/core-mount-utils-browser-internal": "link:bazel-bin/packages/core/mount-utils/core-mount-utils-browser-internal",
+    "@kbn/core-multitenancy-server": "link:bazel-bin/packages/core/multitenancy/core-multitenancy-server",
+    "@kbn/core-multitenancy-server-internal": "link:bazel-bin/packages/core/multitenancy/core-multitenancy-server-internal",
     "@kbn/core-node-server": "link:bazel-bin/packages/core/node/core-node-server",
     "@kbn/core-node-server-internal": "link:bazel-bin/packages/core/node/core-node-server-internal",
     "@kbn/core-node-server-mocks": "link:bazel-bin/packages/core/node/core-node-server-mocks",

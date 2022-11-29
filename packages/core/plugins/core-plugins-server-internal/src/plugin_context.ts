@@ -256,6 +256,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     coreUsageData: {
       registerUsageCounter: deps.coreUsageData.registerUsageCounter,
     },
+    multitenancy: deps.multitenancy,
   };
 }
 
@@ -313,5 +314,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       asScopedToClient: deps.uiSettings.asScopedToClient,
     },
     coreUsageData: deps.coreUsageData,
+    multitenancy: deps.multitenancy,
   };
 }
