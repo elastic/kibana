@@ -41,13 +41,15 @@ export function useGetReplacementCustomIntegrations() {
   return useAsync(customIntegrations.getReplacementCustomIntegrations, []);
 }
 
-export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
-  return useRequest<GetCategoriesResponse>({
-    path: epmRouteService.getCategoriesPath(),
-    method: 'get',
-    query,
-  });
-};
+export function useGetCategoriesQuery(query: GetCategoriesRequest['query'] = {}) {
+  return useQuery(['categories'], () =>
+    sendRequest<GetCategoriesResponse>({
+      path: epmRouteService.getCategoriesPath(),
+      method: 'get',
+      query,
+    })
+  );
+}
 
 export const sendGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
   return sendRequest<GetCategoriesResponse>({
