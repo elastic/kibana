@@ -16,7 +16,7 @@ import {
   getRuleMock,
 } from '../../../routes/__mocks__/request_responses';
 
-const notDefeaultExceptionList: List = {
+const notDefaultExceptionList: List = {
   id: '1',
   list_id: '2345',
   namespace_type: 'single',
@@ -48,7 +48,7 @@ describe('isValidExceptionList', () => {
   it('returns true if there default exceptions list', async () => {
     const result = await isValidExceptionList({
       ruleId: '1',
-      exceptionsList: [notDefeaultExceptionList],
+      exceptionsList: [notDefaultExceptionList],
       rulesClient: clients.rulesClient,
     });
     expect(result).toEqual(true);

@@ -9,7 +9,7 @@ import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { getRulesIndexesWithDuplicatedDefaultExceptionsList } from './get_rules_indexes_with_duplicated_default_exceptions_list';
 
-const notDefeaultExceptionList: List = {
+const notDefaultExceptionList: List = {
   id: '1',
   list_id: '2345',
   namespace_type: 'single',
@@ -31,7 +31,7 @@ describe('getRulesIndexesWithDuplicatedDefaultExceptionsList.test', () => {
   it('returns empty array if there no default exceptions list duplicated', () => {
     const result = getRulesIndexesWithDuplicatedDefaultExceptionsList([
       {
-        exceptions_list: [notDefeaultExceptionList],
+        exceptions_list: [notDefaultExceptionList],
       },
       {
         exceptions_list: [defaultExceptionList],
@@ -46,7 +46,7 @@ describe('getRulesIndexesWithDuplicatedDefaultExceptionsList.test', () => {
         exceptions_list: [defaultExceptionList],
       },
       {
-        exceptions_list: [notDefeaultExceptionList],
+        exceptions_list: [notDefaultExceptionList],
       },
       {
         exceptions_list: [defaultExceptionList],
