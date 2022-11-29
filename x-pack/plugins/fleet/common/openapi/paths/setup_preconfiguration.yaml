@@ -1,6 +1,6 @@
 put:
   summary: Preconfiguration
-  operationId: get-settings
+  operationId: put-preconfiguration
   tags: []
   responses:
     '200':
