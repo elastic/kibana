@@ -2,9 +2,8 @@
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./target/types",
-    "emit": true,
-    "sourceMap": true,
     "declaration": true,
+    "emitDeclarationOnly": true,
   },
   "include": [
     ".storybook/**/*",
