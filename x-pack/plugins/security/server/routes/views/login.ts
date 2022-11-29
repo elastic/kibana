@@ -24,6 +24,7 @@ export function defineLoginRoutes({
   router,
   logger,
   httpResources,
+  multitenancy,
   basePath,
   license,
 }: RouteDefinitionParams) {
@@ -84,6 +85,7 @@ export function defineLoginRoutes({
         requiresSecureConnection: config.secureCookies,
         loginHelp: config.loginHelp,
         selector: { enabled: selector.enabled, providers },
+        tenants: multitenancy.getTenantIds(),
       };
 
       return response.ok({ body: loginState });

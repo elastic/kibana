@@ -319,6 +319,7 @@ export class SecurityPlugin
       router: core.http.createRouter(),
       basePath: core.http.basePath,
       httpResources: core.http.resources,
+      multitenancy: core.multitenancy,
       logger: this.initializerContext.logger.get('routes'),
       config,
       config$,

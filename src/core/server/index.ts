@@ -474,6 +474,17 @@ export type {
 } from '@kbn/core-lifecycle-server';
 
 export type {
+  MultitenancyServiceSetup,
+  MultitenancyServiceStart,
+  MultitenancyApi,
+  TenantResolver,
+  MultitenancyConfig,
+  TenantConfig,
+  TenantCustomConfig,
+  MultitenancyRequestHandlerContext,
+} from '@kbn/core-multitenancy-server';
+
+export type {
   CapabilitiesSetup,
   CapabilitiesStart,
   ExecutionContextSetup,

@@ -136,6 +136,7 @@ export function defineCommonRoutes({
             basicParamsSchema,
             schema.never()
           ),
+          tenantId: schema.string(),
         }),
       },
       options: { authRequired: false },

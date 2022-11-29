@@ -28,4 +28,5 @@ export interface LoginState {
   requiresSecureConnection: boolean;
   loginHelp?: string;
   selector: LoginSelector;
+  tenants: string[];
 }

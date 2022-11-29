@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 
-import type { HttpResources, IBasePath, Logger } from '@kbn/core/server';
+import type { HttpResources, IBasePath, Logger, MultitenancyApi } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -42,6 +42,7 @@ export interface RouteDefinitionParams {
   router: SecurityRouter;
   basePath: IBasePath;
   httpResources: HttpResources;
+  multitenancy: MultitenancyApi;
   logger: Logger;
   config: ConfigType;
   config$: Observable<ConfigType>;

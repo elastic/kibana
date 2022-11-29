@@ -162,6 +162,7 @@ export class LoginPage extends Component<Props, State> {
     isSecureConnection,
     isCookiesEnabled,
     selector,
+    tenants,
     loginHelp,
   }: LoginState & {
     isSecureConnection: boolean;
@@ -324,6 +325,7 @@ export class LoginPage extends Component<Props, State> {
         http={this.props.http}
         notifications={this.props.notifications}
         selector={selector}
+        tenants={tenants}
         message={
           loginFormMessages[searchParams.get(LOGOUT_REASON_QUERY_STRING_PARAMETER) as LogoutReason]
         }

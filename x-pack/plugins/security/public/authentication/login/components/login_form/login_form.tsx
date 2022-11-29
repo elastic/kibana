@@ -21,6 +21,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -41,6 +42,7 @@ export interface LoginFormProps {
   http: HttpStart;
   notifications: NotificationsStart;
   selector: LoginSelector;
+  tenants: string[];
   message?: { type: MessageType.Danger | MessageType.Info; content: string };
   loginAssistanceMessage: string;
   loginHelp?: string;
@@ -53,6 +55,7 @@ interface State {
     | { type: LoadingStateType.Selector; providerName: string };
   username: string;
   password: string;
+  tenant: string;
   message:
     | { type: MessageType.None }
     | { type: MessageType.Danger | MessageType.Info; content: string };
@@ -107,6 +110,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
       loadingState: { type: LoadingStateType.None },
       username: '',
       password: '',
+      tenant: props.tenants[0],
       message: this.props.message || { type: MessageType.None },
       mode,
       previousMode: mode,
@@ -214,6 +218,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
     return (
       <EuiPanel data-test-subj="loginForm">
         <form onSubmit={this.submitLoginForm}>
+          {/* TODO: add tenant */}
           <EuiFormRow
             label={
               <FormattedMessage
@@ -257,6 +262,24 @@ export class LoginForm extends Component<LoginFormProps, State> {
               disabled={!this.isLoadingState(LoadingStateType.None)}
               isInvalid={false}
               aria-required={true}
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.security.login.basicLoginForm.tenantFormRowLabel"
+                defaultMessage="Tenant"
+              />
+            }
+          >
+            <EuiSelect
+              value={this.state.tenant}
+              onChange={(e) => this.onTenantChange(e.target.value)}
+              options={this.props.tenants.map((tenant) => ({
+                value: tenant,
+                text: tenant,
+              }))}
             />
           </EuiFormRow>
 
@@ -431,6 +454,12 @@ export class LoginForm extends Component<LoginFormProps, State> {
     });
   };
 
+  private onTenantChange = (tenantId: string) => {
+    this.setState({
+      tenant: tenantId,
+    });
+  };
+
   private onPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({
       password: e.target.value,
@@ -444,7 +473,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
 
     this.validator.enableValidation();
 
-    const { username, password } = this.state;
+    const { username, password, tenant } = this.state;
     if (this.validator.validateForLogin(username, password).isInvalid) {
       // Since validation is enabled now, we should ask React to re-render form and display
       // validation error messages if any.
@@ -470,6 +499,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
             providerName: providerToLoginWith.name,
             currentURL: window.location.href,
             params: { username, password },
+            tenantId: tenant,
           }),
         }
       );
