@@ -30,7 +30,7 @@ export const buildGroupByFieldAggregation = ({
     aggs: {
       topHits: {
         top_hits: {
-          size: maxSignals,
+          size: 1,
           sort: [
             {
               [aggregatableTimestampField]: {

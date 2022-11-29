@@ -16,7 +16,7 @@ Object {
       },
       "topHits": Object {
         "top_hits": Object {
-          "size": 100,
+          "size": 1,
           "sort": Array [
             Object {
               "kibana.combined_timestamp": Object {
