@@ -16,7 +16,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
@@ -107,7 +107,6 @@ import type { SaveModalContainerProps } from './app_plugin/save_modal_container'
 import { setupExpressions } from './expressions';
 import { getSearchProvider } from './search_provider';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
-import type { LensDataViews } from './lens_suggestions_api';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -229,8 +228,8 @@ export interface LensPublicStart {
     formula: FormulaPublicApi;
     suggestionsApi: (
       context: VisualizeFieldContext | VisualizeEditorContext,
-      dataViews: LensDataViews
-    ) => Suggestion | undefined;
+      dataViews: DataView
+    ) => Suggestion[] | undefined;
   }>;
 }
 
@@ -579,13 +578,13 @@ export class LensPlugin {
           formula: createFormulaPublicApi(),
           suggestionsApi: (
             context: VisualizeFieldContext | VisualizeEditorContext,
-            dataViews: LensDataViews
+            dataView: DataView
           ) => {
             return suggestionsApi({
               datasourceMap,
               visualizationMap,
               context,
-              dataViews,
+              dataView,
             });
           },
         };

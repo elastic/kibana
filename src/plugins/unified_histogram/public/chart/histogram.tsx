@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -56,6 +56,10 @@ export function Histogram({
   onChartLoad,
 }: HistogramProps) {
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
+  const [chartSize, setChartSize] = useState('100%');
+  const chartRef = useRef<HTMLDivElement | null>(null);
+
+  const { height: containerHeight, width: containerWidth } = useResizeObserver(chartRef.current);
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
     uiSettings,
     bucketInterval,
@@ -101,6 +105,15 @@ export function Histogram({
     [data, dataView, onChartLoad, onTotalHitsChange, timeInterval, timeRange]
   );
 
+  useEffect(() => {
+    if (attributes.visualizationType === 'lnsMetric') {
+      const size = containerHeight < containerWidth ? containerHeight : containerWidth;
+      setChartSize(`${size}px`);
+    } else {
+      setChartSize('100%');
+    }
+  }, [attributes, containerHeight, containerWidth]);
+
   const { euiTheme } = useEuiTheme();
   const chartCss = css`
     position: relative;
@@ -108,6 +121,13 @@ export function Histogram({
 
     & > div {
       height: 100%;
+      position: absolute;
+      width: 100%;
+    }
+
+    & .lnsExpressionRenderer {
+      width: ${chartSize};
+      margin: auto;
     }
 
     & .echLegend .echLegendList {
@@ -144,7 +164,12 @@ export function Histogram({
 
   return (
     <>
-      <div data-test-subj="unifiedHistogramChart" data-time-range={timeRangeText} css={chartCss}>
+      <div
+        data-test-subj="unifiedHistogramChart"
+        data-time-range={timeRangeText}
+        css={chartCss}
+        ref={chartRef}
+      >
         <lens.EmbeddableComponent {...debouncedProps} />
       </div>
       {timeRangeDisplay}

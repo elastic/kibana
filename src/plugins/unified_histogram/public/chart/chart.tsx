@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ReactElement, useMemo, useEffect, useState } from 'react';
+import { ReactElement, useMemo, useEffect, useState, useCallback } from 'react';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import React, { memo } from 'react';
 import {
@@ -33,6 +33,7 @@ import type {
   UnifiedHistogramServices,
 } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
+import { SuggestionSelector } from './suggestion_selector';
 import { useTotalHits } from './use_total_hits';
 import { useRequestParams } from './use_request_params';
 import { useChartStyles } from './use_chart_styles';
@@ -87,7 +88,8 @@ export function Chart({
   onTotalHitsChange,
   onChartLoad,
 }: ChartProps) {
-  const [suggestion, setSuggestion] = useState<Suggestion | undefined>(undefined);
+  const [currentSuggestion, setCurrentSuggestion] = useState<Suggestion | undefined>(undefined);
+  const [allSuggestions, setAllSuggestions] = useState<Suggestion[] | undefined>(undefined);
 
   const {
     showChartOptionsPopover,
@@ -179,9 +181,9 @@ export function Chart({
         dataView,
         timeInterval: chart?.timeInterval,
         breakdownField: breakdown?.field,
-        suggestion,
+        suggestion: currentSuggestion,
       }),
-    [breakdown?.field, chart?.timeInterval, dataView, filters, query, suggestion]
+    [breakdown?.field, chart?.timeInterval, dataView, filters, query, currentSuggestion]
   );
 
   useEffect(() => {
@@ -191,21 +193,24 @@ export function Chart({
         dataViewSpec: dataView.toSpec(),
         fieldName: '',
         contextualFields: columns,
-        originatingApp: 'discover',
         query: isOfAggregateQueryType(query) ? query : undefined,
       };
-      const currentDataViewId = dataView.id ?? '';
-      const dataViews = {
-        indexPatterns: {
-          [currentDataViewId]: dataView,
-        },
-        indexPatternRefs: [],
-      };
-      const lensSuggestion = isOfAggregateQueryType(query)
-        ? suggestionsApi(context, dataViews)
+      const lensSuggestions = isOfAggregateQueryType(query)
+        ? suggestionsApi(context, dataView)
         : undefined;
-      setSuggestion(lensSuggestion);
-      if (lensSuggestion?.visualizationId === 'lnsDatatable') {
+      const firstSuggestion = lensSuggestions?.length ? lensSuggestions[0] : undefined;
+      const restSuggestions = lensSuggestions?.filter((sug) => {
+        return !sug.hide && sug.visualizationId !== 'lnsLegacyMetric';
+      });
+      const firstSuggestionExists = restSuggestions?.find(
+        (sug) => sug.visualizationId === firstSuggestion?.visualizationId
+      );
+      if (firstSuggestion && !firstSuggestionExists) {
+        restSuggestions?.push(firstSuggestion);
+      }
+      setAllSuggestions(restSuggestions);
+      setCurrentSuggestion(firstSuggestion);
+      if (firstSuggestion?.visualizationId === 'lnsDatatable') {
         setChartVisible(false);
       } else {
         setChartVisible(true);
@@ -213,6 +218,10 @@ export function Chart({
     };
     getSuggestions();
   }, [chart, columns, dataView, query, services.lens, setChartVisible]);
+
+  const onSuggestionChange = useCallback((suggestion) => {
+    setCurrentSuggestion(suggestion);
+  }, []);
 
   const onEditVisualization = useMemo(
     () =>
@@ -256,6 +265,15 @@ export function Chart({
                       dataView={dataView}
                       breakdown={breakdown}
                       onBreakdownFieldChange={onBreakdownFieldChange}
+                    />
+                  </EuiFlexItem>
+                )}
+                {chartVisible && currentSuggestion && allSuggestions && allSuggestions?.length > 1 && (
+                  <EuiFlexItem css={breakdownFieldSelectorItemCss}>
+                    <SuggestionSelector
+                      suggestions={allSuggestions}
+                      activeSuggestion={currentSuggestion}
+                      onSuggestionChange={onSuggestionChange}
                     />
                   </EuiFlexItem>
                 )}

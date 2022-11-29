@@ -6,30 +6,20 @@
  */
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getVisualizeFieldSuggestions } from './editor_frame_service/editor_frame/suggestion_helpers';
-import type {
-  DatasourceMap,
-  VisualizationMap,
-  VisualizeEditorContext,
-  IndexPattern,
-} from './types';
+import { getSuggestions } from './editor_frame_service/editor_frame/suggestion_helpers';
+import type { DatasourceMap, VisualizationMap, VisualizeEditorContext } from './types';
 import type { DataViewsState } from './state_management';
-
-export interface LensDataViews {
-  indexPatterns: Record<string, DataView | IndexPattern>;
-  indexPatternRefs: DataViewsState['indexPatternRefs'];
-}
 
 interface SuggestionsApi {
   context: VisualizeFieldContext | VisualizeEditorContext;
-  dataViews: LensDataViews;
+  dataView: DataView;
   visualizationMap?: VisualizationMap;
   datasourceMap?: DatasourceMap;
 }
 
 export const suggestionsApi = ({
   context,
-  dataViews,
+  dataView,
   datasourceMap,
   visualizationMap,
 }: SuggestionsApi) => {
@@ -51,11 +41,31 @@ export const suggestionsApi = ({
     },
   };
   if (!datasourceMap || !visualizationMap) return undefined;
-  return getVisualizeFieldSuggestions({
+  const currentDataViewId = dataView.id ?? '';
+  const dataViews = {
+    indexPatterns: {
+      [currentDataViewId]: dataView,
+    },
+    indexPatternRefs: [],
+  } as unknown as DataViewsState;
+  // const firstSuggestion = getVisualizeFieldSuggestions({
+  //   datasourceMap,
+  //   datasourceStates,
+  //   visualizationMap,
+  //   visualizeTriggerFieldContext: context,
+  //   dataViews,
+  // });
+  const activeVisualization = visualizationMap?.[Object.keys(visualizationMap)[0]] || null;
+
+  const suggestions = getSuggestions({
     datasourceMap,
     datasourceStates,
     visualizationMap,
+    activeVisualization,
+    visualizationState: undefined,
     visualizeTriggerFieldContext: context,
-    dataViews: dataViews as DataViewsState,
+    dataViews,
   });
+
+  return suggestions;
 };
