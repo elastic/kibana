@@ -20,6 +20,7 @@ import type { RulesTableState } from './rules_table_context';
 import { useRulesTableContext } from './rules_table_context';
 import type { RulesTableSavedState } from './rules_table_saved_state';
 import { useSyncRulesTableSavedState } from './use_sync_rules_table_saved_state';
+import { omit } from 'lodash';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/utils/global_query_string/helpers', () => ({
@@ -122,8 +123,7 @@ describe('useSyncRulesTableSavedState', () => {
       page: 3,
       perPage: 10,
     };
-    const expectedStorageState = { ...expectedUrlState };
-    delete expectedStorageState.page;
+    const expectedStorageState = omit(expectedUrlState, 'page');
 
     (useRulesTableContext as jest.Mock).mockReturnValue({
       state,
