@@ -7,4 +7,4 @@
  */
 
 export const ID = 'esql';
-export const ESQL_THEME_ID = 'esql_theme';
+export const ESQL_THEME_ID = 'esqlTheme';
