@@ -223,7 +223,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                   }
                 )
           }
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
         />
       ),
       valign: 'top',
