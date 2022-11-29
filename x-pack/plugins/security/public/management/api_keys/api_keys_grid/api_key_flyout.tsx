@@ -253,8 +253,9 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                     whiteSpace: 'nowrap',
                     textOverflow: 'ellipsis',
                   }}
+                  data-test-subj="apiKeyFlyoutUsername"
                 >
-                  {currentUser?.username}
+                  {selectedApiKey ? selectedApiKey.username : currentUser?.username}
                 </EuiText>
                 <EuiSpacer size="xs" />
               </EuiFlexItem>
@@ -516,8 +517,10 @@ export function mapUpdateApiKeyValues(id: string, values: ApiKeyFormValues): Upd
   return {
     id,
     role_descriptors:
-      values.customPrivileges && values.role_descriptors ? JSON.parse(values.role_descriptors) : {},
-    metadata: values.includeMetadata && values.metadata ? JSON.parse(values.metadata) : {},
+      values.customPrivileges && values.role_descriptors
+        ? JSON.parse(values.role_descriptors)
+        : undefined,
+    metadata: values.includeMetadata && values.metadata ? JSON.parse(values.metadata) : undefined,
   };
 }
 

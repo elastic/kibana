@@ -83,6 +83,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/flyout');
         expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Create API Key');
 
+        expect(await pageObjects.apiKeys.getFlyoutUsername()).to.be('test_user');
+
         await pageObjects.apiKeys.setApiKeyName(apiKeyName);
         await pageObjects.apiKeys.clickSubmitButtonOnApiKeyFlyout();
         const newApiKeyCreation = await pageObjects.apiKeys.getNewApiKeyCreation();
@@ -384,6 +386,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys/flyout');
         expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('View API Key');
+
+        expect(await pageObjects.apiKeys.getFlyoutUsername()).to.be('elastic');
 
         // Verify name input box are disabled
         const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
