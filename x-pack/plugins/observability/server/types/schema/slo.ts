@@ -6,16 +6,16 @@
  */
 
 import * as t from 'io-ts';
-import { dateType } from './common';
+import { dateType, summarySchema } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
 
-const occurencesBudgetingMethodSchema = t.literal<string>('occurrences');
+const occurrencesBudgetingMethodSchema = t.literal<string>('occurrences');
 const timeslicesBudgetingMethodSchema = t.literal<string>('timeslices');
 
 const budgetingMethodSchema = t.union([
-  occurencesBudgetingMethodSchema,
+  occurrencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
 ]);
 
@@ -37,10 +37,13 @@ const sloSchema = t.type({
   updated_at: dateType,
 });
 
+const sloWithSummarySchema = t.intersection([sloSchema, t.type({ summary: summarySchema })]);
+
 export {
   budgetingMethodSchema,
   objectiveSchema,
-  occurencesBudgetingMethodSchema,
+  occurrencesBudgetingMethodSchema,
   sloSchema,
+  sloWithSummarySchema,
   timeslicesBudgetingMethodSchema,
 };
