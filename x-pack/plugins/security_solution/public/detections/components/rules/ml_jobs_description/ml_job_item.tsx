@@ -13,6 +13,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 import * as i18n from './translations';
 
+import { isJobStarted } from '../../../../../common/machine_learning/helpers';
+
 import { MlJobLink } from '../ml_job_link/ml_job_link';
 import { MlAuditIcon } from '../ml_audit_icon';
 import { MlJobStatusBadge } from '../ml_job_status_badge';
@@ -25,6 +27,8 @@ const MlJobItemComponent: FC<{
   job: MlSummaryJob;
   switchComponent: ReactNode;
 }> = ({ job, switchComponent, ...props }) => {
+  const isStarted = isJobStarted(job.jobState, job.datafeedState);
+
   return (
     <Wrapper {...props}>
       <div>
@@ -37,7 +41,7 @@ const MlJobItemComponent: FC<{
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{switchComponent}</EuiFlexItem>
         <EuiFlexItem grow={false} style={{ marginLeft: '0' }}>
-          {i18n.ML_RUN_JOB_LABEL}
+          {isStarted ? i18n.ML_RUN_JOB_LABEL : i18n.ML_JOB_STOPPED}
         </EuiFlexItem>
       </EuiFlexGroup>
     </Wrapper>
