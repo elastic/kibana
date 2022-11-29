@@ -12,7 +12,7 @@ import { SecurityPageName } from '../app/types';
 
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { StartPlugins } from '../types';
-import { links, getManagementFilteredLinks } from './links';
+import { getManagementFilteredLinks, links } from './links';
 import { allowedExperimentalValues } from '../../common/experimental_features';
 import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
@@ -253,7 +253,20 @@ describe('links', () => {
 
       expect(filteredLinks).toEqual(links);
     });
+
+    it('should NOT return policies if `canReadPolicyManagement` is `false`', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canReadPolicyManagement: false,
+        })
+      );
+
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.policies));
+    });
   });
+
   describe('Endpoint List', () => {
     it('should return all but endpoints link when no Endpoint List READ access', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
