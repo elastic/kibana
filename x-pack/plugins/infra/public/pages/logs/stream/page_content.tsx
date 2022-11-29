@@ -15,7 +15,7 @@ import { fullHeightContentStyles } from '../../../page_template.styles';
 import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
 import { LogsPageTemplate } from '../shared/page_template';
 import { LogsPageLogsContent } from './page_logs_content';
-import { LogsPageContentProviders } from './page_providers';
+import { LogStreamPageContentProviders } from './page_providers';
 
 const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
   defaultMessage: 'Stream',
@@ -96,9 +96,9 @@ export const StreamPageContent: React.FC<InjectedProps> = (props: InjectedProps)
             },
           }}
         >
-          <LogsPageContentProviders>
+          <LogStreamPageContentProviders>
             <LogsPageLogsContent />
-          </LogsPageContentProviders>
+          </LogStreamPageContentProviders>
         </LogsPageTemplate>
       </div>
     );

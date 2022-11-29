@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import { type LogViewNotificationChannel } from '../../../observability_logs/log_view_state';
-import { LogStreamPageStateProvider } from '../../../observability_logs/log_stream_page/state/src/provider';
 import {
   LogFilterStateProvider,
   useLogFilterStateContext,
@@ -23,6 +21,8 @@ import { LogStreamProvider, useLogStreamContext } from '../../../containers/logs
 import { LogViewConfigurationProvider } from '../../../containers/logs/log_view_configuration';
 import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { useLogViewContext } from '../../../hooks/use_log_view';
+import { LogStreamPageStateProvider } from '../../../observability_logs/log_stream_page/state';
+import { type LogViewNotificationChannel } from '../../../observability_logs/log_view_state';
 
 const LogFilterState: React.FC = ({ children }) => {
   const { derivedDataView } = useLogViewContext();
@@ -104,7 +104,7 @@ export const LogStreamPageProviders: React.FunctionComponent<{
   );
 };
 
-export const LogsPageContentProviders: React.FunctionComponent = ({ children }) => {
+export const LogStreamPageContentProviders: React.FunctionComponent = ({ children }) => {
   return (
     <LogViewConfigurationProvider>
       <LogEntryFlyoutProvider>
