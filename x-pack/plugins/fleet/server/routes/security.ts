@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { result } from 'lodash';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type {
   IRouter,
   RouteConfig,
   RouteMethod,
   KibanaRequest,
+  KibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
   OnPostAuthHandler,
@@ -110,6 +112,116 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
   });
 }
 
+// needed from Read routes
+export const readEndpointPackagePrivileges: DeepPartialTruthy<FleetAuthz> = Object.freeze({
+  packagePrivileges: {
+    endpoint: {
+      actions: {
+        readPolicyManagement: {
+          executePackageAction: true,
+        },
+        readTrustedApplications: {
+          executePackageAction: true,
+        },
+        readEventFilters: {
+          executePackageAction: true,
+        },
+        readHostIsolationExceptions: {
+          executePackageAction: true,
+        },
+        readBlocklist: {
+          executePackageAction: true,
+        },
+      },
+    },
+  },
+});
+
+// needed from CUD routes
+export const writeEndpointPackagePrivileges: DeepPartialTruthy<FleetAuthz> = Object.freeze({
+  packagePrivileges: {
+    endpoint: {
+      actions: {
+        writePolicyManagement: {
+          executePackageAction: true,
+        },
+        writeTrustedApplications: {
+          executePackageAction: true,
+        },
+        writeEventFilters: {
+          executePackageAction: true,
+        },
+        writeHostIsolationExceptions: {
+          executePackageAction: true,
+        },
+        writeBlocklist: {
+          executePackageAction: true,
+        },
+      },
+    },
+  },
+});
+
+// exported only for testing
+export function buildPathsFromRequiredAuthz(required: FleetAuthzRequirements): string[] {
+  const paths: string[] = [];
+  if (required) {
+    function fleetAuthzToPaths(requirements: DeepPartialTruthy<Authz>, prefix: string = '') {
+      for (const key of Object.keys(requirements)) {
+        if (typeof requirements[key] === 'boolean') {
+          paths.push(`${prefix}${key}`);
+        } else if (typeof requirements[key] !== 'undefined') {
+          fleetAuthzToPaths(requirements[key] as DeepPartialTruthy<Authz>, `${prefix}${key}.`);
+        }
+      }
+    }
+    fleetAuthzToPaths(required);
+  }
+  return paths;
+}
+
+export function validateSecurityRbac(
+  fleetAuthz: FleetAuthz,
+  requiredAuthz: {
+    any?: FleetAuthzRequirements;
+    all?: FleetAuthzRequirements;
+  }
+): boolean {
+  const getBoolListFromPaths = (reqAuthz: FleetAuthzRequirements): boolean[] =>
+    buildPathsFromRequiredAuthz(reqAuthz).reduce<boolean[]>((acc, path) => {
+      // add the bool value of the given path in FleetAuthz in the list
+      acc.push(result(fleetAuthz, path));
+      return acc;
+    }, []);
+
+  if (requiredAuthz.any && !requiredAuthz.all) {
+    return getBoolListFromPaths(requiredAuthz.any).some((v) => v);
+  } else if (requiredAuthz.all) {
+    return getBoolListFromPaths(requiredAuthz.all).every((v) => v);
+  } else if (requiredAuthz.any && requiredAuthz.all) {
+    // integration privileges should be all true or any of the endpoint privileges should be true
+    // e.g. epm/BULK_INSTALL_PATTERN
+    return (
+      getBoolListFromPaths(requiredAuthz.any).some((v) => v) ||
+      getBoolListFromPaths(requiredAuthz.all).every((v) => v)
+    );
+  }
+  return false;
+}
+
+export function doesNotHaveRequiredFleetAuthz(
+  authz: FleetAuthz,
+  fleetAuthzConfig: FleetAuthzRouteConfig
+) {
+  return (
+    fleetAuthzConfig.fleetAuthz &&
+    ((typeof fleetAuthzConfig.fleetAuthz === 'function' && !fleetAuthzConfig.fleetAuthz(authz)) ||
+      (fleetAuthzConfig.fleetAuthz &&
+        typeof fleetAuthzConfig.fleetAuthz !== 'function' &&
+        !validateSecurityRbac(authz, { all: fleetAuthzConfig.fleetAuthz })))
+  );
+}
+
 interface Authz {
   [k: string]: Authz | boolean;
 }
@@ -160,8 +272,11 @@ type FleetAuthzRouteRegistrar<
   handler: RequestHandler<P, Q, B, Context, Method>
 ) => void;
 
-export interface FleetAuthzRouteConfig {
-  fleetAuthz?: FleetAuthzRequirements;
+type FleetAuthzRouterConfigParam = FleetAuthzRequirements | ((userAuthz: FleetAuthz) => boolean);
+export interface FleetAuthzRouteConfig<
+  T extends FleetAuthzRouterConfigParam = FleetAuthzRouterConfigParam
+> {
+  fleetAuthz?: T;
 }
 
 type FleetRouteConfig<P, Q, B, Method extends RouteMethod> = RouteConfig<P, Q, B, Method> &
@@ -220,8 +335,7 @@ export function deserializeAuthzConfig(tags: readonly string[]): FleetAuthzRoute
 // Exported for test only
 export function serializeAuthzConfig(config: FleetAuthzRouteConfig): string[] {
   const tags: string[] = [];
-
-  if (config.fleetAuthz) {
+  if (config.fleetAuthz && typeof config.fleetAuthz !== 'function') {
     function fleetAuthzToTags(requirements: DeepPartialTruthy<Authz>, prefix: string = '') {
       for (const key of Object.keys(requirements)) {
         if (typeof requirements[key] === 'boolean') {
@@ -241,24 +355,6 @@ export function serializeAuthzConfig(config: FleetAuthzRouteConfig): string[] {
 export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerContext>(
   router: IRouter<TContext>
 ): { router: FleetAuthzRouter<TContext>; onPostAuthHandler: OnPostAuthHandler } {
-  function buildFleetAuthzRouteConfig<P, Q, B, Method extends RouteMethod>({
-    fleetAuthz,
-    ...routeConfig
-  }: FleetRouteConfig<P, Q, B, Method>) {
-    return {
-      ...routeConfig,
-      options: {
-        ...routeConfig.options,
-        tags: [
-          ...(routeConfig?.options?.tags ?? []),
-          ...serializeAuthzConfig({
-            fleetAuthz,
-          }),
-        ],
-      },
-    };
-  }
-
   const fleetAuthzOnPostAuthHandler: OnPostAuthHandler = async (req, res, toolkit) => {
     if (!shouldHandlePostAuthRequest(req)) {
       return toolkit.next();
@@ -273,21 +369,68 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
     if (!fleetAuthzConfig) {
       return toolkit.next();
     }
+
     const authz = await getAuthzFromRequest(req);
-    if (!hasRequiredFleetAuthzPrivilege(authz, fleetAuthzConfig)) {
+
+    if (doesNotHaveRequiredFleetAuthz(authz, fleetAuthzConfig)) {
       return res.forbidden();
     }
 
     return toolkit.next();
   };
 
+  async function routerAuthzWrapper({
+    context,
+    request,
+    response,
+    handler,
+    hasRequiredAuthz,
+  }: {
+    context: TContext;
+    request: KibanaRequest;
+    response: KibanaResponseFactory;
+    handler: RequestHandler<any, any, any, TContext, any, KibanaResponseFactory>;
+    hasRequiredAuthz?: FleetAuthzRouterConfigParam;
+  }) {
+    const requestedAuthz = await getAuthzFromRequest(request);
+    if (
+      hasRequiredAuthz &&
+      typeof hasRequiredAuthz === 'function' &&
+      hasRequiredAuthz(requestedAuthz)
+    ) {
+      return handler(context, request, response);
+    } else if (hasRequiredAuthz && typeof hasRequiredAuthz !== 'function') {
+      validateSecurityRbac(requestedAuthz, { all: hasRequiredAuthz });
+    }
+    return response.forbidden();
+  }
+
   const fleetAuthzRouter: FleetAuthzRouter<TContext> = {
-    get: (routeConfig, handler) => router.get(buildFleetAuthzRouteConfig(routeConfig), handler),
-    delete: (routeConfig, handler) =>
-      router.delete(buildFleetAuthzRouteConfig(routeConfig), handler),
-    post: (routeConfig, handler) => router.post(buildFleetAuthzRouteConfig(routeConfig), handler),
-    put: (routeConfig, handler) => router.put(buildFleetAuthzRouteConfig(routeConfig), handler),
-    patch: (routeConfig, handler) => router.patch(buildFleetAuthzRouteConfig(routeConfig), handler),
+    get: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {
+      router.get(options, async (context, request, response) =>
+        routerAuthzWrapper({ context, request, response, handler, hasRequiredAuthz })
+      );
+    },
+    delete: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {
+      router.delete(options, async (context, request, response) =>
+        routerAuthzWrapper({ context, request, response, handler, hasRequiredAuthz })
+      );
+    },
+    post: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {
+      router.post(options, async (context, request, response) =>
+        routerAuthzWrapper({ context, request, response, handler, hasRequiredAuthz })
+      );
+    },
+    put: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {
+      router.put(options, async (context, request, response) =>
+        routerAuthzWrapper({ context, request, response, handler, hasRequiredAuthz })
+      );
+    },
+    patch: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {
+      router.patch(options, async (context, request, response) =>
+        routerAuthzWrapper({ context, request, response, handler, hasRequiredAuthz })
+      );
+    },
     handleLegacyErrors: (handler) => router.handleLegacyErrors(handler),
     getRoutes: () => router.getRoutes(),
     routerPath: router.routerPath,
