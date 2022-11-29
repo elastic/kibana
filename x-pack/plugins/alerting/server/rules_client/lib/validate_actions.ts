@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { RawRule } from '../../types';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { NormalizedAlertAction } from '../types';
-import { RulesClientContext } from '../rules_client';
+import { RulesClientContext } from '../types';
 
 export async function validateActions(
   context: RulesClientContext,

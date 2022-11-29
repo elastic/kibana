@@ -6,7 +6,7 @@
  */
 
 import { RawRule } from '../../types';
-import { RulesClientContext } from '../rules_client';
+import { RulesClientContext } from '../types';
 
 export function updateMeta<T extends Partial<RawRule>>(
   context: RulesClientContext,

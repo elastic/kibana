@@ -10,7 +10,7 @@ import { RawRule, RuleTypeParams } from '../../types';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { NormalizedAlertAction } from '../types';
 import { extractedSavedObjectParamReferenceNamePrefix } from '../common/constants';
-import { RulesClientContext } from '../rules_client';
+import { RulesClientContext } from '../types';
 import { denormalizeActions } from './denormalize_actions';
 
 export async function extractReferences<

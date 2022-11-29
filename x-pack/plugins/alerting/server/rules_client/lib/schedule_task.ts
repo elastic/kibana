@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RulesClientContext } from '../rules_client';
+import { RulesClientContext } from '../types';
 import { ScheduleTaskOptions } from '../types';
 
 export async function scheduleTask(context: RulesClientContext, opts: ScheduleTaskOptions) {

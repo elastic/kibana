@@ -24,7 +24,7 @@ import {
   injectReferencesIntoActions,
   injectReferencesIntoParams,
 } from '../common';
-import { RulesClientContext } from '../rules_client';
+import { RulesClientContext } from '../types';
 
 export function getAlertFromRaw<Params extends RuleTypeParams>(
   context: RulesClientContext,

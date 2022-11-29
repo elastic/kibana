@@ -15,7 +15,7 @@ import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { createRuleSavedObject, extractReferences, validateActions } from './lib';
 import { generateAPIKeyName, getMappedParams, apiKeyAsAlertAttributes } from './common';
 import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
-import { RulesClientContext } from './rules_client';
+import { RulesClientContext } from './types';
 
 type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
 interface SavedObjectOptions {
