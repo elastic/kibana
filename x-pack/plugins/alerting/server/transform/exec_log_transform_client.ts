@@ -90,7 +90,7 @@ export class ExecLogTransformClient {
       const musts: estypes.QueryDslQueryContainer[] = [
         {
           terms: {
-            'rule.data.alerting.rule_data.rule.id': ids,
+            'alerting.doc.rule.id': ids,
           },
         },
         namespaceQuery,
@@ -99,7 +99,7 @@ export class ExecLogTransformClient {
       if (start) {
         musts.push({
           range: {
-            '@timestamp': {
+            '@timestamp.min': {
               gte: start,
             },
           },
@@ -108,7 +108,7 @@ export class ExecLogTransformClient {
       if (end) {
         musts.push({
           range: {
-            '@timestamp': {
+            '@timestamp.min': {
               lte: end,
             },
           },
@@ -128,7 +128,6 @@ export class ExecLogTransformClient {
           ? { sort: sort.map((s) => ({ [s.sort_field]: { order: s.sort_order } })) as estypes.Sort }
           : {}),
       };
-      this.logger.info(JSON.stringify(body));
       const {
         hits: { hits, total },
       } = await this.esClient.search({
@@ -179,7 +178,7 @@ export class ExecLogTransformClient {
 function getNamespaceQuery(namespace?: string) {
   return {
     term: {
-      'rule.data.alerting.rule_data.kibana.space_ids': {
+      'alerting.doc.kibana.space_ids': {
         value: namespace ? namespace : 'default',
       },
     },

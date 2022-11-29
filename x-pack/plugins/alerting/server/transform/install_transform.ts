@@ -35,10 +35,9 @@ export const installTransform = async ({
         const result = await pRetry(() => startTransformIfNotStarted(esClient, logger), {
           retries: 3,
         });
-        logger.info(`startTransformIfNotStarted result ${result}`);
         return result;
       } catch (err) {
-        logger.error(`Failed to start transform ${TRANSFORM_ID}`);
+        logger.error(`Failed to start transform ${TRANSFORM_ID} after 3 retries`);
         return false;
       }
     }
@@ -55,13 +54,430 @@ const createComponentTemplate = async (esClient: ElasticsearchClient, logger: Lo
   try {
     await esClient.cluster.putComponentTemplate({
       name: DESTINATION_COMPONENT_TEMPLATE,
-      template: {
-        settings: {
-          number_of_shards: 1,
-          'index.mapping.total_fields.limit': 200,
-        },
-        mappings: {
-          dynamic: true,
+      body: {
+        template: {
+          settings: {
+            number_of_shards: 1,
+            'index.mapping.total_fields.limit': 200,
+          },
+          mappings: {
+            dynamic: 'false',
+            properties: {
+              '@timestamp': {
+                properties: {
+                  min: {
+                    type: 'date',
+                  },
+                },
+              },
+              actions: {
+                properties: {
+                  doc: {
+                    properties: {
+                      '@timestamp': {
+                        type: 'date',
+                      },
+                      ecs: {
+                        properties: {
+                          version: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                        },
+                      },
+                      event: {
+                        properties: {
+                          action: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          duration: {
+                            type: 'long',
+                          },
+                          end: {
+                            type: 'date',
+                          },
+                          kind: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          outcome: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          provider: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          start: {
+                            type: 'date',
+                          },
+                        },
+                      },
+                      error: {
+                        properties: {
+                          message: {
+                            type: 'text',
+                            fields: {
+                              keyword: {
+                                type: 'keyword',
+                                ignore_above: 1024,
+                              },
+                            },
+                          },
+                        },
+                      },
+                      kibana: {
+                        properties: {
+                          alert: {
+                            properties: {
+                              rule: {
+                                properties: {
+                                  consumer: {
+                                    type: 'keyword',
+                                    ignore_above: 1024,
+                                  },
+                                  execution: {
+                                    properties: {
+                                      uuid: {
+                                        type: 'keyword',
+                                        ignore_above: 1024,
+                                      },
+                                    },
+                                  },
+                                  rule_type_id: {
+                                    type: 'keyword',
+                                    ignore_above: 1024,
+                                  },
+                                },
+                              },
+                            },
+                          },
+                          saved_objects: {
+                            properties: {
+                              id: {
+                                type: 'keyword',
+                                ignore_above: 1024,
+                              },
+                              rel: {
+                                type: 'keyword',
+                                ignore_above: 1024,
+                              },
+                              type: {
+                                type: 'keyword',
+                                ignore_above: 1024,
+                              },
+                              type_id: {
+                                type: 'keyword',
+                                ignore_above: 1024,
+                              },
+                            },
+                          },
+                          server_uuid: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          space_ids: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          task: {
+                            properties: {
+                              schedule_delay: {
+                                type: 'long',
+                              },
+                              scheduled: {
+                                type: 'date',
+                              },
+                            },
+                          },
+                          version: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                        },
+                      },
+                      message: {
+                        type: 'text',
+                        fields: {
+                          keyword: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                        },
+                      },
+                    },
+                  },
+                  outcomes: {
+                    properties: {
+                      success: {
+                        type: 'long',
+                      },
+                      failure: {
+                        type: 'long',
+                      },
+                    },
+                  },
+                },
+              },
+              alerting: {
+                properties: {
+                  doc: {
+                    properties: {
+                      '@timestamp': {
+                        type: 'date',
+                      },
+                      ecs: {
+                        properties: {
+                          version: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                        },
+                      },
+                      error: {
+                        properties: {
+                          message: {
+                            type: 'text',
+                            fields: {
+                              keyword: {
+                                type: 'keyword',
+                                ignore_above: 1024,
+                              },
+                            },
+                          },
+                        },
+                      },
+                      event: {
+                        properties: {
+                          action: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          category: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          duration: {
+                            type: 'long',
+                          },
+                          end: {
+                            type: 'date',
+                          },
+                          kind: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          outcome: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          provider: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          start: {
+                            type: 'date',
+                          },
+                        },
+                      },
+                      kibana: {
+                        properties: {
+                          alert: {
+                            properties: {
+                              rule: {
+                                properties: {
+                                  consumer: {
+                                    type: 'keyword',
+                                    ignore_above: 1024,
+                                  },
+                                  execution: {
+                                    properties: {
+                                      metrics: {
+                                        properties: {
+                                          alert_counts: {
+                                            properties: {
+                                              active: {
+                                                type: 'long',
+                                              },
+                                              new: {
+                                                type: 'long',
+                                              },
+                                              recovered: {
+                                                type: 'long',
+                                              },
+                                            },
+                                          },
+                                          claim_to_start_duration_ms: {
+                                            type: 'long',
+                                          },
+                                          es_search_duration_ms: {
+                                            type: 'long',
+                                          },
+                                          number_of_generated_actions: {
+                                            type: 'long',
+                                          },
+                                          number_of_searches: {
+                                            type: 'long',
+                                          },
+                                          number_of_triggered_actions: {
+                                            type: 'long',
+                                          },
+                                          prepare_rule_duration_ms: {
+                                            type: 'long',
+                                          },
+                                          process_alerts_duration_ms: {
+                                            type: 'long',
+                                          },
+                                          process_rule_duration_ms: {
+                                            type: 'long',
+                                          },
+                                          rule_type_run_duration_ms: {
+                                            type: 'long',
+                                          },
+                                          total_run_duration_ms: {
+                                            type: 'long',
+                                          },
+                                          total_search_duration_ms: {
+                                            type: 'long',
+                                          },
+                                          trigger_actions_duration_ms: {
+                                            type: 'long',
+                                          },
+                                        },
+                                      },
+                                      uuid: {
+                                        type: 'keyword',
+                                        ignore_above: 1024,
+                                      },
+                                    },
+                                  },
+                                  rule_type_id: {
+                                    type: 'keyword',
+                                    ignore_above: 1024,
+                                  },
+                                },
+                              },
+                            },
+                          },
+                          alerting: {
+                            properties: {
+                              outcome: {
+                                type: 'keyword',
+                                ignore_above: 1024,
+                              },
+                              status: {
+                                type: 'keyword',
+                                ignore_above: 1024,
+                              },
+                            },
+                          },
+                          saved_objects: {
+                            properties: {
+                              id: {
+                                type: 'keyword',
+                                ignore_above: 1024,
+                              },
+                              rel: {
+                                type: 'keyword',
+                                ignore_above: 1024,
+                              },
+                              type: {
+                                type: 'keyword',
+                                ignore_above: 1024,
+                              },
+                              type_id: {
+                                type: 'keyword',
+                                ignore_above: 1024,
+                              },
+                            },
+                          },
+                          server_uuid: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          space_ids: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          task: {
+                            properties: {
+                              schedule_delay: {
+                                type: 'long',
+                              },
+                              scheduled: {
+                                type: 'date',
+                              },
+                            },
+                          },
+                          version: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                        },
+                      },
+                      message: {
+                        type: 'text',
+                        fields: {
+                          keyword: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                        },
+                      },
+                      rule: {
+                        properties: {
+                          category: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          id: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          license: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          name: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                          ruleset: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                        },
+                      },
+                    },
+                  },
+                  timeout: {
+                    type: 'long',
+                  },
+                },
+              },
+              kibana: {
+                properties: {
+                  alert: {
+                    properties: {
+                      rule: {
+                        properties: {
+                          execution: {
+                            properties: {
+                              uuid: {
+                                type: 'keyword',
+                                ignore_above: 1024,
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     });
@@ -122,7 +538,13 @@ const createTransformIfNotExists = async (
           ...eventLogTransform(),
           transform_id: TRANSFORM_ID,
           defer_validation: true,
-          frequency: '1m',
+          frequency: '10s',
+          sync: {
+            time: {
+              field: '@timestamp',
+              delay: '10s',
+            },
+          },
         });
 
         // transform created
@@ -146,9 +568,9 @@ const startTransformIfNotStarted = async (
     const transformStats = await esClient.transform.getTransformStats({
       transform_id: TRANSFORM_ID,
     });
-    logger.info(`Transform status ${JSON.stringify(transformStats)}`);
+    logger.debug(`Transform status ${JSON.stringify(transformStats)}`);
     if (transformStats.count <= 0) {
-      logger.error(`Failed starting transform ${TRANSFORM_ID}: couldn't find transform`);
+      logger.warn(`Failed starting transform ${TRANSFORM_ID}: couldn't find transform`);
       throw new Error(`Failed starting transform ${TRANSFORM_ID}: couldn't find transform`);
     }
     const fetchedTransformStats = transformStats.transforms[0];
@@ -158,10 +580,9 @@ const startTransformIfNotStarted = async (
         const { acknowledged } = await esClient.transform.startTransform({
           transform_id: TRANSFORM_ID,
         });
-        logger.info(`acknowledged ${acknowledged}`);
         return acknowledged;
       } catch (startErr) {
-        logger.error(`Failed starting transform ${TRANSFORM_ID}: ${startErr.message}`);
+        logger.warn(`Failed starting transform ${TRANSFORM_ID}: ${startErr.message}`);
         throw startErr;
       }
     } else if (
@@ -169,7 +590,7 @@ const startTransformIfNotStarted = async (
       fetchedTransformStats.state === 'aborting' ||
       fetchedTransformStats.state === 'failed'
     ) {
-      logger.error(
+      logger.warn(
         `Not starting transform ${TRANSFORM_ID} since it's state is: ${fetchedTransformStats.state}`
       );
       throw new Error(
@@ -180,7 +601,7 @@ const startTransformIfNotStarted = async (
       return true;
     }
   } catch (statsErr) {
-    logger.error(`Failed to check if transform ${TRANSFORM_ID} is started: ${statsErr.message}`);
+    logger.warn(`Failed to check if transform ${TRANSFORM_ID} is started: ${statsErr.message}`);
     throw new Error(`Failed to check if transform ${TRANSFORM_ID} is started: ${statsErr.message}`);
   }
 

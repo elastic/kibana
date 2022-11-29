@@ -177,7 +177,6 @@ export class AlertingPlugin {
   private kibanaBaseUrl: string | undefined;
   private usageCounter: UsageCounter | undefined;
   private inMemoryMetrics: InMemoryMetrics;
-  private isEventLogTransformActive: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -188,7 +187,6 @@ export class AlertingPlugin {
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
-    this.isEventLogTransformActive = false;
   }
 
   public setup(
@@ -224,14 +222,6 @@ export class AlertingPlugin {
 
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
-
-    core.getStartServices().then(async ([{ elasticsearch }]) => {
-      this.isEventLogTransformActive = await installTransform({
-        esClient: elasticsearch.client.asInternalUser,
-        logger: this.logger,
-      });
-      this.logger.info(`this.isEventLogTransformActive ${this.isEventLogTransformActive}`);
-    });
 
     const ruleTypeRegistry = new RuleTypeRegistry({
       logger: this.logger,
@@ -378,7 +368,6 @@ export class AlertingPlugin {
       alertingAuthorizationClientFactory,
       security,
       licenseState,
-      isEventLogTransformActive,
     } = this;
 
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
@@ -393,6 +382,40 @@ export class AlertingPlugin {
         : undefined;
     };
 
+    installTransform({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger,
+    }).then((success: boolean) => {
+      rulesClientFactory.initialize({
+        ruleTypeRegistry: ruleTypeRegistry!,
+        logger,
+        taskManager: plugins.taskManager,
+        securityPluginSetup: security,
+        securityPluginStart: plugins.security,
+        encryptedSavedObjectsClient,
+        spaceIdToNamespace,
+        getSpaceId(request: KibanaRequest) {
+          return plugins.spaces?.spacesService.getSpaceId(request);
+        },
+        actions: plugins.actions,
+        eventLog: plugins.eventLog,
+        kibanaVersion: this.kibanaVersion,
+        authorization: alertingAuthorizationClientFactory,
+        eventLogger: this.eventLogger,
+        minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
+        getExecLogTransformClientWithRequest(request: KibanaRequest) {
+          return success
+            ? new ExecLogTransformClient({
+                request,
+                logger,
+                esClient: core.elasticsearch.client.asInternalUser,
+                spacesService: plugins.spaces?.spacesService,
+              })
+            : null;
+        },
+      });
+    });
+
     alertingAuthorizationClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
       securityPluginSetup: security,
@@ -406,47 +429,12 @@ export class AlertingPlugin {
       features: plugins.features,
     });
 
-    rulesClientFactory.initialize({
-      ruleTypeRegistry: ruleTypeRegistry!,
-      logger,
-      taskManager: plugins.taskManager,
-      securityPluginSetup: security,
-      securityPluginStart: plugins.security,
-      encryptedSavedObjectsClient,
-      spaceIdToNamespace,
-      getSpaceId(request: KibanaRequest) {
-        return plugins.spaces?.spacesService.getSpaceId(request);
-      },
-      actions: plugins.actions,
-      eventLog: plugins.eventLog,
-      kibanaVersion: this.kibanaVersion,
-      authorization: alertingAuthorizationClientFactory,
-      eventLogger: this.eventLogger,
-      minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
-      async getExecLogTransformClientWithRequest(request: KibanaRequest) {
-        logger.info(
-          `rulesClientFactory.initialize this.isEventLogTransformActive ${isEventLogTransformActive}`
-        );
-        return isEventLogTransformActive
-          ? new ExecLogTransformClient({
-              request,
-              logger,
-              esClient: core.elasticsearch.client.asInternalUser,
-              spacesService: plugins.spaces?.spacesService,
-            })
-          : null;
-      },
-    });
-
     const getRulesClientWithRequest = (request: KibanaRequest) => {
       if (isESOCanEncrypt !== true) {
         throw new Error(
           `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
       }
-      logger.info(
-        `getRulesClientWithRequest this.isEventLogTransformActive ${isEventLogTransformActive}`
-      );
       return rulesClientFactory!.create(request, core.savedObjects);
     };
 

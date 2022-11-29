@@ -38,9 +38,7 @@ export interface RulesClientFactoryOpts {
   authorization: AlertingAuthorizationClientFactory;
   eventLogger?: IEventLogger;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
-  getExecLogTransformClientWithRequest: (
-    request: KibanaRequest
-  ) => Promise<ExecLogTransformClient | null>;
+  getExecLogTransformClientWithRequest: (request: KibanaRequest) => ExecLogTransformClient | null;
 }
 
 export class RulesClientFactory {
@@ -61,7 +59,7 @@ export class RulesClientFactory {
   private minimumScheduleInterval!: AlertingRulesConfig['minimumScheduleInterval'];
   private getExecLogTransformClientWithRequest!: (
     request: KibanaRequest
-  ) => Promise<ExecLogTransformClient | null>;
+  ) => ExecLogTransformClient | null;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -147,7 +145,7 @@ export class RulesClientFactory {
       async getEventLogClient() {
         return eventLog.getClient(request);
       },
-      async getExecLogTransformClient() {
+      getExecLogTransformClient() {
         return getExecLogTransformClientWithRequest(request);
       },
       eventLogger: this.eventLogger,
