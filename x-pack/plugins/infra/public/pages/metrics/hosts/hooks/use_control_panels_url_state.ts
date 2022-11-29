@@ -42,17 +42,12 @@ export const getDefaultPanels = (dataViewId: string): ControlGroupInput['panels'
 const HOST_FILTERS_URL_STATE_KEY = 'controlPanels';
 
 export const useControlPanels = (dataViewId: string) => {
-  const [urlState, setUrlState] = useUrlState<ControlPanels>({
+  return useUrlState<ControlPanels>({
     defaultState: getDefaultPanels(dataViewId),
     decodeUrlState,
     encodeUrlState,
     urlStateKey: HOST_FILTERS_URL_STATE_KEY,
   });
-
-  return {
-    controlPanel: urlState,
-    setControlPanels: setUrlState,
-  };
 };
 
 const PanelRT = rt.type({

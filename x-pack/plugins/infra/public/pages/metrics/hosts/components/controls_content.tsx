@@ -37,7 +37,7 @@ export const ControlsContent: React.FC<Props> = ({
   filters,
   setPanelFilters,
 }) => {
-  const { setControlPanels, controlPanel } = useControlPanels(dataViewId);
+  const [controlPanel, setControlPanels] = useControlPanels(dataViewId);
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer | undefined>();
 
   useEffect(() => {

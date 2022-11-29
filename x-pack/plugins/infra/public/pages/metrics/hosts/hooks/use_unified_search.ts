@@ -89,7 +89,7 @@ export const useUnifiedSearch = () => {
     if (!metricsDataView) {
       return null;
     }
-    if (panelFilters && panelFilters.length > 0) {
+    if (Array.isArray(panelFilters) && panelFilters.length > 0) {
       return buildEsQuery(metricsDataView, state.query, [...state.filters, ...panelFilters]);
     }
     return buildEsQuery(metricsDataView, state.query, [...state.filters]);
