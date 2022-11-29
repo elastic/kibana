@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useEffect } from 'react';
+import React, { memo } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DeprecateNoticeModal } from './deprecate_notice_modal';
 import { PolicyConfig } from './types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
@@ -23,12 +22,6 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
   ({ newPolicy, onChange }) => {
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate' });
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate', delay: 15000 });
-
-    const { application } = useKibana().services;
-
-    useEffect(() => {
-      // application?.navigateToApp('uptime');
-    }, [application]);
 
     return <DeprecateNoticeModal />;
   }
