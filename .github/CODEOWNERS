@@ -1052,10 +1052,10 @@ packages/shared-ux/page/no_data/impl @elastic/kibana-global-experience
 packages/shared-ux/page/no_data/mocks @elastic/kibana-global-experience
 packages/shared-ux/page/no_data/types @elastic/kibana-global-experience
 packages/shared-ux/page/solution_nav @elastic/kibana-global-experience
-packages/shared-ux/prompt/not_found @elastic/kibana-global-experience
 packages/shared-ux/prompt/no_data_views/impl @elastic/kibana-global-experience
 packages/shared-ux/prompt/no_data_views/mocks @elastic/kibana-global-experience
 packages/shared-ux/prompt/no_data_views/types @elastic/kibana-global-experience
+packages/shared-ux/prompt/not_found @elastic/kibana-global-experience
 packages/shared-ux/router/impl @elastic/kibana-global-experience
 packages/shared-ux/router/mocks @elastic/kibana-global-experience
 packages/shared-ux/router/types @elastic/kibana-global-experience
