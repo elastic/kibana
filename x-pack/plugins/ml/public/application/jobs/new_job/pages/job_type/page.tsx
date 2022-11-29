@@ -210,6 +210,22 @@ export const Page: FC = () => {
       }),
       id: 'mlJobTypeLinkrareJob',
     },
+    {
+      onClick: () => navigateToPath(`/jobs/new_job/geo${getUrlParams()}`),
+      icon: {
+        type: RareIcon,
+        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.geoAriaLabel', {
+          defaultMessage: 'Geo job',
+        }),
+      },
+      title: i18n.translate('xpack.ml.newJob.wizard.jobType.geoTitle', {
+        defaultMessage: 'Geo',
+      }),
+      description: i18n.translate('xpack.ml.newJob.wizard.jobType.rareDescription', {
+        defaultMessage: 'Detect anomalies in the geographic location of the input data.',
+      }),
+      id: 'mlJobTypeLinkGeoJob',
+    },
   ];
 
   return (

@@ -161,6 +161,12 @@ export const rareRouteFactory = (navigateToPath: NavigateToPath, basePath: strin
   breadcrumbs: getRareBreadcrumbs(navigateToPath, basePath),
 });
 
+export const geoRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
+  path: '/jobs/new_job/geo',
+  render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.GEO} deps={deps} />,
+  breadcrumbs: getRareBreadcrumbs(navigateToPath, basePath),
+});
+
 const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
   const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE

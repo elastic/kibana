@@ -20,5 +20,6 @@ export {
   isAdvancedJobCreator,
   isCategorizationJobCreator,
   isRareJobCreator,
+  isGeoJobCreator,
 } from './type_guards';
 export { jobCreatorFactory } from './job_creator_factory';
