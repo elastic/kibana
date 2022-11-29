@@ -19,7 +19,7 @@ import { getTraceSampleIds } from './get_trace_sample_ids';
 import { transformServiceMapResponses } from './transform_service_map_responses';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { APMConfig } from '../..';
-import { getServicesData } from './get_services_data';
+import { getServiceStats } from './get_service_stats';
 
 export interface IEnvOptions {
   mlClient?: MlClient;
@@ -92,7 +92,7 @@ async function getConnectionData({
 }
 
 export type ConnectionsResponse = Awaited<ReturnType<typeof getConnectionData>>;
-export type ServicesResponse = Awaited<ReturnType<typeof getServicesData>>;
+export type ServicesResponse = Awaited<ReturnType<typeof getServiceStats>>;
 
 export function getServiceMap(
   options: IEnvOptions & { maxNumberOfServices: number }
@@ -111,7 +111,7 @@ export function getServiceMap(
 
     const [connectionData, servicesData, anomalies] = await Promise.all([
       getConnectionData(options),
-      getServicesData(options),
+      getServiceStats(options),
       anomaliesPromise,
     ]);
 

@@ -21,18 +21,16 @@ import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { IEnvOptions } from './get_service_map';
 
-export async function getServicesData(
-  options: IEnvOptions & { maxNumberOfServices: number }
-) {
-  const {
-    environment,
-    apmEventClient,
-    searchAggregatedTransactions,
-    start,
-    end,
-    maxNumberOfServices,
-    serviceGroupKuery,
-  } = options;
+export async function getServiceStats({
+  environment,
+  apmEventClient,
+  searchAggregatedTransactions,
+  start,
+  end,
+  maxNumberOfServices,
+  serviceGroupKuery,
+  serviceName,
+}: IEnvOptions & { maxNumberOfServices: number }) {
   const params = {
     apm: {
       events: [
@@ -49,7 +47,7 @@ export async function getServicesData(
           filter: [
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
-            ...termsQuery(SERVICE_NAME, ...(options.serviceName ?? [])),
+            ...termsQuery(SERVICE_NAME, serviceName),
             ...kqlQuery(serviceGroupKuery),
           ],
         },
@@ -84,9 +82,7 @@ export async function getServicesData(
         [AGENT_NAME]:
           (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
         [SERVICE_ENVIRONMENT]:
-          options.environment === ENVIRONMENT_ALL.value
-            ? null
-            : options.environment,
+          environment === ENVIRONMENT_ALL.value ? null : environment,
       };
     }) || []
   );
