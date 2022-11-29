@@ -38,18 +38,23 @@ export function formatGenericMlUrl(
 
     if (!isEmpty(restParams)) {
       Object.keys(restParams).forEach((key) => {
-        url = setStateToKbnUrl(key, restParams[key], url, {
-          useHash: false,
-          storeInHashQuery: false,
-        });
+        url = setStateToKbnUrl(
+          key,
+          restParams[key],
+          {
+            useHash: false,
+            storeInHashQuery: false,
+          },
+          url
+        );
       });
     }
 
     if (globalState) {
-      url = setStateToKbnUrl('_g', globalState, url, { useHash: false, storeInHashQuery: false });
+      url = setStateToKbnUrl('_g', globalState, { useHash: false, storeInHashQuery: false }, url);
     }
     if (appState) {
-      url = setStateToKbnUrl('_a', appState, url, { useHash: false, storeInHashQuery: false });
+      url = setStateToKbnUrl('_a', appState, { useHash: false, storeInHashQuery: false }, url);
     }
   }
 

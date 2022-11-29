@@ -190,8 +190,8 @@ export function createKbnUrlTracker({
         const updatedUrl = setStateToKbnUrl(
           kbnUrlKey,
           state,
-          baseUrl + (activeUrl || defaultSubUrl),
-          { useHash: false }
+          { useHash: false },
+          baseUrl + (activeUrl || defaultSubUrl)
         );
         previousActiveUrl = activeUrl;
         // remove baseUrl prefix (just storing the sub url part)

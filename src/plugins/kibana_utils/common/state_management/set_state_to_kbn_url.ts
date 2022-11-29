@@ -15,11 +15,11 @@ import { replaceUrlHashQuery, replaceUrlQuery } from './format';
 export function setStateToKbnUrl<State>(
   key: string,
   state: State,
-  rawUrl: string,
   { useHash = false, storeInHashQuery = true }: { useHash: boolean; storeInHashQuery?: boolean } = {
     useHash: false,
     storeInHashQuery: true,
-  }
+  },
+  rawUrl: string
 ): string {
   const replacer = storeInHashQuery ? replaceUrlHashQuery : replaceUrlQuery;
   return replacer(rawUrl, (query) => {

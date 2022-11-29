@@ -83,10 +83,15 @@ export const createKbnUrlStateStorage = (
       // syncState() utils doesn't wait for this promise
       return url.updateAsync((currentUrl) => {
         try {
-          return setStateToKbnUrl(key, state, currentUrl, {
-            useHash,
-            storeInHashQuery: useHashQuery,
-          });
+          return setStateToKbnUrl(
+            key,
+            state,
+            {
+              useHash,
+              storeInHashQuery: useHashQuery,
+            },
+            currentUrl
+          );
         } catch (error) {
           if (onSetError) onSetError(error);
         }

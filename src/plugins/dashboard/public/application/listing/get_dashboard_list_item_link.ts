@@ -36,6 +36,6 @@ export const getDashboardListItemLink = (
     delete globalStateInUrl.time;
     delete globalStateInUrl.refreshInterval;
   }
-  url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, globalStateInUrl, url, { useHash });
+  url = setStateToKbnUrl<QueryState>(GLOBAL_STATE_STORAGE_KEY, globalStateInUrl, { useHash }, url);
   return url;
 };

@@ -187,8 +187,8 @@ async function buildDashboardUrlFromSettings(settings) {
       filters: state.filters?.filter((f) => !isFilterPinned(f)),
       savedQuery: state.savedQuery,
     }),
-    location.path,
-    { useHash: false, storeInHashQuery: true }
+    { useHash: false, storeInHashQuery: true },
+    location.path
   );
 
   const urlToAdd = {

@@ -99,8 +99,8 @@ export interface DiscoverAppLocatorDependencies {
   setStateToKbnUrl: <State>(
     key: string,
     state: State,
-    rawUrl: string,
-    options: { useHash: boolean; storeInHashQuery?: boolean }
+    options: { useHash: boolean; storeInHashQuery?: boolean },
+    rawUrl: string
   ) => string;
 }
 
@@ -171,8 +171,8 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     }
 
     let path = `#/${savedSearchPath}`;
-    path = this.deps.setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, path, { useHash });
-    path = this.deps.setStateToKbnUrl('_a', appState, path, { useHash });
+    path = this.deps.setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
+    path = this.deps.setStateToKbnUrl('_a', appState, { useHash }, path);
 
     if (searchSessionId) {
       path = `${path}&searchSessionId=${searchSessionId}`;

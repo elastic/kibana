@@ -99,8 +99,8 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
         filters: state.filters?.filter((f) => !isFilterPinned(f)),
         savedQuery: state.savedQuery,
       }),
-      location.path,
-      { useHash: false, storeInHashQuery: true }
+      { useHash: false, storeInHashQuery: true },
+      location.path
     );
   }
 
