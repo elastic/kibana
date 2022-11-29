@@ -14,7 +14,7 @@ import mdx from '../README.mdx';
 import { NotFoundPrompt } from './not_found_prompt';
 
 export default {
-  title: 'Not found/Not found',
+  title: 'Not found/Prompt',
   description:
     'A component to display when the user reaches a page or tries to load a resource that does not exist',
   parameters: {
