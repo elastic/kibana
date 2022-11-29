@@ -21,6 +21,8 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
+  toSentenceCase,
+  EuiLink,
 } from '@elastic/eui';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -303,7 +305,22 @@ export const SearchBar: FC<SearchBarProps> = ({
       className="kbnSearchBar"
       popoverButtonBreakpoints={['xs', 's']}
       singleSelection={true}
-      renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchTerm)}
+      renderOption={(option) => {
+        return option.type === 'documentation' ? (
+          <span className="euiSelectableListItem__text">
+            <EuiLink href="" external={true}>
+              <span className="euiSelectableTemplateSitewide__listItemTitle">{option.label}</span>
+            </EuiLink>
+            <span className="euiSelectableTemplateSitewide__optionMetasList">
+              <span className="euiSelectableTemplateSitewide__optionMeta">
+                {toSentenceCase(option.type)}
+              </span>
+            </span>
+          </span>
+        ) : (
+          euiSelectableTemplateSitewideRenderOptions(option, searchTerm)
+        );
+      }}
       searchProps={{
         value: searchValue,
         onInput: (e: React.UIEvent<HTMLInputElement>) => setSearchValue(e.currentTarget.value),

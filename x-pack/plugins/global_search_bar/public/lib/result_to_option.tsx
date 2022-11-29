@@ -43,17 +43,16 @@ export const resultToOption = (
       <ResultTagList tags={tagIds.map(getTag) as Tag[]} searchTagIds={searchTagIds} />
     );
   }
-
-  if (type === 'documentation') {
-    // Did the following in the application service instead
-    /*
+  // Did the following in the application service instead
+  /*
+    if (type === 'documentation') {
         option.onClick = (x) => {
           window.open(url, '_blank', 'noopener,noreferrer');
         };
-    */
-
-    option.append = <EuiIcon type="popout" />;
-  }
+        
+        option.append = <EuiIcon type="popout" />;
+    }
+  */
 
   return option;
 };
