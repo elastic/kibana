@@ -56,8 +56,6 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       const pushMonitorFormatter = new ProjectMonitorFormatter({
         projectId: decodedProjectName,
         spaceId,
-        locations: [],
-        privateLocations: [],
         encryptedSavedObjectsClient,
         savedObjectsClient,
         monitors,
