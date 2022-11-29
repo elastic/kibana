@@ -26,9 +26,9 @@ export function MachineLearningAlertingProvider(
 
   return {
     async selectAnomalyDetectionAlertType() {
-      await testSubjects.click('xpack.ml.anomaly_detection_alert-SelectOption');
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail(`mlAnomalyAlertForm`);
+        await testSubjects.click('xpack.ml.anomaly_detection_alert-SelectOption');
+        await testSubjects.existOrFail(`mlAnomalyAlertForm`, { timeout: 1000 });
       });
     },
 
@@ -50,8 +50,14 @@ export function MachineLearningAlertingProvider(
     },
 
     async selectResultType(resultType: string) {
-      await testSubjects.click(`mlAnomalyAlertResult_${resultType}`);
-      await this.assertResultTypeSelection(resultType);
+      if (
+        (await testSubjects.exists(`mlAnomalyAlertResult_${resultType}_selected`, {
+          timeout: 1000,
+        })) === false
+      ) {
+        await testSubjects.click(`mlAnomalyAlertResult_${resultType}`);
+        await this.assertResultTypeSelection(resultType);
+      }
     },
 
     async assertResultTypeSelection(resultType: string) {
@@ -167,6 +173,13 @@ export function MachineLearningAlertingProvider(
           .set('kbn-xsrf', 'foo');
         mlApi.assertResponseStatusCode(204, status, body);
       }
+    },
+
+    async openNotifySelection() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('notifyWhenSelect');
+        await testSubjects.existOrFail('onActionGroupChange', { timeout: 1000 });
+      });
     },
   };
 }
