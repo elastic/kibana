@@ -12,15 +12,9 @@ import {
   DEFAULT_FROM,
   DEFAULT_APP_TIME_RANGE,
   DEFAULT_TO,
-  DEFAULT_APP_REFRESH_INTERVAL,
-  DEFAULT_INTERVAL_PAUSE,
-  DEFAULT_INTERVAL_VALUE,
 } from '../../../../../../common/constants';
 import { KibanaServices } from '../../../../lib/kibana';
-import type {
-  DefaultTimeRangeSetting,
-  DefaultIntervalSetting,
-} from '../../../../utils/default_date_settings';
+import type { DefaultTimeRangeSetting } from '../../../../utils/default_date_settings';
 import { renderer as Renderer } from '.';
 import type { InvestigateInTimelineButtonProps } from '../../../event_details/table/investigate_in_timeline_button';
 
@@ -48,11 +42,7 @@ jest.mock('../../../event_details/table/investigate_in_timeline_button', () => {
   };
 });
 const mockTimeRange = (
-  timeRange: DefaultTimeRangeSetting = { from: DEFAULT_FROM, to: DEFAULT_TO },
-  interval: DefaultIntervalSetting = {
-    pause: DEFAULT_INTERVAL_PAUSE,
-    value: DEFAULT_INTERVAL_VALUE,
-  }
+  timeRange: DefaultTimeRangeSetting = { from: DEFAULT_FROM, to: DEFAULT_TO }
 ) => {
   mockGetServices.mockImplementation(() => ({
     uiSettings: {
@@ -60,8 +50,6 @@ const mockTimeRange = (
         switch (key) {
           case DEFAULT_APP_TIME_RANGE:
             return timeRange;
-          case DEFAULT_APP_REFRESH_INTERVAL:
-            return interval;
           default:
             throw new Error(`Unexpected config key: ${key}`);
         }
