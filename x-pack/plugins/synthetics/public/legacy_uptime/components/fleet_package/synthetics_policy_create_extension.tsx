@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DeprecateNoticeModal } from './deprecate_notice_modal';
 import { PolicyConfig } from './types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
@@ -23,7 +24,16 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate' });
     useTrackPageview({ app: 'fleet', path: 'syntheticsCreate', delay: 15000 });
 
-    return <DeprecateNoticeModal />;
+    const { application } = useKibana().services;
+
+    const { package: pkg } = newPolicy;
+
+    const onCancel = useCallback(() => {
+      application?.navigateToApp('integrations', {
+        path: `/detail/${pkg?.name}-${pkg?.version}/overview`,
+      });
+    }, [application, pkg?.name, pkg?.version]);
+    return <DeprecateNoticeModal onCancel={onCancel} />;
   }
 );
 SyntheticsPolicyCreateExtension.displayName = 'SyntheticsPolicyCreateExtension';
