@@ -12,8 +12,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function canvasExpressionTest({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const monacoEditor = getService('monacoEditor');
   const PageObjects = getPageObjects(['canvas', 'common']);
-  const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default';
 
@@ -43,31 +43,31 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
         expect(elements).to.have.length(4);
       });
 
+      const codeEditorSubj = 'canvasCodeEditorField';
+
       // find the first workpad element (a markdown element) and click it to select it
       await testSubjects.click('canvasWorkpadPage > canvasWorkpadPageElementContent', 20000);
+      await monacoEditor.waitCodeEditorReady(codeEditorSubj);
 
       // open the expression editor
       await PageObjects.canvas.openExpressionEditor();
+      await monacoEditor.waitCodeEditorReady('canvasExpressionInput');
 
       // select markdown content and clear it
-      const mdBox = await find.byCssSelector('.canvasSidebar__panel .canvasTextArea__code');
-      const oldMd = await mdBox.getVisibleText();
-      await mdBox.clearValueWithKeyboard();
+      const oldMd = await monacoEditor.getCodeEditorValue(0);
+      await monacoEditor.setCodeEditorValue('', 0);
 
       // type the new text
       const newMd = `${oldMd} and this is a test`;
-      await mdBox.type(newMd);
-      await find.clickByCssSelector('.canvasArg--controls .euiButton');
+      await monacoEditor.setCodeEditorValue(newMd, 0);
+      await PageObjects.common.sleep(300);
 
       // make sure the open expression editor also has the changes
-      const editor = await find.byCssSelector('.monaco-editor .view-lines');
-      const editorText = await editor.getVisibleText();
+      const editorText = await monacoEditor.getCodeEditorValue(1);
       expect(editorText).to.contain('Orange: Timelion, Server function and this is a test');
 
       // reset the markdown
-      await mdBox.clearValueWithKeyboard();
-      await mdBox.type(oldMd);
-      await find.clickByCssSelector('.canvasArg--controls .euiButton');
+      await monacoEditor.setCodeEditorValue(oldMd, 0);
     });
   });
 }
