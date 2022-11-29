@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 import { EuiSwitch, EuiToolTip } from '@elastic/eui';
 import noop from 'lodash/noop';
 
@@ -39,4 +39,4 @@ const MlUserJobDescriptionComponent: FC<{
   return <MlJobItem job={job} switchComponent={switchComponent} />;
 };
 
-export const MlUserJobDescription = React.memo(MlUserJobDescriptionComponent);
+export const MlUserJobDescription = memo(MlUserJobDescriptionComponent);

@@ -30,7 +30,7 @@ const securityJobNotStarted: SecurityJob = {
   },
 };
 
-(useEnableDataFeed as jest.Mock).mockReturnValue({
+const useEnableDataFeedMock = (useEnableDataFeed as jest.Mock).mockReturnValue({
   isLoading: false,
 });
 
@@ -38,7 +38,7 @@ describe('MlAdminJobDescription', () => {
   it('should enable datafeed and call refreshJob when enabling job', async () => {
     const refreshJobSpy = jest.fn();
     const enableDatafeedSpy = jest.fn();
-    (useEnableDataFeed as jest.Mock).mockReturnValueOnce({
+    useEnableDataFeedMock.mockReturnValueOnce({
       enableDatafeed: enableDatafeedSpy,
     });
 
@@ -66,7 +66,7 @@ describe('MlAdminJobDescription', () => {
   });
 
   it('should render loading spinner when job start is in progress', async () => {
-    (useEnableDataFeed as jest.Mock).mockReturnValueOnce({
+    useEnableDataFeedMock.mockReturnValueOnce({
       isLoading: true,
     });
 

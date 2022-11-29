@@ -24,16 +24,18 @@ jest.mock(
 
 jest.mock('../../../../../common/components/ml_popover/hooks/use_security_jobs');
 
+const useSecurityJobsMock = useSecurityJobs as jest.Mock;
+
 describe('MlUsersJobDescription', () => {
   it('should render null if admin permissions absent', () => {
-    (useSecurityJobs as jest.Mock).mockReturnValueOnce({ jobs: [], isMlAdmin: false });
+    useSecurityJobsMock.mockReturnValueOnce({ jobs: [], isMlAdmin: false });
     const { container } = render(<MlAdminJobsDescription jobIds={['mock-1']} />);
 
     expect(container.firstChild).toBeNull();
   });
 
   it('should render only jobs with job ids passed as props', () => {
-    (useSecurityJobs as jest.Mock).mockReturnValueOnce({
+    useSecurityJobsMock.mockReturnValueOnce({
       jobs: [{ id: 'mock-1' }, { id: 'mock-2' }, { id: 'mock-3' }],
       isMlAdmin: true,
     });

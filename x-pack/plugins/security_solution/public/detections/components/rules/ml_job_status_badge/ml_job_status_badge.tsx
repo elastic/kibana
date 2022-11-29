@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { memo } from 'react';
 import { EuiBadge } from '@elastic/eui';
 
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
@@ -30,4 +30,4 @@ const MlJobStatusBadgeComponent: FC<JobStatusBadgeProps> = ({ job }) => {
   );
 };
 
-export const MlJobStatusBadge = React.memo(MlJobStatusBadgeComponent);
+export const MlJobStatusBadge = memo(MlJobStatusBadgeComponent);

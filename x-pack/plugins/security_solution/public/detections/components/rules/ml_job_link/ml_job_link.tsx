@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import styled from 'styled-components';
 import { EuiLink } from '@elastic/eui';
 
@@ -38,4 +38,4 @@ const MlJobLinkComponent: React.FC<MlJobLinkProps> = ({ jobId }) => {
   );
 };
 
-export const MlJobLink = React.memo(MlJobLinkComponent);
+export const MlJobLink = memo(MlJobLinkComponent);

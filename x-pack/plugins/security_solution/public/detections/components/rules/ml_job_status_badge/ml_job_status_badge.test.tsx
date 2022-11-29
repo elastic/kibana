@@ -14,6 +14,8 @@ import { MlJobStatusBadge } from './ml_job_status_badge';
 
 jest.mock('../../../../../common/machine_learning/helpers');
 
+const isJobStartedMock = isJobStarted as jest.Mock;
+
 describe('MlJobStatusBadge', () => {
   it('should call isJobStarted helper', () => {
     render(<MlJobStatusBadge job={mockOpenedJob} />);
@@ -22,14 +24,14 @@ describe('MlJobStatusBadge', () => {
   });
 
   it('should render started if isJobStarted return true', () => {
-    (isJobStarted as jest.Mock).mockReturnValueOnce(true);
+    isJobStartedMock.mockReturnValueOnce(true);
     render(<MlJobStatusBadge job={mockOpenedJob} />);
 
     expect(screen.getByTestId('machineLearningJobStatus')).toHaveTextContent('Started');
   });
 
   it('should render stopped if isJobStarted return false', () => {
-    (isJobStarted as jest.Mock).mockReturnValueOnce(false);
+    isJobStartedMock.mockReturnValueOnce(false);
     render(<MlJobStatusBadge job={mockOpenedJob} />);
 
     expect(screen.getByTestId('machineLearningJobStatus')).toHaveTextContent('Stopped');

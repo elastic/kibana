@@ -24,20 +24,23 @@ jest.mock(
 
 jest.mock('../../../../../common/components/ml/hooks/use_installed_security_jobs');
 
+const useInstalledSecurityJobsMock = useInstalledSecurityJobs as jest.Mock;
+
 describe('MlUsersJobDescription', () => {
   it('should render null if user permissions absent', () => {
-    (useInstalledSecurityJobs as jest.Mock).mockReturnValueOnce({ jobs: [], isMlUser: false });
+    useInstalledSecurityJobsMock.mockReturnValueOnce({ jobs: [], isMlUser: false });
     const { container } = render(<MlUserJobsDescription jobIds={['mock-1']} />);
 
     expect(container.firstChild).toBeNull();
   });
 
   it('should render only jobs with job ids passed as props', () => {
-    (useInstalledSecurityJobs as jest.Mock).mockReturnValueOnce({
+    useInstalledSecurityJobsMock.mockReturnValueOnce({
       jobs: [{ id: 'mock-1' }, { id: 'mock-2' }, { id: 'mock-3' }],
       isMlUser: true,
     });
     render(<MlUserJobsDescription jobIds={['mock-1', 'mock-2', 'mock-4']} />);
+
     const expectedJobs = screen.getAllByTestId('userMock');
     expect(expectedJobs).toHaveLength(2);
     expect(expectedJobs[0]).toHaveTextContent('mock-1');

@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { memo } from 'react';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
@@ -44,4 +44,4 @@ const MlAuditIconComponent: FC<MlAuditIconProps> = ({ message }) => {
   );
 };
 
-export const MlAuditIcon = React.memo(MlAuditIconComponent);
+export const MlAuditIcon = memo(MlAuditIconComponent);

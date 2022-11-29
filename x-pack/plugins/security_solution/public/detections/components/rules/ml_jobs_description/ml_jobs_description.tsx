@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { memo } from 'react';
 
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
@@ -36,4 +36,4 @@ const MlJobsDescriptionComponent: FC<MlJobsDescriptionProps> = ({ jobIds }) => {
   return null;
 };
 
-export const MlJobsDescription = React.memo(MlJobsDescriptionComponent);
+export const MlJobsDescription = memo(MlJobsDescriptionComponent);

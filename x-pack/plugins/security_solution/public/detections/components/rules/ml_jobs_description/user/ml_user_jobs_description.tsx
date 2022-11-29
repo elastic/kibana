@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { memo } from 'react';
 
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 
@@ -34,4 +34,4 @@ const MlUserJobsDescriptionComponent: FC<MlUserJobsDescriptionProps> = ({ jobIds
   );
 };
 
-export const MlUserJobsDescription = React.memo(MlUserJobsDescriptionComponent);
+export const MlUserJobsDescription = memo(MlUserJobsDescriptionComponent);
