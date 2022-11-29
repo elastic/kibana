@@ -55,11 +55,15 @@ export class DefaultSLIClient implements SLIClient {
       generateSearchQuery(slo, dateRangeBySlo[slo.id]),
     ]);
 
+    const indicatorDataBySlo: Record<SLOId, IndicatorData> = {};
+    if (searches.length === 0) {
+      return indicatorDataBySlo;
+    }
+
     const result = await this.esClient.msearch<unknown, Record<AggKey, AggregationsSumAggregate>>({
       searches,
     });
 
-    const indicatorDataBySlo: Record<SLOId, IndicatorData> = {};
     for (let i = 0; i < result.responses.length; i++) {
       const slo = sloList[i];
       if ('error' in result.responses[i]) {
