@@ -137,13 +137,15 @@ export const useDiscoverHistogram = ({
 
   const { bucketInterval, chartData } = useMemo(
     () =>
-      buildChartData({
-        data,
-        dataView,
-        timeInterval: state.interval,
-        response,
-      }),
-    [data, dataView, response, state.interval]
+      isPlainRecord || !isTimeBased
+        ? { bucketInterval: undefined, chartData: undefined }
+        : buildChartData({
+            data,
+            dataView,
+            timeInterval: state.interval,
+            response,
+          }),
+    [data, dataView, isPlainRecord, isTimeBased, response, state.interval]
   );
 
   const chart = useMemo(
