@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditorField, useKibana } from '@kbn/kibana-react-plugin/public';
 
-import type { ApiKey, ApiKeyRoleDescriptors } from '../../../../common/model';
+import type { ApiKey, ApiKeyRoleDescriptors, AuthenticatedUser } from '../../../../common/model';
 import { DocLink } from '../../../components/doc_link';
 import type { FormFlyoutProps } from '../../../components/form_flyout';
 import { FormFlyout } from '../../../components/form_flyout';
@@ -88,6 +88,10 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   let inProgressButtonText = 'Creating API Key…';
   let errorTitle = 'create API key';
 
+  const { value: currentUser, loading: isLoadingCurrentUser } = useCurrentUser();
+
+  let canEditApiKey = false;
+
   if (selectedApiKey) {
     // Collect data from the selected API key to pre-populate the form
     const doesMetadataExist = Object.keys(selectedApiKey.metadata).length > 0;
@@ -108,7 +112,9 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
         : '{}',
     };
 
-    if (readonly) {
+    canEditApiKey = isEditable(currentUser, selectedApiKey);
+
+    if (readonly || !canEditApiKey) {
       formTitle = 'View API Key';
       inProgressButtonText = ''; // This won't be seen since Submit will be disabled
       errorTitle = '';
@@ -120,8 +126,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   }
 
   const { services } = useKibana();
-
-  const { value: currentUser, loading: isLoadingCurrentUser } = useCurrentUser();
 
   const [{ value: roles, loading: isLoadingRoles }, getRoles] = useAsyncFn(
     () => new RolesAPIClient(services.http!).getRoles(),
@@ -195,7 +199,12 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
         }
       )}
       isLoading={form.isSubmitting}
-      isDisabled={isLoading || (form.isSubmitted && form.isInvalid) || readonly}
+      isDisabled={
+        isLoading ||
+        (form.isSubmitted && form.isInvalid) ||
+        readonly ||
+        (selectedApiKey && !canEditApiKey)
+      }
       size="s"
       ownFocus
     >
@@ -285,7 +294,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
               checked={!!form.values.customPrivileges}
               data-test-subj="apiKeysRoleDescriptorsSwitch"
               onChange={(e) => form.setValue('customPrivileges', e.target.checked)}
-              disabled={readonly}
+              disabled={readonly || (selectedApiKey && !canEditApiKey)}
             />
             {form.values.customPrivileges && (
               <>
@@ -311,7 +320,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                     onChange={(value) => form.setValue('role_descriptors', value)}
                     languageId="xjson"
                     height={200}
-                    options={{ readOnly: readonly }}
+                    options={{ readOnly: readonly || (selectedApiKey && !canEditApiKey) }}
                   />
                 </EuiFormRow>
                 <EuiSpacer size="s" />
@@ -330,7 +339,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
               )}
               checked={!!form.values.customExpiration}
               onChange={(e) => form.setValue('customExpiration', e.target.checked)}
-              disabled={!!selectedApiKey || readonly}
+              disabled={readonly || !!selectedApiKey}
               data-test-subj="apiKeyCustomExpirationSwitch"
             />
             {form.values.customExpiration && (
@@ -361,7 +370,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                     }
                     fullWidth
                     data-test-subj="apiKeyCustomExpirationInput"
-                    disabled={!!selectedApiKey || readonly}
+                    disabled={readonly || !!selectedApiKey}
                   />
                 </EuiFormRow>
                 <EuiSpacer size="s" />
@@ -380,7 +389,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
               )}
               data-test-subj="apiKeysMetadataSwitch"
               checked={!!form.values.includeMetadata}
-              disabled={readonly}
+              disabled={readonly || (selectedApiKey && !canEditApiKey)}
               onChange={(e) => form.setValue('includeMetadata', e.target.checked)}
             />
             {form.values.includeMetadata && (
@@ -407,7 +416,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                     onChange={(value) => form.setValue('metadata', value)}
                     languageId="xjson"
                     height={200}
-                    options={{ readOnly: readonly }}
+                    options={{ readOnly: readonly || (selectedApiKey && !canEditApiKey) }}
                   />
                 </EuiFormRow>
                 <EuiSpacer size="s" />
@@ -510,4 +519,16 @@ export function mapUpdateApiKeyValues(id: string, values: ApiKeyFormValues): Upd
       values.customPrivileges && values.role_descriptors ? JSON.parse(values.role_descriptors) : {},
     metadata: values.includeMetadata && values.metadata ? JSON.parse(values.metadata) : {},
   };
+}
+
+function isEditable(currentUser: AuthenticatedUser | undefined, selectedApiKey: ApiKey): boolean {
+  let result = false;
+  const isApiKeyOwner = currentUser && currentUser.username === selectedApiKey.username;
+  const isNotExpired = !selectedApiKey.expiration || moment(selectedApiKey.expiration).isAfter();
+
+  if (isApiKeyOwner && isNotExpired) {
+    result = true;
+  }
+
+  return result;
 }
