@@ -8,41 +8,87 @@
 
 import uuid from 'uuid';
 import useLifecycles from 'react-use/lib/useLifecycles';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 
 import { pluginServices } from '../services';
-import { getDefaultControlGroupInput } from '../../common';
-import { ControlGroupInput, ControlGroupOutput, CONTROL_GROUP_TYPE } from './types';
+import { ControlPanelState, getDefaultControlGroupInput } from '../../common';
+import {
+  ControlGroupInput,
+  ControlGroupOutput,
+  ControlGroupReduxState,
+  CONTROL_GROUP_TYPE,
+} from './types';
 import { ControlGroupContainer } from './embeddable/control_group_container';
+import { DataControlInput } from '../types';
+import { getCompatibleControlType, getNextPanelOrder } from './embeddable/control_group_helpers';
+import { controlGroupReducers } from './state/control_group_reducers';
+
+const ControlGroupInputBuilder = {
+  addDataControlFromField: async (
+    initialInput: Partial<ControlGroupInput>,
+    newPanelInput: {
+      title?: string;
+      panelId?: string;
+      fieldName: string;
+      dataViewId: string;
+    } & Partial<ControlPanelState>
+  ) => {
+    const { defaultControlGrow, defaultControlWidth } = getDefaultControlGroupInput();
+    const controlGrow = initialInput.defaultControlGrow ?? defaultControlGrow;
+    const controlWidth = initialInput.defaultControlWidth ?? defaultControlWidth;
+
+    const { panelId, dataViewId, fieldName, title, grow, width } = newPanelInput;
+    const newPanelId = panelId || uuid.v4();
+    const nextOrder = getNextPanelOrder(initialInput);
+    const controlType = await getCompatibleControlType({ dataViewId, fieldName });
+
+    initialInput.panels = {
+      ...initialInput.panels,
+      [newPanelId]: {
+        order: nextOrder,
+        type: controlType,
+        grow: grow ?? controlGrow,
+        width: width ?? controlWidth,
+        explicitInput: { id: newPanelId, dataViewId, fieldName, title: title ?? fieldName },
+      } as ControlPanelState<DataControlInput>,
+    };
+  },
+};
 
 export interface ControlGroupRendererProps {
-  input?: Partial<Pick<ControlGroupInput, 'viewMode' | 'executionContext'>>;
   onEmbeddableLoad: (controlGroupContainer: ControlGroupContainer) => void;
+  getCreationOptions: (
+    builder: typeof ControlGroupInputBuilder
+  ) => Promise<Partial<ControlGroupInput>>;
 }
 
-export const ControlGroupRenderer = ({ input, onEmbeddableLoad }: ControlGroupRendererProps) => {
+export const ControlGroupRenderer = ({
+  onEmbeddableLoad,
+  getCreationOptions,
+}: ControlGroupRendererProps) => {
   const controlsRoot = useRef(null);
   const [controlGroupContainer, setControlGroupContainer] = useState<ControlGroupContainer>();
-
   const id = useMemo(() => uuid.v4(), []);
-
   /**
    * Use Lifecycles to load initial control group container
    */
   useLifecycles(
     () => {
       const { embeddable } = pluginServices.getServices();
-
       (async () => {
-        const container = (await embeddable
-          .getEmbeddableFactory<
-            ControlGroupInput,
-            ControlGroupOutput,
-            IEmbeddable<ControlGroupInput, ControlGroupOutput>
-          >(CONTROL_GROUP_TYPE)
-          ?.create({ id, ...getDefaultControlGroupInput(), ...input })) as ControlGroupContainer;
+        const factory = embeddable.getEmbeddableFactory<
+          ControlGroupInput,
+          ControlGroupOutput,
+          IEmbeddable<ControlGroupInput, ControlGroupOutput>
+        >(CONTROL_GROUP_TYPE);
+        const container = (await factory?.create({
+          id,
+          ...getDefaultControlGroupInput(),
+          ...(await getCreationOptions(ControlGroupInputBuilder)),
+        })) as ControlGroupContainer;
 
         if (controlsRoot.current) {
           container.render(controlsRoot.current);
@@ -56,28 +102,11 @@ export const ControlGroupRenderer = ({ input, onEmbeddableLoad }: ControlGroupRe
     }
   );
 
-  /**
-   * Update embeddable input when props input changes
-   */
-  useEffect(() => {
-    let updateCanceled = false;
-    (async () => {
-      // check if applying input from props would result in any changes to the embeddable input
-      const isInputEqual = await controlGroupContainer?.getExplicitInputIsEqual({
-        ...controlGroupContainer?.getInput(),
-        ...input,
-      });
-      if (!controlGroupContainer || isInputEqual || updateCanceled) return;
-      controlGroupContainer.updateInput({ ...input });
-    })();
-
-    return () => {
-      updateCanceled = true;
-    };
-  }, [controlGroupContainer, input]);
-
   return <div ref={controlsRoot} />;
 };
+
+export const useControlGroupContainerContext = () =>
+  useReduxContainerContext<ControlGroupReduxState, typeof controlGroupReducers>();
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export

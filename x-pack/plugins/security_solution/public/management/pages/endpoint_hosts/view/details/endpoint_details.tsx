@@ -43,7 +43,7 @@ export const EndpointDetails = memo(() => {
   const policyInfo = useEndpointSelector(policyVersionInfo);
   const hostStatus = useEndpointSelector(hostStatusInfo);
   const show = useEndpointSelector(showView);
-  const { canReadActionsLogManagement } = useUserPrivileges().endpointPrivileges;
+  const { canAccessEndpointActionsLogManagement } = useUserPrivileges().endpointPrivileges;
 
   const ContentLoadingMarkup = useMemo(
     () => (
@@ -82,7 +82,7 @@ export const EndpointDetails = memo(() => {
 
       // show the response actions history tab
       // only when the user has the required permission
-      if (canReadActionsLogManagement) {
+      if (canAccessEndpointActionsLogManagement) {
         tabs.push({
           id: EndpointDetailsTabsTypes.activityLog,
           name: i18.ACTIVITY_LOG.tabTitle,
@@ -97,7 +97,7 @@ export const EndpointDetails = memo(() => {
       return tabs;
     },
     [
-      canReadActionsLogManagement,
+      canAccessEndpointActionsLogManagement,
       ContentLoadingMarkup,
       hostDetails,
       policyInfo,
@@ -142,7 +142,7 @@ export const EndpointDetails = memo(() => {
               hostname={hostDetails.host.hostname}
               // show overview tab if forcing response actions history
               // tab via URL without permission
-              show={!canReadActionsLogManagement ? 'details' : show}
+              show={!canAccessEndpointActionsLogManagement ? 'details' : show}
               tabs={getTabs(hostDetails.agent.id)}
             />
           )}

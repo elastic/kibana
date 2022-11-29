@@ -7,7 +7,7 @@
 
 import { of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { functionWrapper } from '@kbn/presentation-util-plugin/common/lib';
+import { functionWrapper } from '@kbn/presentation-util-plugin/common';
 import { ifFn } from './if';
 
 describe('if', () => {

@@ -75,7 +75,7 @@ function createCommentFindResponse(
 describe('common utils', () => {
   describe('transformNewCase', () => {
     beforeAll(() => {
-      jest.useFakeTimers('modern');
+      jest.useFakeTimers();
       jest.setSystemTime(new Date('2020-04-09T09:43:51.778Z'));
     });
 

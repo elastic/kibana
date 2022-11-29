@@ -19,10 +19,15 @@ import {
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { calcEstimatedCost, calcMemoryUsedRate } from './helper';
+import { computeUsageAvgScript } from './get_compute_usage_chart';
+import {
+  calcEstimatedCost,
+  calcMemoryUsedRate,
+  convertComputeUsageToGbSec,
+} from './helper';
 
 export type AwsLambdaArchitecture = 'arm' | 'x86_64';
 
@@ -121,6 +126,7 @@ export async function getServerlessSummary({
         avgTotalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
         avgFreeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
         countInvocations: { value_count: { field: FAAS_BILLED_DURATION } },
+        avgComputeUsageBytesMs: computeUsageAvgScript,
         sample: {
           top_metrics: {
             metrics: [{ field: HOST_ARCHITECTURE }],
@@ -159,9 +165,11 @@ export async function getServerlessSummary({
         HOST_ARCHITECTURE
       ] as AwsLambdaArchitecture | undefined,
       transactionThroughput,
-      billedDuration: response.aggregations?.faasBilledDurationAvg.value,
-      totalMemory: response.aggregations?.avgTotalMemory.value,
-      countInvocations: response.aggregations?.countInvocations.value,
+      computeUsageGbSec: convertComputeUsageToGbSec({
+        computeUsageBytesMs:
+          response.aggregations?.avgComputeUsageBytesMs.value,
+        countInvocations: response.aggregations?.countInvocations.value,
+      }),
     }),
   };
 }

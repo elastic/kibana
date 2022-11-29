@@ -20,7 +20,7 @@ describe('Mappings editor: runtime fields', () => {
   let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

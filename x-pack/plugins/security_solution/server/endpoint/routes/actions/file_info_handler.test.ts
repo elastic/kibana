@@ -16,6 +16,7 @@ import type { ActionDetails } from '../../../../common/endpoint/types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { getFileInfo as _getFileInfo } from '../../services/actions/action_files';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 
 jest.mock('../../services');
 jest.mock('../../services/actions/action_files');
@@ -52,8 +53,9 @@ describe('Response Action file info API', () => {
     });
 
     it('should error if user has no authz to api', async () => {
-      const authz = (await httpHandlerContextMock.securitySolution).endpointAuthz;
-      authz.canWriteFileOperations = false;
+      (
+        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as jest.Mock
+      ).mockResolvedValue(getEndpointAuthzInitialStateMock({ canWriteFileOperations: false }));
 
       await apiTestSetup.getRegisteredRouteHandler('get', ACTION_AGENT_FILE_INFO_ROUTE)(
         httpHandlerContextMock,

@@ -2,10 +2,10 @@
 
 exports[`TimeExpressionSelect component should renders against props 1`] = `
 <div
-  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
 >
   <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
       class="euiPopover emotion-euiPopover"
@@ -35,7 +35,7 @@ exports[`TimeExpressionSelect component should renders against props 1`] = `
     </div>
   </div>
   <div
-    class="euiFlexItem"
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
     <div
       class="euiPopover emotion-euiPopover"

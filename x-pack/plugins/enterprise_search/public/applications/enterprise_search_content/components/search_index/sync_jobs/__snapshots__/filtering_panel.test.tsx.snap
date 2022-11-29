@@ -3,7 +3,7 @@
 exports[`FilteringPanel renders 1`] = `
 <Fragment>
   <FlyoutPanel
-    title="Filtering"
+    title="Sync rules"
   >
     <FilteringRulesTable
       filteringRules={Array []}
@@ -16,7 +16,7 @@ exports[`FilteringPanel renders 1`] = `
 exports[`FilteringPanel renders advanced snippet 1`] = `
 <Fragment>
   <FlyoutPanel
-    title="Filtering"
+    title="Sync rules"
   >
     <FilteringRulesTable
       filteringRules={
@@ -58,7 +58,7 @@ exports[`FilteringPanel renders advanced snippet 1`] = `
   </FlyoutPanel>
   <EuiSpacer />
   <FlyoutPanel
-    title="Advanced filtering rules"
+    title="Advanced sync rules"
   >
     <EuiPanel
       hasShadow={false}
@@ -80,7 +80,7 @@ exports[`FilteringPanel renders advanced snippet 1`] = `
 exports[`FilteringPanel renders filtering rules list 1`] = `
 <Fragment>
   <FlyoutPanel
-    title="Filtering"
+    title="Sync rules"
   >
     <FilteringRulesTable
       filteringRules={

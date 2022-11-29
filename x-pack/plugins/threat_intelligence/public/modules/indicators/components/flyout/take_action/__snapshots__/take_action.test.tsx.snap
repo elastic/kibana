@@ -14,7 +14,7 @@ Object {
           class="euiPopover__anchor css-16vtueo-render"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
             type="button"
           >
             <span
@@ -41,7 +41,7 @@ Object {
         class="euiPopover__anchor css-16vtueo-render"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-m-m-base-primary"
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
           type="button"
         >
           <span

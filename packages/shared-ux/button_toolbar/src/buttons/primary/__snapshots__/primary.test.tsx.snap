@@ -2,7 +2,7 @@
 
 exports[`<ToolbarButton /> is rendered 1`] = `
 <button
-  class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
   intl="[object Object]"
   type="button"
 >

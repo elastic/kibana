@@ -30,7 +30,7 @@ describe('TTYPlayer/hooks', () => {
       })),
     });
 
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   describe('useIOLines', () => {
