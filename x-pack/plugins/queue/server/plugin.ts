@@ -41,6 +41,8 @@ export interface PluginStartDeps {
 }
 
 export interface Adapter {
+  setup(plugins: PluginSetupDeps): void;
+  start(plugins: PluginStartDeps): void;
   registerWorkerAdapter(worker: Worker<unknown>, plugins: PluginSetupDeps): void;
   enqueueAdater(job: Job<unknown>, plugins: PluginStartDeps): Promise<void>;
   bulkEnqueueAdapter(jobs: Array<Job<unknown>>, plugins: PluginStartDeps): Promise<void>;
@@ -57,6 +59,7 @@ export class QueuePlugin
   }
 
   public setup(core: CoreSetup, plugins: PluginSetupDeps) {
+    this.adapter.setup(plugins);
     return {
       registerWorker: (worker: Worker<unknown>) => {
         this.workerRegistry.register(worker);
@@ -66,6 +69,7 @@ export class QueuePlugin
   }
 
   public start(coreStart: CoreStart, plugins: PluginStartDeps) {
+    this.adapter.start(plugins);
     return {
       enqueue: async (job: Job<unknown>) => {
         await this.adapter.enqueueAdater(job, plugins);
