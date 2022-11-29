@@ -31,13 +31,13 @@ export const ASSIGN_YOURSELF = i18n.translate('xpack.cases.create.assignYourself
 });
 
 export const MODAL_TITLE = i18n.translate('xpack.cases.create.modalTitle', {
-  defaultMessage: 'Are you sure you want to cancel?',
+  defaultMessage: 'Discard case?',
 });
 
 export const CANCEL_MODAL_BUTTON = i18n.translate('xpack.cases.create.cancelModalButton', {
-  defaultMessage: 'Go back',
+  defaultMessage: 'Cancel',
 });
 
 export const CONFIRM_MODAL_BUTTON = i18n.translate('xpack.cases.create.confirmModalButton', {
-  defaultMessage: 'Confirm',
+  defaultMessage: 'Exit without saving',
 });
