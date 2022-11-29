@@ -11,7 +11,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PrivateLocationDocsLink } from '../monitor_management/manage_locations/empty_locations';
 
 export const DeprecateNoticeModal = () => {
   const { application } = useKibana().services;
@@ -37,16 +36,22 @@ export const DeprecateNoticeModal = () => {
       <p>
         <FormattedMessage
           id="xpack.synthetics.deprecateNoticeModal.description"
-          defaultMessage="The Elastic Synthetics integration is deprecated. Instead, you can now monitor endpoints, 
+          defaultMessage="The Elastic Synthetics integration is deprecated. Instead, you can now monitor endpoints,
         pages, and user journeys directly from Uptime much more efficiently:"
         />
       </p>
       <p>
         <li>
-          <PrivateLocationDocsLink label={ADD_PRIVATE_LOCATIONS_TEXT} /> {POLICIES_TEXT}
+          <FormattedMessage
+            id="xpack.synthetics.deprecateNoticeModal.addPrivateLocations"
+            defaultMessage="Add private locations against your fleet policies"
+          />
         </li>
         <li>
-          <ManageMonitorDocsLink />
+          <FormattedMessage
+            id="xpack.synthetics.deprecateNoticeModal.manageMonitors"
+            defaultMessage="Manage lightweight and browser monitors from a single place"
+          />
         </li>
         <li>
           <FormattedMessage
@@ -55,71 +60,40 @@ export const DeprecateNoticeModal = () => {
           />
         </li>
         <li>
-          <ProjectMonitorDocsLink />
+          <FormattedMessage
+            id="xpack.synthetics.deprecateNoticeModal.automateMonitors"
+            defaultMessage="Automate the creation of your monitors using project monitors"
+          />
         </li>
+      </p>
+      <p>
+        <FormattedMessage
+          id="xpack.synthetics.deprecateNoticeModal.automateMonitors"
+          defaultMessage="For more information, {docsLink}"
+          values={{
+            docsLink: (
+              <EuiLink href="https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html">
+                {READ_DOCS_TEXT}
+              </EuiLink>
+            ),
+          }}
+        />
       </p>
     </EuiConfirmModal>
   );
 };
 
-export const ManageMonitorDocsLink = ({ label }: { label?: string }) => (
-  <FormattedMessage
-    id="xpack.synthetics.deprecateNoticeModal.manageMonitors"
-    defaultMessage="Manage lightweight and browser monitors from a single place"
-    values={{
-      link: (
-        <EuiLink
-          href="hhttps://www.elastic.co/guide/en/observability/current/synthetics-manage-monitors.html"
-          target="_blank"
-        >
-          <FormattedMessage
-            id="xpack.synthetics.deprecateNoticeModal.uptimeApp"
-            defaultMessage="Uptime app"
-          />
-        </EuiLink>
-      ),
-    }}
-  />
-);
-
-export const ProjectMonitorDocsLink = ({ label }: { label?: string }) => (
-  <FormattedMessage
-    id="xpack.synthetics.deprecateNoticeModal.automateMonitors"
-    defaultMessage="Automate the creation of your monitors using project monitors"
-    values={{
-      link: (
-        <EuiLink
-          href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-project-monitors.html"
-          target="_blank"
-        >
-          <FormattedMessage
-            id="xpack.synthetics.deprecateNoticeModal.projectMonitors"
-            defaultMessage="Project Monitors"
-          />
-        </EuiLink>
-      ),
-    }}
-  />
-);
-
 const HEADER_TEXT = i18n.translate('xpack.synthetics.deprecateNoticeModal.headerText', {
   defaultMessage: 'Synthetic Monitoring is now available out of the box in Uptime',
-});
-
-const POLICIES_TEXT = i18n.translate('xpack.synthetics.deprecateNoticeModal.againstPolicies', {
-  defaultMessage: 'against your fleet policies',
 });
 
 const GO_BACK_TEXT = i18n.translate('xpack.synthetics.deprecateNoticeModal.goBack', {
   defaultMessage: 'Go back',
 });
 
-const ADD_PRIVATE_LOCATIONS_TEXT = i18n.translate(
-  'xpack.synthetics.deprecateNoticeModal.addPrivateLocations',
-  {
-    defaultMessage: 'Add private locations',
-  }
-);
+const READ_DOCS_TEXT = i18n.translate('xpack.synthetics.deprecateNoticeModal.readDocs', {
+  defaultMessage: 'read docs',
+});
 
 const GO_MONITOR_MANAGEMENT_TEXT = i18n.translate(
   'xpack.synthetics.deprecateNoticeModal.goToMonitorManagement',
