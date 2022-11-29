@@ -580,11 +580,11 @@ describe('Log threshold executor', () => {
               group: 'i-am-a-host-name-1, i-am-a-dataset-1',
               groupByKeys: {
                 event: {
-                  dataset: "i-am-a-dataset-1"
+                  dataset: 'i-am-a-dataset-1',
                 },
                 host: {
-                  name: "i-am-a-host-name-1"
-                }
+                  name: 'i-am-a-host-name-1',
+                },
               },
               matchingDocuments: 10,
               isRatio: false,
@@ -603,11 +603,11 @@ describe('Log threshold executor', () => {
               group: 'i-am-a-host-name-3, i-am-a-dataset-3',
               groupByKeys: {
                 event: {
-                  dataset: "i-am-a-dataset-3"
+                  dataset: 'i-am-a-dataset-3',
                 },
                 host: {
-                  name: "i-am-a-host-name-3"
-                }
+                  name: 'i-am-a-host-name-3',
+                },
               },
               matchingDocuments: 20,
               isRatio: false,
