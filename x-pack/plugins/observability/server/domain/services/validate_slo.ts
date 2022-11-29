@@ -76,6 +76,9 @@ function isValidTimesliceWindowDuration(timesliceWindow: Duration, timeWindow: D
   );
 }
 
+/**
+ * validate that 1 minute <= frequency < 1 hour
+ */
 function isValidFrequencySettings(frequency: Duration): boolean {
   return (
     frequency.isLongerOrEqualThan(new Duration(1, DurationUnit.Minute)) &&
@@ -83,9 +86,12 @@ function isValidFrequencySettings(frequency: Duration): boolean {
   );
 }
 
-function isValidSyncDelaySettings(frequency: Duration): boolean {
+/**
+ * validate that 1 minute <= sync_delay < 6 hour
+ */
+function isValidSyncDelaySettings(syncDelay: Duration): boolean {
   return (
-    frequency.isLongerOrEqualThan(new Duration(1, DurationUnit.Minute)) &&
-    frequency.isShorterThan(new Duration(6, DurationUnit.Hour))
+    syncDelay.isLongerOrEqualThan(new Duration(1, DurationUnit.Minute)) &&
+    syncDelay.isShorterThan(new Duration(6, DurationUnit.Hour))
   );
 }
