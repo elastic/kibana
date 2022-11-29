@@ -9,7 +9,15 @@
 import './discover_field.scss';
 
 import React, { useState, useCallback, memo, useMemo } from 'react';
-import { EuiButtonIcon, EuiToolTip, EuiTitle, EuiIcon, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiTitle,
+  EuiIcon,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
@@ -100,30 +108,56 @@ const ActionButton: React.FC<ActionButtonProps> = memo(
     }
     if (!isSelected) {
       return (
-        <EuiToolTip
-          delay="long"
-          content={i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
-            defaultMessage: 'Add field as column',
-          })}
-        >
-          <EuiButtonIcon
-            iconType="plusInCircleFilled"
-            className={actionBtnClassName}
-            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-              if (ev.type === 'click') {
-                ev.currentTarget.focus();
-              }
-              ev.preventDefault();
-              ev.stopPropagation();
-              toggleDisplay(field, isSelected);
-            }}
-            data-test-subj={`fieldToggle-${field.name}`}
-            aria-label={i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
-              defaultMessage: 'Add {field} to table',
-              values: { field: field.name },
-            })}
-          />
-        </EuiToolTip>
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              delay="long"
+              content={i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
+                defaultMessage: 'Add field as column',
+              })}
+            >
+              <EuiButtonIcon
+                iconType="plusInCircleFilled"
+                className={actionBtnClassName}
+                onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+                  if (ev.type === 'click') {
+                    ev.currentTarget.focus();
+                  }
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  toggleDisplay(field, isSelected);
+                }}
+                data-test-subj={`fieldToggle-${field.name}`}
+                aria-label={i18n.translate(
+                  'discover.fieldChooser.discoverField.addButtonAriaLabel',
+                  {
+                    defaultMessage: 'Add {field} to table',
+                    values: { field: field.name },
+                  }
+                )}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="listAdd"
+              className={actionBtnClassName}
+              onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+                if (ev.type === 'click') {
+                  ev.currentTarget.focus();
+                }
+                ev.preventDefault();
+                ev.stopPropagation();
+                toggleDisplay(field, isSelected);
+              }}
+              data-test-subj={`fieldToggle-${field.name}`}
+              aria-label={i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
+                defaultMessage: 'Add {field} to table',
+                values: { field: field.name },
+              })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     } else {
       return (

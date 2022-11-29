@@ -71,6 +71,27 @@ export const DocumentViewModeToggle = ({
           defaultMessage="Field statistics"
         />
       </EuiTab>
+      <EuiTab
+        isSelected={viewMode === VIEW_MODE.TERMS_LEVEL}
+        onClick={() => setDiscoverViewMode(VIEW_MODE.TERMS_LEVEL)}
+        className="dscViewModeToggle__field"
+        data-test-subj="dscViewModeFieldButton"
+        append={
+          <EuiBetaBadge
+            label={i18n.translate('discover.viewModes.fieldStatistics.spacetimeTitle', {
+              defaultMessage: 'Spacetime',
+            })}
+            size="s"
+            className="fieldStatsBetaBadge"
+            css={betaBadgeCss}
+          />
+        }
+      >
+        <FormattedMessage
+          id="discover.viewModes.termExplorer.label"
+          defaultMessage="Term explorer"
+        />
+      </EuiTab>
     </EuiTabs>
   );
 };

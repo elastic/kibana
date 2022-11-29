@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-export enum VIEW_MODE {
-  DOCUMENT_LEVEL = 'documents',
-  AGGREGATED_LEVEL = 'aggregated',
-  TERMS_LEVEL = 'terms',
-}
+export { TermsExplorerTable, type TermsExplorerTableProps } from './terms_explorer_table';
+export { TermsExplorerTab } from './terms_explorer_tab';

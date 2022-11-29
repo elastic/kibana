@@ -1,0 +1,277 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import {
+  EmbeddableInput,
+  EmbeddableOutput,
+  ErrorEmbeddable,
+  IEmbeddable,
+  isErrorEmbeddable,
+} from '@kbn/embeddable-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiDescriptionList,
+  EuiFlexItem,
+  EuiHealth,
+  EuiScreenReaderOnly,
+  formatDate,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import type { GetStateReturn } from '../../services/discover_state';
+import { AvailableFields$, DataRefetch$, DataTotalHits$ } from '../../hooks/use_saved_search';
+export interface RandomSamplingOption {
+  mode: 'random_sampling';
+  seed: string;
+  probability: number;
+}
+
+export interface NormalSamplingOption {
+  mode: 'normal_sampling';
+  seed: string;
+  shardSize: number;
+}
+
+export interface NoSamplingOption {
+  mode: 'no_sampling';
+  seed: string;
+}
+
+export type SamplingOption = RandomSamplingOption | NormalSamplingOption | NoSamplingOption;
+
+export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
+  dataView: DataView;
+  savedSearch?: SavedSearch;
+  query?: Query | AggregateQuery;
+  visibleFieldNames?: string[];
+  filters?: Filter[];
+  showPreviewByDefault?: boolean;
+  /**
+   * Callback to add a filter to filter bar
+   */
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  sessionId?: string;
+  fieldsToFetch?: string[];
+  totalDocuments?: number;
+  samplingOption?: SamplingOption;
+}
+export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
+  showDistributions?: boolean;
+}
+
+export interface TermsExplorerTableProps {
+  /**
+   * Determines which columns are displayed
+   */
+  columns: string[];
+  /**
+   * The used data view
+   */
+  dataView: DataView;
+  /**
+   * Saved search description
+   */
+  searchDescription?: string;
+  /**
+   * Saved search title
+   */
+  searchTitle?: string;
+  /**
+   * Optional saved search
+   */
+  savedSearch?: SavedSearch;
+  /**
+   * Optional query to update the table content
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * Filters query to update the table content
+   */
+  filters?: Filter[];
+  /**
+   * State container with persisted settings
+   */
+  stateContainer?: GetStateReturn;
+  /**
+   * Callback to add a filter to filter bar
+   */
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  /**
+   * Metric tracking function
+   * @param metricType
+   * @param eventName
+   */
+  savedSearchRefetch$?: DataRefetch$;
+  availableFields$?: AvailableFields$;
+  searchSessionId?: string;
+  savedSearchDataTotalHits$?: DataTotalHits$;
+}
+
+const TestUsers = [
+  {
+    id: '1',
+    firstName: 'john',
+    lastName: 'doe',
+    github: 'johndoe',
+    dateOfBirth: Date.now(),
+    nationality: 'NL',
+    online: true,
+  },
+  {
+    id: '2',
+    firstName: 'Clinton',
+    lastName: 'Gormley',
+    github: 'clingorm',
+    dateOfBirth: new Date(Date.now() + 3600 * 1000 * 24),
+    nationality: 'UK',
+    online: false,
+  },
+];
+
+const TestCountries = {
+  ['NL']: { name: 'Netherlands', flag: '🇳🇱' },
+  ['UK']: { name: 'United Kingdom', flag: '🇬🇧' },
+};
+
+export const TermsExplorerTable = (props: TermsExplorerTableProps) => {
+  // const {
+  //   availableFields$,
+  //   dataView,
+  //   savedSearch,
+  //   query,
+  //   columns,
+  //   filters,
+  //   stateContainer,
+  //   onAddFilter,
+  //   trackUiMetric,
+  //   savedSearchRefetch$,
+  //   searchSessionId,
+  //   savedSearchDataTotalHits$,
+  // } = props;
+  // const services = useDiscoverServices();
+  // const [embeddable, setEmbeddable] = useState<
+  //   | ErrorEmbeddable
+  //   | IEmbeddable<DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput>
+  //   | undefined
+  // >();
+  // const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
+
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState({});
+
+  const toggleDetails = (item) => {
+    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+    if (itemIdToExpandedRowMapValues[item.id]) {
+      delete itemIdToExpandedRowMapValues[item.id];
+    } else {
+      const { nationality, online } = item;
+      const country = TestCountries[nationality];
+      const color = online ? 'success' : 'danger';
+      const label = online ? 'Online' : 'Offline';
+      const listItems = [
+        {
+          title: 'Nationality',
+          description: `${country.flag} ${country.name}`,
+        },
+        {
+          title: 'Online',
+          description: <EuiHealth color={color}>{label}</EuiHealth>,
+        },
+      ];
+      itemIdToExpandedRowMapValues[item.id] = <EuiDescriptionList listItems={listItems} />;
+    }
+    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  };
+
+  const columns = [
+    {
+      field: 'firstName',
+      name: 'First Name',
+      sortable: true,
+      truncateText: true,
+      mobileOptions: {
+        render: (item) => (
+          <span>
+            {item.firstName} {item.lastName}
+          </span>
+        ),
+        header: false,
+        truncateText: false,
+        enlarge: true,
+        width: '100%',
+      },
+    },
+    {
+      field: 'lastName',
+      name: 'Last Name',
+      truncateText: true,
+      mobileOptions: {
+        show: false,
+      },
+    },
+    {
+      field: 'dateOfBirth',
+      name: 'Date of Birth',
+      schema: 'date',
+      render: (date) => formatDate(date, 'dobLong'),
+      sortable: true,
+    },
+    {
+      name: 'Actions',
+      actions: [
+        {
+          name: 'Clone',
+          description: 'Clone this person',
+          type: 'icon',
+          icon: 'copy',
+          onClick: () => '',
+        },
+      ],
+    },
+    {
+      align: RIGHT_ALIGNMENT,
+      width: '40px',
+      isExpander: true,
+      name: (
+        <EuiScreenReaderOnly>
+          <span>Expand rows</span>
+        </EuiScreenReaderOnly>
+      ),
+      render: (item) => (
+        <EuiButtonIcon
+          onClick={() => toggleDetails(item)}
+          aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+        />
+      ),
+    },
+  ];
+
+  return (
+    <EuiBasicTable
+      tableCaption="Demo of EuiBasicTable with expanding rows"
+      items={TestUsers}
+      itemId="id"
+      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+      isExpandable={true}
+      hasActions={true}
+      columns={columns}
+      // pagination={pagination}
+      // sorting={sorting}
+      isSelectable={true}
+      // selection={selection}
+      // onChange={onTableChange}
+    />
+  );
+};

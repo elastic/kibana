@@ -24,6 +24,7 @@ import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { useDiscoverHistogram } from './use_discover_histogram';
+import { TermsExplorerTab } from '../terms_explorer_table';
 
 export interface DiscoverMainContentProps {
   isPlainRecord: boolean;
@@ -158,7 +159,7 @@ export const DiscoverMainContent = ({
             stateContainer={stateContainer}
             onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
           />
-        ) : (
+        ) : viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
           <FieldStatisticsTab
             availableFields$={savedSearchData$.availableFields$}
             savedSearch={savedSearch}
@@ -167,6 +168,17 @@ export const DiscoverMainContent = ({
             stateContainer={stateContainer}
             onAddFilter={!isPlainRecord ? onAddFilter : undefined}
             trackUiMetric={trackUiMetric}
+            savedSearchRefetch$={savedSearchRefetch$}
+            savedSearchDataTotalHits$={savedSearchData$.totalHits$}
+          />
+        ) : (
+          <TermsExplorerTab
+            availableFields$={savedSearchData$.availableFields$}
+            savedSearch={savedSearch}
+            dataView={dataView}
+            columns={columns}
+            stateContainer={stateContainer}
+            onAddFilter={!isPlainRecord ? onAddFilter : undefined}
             savedSearchRefetch$={savedSearchRefetch$}
             savedSearchDataTotalHits$={savedSearchData$.totalHits$}
           />
