@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pickBy, isEmpty } from 'lodash';
+import { pickBy, isEmpty, reduce, each } from 'lodash';
 import type { Plugin } from 'unified';
 import React, { useContext, useMemo, useState, useCallback } from 'react';
 import type { RemarkTokenizer } from '@elastic/eui';
@@ -262,11 +262,38 @@ const RunOsqueryButtonRenderer = ({
   };
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
-  const { agentId, alertId } = useContext(BasicAlertDataContext);
+  const { agentId, alertId, data } = useContext(BasicAlertDataContext);
 
   const handleOpen = useCallback(() => setShowFlyout(true), [setShowFlyout]);
 
   const handleClose = useCallback(() => setShowFlyout(false), [setShowFlyout]);
+
+  const parsedConfigurationQuery = useMemo(() => {
+    const regex = /[^{\}]+(?=})/g;
+    const matchedBraces = configuration.query.match(regex);
+    let resultQuery = configuration.query;
+
+    if (matchedBraces) {
+      const fieldsMap: Record<string, string> = reduce(
+        data,
+        (acc, eventDetailItem) => ({
+          ...acc,
+          [eventDetailItem.field]: eventDetailItem?.values?.[0],
+        }),
+        {}
+      );
+      each(matchedBraces, (bracesText: string) => {
+        if (resultQuery.includes(`{${bracesText}}`)) {
+          const foundFieldValue = fieldsMap[bracesText];
+          if (foundFieldValue) {
+            resultQuery = resultQuery.replace(`{${bracesText}}`, foundFieldValue);
+          }
+        }
+      });
+    }
+
+    return resultQuery;
+  }, [configuration.query, data]);
 
   return (
     <>
@@ -280,7 +307,7 @@ const RunOsqueryButtonRenderer = ({
         <OsqueryFlyout
           defaultValues={{
             ...(alertId ? { alertIds: [alertId] } : {}),
-            query: configuration.query,
+            query: parsedConfigurationQuery,
             ecs_mapping: configuration.ecs_mapping,
             queryField: false,
           }}
