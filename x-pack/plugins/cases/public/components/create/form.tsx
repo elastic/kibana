@@ -186,45 +186,41 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     initialValue,
   }) => (
     <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-      <EuiFlexGroup style={{ maxWidth: 1200 }}>
-        <EuiFlexItem>
-          <FormContext
-            afterCaseCreated={afterCaseCreated}
-            onSuccess={onSuccess}
-            attachments={attachments}
-            initialValue={initialValue}
+      <FormContext
+        afterCaseCreated={afterCaseCreated}
+        onSuccess={onSuccess}
+        attachments={attachments}
+        initialValue={initialValue}
+      >
+        <CreateCaseFormFields
+          connectors={empty}
+          isLoadingConnectors={false}
+          withSteps={withSteps}
+        />
+        <Container>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="l"
+            responsive={false}
           >
-            <CreateCaseFormFields
-              connectors={empty}
-              isLoadingConnectors={false}
-              withSteps={withSteps}
-            />
-            <Container>
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="flexEnd"
-                gutterSize="l"
-                responsive={false}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="create-case-cancel"
+                iconType="cross"
+                onClick={onCancel}
+                size="s"
               >
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj="create-case-cancel"
-                    iconType="cross"
-                    onClick={onCancel}
-                    size="s"
-                  >
-                    {i18n.CANCEL}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <SubmitCaseButton />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </Container>
-            <InsertTimeline fieldName={descriptionFieldName} />
-          </FormContext>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+                {i18n.CANCEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SubmitCaseButton />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Container>
+        <InsertTimeline fieldName={descriptionFieldName} />
+      </FormContext>
     </CasesTimelineIntegrationProvider>
   )
 );
