@@ -82,7 +82,7 @@ export function Waterfall({
 
   return (
     <Container>
-      {waterfall.apiResponse.exceedsMax && (
+      {waterfall.exceedsMax && (
         <EuiCallOut
           color="warning"
           size="s"

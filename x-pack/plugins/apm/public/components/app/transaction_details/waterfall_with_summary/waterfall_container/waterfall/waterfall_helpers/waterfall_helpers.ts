@@ -44,7 +44,8 @@ export interface IWaterfall {
   getErrorCount: (parentId: string) => number;
   legends: IWaterfallLegend[];
   errorItems: IWaterfallError[];
-  apiResponse: TraceAPIResponse;
+  exceedsMax: boolean;
+  totalErrorsCount: number;
 }
 
 interface IWaterfallSpanItemBase<TDocument, TDoctype>
@@ -417,7 +418,8 @@ export function getWaterfall(
 ): IWaterfall {
   if (isEmpty(apiResponse.traceDocs) || !entryTransactionId) {
     return {
-      apiResponse,
+      exceedsMax: false,
+      totalErrorsCount: 0,
       duration: 0,
       items: [],
       legends: [],
@@ -458,7 +460,8 @@ export function getWaterfall(
   const legends = getLegends(items);
 
   return {
-    apiResponse,
+    exceedsMax: apiResponse.exceedsMax,
+    totalErrorsCount: apiResponse.errorDocs.length,
     entryWaterfallTransaction,
     rootTransaction,
     duration,

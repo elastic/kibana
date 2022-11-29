@@ -131,14 +131,13 @@ describe('waterfall_helpers', () => {
         linkedChildrenOfSpanCountBySpanId: {},
       };
       const waterfall = getWaterfall(apiResp, entryTransactionId);
-      const { apiResponse, ...waterfallRest } = waterfall;
 
+      expect(waterfall.exceedsMax).toBeFalsy();
       expect(waterfall.items.length).toBe(6);
       expect(waterfall.items[0].id).toBe('myTransactionId1');
       expect(waterfall.errorItems.length).toBe(1);
       expect(waterfall.getErrorCount('myTransactionId1')).toEqual(1);
-      expect(waterfallRest).toMatchSnapshot();
-      expect(apiResponse).toEqual(apiResp);
+      expect(waterfall).toMatchSnapshot();
     });
 
     it('should return partial waterfall', () => {
@@ -151,14 +150,12 @@ describe('waterfall_helpers', () => {
       };
       const waterfall = getWaterfall(apiResp, entryTransactionId);
 
-      const { apiResponse, ...waterfallRest } = waterfall;
-
+      expect(waterfall.exceedsMax).toBeFalsy();
       expect(waterfall.items.length).toBe(4);
       expect(waterfall.items[0].id).toBe('myTransactionId2');
       expect(waterfall.errorItems.length).toBe(0);
       expect(waterfall.getErrorCount('myTransactionId2')).toEqual(0);
-      expect(waterfallRest).toMatchSnapshot();
-      expect(apiResponse).toEqual(apiResp);
+      expect(waterfall).toMatchSnapshot();
     });
     it('should reparent spans', () => {
       const traceItems = [

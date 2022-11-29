@@ -158,9 +158,7 @@ export function WaterfallWithSummary<TSample extends {}>({
       ) : (
         <EuiFlexItem grow={false}>
           <TransactionSummary
-            errorCount={
-              waterfallFetchResult.waterfall.apiResponse.errorDocs.length
-            }
+            errorCount={waterfallFetchResult.waterfall.totalErrorsCount}
             totalDuration={
               waterfallFetchResult.waterfall.rootTransaction?.transaction
                 .duration.us
