@@ -46,23 +46,8 @@ export const useAddToRulesTable = ({
     initialPageSize: 5,
     showPerPageOptions: false,
   });
-  const [message, setMessage] = useState<JSX.Element | string | undefined>(
-    <EuiLoadingContent lines={4} data-test-subj="exceptionItemViewerEmptyPrompts-loading" />
-  );
+
   const [linkedRules, setLinkedRules] = useState<Rule[]>(initiallySelectedRules || []);
-
-  useEffect(() => {
-    if (!isFetched) {
-      setMessage(
-        <EuiLoadingContent lines={4} data-test-subj="exceptionItemViewerEmptyPrompts-loading" />
-      );
-    }
-
-    if (isFetched) {
-      setMessage(undefined);
-    }
-  }, [setMessage, isFetched]);
-
   useEffect(() => {
     if (typeof onRuleSelectionChange === 'function') onRuleSelectionChange(linkedRules);
   }, [linkedRules, onRuleSelectionChange]);
@@ -131,8 +116,7 @@ export const useAddToRulesTable = ({
     [pagination]
   );
   return {
-    isFetched,
-    message,
+    isLoading: !isFetched,
     pagination,
     searchOptions,
     sortedRulesByLinkedRulesOnTop,

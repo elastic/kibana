@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiPanel, EuiText, EuiInMemoryTable } from '@elastic/eui';
+import { EuiSpacer, EuiPanel, EuiText, EuiInMemoryTable, EuiLoadingContent } from '@elastic/eui';
 import type { Rule } from '../../../../rule_management/logic/types';
 import { useAddToRulesTable } from './use_add_to_rules_table';
 
@@ -21,8 +21,8 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
   onRuleSelectionChange,
 }) => {
   const {
-    isFetched,
-    message,
+    isLoading,
+
     searchOptions,
     pagination,
     sortedRulesByLinkedRulesOnTop,
@@ -42,12 +42,18 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
           tableLayout="auto"
           search={searchOptions}
           data-test-subj="addExceptionToRulesTable"
-          hasActions={true}
           tableCaption="Rules table"
           items={sortedRulesByLinkedRulesOnTop}
-          loading={!isFetched}
+          loading={isLoading}
           columns={rulesTableColumnsWithLinkSwitch}
-          message={message}
+          message={
+            isLoading ? (
+              <EuiLoadingContent
+                lines={4}
+                data-test-subj="exceptionItemViewerEmptyPrompts-loading"
+              />
+            ) : null
+          }
           pagination={pagination}
           onTableChange={onTableChange}
         />
