@@ -8,6 +8,7 @@
 export const OBSERVABILITY_BASE_PATH = '/app/observability';
 export const ALERT_PAGE_LINK = `${OBSERVABILITY_BASE_PATH}/alerts`;
 export const RULES_PAGE_LINK = `${ALERT_PAGE_LINK}/rules`;
+export const SLOS_PAGE_LINK = `${OBSERVABILITY_BASE_PATH}/slos`;
 
 export const paths = {
   observability: {
@@ -16,6 +17,7 @@ export const paths = {
     rules: RULES_PAGE_LINK,
     ruleDetails: (ruleId?: string | null) =>
       ruleId ? `${RULES_PAGE_LINK}/${encodeURI(ruleId)}` : RULES_PAGE_LINK,
+    slos: SLOS_PAGE_LINK,
   },
   management: {
     rules: '/app/management/insightsAndAlerting/triggersActions/rules',
