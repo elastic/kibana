@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -50,16 +49,9 @@ export const useControlPanels = (dataViewId: string) => {
     urlStateKey: HOST_FILTERS_URL_STATE_KEY,
   });
 
-  const setControlPanels = useCallback(
-    (panels: ControlPanels) => {
-      setUrlState(panels);
-    },
-    [setUrlState]
-  );
-
   return {
     controlPanel: urlState,
-    setControlPanels,
+    setControlPanels: setUrlState,
   };
 };
 
