@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { ReactElement } from 'react';
+import { ErrorToastOptions, Toast, ToastsStart } from '@kbn/core-notifications-browser';
+import { TimefilterContract } from '@kbn/data-plugin/public';
+import { AlertsSearchBarProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_search_bar';
 import { BoolQuery, Query } from '@kbn/es-query';
 import { AlertStatus } from '../../../../common/typings';
 
@@ -12,6 +16,35 @@ export interface AlertStatusFilterProps {
   status: AlertStatus;
   onChange: (id: string, value: string) => void;
 }
+
+export interface AlertSearchBarWithUrlSyncProps extends CommonAlertSearchBarProps {
+  urlStorageKey: string;
+}
+
+export interface KibanaDependencies {
+  data: {
+    query: {
+      timefilter: { timefilter: TimefilterContract };
+    };
+  };
+  notifications: { toasts: ToastsStart };
+  triggersActionsUi: {
+    getAlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
+  };
+}
+
+export type ObservabilityAlertSearchBarKibanaDependencies = KibanaDependencies;
+
+export interface Services {
+  timeFilterService: TimefilterContract;
+  AlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
+  errorToast: (error: Error, options: ErrorToastOptions) => Toast;
+}
+
+export interface ObservabilityAlertSearchBarProps
+  extends AlertSearchBarContainerState,
+    AlertSearchBarStateTransitions,
+    CommonAlertSearchBarProps {}
 
 interface AlertSearchBarContainerState {
   rangeFrom: string;
@@ -27,17 +60,8 @@ interface AlertSearchBarStateTransitions {
   onStatusChange: (status: AlertStatus) => void;
 }
 
-export interface CommonAlertSearchBarProps {
+interface CommonAlertSearchBarProps {
   appName: string;
   onEsQueryChange: (query: { bool: BoolQuery }) => void;
   defaultSearchQueries?: Query[];
 }
-
-export interface AlertSearchBarWithUrlSyncProps extends CommonAlertSearchBarProps {
-  urlStorageKey: string;
-}
-
-export interface ObservabilityAlertSearchBarProps
-  extends AlertSearchBarContainerState,
-    AlertSearchBarStateTransitions,
-    CommonAlertSearchBarProps {}

@@ -5,33 +5,28 @@
  * 2.0.
  */
 
-import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import React from 'react';
 import { act, waitFor } from '@testing-library/react';
+import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
+import { useServices } from './services';
 import { ObservabilityAlertSearchBarProps } from './types';
 import { ObservabilityAlertSearchBar } from './alert_search_bar';
 import { observabilityAlertFeatureIds } from '../../../config';
-import { useKibana } from '../../../utils/kibana_react';
-import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import { render } from '../../../utils/test_helper';
 
-const useKibanaMock = useKibana as jest.Mock;
+const useServicesMock = useServices as jest.Mock;
 const getAlertsSearchBarMock = jest.fn();
 const ALERT_SEARCH_BAR_DATA_TEST_SUBJ = 'alerts-search-bar';
 
-jest.mock('../../../utils/kibana_react');
+jest.mock('./services');
 
-const mockKibana = () => {
-  useKibanaMock.mockReturnValue({
-    services: {
-      ...kibanaStartMock.startContract().services,
-      triggersActionsUi: {
-        ...triggersActionsUiMock.createStart(),
-        getAlertsSearchBar: getAlertsSearchBarMock.mockReturnValue(
-          <div data-test-subj={ALERT_SEARCH_BAR_DATA_TEST_SUBJ} />
-        ),
-      },
-    },
+const mockServices = () => {
+  useServicesMock.mockReturnValue({
+    timeFilterService: timefilterServiceMock,
+    AlertsSearchBar: getAlertsSearchBarMock.mockReturnValue(
+      <div data-test-subj={ALERT_SEARCH_BAR_DATA_TEST_SUBJ} />
+    ),
+    errorToast: jest.fn(),
   });
 };
 
@@ -54,7 +49,7 @@ describe('ObservabilityAlertSearchBar', () => {
   };
 
   beforeAll(() => {
-    mockKibana();
+    mockServices();
   });
 
   beforeEach(() => {

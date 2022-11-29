@@ -47,6 +47,8 @@ export * from './components/shared/action_menu';
 
 export type { UXMetrics } from './components/shared/core_web_vitals';
 export { DatePickerContextProvider } from './context/date_picker_context';
+export { ObservabilityAlertSearchBarKibanaProvider } from './components/shared/alert_search_bar/services';
+
 export {
   getCoreVitalsComponent,
   HeaderMenuPortal,

@@ -6,14 +6,13 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
 import React, { useCallback, useEffect } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { Query } from '@kbn/es-query';
-import { useKibana } from '../../../utils/kibana_react';
-import { observabilityAlertFeatureIds } from '../../../config';
-import { ObservabilityAppServices } from '../../../application/types';
+import { useServices } from './services';
 import { AlertsStatusFilter } from './components';
+import { observabilityAlertFeatureIds } from '../../../config';
 import { ALERT_STATUS_QUERY, DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';
 import { ObservabilityAlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../../utils/build_es_query';
@@ -38,15 +37,7 @@ export function ObservabilityAlertSearchBar({
   rangeTo,
   status,
 }: ObservabilityAlertSearchBarProps) {
-  const {
-    data: {
-      query: {
-        timefilter: { timefilter: timeFilterService },
-      },
-    },
-    notifications: { toasts },
-    triggersActionsUi: { getAlertsSearchBar: AlertsSearchBar },
-  } = useKibana<ObservabilityAppServices>().services;
+  const { AlertsSearchBar, errorToast, timeFilterService } = useServices();
 
   const onAlertStatusChange = useCallback(
     (alertStatus: AlertStatus) => {
@@ -75,7 +66,6 @@ export function ObservabilityAlertSearchBar({
     }) => void
   >(
     ({ dateRange, query }) => {
-      console.log('query:', { dateRange, query });
       try {
         // First try to create es query to make sure query is valid, then save it in state
         const esQuery = buildEsQuery(
@@ -92,7 +82,7 @@ export function ObservabilityAlertSearchBar({
         onRangeToChange(dateRange.to);
         onEsQueryChange(esQuery);
       } catch (error) {
-        toasts.addError(error, {
+        errorToast(error, {
           title: i18n.translate('xpack.observability.alerts.searchBar.invalidQueryTitle', {
             defaultMessage: 'Invalid query string',
           }),
@@ -108,7 +98,7 @@ export function ObservabilityAlertSearchBar({
       onKueryChange,
       onEsQueryChange,
       status,
-      toasts,
+      errorToast,
     ]
   );
 
