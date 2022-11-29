@@ -54,3 +54,24 @@ export function taskInstanceToAlertTaskInstance<Params extends RuleTypeParams>(
     ),
   };
 }
+
+export function decodeParams(params: ConcreteTaskInstance['params']) {
+  return pipe(
+    ruleParamsSchema.decode(params),
+    fold((e: t.Errors) => {
+      throw new Error(`Task has an invalid param at ${enumerateErrorFields(e)}`);
+    }, t.identity)
+  );
+}
+
+export function decodeState(state: SanitizedRule['state']) {
+  if (!state) {
+    return {};
+  }
+  return pipe(
+    ruleStateSchema.decode(state),
+    fold((e: t.Errors) => {
+      throw new Error(`Task has invalid state at ${enumerateErrorFields(e)}`);
+    }, t.identity)
+  );
+}

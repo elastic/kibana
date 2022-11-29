@@ -89,7 +89,7 @@ export class TaskRunnerFactory {
       ActionGroupIds,
       RecoveryActionGroupId
     >,
-    { taskInstance }: RunContext,
+    params: RunContext['taskInstance']['params'],
     inMemoryMetrics: InMemoryMetrics
   ) {
     if (!this.isInitialized) {
@@ -104,6 +104,6 @@ export class TaskRunnerFactory {
       InstanceContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(ruleType, taskInstance, this.taskRunnerContext!, inMemoryMetrics);
+    >(ruleType, params, this.taskRunnerContext!, inMemoryMetrics);
   }
 }

@@ -9,7 +9,6 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger } from '@kbn/core/server';
 import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
-import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
@@ -17,7 +16,7 @@ import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event
 import { RawRule } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
-import { ExecutionHandlerOptions, RuleTaskInstance } from './types';
+import { ExecutionHandlerOptions } from './types';
 import { TaskRunnerContext } from './task_runner_factory';
 import { transformActionParams } from './transform_action_params';
 import { Alert } from '../alert';
@@ -60,13 +59,12 @@ export class ExecutionHandler<
     RecoveryActionGroupId
   >;
   private taskRunnerContext: TaskRunnerContext;
-  private taskInstance: RuleTaskInstance;
+  private params: SanitizedRule['params'];
   private ruleRunMetricsStore: RuleRunMetricsStore;
   private apiKey: RawRule['apiKey'];
   private ruleConsumer: string;
   private executionId: string;
   private ruleLabel: string;
-  private ephemeralActionsToSchedule: number;
   private CHUNK_SIZE = 1000;
   private skippedAlerts: { [key: string]: { reason: string } } = {};
   private actionsClient: PublicMethodsOf<ActionsClient>;
@@ -79,7 +77,7 @@ export class ExecutionHandler<
     logger,
     alertingEventLogger,
     taskRunnerContext,
-    taskInstance,
+    params,
     ruleRunMetricsStore,
     apiKey,
     ruleConsumer,
@@ -100,14 +98,13 @@ export class ExecutionHandler<
     this.rule = rule;
     this.ruleType = ruleType;
     this.taskRunnerContext = taskRunnerContext;
-    this.taskInstance = taskInstance;
+    this.params = params;
     this.ruleRunMetricsStore = ruleRunMetricsStore;
     this.apiKey = apiKey;
     this.ruleConsumer = ruleConsumer;
     this.executionId = executionId;
     this.ruleLabel = ruleLabel;
     this.actionsClient = actionsClient;
-    this.ephemeralActionsToSchedule = taskRunnerContext.maxEphemeralActionsPerRule;
     this.ruleTypeActionGroups = new Map(
       ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
     );
@@ -124,9 +121,7 @@ export class ExecutionHandler<
       alertingEventLogger,
       ruleRunMetricsStore,
       taskRunnerContext: { actionsConfigMap, actionsPlugin },
-      taskInstance: {
-        params: { spaceId, alertId: ruleId },
-      },
+      params: { spaceId, alertId: ruleId },
     } = this;
 
     const executables = this.generateExecutables({ alerts, recovered });
@@ -178,7 +173,7 @@ export class ExecutionHandler<
 
         if (!this.isActionExecutable(action)) {
           this.logger.warn(
-            `Rule "${this.taskInstance.params.alertId}" skipped scheduling action "${action.id}" because it is disabled`
+            `Rule "${alertId}" skipped scheduling action "${action.id}" because it is disabled`
           );
           continue;
         }
@@ -321,9 +316,7 @@ export class ExecutionHandler<
       apiKey,
       ruleConsumer,
       executionId,
-      taskInstance: {
-        params: { spaceId, alertId: ruleId },
-      },
+      params: { spaceId, alertId: ruleId },
     } = this;
 
     const namespace = spaceId === 'default' ? {} : { namespace: spaceId };

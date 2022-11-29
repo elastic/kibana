@@ -19,7 +19,7 @@ import { createAlertEventLogRecordObject } from '../create_alert_event_log_recor
 import { RuleRunMetrics } from '../rule_run_metrics_store';
 
 // 1,000,000 nanoseconds in 1 millisecond
-const Millis2Nanos = 1000 * 1000;
+// const Millis2Nanos = 1000 * 1000;
 
 export interface RuleContextOpts {
   ruleId: string;
@@ -28,13 +28,10 @@ export interface RuleContextOpts {
   namespace?: string;
   spaceId: string;
   executionId: string;
-  taskScheduledAt: Date;
   ruleName?: string;
 }
 
-type RuleContext = RuleContextOpts & {
-  taskScheduleDelay: number;
-};
+type RuleContext = RuleContextOpts;
 
 interface DoneOpts {
   timings?: TaskRunnerTimings;
@@ -93,7 +90,6 @@ export class AlertingEventLogger {
 
     const context = {
       ...this.ruleContext,
-      taskScheduleDelay: this.startTime.getTime() - this.ruleContext.taskScheduledAt.getTime(),
     };
 
     // Initialize the "execute" event
@@ -316,10 +312,6 @@ export function initializeExecuteRecord(context: RuleContext) {
     spaceId: context.spaceId,
     executionId: context.executionId,
     action: EVENT_LOG_ACTIONS.execute,
-    task: {
-      scheduled: context.taskScheduledAt.toISOString(),
-      scheduleDelay: Millis2Nanos * context.taskScheduleDelay,
-    },
     savedObjects: [
       {
         id: context.ruleId,

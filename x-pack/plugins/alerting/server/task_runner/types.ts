@@ -76,7 +76,7 @@ export interface ExecutionHandlerOptions<
   alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
   rule: SanitizedRule<Params>;
   taskRunnerContext: TaskRunnerContext;
-  taskInstance: RuleTaskInstance;
+  params: SanitizedRule['params'];
   ruleRunMetricsStore: RuleRunMetricsStore;
   apiKey: RawRule['apiKey'];
   ruleConsumer: string;

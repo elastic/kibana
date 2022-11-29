@@ -38,7 +38,7 @@ import {
   RawRuleLastRun,
 } from '../types';
 import { asErr, asOk, isOk, map, resolveErr, Result } from '../lib/result_type';
-import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
+import { decodeParams, decodeState } from './alert_task_instance';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
 import { partiallyUpdateAlert } from '../saved_objects';
 import {
@@ -89,7 +89,7 @@ export class TaskRunner<
 > {
   private context: TaskRunnerContext;
   private logger: Logger;
-  private taskInstance: RuleTaskInstance;
+  private params: RuleTaskInstance['params'];
   private ruleConsumer: string | null;
   private ruleType: NormalizedRuleType<
     Params,
@@ -100,6 +100,8 @@ export class TaskRunner<
     ActionGroupIds,
     RecoveryActionGroupId
   >;
+  // HACK
+  private readonly startedAt: Date = new Date();
   private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly inMemoryMetrics: InMemoryMetrics;
@@ -123,7 +125,7 @@ export class TaskRunner<
       ActionGroupIds,
       RecoveryActionGroupId
     >,
-    taskInstance: ConcreteTaskInstance,
+    params: ConcreteTaskInstance['params'],
     context: TaskRunnerContext,
     inMemoryMetrics: InMemoryMetrics
   ) {
@@ -133,7 +135,7 @@ export class TaskRunner<
     this.usageCounter = context.usageCounter;
     this.ruleType = ruleType;
     this.ruleConsumer = null;
-    this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
+    this.params = decodeParams(params);
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
     this.cancelled = false;
@@ -230,15 +232,13 @@ export class TaskRunner<
       enabled,
       actions,
     } = rule;
-    const {
-      params: { alertId: ruleId, spaceId },
-    } = this.taskInstance;
+    const { alertId: ruleId, spaceId } = this.params;
 
     const {
       alertInstances: alertRawInstances = {},
       alertTypeState: ruleTypeState = {},
       previousStartedAt,
-    } = rule.state || {};
+    } = decodeState(rule.state) || {};
 
     const ruleRunMetricsStore = new RuleRunMetricsStore();
 
@@ -330,7 +330,7 @@ export class TaskRunner<
               },
               params,
               state: ruleTypeState as RuleState,
-              startedAt: this.taskInstance.startedAt!,
+              startedAt: this.startedAt,
               previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
               spaceId,
               namespace,
@@ -432,7 +432,7 @@ export class TaskRunner<
       ruleType: this.ruleType,
       logger: this.logger,
       taskRunnerContext: this.context,
-      taskInstance: this.taskInstance,
+      params: this.params,
       ruleRunMetricsStore,
       apiKey,
       ruleConsumer: this.ruleConsumer!,
@@ -476,9 +476,7 @@ export class TaskRunner<
    * Initialize event logger, load and validate the rule
    */
   private async prepareToRun() {
-    const {
-      params: { alertId: ruleId, spaceId, consumer },
-    } = this.taskInstance;
+    const { alertId: ruleId, spaceId, consumer } = this.params;
 
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule`;
@@ -507,7 +505,6 @@ export class TaskRunner<
       consumer: this.ruleConsumer!,
       spaceId,
       executionId: this.executionId,
-      taskScheduledAt: this.taskInstance.scheduledAt,
       ...(namespace ? { namespace } : {}),
     });
 
@@ -536,9 +533,7 @@ export class TaskRunner<
     startedAt: Date | null;
     originalState: RuleTypeState;
   }) {
-    const {
-      params: { alertId: ruleId, spaceId },
-    } = this.taskInstance;
+    const { alertId: ruleId, spaceId } = this.params;
 
     const namespace = this.context.spaceIdToNamespace(spaceId);
 
@@ -666,27 +661,20 @@ export class TaskRunner<
   }
 
   async run(): Promise<RuleTaskRunResult> {
-    const {
-      params: { alertId: ruleId, spaceId },
-      startedAt,
-      state: originalState,
-      schedule: taskSchedule,
-    } = this.taskInstance;
+    const { alertId: ruleId, spaceId } = this.params;
 
     const runDate = new Date();
     this.logger.debug(`executing rule ${this.ruleType.id}:${ruleId} at ${runDate.toISOString()}`);
 
-    if (startedAt) {
-      // Capture how long it took for the rule to start running after being claimed
-      this.timer.setDuration(TaskRunnerTimerSpan.StartTaskRun, startedAt);
-    }
+    // Capture how long it took for the rule to start running after being claimed
+    this.timer.setDuration(TaskRunnerTimerSpan.StartTaskRun, this.startedAt);
 
     let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
     let schedule: Result<IntervalSchedule, Error>;
+    let preparedResult: any;
     try {
-      const preparedResult = await this.timer.runWithTimer(
-        TaskRunnerTimerSpan.PrepareRule,
-        async () => this.prepareToRun()
+      preparedResult = await this.timer.runWithTimer(TaskRunnerTimerSpan.PrepareRule, async () =>
+        this.prepareToRun()
       );
       this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring);
 
@@ -702,9 +690,7 @@ export class TaskRunner<
 
     let nextRun: string | null = null;
     if (isOk(schedule)) {
-      nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
-    } else if (taskSchedule) {
-      nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
+      nextRun = getNextRun({ startDate: this.startedAt, interval: schedule.value.interval });
     }
 
     const { executionStatus, executionMetrics } = await this.timer.runWithTimer(
@@ -714,15 +700,13 @@ export class TaskRunner<
           nextRun,
           runDate,
           stateWithMetrics,
-          startedAt,
-          originalState,
+          startedAt: this.startedAt,
+          originalState: preparedResult.rule.state,
         })
     );
 
-    if (startedAt) {
-      // Capture how long it took for the rule to run after being claimed
-      this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
-    }
+    // Capture how long it took for the rule to run after being claimed
+    this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, this.startedAt);
 
     this.alertingEventLogger.done({
       status: executionStatus,
@@ -740,7 +724,7 @@ export class TaskRunner<
           throwUnrecoverableError(error);
         }
 
-        let retryInterval = taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL;
+        let retryInterval = FALLBACK_RETRY_INTERVAL;
 
         // Set retry interval smaller for ES connectivity errors
         if (isEsUnavailableError(error, ruleId)) {
@@ -764,11 +748,7 @@ export class TaskRunner<
     this.cancelled = true;
 
     // Write event log entry
-    const {
-      params: { alertId: ruleId, spaceId, consumer },
-      schedule: taskSchedule,
-      startedAt,
-    } = this.taskInstance;
+    const { alertId: ruleId, spaceId, consumer } = this.params;
     const namespace = this.context.spaceIdToNamespace(spaceId);
 
     if (consumer && !this.ruleConsumer) {
@@ -787,11 +767,6 @@ export class TaskRunner<
     this.alertingEventLogger.logTimeout();
 
     this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_TIMEOUTS);
-
-    let nextRun: string | null = null;
-    if (taskSchedule) {
-      nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
-    }
 
     const outcomeMsg = `${this.ruleType.id}:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`;
     const date = new Date();
@@ -816,7 +791,6 @@ export class TaskRunner<
         alertsCount: {},
       },
       monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
-      nextRun: nextRun && new Date(nextRun).getTime() > date.getTime() ? nextRun : null,
     });
   }
 }

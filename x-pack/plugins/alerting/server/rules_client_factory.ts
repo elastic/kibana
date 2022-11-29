@@ -17,12 +17,14 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { SchedulerPluginStart } from '@kbn/scheduler-plugin/server';
 import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingRulesConfig } from './config';
 export interface RulesClientFactoryOpts {
   logger: Logger;
+  scheduler: SchedulerPluginStart;
   taskManager: TaskManagerStartContract;
   ruleTypeRegistry: RuleTypeRegistry;
   securityPluginSetup?: SecurityPluginSetup;
@@ -41,6 +43,7 @@ export interface RulesClientFactoryOpts {
 export class RulesClientFactory {
   private isInitialized = false;
   private logger!: Logger;
+  private scheduler: SchedulerPluginStart;
   private taskManager!: TaskManagerStartContract;
   private ruleTypeRegistry!: RuleTypeRegistry;
   private securityPluginSetup?: SecurityPluginSetup;
@@ -59,6 +62,7 @@ export class RulesClientFactory {
     if (this.isInitialized) {
       throw new Error('RulesClientFactory already initialized');
     }
+    this.scheduler = options.scheduler;
     this.isInitialized = true;
     this.logger = options.logger;
     this.getSpaceId = options.getSpaceId;
@@ -77,7 +81,7 @@ export class RulesClientFactory {
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
-    const { securityPluginSetup, securityPluginStart, actions, eventLog } = this;
+    const { securityPluginSetup, securityPluginStart, actions, eventLog, scheduler } = this;
     const spaceId = this.getSpaceId(request);
 
     if (!this.authorization) {
@@ -85,6 +89,7 @@ export class RulesClientFactory {
     }
 
     return new RulesClient({
+      scheduler,
       spaceId,
       kibanaVersion: this.kibanaVersion,
       logger: this.logger,

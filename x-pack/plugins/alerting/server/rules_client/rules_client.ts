@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SchedulerPluginStart } from '@kbn/scheduler-plugin/server';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -46,6 +47,7 @@ import {
   ConcreteTaskInstance,
   TaskManagerStartContract,
   TaskStatus,
+  parseIntervalAsMillisecond,
 } from '@kbn/task-manager-plugin/server';
 import {
   IEvent,
@@ -204,6 +206,7 @@ export interface RuleBulkOperationAggregation {
 
 export interface ConstructorOptions {
   logger: Logger;
+  scheduler: SchedulerPluginStart;
   taskManager: TaskManagerStartContract;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   authorization: AlertingAuthorization;
@@ -482,6 +485,7 @@ const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
 };
 export class RulesClient {
   private readonly logger: Logger;
+  private readonly scheduler: SchedulerPluginStart;
   private readonly getUserName: () => Promise<string | null>;
   private readonly spaceId: string;
   private readonly namespace?: string;
@@ -524,8 +528,10 @@ export class RulesClient {
     kibanaVersion,
     auditLogger,
     eventLogger,
+    scheduler,
   }: ConstructorOptions) {
     this.logger = logger;
+    this.scheduler = scheduler;
     this.getUserName = getUserName;
     this.spaceId = spaceId;
     this.namespace = namespace;
@@ -793,9 +799,8 @@ export class RulesClient {
       throw e;
     }
     if (rawRule.enabled) {
-      let scheduledTask;
       try {
-        scheduledTask = await this.scheduleTask({
+        await this.scheduleTask({
           id: createdAlert.id,
           consumer: rawRule.consumer,
           ruleTypeId: rawRule.alertTypeId,
@@ -815,9 +820,9 @@ export class RulesClient {
         throw e;
       }
       await this.unsecuredSavedObjectsClient.update<RawRule>('alert', createdAlert.id, {
-        scheduledTaskId: scheduledTask.id,
+        scheduledTaskId: createdAlert.id,
       });
-      createdAlert.attributes.scheduledTaskId = scheduledTask.id;
+      createdAlert.attributes.scheduledTaskId = createdAlert.id;
     }
 
     // Log warning if schedule interval is less than the minimum but we're not enforcing it
@@ -2771,23 +2776,21 @@ export class RulesClient {
             rule.attributes.scheduledTaskId
           );
 
-          let scheduledTaskId;
           if (shouldScheduleTask) {
-            const scheduledTask = await this.scheduleTask({
+            await this.scheduleTask({
               id: rule.id,
               consumer: rule.attributes.consumer,
               ruleTypeId: rule.attributes.alertTypeId,
               schedule: rule.attributes.schedule as IntervalSchedule,
               throwOnConflict: false,
             });
-            scheduledTaskId = scheduledTask.id;
           }
 
           rulesToEnable.push({
             ...rule,
             attributes: {
               ...updatedAttributes,
-              ...(scheduledTaskId ? { scheduledTaskId } : undefined),
+              ...(shouldScheduleTask ? { scheduledTaskId: rule.id } : undefined),
             },
           });
 
@@ -3322,7 +3325,7 @@ export class RulesClient {
 
     if (scheduledTaskIdToCreate) {
       // Schedule the task if it doesn't exist
-      const scheduledTask = await this.scheduleTask({
+      await this.scheduleTask({
         id,
         consumer: attributes.consumer,
         ruleTypeId: attributes.alertTypeId,
@@ -3330,7 +3333,7 @@ export class RulesClient {
         throwOnConflict: false,
       });
       await this.unsecuredSavedObjectsClient.update('alert', id, {
-        scheduledTaskId: scheduledTask.id,
+        scheduledTaskId: id,
       });
     } else {
       // Task exists so set enabled to true
@@ -3999,7 +4002,16 @@ export class RulesClient {
       enabled: true,
     };
     try {
-      return await this.taskManager.schedule(taskInstance);
+      return await this.scheduler.schedule({
+        id,
+        workerId: `alerting:${ruleTypeId}`,
+        interval: parseIntervalAsMillisecond(schedule.interval),
+        params: {
+          alertId: id,
+          spaceId: this.spaceId,
+          consumer,
+        },
+      });
     } catch (err) {
       if (err.statusCode === 409 && !throwOnConflict) {
         return taskInstance;

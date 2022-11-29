@@ -49,6 +49,7 @@ import {
 import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+import { SchedulerPluginSetup, SchedulerPluginStart } from '@kbn/scheduler-plugin/server';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
@@ -144,6 +145,7 @@ export interface AlertingPluginsSetup {
   statusService: StatusServiceSetup;
   monitoringCollection: MonitoringCollectionSetup;
   data: DataPluginSetup;
+  scheduler: SchedulerPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -156,6 +158,7 @@ export interface AlertingPluginsStart {
   spaces: SpacesPluginStart;
   security?: SecurityPluginStart;
   data: DataPluginStart;
+  scheduler: SchedulerPluginStart;
 }
 
 export class AlertingPlugin {
@@ -222,6 +225,7 @@ export class AlertingPlugin {
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
 
     const ruleTypeRegistry = new RuleTypeRegistry({
+      scheduler: plugins.scheduler,
       logger: this.logger,
       taskManager: plugins.taskManager,
       taskRunnerFactory: this.taskRunnerFactory,
@@ -394,6 +398,7 @@ export class AlertingPlugin {
     });
 
     rulesClientFactory.initialize({
+      scheduler: plugins.scheduler,
       ruleTypeRegistry: ruleTypeRegistry!,
       logger,
       taskManager: plugins.taskManager,

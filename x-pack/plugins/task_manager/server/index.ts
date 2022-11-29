@@ -24,7 +24,7 @@ export { TaskStatus } from './task';
 
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 
-export { asInterval } from './lib/intervals';
+export { asInterval, parseIntervalAsMillisecond } from './lib/intervals';
 export {
   isUnrecoverableError,
   throwUnrecoverableError,

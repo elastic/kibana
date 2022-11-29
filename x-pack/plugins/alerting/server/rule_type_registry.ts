@@ -12,7 +12,8 @@ import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { SchedulerPluginSetup } from '@kbn/scheduler-plugin/server';
 import { TaskRunnerFactory } from './task_runner';
 import {
   RuleType,
@@ -35,6 +36,7 @@ import { InMemoryMetrics } from './monitoring';
 import { AlertingRulesConfig } from '.';
 
 export interface ConstructorOptions {
+  scheduler: SchedulerPluginSetup;
   logger: Logger;
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
@@ -131,8 +133,8 @@ export type UntypedNormalizedRuleType = NormalizedRuleType<
 >;
 
 export class RuleTypeRegistry {
+  private readonly scheduler: SchedulerPluginSetup;
   private readonly logger: Logger;
-  private readonly taskManager: TaskManagerSetupContract;
   private readonly ruleTypes: Map<string, UntypedNormalizedRuleType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly licenseState: ILicenseState;
@@ -141,6 +143,7 @@ export class RuleTypeRegistry {
   private readonly inMemoryMetrics: InMemoryMetrics;
 
   constructor({
+    scheduler,
     logger,
     taskManager,
     taskRunnerFactory,
@@ -149,8 +152,8 @@ export class RuleTypeRegistry {
     minimumScheduleInterval,
     inMemoryMetrics,
   }: ConstructorOptions) {
+    this.scheduler = scheduler;
     this.logger = logger;
-    this.taskManager = taskManager;
     this.taskRunnerFactory = taskRunnerFactory;
     this.licenseState = licenseState;
     this.licensing = licensing;
@@ -261,20 +264,24 @@ export class RuleTypeRegistry {
       /** stripping the typing is required in order to store the RuleTypes in a Map */
       normalizedRuleType as unknown as UntypedNormalizedRuleType
     );
-    this.taskManager.registerTaskDefinitions({
-      [`alerting:${ruleType.id}`]: {
-        title: ruleType.name,
-        timeout: ruleType.ruleTaskTimeout,
-        createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create<
-            Params,
-            ExtractedParams,
-            State,
-            InstanceState,
-            InstanceContext,
-            ActionGroupIds,
-            RecoveryActionGroupId | RecoveredActionGroupId
-          >(normalizedRuleType, context, this.inMemoryMetrics),
+    this.scheduler.registerWorker({
+      id: `alerting:${ruleType.id}`,
+      // TOOD: Convert to ms
+      // timeout: ruleType.ruleTaskTimeout,
+      run: async (params, abortSignal) => {
+        const taskRunner = this.taskRunnerFactory.create<
+          Params,
+          ExtractedParams,
+          State,
+          InstanceState,
+          InstanceContext,
+          ActionGroupIds,
+          RecoveryActionGroupId | RecoveredActionGroupId
+        >(normalizedRuleType, params, this.inMemoryMetrics);
+        await taskRunner.run();
+        abortSignal.addEventListener('abort', () => {
+          taskRunner.cancel();
+        });
       },
     });
     // No need to notify usage on basic alert types
