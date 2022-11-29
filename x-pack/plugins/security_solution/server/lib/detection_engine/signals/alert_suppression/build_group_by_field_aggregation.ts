@@ -22,6 +22,7 @@ export const buildGroupByFieldAggregation = ({
         [field]: {
           terms: {
             field,
+            missing_bucket: true,
           },
         },
       })),

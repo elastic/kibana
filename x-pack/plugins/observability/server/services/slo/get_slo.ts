@@ -32,6 +32,7 @@ export class GetSLO {
       time_window: slo.time_window,
       budgeting_method: slo.budgeting_method,
       objective: slo.objective,
+      settings: slo.settings,
       summary: slo.summary,
       revision: slo.revision,
       created_at: slo.created_at,
