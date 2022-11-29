@@ -27,7 +27,6 @@ import {
   apmAWSLambdaRequestCostPerMillion,
   enableCriticalPath,
   enableInfrastructureHostsView,
-  enableServiceMetrics,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
@@ -163,21 +162,6 @@ export const uiSettings: Record<string, UiSettings> = {
         }
       ),
     },
-    showInLabs: true,
-  },
-  [enableServiceMetrics]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableServiceMetrics', {
-      defaultMessage: 'Service metrics',
-    }),
-    value: false,
-    description: i18n.translate('xpack.observability.apmEnableServiceMetricsGroupsDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enables Service metrics. When is enabled, additional configuration in APM Server is required.',
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
     showInLabs: true,
   },
   [apmServiceInventoryOptimizedSorting]: {
