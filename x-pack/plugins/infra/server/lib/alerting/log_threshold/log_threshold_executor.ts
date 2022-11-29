@@ -486,7 +486,8 @@ export const processGroupByResults = (
 
       const groupByKeysObjectMapping = getGroupByObject(
         params.groupBy,
-        new Set<string>(groupResults.map((groupResult) => groupResult.name)));
+        new Set<string>(groupResults.map((groupResult) => groupResult.name))
+      );
 
       const actions = [
         {
@@ -551,7 +552,8 @@ export const processGroupByRatioResults = (
 
       const groupByKeysObjectMapping = getGroupByObject(
         params.groupBy,
-        new Set<string>(numeratorGroupResults.map((groupResult) => groupResult.name)));
+        new Set<string>(numeratorGroupResults.map((groupResult) => groupResult.name))
+      );
 
       const actions = [
         {

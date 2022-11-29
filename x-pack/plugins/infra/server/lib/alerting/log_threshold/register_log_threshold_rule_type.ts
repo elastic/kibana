@@ -15,7 +15,10 @@ import {
 import { InfraBackendLibs } from '../../infra_types';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getAlertDetailsPageEnabledForApp } from '../common/utils';
-import { alertDetailUrlActionVariableDescription, groupByKeysActionVariableDescription } from '../common/messages';
+import {
+  alertDetailUrlActionVariableDescription,
+  groupByKeysActionVariableDescription,
+} from '../common/messages';
 
 const timestampActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.timestampActionVariableDescription',
