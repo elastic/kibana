@@ -732,6 +732,7 @@ export class RulesClient {
       throttle,
       executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
       monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
+      state: data.state ? JSON.stringify(data.state) : null,
     };
 
     const mappedParams = getMappedParams(updatedParams);
@@ -4078,6 +4079,7 @@ export class RulesClient {
       schedule,
       actions,
       snoozeSchedule,
+      state,
       ...partialRawRule
     }: Partial<RawRule>,
     references: SavedObjectReference[] | undefined,
@@ -4131,6 +4133,7 @@ export class RulesClient {
         ? { monitoring: convertMonitoringFromRawAndVerify(this.logger, id, monitoring) }
         : {}),
       ...(nextRun ? { nextRun: new Date(nextRun) } : {}),
+      ...(state ? { state: JSON.parse(state) } : null),
     };
 
     return includeLegacyId

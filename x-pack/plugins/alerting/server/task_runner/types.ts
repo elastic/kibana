@@ -26,7 +26,6 @@ import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_sto
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 
 export interface RuleTaskRunResult {
-  state: RuleTaskState;
   monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
 }

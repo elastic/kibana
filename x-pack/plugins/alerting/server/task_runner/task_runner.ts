@@ -155,6 +155,7 @@ export class TaskRunner<
       monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
+      state?: string;
     }
   ) {
     const client = this.context.internalSavedObjectsRepository;
@@ -231,12 +232,13 @@ export class TaskRunner<
     } = rule;
     const {
       params: { alertId: ruleId, spaceId },
-      state: {
-        alertInstances: alertRawInstances = {},
-        alertTypeState: ruleTypeState = {},
-        previousStartedAt,
-      },
     } = this.taskInstance;
+
+    const {
+      alertInstances: alertRawInstances = {},
+      alertTypeState: ruleTypeState = {},
+      previousStartedAt,
+    } = rule.state || {};
 
     const ruleRunMetricsStore = new RuleRunMetricsStore();
 
@@ -525,10 +527,14 @@ export class TaskRunner<
     nextRun,
     runDate,
     stateWithMetrics,
+    startedAt,
+    originalState,
   }: {
     nextRun: string | null;
     runDate: Date;
     stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
+    startedAt: Date | null;
+    originalState: RuleTypeState;
   }) {
     const {
       params: { alertId: ruleId, spaceId },
@@ -612,10 +618,46 @@ export class TaskRunner<
           executionStatus
         )} - ${JSON.stringify(lastRun)}`
       );
+
+      const transformRunStateToTaskState = (
+        runStateWithMetrics: RuleTaskStateAndMetrics
+      ): RuleTaskState => {
+        return {
+          ...omit(runStateWithMetrics, ['metrics']),
+          previousStartedAt: startedAt,
+        };
+      };
+
       await this.updateRuleSavedObject(ruleId, namespace, {
         executionStatus: ruleExecutionStatusToRaw(executionStatus),
         nextRun,
         lastRun: lastRunToRaw(lastRun),
+        state: JSON.stringify(
+          map<RuleTaskStateAndMetrics, ElasticsearchError, RuleTaskState>(
+            stateWithMetrics,
+            (ruleRunStateWithMetrics: RuleTaskStateAndMetrics) =>
+              transformRunStateToTaskState(ruleRunStateWithMetrics),
+            (err: ElasticsearchError) => {
+              if (isAlertSavedObjectNotFoundError(err, ruleId)) {
+                const message = `Executing Rule ${spaceId}:${
+                  this.ruleType.id
+                }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
+                this.logger.debug(message);
+              } else {
+                const error = this.stackTraceLog ? this.stackTraceLog.message : err;
+                const stack = this.stackTraceLog ? this.stackTraceLog.stackTrace : err.stack;
+                const message = `Executing Rule ${spaceId}:${
+                  this.ruleType.id
+                }:${ruleId} has resulted in Error: ${getEsErrorMessage(error)} - ${stack ?? ''}`;
+                this.logger.error(message, {
+                  tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
+                  error: { stack_trace: stack },
+                });
+              }
+              return originalState;
+            }
+          )
+        ),
         monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
       });
     }
@@ -672,17 +714,10 @@ export class TaskRunner<
           nextRun,
           runDate,
           stateWithMetrics,
+          startedAt,
+          originalState,
         })
     );
-
-    const transformRunStateToTaskState = (
-      runStateWithMetrics: RuleTaskStateAndMetrics
-    ): RuleTaskState => {
-      return {
-        ...omit(runStateWithMetrics, ['metrics']),
-        previousStartedAt: startedAt,
-      };
-    };
 
     if (startedAt) {
       // Capture how long it took for the rule to run after being claimed
@@ -696,30 +731,6 @@ export class TaskRunner<
     });
 
     return {
-      state: map<RuleTaskStateAndMetrics, ElasticsearchError, RuleTaskState>(
-        stateWithMetrics,
-        (ruleRunStateWithMetrics: RuleTaskStateAndMetrics) =>
-          transformRunStateToTaskState(ruleRunStateWithMetrics),
-        (err: ElasticsearchError) => {
-          if (isAlertSavedObjectNotFoundError(err, ruleId)) {
-            const message = `Executing Rule ${spaceId}:${
-              this.ruleType.id
-            }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
-            this.logger.debug(message);
-          } else {
-            const error = this.stackTraceLog ? this.stackTraceLog.message : err;
-            const stack = this.stackTraceLog ? this.stackTraceLog.stackTrace : err.stack;
-            const message = `Executing Rule ${spaceId}:${
-              this.ruleType.id
-            }:${ruleId} has resulted in Error: ${getEsErrorMessage(error)} - ${stack ?? ''}`;
-            this.logger.error(message, {
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
-              error: { stack_trace: stack },
-            });
-          }
-          return originalState;
-        }
-      ),
       schedule: resolveErr<IntervalSchedule | undefined, Error>(schedule, (error) => {
         if (isAlertSavedObjectNotFoundError(error, ruleId)) {
           const spaceMessage = spaceId ? `in the "${spaceId}" space ` : '';

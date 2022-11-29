@@ -12,6 +12,7 @@ import type {
 } from '@kbn/core/server';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 import { RuleSnooze } from './rule_snooze_type';
+import { RawAlertInstance } from './alert_instance';
 
 export type RuleTypeState = Record<string, unknown>;
 export type RuleTypeParams = Record<string, unknown>;
@@ -110,6 +111,12 @@ export interface MappedParamsProperties {
 
 export type MappedParams = SavedObjectAttributes & MappedParamsProperties;
 
+interface RuleSOState {
+  alertInstances: Record<string, RawAlertInstance>;
+  alertTypeState: Record<string, unknown>;
+  previousStartedAt: Date;
+}
+
 export interface Rule<Params extends RuleTypeParams = never> {
   id: string;
   enabled: boolean;
@@ -139,6 +146,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   isSnoozedUntil?: Date | null;
   lastRun?: RuleLastRun | null;
   nextRun?: Date | null;
+  state?: RuleSOState;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;

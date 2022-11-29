@@ -105,6 +105,10 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     mutedInstanceIds: {
       type: 'keyword',
     },
+    state: {
+      enabled: false,
+      type: 'object',
+    },
     meta: {
       properties: {
         versionApiKeyLastmodified: {

@@ -73,7 +73,7 @@ export class Alert<
         this.meta.lastScheduledActions,
         this.scheduledExecutionOptions
       ) &&
-      this.meta.lastScheduledActions.date.getTime() + throttleMills > Date.now()
+      new Date(this.meta.lastScheduledActions.date).getTime() + throttleMills > Date.now()
     ) {
       return true;
     }
