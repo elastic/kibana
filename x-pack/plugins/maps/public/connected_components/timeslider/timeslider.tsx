@@ -13,15 +13,18 @@ import { distinctUntilChanged } from 'rxjs/operators';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 import {
+  LazyControlGroupRenderer,
   ControlGroupContainer,
   ControlGroupInput,
   ControlGroupOutput,
   CONTROL_GROUP_TYPE,
 } from '@kbn/controls-plugin/public';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { first } from 'rxjs/operators';
 import type { TimeRange } from '@kbn/es-query';
-import { getEmbeddableService } from '../../kibana_services';
 import { Timeslice } from '../../../common/descriptor_types';
+
+const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 export interface Props {
   setTimeslice: (timeslice: Timeslice) => void;
@@ -32,7 +35,6 @@ export interface Props {
 export class Timeslider extends Component<Props, {}> {
   private _isMounted: boolean = false;
   private _controlGroup?: ControlGroupContainer | undefined;
-  private readonly _controlGroupRef: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
   private readonly _subscriptions = new Subscription();
 
   componentWillUnmount() {
@@ -53,18 +55,15 @@ export class Timeslider extends Component<Props, {}> {
 
   componentDidMount() {
     this._isMounted = true;
-    this._load();
   }
 
-  async _load() {
-    const embeddableService = getEmbeddableService();
-    const controlsGroupFactory = embeddableService.getEmbeddableFactory<
-      ControlGroupInput,
-      ControlGroupOutput,
-      ControlGroupContainer
-    >(CONTROL_GROUP_TYPE);
+  _getCreationOptions = () => {
+    if (!this._isMounted) {
+      return;
+    }
+
     const timesliderId = uuid();
-    this._controlGroup = await controlsGroupFactory?.create({
+    return {
       id: uuid(),
       ...getDefaultControlGroupInput(),
       panels: {
@@ -81,12 +80,15 @@ export class Timeslider extends Component<Props, {}> {
       },
       viewMode: ViewMode.VIEW,
       timeRange: this.props.timeRange,
-    });
+    };
+  }
 
+  _onLoadComplete = (controlGroup) => {
     if (!this._isMounted) {
       return;
     }
 
+    this._controlGroup = controlGroup;
     this._subscriptions.add(
       this._controlGroup
         .getOutput$()
@@ -112,13 +114,16 @@ export class Timeslider extends Component<Props, {}> {
           );
         })
     );
-
-    if (this._controlGroupRef.current) {
-      this._controlGroup.render(this._controlGroupRef.current);
-    }
   }
 
   render() {
-    return <div className="mapTimeslider mapTimeslider--animation" ref={this._controlGroupRef} />;
+    return (
+      <div className="mapTimeslider mapTimeslider--animation">
+        <ControlGroupRenderer
+          onEmbeddableLoad={this._onLoadComplete}
+          getCreationOptions={this._getCreationOptions}
+        />
+      </div>
+    );
   }
 }
