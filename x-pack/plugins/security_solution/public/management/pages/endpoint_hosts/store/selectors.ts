@@ -290,6 +290,7 @@ export const getEndpointHostIsolationStatusPropsCallback: (
       let pendingKillProcess = 0;
       let pendingSuspendProcess = 0;
       let pendingRunningProcesses = 0;
+      let pendingKubeList = 0;
 
       if (isLoadedResourceState(pendingActionsState)) {
         const endpointPendingActions = pendingActionsState.data.get(endpoint.elastic.agent.id);
@@ -300,6 +301,7 @@ export const getEndpointHostIsolationStatusPropsCallback: (
           pendingKillProcess = endpointPendingActions?.['kill-process'] ?? 0;
           pendingSuspendProcess = endpointPendingActions?.['suspend-process'] ?? 0;
           pendingRunningProcesses = endpointPendingActions?.['running-processes'] ?? 0;
+          pendingKubeList = endpointPendingActions?.['kube-list'] ?? 0;
         }
       }
 
@@ -311,6 +313,7 @@ export const getEndpointHostIsolationStatusPropsCallback: (
           pendingKillProcess,
           pendingSuspendProcess,
           pendingRunningProcesses,
+          pendingKubeList,
         },
       };
     };

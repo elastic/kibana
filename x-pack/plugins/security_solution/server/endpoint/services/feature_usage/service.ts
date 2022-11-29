@@ -23,6 +23,7 @@ const FEATURES = {
   RUNNING_PROCESSES: 'Get running processes',
   GET_FILE: 'Get file',
   ALERTS_BY_PROCESS_ANCESTRY: 'Get related alerts by process ancestry',
+  KUBE_LIST: 'List kubernetes resources',
 } as const;
 
 export type FeatureKeys = keyof typeof FEATURES;

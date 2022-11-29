@@ -268,6 +268,34 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     return super.randomN(max);
   }
 
+  randomResponseActionKubeList(
+    n?: number,
+    resource: 'pod' | 'deployment' = 'pod'
+  ): ProcessesEntry[] {
+    const numberOfEntries = n ?? this.randomChoice([20, 30, 40, 50]);
+    const entries = [];
+    for (let i = 0; i < numberOfEntries; i++) {
+      if (resource === 'pod') {
+        entries.push({
+          name: `nginx-${this.randomString(10)}-${this.randomString(5)}`,
+          ready: '1/1',
+          status: 'Running',
+          restarts: '0',
+          age: '7d17h',
+        });
+      } else if (resource === 'deployment') {
+        entries.push({
+          name: `nginx`,
+          ready: `${n}/${n}`,
+          up_to_date: n,
+          available: n,
+        });
+      }
+    }
+
+    return entries;
+  }
+
   randomResponseActionProcesses(n?: number): ProcessesEntry[] {
     const numberOfEntries = n ?? this.randomChoice([20, 30, 40, 50]);
     const entries = [];

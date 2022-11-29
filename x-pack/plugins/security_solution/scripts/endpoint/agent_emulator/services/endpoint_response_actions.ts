@@ -266,6 +266,18 @@ type ResponseOutput<TOutputContent extends object = object> = Pick<
 
 const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
   switch (action.command) {
+    case 'kube-list':
+      return {
+        output: {
+          type: 'json',
+          content: {
+            entries: endpointActionGenerator.randomResponseActionKubeList(
+              3,
+              action.parameters.resource
+            ),
+          },
+        },
+      } as ResponseOutput<GetProcessesActionOutputContent>;
     case 'running-processes':
       return {
         output: {

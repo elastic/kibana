@@ -184,6 +184,7 @@ const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKe
   ['suspend-process', 'SUSPEND_PROCESS'],
   ['running-processes', 'RUNNING_PROCESSES'],
   ['get-file', 'GET_FILE'],
+  ['kube-list', 'KUBE_LIST'],
 ]);
 
 const returnActionIdCommands: ResponseActionsApiCommandNames[] = ['isolate', 'unisolate'];

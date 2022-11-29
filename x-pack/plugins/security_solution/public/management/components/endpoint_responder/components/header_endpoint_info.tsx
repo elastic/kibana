@@ -43,6 +43,7 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
         pendingKillProcess: pendingActions?.['kill-process'] ?? 0,
         pendingSuspendProcess: pendingActions?.['suspend-process'] ?? 0,
         pendingRunningProcesses: pendingActions?.['running-processes'] ?? 0,
+        pendingKubeList: pendingActions?.['kube-list'] ?? 0,
       },
     };
   }, [endpointPendingActions?.data]);

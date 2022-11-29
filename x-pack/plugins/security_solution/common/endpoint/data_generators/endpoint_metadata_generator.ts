@@ -26,6 +26,11 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
     const isIsolated = this.randomBoolean(0.3);
     const capabilities: EndpointCapabilities[] = ['isolation'];
 
+    // v8.7 introduced kubernetes endpoint capabilities
+    if (gte(agentVersion, '8.7.0')) {
+      capabilities.push('kube-list');
+    }
+
     // v8.4 introduced additional endpoint capabilities
     if (gte(agentVersion, '8.4.0')) {
       capabilities.push('kill_process', 'suspend_process', 'running_processes');

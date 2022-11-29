@@ -26,6 +26,7 @@ import {
   UPGRADE_ENDPOINT_FOR_RESPONDER,
 } from '../../../../common/translations';
 import { getCommandAboutInfo } from './get_command_about_info';
+import { KubeListActionResult } from '../command_render_components/kube_list_action';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
@@ -50,6 +51,21 @@ const pidValidator = (argData: ParsedArgData): true | string => {
   }
 };
 
+const kubernetesResourceValidator = (argData: ParsedArgData): true | string => {
+  const emptyResult = emptyArgumentValidator(argData);
+
+  if (emptyResult !== true) {
+    return emptyResult;
+  } else if (argData[0] === 'pod' || argData[0] === 'deployment') {
+    return true;
+  } else {
+    return i18n.translate('xpack.securitySolution.endpointConsoleCommands.invalidResource', {
+      defaultMessage:
+        'Argument must be a valid and supported kubernetes resource: pod or deployment',
+    });
+  }
+};
+
 const commandToCapabilitiesMap = new Map<ConsoleResponseActionCommands, EndpointCapabilities>([
   ['isolate', 'isolation'],
   ['release', 'isolation'],
@@ -57,6 +73,7 @@ const commandToCapabilitiesMap = new Map<ConsoleResponseActionCommands, Endpoint
   ['suspend-process', 'suspend_process'],
   ['processes', 'running_processes'],
   ['get-file', 'get_file'],
+  ['kube-list', 'kube-list'],
 ]);
 
 const getRbacControl = ({
@@ -73,6 +90,7 @@ const getRbacControl = ({
     ['suspend-process', privileges.canSuspendProcess],
     ['processes', privileges.canGetRunningProcesses],
     ['get-file', privileges.canWriteFileOperations],
+    ['kube-list', true], // TODO: RBAC Kubernetes
   ]);
   return commandToPrivilegeMap.get(commandName as ConsoleResponseActionCommands) ?? false;
 };
@@ -124,6 +142,11 @@ const ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION = i18n.translate(
 const COMMENT_ARG_ABOUT = i18n.translate(
   'xpack.securitySolution.endpointConsoleCommands.suspendProcess.commandArgAbout',
   { defaultMessage: 'A comment to go along with the action' }
+);
+
+const ENTER_RESOURCE_NAME = i18n.translate(
+  'xpack.securitySolution.endpointResponseActionsConsoleCommands.enterResourceName',
+  { defaultMessage: 'Enter a resource name to execute' }
 );
 
 export const getEndpointConsoleCommands = ({
@@ -420,6 +443,52 @@ export const getEndpointConsoleCommands = ({
       }),
     });
   }
+
+  // TODO: check kubernetes feature flag
+  consoleCommands.push({
+    name: 'kube-list',
+    about: getCommandAboutInfo({
+      aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.kubeList.about', {
+        defaultMessage: 'List Kubernetes Resources (pods or deployments)',
+      }),
+      // isSupported: doesEndpointSupportCommand('processes'),
+      isSupported: true,
+    }),
+    RenderComponent: KubeListActionResult,
+    meta: {
+      endpointId: endpointAgentId,
+      capabilities: endpointCapabilities,
+      privileges: endpointPrivileges,
+    },
+    exampleUsage: 'kube-list --resource pod --comment "listing kubernetes pods"',
+    exampleInstruction: ENTER_RESOURCE_NAME,
+    validate: capabilitiesAndPrivilegesValidator,
+    mustHaveArgs: true,
+    args: {
+      comment: {
+        required: false,
+        allowMultiples: false,
+        about: COMMENT_ARG_ABOUT,
+      },
+      resource: {
+        required: true,
+        allowMultiples: false,
+        exclusiveOr: false,
+        about: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.suspendProcess.pid.arg.comment',
+          {
+            defaultMessage: 'A kubernetes resource to list (pod or deployment)',
+          }
+        ),
+        validate: kubernetesResourceValidator,
+      },
+    },
+    helpGroupLabel: HELP_GROUPS.responseActions.label,
+    helpGroupPosition: HELP_GROUPS.responseActions.position,
+    helpCommandPosition: 7,
+    helpDisabled: doesEndpointSupportCommand('kube-list') === false,
+    helpHidden: !getRbacControl({ commandName: 'kube-list', privileges: endpointPrivileges }),
+  });
 
   return consoleCommands;
 };
