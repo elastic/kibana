@@ -705,7 +705,7 @@ describe('rules_list component with items', () => {
     );
   });
 
-  it('sorts rules when clicking the status control column', async () => {
+  it.skip('sorts rules when clicking the status control column', async () => {
     await setup();
     wrapper
       .find('[data-test-subj="tableHeaderCell_enabled_10"] .euiTableHeaderButton')
