@@ -683,7 +683,7 @@ describe('rules_list component with items', () => {
     expect(global.open).toHaveBeenCalled();
   });
 
-  it('sorts rules when clicking the name column', async () => {
+  it.skip('sorts rules when clicking the name column', async () => {
     await setup();
     wrapper
       .find('[data-test-subj="tableHeaderCell_name_1"] .euiTableHeaderButton')
