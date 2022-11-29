@@ -6,14 +6,13 @@
  */
 
 import { GlobalSearchProviderResult } from '@kbn/global-search-plugin/server';
-import { toSentenceCase } from '@elastic/eui';
 import uuid from 'uuid';
 
 export const mapToResults = (term: string, response: Response): GlobalSearchProviderResult[] => {
   return [
     {
       id: uuid.v4(),
-      title: `${toSentenceCase(term)}`,
+      title: `Search for "${term}" in the docs`,
       type: 'documentation',
       icon: 'document',
       url: response.url,

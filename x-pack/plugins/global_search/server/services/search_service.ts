@@ -177,7 +177,9 @@ export class SearchService {
         catchError(() => EMPTY),
         takeInArray(this.maxProviderResults),
         takeUntil(aborted$),
-        map((results) => results.map((r) => processResult(r)))
+        map((results) => {
+          return results.map((r) => processResult(r));
+        })
       );
     });
 

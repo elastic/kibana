@@ -99,12 +99,11 @@ export const SearchBar: FC<SearchBarProps> = ({
   }, [globalSearch, initialLoad]);
 
   const loadSuggestions = useCallback(
-    (term: string, docs?: FilterValues<string>) => {
+    (term: string) => {
       return getSuggestions({
         searchTerm: term,
         searchableTypes,
         tagCache: taggingApi?.cache,
-        docs,
       });
     },
     [taggingApi, searchableTypes]

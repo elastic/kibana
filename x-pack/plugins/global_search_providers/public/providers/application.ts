@@ -29,8 +29,8 @@ export const createApplicationResultProvider = (
 
   return {
     id: 'application',
-    find: ({ term, types, tags }, { aborted$, maxResults }) => {
-      if (tags || (types && !types.includes(applicationType))) {
+    find: ({ term, types, tags, docs }, { aborted$, maxResults }) => {
+      if (tags || docs || (types && !types.includes(applicationType))) {
         return of([]);
       }
       return searchableApps$.pipe(

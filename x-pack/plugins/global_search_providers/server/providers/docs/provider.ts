@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { from } from 'rxjs';
+import { from, of } from 'rxjs';
 import fetch from 'node-fetch';
 import { map, takeUntil, filter } from 'rxjs/operators';
 import { GlobalSearchResultProvider } from '@kbn/global-search-plugin/server';
@@ -15,7 +15,7 @@ export const createDocsResultProvider = (): GlobalSearchResultProvider => {
   return {
     id: 'docsLink',
     find: ({ docs }, { aborted$ }) => {
-      if (!docs || docs.length <= 0) return from([]);
+      if (!docs || docs.length <= 0) return of([]);
       const term = docs[0].toLowerCase();
 
       const responsePromise = fetch(`https://www.elastic.co/guide/en/kibana/current/${term}.html`);
@@ -26,6 +26,6 @@ export const createDocsResultProvider = (): GlobalSearchResultProvider => {
         map((res) => mapToResults(term ?? '', res))
       );
     },
-    getSearchableTypes: () => ['docs'],
+    getSearchableTypes: () => [],
   };
 };
