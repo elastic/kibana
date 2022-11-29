@@ -129,6 +129,7 @@ export type {
   PostDownloadSourceRequest,
   PutDownloadSourceRequest,
   GetAvailableVersionsResponse,
+  PostHealthCheckRequest,
 } from '../../common/types';
 export {
   entries,
