@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useQuery } from '@tanstack/react-query';
+
 import { appRoutesService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../types';
 
@@ -23,6 +25,15 @@ export const sendGenerateServiceToken = () => {
     path: appRoutesService.getRegenerateServiceTokenPath(),
     method: 'post',
   });
+};
+
+export const usePermissionCheckQuery = () => {
+  return useQuery(['permissionsCheck'], () =>
+    sendRequest<CheckPermissionsResponse>({
+      path: appRoutesService.getCheckPermissionsPath(),
+      method: 'get',
+    })
+  );
 };
 
 export const usePermissionCheck = () => {

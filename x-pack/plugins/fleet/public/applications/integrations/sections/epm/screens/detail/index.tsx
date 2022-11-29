@@ -37,9 +37,9 @@ import {
   useBreadcrumbs,
   useStartServices,
   useAuthz,
-  usePermissionCheck,
+  usePermissionCheckQuery,
   useIntegrationsStateContext,
-  useGetSettings,
+  useGetSettingsQuery,
 } from '../../../../hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { ExperimentalFeaturesService, isPackagePrerelease } from '../../../../services';
@@ -112,17 +112,19 @@ export function Detail() {
   const { getFromIntegrations } = useIntegrationsStateContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref, getPath } = useLink();
-  const canInstallPackages = useAuthz().integrations.installPackages;
-  const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
-  const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
-  const permissionCheck = usePermissionCheck();
-  const missingSecurityConfiguration =
-    !permissionCheck.data?.success && permissionCheck.data?.error === 'MISSING_SECURITY';
-  const userCanInstallPackages = canInstallPackages && permissionCheck.data?.success;
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
+
+  const canInstallPackages = useAuthz().integrations.installPackages;
+  const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
+  const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
+  const { data: permissionCheck, isLoading: isPermissionCheckLoading } = usePermissionCheckQuery();
+  const missingSecurityConfiguration =
+    !permissionCheck?.data?.success && permissionCheck?.data?.error === 'MISSING_SECURITY';
+  const userCanInstallPackages = canInstallPackages && permissionCheck?.data?.success;
+
   const services = useStartServices();
   const isCloud = !!services?.cloud?.cloudId;
   const { createPackagePolicyMultiPageLayout: isExperimentalAddIntegrationPageEnabled } =
@@ -161,12 +163,12 @@ export function Detail() {
     boolean | undefined
   >();
 
-  const { data: settings } = useGetSettings();
+  const { data: settings } = useGetSettingsQuery();
 
   useEffect(() => {
-    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
+    const isEnabled = Boolean(settings?.data?.item.prerelease_integrations_enabled);
     setPrereleaseIntegrationsEnabled(isEnabled);
-  }, [settings?.item.prerelease_integrations_enabled]);
+  }, [settings?.data?.item.prerelease_integrations_enabled]);
 
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
@@ -220,7 +222,7 @@ export function Detail() {
     }
   }, [packageInstallStatus, oldPackageInstallStatus, refetchPackageInfo]);
 
-  const isLoading = packageInfoLoading || permissionCheck.isLoading || firstTimeUserLoading;
+  const isLoading = packageInfoLoading || isPermissionCheckLoading || firstTimeUserLoading;
 
   const showCustomTab =
     useUIExtension(packageInfoData?.data?.item?.name ?? '', 'package-detail-custom') !== undefined;
