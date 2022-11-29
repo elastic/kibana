@@ -12,8 +12,9 @@ import { createBrowserHistory, History } from 'history';
 import { parseUrl, parseUrlHash } from '../../../common/state_management/parse';
 import { replaceUrlHashQuery, replaceUrlQuery } from '../../../common/state_management/format';
 import { decodeState, encodeState } from '../state_encoder';
-import { getCurrentUrl } from './get_current_url';
 import { url as urlUtils } from '../../../common';
+
+export const getCurrentUrl = (history: History) => history.createHref(history.location);
 
 /**
  * Parses a kibana url and retrieves all the states encoded into the URL,
