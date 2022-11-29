@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export const ID = 'es_ql';
+import { LangModuleType } from '../types';
+import { ID } from './constants';
+import { lexerRules } from './lexer_rules';
+
+export const SQLLang: LangModuleType = { ID, lexerRules };

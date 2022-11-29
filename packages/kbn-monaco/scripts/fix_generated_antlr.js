@@ -11,7 +11,7 @@ const { readdirSync, readFileSync, writeFileSync, renameSync } = require('fs');
 const ora = require('ora');
 const log = ora('Updating generated antlr grammar').start();
 
-const SUPPORTED_FOLDERS = ['painless', 'es_ql'];
+const SUPPORTED_FOLDERS = ['painless', 'esql'];
 
 function execute(folder) {
   const generatedAntlrFolder = join(__dirname, '..', 'src', folder, 'antlr');

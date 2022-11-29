@@ -6,9 +6,9 @@
  * 2.0.
  */
 
-parser grammar es_ql_parser;
+parser grammar esql_parser;
 
-options {tokenVocab=es_ql_lexer;}
+options {tokenVocab=esql_lexer;}
 
 singleStatement
     : query EOF

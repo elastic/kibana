@@ -12,10 +12,8 @@ import { tokenPostfix } from './esql_constants';
 /** @internal **/
 export class ESQLToken implements monaco.languages.IToken {
   scopes: string;
-  startIndex: number;
 
-  constructor(ruleName: string, startIndex: number) {
+  constructor(ruleName: string, public startIndex: number, public stopIndex?: number) {
     this.scopes = ruleName.toLowerCase() + tokenPostfix;
-    this.startIndex = startIndex;
   }
 }

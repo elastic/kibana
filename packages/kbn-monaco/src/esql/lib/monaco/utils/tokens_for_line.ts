@@ -10,7 +10,7 @@ import { CharStreams } from 'antlr4ts';
 import { monaco } from '../../../../monaco_imports';
 
 import { ESQLErrorListener } from '../../error_listener';
-import { es_ql_lexer as ESQLLexer } from '../../../antlr/es_ql_lexer';
+import { esql_lexer as ESQLLexer } from '../../../antlr/esql_lexer';
 import { ESQLToken } from '../esql_token';
 import { ESQLLineTokens } from '../esql_line_tokens';
 import { tokenPostfix } from '../esql_constants';
@@ -31,6 +31,7 @@ export function tokensForLine(input: string): monaco.languages.ILineTokens {
 
   do {
     const token = lexer.nextToken();
+
     if (token == null) {
       done = true;
     } else {
@@ -38,9 +39,11 @@ export function tokensForLine(input: string): monaco.languages.ILineTokens {
       if (token.type === EOF) {
         done = true;
       } else {
-        const tokenTypeName = lexer.ruleNames[token.type];
-        const myToken = new ESQLToken(tokenTypeName, token.startIndex);
-        myTokens.push(myToken);
+        const tokenTypeName = lexer.vocabulary.getSymbolicName(token.type);
+        if (tokenTypeName) {
+          const myToken = new ESQLToken(tokenTypeName, token.startIndex, token.stopIndex);
+          myTokens.push(myToken);
+        }
       }
     }
   } while (!done);

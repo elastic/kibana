@@ -1,5 +1,5 @@
 // @ts-nocheck
-// Generated from ./src/es_ql/antlr/es_ql_lexer.g4 by ANTLR 4.7.3-SNAPSHOT
+// Generated from src/esql/antlr/esql_lexer.g4 by ANTLR 4.7.3-SNAPSHOT
 
 
 import { ATN } from "antlr4ts/atn/ATN";
@@ -16,7 +16,7 @@ import { VocabularyImpl } from "antlr4ts/VocabularyImpl";
 import * as Utils from "antlr4ts/misc/Utils";
 
 
-export class es_ql_lexer extends Lexer {
+export class esql_lexer extends Lexer {
 	public static readonly EVAL = 1;
 	public static readonly EXPLAIN = 2;
 	public static readonly FROM = 3;
@@ -121,35 +121,35 @@ export class es_ql_lexer extends Lexer {
 		"EXPR_MULTILINE_COMMENT", "EXPR_WS", "SRC_UNQUOTED_IDENTIFIER", "SRC_QUOTED_IDENTIFIER", 
 		"SRC_LINE_COMMENT", "SRC_MULTILINE_COMMENT", "SRC_WS",
 	];
-	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(es_ql_lexer._LITERAL_NAMES, es_ql_lexer._SYMBOLIC_NAMES, []);
+	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(esql_lexer._LITERAL_NAMES, esql_lexer._SYMBOLIC_NAMES, []);
 
 	// @Override
 	// @NotNull
 	public get vocabulary(): Vocabulary {
-		return es_ql_lexer.VOCABULARY;
+		return esql_lexer.VOCABULARY;
 	}
 	// tslint:enable:no-trailing-whitespace
 
 
 	constructor(input: CharStream) {
 		super(input);
-		this._interp = new LexerATNSimulator(es_ql_lexer._ATN, this);
+		this._interp = new LexerATNSimulator(esql_lexer._ATN, this);
 	}
 
 	// @Override
-	public get grammarFileName(): string { return "es_ql_lexer.g4"; }
+	public get grammarFileName(): string { return "esql_lexer.g4"; }
 
 	// @Override
-	public get ruleNames(): string[] { return es_ql_lexer.ruleNames; }
+	public get ruleNames(): string[] { return esql_lexer.ruleNames; }
 
 	// @Override
-	public get serializedATN(): string { return es_ql_lexer._serializedATN; }
+	public get serializedATN(): string { return esql_lexer._serializedATN; }
 
 	// @Override
-	public get channelNames(): string[] { return es_ql_lexer.channelNames; }
+	public get channelNames(): string[] { return esql_lexer.channelNames; }
 
 	// @Override
-	public get modeNames(): string[] { return es_ql_lexer.modeNames; }
+	public get modeNames(): string[] { return esql_lexer.modeNames; }
 
 	public static readonly _serializedATN: string =
 		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x02;\u021D\b\x01" +
@@ -414,11 +414,11 @@ export class es_ql_lexer extends Lexer {
 		"\x02\x07\x02\x02\t\x10\x02\t \x02\t\x18\x02\t\x17\x02";
 	public static __ATN: ATN;
 	public static get _ATN(): ATN {
-		if (!es_ql_lexer.__ATN) {
-			es_ql_lexer.__ATN = new ATNDeserializer().deserialize(Utils.toCharArray(es_ql_lexer._serializedATN));
+		if (!esql_lexer.__ATN) {
+			esql_lexer.__ATN = new ATNDeserializer().deserialize(Utils.toCharArray(esql_lexer._serializedATN));
 		}
 
-		return es_ql_lexer.__ATN;
+		return esql_lexer.__ATN;
 	}
 
 }

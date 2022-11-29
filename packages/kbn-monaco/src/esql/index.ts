@@ -8,6 +8,46 @@
 
 import { LangModuleType } from '../types';
 import { ID } from './constants';
-import { lexerRules } from './lexer_rules';
 
-export const EsqlLang: LangModuleType = { ID, lexerRules };
+const getRuleGroup = (tokens: string[], color: string) =>
+  tokens.map((i) => ({
+    token: i + '.esql',
+    foreground: color,
+  }));
+
+export const ESQLLang: LangModuleType = {
+  ID,
+  tokensProvider: async () => {
+    const { ESQLTokensProvider } = await import('./lib/monaco/esql_tokens_provider');
+
+    return new ESQLTokensProvider();
+  },
+  customTheme: {
+    ID: 'testTheme',
+    themeData: {
+      base: 'vs',
+      inherit: false,
+      rules: [
+        ...getRuleGroup(
+          [
+            'unquoted_identifier',
+            'eval',
+            'explain',
+            'from',
+            'row',
+            'stats',
+            'where',
+            'sort',
+            'limit',
+            'project',
+          ],
+          '#1d67bd'
+        ),
+        ...getRuleGroup(['eq', 'minus', 'by', 'lp'], '#bd781d'),
+      ],
+      colors: {
+        'by.esql': '#ff0000',
+      },
+    },
+  },
+};

@@ -8,9 +8,9 @@
 
 import { XJsonLang } from './xjson';
 import { PainlessLang } from './painless';
-import { EsqlLang } from './esql';
+import { SQLLang } from './sql';
 import { monaco } from './monaco_imports';
-import { ESQLLang } from './es_ql';
+import { ESQLLang } from './esql';
 import { registerLanguage } from './helpers';
 
 import jsonWorkerSrc from '!!raw-loader!../../target_workers/json.editor.worker.js';
@@ -23,7 +23,7 @@ import painlessWorkerSrc from '!!raw-loader!../../target_workers/painless.editor
  */
 registerLanguage(XJsonLang);
 registerLanguage(PainlessLang);
-registerLanguage(EsqlLang);
+registerLanguage(SQLLang);
 registerLanguage(ESQLLang);
 
 /**

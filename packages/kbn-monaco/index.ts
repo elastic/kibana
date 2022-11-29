@@ -11,8 +11,8 @@ import './src/register_globals';
 
 export { monaco } from './src/monaco_imports';
 export { XJsonLang } from './src/xjson';
-export { EsqlLang } from './src/esql';
-export { ESQLLang } from './src/es_ql';
+export { SQLLang } from './src/sql';
+export { ESQLLang } from './src/esql';
 
 export * from './src/painless';
 /* eslint-disable-next-line @kbn/eslint/module_migration */

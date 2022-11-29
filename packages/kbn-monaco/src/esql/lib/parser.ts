@@ -7,10 +7,10 @@
  */
 
 import { CommonTokenStream, CharStreams } from 'antlr4ts';
-import { es_ql_parser as ESQLParser, QueryContext } from '../antlr/es_ql_parser';
+import { esql_parser as ESQLParser, QueryContext } from '../antlr/esql_parser';
 
 import { SyntaxError, ESQLErrorListener } from './error_listener';
-import { es_ql_lexer as ESQLLexer } from '../antlr/es_ql_lexer';
+import { esql_lexer as ESQLLexer } from '../antlr/esql_lexer';
 
 const parse = (
   code: string

@@ -1,4 +1,4 @@
-lexer grammar es_ql_lexer;
+lexer grammar esql_lexer;
 
 EVAL : 'eval' -> pushMode(EXPRESSION);
 EXPLAIN : 'explain' -> pushMode(EXPRESSION);
