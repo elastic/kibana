@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
@@ -148,87 +148,106 @@ const TestCountries = {
 
 export const TermsExplorerTable = (props: TermsExplorerTableProps) => {
   const [primaryItemIdToExpandedRowMap, setPrimaryItemIdToExpandedRowMap] = useState({});
+  const [secondaryItemIdToExpandedRowMap, setSecondaryItemIdToExpandedRowMap] = useState({});
 
-  const togglePrimaryDetails = (item) => {
-    const itemIdToExpandedRowMapValues = { ...primaryItemIdToExpandedRowMap };
-    if (itemIdToExpandedRowMapValues[item.id]) {
-      delete itemIdToExpandedRowMapValues[item.id];
-    } else {
-      const { nationality, dateOfBirth } = item;
-      const country = TestCountries[nationality];
-      const listItems = [
-        {
-          nationality: `${country.flag} ${country.name}`,
-          dateOfBirth,
-        },
-      ];
-      itemIdToExpandedRowMapValues[item.id] = (
-        <EuiBasicTable
-          tableCaption="Demo of EuiBasicTable"
-          items={listItems}
-          rowHeader="firstName"
-          columns={[
-            {
-              field: 'nationality',
-              name: 'Nationality',
-            },
-            {
-              field: 'dateOfBirth',
-              name: 'Date of Birth',
-              schema: 'date',
-              render: (date) => formatDate(date, 'dobLong'),
-            },
-          ]}
-        />
-      );
-    }
-    setPrimaryItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
-  };
+  const toggleSecondaryDetails = useCallback(
+    (item) => {
+      console.log('secondary', item);
+      const itemIdToExpandedRowMapValues = { ...secondaryItemIdToExpandedRowMap };
+      console.log('---> before: ', itemIdToExpandedRowMapValues);
+      if (itemIdToExpandedRowMapValues[item.id]) {
+        console.log('delete');
+        delete itemIdToExpandedRowMapValues[item.id];
+      } else {
+        const { online } = item;
+        const color = online ? 'success' : 'danger';
+        const label = online ? 'Online' : 'Offline';
+        const listItems = [
+          {
+            title: 'Online',
+            description: <EuiHealth color={color}>{label}</EuiHealth>,
+          },
+        ];
+        itemIdToExpandedRowMapValues[item.id] = <EuiDescriptionList listItems={listItems} />;
+      }
+      console.log('---> after: ', itemIdToExpandedRowMapValues);
 
-  const columns = [
-    {
-      field: 'firstName',
-      name: 'First Name',
-      sortable: true,
-      truncateText: true,
-      mobileOptions: {
-        render: (item) => (
-          <span>
-            {item.firstName} {item.lastName}
-          </span>
+      setSecondaryItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+    },
+    [secondaryItemIdToExpandedRowMap]
+  );
+
+  const getPrimaryColumns = useMemo(() => {
+    console.log('here', secondaryItemIdToExpandedRowMap);
+    return [
+      {
+        field: 'nationality',
+        name: 'Nationality',
+      },
+      {
+        field: 'dateOfBirth',
+        name: 'Date of Birth',
+        schema: 'date',
+        render: (date) => formatDate(date, 'dobLong'),
+      },
+      {
+        align: RIGHT_ALIGNMENT,
+        width: '40px',
+        isExpander: true,
+        name: (
+          <EuiScreenReaderOnly>
+            <span>Expand rows</span>
+          </EuiScreenReaderOnly>
         ),
-        header: false,
-        truncateText: false,
-        enlarge: true,
-        width: '100%',
+        render: (item) => (
+          <EuiButtonIcon
+            onClick={() => toggleSecondaryDetails(item)}
+            aria-label={secondaryItemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+            iconType={secondaryItemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          />
+        ),
       },
+    ];
+  }, [secondaryItemIdToExpandedRowMap, toggleSecondaryDetails]);
+
+  const togglePrimaryDetails = useCallback(
+    (item) => {
+      console.log('primary', item);
+      const itemIdToExpandedRowMapValues = { ...primaryItemIdToExpandedRowMap };
+      console.log('---> before: ', itemIdToExpandedRowMapValues);
+      console.log('---> secondary:', secondaryItemIdToExpandedRowMap);
+      if (itemIdToExpandedRowMapValues[item.id]) {
+        delete itemIdToExpandedRowMapValues[item.id];
+      } else {
+        const { nationality, dateOfBirth } = item;
+        const country = TestCountries[nationality];
+        const listItems = [
+          {
+            ...item,
+            nationality: `${country.flag} ${country.name}`,
+            id: `${item.id}-secondary`,
+          },
+        ];
+        itemIdToExpandedRowMapValues[item.id] = (
+          <EuiBasicTable
+            tableCaption="Demo of EuiBasicTable"
+            items={listItems}
+            rowHeader="firstName"
+            itemId={''}
+            itemIdToExpandedRowMap={secondaryItemIdToExpandedRowMap}
+            isExpandable={true}
+            columns={getPrimaryColumns}
+          />
+        );
+      }
+      console.log('---> after: ', itemIdToExpandedRowMapValues);
+
+      setPrimaryItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
     },
-    {
-      field: 'lastName',
-      name: 'Last Name',
-      truncateText: true,
-      mobileOptions: {
-        show: false,
-      },
-    },
-    {
-      align: RIGHT_ALIGNMENT,
-      width: '40px',
-      isExpander: true,
-      name: (
-        <EuiScreenReaderOnly>
-          <span>Expand rows</span>
-        </EuiScreenReaderOnly>
-      ),
-      render: (item) => (
-        <EuiButtonIcon
-          onClick={() => togglePrimaryDetails(item)}
-          aria-label={primaryItemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
-          iconType={primaryItemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
-        />
-      ),
-    },
-  ];
+    [primaryItemIdToExpandedRowMap, secondaryItemIdToExpandedRowMap, getPrimaryColumns]
+  );
+
+  console.log('render');
 
   return (
     <EuiBasicTable
@@ -237,13 +256,50 @@ export const TermsExplorerTable = (props: TermsExplorerTableProps) => {
       itemId="id"
       itemIdToExpandedRowMap={primaryItemIdToExpandedRowMap}
       isExpandable={true}
-      hasActions={true}
-      columns={columns}
-      // pagination={pagination}
-      // sorting={sorting}
-      isSelectable={true}
-      // selection={selection}
-      // onChange={onTableChange}
+      columns={[
+        {
+          field: 'firstName',
+          name: 'First Name',
+          sortable: true,
+          truncateText: true,
+          mobileOptions: {
+            render: (item) => (
+              <span>
+                {item.firstName} {item.lastName}
+              </span>
+            ),
+            header: false,
+            truncateText: false,
+            enlarge: true,
+            width: '100%',
+          },
+        },
+        {
+          field: 'lastName',
+          name: 'Last Name',
+          truncateText: true,
+          mobileOptions: {
+            show: false,
+          },
+        },
+        {
+          align: RIGHT_ALIGNMENT,
+          width: '40px',
+          isExpander: true,
+          name: (
+            <EuiScreenReaderOnly>
+              <span>Expand rows</span>
+            </EuiScreenReaderOnly>
+          ),
+          render: (item) => (
+            <EuiButtonIcon
+              onClick={() => togglePrimaryDetails(item)}
+              aria-label={primaryItemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+              iconType={primaryItemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+            />
+          ),
+        },
+      ]}
     />
   );
 };
