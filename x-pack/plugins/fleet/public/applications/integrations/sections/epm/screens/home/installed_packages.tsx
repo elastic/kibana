@@ -60,10 +60,15 @@ const InstalledIntegrationsInfoCallout: React.FC = () => (
     </p>
   </EuiCallOut>
 );
-const UpdatesAvailableCallout: React.FC = () => (
+
+const UpdatesAvailableCallout: React.FC<{ count: number }> = ({ count }) => (
   <EuiCallOut
     title={i18n.translate('xpack.fleet.epmList.updatesAvailableCalloutTitle', {
-      defaultMessage: 'Some of your installed integrations have updates available.',
+      defaultMessage:
+        '{count, number} of your installed integrations {count, plural, one {has an update} other {have updates}} available.',
+      values: {
+        count,
+      },
     })}
     iconType="alert"
     color="warning"
@@ -72,7 +77,6 @@ const UpdatesAvailableCallout: React.FC = () => (
       <FormattedMessage
         id="xpack.fleet.epmList.updatesAvailableCalloutText"
         defaultMessage="Install the latest version of integrations to get the latest integration features."
-       
       />
     </p>
   </EuiCallOut>
@@ -202,14 +206,16 @@ export const InstalledPackages: React.FC<{
     })
   );
 
-  let CalloutComponent = InstalledIntegrationsInfoCallout
-  
-  if(cards.some((c) => c.isUnverified)){
-    CalloutComponent = VerificationWarningCallout;
-  } else if (cards.some((c) => c.isUpdateAvailable)){
-    CalloutComponent = UpdatesAvailableCallout;
+  let CalloutComponent = <InstalledIntegrationsInfoCallout />;
+
+  const unverifiedCount = cards.filter((c) => c.isUnverified).length;
+  const updateAvailableCount = cards.filter((c) => c.isUpdateAvailable).length;
+  if (unverifiedCount) {
+    CalloutComponent = <VerificationWarningCallout />;
+  } else if (updateAvailableCount) {
+    CalloutComponent = <UpdatesAvailableCallout count={updateAvailableCount} />;
   }
-  const callout = selectedCategory === UPDATES_AVAILABLE || isLoading ? null : <CalloutComponent />;
+  const callout = selectedCategory === UPDATES_AVAILABLE || isLoading ? null : CalloutComponent;
 
   return (
     <PackageListGrid

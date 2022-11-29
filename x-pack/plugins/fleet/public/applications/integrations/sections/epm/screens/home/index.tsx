@@ -28,8 +28,6 @@ import type {
 
 import { useGetPackages } from '../../../../hooks';
 
-import type { Section } from '../../..';
-
 import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
 
 import { InstalledPackages } from './installed_packages';
@@ -124,23 +122,24 @@ export const EPMHomePage: React.FC = () => {
     [allPackages?.response]
   );
 
-  const atLeastOneUnverifiedPackageInstalled = installedPackages.some(
+  const unverifiedPackageCount = installedPackages.filter(
     (pkg) => 'savedObject' in pkg && pkg.savedObject.attributes.verification_status === 'unverified'
-  );
-  const atLeastOnePackageUpgradeable = installedPackages.some(isPackageUpdatable);
+  ).length;
 
-  const sectionsWithWarning = (
-    atLeastOneUnverifiedPackageInstalled || atLeastOnePackageUpgradeable ? ['manage'] : []
-  ) as Section[];
+  const upgradeablePackageCount = installedPackages.filter(isPackageUpdatable).length;
+
+  const notificationsBySection = {
+    manage: unverifiedPackageCount + upgradeablePackageCount,
+  };
   return (
     <Switch>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
-        <DefaultLayout section="manage" sectionsWithWarning={sectionsWithWarning}>
+        <DefaultLayout section="manage" notificationsBySection={notificationsBySection}>
           <InstalledPackages installedPackages={installedPackages} isLoading={isLoading} />
         </DefaultLayout>
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
-        <DefaultLayout section="browse" sectionsWithWarning={sectionsWithWarning}>
+        <DefaultLayout section="browse" notificationsBySection={notificationsBySection}>
           <AvailablePackages />
         </DefaultLayout>
       </Route>
