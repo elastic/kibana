@@ -11,7 +11,7 @@ export default function ({
   getService,
   getPageObjects,
 }: FtrProviderContext & { updateBaselines: boolean }) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker', 'header', 'home']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker', 'header', 'home', 'discover', 'maps']);
   const browser = getService('browser');
   const renderable = getService('renderable');
 
@@ -29,7 +29,7 @@ export default function ({
       await PageObjects.header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
       await PageObjects.timePicker.startAutoRefresh();
-      await PageObjects.common.sleep(3000000);
+      await PageObjects.common.sleep(900000);
 
       await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
       });
@@ -37,7 +37,7 @@ export default function ({
       await PageObjects.header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
       await PageObjects.timePicker.startAutoRefresh();
-      await PageObjects.common.sleep(3000000);
+      await PageObjects.common.sleep(900000);
 
 
       await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
@@ -46,7 +46,17 @@ export default function ({
       await PageObjects.header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
       await PageObjects.timePicker.startAutoRefresh();
-      await PageObjects.common.sleep(3000000);
+      await PageObjects.common.sleep(900000);
+
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.timePicker.startAutoRefresh();
+      await PageObjects.common.sleep(900000);
+
+      await PageObjects.maps.loadSavedMap('[eCommerce] Orders by Country');
+      await PageObjects.timePicker.startAutoRefresh();
+      await PageObjects.common.sleep(900000);
+
 
     });
     it('dashboard auto refresh finished successfully', async function () {
