@@ -9,9 +9,10 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
+import uuid from 'uuid';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
-import { LazyControlGroupRenderer, ControlGroupContainer } from '@kbn/controls-plugin/public';
+import { ControlGroupContainer, type ControlGroupInputBuilder, LazyControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { first } from 'rxjs/operators';
 import type { TimeRange } from '@kbn/es-query';
@@ -20,7 +21,7 @@ import { Timeslice } from '../../../common/descriptor_types';
 const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 export interface Props {
-  setTimeslice: (timeslice: Timeslice) => void;
+  setTimeslice: (timeslice?: Timeslice) => void;
   timeRange: TimeRange;
   waitForTimesliceToLoad$: Observable<void>;
 }
@@ -50,11 +51,14 @@ export class Timeslider extends Component<Props, {}> {
     this._isMounted = true;
   }
 
-  _getCreationOptions = (builder) => {
+  _getCreationOptions = async (builder: typeof ControlGroupInputBuilder) => {
+    const input = {
+      id: uuid(),
+      ...getDefaultControlGroupInput()
+    };
     if (!this._isMounted) {
-      return;
+      return input;
     }
-    const input = getDefaultControlGroupInput();
     builder.addTimesliderControl(input);
     return {
       ...input,
@@ -63,7 +67,7 @@ export class Timeslider extends Component<Props, {}> {
     };
   };
 
-  _onLoadComplete = (controlGroup) => {
+  _onLoadComplete = (controlGroup: ControlGroupContainer) => {
     if (!this._isMounted) {
       return;
     }
@@ -81,7 +85,7 @@ export class Timeslider extends Component<Props, {}> {
           // use waitForTimesliceToLoad$ observable to wait until next frame loaded
           // .pipe(first()) waits until the first value is emitted from an observable and then automatically unsubscribes
           this.props.waitForTimesliceToLoad$.pipe(first()).subscribe(() => {
-            this._controlGroup.anyControlOutputConsumerLoading$.next(false);
+            this._controlGroup!.anyControlOutputConsumerLoading$.next(false);
           });
 
           this.props.setTimeslice(

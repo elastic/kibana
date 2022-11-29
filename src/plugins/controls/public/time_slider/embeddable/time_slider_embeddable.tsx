@@ -49,7 +49,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
 
   private getTimezone: ControlsSettingsService['getTimezone'];
   private timefilter: ControlsDataService['timefilter'];
-  private prevTimeRange: TimeRange;
+  private prevTimeRange: TimeRange | undefined;
   private readonly waitForControlOutputConsumersToLoad$;
 
   private reduxEmbeddableTools: ReduxEmbeddableTools<

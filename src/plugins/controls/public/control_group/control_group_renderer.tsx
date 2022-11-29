@@ -26,7 +26,7 @@ import { DataControlInput, ControlInput } from '../types';
 import { getCompatibleControlType, getNextPanelOrder } from './embeddable/control_group_helpers';
 import { controlGroupReducers } from './state/control_group_reducers';
 
-const ControlGroupInputBuilder = {
+export const ControlGroupInputBuilder = {
   addDataControlFromField: async (
     initialInput: Partial<ControlGroupInput>,
     newPanelInput: {
