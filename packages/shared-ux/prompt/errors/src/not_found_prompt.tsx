@@ -39,20 +39,20 @@ interface NotFoundProps {
  */
 export const NotFoundPrompt = ({ actions }: NotFoundProps) => {
   const { colorMode } = useEuiTheme();
-  const [errorImage, setErrorImage] = useState<string>();
+  const [imageSrc, setImageSrc] = useState<string>();
   const goBack = useCallback(() => history.back(), []);
 
   useEffect(() => {
     const loadImage = async () => {
-      const { default: img } = await import(
+      const { default: imgSrc } = await import(
         `./assets/404_astronaut_${colorMode.toLowerCase()}.png`
       );
-      setErrorImage(img);
+      setImageSrc(imgSrc);
     };
     loadImage();
   }, [colorMode]);
 
-  const icon = errorImage ? <EuiImage src={errorImage} alt="" /> : null;
+  const icon = imageSrc ? <EuiImage src={imageSrc} alt="" /> : null;
 
   return (
     <EuiEmptyPrompt
