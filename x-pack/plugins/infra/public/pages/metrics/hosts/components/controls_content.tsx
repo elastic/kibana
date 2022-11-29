@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ControlGroupInput } from '@kbn/controls-plugin/public';
+import React, { useEffect, useState } from 'react';
+import { ControlGroupContainer, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { Filter, TimeRange } from '@kbn/es-query';
+import { Filter, TimeRange, compareFilters } from '@kbn/es-query';
+import { isEqual } from 'lodash';
 import { LazyControlsRenderer } from './lazy_controls_renderer';
 import { useControlPanels } from '../hooks/use_control_panels_url_state';
 
@@ -23,6 +24,12 @@ interface Props {
   setPanelFilters: React.Dispatch<React.SetStateAction<null | Filter[]>>;
 }
 
+// Disable refresh, allow our timerange changes to refresh the embeddable.
+const REFRESH_CONFIG = {
+  pause: true,
+  value: 0,
+};
+
 export const ControlsContent: React.FC<Props> = ({
   timeRange,
   dataViewId,
@@ -31,32 +38,46 @@ export const ControlsContent: React.FC<Props> = ({
   setPanelFilters,
 }) => {
   const { setControlPanels, controlPanel } = useControlPanels(dataViewId);
+  const [controlGroup, setControlGroup] = useState<ControlGroupContainer | undefined>();
+
+  useEffect(() => {
+    if (!controlGroup) {
+      return;
+    }
+    if (
+      !isEqual(controlGroup.getInput().timeRange, timeRange) ||
+      !compareFilters(controlGroup.getInput().filters ?? [], filters) ||
+      !isEqual(controlGroup.getInput().query, query)
+    ) {
+      controlGroup.updateInput({
+        timeRange,
+        query,
+        filters,
+      });
+    }
+  }, [query, filters, controlGroup, timeRange]);
 
   return (
     <LazyControlsRenderer
-      getCreationOptions={async ({ addDataControlFromField }) => {
-        const input: Partial<ControlGroupInput> = {
-          id: dataViewId,
-          timeRange: {
-            from: timeRange.from,
-            to: timeRange.to,
-          },
-          viewMode: ViewMode.VIEW,
-          filters,
-          query,
-          chainingSystem: 'HIERARCHICAL',
-          controlStyle: 'oneLine',
-          defaultControlWidth: 'small',
-          panels: controlPanel,
-        };
-
-        return input;
-      }}
-      onEmbeddableLoad={(controlGroup) => {
-        controlGroup.onFiltersPublished$.subscribe((newFilters) => {
+      getCreationOptions={async ({ addDataControlFromField }) => ({
+        id: dataViewId,
+        type: CONTROL_GROUP_TYPE,
+        timeRange,
+        refreshConfig: REFRESH_CONFIG,
+        viewMode: ViewMode.VIEW,
+        filters: [...filters],
+        query,
+        chainingSystem: 'HIERARCHICAL',
+        controlStyle: 'oneLine',
+        defaultControlWidth: 'small',
+        panels: controlPanel,
+      })}
+      onEmbeddableLoad={(newControlGroup) => {
+        setControlGroup(newControlGroup);
+        newControlGroup.onFiltersPublished$.subscribe((newFilters) => {
           setPanelFilters([...newFilters]);
         });
-        controlGroup.getInput$().subscribe(({ panels, filters: currentFilters }) => {
+        newControlGroup.getInput$().subscribe(({ panels, filters: currentFilters }) => {
           setControlPanels(panels);
           if (currentFilters?.length === 0) {
             setPanelFilters([]);
