@@ -25,7 +25,7 @@ import { getDuplicates } from './get_duplicates';
 import { transformValidateBulkError } from '../../../utils/validate';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
-import { getRulesIndexesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/get_rules_indexes_with_duplicated_default_exceptions_list';
+import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
 
 import {
   transformBulkError,
@@ -72,12 +72,8 @@ export const bulkCreateRulesRoute = (
       const ruleDefinitions = request.body;
       const dupes = getDuplicates(ruleDefinitions, 'rule_id');
 
-      const rulesIndexesWithDuplicatedDefaultExceptionsList =
-        getRulesIndexesWithDuplicatedDefaultExceptionsList(ruleDefinitions);
-
       const rules = await Promise.all(
         ruleDefinitions
-          .filter((rule, index) => !rulesIndexesWithDuplicatedDefaultExceptionsList.includes(index))
           .filter((rule) => rule.rule_id == null || !dupes.includes(rule.rule_id))
           .map(async (payloadRule) => {
             if (payloadRule.rule_id != null) {
@@ -96,6 +92,11 @@ export const bulkCreateRulesRoute = (
             }
 
             try {
+              validateRulesWithDuplicatedDefaultExceptionsList({
+                allRules: request.body,
+                exceptionsList: payloadRule.exceptions_list,
+              });
+
               await validateRuleDefaultExceptionList({
                 exceptionsList: payloadRule.exceptions_list,
                 rulesClient,
@@ -136,16 +137,6 @@ export const bulkCreateRulesRoute = (
             message: `rule_id: "${ruleId}" already exists`,
           })
         ),
-        ...ruleDefinitions
-          .filter((rule, index) => rulesIndexesWithDuplicatedDefaultExceptionsList.includes(index))
-          .filter((rule) => rule.rule_id)
-          .map((rule) =>
-            createBulkErrorObject({
-              ruleId: rule.rule_id,
-              statusCode: 409,
-              message: `default exception list is duplicated in "${rule?.rule_id}"`,
-            })
-          ),
       ];
       const [validated, errors] = validate(rulesBulk, BulkCrudRulesResponse);
       if (errors != null) {

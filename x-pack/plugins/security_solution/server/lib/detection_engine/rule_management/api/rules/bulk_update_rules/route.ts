@@ -33,7 +33,7 @@ import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migrati
 import { readRules } from '../../../logic/crud/read_rules';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
-import { getRulesIndexesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/get_rules_indexes_with_duplicated_default_exceptions_list';
+import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
@@ -71,79 +71,61 @@ export const bulkUpdateRulesRoute = (
         savedObjectsClient,
       });
 
-      const ruleDefinitions = request.body;
-
-      const rulesIndexesWithDuplicatedDefaultExceptionsList =
-        getRulesIndexesWithDuplicatedDefaultExceptionsList(ruleDefinitions);
-
       const rules = await Promise.all(
-        ruleDefinitions
-          .filter((rule, index) => !rulesIndexesWithDuplicatedDefaultExceptionsList.includes(index))
-          .map(async (payloadRule) => {
-            const idOrRuleIdOrUnknown = payloadRule.id ?? payloadRule.rule_id ?? '(unknown id)';
-            try {
-              const validationErrors = validateUpdateRuleProps(payloadRule);
-              if (validationErrors.length) {
-                return createBulkErrorObject({
-                  ruleId: payloadRule.rule_id,
-                  statusCode: 400,
-                  message: validationErrors.join(),
-                });
-              }
-
-              throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
-
-              const existingRule = await readRules({
-                rulesClient,
+        request.body.map(async (payloadRule) => {
+          const idOrRuleIdOrUnknown = payloadRule.id ?? payloadRule.rule_id ?? '(unknown id)';
+          try {
+            const validationErrors = validateUpdateRuleProps(payloadRule);
+            if (validationErrors.length) {
+              return createBulkErrorObject({
                 ruleId: payloadRule.rule_id,
-                id: payloadRule.id,
+                statusCode: 400,
+                message: validationErrors.join(),
               });
-
-              await validateRuleDefaultExceptionList({
-                exceptionsList: payloadRule.exceptions_list,
-                rulesClient,
-                ruleId: payloadRule.id,
-              });
-
-              const migratedRule = await legacyMigrate({
-                rulesClient,
-                savedObjectsClient,
-                rule: existingRule,
-              });
-
-              const rule = await updateRules({
-                rulesClient,
-                existingRule: migratedRule,
-                ruleUpdate: payloadRule,
-              });
-              if (rule != null) {
-                const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
-                return transformValidateBulkError(rule.id, rule, ruleExecutionSummary);
-              } else {
-                return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
-              }
-            } catch (err) {
-              return transformBulkError(idOrRuleIdOrUnknown, err);
             }
-          })
+
+            throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
+
+            const existingRule = await readRules({
+              rulesClient,
+              ruleId: payloadRule.rule_id,
+              id: payloadRule.id,
+            });
+
+            validateRulesWithDuplicatedDefaultExceptionsList({
+              allRules: request.body,
+              exceptionsList: payloadRule.exceptions_list,
+            });
+            await validateRuleDefaultExceptionList({
+              exceptionsList: payloadRule.exceptions_list,
+              rulesClient,
+              ruleId: payloadRule.id,
+            });
+
+            const migratedRule = await legacyMigrate({
+              rulesClient,
+              savedObjectsClient,
+              rule: existingRule,
+            });
+
+            const rule = await updateRules({
+              rulesClient,
+              existingRule: migratedRule,
+              ruleUpdate: payloadRule,
+            });
+            if (rule != null) {
+              const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
+              return transformValidateBulkError(rule.id, rule, ruleExecutionSummary);
+            } else {
+              return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
+            }
+          } catch (err) {
+            return transformBulkError(idOrRuleIdOrUnknown, err);
+          }
+        })
       );
 
-      const rulesBulk = [
-        ...rules,
-        ...ruleDefinitions
-          .filter((rule, index) => rulesIndexesWithDuplicatedDefaultExceptionsList.includes(index))
-          .map((rule) => {
-            const idOrRuleIdOrUnknown = rule.id ?? rule.rule_id ?? '(unknown id)';
-
-            return createBulkErrorObject({
-              ruleId: idOrRuleIdOrUnknown,
-              statusCode: 409,
-              message: `default exception list is duplicated in "${idOrRuleIdOrUnknown}"`,
-            });
-          }),
-      ];
-
-      const [validated, errors] = validate(rulesBulk, BulkCrudRulesResponse);
+      const [validated, errors] = validate(rules, BulkCrudRulesResponse);
       if (errors != null) {
         return siemResponse.error({
           statusCode: 500,
