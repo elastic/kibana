@@ -29,3 +29,15 @@ export const SYNC_ALERTS_LABEL = i18n.translate('xpack.cases.create.syncAlertsLa
 export const ASSIGN_YOURSELF = i18n.translate('xpack.cases.create.assignYourself', {
   defaultMessage: 'Assign yourself',
 });
+
+export const MODAL_TITLE = i18n.translate('xpack.cases.create.modalTitle', {
+  defaultMessage: 'Are you sure you want to cancel?',
+});
+
+export const CANCEL_MODAL_BUTTON = i18n.translate('xpack.cases.create.cancelModalButton', {
+  defaultMessage: 'Go back',
+});
+
+export const CONFIRM_MODAL_BUTTON = i18n.translate('xpack.cases.create.confirmModalButton', {
+  defaultMessage: 'Confirm',
+});
