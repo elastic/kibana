@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/shared-ux-prompt-error",
+  "name": "@kbn/shared-ux-prompt-not-found",
   "private": true,
   "version": "1.0.0",
   "main": "./target_node/index.js",

@@ -4005,7 +4005,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-prompt-error@link:bazel-bin/packages/shared-ux/prompt/errors":
+"@kbn/shared-ux-prompt-not-found@link:bazel-bin/packages/shared-ux/prompt/not_found":
   version "0.0.0"
   uid ""
 
