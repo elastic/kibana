@@ -8,7 +8,7 @@
 import useAsync from 'react-use/lib/useAsync';
 import { useQuery } from '@tanstack/react-query';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { epmRouteService, isVerificationError } from '../../services';
 import type {
@@ -97,9 +97,48 @@ export const useGetPackageInfoByKey = (
   const [ignoreUnverifiedQueryParam, setIgnoreUnverifiedQueryParam] = useState(
     options?.ignoreUnverified
   );
+  const res = useRequest<GetInfoResponse>({
+    path: epmRouteService.getInfoPath(pkgName, pkgVersion),
+    method: 'get',
+    query: {
+      ...options,
+      ...(ignoreUnverifiedQueryParam && { ignoreUnverified: ignoreUnverifiedQueryParam }),
+    },
+  });
 
-  const { data: packageData } = useQuery([pkgName, pkgVersion, options], () =>
-    sendRequest({
+  useEffect(() => {
+    const confirm = async () => {
+      const forceInstall = await confirmOpenUnverified(pkgName);
+
+      if (forceInstall) {
+        setIgnoreUnverifiedQueryParam(true);
+      }
+    };
+
+    if (res.error && isVerificationError(res.error)) {
+      confirm();
+    }
+  }, [res.error, pkgName, pkgVersion, confirmOpenUnverified]);
+
+  return res;
+};
+
+export const useGetPackageInfoByKeyQuery = (
+  pkgName: string,
+  pkgVersion?: string,
+  options?: {
+    ignoreUnverified?: boolean;
+    prerelease?: boolean;
+    full?: boolean;
+  }
+) => {
+  const confirmOpenUnverified = useConfirmOpenUnverified();
+  const [ignoreUnverifiedQueryParam, setIgnoreUnverifiedQueryParam] = useState(
+    options?.ignoreUnverified
+  );
+
+  const response = useQuery([pkgName, pkgVersion, options], () =>
+    sendRequest<GetInfoResponse>({
       path: epmRouteService.getInfoPath(pkgName, pkgVersion),
       method: 'get',
       query: {
@@ -117,11 +156,11 @@ export const useGetPackageInfoByKey = (
     }
   };
 
-  if (packageData?.error && isVerificationError(packageData?.error)) {
+  if (response?.data?.error && isVerificationError(response?.data?.error)) {
     confirm();
   }
 
-  return packageData;
+  return response;
 };
 
 export const useGetPackageStats = (pkgName: string) => {

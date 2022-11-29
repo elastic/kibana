@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { useState } from 'react';
-
 import { useGetAgentPoliciesQuery, useGetAgentsQuery } from '../../../../../hooks';
 import { policyHasFleetServer } from '../../../../../services';
 
@@ -15,9 +13,12 @@ interface UseIsFirstTimeAgentUserResponse {
   isLoading?: boolean;
 }
 
-export const useIsFirstTimeAgentUserQuery = () => {
-  const [result, setResult] = useState<UseIsFirstTimeAgentUserResponse>({ isLoading: false });
-  const { data: agentPolicies, isLoading: areAgentPoliciesLoading } = useGetAgentPoliciesQuery({
+export const useIsFirstTimeAgentUserQuery = (): UseIsFirstTimeAgentUserResponse => {
+  const {
+    data: agentPolicies,
+    isLoading: areAgentPoliciesLoading,
+    isFetched: areAgentsFetched,
+  } = useGetAgentPoliciesQuery({
     full: true,
   });
 
@@ -39,13 +40,11 @@ export const useIsFirstTimeAgentUserQuery = () => {
       showInactive: true,
       kuery,
     },
-    { enabled: !!agentPolicies?.data?.items?.length } // don't run the query until agent policies are loaded
+    { enabled: areAgentsFetched } // don't run the query until agent policies are loaded
   );
 
-  setResult({
+  return {
     isLoading: areAgentPoliciesLoading || areAgentsLoading,
     isFirstTimeAgentUser: agents?.data?.total === 0,
-  });
-
-  return result;
+  };
 };

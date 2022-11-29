@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 
-import { useGetPackageInfoByKey, useKibanaLink } from '../../../../hooks';
+import { useGetPackageInfoByKeyQuery, useKibanaLink } from '../../../../hooks';
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
@@ -17,7 +17,7 @@ import {
 } from '../../../../../../../common/constants';
 
 function useAgentDashboardLink(agent: Agent) {
-  const { isLoading, data } = useGetPackageInfoByKey(FLEET_ELASTIC_AGENT_PACKAGE);
+  const { isLoading, data } = useGetPackageInfoByKeyQuery(FLEET_ELASTIC_AGENT_PACKAGE);
 
   const isInstalled = data?.item.status === 'installed';
 

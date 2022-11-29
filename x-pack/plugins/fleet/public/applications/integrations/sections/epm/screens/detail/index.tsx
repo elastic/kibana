@@ -39,12 +39,12 @@ import {
   useAuthz,
   usePermissionCheck,
   useIntegrationsStateContext,
-  useGetSettingsQuery,
+  useGetSettings,
 } from '../../../../hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { ExperimentalFeaturesService, isPackagePrerelease } from '../../../../services';
 import {
-  useGetPackageInfoByKey,
+  useGetPackageInfoByKeyQuery,
   useLink,
   useAgentPolicyContext,
   useIsGuidedOnboardingActive,
@@ -161,22 +161,20 @@ export function Detail() {
     boolean | undefined
   >();
 
-  const { data: settings } = useGetSettingsQuery();
+  const { data: settings } = useGetSettings();
 
   useEffect(() => {
-    const isEnabled = Boolean(settings?.data?.item.prerelease_integrations_enabled);
+    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
     setPrereleaseIntegrationsEnabled(isEnabled);
-  }, [settings?.data?.item.prerelease_integrations_enabled]);
+  }, [settings?.item.prerelease_integrations_enabled]);
 
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
   const {
     data: packageInfoData,
-    error: packageInfoError,
     isLoading: packageInfoLoading,
-    isInitialRequest: packageIsInitialRequest,
-    resendRequest: refreshPackageInfo,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion, {
+    refetch: refetchPackageInfo,
+  } = useGetPackageInfoByKeyQuery(pkgName, pkgVersion, {
     prerelease: prereleaseIntegrationsEnabled,
   });
 
@@ -184,26 +182,26 @@ export function Detail() {
   const [latestPrereleaseVersion, setLatestPrereleaseVersion] = useState<string | undefined>();
 
   // fetch latest GA version (prerelease=false)
-  const { data: packageInfoLatestGAData } = useGetPackageInfoByKey(pkgName, '', {
+  const { data: packageInfoLatestGAData } = useGetPackageInfoByKeyQuery(pkgName, '', {
     prerelease: false,
   });
 
   useEffect(() => {
-    const pkg = packageInfoLatestGAData?.item;
+    const pkg = packageInfoLatestGAData?.data?.item;
     const isGAVersion = pkg && !isPackagePrerelease(pkg.version);
     if (isGAVersion) {
       setLatestGAVersion(pkg.version);
     }
-  }, [packageInfoLatestGAData?.item]);
+  }, [packageInfoLatestGAData?.data?.item]);
 
   // fetch latest Prerelease version (prerelease=true)
-  const { data: packageInfoLatestPrereleaseData } = useGetPackageInfoByKey(pkgName, '', {
+  const { data: packageInfoLatestPrereleaseData } = useGetPackageInfoByKeyQuery(pkgName, '', {
     prerelease: true,
   });
 
   useEffect(() => {
-    setLatestPrereleaseVersion(packageInfoLatestPrereleaseData?.item.version);
-  }, [packageInfoLatestPrereleaseData?.item.version]);
+    setLatestPrereleaseVersion(packageInfoLatestPrereleaseData?.data?.item.version);
+  }, [packageInfoLatestPrereleaseData?.data?.item.version]);
 
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
     useIsFirstTimeAgentUserQuery();
@@ -218,26 +216,23 @@ export function Detail() {
     }
     if (oldPackageInstallStatus === 'not_installed' && packageInstallStatus === 'installed') {
       setOldPackageStatus(packageInstallStatus);
-      refreshPackageInfo();
+      refetchPackageInfo();
     }
-  }, [packageInstallStatus, oldPackageInstallStatus, refreshPackageInfo]);
+  }, [packageInstallStatus, oldPackageInstallStatus, refetchPackageInfo]);
 
-  const isLoading =
-    (packageInfoLoading && !packageIsInitialRequest) ||
-    permissionCheck.isLoading ||
-    firstTimeUserLoading;
+  const isLoading = packageInfoLoading || permissionCheck.isLoading || firstTimeUserLoading;
 
   const showCustomTab =
-    useUIExtension(packageInfoData?.item.name ?? '', 'package-detail-custom') !== undefined;
+    useUIExtension(packageInfoData?.data?.item?.name ?? '', 'package-detail-custom') !== undefined;
 
   // Track install status state
   useEffect(() => {
-    if (packageInfoData?.item) {
-      const packageInfoResponse = packageInfoData.item;
+    if (packageInfoData?.data?.item) {
+      const packageInfoResponse = packageInfoData.data?.item;
       setPackageInfo(packageInfoResponse);
 
       let installedVersion;
-      const { name } = packageInfoData.item;
+      const { name } = packageInfoData.data?.item;
       if ('savedObject' in packageInfoResponse) {
         installedVersion = packageInfoResponse.savedObject.attributes.version;
       }
@@ -688,7 +683,7 @@ export function Detail() {
       {integrationInfo || packageInfo ? (
         <Breadcrumbs packageTitle={integrationInfo?.title || packageInfo?.title || ''} />
       ) : null}
-      {packageInfoError ? (
+      {packageInfoData?.error ? (
         <Error
           title={
             <FormattedMessage
@@ -696,7 +691,7 @@ export function Detail() {
               defaultMessage="Error loading integration details"
             />
           }
-          error={packageInfoError}
+          error={packageInfoData?.error.message}
         />
       ) : isLoading || !packageInfo ? (
         <Loading />

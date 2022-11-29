@@ -9,12 +9,12 @@ import React from 'react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { Agent, AgentPolicy } from '../../../../types';
-import { useGetPackageInfoByKey } from '../../../../../../hooks/use_request/epm';
+import { useGetPackageInfoByKeyQuery } from '../../../../../../hooks/use_request/epm';
 
 import { AgentDashboardLink } from './agent_dashboard_link';
 
-const mockedUseGetPackageInfoByKey = useGetPackageInfoByKey as jest.MockedFunction<
-  typeof useGetPackageInfoByKey
+const mockedUseGetPackageInfoByKey = useGetPackageInfoByKeyQuery as jest.MockedFunction<
+  typeof useGetPackageInfoByKeyQuery
 >;
 
 jest.mock('../../../../../../hooks/use_fleet_status', () => ({
@@ -34,7 +34,7 @@ describe('AgentDashboardLink', () => {
           status: 'installed',
         },
       },
-    } as ReturnType<typeof useGetPackageInfoByKey>);
+    } as ReturnType<typeof useGetPackageInfoByKeyQuery>);
     const testRenderer = createFleetTestRendererMock();
 
     const result = testRenderer.render(
@@ -64,7 +64,7 @@ describe('AgentDashboardLink', () => {
           status: 'not_installed',
         },
       },
-    } as ReturnType<typeof useGetPackageInfoByKey>);
+    } as ReturnType<typeof useGetPackageInfoByKeyQuery>);
     const testRenderer = createFleetTestRendererMock();
 
     const result = testRenderer.render(
@@ -95,7 +95,7 @@ describe('AgentDashboardLink', () => {
           status: 'installed',
         },
       },
-    } as ReturnType<typeof useGetPackageInfoByKey>);
+    } as ReturnType<typeof useGetPackageInfoByKeyQuery>);
     const testRenderer = createFleetTestRendererMock();
 
     const result = testRenderer.render(
