@@ -105,6 +105,7 @@ export {
   toggleFilterPinned,
   uniqFilters,
   unpinFilter,
+  updateFilter,
   extractTimeFilter,
   extractTimeRange,
   convertRangeFilterToTimeRange,

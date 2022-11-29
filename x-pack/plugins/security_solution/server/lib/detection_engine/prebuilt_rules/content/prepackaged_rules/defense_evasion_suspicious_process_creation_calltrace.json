@@ -73,7 +73,8 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Defense Evasion"
+    "Defense Evasion",
+    "has_guide"
   ],
   "threat": [
     {
@@ -93,5 +94,5 @@
     }
   ],
   "type": "eql",
-  "version": 101
+  "version": 102
 }

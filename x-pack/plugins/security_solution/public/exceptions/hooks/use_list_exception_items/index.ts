@@ -133,7 +133,6 @@ export const useListExceptionItems = ({
     lastUpdated,
     pagination,
     exceptionViewerStatus: viewerStatus,
-
     ruleReferences: exceptionListReferences,
     fetchItems,
     onDeleteException,

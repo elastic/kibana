@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getDisplayValueFromFilter, getFieldDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import { EuiTextColor, useEuiPaddingCSS, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { EuiTextColor, useEuiPaddingCSS } from '@elastic/eui';
 import { FilterBadgeGroup } from './filter_badge_group';
 import { FilterContent } from './filter_content';
 import { getBooleanRelationType } from '../utils';
 import { FilterBadgeInvalidPlaceholder } from './filter_badge_invalid';
+import { bracketColorCss } from './filter_badge.styles';
 
 export interface FilterBadgeExpressionProps {
   filter: Filter;
@@ -31,12 +31,11 @@ interface FilterBadgeContentProps {
 }
 
 const FilterBadgeContent = ({ filter, dataViews, filterLabelStatus }: FilterBadgeContentProps) => {
-  const valueLabel = filterLabelStatus
-    ? filterLabelStatus
-    : getDisplayValueFromFilter(filter, dataViews);
+  const valueLabel = filterLabelStatus || getDisplayValueFromFilter(filter, dataViews);
+
   const fieldLabel = getFieldDisplayValueFromFilter(filter, dataViews);
 
-  if (!(valueLabel && filter)) {
+  if (!valueLabel || !filter) {
     return <FilterBadgeInvalidPlaceholder />;
   }
 
@@ -49,40 +48,32 @@ export function FilterExpressionBadge({
   dataViews,
   filterLabelStatus,
 }: FilterBadgeExpressionProps) {
+  const paddingLeftCss = useEuiPaddingCSS('left').xs;
+  const paddingRightCss = useEuiPaddingCSS('right').xs;
+
   const conditionalOperationType = getBooleanRelationType(filter);
-  const paddingLeft = useEuiPaddingCSS('left').xs;
-  const paddingRight = useEuiPaddingCSS('right').xs;
-
-  const { euiTheme } = useEuiTheme();
-
-  const bracketColor = useMemo(
-    () => css`
-      color: ${euiTheme.colors.primary};
-    `,
-    [euiTheme.colors.primary]
-  );
 
   return conditionalOperationType ? (
     <>
-      {shouldShowBrackets ? (
-        <span css={paddingLeft}>
-          <EuiTextColor className={bracketColor}>(</EuiTextColor>
+      {shouldShowBrackets && (
+        <span css={paddingLeftCss}>
+          <EuiTextColor className={bracketColorCss}>(</EuiTextColor>
         </span>
-      ) : null}
+      )}
       <FilterBadgeGroup
         filters={filter.meta?.params}
         dataViews={dataViews}
         filterLabelStatus={filterLabelStatus}
         booleanRelation={getBooleanRelationType(filter)}
       />
-      {shouldShowBrackets ? (
-        <span css={paddingRight}>
-          <EuiTextColor className={bracketColor}>)</EuiTextColor>
+      {shouldShowBrackets && (
+        <span css={paddingRightCss}>
+          <EuiTextColor className={bracketColorCss}>)</EuiTextColor>
         </span>
-      ) : null}
+      )}
     </>
   ) : (
-    <span css={[paddingLeft, paddingRight]}>
+    <span css={[paddingLeftCss, paddingRightCss]}>
       <FilterBadgeContent
         filter={filter}
         dataViews={dataViews}

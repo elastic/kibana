@@ -20,14 +20,13 @@ export interface PhrasesSuggestorProps extends PhraseSuggestorProps {
   intl: InjectedIntl;
   fullWidth?: boolean;
   compressed?: boolean;
-  isDisabled?: boolean;
+  disabled?: boolean;
 }
 
 class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesSuggestorProps> {
   public render() {
     const { suggestions } = this.state;
-    const { values, intl, onChange, fullWidth, onParamsUpdate, compressed, isDisabled } =
-      this.props;
+    const { values, intl, onChange, fullWidth, onParamsUpdate, compressed, disabled } = this.props;
     const options = values ? uniq([...values, ...suggestions]) : suggestions;
     return (
       <StringComboBox
@@ -48,7 +47,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesSuggestorProps> {
         onChange={onChange}
         isClearable={false}
         data-test-subj="filterParamsComboBox phrasesParamsComboxBox"
-        isDisabled={isDisabled}
+        isDisabled={disabled}
       />
     );
   }

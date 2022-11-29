@@ -17,6 +17,7 @@ export {
   isFilter,
   isFilters,
   pinFilter,
+  updateFilter,
   isFilterPinned,
   onlyDisabledFiltersChanged,
   enableFilter,

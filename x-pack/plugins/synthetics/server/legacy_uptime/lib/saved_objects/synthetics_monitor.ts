@@ -109,6 +109,9 @@ export const getSyntheticsMonitorSavedObjectType = (
         custom_heartbeat_id: {
           type: 'keyword',
         },
+        id: {
+          type: 'keyword',
+        },
         tags: {
           type: 'keyword',
           fields: {
@@ -123,6 +126,9 @@ export const getSyntheticsMonitorSavedObjectType = (
               type: 'integer',
             },
           },
+        },
+        enabled: {
+          type: 'boolean',
         },
       },
     },

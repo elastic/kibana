@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-jest.useFakeTimers('legacy');
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 import sinon from 'sinon';
 import moment from 'moment';

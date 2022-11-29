@@ -15,6 +15,7 @@ import { MonitoredHealth } from '../routes/health';
 import { calculateHealthStatus } from './calculate_health_status';
 
 enum LogLevel {
+  Info = 'info',
   Warn = 'warn',
   Error = 'error',
   Debug = 'debug',
@@ -30,7 +31,8 @@ export function logHealthMetrics(
   config: TaskManagerConfig,
   shouldRunTasks: boolean
 ) {
-  let logLevel: LogLevel = LogLevel.Debug;
+  let logLevel: LogLevel =
+    config.monitored_stats_health_verbose_log.level === 'info' ? LogLevel.Info : LogLevel.Debug;
   const enabled = config.monitored_stats_health_verbose_log.enabled;
   const healthWithoutCapacity: MonitoredHealth = {
     ...monitoredHealth,
@@ -82,6 +84,9 @@ export function logHealthMetrics(
       logLevel = LogLevel.Warn;
     }
     switch (logLevel) {
+      case LogLevel.Info:
+        logger.info(message);
+        break;
       case LogLevel.Warn:
         logger.warn(message);
         break;

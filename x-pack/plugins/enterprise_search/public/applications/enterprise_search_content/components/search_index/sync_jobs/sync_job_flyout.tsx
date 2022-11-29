@@ -88,13 +88,13 @@ export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }
           </EuiFlexItem>
           <EuiFlexItem>
             <FilteringPanel
-              advancedSnippet={syncJob.filtering?.advanced_snippet}
-              filteringRules={syncJob.filtering?.rules ?? []}
+              advancedSnippet={syncJob.connector?.filtering?.advanced_snippet}
+              filteringRules={syncJob.connector?.filtering?.rules ?? []}
             />
           </EuiFlexItem>
-          {syncJob.pipeline && (
+          {syncJob.connector?.pipeline && (
             <EuiFlexItem>
-              <PipelinePanel pipeline={syncJob.pipeline} />
+              <PipelinePanel pipeline={syncJob.connector.pipeline} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

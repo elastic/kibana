@@ -89,14 +89,16 @@ Object {
             "type": "vis_dimension",
           },
         ],
-        "metric": Object {
-          "accessor": 0,
-          "format": Object {
-            "id": "number",
-            "params": Object {},
+        "metrics": Array [
+          Object {
+            "accessor": 0,
+            "format": Object {
+              "id": "number",
+              "params": Object {},
+            },
+            "type": "vis_dimension",
           },
-          "type": "vis_dimension",
-        },
+        ],
         "splitColumn": undefined,
         "splitRow": undefined,
       },
@@ -122,6 +124,7 @@ Object {
         },
         "type": "vis_dimension",
       },
+      "metricsToLabels": Object {},
       "nestedLegend": true,
       "palette": Object {
         "name": "kibana_palette",

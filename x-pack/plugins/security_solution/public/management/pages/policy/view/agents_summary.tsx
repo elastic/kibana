@@ -84,7 +84,7 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
             grow={false}
             key={key}
             style={{
-              marginRight: key === 'total' ? theme.eui.gutterTypes.gutterExtraLarge : undefined,
+              marginRight: key === 'total' ? theme.eui.euiSizeXXL : undefined,
             }}
           >
             <EuiDescriptionList

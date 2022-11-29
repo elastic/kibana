@@ -23,6 +23,13 @@ import type { SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
 import { QueryBarMenuPanels, QueryBarMenuPanelsProps } from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 
+export const strings = {
+  getFilterSetButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.filterSetButtonLabel', {
+      defaultMessage: 'Saved query menu',
+    }),
+};
+
 export interface QueryBarMenuProps {
   language: string;
   onQueryChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
@@ -97,12 +104,8 @@ export function QueryBarMenu({
     toggleFilterBarMenuPopover(false);
   };
 
-  const buttonLabel = i18n.translate('unifiedSearch.filter.options.filterSetButtonLabel', {
-    defaultMessage: 'Saved query menu',
-  });
-
   const button = (
-    <EuiToolTip delay="long" content={buttonLabel}>
+    <EuiToolTip delay="long" content={strings.getFilterSetButtonLabel()}>
       <EuiButtonIcon
         size="m"
         display="empty"
@@ -110,7 +113,7 @@ export function QueryBarMenu({
         isDisabled={isDisabled}
         {...buttonProps}
         iconType="filter"
-        aria-label={buttonLabel}
+        aria-label={strings.getFilterSetButtonLabel()}
         data-test-subj="showQueryBarMenu"
       />
     </EuiToolTip>

@@ -35,7 +35,7 @@ export async function queryMonitorStatus(
   esClient: UptimeEsClient,
   maxLocations: number,
   maxPeriod: number,
-  ids: Array<string | undefined>
+  ids: string[]
 ): Promise<Omit<OverviewStatus, 'disabledCount'>> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / maxLocations);
   const pageCount = Math.ceil(ids.length / idSize);
@@ -135,7 +135,7 @@ export async function queryMonitorStatus(
       });
     });
   }
-  return { up, down, upConfigs, downConfigs };
+  return { up, down, upConfigs, downConfigs, enabledIds: ids };
 }
 
 /**
@@ -150,9 +150,9 @@ export async function getStatus(
   syntheticsMonitorClient: SyntheticsMonitorClient,
   params: MonitorsQuery
 ) {
-  const enabledIds: Array<string | undefined> = [];
   const { query } = params;
   let monitors;
+  const enabledIds: string[] = [];
   let disabledCount = 0;
   let page = 1;
   let maxPeriod = 0;
@@ -180,7 +180,7 @@ export async function getStatus(
       if (monitor.attributes[ConfigKey.ENABLED] === false) {
         disabledCount += monitor.attributes[ConfigKey.LOCATIONS].length;
       } else {
-        enabledIds.push(monitor.attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitor.id);
+        enabledIds.push(monitor.attributes[ConfigKey.MONITOR_QUERY_ID]);
         maxLocations = Math.max(maxLocations, monitor.attributes.locations.length);
         maxPeriod = Math.max(maxPeriod, periodToMs(monitor.attributes.schedule));
       }
@@ -195,6 +195,7 @@ export async function getStatus(
   );
 
   return {
+    enabledIds,
     disabledCount,
     up,
     down,

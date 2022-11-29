@@ -224,6 +224,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
@@ -294,6 +295,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
@@ -375,6 +377,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
@@ -418,6 +421,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
@@ -509,6 +513,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',
@@ -556,6 +561,7 @@ describe('disable()', () => {
             },
           },
         ],
+        nextRun: null,
       },
       {
         version: '123',

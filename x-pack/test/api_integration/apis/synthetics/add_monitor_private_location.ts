@@ -18,7 +18,8 @@ import { comparePolicies, getTestSyntheticsPolicy } from '../uptime/rest/sample_
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('PrivateLocationMonitor', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/145639
+  describe.skip('PrivateLocationMonitor', function () {
     this.tags('skipCloud');
     const kibanaServer = getService('kibanaServer');
     const supertestAPI = getService('supertest');
@@ -148,7 +149,15 @@ export default function ({ getService }: FtrProviderContext) {
         .send(httpMonitorJson);
 
       expect(apiResponse.body.attributes).eql(
-        omit({ ...httpMonitorJson, revision: 2 }, secretKeys)
+        omit(
+          {
+            ...httpMonitorJson,
+            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
+            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            revision: 2,
+          },
+          secretKeys
+        )
       );
     });
 

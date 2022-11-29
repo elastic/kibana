@@ -5,12 +5,41 @@
  * 2.0.
  */
 
+import type {
+  MappingProperty,
+  PropertyName,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import type { NewPackagePolicy, PackagePolicy } from '../../types';
 import { getInstallation } from '../epm/packages';
 import { updateDatastreamExperimentalFeatures } from '../epm/packages/update';
+
+function mapFields(mappingProperties: Record<PropertyName, MappingProperty>) {
+  const mappings = Object.keys(mappingProperties).reduce((acc, curr) => {
+    const property = mappingProperties[curr] as any;
+    if (property.properties) {
+      const childMappings = mapFields(property.properties);
+      Object.keys(childMappings).forEach((key) => {
+        acc[curr + '.' + key] = childMappings[key];
+      });
+    } else {
+      acc[curr] = property;
+    }
+    return acc;
+  }, {} as any);
+  return mappings;
+}
+
+export function builRoutingPath(properties: Record<PropertyName, MappingProperty>) {
+  const mappingsProperties = mapFields(properties);
+  return Object.keys(mappingsProperties).filter(
+    (mapping) =>
+      mappingsProperties[mapping].type === 'keyword' &&
+      mappingsProperties[mapping].time_series_dimension
+  );
+}
 
 export async function handleExperimentalDatastreamFeatureOptIn({
   soClient,
@@ -42,13 +71,12 @@ export async function handleExperimentalDatastreamFeatureOptIn({
       (optIn) => optIn.data_stream === featureMapEntry.data_stream
     );
 
-    const isOptInChanged =
+    const isSyntheticSourceOptInChanged =
       existingOptIn?.features.synthetic_source !== featureMapEntry.features.synthetic_source;
 
-    // If the feature opt-in status in unchanged, we don't need to update any component templates
-    if (!isOptInChanged) {
-      continue;
-    }
+    const isTSDBOptInChanged = existingOptIn?.features.tsdb !== featureMapEntry.features.tsdb;
+
+    if (!isSyntheticSourceOptInChanged && !isTSDBOptInChanged) continue;
 
     const componentTemplateName = `${featureMapEntry.data_stream}@package`;
     const componentTemplateRes = await esClient.cluster.getComponentTemplate({
@@ -57,23 +85,59 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
     const componentTemplate = componentTemplateRes.component_templates[0].component_template;
 
-    const body = {
-      template: {
-        ...componentTemplate.template,
-        mappings: {
-          ...componentTemplate.template.mappings,
-          _source: {
-            mode: featureMapEntry.features.synthetic_source ? 'synthetic' : 'stored',
+    if (isSyntheticSourceOptInChanged) {
+      const body = {
+        template: {
+          ...componentTemplate.template,
+          mappings: {
+            ...componentTemplate.template.mappings,
+            _source: {
+              mode: featureMapEntry.features.synthetic_source ? 'synthetic' : 'stored',
+            },
           },
         },
-      },
-    };
+      };
 
-    await esClient.cluster.putComponentTemplate({
-      name: componentTemplateName,
-      // @ts-expect-error - TODO: Remove when ES client typings include support for synthetic source
-      body,
-    });
+      await esClient.cluster.putComponentTemplate({
+        name: componentTemplateName,
+        // @ts-expect-error - TODO: Remove when ES client typings include support for synthetic source
+        body,
+      });
+    }
+
+    if (isTSDBOptInChanged && featureMapEntry.features.tsdb) {
+      const mappingsProperties = componentTemplate.template?.mappings?.properties ?? {};
+
+      // All mapped fields of type keyword and time_series_dimension enabled will be included in the generated routing path
+      // Temporarily generating routing_path here until fixed in elasticsearch https://github.com/elastic/elasticsearch/issues/91592
+      const routingPath = builRoutingPath(mappingsProperties);
+
+      if (routingPath.length === 0) continue;
+
+      const indexTemplateRes = await esClient.indices.getIndexTemplate({
+        name: featureMapEntry.data_stream,
+      });
+      const indexTemplate = indexTemplateRes.index_templates[0].index_template;
+
+      const indexTemplateBody = {
+        ...indexTemplate,
+        template: {
+          ...(indexTemplate.template ?? {}),
+          settings: {
+            ...(indexTemplate.template?.settings ?? {}),
+            index: {
+              mode: 'time_series',
+              routing_path: routingPath,
+            },
+          },
+        },
+      };
+
+      await esClient.indices.putIndexTemplate({
+        name: featureMapEntry.data_stream,
+        body: indexTemplateBody,
+      });
+    }
   }
 
   // Update the installation object to persist the experimental feature map

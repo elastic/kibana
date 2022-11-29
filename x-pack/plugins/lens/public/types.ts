@@ -489,13 +489,6 @@ export interface Datasource<T = unknown, P = unknown> {
    */
   getUsedDataViews: (state: T) => string[];
 
-  getSupportedActionsForLayer?: (
-    layerId: string,
-    state: T,
-    setState: StateSetter<T>,
-    openLayerSettings?: () => void
-  ) => LayerAction[];
-
   getDatasourceInfo: (
     state: T,
     references?: SavedObjectReference[],
@@ -581,6 +574,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
 
 /** @internal **/
 export interface LayerAction {
+  id: string;
   displayName: string;
   description?: string;
   execute: () => void | Promise<void>;
@@ -589,6 +583,8 @@ export interface LayerAction {
   isCompatible: boolean;
   'data-test-subj'?: string;
 }
+
+export type LayerActionFromVisualization = Omit<LayerAction, 'execute'>;
 
 interface SharedDimensionProps {
   /** Visualizations can restrict operations based on their own rules.
@@ -796,6 +792,10 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   /** ID is passed back to visualization. For example, `x` */
   groupId: string;
   accessors: AccessorConfig[];
+  // currently used only on partition charts to display non-editable UI dimension trigger in the buckets group when multiple metrics exist
+  fakeFinalAccessor?: {
+    label: string;
+  };
   supportsMoreColumns: boolean;
   dimensionsTooMany?: number;
   /** If required, a warning will appear if accessors are empty */
@@ -1065,12 +1065,13 @@ export interface Visualization<T = unknown, P = unknown> {
    * returns a list of custom actions supported by the visualization layer.
    * Default actions like delete/clear are not included in this list and are managed by the editor frame
    * */
-  getSupportedActionsForLayer?: (
-    layerId: string,
-    state: T,
-    setState: StateSetter<T>,
-    openLayerSettings?: () => void
-  ) => LayerAction[];
+  getSupportedActionsForLayer?: (layerId: string, state: T) => LayerActionFromVisualization[];
+
+  /**
+   * Perform state mutations in response to a layer action
+   */
+  onLayerAction?: (layerId: string, actionId: string, state: T) => T;
+
   /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
 

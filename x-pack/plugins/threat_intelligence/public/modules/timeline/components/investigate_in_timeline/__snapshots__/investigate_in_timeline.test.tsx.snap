@@ -6,28 +6,36 @@ Object {
   "baseElement": <body>
     <div>
       <button
-        class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+        class="euiContextMenuItem"
         data-test-subj="mockId"
         type="button"
       >
         <span
-          class="emotion-euiButtonDisplayContent"
+          class="euiContextMenu__itemLayout"
         >
-          Investigate in Timeline
+          <span
+            class="euiContextMenuItem__text"
+          >
+            Investigate in Timeline
+          </span>
         </span>
       </button>
     </div>
   </body>,
   "container": <div>
     <button
-      class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+      class="euiContextMenuItem"
       data-test-subj="mockId"
       type="button"
     >
       <span
-        class="emotion-euiButtonDisplayContent"
+        class="euiContextMenu__itemLayout"
       >
-        Investigate in Timeline
+        <span
+          class="euiContextMenuItem__text"
+        >
+          Investigate in Timeline
+        </span>
       </span>
     </button>
   </div>,

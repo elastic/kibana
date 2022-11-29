@@ -59,7 +59,7 @@ A string that corresponds to *Execution time field*.
 
 [float]
 [[define-index-ui]]
-==== Define connector in Stack Management
+==== Define connector in {stack-manage-app}
 
 Define Index connector properties.
 

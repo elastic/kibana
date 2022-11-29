@@ -10,7 +10,14 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
-import { CoreSetup, CoreStart, Plugin, CoreTheme, ApplicationStart } from '@kbn/core/public';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  CoreTheme,
+  ApplicationStart,
+  NotificationsStart,
+} from '@kbn/core/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type {
@@ -33,10 +40,10 @@ export class GuidedOnboardingPlugin
     core: CoreStart,
     { cloud }: AppPluginStartDependencies
   ): GuidedOnboardingPluginStart {
-    const { chrome, http, theme, application } = core;
+    const { chrome, http, theme, application, notifications } = core;
 
     // Initialize services
-    apiService.setup(http);
+    apiService.setup(http, !!cloud?.isCloudEnabled);
 
     // Guided onboarding UI is only available on cloud
     if (cloud?.isCloudEnabled) {
@@ -48,6 +55,7 @@ export class GuidedOnboardingPlugin
             theme$: theme.theme$,
             api: apiService,
             application,
+            notifications,
           }),
       });
     }
@@ -65,16 +73,18 @@ export class GuidedOnboardingPlugin
     theme$,
     api,
     application,
+    notifications,
   }: {
     targetDomElement: HTMLElement;
     theme$: Rx.Observable<CoreTheme>;
     api: ApiService;
     application: ApplicationStart;
+    notifications: NotificationsStart;
   }) {
     ReactDOM.render(
       <KibanaThemeProvider theme$={theme$}>
         <I18nProvider>
-          <GuidePanel api={api} application={application} />
+          <GuidePanel api={api} application={application} notifications={notifications} />
         </I18nProvider>
       </KibanaThemeProvider>,
       targetDomElement

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { Filter, BooleanRelation } from '@kbn/es-query';
 import { EuiTextColor, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { css } from '@emotion/css';
 import { FilterBadgeErrorBoundary } from './filter_badge_error_boundary';
 import { FilterExpressionBadge } from './filter_badge_expression';
+import { conditionCss } from './filter_badge.styles';
 
 export interface FilterBadgeGroupProps {
   filters: Filter[];
@@ -24,14 +24,11 @@ export interface FilterBadgeGroupProps {
 
 const BooleanRelationDelimiter = ({ conditional }: { conditional: BooleanRelation }) => {
   const { euiTheme } = useEuiTheme();
-  const bracketColor = useMemo(
-    () => css`
-      color: ${euiTheme.colors.primary};
-    `,
-    [euiTheme.colors.primary]
-  );
-
-  return <EuiTextColor className={bracketColor}>{conditional}</EuiTextColor>;
+  /**
+   *  Spaces have been added to make the title readable.
+   *  To eliminate the extra paddings of the text around it, margin-inline with a negative value was added.
+   */
+  return <EuiTextColor className={conditionCss(euiTheme)}>{` ${conditional} `}</EuiTextColor>;
 };
 
 export function FilterBadgeGroup({
@@ -43,19 +40,21 @@ export function FilterBadgeGroup({
 }: FilterBadgeGroupProps) {
   return (
     <FilterBadgeErrorBoundary>
-      {filters.map((filter, index, arrayRef) => (
-        <>
-          <FilterExpressionBadge
-            filter={filter}
-            shouldShowBrackets={shouldShowBrackets && (filter.meta.negate || arrayRef.length > 1)}
-            dataViews={dataViews}
-            filterLabelStatus={filterLabelStatus}
-          />
-          {booleanRelation && index + 1 < arrayRef.length ? (
-            <BooleanRelationDelimiter conditional={booleanRelation} />
-          ) : null}
-        </>
-      ))}
+      {filters.map((filter, index, filterArr) => {
+        const showRelationDelimiter = booleanRelation && index + 1 < filterArr.length;
+        const showBrackets = shouldShowBrackets && (filter.meta.negate || filterArr.length > 1);
+        return (
+          <>
+            <FilterExpressionBadge
+              filter={filter}
+              shouldShowBrackets={showBrackets}
+              dataViews={dataViews}
+              filterLabelStatus={filterLabelStatus}
+            />
+            {showRelationDelimiter && <BooleanRelationDelimiter conditional={booleanRelation} />}
+          </>
+        );
+      })}
     </FilterBadgeErrorBoundary>
   );
 }

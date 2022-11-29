@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import {
   EuiFlexItem,
   EuiButtonIcon,
@@ -15,12 +14,19 @@ import {
   EuiButtonIconProps,
   EuiToolTip,
   useEuiTheme,
-  euiShadowMedium,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { css } from '@emotion/react';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
+import { popoverDragAndDropCss } from './add_filter_popover.styles';
+
+export const strings = {
+  getAddFilterButtonLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterBar.addFilterButtonLabel', {
+      defaultMessage: 'Add filter',
+    }),
+};
 
 interface AddFilterPopoverProps {
   indexPatterns?: Array<DataView | string>;
@@ -40,32 +46,14 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
   isDisabled,
 }: AddFilterPopoverProps) {
   const euiTheme = useEuiTheme();
-
-  /** @todo important style should be remove after fixing elastic/eui/issues/6314. */
-  const popoverDragAndDropStyle = useMemo(
-    () =>
-      css`
-        // Always needed for popover with drag & drop in them
-        transform: none !important;
-        transition: none !important;
-        filter: none !important;
-        ${euiShadowMedium(euiTheme)}
-      `,
-    [euiTheme]
-  );
-
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
 
-  const buttonIconLabel = i18n.translate('unifiedSearch.filter.filterBar.addFilterButtonLabel', {
-    defaultMessage: 'Add filter',
-  });
-
   const button = (
-    <EuiToolTip delay="long" content={buttonIconLabel}>
+    <EuiToolTip delay="long" content={strings.getAddFilterButtonLabel()}>
       <EuiButtonIcon
         display="base"
         iconType="plusInCircleFilled"
-        aria-label={buttonIconLabel}
+        aria-label={strings.getAddFilterButtonLabel()}
         data-test-subj="addFilter"
         onClick={() => setIsAddFilterPopoverOpen((isOpen) => !isOpen)}
         size="m"
@@ -86,7 +74,7 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
         panelPaddingSize="none"
         panelProps={{
           'data-test-subj': 'addFilterPopover',
-          css: popoverDragAndDropStyle,
+          css: popoverDragAndDropCss(euiTheme),
         }}
         initialFocus=".filterEditor__hiddenItem"
         ownFocus

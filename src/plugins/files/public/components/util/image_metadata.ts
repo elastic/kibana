@@ -7,15 +7,15 @@
  */
 
 import * as bh from 'blurhash';
-import type { FileImageMetadata } from '../../../common';
+import type { FileImageMetadata } from '@kbn/shared-ux-file-image-types';
 
 export function isImage(file: { type?: string }): boolean {
   return Boolean(file.type?.startsWith('image/'));
 }
 
 export const boxDimensions = {
-  width: 300,
-  height: 300,
+  width: 120,
+  height: 120,
 };
 
 /**
@@ -57,6 +57,8 @@ export async function getImageMetadata(file: File | Blob): Promise<undefined | F
   try {
     const image = await loadImage(imgUrl);
     const canvas = document.createElement('canvas');
+    // blurhash encoding and decoding is an expensive algorithm,
+    // so we have to shrink the image to speed up the calculation
     const { width, height } = fitToBox(image.width, image.height);
     canvas.width = width;
     canvas.height = height;
@@ -78,3 +80,32 @@ export async function getImageMetadata(file: File | Blob): Promise<undefined | F
 }
 
 export type ImageMetadataFactory = typeof getImageMetadata;
+
+export function getBlurhashSrc({
+  width,
+  height,
+  hash,
+}: {
+  width: number;
+  height: number;
+  hash: string;
+}): string {
+  const smallSizeImageCanvas = document.createElement('canvas');
+  const { width: blurWidth, height: blurHeight } = fitToBox(width, height);
+  smallSizeImageCanvas.width = blurWidth;
+  smallSizeImageCanvas.height = blurHeight;
+
+  const smallSizeImageCtx = smallSizeImageCanvas.getContext('2d')!;
+  const imageData = smallSizeImageCtx.createImageData(blurWidth, blurHeight);
+  imageData.data.set(bh.decode(hash, blurWidth, blurHeight));
+  smallSizeImageCtx.putImageData(imageData, 0, 0);
+
+  // scale back the blurred image to the size of the original image,
+  // so it is sized and positioned the same as the original image when used with an `<img>` tag
+  const originalSizeImageCanvas = document.createElement('canvas');
+  originalSizeImageCanvas.width = width;
+  originalSizeImageCanvas.height = height;
+  const originalSizeImageCtx = originalSizeImageCanvas.getContext('2d')!;
+  originalSizeImageCtx.drawImage(smallSizeImageCanvas, 0, 0, width, height);
+  return originalSizeImageCanvas.toDataURL();
+}

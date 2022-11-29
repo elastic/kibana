@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiButton, EuiProgress, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiProgress, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GuideId, GuideState } from '../../types';
 import { UseCase } from './use_case_card';
@@ -54,16 +54,18 @@ export interface GuideCardFooterProps {
 export const GuideCardFooter = ({ guides, useCase, activateGuide }: GuideCardFooterProps) => {
   const guideState = guides.find((guide) => guide.guideId === (useCase as GuideId));
   const viewGuideButton = (
-    <div className="eui-textCenter">
-      <EuiButton
-        // Used for FS tracking
-        data-test-subj={`onboarding--guideCard--view--${useCase}`}
-        fill
-        onClick={() => activateGuide(useCase, guideState)}
-      >
-        {viewGuideLabel}
-      </EuiButton>
-    </div>
+    <EuiFlexGroup justifyContent="center">
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          // Used for FS tracking
+          data-test-subj={`onboarding--guideCard--view--${useCase}`}
+          fill
+          onClick={() => activateGuide(useCase, guideState)}
+        >
+          {viewGuideLabel}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
   // guide has not started yet
   if (!guideState || guideState.status === 'not_started') {
@@ -108,16 +110,18 @@ export const GuideCardFooter = ({ guides, useCase, activateGuide }: GuideCardFoo
         }}
       />
       <EuiSpacer size="l" />
-      <div className="eui-textCenter">
-        <EuiButton
-          // Used for FS tracking
-          data-test-subj={`onboarding--guideCard--continue--${useCase}`}
-          fill
-          onClick={() => activateGuide(useCase, guideState)}
-        >
-          {continueGuideLabel}
-        </EuiButton>
-      </div>
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            // Used for FS tracking
+            data-test-subj={`onboarding--guideCard--continue--${useCase}`}
+            fill
+            onClick={() => activateGuide(useCase, guideState)}
+          >
+            {continueGuideLabel}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };

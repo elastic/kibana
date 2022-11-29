@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 import { UiSettingsParams } from '@kbn/core/types';
+import { i18n } from '@kbn/i18n';
 import { observabilityFeatureId, ProgressiveLoadingQuality } from '../common';
 import {
   enableComparisonByDefault,
@@ -21,12 +21,13 @@ import {
   apmTraceExplorerTab,
   apmOperationsTab,
   apmLabsButton,
-  enableInfrastructureHostsView,
-  enableServiceMetrics,
+  enableAgentExplorerView,
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   enableCriticalPath,
+  enableInfrastructureHostsView,
+  enableServiceMetrics,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
@@ -271,7 +272,12 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: false,
     description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
-      defaultMessage: 'Enable the Hosts view in the Infrastructure app',
+      defaultMessage:
+        '{technicalPreviewLabel} Enable the Hosts view in the Infrastructure app. {feedbackLink}.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-host-observability' }),
+      },
     }),
     schema: schema.boolean(),
   },
@@ -290,6 +296,23 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
     value: true,
+    requiresPageReload: true,
+    type: 'boolean',
+    showInLabs: true,
+  },
+  [enableAgentExplorerView]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableAgentExplorer', {
+      defaultMessage: 'Agent explorer',
+    }),
+    description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
+      defaultMessage: '{technicalPreviewLabel} Enables Agent explorer view.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: false,
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,

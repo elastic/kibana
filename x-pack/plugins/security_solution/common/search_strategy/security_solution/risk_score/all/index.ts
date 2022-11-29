@@ -72,7 +72,7 @@ export interface RuleRisk {
 
 export type RiskScoreSortField = SortField<RiskScoreFields>;
 
-export const enum RiskScoreFields {
+export enum RiskScoreFields {
   timestamp = '@timestamp',
   hostName = 'host.name',
   hostRiskScore = 'host.risk.calculated_score_norm',
@@ -97,7 +97,7 @@ export interface RiskScoreItem {
   [RiskScoreFields.alertsCount]: Maybe<number>;
 }
 
-export const enum RiskSeverity {
+export enum RiskSeverity {
   unknown = 'Unknown',
   low = 'Low',
   moderate = 'Moderate',

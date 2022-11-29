@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useReducer, useCallback, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useReducer, useCallback, useState, useRef } from 'react';
 import { EuiDragDropContext, DragDropContextProps, useEuiPaddingSize } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { type Filter, BooleanRelation } from '@kbn/es-query';
-import { css } from '@emotion/css';
-import { FiltersBuilderContextType } from './filters_builder_context';
-import { FilterGroup } from './filters_builder_filter_group';
-import { FiltersBuilderReducer } from './filters_builder_reducer';
+import { FiltersBuilderContextType } from './context';
+import { FilterGroup } from './filter_group';
+import { FiltersBuilderReducer } from './reducer';
+import { getPathInArray } from './utils';
+import { FilterLocation } from './types';
+import { filtersBuilderCss } from './filters_builder.styles';
 
 export interface FiltersBuilderProps {
   filters: Filter[];
@@ -22,7 +24,7 @@ export interface FiltersBuilderProps {
   timeRangeForSuggestionsOverride?: boolean;
   maxDepth?: number;
   hideOr?: boolean;
-  isDisabled?: boolean;
+  disabled?: boolean;
 }
 
 const rootLevelConditionType = BooleanRelation.AND;
@@ -35,29 +37,12 @@ function FiltersBuilder({
   timeRangeForSuggestionsOverride,
   maxDepth = DEFAULT_MAX_DEPTH,
   hideOr = false,
-  isDisabled = false,
+  disabled = false,
 }: FiltersBuilderProps) {
   const filtersRef = useRef(filters);
   const [state, dispatch] = useReducer(FiltersBuilderReducer, { filters });
   const [dropTarget, setDropTarget] = useState('');
   const sPaddingSize = useEuiPaddingSize('s');
-
-  const filtersBuilderStyles = useMemo(
-    () => css`
-      .filter-builder__panel {
-        &.filter-builder__panel-nested {
-          padding: ${sPaddingSize} 0;
-        }
-      }
-
-      .filter-builder__item {
-        &.filter-builder__item-nested {
-          padding: 0 ${sPaddingSize};
-        }
-      }
-    `,
-    [sPaddingSize]
-  );
 
   useEffect(() => {
     if (filters !== filtersRef.current) {
@@ -74,16 +59,16 @@ function FiltersBuilder({
   }, [onChange, state.filters]);
 
   const handleMoveFilter = useCallback(
-    (pathFrom: string, pathTo: string, booleanRelation: BooleanRelation) => {
-      if (pathFrom === pathTo) {
+    (from: FilterLocation, to: FilterLocation, booleanRelation: BooleanRelation) => {
+      if (from.path === to.path) {
         return null;
       }
 
       dispatch({
         type: 'moveFilter',
         payload: {
-          pathFrom,
-          pathTo,
+          from,
+          to,
           booleanRelation,
           dataView,
         },
@@ -92,13 +77,23 @@ function FiltersBuilder({
     [dataView]
   );
 
-  const onDragEnd: DragDropContextProps['onDragEnd'] = ({ combine, source, destination }) => {
+  const onDragEnd: DragDropContextProps['onDragEnd'] = (args) => {
+    const { combine, source, destination } = args;
     if (source && destination) {
-      handleMoveFilter(source.droppableId, destination.droppableId, BooleanRelation.AND);
+      handleMoveFilter(
+        { path: source.droppableId, index: source.index },
+        { path: destination.droppableId, index: destination.index },
+        BooleanRelation.AND
+      );
     }
 
     if (source && combine) {
-      handleMoveFilter(source.droppableId, combine.droppableId, BooleanRelation.OR);
+      const path = getPathInArray(combine.droppableId);
+      handleMoveFilter(
+        { path: source.droppableId, index: source.index },
+        { path: combine.droppableId, index: path.at(-1) ?? 0 },
+        BooleanRelation.OR
+      );
     }
     setDropTarget('');
   };
@@ -114,7 +109,7 @@ function FiltersBuilder({
   };
 
   return (
-    <div className={filtersBuilderStyles}>
+    <div className={filtersBuilderCss(sPaddingSize)}>
       <FiltersBuilderContextType.Provider
         value={{
           globalParams: { hideOr, maxDepth },
@@ -122,7 +117,7 @@ function FiltersBuilder({
           dispatch,
           dropTarget,
           timeRangeForSuggestionsOverride,
-          isDisabled,
+          disabled,
         }}
       >
         <EuiDragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragActive}>

@@ -40,7 +40,9 @@ describe('FilePickerState', () => {
   });
   it('updates when files are added', () => {
     getTestScheduler().run(({ expectObservable, cold, flush }) => {
-      const addFiles$ = cold('--a-b|').pipe(tap((id) => filePickerState.selectFile(id)));
+      const addFiles$ = cold('--a-b|').pipe(
+        tap((id) => filePickerState.selectFile({ id } as FileJSON))
+      );
       expectObservable(addFiles$).toBe('--a-b|');
       expectObservable(filePickerState.selectedFileIds$).toBe('a-b-c-', {
         a: [],
@@ -54,7 +56,9 @@ describe('FilePickerState', () => {
   });
   it('adds files simultaneously as one update', () => {
     getTestScheduler().run(({ expectObservable, cold, flush }) => {
-      const addFiles$ = cold('--a|').pipe(tap(() => filePickerState.selectFile(['1', '2', '3'])));
+      const addFiles$ = cold('--a|').pipe(
+        tap(() => filePickerState.selectFile([{ id: '1' }, { id: '2' }, { id: '3' }] as FileJSON[]))
+      );
       expectObservable(addFiles$).toBe('--a|');
       expectObservable(filePickerState.selectedFileIds$).toBe('a-b-', {
         a: [],
@@ -67,7 +71,9 @@ describe('FilePickerState', () => {
   });
   it('updates when files are removed', () => {
     getTestScheduler().run(({ expectObservable, cold, flush }) => {
-      const addFiles$ = cold('   --a-b---c|').pipe(tap((id) => filePickerState.selectFile(id)));
+      const addFiles$ = cold('   --a-b---c|').pipe(
+        tap((id) => filePickerState.selectFile({ id } as FileJSON))
+      );
       const removeFiles$ = cold('------a|').pipe(tap((id) => filePickerState.unselectFile(id)));
       expectObservable(merge(addFiles$, removeFiles$)).toBe('--a-b-a-c|');
       expectObservable(filePickerState.selectedFileIds$).toBe('a-b-c-d-e-', {
@@ -84,7 +90,9 @@ describe('FilePickerState', () => {
   });
   it('does not add duplicates', () => {
     getTestScheduler().run(({ expectObservable, cold, flush }) => {
-      const addFiles$ = cold('--a-b-a-a-a|').pipe(tap((id) => filePickerState.selectFile(id)));
+      const addFiles$ = cold('--a-b-a-a-a|').pipe(
+        tap((id) => filePickerState.selectFile({ id } as FileJSON))
+      );
       expectObservable(addFiles$).toBe('--a-b-a-a-a|');
       expectObservable(filePickerState.selectedFileIds$).toBe('a-b-c-d-e-f-', {
         a: [],
@@ -192,9 +200,9 @@ describe('FilePickerState', () => {
       });
     });
     it('allows only one file to be selected', () => {
-      filePickerState.selectFile('a');
+      filePickerState.selectFile({ id: 'a' } as FileJSON);
       expect(filePickerState.getSelectedFileIds()).toEqual(['a']);
-      filePickerState.selectFile(['b', 'a', 'c']);
+      filePickerState.selectFile([{ id: 'b' }, { id: 'a' }, { id: 'c' }] as FileJSON[]);
       expect(filePickerState.getSelectedFileIds()).toEqual(['b']);
     });
   });

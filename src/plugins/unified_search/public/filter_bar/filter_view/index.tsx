@@ -103,6 +103,7 @@ export const FilterView: FC<Props> = ({
       hideAlias={hideAlias}
       {...badgeProps}
       {...rest}
+      data-test-subj={`filter-badge-'${innerText}' ${rest['data-test-subj']}`}
     />
   );
 

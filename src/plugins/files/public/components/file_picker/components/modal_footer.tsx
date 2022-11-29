@@ -46,7 +46,7 @@ export const ModalFooter: FunctionComponent<Props> = ({ kind, onDone, onUpload, 
         >
           <UploadFile
             onDone={(n) => {
-              state.selectFile(n.map(({ id }) => id));
+              state.selectFile(n.map(({ fileJSON }) => fileJSON));
               state.resetFilters();
               onUpload?.(n);
             }}

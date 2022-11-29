@@ -131,6 +131,14 @@ export const BulkActionEditPayload = t.union([
   BulkActionEditPayloadSchedule,
 ]);
 
+const bulkActionDuplicatePayload = t.exact(
+  t.type({
+    include_exceptions: t.boolean,
+  })
+);
+
+export type BulkActionDuplicatePayload = t.TypeOf<typeof bulkActionDuplicatePayload>;
+
 /**
  * actions that modify rules attributes
  */
@@ -164,12 +172,23 @@ export const PerformBulkActionRequestBody = t.intersection([
         action: t.union([
           t.literal(BulkActionType.delete),
           t.literal(BulkActionType.disable),
-          t.literal(BulkActionType.duplicate),
           t.literal(BulkActionType.enable),
           t.literal(BulkActionType.export),
         ]),
       })
     ),
+    t.intersection([
+      t.exact(
+        t.type({
+          action: t.literal(BulkActionType.duplicate),
+        })
+      ),
+      t.exact(
+        t.partial({
+          [BulkActionType.duplicate]: bulkActionDuplicatePayload,
+        })
+      ),
+    ]),
     t.exact(
       t.type({
         action: t.literal(BulkActionType.edit),

@@ -39,14 +39,16 @@ interface FileState {
   file: File;
   status: 'idle' | 'uploading' | 'uploaded' | 'upload_failed';
   id?: string;
+  fileJSON?: FileJSON;
   error?: Error;
 }
 
 type Upload = SimpleStateSubject<FileState>;
 
-export interface DoneNotification {
+export interface DoneNotification<Meta = unknown> {
   id: string;
   kind: string;
+  fileJSON: FileJSON<Meta>;
 }
 
 interface UploadOptions {
@@ -97,7 +99,13 @@ export class UploadState {
           filter(
             (files) => Boolean(files.length) && files.every((file) => file.status === 'uploaded')
           ),
-          map((files) => files.map((file) => ({ id: file.id!, kind: this.fileKind.id })))
+          map((files) =>
+            files.map((file) => ({
+              id: file.id!,
+              kind: this.fileKind.id,
+              fileJSON: file.fileJSON!,
+            }))
+          )
         )
         .subscribe(this.done$),
     ];
@@ -205,7 +213,7 @@ export class UploadState {
         );
       }),
       map(() => {
-        file$.setState({ status: 'uploaded', id: uploadTarget?.id });
+        file$.setState({ status: 'uploaded', id: uploadTarget?.id, fileJSON: uploadTarget });
       }),
       catchError((e) => {
         const isAbortError = e.message === 'Abort!';

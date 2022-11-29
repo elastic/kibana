@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiBadge, EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/css';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { isCombinedFilter } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { FilterBadgeGroup } from './filter_badge_group';
 import type { FilterLabelStatus } from '../filter_bar/filter_item/filter_item';
+import { badgePaddingCss, marginLeftLabelCss } from './filter_badge.styles';
+import { strings } from './i18n';
 
 export interface FilterBadgeProps {
   filter: Filter;
@@ -34,29 +34,11 @@ function FilterBadge({
 }: FilterBadgeProps) {
   const { euiTheme } = useEuiTheme();
 
-  const badgePadding = useMemo(
-    () => css`
-      padding: calc(${euiTheme.size.xs} + ${euiTheme.size.xxs});
-    `,
-    [euiTheme.size.xs, euiTheme.size.xxs]
-  );
-
-  const marginLeftLabel = useMemo(
-    () => css`
-      margin-left: ${euiTheme.size.xs};
-    `,
-    [euiTheme.size.xs]
-  );
-
   if (!dataViews.length) {
     return null;
   }
 
-  const prefixText = filter.meta.negate
-    ? ` ${i18n.translate('unifiedSearch.filter.filterBar.negatedFilterPrefix', {
-        defaultMessage: 'NOT ',
-      })}`
-    : '';
+  const prefixText = filter.meta.negate ? ` ${strings.getNotLabel()}` : '';
 
   const prefix =
     filter.meta.negate && !filter.meta.disabled ? (
@@ -65,24 +47,28 @@ function FilterBadge({
       prefixText
     );
 
-  const getValue = (text?: string) => {
-    return <span className="globalFilterLabel__value">{text}</span>;
-  };
+  const filterLabelValue = <span className="globalFilterLabel__value">{valueLabel}</span>;
 
   return (
-    <EuiBadge className={badgePadding} color="hollow" iconType="cross" iconSide="right" {...rest}>
+    <EuiBadge
+      className={badgePaddingCss(euiTheme)}
+      color="hollow"
+      iconType="cross"
+      iconSide="right"
+      {...rest}
+    >
       {!hideAlias && filter.meta.alias !== null ? (
         <>
           <EuiIcon type="save" size="s" />
-          <span className={marginLeftLabel}>
+          <span className={marginLeftLabelCss(euiTheme)}>
             {prefix}
             {filter.meta.alias}
-            {filterLabelStatus && <>: {getValue(valueLabel)}</>}
+            {filterLabelStatus && <>: {filterLabelValue}</>}
           </span>
         </>
       ) : (
         <div>
-          {isCombinedFilter(filter) ? prefix : null}
+          {isCombinedFilter(filter) && prefix}
           <FilterBadgeGroup
             filters={[filter]}
             dataViews={dataViews}

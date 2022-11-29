@@ -27,6 +27,8 @@ export interface AggregatedTransactionsCounts {
 export interface APMPerService {
   service_id: string;
   timed_out: boolean;
+  num_service_nodes: number;
+  num_transaction_types: number;
   cloud: {
     availability_zones: string[];
     regions: string[];
@@ -157,6 +159,36 @@ export interface APMUsage {
     }
   >;
   indices: {
+    traces: {
+      shards: {
+        total: number;
+      };
+      all: {
+        total: {
+          docs: {
+            count: number;
+          };
+          store: {
+            size_in_bytes: number;
+          };
+        };
+      };
+    };
+    metric: {
+      shards: {
+        total: number;
+      };
+      all: {
+        total: {
+          docs: {
+            count: number;
+          };
+          store: {
+            size_in_bytes: number;
+          };
+        };
+      };
+    };
     shards: {
       total: number;
     };

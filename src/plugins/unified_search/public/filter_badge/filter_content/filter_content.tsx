@@ -10,8 +10,8 @@ import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { existsOperator, isOneOfOperator } from '../../filter_bar/filter_editor';
+import { strings } from '../i18n';
 
 const FilterValue = ({ value }: { value: string | number }) => {
   return (
@@ -40,13 +40,7 @@ const FilterField = ({
 };
 
 const Prefix = ({ prefix }: { prefix?: boolean }) =>
-  prefix ? (
-    <EuiTextColor color="danger">
-      {i18n.translate('unifiedSearch.filter.filterBar.negatedFilterPrefix', {
-        defaultMessage: 'NOT ',
-      })}
-    </EuiTextColor>
-  ) : null;
+  prefix ? <EuiTextColor color="danger">{strings.getNotLabel()}</EuiTextColor> : null;
 
 export interface FilterContentProps {
   filter: Filter;
