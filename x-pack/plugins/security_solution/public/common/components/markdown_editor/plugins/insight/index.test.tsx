@@ -81,7 +81,7 @@ describe('insight component renderer', () => {
           label={'test label'}
           description={'test description'}
           providers={
-            '[[{"field":"event.id","value":"kibana.alert.origin….pid","value":"process.pid","type":"parameter"}]]'
+            '[[{"field":"event.id","value":"kibana.alert.original_event.id","type":"parameter"}],[{"field":"event.category","value":"network","type":"literal"},{"field":"process.pid","value":"process.pid","type":"parameter"}]]'
           }
         />
       </TestProviders>
