@@ -1101,7 +1101,7 @@ export class RulesClient {
         filter,
         page,
         per_page: perPage,
-        sort: [{ sort_field: '@timestamp.min', sort_order: 'desc' }],
+        sort,
       });
 
       return formatExecLogTransformResults(aggResult);

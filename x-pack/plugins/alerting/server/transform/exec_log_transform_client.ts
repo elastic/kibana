@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isNumber } from 'lodash';
+import { flatMap, get, isNumber } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { ElasticsearchClient, Logger, KibanaRequest } from '@kbn/core/server';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -24,23 +24,57 @@ const optionalDateFieldSchema = schema.maybe(
   })
 );
 
-const sortSchema = schema.object({
-  sort_field: schema.string(),
-  sort_order: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
-});
-
 export const GetByRuleIdsOptionsSchema = schema.object({
   per_page: schema.number({ defaultValue: 10, min: 0 }),
   page: schema.number({ defaultValue: 1, min: 1 }),
   start: optionalDateFieldSchema,
   end: optionalDateFieldSchema,
-  sort: schema.arrayOf(sortSchema, {
-    defaultValue: [{ sort_field: '@timestamp', sort_order: 'asc' }],
-  }),
   filter: schema.maybe(schema.string()),
 });
 
-export type GetByRuleIdsOptionsType = TypeOf<typeof GetByRuleIdsOptionsSchema>;
+export type GetByRuleIdsOptionsType = TypeOf<typeof GetByRuleIdsOptionsSchema> & {
+  sort: estypes.Sort;
+};
+
+export const ExecLogTransformFields: Record<string, string> = {
+  timestamp: '@timestamp.min',
+  rule_id: 'alerting.doc.rule.id',
+  rule_name: 'alerting.doc.rule.id',
+  space_ids: 'alerting.doc.kibana.space_ids',
+  id: 'kibana.alert.rule.execution.uuid',
+  status: 'alerting.doc.kibana.alerting.outcome',
+  message: 'alerting.doc.message',
+  execution_duration: 'alerting.doc.event.duration',
+  total_search_duration:
+    'alerting.doc.kibana.alert.rule.execution.metrics.total_search_duration_ms',
+  es_search_duration: 'alerting.doc.kibana.alert.rule.execution.metrics.es_search_duration_ms',
+  schedule_delay: 'alerting.doc.kibana.task.schedule_delay',
+  num_triggered_actions:
+    'alerting.doc.kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+  num_generated_actions:
+    'alerting.doc.kibana.alert.rule.execution.metrics.number_of_generated_actions',
+  num_active_alerts: 'alerting.doc.kibana.alert.rule.execution.metrics.alert_counts.active',
+  num_recovered_alerts: 'alerting.doc.kibana.alert.rule.execution.metrics.alert_counts.recovered',
+  num_new_alerts: 'alerting.doc.kibana.alert.rule.execution.metrics.alert_counts.new',
+  num_succeeded_actions: 'actions.outcomes.success',
+  num_errored_actions: 'actions.outcomes.failure',
+  timed_out: 'alerting.timeout',
+  version: 'alerting.doc.kibana.version',
+};
+
+const sortMissingOptionFields = [
+  'execution_duration',
+  'total_search_duration',
+  'es_search_duration',
+  'schedule_delay',
+  'num_triggered_actions',
+  'num_generated_actions',
+  'num_active_alerts',
+  'num_new_alerts',
+  'num_recovered_alerts',
+  'num_succeeded_actions',
+  'num_errored_actions',
+];
 
 interface ConstructorOptions {
   logger: Logger;
@@ -68,6 +102,16 @@ export class ExecLogTransformClient {
       const namespace = await this.getNamespace();
       const namespaceQuery = getNamespaceQuery(namespace);
 
+      const sortFields = flatMap(sort as estypes.SortCombinations[], (s) => Object.keys(s));
+      for (const field of sortFields) {
+        if (!Object.keys(ExecLogTransformFields).includes(field)) {
+          throw new Error(
+            `Invalid sort field "${field}" - must be one of [${Object.keys(
+              ExecLogTransformFields
+            ).join(',')}]`
+          );
+        }
+      }
       let filterKueryNode;
       try {
         filterKueryNode = JSON.parse(filter ?? '');
@@ -124,9 +168,7 @@ export class ExecLogTransformClient {
             must: musts,
           },
         },
-        ...(sort
-          ? { sort: sort.map((s) => ({ [s.sort_field]: { order: s.sort_order } })) as estypes.Sort }
-          : {}),
+        ...(sort ? { sort: formatSortForBucketSort(sort) } : {}),
       };
       const {
         hits: { hits, total },
@@ -183,4 +225,19 @@ function getNamespaceQuery(namespace?: string) {
       },
     },
   };
+}
+
+export function formatSortForBucketSort(sort: estypes.Sort) {
+  return (sort as estypes.SortCombinations[]).map((s) =>
+    Object.keys(s).reduce(
+      (acc, curr) => ({
+        ...acc,
+        [ExecLogTransformFields[curr]]: {
+          ...get(s, curr),
+          ...(sortMissingOptionFields.includes(curr) ? { missing: 0 } : {}),
+        },
+      }),
+      {}
+    )
+  );
 }

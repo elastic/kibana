@@ -7,6 +7,7 @@
 
 import { get, isEmpty } from 'lodash';
 import { IExecutionLog, IExecutionLogResult } from '../types';
+import { ExecLogTransformFields } from './exec_log_transform_client';
 
 const Millis2Nanos = 1000 * 1000;
 
@@ -34,30 +35,25 @@ const formatTransformResult = (result: any): IExecutionLog => {
       : result.alerting.doc.message;
 
   return {
-    id: result.kibana.alert.rule.execution.uuid,
-    timestamp: get(result, '@timestamp.min'),
-    duration_ms: result.alerting.doc.event.duration / Millis2Nanos,
+    id: get(result, ExecLogTransformFields.id),
+    timestamp: get(result, ExecLogTransformFields.timestamp),
+    duration_ms: get(result, ExecLogTransformFields.execution_duration, 0) / Millis2Nanos,
     status,
     message,
-    version: result.alerting.doc.kibana.version,
-    num_active_alerts: result.alerting.doc.kibana.alert.rule.execution.metrics.alert_counts.active,
-    num_new_alerts: result.alerting.doc.kibana.alert.rule.execution.metrics.alert_counts.new,
-    num_recovered_alerts:
-      result.alerting.doc.kibana.alert.rule.execution.metrics.alert_counts.recovered,
-    num_triggered_actions:
-      result.alerting.doc.kibana.alert.rule.execution.metrics.number_of_triggered_actions,
-    num_generated_actions:
-      result.alerting.doc.kibana.alert.rule.execution.metrics.number_of_generated_actions,
-    num_succeeded_actions: result.actions.outcomes.success ?? 0,
-    num_errored_actions: result.actions.outcomes.failure ?? 0,
-    total_search_duration_ms:
-      result.alerting.doc.kibana.alert.rule.execution.metrics.total_search_duration_ms,
-    es_search_duration_ms:
-      result.alerting.doc.kibana.alert.rule.execution.metrics.es_search_duration_ms,
-    schedule_delay_ms: result.alerting.doc.kibana.task.schedule_delay / Millis2Nanos,
-    timed_out: result.alerting.timeout > 0,
-    rule_id: result.alerting.doc.rule.id,
-    space_ids: result.alerting.doc.kibana.space_ids,
-    rule_name: result.alerting.doc.rule.name,
+    version: get(result, ExecLogTransformFields.version),
+    num_active_alerts: get(result, ExecLogTransformFields.num_active_alerts, 0),
+    num_new_alerts: get(result, ExecLogTransformFields.num_new_alerts, 0),
+    num_recovered_alerts: get(result, ExecLogTransformFields.num_recovered_alerts, 0),
+    num_triggered_actions: get(result, ExecLogTransformFields.num_triggered_actions, 0),
+    num_generated_actions: get(result, ExecLogTransformFields.num_generated_actions, 0),
+    num_succeeded_actions: get(result, ExecLogTransformFields.num_succeeded_actions, 0),
+    num_errored_actions: get(result, ExecLogTransformFields.num_errored_actions, 0),
+    total_search_duration_ms: get(result, ExecLogTransformFields.total_search_duration, 0),
+    es_search_duration_ms: get(result, ExecLogTransformFields.es_search_duration, 0),
+    schedule_delay_ms: get(result, ExecLogTransformFields.schedule_delay, 0) / Millis2Nanos,
+    timed_out: get(result, ExecLogTransformFields.timed_out, 0) > 0,
+    rule_id: get(result, ExecLogTransformFields.rule_id),
+    space_ids: get(result, ExecLogTransformFields.space_ids),
+    rule_name: get(result, ExecLogTransformFields.rule_name),
   };
 };

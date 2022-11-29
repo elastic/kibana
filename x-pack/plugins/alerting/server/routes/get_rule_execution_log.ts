@@ -18,22 +18,12 @@ const paramSchema = schema.object({
 
 const sortOrderSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')]);
 
-const sortFieldSchema = schema.oneOf([
-  schema.object({ timestamp: schema.object({ order: sortOrderSchema }) }),
-  schema.object({ execution_duration: schema.object({ order: sortOrderSchema }) }),
-  schema.object({ total_search_duration: schema.object({ order: sortOrderSchema }) }),
-  schema.object({ es_search_duration: schema.object({ order: sortOrderSchema }) }),
-  schema.object({ schedule_delay: schema.object({ order: sortOrderSchema }) }),
-  schema.object({ num_triggered_actions: schema.object({ order: sortOrderSchema }) }),
-  schema.object({ num_generated_actions: schema.object({ order: sortOrderSchema }) }),
-  schema.object({ num_active_alerts: schema.object({ order: sortOrderSchema }) }),
-  schema.object({ num_recovered_alerts: schema.object({ order: sortOrderSchema }) }),
-  schema.object({ num_new_alerts: schema.object({ order: sortOrderSchema }) }),
-]);
-
-const sortFieldsSchema = schema.arrayOf(sortFieldSchema, {
-  defaultValue: [{ timestamp: { order: 'desc' } }],
-});
+const sortFieldsSchema = schema.arrayOf(
+  schema.recordOf(schema.string(), schema.object({ order: sortOrderSchema })),
+  {
+    defaultValue: [{ timestamp: { order: 'desc' } }],
+  }
+);
 
 const querySchema = schema.object({
   date_start: schema.string(),
