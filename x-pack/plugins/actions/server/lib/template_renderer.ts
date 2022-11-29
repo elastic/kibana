@@ -7,6 +7,7 @@
 
 import Mustache from 'mustache';
 import Handlebars from '@kbn/handlebars';
+import moment from 'moment-timezone';
 
 import { Escape, getEscape } from './mustache_renderer';
 
@@ -18,9 +19,8 @@ export function renderTemplate(
   escape: Escape
 ): string {
   const { template, properties } = getPropertiesFromTemplate(originalTemplate);
-  const format = properties.get('format') || 'mustache';
-
-  const handlebars = Handlebars.create();
+  // presumably we'll default to mustache, but trying defaulting to handlebars
+  const format = properties.get('format') || 'handlebars';
 
   switch (format) {
     case 'mustache':
@@ -31,8 +31,23 @@ export function renderTemplate(
       } finally {
         Mustache.escape = previousMustacheEscape;
       }
+
     case 'handlebars':
-      return handlebars.compile(template)(variables);
+      // list: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+      const timeZone = properties.get('timeZone');
+      // list: https://momentjs.com/docs/#/displaying/format/
+      const dateFormat = properties.get('dateFormat');
+
+      const handlebars = Handlebars.create();
+      handlebars.registerHelper('date', (s: string) => formatDate(s, timeZone, dateFormat));
+      const previousHandlebarsEscape = handlebars.Utils.escapeExpression;
+      handlebars.Utils.escapeExpression = getEscape(escape);
+      try {
+        return handlebars.compile(template)(variables);
+      } finally {
+        handlebars.Utils.escapeExpression = previousHandlebarsEscape;
+      }
+
     default:
       throw new Error(`unknown format specified for template: ${format}`);
   }
@@ -47,7 +62,7 @@ interface GetPropertiesFromTemplate {
 const commentPattern = /^\s*\{\{\!@(.*)\}\}\s*$/;
 
 // match lines like foo : bar car
-const propertyPattern = /^\s*(\w+)\s*:\s*([^\s]*)\s*$/;
+const propertyPattern = /^\s*(\w+)\s*:\s*(.*)\s*$/;
 
 function getPropertiesFromTemplate(template: string): GetPropertiesFromTemplate {
   const lines = template.split('\n');
@@ -76,4 +91,14 @@ function getPropertiesFromTemplate(template: string): GetPropertiesFromTemplate 
   };
 
   return result;
+}
+
+const DefaultFormat = 'YYYY-MM-DD hh:mma';
+
+function formatDate(date: string, timeZone: string = 'UTC', format?: string): string {
+  const mDate = moment(date);
+  if (timeZone) {
+    mDate.tz(timeZone);
+  }
+  return mDate.format(format ?? DefaultFormat);
 }

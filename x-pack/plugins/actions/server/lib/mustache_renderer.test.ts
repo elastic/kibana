@@ -120,8 +120,8 @@ describe('mustache_renderer', () => {
     });
 
     it('handles errors', () => {
-      expect(renderMustacheString('{{a}', variables, 'none')).toMatchInlineSnapshot(
-        `"error rendering mustache template \\"{{a}\\": Unclosed tag at 4"`
+      expect(renderMustacheString('{{a}', variables, 'none')).toMatch(
+        `error rendering mustache template \"{{a}\":`
       );
     });
   });
@@ -316,11 +316,9 @@ describe('mustache_renderer', () => {
     });
 
     it('handles errors', () => {
-      expect(renderMustacheObject({ a: '{{a}' }, variables)).toMatchInlineSnapshot(`
-        Object {
-          "a": "error rendering mustache template \\"{{a}\\": Unclosed tag at 4",
-        }
-      `);
+      expect(renderMustacheObject({ a: '{{a}' }, variables).a).toMatch(
+        `error rendering mustache template \"{{a}\":`
+      );
     });
   });
 
@@ -421,5 +419,57 @@ describe('mustache_renderer', () => {
 
       expect(renderMustacheString(template, { x: 1 }, 'none')).toEqual('1');
     });
+
+    it('has a date helper', () => {
+      const timeStamp = '2022-11-29T15:52:44Z';
+      const template = `
+{{!@ format: handlebars}}
+{{date timeStamp}}
+      `.trim();
+
+      expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual('2022-11-29 03:52pm');
+    });
+
+    it('date with a time zone is successful', () => {
+      const timeStamp = '2022-11-29T15:52:44Z';
+      const timeZone = 'America/New_York';
+      const template = `
+{{!@ format: handlebars}}
+{{!@ timeZone: ${timeZone}}}
+{{date timeStamp}}
+      `.trim();
+
+      expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual('2022-11-29 10:52am');
+    });
+
+    it('date with a format is successful', () => {
+      const timeStamp = '2022-11-29T15:52:44Z';
+      const dateFormat = 'dddd MMM Do YYYY HH:mm:ss.SSS';
+      const template = `
+{{!@ format: handlebars}}
+{{!@ dateFormat: ${dateFormat}}}
+{{date timeStamp}}
+      `.trim();
+
+      expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual(
+        'Tuesday Nov 29th 2022 15:52:44.000'
+      );
+    });
+  });
+
+  it('date with a format and timezone is successful', () => {
+    const timeStamp = '2022-11-29T15:52:44Z';
+    const dateFormat = 'dddd MMM Do YYYY HH:mm:ss.SSS';
+    const timeZone = 'America/New_York';
+    const template = `
+{{!@ format: handlebars}}
+{{!@ dateFormat: ${dateFormat}}}
+{{!@ timeZone: ${timeZone}}}
+{{date timeStamp}}
+    `.trim();
+
+    expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual(
+      'Tuesday Nov 29th 2022 10:52:44.000'
+    );
   });
 });
