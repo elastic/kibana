@@ -16,7 +16,7 @@ import {
   SERVICE_NAME,
   KUBERNETES_POD_NAME,
   HOST_OS_PLATFORM,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { ContainerType } from '../../../common/service_metadata';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';

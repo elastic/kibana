@@ -31,7 +31,6 @@ import type {
   AgentPolicyDetailsDeployAgentAction,
 } from '@kbn/fleet-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
@@ -70,7 +69,8 @@ import { WARNING_TRANSFORM_STATES, APP_UI_ID } from '../../../../../common/const
 import type { BackToExternalAppButtonProps } from '../../../components/back_to_external_app_button/back_to_external_app_button';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button/back_to_external_app_button';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
-
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useKibana } from '../../../../common/lib/kibana';
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
 
@@ -132,6 +132,11 @@ export const EndpointList = () => {
     endpointsTotalError,
     metadataTransformStats,
   } = useEndpointSelector(selector);
+  const {
+    canReadEndpointList,
+    canAccessFleet,
+    loading: endpointPrivilegesLoading,
+  } = useUserPrivileges().endpointPrivileges;
   const { search } = useFormatUrl(SecurityPageName.administration);
   const { search: searchParams } = useLocation();
   const { getAppUrl } = useAppUrl();
@@ -547,6 +552,12 @@ export const EndpointList = () => {
           rowProps={setTableRowProps}
         />
       );
+    } else if (canReadEndpointList && !canAccessFleet) {
+      return (
+        <ManagementEmptyStateWrapper>
+          <PolicyEmptyState loading={endpointPrivilegesLoading} />
+        </ManagementEmptyStateWrapper>
+      );
     } else if (!policyItemsLoading && policyItems && policyItems.length > 0) {
       return (
         <HostsEmptyState
@@ -581,6 +592,9 @@ export const EndpointList = () => {
     handleSelectableOnChange,
     selectionOptions,
     handleCreatePolicyClick,
+    canAccessFleet,
+    canReadEndpointList,
+    endpointPrivilegesLoading,
   ]);
 
   const hasListData = listData && listData.length > 0;
@@ -633,7 +647,7 @@ export const EndpointList = () => {
             docsPage: (
               <EuiLink
                 data-test-subj="failed-transform-docs-link"
-                href={services?.docLinks?.links.endpoints.troubleshooting}
+                href={services.docLinks.links.endpoints.troubleshooting}
                 target="_blank"
               >
                 <FormattedMessage
@@ -647,7 +661,7 @@ export const EndpointList = () => {
         <EuiSpacer size="s" />
       </>
     );
-  }, [metadataTransformStats, services?.docLinks?.links.endpoints.troubleshooting]);
+  }, [metadataTransformStats, services.docLinks.links.endpoints.troubleshooting]);
 
   const transformFailedCallout = useMemo(() => {
     if (!showTransformFailedCallout) {
@@ -712,7 +726,7 @@ export const EndpointList = () => {
                       appPath={`#${pagePathGetters.agent_list({
                         kuery: 'packages : "endpoint"',
                       })}`}
-                      href={`${services?.application?.getUrlForApp(
+                      href={`${services.application.getUrlForApp(
                         'fleet'
                       )}#${pagePathGetters.agent_list({
                         kuery: 'packages : "endpoint"',

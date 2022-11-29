@@ -7,7 +7,7 @@
 
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { METRIC_JAVA_GC_COUNT } from '../../../../../../common/elasticsearch_fieldnames';
+import { METRIC_JAVA_GC_COUNT } from '../../../../../../common/es_fields/apm';
 import { fetchAndTransformGcMetrics } from './fetch_and_transform_gc_metrics';
 import { ChartBase } from '../../../types';
 import { APMConfig } from '../../../../..';
