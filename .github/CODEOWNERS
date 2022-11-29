@@ -24,7 +24,6 @@
 /src/plugins/data_view_management/ @elastic/kibana-data-discovery
 /src/plugins/data/ @elastic/kibana-visualizations @elastic/kibana-data-discovery
 /src/plugins/field_formats/ @elastic/kibana-data-discovery
-/x-pack/plugins/runtime_fields @elastic/kibana-data-discovery
 /x-pack/test/search_sessions_integration/ @elastic/kibana-data-discovery
 /test/plugin_functional/test_suites/data_plugin @elastic/kibana-data-discovery
 /examples/field_formats_example/ @elastic/kibana-data-discovery
@@ -410,7 +409,8 @@
 /x-pack/plugins/cross_cluster_replication/  @elastic/platform-deployment-management
 /x-pack/plugins/index_lifecycle_management/  @elastic/platform-deployment-management
 /x-pack/plugins/grokdebugger/  @elastic/platform-deployment-management
-/x-pack/plugins/index_management/  @elastic/platform-deployment-management
+/x-pack/plugins/index_management/ @elastic/platform-deployment-management
+/x-pack/plugins/runtime_fields @elastic/platform-deployment-management
 /x-pack/plugins/license_api_guard/  @elastic/platform-deployment-management
 /x-pack/plugins/license_management/  @elastic/platform-deployment-management
 /x-pack/plugins/painless_lab/  @elastic/platform-deployment-management
