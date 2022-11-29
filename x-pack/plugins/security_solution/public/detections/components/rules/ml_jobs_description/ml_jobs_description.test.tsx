@@ -22,15 +22,17 @@ jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
 jest.mock('../../../../../common/machine_learning/has_ml_admin_permissions');
 jest.mock('../../../../../common/machine_learning/has_ml_user_permissions');
 
+const hasMlUserPermissionsMock = hasMlUserPermissions as jest.Mock;
+
 describe('MlUserJobDescription', () => {
-  it('should render null if ML license is absent', () => {
+  it('should render null if no ML permissions available', () => {
     const { container } = render(<MlJobsDescription jobIds={[]} />);
 
     expect(container.firstChild).toBeNull();
   });
 
   it('should render user jobs component if ML permissions is for user only', () => {
-    (hasMlUserPermissions as jest.Mock).mockReturnValueOnce(true);
+    hasMlUserPermissionsMock.mockReturnValueOnce(true);
     render(<MlJobsDescription jobIds={[]} />);
 
     expect(screen.getByTestId('userJobs')).toBeInTheDocument();
