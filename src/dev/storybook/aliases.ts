@@ -33,7 +33,6 @@ export const storybookAliases = {
   expression_reveal_image: 'src/plugins/expression_reveal_image/.storybook',
   expression_shape: 'src/plugins/expression_shape/.storybook',
   expression_tagcloud: 'src/plugins/chart_expressions/expression_tagcloud/.storybook',
-  files: 'src/plugins/files/.storybook',
   fleet: 'x-pack/plugins/fleet/.storybook',
   home: 'src/plugins/home/.storybook',
   infra: 'x-pack/plugins/infra/.storybook',
