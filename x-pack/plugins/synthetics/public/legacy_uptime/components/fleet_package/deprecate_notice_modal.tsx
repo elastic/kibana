@@ -72,7 +72,10 @@ export const DeprecateNoticeModal = () => {
           defaultMessage="For more information, {docsLink}"
           values={{
             docsLink: (
-              <EuiLink href="https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html">
+              <EuiLink
+                target="_blank"
+                href="https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html"
+              >
                 {READ_DOCS_TEXT}
               </EuiLink>
             ),
@@ -92,7 +95,7 @@ const GO_BACK_TEXT = i18n.translate('xpack.synthetics.deprecateNoticeModal.goBac
 });
 
 const READ_DOCS_TEXT = i18n.translate('xpack.synthetics.deprecateNoticeModal.readDocs', {
-  defaultMessage: 'read docs',
+  defaultMessage: 'read docs.',
 });
 
 const GO_MONITOR_MANAGEMENT_TEXT = i18n.translate(
