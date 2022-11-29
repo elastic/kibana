@@ -703,25 +703,36 @@ import rule690 from './lateral_movement_remote_task_creation_winlog.json';
 import rule691 from './persistence_scheduled_task_creation_winlog.json';
 import rule692 from './persistence_scheduled_task_updated.json';
 import rule693 from './credential_access_saved_creds_vault_winlog.json';
-import rule694 from './privilege_escalation_create_process_as_different_user.json';
-import rule695 from './privilege_escalation_unshare_namesapce_manipulation.json';
-import rule696 from './privilege_escalation_shadow_file_read.json';
-import rule697 from './defense_evasion_google_workspace_bitlocker_setting_disabled.json';
-import rule698 from './persistence_google_workspace_user_organizational_unit_changed.json';
-import rule699 from './collection_google_workspace_custom_gmail_route_created_or_modified.json';
-import rule700 from './discovery_denied_service_account_request.json';
-import rule701 from './initial_access_anonymous_request_authorized.json';
-import rule702 from './privilege_escalation_suspicious_assignment_of_controller_service_account.json';
-import rule703 from './credential_access_bruteforce_passowrd_guessing.json';
-import rule704 from './credential_access_potential_linux_ssh_bruteforce.json';
-import rule705 from './credential_access_potential_linux_ssh_bruteforce_root.json';
-import rule706 from './privilege_escalation_container_created_with_excessive_linux_capabilities.json';
-import rule707 from './impact_kms_cmk_disabled_or_scheduled_for_deletion.json';
-import rule708 from './guided_onborading_sample_rule.json';
-import rule709 from './credential_access_wireless_creds_dumping.json';
-import rule710 from './defense_evasion_persistence_account_tokenfilterpolicy.json';
-import rule711 from './discovery_files_dir_systeminfo_via_cmd.json';
-import rule712 from './execution_reverse_shell_via_named_pipe.json';
+import rule694 from './lateral_movement_remote_service_installed_winlog.json';
+import rule695 from './persistence_service_windows_service_winlog.json';
+import rule696 from './privilege_escalation_create_process_as_different_user.json';
+import rule697 from './privilege_escalation_unshare_namesapce_manipulation.json';
+import rule698 from './privilege_escalation_shadow_file_read.json';
+import rule699 from './defense_evasion_google_workspace_bitlocker_setting_disabled.json';
+import rule700 from './persistence_google_workspace_user_organizational_unit_changed.json';
+import rule701 from './collection_google_workspace_custom_gmail_route_created_or_modified.json';
+import rule702 from './discovery_denied_service_account_request.json';
+import rule703 from './initial_access_anonymous_request_authorized.json';
+import rule704 from './privilege_escalation_suspicious_assignment_of_controller_service_account.json';
+import rule705 from './credential_access_bruteforce_passowrd_guessing.json';
+import rule706 from './credential_access_potential_linux_ssh_bruteforce.json';
+import rule707 from './credential_access_potential_linux_ssh_bruteforce_root.json';
+import rule708 from './privilege_escalation_container_created_with_excessive_linux_capabilities.json';
+import rule709 from './impact_kms_cmk_disabled_or_scheduled_for_deletion.json';
+import rule710 from './guided_onborading_sample_rule.json';
+import rule711 from './persistence_powersshell_profiles.json';
+import rule712 from './command_and_control_non_standard_ssh_port.json';
+import rule713 from './defense_evasion_masquerading_space_after_filename.json';
+import rule714 from './privilege_escalation_tokenmanip_sedebugpriv_enabled.json';
+import rule715 from './privilege_escalation_via_ppid_spoofing.json';
+import rule716 from './privilege_escalation_via_token_theft.json';
+import rule717 from './credential_access_wireless_creds_dumping.json';
+import rule718 from './defense_evasion_persistence_account_tokenfilterpolicy.json';
+import rule719 from './discovery_files_dir_systeminfo_via_cmd.json';
+import rule720 from './credential_access_ldap_attributes.json';
+import rule721 from './privilege_escalation_credroaming_ldap.json';
+import rule722 from './execution_reverse_shell_via_named_pipe.json';
+import rule723 from './multiple_alerts_different_tactics_host.json';
 
 export const rawRules = [
   rule1,
@@ -1436,4 +1447,15 @@ export const rawRules = [
   rule710,
   rule711,
   rule712,
+  rule713,
+  rule714,
+  rule715,
+  rule716,
+  rule717,
+  rule718,
+  rule719,
+  rule720,
+  rule721,
+  rule722,
+  rule723,
 ];

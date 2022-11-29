@@ -123,8 +123,10 @@ export interface DocLinks {
     readonly languageAnalyzers: string;
     readonly languageClients: string;
     readonly licenseManagement: string;
+    readonly machineLearningStart: string;
     readonly mailService: string;
     readonly start: string;
+    readonly syncRules: string;
     readonly troubleshootSetup: string;
     readonly usersAccess: string;
   };
