@@ -181,12 +181,14 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
 
   return (
     <>
-      <GuideButton
-        pluginState={pluginState}
-        toggleGuidePanel={toggleGuide}
-        isGuidePanelOpen={isGuideOpen}
-        navigateToLandingPage={navigateToLandingPage}
-      />
+      <div css={styles.setupButton}>
+        <GuideButton
+          pluginState={pluginState}
+          toggleGuidePanel={toggleGuide}
+          isGuidePanelOpen={isGuideOpen}
+          navigateToLandingPage={navigateToLandingPage}
+        />
+      </div>
 
       {isGuideOpen && (
         <EuiFlyout
