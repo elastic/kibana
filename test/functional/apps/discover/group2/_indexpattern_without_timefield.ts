@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'header']);
 
   describe('indexpattern without timefield', () => {
     before(async () => {
@@ -113,6 +113,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.selectIndexPattern('without-timefield');
       url = await browser.getCurrentUrl();
       expect(url).to.contain(`refreshInterval:(pause:!t,value:${autoRefreshInterval * 1000})`);
+    });
+
+    it('should allow switching from a saved search with a time field to a saved search without a time field', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectIndexPattern('with-timefield');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.saveSearch('with-timefield');
+      await PageObjects.discover.selectIndexPattern('without-timefield');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.saveSearch('without-timefield', true);
+      await PageObjects.discover.loadSavedSearch('with-timefield');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.loadSavedSearch('without-timefield');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.assertHitCount('1');
     });
   });
 }

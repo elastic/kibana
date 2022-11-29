@@ -97,7 +97,6 @@ export const getSearchAfterFromResponse = <T>({
 }: {
   response: estypes.SearchResponse<T>;
 }): string[] | undefined =>
-  // @ts-expect-error @elastic/elasticsearch SortResults contains null
   response.hits.hits.length > 0
     ? response.hits.hits[response.hits.hits.length - 1].sort
     : undefined;
