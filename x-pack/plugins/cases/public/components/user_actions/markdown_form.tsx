@@ -119,6 +119,7 @@ const UserActionMarkdownComponent = forwardRef<
           id,
           draftCommentStorageKey,
           bottomRightContent: EditorButtons,
+          initialValue: content,
         }}
       />
     </Form>

@@ -13,6 +13,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import * as i18n from '../../common/translations';
 import type { MarkdownEditorRef } from './editor';
 import { MarkdownEditor } from './editor';
 import { CommentEditorContext } from './context';
@@ -28,6 +29,7 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   caseTags?: string[];
   draftCommentStorageKey?: string;
   disabledUiPlugins?: string[];
+  initialValue?: string;
 };
 
 const BottomContentWrapper = styled(EuiFlexGroup)`
@@ -49,6 +51,7 @@ export const MarkdownEditorForm = React.memo(
         caseTags,
         draftCommentStorageKey,
         disabledUiPlugins,
+        initialValue,
       },
       ref
     ) => {
@@ -72,6 +75,13 @@ export const MarkdownEditorForm = React.memo(
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);
+
+      useEffect(() => {
+        if (initialValue && initialValue !== field.value) {
+          field.setErrors([{ message: i18n.COMMENT_VERSION_CONFLICT_ERROR }]);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [initialValue]);
 
       useDebounce(
         () => {

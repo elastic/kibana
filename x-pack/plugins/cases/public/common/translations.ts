@@ -308,6 +308,14 @@ export const ADD_TAG_CUSTOM_OPTION_LABEL = (searchValue: string) =>
     values: { searchValue },
   });
 
+export const COMMENT_VERSION_CONFLICT_ERROR = i18n.translate(
+  'xpack.cases.configure.commentVersionConflictError',
+  {
+    defaultMessage:
+      'You do not have permission to view connectors. If you would like to view connectors, contact your Kibana administrator.',
+  }
+);
+
 /**
  * EUI checkbox replace {searchValue} with the current
  * search value. We need to put the template variable
