@@ -8,36 +8,20 @@
 
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
-// FIXME can't import plugins from package
-import type { Action } from '@kbn/ui-actions-plugin/public';
-
 import { CellActionsContextProvider, CellActions, CellActionsMode, CellActionsProps } from '..';
 
-const filterInTestAction: Action = {
-  id: 'filterInTestAction',
-  type: 'filter in',
-  getIconType: () => 'plusInCircle',
-  getDisplayName: () => 'Filter in',
-  getDisplayNameTooltip: () => 'Filter in',
+const makeActions = (actionsName: string, icon: string) => ({
+  id: actionsName,
+  type: actionsName,
+  getIconType: () => icon,
+  getDisplayName: () => actionsName,
+  getDisplayNameTooltip: () => actionsName,
   isCompatible: () => Promise.resolve(true),
   execute: () => {
-    alert('Filter in clicked');
+    alert(actionsName);
     return Promise.resolve();
   },
-};
-
-const filterOutTestAction: Action = {
-  id: 'filterOutTestAction',
-  type: 'filter out',
-  getIconType: () => 'minusInCircle',
-  getDisplayName: () => 'Filter out',
-  getDisplayNameTooltip: () => 'Filter out',
-  isCompatible: () => Promise.resolve(true),
-  execute: () => {
-    alert('Filter out clicked');
-    return Promise.resolve();
-  },
-};
+});
 
 const TRIGGER_ID = 'testTriggerId';
 
@@ -50,10 +34,11 @@ export default {
       <CellActionsContextProvider
         // call uiActions getTriggerCompatibleActions(triggerId, data)
         getCompatibleActions={() => [
-          filterInTestAction,
-          filterOutTestAction,
-          filterInTestAction,
-          filterOutTestAction,
+          makeActions('Filter in', 'plusInCircle'),
+          makeActions('Filter out', 'minusInCircle'),
+          makeActions('Minimize', 'minimize'),
+          makeActions('Send email', 'email'),
+          makeActions('Pin field', 'pin'),
         ]}
       >
         {storyFn()}
@@ -66,9 +51,9 @@ const CellActionsTemplate: ComponentStory<React.FC<CellActionsProps>> = (args) =
   <CellActions {...args}>Field value</CellActions>
 );
 
-export const Default = CellActionsTemplate.bind({});
+export const DefaultWithControls = CellActionsTemplate.bind({});
 
-Default.argTypes = {
+DefaultWithControls.argTypes = {
   mode: {
     options: [CellActionsMode.HOVER_POPUP, CellActionsMode.HOVER_INLINE, CellActionsMode.INLINE],
     defaultValue: CellActionsMode.HOVER_POPUP,
@@ -78,11 +63,12 @@ Default.argTypes = {
   },
 };
 
-Default.args = {
+DefaultWithControls.args = {
   showTooltip: true,
   mode: CellActionsMode.INLINE,
   triggerId: TRIGGER_ID,
   config: CONFIG,
+  showMoreActionsFrom: 3,
 };
 
 export const CellActionInline = ({}: {}) => (
@@ -93,6 +79,12 @@ export const CellActionInline = ({}: {}) => (
 
 export const CellActionHoverPopup = ({}: {}) => (
   <CellActions mode={CellActionsMode.HOVER_POPUP} triggerId={TRIGGER_ID} config={CONFIG}>
+    Hover me
+  </CellActions>
+);
+
+export const CellActionHoverInline = ({}: {}) => (
+  <CellActions mode={CellActionsMode.HOVER_INLINE} triggerId={TRIGGER_ID} config={CONFIG}>
     Hover me
   </CellActions>
 );

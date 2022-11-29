@@ -32,6 +32,7 @@ export interface CellActionsProps {
   triggerId: string;
   mode: CellActionsMode;
   showTooltip?: boolean;
+  showMoreActionsFrom?: number;
 }
 
 export const CellActions: React.FC<CellActionsProps> = ({
@@ -40,6 +41,10 @@ export const CellActions: React.FC<CellActionsProps> = ({
   children,
   mode,
   showTooltip = true,
+  /**
+   * It shows 'more actions' button when the number of actions is bigger than this parameter.
+   */
+  showMoreActionsFrom = 3,
 }) => {
   const context = useContext(CellActionsContext);
 
@@ -71,11 +76,12 @@ export const CellActions: React.FC<CellActionsProps> = ({
         getActions={getActions}
         actionContext={actionContext}
         showTooltip={showTooltip}
+        showMoreActionsFrom={showMoreActionsFrom}
       >
         {children}
       </HoverActions>
     );
-  } else {
+  } else if (mode === CellActionsMode.INLINE) {
     return (
       <>
         {children}
@@ -83,9 +89,12 @@ export const CellActions: React.FC<CellActionsProps> = ({
           getActions={getActions}
           actionContext={actionContext}
           showTooltip={showTooltip}
+          showMoreActionsFrom={showMoreActionsFrom}
         />
       </>
     );
+  } else {
+    return <>Not implemented</>;
   }
 };
 
@@ -93,12 +102,14 @@ interface InlineActionsProps {
   getActions: () => Action[];
   actionContext: ActionExecutionContext;
   showTooltip: boolean;
+  showMoreActionsFrom: number;
 }
 
 const InlineActions: React.FC<InlineActionsProps> = ({
   getActions,
   actionContext,
   showTooltip,
+  showMoreActionsFrom,
 }) => {
   const actions = useMemo(() => getActions(), [getActions]);
 

@@ -15,8 +15,6 @@ import { css } from '@emotion/react';
 /** This class is added to the document body while dragging */
 export const IS_DRAGGING_CLASS_NAME = 'is-dragging';
 
-const HOVER_ACTIONS_ALWAYS_SHOW_CLASS_NAME = 'always-show-cell-actions';
-
 /**
  * To avoid expensive changes to the DOM, delay showing the popover menu
  */
@@ -44,16 +42,7 @@ interface Props {
    * layout, and to adjust it's position via `top` and `left`.
    * The function will be called once the first time the hover event starts for performance optimization.
    */
-  getHoverContent: () => JSX.Element;
-
-  // TODO DELETE comment, replaced by children
-  /**
-   * The content that will be wrapped with hover actions. In addition to
-   * rendering the `hoverContent` when the user hovers, this render prop
-   * passes `showHoverContent` to provide a signal that it is in the hover
-   * state.
-   */
-  // render: (showHoverContent: boolean) => JSX.Element;
+  getHoverContent: (closePopover: () => void) => JSX.Element;
 
   /**
    * This optional callback is invoked when a close is requested via user
@@ -85,16 +74,7 @@ interface Props {
  * reader users to navigate to and from your popover.
  */
 export const HoverActionsPopover = React.memo<Props>(
-  ({ alwaysShow = false, closePopOverTrigger, getHoverContent, onCloseRequested, children }) => {
-    const [isOpen, setIsOpen] = useState(alwaysShow);
-
-    // TODO Cache the returned value of getHoverContent() for performance optimization on successive calls.
-    const hoverContent = useMemo(
-      () => (isOpen ? getHoverContent() : null),
-
-      [isOpen, getHoverContent]
-    );
-
+  ({ closePopOverTrigger, getHoverContent, onCloseRequested, children }) => {
     const [showHoverContent, setShowHoverContent] = useState(false);
     const [, setHoverTimeout] = useState<number | undefined>(undefined);
     const popoverRef = useRef<EuiPopover>(null);
@@ -112,6 +92,13 @@ export const HoverActionsPopover = React.memo<Props>(
       }
     }, [onCloseRequested]);
 
+    // TODO Cache the returned value of getHoverContent() for performance optimization on successive calls.
+    const hoverContent = useMemo(
+      () => (showHoverContent ? getHoverContent(() => tryClosePopover()) : null),
+
+      [getHoverContent, showHoverContent, tryClosePopover]
+    );
+
     const onMouseEnter = useCallback(() => {
       setHoverTimeout(
         Number(
@@ -128,18 +115,16 @@ export const HoverActionsPopover = React.memo<Props>(
     }, [setHoverTimeout, setShowHoverContent]);
 
     const onMouseLeave = useCallback(() => {
-      if (!alwaysShow) {
-        tryClosePopover();
-      }
-    }, [alwaysShow, tryClosePopover]);
+      tryClosePopover();
+    }, [tryClosePopover]);
 
     const onKeyDown = useCallback(
       (keyboardEvent: React.KeyboardEvent) => {
-        if (isOpen && keyboardEvent.key === 'Escape') {
+        if (showHoverContent && keyboardEvent.key === 'Escape') {
           onMouseLeave();
         }
       },
-      [isOpen, onMouseLeave]
+      [showHoverContent, onMouseLeave]
     );
 
     const content = useMemo(
@@ -152,24 +137,17 @@ export const HoverActionsPopover = React.memo<Props>(
     );
 
     useEffect(() => {
-      setIsOpen(showHoverContent || alwaysShow);
-    }, [showHoverContent, alwaysShow]);
-
-    useEffect(() => {
       setShowHoverContent(false);
     }, [closePopOverTrigger]); // NOTE: the `closePopOverTrigger` dependency here will close the hover menu whenever `closePopOverTrigger` changes
 
-    useEffect(() => {
-      // in case of dynamic content i.e when the value of hoverContent changes,
-      // we will try to reposition the popover so that the content does not collide with screen edge.
-      if (isOpen) popoverRef?.current?.positionPopoverFluid();
-    }, [hoverContent, isOpen]);
+    // useEffect(() => {
+    //   // in case of dynamic content i.e when the value of hoverContent changes,
+    //   // we will try to reposition the popover so that the content does not collide with screen edge.
+    //   if (showHoverContent) popoverRef?.current?.positionPopoverFluid();
+    // }, [hoverContent, showHoverContent]);
 
     return (
-      <div
-        className={alwaysShow ? HOVER_ACTIONS_ALWAYS_SHOW_CLASS_NAME : ''}
-        onMouseLeave={onMouseLeave}
-      >
+      <div onMouseLeave={onMouseLeave}>
         <EuiPopover
           css={euiPopoverCSS}
           ref={popoverRef}
@@ -177,13 +155,12 @@ export const HoverActionsPopover = React.memo<Props>(
           button={content}
           closePopover={tryClosePopover}
           hasArrow={false}
-          isOpen={isOpen}
-          ownFocus={false}
+          isOpen={showHoverContent}
           panelPaddingSize="none"
-          panelClassName="withHoverActions__popover"
-          repositionOnScroll={true}
+          repositionOnScroll
+          ownFocus={false}
         >
-          {isOpen ? <div onKeyDown={onKeyDown}>{hoverContent}</div> : null}
+          {showHoverContent ? <div onKeyDown={onKeyDown}>{hoverContent}</div> : null}
         </EuiPopover>
       </div>
     );
