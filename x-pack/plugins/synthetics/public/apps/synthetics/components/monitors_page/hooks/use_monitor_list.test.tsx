@@ -51,6 +51,10 @@ describe('useMonitorList', () => {
     };
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('returns expected initial state', () => {
     const {
       result: { current: hookResult },
@@ -62,6 +66,8 @@ describe('useMonitorList', () => {
   it('dispatches correct action for query url param', async () => {
     const query = 'xyz';
     const url = `/monitor/1?query=${query}`;
+
+    jest.useFakeTimers().setSystemTime(Date.now());
     const WrapperWithState = ({ children }: { children: React.ReactElement }) => {
       return (
         <WrappedHelper url={url} path={MONITOR_ROUTE}>
@@ -85,6 +91,8 @@ describe('useMonitorList', () => {
     const url = `/monitor/1?tags=${JSON.stringify(tags)}&locations=${JSON.stringify(
       locations
     )}&monitorType=${JSON.stringify(monitorType)}`;
+
+    jest.useFakeTimers().setSystemTime(Date.now());
     const WrapperWithState = ({ children }: { children: React.ReactElement }) => {
       return (
         <WrappedHelper url={url} path={MONITOR_ROUTE}>
