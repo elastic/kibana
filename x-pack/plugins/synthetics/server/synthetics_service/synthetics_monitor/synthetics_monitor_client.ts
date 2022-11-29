@@ -60,8 +60,6 @@ export class SyntheticsMonitorClient {
     let newPolicies;
 
     if (privateConfigs.length > 0) {
-      // it's important to await installation before we add private configs
-      await this.syntheticsService.setupIndexTemplates();
       newPolicies = await this.privateLocationAPI.createMonitors(
         privateConfigs,
         request,

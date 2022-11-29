@@ -51,6 +51,7 @@ export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => (
       if (!canEnable) {
         return response.forbidden();
       }
+      await syntheticsService.disableScheduledTask();
       await syntheticsService.deleteAllConfigs();
       const { apiKey } = await libs.requests.getAPIKeyForSyntheticsService({
         server,
@@ -65,18 +66,21 @@ export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => (
   },
 });
 
-export const enableSyntheticsRoute: UMRestApiRouteFactory = (libs) => ({
+export const enableSyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => ({
   method: 'POST',
   path: API_URLS.SYNTHETICS_ENABLEMENT,
   validate: {},
-  handler: async ({ request, response, server }): Promise<any> => {
+  handler: async ({ request, response, server, syntheticsMonitorClient }): Promise<any> => {
     const { authSavedObjectsClient, logger } = server;
     try {
-      await generateAndSaveServiceAPIKey({
-        request,
-        authSavedObjectsClient,
-        server,
-      });
+      await Promise.all([
+        syntheticsMonitorClient.syntheticsService.init(),
+        generateAndSaveServiceAPIKey({
+          request,
+          authSavedObjectsClient,
+          server,
+        }),
+      ]);
       return response.ok({
         body: await libs.requests.getSyntheticsEnablement({
           server,
