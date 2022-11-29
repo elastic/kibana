@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/139762
-  describe.skip('dashboard state', function describeIndexTests() {
+  describe.only('dashboard state', function describeIndexTests() {
     // Used to track flag before and after reset
     let isNewChartsLibraryEnabled = true;
 
@@ -190,6 +190,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const newUrl = currentUrl.replace(`query:'${oldQuery}'`, `query:'${newQuery}'`);
 
         await browser.get(newUrl.toString(), !useHardRefresh);
+
+        await retry.waitForWithTimeout('query bar to change from old query', 30000, async () => {
+          return oldQuery !== (await queryBar.getQueryString());
+        });
         const queryBarContentsAfterRefresh = await queryBar.getQueryString();
         expect(queryBarContentsAfterRefresh).to.equal(newQuery);
       };
