@@ -14,7 +14,7 @@ import path from 'path';
 run(
   async ({ log, flagsReader, procRunner }) => {
     async function runFunctionalTest(journey: string, phase: 'TEST' | 'WARMUP') {
-      // Pass in a clean APM environemnt, so that FTR can later
+      // Pass in a clean APM environment, so that FTR can later
       // set it's own values.
       const cleanApmEnv = {
         ELASTIC_APM_TRANSACTION_SAMPLE_RATE: undefined,
