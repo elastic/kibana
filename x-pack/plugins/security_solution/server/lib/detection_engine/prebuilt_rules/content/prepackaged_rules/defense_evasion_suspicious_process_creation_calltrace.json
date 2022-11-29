@@ -73,7 +73,9 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Defense Evasion"
+    "Defense Evasion",
+    "Investigation Guide",
+    "Sysmon Only"
   ],
   "threat": [
     {
@@ -93,5 +95,5 @@
     }
   ],
   "type": "eql",
-  "version": 101
+  "version": 102
 }

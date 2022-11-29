@@ -1,5 +1,7 @@
 /* eslint-disable @kbn/eslint/require-license-header */
 
+export {};
+
 /* @notice
  * Detection Rules
  * Copyright 2021 Elasticsearch B.V.
