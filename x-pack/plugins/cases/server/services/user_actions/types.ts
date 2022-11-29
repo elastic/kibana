@@ -107,9 +107,8 @@ export interface PersistableUserActionFields {
 export interface UserActionLogBody {
   createMessage: (storedUserActionId?: string) => string;
   eventAction: string;
-  // TODO: think about renaming these
-  entityId: string;
-  entityType: string;
+  savedObjectId: string;
+  savedObjectType: string;
 }
 
 export interface LoggerCommonFields {

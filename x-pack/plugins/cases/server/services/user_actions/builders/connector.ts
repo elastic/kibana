@@ -28,8 +28,8 @@ export class ConnectorUserActionBuilder extends UserActionBuilder {
     const loggerFields: UserActionLogBody = {
       createMessage,
       eventAction: 'case_user_action_update_case_connector',
-      entityId: args.caseId,
-      entityType: CASE_SAVED_OBJECT,
+      savedObjectId: args.caseId,
+      savedObjectType: CASE_SAVED_OBJECT,
     };
 
     return this.createPersistableUserAction(loggerFields, fields);

@@ -50,8 +50,8 @@ export class PersistableUserAction {
       },
       kibana: {
         saved_object: {
-          type: this.logBody.entityType,
-          id: this.logBody.entityId,
+          type: this.logBody.savedObjectType,
+          id: this.logBody.savedObjectId,
         },
       },
     });

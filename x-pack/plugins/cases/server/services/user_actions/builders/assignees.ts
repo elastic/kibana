@@ -33,8 +33,8 @@ export class AssigneesUserActionBuilder extends UserActionBuilder {
     const loggerFields: UserActionLogBody = {
       createMessage,
       eventAction: `case_user_action_${action}_case_assignees`,
-      entityId: args.caseId,
-      entityType: CASE_SAVED_OBJECT,
+      savedObjectId: args.caseId,
+      savedObjectType: CASE_SAVED_OBJECT,
     };
 
     return this.createPersistableUserAction(loggerFields, persistableFields);

@@ -34,8 +34,8 @@ export class CreateCaseUserActionBuilder extends UserActionBuilder {
     const loggerFields: UserActionLogBody = {
       createMessage,
       eventAction: 'case_user_action_create_case',
-      entityId: caseId,
-      entityType: CASE_SAVED_OBJECT,
+      savedObjectId: caseId,
+      savedObjectType: CASE_SAVED_OBJECT,
     };
 
     return this.createPersistableUserAction(loggerFields, fields);

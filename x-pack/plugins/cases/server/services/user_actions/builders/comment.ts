@@ -57,8 +57,8 @@ export class CommentUserActionBuilder extends UserActionBuilder {
     const loggerFields: UserActionLogBody = {
       createMessage,
       eventAction: `case_user_action_${action}_comment`,
-      entityId: args.attachmentId ?? args.caseId,
-      entityType: CASE_COMMENT_SAVED_OBJECT,
+      savedObjectId: args.attachmentId ?? args.caseId,
+      savedObjectType: CASE_COMMENT_SAVED_OBJECT,
     };
 
     return this.createPersistableUserAction(loggerFields, fields);

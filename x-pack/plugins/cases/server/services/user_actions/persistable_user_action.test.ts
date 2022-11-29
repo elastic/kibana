@@ -30,8 +30,8 @@ describe('PersistableUserAction', () => {
       _persistableFields: { attributes: { action } as Attributes, references: [] },
       logBody: {
         createMessage: (id?: string) => `id: ${id}`,
-        entityId: '123',
-        entityType: 'type',
+        savedObjectId: '123',
+        savedObjectType: 'type',
         eventAction: 'action',
       },
     });

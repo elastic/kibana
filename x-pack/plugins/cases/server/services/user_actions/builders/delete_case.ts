@@ -37,8 +37,8 @@ export class DeleteCaseUserActionBuilder extends UserActionBuilder {
     const loggerFields: UserActionLogBody = {
       createMessage,
       eventAction: 'case_user_action_delete_case',
-      entityId: caseId,
-      entityType: CASE_SAVED_OBJECT,
+      savedObjectId: caseId,
+      savedObjectType: CASE_SAVED_OBJECT,
     };
 
     return this.createPersistableUserAction(loggerFields, persistableFields);

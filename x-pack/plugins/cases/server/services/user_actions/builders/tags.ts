@@ -34,8 +34,8 @@ export class TagsUserActionBuilder extends UserActionBuilder {
     const loggerFields: UserActionLogBody = {
       createMessage,
       eventAction: `case_user_action_${action}_case_tags`,
-      entityId: args.caseId,
-      entityType: CASE_SAVED_OBJECT,
+      savedObjectId: args.caseId,
+      savedObjectType: CASE_SAVED_OBJECT,
     };
 
     return this.createPersistableUserAction(loggerFields, fields);
