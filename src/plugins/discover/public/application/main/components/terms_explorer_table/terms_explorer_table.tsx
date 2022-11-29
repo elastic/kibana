@@ -25,6 +25,7 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiScreenReaderOnly,
+  EuiTableRow,
   formatDate,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
@@ -146,52 +147,42 @@ const TestCountries = {
 };
 
 export const TermsExplorerTable = (props: TermsExplorerTableProps) => {
-  // const {
-  //   availableFields$,
-  //   dataView,
-  //   savedSearch,
-  //   query,
-  //   columns,
-  //   filters,
-  //   stateContainer,
-  //   onAddFilter,
-  //   trackUiMetric,
-  //   savedSearchRefetch$,
-  //   searchSessionId,
-  //   savedSearchDataTotalHits$,
-  // } = props;
-  // const services = useDiscoverServices();
-  // const [embeddable, setEmbeddable] = useState<
-  //   | ErrorEmbeddable
-  //   | IEmbeddable<DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput>
-  //   | undefined
-  // >();
-  // const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
+  const [primaryItemIdToExpandedRowMap, setPrimaryItemIdToExpandedRowMap] = useState({});
 
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState({});
-
-  const toggleDetails = (item) => {
-    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+  const togglePrimaryDetails = (item) => {
+    const itemIdToExpandedRowMapValues = { ...primaryItemIdToExpandedRowMap };
     if (itemIdToExpandedRowMapValues[item.id]) {
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
-      const { nationality, online } = item;
+      const { nationality, dateOfBirth } = item;
       const country = TestCountries[nationality];
-      const color = online ? 'success' : 'danger';
-      const label = online ? 'Online' : 'Offline';
       const listItems = [
         {
-          title: 'Nationality',
-          description: `${country.flag} ${country.name}`,
-        },
-        {
-          title: 'Online',
-          description: <EuiHealth color={color}>{label}</EuiHealth>,
+          nationality: `${country.flag} ${country.name}`,
+          dateOfBirth,
         },
       ];
-      itemIdToExpandedRowMapValues[item.id] = <EuiDescriptionList listItems={listItems} />;
+      itemIdToExpandedRowMapValues[item.id] = (
+        <EuiBasicTable
+          tableCaption="Demo of EuiBasicTable"
+          items={listItems}
+          rowHeader="firstName"
+          columns={[
+            {
+              field: 'nationality',
+              name: 'Nationality',
+            },
+            {
+              field: 'dateOfBirth',
+              name: 'Date of Birth',
+              schema: 'date',
+              render: (date) => formatDate(date, 'dobLong'),
+            },
+          ]}
+        />
+      );
     }
-    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+    setPrimaryItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
 
   const columns = [
@@ -221,25 +212,6 @@ export const TermsExplorerTable = (props: TermsExplorerTableProps) => {
       },
     },
     {
-      field: 'dateOfBirth',
-      name: 'Date of Birth',
-      schema: 'date',
-      render: (date) => formatDate(date, 'dobLong'),
-      sortable: true,
-    },
-    {
-      name: 'Actions',
-      actions: [
-        {
-          name: 'Clone',
-          description: 'Clone this person',
-          type: 'icon',
-          icon: 'copy',
-          onClick: () => '',
-        },
-      ],
-    },
-    {
       align: RIGHT_ALIGNMENT,
       width: '40px',
       isExpander: true,
@@ -250,9 +222,9 @@ export const TermsExplorerTable = (props: TermsExplorerTableProps) => {
       ),
       render: (item) => (
         <EuiButtonIcon
-          onClick={() => toggleDetails(item)}
-          aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          onClick={() => togglePrimaryDetails(item)}
+          aria-label={primaryItemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+          iconType={primaryItemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
         />
       ),
     },
@@ -263,7 +235,7 @@ export const TermsExplorerTable = (props: TermsExplorerTableProps) => {
       tableCaption="Demo of EuiBasicTable with expanding rows"
       items={TestUsers}
       itemId="id"
-      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+      itemIdToExpandedRowMap={primaryItemIdToExpandedRowMap}
       isExpandable={true}
       hasActions={true}
       columns={columns}
