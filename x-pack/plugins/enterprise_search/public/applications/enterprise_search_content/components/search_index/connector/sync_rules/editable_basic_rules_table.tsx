@@ -210,7 +210,12 @@ export const SyncRulesTable: React.FC = () => {
         } as InlineEditableTableProps<ItemWithAnID>).actions.doneEditing();
       }}
       onDelete={deleteFilteringRule}
-      onUpdate={updateFilteringRule}
+      onUpdate={(rule) => {
+        updateFilteringRule(rule);
+        InlineEditableTableLogic({
+          instanceId,
+        } as InlineEditableTableProps<ItemWithAnID>).actions.doneEditing();
+      }}
       onReorder={reorderFilteringRules}
       title=""
       validateItem={validateItem}
