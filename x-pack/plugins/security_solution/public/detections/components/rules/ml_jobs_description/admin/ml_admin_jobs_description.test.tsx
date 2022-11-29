@@ -17,9 +17,9 @@ jest.mock(
   () =>
     ({
       MlAdminJobDescription: (props) => {
-        return <div data-test-subj={props['data-test-subj']}>{props.job.id}</div>;
+        return <div data-test-subj="admin-mock">{props.job.id}</div>;
       },
-    } as Record<string, React.FC<{ job: MlSummaryJob; 'data-test-subj': string }>>)
+    } as Record<string, React.FC<{ job: MlSummaryJob }>>)
 );
 
 jest.mock('../../../../../common/components/ml_popover/hooks/use_security_jobs');
@@ -38,7 +38,7 @@ describe('MlUsersJobDescription', () => {
       isMlAdmin: true,
     });
     render(<MlAdminJobsDescription jobIds={['mock-1', 'mock-2', 'mock-4']} />);
-    const expectedJobs = screen.getAllByTestId('ml-admin-job-description');
+    const expectedJobs = screen.getAllByTestId('admin-mock');
 
     expect(expectedJobs).toHaveLength(2);
     expect(expectedJobs[0]).toHaveTextContent('mock-1');

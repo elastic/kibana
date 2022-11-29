@@ -28,13 +28,7 @@ const MlAdminJobsDescriptionComponent: FC<MlAdminJobsDescriptionProps> = ({ jobI
   return (
     <>
       {relevantJobs.map((job) => (
-        <MlAdminJobDescription
-          key={job.id}
-          job={job}
-          loading={loading}
-          refreshJob={refreshJobs}
-          data-test-subj="ml-admin-job-description"
-        />
+        <MlAdminJobDescription key={job.id} job={job} loading={loading} refreshJob={refreshJobs} />
       ))}
     </>
   );

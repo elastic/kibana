@@ -17,9 +17,9 @@ jest.mock(
   () =>
     ({
       MlUserJobDescription: (props) => {
-        return <div data-test-subj={props['data-test-subj']}>{props.job.id}</div>;
+        return <div data-test-subj="user-mock">{props.job.id}</div>;
       },
-    } as Record<string, React.FC<{ job: MlSummaryJob; 'data-test-subj': string }>>)
+    } as Record<string, React.FC<{ job: MlSummaryJob }>>)
 );
 
 jest.mock('../../../../../common/components/ml/hooks/use_installed_security_jobs');
@@ -38,7 +38,7 @@ describe('MlUsersJobDescription', () => {
       isMlUser: true,
     });
     render(<MlUserJobsDescription jobIds={['mock-1', 'mock-2', 'mock-4']} />);
-    const expectedJobs = screen.getAllByTestId('ml-user-job-description');
+    const expectedJobs = screen.getAllByTestId('user-mock');
     expect(expectedJobs).toHaveLength(2);
     expect(expectedJobs[0]).toHaveTextContent('mock-1');
     expect(expectedJobs[1]).toHaveTextContent('mock-2');

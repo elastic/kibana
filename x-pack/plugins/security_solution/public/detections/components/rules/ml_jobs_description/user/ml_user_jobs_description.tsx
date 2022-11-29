@@ -28,7 +28,7 @@ const MlUserJobsDescriptionComponent: FC<MlUserJobsDescriptionProps> = ({ jobIds
   return (
     <>
       {relevantJobs.map((job) => (
-        <MlUserJobDescription key={job.id} job={job} data-test-subj="ml-user-job-description" />
+        <MlUserJobDescription key={job.id} job={job} />
       ))}
     </>
   );
