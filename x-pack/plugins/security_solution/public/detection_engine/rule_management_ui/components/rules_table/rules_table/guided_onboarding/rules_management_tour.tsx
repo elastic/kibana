@@ -143,7 +143,7 @@ export const RulesManagementTour = () => {
       )}
       {isSearchFirstRuleAnchorMounted && demoRule && (
         <EuiTourStep
-          title={i18n.SEARCH_FIRST_RULE_TITLE(demoRule.name)}
+          title={i18n.SEARCH_FIRST_RULE_TITLE}
           content={i18n.SEARCH_FIRST_RULE_CONTENT(demoRule.name)}
           onFinish={noop}
           step={2}
@@ -152,7 +152,7 @@ export const RulesManagementTour = () => {
           anchor={`#${SEARCH_FIRST_RULE_ANCHOR}`}
           anchorPosition="upCenter"
           footerAction={
-            <EuiButton size="s" color="success" fill onClick={findDemoRule}>
+            <EuiButton size="s" color="success" onClick={findDemoRule}>
               {i18n.NEXT_BUTTON}
             </EuiButton>
           }
@@ -160,7 +160,7 @@ export const RulesManagementTour = () => {
       )}
       {isActivateFirstRuleAnchorMounted && demoRule && (
         <EuiTourStep
-          title={i18n.ENABLE_FIRST_RULE_TITLE(demoRule.name)}
+          title={i18n.ENABLE_FIRST_RULE_TITLE}
           content={i18n.ENABLE_FIRST_RULE_CONTENT(demoRule.name)}
           onFinish={noop}
           step={3}
@@ -169,7 +169,7 @@ export const RulesManagementTour = () => {
           anchor={`#${ruleSwitchAnchor}`}
           anchorPosition="upCenter"
           footerAction={
-            <EuiButton size="s" color="success" fill onClick={enableDemoRule}>
+            <EuiButton size="s" color="success" onClick={enableDemoRule}>
               {i18n.NEXT_BUTTON}
             </EuiButton>
           }
