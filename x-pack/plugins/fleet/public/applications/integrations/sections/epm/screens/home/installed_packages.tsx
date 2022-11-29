@@ -76,7 +76,7 @@ const UpdatesAvailableCallout: React.FC<{ count: number }> = ({ count }) => (
     <p>
       <FormattedMessage
         id="xpack.fleet.epmList.updatesAvailableCalloutText"
-        defaultMessage="Install the latest version of integrations to get the latest integration features."
+        defaultMessage="Update your integrations to get the latest features."
       />
     </p>
   </EuiCallOut>
