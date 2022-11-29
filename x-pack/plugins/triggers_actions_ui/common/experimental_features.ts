@@ -17,7 +17,7 @@ export const allowedExperimentalValues = Object.freeze({
   ruleTagFilter: true,
   ruleStatusFilter: true,
   rulesDetailLogs: true,
-  ruleLastRunOutcome: true,
+  ruleUseExecutionStatus: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

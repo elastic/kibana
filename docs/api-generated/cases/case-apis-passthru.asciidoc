@@ -48,7 +48,7 @@ Any modifications made to this file will be overwritten.
     <a class="up" href="#__Methods">Up</a>
     <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/cases/{caseId}/comments</code></pre></div>
     <div class="method-summary">Adds a comment or alert to a case. (<span class="nickname">addCaseComment</span>)</div>
-    <div class="method-notes">You must have <code>all</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the case you're creating.</div>
+    <div class="method-notes">You must have <code>all</code> privileges for the <strong>Cases</strong> feature in the <strong>Management</strong>, <strong>Observability</strong>, or <strong>Security</strong> section of the Kibana feature privileges, depending on the owner of the case you're creating. NOTE: Each case can have a maximum of 1,000 alerts.</div>
 
     <h3 class="field-label">Path parameters</h3>
     <div class="field-items">
@@ -1085,7 +1085,9 @@ Any modifications made to this file will be overwritten.
 
     <h3 class="field-label">Query parameters</h3>
     <div class="field-items">
-      <div class="param">defaultSearchOperator (optional)</div>
+      <div class="param">assignees (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the returned cases by assignees. Valid values are <code>none</code> or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API. default: null </div><div class="param">defaultSearchOperator (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The default operator to use for the simple_query_string. default: OR </div><div class="param">fields (optional)</div>
 
@@ -1922,8 +1924,8 @@ Any modifications made to this file will be overwritten.
     <li><a href="#getCaseStatus_200_response"><code>getCaseStatus_200_response</code> - </a></li>
     <li><a href="#getCasesByAlert_200_response_inner"><code>getCasesByAlert_200_response_inner</code> - </a></li>
     <li><a href="#getCases_200_response"><code>getCases_200_response</code> - </a></li>
+    <li><a href="#getCases_assignees_parameter"><code>getCases_assignees_parameter</code> - </a></li>
     <li><a href="#getCases_owner_parameter"><code>getCases_owner_parameter</code> - </a></li>
-    <li><a href="#getCases_reporters_parameter"><code>getCases_reporters_parameter</code> - </a></li>
     <li><a href="#owners"><code>owners</code> - </a></li>
     <li><a href="#payload_alert_comment"><code>payload_alert_comment</code> - </a></li>
     <li><a href="#payload_alert_comment_comment"><code>payload_alert_comment_comment</code> - </a></li>
@@ -2077,13 +2079,13 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="alert_identifiers"><code>alert_identifiers</code> - Alert identifiers</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The alert identifier. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>index</code> must also be an array with the same length or number of elements. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
+    <div class='model-description'>The alert identifiers. It is required only when <code>type</code> is <code>alert</code>. You can use an array of strings to add multiple alerts to a case, provided that they all relate to the same rule; <code>index</code> must also be an array with the same length or number of elements. Adding multiple alerts in this manner is recommended rather than calling the API multiple times. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
     <div class="field-items">
           </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="alert_indices"><code>alert_indices</code> - Alert indices</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The alert index. It is required only when <code>type</code> is <code>alert</code>. If it is an array, <code>alertId</code> must also be an array with the same length or number of elements. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
+    <div class='model-description'>The alert indices. It is required only when <code>type</code> is <code>alert</code>.  If you are adding multiple alerts to a case, use an array of strings; the position of each index name in the array must match the position of the corresponding alert identifier in the <code>alertId</code> array. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
     <div class="field-items">
           </div>  <!-- field-items -->
   </div>
@@ -2485,13 +2487,13 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="getCases_owner_parameter"><code>getCases_owner_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="getCases_assignees_parameter"><code>getCases_assignees_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
           </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="getCases_reporters_parameter"><code>getCases_reporters_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="getCases_owner_parameter"><code>getCases_owner_parameter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
           </div>  <!-- field-items -->
@@ -2663,7 +2665,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="rule"><code>rule</code> - Alerting rule</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The rule that is associated with the alert. It is required only when <code>type</code> is <code>alert</code>. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
+    <div class='model-description'>The rule that is associated with the alerts. It is required only when <code>type</code> is <code>alert</code>. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.</div>
     <div class="field-items">
       <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule identifier. </div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The rule name. </div>

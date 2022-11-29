@@ -32,7 +32,7 @@ import {
   checkConflicts,
   executeImportHooks,
   checkOriginConflicts,
-  ImportStateMap,
+  type ImportStateMap,
 } from './lib';
 
 /**

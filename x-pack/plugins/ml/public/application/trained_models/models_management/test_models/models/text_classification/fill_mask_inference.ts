@@ -6,12 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { estypes } from '@elastic/elasticsearch';
+import { map } from 'rxjs/operators';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 import { processResponse, processInferenceResult } from './common';
 import { getGeneralInputComponent } from '../text_input';
 import { getFillMaskOutputComponent } from './fill_mask_output';
 import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
+import { trainedModelsApiProvider } from '../../../../../services/ml_api_service/trained_models';
 
 const MASK = '[MASK]';
 
@@ -28,13 +31,22 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
     }),
   ];
 
+  constructor(
+    trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
+    model: estypes.MlTrainedModelConfig,
+    inputType: INPUT_TYPE
+  ) {
+    super(trainedModelsApi, model, inputType);
+
+    this.initialize([
+      this.inputText$.pipe(map((inputText) => inputText.every((t) => t.includes(MASK)))),
+    ]);
+  }
+
   protected async inferText() {
     return this.runInfer<RawTextClassificationResponse>(
-      (inputText: string) => {
-        return {
-          docs: [{ [this.inputField]: inputText }],
-          inference_config: this.getInferenceConfig(this.getNumTopClassesConfig()),
-        };
+      () => {
+        return this.getInferenceConfig(this.getNumTopClassesConfig());
       },
       (resp, inputText) => {
         return processResponse(resp, this.model, inputText);
@@ -47,7 +59,7 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
       return {
         response: processInferenceResult(doc._source[this.inferenceType], this.model),
         rawResponse: doc._source[this.inferenceType],
-        inputText: doc._source[this.inputField],
+        inputText: doc._source[this.getInputField()],
       };
     });
   }

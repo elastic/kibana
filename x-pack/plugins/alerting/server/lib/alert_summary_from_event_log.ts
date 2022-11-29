@@ -31,7 +31,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     statusEndDate: dateEnd,
     status: 'OK',
     muteAll: rule.muteAll,
-    throttle: rule.throttle,
+    throttle: rule.throttle ?? null,
     enabled: rule.enabled,
     lastRun: undefined,
     errorMessages: [],

@@ -80,7 +80,7 @@ exports[`policy table shows empty state when there are no policies 1`] = `
             class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
           <button
-            class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
             data-test-subj="createPolicyButton"
             type="button"
           >

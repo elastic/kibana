@@ -239,9 +239,9 @@ describe('ThreatMatchComponent', () => {
       </ThemeProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="entriesContainer"]').length).toEqual(4);
+    expect(wrapper.find('div[data-test-subj="entriesContainer"]').length).toEqual(2);
     wrapper.find('[data-test-subj="firstRowDeleteButton"] button').simulate('click');
-    expect(wrapper.find('[data-test-subj="entriesContainer"]').length).toEqual(2);
+    expect(wrapper.find('div[data-test-subj="entriesContainer"]').length).toEqual(1);
     wrapper.unmount();
   });
 

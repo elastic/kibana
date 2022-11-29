@@ -140,7 +140,7 @@ const EmptyHeaderCellRender: ComponentType = () => null;
 
 const gridStyle: EuiDataGridStyle = { border: 'none', fontSize: 's', header: 'underline' };
 
-const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
+const EuiEventTableContainer = styled.div<{ hideLastPage: boolean }>`
   ul.euiPagination__list {
     li.euiPagination__item:last-child {
       ${({ hideLastPage }) => `${hideLastPage ? 'display:none' : ''}`};
@@ -877,7 +877,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       <>
         <StatefulEventContext.Provider value={activeStatefulEventContext}>
           {tableView === 'gridView' && (
-            <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
+            <EuiEventTableContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
               <EuiDataGrid
                 id={'body-data-grid'}
                 data-test-subj="body-data-grid"
@@ -901,24 +901,26 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 }}
                 ref={dataGridRef}
               />
-            </EuiDataGridContainer>
+            </EuiEventTableContainer>
           )}
           {tableView === 'eventRenderedView' && (
-            <EventRenderedView
-              appId={appId}
-              alertToolbar={alertToolbar}
-              events={data}
-              getRowRenderer={getRowRenderer}
-              leadingControlColumns={leadingTGridControlColumns ?? []}
-              onChangePage={onChangePage}
-              onChangeItemsPerPage={onChangeItemsPerPage}
-              pageIndex={activePage}
-              pageSize={pageSize}
-              pageSizeOptions={itemsPerPageOptions}
-              rowRenderers={rowRenderers}
-              timelineId={id}
-              totalItemCount={totalItems}
-            />
+            <EuiEventTableContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
+              <EventRenderedView
+                appId={appId}
+                alertToolbar={alertToolbar}
+                events={data}
+                getRowRenderer={getRowRenderer}
+                leadingControlColumns={leadingTGridControlColumns ?? []}
+                onChangePage={onChangePage}
+                onChangeItemsPerPage={onChangeItemsPerPage}
+                pageIndex={activePage}
+                pageSize={pageSize}
+                pageSizeOptions={itemsPerPageOptions}
+                rowRenderers={rowRenderers}
+                timelineId={id}
+                totalItemCount={totalItems}
+              />
+            </EuiEventTableContainer>
           )}
         </StatefulEventContext.Provider>
       </>

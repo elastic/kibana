@@ -70,13 +70,13 @@ describe('GuidedOnboarding ApiService', () => {
       expect(httpClient.get).toHaveBeenCalledTimes(1);
     });
 
-    it(`re-sends the request if the previous one failed`, async () => {
+    it(`doesn't send multiple requests if the request failed`, async () => {
       httpClient.get.mockRejectedValueOnce(new Error('request failed'));
       subscription = apiService.fetchPluginState$().subscribe();
       // wait until the request fails
       await new Promise((resolve) => process.nextTick(resolve));
       anotherSubscription = apiService.fetchPluginState$().subscribe();
-      expect(httpClient.get).toHaveBeenCalledTimes(2);
+      expect(httpClient.get).toHaveBeenCalledTimes(1);
     });
 
     it(`re-sends the request if the subscription was unsubscribed before the request completed`, async () => {
@@ -255,6 +255,7 @@ describe('GuidedOnboarding ApiService', () => {
         .isGuideStepActive$(testGuide, testGuideFirstStep)
         .subscribe((isStepActive) => {
           if (isStepActive) {
+            subscription.unsubscribe();
             done();
           }
         });
@@ -265,6 +266,7 @@ describe('GuidedOnboarding ApiService', () => {
         .isGuideStepActive$(testGuide, testGuideFirstStep)
         .subscribe((isStepActive) => {
           if (!isStepActive) {
+            subscription.unsubscribe();
             done();
           }
         });
@@ -408,6 +410,7 @@ describe('GuidedOnboarding ApiService', () => {
         .isGuidedOnboardingActiveForIntegration$(testIntegration)
         .subscribe((isIntegrationInGuideStep) => {
           if (isIntegrationInGuideStep) {
+            subscription.unsubscribe();
             done();
           }
         });
@@ -422,6 +425,7 @@ describe('GuidedOnboarding ApiService', () => {
         .isGuidedOnboardingActiveForIntegration$(wrongIntegration)
         .subscribe((isIntegrationInGuideStep) => {
           if (!isIntegrationInGuideStep) {
+            subscription.unsubscribe();
             done();
           }
         });
@@ -436,6 +440,7 @@ describe('GuidedOnboarding ApiService', () => {
         .isGuidedOnboardingActiveForIntegration$(testIntegration)
         .subscribe((isIntegrationInGuideStep) => {
           if (!isIntegrationInGuideStep) {
+            subscription.unsubscribe();
             done();
           }
         });

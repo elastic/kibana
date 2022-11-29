@@ -28,7 +28,7 @@
     "Threat Detection",
     "ML",
     "Persistence",
-    "has_guide"
+    "Investigation Guide"
   ],
   "threat": [
     {
@@ -55,5 +55,5 @@
     }
   ],
   "type": "machine_learning",
-  "version": 101
+  "version": 102
 }

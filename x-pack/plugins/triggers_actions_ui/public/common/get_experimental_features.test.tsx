@@ -21,7 +21,7 @@ describe('getIsExperimentalFeatureEnabled', () => {
         rulesDetailLogs: true,
         ruleTagFilter: true,
         ruleStatusFilter: true,
-        ruleLastRunOutcome: true,
+        ruleUseExecutionStatus: false,
       },
     });
 
@@ -45,9 +45,9 @@ describe('getIsExperimentalFeatureEnabled', () => {
 
     expect(result).toEqual(true);
 
-    result = getIsExperimentalFeatureEnabled('ruleLastRunOutcome');
+    result = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
-    expect(result).toEqual(true);
+    expect(result).toEqual(false);
 
     expect(() => getIsExperimentalFeatureEnabled('doesNotExist' as any)).toThrowError(
       `Invalid enable value doesNotExist. Allowed values are: ${allowedExperimentalValueKeys.join(

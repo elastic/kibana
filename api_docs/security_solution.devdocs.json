@@ -1699,17 +1699,23 @@
           },
           {
             "parentPluginId": "securitySolution",
-            "id": "def-server.SecuritySolutionApiRequestHandlerContext.endpointAuthz",
-            "type": "Object",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getEndpointAuthz",
+            "type": "Function",
             "tags": [],
-            "label": "endpointAuthz",
+            "label": "getEndpointAuthz",
             "description": [],
             "signature": [
-              "EndpointAuthz"
+              "() => Promise<",
+              "ImmutableObject",
+              "<",
+              "EndpointAuthz",
+              ">>"
             ],
             "path": "x-pack/plugins/security_solution/server/types.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "securitySolution",

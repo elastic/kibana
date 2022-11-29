@@ -69,7 +69,8 @@
     "Windows",
     "Threat Detection",
     "Persistence",
-    "Privilege Escalation"
+    "Privilege Escalation",
+    "Investigation Guide"
   ],
   "threat": [
     {
@@ -119,5 +120,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 101
+  "version": 102
 }

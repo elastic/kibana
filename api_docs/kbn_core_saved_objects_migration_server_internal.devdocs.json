@@ -12,6 +12,237 @@
     "classes": [
       {
         "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+        "id": "def-server.DocumentMigrator",
+        "type": "Class",
+        "tags": [],
+        "label": "DocumentMigrator",
+        "description": [
+          "\nA concrete implementation of the VersionedTransformer interface."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsMigrationServerInternalPluginApi",
+            "section": "def-server.DocumentMigrator",
+            "text": "DocumentMigrator"
+          },
+          " implements ",
+          "VersionedTransformer"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.DocumentMigrator.Unnamed",
+            "type": "Function",
+            "tags": [
+              "prop",
+              "prop",
+              "prop",
+              "prop",
+              "memberof"
+            ],
+            "label": "Constructor",
+            "description": [
+              "\nCreates an instance of DocumentMigrator.\n"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+                "id": "def-server.DocumentMigrator.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    typeRegistry,\n    kibanaVersion,\n    minimumConvertVersion = DEFAULT_MINIMUM_CONVERT_VERSION,\n    log,\n  }",
+                "description": [],
+                "signature": [
+                  "DocumentMigratorOptions"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.DocumentMigrator.migrationVersion",
+            "type": "Object",
+            "tags": [
+              "readonly",
+              "type",
+              "memberof"
+            ],
+            "label": "migrationVersion",
+            "description": [
+              "\nGets the latest version of each migrate-able property.\n"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsMigrationVersion",
+                "text": "SavedObjectsMigrationVersion"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.DocumentMigrator.prepareMigrations",
+            "type": "Function",
+            "tags": [
+              "memberof"
+            ],
+            "label": "prepareMigrations",
+            "description": [
+              "\nPrepares active migrations and document transformer function.\n"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.DocumentMigrator.migrate",
+            "type": "Function",
+            "tags": [
+              "memberof"
+            ],
+            "label": "migrate",
+            "description": [
+              "\nMigrates a document to the latest version.\n"
+            ],
+            "signature": [
+              "(doc: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
+              "<unknown>) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
+              "<unknown>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+                "id": "def-server.DocumentMigrator.migrate.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "doc",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectUnsanitizedDoc",
+                    "text": "SavedObjectUnsanitizedDoc"
+                  },
+                  "<unknown>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.DocumentMigrator.migrateAndConvert",
+            "type": "Function",
+            "tags": [
+              "memberof"
+            ],
+            "label": "migrateAndConvert",
+            "description": [
+              "\nMigrates a document to the latest version and applies type conversions if applicable. Also returns any additional document(s) that may\nhave been created during the transformation process.\n"
+            ],
+            "signature": [
+              "(doc: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
+              "<unknown>) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
+              "<unknown>[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+                "id": "def-server.DocumentMigrator.migrateAndConvert.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "doc",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectUnsanitizedDoc",
+                    "text": "SavedObjectUnsanitizedDoc"
+                  },
+                  "<unknown>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/document_migrator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
         "id": "def-server.KibanaMigrator",
         "type": "Class",
         "tags": [],
@@ -1446,6 +1677,47 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+        "id": "def-server.updateTargetMappingsMeta",
+        "type": "Function",
+        "tags": [],
+        "label": "updateTargetMappingsMeta",
+        "description": [
+          "\nUpdates an index's mappings _meta information"
+        ],
+        "signature": [
+          "({ client, index, meta, }: ",
+          "UpdateTargetMappingsMetaParams",
+          ") => ",
+          "TaskEither",
+          "<",
+          "RetryableEsClientError",
+          ", \"update_mappings_meta_succeeded\">"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_target_mappings_meta.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.updateTargetMappingsMeta.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n    client,\n    index,\n    meta,\n  }",
+            "description": [],
+            "signature": [
+              "UpdateTargetMappingsMetaParams"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_target_mappings_meta.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
         "id": "def-server.waitForIndexStatus",
         "type": "Function",
         "tags": [],
@@ -2275,29 +2547,29 @@
               "ExplainResponse",
               "<TDocument>>; }; features: ",
               "default",
-              "; fieldCaps: { (this: That, params: ",
+              "; fieldCaps: { (this: That, params?: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              ", options?: ",
+              " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "FieldCapsResponse",
-              ">; (this: That, params: ",
+              ">; (this: That, params?: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              ", options?: ",
+              " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
               "FieldCapsResponse",
-              ", unknown>>; (this: That, params: ",
+              ", unknown>>; (this: That, params?: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              ", options?: ",
+              " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "FieldCapsResponse",
