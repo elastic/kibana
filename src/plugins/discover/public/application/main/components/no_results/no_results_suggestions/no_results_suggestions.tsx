@@ -18,7 +18,6 @@ import {
 } from './no_results_suggestion_when_filters';
 import { NoResultsSuggestionWhenQuery } from './no_results_suggestion_when_query';
 import { NoResultsSuggestionWhenTimeRange } from './no_results_suggestion_when_time_range';
-import { NoResultsSuggestionOccurrences } from './no_results_suggestion_occurrences';
 import { hasActiveFilter } from '../../layout/utils';
 
 interface NoResultsSuggestionProps {
@@ -43,6 +42,11 @@ export function NoResultsSuggestions({
   if (canAdjustSearchCriteria) {
     return (
       <>
+        {isTimeBased && (
+          <>
+            <NoResultsSuggestionWhenTimeRange dataView={dataView} query={query} filters={filters} />
+          </>
+        )}
         {hasQuery && (
           <>
             <EuiSpacer size="s" />
@@ -53,14 +57,6 @@ export function NoResultsSuggestions({
           <>
             <EuiSpacer size="s" />
             <NoResultsSuggestionWhenFilters onDisableFilters={onDisableFilters} />
-          </>
-        )}
-        {isTimeBased && (
-          <>
-            <EuiSpacer size="s" />
-            <NoResultsSuggestionWhenTimeRange />
-            <EuiSpacer size="s" />
-            <NoResultsSuggestionOccurrences dataView={dataView} query={query} filters={filters} />
           </>
         )}
       </>
