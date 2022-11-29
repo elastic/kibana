@@ -60,12 +60,12 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
       // type the new text
       const newMd = `${oldMd} and this is a test`;
       await monacoEditor.setCodeEditorValue(newMd, 0);
-      await PageObjects.common.sleep(300);
 
       // make sure the open expression editor also has the changes
-      const editorText = await monacoEditor.getCodeEditorValue(1);
-      expect(editorText).to.contain('Orange: Timelion, Server function and this is a test');
-
+      await retry.try(async () => {
+        const editorText = await monacoEditor.getCodeEditorValue(1);
+        expect(editorText).to.contain('Orange: Timelion, Server function and this is a test');
+      });
       // reset the markdown
       await monacoEditor.setCodeEditorValue(oldMd, 0);
     });
