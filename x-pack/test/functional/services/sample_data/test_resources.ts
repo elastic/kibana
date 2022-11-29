@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function SampleDataTestResourcesServiceProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
