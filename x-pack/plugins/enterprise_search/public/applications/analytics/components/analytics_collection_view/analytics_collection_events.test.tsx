@@ -19,6 +19,7 @@ import { AnalyticsCollectionEvents } from './analytics_collection_events';
 describe('AnalyticsCollectionEvents', () => {
   const analyticsCollections: AnalyticsCollection = {
     event_retention_day_length: 180,
+    events_datastream: 'analytics-events-example',
     id: '1',
     name: 'example',
   };
