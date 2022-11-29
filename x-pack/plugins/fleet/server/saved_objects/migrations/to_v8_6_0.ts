@@ -36,7 +36,7 @@ export const migrateInstallationToV860: SavedObjectMigrationFn<Installation, Ins
   return installationDoc;
 };
 
-export const migratePackagePolicyToV840: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
+export const migratePackagePolicyToV860: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
   packagePolicyDoc,
   migrationContext
 ) => {
