@@ -9,6 +9,6 @@
   "description": "Drift prevention for containers.",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["fleet"],
+  "requiredPlugins": ["fleet", "kibanaReact"],
   "optionalPlugins": []
 }

@@ -5,12 +5,12 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { EuiForm } from '@elastic/eui';
 import type { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import { AdvancedView } from './advanced_view';
 
 export const CloudDefendEditPolicyExtension = memo<PackagePolicyEditExtensionComponentProps>(
   ({ newPolicy, onChange }) => {
-    return <EuiForm style={{ marginTop: 0 }}>{JSON.stringify(newPolicy.inputs)}</EuiForm>;
+    return <AdvancedView policy={newPolicy} onChange={onChange} />;
   }
 );
 
