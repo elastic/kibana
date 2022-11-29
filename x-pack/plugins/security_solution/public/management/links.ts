@@ -273,17 +273,21 @@ export const getManagementFilteredLinks = async (
     );
   }
 
-  const { canReadActionsLogManagement, canReadHostIsolationExceptions, canReadEndpointList } =
-    fleetAuthz
-      ? calculateEndpointAuthz(
-          licenseService,
-          fleetAuthz,
-          currentUser.roles,
-          isEndpointRbacEnabled,
-          endpointPermissions,
-          hasHostIsolationExceptions
-        )
-      : getEndpointAuthzInitialState();
+  const {
+    canReadActionsLogManagement,
+    canReadHostIsolationExceptions,
+    canReadEndpointList,
+    canReadTrustedApplications,
+  } = fleetAuthz
+    ? calculateEndpointAuthz(
+        licenseService,
+        fleetAuthz,
+        currentUser.roles,
+        isEndpointRbacEnabled,
+        endpointPermissions,
+        hasHostIsolationExceptions
+      )
+    : getEndpointAuthzInitialState();
 
   if (!canReadEndpointList) {
     linksToExclude.push(SecurityPageName.endpoints);
@@ -295,6 +299,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadHostIsolationExceptions) {
     linksToExclude.push(SecurityPageName.hostIsolationExceptions);
+  }
+
+  if (endpointRbacEnabled && !canReadTrustedApplications) {
+    linksToExclude.push(SecurityPageName.trustedApps);
   }
 
   return excludeLinks(linksToExclude);
