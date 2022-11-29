@@ -12,7 +12,7 @@ import {
   useAlertSearchBarStateContainer,
 } from './containers';
 import { ObservabilityAlertSearchBar } from './alert_search_bar';
-import { ObservabilityAlertSearchBarKibanaProvider } from './services';
+import { ObservabilityAlertSearchBarProvider } from './services';
 import { AlertSearchBarWithUrlSyncProps } from './types';
 import { useKibana } from '../../../utils/kibana_react';
 import { ObservabilityAppServices } from '../../../application/types';
@@ -23,9 +23,9 @@ function AlertSearchbarWithUrlSync(props: AlertSearchBarWithUrlSyncProps) {
   const services = useKibana<ObservabilityAppServices>().services;
 
   return (
-    <ObservabilityAlertSearchBarKibanaProvider {...services}>
+    <ObservabilityAlertSearchBarProvider {...services}>
       <ObservabilityAlertSearchBar {...stateProps} {...searchBarProps} />
-    </ObservabilityAlertSearchBarKibanaProvider>
+    </ObservabilityAlertSearchBarProvider>
   );
 }
 
