@@ -141,6 +141,7 @@ import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors'
 import { getActiveScheduledSnoozes } from '../lib/is_rule_snoozed';
 import { isSnoozeExpired } from '../lib';
 import { isDetectionEngineAADRuleType } from '../saved_objects/migrations/utils';
+import { ExecLogTransformClient } from '../transform/exec_log_transform_client';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -217,6 +218,7 @@ export interface ConstructorOptions {
   createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   getActionsClient: () => Promise<ActionsClient>;
   getEventLogClient: () => Promise<IEventLogClient>;
+  getExecLogTransformClient: () => Promise<ExecLogTransformClient | null>;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   auditLogger?: AuditLogger;
   eventLogger?: IEventLogger;
@@ -495,6 +497,7 @@ export class RulesClient {
   private readonly getActionsClient: () => Promise<ActionsClient>;
   private readonly actionsAuthorization: ActionsAuthorization;
   private readonly getEventLogClient: () => Promise<IEventLogClient>;
+  private readonly getExecLogTransformClient: () => Promise<ExecLogTransformClient | null>;
   private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   private readonly kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly auditLogger?: AuditLogger;
@@ -521,6 +524,7 @@ export class RulesClient {
     getActionsClient,
     actionsAuthorization,
     getEventLogClient,
+    getExecLogTransformClient,
     kibanaVersion,
     auditLogger,
     eventLogger,
@@ -540,6 +544,7 @@ export class RulesClient {
     this.getActionsClient = getActionsClient;
     this.actionsAuthorization = actionsAuthorization;
     this.getEventLogClient = getEventLogClient;
+    this.getExecLogTransformClient = getExecLogTransformClient;
     this.kibanaVersion = kibanaVersion;
     this.auditLogger = auditLogger;
     this.eventLogger = eventLogger;
@@ -1022,6 +1027,92 @@ export class RulesClient {
     });
   }
 
+  private async getExecutionLogForRuleFromEventLog({
+    id,
+    start,
+    end,
+    filter,
+    page,
+    perPage,
+    sort,
+    legacyId,
+  }: {
+    id: string;
+    start: Date;
+    end: Date;
+    filter: string | undefined;
+    page: number;
+    perPage: number;
+    sort: estypes.Sort;
+    legacyId: string | null;
+  }): Promise<IExecutionLogResult> {
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const aggResult = await eventLogClient.aggregateEventsBySavedObjectIds(
+        'alert',
+        [id],
+        {
+          start: start.toISOString(),
+          end: end.toISOString(),
+          aggs: getExecutionLogAggregation({
+            filter,
+            page,
+            perPage,
+            sort,
+          }),
+        },
+        legacyId !== null ? [legacyId] : undefined
+      );
+
+      return formatExecutionLogResult(aggResult);
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getExecutionLogForRule(): error searching event log for rule ${id}: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  private async getExecutionLogForRuleFromExecLogTransform({
+    id,
+    start,
+    end,
+    filter,
+    page,
+    perPage,
+    sort,
+  }: {
+    id: string;
+    start: Date;
+    end: Date;
+    filter: string | undefined;
+    page: number;
+    perPage: number;
+    sort: estypes.Sort;
+  }): Promise<IExecutionLogResult> {
+    const execLogTransformClient = await this.getExecLogTransformClient();
+
+    try {
+      const aggResult = await execLogTransformClient!.getByRuleIds([id], {
+        start: start.toISOString(),
+        end: end.toISOString(),
+        filter,
+        page,
+        per_page: perPage,
+        sort: [{ sort_field: '@timestamp.min', sort_order: 'desc' }],
+      });
+
+      return {};
+      // return formatExecutionLogResult(aggResult);
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getExecutionLogForRule(): error searching event log for rule ${id}: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
   public async getExecutionLogForRule({
     id,
     dateStart,
@@ -1060,37 +1151,33 @@ export class RulesClient {
       })
     );
 
-    // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();
     const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
     const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
 
-    const eventLogClient = await this.getEventLogClient();
-
-    try {
-      const aggResult = await eventLogClient.aggregateEventsBySavedObjectIds(
-        'alert',
-        [id],
-        {
-          start: parsedDateStart.toISOString(),
-          end: parsedDateEnd.toISOString(),
-          aggs: getExecutionLogAggregation({
-            filter,
-            page,
-            perPage,
-            sort,
-          }),
-        },
-        rule.legacyId !== null ? [rule.legacyId] : undefined
-      );
-
-      return formatExecutionLogResult(aggResult);
-    } catch (err) {
-      this.logger.debug(
-        `rulesClient.getExecutionLogForRule(): error searching event log for rule ${id}: ${err.message}`
-      );
-      throw err;
+    const execLogTransformClient = await this.getExecLogTransformClient();
+    if (execLogTransformClient) {
+      return await this.getExecutionLogForRuleFromExecLogTransform({
+        id,
+        start: parsedDateStart,
+        end: parsedDateEnd,
+        filter,
+        page,
+        perPage,
+        sort,
+      });
     }
+
+    return await this.getExecutionLogForRuleFromEventLog({
+      id,
+      start: parsedDateStart,
+      end: parsedDateEnd,
+      filter,
+      page,
+      perPage,
+      sort,
+      legacyId: rule.legacyId,
+    });
   }
 
   public async getGlobalExecutionLogWithAuth({

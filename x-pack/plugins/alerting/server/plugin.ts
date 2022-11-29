@@ -80,6 +80,8 @@ import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
+import { installTransform } from './transform/install_transform';
+import { ExecLogTransformClient } from './transform/exec_log_transform_client';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -175,6 +177,7 @@ export class AlertingPlugin {
   private kibanaBaseUrl: string | undefined;
   private usageCounter: UsageCounter | undefined;
   private inMemoryMetrics: InMemoryMetrics;
+  private isEventLogTransformActive: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -185,6 +188,7 @@ export class AlertingPlugin {
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
+    this.isEventLogTransformActive = false;
   }
 
   public setup(
@@ -220,6 +224,14 @@ export class AlertingPlugin {
 
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
+
+    core.getStartServices().then(async ([{ elasticsearch }]) => {
+      this.isEventLogTransformActive = await installTransform({
+        esClient: elasticsearch.client.asInternalUser,
+        logger: this.logger,
+      });
+      this.logger.info(`this.isEventLogTransformActive ${this.isEventLogTransformActive}`);
+    });
 
     const ruleTypeRegistry = new RuleTypeRegistry({
       logger: this.logger,
@@ -366,6 +378,7 @@ export class AlertingPlugin {
       alertingAuthorizationClientFactory,
       security,
       licenseState,
+      isEventLogTransformActive,
     } = this;
 
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
@@ -410,6 +423,19 @@ export class AlertingPlugin {
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
+      async getExecLogTransformClientWithRequest(request: KibanaRequest) {
+        logger.info(
+          `rulesClientFactory.initialize this.isEventLogTransformActive ${isEventLogTransformActive}`
+        );
+        return isEventLogTransformActive
+          ? new ExecLogTransformClient({
+              request,
+              logger,
+              esClient: core.elasticsearch.client.asInternalUser,
+              spacesService: plugins.spaces?.spacesService,
+            })
+          : null;
+      },
     });
 
     const getRulesClientWithRequest = (request: KibanaRequest) => {
@@ -418,6 +444,9 @@ export class AlertingPlugin {
           `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
       }
+      logger.info(
+        `getRulesClientWithRequest this.isEventLogTransformActive ${isEventLogTransformActive}`
+      );
       return rulesClientFactory!.create(request, core.savedObjects);
     };
 

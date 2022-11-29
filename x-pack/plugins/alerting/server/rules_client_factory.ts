@@ -21,6 +21,8 @@ import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingRulesConfig } from './config';
+import { ExecLogTransformClient } from './transform/exec_log_transform_client';
+
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -36,6 +38,9 @@ export interface RulesClientFactoryOpts {
   authorization: AlertingAuthorizationClientFactory;
   eventLogger?: IEventLogger;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
+  getExecLogTransformClientWithRequest: (
+    request: KibanaRequest
+  ) => Promise<ExecLogTransformClient | null>;
 }
 
 export class RulesClientFactory {
@@ -54,6 +59,9 @@ export class RulesClientFactory {
   private authorization!: AlertingAuthorizationClientFactory;
   private eventLogger?: IEventLogger;
   private minimumScheduleInterval!: AlertingRulesConfig['minimumScheduleInterval'];
+  private getExecLogTransformClientWithRequest!: (
+    request: KibanaRequest
+  ) => Promise<ExecLogTransformClient | null>;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -74,10 +82,17 @@ export class RulesClientFactory {
     this.authorization = options.authorization;
     this.eventLogger = options.eventLogger;
     this.minimumScheduleInterval = options.minimumScheduleInterval;
+    this.getExecLogTransformClientWithRequest = options.getExecLogTransformClientWithRequest;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
-    const { securityPluginSetup, securityPluginStart, actions, eventLog } = this;
+    const {
+      securityPluginSetup,
+      securityPluginStart,
+      actions,
+      eventLog,
+      getExecLogTransformClientWithRequest,
+    } = this;
     const spaceId = this.getSpaceId(request);
 
     if (!this.authorization) {
@@ -131,6 +146,9 @@ export class RulesClientFactory {
       },
       async getEventLogClient() {
         return eventLog.getClient(request);
+      },
+      async getExecLogTransformClient() {
+        return getExecLogTransformClientWithRequest(request);
       },
       eventLogger: this.eventLogger,
     });
