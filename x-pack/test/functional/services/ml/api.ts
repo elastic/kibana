@@ -870,6 +870,21 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       await this.waitForJobState(jobConfig.job_id, JOB_STATE.CLOSED);
     },
 
+    async createAndRunAnomalyDetectionJob(
+      jobConfig: Job,
+      datafeedConfig: Datafeed,
+      stop: string,
+      space?: string
+    ) {
+      log.debug(`Stop datafeed at '{stop}'...`);
+      await this.createAnomalyDetectionJob(jobConfig, space);
+      await this.createDatafeed(datafeedConfig, space);
+      await this.openAnomalyDetectionJob(jobConfig.job_id);
+      await this.startDatafeed(datafeedConfig.datafeed_id, { start: '0', end: `${stop}` });
+      await this.waitForDatafeedState(datafeedConfig.datafeed_id, DATAFEED_STATE.STOPPED);
+      await this.waitForJobState(jobConfig.job_id, JOB_STATE.CLOSED);
+    },
+
     async getDataFrameAnalyticsJob(analyticsId: string, statusCode = 200) {
       log.debug(`Fetching data frame analytics job '${analyticsId}'...`);
       const response = await esSupertest.get(`/_ml/data_frame/analytics/${analyticsId}`);
