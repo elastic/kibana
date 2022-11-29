@@ -95,6 +95,20 @@ interface ConnectorFilteringValues {
   status: Status;
 }
 
+function createDefaultRule(order: number) {
+  const now = new Date().toISOString();
+  return {
+    created_at: now,
+    field: '_',
+    id: 'DEFAULT',
+    order,
+    policy: FilteringPolicy.INCLUDE,
+    rule: FilteringRuleRule.REGEX,
+    updated_at: now,
+    value: '.*',
+  };
+}
+
 export const ConnectorFilteringLogic = kea<
   MakeLogicType<ConnectorFilteringValues, ConnectorFilteringActions>
 >({
@@ -253,19 +267,7 @@ export const ConnectorFilteringLogic = kea<
                 filteringRule,
                 filteringRules[filteringRules.length - 1],
               ]
-            : [
-                filteringRule,
-                {
-                  created_at: new Date().toISOString(),
-                  field: '_',
-                  id: 'DEFAULT',
-                  order: 0,
-                  policy: FilteringPolicy.INCLUDE,
-                  rule: FilteringRuleRule.REGEX,
-                  updated_at: new Date().toISOString(),
-                  value: '.*',
-                },
-              ];
+            : [filteringRule, createDefaultRule(1)];
           return newFilteringRules.map((rule, index) => ({ ...rule, order: index }));
         },
         deleteFilteringRule: (filteringRules, filteringRule) =>
@@ -273,16 +275,7 @@ export const ConnectorFilteringLogic = kea<
         reorderFilteringRules: (filteringRules, newFilteringRules) => {
           const lastItem = filteringRules.length
             ? filteringRules[filteringRules.length - 1]
-            : {
-                created_at: new Date().toISOString(),
-                field: '_',
-                id: 'DEFAULT',
-                order: 0,
-                policy: FilteringPolicy.INCLUDE,
-                rule: FilteringRuleRule.REGEX,
-                updated_at: new Date().toISOString(),
-                value: '.*',
-              };
+            : createDefaultRule(0);
           return [...newFilteringRules, lastItem].map((rule, index) => ({ ...rule, order: index }));
         },
         setLocalFilteringRules: (_, filteringRules) => filteringRules,
