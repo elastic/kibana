@@ -15,6 +15,7 @@ import { BASE_PATH } from '../paths';
 import { installArchive } from './install_archive';
 import { log as defaultLog } from '../utils/log';
 import { Artifact, ArtifactLicense } from '../artifact';
+import { ElasticsearchAPMSettings } from '../utils';
 
 interface DownloadSnapshotOptions {
   version: string;
@@ -23,6 +24,7 @@ interface DownloadSnapshotOptions {
   installPath?: string;
   log?: ToolingLog;
   useCached?: boolean;
+  apmSettings?: ElasticsearchAPMSettings;
 }
 
 /**
@@ -66,6 +68,7 @@ export async function installSnapshot({
   log = defaultLog,
   esArgs,
   useCached = false,
+  apmSettings,
 }: InstallSnapshotOptions) {
   const { downloadPath } = await downloadSnapshot({
     license,
@@ -83,5 +86,6 @@ export async function installSnapshot({
     installPath,
     log,
     esArgs,
+    apmSettings,
   });
 }

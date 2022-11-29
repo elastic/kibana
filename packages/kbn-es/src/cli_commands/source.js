@@ -9,7 +9,8 @@
 const dedent = require('dedent');
 const getopts = require('getopts');
 const { Cluster } = require('../cluster');
-const { parseTimeoutToMs } = require('../utils');
+const { parseTimeoutToMs, getApmSettings } = require('../utils');
+import { log as defaultLog } from '../utils/log';
 
 exports.description = 'Build and run from source';
 
@@ -28,10 +29,12 @@ exports.help = (defaults = {}) => {
       --password.[user] Sets password for native realm user [default: ${password}]
       --ssl             Sets up SSL on Elasticsearch
       --plugins         Comma seperated list of Elasticsearch plugins to install
-      --secure-files     Comma seperated list of secure_setting_name=/path pairs
+      --secure-files    Comma seperated list of secure_setting_name=/path pairs files
       -E                Additional key=value settings to pass to Elasticsearch
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
+      --apm-secret-token Secret token for the APM Server
+      --apm-server-url  URL of APM server
 
     Example:
 
@@ -41,7 +44,7 @@ exports.help = (defaults = {}) => {
 
 exports.run = async (defaults = {}) => {
   const argv = process.argv.slice(2);
-  const options = getopts(argv, {
+  const { apmServerUrl, apmSecretToken, ...options } = getopts(argv, {
     alias: {
       basePath: 'base-path',
       installPath: 'install-path',
@@ -51,6 +54,8 @@ exports.run = async (defaults = {}) => {
       readyTimeout: 'ready-timeout',
       secureFiles: 'secure-files',
       esArgs: 'E',
+      apmServerUrl: 'apm-server-url',
+      apmSecretToken: 'apm-secret-token',
     },
 
     string: ['ready-timeout'],
@@ -60,7 +65,11 @@ exports.run = async (defaults = {}) => {
   });
 
   const cluster = new Cluster({ ssl: options.ssl });
-  const { installPath } = await cluster.installSource(options);
+
+  const { installPath } = await cluster.installSource({
+    ...options,
+    ...getApmSettings(defaultLog, apmServerUrl, apmSecretToken),
+  });
 
   if (options.dataArchive) {
     await cluster.extractDataDirectory(installPath, options.dataArchive);

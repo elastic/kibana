@@ -11,7 +11,7 @@ const getopts = require('getopts');
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 const { Cluster } = require('../cluster');
-const { parseTimeoutToMs } = require('../utils');
+const { parseTimeoutToMs, getApmSettings } = require('../utils');
 
 exports.description = 'Downloads and run from a nightly snapshot';
 
@@ -35,7 +35,8 @@ exports.help = (defaults = {}) => {
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
       --plugins         Comma seperated list of Elasticsearch plugins to install
-      --secure-files     Comma seperated list of secure_setting_name=/path pairs
+      --apm-secret-token Secret token for the APM Server
+      --apm-server-url  URL of APM server
 
     Example:
 
@@ -52,7 +53,7 @@ exports.run = async (defaults = {}) => {
   const reportTime = getTimeReporter(log, 'scripts/es snapshot');
 
   const argv = process.argv.slice(2);
-  const options = getopts(argv, {
+  const { apmServerUrl, apmSecretToken, ...options } = getopts(argv, {
     alias: {
       basePath: 'base-path',
       installPath: 'install-path',
@@ -62,6 +63,8 @@ exports.run = async (defaults = {}) => {
       skipReadyCheck: 'skip-ready-check',
       readyTimeout: 'ready-timeout',
       secureFiles: 'secure-files',
+      apmServerUrl: 'apm-server-url',
+      apmSecretToken: 'apm-secret-token',
     },
 
     string: ['version', 'ready-timeout'],
@@ -71,11 +74,16 @@ exports.run = async (defaults = {}) => {
   });
 
   const cluster = new Cluster({ ssl: options.ssl });
+
   if (options['download-only']) {
     await cluster.downloadSnapshot(options);
   } else {
     const installStartTime = Date.now();
-    const { installPath } = await cluster.installSnapshot(options);
+
+    const { installPath } = await cluster.installSnapshot({
+      ...options,
+      ...getApmSettings(log, apmServerUrl, apmSecretToken),
+    });
 
     if (options.dataArchive) {
       await cluster.extractDataDirectory(installPath, options.dataArchive);
@@ -83,6 +91,7 @@ exports.run = async (defaults = {}) => {
     if (options.plugins) {
       await cluster.installPlugins(installPath, options.plugins, options);
     }
+
     if (options.secureFiles) {
       const pairs = options.secureFiles.split(',').map((kv) => kv.split('=').map((v) => v.trim()));
       await cluster.configureKeystoreWithSecureSettingsFiles(installPath, pairs);

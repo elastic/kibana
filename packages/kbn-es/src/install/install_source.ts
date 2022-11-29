@@ -20,6 +20,7 @@ import { log as defaultLog } from '../utils/log';
 import { cache } from '../utils/cache';
 import { buildSnapshot, archiveForPlatform } from '../utils/build_snapshot';
 import { BASE_PATH } from '../paths';
+import { ElasticsearchAPMSettings } from '../utils';
 
 interface InstallSourceOptions {
   sourcePath: string;
@@ -29,6 +30,7 @@ interface InstallSourceOptions {
   installPath?: string;
   log?: ToolingLog;
   esArgs?: string[];
+  apmSettings?: ElasticsearchAPMSettings;
 }
 
 /**
@@ -42,6 +44,7 @@ export async function installSource({
   installPath = path.resolve(basePath, 'source'),
   log = defaultLog,
   esArgs,
+  apmSettings,
 }: InstallSourceOptions) {
   log.info('source path: %s', chalk.bold(sourcePath));
   log.info('install path: %s', chalk.bold(installPath));
@@ -68,6 +71,7 @@ export async function installSource({
     installPath,
     log,
     esArgs,
+    apmSettings,
   });
 }
 
