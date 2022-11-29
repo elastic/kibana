@@ -13,12 +13,28 @@
   "license": "Elastic License v2",
   "name": "Kubernetes User Exec into Pod",
   "note": "",
-  "query": "kubernetes.audit.objectRef.resource:\"pods\"\n  and kubernetes.audit.objectRef.subresource:\"exec\"\n",
+  "query": "event.dataset : \"kubernetes.audit_logs\" \n  and kubernetes.audit.annotations.authorization_k8s_io/decision:\"allow\" \n  and kubernetes.audit.verb:\"create\" \n  and kubernetes.audit.objectRef.resource:\"pods\"\n  and kubernetes.audit.objectRef.subresource:\"exec\"\n",
   "references": [
     "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/",
     "https://kubernetes.io/docs/tasks/debug/debug-application/get-shell-running-container/"
   ],
+  "related_integrations": [
+    {
+      "package": "kubernetes",
+      "version": "^1.4.1"
+    }
+  ],
   "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "kubernetes.audit.annotations.authorization_k8s_io/decision",
+      "type": "unknown"
+    },
     {
       "ecs": false,
       "name": "kubernetes.audit.objectRef.resource",
@@ -27,6 +43,11 @@
     {
       "ecs": false,
       "name": "kubernetes.audit.objectRef.subresource",
+      "type": "unknown"
+    },
+    {
+      "ecs": false,
+      "name": "kubernetes.audit.verb",
       "type": "unknown"
     }
   ],
@@ -59,5 +80,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 100
+  "version": 200
 }

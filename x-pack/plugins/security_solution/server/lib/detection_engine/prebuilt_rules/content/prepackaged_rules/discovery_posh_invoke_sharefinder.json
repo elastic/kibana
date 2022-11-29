@@ -39,7 +39,8 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Discovery"
+    "Discovery",
+    "Investigation Guide"
   ],
   "threat": [
     {
@@ -87,5 +88,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }
