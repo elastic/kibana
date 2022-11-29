@@ -661,7 +661,7 @@ describe('rules_list component with items', () => {
     jest.clearAllMocks();
   });
 
-  it('renders license errors and manage license modal on click', async () => {
+  it.skip('renders license errors and manage license modal on click', async () => {
     global.open = jest.fn();
     await setup();
     expect(wrapper.find('ManageLicenseModal').exists()).toBeFalsy();
@@ -683,7 +683,7 @@ describe('rules_list component with items', () => {
     expect(global.open).toHaveBeenCalled();
   });
 
-  it.skip('sorts rules when clicking the name column', async () => {
+  it('sorts rules when clicking the name column', async () => {
     await setup();
     wrapper
       .find('[data-test-subj="tableHeaderCell_name_1"] .euiTableHeaderButton')
