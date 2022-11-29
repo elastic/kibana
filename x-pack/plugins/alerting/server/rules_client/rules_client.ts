@@ -76,11 +76,11 @@ export class RulesClient {
     };
   }
 
-  public aggregate = (params: { options?: AggregateOptions }) => aggregate(this.context, params);
+  public aggregate = (params?: { options?: AggregateOptions }) => aggregate(this.context, params);
   public clone = (...args: CloneArguments) => clone(this.context, ...args);
   public create = (params: CreateOptions<RuleTypeParams>) => create(this.context, params);
   public delete = (params: { id: string }) => deleteRule(this.context, params);
-  public find = (params: FindParams) => find(this.context, params);
+  public find = (params?: FindParams) => find(this.context, params);
   public get = (params: GetParams) => get(this.context, params);
   public resolve = (params: ResolveParams) => resolve(this.context, params);
   public update = (params: UpdateOptions<RuleTypeParams>) => update(this.context, params);
