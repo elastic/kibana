@@ -73,7 +73,6 @@ export const DefaultLayout: React.FC<Props> = memo(
           </EuiFlexGroup>
         }
         tabs={tabs.map((tab) => {
-          console.log(notificationsBySection);
           const notificationCount = notificationsBySection?.[tab.section];
           return {
             name: tab.name,
