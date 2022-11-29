@@ -327,8 +327,8 @@ function RelatedErrors({
   );
 
   let kuery = `${TRACE_ID} : "${item.doc.trace.id}"`;
-  if (item.doc.transaction?.id) {
-    kuery += ` and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`;
+  if (item.id) {
+    kuery += ` and ${TRANSACTION_ID} : "${item.id}"`;
   }
 
   const href = apmRouter.link(`/services/{serviceName}/errors`, {
