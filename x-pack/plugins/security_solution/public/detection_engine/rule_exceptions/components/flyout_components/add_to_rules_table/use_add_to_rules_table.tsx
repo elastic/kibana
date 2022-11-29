@@ -11,7 +11,6 @@ import type {
   EuiBasicTableColumn,
   HorizontalAlignment,
 } from '@elastic/eui';
-import { EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import * as myI18n from './translations';
 
