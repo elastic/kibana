@@ -22,6 +22,7 @@ import { isSparseDataJob } from './util/general';
 
 export class GeoJobCreator extends JobCreator {
   private _geoField: Field | null = null;
+  private _geoAgg: Aggregation | null = null;
   // a multi-metric job has one optional overall partition field
   // which is the same for all detectors.
   private _splitField: SplitField = null;
@@ -34,12 +35,37 @@ export class GeoJobCreator extends JobCreator {
     this._wizardInitialized$.next(true);
   }
 
-  public setRareField(field: Field | null) {
+  public setDefaultDetectorProperties(geo: Aggregation | null) {
+    if (geo === null) {
+      throw Error('lat_long aggregations missing');
+    }
+    this._geoAgg = geo;
+  }
+
+  public set geoField(field: Field | null) {
     this._geoField = field;
   }
 
-  public get rareField() {
+  public get geoField() {
     return this._geoField;
+  }
+
+  public setGeoField(field: Field | null) {
+    this._geoField = field;
+
+    if (field === null) {
+      this.removeSplitField();
+      this._removeDetector(0);
+      this._detectors.length = 0;
+      this._fields.length = 0;
+      return;
+    }
+    const agg = this._geoAgg!;
+    if (this._detectors.length === 0) {
+      this.addDetector(agg, field);
+    } else {
+      this._editDetector(this._detectors[0], agg, field, 0);
+    }
   }
 
 
@@ -71,11 +97,6 @@ export class GeoJobCreator extends JobCreator {
     this._addDetector(dtr, agg, field);
   }
 
-  public editDetector(agg: Aggregation, field: Field, index: number) {
-    const dtr: Detector = this._createDetector(agg, field);
-    this._editDetector(dtr, agg, field, index);
-  }
-
   // create a new detector object, applying the overall split field
   private _createDetector(agg: Aggregation, field: Field) {
     const dtr: Detector = createBasicDetector(agg, field);
@@ -103,22 +124,12 @@ export class GeoJobCreator extends JobCreator {
     this._sparseData = isSparseDataJob(job, datafeed);
     const detectors = getRichDetectors(job, datafeed, this.additionalFields, false);
 
-    if (datafeed.aggregations !== undefined) {
-      // if we've converting from a single metric job,
-      // delete the aggregations.
-      delete datafeed.aggregations;
-      delete job.analysis_config.summary_count_field_name;
-    }
-
+    this.removeSplitField();
+    this.removeAllDetectors()
     this.removeAllDetectors();
 
-    detectors.forEach((d, i) => {
-      const dtr = detectors[i];
-      if (dtr.agg !== null && dtr.field !== null) {
-        this.addDetector(dtr.agg, dtr.field);
-      }
-    });
     if (detectors.length) {
+      this.setGeoField(detectors[0].field);
       if (detectors[0].partitionField !== null) {
         this.setSplitField(detectors[0].partitionField);
       }

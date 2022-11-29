@@ -55,6 +55,6 @@ export function isRareJobCreator(jobCreator: JobCreatorType): jobCreator is Rare
   return jobCreator.type === JOB_TYPE.RARE;
 }
 
-export function isGeoJobCreator(jobCreator: JobCreatorType): jobCreator is RareJobCreator {
+export function isGeoJobCreator(jobCreator: JobCreatorType): jobCreator is GeoJobCreator {
   return jobCreator.type === JOB_TYPE.GEO;
 }

@@ -21,6 +21,7 @@ import {
   isAdvancedJobCreator,
   isCategorizationJobCreator,
   isRareJobCreator,
+  isGeoJobCreator,
 } from '../../common/job_creator';
 import {
   JOB_TYPE,
@@ -184,6 +185,9 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       const rare = newJobCapsService.getAggById('rare');
       const freqRare = newJobCapsService.getAggById('freq_rare');
       jobCreator.setDefaultDetectorProperties(rare, freqRare);
+    } else if (isGeoJobCreator(jobCreator)) {
+      const geo = newJobCapsService.getAggById('lat_long');
+      jobCreator.setDefaultDetectorProperties(geo);
     }
   }
 
