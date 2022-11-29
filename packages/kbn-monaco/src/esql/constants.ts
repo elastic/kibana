@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export const ID = 'es_ql';
+export const ID = 'esql';
+export const ESQL_THEME_ID = 'esql_theme';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ANTLRErrorListener, RecognitionException, Recognizer } from 'antlr4ts';
+import { ANTLRErrorListener, Recognizer } from 'antlr4ts';
 
 export interface SyntaxError {
   startLineNumber: number;
@@ -21,16 +21,15 @@ export class ESQLErrorListener implements ANTLRErrorListener<any> {
 
   syntaxError(
     recognizer: Recognizer<any, any>,
-    offendingSymbol: any,
+    offendingSymbol: any | undefined,
     line: number,
     column: number,
-    message: string,
-    e: RecognitionException | undefined
+    message: string
   ): void {
     let endColumn = column + 1;
 
-    if (offendingSymbol?._text) {
-      endColumn = column + offendingSymbol._text.length;
+    if (offendingSymbol?.text) {
+      endColumn = column + offendingSymbol.text.length;
     }
 
     this.errors.push({

@@ -6,48 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { LangModuleType } from '../types';
-import { ID } from './constants';
+import { buildESQlTheme } from './lib/monaco/esql_theme';
+import { ID, ESQL_THEME_ID } from './constants';
 
-const getRuleGroup = (tokens: string[], color: string) =>
-  tokens.map((i) => ({
-    token: i + '.esql',
-    foreground: color,
-  }));
+import type { LangModuleType } from '../types';
 
 export const ESQLLang: LangModuleType = {
   ID,
   tokensProvider: async () => {
-    const { ESQLTokensProvider } = await import('./lib/monaco/esql_tokens_provider');
+    const { ESQLTokensProvider } = await import('./lib/monaco');
 
     return new ESQLTokensProvider();
   },
   customTheme: {
-    ID: 'testTheme',
-    themeData: {
-      base: 'vs',
-      inherit: false,
-      rules: [
-        ...getRuleGroup(
-          [
-            'unquoted_identifier',
-            'eval',
-            'explain',
-            'from',
-            'row',
-            'stats',
-            'where',
-            'sort',
-            'limit',
-            'project',
-          ],
-          '#1d67bd'
-        ),
-        ...getRuleGroup(['eq', 'minus', 'by', 'lp'], '#bd781d'),
-      ],
-      colors: {
-        'by.esql': '#ff0000',
-      },
-    },
+    ID: ESQL_THEME_ID,
+    themeData: buildESQlTheme(),
   },
 };
+
+export { ESQL_THEME_ID };
