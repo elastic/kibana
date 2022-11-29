@@ -13,11 +13,11 @@ function registerLanguage(language: LangModuleType) {
 
   monaco.languages.register({ id: ID });
 
-  if (customTheme) {
-    monaco.editor.defineTheme(customTheme.ID, customTheme.themeData);
-  }
-
   monaco.languages.onLanguage(ID, () => {
+    if (customTheme) {
+      monaco.editor.defineTheme(customTheme.ID, customTheme.themeData);
+    }
+
     if (lexerRules) {
       monaco.languages.setMonarchTokensProvider(ID, lexerRules);
     }
