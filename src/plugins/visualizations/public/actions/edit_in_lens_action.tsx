@@ -46,6 +46,10 @@ const ReactMenuItem: React.FC = () => {
 
 const UiMenuItem = reactToUiComponent(ReactMenuItem);
 
+const isVisualizeEmbeddable = (embeddable: IEmbeddable): embeddable is VisualizeEmbeddable => {
+  return 'getVis' in embeddable;
+};
+
 export class EditInLensAction implements Action<EditInLensContext> {
   public id = ACTION_EDIT_IN_LENS;
   public readonly type = ACTION_EDIT_IN_LENS;
@@ -63,21 +67,30 @@ export class EditInLensAction implements Action<EditInLensContext> {
         .subscribe((appId: string | undefined) => (this.currentAppId = appId));
     }
     const { embeddable } = context;
-    const vis = (embeddable as VisualizeEmbeddable).getVis();
-    const navigateToLensConfig = await vis.type.navigateToLens?.(vis, this.timefilter);
-    const searchFilters = vis.data.searchSource?.getField('filter');
-    const searchQuery = vis.data.searchSource?.getField('query');
-    const updatedWithMeta = {
-      ...navigateToLensConfig,
-      title: embeddable.getOutput().title,
-      savedObjectId: vis.id,
-      embeddableId: embeddable.id,
-      originatingApp: this.currentAppId,
-      searchFilters,
-      searchQuery,
-    };
-    if (navigateToLensConfig) {
-      getUiActions().getTrigger(DASHBOARD_VISUALIZATION_PANEL_TRIGGER).exec(updatedWithMeta);
+    if (isVisualizeEmbeddable(embeddable)) {
+      const vis = embeddable.getVis();
+      const navigateToLensConfig = await vis.type.navigateToLens?.(vis, this.timefilter);
+      const searchFilters = vis.data.searchSource?.getField('filter');
+      const searchQuery = vis.data.searchSource?.getField('query');
+      const updatedWithMeta = {
+        ...navigateToLensConfig,
+        title:
+          embeddable.getOutput().title ||
+          i18n.translate('visualizations.actions.editInLens.visulizationTitle', {
+            defaultMessage: '{type} visualization',
+            values: {
+              type: vis.type.title,
+            },
+          }),
+        savedObjectId: vis.id,
+        embeddableId: embeddable.id,
+        originatingApp: this.currentAppId,
+        searchFilters,
+        searchQuery,
+      };
+      if (navigateToLensConfig) {
+        getUiActions().getTrigger(DASHBOARD_VISUALIZATION_PANEL_TRIGGER).exec(updatedWithMeta);
+      }
     }
   }
 
@@ -93,12 +106,15 @@ export class EditInLensAction implements Action<EditInLensContext> {
 
   async isCompatible(context: ActionExecutionContext<EditInLensContext>) {
     const { embeddable } = context;
-    const vis = (embeddable as VisualizeEmbeddable).getVis?.();
+    if (!isVisualizeEmbeddable(embeddable)) {
+      return false;
+    }
+    const vis = embeddable.getVis();
     if (!vis) {
       return false;
     }
     const canNavigateToLens =
-      (embeddable as VisualizeEmbeddable).getExpressionVariables?.()?.canNavigateToLens ??
+      embeddable.getExpressionVariables?.()?.canNavigateToLens ??
       (await vis.type.navigateToLens?.(vis, this.timefilter));
     return Boolean(canNavigateToLens && embeddable.getInput().viewMode === ViewMode.EDIT);
   }
