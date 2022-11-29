@@ -235,9 +235,7 @@ export class MapContainer extends Component<Props, State> {
           )}
           <RightSideControls />
           {this.props.isTimesliderOpen && (
-            <Timeslider
-              waitForTimesliceToLoad$={this.props.waitUntilTimeLayersLoad$}
-            />
+            <Timeslider waitForTimesliceToLoad$={this.props.waitUntilTimeLayersLoad$} />
           )}
         </EuiFlexItem>
         <EuiFlexItem
