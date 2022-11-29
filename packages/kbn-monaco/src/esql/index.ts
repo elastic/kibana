@@ -11,16 +11,25 @@ import { ID, ESQL_THEME_ID } from './constants';
 
 import type { LangModuleType } from '../types';
 
+import { monaco } from '../monaco_imports';
+
+const getTokenProviderAsync = async () => {
+  const { ESQLTokensProvider } = await import('./lib/monaco');
+
+  return new ESQLTokensProvider();
+};
+
 export const ESQLLang: LangModuleType = {
   ID,
-  tokensProvider: async () => {
-    const { ESQLTokensProvider } = await import('./lib/monaco');
-
-    return new ESQLTokensProvider();
+  getSyntaxErrors: () => {
+    // @todo: to debug
   },
-  customTheme: {
-    ID: ESQL_THEME_ID,
-    themeData: buildESQlTheme(),
+  onLanguage() {
+    monaco.editor.defineTheme(ESQL_THEME_ID, buildESQlTheme());
+
+    monaco.languages.setTokensProvider(ID, getTokenProviderAsync());
+
+    monaco.editor.createWebWorker({ label: ID, moduleId: '' });
   },
 };
 

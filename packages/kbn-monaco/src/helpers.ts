@@ -9,26 +9,20 @@ import { monaco } from './monaco_imports';
 import { LangModuleType } from './types';
 
 function registerLanguage(language: LangModuleType) {
-  const { ID, lexerRules, tokensProvider, languageConfiguration, customTheme } = language;
+  const { ID, lexerRules, languageConfiguration, onLanguage } = language;
 
   monaco.languages.register({ id: ID });
 
   monaco.languages.onLanguage(ID, () => {
-    if (customTheme) {
-      monaco.editor.defineTheme(customTheme.ID, customTheme.themeData);
-    }
-
     if (lexerRules) {
       monaco.languages.setMonarchTokensProvider(ID, lexerRules);
-    }
-
-    if (tokensProvider) {
-      monaco.languages.setTokensProvider(ID, tokensProvider());
     }
 
     if (languageConfiguration) {
       monaco.languages.setLanguageConfiguration(ID, languageConfiguration);
     }
+
+    onLanguage?.();
   });
 }
 

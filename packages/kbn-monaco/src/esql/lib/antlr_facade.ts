@@ -8,14 +8,14 @@
 
 import { CommonTokenStream, CodePointCharStream } from 'antlr4ts';
 
-import { ESQLErrorListener } from './esql_error_listener';
+import { ANTLREErrorListener } from '../../commmon';
 
 import { esql_lexer as ESQLLexer } from '../antlr/esql_lexer';
 import { esql_parser as ESQLParser } from '../antlr/esql_parser';
 
 export const getParser = (
   inputStream: CodePointCharStream,
-  errorListener = new ESQLErrorListener()
+  errorListener = new ANTLREErrorListener()
 ) => {
   const { lexer } = getLexer(inputStream, errorListener);
   const tokenStream = new CommonTokenStream(lexer);
@@ -29,7 +29,7 @@ export const getParser = (
 
 export const getLexer = (
   inputStream: CodePointCharStream,
-  errorListener = new ESQLErrorListener()
+  errorListener = new ANTLREErrorListener()
 ) => {
   const lexer = new ESQLLexer(inputStream);
 

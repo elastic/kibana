@@ -8,6 +8,7 @@
 
 import { monaco } from '../../../monaco_imports';
 
+// @todo: not fully implemented. just for testing
 export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => {
   const getRuleGroup = (tokens: string[], color: string) =>
     tokens.map((i) => ({

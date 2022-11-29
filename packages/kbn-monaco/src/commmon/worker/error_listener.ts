@@ -7,17 +7,10 @@
  */
 
 import { ANTLRErrorListener, RecognitionException, Recognizer } from 'antlr4ts';
+import type { EditorError } from '../../types';
 
-export interface PainlessError {
-  startLineNumber: number;
-  startColumn: number;
-  endLineNumber: number;
-  endColumn: number;
-  message: string;
-}
-
-export class PainlessErrorListener implements ANTLRErrorListener<any> {
-  private errors: PainlessError[] = [];
+export class ANTLREErrorListener implements ANTLRErrorListener<any> {
+  private errors: EditorError[] = [];
 
   syntaxError(
     recognizer: Recognizer<any, any>,
@@ -42,7 +35,7 @@ export class PainlessErrorListener implements ANTLRErrorListener<any> {
     });
   }
 
-  getErrors(): PainlessError[] {
+  getErrors(): EditorError[] {
     return this.errors;
   }
 }

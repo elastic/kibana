@@ -13,14 +13,10 @@ import { monaco } from './monaco_imports';
 export interface LangModuleType {
   ID: string;
   lexerRules?: monaco.languages.IMonarchLanguage;
-  tokensProvider?: () => monaco.languages.TokensProvider | Promise<monaco.languages.TokensProvider>;
-  customTheme?: {
-    ID: string;
-    themeData: monaco.editor.IStandaloneThemeData;
-  };
   languageConfiguration?: monaco.languages.LanguageConfiguration;
   getSuggestionProvider?: Function;
   getSyntaxErrors?: Function;
+  onLanguage?: () => void;
 }
 
 export interface CompleteLangModuleType extends LangModuleType {
@@ -46,4 +42,8 @@ export interface LangValidation {
 
 export interface SyntaxErrors {
   [modelId: string]: EditorError[];
+}
+
+export interface BaseWorkerDefinition {
+  getSyntaxErrors: (modelUri: string) => Promise<EditorError[] | undefined>;
 }

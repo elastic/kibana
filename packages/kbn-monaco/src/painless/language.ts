@@ -8,15 +8,15 @@
 import { Observable, of } from 'rxjs';
 import { monaco } from '../monaco_imports';
 
-import { WorkerProxyService, EditorStateService } from './lib';
+import { EditorStateService } from './lib';
 import { LangValidation, SyntaxErrors } from '../types';
 import { ID } from './constants';
 import { PainlessContext, PainlessAutocompleteField } from './types';
 import { PainlessWorker } from './worker';
 import { PainlessCompletionAdapter } from './completion_adapter';
-import { DiagnosticsAdapter } from './diagnostics_adapter';
+import { DiagnosticsAdapter, WorkerProxyService } from '../commmon';
 
-const workerProxyService = new WorkerProxyService();
+const workerProxyService = new WorkerProxyService<PainlessWorker>();
 const editorStateService = new EditorStateService();
 
 export type WorkerAccessor = (...uris: monaco.Uri[]) => Promise<PainlessWorker>;
@@ -46,7 +46,7 @@ export const validation$: () => Observable<LangValidation> = () =>
   of<LangValidation>({ isValid: true, isValidating: false, errors: [] });
 
 monaco.languages.onLanguage(ID, async () => {
-  workerProxyService.setup();
+  workerProxyService.setup(ID);
 
-  diagnosticsAdapter = new DiagnosticsAdapter(worker);
+  diagnosticsAdapter = new DiagnosticsAdapter(ID, worker);
 });

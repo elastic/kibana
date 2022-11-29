@@ -6,17 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { BaseWorkerDefinition } from '@kbn/monaco';
 import { monaco } from '../../monaco_imports';
-import type {
-  PainlessCompletionResult,
-  PainlessContext,
-  PainlessAutocompleteField,
-} from '../types';
+import { BaseWorkerDefinition } from '../../types';
 
-import { getAutocompleteSuggestions, parseAndGetSyntaxErrors } from './lib';
-
-export class PainlessWorker implements BaseWorkerDefinition {
+export class ESQLWorker implements BaseWorkerDefinition {
   private _ctx: monaco.worker.IWorkerContext;
 
   constructor(ctx: monaco.worker.IWorkerContext) {
@@ -33,24 +26,8 @@ export class PainlessWorker implements BaseWorkerDefinition {
     const code = this.getTextDocument(modelUri);
 
     if (code) {
-      return parseAndGetSyntaxErrors(code);
+      // @todo
+      return undefined;
     }
-  }
-
-  public provideAutocompleteSuggestions(
-    currentLineChars: string,
-    context: PainlessContext,
-    fields?: PainlessAutocompleteField[]
-  ): PainlessCompletionResult {
-    // Array of the active line words, e.g., [boolean, isTrue, =, true]
-    const words = currentLineChars.replace('\t', '').split(' ');
-
-    const autocompleteSuggestions: PainlessCompletionResult = getAutocompleteSuggestions(
-      context,
-      words,
-      fields
-    );
-
-    return autocompleteSuggestions;
   }
 }
