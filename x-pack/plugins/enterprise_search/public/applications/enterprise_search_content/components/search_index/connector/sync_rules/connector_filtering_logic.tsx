@@ -9,8 +9,6 @@ import { kea, MakeLogicType } from 'kea';
 
 import { isEqual } from 'lodash';
 
-import { v4 as uuidv4 } from 'uuid';
-
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../../common/types/api';
@@ -260,7 +258,7 @@ export const ConnectorFilteringLogic = kea<
                 {
                   created_at: new Date().toISOString(),
                   field: '_',
-                  id: uuidv4(),
+                  id: 'DEFAULT',
                   order: 0,
                   policy: FilteringPolicy.INCLUDE,
                   rule: FilteringRuleRule.REGEX,
@@ -278,7 +276,7 @@ export const ConnectorFilteringLogic = kea<
             : {
                 created_at: new Date().toISOString(),
                 field: '_',
-                id: uuidv4(),
+                id: 'DEFAULT',
                 order: 0,
                 policy: FilteringPolicy.INCLUDE,
                 rule: FilteringRuleRule.REGEX,
