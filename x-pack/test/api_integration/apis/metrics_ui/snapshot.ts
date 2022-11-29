@@ -47,6 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
           metrics: [{ type: 'cpu' }],
           nodeType: 'container',
           groupBy: [],
+          includeTimeseries: true,
         });
         return resp.then((data) => {
           if (!resp) {
@@ -71,6 +72,37 @@ export default function ({ getService }: FtrProviderContext) {
                 value: 0,
                 max: 0,
                 avg: 0,
+                timeseries: {
+                  columns: [
+                    {
+                      name: 'timestamp',
+                      type: 'date',
+                    },
+                    {
+                      name: 'metric_0',
+                      type: 'number',
+                    },
+                  ],
+                  id: 'cpu',
+                  rows: [
+                    {
+                      metric_0: 0,
+                      timestamp: 1547578849952,
+                    },
+                    {
+                      metric_0: 0,
+                      timestamp: 1547578909952,
+                    },
+                    {
+                      metric_0: 0,
+                      timestamp: 1547578969952,
+                    },
+                    {
+                      metric_0: 0,
+                      timestamp: 1547579029952,
+                    },
+                  ],
+                },
               },
             ]);
           }
@@ -98,6 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
           metrics: [{ type: 'cpu' }],
           nodeType: 'pod',
           groupBy: [],
+          includeTimeseries: false,
         });
         return resp.then((data) => {
           const snapshot = data;
@@ -130,6 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
           metrics: [{ type: 'cpu' }],
           nodeType: 'container',
           groupBy: [],
+          includeTimeseries: false,
         });
         return resp.then((data) => {
           const snapshot = data;
@@ -151,6 +185,48 @@ export default function ({ getService }: FtrProviderContext) {
           }
         });
       });
+
+      it('should not return timeseries data', async () => {
+        const resp = fetchSnapshot({
+          sourceId: 'default',
+          timerange: {
+            to: max,
+            from: min,
+            interval: '1m',
+          },
+          metrics: [{ type: 'cpu' }],
+          nodeType: 'host',
+          groupBy: [{ field: 'host.name' }],
+          includeTimeseries: false,
+        });
+
+        const expected = {
+          name: 'cpu',
+          value: 0.44708333333333333,
+        };
+
+        return resp.then((data) => {
+          const snapshot = data;
+          expect(snapshot).to.have.property('nodes');
+          if (snapshot) {
+            const { nodes } = snapshot;
+            expect(nodes.length).to.equal(3);
+            const firstNode = nodes[0] as any;
+            expect(firstNode).to.have.property('path');
+            expect(firstNode.path.length).to.equal(2);
+            expect(firstNode.path[0]).to.have.property(
+              'value',
+              'gke-observability-8--observability-8--bc1afd95-f0zc'
+            );
+            expect(firstNode.path[1]).to.have.property(
+              'value',
+              'gke-observability-8--observability-8--bc1afd95-f0zc'
+            );
+            expect(firstNode).to.have.property('metrics');
+            expect(firstNode.metrics).to.eql([expected]);
+          }
+        });
+      });
     });
 
     describe('7.0.0', () => {
@@ -169,6 +245,7 @@ export default function ({ getService }: FtrProviderContext) {
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
           groupBy: [],
+          includeTimeseries: true,
         });
         return resp.then((data) => {
           const snapshot = data;
@@ -188,6 +265,37 @@ export default function ({ getService }: FtrProviderContext) {
                 value: 0.0032,
                 max: 0.0038333333333333336,
                 avg: 0.003341666666666667,
+                timeseries: {
+                  columns: [
+                    {
+                      name: 'timestamp',
+                      type: 'date',
+                    },
+                    {
+                      name: 'metric_0',
+                      type: 'number',
+                    },
+                  ],
+                  id: 'cpu',
+                  rows: [
+                    {
+                      metric_0: 0.003166666666666667,
+                      timestamp: 1547571590967,
+                    },
+                    {
+                      metric_0: 0.003166666666666667,
+                      timestamp: 1547571650967,
+                    },
+                    {
+                      metric_0: 0.0038333333333333336,
+                      timestamp: 1547571710967,
+                    },
+                    {
+                      metric_0: 0.0032,
+                      timestamp: 1547571770967,
+                    },
+                  ],
+                },
               },
             ]);
           }
@@ -280,6 +388,7 @@ export default function ({ getService }: FtrProviderContext) {
           ] as SnapshotMetricInput[],
           nodeType: 'host',
           groupBy: [],
+          includeTimeseries: true,
         });
 
         const snapshot = data;
@@ -299,6 +408,37 @@ export default function ({ getService }: FtrProviderContext) {
               value: 0.0016,
               max: 0.0018333333333333333,
               avg: 0.00165,
+              timeseries: {
+                columns: [
+                  {
+                    name: 'timestamp',
+                    type: 'date',
+                  },
+                  {
+                    name: 'metric_0',
+                    type: 'number',
+                  },
+                ],
+                id: 'custom_0',
+                rows: [
+                  {
+                    metric_0: 0.0016666666666666668,
+                    timestamp: 1547571590967,
+                  },
+                  {
+                    metric_0: 0.0015000000000000002,
+                    timestamp: 1547571650967,
+                  },
+                  {
+                    metric_0: 0.0018333333333333333,
+                    timestamp: 1547571710967,
+                  },
+                  {
+                    metric_0: 0.0016,
+                    timestamp: 1547571770967,
+                  },
+                ],
+              },
             },
           ]);
         }
@@ -315,6 +455,7 @@ export default function ({ getService }: FtrProviderContext) {
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
           groupBy: [{ field: 'cloud.availability_zone' }],
+          includeTimeseries: false,
         });
         return resp.then((data) => {
           const snapshot = data;
@@ -342,6 +483,7 @@ export default function ({ getService }: FtrProviderContext) {
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
           groupBy: [{ field: 'cloud.provider' }, { field: 'cloud.availability_zone' }],
+          includeTimeseries: false,
         });
 
         return resp.then((data) => {
@@ -371,7 +513,47 @@ export default function ({ getService }: FtrProviderContext) {
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
           groupBy: [{ field: 'service.type' }],
+          includeTimeseries: true,
         });
+
+        const expected = {
+          name: 'cpu',
+          value: 0.0032,
+          max: 0.0038333333333333336,
+          avg: 0.003341666666666667,
+          timeseries: {
+            columns: [
+              {
+                name: 'timestamp',
+                type: 'date',
+              },
+              {
+                name: 'metric_0',
+                type: 'number',
+              },
+            ],
+            id: 'cpu',
+            rows: [
+              {
+                metric_0: 0.003166666666666667,
+                timestamp: 1547571590967,
+              },
+              {
+                metric_0: 0.003166666666666667,
+                timestamp: 1547571650967,
+              },
+              {
+                metric_0: 0.0038333333333333336,
+                timestamp: 1547571710967,
+              },
+              {
+                metric_0: 0.0032,
+                timestamp: 1547571770967,
+              },
+            ],
+          },
+        };
+
         return resp.then((data) => {
           const snapshot = data;
           expect(snapshot).to.have.property('nodes');
@@ -384,28 +566,14 @@ export default function ({ getService }: FtrProviderContext) {
             expect(firstNode.path[0]).to.have.property('value', 'mysql');
             expect(firstNode.path[1]).to.have.property('value', 'demo-stack-mysql-01');
             expect(firstNode).to.have.property('metrics');
-            expect(firstNode.metrics).to.eql([
-              {
-                name: 'cpu',
-                value: 0.0032,
-                max: 0.0038333333333333336,
-                avg: 0.003341666666666667,
-              },
-            ]);
+            expect(firstNode.metrics).to.eql([expected]);
             const secondNode = nodes[1] as any;
             expect(secondNode).to.have.property('path');
             expect(secondNode.path.length).to.equal(2);
             expect(secondNode.path[0]).to.have.property('value', 'system');
             expect(secondNode.path[1]).to.have.property('value', 'demo-stack-mysql-01');
             expect(secondNode).to.have.property('metrics');
-            expect(secondNode.metrics).to.eql([
-              {
-                name: 'cpu',
-                value: 0.0032,
-                max: 0.0038333333333333336,
-                avg: 0.003341666666666667,
-              },
-            ]);
+            expect(secondNode.metrics).to.eql([expected]);
           }
         });
       });
