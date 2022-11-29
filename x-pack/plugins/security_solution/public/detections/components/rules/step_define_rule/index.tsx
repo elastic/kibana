@@ -168,6 +168,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'newTermsFields',
       'historyWindowSize',
       'shouldLoadQueryDynamically',
+      'groupByFields',
     ],
     onChange: (data: DefineStepRule) => {
       if (onRuleDataChange) {
