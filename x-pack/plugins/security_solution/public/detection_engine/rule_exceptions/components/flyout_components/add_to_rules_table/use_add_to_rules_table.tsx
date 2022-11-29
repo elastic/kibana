@@ -11,7 +11,6 @@ import type {
   EuiBasicTableColumn,
   HorizontalAlignment,
 } from '@elastic/eui';
-import { EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import * as myI18n from './translations';
 
@@ -22,7 +21,7 @@ import { LinkRuleSwitch } from './link_rule_switch';
 
 export interface ExceptionsAddToRulesComponentProps {
   initiallySelectedRules?: Rule[];
-  onRuleSelectionChange?: (rulesSelectedToAdd: Rule[]) => void;
+  onRuleSelectionChange: (rulesSelectedToAdd: Rule[]) => void;
 }
 export const useAddToRulesTable = ({
   initiallySelectedRules,
@@ -49,7 +48,7 @@ export const useAddToRulesTable = ({
 
   const [linkedRules, setLinkedRules] = useState<Rule[]>(initiallySelectedRules || []);
   useEffect(() => {
-    if (typeof onRuleSelectionChange === 'function') onRuleSelectionChange(linkedRules);
+    onRuleSelectionChange(linkedRules);
   }, [linkedRules, onRuleSelectionChange]);
 
   const sortedRulesByLinkedRulesOnTop = useMemo(

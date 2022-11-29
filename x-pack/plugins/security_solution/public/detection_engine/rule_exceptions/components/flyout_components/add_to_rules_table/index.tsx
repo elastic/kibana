@@ -13,7 +13,7 @@ import { useAddToRulesTable } from './use_add_to_rules_table';
 
 interface ExceptionsAddToRulesComponentProps {
   initiallySelectedRules?: Rule[];
-  onRuleSelectionChange?: (rulesSelectedToAdd: Rule[]) => void;
+  onRuleSelectionChange: (rulesSelectedToAdd: Rule[]) => void;
 }
 
 const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponentProps> = ({

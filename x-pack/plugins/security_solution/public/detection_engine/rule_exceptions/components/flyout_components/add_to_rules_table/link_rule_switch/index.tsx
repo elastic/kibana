@@ -16,7 +16,7 @@ export const LinkRuleSwitch = memo(
   }: {
     rule: Rule;
     linkedRules: Rule[];
-    onRuleLinkChange?: (rulesSelectedToAdd: Rule[]) => void;
+    onRuleLinkChange: (rulesSelectedToAdd: Rule[]) => void;
   }) => {
     const isRuleLinked = useMemo(
       () => Boolean(linkedRules.find((r) => r.id === rule.id)),
