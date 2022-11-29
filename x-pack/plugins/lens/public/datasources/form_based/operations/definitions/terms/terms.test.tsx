@@ -352,6 +352,29 @@ describe('terms', () => {
       );
     });
 
+    it('should default to alphabetical sort when the referenced column does not exist anymore', () => {
+      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
+      const esAggsFn = termsOperation.toEsAggsFn(
+        {
+          ...termsColumn,
+          params: { ...termsColumn.params, orderBy: { type: 'column', columnId: 'unknownCol' } },
+        },
+        'col1',
+        {} as IndexPattern,
+        layer,
+        uiSettingsMock,
+        ['col1', 'col2']
+      );
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          function: 'aggTerms',
+          arguments: expect.objectContaining({
+            orderBy: ['_key'],
+          }),
+        })
+      );
+    });
+
     it('should not enable missing bucket if other bucket is not set', () => {
       const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
       const esAggsFn = termsOperation.toEsAggsFn(

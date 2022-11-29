@@ -589,6 +589,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               debugState={window._echDebugStateFlag ?? false}
               tooltip={tooltip}
               theme={[themeOverrides, chartTheme]}
+              baseTheme={chartsThemeService.useChartsBaseTheme()}
               xDomain={{
                 min:
                   dateHistogramMeta && dateHistogramMeta.timeRange

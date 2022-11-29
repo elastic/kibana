@@ -1,0 +1,124 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FilteringPanel renders 1`] = `
+<Fragment>
+  <FlyoutPanel
+    title="Sync rules"
+  >
+    <FilteringRulesTable
+      filteringRules={Array []}
+      showOrder={false}
+    />
+  </FlyoutPanel>
+</Fragment>
+`;
+
+exports[`FilteringPanel renders advanced snippet 1`] = `
+<Fragment>
+  <FlyoutPanel
+    title="Sync rules"
+  >
+    <FilteringRulesTable
+      filteringRules={
+        Array [
+          Object {
+            "order": 1,
+            "policy": "exclude",
+            "rule": "contains",
+            "value": "THIS VALUE",
+          },
+          Object {
+            "order": 2,
+            "policy": "exclude",
+            "rule": "ends_with",
+            "value": "THIS VALUE",
+          },
+          Object {
+            "order": 0,
+            "policy": "include",
+            "rule": "equals",
+            "value": "THIS VALUE",
+          },
+          Object {
+            "order": 5,
+            "policy": "include",
+            "rule": ">",
+            "value": "THIS VALUE",
+          },
+          Object {
+            "order": 4,
+            "policy": "exclude",
+            "rule": "<",
+            "value": "THIS VALUE",
+          },
+        ]
+      }
+      showOrder={false}
+    />
+  </FlyoutPanel>
+  <EuiSpacer />
+  <FlyoutPanel
+    title="Advanced sync rules"
+  >
+    <EuiPanel
+      hasShadow={false}
+    >
+      <EuiCodeBlock
+        language="json"
+        transparentBackground={true}
+      >
+        {
+  "one": "two",
+  "three": "four"
+}
+      </EuiCodeBlock>
+    </EuiPanel>
+  </FlyoutPanel>
+</Fragment>
+`;
+
+exports[`FilteringPanel renders filtering rules list 1`] = `
+<Fragment>
+  <FlyoutPanel
+    title="Sync rules"
+  >
+    <FilteringRulesTable
+      filteringRules={
+        Array [
+          Object {
+            "order": 1,
+            "policy": "exclude",
+            "rule": "contains",
+            "value": "THIS VALUE",
+          },
+          Object {
+            "order": 2,
+            "policy": "exclude",
+            "rule": "ends_with",
+            "value": "THIS VALUE",
+          },
+          Object {
+            "order": 0,
+            "policy": "include",
+            "rule": "equals",
+            "value": "THIS VALUE",
+          },
+          Object {
+            "order": 5,
+            "policy": "include",
+            "rule": ">",
+            "value": "THIS VALUE",
+          },
+          Object {
+            "order": 4,
+            "policy": "exclude",
+            "rule": "<",
+            "value": "THIS VALUE",
+          },
+        ]
+      }
+      showOrder={false}
+    />
+  </FlyoutPanel>
+</Fragment>
+`;

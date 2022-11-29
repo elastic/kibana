@@ -172,7 +172,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no series 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <span
-        className="euiToolTipAnchor"
+        className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >

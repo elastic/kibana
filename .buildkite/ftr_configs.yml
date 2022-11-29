@@ -33,6 +33,8 @@ disabled:
   - x-pack/test/security_solution_cypress/upgrade_config.ts
   - x-pack/test/security_solution_cypress/visual_config.ts
   - x-pack/test/threat_intelligence_cypress/visual_config.ts
+  - x-pack/test/threat_intelligence_cypress/cli_config_parallel.ts
+  - x-pack/test/threat_intelligence_cypress/config.ts
   - x-pack/test/functional_enterprise_search/with_host_configured.config.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config_open.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config_run.ts
@@ -131,6 +133,7 @@ enabled:
   - x-pack/test/cases_api_integration/security_and_spaces/config_trial.ts
   - x-pack/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
   - x-pack/test/cases_api_integration/spaces_only/config.ts
+  - x-pack/test/cloud_security_posture_functional/config.ts
   - x-pack/test/detection_engine_api_integration/basic/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group1/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group2/config.ts
@@ -260,6 +263,7 @@ enabled:
   - x-pack/test/security_functional/saml.config.ts
   - x-pack/test/security_functional/insecure_cluster_warning.config.ts
   - x-pack/test/security_functional/user_profiles.config.ts
+  - x-pack/test/security_functional/expired_session.config.ts
   - x-pack/test/security_solution_endpoint_api_int/config.ts
   - x-pack/test/security_solution_endpoint/config.ts
   - x-pack/test/session_view/basic/config.ts

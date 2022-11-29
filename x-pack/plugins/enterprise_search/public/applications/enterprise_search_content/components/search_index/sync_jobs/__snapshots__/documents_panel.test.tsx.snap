@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DocumentsPanel renders 1`] = `
+<FlyoutPanel
+  title="Documents"
+>
+  <EuiBasicTable
+    columns={
+      Array [
+        Object {
+          "field": "added",
+          "name": "Added",
+        },
+        Object {
+          "field": "removed",
+          "name": "Removed",
+        },
+        Object {
+          "field": "total",
+          "name": "Total",
+        },
+        Object {
+          "field": "volume",
+          "name": "Volume",
+          "render": [Function],
+        },
+      ]
+    }
+    items={
+      Array [
+        Object {
+          "added": 10,
+          "removed": 0,
+          "total": 305,
+          "volume": 1120,
+        },
+      ]
+    }
+    noItemsMessage={
+      <EuiI18n
+        default="No items found"
+        token="euiBasicTable.noItemsMessage"
+      />
+    }
+    responsive={true}
+    tableLayout="fixed"
+  />
+</FlyoutPanel>
+`;

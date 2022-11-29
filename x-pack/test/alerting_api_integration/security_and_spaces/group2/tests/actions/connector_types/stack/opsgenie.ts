@@ -253,7 +253,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 service_message:
-                  'Request validation failed (Error: [responders.0]: types that failed validation:\n- [responders.0.0.type]: types that failed validation:\n - [responders.0.type.0]: expected value to equal [team]\n - [responders.0.type.1]: expected value to equal [user]\n - [responders.0.type.2]: expected value to equal [escalation]\n - [responders.0.type.3]: expected value to equal [schedule]\n- [responders.0.1.id]: expected value of type [string] but got [undefined])',
+                  'Request validation failed (Error: [responders.0]: types that failed validation:\n- [responders.0.0.type]: types that failed validation:\n - [responders.0.type.0]: expected value to equal [team]\n - [responders.0.type.1]: expected value to equal [user]\n - [responders.0.type.2]: expected value to equal [escalation]\n - [responders.0.type.3]: expected value to equal [schedule]\n- [responders.0.1.id]: expected value of type [string] but got [undefined]\n- [responders.0.2.username]: expected value of type [string] but got [undefined])',
               });
             });
 
@@ -282,7 +282,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 service_message:
-                  'Request validation failed (Error: [responders.0]: types that failed validation:\n- [responders.0.0.name]: expected value of type [string] but got [undefined]\n- [responders.0.1.id]: expected value of type [string] but got [undefined])',
+                  'Request validation failed (Error: [responders.0]: types that failed validation:\n- [responders.0.0.name]: expected value of type [string] but got [undefined]\n- [responders.0.1.id]: expected value of type [string] but got [undefined]\n- [responders.0.2.username]: expected value of type [string] but got [undefined])',
               });
             });
 
@@ -682,7 +682,8 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: opsgenieActionId,
-              service_message: 'Status code: undefined. Message: Message: failed',
+              service_message:
+                'Status code: 422. Message: Request failed with status code 422: {"message":"failed"}',
             });
           });
 
@@ -704,7 +705,8 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: opsgenieActionId,
-              service_message: 'Status code: undefined. Message: Message: failed',
+              service_message:
+                'Status code: 422. Message: Request failed with status code 422: {"message":"failed"}',
             });
           });
         });

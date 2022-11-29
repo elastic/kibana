@@ -6,14 +6,20 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { UpdateByQueryResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit, UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { FileStatus } from '@kbn/files-plugin/common/types';
 
 import {
-  FILE_STORAGE_DATA_INDEX,
-  FILE_STORAGE_METADATA_INDEX,
-} from '../../constants/fleet_es_assets';
+  FILE_STORAGE_DATA_INDEX_PATTERN,
+  FILE_STORAGE_METADATA_INDEX_PATTERN,
+} from '../../../common/constants';
+
+import {
+  getFileMetadataIndexName,
+  getIntegrationNameFromFileDataIndexName,
+} from '../../../common/services';
+
 import { ES_SEARCH_LIMIT } from '../../../common/constants';
-import type { FILE_STATUS } from '../../types/files';
 
 /**
  * Gets files with given status
@@ -25,16 +31,16 @@ import type { FILE_STATUS } from '../../types/files';
 export async function getFilesByStatus(
   esClient: ElasticsearchClient,
   abortController: AbortController,
-  status: FILE_STATUS = 'READY'
+  status: FileStatus = 'READY'
 ): Promise<SearchHit[]> {
   const result = await esClient.search(
     {
-      index: FILE_STORAGE_METADATA_INDEX,
+      index: FILE_STORAGE_METADATA_INDEX_PATTERN,
       body: {
         size: ES_SEARCH_LIMIT,
         query: {
           term: {
-            'file.Status.keyword': status,
+            'file.Status': status,
           },
         },
         _source: false,
@@ -74,7 +80,7 @@ export async function fileIdsWithoutChunksByIndex(
 
   const chunks = await esClient.search<{ bid: string }>(
     {
-      index: FILE_STORAGE_DATA_INDEX,
+      index: FILE_STORAGE_DATA_INDEX_PATTERN,
       body: {
         size: ES_SEARCH_LIMIT,
         query: {
@@ -82,7 +88,7 @@ export async function fileIdsWithoutChunksByIndex(
             must: [
               {
                 terms: {
-                  'bid.keyword': Array.from(allFileIds),
+                  bid: Array.from(allFileIds),
                 },
               },
               {
@@ -102,8 +108,8 @@ export async function fileIdsWithoutChunksByIndex(
   chunks.hits.hits.forEach((hit) => {
     const fileId = hit._source?.bid;
     if (!fileId) return;
-    const integration = hit._index.split('-')[1];
-    const metadataIndex = `.fleet-${integration}-files`;
+    const integration = getIntegrationNameFromFileDataIndexName(hit._index);
+    const metadataIndex = getFileMetadataIndexName(integration);
     if (noChunkFileIdsByIndex[metadataIndex]?.delete(fileId)) {
       allFileIds.delete(fileId);
     }
@@ -124,7 +130,7 @@ export function updateFilesStatus(
   esClient: ElasticsearchClient,
   abortController: AbortController,
   fileIdsByIndex: FileIdsByIndex,
-  status: FILE_STATUS
+  status: FileStatus
 ): Promise<UpdateByQueryResponse[]> {
   return Promise.all(
     Object.entries(fileIdsByIndex).map(([index, fileIds]) => {

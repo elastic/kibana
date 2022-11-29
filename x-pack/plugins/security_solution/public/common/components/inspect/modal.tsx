@@ -70,6 +70,8 @@ interface Response {
 }
 
 const MyEuiModal = styled(EuiModal)`
+  width: min(768px, calc(100vw - 16px));
+  min-height: 41vh;
   .euiModal__flex {
     width: 60vw;
   }
@@ -128,7 +130,10 @@ export const ModalInspectQuery = ({
   const inspectResponses: Response[] = parseInspectStrings(responses);
 
   const isSourcererPattern = useMemo(
-    () => (inspectRequests[0]?.index ?? []).every((pattern) => selectedPatterns.includes(pattern)),
+    () =>
+      (inspectRequests[0]?.index ?? []).every((pattern) =>
+        selectedPatterns.includes(pattern.trim())
+      ),
     [inspectRequests, selectedPatterns]
   );
 

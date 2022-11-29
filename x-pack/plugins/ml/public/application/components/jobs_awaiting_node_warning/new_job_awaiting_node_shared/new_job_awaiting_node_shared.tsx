@@ -63,9 +63,11 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
     try {
       const resp = await ml.mlInfo();
       const cloudId = resp.cloudId ?? null;
+      const isCloudTrial = resp.isCloudTrial === true;
       setCloudInfo({
         isCloud: cloudId !== null,
         cloudId,
+        isCloudTrial,
         deploymentId: cloudId === null ? null : extractDeploymentId(cloudId),
       });
     } catch (error) {

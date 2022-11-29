@@ -244,6 +244,24 @@ export const PingType = t.intersection([
 
 export type Ping = t.TypeOf<typeof PingType>;
 
+export const PingStatusType = t.intersection([
+  t.type({
+    timestamp: t.string,
+    docId: t.string,
+    config_id: t.string,
+    locationId: t.string,
+    summary: t.partial({
+      down: t.number,
+      up: t.number,
+    }),
+  }),
+  t.partial({
+    error: PingErrorType,
+  }),
+]);
+
+export type PingStatus = t.TypeOf<typeof PingStatusType>;
+
 // Convenience function for tests etc that makes an empty ping
 // object with the minimum of fields.
 export const makePing = (f: {
@@ -281,6 +299,15 @@ export const PingsResponseType = t.type({
 });
 
 export type PingsResponse = t.TypeOf<typeof PingsResponseType>;
+
+export const PingStatusesResponseType = t.type({
+  total: t.number,
+  pings: t.array(PingStatusType),
+  from: t.string,
+  to: t.string,
+});
+
+export type PingStatusesResponse = t.TypeOf<typeof PingStatusesResponseType>;
 
 export const GetPingsParamsType = t.intersection([
   t.type({

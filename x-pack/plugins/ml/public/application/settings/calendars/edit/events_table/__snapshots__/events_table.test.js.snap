@@ -137,6 +137,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
         "filters": Array [],
         "toolsRight": Array [
           <EuiButton
+            color="primary"
             data-test-subj="mlCalendarNewEventButton"
             iconType="plusInCircle"
             isDisabled={false}
@@ -150,6 +151,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
             />
           </EuiButton>,
           <EuiButton
+            color="primary"
             data-test-subj="mlCalendarImportEventsButton"
             iconType="importAction"
             isDisabled={false}

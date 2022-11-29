@@ -85,7 +85,7 @@ describe('DocumentsLogic', () => {
   describe('listeners', () => {
     describe('setSearchQuery', () => {
       it('make documents apiRequest request after 250ms debounce', async () => {
-        jest.useFakeTimers('legacy');
+        jest.useFakeTimers({ legacyFakeTimers: true });
         DocumentsLogic.actions.makeRequest = jest.fn();
         DocumentsLogic.actions.setSearchQuery('test');
         await nextTick();

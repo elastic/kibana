@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '../../../../utils/testing/rtl_helpers';
+import { waitFor } from '@testing-library/react';
 import { MonitorOverviewItem } from '../types';
 import { OverviewGrid } from './overview_grid';
 import * as hooks from '../../../../hooks/use_last_50_duration_chart';
@@ -17,6 +18,7 @@ describe('Overview Grid', () => {
     for (let i = 0; i < 20; i++) {
       data.push({
         id: `${i}`,
+        configId: `${i}`,
         location: {
           id: 'us_central',
           isServiceManaged: true,
@@ -26,6 +28,7 @@ describe('Overview Grid', () => {
       });
       data.push({
         id: `${i}`,
+        configId: `${i}`,
         location: {
           id: 'us_east',
           isServiceManaged: true,
@@ -68,6 +71,10 @@ describe('Overview Grid', () => {
           },
           loaded: true,
           loading: false,
+          status: {
+            downConfigs: [],
+            upConfigs: [],
+          },
         },
         serviceLocations: {
           locations: [
@@ -86,11 +93,13 @@ describe('Overview Grid', () => {
       },
     });
 
-    expect(getByText('Showing')).toBeInTheDocument();
-    expect(getByText('40')).toBeInTheDocument();
-    expect(getByText('Monitors')).toBeInTheDocument();
-    expect(queryByText('Showing all monitors')).not.toBeInTheDocument();
-    expect(getAllByTestId('syntheticsOverviewGridItem').length).toEqual(perPage);
+    await waitFor(() => {
+      expect(getByText('Showing')).toBeInTheDocument();
+      expect(getByText('40')).toBeInTheDocument();
+      expect(getByText('Monitors')).toBeInTheDocument();
+      expect(queryByText('Showing all monitors')).not.toBeInTheDocument();
+      expect(getAllByTestId('syntheticsOverviewGridItem').length).toEqual(perPage);
+    });
   });
 
   it('displays showing all monitors label when reaching the end of the list', async () => {
@@ -111,6 +120,10 @@ describe('Overview Grid', () => {
           },
           loaded: true,
           loading: false,
+          status: {
+            downConfigs: [],
+            upConfigs: [],
+          },
         },
         serviceLocations: {
           locations: [

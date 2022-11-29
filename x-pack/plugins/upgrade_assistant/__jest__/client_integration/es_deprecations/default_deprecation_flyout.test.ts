@@ -39,9 +39,7 @@ describe('Default deprecation flyout', () => {
     });
 
     await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup, {
-        isReadOnlyMode: false,
-      });
+      testBed = await setupElasticsearchPage(httpSetup);
     });
 
     testBed.component.update();

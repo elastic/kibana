@@ -20,6 +20,8 @@ import { FleetStatusProvider, ConfigContext, KibanaVersionContext } from '../../
 
 import { getMockTheme } from '../../../../../../mocks';
 
+import { ExperimentalFeaturesService } from '../../../../services';
+
 import { SearchAndFilterBar } from './search_and_filter_bar';
 
 const mockTheme = getMockTheme({
@@ -49,6 +51,14 @@ const TestComponent = (props: any) => (
 );
 
 describe('SearchAndFilterBar', () => {
+  beforeAll(() => {
+    ExperimentalFeaturesService.init({
+      createPackagePolicyMultiPageLayout: true,
+      packageVerification: true,
+      showDevtoolsRequest: false,
+      diagnosticFileUploadEnabled: false,
+    });
+  });
   it('should show no Actions button when no agent is selected', async () => {
     const selectedAgents: Agent[] = [];
     const props: any = {

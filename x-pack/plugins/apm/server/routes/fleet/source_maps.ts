@@ -13,7 +13,6 @@ import {
 import { promisify } from 'util';
 import { unzip } from 'zlib';
 import { Artifact } from '@kbn/fleet-plugin/server';
-import { isEmpty } from 'lodash';
 import { SourceMap } from '../source_maps/route';
 import { APMPluginStartDependencies } from '../../types';
 import { getApmPackagePolicies } from './get_apm_package_policies';
@@ -55,32 +54,15 @@ export async function listArtifacts({
   fleetPluginStart: FleetPluginStart;
 }) {
   const apmArtifactClient = getApmArtifactClient(fleetPluginStart);
-
-  const artifacts = [];
-  const perPage = 100;
-  let page = 1;
-
-  let fleetArtifactsResponse = await apmArtifactClient.listArtifacts({
+  const fleetArtifactsResponse = await apmArtifactClient.listArtifacts({
     kuery: 'type: sourcemap',
-    perPage,
-    page,
+    perPage: 20,
+    page: 1,
+    sortOrder: 'desc',
+    sortField: 'created',
   });
-  artifacts.push(...fleetArtifactsResponse.items);
 
-  while (
-    fleetArtifactsResponse.total > artifacts.length &&
-    !isEmpty(fleetArtifactsResponse.items)
-  ) {
-    page += 1;
-    fleetArtifactsResponse = await apmArtifactClient.listArtifacts({
-      kuery: 'type: sourcemap',
-      perPage,
-      page,
-    });
-    artifacts.push(...fleetArtifactsResponse.items);
-  }
-
-  return decodeArtifacts(artifacts);
+  return decodeArtifacts(fleetArtifactsResponse.items);
 }
 
 export async function createApmArtifact({

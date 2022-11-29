@@ -48,7 +48,7 @@ TYPES_DEPS = [
   "@npm//moment",
   "@npm//tsd",
   "@npm//@types/jest",
-  "@npm//@types/joi",
+  "@npm//joi",
   "@npm//@types/lodash",
   "@npm//@types/node",
   "@npm//@types/type-detect",

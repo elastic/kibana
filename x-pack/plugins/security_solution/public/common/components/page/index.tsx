@@ -25,7 +25,7 @@ SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
  * when shown above content that is set to `full screen`.
  */
 export const FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET = () => css`
-  .euiOverlayMask--belowHeader {
+  .euiOverlayMask[data-relative-to-header='below'] {
     top: 0 !important;
   }
 

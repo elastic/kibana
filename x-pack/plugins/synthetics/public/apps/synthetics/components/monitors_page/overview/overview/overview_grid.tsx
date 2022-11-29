@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, memo, useCallback } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import useThrottle from 'react-use/lib/useThrottle';
-import { useSelector } from 'react-redux';
 import useIntersection from 'react-use/lib/useIntersection';
 import {
   EuiFlexGroup,
@@ -17,18 +17,27 @@ import {
   EuiButtonEmpty,
   EuiText,
 } from '@elastic/eui';
-import { selectOverviewState } from '../../../../state/overview';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
+import {
+  quietFetchOverviewAction,
+  selectOverviewState,
+  setFlyoutConfig,
+} from '../../../../state/overview';
+import { useMonitorsSortedByStatus } from '../../../../hooks/use_monitors_sorted_by_status';
+import { useGetUrlParams } from '../../../../hooks/use_url_params';
+import { OverviewLoader } from './overview_loader';
 import { OverviewPaginationInfo } from './overview_pagination_info';
 import { OverviewGridItem } from './overview_grid_item';
 import { SortFields } from './sort_fields';
-import { useMonitorsSortedByStatus } from '../../../../hooks/use_monitors_sorted_by_status';
-import { OverviewLoader } from './overview_loader';
-import { OverviewStatus } from './overview_status';
+import { NoMonitorsFound } from '../../common/no_monitors_found';
+import { MonitorDetailFlyout } from './monitor_detail_flyout';
 
-export const OverviewGrid = () => {
+export const OverviewGrid = memo(() => {
+  const { statusFilter } = useGetUrlParams();
   const {
     data: { monitors },
+    status,
+    flyoutConfig,
     loaded,
     pageState,
   } = useSelector(selectOverviewState);
@@ -36,17 +45,28 @@ export const OverviewGrid = () => {
   const [loadNextPage, setLoadNextPage] = useState(false);
   const [page, setPage] = useState(1);
 
-  const { monitorsSortedByStatus } = useMonitorsSortedByStatus(
-    sortField === 'status' && monitors.length !== 0
-  );
+  const { monitorsSortedByStatus } = useMonitorsSortedByStatus();
   const currentMonitors = getCurrentMonitors({
     monitors,
     monitorsSortedByStatus,
     perPage,
     page,
     sortField,
+    statusFilter,
   });
 
+  const dispatch = useDispatch();
+
+  const setFlyoutConfigCallback = useCallback(
+    ({ configId, id, location }: { configId: string; id: string; location: string }) =>
+      dispatch(setFlyoutConfig({ configId, id, location })),
+    [dispatch]
+  );
+  const hideFlyout = useCallback(() => dispatch(setFlyoutConfig(null)), [dispatch]);
+  const forceRefreshCallback = useCallback(
+    () => dispatch(quietFetchOverviewAction.get(pageState)),
+    [dispatch, pageState]
+  );
   const intersectionRef = useRef(null);
   const intersection = useIntersection(intersectionRef, {
     root: null,
@@ -74,31 +94,38 @@ export const OverviewGrid = () => {
     }
   }, [loadNextPage]);
 
+  // Display no monitors found when down, up, or disabled filter produces no results
+  if (status && !monitorsSortedByStatus.length) {
+    return <NoMonitorsFound />;
+  }
+
   return (
     <>
-      <EuiFlexGroup gutterSize="none">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline" responsive={false}>
         <EuiFlexItem grow={false}>
-          <OverviewStatus />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <OverviewPaginationInfo page={page} loading={!loaded} />
+          <OverviewPaginationInfo
+            page={page}
+            loading={!loaded}
+            total={status ? monitorsSortedByStatus.length : undefined}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <SortFields onSortChange={() => setPage(1)} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
+      <EuiSpacer size="m" />
       {loaded && currentMonitors.length ? (
-        <EuiFlexGrid columns={4} data-test-subj="syntheticsOverviewGridItemContainer">
+        <EuiFlexGrid
+          columns={4}
+          gutterSize="m"
+          data-test-subj="syntheticsOverviewGridItemContainer"
+        >
           {currentMonitors.map((monitor) => (
             <EuiFlexItem
               key={`${monitor.id}-${monitor.location?.id}`}
               data-test-subj="syntheticsOverviewGridItem"
             >
-              <OverviewGridItem monitor={monitor} />
+              <OverviewGridItem monitor={monitor} onClick={setFlyoutConfigCallback} />
             </EuiFlexItem>
           ))}
         </EuiFlexGrid>
@@ -127,9 +154,19 @@ export const OverviewGrid = () => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {flyoutConfig?.configId && flyoutConfig?.location && (
+        <MonitorDetailFlyout
+          configId={flyoutConfig.configId}
+          id={flyoutConfig.id}
+          location={flyoutConfig.location}
+          onClose={hideFlyout}
+          onEnabledChange={forceRefreshCallback}
+          onLocationChange={setFlyoutConfigCallback}
+        />
+      )}
     </>
   );
-};
+});
 
 const getCurrentMonitors = ({
   sortField,
@@ -137,14 +174,16 @@ const getCurrentMonitors = ({
   page,
   monitors,
   monitorsSortedByStatus,
+  statusFilter,
 }: {
   sortField: string;
   perPage: number;
   page: number;
   monitors: MonitorOverviewItem[];
   monitorsSortedByStatus: MonitorOverviewItem[];
+  statusFilter?: string;
 }) => {
-  if (sortField === 'status') {
+  if (sortField === 'status' || statusFilter) {
     return monitorsSortedByStatus.slice(0, perPage * page);
   } else {
     return monitors.slice(0, perPage * page);

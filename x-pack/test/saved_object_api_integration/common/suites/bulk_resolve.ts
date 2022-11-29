@@ -135,5 +135,6 @@ export function bulkResolveTestSuiteFactory(esArchiver: any, supertest: SuperTes
   return {
     addTests,
     createTestDefinitions,
+    expectSavedObjectForbidden,
   };
 }

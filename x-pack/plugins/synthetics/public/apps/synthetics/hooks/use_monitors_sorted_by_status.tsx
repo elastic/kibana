@@ -11,8 +11,10 @@ import { useSelector } from 'react-redux';
 import { MonitorOverviewItem } from '../../../../common/runtime_types';
 import { selectOverviewState } from '../state/overview';
 import { useLocationNames } from './use_location_names';
+import { useGetUrlParams } from './use_url_params';
 
-export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
+export function useMonitorsSortedByStatus() {
+  const { statusFilter } = useGetUrlParams();
   const {
     pageState: { sortOrder },
     data: { monitors },
@@ -70,6 +72,25 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
   }, [monitors, locationNames, downMonitors, status]);
 
   return useMemo(() => {
+    switch (statusFilter) {
+      case 'down':
+        return {
+          monitorsSortedByStatus: monitorsSortedByStatus.down,
+          downMonitors: downMonitors.current,
+        };
+      case 'up':
+        return {
+          monitorsSortedByStatus: monitorsSortedByStatus.up,
+          downMonitors: downMonitors.current,
+        };
+      case 'disabled':
+        return {
+          monitorsSortedByStatus: monitorsSortedByStatus.disabled,
+          downMonitors: downMonitors.current,
+        };
+      default:
+        break;
+    }
     const upAndDownMonitors =
       sortOrder === 'asc'
         ? [...monitorsSortedByStatus.down, ...monitorsSortedByStatus.up]
@@ -79,5 +100,5 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
       monitorsSortedByStatus: [...upAndDownMonitors, ...monitorsSortedByStatus.disabled],
       downMonitors: downMonitors.current,
     };
-  }, [downMonitors, monitorsSortedByStatus, sortOrder]);
+  }, [downMonitors, monitorsSortedByStatus, sortOrder, statusFilter]);
 }

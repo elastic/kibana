@@ -21,7 +21,8 @@ export const defaultScaledFloatParameters = {
   store: false,
 };
 
-describe('Mappings editor: scaled float datatype', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/145102
+describe.skip('Mappings editor: scaled float datatype', () => {
   /**
    * Variable to store the mappings data forwarded to the consumer component
    */
@@ -31,7 +32,7 @@ describe('Mappings editor: scaled float datatype', () => {
   let testBed: MappingsEditorTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

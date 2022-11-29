@@ -9,8 +9,12 @@
 import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import { Root } from '../../../root';
+import {
+  createTestServers,
+  createRootWithCorePlugins,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
+import { Root } from '@kbn/core-root-server-internal';
 
 const logFilePath = Path.join(__dirname, 'corrupt_outdated_docs.log');
 
@@ -22,7 +26,7 @@ async function removeLogFile() {
 }
 
 describe('migration v2 with corrupt saved object documents', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let esServer: TestElasticsearchUtils;
   let root: Root;
 
   beforeAll(async () => {
@@ -41,7 +45,7 @@ describe('migration v2 with corrupt saved object documents', () => {
   });
 
   it.skip('collects corrupt saved object documents across batches', async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
@@ -149,7 +153,7 @@ describe('migration v2 with corrupt saved object documents', () => {
 });
 
 function createRoot() {
-  return kbnTestServer.createRootWithCorePlugins(
+  return createRootWithCorePlugins(
     {
       migrations: {
         skip: false,

@@ -64,6 +64,20 @@ type GenerateLabelsAstArguments = (
   layer: PieLayerState
 ) => [Ast];
 
+export const getColumnToLabelMap = (
+  columnIds: string[],
+  datasource: DatasourcePublicAPI | undefined
+) => {
+  const columnToLabel: Record<string, string> = {};
+  columnIds.forEach((accessor) => {
+    const operation = datasource?.getOperationForColumnId(accessor);
+    if (operation?.label) {
+      columnToLabel[accessor] = operation.label;
+    }
+  });
+  return columnToLabel;
+};
+
 export const getSortedGroups = (
   datasource: DatasourcePublicAPI | undefined,
   layer: PieLayerState,
@@ -139,7 +153,12 @@ const generateCommonArguments = (
       .filter(({ columnId }) => !isCollapsed(columnId, layer))
       .map(({ columnId }) => columnId)
       .map(prepareDimension),
-    metric: layer.metric ? prepareDimension(layer.metric) : '',
+    metrics: (layer.allowMultipleMetrics ? layer.metrics : [layer.metrics[0]]).map(
+      prepareDimension
+    ),
+    metricsToLabels: JSON.stringify(
+      getColumnToLabelMap(layer.metrics, datasourceLayers[layer.layerId])
+    ),
     legendDisplay: (attributes.isPreview
       ? LegendDisplay.HIDE
       : layer.legendDisplay) as PartitionVisLegendDisplay,
@@ -189,10 +208,13 @@ const generateTreemapVisAst: GenerateExpressionAstFunction = (...rest) => {
   ]).toAst();
 };
 
-const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) =>
-  buildExpression([
+const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) => {
+  const { metrics, ...args } = generateCommonArguments(...rest);
+
+  return buildExpression([
     buildExpressionFunction<MosaicVisExpressionFunctionDefinition>('mosaicVis', {
-      ...generateCommonArguments(...rest),
+      ...{ ...args, metricsToLabels: undefined },
+      metric: metrics,
       // flip order of bucket dimensions so the rows are fetched before the columns to keep them stable
       buckets: rest[2]
         .filter(({ columnId }) => !isCollapsed(columnId, rest[3]))
@@ -201,6 +223,7 @@ const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) =>
         .map(prepareDimension),
     }),
   ]).toAst();
+};
 
 const generateWaffleVisAst: GenerateExpressionAstFunction = (...rest) => {
   const { buckets, nestedLegend, ...args } = generateCommonArguments(...rest);
@@ -251,7 +274,7 @@ function expressionHelper(
     }))
     .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
 
-  if (!layer.metric || !operations.length) {
+  if (!layer.metrics.length) {
     return null;
   }
   const visualizationAst = generateExprAst(
@@ -273,7 +296,7 @@ function expressionHelper(
         .map((columnId) => {
           return buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
             by: groups.filter((chk) => chk !== columnId),
-            metric: layer.metric ? [layer.metric] : [],
+            metric: layer.metrics,
             fn: [layer.collapseFns![columnId]!],
           }).toAst();
         }),

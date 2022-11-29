@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
-  describe.skip('security', function () {
+  describe('security', function () {
     before(async () => {
       await PageObjects.common.navigateToApp('home');
     });
@@ -59,8 +59,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should render the "Stack" section with Upgrade Assistant', async function () {
           await PageObjects.common.navigateToApp('management');
           const sections = await managementMenu.getSections();
-          expect(sections).to.have.length(5);
-          expect(sections[4]).to.eql({
+          expect(sections).to.have.length(3);
+          expect(sections[2]).to.eql({
             sectionId: 'stack',
             sectionLinks: ['license_management', 'upgrade_assistant'],
           });

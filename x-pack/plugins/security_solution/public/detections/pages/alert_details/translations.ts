@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ALERT_DETAILS_TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.alerts.alertDetails.header.technicalPreview',
+  {
+    defaultMessage: 'Technical Preview',
+  }
+);
+
 export const SUMMARY_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.alerts.alertDetails.navigation.summary',
   {

@@ -32,7 +32,7 @@ import {
   type MigrationResult,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { buildActiveMappings } from './core';
-import { DocumentMigrator, VersionedTransformer } from './core/document_migrator';
+import { DocumentMigrator, type VersionedTransformer } from './core/document_migrator';
 import { createIndexMap } from './core/build_index_map';
 import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';

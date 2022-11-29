@@ -23,7 +23,7 @@ const mockIsValidMetrics = jest.fn();
 const mockGetDatasourceValue = jest
   .fn()
   .mockImplementation(() => Promise.resolve(stubLogstashDataView));
-const mockGetDataSourceInfo = jest.fn();
+const mockExtractOrGenerateDatasourceInfo = jest.fn();
 const mockGetColumnState = jest.fn();
 
 jest.mock('../../services', () => ({
@@ -49,7 +49,7 @@ jest.mock('../lib/metrics', () => ({
 }));
 
 jest.mock('../lib/datasource', () => ({
-  getDataSourceInfo: jest.fn(() => mockGetDataSourceInfo()),
+  extractOrGenerateDatasourceInfo: jest.fn(() => mockExtractOrGenerateDatasourceInfo()),
 }));
 
 describe('convertToLens', () => {
@@ -73,7 +73,7 @@ describe('convertToLens', () => {
 
   beforeEach(() => {
     mockIsValidMetrics.mockReturnValue(true);
-    mockGetDataSourceInfo.mockReturnValue({
+    mockExtractOrGenerateDatasourceInfo.mockReturnValue({
       indexPatternId: 'test-index-pattern',
       timeField: 'timeField',
       indexPattern: { id: 'test-index-pattern' },

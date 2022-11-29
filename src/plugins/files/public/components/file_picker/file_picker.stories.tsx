@@ -9,10 +9,11 @@
 import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import { base64dLogo } from '@kbn/shared-ux-file-image-mocks';
+import type { FileImageMetadata } from '@kbn/shared-ux-file-image-types';
 import type { FileJSON } from '../../../common';
 import { FilesClient, FilesClientResponses } from '../../types';
 import { register } from '../stories_shared';
-import { base64dLogo } from '../image/image.constants.stories';
 import { FilesContext } from '../context';
 import { FilePicker, Props as FilePickerProps } from './file_picker';
 
@@ -39,7 +40,10 @@ export default {
       <FilesContext
         client={
           {
-            create: () => Promise.reject(new Error('not so fast buster!')),
+            create: () =>
+              new Promise((res, rej) =>
+                setTimeout(() => rej(new Error('not so fast buster!')), 3000)
+              ),
             list: async (): Promise<FilesClientResponses['list']> => ({
               files: [],
               total: 0,
@@ -59,7 +63,7 @@ export const Empty = Template.bind({});
 
 const d = new Date();
 let id = 0;
-function createFileJSON(file?: Partial<FileJSON>): FileJSON {
+function createFileJSON(file?: Partial<FileJSON<FileImageMetadata>>): FileJSON<FileImageMetadata> {
   return {
     alt: '',
     created: d.toISOString(),

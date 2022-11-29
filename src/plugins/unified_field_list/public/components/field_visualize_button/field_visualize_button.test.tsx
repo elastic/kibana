@@ -77,7 +77,7 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
     });
 
     expect(wrapper!.text()).toBe('Visualize');
-    wrapper!.find(EuiButton).simulate('click');
+    wrapper!.find('a[data-test-subj="fieldVisualize-extension"]').simulate('click');
 
     expect(mockExecuteAction).toHaveBeenCalledWith({
       contextualFields,
@@ -119,7 +119,7 @@ describe('UnifiedFieldList <FieldVisualizeButton />', () => {
     );
 
     expect(wrapper!.text()).toBe('Visualize');
-    wrapper!.find(EuiButton).simulate('click');
+    wrapper!.find('a[data-test-subj="fieldVisualize-geo.coordinates"]').simulate('click');
 
     expect(mockExecuteAction).toHaveBeenCalledWith({
       contextualFields: [],

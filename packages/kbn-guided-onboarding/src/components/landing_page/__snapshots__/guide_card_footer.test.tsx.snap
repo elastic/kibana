@@ -12,32 +12,44 @@ exports[`guide card footer snapshots should render the footer when the guide has
   <EuiSpacer
     size="l"
   />
-  <div
-    className="eui-textCenter"
+  <EuiFlexGroup
+    justifyContent="center"
   >
-    <EuiButton
-      data-test-subj="onboarding--guideCard--view--search"
-      fill={true}
-      onClick={[Function]}
+    <EuiFlexItem
+      grow={false}
     >
-      View guide
-    </EuiButton>
-  </div>
+      <EuiButton
+        color="primary"
+        data-test-subj="onboarding--guideCard--view--search"
+        fill={true}
+        onClick={[Function]}
+        size="m"
+      >
+        View guide
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </Fragment>
 `;
 
 exports[`guide card footer snapshots should render the footer when the guide has not started yet 1`] = `
-<div
-  className="eui-textCenter"
+<EuiFlexGroup
+  justifyContent="center"
 >
-  <EuiButton
-    data-test-subj="onboarding--guideCard--view--search"
-    fill={true}
-    onClick={[Function]}
+  <EuiFlexItem
+    grow={false}
   >
-    View guide
-  </EuiButton>
-</div>
+    <EuiButton
+      color="primary"
+      data-test-subj="onboarding--guideCard--view--search"
+      fill={true}
+      onClick={[Function]}
+      size="m"
+    >
+      View guide
+    </EuiButton>
+  </EuiFlexItem>
+</EuiFlexGroup>
 `;
 
 exports[`guide card footer snapshots should render the footer when the guide is in progress 1`] = `
@@ -65,17 +77,23 @@ exports[`guide card footer snapshots should render the footer when the guide is 
   <EuiSpacer
     size="l"
   />
-  <div
-    className="eui-textCenter"
+  <EuiFlexGroup
+    justifyContent="center"
   >
-    <EuiButton
-      data-test-subj="onboarding--guideCard--continue--search"
-      fill={true}
-      onClick={[Function]}
+    <EuiFlexItem
+      grow={false}
     >
-      Continue
-    </EuiButton>
-  </div>
+      <EuiButton
+        color="primary"
+        data-test-subj="onboarding--guideCard--continue--search"
+        fill={true}
+        onClick={[Function]}
+        size="m"
+      >
+        Continue
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </Fragment>
 `;
 
@@ -104,30 +122,42 @@ exports[`guide card footer snapshots should render the footer when the guide is 
   <EuiSpacer
     size="l"
   />
-  <div
-    className="eui-textCenter"
+  <EuiFlexGroup
+    justifyContent="center"
   >
-    <EuiButton
-      data-test-subj="onboarding--guideCard--continue--search"
-      fill={true}
-      onClick={[Function]}
+    <EuiFlexItem
+      grow={false}
     >
-      Continue
-    </EuiButton>
-  </div>
+      <EuiButton
+        color="primary"
+        data-test-subj="onboarding--guideCard--continue--search"
+        fill={true}
+        onClick={[Function]}
+        size="m"
+      >
+        Continue
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </Fragment>
 `;
 
 exports[`guide card footer snapshots should render the footer when the guided onboarding has not started yet 1`] = `
-<div
-  className="eui-textCenter"
+<EuiFlexGroup
+  justifyContent="center"
 >
-  <EuiButton
-    data-test-subj="onboarding--guideCard--view--search"
-    fill={true}
-    onClick={[Function]}
+  <EuiFlexItem
+    grow={false}
   >
-    View guide
-  </EuiButton>
-</div>
+    <EuiButton
+      color="primary"
+      data-test-subj="onboarding--guideCard--view--search"
+      fill={true}
+      onClick={[Function]}
+      size="m"
+    >
+      View guide
+    </EuiButton>
+  </EuiFlexItem>
+</EuiFlexGroup>
 `;

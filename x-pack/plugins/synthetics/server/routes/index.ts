@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getIndexSizesRoute } from './settings/settings';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
 import { deleteSyntheticsMonitorRoute } from './monitor_cruds/delete_monitor';
@@ -28,7 +29,7 @@ import { editSyntheticsMonitorRoute } from './monitor_cruds/edit_monitor';
 import { addSyntheticsMonitorRoute } from './monitor_cruds/add_monitor';
 import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/add_monitor_project';
 import { addSyntheticsProjectMonitorRouteLegacy } from './monitor_cruds/add_monitor_project_legacy';
-import { syntheticsGetPingsRoute } from './pings';
+import { syntheticsGetPingsRoute, syntheticsGetPingStatusesRoute } from './pings';
 import { createGetCurrentStatusRoute } from './status/current_status';
 import {
   SyntheticsRestApiRouteFactory,
@@ -56,8 +57,10 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getServiceAllowedRoute,
   getAPIKeySyntheticsRoute,
   syntheticsGetPingsRoute,
+  syntheticsGetPingStatusesRoute,
   getHasZipUrlMonitorRoute,
   createGetCurrentStatusRoute,
+  getIndexSizesRoute,
 ];
 
 export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [

@@ -179,7 +179,7 @@ function parseAndVerifyArchive(paths: string[], topLevelDirOverride?: string): A
   });
 
   // The package must contain a manifest file ...
-  const manifestFile = path.join(toplevelDir, MANIFEST_NAME);
+  const manifestFile = path.posix.join(toplevelDir, MANIFEST_NAME);
   const manifestBuffer = MANIFESTS[manifestFile];
   if (!paths.includes(manifestFile) || !manifestBuffer) {
     throw new PackageInvalidArchiveError(`Package must contain a top-level ${MANIFEST_NAME} file.`);
@@ -263,7 +263,7 @@ export function parseAndVerifyDataStreams(
   const dataStreamPaths = new Set<string>();
   const dataStreams: RegistryDataStream[] = [];
   const pkgBasePath = pkgBasePathOverride || pkgToPkgKey({ name: pkgName, version: pkgVersion });
-  const dataStreamsBasePath = path.join(pkgBasePath, 'data_stream');
+  const dataStreamsBasePath = path.posix.join(pkgBasePath, 'data_stream');
   // pick all paths matching name-version/data_stream/DATASTREAM_NAME/...
   // from those, pick all unique data stream names
   paths.forEach((filePath) => {
@@ -275,8 +275,8 @@ export function parseAndVerifyDataStreams(
   });
 
   dataStreamPaths.forEach((dataStreamPath) => {
-    const fullDataStreamPath = path.join(dataStreamsBasePath, dataStreamPath);
-    const manifestFile = path.join(fullDataStreamPath, MANIFEST_NAME);
+    const fullDataStreamPath = path.posix.join(dataStreamsBasePath, dataStreamPath);
+    const manifestFile = path.posix.join(fullDataStreamPath, MANIFEST_NAME);
     const manifestBuffer = MANIFESTS[manifestFile];
     if (!paths.includes(manifestFile) || !manifestBuffer) {
       throw new PackageInvalidArchiveError(
@@ -539,6 +539,10 @@ export function parseDataStreamElasticsearchEntry(
     );
   }
 
+  if (expandedElasticsearch?.index_mode) {
+    parsedElasticsearchEntry.index_mode = expandedElasticsearch.index_mode;
+  }
+
   return parsedElasticsearchEntry;
 }
 
@@ -547,7 +551,10 @@ const isDefaultPipelineFile = (pipelinePath: string) =>
   pipelinePath.endsWith(DEFAULT_INGEST_PIPELINE_FILE_NAME_JSON);
 
 export function parseDefaultIngestPipeline(fullDataStreamPath: string, paths: string[]) {
-  const ingestPipelineDirPath = path.join(fullDataStreamPath, '/elasticsearch/ingest_pipeline');
+  const ingestPipelineDirPath = path.posix.join(
+    fullDataStreamPath,
+    '/elasticsearch/ingest_pipeline'
+  );
   const defaultIngestPipelinePaths = paths.filter(
     (pipelinePath) =>
       pipelinePath.startsWith(ingestPipelineDirPath) && isDefaultPipelineFile(pipelinePath)

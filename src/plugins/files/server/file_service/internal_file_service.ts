@@ -54,13 +54,13 @@ export class InternalFileService {
     }
   }
 
-  public async updateFile({ attributes, fileKind, id }: UpdateFileArgs): Promise<IFile> {
-    const file = await this.getById({ fileKind, id });
+  public async updateFile({ attributes, id }: UpdateFileArgs): Promise<IFile> {
+    const file = await this.getById({ id });
     return await file.update(attributes);
   }
 
-  public async deleteFile({ id, fileKind }: DeleteFileArgs): Promise<void> {
-    const file = await this.getById({ id, fileKind });
+  public async deleteFile({ id }: DeleteFileArgs): Promise<void> {
+    const file = await this.getById({ id });
     await file.delete();
   }
 
@@ -80,12 +80,8 @@ export class InternalFileService {
     }
   }
 
-  public async getById({ fileKind, id }: GetByIdArgs): Promise<IFile> {
-    const file = await this.get(id);
-    if (file.data.fileKind !== fileKind) {
-      throw new Error(`Unexpected file kind "${file.data.fileKind}", expected "${fileKind}".`);
-    }
-    return file;
+  public async getById({ id }: GetByIdArgs): Promise<IFile> {
+    return await this.get(id);
   }
 
   public getFileKind(id: string): FileKind {

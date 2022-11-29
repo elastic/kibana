@@ -66,10 +66,14 @@ export const mockState: SyntheticsAppState = {
   },
   monitorList: {
     pageState: {
+      query: undefined,
       pageIndex: 0,
       pageSize: 10,
-      sortOrder: 'asc',
       sortField: `${ConfigKey.NAME}.keyword`,
+      sortOrder: 'asc',
+      tags: undefined,
+      monitorType: undefined,
+      locations: undefined,
     },
     monitorUpsertStatuses: {},
     data: {
@@ -98,6 +102,7 @@ export const mockState: SyntheticsAppState = {
     error: null,
     loaded: false,
     loading: false,
+    flyoutConfig: null,
     status: null,
     statusError: null,
   },
@@ -105,6 +110,7 @@ export const mockState: SyntheticsAppState = {
   monitorDetails: getMonitorDetailsMockSlice(),
   browserJourney: getBrowserJourneyMockSlice(),
   networkEvents: {},
+  pingStatus: getPingStatusesMockSlice(),
 };
 
 function getBrowserJourneyMockSlice() {
@@ -410,9 +416,40 @@ function getMonitorDetailsMockSlice() {
       'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'] as TLSVersion[],
       revision: 1,
       updated_at: '2022-07-24T17:15:46.342Z',
+      created_at: '2022-05-24T13:20:49.322Z',
     },
     syntheticsMonitorLoading: false,
+    syntheticsMonitorDispatchedAt: 0,
     error: null,
     selectedLocationId: 'us_central',
   };
+}
+
+function getPingStatusesMockSlice() {
+  const monitorDetails = getMonitorDetailsMockSlice();
+
+  return {
+    pingStatuses: monitorDetails.pings.data.reduce((acc, cur) => {
+      if (!acc[cur.monitor.id]) {
+        acc[cur.monitor.id] = {};
+      }
+
+      if (!acc[cur.monitor.id][cur.observer.geo.name]) {
+        acc[cur.monitor.id][cur.observer.geo.name] = {};
+      }
+
+      acc[cur.monitor.id][cur.observer.geo.name][cur.timestamp] = {
+        timestamp: cur.timestamp,
+        error: undefined,
+        locationId: cur.observer.geo.name,
+        config_id: cur.config_id,
+        docId: cur.docId,
+        summary: cur.summary,
+      };
+
+      return acc;
+    }, {} as SyntheticsAppState['pingStatus']['pingStatuses']),
+    loading: false,
+    error: null,
+  } as SyntheticsAppState['pingStatus'];
 }

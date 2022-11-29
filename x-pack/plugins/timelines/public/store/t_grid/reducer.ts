@@ -30,6 +30,7 @@ import {
   updateGraphEventId,
   updateSessionViewConfig,
   setTableUpdatedAt,
+  updateTotalCount,
 } from './actions';
 
 import {
@@ -254,6 +255,16 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
       [id]: {
         ...state.tableById[id],
         updated,
+      },
+    },
+  }))
+  .case(updateTotalCount, (state, { id, totalCount }) => ({
+    ...state,
+    tableById: {
+      ...state.tableById,
+      [id]: {
+        ...state.tableById[id],
+        totalCount,
       },
     },
   }))

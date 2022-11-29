@@ -15,12 +15,6 @@ import {
 } from '../../../../../common/runtime_types';
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
-export interface QueryParams {
-  monitorId: string;
-  dateStart: string;
-  dateEnd: string;
-}
-
 export const fetchMonitorLastRun = async ({
   monitorId,
   locationId,
@@ -75,7 +69,7 @@ export const fetchSyntheticsMonitor = async ({
 
   return {
     ...savedObject.attributes,
-    id: savedObject.id,
     updated_at: savedObject.updated_at,
+    created_at: savedObject.created_at,
   } as EncryptedSyntheticsSavedMonitor;
 };

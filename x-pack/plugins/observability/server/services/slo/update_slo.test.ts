@@ -8,7 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getSLOTransformId } from '../../assets/constants';
-import { SLO } from '../../types/models';
+import { SLO } from '../../domain/models';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { createSLORepositoryMock, createTransformManagerMock } from './mocks';
 import { SLORepository } from './slo_repository';

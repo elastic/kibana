@@ -15,13 +15,13 @@ get:
     '200':
       description: Indicates a successful call.
       content:
-        application/json; charset=utf-8:
+        application/json:
           schema:
             type: array
             items:
               $ref: '../components/schemas/alert_response_properties.yaml'
           examples:
-            createCaseCommentResponse:
+            getCaseAlertsResponse:
               $ref: '../components/examples/get_case_alerts_response.yaml'
   servers:
     - url: https://localhost:5601

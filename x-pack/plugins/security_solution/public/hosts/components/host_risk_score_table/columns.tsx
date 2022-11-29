@@ -77,7 +77,7 @@ export const getHostRiskScoreColumns = ({
       if (riskScore != null) {
         return (
           <span data-test-subj="risk-score-truncate" title={`${riskScore}`}>
-            {riskScore.toFixed(2)}
+            {Math.round(riskScore)}
           </span>
         );
       }

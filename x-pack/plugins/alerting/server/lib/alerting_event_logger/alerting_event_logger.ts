@@ -48,6 +48,7 @@ interface AlertOpts {
   message: string;
   group?: string;
   state?: AlertInstanceState;
+  flapping: boolean;
 }
 
 interface ActionOpts {
@@ -247,6 +248,7 @@ export function createAlertRecord(context: RuleContextOpts, alert: AlertOpts) {
       },
     ],
     ruleName: context.ruleName,
+    flapping: alert.flapping,
   });
 }
 

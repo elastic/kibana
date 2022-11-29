@@ -390,7 +390,7 @@ export const demoTimelineData: TimelineItem[] = [
     ],
     ecs: {
       _id: '13',
-      timestamp: '2018-13-12T19:03:25.937Z',
+      timestamp: '2018-12-12T19:03:25.937Z',
       host: { name: ['joe.computer'], ip: ['192.168.0.1'] },
       event: {
         id: ['13'],

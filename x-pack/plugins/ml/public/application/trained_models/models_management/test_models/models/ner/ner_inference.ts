@@ -7,7 +7,9 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { InferenceBase, InferResponse } from '../inference_base';
+import { trainedModelsApiProvider } from '../../../../../services/ml_api_service/trained_models';
+import { InferenceBase, INPUT_TYPE } from '../inference_base';
+import type { InferResponse } from '../inference_base';
 import { getGeneralInputComponent } from '../text_input';
 import { getNerOutputComponent } from './ner_output';
 import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
@@ -31,36 +33,52 @@ export class NerInference extends InferenceBase<NerResponse> {
     }),
   ];
 
-  public async infer() {
-    try {
-      this.setRunning();
-      const inputText = this.inputText$.getValue();
-      const payload = { docs: [{ [this.inputField]: inputText }] };
-      const resp = await this.trainedModelsApi.inferTrainedModel(
-        this.model.model_id,
-        payload,
-        '30s'
-      );
+  constructor(
+    trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
+    model: estypes.MlTrainedModelConfig,
+    inputType: INPUT_TYPE
+  ) {
+    super(trainedModelsApi, model, inputType);
 
-      const processedResponse: NerResponse = {
-        response: parseResponse(resp),
-        rawResponse: resp,
-        inputText,
-      };
-      this.inferenceResult$.next(processedResponse);
-      this.setFinished();
-      return processedResponse;
-    } catch (error) {
-      this.setFinishedWithErrors(error);
-      throw error;
-    }
+    this.initialize();
   }
 
-  public getInputComponent(): JSX.Element {
-    const placeholder = i18n.translate('xpack.ml.trainedModels.testModelsFlyout.ner.inputText', {
-      defaultMessage: 'Enter a phrase to test',
+  protected async inferText() {
+    return this.runInfer<estypes.MlInferTrainedModelResponse>(
+      () => {},
+      (resp, inputText) => {
+        return {
+          response: parseResponse(resp),
+          rawResponse: resp,
+          inputText,
+        };
+      }
+    );
+  }
+
+  protected async inferIndex() {
+    return this.runPipelineSimulate((doc) => {
+      return {
+        response: parseResponse({ inference_results: [doc._source[this.inferenceType]] }),
+        rawResponse: doc._source[this.inferenceType],
+        inputText: doc._source[this.getInputField()],
+      };
     });
-    return getGeneralInputComponent(this, placeholder);
+  }
+
+  protected getProcessors() {
+    return this.getBasicProcessors();
+  }
+
+  public getInputComponent(): JSX.Element | null {
+    if (this.inputType === INPUT_TYPE.TEXT) {
+      const placeholder = i18n.translate('xpack.ml.trainedModels.testModelsFlyout.ner.inputText', {
+        defaultMessage: 'Enter a phrase to test',
+      });
+      return getGeneralInputComponent(this, placeholder);
+    } else {
+      return null;
+    }
   }
 
   public getOutputComponent(): JSX.Element {

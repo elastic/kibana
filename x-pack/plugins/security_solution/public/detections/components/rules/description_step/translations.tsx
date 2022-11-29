@@ -91,6 +91,20 @@ export const NEW_TERMS_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const ML_RUN_JOB_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.mlRunJobLabel',
+  {
+    defaultMessage: 'Run job',
+  }
+);
+
+export const ML_STOP_JOB_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.mlStopJobLabel',
+  {
+    defaultMessage: 'Stop job',
+  }
+);
+
 export const ML_JOB_STARTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStartedDescription',
   {
@@ -137,5 +151,13 @@ export const EQL_TIMESTAMP_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.eqlTimestampFieldLabel',
   {
     defaultMessage: 'Timestamp field',
+  }
+);
+
+export const ALERT_SUPPRESSION_INSUFFICIENT_LICENSE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionInsufficientLicense',
+  {
+    defaultMessage:
+      'Alert suppression is configured but will not be applied due to insufficient licensing',
   }
 );

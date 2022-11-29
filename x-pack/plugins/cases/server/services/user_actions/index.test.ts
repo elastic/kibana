@@ -59,7 +59,7 @@ import { CaseUserActionService, transformFindResponseToExternalModel } from '.';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import {
   externalReferenceAttachmentSO,
-  getPersistableStateAttachmentTypeRegistry,
+  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
 } from '../../attachment_framework/mocks';
 
@@ -305,10 +305,10 @@ const testConnectorId = (
 };
 
 describe('CaseUserActionService', () => {
-  const persistableStateAttachmentTypeRegistry = getPersistableStateAttachmentTypeRegistry();
+  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
 
   beforeAll(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
   });
 

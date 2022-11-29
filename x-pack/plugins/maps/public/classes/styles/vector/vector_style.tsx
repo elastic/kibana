@@ -25,7 +25,6 @@ import {
   VECTOR_STYLES,
 } from '../../../../common/constants';
 import { StyleMeta } from './style_meta';
-// @ts-expect-error
 import { getMakiSymbol } from './symbol_utils';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';

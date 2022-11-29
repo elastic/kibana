@@ -6,7 +6,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
           class="euiPopover emotion-euiPopover"
@@ -17,7 +17,7 @@ Object {
           >
             <button
               aria-label="Header menu Button Icon"
-              class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
               data-test-subj="ButtonIcon"
               type="button"
             >
@@ -49,7 +49,7 @@ Object {
           tabindex="0"
         >
           <div
-            class="emotion-euiPopoverArrow-bottom"
+            class="euiPopover__arrow emotion-euiPopoverArrow-bottom"
             data-popover-arrow="bottom"
             style="left: 10px; top: 0px;"
           />
@@ -116,7 +116,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
     >
       <div
         class="euiPopover emotion-euiPopover"
@@ -127,7 +127,7 @@ Object {
         >
           <button
             aria-label="Header menu Button Icon"
-            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
             data-test-subj="ButtonIcon"
             type="button"
           >
@@ -202,7 +202,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
           class="euiPopover emotion-euiPopover"
@@ -213,7 +213,7 @@ Object {
           >
             <button
               aria-label="Header menu Button Icon"
-              class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
               data-test-subj="ButtonIcon"
               type="button"
             >
@@ -231,7 +231,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
     >
       <div
         class="euiPopover emotion-euiPopover"
@@ -242,7 +242,7 @@ Object {
         >
           <button
             aria-label="Header menu Button Icon"
-            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
             data-test-subj="ButtonIcon"
             type="button"
           >
@@ -317,7 +317,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
           class="euiPopover emotion-euiPopover"
@@ -328,7 +328,7 @@ Object {
           >
             <button
               aria-label="Header menu Button Empty"
-              class="euiButtonEmpty euiButtonEmpty--primary"
+              class="euiButtonEmpty css-9t7nyf-empty-primary"
               data-test-subj="EmptyButton"
               type="button"
             >
@@ -352,7 +352,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
     >
       <div
         class="euiPopover emotion-euiPopover"
@@ -363,7 +363,7 @@ Object {
         >
           <button
             aria-label="Header menu Button Empty"
-            class="euiButtonEmpty euiButtonEmpty--primary"
+            class="euiButtonEmpty css-9t7nyf-empty-primary"
             data-test-subj="EmptyButton"
             type="button"
           >
@@ -444,7 +444,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
           class="euiPopover emotion-euiPopover"
@@ -455,7 +455,7 @@ Object {
           >
             <button
               aria-label="Header menu Button Empty"
-              class="euiButtonEmpty euiButtonEmpty--primary"
+              class="euiButtonEmpty css-9t7nyf-empty-primary"
               data-test-subj="EmptyButton"
               type="button"
             >
@@ -479,7 +479,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
     >
       <div
         class="euiPopover emotion-euiPopover"
@@ -490,7 +490,7 @@ Object {
         >
           <button
             aria-label="Header menu Button Empty"
-            class="euiButtonEmpty euiButtonEmpty--primary"
+            class="euiButtonEmpty css-9t7nyf-empty-primary"
             data-test-subj="EmptyButton"
             type="button"
           >
@@ -571,7 +571,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
           class="euiPopover emotion-euiPopover"
@@ -582,7 +582,7 @@ Object {
           >
             <button
               aria-label="Header menu Button Empty"
-              class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty-isDisabled"
+              class="euiButtonEmpty css-1at5a38-empty-disabled"
               data-test-subj="EmptyButton"
               disabled=""
               type="button"
@@ -607,7 +607,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
     >
       <div
         class="euiPopover emotion-euiPopover"
@@ -618,7 +618,7 @@ Object {
         >
           <button
             aria-label="Header menu Button Empty"
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty-isDisabled"
+            class="euiButtonEmpty css-1at5a38-empty-disabled"
             data-test-subj="EmptyButton"
             disabled=""
             type="button"
@@ -700,7 +700,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
       >
         <div
           class="euiPopover emotion-euiPopover"
@@ -711,7 +711,7 @@ Object {
           >
             <button
               aria-label="Header menu Button Empty"
-              class="euiButtonEmpty euiButtonEmpty--primary"
+              class="euiButtonEmpty css-9t7nyf-empty-primary"
               data-test-subj="EmptyButton"
               type="button"
             >
@@ -735,7 +735,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
     >
       <div
         class="euiPopover emotion-euiPopover"
@@ -746,7 +746,7 @@ Object {
         >
           <button
             aria-label="Header menu Button Empty"
-            class="euiButtonEmpty euiButtonEmpty--primary"
+            class="euiButtonEmpty css-9t7nyf-empty-primary"
             data-test-subj="EmptyButton"
             type="button"
           >

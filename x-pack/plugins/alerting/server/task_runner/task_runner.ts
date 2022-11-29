@@ -9,11 +9,11 @@ import apm from 'elastic-apm-node';
 import { cloneDeep, omit } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import uuid from 'uuid';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
+import { ExecutionHandler } from './execution_handler';
 import { TaskRunnerContext } from './task_runner_factory';
-import { createExecutionHandler } from './create_execution_handler';
 import { Alert, createAlertFactory } from '../alert';
 import {
   ElasticsearchError,
@@ -23,22 +23,21 @@ import {
   ruleExecutionStatusToRaw,
   isRuleSnoozed,
   processAlerts,
+  lastRunFromError,
+  getNextRun,
 } from '../lib';
 import {
-  Rule,
   RuleExecutionStatus,
   RuleExecutionStatusErrorReasons,
   IntervalSchedule,
   RawAlertInstance,
-  RawRule,
   RawRuleExecutionStatus,
-  RuleMonitoring,
-  RuleMonitoringHistory,
+  RawRuleMonitoring,
   RuleTaskState,
   RuleTypeRegistry,
+  RawRuleLastRun,
 } from '../types';
-import { asErr, asOk, map, resolveErr, Result } from '../lib/result_type';
-import { getExecutionDurationPercentiles, getExecutionSuccessRatio } from '../lib/monitoring';
+import { asErr, asOk, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
 import { partiallyUpdateAlert } from '../saved_objects';
@@ -66,21 +65,13 @@ import { wrapSearchSourceClient } from '../lib/wrap_search_source_client';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { loadRule } from './rule_loader';
 import { logAlerts } from './log_alerts';
-import { scheduleActionsForAlerts } from './schedule_actions_for_alerts';
 import { getPublicAlertFactory } from '../alert/create_alert_factory';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
+import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
+import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
-
-export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
-  execution: {
-    history: [],
-    calculated_metrics: {
-      success_ratio: 0,
-    },
-  },
-});
 
 interface StackTraceLog {
   message: ElasticsearchError;
@@ -120,6 +111,7 @@ export class TaskRunner<
   private searchAbortController: AbortController;
   private cancelled: boolean;
   private stackTraceLog: StackTraceLog | null;
+  private ruleMonitoring: RuleMonitoringService;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -152,56 +144,20 @@ export class TaskRunner<
     this.timer = new TaskRunnerTimer({ logger: this.logger });
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
     this.stackTraceLog = null;
-  }
-
-  private getExecutionHandler(
-    ruleId: string,
-    ruleName: string,
-    tags: string[] | undefined,
-    spaceId: string,
-    apiKey: RawRule['apiKey'],
-    kibanaBaseUrl: string | undefined,
-    actions: Rule<Params>['actions'],
-    ruleParams: Params,
-    request: KibanaRequest
-  ) {
-    return createExecutionHandler<
-      Params,
-      ExtractedParams,
-      RuleState,
-      State,
-      Context,
-      ActionGroupIds,
-      RecoveryActionGroupId
-    >({
-      ruleId,
-      ruleName,
-      ruleConsumer: this.ruleConsumer!,
-      tags,
-      executionId: this.executionId,
-      logger: this.logger,
-      actionsPlugin: this.context.actionsPlugin,
-      apiKey,
-      actions,
-      spaceId,
-      ruleType: this.ruleType,
-      kibanaBaseUrl,
-      alertingEventLogger: this.alertingEventLogger,
-      request,
-      ruleParams,
-      supportsEphemeralTasks: this.context.supportsEphemeralTasks,
-      maxEphemeralActionsPerRule: this.context.maxEphemeralActionsPerRule,
-      actionsConfigMap: this.context.actionsConfigMap,
-    });
+    this.ruleMonitoring = new RuleMonitoringService();
   }
 
   private async updateRuleSavedObject(
     ruleId: string,
     namespace: string | undefined,
-    attributes: { executionStatus?: RawRuleExecutionStatus; monitoring?: RuleMonitoring }
+    attributes: {
+      executionStatus?: RawRuleExecutionStatus;
+      monitoring?: RawRuleMonitoring;
+      nextRun?: string | null;
+      lastRun?: RawRuleLastRun | null;
+    }
   ) {
     const client = this.context.internalSavedObjectsRepository;
-
     try {
       await partiallyUpdateAlert(client, ruleId, attributes, {
         ignore404: true,
@@ -223,6 +179,11 @@ export class TaskRunner<
     return !this.context.cancelAlertsOnRuleTimeout || !this.ruleType.cancelAlertsOnRuleTimeout;
   }
 
+  // Usage counter for telemetry
+  // This keeps track of how many times action executions were skipped after rule
+  // execution completed successfully after the execution timeout
+  // This can occur when rule executors do not short circuit execution in response
+  // to timeout
   private countUsageOfActionExecutionAfterRuleCancellation() {
     if (this.cancelled && this.usageCounter) {
       if (this.context.cancelAlertsOnRuleTimeout && this.ruleType.cancelAlertsOnRuleTimeout) {
@@ -257,9 +218,8 @@ export class TaskRunner<
       alertTypeId: ruleTypeId,
       consumer,
       schedule,
-      throttle,
-      notifyWhen,
-      mutedInstanceIds,
+      throttle = null,
+      notifyWhen = null,
       name,
       tags,
       createdBy,
@@ -364,6 +324,7 @@ export class TaskRunner<
                 alertFactory: getPublicAlertFactory(alertFactory),
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,
+                ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
               },
               params,
               state: ruleTypeState as RuleState,
@@ -464,52 +425,34 @@ export class TaskRunner<
       }
     );
 
-    await this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
-      const executionHandler = this.getExecutionHandler(
-        ruleId,
-        rule.name,
-        rule.tags,
-        spaceId,
-        apiKey,
-        this.context.kibanaBaseUrl,
-        rule.actions,
-        rule.params,
-        fakeRequest
-      );
+    const executionHandler = new ExecutionHandler({
+      rule,
+      ruleType: this.ruleType,
+      logger: this.logger,
+      taskRunnerContext: this.context,
+      taskInstance: this.taskInstance,
+      ruleRunMetricsStore,
+      apiKey,
+      ruleConsumer: this.ruleConsumer!,
+      executionId: this.executionId,
+      ruleLabel,
+      alertingEventLogger: this.alertingEventLogger,
+      actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
+    });
 
+    await this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
       await rulesClient.clearExpiredSnoozes({ id: rule.id });
 
-      const ruleIsSnoozed = isRuleSnoozed(rule);
-      if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
-        const mutedAlertIdsSet = new Set(mutedInstanceIds);
-
-        await scheduleActionsForAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>({
-          activeAlerts,
-          recoveryActionGroup: this.ruleType.recoveryActionGroup,
-          recoveredAlerts,
-          executionHandler,
-          mutedAlertIdsSet,
-          logger: this.logger,
-          ruleLabel,
-          ruleRunMetricsStore,
-          throttle,
-          notifyWhen,
-        });
+      if (isRuleSnoozed(rule)) {
+        this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
+      } else if (!this.shouldLogAndScheduleActionsForAlerts()) {
+        this.logger.debug(
+          `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`
+        );
+        this.countUsageOfActionExecutionAfterRuleCancellation();
       } else {
-        if (ruleIsSnoozed) {
-          this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
-        }
-        if (!this.shouldLogAndScheduleActionsForAlerts()) {
-          this.logger.debug(
-            `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`
-          );
-          // Usage counter for telemetry
-          // This keeps track of how many times action executions were skipped after rule
-          // execution completed successfully after the execution timeout
-          // This can occur when rule executors do not short circuit execution in response
-          // to timeout
-          this.countUsageOfActionExecutionAfterRuleCancellation();
-        }
+        await executionHandler.run(activeAlerts);
+        await executionHandler.run(recoveredAlerts, true);
       }
     });
 
@@ -579,13 +522,13 @@ export class TaskRunner<
   }
 
   private async processRunResults({
+    nextRun,
     runDate,
     stateWithMetrics,
-    monitoring,
   }: {
+    nextRun: string | null;
     runDate: Date;
     stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
-    monitoring: RuleMonitoring;
   }) {
     const {
       params: { alertId: ruleId, spaceId },
@@ -593,7 +536,8 @@ export class TaskRunner<
 
     const namespace = this.context.spaceIdToNamespace(spaceId);
 
-    const { status: executionStatus, metrics: executionMetrics } = map<
+    // Getting executionStatus for backwards compatibility
+    const { status: executionStatus } = map<
       RuleTaskStateAndMetrics,
       ElasticsearchError,
       IExecutionStatusAndMetrics
@@ -603,27 +547,42 @@ export class TaskRunner<
       (err: ElasticsearchError) => executionStatusFromError(err, runDate)
     );
 
+    // New consolidated statuses for lastRun
+    const { lastRun, metrics: executionMetrics } = map<
+      RuleTaskStateAndMetrics,
+      ElasticsearchError,
+      ILastRun
+    >(
+      stateWithMetrics,
+      (ruleRunStateWithMetrics) => lastRunFromState(ruleRunStateWithMetrics),
+      (err: ElasticsearchError) => lastRunFromError(err)
+    );
+
     if (apm.currentTransaction) {
       if (executionStatus.status === 'ok' || executionStatus.status === 'active') {
         apm.currentTransaction.setOutcome('success');
       } else if (executionStatus.status === 'error' || executionStatus.status === 'unknown') {
         apm.currentTransaction.setOutcome('failure');
+      } else if (lastRun.outcome === 'succeeded') {
+        apm.currentTransaction.setOutcome('success');
+      } else if (lastRun.outcome === 'failed') {
+        apm.currentTransaction.setOutcome('failure');
       }
     }
 
     this.logger.debug(
-      `ruleRunStatus for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(executionStatus)}`
+      `deprecated ruleRunStatus for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(
+        executionStatus
+      )}`
+    );
+    this.logger.debug(
+      `ruleRunStatus for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(lastRun)}`
     );
     if (executionMetrics) {
       this.logger.debug(
         `ruleRunMetrics for ${this.ruleType.id}:${ruleId}: ${JSON.stringify(executionMetrics)}`
       );
     }
-
-    const monitoringHistory: RuleMonitoringHistory = {
-      success: true,
-      timestamp: +new Date(),
-    };
 
     // set start and duration based on event log
     const { start, duration } = this.alertingEventLogger.getStartAndDuration();
@@ -632,34 +591,32 @@ export class TaskRunner<
     }
     if (null != duration) {
       executionStatus.lastDuration = nanosToMillis(duration);
-      monitoringHistory.duration = executionStatus.lastDuration;
     }
 
     // if executionStatus indicates an error, fill in fields in
-    // event from it
-    if (executionStatus.error) {
-      monitoringHistory.success = false;
-    }
-
-    monitoring.execution.history.push(monitoringHistory);
-    monitoring.execution.calculated_metrics = {
-      success_ratio: getExecutionSuccessRatio(monitoring),
-      ...getExecutionDurationPercentiles(monitoring),
-    };
+    this.ruleMonitoring.addHistory({
+      duration: executionStatus.lastDuration,
+      hasError: executionStatus.error != null,
+      runDate,
+    });
 
     if (!this.cancelled) {
       this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
-      if (executionStatus.error) {
+      if (lastRun.outcome === 'failed') {
+        this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
+      } else if (executionStatus.error) {
         this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
       }
       this.logger.debug(
         `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
           executionStatus
-        )}`
+        )} - ${JSON.stringify(lastRun)}`
       );
       await this.updateRuleSavedObject(ruleId, namespace, {
         executionStatus: ruleExecutionStatusToRaw(executionStatus),
-        monitoring,
+        nextRun,
+        lastRun: lastRunToRaw(lastRun),
+        monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
       });
     }
 
@@ -683,15 +640,13 @@ export class TaskRunner<
     }
 
     let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
-    let monitoring: RuleMonitoring = getDefaultRuleMonitoring();
     let schedule: Result<IntervalSchedule, Error>;
     try {
       const preparedResult = await this.timer.runWithTimer(
         TaskRunnerTimerSpan.PrepareRule,
         async () => this.prepareToRun()
       );
-
-      monitoring = preparedResult.rule.monitoring ?? getDefaultRuleMonitoring();
+      this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring);
 
       stateWithMetrics = asOk(await this.runRule(preparedResult));
 
@@ -703,13 +658,20 @@ export class TaskRunner<
       schedule = asErr(err);
     }
 
+    let nextRun: string | null = null;
+    if (isOk(schedule)) {
+      nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
+    } else if (taskSchedule) {
+      nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
+    }
+
     const { executionStatus, executionMetrics } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.ProcessRuleRun,
       async () =>
         this.processRunResults({
+          nextRun,
           runDate,
           stateWithMetrics,
-          monitoring,
         })
     );
 
@@ -779,7 +741,7 @@ export class TaskRunner<
 
         return { interval: retryInterval };
       }),
-      monitoring,
+      monitoring: this.ruleMonitoring.getMonitoring(),
     };
   }
 
@@ -793,6 +755,8 @@ export class TaskRunner<
     // Write event log entry
     const {
       params: { alertId: ruleId, spaceId, consumer },
+      schedule: taskSchedule,
+      startedAt,
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
 
@@ -813,13 +777,20 @@ export class TaskRunner<
 
     this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_TIMEOUTS);
 
+    let nextRun: string | null = null;
+    if (taskSchedule) {
+      nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
+    }
+
+    const outcomeMsg = `${this.ruleType.id}:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`;
+    const date = new Date();
     // Update the rule saved object with execution status
     const executionStatus: RuleExecutionStatus = {
-      lastExecutionDate: new Date(),
+      lastExecutionDate: date,
       status: 'error',
       error: {
         reason: RuleExecutionStatusErrorReasons.Timeout,
-        message: `${this.ruleType.id}:${ruleId}: execution cancelled due to timeout - exceeded rule type timeout of ${this.ruleType.ruleTaskTimeout}`,
+        message: outcomeMsg,
       },
     };
     this.logger.debug(
@@ -827,6 +798,14 @@ export class TaskRunner<
     );
     await this.updateRuleSavedObject(ruleId, namespace, {
       executionStatus: ruleExecutionStatusToRaw(executionStatus),
+      lastRun: {
+        outcome: 'failed',
+        warning: RuleExecutionStatusErrorReasons.Timeout,
+        outcomeMsg,
+        alertsCount: {},
+      },
+      monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
+      nextRun: nextRun && new Date(nextRun).getTime() > date.getTime() ? nextRun : null,
     });
   }
 }

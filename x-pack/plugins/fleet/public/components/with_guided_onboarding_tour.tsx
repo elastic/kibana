@@ -85,7 +85,7 @@ export const WithGuidedOnboardingTour: FunctionComponent<{
 
   return config ? (
     <EuiTourStep
-      content={<EuiText>{config.description}</EuiText>}
+      content={<EuiText size="s">{config.description}</EuiText>}
       isStepOpen={isGuidedOnboardingTourOpen}
       maxWidth={350}
       onFinish={() => setIsGuidedOnboardingTourOpen(false)}
@@ -97,7 +97,7 @@ export const WithGuidedOnboardingTour: FunctionComponent<{
       footerAction={
         <EuiButton onClick={() => setIsGuidedOnboardingTourOpen(false)} size="s" color="success">
           {i18n.translate('xpack.fleet.guidedOnboardingTour.nextButtonLabel', {
-            defaultMessage: 'Next',
+            defaultMessage: 'Got it',
           })}
         </EuiButton>
       }
