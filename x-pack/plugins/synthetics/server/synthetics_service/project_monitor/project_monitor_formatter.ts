@@ -72,7 +72,7 @@ export const FAILED_TO_UPDATE_MONITORS = i18n.translate(
 export class ProjectMonitorFormatter {
   private projectId: string;
   private spaceId: string;
-  private locations: Locations;
+  private publicLocations: Locations;
   private privateLocations: PrivateLocation[];
   private savedObjectsClient: SavedObjectsClientContract;
   private encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
@@ -88,8 +88,6 @@ export class ProjectMonitorFormatter {
   private writeIntegrationPoliciesPermissions?: boolean;
 
   constructor({
-    locations,
-    privateLocations,
     savedObjectsClient,
     encryptedSavedObjectsClient,
     projectId,
@@ -99,8 +97,6 @@ export class ProjectMonitorFormatter {
     syntheticsMonitorClient,
     request,
   }: {
-    locations: Locations;
-    privateLocations: PrivateLocation[];
     savedObjectsClient: SavedObjectsClientContract;
     encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
     projectId: string;
@@ -112,8 +108,6 @@ export class ProjectMonitorFormatter {
   }) {
     this.projectId = projectId;
     this.spaceId = spaceId;
-    this.locations = locations;
-    this.privateLocations = privateLocations;
     this.savedObjectsClient = savedObjectsClient;
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
@@ -121,6 +115,8 @@ export class ProjectMonitorFormatter {
     this.server = server;
     this.projectFilter = `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
     this.request = request;
+    this.publicLocations = [];
+    this.privateLocations = [];
   }
 
   init = async () => {
@@ -138,7 +134,7 @@ export class ProjectMonitorFormatter {
 
     const { publicLocations, privateLocations } = locations;
 
-    this.locations = publicLocations;
+    this.publicLocations = publicLocations;
     this.privateLocations = privateLocations;
 
     return existingMonitors;
@@ -218,7 +214,7 @@ export class ProjectMonitorFormatter {
 
       const { normalizedFields: normalizedMonitor, errors } = normalizeProjectMonitor({
         monitor,
-        locations: this.locations,
+        locations: this.publicLocations,
         privateLocations: this.privateLocations,
         projectId: this.projectId,
         namespace: this.spaceId,
