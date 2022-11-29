@@ -22,7 +22,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { ServiceOverviewCharts } from './service_overview_charts/service_overview_charts';
 import { ServiceOverviewMobileCharts } from './service_overview_charts/service_oveview_mobile_charts';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { isPending } from '../../../hooks/use_fetcher';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -61,9 +61,7 @@ export function ServiceOverview() {
     isSingleColumn,
   };
 
-  const isLoading =
-    serviceAgentStatus === FETCH_STATUS.LOADING ||
-    serviceAgentStatus === FETCH_STATUS.NOT_INITIATED;
+  const isPendingServiceAgent = !agentName && isPending(serviceAgentStatus);
 
   return (
     <AnnotationsContextProvider
@@ -73,7 +71,7 @@ export function ServiceOverview() {
       end={end}
     >
       <ChartPointerEventContextProvider>
-        {isLoading ? (
+        {isPendingServiceAgent ? (
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
               <EuiSpacer size="l" />

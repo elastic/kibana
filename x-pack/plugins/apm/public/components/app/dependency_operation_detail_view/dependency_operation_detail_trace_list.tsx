@@ -22,7 +22,7 @@ import { EventOutcome } from '../../../../common/event_outcome';
 import { asMillisecondDuration } from '../../../../common/utils/formatters';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { FetcherResult, FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { FetcherResult, isPending } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { push } from '../../shared/links/url_helpers';
@@ -261,10 +261,7 @@ export function DependencyOperationDetailTraceList({
           initialSortDirection={sortDirection}
           initialPageSize={pageSize}
           initialPageIndex={page}
-          isLoading={
-            spanFetch.status === FETCH_STATUS.LOADING ||
-            spanFetch.status === FETCH_STATUS.NOT_INITIATED
-          }
+          isLoading={isPending(spanFetch.status)}
           sortFn={sortFn}
         />
       </EuiFlexItem>
