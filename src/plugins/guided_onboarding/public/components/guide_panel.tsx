@@ -190,7 +190,7 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
         />
       </div>
 
-      {isGuideOpen && (
+      {isGuideOpen && guideConfig && (
         <EuiFlyout
           ownFocus
           onClose={toggleGuide}
