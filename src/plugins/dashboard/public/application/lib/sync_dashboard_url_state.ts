@@ -10,7 +10,7 @@ import _ from 'lodash';
 import { debounceTime } from 'rxjs/operators';
 import semverSatisfies from 'semver/functions/satisfies';
 
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 
 import { setDashboardState } from '../state';
 import { migrateLegacyQuery } from './migrate_legacy_query';

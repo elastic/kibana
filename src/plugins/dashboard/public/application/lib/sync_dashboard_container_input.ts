@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
 
 import { compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 
 import type { DashboardContainer } from '../embeddable';
 import { DashboardConstants } from '../..';
