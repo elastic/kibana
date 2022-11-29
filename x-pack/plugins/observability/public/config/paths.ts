@@ -11,10 +11,10 @@ export const RULES_PAGE_LINK = `${ALERT_PAGE_LINK}/rules`;
 export const paths = {
   observability: {
     alerts: ALERT_PAGE_LINK,
+    alertDetails: (alertId: string) => `${ALERT_PAGE_LINK}/${encodeURI(alertId)}`,
     rules: RULES_PAGE_LINK,
     ruleDetails: (ruleId?: string | null) =>
       ruleId ? `${RULES_PAGE_LINK}/${encodeURI(ruleId)}` : RULES_PAGE_LINK,
-    alertDetails: (alertId: string) => `${ALERT_PAGE_LINK}/${encodeURI(alertId)}`,
   },
   management: {
     rules: '/app/management/insightsAndAlerting/triggersActions/rules',
