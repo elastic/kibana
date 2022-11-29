@@ -8,7 +8,7 @@
 
 import uuid from 'uuid';
 import useLifecycles from 'react-use/lib/useLifecycles';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
@@ -63,11 +63,13 @@ export interface ControlGroupRendererProps {
   getCreationOptions: (
     builder: typeof ControlGroupInputBuilder
   ) => Promise<Partial<ControlGroupInput>>;
+  input?: Partial<Pick<ControlGroupInput, 'viewMode' | 'executionContext'>>;
 }
 
 export const ControlGroupRenderer = ({
   onEmbeddableLoad,
   getCreationOptions,
+  input,
 }: ControlGroupRendererProps) => {
   const controlsRoot = useRef(null);
   const [controlGroupContainer, setControlGroupContainer] = useState<ControlGroupContainer>();
@@ -87,6 +89,7 @@ export const ControlGroupRenderer = ({
         const container = (await factory?.create({
           id,
           ...getDefaultControlGroupInput(),
+          ...input,
           ...(await getCreationOptions(ControlGroupInputBuilder)),
         })) as ControlGroupContainer;
 
@@ -101,6 +104,26 @@ export const ControlGroupRenderer = ({
       controlGroupContainer?.destroy();
     }
   );
+
+  /**
+   * Update embeddable input when props input changes
+   */
+  useEffect(() => {
+    let updateCanceled = false;
+    (async () => {
+      // check if applying input from props would result in any changes to the embeddable input
+      const isInputEqual = await controlGroupContainer?.getExplicitInputIsEqual({
+        ...controlGroupContainer?.getInput(),
+        ...input,
+      });
+      if (!controlGroupContainer || isInputEqual || updateCanceled) return;
+      controlGroupContainer.updateInput({ ...input });
+    })();
+
+    return () => {
+      updateCanceled = true;
+    };
+  }, [controlGroupContainer, input]);
 
   return <div ref={controlsRoot} />;
 };
