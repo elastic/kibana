@@ -71,7 +71,6 @@ run(
     async function runTest(journey: string) {
       try {
         process.stdout.write(`--- Running test ${journey}\n`);
-        process.env.TEST_PERFORMANCE_PHASE = 'TEST';
         await runFunctionalTest(journey, 'TEST');
       } catch (e) {
         log.warning(`Journey ${journey} failed. Retrying once...`);
