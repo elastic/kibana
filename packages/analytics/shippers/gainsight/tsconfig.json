@@ -2,7 +2,8 @@
   "extends": "../../../../tsconfig.bazel.json",
   "compilerOptions": {
     "declaration": true,
-    "emitDeclarationOnly": true,
+    "emit": true,
+    "sourceMap": true,
     "outDir": "target_types",
     "types": [
       "jest",

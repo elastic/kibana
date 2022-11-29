@@ -2,7 +2,8 @@
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./target/types",
-    "emitDeclarationOnly": true,
+    "emit": true,
+    "sourceMap": true,
     "declaration": true,
   },
   "include": [
