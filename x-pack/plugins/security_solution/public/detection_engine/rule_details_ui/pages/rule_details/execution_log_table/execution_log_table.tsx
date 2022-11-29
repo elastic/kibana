@@ -475,7 +475,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         columns={executionLogColumns}
         items={items}
         loading={isFetching}
-        sorting={sorting}
+        // sorting={sorting}
         pagination={pagination}
         onChange={onTableChangeCallback}
       />

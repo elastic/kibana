@@ -157,7 +157,9 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
         additionalFilters,
       })
     );
+    
   }, [setAlertsQuery, from, to, entityFilter, additionalFilters]);
+
 
   useEffect(() => {
     if (data == null) {

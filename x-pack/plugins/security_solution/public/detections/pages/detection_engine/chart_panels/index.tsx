@@ -21,7 +21,7 @@ import { AlertsTreemapPanel } from '../../../../common/components/alerts_treemap
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { useEuiComboBoxReset } from '../../../../common/components/use_combo_box_reset';
 import { AlertsHistogramPanel } from '../../../components/alerts_kpis/alerts_histogram_panel';
-import { AlertsChartsPanel } from '../../../components/alerts_kpis/alerts_charts_panel';
+import { AlertsSummaryChartsPanel } from '../../../components/alerts_kpis/alerts_summary_charts_panel';
 import {
   DEFAULT_STACK_BY_FIELD,
   DEFAULT_STACK_BY_FIELD1,
@@ -235,10 +235,8 @@ const ChartPanelsComponent: React.FC<Props> = ({
           {isLoadingIndexPattern ? (
             <EuiLoadingSpinner data-test-subj="alertsChartsLoadingSpinner" size="xl" />
           ) : (
-            <AlertsChartsPanel
+            <AlertsSummaryChartsPanel
               alignHeader="flexStart"
-              chartOptionsContextMenu={chartOptionsContextMenu}
-              inspectTitle={i18n.CHARTS}
               filters={alertsHistogramDefaultFilters}
               query={query}
               panelHeight={ALERTS_CHARTS_PANEL_HEIGHT}

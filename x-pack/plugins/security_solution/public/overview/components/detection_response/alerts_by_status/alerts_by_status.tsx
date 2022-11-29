@@ -70,7 +70,7 @@ interface AlertsByStatusProps {
 }
 
 const legendField = 'kibana.alert.severity';
-const chartConfigs: Array<{ key: Severity; label: string; color: string }> = [
+export const chartConfigs: Array<{ key: Severity; label: string; color: string }> = [
   { key: 'critical', label: STATUS_CRITICAL_LABEL, color: SEVERITY_COLOR.critical },
   { key: 'high', label: STATUS_HIGH_LABEL, color: SEVERITY_COLOR.high },
   { key: 'medium', label: STATUS_MEDIUM_LABEL, color: SEVERITY_COLOR.medium },

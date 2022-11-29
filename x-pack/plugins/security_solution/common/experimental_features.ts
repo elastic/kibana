@@ -80,6 +80,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the `get-file` endpoint response action
    */
   responseActionGetFileEnabled: false,
+
+  /**
+   * Enables top charts on Alerts Page
+   */
+  alertsPageChartsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
