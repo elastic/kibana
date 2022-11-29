@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { INITIAL_DATA } from '../../../../common/watefall';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { getWaterfall } from './waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
-const INITIAL_DATA: APIReturnType<'GET /internal/apm/traces/{traceId}'> = {
-  errorDocs: [],
-  traceDocs: [],
-  exceedsMax: false,
-  linkedChildrenOfSpanCountBySpanId: {},
-};
 export type WaterfallFetchResult = ReturnType<typeof useWaterfallFetcher>;
 
 export function useWaterfallFetcher({
@@ -42,18 +34,14 @@ export function useWaterfallFetcher({
             query: {
               start,
               end,
+              entryTransactionId: transactionId,
             },
           },
         });
       }
     },
-    [traceId, start, end]
+    [traceId, start, end, transactionId]
   );
 
-  const waterfall = useMemo(
-    () => getWaterfall(data, transactionId),
-    [data, transactionId]
-  );
-
-  return { waterfall, status, error };
+  return { waterfall: data, status, error };
 }

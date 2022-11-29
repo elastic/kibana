@@ -20,3 +20,30 @@ export interface WaterfallErrorDoc {
     name: string;
   };
 }
+
+export interface RootTransaction {
+  trace: { id: string };
+  transaction: {
+    duration: TimestampUs;
+    id: string;
+    name: string;
+    type: string;
+  };
+  service: {
+    name: string;
+    environment?: string;
+  };
+}
+
+export const INITIAL_DATA = {
+  entryWaterfallTransaction: undefined,
+  rootTransaction: undefined,
+  exceedsMax: false,
+  totalErrorsCount: 0,
+  duration: 0,
+  items: [],
+  legends: [],
+  errorItems: [],
+  childrenByParentId: {},
+  errorCountById: {},
+};

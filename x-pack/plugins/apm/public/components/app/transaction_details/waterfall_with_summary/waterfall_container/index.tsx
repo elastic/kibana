@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { keyBy } from 'lodash';
 import React from 'react';
 import { useCriticalPathFeatureEnabledSetting } from '../../../../../hooks/use_critical_path_feature_enabled_setting';
 import { TechnicalPreviewBadge } from '../../../../shared/technical_preview_badge';
@@ -39,18 +38,12 @@ export function WaterfallContainer({
     return null;
   }
 
-  const { legends, items } = waterfall;
+  const { legends } = waterfall;
 
   // Service colors are needed to color the dot in the error popover
   const serviceLegends = legends.filter(
     ({ type }) => type === WaterfallLegendType.ServiceName
   );
-  const serviceColors = serviceLegends.reduce((colorMap, legend) => {
-    return {
-      ...colorMap,
-      [legend.value!]: legend.color,
-    };
-  }, {} as Record<string, string>);
 
   // only color by span type if there are only events for one service
   const colorBy =
@@ -59,23 +52,6 @@ export function WaterfallContainer({
       : WaterfallLegendType.SpanType;
 
   const displayedLegends = legends.filter((legend) => legend.type === colorBy);
-
-  const legendsByValue = keyBy(displayedLegends, 'value');
-
-  // mutate items rather than rebuilding both items and childrenByParentId
-  items.forEach((item) => {
-    let color = '';
-    if ('legendValues' in item) {
-      color = legendsByValue[item.legendValues[colorBy]].color;
-    }
-
-    if (!color) {
-      // fall back to service color if there's no span.type, e.g. for transactions
-      color = serviceColors[item.doc.service.name];
-    }
-
-    item.color = color;
-  });
 
   // default to serviceName if value is empty, e.g. for transactions (which don't
   // have span.type or span.subtype)

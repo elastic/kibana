@@ -22,6 +22,8 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 import { APMConfig } from '../..';
 import { getErrorDocs } from './get_error_docs';
 
+export type TraceItems = Awaited<ReturnType<typeof getTraceItems>>;
+
 export async function getTraceItems(
   traceId: string,
   config: APMConfig,

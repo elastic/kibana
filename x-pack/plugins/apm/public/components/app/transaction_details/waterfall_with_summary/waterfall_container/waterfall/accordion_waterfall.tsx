@@ -122,7 +122,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
     displayedColor = transparentize(0.5, item.color);
   }
 
-  const errorCount = waterfall.getErrorCount(item.id);
+  const errorCount = waterfall.errorCountById[item.id];
 
   // To indent the items creating the parent/child tree
   const marginLeftLevel = 8 * level;
