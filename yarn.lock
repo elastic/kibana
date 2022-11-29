@@ -3901,15 +3901,31 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-file-context@link:bazel-bin/packages/shared-ux/file/context":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-file-image-mocks@link:bazel-bin/packages/shared-ux/file/image/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-image-types@link:bazel-bin/packages/shared-ux/file/image/types":
+"@kbn/shared-ux-file-image@link:bazel-bin/packages/shared-ux/file/image/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-file-image@link:bazel-bin/packages/shared-ux/file/image/impl":
+"@kbn/shared-ux-file-mocks@link:bazel-bin/packages/shared-ux/file/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-file-picker@link:bazel-bin/packages/shared-ux/file/file_picker/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-file-types@link:bazel-bin/packages/shared-ux/file/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-file-upload@link:bazel-bin/packages/shared-ux/file/file_upload/impl":
   version "0.0.0"
   uid ""
 
