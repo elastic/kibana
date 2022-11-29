@@ -51,7 +51,7 @@ export class Timeslider extends Component<Props, {}> {
     this._isMounted = true;
   }
 
-  _getCreationOptions = async (builder: typeof ControlGroupInputBuilder) => {
+  _getInitialInput = async (builder: typeof ControlGroupInputBuilder) => {
     const input = {
       id: uuid(),
       ...getDefaultControlGroupInput()
@@ -105,7 +105,7 @@ export class Timeslider extends Component<Props, {}> {
       <div className="mapTimeslider mapTimeslider--animation">
         <ControlGroupRenderer
           onEmbeddableLoad={this._onLoadComplete}
-          getCreationOptions={this._getCreationOptions}
+          getCreationOptions={this._getInitialInput}
         />
       </div>
     );
