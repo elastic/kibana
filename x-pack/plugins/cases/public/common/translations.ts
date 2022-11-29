@@ -311,8 +311,7 @@ export const ADD_TAG_CUSTOM_OPTION_LABEL = (searchValue: string) =>
 export const COMMENT_VERSION_CONFLICT_ERROR = i18n.translate(
   'xpack.cases.configure.commentVersionConflictError',
   {
-    defaultMessage:
-      'This case has been updated. Please refresh before saving additional updates.',
+    defaultMessage: 'This case has been updated. Please refresh before saving additional updates.',
   }
 );
 
