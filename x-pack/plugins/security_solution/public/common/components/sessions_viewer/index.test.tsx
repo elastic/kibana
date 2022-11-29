@@ -127,14 +127,14 @@ describe('SessionsView', () => {
   });
 
   it('renders correctly against snapshot', async () => {
-    const wrapper = mount(
+    const { asFragment } = render(
       <TestProviders>
         <SessionsView {...testProps} />
       </TestProviders>
     );
 
     await waitFor(() => {
-      expect(wrapper).toMatchSnapshot();
+      expect(asFragment()).toMatchSnapshot();
     });
   });
 
