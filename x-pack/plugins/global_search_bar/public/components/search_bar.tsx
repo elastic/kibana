@@ -31,7 +31,7 @@ import type {
   GlobalSearchFindParams,
 } from '@kbn/global-search-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { FilterValues, parseSearchParams } from '../search_syntax';
+import { parseSearchParams } from '../search_syntax';
 import { getSuggestions, SearchSuggestion } from '../suggestions';
 import { resultToOption, suggestionToOption } from '../lib';
 import { PopoverFooter } from './popover_footer';
@@ -247,7 +247,10 @@ export const SearchBar: FC<SearchBarProps> = ({
         console.log('Error trying to track searchbar metrics', e);
       }
 
-      navigateToUrl(url);
+      navigateToUrl(
+        url,
+        type === 'documentation' ? { openInNewTab: true, externalLink: true } : {}
+      );
 
       (document.activeElement as HTMLElement).blur();
       if (searchRef) {

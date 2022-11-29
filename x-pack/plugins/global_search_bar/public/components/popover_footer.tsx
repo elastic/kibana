@@ -31,12 +31,13 @@ export const PopoverFooter: FC<PopoverFooterProps> = ({ isMac }) => {
             />
             &nbsp;
             <EuiCode>type:</EuiCode>&nbsp;
+            <EuiCode>tag:</EuiCode>&nbsp;
             <FormattedMessage
               id="xpack.globalSearchBar.searchBar.helpText.helpTextConjunction"
               defaultMessage="or"
             />
             &nbsp;
-            <EuiCode>tag:</EuiCode>
+            <EuiCode>docs:</EuiCode>
           </p>
         </EuiText>
       </EuiFlexItem>

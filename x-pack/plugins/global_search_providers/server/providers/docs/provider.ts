@@ -7,6 +7,8 @@
 
 import { from, of } from 'rxjs';
 import fetch from 'node-fetch';
+import { URLSearchParams } from 'url';
+
 import { map, takeUntil, filter } from 'rxjs/operators';
 import { GlobalSearchResultProvider } from '@kbn/global-search-plugin/server';
 import { mapToResults } from './map_doc_to_result';
@@ -16,9 +18,15 @@ export const createDocsResultProvider = (): GlobalSearchResultProvider => {
     id: 'docsLink',
     find: ({ docs }, { aborted$ }) => {
       if (!docs || docs.length <= 0) return of([]);
-      const term = docs[0].toLowerCase();
+      const term = docs[0];
 
-      const responsePromise = fetch(`https://www.elastic.co/guide/en/kibana/current/${term}.html`);
+      const url = new URL('https://www.elastic.co/search');
+      url.search = new URLSearchParams([
+        ['q', term],
+        ['filters[0][field]', 'website_area'],
+        ['filters[0][values][0]', 'documentation'],
+      ]).toString();
+      const responsePromise = fetch(url);
 
       return from(responsePromise).pipe(
         takeUntil(aborted$),

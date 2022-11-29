@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiSelectableTemplateSitewideOption } from '@elastic/eui';
+import { EuiIcon, EuiSelectableTemplateSitewideOption } from '@elastic/eui';
 import type { GlobalSearchResult } from '@kbn/global-search-plugin/common/types';
 import type { SavedObjectTaggingPluginStart, Tag } from '@kbn/saved-objects-tagging-plugin/public';
 import { ResultTagList } from '../components/result_tag_list';
@@ -42,6 +42,17 @@ export const resultToOption = (
     option.append = (
       <ResultTagList tags={tagIds.map(getTag) as Tag[]} searchTagIds={searchTagIds} />
     );
+  }
+
+  if (type === 'documentation') {
+    // Did the following in the application service instead
+    /*
+        option.onClick = (x) => {
+          window.open(url, '_blank', 'noopener,noreferrer');
+        };
+    */
+
+    option.append = <EuiIcon type="popout" />;
   }
 
   return option;

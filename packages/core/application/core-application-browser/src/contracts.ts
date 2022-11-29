@@ -188,4 +188,7 @@ export interface NavigateToUrlOptions {
    * optional state to forward to the application
    */
   state?: unknown;
+
+  externalLink?: boolean;
+  openInNewTab?: boolean;
 }
