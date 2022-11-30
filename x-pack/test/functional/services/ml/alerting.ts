@@ -181,5 +181,13 @@ export function MachineLearningAlertingProvider(
         await testSubjects.existOrFail('onActionGroupChange', { timeout: 1000 });
       });
     },
+
+    async setRuleName(rulename: string) {
+      await testSubjects.setValue('ruleNameInput', rulename);
+    },
+
+    async scrollRuleNameIntoView() {
+      await testSubjects.scrollIntoView('ruleNameInput');
+    },
   };
 }

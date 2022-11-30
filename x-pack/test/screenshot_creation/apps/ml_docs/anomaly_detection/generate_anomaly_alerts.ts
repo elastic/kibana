@@ -18,7 +18,7 @@ function createTestJobAndDatafeed() {
   return {
     job: {
       job_id: jobId,
-      description: 'test_job_annotation',
+      description: 'test_job',
       groups: ['ecommerce'],
       analysis_config: {
         bucket_span: '1h',
@@ -102,6 +102,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('can create an anomaly detection alert', async () => {
         await ml.navigation.navigateToAlertsAndAction();
         await pageObjects.triggersActionsUI.clickCreateAlertButton();
+        await ml.alerting.setRuleName('test-ecommerce');
 
         await ml.alerting.openNotifySelection();
         await commonScreenshots.takeScreenshot('ml-rule', screenshotDirectories, 1920, 1400);
@@ -124,8 +125,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await ml.alerting.assertPreviewButtonState(false);
         await ml.alerting.setTestInterval('1y');
         await ml.alerting.assertPreviewButtonState(true);
+        await ml.alerting.scrollRuleNameIntoView();
         await ml.testExecution.logTestStep('take screenshot');
-        await commonScreenshots.takeScreenshot('ml-anomaly-alert-severity', screenshotDirectories);
+        await commonScreenshots.takeScreenshot(
+          'ml-anomaly-alert-severity',
+          screenshotDirectories,
+          1920,
+          1400
+        );
       });
     });
   });
