@@ -6,11 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { createListRoute } from './list';
-export { createInstallRoute } from './install';
-export { createUninstallRoute } from './uninstall';
-export {
-  createLargeDatasetRoute,
-  createIsLargeDataSetInstalledRoute,
-  deleteLargeDatasetRoute as createDeleteLargeDatasetRoute,
-} from './large_dataset';
+export { deleteIndex, createIndex, checkIfIndexExists, bulkUpload } from './util/es_operations';

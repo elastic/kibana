@@ -124,7 +124,7 @@ function generateTestData() {
   const format = 'name:str,age:int,last_updated:ts'.split(',');
   const tsStart = Date.now();
   const items = [];
-  for (let i = 1; i < numberOfDocuments; i++) {
+  for (let i = 1; i <= numberOfDocuments; i++) {
     const item = generateRandomDoc(format);
     items.push(item);
   }

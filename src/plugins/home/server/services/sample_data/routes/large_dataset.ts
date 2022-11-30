@@ -12,6 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter, Logger, SavedObject } from '@kbn/core/server';
 import { CoreSetup } from '@kbn/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
+import { deleteIndex, createIndex, bulkUpload } from '../lib';
 
 const dataView = (indexName: string) => {
   return {
@@ -30,6 +31,7 @@ const dataView = (indexName: string) => {
 };
 
 const LARGE_DATASET_ID = 'large_dataset';
+const LARGE_DATASET_INDEX_NAME = 'kibana_sample_data_large';
 
 const largeDatasetProvider = function (
   name: string,
@@ -52,7 +54,7 @@ const largeDatasetProvider = function (
   };
 };
 
-export function createInstallLargeDatasetRoute(
+export function createLargeDatasetRoute(
   router: IRouter,
   logger: Logger,
   core: CoreSetup,
@@ -62,12 +64,11 @@ export function createInstallLargeDatasetRoute(
     {
       path: '/api/sample_data/large_dataset',
       validate: {
-        body: schema.object({ indexName: schema.string(), nrOfDocuments: schema.number() }),
+        body: schema.object({ nrOfDocuments: schema.number() }),
       },
     },
     async (context, req, res) => {
       const { nrOfDocuments } = req.body;
-      const indexName = 'kibana_sample_data_large';
       logger.info(`Called ${nrOfDocuments}`);
       (async () => {
         const esClient = (await core.getStartServices())[0].elasticsearch.client;
@@ -76,54 +77,16 @@ export function createInstallLargeDatasetRoute(
             numberOfDocuments: nrOfDocuments,
           },
         });
-        const indexExists = await esClient.asInternalUser.indices.exists({
-          index: indexName,
-        });
-        if (indexExists) {
-          await esClient.asInternalUser.indices.delete({
-            index: indexName,
-          });
-        }
-        await esClient.asInternalUser.indices.create({
-          index: indexName,
-          settings: {
-            number_of_shards: 2,
-            number_of_replicas: 0,
-          },
-        });
+        await deleteIndex(esClient, LARGE_DATASET_INDEX_NAME);
+        await createIndex(esClient, LARGE_DATASET_INDEX_NAME);
 
         worker.on('message', async (message) => {
-          console.log('Message from worker');
           if (message.status === 'DONE') {
             const { items } = message;
-            const operations = JSON.parse(items).flatMap((doc) => [
-              { index: { _index: indexName } },
-              doc,
-            ]);
-            const bulkResponse = await esClient.asInternalUser.bulk({ refresh: true, operations });
-            if (bulkResponse.errors) {
-              const erroredDocuments = [];
-              // The items array has the same order of the dataset we just indexed.
-              // The presence of the `error` key indicates that the operation
-              // that we did for the document has failed.
-              bulkResponse.items.forEach((action, i) => {
-                const operation = Object.keys(action)[0];
-                if (action[operation].error) {
-                  erroredDocuments.push({
-                    // If the status is 429 it means that you can retry the document,
-                    // otherwise it's very likely a mapping error, and you should
-                    // fix the document before to try it again.
-                    status: action[operation].status,
-                    error: action[operation].error,
-                  });
-                }
-              });
-              console.log(erroredDocuments);
-            }
+            await bulkUpload(esClient, LARGE_DATASET_INDEX_NAME, items);
+            // TODO: add error handling
           }
         });
-
-        worker.postMessage('setup');
         worker.postMessage('start');
       })();
 
@@ -191,16 +154,29 @@ export function createIsLargeDataSetInstalledRoute(router: IRouter, core: CoreSe
     async (context, _req, res) => {
       const esClient = (await core.getStartServices())[0].elasticsearch.client;
       const indexExists = await esClient.asInternalUser.indices.exists({
-        index: 'kibana_sample_data_large',
+        index: LARGE_DATASET_INDEX_NAME,
       });
-      if (!indexExists) {
-        return res.notFound();
-      }
       return res.ok({
         body: {
-          status: 'installed',
+          installed: indexExists,
         },
       });
+    }
+  );
+}
+
+export function deleteLargeDatasetRoute(
+  router: IRouter,
+  logger: Logger,
+  core: CoreSetup,
+  installCompleteCallback?: (id: SampleDatasetSchema) => void
+): void {
+  router.delete(
+    { path: '/api/sample_data/large_dataset', validate: false },
+    async (context, _req, res) => {
+      const esClient = (await core.getStartServices())[0].elasticsearch.client;
+      await deleteIndex(esClient, LARGE_DATASET_INDEX_NAME);
+      return res.noContent();
     }
   );
 }

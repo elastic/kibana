@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -18,14 +18,16 @@ import {
   EuiSpacer,
   EuiForm,
   EuiFormRow,
-  EuiFieldText,
   EuiRange,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LargeDataSetParams } from './services';
+import { LargeDataSetParams, useServices } from './services';
 
-const SESSION_KEY = 'large-dataset-indices';
+const MIN = 10000;
+const MAX = 1000000;
+const STEP = 1000;
+const INDEX_NAME = 'kibana_sample_data_large';
 
 const title = i18n.translate('homePackages.largeDataSetPanel.title', {
   defaultMessage: 'Generate large data set',
@@ -35,6 +37,20 @@ const message = i18n.translate('homePackages.largeDataSetPanel.message', {
   defaultMessage:
     'Generate a large data set. Takes about 10 minutes. Turn the switch on to configure the dataset, or leave the switch off to generate a dataset with default parameters',
 });
+
+const datasetGeneratedSuccessMessage = i18n.translate(
+  'homePackages.largeDataSetPanel.toast.success',
+  {
+    defaultMessage: 'Dataset successfully generated.',
+  }
+);
+
+const datasetUninstallErrorMessage = i18n.translate(
+  'homePackages.largeDataSetPanel.toast.uninstall.error',
+  {
+    defaultMessage: 'Error uninstalling dataset',
+  }
+);
 
 const useSVG: () => [string | null, boolean] = () => {
   const { colorMode } = useEuiTheme();
@@ -66,44 +82,76 @@ const useSVG: () => [string | null, boolean] = () => {
 };
 
 interface Props {
-  install: (params: LargeDataSetParams) => Promise<void>;
+  installDataset: (params: LargeDataSetParams) => Promise<void>;
   checkInstalled: () => Promise<boolean>;
+  uninstallDataset: () => Promise<void>;
 }
 
-export const LargeDatasetPanel = ({ install, checkInstalled }: Props) => {
+enum Status {
+  GENERATING = 'generating',
+  DONE = 'done',
+  UNINSTALLED = 'uninstalled',
+}
+
+export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDataset }: Props) => {
   const [imageSrc] = useSVG();
   const [installed, setInstalled] = useState<boolean>(false);
   const [checked, setChecked] = useState<boolean>(false);
-  const [indexName, setIndexName] = useState<string>('kibana_sample_data_large');
   const [nrOfDocuments, setNrOfDocuments] = useState<number>(100000);
+  const intervalRef = useRef<ReturnType<typeof setTimeout>>();
+  const { notifySuccess, notifyError } = useServices();
 
   const image = imageSrc ? <EuiImage alt={'demo image'} size="l" src={imageSrc} /> : null;
 
-  const updateSessionStorage = () => {
-    const sessionItems = sessionStorage.getItem(SESSION_KEY);
-    if (!sessionItems) {
-      return;
-    }
-    const indices = JSON.parse(sessionItems);
-    indices.push(indexName);
-    sessionStorage.setItem(SESSION_KEY, indices);
+  useEffect(() => {
+    let mounted = true;
+    const checkIfInstalled = async () => {
+      const responseData = await checkInstalled();
+      if (mounted) {
+        setInstalled(responseData);
+      }
+      if (responseData && sessionStorage.getItem(INDEX_NAME) === Status.GENERATING) {
+        updateSessionStorage(Status.DONE);
+        notifySuccess(datasetGeneratedSuccessMessage);
+      }
+    };
+    checkIfInstalled();
+    intervalRef.current = setInterval(checkIfInstalled, 30000); // half a minute
+    return () => {
+      mounted = false;
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const updateSessionStorage = (status: Status) => {
+    sessionStorage.setItem(INDEX_NAME, status);
   };
 
-  const onClick = async () => {
-    updateSessionStorage();
-    await install({ indexName, nrOfDocuments });
-    setInstalled(true);
+  const onInstallClick = async () => {
+    try {
+      updateSessionStorage(Status.GENERATING);
+      installDataset({ nrOfDocuments });
+      setInstalled(true);
+    } catch {
+      notifyError(datasetUninstallErrorMessage);
+    }
+  };
+
+  const onUninstallClick = async () => {
+    try {
+      await uninstallDataset();
+      setInstalled(false);
+      updateSessionStorage(Status.UNINSTALLED);
+    } catch {
+      notifyError(datasetUninstallErrorMessage);
+    }
   };
 
   const onChange = async () => {
     setChecked(!checked);
-  };
-
-  const onIndexNameChange = (val: string) => {
-    if (!val.trim().startsWith('kibana_sample_data_')) {
-      return;
-    }
-    setIndexName(val);
   };
 
   const onNrOfDocumentsChange = (target: EventTarget | (EventTarget & HTMLInputElement)) => {
@@ -113,18 +161,11 @@ export const LargeDatasetPanel = ({ install, checkInstalled }: Props) => {
   const configureLayout = (
     <EuiPanel>
       <EuiForm component="form">
-        <EuiFormRow label="Index name" helpText="Elasticsearch index to generate">
-          <EuiFieldText
-            name="indexName"
-            value={indexName}
-            onChange={(e) => onIndexNameChange(e.target.value)}
-          />
-        </EuiFormRow>
         <EuiFormRow label="Number of documents">
           <EuiRange
-            min={1000}
-            max={100000}
-            step={1000}
+            min={MIN}
+            max={MAX}
+            step={STEP}
             value={nrOfDocuments}
             onChange={(e) => onNrOfDocumentsChange(e.target)}
             showLabels
@@ -142,6 +183,9 @@ export const LargeDatasetPanel = ({ install, checkInstalled }: Props) => {
         <EuiText size="s">
           <h2>Large dataset installed or installation is in progress</h2>
           <p>You will be able to see your data in Discover once it is ready</p>
+          <EuiButton fill onClick={onUninstallClick} target="_blank">
+            Uninstall
+          </EuiButton>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={1} style={{ textAlign: 'center' }}>
@@ -149,6 +193,7 @@ export const LargeDatasetPanel = ({ install, checkInstalled }: Props) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+
   const uninstalledLayout = (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={1}>
@@ -159,7 +204,13 @@ export const LargeDatasetPanel = ({ install, checkInstalled }: Props) => {
           <EuiSpacer />
           {checked ? configureLayout : null}
           {checked ? <EuiSpacer /> : null}
-          <EuiButton fill iconSide="right" iconType="popout" onClick={onClick} target="_blank">
+          <EuiButton
+            fill
+            iconSide="right"
+            iconType="popout"
+            onClick={onInstallClick}
+            target="_blank"
+          >
             Generate!
           </EuiButton>
         </EuiText>
@@ -169,15 +220,6 @@ export const LargeDatasetPanel = ({ install, checkInstalled }: Props) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-
-  const getDatasetInstalledStatus = useCallback(async () => {
-    const installStatus = await checkInstalled();
-    setInstalled(installStatus);
-  }, [checkInstalled]);
-
-  useEffect(() => {
-    getDatasetInstalledStatus();
-  }, [getDatasetInstalledStatus]);
 
   return (
     <EuiPanel hasBorder paddingSize="xl">

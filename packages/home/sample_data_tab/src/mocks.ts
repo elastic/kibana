@@ -39,6 +39,7 @@ export const getStoryServices = (params: Params) => {
     ...getSampleDataCardStoryServices(params),
     installLargeDataset: () => new Promise(() => {}),
     checkLargeDatasetInstalled: () => new Promise(() => false),
+    uninstallLargeDataset: () => new Promise(() => {}),
   };
 
   return services;
