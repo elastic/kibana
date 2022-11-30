@@ -20,6 +20,7 @@ import { API_BASE_PATH, testGuideConfig } from '../../common';
 import { apiService } from '../services/api';
 import type { GuidedOnboardingApi } from '../types';
 import {
+  testGuide,
   testGuideStep1ActiveState,
   testGuideStep1InProgressState,
   testGuideStep2InProgressState,
@@ -34,9 +35,9 @@ const applicationMock = applicationServiceMock.createStartContract();
 const notificationsMock = notificationServiceMock.createStartContract();
 
 const mockGetResponse = (path: string, pluginState: PluginState) => {
-  if (path === `${API_BASE_PATH}/configs`) {
+  if (path === `${API_BASE_PATH}/configs/${testGuide}`) {
     return Promise.resolve({
-      configs: { testGuide: testGuideConfig },
+      config: testGuideConfig,
     });
   }
   return Promise.resolve({ pluginState });

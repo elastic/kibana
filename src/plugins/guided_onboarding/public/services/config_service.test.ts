@@ -27,9 +27,7 @@ describe('GuidedOnboarding ConfigService', () => {
   beforeEach(() => {
     httpClient = httpServiceMock.createStartContract({ basePath: '/base/path' });
     httpClient.get.mockResolvedValue({
-      configs: {
-        testGuide: testGuideConfig,
-      },
+      config: testGuideConfig,
     });
     configService = new ConfigService();
     configService.setup(httpClient);
@@ -39,13 +37,11 @@ describe('GuidedOnboarding ConfigService', () => {
       await configService.getGuideConfig(testGuide);
       await configService.getGuideConfig(testGuide);
       expect(httpClient.get).toHaveBeenCalledTimes(1);
-      expect(httpClient.get).toHaveBeenCalledWith(`${API_BASE_PATH}/configs`);
+      expect(httpClient.get).toHaveBeenCalledWith(`${API_BASE_PATH}/configs/${testGuide}`);
     });
 
     it('returns undefined if the config is not found', async () => {
-      httpClient.get.mockResolvedValueOnce({
-        configs: {},
-      });
+      httpClient.get.mockRejectedValueOnce(new Error('Not found'));
       configService.setup(httpClient);
       const config = await configService.getGuideConfig(testGuide);
       expect(config).toBeUndefined();

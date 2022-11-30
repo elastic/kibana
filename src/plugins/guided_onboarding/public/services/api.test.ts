@@ -131,9 +131,7 @@ describe('GuidedOnboarding ApiService', () => {
     it('activates a new guide', async () => {
       // mock the get config request
       httpClient.get.mockResolvedValueOnce({
-        configs: {
-          testGuide: testGuideConfig,
-        },
+        config: testGuideConfig,
       });
       apiService.setup(httpClient, true);
 
@@ -311,9 +309,7 @@ describe('GuidedOnboarding ApiService', () => {
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep2InProgressState },
       });
       httpClient.get.mockResolvedValueOnce({
-        configs: {
-          testGuide: testGuideConfig,
-        },
+        config: testGuideConfig,
       });
       apiService.setup(httpClient, true);
 
@@ -349,9 +345,7 @@ describe('GuidedOnboarding ApiService', () => {
         },
       });
       httpClient.get.mockResolvedValueOnce({
-        configs: {
-          testGuide: testGuideConfig,
-        },
+        config: testGuideConfig,
       });
       apiService.setup(httpClient, true);
 
@@ -418,9 +412,7 @@ describe('GuidedOnboarding ApiService', () => {
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
       });
       httpClient.get.mockResolvedValueOnce({
-        configs: {
-          testGuide: testGuideConfig,
-        },
+        config: testGuideConfig,
       });
       apiService.setup(httpClient, true);
       subscription = apiService
@@ -470,9 +462,7 @@ describe('GuidedOnboarding ApiService', () => {
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
       });
       httpClient.get.mockResolvedValueOnce({
-        configs: {
-          testGuide: testGuideConfig,
-        },
+        config: testGuideConfig,
       });
       apiService.setup(httpClient, true);
 
@@ -520,7 +510,7 @@ describe('GuidedOnboarding ApiService', () => {
       apiService.setup(httpClient, true);
       await apiService.getGuideConfig(testGuide);
       expect(httpClient.get).toHaveBeenCalledTimes(1);
-      expect(httpClient.get).toHaveBeenCalledWith(`${API_BASE_PATH}/configs`);
+      expect(httpClient.get).toHaveBeenCalledWith(`${API_BASE_PATH}/configs/${testGuide}`);
     });
   });
 
