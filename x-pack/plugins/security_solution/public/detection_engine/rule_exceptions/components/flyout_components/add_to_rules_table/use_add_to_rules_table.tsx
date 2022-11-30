@@ -13,6 +13,7 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import * as myI18n from './translations';
+import * as commonI18n from '../translations';
 
 import { useFindRulesInMemory } from '../../../../rule_management_ui/components/rules_table/rules_table/use_find_rules_in_memory';
 import type { Rule } from '../../../../rule_management/logic/types';
@@ -98,7 +99,7 @@ export const useAddToRulesTable = ({
     () => [
       {
         field: 'link',
-        name: myI18n.LINK_COLUMN,
+        name: commonI18n.LINK_COLUMN,
         align: 'left' as HorizontalAlignment,
         'data-test-subj': 'ruleActionLinkRuleSwitch',
         render: (_, rule: Rule) => (

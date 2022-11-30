@@ -83,7 +83,6 @@ export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginR
         if (foundExceptionLists == null) {
           return response.ok({ body: { references: [] } });
         }
-
         const references: RuleReferencesSchema[] = await Promise.all(
           foundExceptionLists.data.map(async (list, index) => {
             const foundRules = await rulesClient.find<RuleParams>({
@@ -92,7 +91,7 @@ export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginR
                 filter: enrichFilterWithRuleTypeMapping(null),
                 hasReference: {
                   id: list.id,
-                  type: getSavedObjectType({ namespaceType: namespaceTypes[index] }),
+                  type: getSavedObjectType({ namespaceType: list.namespace_type }),
                 },
               },
             });

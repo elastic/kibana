@@ -87,6 +87,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
       )}
       <EuiFlexItem>
         <HeaderMenu
+          iconType="boxesHorizontal"
           dataTestSubj={`${dataTestSubj || ''}MenuActions`}
           actions={[
             {

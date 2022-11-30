@@ -18,6 +18,9 @@ import {
   PanelPaddingSize,
   PopoverAnchorPosition,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+
 import { ButtonContentIconSide } from '@elastic/eui/src/components/button/_button_content_deprecated';
 
 export interface Action {
@@ -27,6 +30,10 @@ export interface Action {
   disabled?: boolean;
   onClick: (e: React.MouseEvent<Element, MouseEvent>) => void;
 }
+
+export const containerCss = css`
+  border-bottom: 1px solid ${euiThemeVars.euiColorLightShade};
+`;
 interface HeaderMenuComponentProps {
   disableActions: boolean;
   actions: Action[] | ReactElement[] | null;
@@ -47,7 +54,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
   disableActions,
   emptyButton,
   useCustomActions,
-  iconType = 'boxesHorizontal',
+  iconType,
   iconSide = 'left',
   anchorPosition = 'downCenter',
   panelPaddingSize = 's',
@@ -61,6 +68,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
     if (useCustomActions || actions === null) return actions;
     return (actions as Action[]).map((action) => (
       <EuiContextMenuItem
+        css={actions.length > 1 ? containerCss : ''}
         data-test-subj={`${dataTestSubj || ''}ActionItem${action.key}`}
         key={action.key}
         icon={action.icon}
@@ -84,7 +92,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
             <EuiButtonEmpty
               isDisabled={disableActions}
               onClick={onAffectedRulesClick}
-              iconType={iconType}
+              iconType={iconType ? iconType : undefined}
               iconSide={iconSide}
               data-test-subj={`${dataTestSubj || ''}EmptyButton`}
               aria-label="Header menu Button Empty"
@@ -95,7 +103,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
             <EuiButtonIcon
               isDisabled={disableActions}
               onClick={onAffectedRulesClick}
-              iconType={iconType}
+              iconType={iconType ? iconType : 'boxesHorizontal'}
               data-test-subj={`${dataTestSubj || ''}ButtonIcon`}
               aria-label="Header menu Button Icon"
             >

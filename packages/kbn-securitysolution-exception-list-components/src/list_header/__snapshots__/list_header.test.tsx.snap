@@ -1839,7 +1839,7 @@ Object {
             >
               <div>
                 <button
-                  class="euiContextMenuItem euiContextMenuItem--small"
+                  class="euiContextMenuItem euiContextMenuItem--small css-es0s2t"
                   data-test-subj="RightSideMenuItemsMenuActionsActionItem1"
                   type="button"
                 >
@@ -1859,7 +1859,7 @@ Object {
                   </span>
                 </button>
                 <button
-                  class="euiContextMenuItem euiContextMenuItem--small euiContextMenuItem-isDisabled"
+                  class="euiContextMenuItem euiContextMenuItem--small euiContextMenuItem-isDisabled css-es0s2t"
                   data-test-subj="RightSideMenuItemsMenuActionsActionItem2"
                   disabled=""
                   type="button"
