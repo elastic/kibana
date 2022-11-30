@@ -26,20 +26,16 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 
-interface Props {
-  dataView: DataView;
-}
 const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
-export const BasicReduxExample = ({ dataView }: Props) => {
-  const [myControlGroup, setControlGroup] = useState<ControlGroupContainer>();
+export const BasicReduxExample = ({ dataViewId }: { dataViewId?: string }) => {
+  const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
   const [currentControlStyle, setCurrentControlStyle] = useState<ControlStyle>('oneLine');
 
   const ControlGroupReduxWrapper = useMemo(() => {
-    if (myControlGroup) return myControlGroup.getReduxEmbeddableTools().Wrapper;
-  }, [myControlGroup]);
+    if (controlGroup) return controlGroup.getReduxEmbeddableTools().Wrapper;
+  }, [controlGroup]);
 
   const ButtonControls = () => {
     const {
@@ -105,20 +101,17 @@ export const BasicReduxExample = ({ dataView }: Props) => {
         )}
 
         <ControlGroupRenderer
-          onEmbeddableLoad={async (controlGroup) => {
-            setControlGroup(controlGroup);
+          onLoadComplete={async (newControlGroup) => {
+            setControlGroup(newControlGroup);
           }}
-          getCreationOptions={async (controlGroupInputBuilder) => {
-            const initialInput: Partial<ControlGroupInput> = {
-              ...getDefaultControlGroupInput(),
-              defaultControlWidth: 'small',
-            };
-            await controlGroupInputBuilder.addDataControlFromField(initialInput, {
-              dataViewId: dataView.id ?? 'kibana_sample_data_ecommerce',
+          getInitialInput={async (initialInput, builder) => {
+            await builder.addDataControlFromField(initialInput, {
+              dataViewId,
               fieldName: 'customer_first_name.keyword',
+              width: 'small',
             });
-            await controlGroupInputBuilder.addDataControlFromField(initialInput, {
-              dataViewId: dataView.id ?? 'kibana_sample_data_ecommerce',
+            await builder.addDataControlFromField(initialInput, {
+              dataViewId,
               fieldName: 'customer_last_name.keyword',
               width: 'medium',
               grow: false,

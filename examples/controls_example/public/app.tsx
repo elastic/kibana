@@ -15,16 +15,19 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ControlsExampleStartDeps } from './plugin';
 import { BasicReduxExample } from './basic_redux_example';
 
-interface Props {
-  dataView: DataView;
-}
-
-const ControlsExamples = ({ dataView }: Props) => {
+const ControlsExamples = ({ dataViewId }: { dataViewId?: string }) => {
+  const examples = dataViewId
+    ? <>
+        <BasicReduxExample dataViewId={dataViewId} />
+      </>
+    : <div>
+        {"Please install e-commerce sample data to run controls examples."}
+      </div>
   return (
     <KibanaPageTemplate>
       <KibanaPageTemplate.Header pageTitle="Controls as a Building Block" />
       <KibanaPageTemplate.Section>
-        <BasicReduxExample dataView={dataView} />
+        {examples}
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
@@ -35,8 +38,7 @@ export const renderApp = async (
   { element }: AppMountParameters
 ) => {
   const dataViews = await data.dataViews.find('kibana_sample_data_ecommerce');
-  if (dataViews.length > 0) {
-    ReactDOM.render(<ControlsExamples dataView={dataViews[0]} />, element);
-  }
+  const dataViewId = dataViews.length > 0 ? dataViews[0].id : undefined;
+  ReactDOM.render(<ControlsExamples dataViewId={dataViewId} />, element);
   return () => ReactDOM.unmountComponentAtNode(element);
 };
