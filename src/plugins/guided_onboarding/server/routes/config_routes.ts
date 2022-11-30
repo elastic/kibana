@@ -7,7 +7,7 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH } from '../../common';
 import { guidesConfig } from '../helpers/guides_config';
 
 export const registerGetConfigRoute = (router: IRouter) => {

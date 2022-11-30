@@ -15,8 +15,8 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
-import type { PluginState } from '../../common/types';
-import { API_BASE_PATH, testGuideConfig } from '../../common/constants';
+import type { PluginState } from '../../common';
+import { API_BASE_PATH, testGuideConfig } from '../../common';
 import { apiService } from '../services/api';
 import type { GuidedOnboardingApi } from '../types';
 import {

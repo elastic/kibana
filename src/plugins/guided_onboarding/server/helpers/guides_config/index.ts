@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { GuidesConfig } from '../../../common/types';
-import { testGuideConfig } from '../../../common/constants';
+import type { GuidesConfig } from '../../../common';
+import { testGuideConfig } from '../../../common';
 import { securityConfig } from './security';
 import { observabilityConfig } from './observability';
 import { searchConfig } from './search';

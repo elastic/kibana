@@ -8,8 +8,8 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 import { GuideId, GuideState, GuideStatus, GuideStepIds } from '@kbn/guided-onboarding';
-import { GuideConfig, GuidesConfig, StepConfig } from '../../common/types';
-import { API_BASE_PATH } from '../../common/constants';
+import type { GuideConfig, GuidesConfig, StepConfig } from '../../common';
+import { API_BASE_PATH } from '../../common';
 import {
   findGuideConfigByGuideId,
   isLastStep,

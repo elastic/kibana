@@ -11,7 +11,7 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { GuideState } from '@kbn/guided-onboarding';
 import { firstValueFrom, Subscription } from 'rxjs';
 
-import { API_BASE_PATH, testGuideConfig } from '../../common/constants';
+import { API_BASE_PATH, testGuideConfig } from '../../common';
 import { ApiService } from './api';
 import {
   testGuide,

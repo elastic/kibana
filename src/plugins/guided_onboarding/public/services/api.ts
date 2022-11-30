@@ -19,8 +19,8 @@ import {
 } from 'rxjs';
 import type { GuideState, GuideId, GuideStep, GuideStepIds } from '@kbn/guided-onboarding';
 
-import { API_BASE_PATH } from '../../common/constants';
-import { PluginState, PluginStatus, GuideConfig } from '../../common/types';
+import { API_BASE_PATH } from '../../common';
+import type { PluginState, PluginStatus, GuideConfig } from '../../common';
 import { GuidedOnboardingApi } from '../types';
 import {
   getInProgressStepId,

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { testGuideConfig } from '../../common/constants';
+import { testGuideConfig } from '../../common';
+import type { GuidesConfig } from '../../common';
 import {
   findGuideConfigByGuideId,
   getCompletedSteps,
@@ -29,7 +30,6 @@ import {
   testGuideStep2InProgressState,
   testGuideStep2ReadyToCompleteState,
 } from './api.mocks';
-import { GuidesConfig } from '../../common/types';
 
 describe('GuidedOnboarding ApiService helpers', () => {
   describe('findGuideConfigByGuideId', () => {

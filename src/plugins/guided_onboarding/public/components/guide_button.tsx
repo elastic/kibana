@@ -11,7 +11,7 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { GuideState } from '@kbn/guided-onboarding';
 
-import type { GuideConfig, PluginState } from '../../common/types';
+import type { GuideConfig, PluginState } from '../../common';
 import { GuideButtonPopover } from './guide_button_popover';
 
 interface GuideButtonProps {

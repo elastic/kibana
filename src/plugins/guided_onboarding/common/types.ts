@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { GuideId, GuideState, GuideStepIds, StepStatus } from '@kbn/guided-onboarding';
 
 /**

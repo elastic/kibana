@@ -9,7 +9,7 @@
 import { HttpSetup } from '@kbn/core-http-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { GuideState } from '@kbn/guided-onboarding';
-import { API_BASE_PATH, testGuideConfig } from '../../common/constants';
+import { API_BASE_PATH, testGuideConfig } from '../../common';
 import {
   testGuide,
   testGuideFirstStep,

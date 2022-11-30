@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { GuideConfig } from '../../../common/types';
+import type { GuideConfig } from '../../../common';
 
 export const observabilityConfig: GuideConfig = {
   title: i18n.translate('guidedOnboarding.observabilityGuide.title', {
@@ -32,6 +32,7 @@ export const observabilityConfig: GuideConfig = {
       integration: 'kubernetes',
       descriptionList: [
         i18n.translate('guidedOnboarding.observabilityGuide.addDataStep.descriptionList.item1', {
+          // TODO add the link to the docs, when markdown support is implemented https://github.com/elastic/kibana/issues/146404
           defaultMessage: 'Deploy kube-state-metrics service to your Kubernetes.',
         }),
         i18n.translate('guidedOnboarding.observabilityGuide.addDataStep.descriptionList.item2', {

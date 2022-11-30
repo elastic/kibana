@@ -34,7 +34,7 @@ import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboa
 import { GuideId } from '@kbn/guided-onboarding';
 import type { GuidedOnboardingApi } from '../types';
 
-import type { GuideConfig, PluginState, StepConfig } from '../../common/types';
+import type { GuideConfig, PluginState, StepConfig } from '../../common';
 
 import { GuideStep } from './guide_panel_step';
 import { QuitGuideModal } from './quit_guide_modal';
@@ -170,7 +170,7 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
     return () => subscription.unsubscribe();
   }, [api]);
 
-  const fetchGuideState = useCallback(async () => {
+  const fetchGuideConfig = useCallback(async () => {
     if (pluginState?.activeGuide?.guideId) {
       const config = await api.getGuideConfig(pluginState.activeGuide.guideId);
       if (config) setGuideConfig(config);
@@ -178,8 +178,8 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
   }, [api, pluginState]);
 
   useEffect(() => {
-    fetchGuideState();
-  }, [fetchGuideState]);
+    fetchGuideConfig();
+  }, [fetchGuideConfig]);
 
   // TODO handle loading state
   // https://github.com/elastic/kibana/issues/139799
