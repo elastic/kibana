@@ -7,14 +7,14 @@
       {
         "action": "constantUsersPerSec",
         "userCount": 10,
-        "duration": "30s"
+        "duration": "10s"
       }
     ],
     "test": [
       {
         "action": "incrementUsersPerSec",
         "userCount": 20,
-        "times": 20,
+        "times": 5,
         "duration": "2s"
       }
     ],

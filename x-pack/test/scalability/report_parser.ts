@@ -21,8 +21,9 @@ interface CapacityMetrics {
 const REQUESTS_REGEXP = /(?<=var requests = unpack\(\[)(.*)(?=\]\);)/g;
 const RESPONSES_PERCENTILES_REGEXP =
   /(?<=var responsetimepercentilesovertimeokPercentiles = unpack\(\[)(.*)(?=\]\);)/g;
+const ACTIVE_USERS_REGEXP = /(?<=data: \[  )(\[.*\])(?=\]\,tooltip)/g;
 
-const findDataSet = (str: string, regex: RegExp, log: ToolingLog) => {
+const findDataSet = (str: string, regex: RegExp) => {
   const found = str.match(regex);
   if (found == null) {
     throw Error('Failed to parse Html string');
@@ -40,6 +41,22 @@ const findDataSet = (str: string, regex: RegExp, log: ToolingLog) => {
       const values: number[] = !arr ? [] : arr.split(',').map(Number);
       return { timestamp: parseInt(pair[0], 10), values };
     });
+};
+
+const getActiveUsers = (str: string, regex: RegExp) => {
+  const found = str.match(regex);
+  if (found == null) {
+    throw Error('Failed to parse Html string');
+  }
+  const usersStr = found[0].split('],tooltip')[0];
+  return usersStr
+    .replaceAll('],[', '].[')
+    .split('.')
+    .map((i) => {
+      const pair = i.replaceAll(/^\[/g, '').replaceAll(/\]$/g, '').split(',');
+      return { key: pair[0].slice(0, -3), value: parseInt(pair[1], 10) };
+    })
+    .reduce((obj, item) => ({ ...obj, [item.key]: item.value }), {});
 };
 
 const getTimeThresholdFirstPassed = (
@@ -84,15 +101,18 @@ export function getCapacityMetrics(
   scalabilitySetup: ScalabilitySetup,
   log: ToolingLog
 ): CapacityMetrics {
-  const htmlContent = fs.readFileSync(htmlReportPath, 'utf-8');
+  const htmlContent = fs.readFileSync(htmlReportPath, 'utf-8').replace(/(\r\n|\n|\r)/gm, '');
   // [timestamp, [activeUsers,requests,0]], e.g. [1669026394,[6,6,0]]
-  const requests = findDataSet(htmlContent, REQUESTS_REGEXP, log);
+  const requests = findDataSet(htmlContent, REQUESTS_REGEXP);
   // [timestamp, [min, 25%, 50%, 75%, 80%, 85%, 90%, 95%, 99%, max]], e.g. 1669026394,[9,11,11,12,13,13,14,15,15,16]
-  const responsePercentiles = findDataSet(htmlContent, RESPONSES_PERCENTILES_REGEXP, log);
-  const responsesWithData = requests.filter((i) => i.values.length > 0);
-  const rpsMax = responsesWithData[responsesWithData.length - 1].values[1];
+  const responsePercentiles = findDataSet(htmlContent, RESPONSES_PERCENTILES_REGEXP);
 
-  const warmupPhase = responsePercentiles.slice(0, 30);
+  const activeUsers: object = getActiveUsers(htmlContent, ACTIVE_USERS_REGEXP);
+  log.info(JSON.stringify(activeUsers));
+  const rpsMax = Math.max(...requests.filter((i) => i.values.length > 1).map((i) => i.values[1]));
+  log.info(`rpsMax=${rpsMax}`);
+
+  const warmupPhase = responsePercentiles.slice(0, 10);
   const rpsAtResponseTimeWarmupAvg = Math.round(
     warmupPhase
       .filter((i) => i.values.length > 0)
@@ -123,6 +143,12 @@ export function getCapacityMetrics(
   const timeX10 = getTimeThresholdFirstPassed(maxResponses, responseThresholdX10);
   const timeX100 = getTimeThresholdFirstPassed(maxResponses, responseThresholdX100);
   const timeActiveUsersToReq = getTimeActiveUsersToReqCountThreshold(requests, usersToReqThreshold);
+
+  requests.filter((i) => {
+    const point = String(i.timestamp);
+    const activeUsersInPoint = activeUsers[point];
+    return activeUsersInPoint > 0 ? activeUsersInPoint / i.values[0] > usersToReqThreshold : false;
+  });
 
   return {
     rpsAtResponseTimeWarmupAvg,

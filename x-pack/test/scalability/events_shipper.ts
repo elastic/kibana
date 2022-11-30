@@ -6,7 +6,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import fetch from 'node-fetch';
+// import fetch from 'node-fetch';
 
 export interface Event {
   eventName: string;
@@ -56,16 +56,18 @@ export class EventsShipper {
     const body = eventsToNDJSON(events);
     this.log.debug(`Sending telemetry data: ${JSON.stringify(eventsToNDJSON)}`);
 
-    const response = await fetch(this.url, {
-      method: 'POST',
-      body,
-      headers: buildHeaders(this.clusterUuid, this.version),
-    });
+    if (process.env.BUILDKITE_BUILD_ID) {
+      const response = await fetch(this.url, {
+        method: 'POST',
+        body,
+        headers: buildHeaders(this.clusterUuid, this.version),
+      });
 
-    if (!response.ok) {
-      throw new Error(`Telemetry sending error: ${response.status} - ${await response.text()}`);
+      if (!response.ok) {
+        throw new Error(`Telemetry sending error: ${response.status} - ${await response.text()}`);
+      }
+
+      return `${response.status}`;
     }
-
-    return `${response.status}`;
   }
 }
