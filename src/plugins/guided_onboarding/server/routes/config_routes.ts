@@ -25,7 +25,6 @@ export const registerGetConfigRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const { guideId } = request.params;
-      console.log({ guideId });
       if (guidesConfig && guideId && Object.keys(guidesConfig).includes(guideId)) {
         return response.ok({
           body: { config: guidesConfig[guideId as GuideId] },
