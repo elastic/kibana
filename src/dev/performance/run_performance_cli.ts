@@ -11,6 +11,8 @@ import { REPO_ROOT } from '@kbn/utils';
 import Fsp from 'fs/promises';
 import path from 'path';
 
+const WARMUP_JOURNEY = 'warmup.ts';
+
 run(
   async ({ log, flagsReader, procRunner }) => {
     async function runFunctionalTest(journey: string, phase: 'TEST' | 'WARMUP') {
@@ -81,7 +83,7 @@ run(
     const journeyBasePath = path.resolve(REPO_ROOT, 'x-pack/performance/journeys/');
     const kibanaInstallDir = flagsReader.requiredPath('kibana-install-dir');
     const journeys = await Fsp.readdir(journeyBasePath);
-    const warmupIndex = journeys.indexOf('warmup.ts');
+    const warmupIndex = journeys.indexOf(WARMUP_JOURNEY);
     const [warmupJourney] = journeys.splice(warmupIndex, 1);
 
     log.info(`Found ${journeys.length} journeys to run`);
