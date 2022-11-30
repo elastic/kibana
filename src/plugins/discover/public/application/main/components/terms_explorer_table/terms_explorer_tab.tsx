@@ -10,6 +10,7 @@ import React from 'react';
 import { useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
 import { TermsExplorerTable, type TermsExplorerTableProps } from './terms_explorer_table';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import './terms_explorer.scss';
 
 export const TermsExplorerTab: React.FC<Omit<TermsExplorerTableProps, 'query' | 'filters'>> =
   React.memo((props) => {
@@ -19,10 +20,12 @@ export const TermsExplorerTab: React.FC<Omit<TermsExplorerTableProps, 'query' | 
     });
 
     return (
-      <TermsExplorerTable
-        {...props}
-        query={querySubscriberResult.query}
-        filters={querySubscriberResult.filters}
-      />
+      <div className={'kbnTermsExplorerWrapper'}>
+        <TermsExplorerTable
+          {...props}
+          query={querySubscriberResult.query}
+          filters={querySubscriberResult.filters}
+        />
+      </div>
     );
   });

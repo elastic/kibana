@@ -11,7 +11,7 @@ import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { EuiTable, EuiTableBody, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { EuiTable, EuiTableBody, formatDate, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
 import type { GetStateReturn } from '../../services/discover_state';
 import { AvailableFields$, DataRefetch$, DataTotalHits$ } from '../../hooks/use_saved_search';
 import { TermsExplorerTableRow } from './terms_explorer_table_row';
@@ -160,6 +160,14 @@ export const TermsExplorerTable = (props: TermsExplorerTableProps) => {
       name: 'Last Name',
       align: LEFT_ALIGNMENT,
       truncateText: true,
+    },
+    {
+      id: 'dateOfBirth',
+      field: 'dateOfBirth',
+      name: 'Date of Birth',
+      schema: 'date',
+      render: (date: Date) => formatDate(date, 'dobLong'),
+      sortable: true,
     },
   ];
 

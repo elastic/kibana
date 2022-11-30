@@ -6,34 +6,35 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
-  EuiHealth,
   EuiTableRow,
-  EuiFlexGrid,
-  EuiFlexItem,
   EuiButtonEmpty,
   EuiTableRowCell,
-  EuiDescriptionListTitle,
-  EuiDescriptionList,
+  useEuiTheme,
+  EuiTableBody,
+  EuiTable,
 } from '@elastic/eui';
 import { TestColumnType, TestRowType } from './terms_explorer_table';
-import { css } from '@emotion/react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 interface Props {
   row: TestRowType;
   columns: TestColumnType[];
 }
 
-const TestCountries = {
-  ['NL']: { name: 'Netherlands', flag: '🇳🇱' },
-  ['UK']: { name: 'United Kingdom', flag: '🇬🇧' },
-};
-
 export const TermsExplorerTableRow = ({ row, columns }: Props) => {
+  const { euiTheme } = useEuiTheme();
+
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const expandedRowStyle = useMemo(
+    () => css`
+      padding: 0 ${euiTheme.size.m};
+      background-color: ${euiTheme.colors.lightestShade};
+    `,
+    [euiTheme.size.m, euiTheme.colors.lightestShade]
+  );
 
   const renderCells = () => {
     return columns.map((column) => {
@@ -55,24 +56,19 @@ export const TermsExplorerTableRow = ({ row, columns }: Props) => {
   };
 
   const ExpandedRow = () => {
-    const { nationality, online } = row;
-    const country = TestCountries[nationality];
-    const color = online ? 'success' : 'danger';
-    const label = online ? 'Online' : 'Offline';
-    const listItems = [
-      {
-        title: 'Nationality',
-        description: `${country.flag} ${country.name}`,
-      },
-      {
-        title: 'Online',
-        description: <EuiHealth color={color}>{label}</EuiHealth>,
-      },
-    ];
-
     return (
-      <EuiTableRowCell colSpan={columns.length + 1}>
-        <EuiDescriptionList listItems={listItems} />
+      <EuiTableRowCell colSpan={columns.length + 1} css={expandedRowStyle}>
+        <EuiTable>
+          <EuiTableBody>
+            <TermsExplorerTableRow
+              row={row}
+              columns={columns}
+              css={css`
+                width: 100% !important;
+              `}
+            />
+          </EuiTableBody>
+        </EuiTable>
       </EuiTableRowCell>
     );
   };
