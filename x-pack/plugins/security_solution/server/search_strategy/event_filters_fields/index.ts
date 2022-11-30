@@ -15,6 +15,7 @@ import {
   findExistingIndices,
 } from '@kbn/timelines-plugin/server/search_strategy/index_fields';
 
+import { eventsIndexPattern } from '../../../common/endpoint/constants';
 import type {
   BeatFields,
   IndexField,
@@ -55,7 +56,7 @@ export const requestEventFiltersFieldsSearch = async (
     throw new Error('Endpoint authz error');
   }
 
-  if (request.indices.length > 1 || request.indices[0] !== 'logs-endpoint.events.*') {
+  if (request.indices.length > 1 || request.indices[0] !== eventsIndexPattern) {
     throw new Error(`Invalid indices request ${request.indices.join(', ')}`);
   }
 

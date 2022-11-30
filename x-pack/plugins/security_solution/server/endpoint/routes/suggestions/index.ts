@@ -7,35 +7,26 @@
 
 import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
-import { schema } from '@kbn/config-schema';
-import type { RequestHandler } from '@kbn/core/server';
+import type { RequestHandler, Logger } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
 import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';
+import {
+  type EndpointSuggestionsBody,
+  EndpointSuggestionsSchema,
+} from '../../../../common/endpoint/schema/suggestions';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
-import { SUGGESTIONS_ROUTE } from '../../../../common/endpoint/constants';
+import { eventsIndexPattern, SUGGESTIONS_ROUTE } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
+import { errorHandler } from '../error_handler';
 
-export const EndpointSuggestonsSchema = {
-  body: schema.object(
-    {
-      field: schema.string(),
-      query: schema.string(),
-      filters: schema.maybe(schema.any()),
-      fieldMeta: schema.maybe(schema.any()),
-    },
-    { unknowns: 'forbid' }
-  ),
-  params: schema.object({
-    // Ready to be used with other suggestion types like endpoints
-    suggestion_type: schema.oneOf([schema.literal('eventFilters')]),
-  }),
+export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
+  return endpointAppContext.logFactory.get('suggestions');
 };
 
 export function registerEndpointSuggestionsRoutes(
@@ -46,22 +37,23 @@ export function registerEndpointSuggestionsRoutes(
   router.post(
     {
       path: SUGGESTIONS_ROUTE,
-      validate: EndpointSuggestonsSchema,
+      validate: EndpointSuggestionsSchema,
     },
     withEndpointAuthz(
       { any: ['canWriteEventFilters'] },
       endpointContext.logFactory.get('endpointSuggestions'),
-      getEndpointSuggestionsRequestHandler(config$)
+      getEndpointSuggestionsRequestHandler(config$, getLogger(endpointContext))
     )
   );
 }
 
 export const getEndpointSuggestionsRequestHandler = (
-  config$: Observable<ConfigSchema>
+  config$: Observable<ConfigSchema>,
+  logger: Logger
 ): RequestHandler<
-  TypeOf<typeof EndpointSuggestonsSchema.params>,
+  TypeOf<typeof EndpointSuggestionsSchema.params>,
   never,
-  never,
+  EndpointSuggestionsBody,
   SecuritySolutionRequestHandlerContext
 > => {
   return async (context, request, response) => {
@@ -70,7 +62,7 @@ export const getEndpointSuggestionsRequestHandler = (
     let index = '';
 
     if (request.params.suggestion_type === 'eventFilters') {
-      index = 'logs-endpoint.events.*';
+      index = eventsIndexPattern;
     } else {
       return response.badRequest({
         body: `Invalid suggestion_type: ${request.params.suggestion_type}`,
@@ -92,9 +84,8 @@ export const getEndpointSuggestionsRequestHandler = (
         abortSignal
       );
       return response.ok({ body });
-    } catch (e) {
-      const kbnErr = getKbnServerError(e);
-      return reportServerError(response, kbnErr);
+    } catch (error) {
+      return errorHandler(logger, response, error);
     }
   };
 };

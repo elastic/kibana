@@ -30,11 +30,15 @@ import {
   createMockConfig,
   requestContextMock,
 } from '../../../lib/detection_engine/routes/__mocks__';
-import type { EndpointSuggestonsSchema } from '.';
-import { getEndpointSuggestionsRequestHandler, registerEndpointSuggestionsRoutes } from '.';
+import type { EndpointSuggestionsSchema } from '../../../../common/endpoint/schema/suggestions';
+import {
+  getEndpointSuggestionsRequestHandler,
+  registerEndpointSuggestionsRoutes,
+  getLogger,
+} from '.';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import { SUGGESTIONS_ROUTE } from '../../../../common/endpoint/constants';
+import { eventsIndexPattern, SUGGESTIONS_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 
@@ -47,7 +51,7 @@ jest.mock('@kbn/unified-search-plugin/server/autocomplete/terms_enum', () => {
 const termsEnumSuggestionsMock = termsEnumSuggestions as jest.Mock;
 
 interface CallRouteInterface {
-  params: TypeOf<typeof EndpointSuggestonsSchema.params>;
+  params: TypeOf<typeof EndpointSuggestionsSchema.params>;
   authz?: Partial<EndpointAuthz>;
 }
 
@@ -77,7 +81,7 @@ describe('when calling the Suggestions route handler', () => {
       .createSetupContract()
       .autocomplete.getInitializerContextConfig()
       .create();
-    suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(config$);
+    suggestionsRouteHandler = getEndpointSuggestionsRequestHandler(config$, getLogger(mockContext));
   });
 
   describe('having right privileges', () => {
@@ -89,7 +93,7 @@ describe('when calling the Suggestions route handler', () => {
       );
 
       const mockRequest = httpServerMock.createKibanaRequest<
-        TypeOf<typeof EndpointSuggestonsSchema.params>,
+        TypeOf<typeof EndpointSuggestionsSchema.params>,
         never,
         never
       >({
@@ -109,7 +113,7 @@ describe('when calling the Suggestions route handler', () => {
         expect.any(Object),
         expect.any(Object),
         expect.any(Object),
-        'logs-endpoint.events.*',
+        eventsIndexPattern,
         'test-field',
         'test-query',
         'test-filters',
@@ -130,7 +134,7 @@ describe('when calling the Suggestions route handler', () => {
         createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
       );
       const mockRequest = httpServerMock.createKibanaRequest<
-        TypeOf<typeof EndpointSuggestonsSchema.params>,
+        TypeOf<typeof EndpointSuggestionsSchema.params>,
         never,
         never
       >({

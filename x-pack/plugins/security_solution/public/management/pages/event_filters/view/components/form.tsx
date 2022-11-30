@@ -28,6 +28,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
+import { eventsIndexPattern } from '../../../../../../common/endpoint/constants';
 import { useSuggestions } from '../../../../hooks/use_suggestions';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
@@ -121,7 +122,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const getSuggestionsFn = useCallback<ValueSuggestionsGetFn>(
       ({ field, query }) => {
         const eventFiltersAPIClient = new EventFiltersApiClient(http);
-        return eventFiltersAPIClient.suggestions(field.name, query);
+        return eventFiltersAPIClient.getSuggestions({ field: field.name, query });
       },
       [http]
     );
@@ -141,7 +142,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
 
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
-    const indexNames = useMemo(() => ['logs-endpoint.events.*'], []);
+    const indexNames = useMemo(() => [eventsIndexPattern], []);
     const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(
       indexNames,
       undefined,
