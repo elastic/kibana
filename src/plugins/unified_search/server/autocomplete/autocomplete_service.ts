@@ -32,7 +32,7 @@ export class AutocompleteService implements Plugin<void> {
         terminateAfter: moment.duration(terminateAfter).asMilliseconds(),
         timeout: moment.duration(timeout).asMilliseconds(),
       }),
-      getInitializerContextConfig: () => this.initializerContext.config,
+      getInitializerContextConfig: () => Object.freeze(this.initializerContext.config),
     };
   }
 
