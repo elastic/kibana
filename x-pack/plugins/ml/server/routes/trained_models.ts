@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import fetch from 'node-fetch';
+import { queue } from 'async';
 import { spawn } from 'child_process';
 import { schema } from '@kbn/config-schema';
 import { streamFactory } from '@kbn/aiops-utils';
+// import { readFile } from 'fs/promises';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
@@ -480,7 +483,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    */
   router.post(
     {
-      path: '/api/ml/trained_models/hugging_face_import',
+      path: '/api/ml/trained_models/hugging_face_import_old',
       validate: {
         body: huggingFaceImport,
       },
@@ -500,6 +503,10 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           request.headers,
           {
             error: (e: any) => {
+              // eslint-disable-next-line no-console
+              console.log(e);
+            },
+            debug: (e: any) => {
               // eslint-disable-next-line no-console
               console.log(e);
             },
@@ -549,6 +556,253 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         })();
 
         return response.ok(responseWithHeaders);
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /api/ml/trained_models/hugging_face_import Import hugging face trained model
+   * @apiName InferTrainedModelDeployment
+   * @apiDescription Import hugging face trained model.
+   */
+  router.post(
+    {
+      path: '/api/ml/trained_models/hugging_face_import',
+      validate: {
+        body: huggingFaceImport,
+      },
+      options: {
+        tags: ['access:ml:canTestTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      const { hubModelId, start, clearPrevious, taskType } = request.body;
+
+      try {
+        function resetAction() {
+          return { type: 'reset' };
+        }
+
+        // const ELASTICSEARCH_URL = 'http://user:pass@localhost:9200';
+        const MODEL_SERVER_URL = 'http://localhost:3213/catalog/models/';
+        const MAX_CONCURRENT_QUERIES = 5;
+        // const FILE_PATH = '/Users/james/dev/models/';
+        // const CHUNK_COUNT = 103;
+        // const FILE_SIZE = 431281830;
+        // const MODEL_ID = 'dslim__bert-base-ner__ner';
+
+        const replaceSlash = (name: string, type: string) => {
+          return name.replaceAll('/', '__').toLocaleLowerCase() + `__${type}`;
+        };
+
+        const { end, push, responseWithHeaders } = streamFactory<any>(
+          request.headers,
+          {
+            error: (e: any) => {
+              // eslint-disable-next-line no-console
+              console.log(e);
+            },
+            debug: (e: any) => {
+              // console.log(e);
+            },
+          } as any,
+          true
+        );
+
+        const getMetaData = async (modelId: string) => {
+          const resp = await fetch(`${MODEL_SERVER_URL}${modelId}`, {
+            method: 'GET',
+          });
+          return resp.json();
+        };
+
+        const getConfig = async (modelId: string) => {
+          // const file = 'models-dslim__bert-base-ner-config.json';
+          // const fileString = await readFile(`${FILE_PATH}${file}`, 'utf8');
+          // return JSON.parse(fileString);
+          const url = `${MODEL_SERVER_URL}${modelId}/config`;
+          // console.log(url);
+
+          const resp = await fetch(url, {
+            method: 'GET',
+          });
+          return resp.json();
+        };
+
+        const putConfig = async (id: string, config: string) => {
+          return client.asInternalUser.transport.request({
+            method: 'PUT',
+            path: `/_ml/trained_models/${id}`,
+            body: config,
+          });
+        };
+
+        const putModelPart = async (
+          id: string,
+          partNumber: number,
+          totalParts: number,
+          totalLength: number,
+          definition: string
+        ) => {
+          // console.log('putting ', partNumber);
+
+          return client.asInternalUser.transport.request(
+            {
+              method: 'PUT',
+              path: `/_ml/trained_models/${id}/definition/${partNumber}`,
+              body: {
+                definition,
+                total_definition_length: totalLength,
+                total_parts: totalParts,
+              },
+            },
+            { maxRetries: 0 }
+          );
+        };
+
+        const getVocabulary = async (modelId: string) => {
+          // const file = 'models-dslim__bert-base-ner-vocabulary.json';
+          // const fileString = await readFile(`${FILE_PATH}${file}`, 'utf8');
+          // return JSON.parse(fileString);
+
+          const url = `${MODEL_SERVER_URL}${modelId}/vocabulary`;
+          // console.log(url);
+          const resp = await fetch(url, {
+            method: 'GET',
+          });
+          return resp.json();
+        };
+
+        const putVocabulary = async (id: string, config: string) => {
+          return client.asInternalUser.transport.request({
+            method: 'PUT',
+            path: `/_ml/trained_models/${id}/vocabulary`,
+            body: config,
+          });
+        };
+
+        const getDefinitionPart = async (modelId: string, part: number) => {
+          const resp = await fetch(`${MODEL_SERVER_URL}${modelId}/definition/part/${part}`, {
+            method: 'GET',
+          });
+          return resp.buffer();
+        };
+
+        (async () => {
+          push(resetAction());
+
+          // const modelId = replaceSlash(hubModelId, taskType);
+          const modelId = hubModelId;
+
+          const run = async () => {
+            try {
+              const meta = await getMetaData(modelId);
+              const definitionSize: number = meta.source.total_definition_length;
+              const definitionParts: number = meta.source.total_parts;
+
+              const config = await getConfig(modelId);
+              // console.log(config);
+
+              push({
+                type: 'get_config',
+              });
+
+              const vocab = await getVocabulary(modelId);
+              // console.log(vocab);
+
+              push({
+                type: 'get_vocabulary',
+              });
+
+              await putConfig(modelId, config);
+              push({
+                type: 'put_config',
+              });
+
+              await putVocabulary(modelId, vocab);
+              push({
+                type: 'put_vocabulary',
+              });
+
+              let completedParts = 0;
+              const requestQueue = queue(async function (partNo: number) {
+                const content = await getDefinitionPart(modelId, partNo);
+                const b64 = content.toString('base64');
+
+                await putModelPart(modelId, partNo, definitionParts, definitionSize, b64);
+                const progress = Number(completedParts / (definitionParts - 1)) * 100;
+                completedParts++;
+                push({
+                  type: 'put_definition_part',
+                  payload: { progress },
+                });
+              }, MAX_CONCURRENT_QUERIES);
+
+              requestQueue.push(Array.from(Array(definitionParts).keys()));
+              await requestQueue.drain();
+
+              // for (let i = 0; i < definitionParts; i++) {
+              //   // const file = String(i).padStart(4, '0');
+              //   // const content = await readFile(`${FILE_PATH}chunked/${file}`);
+              //   const content = await getDefinitionPart(modelId, i);
+              //   const b64 = content.toString('base64');
+
+              //   await putModelPart(modelId, i, definitionParts, definitionSize, b64);
+              //   const progress = Number(i / (definitionParts - 1)) * 100;
+              //   push({
+              //     type: 'put_definition_part',
+              //     payload: { progress },
+              //   });
+              // }
+
+              push({
+                type: 'complete',
+              });
+            } catch (error) {
+              push({ error });
+            }
+          };
+
+          await run();
+          end();
+        })();
+
+        return response.ok(responseWithHeaders);
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /api/ml/trained_models/pipeline_simulate Simulates an ingest pipeline
+   * @apiName SimulateIngestPipeline
+   * @apiDescription Simulates an ingest pipeline.
+   */
+  router.get(
+    {
+      path: '/api/ml/trained_models/hugging_face_model_list',
+      validate: false,
+      options: {
+        tags: ['access:ml:canTestTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const MODEL_SERVER_URL = 'http://localhost:3213/catalog/models/';
+        const resp = await fetch(MODEL_SERVER_URL, {
+          method: 'GET',
+        });
+
+        return response.ok({
+          body: await resp.json(),
+        });
       } catch (e) {
         return response.customError(wrapError(e));
       }

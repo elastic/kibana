@@ -38,7 +38,7 @@ export const UploadTrainedModelFlyout: FC<Props> = ({ onClose }) => {
                 <h2>
                   <FormattedMessage
                     id="xpack.ml.trainedModels.testModelsFlyout.headerLabel"
-                    defaultMessage="Import model from Hugging Face"
+                    defaultMessage="Import model"
                   />
                 </h2>
               </EuiFlexItem>

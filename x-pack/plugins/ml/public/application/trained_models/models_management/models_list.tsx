@@ -499,11 +499,6 @@ export const ModelsList: FC<Props> = ({
                 Import trained model from Hugging Face
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => setShowUploadFlyout(!showUploadFlyout)}>
-                Import trained model from Hugging Face
-              </EuiButtonEmpty>
-            </EuiFlexItem>
           </>
         )}
       </EuiFlexGroup>

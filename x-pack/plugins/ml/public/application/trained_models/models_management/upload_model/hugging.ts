@@ -17,15 +17,13 @@ export interface ModelUpload {
 }
 
 interface StreamState {
-  progress: number;
-  messages: string[];
-  errors: string[];
+  type: string;
+  progress?: number;
+  errors?: string[];
 }
 
 export const initialState: StreamState = {
-  progress: 0,
-  messages: [],
-  errors: [],
+  type: '',
 };
 
 export function streamReducer(
@@ -38,74 +36,97 @@ export function streamReducer(
   }
 
   switch (action.type) {
-    case API_ACTION_NAME.ADD_MESSAGES:
-      return { ...state, messages: [...state.messages, ...action.payload.messages] };
-    case API_ACTION_NAME.PROGRESS:
-      return { ...state, progress: action.payload.progress };
+    case API_ACTION_NAME.GET_CONFIG:
+    case API_ACTION_NAME.GET_VOCABULARY:
+    case API_ACTION_NAME.PUT_CONFIG:
+    case API_ACTION_NAME.PUT_VOCABULARY:
+    case API_ACTION_NAME.COMPLETE:
+      return { ...state, type: action.type };
 
-    case API_ACTION_NAME.UPDATE_LOADING_STATE:
-      return { ...state, ...action.payload };
+    case API_ACTION_NAME.PUT_DEFINITION_PART:
+      return { ...state, type: action.type, progress: action.payload.progress };
+
     default:
       return state;
   }
 }
 
 export const API_ACTION_NAME = {
-  ADD_MESSAGES: 'add_messages',
-  PROGRESS: 'progress',
-  ADD_ERROR: 'add_error',
+  GET_CONFIG: 'get_config',
+  GET_VOCABULARY: 'get_vocabulary',
+  PUT_CONFIG: 'put_config',
+  PUT_VOCABULARY: 'put_vocabulary',
+  PUT_DEFINITION_PART: 'put_definition_part',
+  COMPLETE: 'complete',
   RESET: 'reset',
-  UPDATE_LOADING_STATE: 'update_loading_state',
 } as const;
 export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
 
-interface ApiActionAddMessages {
-  type: typeof API_ACTION_NAME.ADD_MESSAGES;
-  payload: { messages: string[] };
+interface ApiActionGetConfig {
+  type: typeof API_ACTION_NAME.GET_CONFIG;
 }
-
-export function addChangePointsAction(
-  payload: ApiActionAddMessages['payload']
-): ApiActionAddMessages {
-  return {
-    type: API_ACTION_NAME.ADD_MESSAGES,
-    payload,
-  };
+interface ApiActionGetVocabulary {
+  type: typeof API_ACTION_NAME.GET_VOCABULARY;
 }
-
-interface ApiActionUploadProgress {
-  type: typeof API_ACTION_NAME.PROGRESS;
+interface ApiActionPutConfig {
+  type: typeof API_ACTION_NAME.PUT_CONFIG;
+}
+interface ApiActionPutVocabulary {
+  type: typeof API_ACTION_NAME.PUT_VOCABULARY;
+}
+interface ApiActionPutDefinitionPart {
+  type: typeof API_ACTION_NAME.PUT_DEFINITION_PART;
   payload: { progress: number };
 }
-
-export function uploadProgressAction(
-  payload: ApiActionUploadProgress['payload']
-): ApiActionUploadProgress {
-  return {
-    type: API_ACTION_NAME.PROGRESS,
-    payload,
-  };
+interface ApiActionComplete {
+  type: typeof API_ACTION_NAME.COMPLETE;
 }
 
-interface ApiActionUpdateLoadingState {
-  type: typeof API_ACTION_NAME.UPDATE_LOADING_STATE;
-  payload: {
-    ccsWarning: boolean;
-    loaded: number;
-    loadingState: string;
-  };
-}
+// export function addChangePointsAction(
+//   payload: ApiActionAddMessages['payload']
+// ): ApiActionAddMessages {
+//   return {
+//     type: API_ACTION_NAME.ADD_MESSAGES,
+//     payload,
+//   };
+// }
 
-export function updateLoadingStateAction(
-  payload: ApiActionUpdateLoadingState['payload']
-): ApiActionUpdateLoadingState {
-  return {
-    type: API_ACTION_NAME.UPDATE_LOADING_STATE,
-    payload,
-  };
-}
+// interface ApiActionUploadProgress {
+//   type: typeof API_ACTION_NAME.PROGRESS;
+//   payload: { progress: number };
+// }
+
+// export function uploadProgressAction(
+//   payload: ApiActionUploadProgress['payload']
+// ): ApiActionUploadProgress {
+//   return {
+//     type: API_ACTION_NAME.PROGRESS,
+//     payload,
+//   };
+// }
+
+// interface ApiActionUpdateLoadingState {
+//   type: typeof API_ACTION_NAME.UPDATE_LOADING_STATE;
+//   payload: {
+//     ccsWarning: boolean;
+//     loaded: number;
+//     loadingState: string;
+//   };
+// }
+
+// export function updateLoadingStateAction(
+//   payload: ApiActionUpdateLoadingState['payload']
+// ): ApiActionUpdateLoadingState {
+//   return {
+//     type: API_ACTION_NAME.UPDATE_LOADING_STATE,
+//     payload,
+//   };
+// }
 
 export type ModelUploadApiAction =
-  | ApiActionAddMessages
-  | ApiActionUpdateLoadingState
-  | ApiActionUploadProgress;
+  | ApiActionGetConfig
+  | ApiActionGetVocabulary
+  | ApiActionPutConfig
+  | ApiActionPutVocabulary
+  | ApiActionPutDefinitionPart
+  | ApiActionComplete;

@@ -6,29 +6,28 @@
  */
 
 import React, { FC, useEffect, useState, useMemo } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiProgress,
-  EuiFieldText,
-  EuiSelect,
   EuiSteps,
   // EuiIcon,
   // EuiLoadingSpinner,
-  EuiFormControlLayout,
   EuiFormRow,
   EuiCallOut,
+  EuiSuperSelect,
+  EuiText,
 } from '@elastic/eui';
 
 import './style.scss';
 
 import { useFetchStream } from '@kbn/aiops-utils';
-import { ModelUpload, streamReducer, initialState } from './hugging';
+import { ModelUpload, streamReducer, initialState, API_ACTION_NAME } from './hugging';
 import { useMlKibana } from '../../../contexts/kibana';
 import { SUPPORTED_PYTORCH_TASKS } from '../../../../../common/constants/trained_models';
+import { HuggingFaceTrainedModel } from '../../../../../common/types/trained_models';
 
 interface Props {
   onClose: () => void;
@@ -40,6 +39,7 @@ export const UploadModel: FC<Props> = ({ onClose }) => {
       mlServices: {
         mlApiServices: {
           savedObjects: { syncSavedObjects },
+          trainedModels: { getHuggingFaceTrainedModels, getTrainedModels },
         },
       },
     },
@@ -49,19 +49,75 @@ export const UploadModel: FC<Props> = ({ onClose }) => {
   // const [hubModelId, setHubModelId] = useState<string>(
   //   'elastic/distilbert-base-cased-finetuned-conll03-english'
   // );
-  const [hubModelId, setHubModelId] = useState<string>('');
+  // const [hubModelId, setHubModelId] = useState<string>('');
+  const [selectedModelId, setSelectedModelId] = useState<string>('');
+  const [selectedModel, setSelectedModel] = useState<HuggingFaceTrainedModel | null>(null);
+  const [huggingFaceModels, setHuggingFaceModels] = useState<HuggingFaceTrainedModel[]>([]);
+  const [existingTrainedModelsIds, setExistingTrainedModelsIds] = useState<Record<string, null>>(
+    {}
+  );
 
   const [huggingFaceModelInfo, setHuggingFaceModelInfo] = useState<any | undefined | null>(
     undefined
   );
-  const [taskType, setTaskType] = useState<string>('');
+  // const [taskType, setTaskType] = useState<string>('');
   const [startModel, setStartModel] = useState<boolean>(false);
 
   const [progress, setProgress] = useState<number>(0);
-  const [messages, setMessages] = useState<string[]>([]);
+  // const [messages, setMessages] = useState<string[]>([]);
+  const [types, setTypes] = useState<string[]>([]);
   const [finished, setFinished] = useState<boolean>(false);
+  const [globalIsRunning, setGlobalIsRunning] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState(-1);
   const [hubModelIdErrors, setHubModelIdErrors] = useState('');
+
+  const modelOptions = useMemo(() => {
+    return huggingFaceModels.map((m) => {
+      const id = m.model_id;
+      return {
+        value: id,
+        disabled: existingTrainedModelsIds[id] !== undefined,
+        inputDisplay: id,
+        dropdownDisplay: (
+          <>
+            <strong>{id}</strong>
+            <EuiText size="xs">
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem css={{ fontWeight: 'normal', maxWidth: '90px' }}>
+                  Task type
+                </EuiFlexItem>
+                <EuiFlexItem>{m.task_type}</EuiFlexItem>
+              </EuiFlexGroup>
+              {m.source?.metadata?.repo_id ? (
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem css={{ fontWeight: 'normal', maxWidth: '90px' }}>
+                    Last modified
+                  </EuiFlexItem>
+                  <EuiFlexItem>{m.source.last_modified}</EuiFlexItem>
+                </EuiFlexGroup>
+              ) : null}
+              {m.source?.metadata?.repo_id ? (
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem css={{ fontWeight: 'normal', maxWidth: '90px' }}>
+                    Repo ID
+                  </EuiFlexItem>
+                  <EuiFlexItem>{m.source.metadata.repo_id}</EuiFlexItem>
+                </EuiFlexGroup>
+              ) : null}
+            </EuiText>
+          </>
+        ),
+      };
+    });
+  }, [existingTrainedModelsIds, huggingFaceModels]);
+
+  useEffect(() => {
+    const model = huggingFaceModels.find((m) => m.model_id === selectedModelId);
+    if (model) {
+      setSelectedModel(model);
+      setHuggingFaceModelInfo(model);
+    }
+  }, [huggingFaceModels, selectedModelId]);
 
   const {
     cancel,
@@ -72,8 +128,8 @@ export const UploadModel: FC<Props> = ({ onClose }) => {
   } = useFetchStream<ModelUpload, typeof basePath>(
     `${basePath}/api/ml/trained_models/hugging_face_import`,
     {
-      hubModelId,
-      taskType,
+      hubModelId: selectedModel ? selectedModel.model_id : '',
+      taskType: selectedModel ? selectedModel.task_type : '',
       start: startModel,
       clearPrevious: true,
     },
@@ -83,97 +139,189 @@ export const UploadModel: FC<Props> = ({ onClose }) => {
     }
   );
 
+  useEffect(() => {
+    getHuggingFaceTrainedModels().then((resp) => {
+      setHuggingFaceModels(resp.models);
+    });
+    getTrainedModels().then((ms) => {
+      setExistingTrainedModelsIds(Object.fromEntries(ms.map((m) => [m.model_id, null])));
+      // setExistingTrainedModelsIds(ms.map((m) => m.model_id));
+    });
+  }, [getHuggingFaceTrainedModels, getTrainedModels]);
+
   const testUpload = () => {
     start();
   };
 
-  const options = useMemo(
-    () =>
-      Object.values(SUPPORTED_PYTORCH_TASKS).map((value) => ({
-        value,
-        text: value,
-      })),
-    []
-  );
+  // const options = useMemo(
+  //   () =>
+  //     Object.values(SUPPORTED_PYTORCH_TASKS).map((value) => ({
+  //       value,
+  //       text: value,
+  //     })),
+  //   []
+  // );
 
   useEffect(() => {
+    if (isRunning === true) {
+      setGlobalIsRunning(true);
+    }
+
+    if (data.type === '' || isRunning === false) {
+      return;
+    }
+
+    setTypes([...types, data.type]);
+
     if (data.progress !== undefined) {
       setProgress(data.progress);
     }
-    if (data.messages !== undefined) {
-      setMessages(data.messages);
-    }
-  }, [data, isRunning, progress]);
+    // if (data.messages !== undefined) {
+    //   setMessages(data.messages);
+    // }
+  }, [data, isRunning, progress, types]);
 
   useEffect(() => {
-    if (currentStep === 5 && progress === 100) {
+    if (currentStep === 5) {
       syncSavedObjects(false).then(() => {
         setCurrentStep(6);
         setFinished(true);
+        setGlobalIsRunning(false);
       });
     }
   }, [currentStep, progress, syncSavedObjects]);
 
+  // useEffect(() => {
+  //   let maxStep = 0;
+  //   for (const message of messages) {
+  //     if (maxStep < 0 && message.match(/Establishing connection to Elasticsearch/)) {
+  //       maxStep = 0;
+  //       continue;
+  //     }
+  //     if (maxStep < 1 && message.match(/Loading HuggingFace transformer/)) {
+  //       maxStep = 1;
+  //       continue;
+  //     }
+  //     if (maxStep < 2 && message.match(/Creating model with id/)) {
+  //       maxStep = 2;
+  //       continue;
+  //     }
+  //     if (maxStep < 3 && message.match(/Uploading model definition/)) {
+  //       maxStep = 3;
+  //       continue;
+  //     }
+  //     if (maxStep < 4 && message.match(/Uploading model vocabulary/)) {
+  //       maxStep = 4;
+  //       continue;
+  //     }
+  //     if (maxStep < 5 && message.match(/Model successfully imported/)) {
+  //       maxStep = 5;
+  //       continue;
+  //     }
+  //   }
+  //   setCurrentStep(maxStep);
+  // }, [messages]);
+
+  // useEffect(() => {
+  //   let maxStep = 0;
+  //   for (const type of types) {
+  //     if (maxStep < 0 && type === API_ACTION_NAME.GET_CONFIG) {
+  //       maxStep = 0;
+  //       continue;
+  //     }
+  //     if (maxStep < 1 && type === API_ACTION_NAME.GET_VOCABULARY) {
+  //       maxStep = 1;
+  //       continue;
+  //     }
+  //     if (maxStep < 2 && type === API_ACTION_NAME.PUT_CONFIG) {
+  //       maxStep = 2;
+  //       continue;
+  //     }
+  //     if (maxStep < 3 && type === API_ACTION_NAME.PUT_VOCABULARY) {
+  //       maxStep = 3;
+  //       continue;
+  //     }
+  //     if (maxStep < 4 && type === API_ACTION_NAME.PUT_DEFINITION_PART) {
+  //       maxStep = 4;
+  //       continue;
+  //     }
+  //     if (maxStep < 5 && type === API_ACTION_NAME.COMPLETE) {
+  //       maxStep = 5;
+  //       continue;
+  //     }
+  //   }
+  //   setCurrentStep(maxStep);
+  // }, [types]);
+
   useEffect(() => {
+    // console.log(types);
+
     let maxStep = 0;
-    for (const message of messages) {
-      if (maxStep < 0 && message.match(/Establishing connection to Elasticsearch/)) {
+    for (const type of types) {
+      if (maxStep < 0 && type === API_ACTION_NAME.GET_CONFIG) {
         maxStep = 0;
         continue;
       }
-      if (maxStep < 1 && message.match(/Loading HuggingFace transformer/)) {
+      if (maxStep < 1 && type === API_ACTION_NAME.GET_VOCABULARY) {
         maxStep = 1;
         continue;
       }
-      if (maxStep < 2 && message.match(/Creating model with id/)) {
+      if (maxStep < 2 && type === API_ACTION_NAME.PUT_CONFIG) {
         maxStep = 2;
         continue;
       }
-      if (maxStep < 3 && message.match(/Uploading model definition/)) {
+      if (maxStep < 3 && type === API_ACTION_NAME.PUT_VOCABULARY) {
         maxStep = 3;
         continue;
       }
-      if (maxStep < 4 && message.match(/Uploading model vocabulary/)) {
+      if (maxStep < 4 && type === API_ACTION_NAME.PUT_DEFINITION_PART) {
         maxStep = 4;
         continue;
       }
-      if (maxStep < 5 && message.match(/Model successfully imported/)) {
+      if (maxStep < 5 && type === API_ACTION_NAME.COMPLETE) {
         maxStep = 5;
         continue;
       }
     }
+
+    // if (maxStep === 5) {
+    //   syncSavedObjects(false).then(() => {
+    //     setCurrentStep(6);
+    //     setFinished(true);
+    //   });
+    // }
     setCurrentStep(maxStep);
-  }, [messages]);
+  }, [syncSavedObjects, types]);
 
-  const setHubModelIdWrapper = (id: string) => {
-    setHubModelIdErrors('');
-    setHuggingFaceModelInfo(undefined);
-    setHubModelId(id);
-  };
+  // const setHubModelIdWrapper = (id: string) => {
+  //   setHubModelIdErrors('');
+  //   setHuggingFaceModelInfo(undefined);
+  //   setHubModelId(id);
+  // };
 
-  const checkHuggingFaceModelId = async (id: string) => {
-    try {
-      if (id === '') {
-        return;
-      }
-      const modelInfo: any = await http.fetch(`https://api-inference.huggingface.co/models/${id}`);
-      setHuggingFaceModelInfo(modelInfo);
-      const guessedTaskType = pipelineTagToMlTaskType(modelInfo.pipeline_tag);
-      if (guessedTaskType !== null) {
-        setTaskType(guessedTaskType);
-      }
-      // eslint-disable-next-line no-console
-      console.log(modelInfo);
-    } catch (error) {
-      setHuggingFaceModelInfo(null);
-      if (error.response.status === 404) {
-        setHubModelIdErrors('Model does not exist on Hugging Face');
-      } else {
-        // eslint-disable-next-line no-console
-        console.error(error);
-      }
-    }
-  };
+  // const checkHuggingFaceModelId = async (id: string) => {
+  //   try {
+  //     if (id === '') {
+  //       return;
+  //     }
+  //     const modelInfo: any = await http.fetch(`https://api-inference.huggingface.co/models/${id}`);
+  //     setHuggingFaceModelInfo(modelInfo);
+  //     const guessedTaskType = pipelineTagToMlTaskType(modelInfo.pipeline_tag);
+  //     if (guessedTaskType !== null) {
+  //       setTaskType(guessedTaskType);
+  //     }
+  //     // eslint-disable-next-line no-console
+  //     console.log(modelInfo);
+  //   } catch (error) {
+  //     setHuggingFaceModelInfo(null);
+  //     if (error.response.status === 404) {
+  //       setHubModelIdErrors('Model does not exist on Hugging Face');
+  //     } else {
+  //       // eslint-disable-next-line no-console
+  //       console.error(error);
+  //     }
+  //   }
+  // };
 
   // function getIdValidIcon() {
   //   if (hubModelId === '') {
@@ -187,48 +335,48 @@ export const UploadModel: FC<Props> = ({ onClose }) => {
   //   }
   // }
 
-  useDebounce(
-    function refetchNotification() {
-      checkHuggingFaceModelId(hubModelId);
-    },
-    500,
-    [hubModelId]
-  );
+  // useDebounce(
+  //   function refetchNotification() {
+  //     checkHuggingFaceModelId(hubModelId);
+  //   },
+  //   500,
+  //   [hubModelId]
+  // );
 
   const steps = [
     {
-      title: 'Establishing connection to Elasticsearch',
+      title: 'Retrieving model config',
       children: <div style={{ marginTop: '-50px' }} />,
       status: currentStep >= 0 ? 'complete' : 'incomplete',
     },
     {
-      title: 'Loading HuggingFace transformer tokenizer and model',
+      title: 'Retrieving model vocabulary',
       children: <></>,
       status: currentStep >= 1 ? 'complete' : 'incomplete',
     },
     {
-      title: `Creating model with id '${hubModelId}'`,
+      title: 'Uploading model config',
       children: <></>,
       status: currentStep >= 2 ? 'complete' : 'incomplete',
     },
     {
-      title: `Uploading model definition`,
+      title: 'Uploading model vocabulary',
+      children: <></>,
       status: currentStep >= 3 ? 'complete' : 'incomplete',
+    },
+    {
+      title: `Uploading model definition`,
+      status: currentStep >= 4 ? 'complete' : 'incomplete',
       children:
         progress === 0 ? (
           <></>
         ) : (
           <>
             <div style={{ marginTop: '35px' }}>
-              <EuiProgress valueText={true} value={progress} max={100} size="m" />
+              <EuiProgress valueText={true} value={progress.toFixed()} max={100} size="m" />
             </div>
           </>
         ),
-    },
-    {
-      title: `Uploading model vocabulary`,
-      children: <></>,
-      status: currentStep >= 4 ? 'complete' : 'incomplete',
     },
     {
       title: `Model successfully imported`,
@@ -241,37 +389,84 @@ export const UploadModel: FC<Props> = ({ onClose }) => {
       status: currentStep >= 6 ? 'complete' : 'incomplete',
     },
   ];
+  // const steps = [
+  //   {
+  //     title: 'Establishing connection to Elasticsearch',
+  //     children: <div style={{ marginTop: '-50px' }} />,
+  //     status: currentStep >= 0 ? 'complete' : 'incomplete',
+  //   },
+  //   {
+  //     title: 'Loading HuggingFace transformer tokenizer and model',
+  //     children: <></>,
+  //     status: currentStep >= 1 ? 'complete' : 'incomplete',
+  //   },
+  //   {
+  //     title: `Creating model with id '${hubModelId}'`,
+  //     children: <></>,
+  //     status: currentStep >= 2 ? 'complete' : 'incomplete',
+  //   },
+  //   {
+  //     title: `Uploading model definition`,
+  //     status: currentStep >= 3 ? 'complete' : 'incomplete',
+  //     children:
+  //       progress === 0 ? (
+  //         <></>
+  //       ) : (
+  //         <>
+  //           <div style={{ marginTop: '35px' }}>
+  //             <EuiProgress valueText={true} value={progress} max={100} size="m" />
+  //           </div>
+  //         </>
+  //       ),
+  //   },
+  //   {
+  //     title: `Uploading model vocabulary`,
+  //     children: <></>,
+  //     status: currentStep >= 4 ? 'complete' : 'incomplete',
+  //   },
+  //   {
+  //     title: `Model successfully imported`,
+  //     children: <></>,
+  //     status: currentStep >= 5 ? 'complete' : 'incomplete',
+  //   },
+  //   {
+  //     title: `Synchronizing trained models`,
+  //     children: <></>,
+  //     status: currentStep >= 6 ? 'complete' : 'incomplete',
+  //   },
+  // ];
 
-  function getModelItems(modelInfo: any) {
+  function getModelItems(modelInfo: HuggingFaceTrainedModel) {
     const items = [];
-    if (modelInfo.id) {
+    if (modelInfo.model_id) {
       items.push({
         title: 'ID',
-        description: modelInfo.id,
+        description: modelInfo.model_id,
       });
     }
-    if (modelInfo.author) {
-      items.push({
-        title: 'Author',
-        description: modelInfo.author,
-      });
-    }
-    if (modelInfo.lastModified) {
+
+    if (modelInfo.source.last_modified) {
       items.push({
         title: 'Last modified',
-        description: modelInfo.lastModified,
+        description: modelInfo.source.last_modified,
       });
     }
-    if (modelInfo.pipeline_tag) {
+    if (modelInfo.task_type) {
       items.push({
-        title: 'Pipeline tag',
-        description: modelInfo.pipeline_tag,
+        title: 'Task type',
+        description: modelInfo.task_type,
       });
     }
-    if (modelInfo.library_name) {
+    if (modelInfo.source.type) {
       items.push({
-        title: 'Library name',
-        description: modelInfo.library_name,
+        title: 'Type',
+        description: modelInfo.source.type,
+      });
+    }
+    if (modelInfo.source.metadata?.repo_id) {
+      items.push({
+        title: 'Repo ID',
+        description: modelInfo.source.metadata?.repo_id,
       });
     }
 
@@ -281,11 +476,14 @@ export const UploadModel: FC<Props> = ({ onClose }) => {
   return (
     <>
       <EuiFormRow
-        label="Hugging face model ID"
-        isInvalid={(hubModelId !== '' && huggingFaceModelInfo === null) || hubModelIdErrors !== ''}
+        fullWidth
+        label="Model ID"
+        isInvalid={
+          (selectedModelId !== '' && huggingFaceModelInfo === null) || hubModelIdErrors !== ''
+        }
         error={hubModelIdErrors}
       >
-        <EuiFormControlLayout
+        {/* <EuiFormControlLayout
           isLoading={hubModelId !== '' && huggingFaceModelInfo === undefined}
           isInvalid={hubModelId !== '' && huggingFaceModelInfo === null}
         >
@@ -294,17 +492,21 @@ export const UploadModel: FC<Props> = ({ onClose }) => {
             onChange={(e) => setHubModelIdWrapper(e.target.value)}
             value={hubModelId}
           />
-        </EuiFormControlLayout>
+        </EuiFormControlLayout> */}
+
+        <EuiSuperSelect
+          fullWidth
+          id={'dd'}
+          options={modelOptions}
+          valueOfSelected={selectedModelId}
+          onChange={(value) => setSelectedModelId(value)}
+          hasDividers
+        />
       </EuiFormRow>
       {huggingFaceModelInfo !== null && huggingFaceModelInfo !== undefined ? (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut
-            title="Model can be imported"
-            color="success"
-            size="s"
-            iconType="importAction"
-          >
+          <EuiCallOut title="Model information" color="primary" size="s">
             {getModelItems(huggingFaceModelInfo).map(({ title, description }) => (
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem css={{ fontWeight: 'bold', maxWidth: '90px' }}>{title}</EuiFlexItem>
@@ -317,7 +519,7 @@ export const UploadModel: FC<Props> = ({ onClose }) => {
       {/* {getIdValidIcon()} */}
 
       <EuiSpacer />
-      <EuiFormRow label="Task type">
+      {/* <EuiFormRow label="Task type">
         <EuiSelect
           hasNoInitialSelection={true}
           disabled={
@@ -328,10 +530,15 @@ export const UploadModel: FC<Props> = ({ onClose }) => {
           onChange={(e) => setTaskType(e.target.value)}
           aria-label="Use aria labels when no actual label is in use"
         />
-      </EuiFormRow>
+      </EuiFormRow> */}
       <EuiSpacer />
       <EuiButton
-        disabled={isRunning || huggingFaceModelInfo === undefined || huggingFaceModelInfo === null}
+        disabled={
+          globalIsRunning ||
+          finished ||
+          huggingFaceModelInfo === undefined ||
+          huggingFaceModelInfo === null
+        }
         onClick={() => testUpload()}
       >
         Import
@@ -344,7 +551,7 @@ export const UploadModel: FC<Props> = ({ onClose }) => {
           <EuiTextArea disabled={true} value={messages.join('\n')} fullWidth={true} />
         </>
       ) : null} */}
-      {isRunning ? (
+      {globalIsRunning || finished ? (
         <>
           <EuiSpacer />
           {/* @ts-ignore not sure what is wrong with these steps */}
