@@ -21,6 +21,7 @@ import { KibanaUrl } from '../services/kibana_url';
 import { JourneyFtrHarness } from './journey_ftr_harness';
 import { makeFtrConfigProvider } from './journey_ftr_config';
 import { JourneyConfig, JourneyConfigOptions } from './journey_config';
+import { Client } from '@elastic/elasticsearch';
 
 export interface BaseStepCtx {
   page: Page;
@@ -28,6 +29,7 @@ export interface BaseStepCtx {
   inputDelays: InputDelays;
   kbnUrl: KibanaUrl;
   kibanaServer: KibanaServer;
+  esClient: Client;
 }
 
 export type AnyStep = Step<{}>;
@@ -119,6 +121,7 @@ export class Journey<CtxExt extends object> {
       getService('config'),
       getService('esArchiver'),
       getService('kibanaServer'),
+      getService('es'),
       new Auth(getService('config'), getService('log'), getService('kibanaServer')),
       this.config
     ).initMochaSuite(this.#steps);

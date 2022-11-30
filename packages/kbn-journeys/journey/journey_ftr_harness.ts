@@ -18,6 +18,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { Config } from '@kbn/test';
 import { EsArchiver, KibanaServer } from '@kbn/ftr-common-functional-services';
 
+import { Client } from '@elastic/elasticsearch';
 import { Auth } from '../services/auth';
 import { getInputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
@@ -34,6 +35,7 @@ export class JourneyFtrHarness {
     private readonly config: Config,
     private readonly esArchiver: EsArchiver,
     private readonly kibanaServer: KibanaServer,
+    private readonly esClient: Client,
     private readonly auth: Auth,
     private readonly journeyConfig: JourneyConfig<any>
   ) {
@@ -365,6 +367,7 @@ export class JourneyFtrHarness {
         )
       ),
       kibanaServer: this.kibanaServer,
+      esClient: this.esClient,
     });
 
     return this.#_ctx;
