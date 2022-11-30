@@ -18,7 +18,7 @@ import {
   createRootWithCorePlugins,
   createTestServers,
   type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+} from '../../../../test_helpers/kbn_server';
 
 const logFilePath = Path.join(__dirname, 'check_target_mappings.log');
 
