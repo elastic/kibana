@@ -70,6 +70,8 @@ function mockFrame(): FramePublicAPI {
 
 // Just a basic bootstrap here to kickstart the tests
 describe('pie_visualization', () => {
+  beforeEach(() => jest.clearAllMocks());
+
   describe('#getErrorMessages', () => {
     describe('too many dimensions', () => {
       const state = { ...getExampleState(), shape: PieChartTypes.MOSAIC };
@@ -326,7 +328,7 @@ describe('pie_visualization', () => {
         `);
       });
 
-      it('applies color swatch icons with multiple slice-by groups (mosaic)', () => {
+      it('applies color swatch icons with multiple metrics', () => {
         const state = getExampleState();
         state.layers[0].allowMultipleMetrics = true;
         state.layers[0].metrics = colIds;
@@ -399,6 +401,42 @@ describe('pie_visualization', () => {
             ],
           ]
         `);
+      });
+
+      it("applies disabled icons on multiple metrics if there's a slice-by", () => {
+        const state = getExampleState();
+        state.layers[0].allowMultipleMetrics = true;
+
+        const [first, ...rest] = colIds;
+
+        state.layers[0].primaryGroups = [first];
+        state.layers[0].metrics = rest;
+
+        const config = pieVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: state.layers[0].layerId,
+        });
+
+        expect(findMetricGroup(config)?.accessors).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "columnId": "2",
+              "triggerIcon": "disabled",
+            },
+            Object {
+              "columnId": "3",
+              "triggerIcon": "disabled",
+            },
+            Object {
+              "columnId": "4",
+              "triggerIcon": "disabled",
+            },
+          ]
+        `);
+
+        const palette = paletteServiceMock.get('default');
+        expect(palette.getCategoricalColor).not.toHaveBeenCalled();
       });
     });
 

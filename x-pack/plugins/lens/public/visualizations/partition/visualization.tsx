@@ -318,19 +318,23 @@ export const getPieVisualization = ({
 
       const accessors: AccessorConfig[] = layer.metrics.map<AccessorConfig>((columnId, index) => ({
         columnId,
-        ...(layer.allowMultipleMetrics && !hasSliceBy
-          ? {
-              triggerIcon: 'color',
-              color:
-                layer.colorsByDimension?.[columnId] ??
-                getDefaultColorForMultiMetricDimension({
-                  layer,
-                  columnId,
-                  paletteService,
-                  datasource,
-                }) ??
-                undefined,
-            }
+        ...(layer.allowMultipleMetrics
+          ? hasSliceBy
+            ? {
+                triggerIcon: 'disabled',
+              }
+            : {
+                triggerIcon: 'color',
+                color:
+                  layer.colorsByDimension?.[columnId] ??
+                  getDefaultColorForMultiMetricDimension({
+                    layer,
+                    columnId,
+                    paletteService,
+                    datasource,
+                  }) ??
+                  undefined,
+              }
           : {}),
       }));
 

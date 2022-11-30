@@ -17,6 +17,7 @@ import {
   EuiButtonGroup,
   EuiColorPicker,
   euiPaletteColorBlind,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -349,12 +350,24 @@ function StaticColorControls({
   paletteService,
   accessor,
   setState,
-  currentLayer,
   datasource,
+  currentLayer,
 }: DimensionEditorProps & { currentLayer: PieLayerState }) {
   const colorLabel = i18n.translate('xpack.lens.pieChart.color', {
     defaultMessage: 'Color',
   });
+
+  const disabledMessage = currentLayer.primaryGroups.length
+    ? ['pie', 'donut'].includes(state.shape)
+      ? i18n.translate('xpack.lens.pieChart.colorPicker.disabledBecauseSliceBy', {
+          defaultMessage:
+            'You are unable to apply custom colors to individual slices when the layer includes one or more "Slice by" dimensions.',
+        })
+      : i18n.translate('xpack.lens.pieChart.colorPicker.disabledBecauseGroupBy', {
+          defaultMessage:
+            'You are unable to apply custom colors to individual slices when the layer includes one or more "Group by" dimensions.',
+        })
+    : '';
 
   const defaultColor = getDefaultColorForMultiMetricDimension({
     layer: currentLayer,
@@ -397,19 +410,43 @@ function StaticColorControls({
       { allowFalsyValue: true }
     );
 
+  const isDisabled = Boolean(disabledMessage);
+
+  const renderColorPicker = () => (
+    <EuiColorPicker
+      fullWidth
+      compressed
+      disabled={isDisabled}
+      isClearable={true}
+      placeholder={
+        isDisabled
+          ? i18n.translate('xpack.lens.pieChart.colorPicker.auto', {
+              defaultMessage: 'Auto',
+            })
+          : defaultColor
+      }
+      onChange={(color: string) => handleColorChange(color)}
+      color={isDisabled ? '' : currentColor}
+      aria-label={colorLabel}
+      showAlpha={false}
+      swatches={euiPaletteColorBlind()}
+    />
+  );
+
   return (
     <EuiFormRow display="columnCompressed" fullWidth label={colorLabel}>
-      <EuiColorPicker
-        fullWidth
-        compressed
-        isClearable={true}
-        placeholder={defaultColor}
-        onChange={(color: string) => handleColorChange(color)}
-        color={currentColor}
-        aria-label={colorLabel}
-        showAlpha={false}
-        swatches={euiPaletteColorBlind()}
-      />
+      {disabledMessage ? (
+        <EuiToolTip
+          position="top"
+          delay="long"
+          anchorClassName="eui-displayBlock"
+          content={disabledMessage}
+        >
+          {renderColorPicker()}
+        </EuiToolTip>
+      ) : (
+        renderColorPicker()
+      )}
     </EuiFormRow>
   );
 }
