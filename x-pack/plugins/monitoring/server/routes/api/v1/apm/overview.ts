@@ -43,7 +43,9 @@ export function apmOverviewRoute(server: MonitoringCore) {
       try {
         const [stats, metrics] = await Promise.all([
           getApmClusterStatus(req, { clusterUuid }),
-          getMetrics(req, 'beats', metricSet),
+          getMetrics(req, 'beats', metricSet, [
+            { term: { 'beats_stats.beat.type': 'apm-server' } },
+          ]),
         ]);
 
         return postApmOverviewResponsePayloadRT.encode({
