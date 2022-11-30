@@ -12,7 +12,6 @@ import typeDetect from 'type-detect';
 import { intersection } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { SchedulerPluginSetup } from '@kbn/scheduler-plugin/server';
 import { TaskRunnerFactory } from './task_runner';
 import {
@@ -38,7 +37,6 @@ import { AlertingRulesConfig } from '.';
 export interface ConstructorOptions {
   scheduler: SchedulerPluginSetup;
   logger: Logger;
-  taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
   licenseState: ILicenseState;
   licensing: LicensingPluginSetup;
@@ -145,7 +143,6 @@ export class RuleTypeRegistry {
   constructor({
     scheduler,
     logger,
-    taskManager,
     taskRunnerFactory,
     licenseState,
     licensing,

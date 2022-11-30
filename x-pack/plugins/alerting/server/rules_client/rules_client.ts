@@ -940,20 +940,14 @@ export class RulesClient {
   }
 
   public async getAlertState({ id }: { id: string }): Promise<RuleTaskState | void> {
-    const alert = await this.get({ id });
+    const rule = await this.get({ id });
     await this.authorization.ensureAuthorized({
-      ruleTypeId: alert.alertTypeId,
-      consumer: alert.consumer,
+      ruleTypeId: rule.alertTypeId,
+      consumer: rule.consumer,
       operation: ReadOperations.GetRuleState,
       entity: AlertingAuthorizationEntity.Rule,
     });
-    if (alert.scheduledTaskId) {
-      const { state } = taskInstanceToAlertTaskInstance(
-        await this.taskManager.get(alert.scheduledTaskId),
-        alert
-      );
-      return state;
-    }
+    return rule.state;
   }
 
   public async getAlertSummary({
@@ -1759,7 +1753,7 @@ export class RulesClient {
     const removeResult = await this.unsecuredSavedObjectsClient.delete('alert', id);
 
     await Promise.all([
-      taskIdToRemove ? this.taskManager.removeIfExists(taskIdToRemove) : null,
+      taskIdToRemove ? this.scheduler.unschedule(taskIdToRemove) : null,
       apiKeyToInvalidate
         ? bulkMarkApiKeysForInvalidation(
             { apiKeys: [apiKeyToInvalidate] },
@@ -3436,7 +3430,7 @@ export class RulesClient {
       // remove the task, otherwise mark the task as disabled
       if (attributes.scheduledTaskId) {
         if (attributes.scheduledTaskId !== id) {
-          await this.taskManager.removeIfExists(attributes.scheduledTaskId);
+          await this.scheduler.unschedule(attributes.scheduledTaskId);
         } else {
           await this.taskManager.bulkDisable([attributes.scheduledTaskId]);
         }

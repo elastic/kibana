@@ -227,7 +227,6 @@ export class AlertingPlugin {
     const ruleTypeRegistry = new RuleTypeRegistry({
       scheduler: plugins.scheduler,
       logger: this.logger,
-      taskManager: plugins.taskManager,
       taskRunnerFactory: this.taskRunnerFactory,
       licenseState: this.licenseState,
       licensing: plugins.licensing,
