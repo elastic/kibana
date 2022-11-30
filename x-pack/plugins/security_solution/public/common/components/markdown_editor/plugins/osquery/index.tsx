@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pickBy, isEmpty, reduce, each } from 'lodash';
+import { pickBy, isEmpty } from 'lodash';
 import type { Plugin } from 'unified';
 import React, { useContext, useMemo, useState, useCallback } from 'react';
 import type { RemarkTokenizer } from '@elastic/eui';
@@ -24,6 +24,7 @@ import styled from 'styled-components';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { replaceParamsQuery } from './replace_params_query';
 import { useKibana } from '../../../../lib/kibana';
 import { LabelField } from './label_field';
 import OsqueryLogo from './osquery_icon/osquery.svg';
@@ -268,32 +269,10 @@ const RunOsqueryButtonRenderer = ({
 
   const handleClose = useCallback(() => setShowFlyout(false), [setShowFlyout]);
 
-  const parsedConfigurationQuery = useMemo(() => {
-    const regex = /[^{\}]+(?=})/g;
-    const matchedBraces = configuration.query.match(regex);
-    let resultQuery = configuration.query;
-
-    if (matchedBraces) {
-      const fieldsMap: Record<string, string> = reduce(
-        data,
-        (acc, eventDetailItem) => ({
-          ...acc,
-          [eventDetailItem.field]: eventDetailItem?.values?.[0],
-        }),
-        {}
-      );
-      each(matchedBraces, (bracesText: string) => {
-        if (resultQuery.includes(`{${bracesText}}`)) {
-          const foundFieldValue = fieldsMap[bracesText];
-          if (foundFieldValue) {
-            resultQuery = resultQuery.replace(`{${bracesText}}`, foundFieldValue);
-          }
-        }
-      });
-    }
-
-    return resultQuery;
-  }, [configuration.query, data]);
+  const replacedParamsQuery = useMemo(
+    () => replaceParamsQuery(configuration.query, data),
+    [configuration.query, data]
+  );
 
   return (
     <>
@@ -307,7 +286,7 @@ const RunOsqueryButtonRenderer = ({
         <OsqueryFlyout
           defaultValues={{
             ...(alertId ? { alertIds: [alertId] } : {}),
-            query: parsedConfigurationQuery,
+            query: replacedParamsQuery,
             ecs_mapping: configuration.ecs_mapping,
             queryField: false,
           }}
