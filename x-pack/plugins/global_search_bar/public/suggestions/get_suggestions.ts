@@ -31,7 +31,6 @@ export const getSuggestions = ({
 }: GetSuggestionOptions): SearchSuggestion[] => {
   const results: SearchSuggestion[] = [];
   const suggestionTerm = searchTerm.trim();
-
   const matchingType = findIgnoreCase(searchableTypes, suggestionTerm);
   if (matchingType) {
     const suggestedSearch = escapeIfWhiteSpaces(matchingType);
@@ -44,6 +43,18 @@ export const getSuggestions = ({
       }),
       suggestedSearch: `type:${suggestedSearch}`,
     });
+
+    if (matchingType === 'dashboard' || matchingType === 'lens') {
+      results.push({
+        key: '__doc__suggestion__',
+        label: `docs: ${suggestedSearch}`,
+        icon: 'documentation',
+        description: i18n.translate('xpack.globalSearchBar.suggestions.searchForDocsLabel', {
+          defaultMessage: 'Search for docs',
+        }),
+        suggestedSearch: `docs:${suggestedSearch}`,
+      });
+    }
   }
 
   if (tagCache && searchTerm) {

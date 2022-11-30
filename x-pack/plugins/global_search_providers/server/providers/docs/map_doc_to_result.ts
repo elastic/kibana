@@ -9,12 +9,21 @@ import { toSentenceCase } from '@elastic/eui';
 import { GlobalSearchProviderResult } from '@kbn/global-search-plugin/server';
 import uuid from 'uuid';
 
-export const mapToResults = (term: string, response: Response): GlobalSearchProviderResult[] => {
-  const isKibanaDoc = response.url.startsWith('https://www.elastic.co/guide/en/kibana/');
+export const mapToResults = (
+  type: 'kibana' | 'search' | 'default',
+  term: string,
+  response: Response
+): GlobalSearchProviderResult[] => {
+  const isGenericSearch = type === 'default';
+  const isKibanaDoc = type === 'kibana';
   return [
     {
       id: uuid.v4(),
-      title: isKibanaDoc ? `${toSentenceCase(term)} docs` : `Search for "${term}" in the docs`,
+      title: isGenericSearch
+        ? `Elastic docs`
+        : isKibanaDoc
+        ? `${toSentenceCase(term)} docs`
+        : `Search for "${term}" in the docs`,
       type: 'documentation',
       icon: 'documentation',
       url: response.url,

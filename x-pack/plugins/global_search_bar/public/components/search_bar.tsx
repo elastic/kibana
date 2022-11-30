@@ -144,7 +144,6 @@ export const SearchBar: FC<SearchBarProps> = ({
         }
 
         const suggestions = loadSuggestions(searchValue);
-        // console.log('seachValue', searchValue);
 
         let aggregatedResults: GlobalSearchResult[] = [];
         if (searchValue.length !== 0) {

@@ -48,7 +48,7 @@ export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({ basePath, dark
         <p>
           <FormattedMessage
             id="xpack.globalSearchBar.searchBar.noResults"
-            defaultMessage="Try searching for applications, dashboards, visualizations, and more."
+            defaultMessage="Try searching for applications, dashboards, visualizations, docs, and more."
           />
         </p>
       </EuiFlexItem>
