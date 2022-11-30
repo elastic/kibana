@@ -10,12 +10,14 @@ import { map, distinctUntilChanged, Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { isEqual } from 'lodash';
 
+// Use an observable for react state WITH a selector function
 export const useObservableSelector = <S, R>(
   observable: Observable<S>,
   selector: (arg0: S) => R,
   defaultValue: R
 ): R => useObservable(observable.pipe(map(selector), distinctUntilChanged(isEqual)), defaultValue);
 
+// Takes an observable and returns a function for creating multiple stateful values via selectors
 export const useStateSelectorFactory =
   <S>(state: Observable<S>) =>
   <R>(selector: (arg0: S) => R, defaultValue: R) =>
