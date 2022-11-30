@@ -12,7 +12,7 @@ import {
   FAAS_COLDSTART_DURATION,
   FAAS_ID,
   METRICSET_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { fetchAndTransformMetrics } from '../fetch_and_transform_metrics';
 import { ChartBase } from '../types';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';

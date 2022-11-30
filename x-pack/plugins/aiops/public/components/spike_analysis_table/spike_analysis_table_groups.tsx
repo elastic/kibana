@@ -42,6 +42,7 @@ const NARROW_COLUMN_WIDTH = '120px';
 const EXPAND_COLUMN_WIDTH = '40px';
 const ACTIONS_COLUMN_WIDTH = '60px';
 const NOT_AVAILABLE = '--';
+const MAX_GROUP_BADGES = 10;
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'pValue';
@@ -222,7 +223,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                   }
                 )
           }
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
         />
       ),
       valign: 'top',
@@ -252,8 +253,11 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       ),
       render: (_, { group, repeatedValues }) => {
         const valuesBadges = [];
+        const hasExtraBadges = Object.keys(group).length > MAX_GROUP_BADGES;
+
         for (const fieldName in group) {
           if (group.hasOwnProperty(fieldName)) {
+            if (valuesBadges.length === MAX_GROUP_BADGES) break;
             valuesBadges.push(
               <>
                 <EuiBadge
@@ -269,7 +273,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
             );
           }
         }
-        if (Object.keys(repeatedValues).length > 0) {
+        if (Object.keys(repeatedValues).length > 0 || hasExtraBadges) {
           valuesBadges.push(
             <>
               <EuiBadge
@@ -277,11 +281,23 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                 data-test-subj="aiopsSpikeAnalysisGroupsTableColumnGroupBadge"
                 color="hollow"
               >
-                +{Object.keys(repeatedValues).length}{' '}
-                <FormattedMessage
-                  id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreLabel"
-                  defaultMessage="more field/value pairs also appearing in other groups"
-                />
+                {hasExtraBadges ? (
+                  <>
+                    <FormattedMessage
+                      id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreLabel"
+                      defaultMessage="+{count, plural, one {# more field/value pair} other {# more field/value pairs}}"
+                      values={{ count: Object.keys(group).length - MAX_GROUP_BADGES }}
+                    />
+                    <br />
+                  </>
+                ) : null}
+                {Object.keys(repeatedValues).length > 0 ? (
+                  <FormattedMessage
+                    id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreRepeatedLabel"
+                    defaultMessage="+{count, plural, one {# more field/value pair} other {# more field/value pairs}} also appearing in other groups"
+                    values={{ count: Object.keys(repeatedValues).length }}
+                  />
+                ) : null}
               </EuiBadge>
               <EuiSpacer size="xs" />
             </>
