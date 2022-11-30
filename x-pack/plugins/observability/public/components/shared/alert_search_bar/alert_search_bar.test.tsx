@@ -26,7 +26,7 @@ const mockServices = () => {
     AlertsSearchBar: getAlertsSearchBarMock.mockReturnValue(
       <div data-test-subj={ALERT_SEARCH_BAR_DATA_TEST_SUBJ} />
     ),
-    errorToast: jest.fn(),
+    useToasts: jest.fn(),
   });
 };
 

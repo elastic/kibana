@@ -6,7 +6,7 @@
  */
 
 import { ReactElement } from 'react';
-import { ErrorToastOptions, Toast, ToastsStart } from '@kbn/core-notifications-browser';
+import { ToastsStart } from '@kbn/core-notifications-browser';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { AlertsSearchBarProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_search_bar';
 import { BoolQuery, Query } from '@kbn/es-query';
@@ -21,24 +21,24 @@ export interface AlertSearchBarWithUrlSyncProps extends CommonAlertSearchBarProp
   urlStorageKey: string;
 }
 
-export interface KibanaDependencies {
+export interface Dependencies {
   data: {
     query: {
       timefilter: { timefilter: TimefilterContract };
     };
   };
-  notifications: { toasts: ToastsStart };
   triggersActionsUi: {
     getAlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
   };
+  useToasts: () => ToastsStart;
 }
 
-export type ObservabilityAlertSearchBarDependencies = KibanaDependencies;
+export type ObservabilityAlertSearchBarDependencies = Dependencies;
 
 export interface Services {
   timeFilterService: TimefilterContract;
   AlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
-  errorToast: (error: Error, options: ErrorToastOptions) => Toast;
+  useToasts: () => ToastsStart;
 }
 
 export interface ObservabilityAlertSearchBarProps

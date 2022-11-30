@@ -37,7 +37,8 @@ export function ObservabilityAlertSearchBar({
   rangeTo,
   status,
 }: ObservabilityAlertSearchBarProps) {
-  const { AlertsSearchBar, errorToast, timeFilterService } = useServices();
+  const { AlertsSearchBar, timeFilterService, useToasts } = useServices();
+  const toasts = useToasts();
 
   const onAlertStatusChange = useCallback(
     (alertStatus: AlertStatus) => {
@@ -82,7 +83,7 @@ export function ObservabilityAlertSearchBar({
         onRangeToChange(dateRange.to);
         onEsQueryChange(esQuery);
       } catch (error) {
-        errorToast(error, {
+        toasts.addError(error, {
           title: i18n.translate('xpack.observability.alerts.searchBar.invalidQueryTitle', {
             defaultMessage: 'Invalid query string',
           }),
@@ -98,7 +99,7 @@ export function ObservabilityAlertSearchBar({
       onKueryChange,
       onEsQueryChange,
       status,
-      errorToast,
+      toasts,
     ]
   );
 

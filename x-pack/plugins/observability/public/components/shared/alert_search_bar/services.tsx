@@ -5,23 +5,31 @@
  * 2.0.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { FC, useContext, useMemo } from 'react';
 import { ObservabilityAlertSearchBarDependencies, Services } from './types';
 
 const ObservabilityAlertSearchBarContext = React.createContext<Services | null>(null);
 
 export const ObservabilityAlertSearchBarProvider: FC<ObservabilityAlertSearchBarDependencies> = ({
   children,
-  ...services
+  data: {
+    query: {
+      timefilter: { timefilter: timeFilterService },
+    },
+  },
+  useToasts,
+  triggersActionsUi: { getAlertsSearchBar: AlertsSearchBar },
 }) => {
+  const services = useMemo<Services>(
+    () => ({
+      timeFilterService,
+      useToasts,
+      AlertsSearchBar,
+    }),
+    [timeFilterService, useToasts, AlertsSearchBar]
+  );
   return (
-    <ObservabilityAlertSearchBarContext.Provider
-      value={{
-        timeFilterService: services.data.query.timefilter.timefilter,
-        errorToast: services.notifications.toasts.addError,
-        AlertsSearchBar: services.triggersActionsUi.getAlertsSearchBar,
-      }}
-    >
+    <ObservabilityAlertSearchBarContext.Provider value={services}>
       {children}
     </ObservabilityAlertSearchBarContext.Provider>
   );
