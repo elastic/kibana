@@ -13098,10 +13098,6 @@
                 "path": "src/plugins/data_views/common/data_views/data_view.ts"
               },
               {
-                "plugin": "dataViewEditor",
-                "path": "src/plugins/data_view_editor/public/components/data_view_editor_flyout_content.tsx"
-              },
-              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -13379,6 +13375,10 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/quick_create_job.ts"
               },
               {
@@ -13436,6 +13436,14 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
               },
               {
                 "plugin": "canvas",
@@ -17991,29 +17999,29 @@
                   "ExplainResponse",
                   "<TDocument>>; }; features: ",
                   "default",
-                  "; fieldCaps: { (this: That, params: ",
+                  "; fieldCaps: { (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
-                  ">; (this: That, params: ",
+                  ">; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<",
                   "FieldCapsResponse",
-                  ", unknown>>; (this: That, params: ",
+                  ", unknown>>; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
@@ -20792,10 +20800,6 @@
                 "path": "src/plugins/data_views/common/data_views/data_view.ts"
               },
               {
-                "plugin": "dataViewEditor",
-                "path": "src/plugins/data_view_editor/public/components/data_view_editor_flyout_content.tsx"
-              },
-              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -21073,6 +21077,10 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/quick_create_job.ts"
               },
               {
@@ -21130,6 +21138,14 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
               },
               {
                 "plugin": "canvas",
