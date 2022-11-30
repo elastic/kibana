@@ -9,9 +9,24 @@ get:
           schema:
             $ref: ../components/schemas/fleet_settings_response.yaml
   operationId: get-settings
-post:
+put:
   summary: Settings - Update
   tags: []
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            fleet_server_hosts:
+              type: array
+              description: Protocol and path must be the same for each URL
+              items:
+                type: string
+            has_seen_add_data_notice:
+              type: boolean
+            additional_yaml_config:
+              type: string
   responses:
     '200':
       description: OK

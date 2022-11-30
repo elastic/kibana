@@ -54,4 +54,27 @@ describe('Duration', () => {
       expect(long.isShorterThan(new Duration(1, DurationUnit.Year))).toBe(false);
     });
   });
+
+  describe('isLongerOrEqualThan', () => {
+    it('returns true when the current duration is longer or equal than the other duration', () => {
+      const long = new Duration(2, DurationUnit.Year);
+      expect(long.isLongerOrEqualThan(new Duration(1, DurationUnit.Hour))).toBe(true);
+      expect(long.isLongerOrEqualThan(new Duration(1, DurationUnit.Day))).toBe(true);
+      expect(long.isLongerOrEqualThan(new Duration(1, DurationUnit.Week))).toBe(true);
+      expect(long.isLongerOrEqualThan(new Duration(1, DurationUnit.Month))).toBe(true);
+      expect(long.isLongerOrEqualThan(new Duration(1, DurationUnit.Quarter))).toBe(true);
+      expect(long.isLongerOrEqualThan(new Duration(1, DurationUnit.Year))).toBe(true);
+    });
+
+    it('returns false when the current duration is shorter than the other duration', () => {
+      const short = new Duration(1, DurationUnit.Minute);
+      expect(short.isLongerOrEqualThan(new Duration(1, DurationUnit.Minute))).toBe(true);
+      expect(short.isLongerOrEqualThan(new Duration(1, DurationUnit.Hour))).toBe(false);
+      expect(short.isLongerOrEqualThan(new Duration(1, DurationUnit.Day))).toBe(false);
+      expect(short.isLongerOrEqualThan(new Duration(1, DurationUnit.Week))).toBe(false);
+      expect(short.isLongerOrEqualThan(new Duration(1, DurationUnit.Month))).toBe(false);
+      expect(short.isLongerOrEqualThan(new Duration(1, DurationUnit.Quarter))).toBe(false);
+      expect(short.isLongerOrEqualThan(new Duration(1, DurationUnit.Year))).toBe(false);
+    });
+  });
 });
