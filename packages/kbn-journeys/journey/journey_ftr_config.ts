@@ -17,7 +17,6 @@ import { AnyStep } from './journey';
 import { JourneyConfig } from './journey_config';
 import { getAPMSettings } from './get_kibana_apm_settings';
 
-
 export function makeFtrConfigProvider(
   config: JourneyConfig<any>,
   steps: AnyStep[]
@@ -54,7 +53,6 @@ export function makeFtrConfigProvider(
       ...(prId !== undefined ? { prId } : {}),
       ciBuildName: process.env.BUILDKITE_PIPELINE_SLUG,
       journeyName: config.getName(),
-      performancePhase: process.env.TEST_PERFORMANCE_PHASE,
     };
 
     return {
@@ -97,6 +95,7 @@ export function makeFtrConfigProvider(
             ...config.getExtraApmLabels(),
             testJobId,
             testBuildId,
+            performancePhase: process.env.TEST_PERFORMANCE_PHASE,
             ...labels,
           })
             .flatMap(([key, value]) => (value == null ? [] : `${key}=${value}`))

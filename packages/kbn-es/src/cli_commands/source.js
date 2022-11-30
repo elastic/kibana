@@ -42,7 +42,7 @@ exports.help = (defaults = {}) => {
 
 exports.run = async (defaults = {}) => {
   const argv = process.argv.slice(2);
-  const { apmServerUrl, apmSecretToken, ...options } = getopts(argv, {
+  const options = getopts(argv, {
     alias: {
       basePath: 'base-path',
       installPath: 'install-path',
@@ -64,7 +64,7 @@ exports.run = async (defaults = {}) => {
 
   const { installPath } = await cluster.installSource({
     ...options,
-    ...getElasticsearchApmSettings(defaultLog),
+    apmSettings: getElasticsearchApmSettings(defaultLog),
   });
 
   if (options.dataArchive) {

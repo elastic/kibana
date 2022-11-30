@@ -51,7 +51,7 @@ exports.run = async (defaults = {}) => {
   const reportTime = getTimeReporter(log, 'scripts/es snapshot');
 
   const argv = process.argv.slice(2);
-  const { apmServerUrl, apmSecretToken, ...options } = getopts(argv, {
+  const options = getopts(argv, {
     alias: {
       basePath: 'base-path',
       installPath: 'install-path',
@@ -61,8 +61,6 @@ exports.run = async (defaults = {}) => {
       skipReadyCheck: 'skip-ready-check',
       readyTimeout: 'ready-timeout',
       secureFiles: 'secure-files',
-      apmServerUrl: 'apm-server-url',
-      apmSecretToken: 'apm-secret-token',
     },
 
     string: ['version', 'ready-timeout'],
@@ -80,7 +78,7 @@ exports.run = async (defaults = {}) => {
 
     const { installPath } = await cluster.installSnapshot({
       ...options,
-      ...getElasticsearchApmSettings(log),
+      apmSettings: getElasticsearchApmSettings(log),
     });
 
     if (options.dataArchive) {
