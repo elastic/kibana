@@ -11,13 +11,14 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { Worker, WorkerRegistry } from './worker_registry';
-import { taskManagerAdapter, rabbitmqAdapter } from './adapters';
+import { taskManagerAdapter, rabbitmqAdapter, sqsAdapter } from './adapters';
 
 // Set this to whatever one you want to use!
-const CONFIGURED_ADAPTER = 'taskManager';
+const CONFIGURED_ADAPTER = 'sqs';
 const availableAdapters = {
   taskManager: taskManagerAdapter,
   rabbitmq: rabbitmqAdapter,
+  sqs: sqsAdapter,
 };
 
 export interface Job<T> {

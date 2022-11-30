@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RunContext } from '@kbn/task-manager-plugin/server';
+import { RunContext, asInterval } from '@kbn/task-manager-plugin/server';
 import type { Worker } from '../worker_registry';
 import { PluginSetupDeps, PluginStartDeps, Job, Adapter } from '../plugin';
 
@@ -34,6 +34,9 @@ export const taskManagerAdapter: Adapter = {
       id: job.id && `plugin:scheduler:${job.id}`,
       taskType: `plugin:scheduler:${job.workerId}`,
       params: job.params as Record<string, any>,
+      schedule: {
+        interval: asInterval(job.interval),
+      },
       state: {},
     });
   },

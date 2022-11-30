@@ -7,3 +7,4 @@
 
 export { taskManagerAdapter } from './task_manager';
 export { rabbitmqAdapter } from './rabbitmq';
+export { sqsAdapter } from './sqs';
