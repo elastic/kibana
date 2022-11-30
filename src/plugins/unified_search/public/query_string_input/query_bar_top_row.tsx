@@ -263,11 +263,13 @@ export const QueryBarTopRow = React.memo(
                     defaultMessage: 'Time range of documents in the data view',
                   }
                 ),
-                content: <CustomDatePickerPanel currentDataViewId={currentDataViewId} />,
+                content: (
+                  <CustomDatePickerPanel data={data} currentDataViewId={currentDataViewId} />
+                ),
               },
             ]
           : undefined,
-      [currentDataViewId]
+      [currentDataViewId, data]
     );
 
     const onSubmit = useCallback(

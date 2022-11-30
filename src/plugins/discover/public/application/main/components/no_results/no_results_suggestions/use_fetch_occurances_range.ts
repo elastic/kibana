@@ -7,13 +7,13 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { lastValueFrom } from 'rxjs';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { getDocumentsTimeRange } from '@kbn/unified-search-plugin/public';
 
 export interface Params {
   dataView?: DataView;
@@ -25,61 +25,17 @@ export interface Params {
   };
 }
 
-export interface State {
-  from?: string | null;
-  to?: string | null;
+export interface OccurrencesRange {
+  from: string;
+  to: string;
 }
 
-export const useFetchOccurrencesRange = (params: Params): State => {
+export const useFetchOccurrencesRange = (params: Params): OccurrencesRange | null => {
   const data = params.services.data;
   const uiSettings = params.services.uiSettings;
-  const [state, setState] = useState<State>({});
+  const [state, setState] = useState<OccurrencesRange | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const mountedRef = useRef<boolean>(true);
-
-  const searchOccurrence = useCallback(
-    async (
-      sortOrder: 'asc' | 'desc',
-      dataView: DataView,
-      query?: Query | AggregateQuery,
-      filters?: Filter[]
-    ): Promise<string | null> => {
-      if (!dataView?.timeFieldName || !mountedRef.current) {
-        return null;
-      }
-      const result = await lastValueFrom(
-        data.search.search(
-          {
-            params: {
-              index: dataView.title,
-              body: {
-                query: buildEsQuery(
-                  dataView,
-                  query ?? [],
-                  filters ?? [],
-                  getEsQueryConfig(uiSettings)
-                ),
-                fields: [
-                  {
-                    field: dataView.timeFieldName,
-                    format: 'strict_date_optional_time',
-                  },
-                ],
-                size: 1,
-                sort: { [dataView.timeFieldName]: sortOrder },
-                _source: false,
-              },
-            },
-          },
-          {
-            abortSignal: abortControllerRef.current?.signal,
-          }
-        )
-      );
-      return result.rawResponse?.hits?.hits[0]?.fields?.[dataView.timeFieldName]?.[0] ?? null;
-    },
-    [data, uiSettings, abortControllerRef]
-  );
 
   const fetchOccurrences = useCallback(
     async (dataView?: DataView, query?: Query | AggregateQuery, filters?: Filter[]) => {
@@ -91,24 +47,29 @@ export const useFetchOccurrencesRange = (params: Params): State => {
       abortControllerRef.current = new AbortController();
 
       try {
-        const [firstOccurredAt, lastOccurredAt] = await Promise.all([
-          searchOccurrence('asc', dataView, query, filters),
-          searchOccurrence('desc', dataView, query, filters),
-        ]);
+        const dslQuery = buildEsQuery(
+          dataView,
+          query ?? [],
+          filters ?? [],
+          getEsQueryConfig(uiSettings)
+        );
+        const occurrencesRange = await getDocumentsTimeRange({
+          data,
+          dataView,
+          dslQuery,
+          abortSignal: abortControllerRef.current?.signal,
+        });
 
         if (mountedRef.current) {
-          setState({
-            from: firstOccurredAt,
-            to: lastOccurredAt,
-          });
+          setState(occurrencesRange);
         }
       } catch (error) {
         if (mountedRef.current) {
-          setState({});
+          setState(null);
         }
       }
     },
-    [abortControllerRef, searchOccurrence, setState, mountedRef]
+    [abortControllerRef, setState, mountedRef, data, uiSettings]
   );
 
   useEffect(() => {

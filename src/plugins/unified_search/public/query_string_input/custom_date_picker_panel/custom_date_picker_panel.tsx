@@ -9,23 +9,21 @@
 import React, { useCallback } from 'react';
 import dateMath from '@kbn/datemath';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EuiLink, EuiFlexGrid, EuiFlexItem, ApplyTime } from '@elastic/eui';
-import type { IUnifiedSearchPluginServices } from '../../types';
-import { getHistoricalRange } from './get_historical_range';
+import { getDocumentsTimeRange } from './get_documents_time_range';
 
 export interface Props {
+  data: DataPublicPluginStart;
   currentDataViewId: string;
   applyTime?: ApplyTime;
 }
 
-export const CustomDatePickerPanel: React.FC<Props> = ({ currentDataViewId, applyTime }) => {
-  const { data } = useKibana<IUnifiedSearchPluginServices>().services;
-
+export const CustomDatePickerPanel: React.FC<Props> = ({ data, currentDataViewId, applyTime }) => {
   const applyTimeRange = useCallback(
     async (type: 'all' | 'first' | 'last') => {
       const dataView = await data.dataViews.get(currentDataViewId);
-      const historicalRange = await getHistoricalRange(data, dataView);
+      const historicalRange = await getDocumentsTimeRange({ data, dataView });
 
       if (historicalRange?.from && historicalRange?.to) {
         switch (type) {

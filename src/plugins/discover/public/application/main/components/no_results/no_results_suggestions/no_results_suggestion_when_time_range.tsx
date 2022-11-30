@@ -8,7 +8,6 @@
 
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import dateMath from '@kbn/datemath';
 import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -18,10 +17,7 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
-import {
-  useFetchOccurrencesRange,
-  type State as OccurrencesRange,
-} from './use_fetch_occurances_range';
+import { useFetchOccurrencesRange, type OccurrencesRange } from './use_fetch_occurances_range';
 
 export interface Props {
   dataView: DataView;
@@ -32,6 +28,7 @@ export const NoResultsSuggestionWhenTimeRange: React.FC<Props> = ({ dataView, qu
   const services = useDiscoverServices();
   const { data, uiSettings, timefilter } = services;
 
+  // TODO: include pinned filters
   const occurrencesRange = useFetchOccurrencesRange({
     dataView,
     query,
@@ -44,16 +41,15 @@ export const NoResultsSuggestionWhenTimeRange: React.FC<Props> = ({ dataView, qu
 
   const expandTimeRange = useCallback(
     (range: OccurrencesRange) => {
+      // TODO: refetch the range at this moment
       if (range.from && range.to) {
-        const from = dateMath.parse(range.from)!.startOf('minute').toISOString();
-        const to = dateMath.parse(range.to, { roundUp: true })!.endOf('minute').toISOString();
-        timefilter.setTime({ from, to });
+        timefilter.setTime({ from: range.from, to: range.to });
       }
     },
     [timefilter]
   );
 
-  if (!occurrencesRange.from || !occurrencesRange.to) {
+  if (!occurrencesRange?.from || !occurrencesRange?.to) {
     return null;
   }
 
