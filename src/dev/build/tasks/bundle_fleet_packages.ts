@@ -70,8 +70,8 @@ export const BundleFleetPackages: Task = {
         const archivePath = `${fleetPackage.name}-${versionToWrite}.zip`;
         let archiveUrl = `${eprUrl}/epr/${fleetPackage.name}/${fleetPackage.name}-${fleetPackage.version}.zip`;
 
-        // Point APM to package storage v2
-        if (fleetPackage.name === 'apm') {
+        // Point APM and Endpoint packages to package storage v2
+        if (fleetPackage.name === 'apm' || fleetPackage.name === 'endpoint') {
           archiveUrl = `${PACKAGE_STORAGE_V2_URL}/epr/${fleetPackage.name}/${fleetPackage.name}-${fleetPackage.version}.zip`;
         }
 

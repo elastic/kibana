@@ -30,7 +30,8 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
       this.buildCommonGroupBy(slo),
-      this.buildAggregations(slo, slo.indicator)
+      this.buildAggregations(slo, slo.indicator),
+      this.buildSettings(slo)
     );
   }
 
