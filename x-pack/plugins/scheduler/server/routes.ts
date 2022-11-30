@@ -42,7 +42,7 @@ export function registerRoutes(router: IRouter<RequestHandlerContext>) {
           req.body.sessionToken
         ),
       });
-      console.log('AWS settings updated');
+      console.log('SQS: AWS settings updated');
       return res.ok();
     })
   );

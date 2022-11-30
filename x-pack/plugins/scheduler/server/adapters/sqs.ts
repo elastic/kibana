@@ -21,6 +21,7 @@ export const sqsAdapter: Adapter = {
   start() {
     (async () => {
       while (true) {
+        console.log('SQS: Loop - scheduler');
         try {
           const data = await sqs
             .receiveMessage({
@@ -30,6 +31,7 @@ export const sqsAdapter: Adapter = {
               WaitTimeSeconds: 20, // Wait 20 seconds after queue is emtpy before stopping to look for messages
             })
             .promise();
+          console.log('SQS: scheduler MESSAGE:', JSON.stringify(data));
           if (!data.Messages) {
             return;
           }
@@ -40,7 +42,7 @@ export const sqsAdapter: Adapter = {
               const abortController = new AbortController();
               const worker = workers[job.workerId];
               try {
-                console.log('Run scheduled job');
+                console.log('SQS: Run scheduled job');
                 await worker.run(job.params, abortController.signal);
                 try {
                   const params = {
@@ -54,18 +56,18 @@ export const sqsAdapter: Adapter = {
                       .deleteMessage({ QueueUrl: QUEUE_URL, ReceiptHandle: ReceiptHandle! })
                       .promise();
                   } catch (e) {
-                    console.log('Failed to delete message:', e);
+                    console.log('SQS: Failed to delete message:', e);
                   }
                 } catch (e) {
-                  console.log('Failed to re-schedule job', e);
+                  console.log('SQS: Failed to re-schedule job', e);
                 }
               } catch (e) {
-                console.log('Failed to run: ', e);
+                console.log('SQS: Failed to run: ', e);
               }
             })
           );
         } catch (e) {
-          console.log('Failed to get a message from SQS, will try again in 10s', e);
+          console.log('SQS: Failed to get a message from SQS, will try again in 10s', e);
           await new Promise((resolve) => setTimeout(resolve, 10000));
           sqs = new AWS.SQS();
         }
@@ -81,7 +83,7 @@ export const sqsAdapter: Adapter = {
       QueueUrl: QUEUE_URL,
     };
     const result = await sqs.sendMessage(params).promise();
-    console.log('Schedule result', result);
+    console.log('SQS: Schedule result', JSON.stringify(result));
   },
   unscheduleAdapter: async (deduplicationId: string, plugins: PluginStartDeps) => {},
 };
