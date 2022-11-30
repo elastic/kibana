@@ -115,7 +115,10 @@ const generateCommonLabelsAstArgs: GenerateLabelsAstArguments = (
     layer.allowMultipleMetrics && !layer.primaryGroups.length
       ? Object.entries(columnToLabelMap).reduce((acc, [columnId, label]) => {
           const color = layer.colorsByDimension?.[columnId];
-          return color ? { ...acc, [label]: color } : acc;
+          if(color){
+            acc[label] = color;
+          }
+          return acc;
         }, {})
       : {};
 
