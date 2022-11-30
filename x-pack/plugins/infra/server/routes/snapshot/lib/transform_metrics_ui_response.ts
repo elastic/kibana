@@ -90,16 +90,6 @@ const getMetrics = (
         metric_0: get(row, metric.id, null),
       }));
 
-      const metricValues = {
-        value: getLastValue(metrics),
-        ...(snapshotRequest.includeTimeseries
-          ? {
-              max: calculateMax(metrics),
-              avg: calculateAvg(metrics),
-            }
-          : undefined),
-      };
-
       const timeseries = snapshotRequest.includeTimeseries
         ? ({
             id: name,
@@ -113,7 +103,9 @@ const getMetrics = (
 
       return {
         name,
-        ...metricValues,
+        value: getLastValue(metrics),
+        max: calculateMax(metrics),
+        avg: calculateAvg(metrics),
         timeseries,
       };
     });

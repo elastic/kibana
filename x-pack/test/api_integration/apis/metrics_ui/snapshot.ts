@@ -203,6 +203,8 @@ export default function ({ getService }: FtrProviderContext) {
         const expected = {
           name: 'cpu',
           value: 0.44708333333333333,
+          max: 0.44708333333333333,
+          avg: 0.44708333333333333,
         };
 
         return resp.then((data) => {
