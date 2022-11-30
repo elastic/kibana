@@ -8,28 +8,26 @@
 import { renderMustacheString } from './mustache_renderer';
 
 describe('using handlebars', () => {
-  it('is supported with a format comment directive', async () => {
+  it('is supported with a format comment directive', () => {
     const template = `
 {{!@ format: handlebars}}
 {{#if x}}{{x}}{{/if}}
     `.trim();
 
-    expect(await renderMustacheString(template, { x: 1 }, 'none')).toEqual('1');
+    expect(renderMustacheString(template, { x: 1 }, 'none')).toEqual('1');
   });
 
-  it('has a date helper', async () => {
+  it('has a date helper', () => {
     const timeStamp = '2022-11-29T15:52:44Z';
     const template = `
 {{!@ format: handlebars}}
 {{date timeStamp}}
     `.trim();
 
-    expect(await renderMustacheString(template, { timeStamp }, 'none')).toEqual(
-      '2022-11-29 03:52pm'
-    );
+    expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual('2022-11-29 03:52pm');
   });
 
-  it('date with a time zone is successful', async () => {
+  it('date with a time zone is successful', () => {
     const timeStamp = '2022-11-29T15:52:44Z';
     const timeZone = 'America/New_York';
     const template = `
@@ -38,12 +36,10 @@ describe('using handlebars', () => {
 {{date timeStamp}}
     `.trim();
 
-    expect(await renderMustacheString(template, { timeStamp }, 'none')).toEqual(
-      '2022-11-29 10:52am'
-    );
+    expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual('2022-11-29 10:52am');
   });
 
-  it('date with a format is successful', async () => {
+  it('date with a format is successful', () => {
     const timeStamp = '2022-11-29T15:52:44Z';
     const dateFormat = 'dddd MMM Do YYYY HH:mm:ss.SSS';
     const template = `
@@ -52,12 +48,12 @@ describe('using handlebars', () => {
 {{date timeStamp}}
     `.trim();
 
-    expect(await renderMustacheString(template, { timeStamp }, 'none')).toEqual(
+    expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual(
       'Tuesday Nov 29th 2022 15:52:44.000'
     );
   });
 
-  it('date with a format and timezone is successful', async () => {
+  it('date with a format and timezone is successful', () => {
     const timeStamp = '2022-11-29T15:52:44Z';
     const dateFormat = 'dddd MMM Do YYYY HH:mm:ss.SSS';
     const timeZone = 'America/New_York';
@@ -68,12 +64,12 @@ describe('using handlebars', () => {
 {{date timeStamp}}
   `.trim();
 
-    expect(await renderMustacheString(template, { timeStamp }, 'none')).toEqual(
+    expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual(
       'Tuesday Nov 29th 2022 10:52:44.000'
     );
   });
 
-  it('json is successful', async () => {
+  it('json is successful', () => {
     const vars = {
       context: {
         a: {
@@ -89,10 +85,10 @@ describe('using handlebars', () => {
 {{json context}}
   `.trim();
 
-    expect(await renderMustacheString(template, vars, 'none')).toEqual('{"a":{"b":1},"c":{"d":2}}');
+    expect(renderMustacheString(template, vars, 'none')).toEqual('{"a":{"b":1},"c":{"d":2}}');
   });
 
-  it('json with arrays works', async () => {
+  it('json with arrays works', () => {
     const vars = {
       context: {
         arr: [17, 42],
@@ -103,7 +99,7 @@ describe('using handlebars', () => {
 {{json context.arr}}
   `.trim();
 
-    expect(await renderMustacheString(template, vars, 'none')).toEqual('[17,42]');
+    expect(renderMustacheString(template, vars, 'none')).toEqual('[17,42]');
 
     // arrays to JSON doesn't work with mustache due to legacy toString
     // support in the JS arrays
@@ -112,10 +108,10 @@ describe('using handlebars', () => {
 {{context.arr}}
       `.trim();
 
-    expect(await renderMustacheString(template2, vars, 'none')).toEqual('17,42');
+    expect(renderMustacheString(template2, vars, 'none')).toEqual('17,42');
   });
 
-  it('jsonl is successful', async () => {
+  it('jsonl is successful', () => {
     const vars = {
       context: {
         a: {
@@ -131,7 +127,7 @@ describe('using handlebars', () => {
 {{jsonl context}}
   `.trim();
 
-    expect(await renderMustacheString(template, vars, 'none')).toEqual(`{
+    expect(renderMustacheString(template, vars, 'none')).toEqual(`{
     "a": {
         "b": 1
     },
@@ -141,7 +137,7 @@ describe('using handlebars', () => {
 }`);
   });
 
-  it('math is successful', async () => {
+  it('math is successful', () => {
     const vars = {
       context: {
         a: { b: 1 },
@@ -157,7 +153,7 @@ describe('using handlebars', () => {
 {{/context}}
     `.trim();
 
-    const result = await renderMustacheString(template, vars, 'none');
+    const result = renderMustacheString(template, vars, 'none');
     expect(result).toEqual(`1\n2\n3\n`);
   });
 });

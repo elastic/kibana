@@ -8,7 +8,7 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "actions"],
-  "requiredPlugins": ["licensing", "taskManager", "encryptedSavedObjects", "eventLog", "features", "expressions"],
+  "requiredPlugins": ["licensing", "taskManager", "encryptedSavedObjects", "eventLog", "features"],
   "optionalPlugins": ["usageCollection", "spaces", "security", "monitoringCollection"],
   "extraPublicDirs": ["common"],
   "ui": true

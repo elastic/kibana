@@ -112,13 +112,13 @@ export function getConnectorType(): WebhookConnectorType {
   };
 }
 
-async function renderParameterTemplates(
+function renderParameterTemplates(
   params: ActionParamsType,
   variables: Record<string, unknown>
-): Promise<ActionParamsType> {
+): ActionParamsType {
   if (!params.body) return params;
   return {
-    body: await renderMustacheString(params.body, variables, 'json'),
+    body: renderMustacheString(params.body, variables, 'json'),
   };
 }
 

@@ -33,7 +33,7 @@ interface TransformActionParamsOptions {
   ruleUrl?: string;
 }
 
-export async function transformActionParams({
+export function transformActionParams({
   actionsPlugin,
   alertId,
   alertType,
@@ -51,7 +51,7 @@ export async function transformActionParams({
   kibanaBaseUrl,
   alertParams,
   ruleUrl,
-}: TransformActionParamsOptions): Promise<RuleActionParams> {
+}: TransformActionParamsOptions): RuleActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
   // x-pack/plugins/triggers_actions_ui/public/application/lib/action_variables.ts
@@ -82,7 +82,7 @@ export async function transformActionParams({
       actionGroupName: alertActionGroupName,
     },
   };
-  return await actionsPlugin.renderActionParameterTemplates(
+  return actionsPlugin.renderActionParameterTemplates(
     actionTypeId,
     actionId,
     actionParams,

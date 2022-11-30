@@ -23,7 +23,6 @@
     { "path": "../encrypted_saved_objects/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../monitoring_collection/tsconfig.json" },
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../../../src/plugins/expressions/tsconfig.json" },
+    { "path": "../../../src/plugins/usage_collection/tsconfig.json" }
   ]
 }

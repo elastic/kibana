@@ -192,7 +192,7 @@ export class ExecutionHandler<
             ruleId,
             spaceId,
             actionTypeId,
-            actionParams: await transformActionParams({
+            actionParams: transformActionParams({
               actionsPlugin,
               alertId: ruleId,
               alertType: this.ruleType.id,

@@ -6,7 +6,7 @@
  */
 
 import Mustache from 'mustache';
-import { isPlainObject, cloneDeep, merge } from 'lodash';
+import { isString, isPlainObject, cloneDeepWith, merge } from 'lodash';
 
 import { renderTemplate } from './template_renderer';
 
@@ -15,10 +15,7 @@ type Variables = Record<string, unknown>;
 
 // return a rendered mustache template with no escape given the specified variables and escape
 // Individual variable values should be stringified already
-export async function renderMustacheStringNoEscape(
-  string: string,
-  variables: Variables
-): Promise<string> {
+export function renderMustacheStringNoEscape(string: string, variables: Variables): string {
   try {
     return Mustache.render(`${string}`, variables);
   } catch (err) {
@@ -28,11 +25,7 @@ export async function renderMustacheStringNoEscape(
 }
 
 // return a rendered mustache template given the specified variables and escape
-export async function renderMustacheString(
-  string: string,
-  variables: Variables,
-  escape: Escape
-): Promise<string> {
+export function renderMustacheString(string: string, variables: Variables, escape: Escape): string {
   const augmentedVariables = augmentObjectVariables(variables);
 
   try {
@@ -44,43 +37,19 @@ export async function renderMustacheString(
 }
 
 // return a cloned object with all strings rendered as mustache templates
-export async function renderMustacheObject<Params>(
-  params: Params,
-  variables: Variables
-): Promise<Params> {
+export function renderMustacheObject<Params>(params: Params, variables: Variables): Params {
   const augmentedVariables = augmentObjectVariables(variables);
-  const result = await renderStringTemplates(cloneDeep(params), augmentedVariables);
+  const result = cloneDeepWith(params, (value: unknown) => {
+    if (!isString(value)) return;
+
+    // since we're rendering a JS object, no escaping needed
+    return renderMustacheString(value, augmentedVariables, 'none');
+  });
 
   // The return type signature for `cloneDeep()` ends up taking the return
   // type signature for the customizer, but rather than pollute the customizer
   // with casts, seemed better to just do it in one place, here.
   return result as unknown as Params;
-}
-
-async function renderStringTemplates(object: unknown, variables: Variables): Promise<unknown> {
-  if (object == null) return object;
-
-  if (Array.isArray(object)) {
-    for (let i = 0; i < object.length; i++) {
-      object[i] = await renderStringTemplates(object[i], variables);
-    }
-    return object;
-  }
-
-  if (typeof object === 'object') {
-    // @ts-ignore
-    const record: Record<string, unknown> = object;
-    for (const key of Object.keys(record)) {
-      record[key] = await renderStringTemplates(record[key], variables);
-    }
-    return object;
-  }
-
-  if (typeof object === 'string') {
-    return await renderMustacheString(object, variables, 'none');
-  }
-
-  return object;
 }
 
 // return variables cloned, with a toString() added to objects

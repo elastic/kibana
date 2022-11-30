@@ -411,7 +411,7 @@ describe('execute()', () => {
     const variables = {
       rogue,
     };
-    const params = await connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
+    const params = connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let paramsObject: any;

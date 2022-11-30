@@ -344,7 +344,7 @@ describe('execute()', () => {
     const variables = {
       rogue: '*bold*',
     };
-    const params = await connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
+    const params = connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
     expect(params.message).toBe('`*bold*`');
   });
 });
