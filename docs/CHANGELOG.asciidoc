@@ -48,6 +48,21 @@ coming::[8.6.0]
 Review the following information about the {kib} 8.6.0 release.
 
 [float]
+[[known-issues-8.6.0]]
+=== Known issues
+
+[discrete]
+[[known-issue-146020]]
+.Attempting to create APM latency threshold rules from the Observability rules page fail
+[%collapsible]
+====
+*Details* +
+When you attempt to create an APM latency threshold rule in **Observability** > **Alerts** > **Rules** for all services or all transaction types, the request will fail with a `params invalid` error.
+*Impact* +
+This known issue only impacts the Observability Rules page. To work around this issue, create APM latency threshold rules in the APM Alerts and Rules dialog. See {kibana-ref}/apm-alerts.html[Alerts and rules] for detailed instructions.
+====
+
+[float]
 [[breaking-changes-8.6.0]]
 === Breaking changes
 
