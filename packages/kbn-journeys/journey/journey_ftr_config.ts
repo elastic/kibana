@@ -17,7 +17,6 @@ import { AnyStep } from './journey';
 import { JourneyConfig } from './journey_config';
 import { getAPMSettings } from './get_kibana_apm_settings';
 
-
 export function makeFtrConfigProvider(
   config: JourneyConfig<any>,
   steps: AnyStep[]
