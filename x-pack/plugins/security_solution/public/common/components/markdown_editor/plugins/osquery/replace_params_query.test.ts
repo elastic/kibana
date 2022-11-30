@@ -37,4 +37,15 @@ describe('replaceParamsQuery', () => {
       'SELECT * FROM processes WHERE pid = testValue {not.existing} anotherValue';
     expect(result).toBe(expectedQuery);
   });
+  it('should return proper values even if params are duplicated', () => {
+    const query =
+      'SELECT * FROM processes WHERE pid = {params.pid} {not.existing} {params.pid} {params.pid} {another.existing}';
+    const result = replaceParamsQuery(query, [
+      { ...defaultData, field: 'params.pid', values: ['testValue'] },
+      { ...defaultData, field: 'another.existing', values: ['anotherValue'] },
+    ]);
+    const expectedQuery =
+      'SELECT * FROM processes WHERE pid = testValue {not.existing} testValue testValue anotherValue';
+    expect(result).toBe(expectedQuery);
+  });
 });
