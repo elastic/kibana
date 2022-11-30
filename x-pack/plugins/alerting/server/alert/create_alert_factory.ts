@@ -129,16 +129,22 @@ export function createAlertFactory<
             return [];
           }
 
-          const { recoveredAlerts } = processAlerts<State, Context, ActionGroupIds, ActionGroupIds>(
-            {
-              alerts,
-              existingAlerts: originalAlerts,
-              hasReachedAlertLimit,
-              alertLimit: maxAlerts,
-            }
-          );
-          return Object.keys(recoveredAlerts ?? {}).map(
-            (alertId: string) => recoveredAlerts[alertId]
+          const { currentRecoveredAlerts } = processAlerts<
+            State,
+            Context,
+            ActionGroupIds,
+            ActionGroupIds
+          >({
+            alerts,
+            existingAlerts: originalAlerts,
+            previouslyRecoveredAlerts: {},
+            hasReachedAlertLimit,
+            alertLimit: maxAlerts,
+            // setFlapping is false, as we only want to use this function to get the recovered alerts
+            setFlapping: false,
+          });
+          return Object.keys(currentRecoveredAlerts ?? {}).map(
+            (alertId: string) => currentRecoveredAlerts[alertId]
           );
         },
       };
