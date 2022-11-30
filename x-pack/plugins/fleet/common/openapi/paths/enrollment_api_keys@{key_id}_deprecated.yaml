@@ -19,7 +19,7 @@ get:
                 $ref: ../components/schemas/enrollment_api_key.yaml
             required:
               - item
-  operationId: get-enrollment-api-key
+  operationId: get-enrollment-api-key-deprecated
   deprecated: true
 delete:
   summary: Enrollment API Key - Delete
@@ -38,7 +38,7 @@ delete:
                   - deleted
             required:
               - action
-  operationId: delete-enrollment-api-key
+  operationId: delete-enrollment-api-key-deprecated
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
   deprecated: true

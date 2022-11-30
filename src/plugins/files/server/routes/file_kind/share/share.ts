@@ -8,6 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { ExpiryDateInThePastError } from '../../../file_share_service/errors';
+import type { FilesClient } from '../../../../common/files_client';
 import { CreateHandler, FileKindRouter } from '../types';
 
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../../api_routes';
@@ -34,7 +35,11 @@ const rt = {
   }),
 };
 
-export type Endpoint = CreateRouteDefinition<typeof rt, FileShareJSONWithToken>;
+export type Endpoint = CreateRouteDefinition<
+  typeof rt,
+  FileShareJSONWithToken,
+  FilesClient['share']
+>;
 
 export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req, res) => {
   const { fileService } = await files;
