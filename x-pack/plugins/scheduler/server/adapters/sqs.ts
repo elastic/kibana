@@ -40,13 +40,13 @@ export const sqsAdapter: Adapter = {
               const abortController = new AbortController();
               const worker = workers[job.workerId];
               try {
-                console.log('WORKER RUN!');
                 await worker.run(job.params, abortController.signal);
                 try {
                   const params = {
                     MessageBody: JSON.stringify(job),
                     QueueUrl: QUEUE_URL,
                     DelaySeconds: job.interval / 1000,
+                    MessageDeduplicationId: job.deduplicationId,
                   };
                   await sqs.sendMessage(params).promise();
                   try {
@@ -79,8 +79,9 @@ export const sqsAdapter: Adapter = {
     const params = {
       MessageBody: JSON.stringify(job),
       QueueUrl: QUEUE_URL,
+      MessageDeduplicationId: job.deduplicationId,
     };
     await sqs.sendMessage(params).promise();
   },
-  unscheduleAdapter: async (jobId: Job<unknown>['id'], plugins: PluginStartDeps) => {},
+  unscheduleAdapter: async (deduplicationId: string, plugins: PluginStartDeps) => {},
 };

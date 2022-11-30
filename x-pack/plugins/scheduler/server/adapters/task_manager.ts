@@ -33,7 +33,7 @@ export const taskManagerAdapter: Adapter = {
   },
   scheduleAdapter: async (job: Job<unknown>, plugins: PluginStartDeps) => {
     await plugins.taskManager.schedule({
-      id: job.id && `plugin:scheduler:${job.id}`,
+      id: job.deduplicationId && `plugin:scheduler:${job.deduplicationId}`,
       taskType: `plugin:scheduler:${job.workerId}`,
       params: job.params as Record<string, any>,
       schedule: {
@@ -42,7 +42,7 @@ export const taskManagerAdapter: Adapter = {
       state: {},
     });
   },
-  unscheduleAdapter: async (jobId: Job<unknown>['id'], plugins: PluginStartDeps) => {
-    await plugins.taskManager.remove(`plugin:scheduler:${jobId}`);
+  unscheduleAdapter: async (deduplicationId: string, plugins: PluginStartDeps) => {
+    await plugins.taskManager.remove(`plugin:scheduler:${deduplicationId}`);
   },
 };

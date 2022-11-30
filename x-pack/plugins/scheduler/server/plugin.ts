@@ -21,7 +21,7 @@ const availableAdapters = {
 };
 
 export interface Job<T> {
-  id?: string;
+  deduplicationId?: string;
   workerId: string;
   interval: number; // milliseconds
   params: T;
@@ -36,7 +36,7 @@ export interface PluginSetupDeps {
 
 export interface PluginStart {
   schedule(job: Job<unknown>): Promise<void>;
-  unschedule(jobId: Job<unknown>['id']): Promise<void>;
+  unschedule(deduplicationId: string): Promise<void>;
 }
 export interface PluginStartDeps {
   taskManager: TaskManagerStartContract;
@@ -47,7 +47,7 @@ export interface Adapter {
   start(plugins: PluginStartDeps): void;
   registerWorkerAdapter(worker: Worker<unknown>, plugins: PluginSetupDeps): void;
   scheduleAdapter(job: Job<unknown>, plugins: PluginStartDeps): Promise<void>;
-  unscheduleAdapter(jobId: Job<unknown>['id'], plugins: PluginStartDeps): Promise<void>;
+  unscheduleAdapter(deduplicationId: string, plugins: PluginStartDeps): Promise<void>;
 }
 
 export class SchedulerPlugin
@@ -76,8 +76,8 @@ export class SchedulerPlugin
       schedule: async (job: Job<unknown>) => {
         await this.adapter.scheduleAdapter(job, plugins);
       },
-      unschedule: async (jobId: Job<unknown>['id']) => {
-        await this.adapter.unscheduleAdapter(jobId, plugins);
+      unschedule: async (deduplicationId: string) => {
+        await this.adapter.unscheduleAdapter(deduplicationId, plugins);
       },
     };
   }

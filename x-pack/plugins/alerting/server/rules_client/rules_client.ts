@@ -3997,7 +3997,7 @@ export class RulesClient {
     };
     try {
       return await this.scheduler.schedule({
-        id,
+        deduplicationId: id,
         workerId: `alerting:${ruleTypeId}`,
         interval: parseIntervalAsMillisecond(schedule.interval),
         params: {
