@@ -623,7 +623,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should generate multiple alerts for a single doc in multiple groups', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['suppression-data']),
-          query: `destination.ip: *`,
+          query: `*:*`,
           alert_suppression: {
             group_by: ['destination.ip'],
           },
@@ -642,7 +642,7 @@ export default ({ getService }: FtrProviderContext) => {
           size: 1000,
           sort: ['destination.ip'],
         });
-        expect(previewAlerts.length).to.eql(2);
+        expect(previewAlerts.length).to.eql(3);
 
         expect(previewAlerts[0]._source).to.eql({
           ...previewAlerts[0]._source,
@@ -656,6 +656,21 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:00.000Z',
           [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+        });
+
+        // We also expect to have a separate group for documents that don't populate the groupBy field
+        expect(previewAlerts[2]._source).to.eql({
+          ...previewAlerts[2]._source,
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'destination.ip',
+              value: null,
+            },
+          ],
+          [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
+          [ALERT_SUPPRESSION_START]: '2020-10-28T05:00:00.000Z',
+          [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:02.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 16,
         });
       });
     });
