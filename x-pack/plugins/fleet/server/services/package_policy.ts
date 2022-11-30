@@ -26,6 +26,8 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import pMap from 'p-map';
 
+import type { FleetAuthz } from '../../common';
+
 import {
   packageToPackagePolicy,
   packageToPackagePolicyInputs,
@@ -83,9 +85,10 @@ import type {
 import type { ExternalCallback } from '..';
 
 import {
+  doesNotHaveRequiredFleetAuthz,
   getAuthzFromRequest,
-  hasRequiredFleetAuthzPrivilege,
-  type FleetAuthzRequirements,
+  validateSecurityRbac,
+  writeEndpointPackagePrivileges as packagePrivileges,
   type FleetAuthzRouteConfig,
 } from '../routes/security';
 
@@ -1257,11 +1260,9 @@ export class PackagePolicyServiceImpl
   implements PackagePolicyService
 {
   public asScoped(request: KibanaRequest): PackagePolicyClient {
-    const preflightCheck = async (
-      fleetAuthzConfig: FleetAuthzRouteConfig<FleetAuthzRequirements>
-    ) => {
+    const preflightCheck = async (fleetAuthzConfig: FleetAuthzRouteConfig) => {
       const authz = await getAuthzFromRequest(request);
-      if (!hasRequiredFleetAuthzPrivilege(authz, fleetAuthzConfig)) {
+      if (doesNotHaveRequiredFleetAuthz(authz, fleetAuthzConfig)) {
         throw new FleetUnauthorizedError('Not authorized to this action on integration policies');
       }
     };
@@ -1276,13 +1277,13 @@ export class PackagePolicyServiceImpl
 class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
   constructor(
     private readonly preflightCheck?: (
-      fleetAuthzConfig: FleetAuthzRouteConfig<FleetAuthzRequirements>
+      fleetAuthzConfig: FleetAuthzRouteConfig
     ) => void | Promise<void>
   ) {
     super();
   }
 
-  #runPreflight = async (fleetAuthzConfig: FleetAuthzRouteConfig<FleetAuthzRequirements>) => {
+  #runPreflight = async (fleetAuthzConfig: FleetAuthzRouteConfig) => {
     if (this.preflightCheck) {
       return await this.preflightCheck(fleetAuthzConfig);
     }
@@ -1305,9 +1306,13 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
     }
   ): Promise<PackagePolicy> {
     await this.#runPreflight({
-      fleetAuthz: {
-        integrations: { writeIntegrationPolicies: true },
-      },
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        validateSecurityRbac(fleetAuthz, {
+          any: {
+            integrations: { writeIntegrationPolicies: true },
+            ...packagePrivileges,
+          },
+        }),
     });
 
     return super.create(soClient, esClient, packagePolicy, options);

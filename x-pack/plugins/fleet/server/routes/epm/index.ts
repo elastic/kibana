@@ -33,7 +33,12 @@ import {
   UpdatePackageRequestSchema,
   UpdatePackageRequestSchemaDeprecated,
 } from '../../types';
-import { type FleetAuthzRouter, validateSecurityRbac } from '../security';
+import {
+  type FleetAuthzRouter,
+  readEndpointPackagePrivileges,
+  writeEndpointPackagePrivileges,
+  validateSecurityRbac,
+} from '../security';
 
 import {
   getCategoriesHandler,
@@ -67,8 +72,13 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.LIST_PATTERN,
       validate: GetPackagesRequestSchema,
-      fleetAuthz: ({ packagePrivileges, ...rest }: FleetAuthz): boolean =>
-        validateSecurityRbac(rest.integrations.readPackageInfo, packagePrivileges),
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        validateSecurityRbac(fleetAuthz, {
+          any: {
+            integrations: { readPackageInfo: true },
+            ...readEndpointPackagePrivileges,
+          },
+        }),
     },
     getListHandler
   );
@@ -143,9 +153,16 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
       validate: BulkUpgradePackagesFromRegistryRequestSchema,
-      fleetAuthz: {
-        integrations: { installPackages: true, upgradePackages: true },
-      },
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        validateSecurityRbac(fleetAuthz, {
+          // `all` OR `any` should be true for this case
+          all: {
+            integrations: { installPackages: true, upgradePackages: true },
+          },
+          any: {
+            ...writeEndpointPackagePrivileges,
+          },
+        }),
     },
     bulkInstallPackagesFromRegistryHandler
   );
