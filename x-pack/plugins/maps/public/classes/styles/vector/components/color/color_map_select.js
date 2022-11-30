@@ -129,15 +129,25 @@ export class ColorMapSelect extends Component {
     );
   }
 
+  _getColorPalettes() {
+    if (this.props.colorMapType === COLOR_MAP_TYPE.CATEGORICAL) {
+      return CATEGORICAL_COLOR_PALETTES;
+    }
+
+    return this.props.invert
+      ? NUMERICAL_COLOR_PALETTES.map((paletteProps) => {
+          return {
+            ...paletteProps,
+            palette: [...paletteProps.palette].reverse(),
+          };
+        })
+      : NUMERICAL_COLOR_PALETTES;
+  }
+
   _renderColorMapSelections() {
     if (this.props.isCustomOnly) {
       return null;
     }
-
-    const palettes =
-      this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL
-        ? NUMERICAL_COLOR_PALETTES
-        : CATEGORICAL_COLOR_PALETTES;
 
     const palettesWithCustom = [
       {
@@ -153,7 +163,7 @@ export class ColorMapSelect extends Component {
         type: 'text',
         'data-test-subj': `colorMapSelectOption_${CUSTOM_COLOR_MAP}`,
       },
-      ...palettes,
+      ...this._getColorPalettes(),
     ];
 
     const toggle = this.props.showColorMapTypeToggle ? (

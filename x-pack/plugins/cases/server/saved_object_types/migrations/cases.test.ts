@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectSanitizedDoc } from '@kbn/core/server';
-import {
-  CaseAttributes,
-  CaseFullExternalService,
-  CaseSeverity,
-  ConnectorTypes,
-  NONE_CONNECTOR_ID,
-} from '../../../common/api';
+import type { SavedObjectSanitizedDoc } from '@kbn/core/server';
+import type { CaseAttributes, CaseFullExternalService } from '../../../common/api';
+import { CaseSeverity, ConnectorTypes, NONE_CONNECTOR_ID } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
-import { createExternalService, ESCaseConnectorWithId } from '../../services/test_utils';
+import type { ESCaseConnectorWithId } from '../../services/test_utils';
+import { createExternalService } from '../../services/test_utils';
 import {
   addAssignees,
   addDuration,

@@ -13,6 +13,7 @@ import {
   elasticsearchClientMock,
   type ClusterClientMock,
   type CustomClusterClientMock,
+  createAgentStoreMock,
 } from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
   ElasticsearchClientConfig,
@@ -94,6 +95,7 @@ const createInternalSetupContractMock = () => {
       level: ServiceStatusLevels.available,
       summary: 'Elasticsearch is available',
     }),
+    agentStore: createAgentStoreMock(),
   };
   return internalSetupContract;
 };

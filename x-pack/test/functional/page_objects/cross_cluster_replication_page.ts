@@ -39,9 +39,23 @@ export function CrossClusterReplicationPageProvider({ getService }: FtrProviderC
         return await testSubjects.isDisplayed('nameInput');
       });
     },
-    async createFollowerIndex(leader: string, follower: string) {
+    async createFollowerIndex(
+      leader: string,
+      follower: string,
+      advancedSettings: boolean = false,
+      readPollTimeout?: string
+    ) {
       await testSubjects.setValue('leaderIndexInput', leader);
       await testSubjects.setValue('followerIndexInput', follower);
+      if (advancedSettings) {
+        await this.clickAdvancedSettingsToggle();
+        await retry.waitFor('advanced settings to be shown', async () => {
+          return await testSubjects.isDisplayed('readPollTimeoutInput');
+        });
+        if (readPollTimeout) {
+          await testSubjects.setValue('readPollTimeoutInput', readPollTimeout);
+        }
+      }
       await testSubjects.click('submitButton');
       await retry.waitForWithTimeout('follower index to be in table', 45000, async () => {
         return await testSubjects.isDisplayed('maxReadReqSize');
@@ -54,6 +68,9 @@ export function CrossClusterReplicationPageProvider({ getService }: FtrProviderC
       await retry.waitForWithTimeout('flyout title to show up', 20000, async () => {
         return await testSubjects.isDisplayed('settingsValues');
       });
+    },
+    async clickAdvancedSettingsToggle() {
+      await testSubjects.click('advancedSettingsToggle');
     },
   };
 }

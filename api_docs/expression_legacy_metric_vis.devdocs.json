@@ -116,6 +116,21 @@
         "children": [
           {
             "parentPluginId": "expressionLegacyMetricVis",
+            "id": "def-common.MetricArguments.autoScaleMetricAlignment",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoScaleMetricAlignment",
+            "description": [],
+            "signature": [
+              "MetricAlignment",
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionLegacyMetricVis",
             "id": "def-common.MetricArguments.percentageMode",
             "type": "boolean",
             "tags": [],
@@ -158,7 +173,13 @@
             "label": "palette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<",
               {
                 "pluginId": "charts",
@@ -409,6 +430,21 @@
         "children": [
           {
             "parentPluginId": "expressionLegacyMetricVis",
+            "id": "def-common.MetricVisParam.autoScaleMetricAlignment",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoScaleMetricAlignment",
+            "description": [],
+            "signature": [
+              "MetricAlignment",
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionLegacyMetricVis",
             "id": "def-common.MetricVisParam.percentageMode",
             "type": "boolean",
             "tags": [],
@@ -629,6 +665,17 @@
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionLegacyMetricVis",
+            "id": "def-common.MetricVisRenderConfig.canNavigateToLens",
+            "type": "boolean",
+            "tags": [],
+            "label": "canNavigateToLens",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -826,7 +873,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",

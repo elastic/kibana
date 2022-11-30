@@ -26,6 +26,13 @@ jest.mock('./open_in_discover_helpers', () => ({
 
 describe('open in discover drilldown', () => {
   let drilldown: OpenInDiscoverDrilldown;
+  const originalOpen = window.open;
+
+  // Prevent the JSDOM error about missing "window.open"
+  beforeAll(() => {
+    window.open = jest.fn();
+  });
+
   beforeEach(() => {
     drilldown = new OpenInDiscoverDrilldown({
       discover: {} as DiscoverSetup,
@@ -34,6 +41,11 @@ describe('open in discover drilldown', () => {
       application: () => ({} as ApplicationStart),
     });
   });
+
+  afterAll(() => {
+    window.open = originalOpen;
+  });
+
   it('provides UI to edit config', () => {
     const Component = (drilldown as unknown as { ReactCollectConfig: React.FC<CollectConfigProps> })
       .ReactCollectConfig;
@@ -48,14 +60,16 @@ describe('open in discover drilldown', () => {
     instance.find('EuiSwitch').prop('onChange')!({} as unknown as FormEvent<{}>);
     expect(setConfig).toHaveBeenCalledWith({ openInNewTab: true });
   });
-  it('calls through to isCompatible helper', () => {
+
+  it('calls through to isCompatible helper', async () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
-    drilldown.isCompatible(
+    await drilldown.isCompatible(
       { openInNewTab: true },
       { embeddable: { type: 'lens' } as IEmbeddable<EmbeddableInput>, filters }
     );
     expect(isCompatible).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });
+
   it('calls through to getHref helper', async () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
     await drilldown.execute(

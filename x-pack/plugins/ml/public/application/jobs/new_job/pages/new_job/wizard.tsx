@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useReducer, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useCallback } from 'react';
 import { useModelMemoryEstimator } from '../../common/job_creator/util/model_memory_estimator';
-
 import { WIZARD_STEPS } from '../components/step_types';
 
 import { TimeBuckets } from '../../../../util/time_buckets';
@@ -43,15 +42,15 @@ export const Wizard: FC<Props> = ({
   existingJobsAndGroups,
   firstWizardStep = WIZARD_STEPS.TIME_RANGE,
 }) => {
-  const [jobCreatorUpdated, setJobCreatorUpdate] = useReducer<(s: number, action: any) => number>(
-    (s) => s + 1,
-    0
-  );
-  const jobCreatorUpdate = () => setJobCreatorUpdate(jobCreatorUpdated);
+  const [jobCreatorUpdated, setJobCreatorUpdate] = useState(0);
+  const jobCreatorUpdate = useCallback(() => {
+    setJobCreatorUpdate((prev) => prev + 1);
+  }, []);
 
-  const [jobValidatorUpdated, setJobValidatorUpdate] = useReducer<
-    (s: number, action: any) => number
-  >((s) => s + 1, 0);
+  const [jobValidatorUpdated, setJobValidatorUpdate] = useState(0);
+  const jobValidatorUpdate = useCallback(() => {
+    setJobValidatorUpdate((prev) => prev + 1);
+  }, []);
 
   const jobCreatorContext: JobCreatorContextValue = {
     jobCreatorUpdated,
@@ -82,18 +81,18 @@ export const Wizard: FC<Props> = ({
 
   useEffect(() => {
     const subscription = jobValidator.validationResult$.subscribe(() => {
-      setJobValidatorUpdate(jobValidatorUpdated);
+      jobValidatorUpdate();
     });
 
     return () => {
       return subscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [jobValidator]);
 
   useEffect(() => {
     jobValidator.validate(() => {
-      setJobValidatorUpdate(jobValidatorUpdated);
+      jobValidatorUpdate();
     });
 
     // if the job config has changed, reset the highestStep

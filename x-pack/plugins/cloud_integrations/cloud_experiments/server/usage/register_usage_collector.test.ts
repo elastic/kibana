@@ -15,7 +15,7 @@ import {
   type LaunchDarklyEntitiesGetter,
   type Usage,
 } from './register_usage_collector';
-import { createLaunchDarklyClientMock } from '../plugin.test.mock';
+import { launchDarklyClientMocks } from '../launch_darkly_client/mocks';
 
 describe('cloudExperiments usage collector', () => {
   let collector: Collector<Usage>;
@@ -34,27 +34,7 @@ describe('cloudExperiments usage collector', () => {
     expect(collector.isReady()).toStrictEqual(true);
   });
 
-  test('should return initialized false and empty values when the user and the client are not initialized', async () => {
-    await expect(collector.fetch(createCollectorFetchContextMock())).resolves.toStrictEqual({
-      flagNames: [],
-      flags: {},
-      initialized: false,
-    });
-  });
-
-  test('should return initialized false and empty values when the user is not initialized', async () => {
-    getLaunchDarklyEntitiesMock.mockReturnValueOnce({
-      launchDarklyClient: createLaunchDarklyClientMock(),
-    });
-    await expect(collector.fetch(createCollectorFetchContextMock())).resolves.toStrictEqual({
-      flagNames: [],
-      flags: {},
-      initialized: false,
-    });
-  });
-
   test('should return initialized false and empty values when the client is not initialized', async () => {
-    getLaunchDarklyEntitiesMock.mockReturnValueOnce({ launchDarklyUser: { key: 'test' } });
     await expect(collector.fetch(createCollectorFetchContextMock())).resolves.toStrictEqual({
       flagNames: [],
       flags: {},
@@ -63,21 +43,16 @@ describe('cloudExperiments usage collector', () => {
   });
 
   test('should return all the flags returned by the client', async () => {
-    const launchDarklyClient = createLaunchDarklyClientMock();
-    getLaunchDarklyEntitiesMock.mockReturnValueOnce({
-      launchDarklyClient,
-      launchDarklyUser: { key: 'test' },
-    });
+    const launchDarklyClient = launchDarklyClientMocks.createLaunchDarklyClient();
+    getLaunchDarklyEntitiesMock.mockReturnValueOnce({ launchDarklyClient });
 
-    launchDarklyClient.allFlagsState.mockResolvedValueOnce({
-      valid: true,
-      getFlagValue: jest.fn(),
-      getFlagReason: jest.fn(),
-      toJSON: jest.fn(),
-      allValues: jest.fn().mockReturnValueOnce({
+    launchDarklyClient.getAllFlags.mockResolvedValueOnce({
+      initialized: true,
+      flags: {
         'my-plugin.my-feature-flag': true,
         'my-plugin.my-other-feature-flag': 22,
-      }),
+      },
+      flagNames: ['my-plugin.my-feature-flag', 'my-plugin.my-other-feature-flag'],
     });
 
     await expect(collector.fetch(createCollectorFetchContextMock())).resolves.toStrictEqual({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ButtonColor } from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -24,6 +24,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { remove } from 'lodash';
 import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -328,7 +329,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         throw new Error(`Unsupported mode: ${mode}`);
     }
 
-    let buttonColor: ButtonColor = 'primary';
+    let buttonColor: EuiButtonColor = 'primary';
     if (this.requiresGlobalPrivilegeWarning()) {
       buttonColor = 'warning';
     }
@@ -472,9 +473,22 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
       const primaryFeaturePrivilege = securedFeature
         ?.getPrimaryFeaturePrivileges({ includeMinimalFeaturePrivileges: true })
         .find((pfp) => privileges.includes(pfp.id)) ?? { disabled: false, requireAllSpaces: false };
+
+      const areAllSpacesSelected = selectedSpaceIds.includes(ALL_SPACES_ID);
+      if (securedFeature) {
+        securedFeature.getSubFeatures().forEach((subFeature) => {
+          subFeature.privileges.forEach((currentPrivilege) => {
+            if (privileges.includes(currentPrivilege.id)) {
+              if (subFeature.requireAllSpaces && !areAllSpacesSelected) {
+                remove(privileges, (privilege) => privilege === currentPrivilege.id);
+              }
+            }
+          });
+        });
+      }
       const newFeaturePrivileges =
         primaryFeaturePrivilege?.disabled ||
-        (primaryFeaturePrivilege?.requireAllSpaces && !selectedSpaceIds.includes(ALL_SPACES_ID))
+        (primaryFeaturePrivilege?.requireAllSpaces && !areAllSpacesSelected)
           ? [] // The primary feature privilege cannot be selected; remove that and any selected sub-feature privileges, too
           : privileges;
       return {
@@ -536,7 +550,12 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           newPrivileges = [nextFeaturePrivilege.id];
           feature.getSubFeaturePrivileges().forEach((psf) => {
             if (Array.isArray(privileges) && privileges.includes(psf.id)) {
-              newPrivileges.push(psf.id);
+              if (
+                !psf.requireAllSpaces ||
+                (psf.requireAllSpaces && this.state.selectedSpaceIds.includes(ALL_SPACES_ID))
+              ) {
+                newPrivileges.push(psf.id);
+              }
             }
           });
         }
@@ -547,6 +566,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         }
       });
     }
+
     this.setState({
       role,
       privilegeCalculator: new PrivilegeFormCalculator(this.props.kibanaPrivileges, role),

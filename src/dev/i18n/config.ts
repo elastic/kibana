@@ -19,7 +19,7 @@ export interface I18nConfig {
 }
 
 export async function checkConfigNamespacePrefix(configPath: string) {
-  const { prefix, paths } = JSON.parse(await readFileAsync(resolve(configPath)));
+  const { prefix, paths } = JSON.parse(await readFileAsync(resolve(configPath), 'utf8'));
   for (const [namespace] of Object.entries(paths)) {
     if (prefix && prefix !== namespace.split('.')[0]) {
       throw new Error(`namespace ${namespace} must be prefixed with ${prefix} in ${configPath}`);
@@ -35,7 +35,7 @@ export async function assignConfigFromPath(
     paths: {},
     exclude: [],
     translations: [],
-    ...JSON.parse(await readFileAsync(resolve(configPath))),
+    ...JSON.parse(await readFileAsync(resolve(configPath), 'utf8')),
   };
 
   for (const [namespace, namespacePaths] of Object.entries(additionalConfig.paths)) {

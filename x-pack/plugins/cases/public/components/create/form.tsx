@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
-import { useFormContext } from '../../common/shared_imports';
+import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import { Title } from './title';
 import { Description, fieldName as descriptionFieldName } from './description';
@@ -23,18 +23,19 @@ import { Tags } from './tags';
 import { Connector } from './connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import { ActionConnector } from '../../../common/api';
-import { Case } from '../../containers/types';
-import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
+import type { ActionConnector, CasePostRequest } from '../../../common/api';
+import type { Case } from '../../containers/types';
+import type { CasesTimelineIntegration } from '../timeline_context';
+import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { InsertTimeline } from '../insert_timeline';
-import { UseCreateAttachments } from '../../containers/use_create_attachments';
+import type { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { SubmitCaseButton } from './submit_button';
 import { FormContext } from './form_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { CreateCaseOwnerSelector } from './owner_selector';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
-import { CaseAttachmentsWithoutOwner } from '../../types';
+import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { Severity } from './severity';
 import { Assignees } from './assignees';
 
@@ -69,6 +70,7 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
   ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
   attachments?: CaseAttachmentsWithoutOwner;
+  initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
 const empty: ActionConnector[] = [];
@@ -78,6 +80,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
 
     const { owner } = useCasesContext();
+
     const availableOwners = useAvailableCasesOwners();
     const canShowCaseSolutionSelection = !owner.length && availableOwners.length;
 
@@ -180,12 +183,14 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     onSuccess,
     timelineIntegration,
     attachments,
+    initialValue,
   }) => (
     <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
       <FormContext
         afterCaseCreated={afterCaseCreated}
         onSuccess={onSuccess}
         attachments={attachments}
+        initialValue={initialValue}
       >
         <CreateCaseFormFields
           connectors={empty}

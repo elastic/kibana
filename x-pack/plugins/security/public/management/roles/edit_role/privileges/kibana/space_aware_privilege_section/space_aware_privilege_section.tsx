@@ -82,12 +82,10 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
       return (
         <EuiCallOut
           title={
-            <p>
-              <FormattedMessage
-                id="xpack.security.management.editRole.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"
-                defaultMessage="Insufficient Privileges"
-              />
-            </p>
+            <FormattedMessage
+              id="xpack.security.management.editRole.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"
+              defaultMessage="Insufficient Privileges"
+            />
           }
           iconType="alert"
           color="danger"
@@ -180,7 +178,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
             />
           </h2>
         }
-        titleSize={'s'}
+        titleSize="xs"
         actions={this.getAvailablePrivilegeButtons(false)}
       />
     );
@@ -194,20 +192,21 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
       return null;
     }
 
-    const addPrivilegeButton = (
-      <EuiButton
-        color="primary"
-        onClick={this.addSpacePrivilege}
-        iconType={'plusInCircle'}
-        data-test-subj={'addSpacePrivilegeButton'}
-        isDisabled={!hasAvailableSpaces || !this.props.editable}
-      >
-        <FormattedMessage
-          id="xpack.security.management.editRole.spacePrivilegeSection.addSpacePrivilegeButton"
-          defaultMessage="Add Kibana privilege"
-        />
-      </EuiButton>
-    );
+    const addPrivilegeButton =
+      !hasAvailableSpaces || !this.props.editable ? null : (
+        <EuiButton
+          color="primary"
+          onClick={this.addSpacePrivilege}
+          iconType={'plusInCircle'}
+          data-test-subj={'addSpacePrivilegeButton'}
+          isDisabled={!hasAvailableSpaces || !this.props.editable}
+        >
+          <FormattedMessage
+            id="xpack.security.management.editRole.spacePrivilegeSection.addSpacePrivilegeButton"
+            defaultMessage="Add Kibana privilege"
+          />
+        </EuiButton>
+      );
 
     if (!hasPrivilegesAssigned) {
       return addPrivilegeButton;

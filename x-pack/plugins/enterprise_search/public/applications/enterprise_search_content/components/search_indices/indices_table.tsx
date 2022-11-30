@@ -26,8 +26,7 @@ import { EuiBadgeTo } from '../../../shared/react_router_helpers/eui_components'
 import { convertMetaToPagination } from '../../../shared/table_pagination';
 import { SEARCH_INDEX_PATH } from '../../routes';
 import { ElasticsearchViewIndex, IngestionMethod } from '../../types';
-import { crawlerStatusToColor, crawlerStatusToText } from '../../utils/crawler_status_helpers';
-import { ingestionMethodToText, isCrawlerIndex } from '../../utils/indices';
+import { ingestionMethodToText } from '../../utils/indices';
 import {
   ingestionStatusToColor,
   ingestionStatusToText,
@@ -121,26 +120,14 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
       ),
       render: (index: ElasticsearchViewIndex) => {
         const overviewPath = generateEncodedPath(SEARCH_INDEX_PATH, { indexName: index.name });
-        if (isCrawlerIndex(index)) {
-          const label = crawlerStatusToText(index.crawler?.most_recent_crawl_request_status);
-
-          return (
-            <EuiBadgeTo
-              to={overviewPath}
-              label={label}
-              color={crawlerStatusToColor(index.crawler?.most_recent_crawl_request_status)}
-            />
-          );
-        } else {
-          const label = ingestionStatusToText(index.ingestionStatus);
-          return (
-            <EuiBadgeTo
-              to={overviewPath}
-              label={label}
-              color={ingestionStatusToColor(index.ingestionStatus)}
-            />
-          );
-        }
+        const label = ingestionStatusToText(index.ingestionStatus);
+        return (
+          <EuiBadgeTo
+            to={overviewPath}
+            label={label}
+            color={ingestionStatusToColor(index.ingestionStatus)}
+          />
+        );
       },
       truncateText: true,
       width: '15%',
@@ -148,10 +135,24 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
     {
       actions: [
         {
-          description: 'View this index',
+          description: i18n.translate(
+            'xpack.enterpriseSearch.content.searchIndices.actions.viewIndex.title',
+            {
+              defaultMessage: 'View this index',
+            }
+          ),
           icon: 'eye',
           isPrimary: false,
-          name: (index) => `View ${index.name}`,
+          name: (index) =>
+            i18n.translate(
+              'xpack.enterpriseSearch.content.searchIndices.actions.viewIndex.caption',
+              {
+                defaultMessage: 'View index {indexName}',
+                values: {
+                  indexName: index.name,
+                },
+              }
+            ),
           onClick: (index) =>
             navigateToUrl(
               generateEncodedPath(SEARCH_INDEX_PATH, {
@@ -162,10 +163,24 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
         },
         {
           color: 'danger',
-          description: 'Delete this index',
+          description: i18n.translate(
+            'xpack.enterpriseSearch.content.searchIndices.actions.deleteIndex.title',
+            {
+              defaultMessage: 'Delete this index',
+            }
+          ),
           icon: 'trash',
           isPrimary: false,
-          name: (index) => `Delete ${index.name}`,
+          name: (index) =>
+            i18n.translate(
+              'xpack.enterpriseSearch.content.searchIndices.actions.deleteIndex.caption',
+              {
+                defaultMessage: 'Delete index {indexName}',
+                values: {
+                  indexName: index.name,
+                },
+              }
+            ),
           onClick: (index) => onDelete(index),
           type: 'icon',
         },

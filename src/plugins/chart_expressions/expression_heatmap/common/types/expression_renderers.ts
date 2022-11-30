@@ -7,7 +7,7 @@
  */
 
 import type { PaletteRegistry } from '@kbn/coloring';
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
@@ -31,11 +31,14 @@ export type HeatmapRenderProps = HeatmapExpressionProps & {
   timeZone?: string;
   formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginSetup['theme'];
+  chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   datatableUtilities: DatatableUtilitiesService;
   onClickValue: (data: FilterEvent['data']) => void;
   onSelectRange: (data: BrushEvent['data']) => void;
   paletteService: PaletteRegistry;
   uiState: PersistedState;
   interactive: boolean;
+  syncTooltips: boolean;
+  syncCursor: boolean;
   renderComplete: IInterpreterRenderHandlers['done'];
 };

@@ -19,7 +19,6 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmDataView } from '../../../hooks/use_apm_data_view';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';
-// @ts-expect-error
 import { Typeahead } from './typeahead';
 import { useProcessorEvent } from './use_processor_event';
 

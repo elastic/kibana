@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasesPermissions } from '../../common';
+import type { CasesPermissions } from '../../common';
 
 export const isReadOnlyPermissions = (permissions: CasesPermissions) => {
   return (

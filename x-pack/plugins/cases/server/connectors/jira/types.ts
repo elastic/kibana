@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { JiraFieldsType } from '../../../common/api';
-import { ICasesConnector } from '../types';
+import type { JiraFieldsType } from '../../../common/api';
+import type { ICasesConnector } from '../types';
 
 interface ExternalServiceFormatterParams extends JiraFieldsType {
   labels: string[];

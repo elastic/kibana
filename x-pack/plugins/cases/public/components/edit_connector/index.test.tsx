@@ -11,16 +11,17 @@ import { render, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-import { EditConnector, EditConnectorProps } from '.';
+import type { EditConnectorProps } from '.';
+import { EditConnector } from '.';
+import type { AppMockRenderer } from '../../common/mock';
 import {
-  AppMockRenderer,
   createAppMockRenderer,
   readCasesPermissions,
   noPushCasesPermissions,
   TestProviders,
 } from '../../common/mock';
 import { basicCase, basicPush, caseUserActions, connectorsMock } from '../../containers/mock';
-import { CaseConnector } from '../../containers/configure/types';
+import type { CaseConnector } from '../../containers/configure/types';
 
 const onSubmit = jest.fn();
 const caseServices = {

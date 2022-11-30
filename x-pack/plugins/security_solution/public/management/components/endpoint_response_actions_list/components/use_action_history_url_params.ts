@@ -6,10 +6,11 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import type { ConsoleResponseActionCommands } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
-  RESPONSE_ACTION_COMMANDS,
+  RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
-  type ResponseActions,
+  type ResponseActionsApiCommandNames,
   type ResponseActionStatus,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useUrlParams } from '../../../hooks/use_url_params';
@@ -24,9 +25,7 @@ interface UrlParamsActionsLogFilters {
 }
 
 interface ActionsLogFiltersFromUrlParams {
-  commands?: Array<
-    Exclude<ResponseActions, 'unisolate' | 'running-processes'> | 'release' | 'processes'
-  >;
+  commands?: ConsoleResponseActionCommands[];
   hosts?: string[];
   statuses?: ResponseActionStatus[];
   startDate?: string;
@@ -61,7 +60,7 @@ export const actionsLogFiltersFromUrlParams = (
         .split(',')
         .reduce<Required<ActionsLogFiltersFromUrlParams>['commands']>((acc, curr) => {
           if (
-            RESPONSE_ACTION_COMMANDS.includes(curr as ResponseActions) ||
+            RESPONSE_ACTION_API_COMMANDS_NAMES.includes(curr as ResponseActionsApiCommandNames) ||
             curr === 'release' ||
             curr === 'processes'
           ) {

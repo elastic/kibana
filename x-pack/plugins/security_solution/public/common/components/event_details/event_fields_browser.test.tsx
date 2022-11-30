@@ -50,7 +50,7 @@ describe('EventFieldsBrowser', () => {
               browserFields={mockBrowserFields}
               data={mockDetailItemData}
               eventId={mockDetailItemDataId}
-              timelineId="test"
+              scopeId="timeline-test"
               timelineTabType={TimelineTabs.query}
             />
           </TestProviders>
@@ -69,7 +69,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -91,7 +91,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={eventId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -107,7 +107,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={eventId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -123,7 +123,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={eventId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -139,7 +139,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={eventId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
             isReadOnly
           />
@@ -158,7 +158,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={eventId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -176,7 +176,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={eventId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -194,7 +194,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={eventId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -214,7 +214,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -239,7 +239,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -254,7 +254,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -279,7 +279,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
@@ -298,7 +298,7 @@ describe('EventFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            timelineId="test"
+            scopeId="timeline-test"
             timelineTabType={TimelineTabs.query}
           />
         </TestProviders>

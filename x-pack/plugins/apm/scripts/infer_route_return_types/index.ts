@@ -21,7 +21,6 @@ import {
 import Path from 'path';
 import { execSync } from 'child_process';
 import { argv } from 'yargs';
-// @ts-expect-error
 import { optimizeTsConfig } from '../optimize_tsconfig/optimize';
 
 // This script adds explicit return types to route handlers,

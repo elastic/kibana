@@ -11,8 +11,8 @@ import type {
   RegistryPolicyTemplate,
   PackageInfo,
   AgentPolicy,
-  Settings,
   EnrollmentAPIKey,
+  FleetProxy,
 } from '../../../../types';
 
 export interface MultiPageStep {
@@ -21,13 +21,14 @@ export interface MultiPageStep {
 }
 
 export interface MultiPageStepLayoutProps {
-  settings?: Settings;
+  fleetServerHosts: string[];
+  fleetProxy?: FleetProxy;
   agentPolicy?: AgentPolicy;
   error?: Error;
   enrollmentAPIKey?: EnrollmentAPIKey;
   packageInfo: PackageInfo;
   integrationInfo?: RegistryPolicyTemplate;
-  cancelClickHandler: React.ReactEventHandler;
+  cancelClickHandler?: React.ReactEventHandler;
   onBack: React.ReactEventHandler;
   cancelUrl: string;
   steps: MultiPageStep[];

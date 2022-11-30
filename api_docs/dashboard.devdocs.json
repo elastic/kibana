@@ -290,6 +290,20 @@
           },
           {
             "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainerInput.syncCursor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "syncCursor",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
             "id": "def-public.DashboardContainerInput.viewMode",
             "type": "Enum",
             "tags": [],
@@ -316,7 +330,13 @@
             "label": "filters",
             "description": [],
             "signature": [
-              "Filter",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
               "[]"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
@@ -386,7 +406,13 @@
             "label": "executionContext",
             "description": [],
             "signature": [
-              "KibanaExecutionContext",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
               " | undefined"
             ],
             "path": "src/plugins/dashboard/public/types.ts",
@@ -443,7 +469,13 @@
             "description": [],
             "signature": [
               "{ [key: string]: ",
-              "Serializable",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.Serializable",
+                "text": "Serializable"
+              },
               "; }"
             ],
             "path": "src/plugins/dashboard/common/types.ts",
@@ -607,7 +639,13 @@
         ],
         "signature": [
           "{ dashboardId?: string | undefined; timeRange?: ",
-          "TimeRange",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           " | undefined; refreshInterval?: ",
           {
             "pluginId": "data",
@@ -617,9 +655,21 @@
             "text": "RefreshInterval"
           },
           " | undefined; filters?: ",
-          "Filter",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[] | undefined; query?: ",
-          "Query",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
           " | undefined; useHash?: boolean | undefined; preserveSavedFilters?: boolean | undefined; viewMode?: ",
           {
             "pluginId": "embeddable",
@@ -637,7 +687,13 @@
             "text": "SavedDashboardPanel"
           },
           " & ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ")[] | undefined; savedQuery?: string | undefined; tags?: string[] | undefined; options?: ",
           "DashboardOptions",
           " | undefined; controlGroupInput?: ",
@@ -925,9 +981,21 @@
         "description": [],
         "signature": [
           "(savedObjectClient: Pick<",
-          "ISavedObjectsRepository",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.ISavedObjectsRepository",
+            "text": "ISavedObjectsRepository"
+          },
           ", \"find\">, embeddableType: string) => Promise<{ [key: string]: ",
-          "Serializable",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.Serializable",
+            "text": "Serializable"
+          },
           "; }[]>"
         ],
         "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
@@ -943,7 +1011,13 @@
             "description": [],
             "signature": [
               "Pick<",
-              "ISavedObjectsRepository",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.ISavedObjectsRepository",
+                "text": "ISavedObjectsRepository"
+              },
               ", \"find\">"
             ],
             "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
@@ -1306,7 +1380,13 @@
             "text": "EmbeddableStateWithType"
           },
           "; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
           "[]; }"
         ],
         "path": "src/plugins/dashboard/common/persistable_state/dashboard_container_references.ts",
@@ -1363,7 +1443,13 @@
             "text": "EmbeddableStateWithType"
           },
           ", references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectReference",
+            "text": "SavedObjectReference"
+          },
           "[]) => ",
           {
             "pluginId": "embeddable",
@@ -1463,7 +1549,13 @@
           "({ attributes, references = [] }: SavedObjectAttributesAndReferences, deps: ",
           "InjectDeps",
           ") => ",
-          "SavedObjectAttributes"
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectAttributes",
+            "text": "SavedObjectAttributes"
+          }
         ],
         "path": "src/plugins/dashboard/common/persistable_state/dashboard_saved_object_references.ts",
         "deprecated": false,
@@ -1977,7 +2069,13 @@
             "description": [],
             "signature": [
               "{ [key: string]: ",
-              "Serializable",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.Serializable",
+                "text": "Serializable"
+              },
               "; }"
             ],
             "path": "src/plugins/dashboard/common/types.ts",

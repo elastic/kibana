@@ -8,7 +8,10 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { sampleEsClientMetrics } from '@kbn/core-metrics-server-mocks';
+import { AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
 import {
+  mockEsClientCollector,
   mockOsCollector,
   mockProcessCollector,
   mockServerCollector,
@@ -20,7 +23,8 @@ describe('OpsMetricsCollector', () => {
 
   beforeEach(() => {
     const hapiServer = httpServiceMock.createInternalSetupContract().server;
-    collector = new OpsMetricsCollector(hapiServer, { logger: loggerMock.create() });
+    const agentManager = new AgentManager();
+    collector = new OpsMetricsCollector(hapiServer, agentManager, { logger: loggerMock.create() });
 
     mockOsCollector.collect.mockResolvedValue('osMetrics');
   });
@@ -33,12 +37,14 @@ describe('OpsMetricsCollector', () => {
         requests: 'serverRequestsMetrics',
         response_times: 'serverTimingMetrics',
       });
+      mockEsClientCollector.collect.mockResolvedValue(sampleEsClientMetrics);
 
       const metrics = await collector.collect();
 
       expect(mockOsCollector.collect).toHaveBeenCalledTimes(1);
       expect(mockProcessCollector.collect).toHaveBeenCalledTimes(1);
       expect(mockServerCollector.collect).toHaveBeenCalledTimes(1);
+      expect(mockEsClientCollector.collect).toHaveBeenCalledTimes(1);
 
       expect(metrics).toEqual({
         collected_at: expect.any(Date),
@@ -47,6 +53,7 @@ describe('OpsMetricsCollector', () => {
         os: 'osMetrics',
         requests: 'serverRequestsMetrics',
         response_times: 'serverTimingMetrics',
+        elasticsearch_client: sampleEsClientMetrics,
       });
     });
   });

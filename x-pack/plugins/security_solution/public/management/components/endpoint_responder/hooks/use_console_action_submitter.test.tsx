@@ -22,7 +22,8 @@ import type { ActionDetails } from '../../../../../common/endpoint/types';
 import { act, waitFor } from '@testing-library/react';
 import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
 
-describe('When using `useConsoleActionSubmitter()` hook', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/142584
+describe.skip('When using `useConsoleActionSubmitter()` hook', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let renderArgs: UseConsoleActionSubmitterOptions;

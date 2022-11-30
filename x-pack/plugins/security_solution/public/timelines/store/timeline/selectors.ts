@@ -6,8 +6,6 @@
  */
 
 import { createSelector } from 'reselect';
-
-export { getManageTimelineById } from '@kbn/timelines-plugin/public';
 import type { State } from '../../../common/store/types';
 
 import type { TimelineModel } from './model';

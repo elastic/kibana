@@ -167,6 +167,7 @@ function mockRuleSummary(overloads: Partial<any> = {}): any {
       foo: {
         status: 'OK',
         muted: false,
+        flapping: false,
       },
     },
     executionDuration: {

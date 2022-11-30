@@ -45,43 +45,37 @@ const createTestCases = (spaceId: string) => {
     CASES.NAMESPACE_AGNOSTIC,
     { ...CASES.DOES_NOT_EXIST, ...fail404() },
   ];
-  const crossNamespace = [
+  const badRequests = [
+    { ...CASES.HIDDEN, ...fail400() },
     {
       ...CASES.SINGLE_NAMESPACE_SPACE_2,
       namespaces: ['x', 'y'],
-      ...fail400(), // cannot be searched for in multiple spaces
+      ...fail400(), // cannot be searched for in multiple spaces -- second try below succeeds
     },
-    { ...CASES.SINGLE_NAMESPACE_SPACE_2, namespaces: [SPACE_2_ID] }, // second try searches for it in a single other space, which is valid
     {
       ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1,
       namespaces: [ALL_SPACES_ID],
-      ...fail400(), // cannot be searched for in multiple spaces
+      ...fail400(), // cannot be searched for in multiple spaces -- second try below succeeds
     },
+  ];
+  const crossNamespace = [
+    { ...CASES.SINGLE_NAMESPACE_SPACE_2, namespaces: [SPACE_2_ID] }, // second try searches for it in a single other space, which is valid
     { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1, namespaces: [SPACE_1_ID] }, // second try searches for it in a single other space, which is valid
     { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, namespaces: [SPACE_2_ID], ...fail404() },
     { ...CASES.MULTI_NAMESPACE_ALL_SPACES, namespaces: [SPACE_2_ID, 'x'] }, // unknown space is allowed / ignored
     { ...CASES.MULTI_NAMESPACE_ALL_SPACES, namespaces: [ALL_SPACES_ID] }, // this is different than the same test case in the spaces_only suite, since MULTI_NAMESPACE_ONLY_SPACE_1 *may* return a 404 error to a partially authorized user
   ];
-  const hiddenType = [{ ...CASES.HIDDEN, ...fail400() }];
-  const allTypes = [...normalTypes, ...crossNamespace, ...hiddenType];
-  return { normalTypes, crossNamespace, hiddenType, allTypes };
+  const allTypes = [...normalTypes, ...badRequests, ...crossNamespace];
+  return { normalTypes, badRequests, crossNamespace, allTypes };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-
-  const { addTests, createTestDefinitions, expectSavedObjectForbidden } = bulkGetTestSuiteFactory(
-    esArchiver,
-    supertest
-  );
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
+    bulkGetTestSuiteFactory(context);
   const createTests = (spaceId: string) => {
-    const { normalTypes, crossNamespace, hiddenType, allTypes } = createTestCases(spaceId);
+    const { normalTypes, badRequests, crossNamespace, allTypes } = createTestCases(spaceId);
     // use singleRequest to reduce execution time and/or test combined cases
-    const authorizedCommon = [
-      createTestDefinitions(normalTypes, false, { singleRequest: true }),
-      createTestDefinitions(hiddenType, true),
-    ].flat();
+    const singleRequest = true;
     const crossNamespaceAuthorizedAtSpace = crossNamespace.reduce<{
       authorized: BulkGetTestCase[];
       unauthorized: BulkGetTestCase[];
@@ -97,32 +91,43 @@ export default function ({ getService }: FtrProviderContext) {
     );
 
     return {
-      unauthorized: createTestDefinitions(allTypes, true),
-      authorizedAtSpace: [
-        authorizedCommon,
-        createTestDefinitions(crossNamespaceAuthorizedAtSpace.authorized, false, {
-          singleRequest: true,
-        }),
-        createTestDefinitions(crossNamespaceAuthorizedAtSpace.unauthorized, true),
-        createTestDefinitions(allTypes, true, { singleRequest: true }),
-      ].flat(),
-      authorizedEverywhere: [
-        authorizedCommon,
-        createTestDefinitions(crossNamespace, false, { singleRequest: true }),
+      unauthorized: [
+        createTestDefinitions(normalTypes, true),
+        createTestDefinitions(badRequests, false, { singleRequest }), // validation for hidden type and initialNamespaces returns 400 Bad Request before authZ check
+        createTestDefinitions(crossNamespace, true),
         createTestDefinitions(allTypes, true, {
-          singleRequest: true,
-          responseBodyOverride: expectSavedObjectForbidden(['hiddentype']),
+          singleRequest,
+          responseBodyOverride: expectSavedObjectForbidden([
+            'dashboard,globaltype,isolatedtype,sharecapabletype,sharedtype', // 'hiddentype' is not included in the 403 message, it was filtered out before the authZ check
+          ]),
         }),
       ].flat(),
-      superuser: createTestDefinitions(allTypes, false, { singleRequest: true }),
+      authorizedAtSpace: [
+        createTestDefinitions(normalTypes, false, { singleRequest }),
+        createTestDefinitions(badRequests, false, { singleRequest }), // validation for hidden type and initialNamespaces returns 400 Bad Request before authZ check
+        createTestDefinitions(crossNamespaceAuthorizedAtSpace.authorized, false, { singleRequest }),
+        createTestDefinitions(crossNamespaceAuthorizedAtSpace.unauthorized, true),
+        createTestDefinitions(allTypes, true, {
+          singleRequest,
+          responseBodyOverride: expectSavedObjectForbidden(
+            spaceId === DEFAULT_SPACE_ID
+              ? // While the Default space is active, we always attempt to get 'sharecapabletype' (MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1)
+                // with a cross-namespace check in Space 1, and fail the authZ check for 'sharecapabletype' in Space 1 because these users
+                // are only authorized for the Default space!
+                // 'hiddentype' is not included in either 403 message, it was filtered out before the authZ check
+                ['isolatedtype,sharecapabletype,sharedtype']
+              : ['isolatedtype,sharedtype']
+          ),
+        }),
+      ].flat(),
+      authorizedEverywhere: createTestDefinitions(allTypes, false, { singleRequest }),
     };
   };
 
   describe('_bulk_get', () => {
     getTestScenarios().securityAndSpaces.forEach(({ spaceId, users }) => {
       const suffix = ` within the ${spaceId} space`;
-      const { unauthorized, authorizedAtSpace, authorizedEverywhere, superuser } =
-        createTests(spaceId);
+      const { unauthorized, authorizedAtSpace, authorizedEverywhere } = createTests(spaceId);
       const _addTests = (user: TestUser, tests: BulkGetTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };
@@ -135,11 +140,15 @@ export default function ({ getService }: FtrProviderContext) {
         _addTests(user, authorizedAtSpace);
       });
 
-      [users.dualAll, users.dualRead, users.allGlobally, users.readGlobally].forEach((user) => {
+      [
+        users.dualAll,
+        users.dualRead,
+        users.allGlobally,
+        users.readGlobally,
+        users.superuser,
+      ].forEach((user) => {
         _addTests(user, authorizedEverywhere);
       });
-
-      _addTests(users.superuser, superuser);
     });
   });
 }

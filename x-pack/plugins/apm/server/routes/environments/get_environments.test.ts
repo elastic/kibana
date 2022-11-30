@@ -19,9 +19,9 @@ describe('getEnvironments', () => {
   });
 
   it('fetches environments', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams(({ mockApmEventClient }) =>
       getEnvironments({
-        setup,
+        apmEventClient: mockApmEventClient,
         serviceName: 'foo',
         searchAggregatedTransactions: false,
         size: 50,
@@ -34,9 +34,9 @@ describe('getEnvironments', () => {
   });
 
   it('fetches environments without a service name', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams(({ mockApmEventClient }) =>
       getEnvironments({
-        setup,
+        apmEventClient: mockApmEventClient,
         searchAggregatedTransactions: false,
         size: 50,
         start: 0,

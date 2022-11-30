@@ -8,17 +8,21 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 
-import { useForm, Form, FormHook } from '../../common/shared_imports';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { connectorsMock } from '../../containers/mock';
 import { Connector } from './connector';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { incidentTypes, severity, choices } from '../connectors/mock';
-import { schema, FormProps } from './schema';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
+import type { FormProps } from './schema';
+import { schema } from './schema';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 

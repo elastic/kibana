@@ -23,6 +23,7 @@ import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
 import { NetworkDetails } from '.';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn().mockReturnValue({
@@ -146,10 +147,22 @@ describe('Network Details', () => {
 
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
   });
 
   test('it renders', () => {

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { routeToHome, routeToConnectors, routeToRules } from '../constants';
+import { routeToHome, routeToConnectors, routeToRules, routeToLogs } from '../constants';
 
 export const getAlertingSectionBreadcrumb = (
   type: string,
@@ -14,6 +14,17 @@ export const getAlertingSectionBreadcrumb = (
 ): { text: string; href?: string } => {
   // Home and sections
   switch (type) {
+    case 'logs':
+      return {
+        text: i18n.translate('xpack.triggersActionsUI.logs.breadcrumbTitle', {
+          defaultMessage: 'Logs',
+        }),
+        ...(returnHref
+          ? {
+              href: `${routeToLogs}`,
+            }
+          : {}),
+      };
     case 'connectors':
       return {
         text: i18n.translate('xpack.triggersActionsUI.connectors.breadcrumbTitle', {
@@ -39,7 +50,7 @@ export const getAlertingSectionBreadcrumb = (
     default:
       return {
         text: i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
-          defaultMessage: 'Rules and Connectors',
+          defaultMessage: 'Rules',
         }),
         ...(returnHref
           ? {

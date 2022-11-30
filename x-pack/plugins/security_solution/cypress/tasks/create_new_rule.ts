@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { EmailConnector, IndexConnector } from '../objects/connector';
-import { getIndexConnector, getEmailConnector } from '../objects/connector';
+import type {
+  RuleIntervalFrom,
+  Threat,
+  ThreatSubtechnique,
+  ThreatTechnique,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
   CustomRule,
   MachineLearningRule,
@@ -30,7 +34,6 @@ import {
   AT_LEAST_ONE_VALID_MATCH,
   BACK_TO_ALL_RULES_LINK,
   COMBO_BOX_CLEAR_BTN,
-  COMBO_BOX_INPUT,
   CREATE_AND_ENABLE_BTN,
   CUSTOM_QUERY_INPUT,
   CUSTOM_QUERY_REQUIRED,
@@ -59,7 +62,6 @@ import {
   MITRE_ATTACK_TECHNIQUE_DROPDOWN,
   MITRE_TACTIC,
   QUERY_BAR,
-  QUERY_PREVIEW_BUTTON,
   REFERENCE_URLS_INPUT,
   REFRESH_BUTTON,
   RISK_MAPPING_OVERRIDE_OPTION,
@@ -93,13 +95,6 @@ import {
   THREAT_MATCH_QUERY_INPUT,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
-  CONNECTOR_NAME_INPUT,
-  EMAIL_CONNECTOR_FROM_INPUT,
-  EMAIL_CONNECTOR_HOST_INPUT,
-  EMAIL_CONNECTOR_PORT_INPUT,
-  EMAIL_CONNECTOR_USER_INPUT,
-  EMAIL_CONNECTOR_PASSWORD_INPUT,
-  EMAIL_CONNECTOR_SERVICE_SELECTOR,
   PREVIEW_HISTOGRAM,
   DATA_VIEW_COMBO_BOX,
   DATA_VIEW_OPTION,
@@ -108,23 +103,32 @@ import {
   NEW_TERMS_HISTORY_TIME_TYPE,
   NEW_TERMS_INPUT_AREA,
   ACTIONS_THROTTLE_INPUT,
+  CONTINUE_BUTTON,
+  CREATE_WITHOUT_ENABLING_BTN,
+} from '../screens/create_new_rule';
+import {
   INDEX_SELECTOR,
-  CREATE_CONNECTOR_BTN,
-  SAVE_ACTION_CONNECTOR_BTN,
-  JSON_EDITOR,
   CREATE_ACTION_CONNECTOR_BTN,
   EMAIL_ACTION_BTN,
-  COMBO_BOX_SELECTION,
-} from '../screens/create_new_rule';
+} from '../screens/common/rule_actions';
+import { fillIndexConnectorForm, fillEmailConnectorForm } from './common/rule_actions';
 import { TOAST_ERROR } from '../screens/shared';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
-import { EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
+import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
+import { ruleFields } from '../data/detection_engine';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
   cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
+  cy.get(BACK_TO_ALL_RULES_LINK).click({ force: true });
+  cy.get(BACK_TO_ALL_RULES_LINK).should('not.exist');
+};
+
+export const createRuleWithoutEnabling = () => {
+  cy.get(CREATE_WITHOUT_ENABLING_BTN).click({ force: true });
+  cy.get(CREATE_WITHOUT_ENABLING_BTN).should('not.exist');
   cy.get(BACK_TO_ALL_RULES_LINK).click({ force: true });
   cy.get(BACK_TO_ALL_RULES_LINK).should('not.exist');
 };
@@ -161,8 +165,13 @@ export const fillAboutRule = (
   }
 };
 
-export const fillNote = (note: string) => {
+export const expandAdvancedSettings = () => {
+  cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
+};
+
+export const fillNote = (note: string = ruleFields.investigationGuide) => {
   cy.get(INVESTIGATION_NOTES_TEXTAREA).clear({ force: true }).type(note, { force: true });
+  return note;
 };
 
 export const fillMitre = (mitreAttacks: Mitre[]) => {
@@ -190,9 +199,32 @@ export const fillMitre = (mitreAttacks: Mitre[]) => {
 
     cy.get(MITRE_ATTACK_ADD_TACTIC_BUTTON).click({ force: true });
   });
+  return mitreAttacks;
 };
 
-export const fillFalsePositiveExamples = (falsePositives: string[]) => {
+export const fillThreat = (threat: Threat = ruleFields.threat) => {
+  cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).first().click({ force: true });
+  cy.contains(MITRE_TACTIC, threat.tactic.name).click();
+  return threat;
+};
+
+export const fillThreatTechnique = (technique: ThreatTechnique = ruleFields.threatTechnique) => {
+  cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).first().click({ force: true });
+  cy.get(MITRE_ATTACK_TECHNIQUE_DROPDOWN).first().click({ force: true });
+  cy.contains(MITRE_TACTIC, technique.name).click();
+  return technique;
+};
+
+export const fillThreatSubtechnique = (
+  subtechnique: ThreatSubtechnique = ruleFields.threatSubtechnique
+) => {
+  cy.get(MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON).first().click({ force: true });
+  cy.get(MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN).first().click({ force: true });
+  cy.contains(MITRE_TACTIC, subtechnique.name).click();
+  return subtechnique;
+};
+
+export const fillFalsePositiveExamples = (falsePositives: string[] = ruleFields.falsePositives) => {
   falsePositives.forEach((falsePositive, index) => {
     cy.get(FALSE_POSITIVES_INPUT)
       .eq(index)
@@ -200,28 +232,49 @@ export const fillFalsePositiveExamples = (falsePositives: string[]) => {
       .type(falsePositive, { force: true });
     cy.get(ADD_FALSE_POSITIVE_BTN).click({ force: true });
   });
+  return falsePositives;
 };
 
-export const fillSeverity = (severity: string) => {
+export const importSavedQuery = (timelineId: string) => {
+  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
+  cy.get(TIMELINE(timelineId)).click();
+  cy.get(CUSTOM_QUERY_INPUT).should('not.be.empty');
+};
+
+export const fillRuleName = (ruleName: string = ruleFields.ruleName) => {
+  cy.get(RULE_NAME_INPUT).clear({ force: true }).type(ruleName, { force: true });
+  return ruleName;
+};
+
+export const fillDescription = (description: string = ruleFields.ruleDescription) => {
+  cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true }).type(description, { force: true });
+  return description;
+};
+
+export const fillSeverity = (severity: string = ruleFields.ruleSeverity) => {
   cy.get(SEVERITY_DROPDOWN).click({ force: true });
   cy.get(`#${severity.toLowerCase()}`).click();
+  return severity;
 };
 
-export const fillRiskScore = (riskScore: string) => {
+export const fillRiskScore = (riskScore: string = ruleFields.riskScore.toString()) => {
   cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${riskScore}`, { force: true });
+  return riskScore;
 };
 
-export const fillRuleTags = (tags: string[]) => {
+export const fillRuleTags = (tags: string[] = ruleFields.ruleTags) => {
   tags.forEach((tag) => {
     cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
   });
+  return tags;
 };
 
-export const fillReferenceUrls = (referenceUrls: string[]) => {
+export const fillReferenceUrls = (referenceUrls: string[] = ruleFields.referenceUrls) => {
   referenceUrls.forEach((url, index) => {
     cy.get(REFERENCE_URLS_INPUT).eq(index).clear({ force: true }).type(url, { force: true });
     cy.get(ADD_REFERENCE_URL_BTN).click({ force: true });
   });
+  return referenceUrls;
 };
 
 export const fillAboutRuleAndContinue = (
@@ -286,7 +339,7 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
   getAboutContinueButton().should('exist').click({ force: true });
 };
 
-export const fillCustomQuery = (rule: CustomRule | OverrideRule) => {
+const fillCustomQuery = (rule: CustomRule | OverrideRule) => {
   if (rule.timeline?.id) {
     cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
     cy.get(TIMELINE(rule.timeline.id)).click();
@@ -296,6 +349,10 @@ export const fillCustomQuery = (rule: CustomRule | OverrideRule) => {
       .first()
       .type(rule.customQuery || '');
   }
+};
+
+export const continueWithNextSection = () => {
+  cy.get(CONTINUE_BUTTON).should('exist').click();
 };
 
 export const fillDefineCustomRuleAndContinue = (rule: CustomRule | OverrideRule) => {
@@ -320,6 +377,13 @@ export const fillScheduleRuleAndContinue = (rule: CustomRule | MachineLearningRu
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
 };
 
+export const fillFrom = (from: RuleIntervalFrom = ruleFields.ruleIntervalFrom) => {
+  const value = from.slice(0, from.length - 1);
+  const type = from.slice(from.length - 1);
+  cy.get(LOOK_BACK_INTERVAL).type('{selectAll}').type(value);
+  cy.get(LOOK_BACK_TIME_TYPE).select(type);
+};
+
 export const fillRuleAction = (rule: CustomRule) => {
   if (rule.actions) {
     cy.get(ACTIONS_THROTTLE_INPUT).select(rule.actions.throttle);
@@ -327,7 +391,7 @@ export const fillRuleAction = (rule: CustomRule) => {
       switch (connector.type) {
         case 'index':
           cy.get(INDEX_SELECTOR).click();
-          cy.get(CREATE_CONNECTOR_BTN).click();
+          cy.get(CREATE_ACTION_CONNECTOR_BTN).click();
           fillIndexConnectorForm(connector);
           break;
         case 'email':
@@ -338,29 +402,6 @@ export const fillRuleAction = (rule: CustomRule) => {
       }
     });
   }
-};
-
-export const fillDefineThresholdRule = (rule: ThresholdRule) => {
-  const thresholdField = 0;
-  const threshold = 1;
-
-  fillCustomQuery(rule);
-  cy.get(COMBO_BOX_CLEAR_BTN).first().click();
-
-  if (rule.dataSource.type === 'indexPatterns') {
-    rule.dataSource.index.forEach((index) => {
-      cy.get(COMBO_BOX_INPUT).first().type(`${index}{enter}`);
-    });
-  }
-
-  cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
-  cy.get(THRESHOLD_INPUT_AREA)
-    .find(INPUT)
-    .then((inputs) => {
-      cy.wrap(inputs[thresholdField]).type(rule.thresholdField);
-      cy.get(EUI_FILTER_SELECT_ITEM).click({ force: true });
-      cy.wrap(inputs[threshold]).clear().type(rule.threshold);
-    });
 };
 
 export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
@@ -487,31 +528,6 @@ export const fillIndexAndIndicatorIndexPattern = (
   getIndicatorIndicatorIndex().type(`{backspace}{enter}${indicatorIndex}{enter}`);
 };
 
-export const fillEmailConnectorForm = (connector: EmailConnector = getEmailConnector()) => {
-  cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
-  cy.get(EMAIL_CONNECTOR_SERVICE_SELECTOR).select(connector.service);
-  cy.get(EMAIL_CONNECTOR_FROM_INPUT).type(connector.from);
-  cy.get(EMAIL_CONNECTOR_HOST_INPUT).type(connector.host);
-  cy.get(EMAIL_CONNECTOR_PORT_INPUT).type(connector.port);
-  cy.get(EMAIL_CONNECTOR_USER_INPUT).type(connector.user);
-  cy.get(EMAIL_CONNECTOR_PASSWORD_INPUT).type(connector.password);
-};
-
-export const fillIndexConnectorForm = (connector: IndexConnector = getIndexConnector()) => {
-  cy.get(CONNECTOR_NAME_INPUT).type(connector.name);
-  cy.get(COMBO_BOX_INPUT).type(connector.index);
-
-  cy.get(COMBO_BOX_SELECTION).click({ force: true });
-
-  cy.get(SAVE_ACTION_CONNECTOR_BTN).click();
-  cy.get(SAVE_ACTION_CONNECTOR_BTN).should('not.exist');
-  cy.get(JSON_EDITOR).should('be.visible');
-  cy.get(JSON_EDITOR).click();
-  cy.get(JSON_EDITOR).type(connector.document, {
-    parseSpecialCharSequences: false,
-  });
-};
-
 /** Returns the indicator index drop down field. Pass in row number, default is 1 */
 export const getIndicatorIndexComboField = (row = 1) =>
   cy.get(THREAT_COMBO_BOX_INPUT).eq(row * 2 - 2);
@@ -540,7 +556,7 @@ export const getIndicatorAtLeastOneInvalidationText = () => cy.contains(AT_LEAST
 export const getIndexPatternInvalidationText = () => cy.contains(AT_LEAST_ONE_INDEX_PATTERN);
 
 /** Returns the continue button on the step of about */
-export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
+const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 
 /** Returns the continue button on the step of define */
 export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
@@ -631,10 +647,6 @@ export const selectNewTermsRuleType = () => {
   cy.get(NEW_TERMS_TYPE).click({ force: true });
 };
 
-export const previewResults = () => {
-  cy.get(QUERY_PREVIEW_BUTTON).click();
-};
-
 export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
   cy.waitUntil(
     () => {
@@ -678,3 +690,20 @@ export const checkLoadQueryDynamically = () => {
 export const uncheckLoadQueryDynamically = () => {
   cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).click({ force: true }).should('not.be.checked');
 };
+
+export const defineSection = { importSavedQuery };
+export const aboutSection = {
+  fillRuleName,
+  fillDescription,
+  fillSeverity,
+  fillRiskScore,
+  fillRuleTags,
+  expandAdvancedSettings,
+  fillReferenceUrls,
+  fillFalsePositiveExamples,
+  fillThreat,
+  fillThreatTechnique,
+  fillThreatSubtechnique,
+  fillNote,
+};
+export const scheduleSection = { fillFrom };

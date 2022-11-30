@@ -27,7 +27,7 @@ describe('Reindex deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
@@ -61,7 +61,7 @@ describe('Reindex deprecation flyout', () => {
     httpRequestsMockHelpers.setLoadNodeDiskSpaceResponse([]);
 
     await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup);
     });
 
     testBed.component.update();
@@ -81,7 +81,7 @@ describe('Reindex deprecation flyout', () => {
 
   it('renders error callout when reindex fails', async () => {
     await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup);
     });
 
     testBed.component.update();
@@ -107,7 +107,7 @@ describe('Reindex deprecation flyout', () => {
     });
 
     await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup);
     });
 
     testBed.component.update();
@@ -141,7 +141,7 @@ describe('Reindex deprecation flyout', () => {
       });
 
       await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(httpSetup);
       });
 
       testBed.component.update();
@@ -166,7 +166,7 @@ describe('Reindex deprecation flyout', () => {
       });
 
       await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(httpSetup);
       });
 
       testBed.component.update();
@@ -191,7 +191,7 @@ describe('Reindex deprecation flyout', () => {
       });
 
       await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(httpSetup);
       });
 
       testBed.component.update();
@@ -216,7 +216,7 @@ describe('Reindex deprecation flyout', () => {
       });
 
       await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(httpSetup);
       });
 
       const { actions, find, exists, component } = testBed;
@@ -251,7 +251,7 @@ describe('Reindex deprecation flyout', () => {
       ]);
 
       await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+        testBed = await setupElasticsearchPage(httpSetup);
       });
 
       testBed.component.update();

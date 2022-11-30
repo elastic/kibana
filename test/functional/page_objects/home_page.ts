@@ -45,6 +45,10 @@ export class HomePageObject extends FtrService {
     return await this.testSubjects.isDisplayed('homeWelcomeInterstitial');
   }
 
+  async isGuidedOnboardingLandingDisplayed() {
+    return await this.testSubjects.isDisplayed('onboarding--landing-page');
+  }
+
   async getVisibileSolutions() {
     const solutionPanels = await this.testSubjects.findAll('~homSolutionPanel', 2000);
     const panelAttributes = await Promise.all(
@@ -131,7 +135,12 @@ export class HomePageObject extends FtrService {
   async launchSampleDataSet(id: string) {
     await this.addSampleDataSet(id);
     await this.common.closeToastIfExists();
-    await this.testSubjects.click(`launchSampleDataSet${id}`);
+    await this.retry.try(async () => {
+      await this.testSubjects.click(`launchSampleDataSet${id}`);
+      await this.find.byCssSelector(
+        `.euiPopover-isOpen[data-test-subj="launchSampleDataSet${id}"]`
+      );
+    });
   }
 
   async clickAllKibanaPlugins() {

@@ -6,14 +6,18 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { waitFor, act, render, screen } from '@testing-library/react';
 import { EuiSelect } from '@elastic/eui';
+import userEvent from '@testing-library/user-event';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { connector, choices as mockChoices } from '../mock';
-import { Choice } from './types';
+import type { Choice } from './types';
 import Fields from './servicenow_sir_case_fields';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
 
 let onChoicesSuccess = (_c: Choice[]) => {};
 
@@ -26,6 +30,7 @@ jest.mock('./use_get_choices', () => ({
 }));
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+let mockedContext: AppMockRenderer;
 
 describe('ServiceNowSIR Fields', () => {
   const fields = {
@@ -41,6 +46,7 @@ describe('ServiceNowSIR Fields', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedContext = createAppMockRenderer();
     useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
       actionTypeTitle: '.servicenow-sir',
       iconClass: 'logoSecurity',
@@ -280,6 +286,59 @@ describe('ServiceNowSIR Fields', () => {
           category: 'network',
         });
       });
+    });
+  });
+
+  it('should submit servicenow sir connector', async () => {
+    const { rerender } = mockedContext.render(
+      <Fields fields={fields} onChange={onChange} connector={connector} />
+    );
+
+    act(() => {
+      onChoicesSuccess(mockChoices);
+    });
+
+    userEvent.click(screen.getByTestId('destIpCheckbox'));
+
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: '1 - Critical' }));
+      expect(screen.getByRole('option', { name: 'Denial of Service' }));
+    });
+
+    userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['1']);
+
+    rerender(
+      <Fields fields={{ ...fields, priority: '1' }} onChange={onChange} connector={connector} />
+    );
+
+    userEvent.selectOptions(screen.getByTestId('categorySelect'), ['Denial of Service']);
+
+    rerender(
+      <Fields
+        fields={{ ...fields, priority: '1', category: 'Denial of Service' }}
+        onChange={onChange}
+        connector={connector}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: 'Single or distributed (DoS or DDoS)' }));
+    });
+
+    userEvent.selectOptions(screen.getByTestId('subcategorySelect'), ['26']);
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalled();
+    });
+
+    expect(onChange).toBeCalledWith({
+      destIp: false,
+      sourceIp: true,
+      malwareHash: true,
+      malwareUrl: true,
+      priority: '1',
+      category: 'Denial of Service',
+      subcategory: '26',
     });
   });
 });

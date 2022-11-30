@@ -288,6 +288,17 @@ export interface CreateEndpointListItemOptions {
 }
 
 /**
+ * ExceptionListClient.duplicateExceptionListAndItems
+ * {@link ExceptionListClient.duplicateExceptionListAndItems}
+ */
+export interface DuplicateExceptionListOptions {
+  /** The single list id to do the search against */
+  listId: ListId;
+  /** saved object namespace (single | agnostic) */
+  namespaceType: NamespaceType;
+}
+
+/**
  * ExceptionListClient.updateExceptionListItem
  * {@link ExceptionListClient.updateExceptionListItem}
  */
@@ -502,6 +513,7 @@ export interface ImportExceptionListAndItemsOptions {
   maxExceptionsImportSize: number;
   /** whether or not to overwrite an exception list with imported list if a matching list_id found */
   overwrite: boolean;
+  generateNewListId: boolean;
 }
 
 /**

@@ -13,6 +13,7 @@ import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { ChangeDataView } from './change_dataview';
 import { DataViewPickerPropsExtended, TextBasedLanguages } from '.';
 
@@ -44,6 +45,8 @@ describe('DataView component', () => {
     storageValue: boolean,
     uiSettingValue: boolean = false
   ) {
+    const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
+    (dataViewEditorMock.userPermissions.editDataView as jest.Mock).mockReturnValue(true);
     let dataMock = dataPluginMock.createStartContract();
     dataMock = {
       ...dataMock,
@@ -56,6 +59,7 @@ describe('DataView component', () => {
     const services = {
       data: dataMock,
       storage: getStorage(storageValue),
+      dataViewEditor: dataViewEditorMock,
       uiSettings: {
         get: jest.fn(() => uiSettingValue),
       },

@@ -12,7 +12,13 @@
         "description": [],
         "signature": [
           "(core: ",
-          "CoreSetup",
+          {
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreSetup",
+            "text": "CoreSetup"
+          },
           "<object, unknown>) => () => ",
           {
             "pluginId": "expressions",
@@ -35,7 +41,13 @@
             "label": "core",
             "description": [],
             "signature": [
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<object, unknown>"
             ],
             "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx",
@@ -56,7 +68,13 @@
         "description": [],
         "signature": [
           "(core: ",
-          "CoreSetup",
+          {
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-common.CoreSetup",
+            "text": "CoreSetup"
+          },
           "<object, unknown>) => () => ",
           {
             "pluginId": "expressions",
@@ -81,7 +99,13 @@
             "label": "core",
             "description": [],
             "signature": [
-              "CoreSetup",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
               "<object, unknown>"
             ],
             "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx",
@@ -104,7 +128,13 @@
           "(theme$?: ",
           "Observable",
           "<",
-          "CoreTheme",
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-common.CoreTheme",
+            "text": "CoreTheme"
+          },
           ">) => () => ",
           {
             "pluginId": "expressions",
@@ -129,7 +159,13 @@
             "signature": [
               "Observable",
               "<",
-              "CoreTheme",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
+                "text": "CoreTheme"
+              },
               ">"
             ],
             "path": "src/plugins/expression_error/public/expression_renderers/debug_renderer.tsx",
@@ -152,7 +188,13 @@
           "(theme$?: ",
           "Observable",
           "<",
-          "CoreTheme",
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-common.CoreTheme",
+            "text": "CoreTheme"
+          },
           ">) => () => ",
           {
             "pluginId": "expressions",
@@ -179,7 +221,13 @@
             "signature": [
               "Observable",
               "<",
-              "CoreTheme",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
+                "text": "CoreTheme"
+              },
               ">"
             ],
             "path": "src/plugins/expression_error/public/expression_renderers/error_renderer.tsx",

@@ -6,8 +6,8 @@
  */
 
 import * as t from 'io-ts';
+import Boom from '@hapi/boom';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
-import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { kueryRt, rangeRt } from '../default_api_types';
 import { getServiceGroups } from './get_service_groups';
@@ -15,8 +15,12 @@ import { getServiceGroup } from './get_service_group';
 import { saveServiceGroup } from './save_service_group';
 import { deleteServiceGroup } from './delete_service_group';
 import { lookupServices } from './lookup_services';
-import { SavedServiceGroup } from '../../../common/service_groups';
+import {
+  validateServiceGroupKuery,
+  SavedServiceGroup,
+} from '../../../common/service_groups';
 import { getServicesCounts } from './get_services_counts';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const serviceGroupsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-groups',
@@ -57,7 +61,7 @@ const serviceGroupsWithServiceCountRoute = createApmServerRoute({
       query: { start, end },
     } = params;
 
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const serviceGroups = await getServiceGroups({
       savedObjectsClient,
@@ -65,7 +69,7 @@ const serviceGroupsWithServiceCountRoute = createApmServerRoute({
 
     return {
       servicesCounts: await getServicesCounts({
-        setup,
+        apmEventClient,
         serviceGroups,
         start,
         end,
@@ -120,6 +124,12 @@ const serviceGroupSaveRoute = createApmServerRoute({
     const {
       savedObjects: { client: savedObjectsClient },
     } = await context.core;
+    const { isValidFields, isValidSyntax, message } = validateServiceGroupKuery(
+      params.body.kuery
+    );
+    if (!(isValidFields && isValidSyntax)) {
+      throw Boom.badRequest(message);
+    }
 
     await saveServiceGroup({
       savedObjectsClient,
@@ -164,12 +174,12 @@ const serviceGroupServicesRoute = createApmServerRoute({
     const {
       uiSettings: { client: uiSettingsClient },
     } = await context.core;
-    const [setup, maxNumberOfServices] = await Promise.all([
-      setupRequest(resources),
+    const [apmEventClient, maxNumberOfServices] = await Promise.all([
+      getApmEventClient(resources),
       uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
     ]);
     const items = await lookupServices({
-      setup,
+      apmEventClient,
       kuery,
       start,
       end,

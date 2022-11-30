@@ -18,6 +18,7 @@ import { ThemeProvider } from 'styled-components';
 import type { Capabilities } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 import { ConsoleManager } from '../../management/components/console';
 import type { State } from '../store';
 import { createStore } from '../store';
@@ -52,7 +53,13 @@ const { storage } = createSecuritySolutionStorageMock();
 /** A utility for wrapping children in the providers required to run most tests */
 export const TestProvidersComponent: React.FC<Props> = ({
   children,
-  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
+  store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  ),
   onDragEnd = jest.fn(),
 }) => {
   const queryClient = new QueryClient();
@@ -79,7 +86,13 @@ export const TestProvidersComponent: React.FC<Props> = ({
  */
 const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
   children,
-  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
+  store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  ),
   onDragEnd = jest.fn(),
 }) => (
   <I18nProvider>

@@ -40,6 +40,7 @@ describe('ESGeoGridSource', () => {
   const mockIndexPatternService = {
     get() {
       return {
+        getIndexPattern: () => 'foo-*',
         fields: {
           getByName() {
             return {
@@ -310,7 +311,7 @@ describe('ESGeoGridSource', () => {
       const tileUrl = await mvtGeogridSource.getTileUrl(vectorSourceRequestMeta, '1234', false);
 
       expect(tileUrl).toEqual(
-        "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=undefined&gridPrecision=8&hasLabels=false&requestBody=(foobar%3AES_DSL_PLACEHOLDER%2Cparams%3A('0'%3A('0'%3Aindex%2C'1'%3A(fields%3A()))%2C'1'%3A('0'%3Asize%2C'1'%3A0)%2C'2'%3A('0'%3Afilter%2C'1'%3A!())%2C'3'%3A('0'%3Aquery)%2C'4'%3A('0'%3Aindex%2C'1'%3A(fields%3A()))%2C'5'%3A('0'%3Aquery%2C'1'%3A(language%3AKQL%2Cquery%3A''))%2C'6'%3A('0'%3Aaggs%2C'1'%3A())))&renderAs=heatmap&token=1234"
+        "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=foo-*&gridPrecision=8&hasLabels=false&requestBody=(foobar%3AES_DSL_PLACEHOLDER%2Cparams%3A('0'%3A('0'%3Aindex%2C'1'%3A(fields%3A()))%2C'1'%3A('0'%3Asize%2C'1'%3A0)%2C'2'%3A('0'%3Afilter%2C'1'%3A!())%2C'3'%3A('0'%3Aquery)%2C'4'%3A('0'%3Aindex%2C'1'%3A(fields%3A()))%2C'5'%3A('0'%3Aquery%2C'1'%3A(language%3AKQL%2Cquery%3A''))%2C'6'%3A('0'%3Aaggs%2C'1'%3A())))&renderAs=heatmap&token=1234"
       );
     });
   });

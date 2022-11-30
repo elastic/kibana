@@ -7,17 +7,33 @@
 import { createAction } from '@reduxjs/toolkit';
 import { createAsyncAction } from '../utils/actions';
 
-import { MonitorOverviewPageState } from './models';
-import { MonitorOverviewResult } from '../../../../../common/runtime_types';
+import { MonitorOverviewFlyoutConfig, MonitorOverviewPageState } from './models';
+import { MonitorOverviewResult, OverviewStatus } from '../../../../../common/runtime_types';
 
 export const fetchMonitorOverviewAction = createAsyncAction<
   MonitorOverviewPageState,
   MonitorOverviewResult
 >('fetchMonitorOverviewAction');
 
-export const setOverviewPerPageAction = createAction<number>('setOverviewPerPageAction');
+export const setOverviewPageStateAction = createAction<Partial<MonitorOverviewPageState>>(
+  'setOverviewPageStateAction'
+);
+
+export const setFlyoutConfig = createAction<MonitorOverviewFlyoutConfig>('setFlyoutConfig');
 
 export const quietFetchOverviewAction = createAsyncAction<
   MonitorOverviewPageState,
   MonitorOverviewResult
 >('quietFetchOverviewAction');
+
+export const fetchOverviewStatusAction = createAsyncAction<
+  MonitorOverviewPageState,
+  OverviewStatus
+>('fetchOverviewStatusAction');
+
+export const quietFetchOverviewStatusAction = createAsyncAction<
+  MonitorOverviewPageState,
+  OverviewStatus
+>('quietFetchOverviewStatusAction');
+
+export const clearOverviewStatusErrorAction = createAction<void>('clearOverviewStatusErrorAction');

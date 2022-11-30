@@ -15,3 +15,4 @@ export type { ConfigFieldSchema, SecretsFieldSchema } from './simple_connector_f
 export { ButtonGroupField } from './button_group_field';
 export { JsonFieldWrapper } from './json_field_wrapper';
 export { MustacheTextFieldWrapper } from './mustache_text_field_wrapper';
+export { SectionLoading } from './section_loading';

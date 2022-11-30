@@ -9,7 +9,7 @@ import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/typesWithB
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { createUptimeESClient, UptimeESClient } from '../lib';
+import { createUptimeESClient, UptimeEsClient } from '../lib';
 
 export interface MultiPageCriteria<K, T> {
   after_key?: K;
@@ -59,7 +59,7 @@ export const setupMockEsCompositeQuery = <K, C, I>(
 
 interface UptimeEsMockClient {
   esClient: ElasticsearchClientMock;
-  uptimeEsClient: UptimeESClient;
+  uptimeEsClient: UptimeEsClient;
 }
 
 export const getUptimeESMockClient = (
@@ -81,7 +81,7 @@ export const getUptimeESMockClient = (
 export function mockSearchResult(
   data: unknown,
   aggregations: Record<string, AggregationsAggregate> = {}
-): UptimeESClient {
+): UptimeEsClient {
   const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
   mockEsClient.search.mockResponse({

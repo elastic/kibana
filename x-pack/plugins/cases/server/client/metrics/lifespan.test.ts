@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
-import { CaseStatuses, CaseUserActionResponse } from '../../../common/api';
+import type { SavedObject } from '@kbn/core/server';
+import type { CaseUserActionResponse } from '../../../common/api';
+import { CaseStatuses } from '../../../common/api';
 import { getStatusInfo } from './lifespan';
 
 describe('lifespan', () => {
   describe('getStatusInfo', () => {
     beforeEach(() => {
-      jest.useFakeTimers('modern');
+      jest.useFakeTimers();
     });
 
     afterEach(() => {

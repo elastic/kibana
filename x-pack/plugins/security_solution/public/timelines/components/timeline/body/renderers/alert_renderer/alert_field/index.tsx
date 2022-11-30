@@ -23,7 +23,7 @@ interface Props {
   isDraggable: boolean;
   prefix?: React.ReactNode;
   suffix?: React.ReactNode;
-  timelineId: string;
+  scopeId: string;
   values: string[] | number[] | null | undefined;
 }
 
@@ -37,14 +37,14 @@ const AlertFieldComponent: React.FC<Props> = ({
   isDraggable,
   prefix,
   suffix,
-  timelineId,
+  scopeId,
   values,
 }) =>
   values != null ? (
     <AlertFieldFlexGroup
       alignItems="center"
       data-test-subj={dataTestSubj}
-      $timelineId={timelineId}
+      $scopeId={scopeId}
       gutterSize="none"
     >
       {prefix != null && (
@@ -62,7 +62,7 @@ const AlertFieldComponent: React.FC<Props> = ({
             isAggregatable={isAggregatable}
             isDraggable={isDraggable}
             showSeparator={i < values.length - 1}
-            timelineId={timelineId}
+            scopeId={scopeId}
             value={x}
           />
         </EuiFlexItem>

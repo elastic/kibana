@@ -175,10 +175,18 @@ export class TrustedAppValidator extends BaseValidator {
     return item.listId === ENDPOINT_TRUSTED_APPS_LIST_ID;
   }
 
+  protected async validateHasWritePrivilege(): Promise<void> {
+    return super.validateHasPrivilege('canWriteTrustedApplications');
+  }
+
+  protected async validateHasReadPrivilege(): Promise<void> {
+    return super.validateHasPrivilege('canReadTrustedApplications');
+  }
+
   async validatePreCreateItem(
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasWritePrivilege();
     await this.validateTrustedAppData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
     await this.validateByPolicyItem(item);
@@ -187,27 +195,27 @@ export class TrustedAppValidator extends BaseValidator {
   }
 
   async validatePreDeleteItem(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasWritePrivilege();
   }
 
   async validatePreGetOneItem(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreMultiListFind(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreExport(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreSingleListFind(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreGetListSummary(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreUpdateItem(
@@ -216,7 +224,7 @@ export class TrustedAppValidator extends BaseValidator {
   ): Promise<UpdateExceptionListItemOptions> {
     const updatedItem = _updatedItem as ExceptionItemLikeOptions;
 
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasWritePrivilege();
     await this.validateTrustedAppData(updatedItem);
 
     try {

@@ -29,10 +29,12 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
       <EuiEmptyPrompt
         actions={
           <EuiButton
+            color="primary"
             data-test-subj="newItemButton"
             fill={true}
             iconType="plusInCircle"
             onClick={[Function]}
+            size="m"
           >
             Create a dashboard
           </EuiButton>
@@ -122,10 +124,12 @@ exports[`after fetch initialFilter 1`] = `
       <EuiEmptyPrompt
         actions={
           <EuiButton
+            color="primary"
             data-test-subj="newItemButton"
             fill={true}
             iconType="plusInCircle"
             onClick={[Function]}
+            size="m"
           >
             Create a dashboard
           </EuiButton>
@@ -214,10 +218,12 @@ exports[`after fetch renders all table rows 1`] = `
       <EuiEmptyPrompt
         actions={
           <EuiButton
+            color="primary"
             data-test-subj="newItemButton"
             fill={true}
             iconType="plusInCircle"
             onClick={[Function]}
+            size="m"
           >
             Create a dashboard
           </EuiButton>
@@ -306,10 +312,12 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
       <EuiEmptyPrompt
         actions={
           <EuiButton
+            color="primary"
             data-test-subj="newItemButton"
             fill={true}
             iconType="plusInCircle"
             onClick={[Function]}
+            size="m"
           >
             Create a dashboard
           </EuiButton>
@@ -426,6 +434,7 @@ exports[`after fetch renders call to action with continue when no dashboards exi
                 fill={true}
                 iconType="pencil"
                 onClick={[Function]}
+                size="m"
               >
                 Continue editing
               </EuiButton>

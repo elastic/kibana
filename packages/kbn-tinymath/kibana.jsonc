@@ -1,7 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/tinymath",
-  "owner": "@elastic/kibana-vis-editors",
+  "owner": "@elastic/kibana-visualizations",
   "runtimeDeps": [],
   "typeDeps": []
 }

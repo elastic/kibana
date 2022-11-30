@@ -15,16 +15,16 @@ import React, { Suspense } from 'react';
 import { memoize } from 'lodash';
 
 import { EuiCallOut, EuiCode, EuiLoadingSpinner } from '@elastic/eui';
-import { AttachmentType } from '../../../client/attachment_framework/types';
-import { AttachmentTypeRegistry } from '../../../../common/registry';
-import { CommentResponse } from '../../../../common/api';
-import { UserActionBuilder, UserActionBuilderArgs } from '../types';
+import type { AttachmentType } from '../../../client/attachment_framework/types';
+import type { AttachmentTypeRegistry } from '../../../../common/registry';
+import type { CommentResponse } from '../../../../common/api';
+import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
-import { SnakeToCamelCase } from '../../../../common/types';
+import type { SnakeToCamelCase } from '../../../../common/types';
 import { ATTACHMENT_NOT_REGISTERED_ERROR, DEFAULT_EVENT_ATTACHMENT_TITLE } from './translations';
 import { UserActionContentToolbar } from '../content_toolbar';
-import * as i18n from '../translations';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
+import { RegisteredAttachmentsPropertyActions } from '../property_actions/registered_attachments_property_actions';
 
 type BuilderArgs<C, R> = Pick<
   UserActionBuilderArgs,
@@ -123,17 +123,13 @@ export const createRegisteredAttachmentUserActionBuilder = <
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
         timelineAvatar: attachmentViewObject.timelineAvatar,
         actions: (
-          <>
-            <UserActionContentToolbar
-              actions={['delete']}
-              id={comment.id}
-              deleteLabel={i18n.DELETE_COMMENT}
-              deleteConfirmTitle={i18n.DELETE_COMMENT_TITLE}
+          <UserActionContentToolbar id={comment.id}>
+            {attachmentViewObject.actions}
+            <RegisteredAttachmentsPropertyActions
               isLoading={isLoading}
               onDelete={() => handleDeleteComment(comment.id)}
-              extraActions={attachmentViewObject.actions}
             />
-          </>
+          </UserActionContentToolbar>
         ),
         children: renderer(props),
       },

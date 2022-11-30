@@ -8,7 +8,7 @@
 import { get, omit } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import {
+import type {
   SavedObject,
   SavedObjectReference,
   SavedObjectsFindResponse,
@@ -16,16 +16,13 @@ import {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import {
-  Actions,
-  ActionTypes,
+import type {
   CaseAttributes,
-  CaseSeverity,
-  CaseStatuses,
   CaseUserActionAttributes,
   ConnectorUserAction,
   UserAction,
 } from '../../../common/api';
+import { Actions, ActionTypes, CaseSeverity, CaseStatuses } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -59,10 +56,10 @@ import {
   updatedTagsCases,
 } from './mocks';
 import { CaseUserActionService, transformFindResponseToExternalModel } from '.';
-import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import {
   externalReferenceAttachmentSO,
-  getPersistableStateAttachmentTypeRegistry,
+  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
 } from '../../attachment_framework/mocks';
 
@@ -308,10 +305,10 @@ const testConnectorId = (
 };
 
 describe('CaseUserActionService', () => {
-  const persistableStateAttachmentTypeRegistry = getPersistableStateAttachmentTypeRegistry();
+  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
 
   beforeAll(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
   });
 

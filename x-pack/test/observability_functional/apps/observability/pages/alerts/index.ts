@@ -85,6 +85,13 @@ export default ({ getService }: FtrProviderContext) => {
           await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.status-');
         });
 
+        it('Invalid input should not break the page', async () => {
+          await observability.alerts.common.submitQuery('""""');
+          await testSubjects.existOrFail('errorToastMessage');
+          // Page should not go blank with invalid input
+          await testSubjects.existOrFail('alertsPageWithData');
+        });
+
         it('Applies filters correctly', async () => {
           await observability.alerts.common.submitQuery('kibana.alert.status: recovered');
           await retry.try(async () => {
@@ -231,15 +238,6 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      /*
-       * ATTENTION FUTURE DEVELOPER
-       *
-       * These tests should only be valid for 7.17.x
-       * You can run this test if you go to this file:
-       * x-pack/plugins/observability/public/pages/alerts/containers/alerts_table_t_grid/alerts_table_t_grid.tsx
-       * and at line 397 and change showCheckboxes to true
-       *
-       */
       describe.skip('Bulk Actions', () => {
         before(async () => {
           await security.testUser.setRoles(['global_alerts_logs_all_else_read']);

@@ -49,6 +49,9 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./bulk_edit'));
     loadTestFile(require.resolve('./capped_action_type'));
     loadTestFile(require.resolve('./scheduled_task_id'));
+    loadTestFile(require.resolve('./run_soon'));
+    loadTestFile(require.resolve('./flapping_history'));
+    loadTestFile(require.resolve('./check_registered_rule_types'));
     // Do not place test files here, due to https://github.com/elastic/kibana/issues/123059
 
     // note that this test will destroy existing spaces

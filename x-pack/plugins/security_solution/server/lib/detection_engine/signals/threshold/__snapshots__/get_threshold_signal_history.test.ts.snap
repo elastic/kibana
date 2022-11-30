@@ -17,7 +17,7 @@ Object {
           },
           Object {
             "term": Object {
-              "signal.rule.rule_id": "threshold-rule",
+              "kibana.alert.rule.uuid": "threshold-rule",
             },
           },
           Object {
@@ -64,13 +64,13 @@ Object {
         ],
       },
     },
+    "size": 10000,
     "sort": Array [
       Object {
         "@timestamp": "desc",
       },
     ],
   },
-  "size": 10000,
 }
 `;
 
@@ -91,7 +91,7 @@ Object {
           },
           Object {
             "term": Object {
-              "signal.rule.rule_id": "threshold-rule",
+              "kibana.alert.rule.uuid": "threshold-rule",
             },
           },
           Object {
@@ -104,12 +104,12 @@ Object {
         ],
       },
     },
+    "size": 10000,
     "sort": Array [
       Object {
         "@timestamp": "desc",
       },
     ],
   },
-  "size": 10000,
 }
 `;

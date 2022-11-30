@@ -1,24 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`checking if the page should be visible (based on indicator count) when indicator count is being loaded should render nothing at all: loading 1`] = `
-<DocumentFragment>
-  <span
-    aria-label="Loading"
-    class="euiLoadingLogo emotion-euiLoadingLogo-xl"
-    role="progressbar"
-  >
-    <span
-      class="emotion-euiLoadingLogo__icon"
-    >
-      <span
-        data-euiicon-type="logoSecurity"
-      />
-    </span>
-  </span>
-</DocumentFragment>
-`;
-
-exports[`checking if the page should be visible (based on indicator count) when indicator count is loaded and there are no indicators should render empty page when no indicators are found: no indicators 1`] = `
+exports[`IntegrationsGuard should render empty page when no indicators are found and no ti integrations are installed 1`] = `
 <DocumentFragment>
   <div
     class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--horizontal euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
@@ -92,23 +74,18 @@ exports[`checking if the page should be visible (based on indicator count) when 
             class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
           <button
-            class="euiButton euiButton--primary euiButton--fill"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
             data-test-subj="tiEmptyPageIntegrationsPageLink"
             type="button"
           >
             <span
-              class="euiButtonContent euiButton__content"
+              class="emotion-euiButtonDisplayContent"
             >
               <span
-                class="euiButtonContent__icon"
                 color="inherit"
                 data-euiicon-type="plusInCircle"
               />
-              <span
-                class="euiButton__text"
-              >
-                Add Integrations
-              </span>
+              Add Integrations
             </span>
           </button>
         </div>
@@ -118,8 +95,68 @@ exports[`checking if the page should be visible (based on indicator count) when 
 </DocumentFragment>
 `;
 
-exports[`checking if the page should be visible (based on indicator count) when loading is done and we have some indicators should render indicators table: indicators are present 1`] = `
+exports[`IntegrationsGuard should render indicators page when we have some ti integrations installed 1`] = `
 <DocumentFragment>
   should be restricted
+</DocumentFragment>
+`;
+
+exports[`IntegrationsGuard should render indicators table when we have some indicators 1`] = `
+<DocumentFragment>
+  should be restricted
+</DocumentFragment>
+`;
+
+exports[`IntegrationsGuard should render loading when indicator count and integrations are being loaded 1`] = `
+<DocumentFragment>
+  <span
+    aria-label="Loading"
+    class="euiLoadingLogo emotion-euiLoadingLogo-xl"
+    role="progressbar"
+  >
+    <span
+      class="emotion-euiLoadingLogo__icon"
+    >
+      <span
+        data-euiicon-type="logoSecurity"
+      />
+    </span>
+  </span>
+</DocumentFragment>
+`;
+
+exports[`IntegrationsGuard should render loading when indicator only is loading 1`] = `
+<DocumentFragment>
+  <span
+    aria-label="Loading"
+    class="euiLoadingLogo emotion-euiLoadingLogo-xl"
+    role="progressbar"
+  >
+    <span
+      class="emotion-euiLoadingLogo__icon"
+    >
+      <span
+        data-euiicon-type="logoSecurity"
+      />
+    </span>
+  </span>
+</DocumentFragment>
+`;
+
+exports[`IntegrationsGuard should render loading when integrations only are loading 1`] = `
+<DocumentFragment>
+  <span
+    aria-label="Loading"
+    class="euiLoadingLogo emotion-euiLoadingLogo-xl"
+    role="progressbar"
+  >
+    <span
+      class="emotion-euiLoadingLogo__icon"
+    >
+      <span
+        data-euiicon-type="logoSecurity"
+      />
+    </span>
+  </span>
 </DocumentFragment>
 `;

@@ -18,9 +18,9 @@ import { useNavigation } from '../../../lib/kibana/hooks';
 import type { NavTab } from '../types';
 import { SecurityNavGroupKey } from '../types';
 import { SecurityPageName } from '../../../../../common/constants';
-import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useGlobalQueryString } from '../../../utils/global_query_string';
+import { useUserPrivileges } from '../../user_privileges';
 
 export const usePrimaryNavigationItems = ({
   navTabs,
@@ -70,7 +70,8 @@ export const usePrimaryNavigationItems = ({
 
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions().read;
-  const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
+  const { canReadActionsLogManagement, canReadHostIsolationExceptions } =
+    useUserPrivileges().endpointPrivileges;
   const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
 
   const uiCapabilities = useKibana().services.application.capabilities;
@@ -130,15 +131,18 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
             {
               ...securityNavGroup[SecurityNavGroupKey.manage],
               items: [
+                // TODO: also hide other management pages based on authz privileges
                 navTabs[SecurityPageName.endpoints],
                 ...(isPolicyListEnabled ? [navTabs[SecurityPageName.policies]] : []),
                 navTabs[SecurityPageName.trustedApps],
                 navTabs[SecurityPageName.eventFilters],
-                ...(canSeeHostIsolationExceptions
+                ...(canReadHostIsolationExceptions
                   ? [navTabs[SecurityPageName.hostIsolationExceptions]]
                   : []),
                 navTabs[SecurityPageName.blocklist],
-                navTabs[SecurityPageName.responseActionsHistory],
+                ...(canReadActionsLogManagement
+                  ? [navTabs[SecurityPageName.responseActionsHistory]]
+                  : []),
                 navTabs[SecurityPageName.cloudSecurityPostureBenchmarks],
               ],
             },
@@ -155,7 +159,8 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
       uiCapabilities.siem.show,
       navTabs,
       hasCasesReadPermissions,
-      canSeeHostIsolationExceptions,
+      canReadHostIsolationExceptions,
+      canReadActionsLogManagement,
       isPolicyListEnabled,
     ]
   );

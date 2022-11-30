@@ -1,0 +1,61 @@
+get:
+  summary: Fleet Proxies - List
+  description: Return a list of Proxies
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  $ref: ../components/schemas/proxies.yaml
+              total:
+                type: integer
+              page:
+                type: integer
+              perPage:
+                type: integer
+  operationId: get-fleet-proxies
+post:
+  summary: Fleet Proxies - Create
+  description: 'Create a new Fleet Server Host'
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              item:
+                $ref: ../components/schemas/proxies.yaml
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            url:
+              type: string
+            proxy_headers:
+              type: object
+            certificate_authorities:
+              type: string
+            certificate:
+              type: string
+            certificate_key:
+              type: string
+          required:
+            - name
+            - url
+  operationId: post-fleet-proxies

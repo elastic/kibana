@@ -18,6 +18,7 @@ const ROOT_FIELDS = [
   'migrationVersion',
   'coreMigrationVersion',
   'updated_at',
+  'created_at',
   'originId',
 ];
 

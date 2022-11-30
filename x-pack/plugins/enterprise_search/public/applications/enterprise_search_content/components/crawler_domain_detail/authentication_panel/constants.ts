@@ -15,6 +15,6 @@ export const AUTHENTICATION_LABELS = {
     }
   ),
   raw: i18n.translate('xpack.enterpriseSearch.crawler.authenticationPanel.rawAuthenticationLabel', {
-    defaultMessage: 'Bearer authentication',
+    defaultMessage: 'Authentication header',
   }),
 };

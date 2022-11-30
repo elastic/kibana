@@ -5,10 +5,14 @@
  * 2.0.
  */
 import { get } from 'lodash';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { AlertingBuiltinsPlugin } from './plugin';
-import { configSchema, Config } from '../common/config';
-export { ID as INDEX_THRESHOLD_ID } from './alert_types/index_threshold/alert_type';
+export { ID as INDEX_THRESHOLD_ID } from './rule_types/index_threshold/rule_type';
+
+export const configSchema = schema.object({});
+
+export type Config = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<Config> = {
   exposeToBrowser: {},

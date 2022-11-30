@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButtonIcon, EuiButtonIconColor } from '@elastic/eui';
+import { EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
 
 import { ResultActions } from './result_actions';
 
@@ -19,7 +19,7 @@ describe('ResultActions', () => {
       title: 'Hide',
       onClick: jest.fn(),
       iconType: 'eyeClosed',
-      iconColor: 'danger' as EuiButtonIconColor,
+      iconColor: 'danger' as EuiButtonIconProps['color'],
     },
     {
       title: 'Bookmark',

@@ -6,7 +6,7 @@
 
 The {sn-itsm} connector uses the
 https://developer.servicenow.com/dev.do#!/reference/api/sandiego/rest/c_ImportSetAPI[import set API]
-to create {sn} incidents.
+to create {sn} incidents. You can use the connector for rule actions and cases.
 
 [float]
 [[servicenow-itsm-connector-prerequisites]]
@@ -166,7 +166,7 @@ IMPORTANT: Deprecated connectors will continue to function with the rules they w
 
 To update a deprecated connector:
 
-. Open the main menu and go to *Stack Management -> Rules and connectors -> Connectors*.
+. Open the main menu and go to *{stack-manage-app} > {connectors-ui}*.
 . Select the deprecated connector to open the *Edit connector* flyout.
 . In the warning message, click *Update this connector*.
 . Complete the guided steps in the *Edit connector* flyout.
@@ -181,7 +181,7 @@ To update a deprecated connector:
 
 {sn-itsm} connectors have the following configuration properties.
 
-Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
+Name::      The name of the connector.
 Is OAuth::  The type of authentication to use.
 URL::       {sn} instance URL.
 Username::  Username for HTTP Basic authentication.
@@ -257,7 +257,7 @@ Secrets defines sensitive information for the connector type.
 
 [float]
 [[define-servicenow-ui]]
-=== Define connector in Stack Management
+=== Define connector in {stack-manage-app}
 
 Define {sn-itsm} connector properties. Choose whether to use OAuth for authentication.
 

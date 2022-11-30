@@ -8,13 +8,3 @@
 import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 
 export const mlServicesMock = mlPluginServerMock;
-
-const mockValidateRuleType = jest.fn().mockResolvedValue({ valid: true, message: undefined });
-const createBuildMlAuthzMock = () =>
-  jest.fn().mockReturnValue({ validateRuleType: mockValidateRuleType });
-
-export const mlAuthzMock = {
-  create: () => ({
-    buildMlAuthz: createBuildMlAuthzMock(),
-  }),
-};

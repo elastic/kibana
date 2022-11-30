@@ -24,6 +24,7 @@ import type {
 } from '@testing-library/react-hooks/src/types/react';
 import type { UseBaseQueryResult } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 import { ConsoleManager } from '../../../management/components/console';
 import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
@@ -204,10 +205,14 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     app: experimentalFeaturesReducer,
   };
 
-  const store = createStore(mockGlobalState, storeReducer, kibanaObservable, storage, [
-    ...managementMiddlewareFactory(coreStart, depsStart),
-    middlewareSpy.actionSpyMiddleware,
-  ]);
+  const store = createStore(
+    mockGlobalState,
+    storeReducer,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage,
+    [...managementMiddlewareFactory(coreStart, depsStart), middlewareSpy.actionSpyMiddleware]
+  );
 
   const queryClient = new QueryClient({
     defaultOptions: {

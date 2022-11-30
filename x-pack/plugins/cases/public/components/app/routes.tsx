@@ -13,7 +13,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { AllCases } from '../all_cases';
 import { CreateCase } from '../create';
 import { ConfigureCases } from '../configure_cases';
-import { CasesRoutesProps } from './types';
+import type { CasesRoutesProps } from './types';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import {
   getCasesConfigurePath,

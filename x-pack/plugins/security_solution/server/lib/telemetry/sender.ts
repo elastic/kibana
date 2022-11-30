@@ -19,7 +19,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { ITelemetryReceiver } from './receiver';
-import { copyAllowlistedFields, endpointAllowlistFields } from './filterlists';
+import { copyAllowlistedFields, filterList } from './filterlists';
 import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel, tlog } from './helpers';
 import type { TelemetryEvent } from './types';
@@ -299,7 +299,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
   public processEvents(events: TelemetryEvent[]): TelemetryEvent[] {
     return events.map(function (obj: TelemetryEvent): TelemetryEvent {
-      return copyAllowlistedFields(endpointAllowlistFields, obj);
+      return copyAllowlistedFields(filterList.endpointAlerts, obj);
     });
   }
 

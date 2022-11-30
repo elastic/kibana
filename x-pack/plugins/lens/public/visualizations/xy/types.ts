@@ -36,7 +36,8 @@ import {
 } from '@kbn/chart-icons';
 
 import { DistributiveOmit } from '@elastic/eui';
-import type { VisualizationType, Suggestion } from '../../types';
+import { CollapseFunction } from '../../../common/expressions';
+import type { VisualizationType } from '../../types';
 import type { ValueLabelConfig } from '../../../common/types';
 
 export const YAxisModes = {
@@ -99,7 +100,7 @@ export interface XYDataLayerConfig {
   yConfig?: YConfig[];
   splitAccessor?: string;
   palette?: PaletteOutput;
-  collapseFn?: string;
+  collapseFn?: CollapseFunction;
   xScaleType?: XScaleType;
   isHistogram?: boolean;
   columnToLabel?: string;
@@ -274,12 +275,3 @@ export const visualizationTypes: VisualizationType[] = [
     sortPriority: 2,
   },
 ];
-
-interface XYStateWithLayers {
-  [prop: string]: unknown;
-  layers: XYLayerConfig[];
-}
-export interface XYSuggestion extends Suggestion {
-  datasourceState: XYStateWithLayers;
-  visualizationState: XYStateWithLayers;
-}

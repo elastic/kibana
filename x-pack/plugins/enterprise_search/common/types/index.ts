@@ -15,13 +15,13 @@ import {
 } from './workplace_search';
 
 export interface InitialAppData {
+  access?: ProductAccess;
+  appSearch?: AppSearchAccount;
+  configuredLimits?: ConfiguredLimits;
   enterpriseSearchVersion?: string;
   kibanaVersion?: string;
   readOnlyMode?: boolean;
   searchOAuth?: SearchOAuth;
-  configuredLimits?: ConfiguredLimits;
-  access?: ProductAccess;
-  appSearch?: AppSearchAccount;
   workplaceSearch?: WorkplaceSearchInitialData;
 }
 

@@ -35,6 +35,11 @@ export function createPluginInitializerContext(
   return {
     opaqueId,
     env: coreContext.env,
+    logger: {
+      get(...contextParts) {
+        return coreContext.logger.get('plugins', pluginManifest.id, ...contextParts);
+      },
+    },
     config: {
       get<T>() {
         return pluginConfig as unknown as T;

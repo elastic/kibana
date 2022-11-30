@@ -10,9 +10,6 @@ Configure the search session settings in your `kibana.yml` configuration file.
 `data.search.sessions.enabled` {ess-icon}::
 Set to `true` (default) to enable search sessions.
 
-`data.search.sessions.trackingInterval` {ess-icon}::
-The frequency for updating the state of a search session. The default is `10s`.
-
 `data.search.sessions.pageSize` {ess-icon}::
 How many search sessions {kib} processes at once while monitoring
 session progress. The default is `100`.
@@ -21,11 +18,8 @@ session progress. The default is `100`.
 How long {kib} stores search results from unsaved sessions,
 after the last search in the session completes. The default is `5m`.
 
-`data.search.sessions.notTouchedInProgressTimeout` {ess-icon}::
-How long a search session can run after a user navigates away without saving a session. The default is `1m`.
-
 `data.search.sessions.maxUpdateRetries` {ess-icon}::
-How many retries {kib} can perform while attempting to save a search session. The default is `3`.
+How many retries {kib} can perform while attempting to save a search session. The default is `10`.
 
 `data.search.sessions.defaultExpiration` {ess-icon}::
 How long search session results are stored before they are deleted.

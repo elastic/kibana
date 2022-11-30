@@ -36,71 +36,27 @@ interface RiskScoreKpi {
   timerange?: { to: string; from: string };
 }
 
-type UseHostRiskScoreKpiProps = Omit<
-  UseRiskScoreKpiProps,
-  'defaultIndex' | 'aggBy' | 'featureEnabled' | 'entity'
->;
-type UseUserRiskScoreKpiProps = Omit<
-  UseRiskScoreKpiProps,
-  'defaultIndex' | 'aggBy' | 'featureEnabled' | 'entity'
->;
-
-export const useUserRiskScoreKpi = ({
-  filterQuery,
-  skip,
-  timerange,
-}: UseUserRiskScoreKpiProps): RiskScoreKpi => {
-  const spaceId = useSpaceId();
-  const defaultIndex = spaceId ? getUserRiskIndex(spaceId) : undefined;
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
-
-  return useRiskScoreKpi({
-    filterQuery,
-    skip,
-    defaultIndex,
-    entity: RiskScoreEntity.user,
-    featureEnabled: isPlatinumOrTrialLicense,
-    timerange,
-  });
-};
-
-export const useHostRiskScoreKpi = ({
-  filterQuery,
-  skip,
-  timerange,
-}: UseHostRiskScoreKpiProps): RiskScoreKpi => {
-  const spaceId = useSpaceId();
-  const defaultIndex = spaceId ? getHostRiskIndex(spaceId) : undefined;
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
-
-  return useRiskScoreKpi({
-    filterQuery,
-    skip,
-    defaultIndex,
-    entity: RiskScoreEntity.host,
-    featureEnabled: isPlatinumOrTrialLicense,
-    timerange,
-  });
-};
-
 interface UseRiskScoreKpiProps {
   filterQuery?: string | ESTermQuery;
   skip?: boolean;
-  defaultIndex: string | undefined;
-  entity: RiskScoreEntity;
-  featureEnabled: boolean;
+  riskEntity: RiskScoreEntity;
   timerange?: { to: string; from: string };
 }
 
-const useRiskScoreKpi = ({
+export const useRiskScoreKpi = ({
   filterQuery,
   skip,
-  defaultIndex,
-  entity,
-  featureEnabled,
+  riskEntity,
   timerange,
 }: UseRiskScoreKpiProps): RiskScoreKpi => {
   const { addError } = useAppToasts();
+  const spaceId = useSpaceId();
+  const featureEnabled = useMlCapabilities().isPlatinumOrTrialLicense;
+  const defaultIndex = spaceId
+    ? riskEntity === RiskScoreEntity.host
+      ? getHostRiskIndex(spaceId)
+      : getUserRiskIndex(spaceId)
+    : undefined;
 
   const { loading, result, search, refetch, inspect, error } =
     useSearchStrategy<RiskQueries.kpiRiskScore>({
@@ -119,10 +75,10 @@ const useRiskScoreKpi = ({
       search({
         filterQuery,
         defaultIndex: [defaultIndex],
-        entity,
+        entity: riskEntity,
       });
     }
-  }, [defaultIndex, search, filterQuery, skip, entity, featureEnabled]);
+  }, [defaultIndex, search, filterQuery, skip, riskEntity, featureEnabled]);
 
   // since query does not take timerange arg, we need to manually refetch when time range updates
   useEffect(() => {

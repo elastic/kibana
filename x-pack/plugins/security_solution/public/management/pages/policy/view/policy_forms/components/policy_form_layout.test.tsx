@@ -135,6 +135,13 @@ describe('Policy Form Layout', () => {
       expect(saveButton).toHaveLength(1);
       expect(saveButton.text()).toEqual('Save');
     });
+    it('should display beta badge', async () => {
+      await asyncActions;
+      policyFormLayoutView.update();
+      const saveButton = policyFormLayoutView.find('EuiBetaBadge');
+      expect(saveButton).toHaveLength(1);
+      expect(saveButton.text()).toEqual('beta');
+    });
     describe('when the save button is clicked', () => {
       let saveButton: FindReactWrapperResponse;
       let confirmModal: FindReactWrapperResponse;
@@ -144,9 +151,7 @@ describe('Policy Form Layout', () => {
       beforeEach(async () => {
         await asyncActions;
         policyFormLayoutView.update();
-        saveButton = policyFormLayoutView.find(
-          'EuiButton[data-test-subj="policyDetailsSaveButton"]'
-        );
+        saveButton = policyFormLayoutView.find('button[data-test-subj="policyDetailsSaveButton"]');
         saveButton.simulate('click');
         policyFormLayoutView.update();
         confirmModal = policyFormLayoutView.find(

@@ -24,7 +24,9 @@ import { createStore } from '../../store';
 
 import type { Props } from './top_n';
 import { StatefulTopN } from '.';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TableId, TimelineId } from '../../../../common/types/timeline';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { detectionAlertsTables } from './helpers';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -93,7 +95,7 @@ const state: State = {
     ...mockGlobalState.timeline,
     timelineById: {
       [TimelineId.active]: {
-        ...mockGlobalState.timeline.timelineById.test,
+        ...mockGlobalState.timeline.timelineById['timeline-test'],
         id: TimelineId.active,
         dataProviders: [
           {
@@ -149,13 +151,19 @@ const state: State = {
 };
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const store = createStore(
+  state,
+  SUB_PLUGINS_REDUCER,
+  { dataTable: tGridReducer },
+  kibanaObservable,
+  storage
+);
 
-let testProps = {
+const testProps = {
   browserFields: mockBrowserFields,
   field,
   indexPattern: mockIndexPattern,
-  timelineId: TimelineId.hostsPageEvents,
+  scopeId: TableId.hostsPageEvents,
   toggleTopN: jest.fn(),
   onFilterAdded: jest.fn(),
   value,
@@ -292,13 +300,14 @@ describe('StatefulTopN', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      testProps = {
-        ...testProps,
-        timelineId: TimelineId.active,
-      };
       wrapper = mount(
         <TestProviders store={store}>
-          <StatefulTopN {...testProps} />
+          <StatefulTopN
+            {...{
+              ...testProps,
+              scopeId: TimelineId.active,
+            }}
+          />
         </TestProviders>
       );
     });
@@ -353,21 +362,24 @@ describe('StatefulTopN', () => {
       expect(props.to).toEqual('2020-04-15T03:46:09.047Z');
     });
   });
-  describe('rendering in a NON-active timeline context', () => {
-    test(`defaults to the 'Alert events' option when rendering in a NON-active timeline context (e.g. the Alerts table on the Detections page) when 'documentType' from 'useTimelineTypeContext()' is 'alerts'`, async () => {
-      testProps = {
-        ...testProps,
-        timelineId: TimelineId.detectionsPage,
-      };
-      const wrapper = mount(
-        <TestProviders store={store}>
-          <StatefulTopN {...testProps} />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
 
-        expect(props.defaultView).toEqual('alert');
+  describe('rendering in alerts context', () => {
+    detectionAlertsTables.forEach((tableId) => {
+      test(`defaults to the 'Alert events' option when rendering in Alerts`, async () => {
+        const wrapper = mount(
+          <TestProviders store={store}>
+            <StatefulTopN
+              {...{
+                ...testProps,
+                scopeId: tableId,
+              }}
+            />
+          </TestProviders>
+        );
+        await waitFor(() => {
+          const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
+          expect(props.defaultView).toEqual('alert');
+        });
       });
     });
   });

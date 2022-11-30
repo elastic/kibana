@@ -80,7 +80,7 @@ describe('<TemplateCreate />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
     httpRequestsMockHelpers.setLoadNodesPluginsResponse([]);
@@ -445,10 +445,10 @@ describe('<TemplateCreate />', () => {
       test('should have 3 tabs', () => {
         const { find } = testBed;
 
-        expect(find('summaryTabContent').find('.euiTab').length).toBe(3);
+        expect(find('summaryTabContent').find('button.euiTab').length).toBe(3);
         expect(
           find('summaryTabContent')
-            .find('.euiTab')
+            .find('button.euiTab')
             .map((t) => t.text())
         ).toEqual(['Summary', 'Preview', 'Request']);
       });

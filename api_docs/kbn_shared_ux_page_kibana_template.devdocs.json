@@ -165,7 +165,7 @@
           " & ",
           "RedirectAppLinksKibanaDependencies"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-kibana-template-types/index.d.ts",
+        "path": "packages/shared-ux/page/kibana_template/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -190,7 +190,13 @@
           ".MinHeight<string | number> | undefined; offset?: number | undefined; mainProps?: (",
           "CommonProps",
           " & React.HTMLAttributes<HTMLElement>) | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
-          "SolutionNavProps",
+          {
+            "pluginId": "@kbn/shared-ux-page-solution-nav",
+            "scope": "common",
+            "docId": "kibKbnSharedUxPageSolutionNavPluginApi",
+            "section": "def-common.SolutionNavProps",
+            "text": "SolutionNavProps"
+          },
           " | undefined; noDataConfig?: ",
           "NoDataPageProps",
           " | undefined; pageHeader?: ",
@@ -199,7 +205,7 @@
           "EuiPageSidebarProps",
           " | undefined; }"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-kibana-template-types/index.d.ts",
+        "path": "packages/shared-ux/page/kibana_template/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -216,7 +222,7 @@
           " & ",
           "RedirectAppLinksServices"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-kibana-template-types/index.d.ts",
+        "path": "packages/shared-ux/page/kibana_template/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -231,7 +237,7 @@
         "signature": [
           "NoDataPageProps"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-no-data-config-types/index.d.ts",
+        "path": "packages/shared-ux/page/no_data_config/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

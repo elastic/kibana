@@ -5,20 +5,15 @@
  * 2.0.
  */
 
-import fnv from 'fnv-plus';
-
 import { createFrameGroupID, FrameGroupID } from './frame_group';
 import {
-  createStackFrameMetadata,
   emptyExecutable,
   emptyStackFrame,
   emptyStackTrace,
   Executable,
   FileID,
-  getCalleeLabel,
   StackFrame,
   StackFrameID,
-  StackFrameMetadata,
   StackTrace,
   StackTraceID,
 } from './profiling';
@@ -29,84 +24,19 @@ export interface CalleeTree {
   Size: number;
   Edges: Array<Map<FrameGroupID, NodeID>>;
 
-  ID: string[];
+  FileID: string[];
   FrameType: number[];
-  FrameID: StackFrameID[];
-  FileID: FileID[];
-  Label: string[];
+  ExeFilename: string[];
+  AddressOrLine: number[];
+  FunctionName: string[];
+  FunctionOffset: number[];
+  SourceFilename: string[];
+  SourceLine: number[];
 
-  Samples: number[];
   CountInclusive: number[];
   CountExclusive: number[];
 }
 
-function initCalleeTree(capacity: number): CalleeTree {
-  const metadata = createStackFrameMetadata();
-  const frameGroupID = createFrameGroupID(
-    metadata.FileID,
-    metadata.AddressOrLine,
-    metadata.ExeFileName,
-    metadata.SourceFilename,
-    metadata.FunctionName
-  );
-  const tree: CalleeTree = {
-    Size: 1,
-    Edges: new Array(capacity),
-    ID: new Array(capacity),
-    FrameType: new Array(capacity),
-    FrameID: new Array(capacity),
-    FileID: new Array(capacity),
-    Label: new Array(capacity),
-    Samples: new Array(capacity),
-    CountInclusive: new Array(capacity),
-    CountExclusive: new Array(capacity),
-  };
-
-  tree.Edges[0] = new Map<FrameGroupID, NodeID>();
-
-  tree.ID[0] = fnv.fast1a64utf(frameGroupID).toString();
-  tree.FrameType[0] = metadata.FrameType;
-  tree.FrameID[0] = metadata.FrameID;
-  tree.FileID[0] = metadata.FileID;
-  tree.Label[0] = 'root: Represents 100% of CPU time.';
-  tree.Samples[0] = 0;
-  tree.CountInclusive[0] = 0;
-  tree.CountExclusive[0] = 0;
-
-  return tree;
-}
-
-function insertNode(
-  tree: CalleeTree,
-  parent: NodeID,
-  metadata: StackFrameMetadata,
-  frameGroupID: FrameGroupID,
-  samples: number
-) {
-  const node = tree.Size;
-
-  tree.Edges[parent].set(frameGroupID, node);
-  tree.Edges[node] = new Map<FrameGroupID, NodeID>();
-
-  tree.ID[node] = fnv.fast1a64utf(`${tree.ID[parent]}${frameGroupID}`).toString();
-  tree.FrameType[node] = metadata.FrameType;
-  tree.FrameID[node] = metadata.FrameID;
-  tree.FileID[node] = metadata.FileID;
-  tree.Label[node] = getCalleeLabel(metadata);
-  tree.Samples[node] = samples;
-  tree.CountInclusive[node] = 0;
-  tree.CountExclusive[node] = 0;
-
-  tree.Size++;
-
-  return node;
-}
-
-// createCalleeTree creates a tree from the trace results, the number of
-// times that the trace has been seen, and the respective metadata.
-//
-// The resulting data structure contains all of the data, but is not yet in the
-// form most easily digestible by others.
 export function createCalleeTree(
   events: Map<StackTraceID, number>,
   stackTraces: Map<StackTraceID, StackTrace>,
@@ -114,7 +44,35 @@ export function createCalleeTree(
   executables: Map<FileID, Executable>,
   totalFrames: number
 ): CalleeTree {
-  const tree = initCalleeTree(totalFrames);
+  const tree: CalleeTree = {
+    Size: 1,
+    Edges: new Array(totalFrames),
+    FileID: new Array(totalFrames),
+    FrameType: new Array(totalFrames),
+    ExeFilename: new Array(totalFrames),
+    AddressOrLine: new Array(totalFrames),
+    FunctionName: new Array(totalFrames),
+    FunctionOffset: new Array(totalFrames),
+    SourceFilename: new Array(totalFrames),
+    SourceLine: new Array(totalFrames),
+
+    CountInclusive: new Array(totalFrames),
+    CountExclusive: new Array(totalFrames),
+  };
+
+  tree.Edges[0] = new Map<FrameGroupID, NodeID>();
+
+  tree.FileID[0] = '';
+  tree.FrameType[0] = 0;
+  tree.ExeFilename[0] = '';
+  tree.AddressOrLine[0] = 0;
+  tree.FunctionName[0] = '';
+  tree.FunctionOffset[0] = 0;
+  tree.SourceFilename[0] = '';
+  tree.SourceLine[0] = 0;
+
+  tree.CountInclusive[0] = 0;
+  tree.CountExclusive[0] = 0;
 
   const sortedStackTraceIDs = new Array<StackTraceID>();
   for (const trace of stackTraces.keys()) {
@@ -139,7 +97,9 @@ export function createCalleeTree(
     const samples = events.get(stackTraceID) ?? 0;
 
     let currentNode = 0;
-    tree.Samples[currentNode] += samples;
+
+    tree.CountInclusive[currentNode] += samples;
+    tree.CountExclusive[currentNode] = 0;
 
     for (let i = 0; i < lenStackTrace; i++) {
       const frameID = stackTrace.FrameIDs[i];
@@ -159,24 +119,26 @@ export function createCalleeTree(
       let node = tree.Edges[currentNode].get(frameGroupID);
 
       if (node === undefined) {
-        const metadata = createStackFrameMetadata({
-          FrameID: frameID,
-          FileID: fileID,
-          AddressOrLine: addressOrLine,
-          FrameType: stackTrace.Types[i],
-          FunctionName: frame.FunctionName,
-          FunctionOffset: frame.FunctionOffset,
-          SourceLine: frame.LineNumber,
-          SourceFilename: frame.FileName,
-          ExeFileName: executable.FileName,
-        });
+        node = tree.Size;
 
-        node = insertNode(tree, currentNode, metadata, frameGroupID, samples);
+        tree.FileID[node] = fileID;
+        tree.FrameType[node] = stackTrace.Types[i];
+        tree.ExeFilename[node] = executable.FileName;
+        tree.AddressOrLine[node] = addressOrLine;
+        tree.FunctionName[node] = frame.FunctionName;
+        tree.FunctionOffset[node] = frame.FunctionOffset;
+        tree.SourceLine[node] = frame.LineNumber;
+        tree.SourceFilename[node] = frame.FileName;
+        tree.CountInclusive[node] = samples;
+        tree.CountExclusive[node] = 0;
+
+        tree.Edges[currentNode].set(frameGroupID, node);
+        tree.Edges[node] = new Map<FrameGroupID, NodeID>();
+
+        tree.Size++;
       } else {
-        tree.Samples[node] += samples;
+        tree.CountInclusive[node] += samples;
       }
-
-      tree.CountInclusive[node] += samples;
 
       if (i === lenStackTrace - 1) {
         // Leaf frame: sum up counts for exclusive CPU.
@@ -185,9 +147,6 @@ export function createCalleeTree(
       currentNode = node;
     }
   }
-
-  tree.CountExclusive[0] = 0;
-  tree.CountInclusive[0] = tree.Samples[0];
 
   return tree;
 }

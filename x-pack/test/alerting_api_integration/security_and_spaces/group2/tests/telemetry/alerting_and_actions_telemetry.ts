@@ -235,8 +235,9 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       // number of action executions broken down by connector type
       expect(telemetry.count_actions_executions_by_type_per_day['test.throw'] > 0).to.be(true);
 
-      // average execution time - just checking for non-zero as we can't set an exact number
-      expect(telemetry.avg_execution_time_per_day > 0).to.be(true);
+      // average execution time - just checking for a positive number as we can't set an exact number
+      // if the time is less than 1ms it will round down to 0
+      expect(telemetry.avg_execution_time_per_day >= 0).to.be(true);
 
       // average execution time broken down by rule type
       expect(telemetry.avg_execution_time_by_type_per_day['test.throw'] > 0).to.be(true);
@@ -570,7 +571,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         expect(taskState).not.to.be(undefined);
         actionsTelemetry = JSON.parse(taskState!);
         expect(actionsTelemetry.runs).to.equal(2);
-        expect(actionsTelemetry.count_total).to.equal(19);
+        expect(actionsTelemetry.count_total).to.equal(20);
       });
 
       // request alerting telemetry task to run

@@ -14,3 +14,8 @@ export type SnakeToCamelCase<T> = T extends Record<string, unknown>
       [K in keyof T as SnakeToCamelCaseString<K & string>]: SnakeToCamelCase<T[K]>;
     }
   : T;
+
+export enum CASE_VIEW_PAGE_TABS {
+  ALERTS = 'alerts',
+  ACTIVITY = 'activity',
+}

@@ -8,7 +8,7 @@
 import { orderBy } from 'lodash/fp';
 import React, { memo, useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiPopoverTitle } from '@elastic/eui';
-import type { ResponseActions } from '../../../../../common/endpoint/service/response_actions/constants';
+import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
 import { ActionsLogFilterPopover } from './actions_log_filter_popover';
 import { type FilterItems, type FilterName, useActionsLogFilter, getUiCommand } from './hooks';
 import { ClearAllButton } from './clear_all_button';
@@ -105,7 +105,9 @@ export const ActionsLogFilter = memo(
           // update URL params
           if (filterName === 'actions') {
             setUrlActionsFilters(
-              selectedItems.map((item) => getUiCommand(item as ResponseActions)).join()
+              selectedItems
+                .map((item) => getUiCommand(item as ResponseActionsApiCommandNames))
+                .join()
             );
           } else if (filterName === 'hosts') {
             setUrlHostsFilters(selectedItems.join());

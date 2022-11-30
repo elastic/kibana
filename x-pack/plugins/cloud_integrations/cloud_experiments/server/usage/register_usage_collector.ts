@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import type { LDClient, LDUser } from 'launchdarkly-node-server-sdk';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { LaunchDarklyClient } from '../launch_darkly_client';
 
 export interface Usage {
   initialized: boolean;
-  flags: Record<string, string>;
+  flags: Record<string, unknown>;
   flagNames: string[];
 }
 
 export type LaunchDarklyEntitiesGetter = () => {
-  launchDarklyUser?: LDUser;
-  launchDarklyClient?: LDClient;
+  launchDarklyClient?: LaunchDarklyClient;
 };
 
 export function registerUsageCollector(
@@ -37,10 +36,8 @@ export function registerUsageCollector(
         },
         // We'll likely map "flags" as `flattened`, so "flagNames" helps out to discover the key names
         flags: {
-          DYNAMIC_KEY: {
-            type: 'keyword',
-            _meta: { description: 'Flags received by the client' },
-          },
+          type: 'pass_through',
+          _meta: { description: 'Flags received by the client' },
         },
         flagNames: {
           type: 'array',
@@ -53,17 +50,9 @@ export function registerUsageCollector(
         },
       },
       fetch: async () => {
-        const { launchDarklyUser, launchDarklyClient } = getLaunchDarklyEntities();
-        if (!launchDarklyUser || !launchDarklyClient)
-          return { initialized: false, flagNames: [], flags: {} };
-        // According to the docs, this method does not send analytics back to LaunchDarkly, so it does not provide false results
-        const flagsState = await launchDarklyClient.allFlagsState(launchDarklyUser);
-        const flags = flagsState.allValues();
-        return {
-          initialized: flagsState.valid,
-          flags,
-          flagNames: Object.keys(flags),
-        };
+        const { launchDarklyClient } = getLaunchDarklyEntities();
+        if (!launchDarklyClient) return { initialized: false, flagNames: [], flags: {} };
+        return await launchDarklyClient.getAllFlags();
       },
     })
   );

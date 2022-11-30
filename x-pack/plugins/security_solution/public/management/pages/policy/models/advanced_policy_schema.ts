@@ -168,6 +168,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.capture_env_vars',
+    first_supported_version: '8.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.capture_env_vars',
+      {
+        defaultMessage:
+          'The list of environment variables to capture (up to five), separated by commas.',
+      }
+    ),
+  },
+  {
     key: 'linux.advanced.tty_io.max_event_interval_seconds',
     first_supported_version: '8.5',
     documentation: i18n.translate(
@@ -914,7 +925,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.kernel.capture_mode',
       {
         defaultMessage:
-          'Allows users to control whether kprobes or ebpf are used to gather data. Possible options are kprobes, ebpf, or auto. Default: kprobes',
+          'Allows users to control whether kprobes or ebpf are used to gather data. Options are kprobe, ebpf, or auto. Auto uses ebpf if possible, otherwise uses kprobe. Default: auto',
       }
     ),
   },

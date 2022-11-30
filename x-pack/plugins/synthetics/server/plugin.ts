@@ -81,7 +81,7 @@ export class Plugin implements PluginType {
       config,
       router: core.http.createRouter(),
       cloud: plugins.cloud,
-      kibanaVersion: this.initContext.env.packageInfo.version,
+      stackVersion: this.initContext.env.packageInfo.version,
       basePath: core.http.basePath,
       logger: this.logger,
       telemetry: this.telemetryEventsSender,
@@ -121,6 +121,7 @@ export class Plugin implements PluginType {
     );
 
     if (this.server) {
+      this.server.coreStart = coreStart;
       this.server.security = pluginsStart.security;
       this.server.fleet = pluginsStart.fleet;
       this.server.encryptedSavedObjects = pluginsStart.encryptedSavedObjects;

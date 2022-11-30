@@ -26,7 +26,13 @@
             "text": "ToolingLog"
           },
           " implements ",
-          "SomeDevLog"
+          {
+            "pluginId": "@kbn/some-dev-log",
+            "scope": "server",
+            "docId": "kibKbnSomeDevLogPluginApi",
+            "section": "def-server.SomeDevLog",
+            "text": "SomeDevLog"
+          }
         ],
         "path": "packages/kbn-tooling-log/src/tooling_log.ts",
         "deprecated": false,

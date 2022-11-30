@@ -13,26 +13,6 @@
   .prfDevTool__progress--percent-ie {
     display: none;
   }
-
-  @include internetExplorerOnly {
-    position: relative;
-    overflow: hidden;
-
-    .prfDevTool__progress--percent-ie {
-      display: block;
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      background: $color;
-      z-index: 1;
-    }
-
-    .prfDevTool__progressText {
-      position: relative;
-      z-index: 2;
-    }
-  }
 }
 
 .prfDevTool__percentBadge {

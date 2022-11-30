@@ -31,6 +31,11 @@ describe('RedirectWithOffset', () => {
       .spyOn(useApmPluginContextExports, 'useApmPluginContext')
       .mockReturnValue({
         core: {
+          http: {
+            basePath: {
+              prepend: () => {},
+            },
+          },
           uiSettings: {
             get: () => defaultSetting,
           },

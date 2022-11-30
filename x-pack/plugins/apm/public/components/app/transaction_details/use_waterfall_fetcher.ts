@@ -16,6 +16,7 @@ const INITIAL_DATA: APIReturnType<'GET /internal/apm/traces/{traceId}'> = {
   exceedsMax: false,
   linkedChildrenOfSpanCountBySpanId: {},
 };
+export type WaterfallFetchResult = ReturnType<typeof useWaterfallFetcher>;
 
 export function useWaterfallFetcher({
   traceId,

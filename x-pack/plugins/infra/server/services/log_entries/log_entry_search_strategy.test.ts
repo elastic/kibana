@@ -70,6 +70,8 @@ describe('LogEntry search strategy', () => {
         params: expect.objectContaining({
           index: 'log-indices-*',
           body: expect.objectContaining({
+            track_total_hits: false,
+            terminate_after: 1,
             query: {
               ids: {
                 values: ['LOG_ENTRY_ID'],
@@ -84,8 +86,6 @@ describe('LogEntry search strategy', () => {
               },
             },
           }),
-          terminate_after: 1,
-          track_total_hits: false,
         }),
       },
       expect.anything(),

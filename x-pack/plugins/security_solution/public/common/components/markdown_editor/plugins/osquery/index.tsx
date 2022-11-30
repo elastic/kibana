@@ -258,10 +258,11 @@ const RunOsqueryButtonRenderer = ({
     label?: string;
     query: string;
     ecs_mapping: { [key: string]: {} };
+    test: [];
   };
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
-  const { agentId } = useContext(BasicAlertDataContext);
+  const { agentId, alertId } = useContext(BasicAlertDataContext);
 
   const handleOpen = useCallback(() => setShowFlyout(true), [setShowFlyout]);
 
@@ -278,6 +279,7 @@ const RunOsqueryButtonRenderer = ({
       {showFlyout && (
         <OsqueryFlyout
           defaultValues={{
+            ...(alertId ? { alertIds: [alertId] } : {}),
             query: configuration.query,
             ecs_mapping: configuration.ecs_mapping,
             queryField: false,

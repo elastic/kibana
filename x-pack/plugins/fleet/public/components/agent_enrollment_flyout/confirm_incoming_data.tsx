@@ -10,6 +10,8 @@ import { EuiCallOut, EuiText, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { useIsGuidedOnboardingActive, useStartServices } from '../../hooks';
+
 import type { InstalledIntegrationPolicy } from './use_get_agent_incoming_data';
 import { useGetAgentIncomingData, usePollingIncomingData } from './use_get_agent_incoming_data';
 
@@ -29,6 +31,8 @@ export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
   troubleshootLink,
 }) => {
   const { incomingData, isLoading } = usePollingIncomingData(agentIds);
+  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(installedPolicy?.name);
+  const { guidedOnboarding } = useStartServices();
 
   const { enrolledAgents, numAgentsWithData, linkButton, message } = useGetAgentIncomingData(
     incomingData,
@@ -37,6 +41,11 @@ export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
 
   if (!isLoading && enrolledAgents > 0 && numAgentsWithData > 0) {
     setAgentDataConfirmed(true);
+    if (installedPolicy?.name && isGuidedOnboardingActive) {
+      guidedOnboarding.guidedOnboardingApi?.completeGuidedOnboardingForIntegration(
+        installedPolicy!.name
+      );
+    }
   }
 
   if (!agentDataConfirmed) {

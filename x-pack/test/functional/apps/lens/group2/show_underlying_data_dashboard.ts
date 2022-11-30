@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(discoverWindowHandle);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('discoverChart');
+      await testSubjects.existOrFail('unifiedHistogramChart');
       // check the table columns
       const columns = await PageObjects.discover.getColumnHeaders();
       expect(columns).to.eql(['ip', '@timestamp', 'bytes']);

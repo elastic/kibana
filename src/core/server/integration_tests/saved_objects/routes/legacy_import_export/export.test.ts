@@ -33,7 +33,7 @@ import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import { setupServer } from '../test_utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import {

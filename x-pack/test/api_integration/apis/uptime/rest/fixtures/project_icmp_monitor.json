@@ -14,7 +14,8 @@
       "schedule": 1,
       "tags": [ "service:smtp", "org:google" ],
       "privateLocations": [ "Test private location 0" ],
-      "wait": "30s"
+      "wait": "30s",
+      "hash": "ekrjelkjrelkjre"
     },
     {
       "locations": [ "localhost" ],
@@ -25,7 +26,8 @@
       "schedule": 1,
       "tags": "tag1,tag2",
       "privateLocations": [ "Test private location 0" ],
-      "wait": "1m"
+      "wait": "1m",
+      "hash": "ekrjelkjrelkjre"
     },
     {
       "locations": [ "localhost" ],
@@ -38,7 +40,8 @@
       "privateLocations": [ "Test private location 0" ],
       "unsupportedKey": {
         "nestedUnsupportedKey": "unnsuportedValue"
-      }
+      },
+      "hash": "ekrjelkjrelkjre"
     }
   ]
 }

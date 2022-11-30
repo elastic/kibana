@@ -6,35 +6,61 @@
  * Side Public License, v 1.
  */
 
-import type { HasReferenceQueryParams, SearchOperator } from './query_params';
+import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
+
+import type { SearchOperator } from './query_params';
 
 export function getReferencesFilter({
   references,
   operator = 'OR',
   maxTermsPerClause = 1000,
+  must = true,
 }: {
-  references: HasReferenceQueryParams[];
+  references: SavedObjectTypeIdTuple[];
   operator?: SearchOperator;
   maxTermsPerClause?: number;
+  must?: boolean;
 }) {
   if (operator === 'AND') {
+    if (must) {
+      return {
+        bool: {
+          must: references.map(getNestedTermClauseForReference),
+        },
+      };
+    }
+
     return {
       bool: {
-        must: references.map(getNestedTermClauseForReference),
+        must_not: [
+          {
+            bool: {
+              must: references.map(getNestedTermClauseForReference),
+            },
+          },
+        ],
       },
     };
   } else {
+    if (must) {
+      return {
+        bool: {
+          should: getAggregatedTermsClauses(references, maxTermsPerClause),
+          minimum_should_match: 1,
+        },
+      };
+    }
+
     return {
       bool: {
-        should: getAggregatedTermsClauses(references, maxTermsPerClause),
-        minimum_should_match: 1,
+        must_not: getAggregatedTermsClauses(references, maxTermsPerClause),
       },
     };
   }
 }
 
 const getAggregatedTermsClauses = (
-  references: HasReferenceQueryParams[],
+  references: SavedObjectTypeIdTuple[],
   maxTermsPerClause: number
 ) => {
   const refTypeToIds = references.reduce((map, { type, id }) => {
@@ -58,7 +84,7 @@ const createChunks = <T>(array: T[], chunkSize: number): T[][] => {
   return chunks;
 };
 
-export const getNestedTermClauseForReference = (reference: HasReferenceQueryParams) => {
+export const getNestedTermClauseForReference = (reference: SavedObjectTypeIdTuple) => {
   return {
     nested: {
       path: 'references',

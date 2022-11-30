@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiCommentList,
-  EuiCommentProps,
-} from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCommentList } from '@elastic/eui';
 
 import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
@@ -58,7 +53,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
 
     & .comment-alert .euiCommentEvent {
       background-color: ${theme.eui.euiColorLightestShade};
-      border: ${theme.eui.euiFlyoutBorder};
+      border: ${theme.eui.euiBorderThin};
       padding: ${theme.eui.euiSizeS};
       border-radius: ${theme.eui.euiSizeXS};
     }

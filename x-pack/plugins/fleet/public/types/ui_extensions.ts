@@ -136,13 +136,7 @@ export interface PackagePolicyCreateExtension {
  * UI Component Extension is used on the pages displaying the ability to Create a multi step
  * Integration Policy
  */
-export type PackagePolicyCreateMultiStepExtensionComponent =
-  ComponentType<PackagePolicyCreateMultiStepExtensionComponentProps>;
-
-export interface PackagePolicyCreateMultiStepExtensionComponentProps {
-  /** The integration policy being created */
-  newPolicy: NewPackagePolicy;
-}
+export type PackagePolicyCreateMultiStepExtensionComponent = ComponentType<{}>;
 
 /** Extension point registration contract for Integration Policy Create views in multi-step onboarding */
 export interface PackagePolicyCreateMultiStepExtension {

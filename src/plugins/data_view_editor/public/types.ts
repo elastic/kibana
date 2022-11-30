@@ -13,13 +13,14 @@ import {
   NotificationsStart,
   DocLinksStart,
   HttpSetup,
+  OverlayStart,
 } from '@kbn/core/public';
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import type {
   DataView,
-  DataViewsPublicPluginStart,
+  DataViewsServicePublic,
   INDEX_PATTERN_TYPE,
   MatchedItem,
 } from '@kbn/data-views-plugin/public';
@@ -31,7 +32,8 @@ export interface DataViewEditorContext {
   http: HttpSetup;
   notifications: NotificationsStart;
   application: ApplicationStart;
-  dataViews: DataViewsPublicPluginStart;
+  overlays: OverlayStart;
+  dataViews: DataViewsServicePublic;
   searchClient: DataPublicPluginStart['search']['search'];
 }
 
@@ -62,6 +64,11 @@ export interface DataViewEditorProps {
    * if set to true user is presented with an option to create ad-hoc dataview without a saved object.
    */
   allowAdHocDataView?: boolean;
+
+  /**
+   * if set to true a link to the management page is shown
+   */
+  showManagementLink?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -80,7 +87,7 @@ export interface SetupPlugins {}
 
 export interface StartPlugins {
   data: DataPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
+  dataViews: DataViewsServicePublic;
 }
 
 export type CloseEditor = () => void;

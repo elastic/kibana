@@ -20,7 +20,13 @@
         "description": [],
         "signature": [
           "() => ",
-          "OpsProcessMetrics"
+          {
+            "pluginId": "@kbn/core-metrics-server",
+            "scope": "server",
+            "docId": "kibKbnCoreMetricsServerPluginApi",
+            "section": "def-server.OpsProcessMetrics",
+            "text": "OpsProcessMetrics"
+          }
         ],
         "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/process.mocks.ts",
         "deprecated": false,
@@ -54,7 +60,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "MetricsCollector",
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.MetricsCollector",
+                "text": "MetricsCollector"
+              },
               "<any>>"
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/mocks.ts",
@@ -72,7 +84,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "OpsProcessMetrics"
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.OpsProcessMetrics",
+                "text": "OpsProcessMetrics"
+              }
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/mocks.ts",
             "deprecated": false,
@@ -103,7 +121,13 @@
             "description": [],
             "signature": [
               "<T = any>(collectReturnValue?: any) => jest.Mocked<",
-              "MetricsCollector",
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.MetricsCollector",
+                "text": "MetricsCollector"
+              },
               "<T>>"
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/collector.mock.ts",
@@ -150,9 +174,21 @@
             "description": [],
             "signature": [
               "(overwrites?: Partial<",
-              "IntervalHistogram",
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.IntervalHistogram",
+                "text": "IntervalHistogram"
+              },
               ">) => ",
-              "IntervalHistogram"
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.IntervalHistogram",
+                "text": "IntervalHistogram"
+              }
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
             "deprecated": false,
@@ -184,7 +220,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "EventLoopDelaysMonitor"
+              {
+                "pluginId": "@kbn/core-metrics-collectors-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsCollectorsServerInternalPluginApi",
+                "section": "def-server.EventLoopDelaysMonitor",
+                "text": "EventLoopDelaysMonitor"
+              }
             ],
             "path": "packages/core/metrics/core-metrics-collectors-server-mocks/src/event_loop_delays_monitor.mocks.ts",
             "deprecated": false,

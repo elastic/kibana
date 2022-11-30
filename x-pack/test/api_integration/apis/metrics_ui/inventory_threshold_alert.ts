@@ -102,6 +102,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 1.109,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-0', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
         });
       });
@@ -125,6 +133,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 1.0376666666666665,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-0', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
         });
       });
@@ -157,6 +173,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 79351.95,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0', network: {} },
+              container: undefined,
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
           'host-1': {
             metric: 'rx',
@@ -170,6 +194,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 10,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-1', network: {} },
+              container: undefined,
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
         });
       });
@@ -198,6 +230,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 79351.95,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0', network: {} },
+              container: undefined,
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
           'host-1': {
             metric: 'rx',
@@ -211,6 +251,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 10,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-1', network: {} },
+              container: undefined,
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
         });
       });
@@ -240,6 +288,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 125658.70833333333,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0', network: {} },
+              container: undefined,
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
           'host-1': {
             metric: 'rx',
@@ -253,6 +309,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 11.666666666666668,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-1', network: {} },
+              container: undefined,
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
         });
       });
@@ -298,6 +362,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 833.3333333333334,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-0', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
           'host-1': {
             metric: 'custom',
@@ -318,6 +390,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 1000,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-1' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-1', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
         });
       });
@@ -359,6 +439,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 1133.3333333333333,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-0', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
           'host-1': {
             metric: 'custom',
@@ -379,6 +467,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 1133.3333333333333,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-1' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-1', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
         });
       });
@@ -411,6 +507,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 0.3,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-0', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
           'host-1': {
             metric: 'logRate',
@@ -424,6 +528,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 0.3,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-1' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-1', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
         });
       });
@@ -453,6 +565,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 0.3,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-0', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
           'host-1': {
             metric: 'logRate',
@@ -466,6 +586,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 0.3,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-1' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-1', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
         });
       });
@@ -499,6 +627,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 43332.833333333336,
+            context: {
+              cloud: undefined,
+              host: undefined,
+              container: [],
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
           'ed01e3a3-4787-42f6-b73e-ac9e97294e9d': {
             metric: 'rx',
@@ -512,6 +648,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 42783.833333333336,
+            context: {
+              cloud: undefined,
+              host: undefined,
+              container: [],
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
         });
       });
@@ -542,6 +686,21 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 50197.666666666664,
+            context: {
+              cloud: undefined,
+              host: undefined,
+              container: [
+                {
+                  id: 'container-03',
+                },
+                {
+                  id: 'container-04',
+                },
+              ],
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
           'ed01e3a3-4787-42f6-b73e-ac9e97294e9d': {
             metric: 'rx',
@@ -555,6 +714,21 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 50622.066666666666,
+            context: {
+              cloud: undefined,
+              host: undefined,
+              container: [
+                {
+                  id: 'container-01',
+                },
+                {
+                  id: 'container-02',
+                },
+              ],
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
         });
       });

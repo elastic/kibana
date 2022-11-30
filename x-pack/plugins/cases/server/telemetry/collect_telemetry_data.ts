@@ -12,7 +12,7 @@ import { getConfigurationTelemetryData } from './queries/configuration';
 import { getConnectorsTelemetryData } from './queries/connectors';
 import { getPushedTelemetryData } from './queries/pushes';
 import { getUserActionsTelemetryData } from './queries/user_actions';
-import { CasesTelemetry, CollectTelemetryDataParams } from './types';
+import type { CasesTelemetry, CollectTelemetryDataParams } from './types';
 
 export const collectTelemetryData = async ({
   savedObjectsClient,

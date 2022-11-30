@@ -163,6 +163,8 @@ const kibanaMutuallyExclusiveSubFeaturePrivilegeSchema =
 
 const kibanaSubFeatureSchema = schema.object({
   name: schema.string(),
+  requireAllSpaces: schema.maybe(schema.boolean()),
+  privilegesTooltip: schema.maybe(schema.string()),
   privilegeGroups: schema.maybe(
     schema.arrayOf(
       schema.oneOf([

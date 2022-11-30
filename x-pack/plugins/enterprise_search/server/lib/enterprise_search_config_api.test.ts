@@ -223,7 +223,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
   });
 
   it('handles timeouts', async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     // Warning
     callEnterpriseSearchConfigAPI(mockDependencies);

@@ -36,3 +36,25 @@ export const UPGRADE_ENDPOINT_FOR_RESPONDER = i18n.translate(
       'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.',
   }
 );
+
+export const INSUFFICIENT_PRIVILEGES_FOR_COMMAND = i18n.translate(
+  'xpack.securitySolution.endpoint.actions.insufficientPrivileges.error',
+  {
+    defaultMessage:
+      'You do not have sufficient privileges to use this command. Please contact your administrator for access.',
+  }
+);
+
+export const UNSAVED_TIMELINE_SAVE_PROMPT = i18n.translate(
+  'xpack.securitySolution.timeline.unsavedWorkMessage',
+  {
+    defaultMessage: 'Leave Timeline with unsaved work?',
+  }
+);
+
+export const UNSAVED_TIMELINE_SAVE_PROMPT_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.unsavedWorkTitle',
+  {
+    defaultMessage: 'Unsaved changes',
+  }
+);

@@ -26,10 +26,12 @@ import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { LocalStorageMock } from './local_storage_mock';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { dataViewsMock } from './data_views';
+import { Observable, of } from 'rxjs';
 const dataPlugin = dataPluginMock.createStartContract();
 const expressionsPlugin = expressionsPluginMock.createStartContract();
 
 dataPlugin.query.filterManager.getFilters = jest.fn(() => []);
+dataPlugin.query.filterManager.getUpdates$ = jest.fn(() => of({}) as unknown as Observable<void>);
 
 export const discoverServiceMock = {
   core: coreMock.createStart(),
@@ -124,4 +126,11 @@ export const discoverServiceMock = {
   savedObjectsTagging: {},
   dataViews: dataViewsMock,
   timefilter: { createFilter: jest.fn() },
+  locator: {
+    useUrl: jest.fn(() => ''),
+    navigate: jest.fn(),
+    getUrl: jest.fn(() => Promise.resolve('')),
+  },
+  contextLocator: { getRedirectUrl: jest.fn(() => '') },
+  singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
 } as unknown as DiscoverServices;

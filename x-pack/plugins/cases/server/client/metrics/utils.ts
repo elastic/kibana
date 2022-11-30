@@ -6,15 +6,15 @@
  */
 
 import Boom from '@hapi/boom';
-import { CasesMetricsRequest, SingleCaseMetricsRequest } from '../../../common/api';
-import { CasesClient } from '../client';
-import { CasesClientArgs } from '../types';
+import type { CasesMetricsRequest, SingleCaseMetricsRequest } from '../../../common/api';
+import type { CasesClient } from '../client';
+import type { CasesClientArgs } from '../types';
 import { AlertsCount } from './alerts/count';
 import { AlertDetails } from './alerts/details';
 import { Actions } from './actions';
 import { Connectors } from './connectors';
 import { Lifespan } from './lifespan';
-import { MetricsHandler } from './types';
+import type { MetricsHandler } from './types';
 import { MTTR } from './all_cases/mttr';
 
 const isSingleCaseMetrics = (

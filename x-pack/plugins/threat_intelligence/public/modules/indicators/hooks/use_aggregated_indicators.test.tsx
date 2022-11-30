@@ -7,17 +7,17 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useAggregatedIndicators, UseAggregatedIndicatorsParam } from './use_aggregated_indicators';
-import { DEFAULT_TIME_RANGE } from '../../query_bar/hooks/use_filters/utils';
 import {
   mockedTimefilterService,
   TestProvidersComponent,
 } from '../../../common/mocks/test_providers';
 import { createFetchAggregatedIndicators } from '../services';
+import { mockTimeRange } from '../../../common/mocks/mock_indicators_filters_context';
 
 jest.mock('../services/fetch_aggregated_indicators');
 
 const useAggregatedIndicatorsParams: UseAggregatedIndicatorsParam = {
-  timeRange: DEFAULT_TIME_RANGE,
+  timeRange: mockTimeRange,
   filters: [],
   filterQuery: { language: 'kuery', query: '' },
 };
@@ -28,8 +28,7 @@ const renderUseAggregatedIndicators = () =>
     wrapper: TestProvidersComponent,
   });
 
-// FLAKY: https://github.com/elastic/kibana/issues/142312
-describe.skip('useAggregatedIndicators()', () => {
+describe('useAggregatedIndicators()', () => {
   beforeEach(jest.clearAllMocks);
 
   type MockedCreateFetchAggregatedIndicators = jest.MockedFunction<
@@ -51,7 +50,7 @@ describe.skip('useAggregatedIndicators()', () => {
   it('should create and call the aggregatedIndicatorsQuery correctly', async () => {
     aggregatedIndicatorsQuery.mockResolvedValue([]);
 
-    const { result, rerender } = renderUseAggregatedIndicators();
+    const { result, rerender, waitFor } = renderUseAggregatedIndicators();
 
     // indicators service and the query should be called just once
     expect(
@@ -73,6 +72,7 @@ describe.skip('useAggregatedIndicators()', () => {
       rerender({
         filterQuery: { language: 'kuery', query: "threat.indicator.type: 'file'" },
         filters: [],
+        timeRange: mockTimeRange,
       })
     );
 
@@ -83,14 +83,17 @@ describe.skip('useAggregatedIndicators()', () => {
       }),
       expect.any(AbortSignal)
     );
+
+    await waitFor(() => !result.current.isLoading);
+
     expect(result.current).toMatchInlineSnapshot(`
       Object {
         "dateRange": Object {
           "max": "2022-01-02T00:00:00.000Z",
           "min": "2022-01-01T00:00:00.000Z",
         },
-        "isFetching": true,
-        "isLoading": true,
+        "isFetching": false,
+        "isLoading": false,
         "onFieldChange": [Function],
         "selectedField": "threat.feed.name",
         "series": Array [],

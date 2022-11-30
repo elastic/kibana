@@ -6,7 +6,7 @@
  */
 
 import { TIPage, TIPageProperties } from './types';
-import { INDICATORS, INTELLIGENCE, DESCRIPTION } from './translations';
+import { DESCRIPTION, INDICATORS, INTELLIGENCE } from './translations';
 
 /**
  * Base path for all the pages within the Threat Intelligence plugin.

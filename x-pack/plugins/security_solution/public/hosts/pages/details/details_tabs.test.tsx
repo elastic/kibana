@@ -10,15 +10,25 @@ import { MemoryRouter } from 'react-router-dom';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../../common/mock/match_media';
-import { mockIndexPattern, TestProviders } from '../../../common/mock';
+import {
+  createSecuritySolutionStorageMock,
+  kibanaObservable,
+  mockGlobalState,
+  mockIndexPattern,
+  SUB_PLUGINS_REDUCER,
+  TestProviders,
+} from '../../../common/mock';
 import { HostDetailsTabs } from './details_tabs';
-import type { HostDetailsTabsProps } from './types';
 import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
 import { HostsTableType } from '../../store/model';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { TableId } from '../../../../common/types';
 
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
@@ -67,6 +77,23 @@ jest.mock('../../../common/components/visualization_actions', () => ({
   VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
 }));
 
+const myState: State = mockGlobalState;
+const { storage } = createSecuritySolutionStorageMock();
+const myStore = createStore(
+  {
+    ...myState,
+    dataTable: {
+      tableById: {
+        [TableId.hostsPageEvents]: myState.dataTable.tableById['table-test'],
+      },
+    },
+  },
+  SUB_PLUGINS_REDUCER,
+  { dataTable: tGridReducer },
+  kibanaObservable,
+  storage
+);
+
 describe('body', () => {
   const scenariosMap = {
     [HostsTableType.authentications]: 'AuthenticationsQueryTabBody',
@@ -86,16 +113,12 @@ describe('body', () => {
     },
   });
 
-  const componentProps: Record<string, Partial<HostDetailsTabsProps>> = {
-    events: { pageFilters: mockHostDetailsPageFilters },
-    alerts: { pageFilters: mockHostDetailsPageFilters },
-  };
   const mount = useMountAppended();
 
   Object.entries(scenariosMap).forEach(([path, componentName]) =>
     test(`it should pass expected object properties to ${componentName}`, () => {
       const wrapper = mount(
-        <TestProviders>
+        <TestProviders store={myStore}>
           <MemoryRouter initialEntries={[`/hosts/name/host-1/${path}`]}>
             <HostDetailsTabs
               isInitializing={false}
@@ -105,7 +128,7 @@ describe('body', () => {
               indexNames={[]}
               indexPattern={mockIndexPattern}
               type={type}
-              pageFilters={mockHostDetailsPageFilters}
+              hostDetailsFilter={mockHostDetailsPageFilters}
               filterQuery={filterQuery}
               from={'2020-07-07T08:20:18.966Z'}
               to={'2020-07-08T08:20:18.966Z'}
@@ -153,7 +176,7 @@ describe('body', () => {
           title: 'filebeat-*,auditbeat-*,packetbeat-*',
         },
         hostName: 'host-1',
-        ...(componentProps[path] != null ? componentProps[path] : []),
+        ...(path === 'events' && { additionalFilters: mockHostDetailsPageFilters }),
       });
     })
   );

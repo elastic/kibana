@@ -17,3 +17,8 @@ export const getSavedQueriesDropdown = () =>
   cy.react('EuiComboBox', {
     props: { placeholder: 'Search for a query to run, or write a new query below' },
   });
+
+export const getIdFormField = () =>
+  cy.react('EuiFormRow', {
+    props: { label: 'ID' },
+  });

@@ -22,9 +22,16 @@ import { appContextService } from '../../app_context';
 
 import { PackageNotFoundError } from '../../../errors';
 
+import { getSettings } from '../../settings';
+
 import { getPackageInfo, getPackageUsageStats } from './get';
 
 const MockRegistry = Registry as jest.Mocked<typeof Registry>;
+
+jest.mock('../../settings');
+
+const mockGetSettings = getSettings as jest.Mock;
+mockGetSettings.mockResolvedValue({ prerelease_integrations_enabled: true });
 
 describe('When using EPM `get` services', () => {
   describe('and invoking getPackageUsageStats()', () => {
@@ -188,7 +195,11 @@ describe('When using EPM `get` services', () => {
         name: 'my-package',
         version: '1.0.0',
       } as RegistryPackage);
-      MockRegistry.getRegistryPackage.mockResolvedValue({
+      MockRegistry.fetchInfo.mockResolvedValue({
+        name: 'my-package',
+        version: '1.0.0',
+      } as RegistryPackage);
+      MockRegistry.getPackage.mockResolvedValue({
         paths: [],
         packageInfo: {
           name: 'my-package',
@@ -366,7 +377,7 @@ describe('When using EPM `get` services', () => {
           status: 'not_installed',
         });
 
-        expect(MockRegistry.getRegistryPackage).not.toHaveBeenCalled();
+        expect(MockRegistry.getPackage).not.toHaveBeenCalled();
       });
 
       // when calling the get package endpoint without a package version we
@@ -392,7 +403,7 @@ describe('When using EPM `get` services', () => {
           status: 'not_installed',
         });
 
-        expect(MockRegistry.getRegistryPackage).not.toHaveBeenCalled();
+        expect(MockRegistry.getPackage).not.toHaveBeenCalled();
       });
     });
   });

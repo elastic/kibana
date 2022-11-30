@@ -18,7 +18,6 @@ import {
   isNewTermsRule,
 } from '../../../../../common/detection_engine/utils';
 import type { FieldHook } from '../../../../shared_imports';
-import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
 
@@ -50,9 +49,6 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   const setThreshold = useCallback(() => setType('threshold'), [setType]);
   const setThreatMatch = useCallback(() => setType('threat_match'), [setType]);
   const setNewTerms = useCallback(() => setType('new_terms'), [setType]);
-  const licensingUrl = useKibana().services.application.getUrlForApp('kibana', {
-    path: '#/management/stack/license_management',
-  });
 
   const eqlSelectableConfig = useMemo(
     () => ({
@@ -130,12 +126,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               data-test-subj="machineLearningRuleType"
               title={i18n.ML_TYPE_TITLE}
               titleSize="xs"
-              description={
-                <MlCardDescription
-                  subscriptionUrl={licensingUrl}
-                  hasValidLicense={hasValidLicense}
-                />
-              }
+              description={<MlCardDescription hasValidLicense={hasValidLicense} />}
               icon={<EuiIcon size="l" type="machineLearningApp" />}
               isDisabled={mlSelectableConfig.isDisabled && !mlSelectableConfig.isSelected}
               selectable={mlSelectableConfig}

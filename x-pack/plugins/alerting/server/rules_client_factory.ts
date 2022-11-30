@@ -16,6 +16,7 @@ import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/s
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
@@ -91,7 +92,7 @@ export class RulesClientFactory {
       ruleTypeRegistry: this.ruleTypeRegistry,
       minimumScheduleInterval: this.minimumScheduleInterval,
       unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
-        excludedWrappers: ['security'],
+        excludedExtensions: [SECURITY_EXTENSION_ID],
         includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
       }),
       authorization: this.authorization.create(request),

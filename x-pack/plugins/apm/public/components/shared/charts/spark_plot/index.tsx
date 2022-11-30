@@ -50,7 +50,7 @@ export function SparkPlot({
   valueLabel: React.ReactNode;
   compact?: boolean;
   comparisonSeries?: Coordinate[];
-  comparisonSeriesColor: string;
+  comparisonSeriesColor?: string;
 }) {
   return (
     <EuiFlexGroup
@@ -90,7 +90,7 @@ function SparkPlotItem({
   series?: Coordinate[] | null;
   compact?: boolean;
   comparisonSeries?: Coordinate[];
-  comparisonSeriesColor: string;
+  comparisonSeriesColor?: string;
 }) {
   const theme = useTheme();
   const defaultChartTheme = useChartTheme();

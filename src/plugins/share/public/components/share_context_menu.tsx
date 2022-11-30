@@ -32,6 +32,7 @@ export interface ShareContextMenuProps {
   anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   urlService: BrowserUrlService;
+  snapshotShareWarning?: string;
 }
 
 export class ShareContextMenu extends Component<ShareContextMenuProps> {
@@ -66,6 +67,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
           anonymousAccess={this.props.anonymousAccess}
           showPublicUrlSwitch={this.props.showPublicUrlSwitch}
           urlService={this.props.urlService}
+          snapshotShareWarning={this.props.snapshotShareWarning}
         />
       ),
     };
@@ -96,6 +98,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
             anonymousAccess={this.props.anonymousAccess}
             showPublicUrlSwitch={this.props.showPublicUrlSwitch}
             urlService={this.props.urlService}
+            snapshotShareWarning={this.props.snapshotShareWarning}
           />
         ),
       };

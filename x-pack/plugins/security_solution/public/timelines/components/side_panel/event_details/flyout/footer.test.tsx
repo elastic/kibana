@@ -109,7 +109,7 @@ jest.mock(
 jest.mock('../../../../../detections/components/alerts_table/actions');
 
 const defaultProps = {
-  timelineId: TimelineId.test,
+  scopeId: TimelineId.test,
   loadingEventDetails: false,
   detailsEcsData: ecsData,
   isHostIsolationPanelOpen: false,

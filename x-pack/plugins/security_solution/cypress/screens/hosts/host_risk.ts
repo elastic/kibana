@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const RULE_NAME = '[data-test-subj="topRiskScoreContributors"] .euiTableCellContent';
-
 export const RISK_DETAILS_NAV = '[data-test-subj="navigation-hostRisk"]';
 
 export const LOADING_SPINNER = '[data-test-subj="loading-spinner"]';

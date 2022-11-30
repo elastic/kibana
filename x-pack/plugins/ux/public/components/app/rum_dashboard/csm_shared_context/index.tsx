@@ -57,6 +57,7 @@ export function CsmSharedContextProvider({
     if (dataViewTitle) {
       return dataViews.create({
         title: dataViewTitle,
+        timeFieldName: '@timestamp',
       });
     }
   }, [dataViewTitle, dataViews]);

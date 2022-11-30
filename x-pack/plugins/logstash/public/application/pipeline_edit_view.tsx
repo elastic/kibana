@@ -13,11 +13,8 @@ import { i18n } from '@kbn/i18n';
 import { ToastsStart } from '@kbn/core/public';
 
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-// @ts-expect-error
 import { PipelineEditor } from './components/pipeline_editor';
-// @ts-expect-error
 import { Pipeline } from '../models/pipeline';
-// @ts-expect-error
 import * as Breadcrumbs from './breadcrumbs';
 
 const usePipeline = (

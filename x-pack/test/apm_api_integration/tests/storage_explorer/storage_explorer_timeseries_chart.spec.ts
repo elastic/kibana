@@ -22,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
   async function callApi() {
-    return await apmApiClient.monitorIndicesUser({
+    return await apmApiClient.monitorClusterAndIndicesUser({
       endpoint: 'GET /internal/apm/storage_chart',
       params: {
         query: {

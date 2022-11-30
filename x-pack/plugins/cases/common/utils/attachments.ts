@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   CommentRequest,
   CommentRequestExternalReferenceType,
-  CommentType,
   CommentRequestPersistableStateType,
 } from '../api';
+import { CommentType } from '../api';
 
 /**
  * A type narrowing function for external reference attachments.

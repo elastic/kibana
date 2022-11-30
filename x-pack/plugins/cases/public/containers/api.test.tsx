@@ -75,7 +75,7 @@ describe('Cases API', () => {
     });
     const data = ['1', '2'];
 
-    test('should be called with correct check url, method, signal', async () => {
+    it('should be called with correct check url, method, signal', async () => {
       await deleteCases(data, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'DELETE',
@@ -84,7 +84,7 @@ describe('Cases API', () => {
       });
     });
 
-    test('should return correct response', async () => {
+    it('should return correct response', async () => {
       const resp = await deleteCases(data, abortCtrl.signal);
       expect(resp).toEqual('');
     });
@@ -96,7 +96,7 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(actionLicenses);
     });
 
-    test('should be called with correct check url, method, signal', async () => {
+    it('should be called with correct check url, method, signal', async () => {
       await getActionLicense(abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`/api/actions/connector_types`, {
         method: 'GET',
@@ -104,7 +104,7 @@ describe('Cases API', () => {
       });
     });
 
-    test('should return correct response', async () => {
+    it('should return correct response', async () => {
       const resp = await getActionLicense(abortCtrl.signal);
       expect(resp).toEqual(actionLicenses);
     });
@@ -117,7 +117,7 @@ describe('Cases API', () => {
     });
     const data = basicCase.id;
 
-    test('should be called with correct check url, method, signal', async () => {
+    it('should be called with correct check url, method, signal', async () => {
       await getCase(data, true, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}`, {
         method: 'GET',
@@ -126,12 +126,12 @@ describe('Cases API', () => {
       });
     });
 
-    test('should return correct response', async () => {
+    it('should return correct response', async () => {
       const resp = await getCase(data, true, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
     });
 
-    test('should not covert to camel case registered attachments', async () => {
+    it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
       const resp = await getCase(data, true, abortCtrl.signal);
       expect(resp).toEqual(caseWithRegisteredAttachments);
@@ -151,7 +151,7 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue({ ...basicResolveCase, target_alias_id: targetAliasId });
     });
 
-    test('should be called with correct check url, method, signal', async () => {
+    it('should be called with correct check url, method, signal', async () => {
       await resolveCase(caseId, true, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${caseId}/resolve`, {
         method: 'GET',
@@ -160,12 +160,12 @@ describe('Cases API', () => {
       });
     });
 
-    test('should return correct response', async () => {
+    it('should return correct response', async () => {
       const resp = await resolveCase(caseId, true, abortCtrl.signal);
       expect(resp).toEqual({ ...basicResolveCase, case: basicCase, targetAliasId });
     });
 
-    test('should not covert to camel case registered attachments', async () => {
+    it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue({
         ...basicResolveCase,
         case: caseWithRegisteredAttachmentsSnake,
@@ -186,40 +186,40 @@ describe('Cases API', () => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(allCasesSnake);
     });
-    test('should be called with correct check url, method, signal', async () => {
+
+    it('should be called with correct check url, method, signal with empty defaults', async () => {
       await getCases({
-        filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
+        filterOptions: DEFAULT_FILTER_OPTIONS,
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
+
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-          assignees: [],
-          reporters: [],
-          tags: [],
-          owner: [SECURITY_SOLUTION_OWNER],
         },
         signal: abortCtrl.signal,
       });
     });
 
-    test('should applies correct filters', async () => {
+    it('should applies correct all filters', async () => {
       await getCases({
         filterOptions: {
-          ...DEFAULT_FILTER_OPTIONS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           assignees: ['123'],
           reporters: [{ username: 'username', full_name: null, email: null }],
           tags,
           status: CaseStatuses.open,
+          severity: CaseSeverity.HIGH,
           search: 'hello',
           owner: [SECURITY_SOLUTION_OWNER],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
+
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
         method: 'GET',
         query: {
@@ -230,13 +230,14 @@ describe('Cases API', () => {
           search: 'hello',
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           status: CaseStatuses.open,
+          severity: CaseSeverity.HIGH,
           owner: [SECURITY_SOLUTION_OWNER],
         },
         signal: abortCtrl.signal,
       });
     });
 
-    test('should apply the severity field correctly (with severity value)', async () => {
+    it('should apply the severity field correctly (with severity value)', async () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
@@ -245,21 +246,19 @@ describe('Cases API', () => {
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
+
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-          assignees: [],
-          reporters: [],
-          tags: [],
           severity: CaseSeverity.HIGH,
         },
         signal: abortCtrl.signal,
       });
     });
 
-    test('should not send the severity field with "all" severity value', async () => {
+    it('should not send the severity field with "all" severity value', async () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
@@ -268,20 +267,121 @@ describe('Cases API', () => {
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
+
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-          assignees: [],
-          reporters: [],
-          tags: [],
         },
         signal: abortCtrl.signal,
       });
     });
 
-    test('should handle tags with weird chars', async () => {
+    it('should apply the severity field correctly (with status value)', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          status: CaseStatuses.open,
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          status: CaseStatuses.open,
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    it('should not send the severity field with "all" status value', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          status: 'all',
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    it('should not send the assignees field if it an empty array', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          assignees: [],
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    it('should convert a single null value to none', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          assignees: null,
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          assignees: 'none',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    it('should converts null value in the array to none', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          assignees: [null, '123'],
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          assignees: ['none', '123'],
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    it('should handle tags with weird chars', async () => {
       const weirdTags: string[] = ['(', '"double"'];
 
       await getCases({
@@ -297,6 +397,7 @@ describe('Cases API', () => {
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
+
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
         method: 'GET',
         query: {
@@ -313,7 +414,7 @@ describe('Cases API', () => {
       });
     });
 
-    test('should return correct response and not covert to camel case registered attachments', async () => {
+    it('should return correct response and not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue(allCasesSnake);
       const resp = await getCases({
         filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
@@ -332,7 +433,7 @@ describe('Cases API', () => {
       fetchMock.mockClear();
     });
 
-    test('should be called with correct check url, method, signal', async () => {
+    it('should be called with correct check url, method, signal', async () => {
       await getCasesStatus({
         http,
         signal: abortCtrl.signal,
@@ -345,7 +446,7 @@ describe('Cases API', () => {
       });
     });
 
-    test('should return correct response', async () => {
+    it('should return correct response', async () => {
       const resp = await getCasesStatus({
         http,
         signal: abortCtrl.signal,
@@ -362,7 +463,7 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(caseUserActionsSnake);
     });
 
-    test('should be called with correct check url, method, signal', async () => {
+    it('should be called with correct check url, method, signal', async () => {
       await getCaseUserActions(basicCase.id, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions`, {
         method: 'GET',
@@ -370,12 +471,12 @@ describe('Cases API', () => {
       });
     });
 
-    test('should return correct response', async () => {
+    it('should return correct response', async () => {
       const resp = await getCaseUserActions(basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(caseUserActions);
     });
 
-    test('should not covert to camel case registered attachments', async () => {
+    it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue(caseUserActionsWithRegisteredAttachmentsSnake);
       const resp = await getCaseUserActions(basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(caseUserActionsWithRegisteredAttachments);
@@ -388,7 +489,7 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(tags);
     });
 
-    test('should be called with correct check url, method, signal', async () => {
+    it('should be called with correct check url, method, signal', async () => {
       await getTags(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/tags`, {
         method: 'GET',
@@ -399,7 +500,7 @@ describe('Cases API', () => {
       });
     });
 
-    test('should return correct response', async () => {
+    it('should return correct response', async () => {
       const resp = await getTags(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
       expect(resp).toEqual(tags);
     });
@@ -413,7 +514,7 @@ describe('Cases API', () => {
 
     const data = { description: 'updated description' };
 
-    test('should be called with correct check url, method, signal', async () => {
+    it('should be called with correct check url, method, signal', async () => {
       await patchCase(basicCase.id, data, basicCase.version, abortCtrl.signal);
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
@@ -425,7 +526,7 @@ describe('Cases API', () => {
       });
     });
 
-    test('should return correct response', async () => {
+    it('should return correct response', async () => {
       const resp = await patchCase(
         basicCase.id,
         { description: 'updated description' },
@@ -436,7 +537,7 @@ describe('Cases API', () => {
       expect(resp).toEqual([basicCase]);
     });
 
-    test('should not covert to camel case registered attachments', async () => {
+    it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue([caseWithRegisteredAttachmentsSnake]);
       const resp = await patchCase(
         basicCase.id,
@@ -463,7 +564,7 @@ describe('Cases API', () => {
       },
     ];
 
-    test('should be called with correct check url, method, signal', async () => {
+    it('should be called with correct check url, method, signal', async () => {
       await updateCases(data, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'PATCH',
@@ -472,9 +573,14 @@ describe('Cases API', () => {
       });
     });
 
-    test('should return correct response should not covert to camel case registered attachments', async () => {
+    it('should return correct response should not covert to camel case registered attachments', async () => {
       const resp = await updateCases(data, abortCtrl.signal);
       expect(resp).toEqual(cases);
+    });
+
+    it('returns an empty array if the cases are empty', async () => {
+      const resp = await updateCases([], abortCtrl.signal);
+      expect(resp).toEqual([]);
     });
   });
 
@@ -484,7 +590,7 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(basicCaseSnake);
     });
 
-    test('should be called with correct check url, method, signal', async () => {
+    it('should be called with correct check url, method, signal', async () => {
       await patchComment({
         caseId: basicCase.id,
         commentId: basicCase.comments[0].id,
@@ -507,7 +613,7 @@ describe('Cases API', () => {
       });
     });
 
-    test('should return correct response', async () => {
+    it('should return correct response', async () => {
       const resp = await patchComment({
         caseId: basicCase.id,
         commentId: basicCase.comments[0].id,
@@ -519,7 +625,7 @@ describe('Cases API', () => {
       expect(resp).toEqual(basicCase);
     });
 
-    test('should not covert to camel case registered attachments', async () => {
+    it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
 
       const resp = await patchComment({
@@ -556,7 +662,7 @@ describe('Cases API', () => {
       owner: SECURITY_SOLUTION_OWNER,
     };
 
-    test('should be called with correct check url, method, signal', async () => {
+    it('should be called with correct check url, method, signal', async () => {
       await postCase(data, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'POST',
@@ -565,12 +671,12 @@ describe('Cases API', () => {
       });
     });
 
-    test('should return correct response', async () => {
+    it('should return correct response', async () => {
       const resp = await postCase(data, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
     });
 
-    test('should not covert to camel case registered attachments', async () => {
+    it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
       const resp = await postCase(data, abortCtrl.signal);
       expect(resp).toEqual(caseWithRegisteredAttachments);
@@ -600,7 +706,7 @@ describe('Cases API', () => {
       },
     ];
 
-    test('should be called with correct check url, method, signal', async () => {
+    it('should be called with correct check url, method, signal', async () => {
       await createAttachments(data, basicCase.id, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(
         INTERNAL_BULK_CREATE_ATTACHMENTS_URL.replace('{case_id}', basicCase.id),
@@ -612,12 +718,12 @@ describe('Cases API', () => {
       );
     });
 
-    test('should return correct response', async () => {
+    it('should return correct response', async () => {
       const resp = await createAttachments(data, basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
     });
 
-    test('should not covert to camel case registered attachments', async () => {
+    it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
       const resp = await createAttachments(data, basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(caseWithRegisteredAttachments);
@@ -632,7 +738,7 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(pushedCaseSnake);
     });
 
-    test('should be called with correct check url, method, signal', async () => {
+    it('should be called with correct check url, method, signal', async () => {
       await pushCase(basicCase.id, connectorId, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(
         `${CASES_URL}/${basicCase.id}/connector/${connectorId}/_push`,
@@ -644,12 +750,12 @@ describe('Cases API', () => {
       );
     });
 
-    test('should return correct response', async () => {
+    it('should return correct response', async () => {
       const resp = await pushCase(basicCase.id, connectorId, abortCtrl.signal);
       expect(resp).toEqual(pushedCase);
     });
 
-    test('should not covert to camel case registered attachments', async () => {
+    it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
       const resp = await pushCase(basicCase.id, connectorId, abortCtrl.signal);
       expect(resp).toEqual(caseWithRegisteredAttachments);
@@ -663,7 +769,7 @@ describe('Cases API', () => {
     });
     const commentId = 'ab1234';
 
-    test('should be called with correct check url, method, signal', async () => {
+    it('should be called with correct check url, method, signal', async () => {
       const resp = await deleteComment({
         caseId: basicCaseId,
         commentId,
@@ -683,7 +789,7 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(['siem', 'observability']);
     });
 
-    test('should be called with correct check url, method, signal', async () => {
+    it('should be called with correct check url, method, signal', async () => {
       const resp = await getFeatureIds(
         { registrationContext: ['security', 'observability.logs'] },
         abortCtrl.signal
@@ -710,7 +816,7 @@ describe('Cases API', () => {
       owner: SECURITY_SOLUTION_OWNER,
     };
 
-    test('should be called with correct check url, method, signal', async () => {
+    it('should be called with correct check url, method, signal', async () => {
       await postComment(data, basicCase.id, abortCtrl.signal);
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/comments`, {
@@ -720,12 +826,12 @@ describe('Cases API', () => {
       });
     });
 
-    test('should return correct response', async () => {
+    it('should return correct response', async () => {
       const resp = await postComment(data, basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
     });
 
-    test('should not covert to camel case registered attachments', async () => {
+    it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
       const resp = await postComment(data, basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(caseWithRegisteredAttachments);

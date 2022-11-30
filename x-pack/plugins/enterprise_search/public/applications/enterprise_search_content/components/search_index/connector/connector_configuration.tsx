@@ -18,7 +18,6 @@ import {
   EuiSpacer,
   EuiSteps,
   EuiCodeBlock,
-  EuiHorizontalRule,
   EuiCallOut,
   EuiButton,
 } from '@elastic/eui';
@@ -48,18 +47,18 @@ import { NativeConnectorConfiguration } from './native_connector_configuration/n
 
 export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
-  const { index: indexData, recheckIndexLoading } = useValues(IndexViewLogic);
+  const { index, recheckIndexLoading } = useValues(IndexViewLogic);
   const { indexName } = useValues(IndexNameLogic);
   const { recheckIndex } = useActions(IndexViewLogic);
-  if (!isConnectorIndex(indexData)) {
+  if (!isConnectorIndex(index)) {
     return <></>;
   }
 
-  if (indexData.connector.is_native && indexData.connector.service_type) {
+  if (index.connector.is_native && index.connector.service_type) {
     return <NativeConnectorConfiguration />;
   }
 
-  const hasApiKey = !!(indexData.connector.api_key_id ?? apiKeyData);
+  const hasApiKey = !!(index.connector.api_key_id ?? apiKeyData);
 
   return (
     <>
@@ -71,10 +70,7 @@ export const ConnectorConfiguration: React.FC = () => {
               steps={[
                 {
                   children: (
-                    <ApiKeyConfig
-                      indexName={indexName}
-                      hasApiKey={!!indexData.connector.api_key_id}
-                    />
+                    <ApiKeyConfig indexName={indexName} hasApiKey={!!index.connector.api_key_id} />
                   ),
                   status: hasApiKey ? 'complete' : 'incomplete',
                   title: i18n.translate(
@@ -87,7 +83,7 @@ export const ConnectorConfiguration: React.FC = () => {
                 },
                 {
                   children: <ConnectorNameAndDescription />,
-                  status: indexData.connector.description ? 'complete' : 'incomplete',
+                  status: index.connector.description ? 'complete' : 'incomplete',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.nameAndDescriptionTitle',
                     {
@@ -166,7 +162,7 @@ export const ConnectorConfiguration: React.FC = () => {
   api_key: "${apiKeyData?.encoded}"
 `
                             : ''
-                        }connector_id: "${indexData.connector.id}"
+                        }connector_id: "${index.connector.id}"
             `}
                       </EuiCodeBlock>
                       <EuiSpacer />
@@ -179,9 +175,25 @@ export const ConnectorConfiguration: React.FC = () => {
                           }
                         )}
                       </EuiText>
-                      <EuiHorizontalRule />
-                      {!indexData.connector.status ||
-                      indexData.connector.status === ConnectorStatus.CREATED ? (
+                    </>
+                  ),
+                  status:
+                    !index.connector.status || index.connector.status === ConnectorStatus.CREATED
+                      ? 'incomplete'
+                      : 'complete',
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.steps.deployConnector.title',
+                    {
+                      defaultMessage: 'Deploy a connector',
+                    }
+                  ),
+                  titleSize: 'xs',
+                },
+                {
+                  children: (
+                    <ConnectorConfigurationConfig>
+                      {!index.connector.status ||
+                      index.connector.status === ConnectorStatus.CREATED ? (
                         <EuiCallOut
                           title={i18n.translate(
                             'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.waitingForConnectorTitle',
@@ -200,6 +212,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           )}
                           <EuiSpacer size="s" />
                           <EuiButton
+                            data-telemetry-id="entSearchContent-connector-configuration-recheckNow"
                             iconType="refresh"
                             onClick={() => recheckIndex()}
                             isLoading={recheckIndexLoading}
@@ -221,30 +234,15 @@ export const ConnectorConfiguration: React.FC = () => {
                             {
                               defaultMessage:
                                 'Your connector {name} has connected to Enterprise Search successfully.',
-                              values: { name: indexData.connector.name },
+                              values: { name: index.connector.name },
                             }
                           )}
                         />
                       )}
-                    </>
+                    </ConnectorConfigurationConfig>
                   ),
                   status:
-                    !indexData.connector.status ||
-                    indexData.connector.status === ConnectorStatus.CREATED
-                      ? 'incomplete'
-                      : 'complete',
-                  title: i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.steps.deployConnector.title',
-                    {
-                      defaultMessage: 'Deploy a connector',
-                    }
-                  ),
-                  titleSize: 'xs',
-                },
-                {
-                  children: <ConnectorConfigurationConfig />,
-                  status:
-                    indexData.connector.status === ConnectorStatus.CONNECTED
+                    index.connector.status === ConnectorStatus.CONNECTED
                       ? 'complete'
                       : 'incomplete',
                   title: i18n.translate(
@@ -273,6 +271,7 @@ export const ConnectorConfiguration: React.FC = () => {
                         <EuiFlexGroup>
                           <EuiFlexItem grow={false}>
                             <EuiButtonTo
+                              data-telemetry-id="entSearchContent-connector-configuration-setScheduleAndSync"
                               to={`${generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
                                 indexName,
                                 tabId: SearchIndexTabId.SCHEDULING,
@@ -290,7 +289,7 @@ export const ConnectorConfiguration: React.FC = () => {
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   ),
-                  status: indexData.connector.scheduling.enabled ? 'complete' : 'incomplete',
+                  status: index.connector.scheduling.enabled ? 'complete' : 'incomplete',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.schedule.title',
                     {

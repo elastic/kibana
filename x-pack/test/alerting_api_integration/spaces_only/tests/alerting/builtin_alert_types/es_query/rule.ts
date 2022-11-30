@@ -220,6 +220,8 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     ].forEach(([searchType, initData]) =>
       it(`runs correctly: use epoch millis - threshold on hit count < > for ${searchType} search type`, async () => {
         // write documents from now to the future end date in groups
+        const endDateMillis = Date.now() + (RULE_INTERVALS_TO_WRITE - 1) * RULE_INTERVAL_MILLIS;
+        endDate = new Date(endDateMillis).toISOString();
         await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
         await initData();
 
@@ -238,7 +240,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
           // during the first execution, the latestTimestamp value should be empty
           // since this rule always fires, the latestTimestamp value should be updated each execution
-          if (!i) {
+          if (i === 0) {
             expect(previousTimestamp).to.be.empty();
           } else {
             expect(previousTimestamp).not.to.be.empty();

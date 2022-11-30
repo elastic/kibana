@@ -107,8 +107,7 @@ export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchSta
   });
   data.charts$.next({
     fetchStatus: initialFetchStatus,
-    chartData: undefined,
-    bucketInterval: undefined,
+    response: undefined,
     recordRawType,
   });
   data.totalHits$.next({

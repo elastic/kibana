@@ -19,6 +19,7 @@ import '../../../common/mock/match_media';
 import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
 import { NetworkKpiComponent } from '.';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 describe('NetworkKpiComponent', () => {
   const state: State = mockGlobalState;
@@ -33,10 +34,22 @@ describe('NetworkKpiComponent', () => {
   };
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
   });
 
   describe('rendering', () => {

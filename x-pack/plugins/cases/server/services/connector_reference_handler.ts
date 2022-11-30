@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { NONE_CONNECTOR_ID } from '../../common/api';
 
 interface Reference {

@@ -40,7 +40,6 @@ const timeFilter = dataStart.query.timefilter.timefilter as jest.Mocked<Timefilt
 timeFilter.getRefreshIntervalUpdate$.mockImplementation(() => refreshInterval$.pipe(map(() => {})));
 timeFilter.getRefreshInterval.mockImplementation(() => refreshInterval$.getValue());
 
-const disableSaveAfterSessionCompletesTimeout = 5 * 60 * 1000;
 const tourDisabled = false;
 
 function Container({ children }: { children?: ReactNode }) {
@@ -64,7 +63,6 @@ test("shouldn't show indicator in case no active search session", async () => {
     sessionService,
     application,
     storage,
-    disableSaveAfterSessionCompletesTimeout,
     usageCollector,
     basePath,
     tourDisabled,
@@ -93,7 +91,6 @@ test("shouldn't show indicator in case app hasn't opt-in", async () => {
     sessionService,
     application,
     storage,
-    disableSaveAfterSessionCompletesTimeout,
     usageCollector,
     basePath,
     tourDisabled,
@@ -124,7 +121,6 @@ test('should show indicator in case there is an active search session', async ()
     sessionService: { ...sessionService, state$ },
     application,
     storage,
-    disableSaveAfterSessionCompletesTimeout,
     usageCollector,
     basePath,
     tourDisabled,
@@ -150,7 +146,6 @@ test('should be disabled in case uiConfig says so ', async () => {
     sessionService: { ...sessionService, state$ },
     application,
     storage,
-    disableSaveAfterSessionCompletesTimeout,
     usageCollector,
     basePath,
     tourDisabled,
@@ -175,7 +170,6 @@ test('should be disabled in case not enough permissions', async () => {
     sessionService: { ...sessionService, state$, hasAccess: () => false },
     application,
     storage,
-    disableSaveAfterSessionCompletesTimeout,
     basePath,
     tourDisabled,
   });
@@ -195,20 +189,15 @@ test('should be disabled in case not enough permissions', async () => {
 });
 
 describe('Completed inactivity', () => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-  });
-  afterEach(() => {
-    jest.useRealTimers();
-  });
   test('save should be disabled after completed and timeout', async () => {
     const state$ = new BehaviorSubject(SearchSessionState.Loading);
 
+    const disableSaveAfterSearchesExpire$ = new BehaviorSubject(false);
+
     const SearchSessionIndicator = createConnectedSearchSessionIndicator({
-      sessionService: { ...sessionService, state$ },
+      sessionService: { ...sessionService, state$, disableSaveAfterSearchesExpire$ },
       application,
       storage,
-      disableSaveAfterSessionCompletesTimeout,
       usageCollector,
       basePath,
       tourDisabled,
@@ -227,37 +216,17 @@ describe('Completed inactivity', () => {
     expect(screen.getByRole('button', { name: 'Save session' })).not.toBeDisabled();
 
     act(() => {
-      jest.advanceTimersByTime(5 * 60 * 1000);
-    });
-
-    expect(screen.getByRole('button', { name: 'Save session' })).not.toBeDisabled();
-
-    act(() => {
-      state$.next(SearchSessionState.Completed);
-    });
-
-    expect(screen.getByRole('button', { name: 'Save session' })).not.toBeDisabled();
-
-    act(() => {
-      jest.advanceTimersByTime(2.5 * 60 * 1000);
-    });
-
-    expect(screen.getByRole('button', { name: 'Save session' })).not.toBeDisabled();
-    expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(0);
-
-    act(() => {
-      jest.advanceTimersByTime(2.5 * 60 * 1000);
+      disableSaveAfterSearchesExpire$.next(true);
     });
 
     expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
-    expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(1);
   });
 });
 
 describe('tour steps', () => {
   describe('loading state', () => {
     beforeAll(() => {
-      jest.useFakeTimers();
+      jest.useFakeTimers({ legacyFakeTimers: true });
     });
 
     afterAll(() => {
@@ -270,7 +239,6 @@ describe('tour steps', () => {
         sessionService: { ...sessionService, state$ },
         application,
         storage,
-        disableSaveAfterSessionCompletesTimeout,
         usageCollector,
         basePath,
         tourDisabled,
@@ -312,7 +280,6 @@ describe('tour steps', () => {
         sessionService: { ...sessionService, state$ },
         application,
         storage,
-        disableSaveAfterSessionCompletesTimeout,
         usageCollector,
         basePath,
         tourDisabled,
@@ -347,7 +314,6 @@ describe('tour steps', () => {
         sessionService: { ...sessionService, state$ },
         application,
         storage,
-        disableSaveAfterSessionCompletesTimeout,
         usageCollector,
         basePath,
         tourDisabled: true,
@@ -393,7 +359,6 @@ describe('tour steps', () => {
       sessionService: { ...sessionService, state$ },
       application,
       storage,
-      disableSaveAfterSessionCompletesTimeout,
       usageCollector,
       basePath,
       tourDisabled,
@@ -421,7 +386,6 @@ describe('tour steps', () => {
       sessionService: { ...sessionService, state$ },
       application,
       storage,
-      disableSaveAfterSessionCompletesTimeout,
       usageCollector,
       basePath,
       tourDisabled,

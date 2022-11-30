@@ -6,14 +6,38 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty, EuiHorizontalRule, EuiPopover, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiHorizontalRule,
+  EuiPopover,
+  EuiText,
+  useEuiFontSize,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 
-export function Warnings({ warnings }: { warnings: React.ReactNode[] }) {
+export function Warnings({
+  warnings,
+  compressed = false,
+  'data-test-subj': dataTestSubj = 'chart-inline-warning-button',
+}: {
+  warnings: React.ReactNode[];
+  compressed?: boolean;
+  'data-test-subj'?: string;
+}) {
+  const { euiTheme } = useEuiTheme();
   const [open, setOpen] = useState(false);
+  const xsFontSize = useEuiFontSize('xs').fontSize;
+
+  const onWarningButtonClick = useCallback(() => {
+    setOpen(!open);
+  }, [open]);
+
   if (warnings.length === 0) return null;
+
   return (
     <>
       <EuiPopover
@@ -21,21 +45,44 @@ export function Warnings({ warnings }: { warnings: React.ReactNode[] }) {
         panelPaddingSize="none"
         closePopover={() => setOpen(false)}
         button={
-          <EuiButtonEmpty
-            color="warning"
-            iconType="alert"
-            onClick={() => setOpen(!open)}
-            size="xs"
-            data-test-subj="chart-inline-warning-button"
-          >
-            {i18n.translate('charts.warning.warningLabel', {
-              defaultMessage:
-                '{numberWarnings, number} {numberWarnings, plural, one {warning} other {warnings}}',
-              values: {
-                numberWarnings: warnings.length,
-              },
-            })}
-          </EuiButtonEmpty>
+          compressed ? (
+            <EuiButton
+              color="warning"
+              css={css`
+                block-size: ${euiTheme.size.l};
+                border-radius: 0 ${euiTheme.border.radius.medium} 0 ${euiTheme.border.radius.small};
+                font-size: ${xsFontSize};
+                padding: 0 ${euiTheme.size.xs};
+                & > * {
+                  gap: ${euiTheme.size.xs};
+                }
+              `}
+              iconSize="s"
+              iconType="alert"
+              minWidth={0}
+              onClick={onWarningButtonClick}
+              size="s"
+              data-test-subj={dataTestSubj}
+            >
+              {warnings.length}
+            </EuiButton>
+          ) : (
+            <EuiButtonEmpty
+              color="warning"
+              iconType="alert"
+              onClick={onWarningButtonClick}
+              size="xs"
+              data-test-subj={dataTestSubj}
+            >
+              {i18n.translate('charts.warning.warningLabel', {
+                defaultMessage:
+                  '{numberWarnings, number} {numberWarnings, plural, one {warning} other {warnings}}',
+                values: {
+                  numberWarnings: warnings.length,
+                },
+              })}
+            </EuiButtonEmpty>
+          )
         }
       >
         <div style={{ maxWidth: 512 }}>
@@ -43,7 +90,7 @@ export function Warnings({ warnings }: { warnings: React.ReactNode[] }) {
             <React.Fragment key={i}>
               <div
                 css={{
-                  padding: euiThemeVars.euiSizeS,
+                  padding: euiTheme.size.s,
                 }}
                 data-test-subj="chart-inline-warning"
               >

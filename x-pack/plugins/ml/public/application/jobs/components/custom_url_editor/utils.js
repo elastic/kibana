@@ -10,7 +10,10 @@ import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import rison from 'rison-node';
 import url from 'url';
 
-import { getPartitioningFieldNames } from '../../../../../common/util/job_utils';
+import {
+  getPartitioningFieldNames,
+  getFiltersForDSLQuery,
+} from '../../../../../common/util/job_utils';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { replaceTokensInUrlValue, isValidLabel } from '../../../util/custom_url_utils';
 import { ml } from '../../../services/ml_api_service';
@@ -20,7 +23,6 @@ import { getSavedObjectsClient, getDashboard } from '../../../util/dependency_ca
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
 import { isFilterPinned } from '@kbn/es-query';
-import { getFiltersForDSLQuery } from '../../../components/anomalies_table/get_filters_for_datafeed_query';
 
 export function getNewCustomUrlDefaults(job, dashboards, dataViews) {
   // Returns the settings object in the format used by the custom URL editor
@@ -51,11 +53,10 @@ export function getNewCustomUrlDefaults(job, dashboards, dataViews) {
     const indicesName = datafeedConfig.indices.join();
     const defaultDataViewId = dataViews.find((dv) => dv.title === indicesName)?.id;
     kibanaSettings.discoverIndexPatternId = defaultDataViewId;
-    kibanaSettings.filters = getFiltersForDSLQuery(
-      job.datafeed_config.query,
-      defaultDataViewId,
-      job.job_id
-    );
+    kibanaSettings.filters =
+      defaultDataViewId === null
+        ? []
+        : getFiltersForDSLQuery(job.datafeed_config.query, defaultDataViewId, job.job_id);
   }
 
   return {

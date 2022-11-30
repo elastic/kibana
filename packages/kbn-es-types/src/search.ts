@@ -8,6 +8,7 @@
 
 import type { ValuesType, UnionToIntersection } from 'utility-types';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypesWithoutBodyKey from '@elastic/elasticsearch/lib/api/types';
 
 interface AggregationsAggregationContainer extends Record<string, any> {
   aggs?: any;
@@ -602,7 +603,9 @@ type WrapAggregationResponse<T> = keyof UnionToIntersection<T> extends never
 
 export type InferSearchResponseOf<
   TDocument = unknown,
-  TSearchRequest extends estypes.SearchRequest = estypes.SearchRequest,
+  TSearchRequest extends
+    | estypes.SearchRequest
+    | (estypesWithoutBodyKey.SearchRequest & { body?: never }) = estypes.SearchRequest,
   TOptions extends { restTotalHitsAsInt?: boolean } = {}
 > = Omit<estypes.SearchResponse<TDocument>, 'aggregations' | 'hits'> &
   (TSearchRequest['body'] extends TopLevelAggregationRequest
@@ -622,9 +625,7 @@ export type InferSearchResponseOf<
             };
           }) & {
         hits: HitsOf<
-          TSearchRequest['body'] extends estypes.SearchRequest['body']
-            ? TSearchRequest['body']
-            : TSearchRequest,
+          TSearchRequest extends estypes.SearchRequest ? TSearchRequest['body'] : TSearchRequest,
           TDocument
         >;
       };

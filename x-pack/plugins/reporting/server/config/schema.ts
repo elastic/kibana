@@ -42,7 +42,7 @@ const QueueSchema = schema.object({
   }),
   pollIntervalErrorMultiplier: schema.number({ defaultValue: 10 }),
   timeout: schema.oneOf([schema.number(), schema.duration()], {
-    defaultValue: moment.duration({ minutes: 2 }),
+    defaultValue: moment.duration({ minutes: 4 }),
   }),
 });
 

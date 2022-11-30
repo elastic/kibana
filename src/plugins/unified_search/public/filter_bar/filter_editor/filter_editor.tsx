@@ -169,7 +169,13 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
           </div>
 
           <EuiPopoverFooter paddingSize="s">
-            <EuiFlexGroup direction="rowReverse" alignItems="center" responsive={false}>
+            {/* Adding isolation here fixes this bug https://github.com/elastic/kibana/issues/142211 */}
+            <EuiFlexGroup
+              direction="rowReverse"
+              alignItems="center"
+              style={{ isolation: 'isolate' }}
+              responsive={false}
+            >
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill

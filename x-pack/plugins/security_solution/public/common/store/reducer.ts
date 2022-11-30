@@ -27,6 +27,8 @@ import { initDataView, SourcererScopeName } from './sourcerer/model';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from './sourcerer/helpers';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
+import type { DataTableReducer } from './data_table';
+import type { DataTableState } from './data_table/types';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
   UsersPluginReducer &
@@ -51,7 +53,8 @@ export const createInitialState = (
     kibanaDataViews: SourcererModel['kibanaDataViews'];
     signalIndexName: SourcererModel['signalIndexName'];
     enableExperimental: ExperimentalFeatures;
-  }
+  },
+  dataTableState: DataTableState
 ): State => {
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(
@@ -104,6 +107,7 @@ export const createInitialState = (
       signalIndexName,
     },
     globalUrlParam: initialGlobalUrlParam,
+    dataTable: dataTableState.dataTable,
   };
 
   return preloadedState;
@@ -113,8 +117,12 @@ export const createInitialState = (
  * Factory for the Security app's redux reducer.
  */
 export const createReducer: (
-  pluginsReducer: SubPluginsInitReducer
-) => Reducer<State, AppAction | AnyAction> = (pluginsReducer: SubPluginsInitReducer) =>
+  pluginsReducer: SubPluginsInitReducer,
+  tgridReducer: DataTableReducer // TODO: remove this param when the table reducer will be moved to security_solution
+) => Reducer<State, AppAction | AnyAction> = (
+  pluginsReducer: SubPluginsInitReducer,
+  tgridReducer: DataTableReducer
+) =>
   combineReducers({
     app: appReducer,
     dragAndDrop: dragAndDropReducer,
@@ -122,4 +130,5 @@ export const createReducer: (
     sourcerer: sourcererReducer,
     globalUrlParam: globalUrlParamReducer,
     ...pluginsReducer,
+    ...tgridReducer,
   });

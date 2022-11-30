@@ -7,8 +7,10 @@
  */
 
 export {
-  guidedSetupSavedObjects,
-  guidedSetupSavedObjectsType,
-  guidedSetupSavedObjectsId,
-  guidedSetupDefaultState,
+  guideStateSavedObjects,
+  guideStateSavedObjectsType,
+  pluginStateSavedObjects,
+  pluginStateSavedObjectsId,
+  pluginStateSavedObjectsType,
 } from './guided_setup';
+export type { PluginStateSO } from './guided_setup';

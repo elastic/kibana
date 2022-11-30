@@ -3,6 +3,11 @@
 exports[`telemetry_ops_stats should return something when there is a metric 1`] = `
 Object {
   "concurrent_connections": 1,
+  "elasticsearch_client": Object {
+    "totalActiveSockets": 25,
+    "totalIdleSockets": 2,
+    "totalQueuedRequests": 0,
+  },
   "os": Object {
     "load": Object {
       "15m": 1,

@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { CasesClientArgs } from '../types';
+import type { CasesClientArgs } from '../types';
 import { getConnectors } from './client';
 
 describe('client', () => {

@@ -9,7 +9,7 @@ import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
-import { verifyAccessAndContext, RewriteResponseCase } from './lib';
+import { verifyAccessAndContext, RewriteResponseCase, rewriteRuleLastRun } from './lib';
 import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
@@ -34,6 +34,8 @@ const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<RuleTypeParams>>
   executionStatus,
   actions,
   scheduledTaskId,
+  lastRun,
+  nextRun,
   ...rest
 }) => ({
   ...rest,
@@ -58,6 +60,8 @@ const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<RuleTypeParams>>
     params,
     connector_type_id: actionTypeId,
   })),
+  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
+  ...(nextRun ? { next_run: nextRun } : {}),
 });
 
 export const resolveRuleRoute = (
@@ -75,7 +79,7 @@ export const resolveRuleRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
-        const rule = await rulesClient.resolve({ id });
+        const rule = await rulesClient.resolve({ id, includeSnoozeData: true });
         return res.ok({
           body: rewriteBodyRes(rule),
         });

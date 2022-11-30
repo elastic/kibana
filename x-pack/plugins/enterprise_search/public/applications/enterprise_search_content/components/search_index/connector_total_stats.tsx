@@ -21,6 +21,8 @@ import { i18n } from '@kbn/i18n';
 
 import { isConnectorIndex } from '../../utils/indices';
 
+import { languageToText } from '../../utils/language_to_text';
+
 import { ConnectorOverviewPanels } from './connector/connector_overview_panels';
 import { NATIVE_CONNECTORS } from './connector/constants';
 import { NameAndDescriptionStats } from './name_and_description_stats';
@@ -71,11 +73,7 @@ export const ConnectorTotalStats: React.FC = () => {
         }
       ),
       isLoading: hideStats,
-      title:
-        indexData.connector.language ??
-        i18n.translate('xpack.enterpriseSearch.content.searchIndex.totalStats.noneLabel', {
-          defaultMessage: 'None',
-        }),
+      title: languageToText(indexData.connector.language ?? ''),
     },
   ];
 

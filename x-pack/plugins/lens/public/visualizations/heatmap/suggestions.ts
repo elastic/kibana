@@ -8,10 +8,10 @@
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { Visualization } from '../../types';
 import type { HeatmapVisualizationState } from './types';
 import { CHART_SHAPES, HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
-import { layerTypes } from '../../../common';
 
 export const getSuggestions: Visualization<HeatmapVisualizationState>['getSuggestions'] = ({
   table,
@@ -81,7 +81,7 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
   const newState: HeatmapVisualizationState = {
     shape: CHART_SHAPES.HEATMAP,
     layerId: table.layerId,
-    layerType: layerTypes.DATA,
+    layerType: LayerTypes.DATA,
     legend: {
       isVisible: state?.legend?.isVisible ?? true,
       position: state?.legend?.position ?? Position.Right,

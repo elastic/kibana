@@ -4,7 +4,7 @@
   "kibanaVersion": "kibana",
   "owner": {
     "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "githubTeam": "kibana-visualizations"
   },
   "description": "Expression XY plugin adds a `xy` renderer and function to the expression plugin. The renderer will display the `xy` chart.",
   "server": true,

@@ -14,7 +14,7 @@ import { TestProviders } from '../../../common/mock';
 import { HostOverview } from '.';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
-import { useHostRiskScore } from '../../../risk_score/containers/all';
+import { useRiskScore } from '../../../risk_score/containers/all';
 
 const defaultProps = {
   data: undefined,
@@ -22,11 +22,12 @@ const defaultProps = {
   refetch: () => {},
   isModuleEnabled: true,
   isLicenseValid: true,
+  loading: true,
 };
 
 jest.mock('../../../risk_score/containers/all');
 
-const mockUseHostRiskScore = useHostRiskScore as jest.Mock;
+const mockUseRiskScore = useRiskScore as jest.Mock;
 
 describe('Host Summary Component', () => {
   const mockProps = {
@@ -45,7 +46,7 @@ describe('Host Summary Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseHostRiskScore.mockReturnValue([true, { ...defaultProps, isModuleEnabled: false }]);
+    mockUseRiskScore.mockReturnValue({ ...defaultProps, isModuleEnabled: false });
   });
 
   test('it renders the default Host Summary', () => {
@@ -80,24 +81,22 @@ describe('Host Summary Component', () => {
     };
     const risk = 'very high host risk';
     const riskScore = 9999999;
-    mockUseHostRiskScore.mockReturnValue([
-      false,
-      {
-        ...defaultProps,
-        data: [
-          {
-            host: {
-              name: 'testHostmame',
-              risk: {
-                rule_risks: [],
-                calculated_score_norm: riskScore,
-                calculated_level: risk,
-              },
+    mockUseRiskScore.mockReturnValue({
+      ...defaultProps,
+      loading: false,
+      data: [
+        {
+          host: {
+            name: 'testHostmame',
+            risk: {
+              rule_risks: [],
+              calculated_score_norm: riskScore,
+              calculated_level: risk,
             },
           },
-        ],
-      },
-    ]);
+        },
+      ],
+    });
 
     const { getByTestId } = render(
       <TestProviders>

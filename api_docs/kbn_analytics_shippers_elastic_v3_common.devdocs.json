@@ -234,11 +234,29 @@
           "(telemetryCounter$: ",
           "Subject",
           "<",
-          "TelemetryCounter",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.TelemetryCounter",
+            "text": "TelemetryCounter"
+          },
           ">, source: string) => (events: ",
-          "Event",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.Event",
+            "text": "Event"
+          },
           "<Record<string, unknown>>[], { type, code, error, }?: { type?: ",
-          "TelemetryCounterType",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.TelemetryCounterType",
+            "text": "TelemetryCounterType"
+          },
           " | undefined; code?: string | undefined; error?: Error | undefined; }) => void"
         ],
         "path": "packages/analytics/shippers/elastic_v3/common/src/report_telemetry_counters.ts",
@@ -257,7 +275,13 @@
             "signature": [
               "Subject",
               "<",
-              "TelemetryCounter",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.TelemetryCounter",
+                "text": "TelemetryCounter"
+              },
               ">"
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/report_telemetry_counters.ts",
@@ -297,7 +321,13 @@
         ],
         "signature": [
           "(events: ",
-          "Event",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.Event",
+            "text": "Event"
+          },
           "<Record<string, unknown>>[]) => string"
         ],
         "path": "packages/analytics/shippers/elastic_v3/common/src/events_to_ndjson.ts",
@@ -314,7 +344,13 @@
               "An array of events {@link Event }"
             ],
             "signature": [
-              "Event",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.Event",
+                "text": "Event"
+              },
               "<Record<string, unknown>>[]"
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/events_to_ndjson.ts",

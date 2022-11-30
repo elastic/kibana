@@ -4,10 +4,9 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
-  "references": [
+  "kbn_references": [
     { "path": "../spaces/tsconfig.json" },
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../task_manager/tsconfig.json" },
@@ -32,8 +31,10 @@
     { "path": "../../../src/plugins/embeddable/tsconfig.json"},
     { "path": "../../../src/plugins/presentation_util/tsconfig.json"},
     { "path": "../../../src/plugins/field_formats/tsconfig.json"},
+    { "path": "../../../src/plugins/chart_expressions/expression_partition_vis/tsconfig.json"},
     { "path": "../../../src/plugins/chart_expressions/expression_heatmap/tsconfig.json"},
     { "path": "../../../src/plugins/chart_expressions/expression_gauge/tsconfig.json"},
+    { "path": "../../../src/plugins/chart_expressions/expression_legacy_metric/tsconfig.json"},
     { "path": "../../../src/plugins/chart_expressions/expression_metric/tsconfig.json"},
     { "path": "../../../src/plugins/data_view_editor/tsconfig.json"},
     { "path": "../../../src/plugins/event_annotation/tsconfig.json"},

@@ -14,7 +14,13 @@ const http = httpServiceMock.createStartContract();
 describe('loadRuleSummary', () => {
   test('should call rule summary API', async () => {
     const resolvedValue: RuleSummary = {
-      alerts: {},
+      alerts: {
+        '1': {
+          flapping: true,
+          status: 'OK',
+          muted: false,
+        },
+      },
       consumer: 'alerts',
       enabled: true,
       errorMessages: [],
@@ -35,7 +41,13 @@ describe('loadRuleSummary', () => {
     };
 
     http.get.mockResolvedValueOnce({
-      alerts: {},
+      alerts: {
+        '1': {
+          flapping: true,
+          status: 'OK',
+          muted: false,
+        },
+      },
       consumer: 'alerts',
       enabled: true,
       error_messages: [],

@@ -19,10 +19,10 @@ import {
 
 import styled, { css } from 'styled-components';
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { ElasticUser } from '../../../containers/types';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { ElasticUser } from '../../../containers/types';
 import * as i18n from '../translations';
-import { UserInfoWithAvatar } from '../../user_profiles/types';
+import type { UserInfoWithAvatar } from '../../user_profiles/types';
 import { HoverableUserWithAvatar } from '../../user_profiles/hoverable_user_with_avatar';
 import { convertToUserInfo } from '../../user_profiles/user_converter';
 
@@ -88,18 +88,20 @@ export const UserList: React.FC<UserListProps> = React.memo(
     }
 
     return (
-      <EuiText data-test-subj={dataTestSubj}>
-        <h4>{headline}</h4>
-        <EuiHorizontalRule margin="xs" />
-        {loading && (
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiLoadingSpinner />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-        {renderUsers(validUsers, handleSendEmail)}
-      </EuiText>
+      <EuiFlexItem grow={false}>
+        <EuiText data-test-subj={dataTestSubj}>
+          <h4>{headline}</h4>
+          <EuiHorizontalRule margin="xs" />
+          {loading && (
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiLoadingSpinner />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+          {renderUsers(validUsers, handleSendEmail)}
+        </EuiText>
+      </EuiFlexItem>
     );
   }
 );

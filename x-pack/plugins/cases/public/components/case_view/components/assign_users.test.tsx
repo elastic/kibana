@@ -10,12 +10,10 @@ import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_
 import { userProfiles, userProfilesMap } from '../../../containers/user_profiles/api.mock';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import {
-  AppMockRenderer,
-  createAppMockRenderer,
-  noUpdateCasesPermissions,
-} from '../../../common/mock';
-import { AssignUsers, AssignUsersProps } from './assign_users';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer, noUpdateCasesPermissions } from '../../../common/mock';
+import type { AssignUsersProps } from './assign_users';
+import { AssignUsers } from './assign_users';
 import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('../../../containers/user_profiles/use_suggest_user_profiles');
@@ -48,7 +46,7 @@ describe('AssignUsers', () => {
   it('does not show any assignees when there are none assigned', () => {
     appMockRender.render(<AssignUsers {...defaultProps} />);
 
-    expect(screen.getByText('No users have been assigned.')).toBeInTheDocument();
+    expect(screen.getByText('No users are assigned')).toBeInTheDocument();
   });
 
   it('does not show the suggest users edit button when the user does not have update permissions', () => {
@@ -97,7 +95,7 @@ describe('AssignUsers', () => {
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
     expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
     expect(screen.queryByText('Wet Dingo')).not.toBeInTheDocument();
-    expect(screen.queryByText('No users have been assigned.')).not.toBeInTheDocument();
+    expect(screen.queryByText('No users are assigned')).not.toBeInTheDocument();
     expect(screen.queryByTestId('case-view-assignees-loading')).not.toBeInTheDocument();
   });
 
@@ -114,7 +112,7 @@ describe('AssignUsers', () => {
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
     expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
     expect(screen.queryByText('Wet Dingo')).not.toBeInTheDocument();
-    expect(screen.queryByText('No users have been assigned.')).not.toBeInTheDocument();
+    expect(screen.queryByText('No users are assigned')).not.toBeInTheDocument();
     expect(screen.queryByTestId('case-view-assignees-loading')).not.toBeInTheDocument();
   });
 

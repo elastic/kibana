@@ -449,7 +449,6 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   // if the Command definition has a `validate()` callback, then call it now
   if (commandDefinition.validate) {
     const validationResult = commandDefinition.validate(command);
-
     if (validationResult !== true) {
       return updateStateWithNewCommandHistoryItem(
         state,

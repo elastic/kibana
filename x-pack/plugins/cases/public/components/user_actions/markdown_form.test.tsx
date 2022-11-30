@@ -8,7 +8,8 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { UserActionMarkdown } from './markdown_form';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 const onChangeEditable = jest.fn();
@@ -53,7 +54,7 @@ describe('UserActionMarkdown ', () => {
         target: { value: newValue },
       });
 
-    wrapper.find(`[data-test-subj="user-action-save-markdown"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="user-action-save-markdown"]`).first().simulate('click');
 
     await waitFor(() => {
       expect(onSaveContent).toHaveBeenCalledWith(newValue);
@@ -67,7 +68,7 @@ describe('UserActionMarkdown ', () => {
       </TestProviders>
     );
 
-    wrapper.find(`[data-test-subj="user-action-save-markdown"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="user-action-save-markdown"]`).first().simulate('click');
 
     await waitFor(() => {
       expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);

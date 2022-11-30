@@ -187,10 +187,7 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
     document['service.node.name'] =
       document['service.node.name'] || document['container.id'] || document['host.name'];
     document['ecs.version'] = '1.4';
-    // TODO this non standard field should not be enriched here
-    if (document['processor.event'] !== 'metric') {
-      document['timestamp.us'] = document['@timestamp']! * 1000;
-    }
+
     return document;
   }
 

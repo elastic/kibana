@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
-import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
-import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 import moment from 'moment';
 import { LogStream } from '@kbn/infra-plugin/public';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useFetcher } from '../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
@@ -19,7 +16,7 @@ import {
   CONTAINER_ID,
   HOST_NAME,
   SERVICE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 
@@ -32,7 +29,7 @@ export function ServiceLogs() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { data, status } = useFetcher(
+  const { data } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi(
@@ -53,32 +50,6 @@ export function ServiceLogs() {
     },
     [environment, kuery, serviceName, start, end]
   );
-
-  const noInfrastructureData = useMemo(() => {
-    return isEmpty(data?.containerIds) && isEmpty(data?.hostNames);
-  }, [data]);
-
-  if (status === FETCH_STATUS.LOADING) {
-    return (
-      <div style={{ textAlign: 'center' }}>
-        <EuiLoadingSpinner size="m" />
-      </div>
-    );
-  }
-
-  if (status === FETCH_STATUS.SUCCESS && noInfrastructureData) {
-    return (
-      <EuiEmptyPrompt
-        title={
-          <h2>
-            {i18n.translate('xpack.apm.serviceLogs.noInfrastructureMessage', {
-              defaultMessage: 'There are no log messages to display.',
-            })}
-          </h2>
-        }
-      />
-    );
-  }
 
   return (
     <LogStream

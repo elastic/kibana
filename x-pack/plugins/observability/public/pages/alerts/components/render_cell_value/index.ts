@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getRenderCellValue, getMappedNonEcsValue } from './render_cell_value';
+export { getRenderCellValue } from './render_cell_value';

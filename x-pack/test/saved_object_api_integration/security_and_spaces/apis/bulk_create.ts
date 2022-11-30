@@ -85,6 +85,19 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
       expectedNamespaces,
     },
   ];
+  const badRequests = [
+    { ...CASES.HIDDEN, ...fail400() },
+    {
+      ...CASES.INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE,
+      initialNamespaces: ['x', 'y'],
+      ...fail400(), // cannot be created in multiple spaces -- second try below succeeds
+    },
+    {
+      ...CASES.INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE,
+      initialNamespaces: [ALL_SPACES_ID],
+      ...fail400(), // cannot be created in multiple spaces -- second try below succeeds
+    },
+  ];
   const crossNamespace = [
     {
       ...CASES.ALIAS_CONFLICT_OBJ,
@@ -93,81 +106,61 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
       fail409Param: 'aliasConflictAllSpaces', // second try fails because an alias exists in space_x, the default space, and space_1 (but not space_y because that alias is disabled)
       // note that if an object was successfully created with this type/ID in the first try, that won't change this outcome, because an alias conflict supersedes all other types of conflicts
     },
-    {
-      ...CASES.INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE,
-      initialNamespaces: ['x', 'y'],
-      ...fail400(), // cannot be created in multiple spaces
-    },
     CASES.INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE, // second try creates it in a single other space, which is valid
-    {
-      ...CASES.INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE,
-      initialNamespaces: [ALL_SPACES_ID],
-      ...fail400(), // cannot be created in multiple spaces
-    },
     CASES.INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE, // second try creates it in a single other space, which is valid
     CASES.INITIAL_NS_MULTI_NAMESPACE_OBJ_EACH_SPACE,
     CASES.INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES,
   ];
-  const hiddenType = [{ ...CASES.HIDDEN, ...fail400() }];
-  const allTypes = [...normalTypes, ...crossNamespace, ...hiddenType];
-  return { normalTypes, crossNamespace, hiddenType, allTypes };
+  const allTypes = [...normalTypes, ...badRequests, ...crossNamespace];
+  return { normalTypes, badRequests, crossNamespace, allTypes };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-
+export default function (context: FtrProviderContext) {
   const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
-    bulkCreateTestSuiteFactory(esArchiver, supertest);
+    bulkCreateTestSuiteFactory(context);
   const createTests = (overwrite: boolean, spaceId: string, user: TestUser) => {
-    const { normalTypes, crossNamespace, hiddenType, allTypes } = createTestCases(
+    const { normalTypes, badRequests, crossNamespace, allTypes } = createTestCases(
       overwrite,
       spaceId
     );
     // use singleRequest to reduce execution time and/or test combined cases
-    const authorizedCommon = [
-      createTestDefinitions(normalTypes, false, overwrite, {
-        spaceId,
-        user,
-        singleRequest: true,
-      }),
-      createTestDefinitions(hiddenType, true, overwrite, { spaceId, user }),
-    ].flat();
+    const singleRequest = true;
     return {
-      unauthorized: createTestDefinitions(allTypes, true, overwrite, { spaceId, user }),
-      authorizedAtSpace: [
-        authorizedCommon,
+      unauthorized: [
+        createTestDefinitions(normalTypes, true, overwrite, { spaceId, user }),
+        createTestDefinitions(badRequests, false, overwrite, { spaceId, user, singleRequest }), // validation for hidden type and initialNamespaces returns 400 Bad Request before authZ check
         createTestDefinitions(crossNamespace, true, overwrite, { spaceId, user }),
         createTestDefinitions(allTypes, true, overwrite, {
           spaceId,
           user,
-          singleRequest: true,
+          singleRequest,
+          responseBodyOverride: expectSavedObjectForbidden([
+            'dashboard,globaltype,isolatedtype,resolvetype,sharecapabletype,sharedtype', // 'hiddentype' is not included in the 403 message, it was filtered out before the authZ check
+          ]),
         }),
       ].flat(),
-      authorizedEverywhere: [
-        authorizedCommon,
-        createTestDefinitions(crossNamespace, false, overwrite, {
-          spaceId,
-          user,
-          singleRequest: true,
-        }),
+      authorizedAtSpace: [
+        createTestDefinitions(normalTypes, false, overwrite, { spaceId, user, singleRequest }),
+        createTestDefinitions(badRequests, false, overwrite, { spaceId, user, singleRequest }), // validation for hidden type and initialNamespaces returns 400 Bad Request before authZ check
+        createTestDefinitions(crossNamespace, true, overwrite, { spaceId, user }),
         createTestDefinitions(allTypes, true, overwrite, {
           spaceId,
           user,
-          singleRequest: true,
-          responseBodyOverride: expectSavedObjectForbidden(['hiddentype']),
+          singleRequest,
+          responseBodyOverride: expectSavedObjectForbidden([
+            'dashboard,globaltype,isolatedtype,resolvetype,sharecapabletype,sharedtype', // 'hiddentype' is not included in the 403 message, it was filtered out before the authZ check
+          ]),
         }),
       ].flat(),
-      superuser: createTestDefinitions(allTypes, false, overwrite, {
+      authorizedEverywhere: createTestDefinitions(allTypes, false, overwrite, {
         spaceId,
         user,
-        singleRequest: true,
+        singleRequest,
       }),
     };
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/122827
-  describe.skip('_bulk_create', () => {
+  describe('_bulk_create', () => {
     getTestScenarios([false, true]).securityAndSpaces.forEach(
       ({ spaceId, users, modifier: overwrite }) => {
         const suffix = ` within the ${spaceId} space${overwrite ? ' with overwrite enabled' : ''}`;
@@ -190,13 +183,10 @@ export default function ({ getService }: FtrProviderContext) {
         const { authorizedAtSpace } = createTests(overwrite!, spaceId, users.allAtSpace);
         _addTests(users.allAtSpace, authorizedAtSpace);
 
-        [users.dualAll, users.allGlobally].forEach((user) => {
+        [users.dualAll, users.allGlobally, users.superuser].forEach((user) => {
           const { authorizedEverywhere } = createTests(overwrite!, spaceId, user);
           _addTests(user, authorizedEverywhere);
         });
-
-        const { superuser } = createTests(overwrite!, spaceId, users.superuser);
-        _addTests(users.superuser, superuser);
       }
     );
   });

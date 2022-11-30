@@ -64,9 +64,10 @@ export interface TimeseriesVisProps {
   getConfig: IUiSettingsClient['get'];
   syncColors: boolean;
   syncTooltips: boolean;
+  syncCursor: boolean;
   palettesService: PaletteRegistry;
   indexPattern?: FetchedIndexPattern['indexPattern'];
   /** @deprecated please use indexPattern.fieldFormatMap instead **/
   fieldFormatMap?: FieldFormatMap;
-  initialRender: () => void;
+  initialRender: () => void | undefined;
 }

@@ -16,8 +16,6 @@
  * last([1, 2, 3]) // returns 3
  */
 
-module.exports = { last };
-
 function last(a) {
   if (Array.isArray(a)) {
     return a[a.length - 1];
@@ -26,3 +24,4 @@ function last(a) {
 }
 
 last.skipNumberValidation = true;
+module.exports = { last };

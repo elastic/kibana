@@ -46,7 +46,7 @@ export const TIMELINES_USERNAME = '[data-test-subj="username"]';
 
 export const REFRESH_BUTTON = '[data-test-subj="refreshButton-linkIcon"]';
 
-export const TIMELINES_OVERVIEW = '[data-test-subj="timelines-container"]';
+const TIMELINES_OVERVIEW = '[data-test-subj="timelines-container"]';
 
 export const TIMELINES_OVERVIEW_ONLY_FAVORITES = `${TIMELINES_OVERVIEW} [data-test-subj="only-favorites-toggle"]`;
 

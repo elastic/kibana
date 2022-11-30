@@ -1,6 +1,6 @@
 {
   "extends": "../../../../../../../tsconfig.base.json",
-  "references": [{ "path": "../../../../../../../test/tsconfig.json" }],
+  "kbn_references": [{ "path": "../../../../../../../test/tsconfig.json" }],
   "include": ["./**/*"],
   "compilerOptions": {
     "outDir": "../../../../target/cypress/types/shared",

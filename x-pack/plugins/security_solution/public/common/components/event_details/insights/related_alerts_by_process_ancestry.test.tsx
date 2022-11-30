@@ -43,6 +43,8 @@ const props = {
     values: ['original'],
     isObjectArray: false,
   },
+  scopeId: 'table-test',
+  isActiveTimelines: false,
 };
 describe('RelatedAlertsByProcessAncestry', () => {
   beforeEach(() => {
@@ -116,11 +118,30 @@ describe('RelatedAlertsByProcessAncestry', () => {
     });
   });
 
-  it('renders a special message when there are no alerts to display', async () => {
+  it('renders a special message when there are no alerts to display (empty response)', async () => {
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,
       error: false,
       alertIds: [] as string[],
+    });
+
+    render(
+      <TestProviders>
+        <RelatedAlertsByProcessAncestry {...props} />
+      </TestProviders>
+    );
+
+    userEvent.click(screen.getByText(PROCESS_ANCESTRY));
+    await waitFor(() => {
+      expect(screen.getByText(PROCESS_ANCESTRY_EMPTY)).toBeInTheDocument();
+    });
+  });
+
+  it('renders a special message when there are no alerts to display (undefined case)', async () => {
+    mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
+      loading: false,
+      error: false,
+      alertIds: undefined,
     });
 
     render(

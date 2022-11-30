@@ -8,8 +8,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSearchBar } from '@elastic/eui';
 
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import * as sharedI18n from '../../utils/translations';
 import * as i18n from './translations';
 import type { GetExceptionItemProps } from '.';
 
@@ -47,10 +45,10 @@ interface ExceptionsViewerSearchBarProps {
   canAddException: boolean;
   // Exception list type used to determine what type of item is
   // being created when "onAddExceptionClick" is invoked
-  listType: ExceptionListTypeEnum;
+  isEndpoint: boolean;
   isSearching: boolean;
   onSearch: (arg: GetExceptionItemProps) => void;
-  onAddExceptionClick: (type: ExceptionListTypeEnum) => void;
+  onAddExceptionClick: () => void;
 }
 
 /**
@@ -58,7 +56,7 @@ interface ExceptionsViewerSearchBarProps {
  */
 const ExceptionsViewerSearchBarComponent = ({
   canAddException,
-  listType,
+  isEndpoint,
   isSearching,
   onSearch,
   onAddExceptionClick,
@@ -71,14 +69,12 @@ const ExceptionsViewerSearchBarComponent = ({
   );
 
   const handleAddException = useCallback(() => {
-    onAddExceptionClick(listType);
-  }, [onAddExceptionClick, listType]);
+    onAddExceptionClick();
+  }, [onAddExceptionClick]);
 
   const addExceptionButtonText = useMemo(() => {
-    return listType === ExceptionListTypeEnum.ENDPOINT
-      ? sharedI18n.ADD_TO_ENDPOINT_LIST
-      : sharedI18n.ADD_TO_DETECTIONS_LIST;
-  }, [listType]);
+    return isEndpoint ? i18n.ADD_TO_ENDPOINT_LIST : i18n.ADD_TO_DETECTIONS_LIST;
+  }, [isEndpoint]);
 
   return (
     <EuiFlexGroup alignItems="center">

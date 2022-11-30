@@ -4,11 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * On master, the version should represent the next major version (e.g., master --> 8.0.0)
- * The release branch should match the release version (e.g., 7.x --> 7.0.0)
- */
-export const MAJOR_VERSION = '8.0.0';
 
 export const API_BASE_PATH = '/api/upgrade_assistant';
 

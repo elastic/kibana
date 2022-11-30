@@ -13,34 +13,56 @@ import { Span } from './span';
 import { Transaction } from './transaction';
 import { ApmApplicationMetricFields, ApmFields } from './apm_fields';
 
+export type SpanParams = {
+  spanName: string;
+  spanType: string;
+  spanSubtype?: string;
+} & ApmFields;
+
 export class Instance extends Entity<ApmFields> {
-  transaction({
-    transactionName,
-    transactionType = 'request',
-  }: {
-    transactionName: string;
-    transactionType?: string;
-  }) {
+  transaction(
+    ...options:
+      | [{ transactionName: string; transactionType?: string }]
+      | [string]
+      | [string, string]
+  ) {
+    let transactionName: string;
+    let transactionType: string | undefined;
+    if (options.length === 2) {
+      transactionName = options[0];
+      transactionType = options[1];
+    } else if (typeof options[0] === 'string') {
+      transactionName = options[0];
+    } else {
+      transactionName = options[0].transactionName;
+      transactionType = options[0].transactionType;
+    }
+
     return new Transaction({
       ...this.fields,
       'transaction.name': transactionName,
-      'transaction.type': transactionType,
+      'transaction.type': transactionType || 'request',
     });
   }
 
-  span({
-    spanName,
-    spanType,
-    spanSubtype,
-    ...apmFields
-  }: {
-    spanName: string;
-    spanType: string;
-    spanSubtype?: string;
-  } & ApmFields) {
+  span(...options: [string, string] | [string, string, string] | [SpanParams]) {
+    let spanName: string;
+    let spanType: string;
+    let spanSubtype: string;
+    let fields: ApmFields;
+
+    if (options.length === 3 || options.length === 2) {
+      spanName = options[0];
+      spanType = options[1];
+      spanSubtype = options[2] || 'unknown';
+      fields = {};
+    } else {
+      ({ spanName, spanType, spanSubtype = 'unknown', ...fields } = options[0]);
+    }
+
     return new Span({
       ...this.fields,
-      ...apmFields,
+      ...fields,
       'span.name': spanName,
       'span.type': spanType,
       'span.subtype': spanSubtype,

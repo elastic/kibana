@@ -8,7 +8,8 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../../common/mock';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import { MultipleAlertsCommentEvent, SingleAlertCommentEvent } from './alert_event';
 

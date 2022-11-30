@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
@@ -20,9 +20,10 @@ import {
   EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSwitch,
 } from '@elastic/eui';
 
-import { useStartServices } from '../../../hooks';
+import { sendPutSettings, useGetSettings, useStartServices } from '../../../hooks';
 
 export type IntegrationPreferenceType = 'recommended' | 'beats' | 'agent';
 
@@ -34,6 +35,7 @@ interface Option {
 export interface Props {
   initialType: IntegrationPreferenceType;
   onChange: (type: IntegrationPreferenceType) => void;
+  onPrereleaseEnabledChange: (prerelease: boolean) => void;
 }
 
 const recommendedTooltip = (
@@ -45,6 +47,10 @@ const recommendedTooltip = (
 
 const Item = styled(EuiFlexItem)`
   padding-left: ${(props) => props.theme.eui.euiSizeXS};
+`;
+
+const EuiSwitchNoWrap = styled(EuiSwitch)`
+  white-space: nowrap;
 `;
 
 const options: Option[] = [
@@ -77,10 +83,45 @@ const options: Option[] = [
   },
 ];
 
-export const IntegrationPreference = ({ initialType, onChange }: Props) => {
+export const IntegrationPreference = ({
+  initialType,
+  onChange,
+  onPrereleaseEnabledChange,
+}: Props) => {
   const [idSelected, setIdSelected] = React.useState<IntegrationPreferenceType>(initialType);
 
   const { docLinks } = useStartServices();
+
+  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
+    boolean | undefined
+  >(undefined);
+
+  const { data: settings, error: settingsError } = useGetSettings();
+
+  useEffect(() => {
+    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
+    if (settings?.item) {
+      setPrereleaseIntegrationsEnabled(isEnabled);
+    } else if (settingsError) {
+      setPrereleaseIntegrationsEnabled(false);
+    }
+  }, [settings?.item, settingsError]);
+
+  useEffect(() => {
+    if (prereleaseIntegrationsEnabled !== undefined) {
+      onPrereleaseEnabledChange(prereleaseIntegrationsEnabled);
+    }
+  }, [onPrereleaseEnabledChange, prereleaseIntegrationsEnabled]);
+
+  const updateSettings = useCallback(async (prerelease: boolean) => {
+    const res = await sendPutSettings({
+      prerelease_integrations_enabled: prerelease,
+    });
+
+    if (res.error) {
+      throw res.error;
+    }
+  }, []);
 
   const link = (
     <EuiLink href={docLinks.links.fleet.beatsAgentComparison}>
@@ -105,8 +146,28 @@ export const IntegrationPreference = ({ initialType, onChange }: Props) => {
     label: option.label,
   }));
 
+  const onPrereleaseSwitchChange = (
+    event: React.BaseSyntheticEvent<
+      React.MouseEvent<HTMLButtonElement>,
+      HTMLButtonElement,
+      EventTarget & { checked: boolean }
+    >
+  ) => {
+    const isChecked = event.target.checked;
+    setPrereleaseIntegrationsEnabled(isChecked);
+    updateSettings(isChecked);
+  };
+
   return (
     <EuiPanel hasShadow={false} paddingSize="none">
+      {prereleaseIntegrationsEnabled !== undefined && (
+        <EuiSwitchNoWrap
+          label="Display beta integrations"
+          checked={prereleaseIntegrationsEnabled}
+          onChange={onPrereleaseSwitchChange}
+        />
+      )}
+      <EuiSpacer size="l" />
       <EuiText size="s">{title}</EuiText>
       <EuiSpacer size="m" />
       <EuiForm>

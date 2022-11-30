@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { captureBodyRt } from '../runtime_types/capture_body_rt';
 import { logLevelRt } from '../runtime_types/log_level_rt';
+import { traceContinuationStrategyRt } from '../runtime_types/trace_continuation_strategy_rt';
 import { RawSettingDefinition } from './types';
 
 export const generalSettings: RawSettingDefinition[] = [
@@ -72,6 +73,29 @@ export const generalSettings: RawSettingDefinition[] = [
     excludeAgents: ['js-base', 'rum-js', 'php'],
   },
 
+  {
+    key: 'capture_body_content_types',
+    type: 'text',
+    defaultValue:
+      'application/x-www-form-urlencoded*, text/*, application/json*, application/xml*',
+    label: i18n.translate(
+      'xpack.apm.agentConfig.captureBodyContentTypes.label',
+      {
+        defaultMessage: 'Capture Body Content Types',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.captureBodyContentTypes.description',
+      {
+        defaultMessage:
+          'Configures which content types should be recorded.\n' +
+          '\n' +
+          'The defaults end with a wildcard so that content types like `text/plain; charset=utf-8` are captured as well.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
   // Capture headers
   {
     key: 'capture_headers',
@@ -88,6 +112,67 @@ export const generalSettings: RawSettingDefinition[] = [
       }
     ),
     excludeAgents: ['js-base', 'rum-js', 'nodejs', 'php'],
+  },
+
+  {
+    key: 'dedot_custom_metrics',
+    type: 'boolean',
+    defaultValue: 'true',
+    label: i18n.translate('xpack.apm.agentConfig.dedotCustomMetrics.label', {
+      defaultMessage: 'Dedot custom metrics',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.dedotCustomMetrics.description',
+      {
+        defaultMessage:
+          'Replaces dots with underscores in the metric names for custom metrics.\n' +
+          '\n' +
+          'WARNING: Setting this to `false` can lead to mapping conflicts as dots indicate nesting in Elasticsearch.\n' +
+          'An example of when a conflict happens is two metrics with the name `foo` and `foo.bar`.\n' +
+          'The first metric maps `foo` to a number and the second metric maps `foo` as an object.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'exit_span_min_duration',
+    type: 'duration',
+    defaultValue: '0ms',
+    min: '0ms',
+    label: i18n.translate('xpack.apm.agentConfig.exitSpanMinDuration.label', {
+      defaultMessage: 'Exit span min duration',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.exitSpanMinDuration.description',
+      {
+        defaultMessage:
+          'Exit spans are spans that represent a call to an external service, like a database. If such calls are very short, they are usually not relevant and can be ignored.\n' +
+          '\n' +
+          'NOTE: If a span propagates distributed tracing ids, it will not be ignored, even if it is shorter than the configured threshold. This is to ensure that no broken traces are recorded.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'ignore_message_queues',
+    type: 'text',
+    defaultValue: '',
+    label: i18n.translate('xpack.apm.agentConfig.ignoreMessageQueues.label', {
+      defaultMessage: 'Ignore message queues',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.ignoreMessageQueues.description',
+      {
+        defaultMessage:
+          'Used to filter out specific messaging queues/topics from being traced. \n' +
+          '\n' +
+          'This property should be set to an array containing one or more strings.\n' +
+          'When set, sends-to and receives-from the specified queues/topic will be ignored.',
+      }
+    ),
+    includeAgents: ['java'],
   },
 
   // LOG_LEVEL
@@ -147,6 +232,68 @@ export const generalSettings: RawSettingDefinition[] = [
     includeAgents: ['java'],
   },
 
+  {
+    key: 'span_compression_enabled',
+    type: 'boolean',
+    defaultValue: 'true',
+    label: i18n.translate(
+      'xpack.apm.agentConfig.spanCompressionEnabled.label',
+      {
+        defaultMessage: 'Span compression enabled',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.spanCompressionEnabled.description',
+      {
+        defaultMessage:
+          'Setting this option to true will enable span compression feature.\n' +
+          'Span compression reduces the collection, processing, and storage overhead, and removes clutter from the UI. The tradeoff is that some information such as DB statements of all the compressed spans will not be collected.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'span_compression_exact_match_max_duration',
+    type: 'duration',
+    defaultValue: '50ms',
+    min: '0ms',
+    label: i18n.translate(
+      'xpack.apm.agentConfig.spanCompressionExactMatchMaxDuration.label',
+      {
+        defaultMessage: 'Span compression exact match max duration',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.spanCompressionExactMatchMaxDuration.description',
+      {
+        defaultMessage:
+          'Consecutive spans that are exact match and that are under this threshold will be compressed into a single composite span. This option does not apply to composite spans. This reduces the collection, processing, and storage overhead, and removes clutter from the UI. The tradeoff is that the DB statements of all the compressed spans will not be collected.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+  {
+    key: 'span_compression_same_kind_max_duration',
+    type: 'duration',
+    defaultValue: '0ms',
+    min: '0ms',
+    label: i18n.translate(
+      'xpack.apm.agentConfig.spanCompressionSameKindMaxDuration.label',
+      {
+        defaultMessage: 'Span compression same kind max duration',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.spanCompressionSameKindMaxDuration.description',
+      {
+        defaultMessage:
+          'Consecutive spans to the same destination that are under this threshold will be compressed into a single composite span. This option does not apply to composite spans. This reduces the collection, processing, and storage overhead, and removes clutter from the UI. The tradeoff is that the DB statements of all the compressed spans will not be collected.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
   // SPAN_FRAMES_MIN_DURATION
   {
     key: 'span_frames_min_duration',
@@ -182,6 +329,44 @@ export const generalSettings: RawSettingDefinition[] = [
       }
     ),
     includeAgents: ['java', 'dotnet', 'go'],
+  },
+
+  {
+    key: 'trace_continuation_strategy',
+    validation: traceContinuationStrategyRt,
+    type: 'select',
+    defaultValue: 'continue',
+    label: i18n.translate(
+      'xpack.apm.agentConfig.traceContinuationStrategy.label',
+      {
+        defaultMessage: 'Trace continuation strategy',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.traceContinuationStrategy.description',
+      {
+        defaultMessage:
+          'This option allows some control over how the APM agent handles W3C trace-context headers on incoming requests. By default, the `traceparent` and `tracestate` headers are used per W3C spec for distributed tracing. However, in certain cases it can be helpful to not use the incoming `traceparent` header. Some example use cases:\n' +
+          '\n' +
+          '* An Elastic-monitored service is receiving requests with `traceparent` headers from unmonitored services.\n' +
+          '* An Elastic-monitored service is publicly exposed, and does not want tracing data (trace-ids, sampling decisions) to possibly be spoofed by user requests.\n' +
+          '\n' +
+          'Valid values are:\n' +
+          "* 'continue': The default behavior. An incoming `traceparent` value is used to continue the trace and determine the sampling decision.\n" +
+          "* 'restart': Always ignores the `traceparent` header of incoming requests. A new trace-id will be generated and the sampling decision will be made based on transaction_sample_rate. A span link will be made to the incoming `traceparent`.\n" +
+          "* 'restart_external': If an incoming request includes the `es` vendor flag in `tracestate`, then any `traceparent` will be considered internal and will be handled as described for 'continue' above. Otherwise, any `traceparent` is considered external and will be handled as described for 'restart' above.\n" +
+          '\n' +
+          'Starting with Elastic Observability 8.2, span links are visible in trace views.\n' +
+          '\n' +
+          'This option is case-insensitive.',
+      }
+    ),
+    options: [
+      { text: 'continue', value: 'continue' },
+      { text: 'restart', value: 'restart' },
+      { text: 'restart_external', value: 'restart_external' },
+    ],
+    includeAgents: ['java'],
   },
 
   // Transaction max spans
@@ -256,5 +441,77 @@ export const generalSettings: RawSettingDefinition[] = [
       }
     ),
     includeAgents: ['java', 'nodejs', 'python', 'dotnet', 'ruby', 'go'],
+  },
+
+  {
+    key: 'transaction_ignore_user_agents',
+    type: 'text',
+    defaultValue: '',
+    label: i18n.translate(
+      'xpack.apm.agentConfig.transactionIgnoreUserAgents.label',
+      {
+        defaultMessage: 'Transaction ignore user agents',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.transactionIgnoreUserAgents.description',
+      {
+        defaultMessage:
+          'Used to restrict requests from certain User-Agents from being instrumented.\n' +
+          '\n' +
+          'When an incoming HTTP request is detected,\n' +
+          'the User-Agent from the request headers will be tested against each element in this list.\n' +
+          'Example: `curl/*`, `*pingdom*`',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'use_path_as_transaction_name',
+    type: 'boolean',
+    defaultValue: 'false',
+    label: i18n.translate(
+      'xpack.apm.agentConfig.usePathAsTransactionName.label',
+      {
+        defaultMessage: 'Use path as transaction name',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.usePathAsTransactionName.description',
+      {
+        defaultMessage:
+          'If set to `true`,\n' +
+          'transaction names of unsupported or partially-supported frameworks will be in the form of `$method $path` instead of just `$method unknown route`.\n' +
+          '\n' +
+          'WARNING: If your URLs contain path parameters like `/user/$userId`,\n' +
+          'you should be very careful when enabling this flag,\n' +
+          'as it can lead to an explosion of transaction groups.\n' +
+          'Take a look at the `transaction_name_groups` option on how to mitigate this problem by grouping URLs together.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'transaction_name_groups',
+    type: 'text',
+    defaultValue: '',
+    label: i18n.translate('xpack.apm.agentConfig.transactionNameGroups.label', {
+      defaultMessage: 'Transaction name groups',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.transactionNameGroups.description',
+      {
+        defaultMessage:
+          'With this option,\n' +
+          'you can group transaction names that contain dynamic parts with a wildcard expression.\n' +
+          'For example,\n' +
+          'the pattern `GET /user/*/cart` would consolidate transactions,\n' +
+          'such as `GET /users/42/cart` and `GET /users/73/cart` into a single transaction name `GET /users/*/cart`,\n' +
+          'hence reducing the transaction name cardinality.',
+      }
+    ),
+    includeAgents: ['java'],
   },
 ];

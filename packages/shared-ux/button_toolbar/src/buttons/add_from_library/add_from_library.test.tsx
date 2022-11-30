@@ -14,6 +14,6 @@ import { AddFromLibraryButton } from './add_from_library';
 describe('<ToolbarButton />', () => {
   test('is rendered', () => {
     const component = mountWithIntl(<AddFromLibraryButton />);
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 });

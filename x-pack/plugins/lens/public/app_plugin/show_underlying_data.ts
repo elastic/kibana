@@ -110,16 +110,7 @@ export function getLayerMetaInfo(
       isVisible,
     };
   }
-  // maybe add also datasourceId validation here?
-  if (datasourceAPI.datasourceId !== 'indexpattern') {
-    return {
-      meta: undefined,
-      error: i18n.translate('xpack.lens.app.showUnderlyingDataUnsupportedDatasource', {
-        defaultMessage: 'Underlying data does not support the current datasource',
-      }),
-      isVisible,
-    };
-  }
+
   const tableSpec = datasourceAPI.getTableSpec();
 
   const columnsWithNoTimeShifts = tableSpec.filter(

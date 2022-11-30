@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
+import { TimelineId } from '../../../../../common/types';
 import type { AlertSummaryRow } from '../helpers';
 import { getEmptyTagValue } from '../../empty_value';
 import { InvestigateInTimelineButton } from './investigate_in_timeline_button';
@@ -22,18 +23,18 @@ const PrevalenceCell: React.FC<AlertSummaryRow['description']> = ({
   eventId,
   fieldFromBrowserField,
   linkValue,
-  timelineId,
+  scopeId,
   values,
 }) => {
   const { loading, count } = useAlertPrevalence({
     field: data.field,
-    timelineId,
+    isActiveTimelines: scopeId === TimelineId.active,
     value: values,
     signalIndexName: null,
   });
 
   const cellDataProviders = useActionCellDataProvider({
-    contextId: timelineId,
+    contextId: scopeId,
     eventId,
     field: data.field,
     fieldFormat: data.format,

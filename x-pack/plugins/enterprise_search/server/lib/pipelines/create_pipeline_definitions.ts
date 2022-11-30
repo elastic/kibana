@@ -27,24 +27,24 @@ export interface CreatedPipelines {
  * @param indexName the index for which the pipelines should be created.
  * @param esClient the Elasticsearch Client with which to create the pipelines.
  */
-export const createIndexPipelineDefinitions = (
+export const createIndexPipelineDefinitions = async (
   indexName: string,
   esClient: ElasticsearchClient
-): CreatedPipelines => {
+): Promise<CreatedPipelines> => {
   // TODO: add back descriptions (see: https://github.com/elastic/elasticsearch-specification/issues/1827)
-  esClient.ingest.putPipeline({
+  await esClient.ingest.putPipeline({
     description: `Enterprise Search Machine Learning Inference pipeline for the '${indexName}' index`,
     id: getInferencePipelineNameFromIndexName(indexName),
     processors: [],
     version: 1,
   });
-  esClient.ingest.putPipeline({
+  await esClient.ingest.putPipeline({
     description: `Enterprise Search customizable ingest pipeline for the '${indexName}' index`,
     id: `${indexName}@custom`,
     processors: [],
     version: 1,
   });
-  esClient.ingest.putPipeline({
+  await esClient.ingest.putPipeline({
     _meta: {
       managed: true,
       managed_by: 'Enterprise Search',

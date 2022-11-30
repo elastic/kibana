@@ -141,7 +141,9 @@ describe('cloneDescriptor', () => {
         customIcons,
       });
 
-      const clonedLayerDescriptor = await blendedVectorLayer.cloneDescriptor();
+      const clones = await blendedVectorLayer.cloneDescriptor();
+      expect(clones.length).toBe(1);
+      const clonedLayerDescriptor = clones[0];
       expect(clonedLayerDescriptor.sourceDescriptor!.type).toBe(SOURCE_TYPES.ES_SEARCH);
       expect(clonedLayerDescriptor.label).toBe('Clone of myIndexPattern');
     });
@@ -161,7 +163,9 @@ describe('cloneDescriptor', () => {
         customIcons,
       });
 
-      const clonedLayerDescriptor = await blendedVectorLayer.cloneDescriptor();
+      const clones = await blendedVectorLayer.cloneDescriptor();
+      expect(clones.length).toBe(1);
+      const clonedLayerDescriptor = clones[0];
       expect(clonedLayerDescriptor.sourceDescriptor!.type).toBe(SOURCE_TYPES.ES_SEARCH);
       expect(clonedLayerDescriptor.label).toBe('Clone of myIndexPattern');
     });

@@ -8,6 +8,7 @@
 
 import { AggTypes } from '../../../common';
 import { getConfiguration } from '.';
+import { CollapseFunction } from '@kbn/visualizations-plugin/common';
 
 const params = {
   perPage: 20,
@@ -25,7 +26,7 @@ describe('getConfiguration', () => {
     expect(
       getConfiguration('test1', params, {
         metrics: ['metric-1'],
-        buckets: ['bucket-1'],
+        buckets: { all: ['bucket-1'], customBuckets: { 'metric-1': 'bucket-1' } },
         columnsWithoutReferenced: [
           {
             columnId: 'metric-1',
@@ -48,7 +49,7 @@ describe('getConfiguration', () => {
             },
           },
         ],
-        bucketCollapseFn: { 'bucket-1': 'sum' },
+        bucketCollapseFn: { sum: ['bucket-1'] } as Record<CollapseFunction, string[]>,
       })
     ).toEqual({
       columns: [

@@ -7,6 +7,7 @@
 
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTimeZone } from '@kbn/observability-plugin/public';
 import { PingHistogramComponent } from '../../common/charts';
 import { getPingHistogram } from '../../../state/actions';
 import { esKuerySelector, selectPingHistogram } from '../../../state/selectors';
@@ -28,7 +29,7 @@ const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
     dateRangeStart: dateStart,
     dateRangeEnd: dateEnd,
   } = useGetUrlParams();
-  const filterCheck = useOverviewFilterCheck();
+  const { filterCheck, pending } = useOverviewFilterCheck();
 
   const dispatch = useDispatch();
   const monitorId = useMonitorId();
@@ -39,23 +40,44 @@ const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
 
   const { loading, pingHistogram: data } = useSelector(selectPingHistogram);
 
+  const timeZone = useTimeZone();
+
   useEffect(() => {
     if (monitorId) {
       // we don't need filter check on monitor details page, where we have monitorId defined
-      dispatch(getPingHistogram.get({ monitorId, dateStart, dateEnd, query, filters: esKuery }));
+      dispatch(
+        getPingHistogram.get({
+          monitorId,
+          dateStart,
+          dateEnd,
+          query,
+          filters: esKuery,
+          timeZone,
+        })
+      );
     } else {
       filterCheck(() =>
-        dispatch(getPingHistogram.get({ monitorId, dateStart, dateEnd, query, filters: esKuery }))
+        dispatch(
+          getPingHistogram.get({
+            monitorId,
+            dateStart,
+            dateEnd,
+            query,
+            filters: esKuery,
+            timeZone,
+          })
+        )
       );
     }
-  }, [filterCheck, dateStart, dateEnd, monitorId, lastRefresh, esKuery, dispatch, query]);
+  }, [filterCheck, dateStart, dateEnd, monitorId, lastRefresh, esKuery, dispatch, query, timeZone]);
   return (
     <PingHistogramComponent
       data={data}
       absoluteStartDate={absoluteDateRangeStart}
       absoluteEndDate={absoluteDateRangeEnd}
       height={height}
-      loading={loading}
+      loading={loading || pending}
+      timeZone={timeZone}
     />
   );
 };

@@ -11,7 +11,7 @@ import { getActionLicense } from './api';
 import * as i18n from './translations';
 import { ConnectorTypes } from '../../common/api';
 import { casesQueriesKeys } from './constants';
-import { ServerError } from '../types';
+import type { ServerError } from '../types';
 
 const MINIMUM_LICENSE_REQUIRED_CONNECTOR = ConnectorTypes.jira;
 

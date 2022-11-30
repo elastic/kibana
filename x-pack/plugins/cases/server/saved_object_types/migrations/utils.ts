@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LogMeta, SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type {
+  LogMeta,
+  SavedObjectMigrationContext,
+  SavedObjectUnsanitizedDoc,
+} from '@kbn/core/server';
 
 interface MigrationLogMeta extends LogMeta {
   migrations: {

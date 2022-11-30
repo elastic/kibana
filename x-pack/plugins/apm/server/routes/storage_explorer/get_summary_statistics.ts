@@ -6,7 +6,6 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   termQuery,
   kqlQuery,
@@ -15,19 +14,15 @@ import {
 import {
   getTotalIndicesStats,
   getEstimatedSizeForDocumentsInIndex,
+  getApmDiskSpacedUsedPct,
 } from './indices_stats_helpers';
-import { Setup } from '../../lib/helpers/setup_request';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
 } from '../../../common/storage_explorer_types';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
-import {
-  SERVICE_NAME,
-  TIER,
-  INDEX,
-} from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, TIER, INDEX } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,
@@ -36,9 +31,10 @@ import {
   isRootTransaction,
 } from '../../lib/helpers/transactions';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTracesPerMinute({
-  setup,
+  apmEventClient,
   indexLifecyclePhase,
   start,
   end,
@@ -46,7 +42,7 @@ export async function getTracesPerMinute({
   kuery,
   searchAggregatedTransactions,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   start: number;
   end: number;
@@ -54,8 +50,6 @@ export async function getTracesPerMinute({
   kuery: string;
   searchAggregatedTransactions: boolean;
 }) {
-  const { apmEventClient } = setup;
-
   const response = await apmEventClient.search('get_traces_per_minute', {
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
@@ -102,7 +96,7 @@ export async function getTracesPerMinute({
 }
 
 export async function getMainSummaryStats({
-  setup,
+  apmEventClient,
   context,
   indexLifecyclePhase,
   randomSampler,
@@ -111,7 +105,7 @@ export async function getMainSummaryStats({
   environment,
   kuery,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   randomSampler: RandomSampler;
@@ -120,10 +114,9 @@ export async function getMainSummaryStats({
   environment: string;
   kuery: string;
 }) {
-  const { apmEventClient } = setup;
-
-  const [{ indices: allIndicesStats }, res] = await Promise.all([
-    getTotalIndicesStats({ context, setup }),
+  const [totalIndicesStats, totalDiskSpace, res] = await Promise.all([
+    getTotalIndicesStats({ context, apmEventClient }),
+    getApmDiskSpacedUsedPct(context),
     apmEventClient.search('get_storage_explorer_main_summary_stats', {
       apm: {
         events: [
@@ -148,7 +141,7 @@ export async function getMainSummaryStats({
                     indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
                   )
                 : []),
-            ] as QueryDslQueryContainer[],
+            ],
           },
         },
         aggs: {
@@ -180,7 +173,8 @@ export async function getMainSummaryStats({
     }),
   ]);
 
-  const estimatedSize = allIndicesStats
+  const { indices: allIndicesStats } = totalIndicesStats;
+  const estimatedIncrementalSize = allIndicesStats
     ? res.aggregations?.sample.indices.buckets.reduce((prev, curr) => {
         return (
           prev +
@@ -194,10 +188,13 @@ export async function getMainSummaryStats({
     : 0;
 
   const durationAsDays = (end - start) / 1000 / 60 / 60 / 24;
+  const totalApmSize = totalIndicesStats._all.total?.store?.size_in_bytes ?? 0;
 
   return {
+    totalSize: totalApmSize,
+    diskSpaceUsedPct: totalApmSize / totalDiskSpace,
     numberOfServices: res.aggregations?.services_count.value ?? 0,
-    estimatedSize,
-    dailyDataGeneration: estimatedSize / durationAsDays,
+    estimatedIncrementalSize,
+    dailyDataGeneration: estimatedIncrementalSize / durationAsDays,
   };
 }

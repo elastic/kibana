@@ -11,31 +11,22 @@ import type { JsonObject, JsonValue } from '@kbn/utility-types';
 import { parseFilterQuery } from '../../../../utils/serialized_query';
 import type { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import type { PaginationBuilder } from '../utils/pagination';
-
-interface TimeRange {
-  from: string;
-  to: string;
-}
+import { BaseResolverQuery } from '../tree/queries/base';
+import type { ResolverQueryParams } from '../tree/queries/base';
 
 /**
  * Builds a query for retrieving events.
  */
-export class EventsQuery {
-  private readonly pagination: PaginationBuilder;
-  private readonly indexPatterns: string | string[];
-  private readonly timeRange: TimeRange;
+export class EventsQuery extends BaseResolverQuery {
+  readonly pagination: PaginationBuilder;
   constructor({
-    pagination,
     indexPatterns,
     timeRange,
-  }: {
-    pagination: PaginationBuilder;
-    indexPatterns: string | string[];
-    timeRange: TimeRange;
-  }) {
+    isInternalRequest,
+    pagination,
+  }: ResolverQueryParams & { pagination: PaginationBuilder }) {
+    super({ indexPatterns, timeRange, isInternalRequest });
     this.pagination = pagination;
-    this.indexPatterns = indexPatterns;
-    this.timeRange = timeRange;
   }
 
   private query(filters: JsonObject[]): JsonObject {
@@ -44,15 +35,7 @@ export class EventsQuery {
         bool: {
           filter: [
             ...filters,
-            {
-              range: {
-                '@timestamp': {
-                  gte: this.timeRange.from,
-                  lte: this.timeRange.to,
-                  format: 'strict_date_optional_time',
-                },
-              },
-            },
+            ...this.getRangeFilter(),
             {
               term: { 'event.kind': 'event' },
             },
@@ -71,15 +54,7 @@ export class EventsQuery {
             {
               term: { 'event.id': id },
             },
-            {
-              range: {
-                '@timestamp': {
-                  gte: this.timeRange.from,
-                  lte: this.timeRange.to,
-                  format: 'strict_date_optional_time',
-                },
-              },
-            },
+            ...this.getRangeFilter(),
           ],
         },
       },
@@ -97,15 +72,7 @@ export class EventsQuery {
             {
               term: { 'process.entity_id': id },
             },
-            {
-              range: {
-                '@timestamp': {
-                  gte: this.timeRange.from,
-                  lte: this.timeRange.to,
-                  format: 'strict_date_optional_time',
-                },
-              },
-            },
+            ...this.getRangeFilter(),
           ],
         },
       },

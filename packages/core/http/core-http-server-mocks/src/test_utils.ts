@@ -26,6 +26,7 @@ const createConfigService = () => {
   configService.atPath.mockImplementation((path) => {
     if (path === 'server') {
       return new BehaviorSubject({
+        name: 'kibana',
         hosts: ['localhost'],
         maxPayload: new ByteSizeValue(1024),
         autoListen: true,
@@ -35,7 +36,7 @@ const createConfigService = () => {
         cors: {
           enabled: false,
         },
-        compression: { enabled: true },
+        compression: { enabled: true, brotli: { enabled: false } },
         xsrf: {
           disableProtection: true,
           allowlist: [],

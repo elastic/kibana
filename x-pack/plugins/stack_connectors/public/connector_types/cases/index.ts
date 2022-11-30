@@ -8,10 +8,6 @@
 export { getCasesWebhookConnectorType } from './cases_webhook';
 export { getJiraConnectorType } from './jira';
 export { getResilientConnectorType } from './resilient';
-export {
-  getServiceNowITSMConnectorType,
-  getServiceNowSIRConnectorType,
-  getServiceNowITOMConnectorType,
-} from './servicenow';
+export { getServiceNowITSMConnectorType } from './servicenow_itsm';
+export { getServiceNowSIRConnectorType } from './servicenow_sir';
 export { getSwimlaneConnectorType } from './swimlane';
-export { getXmattersConnectorType } from './xmatters';

@@ -9,7 +9,12 @@ import { render } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
 import { useVariationMock } from '../../../common/components/utils.mocks';
 import { GlobalHeader } from '.';
-import { ADD_DATA_PATH, SecurityPageName } from '../../../../common/constants';
+import {
+  ADD_DATA_PATH,
+  ADD_THREAT_INTELLIGENCE_DATA_PATH,
+  SecurityPageName,
+  THREAT_INTELLIGENCE_PATH,
+} from '../../../../common/constants';
 import {
   createSecuritySolutionStorageMock,
   mockGlobalState,
@@ -21,6 +26,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { createStore } from '../../../common/store';
 import { kibanaObservable } from '@kbn/timelines-plugin/public/mock';
 import { sourcererPaths } from '../../../common/containers/sourcerer';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -67,7 +73,13 @@ describe('global header', () => {
     },
   };
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
     useVariationMock.mockReset();
@@ -96,6 +108,17 @@ describe('global header', () => {
     );
     const link = queryByTestId('add-data');
     expect(link?.getAttribute('href')).toBe(ADD_DATA_PATH);
+  });
+
+  it('points to the threat_intel Add data URL for threat_intelligence url', () => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname: THREAT_INTELLIGENCE_PATH });
+    const { queryByTestId } = render(
+      <TestProviders store={store}>
+        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+      </TestProviders>
+    );
+    const link = queryByTestId('add-data');
+    expect(link?.getAttribute('href')).toBe(ADD_THREAT_INTELLIGENCE_DATA_PATH);
   });
 
   it('points to the resolved Add data URL by useVariation', () => {
@@ -153,7 +176,13 @@ describe('global header', () => {
         },
       },
     };
-    const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const mockStore = createStore(
+      mockstate,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
 
     (useLocation as jest.Mock).mockReturnValue({ pathname: sourcererPaths[2] });
 

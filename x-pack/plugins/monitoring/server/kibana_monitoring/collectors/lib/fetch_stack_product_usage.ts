@@ -42,10 +42,10 @@ export async function fetchStackProductUsage(
   const size = config.ui.max_bucket_size;
   const params: estypes.SearchRequest = {
     index,
-    size: 0,
     ignore_unavailable: true,
     filter_path: ['aggregations.uuids.buckets'],
     body: {
+      size: 0,
       query: {
         bool: {
           must: [

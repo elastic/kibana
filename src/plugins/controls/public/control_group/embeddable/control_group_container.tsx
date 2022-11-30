@@ -9,8 +9,9 @@
 import { skip, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Filter, uniqFilters } from '@kbn/es-query';
-import { merge, Subject, Subscription } from 'rxjs';
+import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
+import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
+import _ from 'lodash';
 import { EuiContextMenuPanel } from '@elastic/eui';
 
 import {
@@ -39,10 +40,11 @@ import { ControlGroupStrings } from '../control_group_strings';
 import { EditControlGroup } from '../editor/edit_control_group';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
-import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
+import { ControlEmbeddable, ControlInput, ControlOutput, DataControlInput } from '../../types';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
 import { CreateTimeSliderControlButton } from '../editor/create_time_slider_control';
 import { TIME_SLIDER_CONTROL } from '../../time_slider';
+import { getCompatibleControlType, getNextPanelOrder } from './control_group_helpers';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -57,6 +59,8 @@ export class ControlGroupContainer extends Container<
   public readonly type = CONTROL_GROUP_TYPE;
   public readonly anyControlOutputConsumerLoading$: Subject<boolean> = new Subject();
 
+  private initialized$ = new BehaviorSubject(false);
+
   private subscriptions: Subscription = new Subscription();
   private domNode?: HTMLElement;
   private recalculateFilters$: Subject<null>;
@@ -67,6 +71,9 @@ export class ControlGroupContainer extends Container<
     ControlGroupReduxState,
     typeof controlGroupReducers
   >;
+
+  public onFiltersPublished$: Subject<Filter[]>;
+  public onControlRemoved$: Subject<string>;
 
   public setLastUsedDataViewId = (lastUsedDataViewId: string) => {
     this.lastUsedDataViewId = lastUsedDataViewId;
@@ -80,9 +87,32 @@ export class ControlGroupContainer extends Container<
     return this.lastUsedDataViewId ?? this.relevantDataViewId;
   };
 
+  public getReduxEmbeddableTools = () => {
+    return this.reduxEmbeddableTools;
+  };
+
   public closeAllFlyouts() {
     flyoutRef?.close();
     flyoutRef = undefined;
+  }
+
+  public async addDataControlFromField({
+    uuid,
+    dataViewId,
+    fieldName,
+    title,
+  }: {
+    uuid?: string;
+    dataViewId: string;
+    fieldName: string;
+    title?: string;
+  }) {
+    return this.addNewEmbeddable(await getCompatibleControlType({ dataViewId, fieldName }), {
+      id: uuid,
+      dataViewId,
+      fieldName,
+      title: title ?? fieldName,
+    } as DataControlInput);
   }
 
   /**
@@ -183,6 +213,8 @@ export class ControlGroupContainer extends Container<
     );
 
     this.recalculateFilters$ = new Subject();
+    this.onFiltersPublished$ = new Subject<Filter[]>();
+    this.onControlRemoved$ = new Subject<string>();
 
     // build redux embeddable tools
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
@@ -194,10 +226,11 @@ export class ControlGroupContainer extends Container<
     });
 
     // when all children are ready setup subscriptions
-    this.untilReady().then(() => {
+    this.untilAllChildrenReady().then(() => {
       this.recalculateDataViews();
       this.recalculateFilters();
       this.setupSubscriptions();
+      this.initialized$.next(true);
     });
   }
 
@@ -246,6 +279,10 @@ export class ControlGroupContainer extends Container<
     return Object.keys(this.getInput().panels).length;
   };
 
+  public updateFilterContext = (filters: Filter[]) => {
+    this.updateInput({ filters });
+  };
+
   private recalculateFilters = () => {
     const allFilters: Filter[] = [];
     let timeslice;
@@ -256,7 +293,14 @@ export class ControlGroupContainer extends Container<
         timeslice = childOutput.timeslice;
       }
     });
-    this.updateOutput({ filters: uniqFilters(allFilters), timeslice });
+    // if filters are different, publish them
+    if (
+      !compareFilters(this.output.filters ?? [], allFilters ?? [], COMPARE_ALL_OPTIONS) ||
+      !_.isEqual(this.output.timeslice, timeslice)
+    ) {
+      this.updateOutput({ filters: uniqFilters(allFilters), timeslice });
+      this.onFiltersPublished$.next(allFilters);
+    }
   };
 
   private recalculateDataViews = () => {
@@ -273,14 +317,7 @@ export class ControlGroupContainer extends Container<
     partial: Partial<TEmbeddableInput> = {}
   ): ControlPanelState<TEmbeddableInput> {
     const panelState = super.createNewPanelState(factory, partial);
-    let nextOrder = 0;
-    if (Object.keys(this.getInput().panels).length > 0) {
-      nextOrder =
-        Object.values(this.getInput().panels).reduce((highestSoFar, panel) => {
-          if (panel.order > highestSoFar) highestSoFar = panel.order;
-          return highestSoFar;
-        }, 0) + 1;
-    }
+    const nextOrder = getNextPanelOrder(this.getInput());
     return {
       order: nextOrder,
       width:
@@ -301,6 +338,7 @@ export class ControlGroupContainer extends Container<
         order: currentOrder - 1,
       };
     }
+    this.onControlRemoved$.next(idToRemove);
     return newPanels;
   }
 
@@ -327,7 +365,7 @@ export class ControlGroupContainer extends Container<
     };
   }
 
-  public untilReady = () => {
+  public untilAllChildrenReady = () => {
     const panelsLoading = () =>
       Object.keys(this.getInput().panels).some(
         (panelId) => !this.getOutput().embeddableLoaded[panelId]
@@ -340,6 +378,24 @@ export class ControlGroupContainer extends Container<
             reject();
           }
           if (!panelsLoading()) {
+            subscription.unsubscribe();
+            resolve();
+          }
+        });
+      });
+    }
+    return Promise.resolve();
+  };
+
+  public untilInitialized = () => {
+    if (this.initialized$.value === false) {
+      return new Promise<void>((resolve, reject) => {
+        const subscription = this.initialized$.subscribe((isInitialized) => {
+          if (this.destroyed) {
+            subscription.unsubscribe();
+            reject();
+          }
+          if (isInitialized) {
             subscription.unsubscribe();
             resolve();
           }

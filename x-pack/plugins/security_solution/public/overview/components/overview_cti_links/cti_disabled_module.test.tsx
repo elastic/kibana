@@ -21,6 +21,10 @@ import {
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
 import { mockTheme } from './mock';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { createKibanaContextProviderMock } from '../../../common/lib/kibana/kibana_react.mock';
+
+const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 jest.mock('../../../common/lib/kibana');
 
@@ -28,11 +32,23 @@ describe('CtiDisabledModule', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
     const myState = cloneDeep(state);
-    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      myState,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
   });
 
   it('renders splitPanel with "danger" variant', () => {
@@ -40,7 +56,9 @@ describe('CtiDisabledModule', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <CtiDisabledModule />
+            <MockKibanaContextProvider>
+              <CtiDisabledModule />
+            </MockKibanaContextProvider>
           </ThemeProvider>
         </I18nProvider>
       </Provider>

@@ -57,6 +57,7 @@ export interface ExplorerJob {
   bucketSpanSeconds: number;
   isSingleMetricViewerJob?: boolean;
   sourceIndices?: string[];
+  modelPlotEnabled: boolean;
 }
 
 export function isExplorerJob(arg: unknown): arg is ExplorerJob {
@@ -143,6 +144,7 @@ export function createJobs(jobs: CombinedJob[]): ExplorerJob[] {
       bucketSpanSeconds: bucketSpan!.asSeconds(),
       isSingleMetricViewerJob: isTimeSeriesViewJob(job),
       sourceIndices: job.datafeed_config.indices,
+      modelPlotEnabled: job.model_plot_config?.enabled === true,
     };
   });
 }

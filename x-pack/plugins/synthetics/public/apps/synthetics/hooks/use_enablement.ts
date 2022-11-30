@@ -31,6 +31,7 @@ export function useEnablement() {
       canEnable: enablement?.canEnable,
       isEnabled: enablement?.isEnabled,
     },
+    invalidApiKeyError: enablement ? !Boolean(enablement?.isValidApiKey) : false,
     error,
     loading,
     enableSynthetics: useCallback(() => dispatch(enableSynthetics()), [dispatch]),

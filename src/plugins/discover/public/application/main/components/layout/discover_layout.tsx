@@ -72,6 +72,8 @@ export function DiscoverLayout({
   persistDataView,
   updateAdHocDataViewId,
   adHocDataViewList,
+  savedDataViewList,
+  updateDataViewList,
 }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
@@ -152,9 +154,13 @@ export function DiscoverLayout({
     [filterManager, dataView, dataViews, trackUiMetric, capabilities]
   );
 
-  const onFieldEdited = useCallback(() => {
+  const onFieldEdited = useCallback(async () => {
+    if (!dataView.isPersisted()) {
+      await updateAdHocDataViewId(dataView);
+      return;
+    }
     savedSearchRefetch$.next('reset');
-  }, [savedSearchRefetch$]);
+  }, [dataView, savedSearchRefetch$, updateAdHocDataViewId]);
 
   const onDisableFilters = useCallback(() => {
     const disabledFilters = filterManager
@@ -229,6 +235,8 @@ export function DiscoverLayout({
         persistDataView={persistDataView}
         updateAdHocDataViewId={updateAdHocDataViewId}
         adHocDataViewList={adHocDataViewList}
+        savedDataViewList={savedDataViewList}
+        updateDataViewList={updateDataViewList}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
@@ -247,7 +255,6 @@ export function DiscoverLayout({
               onRemoveField={onRemoveColumn}
               onChangeDataView={onChangeDataView}
               selectedDataView={dataView}
-              state={state}
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}

@@ -61,6 +61,7 @@ export interface TimelinePersistInput {
   timelineType?: TimelineTypeLiteral;
   templateTimelineId?: string | null;
   templateTimelineVersion?: number | null;
+  title?: string;
 }
 
 /** Invoked when a column is sorted */

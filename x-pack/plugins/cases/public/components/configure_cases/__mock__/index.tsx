@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ActionTypeConnector, ConnectorTypes } from '../../../../common/api';
-import { ActionConnector } from '../../../containers/configure/types';
-import { ReturnUseCaseConfigure } from '../../../containers/configure/use_configure';
+import type { ActionTypeConnector } from '../../../../common/api';
+import { ConnectorTypes } from '../../../../common/api';
+import type { ActionConnector } from '../../../containers/configure/types';
+import type { ReturnUseCaseConfigure } from '../../../containers/configure/use_configure';
 import { connectorsMock, actionTypesMock } from '../../../common/mock/connectors';
 export { mappings } from '../../../containers/configure/mock';
 

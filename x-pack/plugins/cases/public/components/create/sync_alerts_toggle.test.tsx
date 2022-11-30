@@ -9,9 +9,11 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { useForm, Form, FormHook } from '../../common/shared_imports';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import { schema, FormProps } from './schema';
+import type { FormProps } from './schema';
+import { schema } from './schema';
 
 describe('SyncAlertsToggle', () => {
   let globalForm: FormHook;

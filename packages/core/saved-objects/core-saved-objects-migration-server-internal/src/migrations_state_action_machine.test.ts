@@ -39,6 +39,7 @@ describe('migrationsStateActionMachine', () => {
 
   const initialState = createInitialState({
     kibanaVersion: '7.11.0',
+    waitForMigrationCompletion: false,
     targetMappings: { properties: {} },
     migrationVersionPerType: {},
     indexPrefix: '.my-so-index',

@@ -68,7 +68,7 @@ exports[`suricata_row_renderer renders correctly against snapshot 1`] = `
         }
       }
       isDraggable={true}
-      timelineId="test"
+      timelineId="timeline-test"
     />
   </RowRendererContainer>
 </span>

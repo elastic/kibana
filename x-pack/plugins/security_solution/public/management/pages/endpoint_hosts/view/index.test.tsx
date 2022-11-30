@@ -50,12 +50,17 @@ import {
   HOST_METADATA_LIST_ROUTE,
   metadataTransformPrefix,
   METADATA_UNITED_TRANSFORM,
-  RESPONDER_CAPABILITIES,
 } from '../../../../../common/endpoint/constants';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
+import {
+  initialUserPrivilegesState,
+  initialUserPrivilegesState as mockInitialUserPrivilegesState,
+} from '../../../../common/components/user_privileges/user_privileges_context';
 import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
+import { ENDPOINT_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 
+const mockUserPrivileges = useUserPrivileges as jest.Mock;
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
 jest.mock('@kbn/i18n-react', () => {
@@ -664,6 +669,7 @@ describe('when on the endpoint list page', () => {
 
     beforeEach(async () => {
       mockEndpointListApi();
+      mockUserPrivileges.mockReturnValue(getUserPrivilegesMockDefaultValue());
 
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/endpoints?selected_endpoint=1`);
@@ -678,6 +684,7 @@ describe('when on the endpoint list page', () => {
 
     afterEach(() => {
       jest.clearAllMocks();
+      mockUserPrivileges.mockReset();
     });
 
     it('should show the flyout and footer', async () => {
@@ -777,29 +784,85 @@ describe('when on the endpoint list page', () => {
         });
       });
 
-      afterEach(reactTestingLibrary.cleanup);
-
-      it('should start with the activity log tab as unselected', async () => {
-        const renderResult = await renderAndWaitForData();
-        const detailsTab = renderResult.getByTestId('endpoint-details-flyout-tab-details');
-        const activityLogTab = renderResult.getByTestId('endpoint-details-flyout-tab-activity_log');
-
-        expect(detailsTab).toHaveAttribute('aria-selected', 'true');
-        expect(activityLogTab).toHaveAttribute('aria-selected', 'false');
-        expect(renderResult.getByTestId('endpointDetailsFlyoutBody')).not.toBeNull();
-        expect(renderResult.queryByTestId('endpointActivityLogFlyoutBody')).toBeNull();
+      afterEach(() => {
+        reactTestingLibrary.cleanup();
       });
 
-      it('should show the activity log content when selected', async () => {
-        const renderResult = await renderAndWaitForData();
-        const detailsTab = renderResult.getByTestId('endpoint-details-flyout-tab-details');
-        const activityLogTab = renderResult.getByTestId('endpoint-details-flyout-tab-activity_log');
+      describe('when `canReadActionsLogManagement` is TRUE', () => {
+        it('should start with the activity log tab as unselected', async () => {
+          const renderResult = await renderAndWaitForData();
+          const detailsTab = renderResult.getByTestId('endpoint-details-flyout-tab-details');
+          const activityLogTab = renderResult.getByTestId(
+            'endpoint-details-flyout-tab-activity_log'
+          );
 
-        userEvent.click(activityLogTab);
-        expect(detailsTab).toHaveAttribute('aria-selected', 'false');
-        expect(activityLogTab).toHaveAttribute('aria-selected', 'true');
-        expect(renderResult.getByTestId('endpointActivityLogFlyoutBody')).not.toBeNull();
-        expect(renderResult.queryByTestId('endpointDetailsFlyoutBody')).toBeNull();
+          expect(detailsTab).toHaveAttribute('aria-selected', 'true');
+          expect(activityLogTab).toHaveAttribute('aria-selected', 'false');
+          expect(renderResult.getByTestId('endpointDetailsFlyoutBody')).not.toBeNull();
+          expect(renderResult.queryByTestId('endpointActivityLogFlyoutBody')).toBeNull();
+        });
+
+        it('should show the activity log content when selected', async () => {
+          const renderResult = await renderAndWaitForData();
+          const detailsTab = renderResult.getByTestId('endpoint-details-flyout-tab-details');
+          const activityLogTab = renderResult.getByTestId(
+            'endpoint-details-flyout-tab-activity_log'
+          );
+
+          userEvent.click(activityLogTab);
+          expect(detailsTab).toHaveAttribute('aria-selected', 'false');
+          expect(activityLogTab).toHaveAttribute('aria-selected', 'true');
+          expect(renderResult.getByTestId('endpointActivityLogFlyoutBody')).not.toBeNull();
+          expect(renderResult.queryByTestId('endpointDetailsFlyoutBody')).toBeNull();
+        });
+      });
+
+      describe('when `canReadActionsLogManagement` is FALSE', () => {
+        it('should not show the response actions history tab', async () => {
+          mockUserPrivileges.mockReturnValue({
+            ...mockInitialUserPrivilegesState(),
+            endpointPrivileges: {
+              ...mockInitialUserPrivilegesState().endpointPrivileges,
+              canReadActionsLogManagement: false,
+              canReadEndpointList: true,
+              canAccessFleet: true,
+            },
+          });
+          const renderResult = await renderAndWaitForData();
+          const detailsTab = renderResult.getByTestId('endpoint-details-flyout-tab-details');
+          const activityLogTab = renderResult.queryByTestId(
+            'endpoint-details-flyout-tab-activity_log'
+          );
+
+          expect(detailsTab).toHaveAttribute('aria-selected', 'true');
+          expect(activityLogTab).toBeNull();
+          expect(renderResult.findByTestId('endpointDetailsFlyoutBody')).not.toBeNull();
+        });
+
+        it('should show the overview tab when force loading actions history tab via URL', async () => {
+          mockUserPrivileges.mockReturnValue({
+            ...mockInitialUserPrivilegesState(),
+            endpointPrivileges: {
+              ...mockInitialUserPrivilegesState().endpointPrivileges,
+              canReadActionsLogManagement: false,
+              canReadEndpointList: true,
+              canAccessFleet: true,
+            },
+          });
+          reactTestingLibrary.act(() => {
+            history.push(`${MANAGEMENT_PATH}/endpoints?selected_endpoint=1&show=activity_log`);
+          });
+
+          const renderResult = await renderAndWaitForData();
+          const detailsTab = renderResult.getByTestId('endpoint-details-flyout-tab-details');
+          const activityLogTab = renderResult.queryByTestId(
+            'endpoint-details-flyout-tab-activity_log'
+          );
+
+          expect(detailsTab).toHaveAttribute('aria-selected', 'true');
+          expect(activityLogTab).toBeNull();
+          expect(renderResult.findByTestId('endpointDetailsFlyoutBody')).not.toBeNull();
+        });
       });
     });
 
@@ -1019,7 +1082,7 @@ describe('when on the endpoint list page', () => {
             ...hosts[0].metadata,
             Endpoint: {
               ...hosts[0].metadata.Endpoint,
-              capabilities: [...RESPONDER_CAPABILITIES],
+              capabilities: [...ENDPOINT_CAPABILITIES],
               state: {
                 ...hosts[0].metadata.Endpoint.state,
                 isolation: false,
@@ -1082,7 +1145,7 @@ describe('when on the endpoint list page', () => {
 
     beforeEach(async () => {
       mockEndpointListApi();
-      (useUserPrivileges as jest.Mock).mockReturnValue(getUserPrivilegesMockDefaultValue());
+      mockUserPrivileges.mockReturnValue(getUserPrivilegesMockDefaultValue());
 
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/endpoints`);
@@ -1101,6 +1164,7 @@ describe('when on the endpoint list page', () => {
 
     afterEach(() => {
       jest.clearAllMocks();
+      mockUserPrivileges.mockReset();
     });
 
     it('shows the Responder option when all 3 processes capabilities are present in the endpoint', async () => {
@@ -1134,7 +1198,7 @@ describe('when on the endpoint list page', () => {
     });
 
     it('hides isolate host option if canIsolateHost is false', () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
+      mockUserPrivileges.mockReturnValue({
         ...mockInitialUserPrivilegesState(),
         endpointPrivileges: {
           ...mockInitialUserPrivilegesState().endpointPrivileges,
@@ -1175,6 +1239,14 @@ describe('when on the endpoint list page', () => {
   });
 
   describe('required transform failed banner', () => {
+    beforeEach(() => {
+      mockUserPrivileges.mockReturnValue(getUserPrivilegesMockDefaultValue());
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+      mockUserPrivileges.mockReset();
+    });
     it('is not displayed when transform state is not failed', () => {
       const transforms: TransformStats[] = [
         {
@@ -1257,6 +1329,66 @@ describe('when on the endpoint list page', () => {
       const banner = await screen.findByTestId('callout-endpoints-list-transform-failed');
       expect(banner).not.toHaveTextContent(transforms[0].id);
       expect(banner).toHaveTextContent(transforms[1].id);
+    });
+  });
+  describe('endpoint list onboarding screens with RBAC', () => {
+    beforeEach(() => {
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: [],
+        endpointPackagePolicies: mockPolicyResultList({ total: 3 }).items,
+      });
+    });
+    afterEach(() => {
+      mockUserPrivileges.mockReset();
+    });
+    it('user has endpoint list ALL and fleet All and can view entire onboarding screen', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...initialUserPrivilegesState(),
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+          canWriteEndpointList: true,
+          canAccessFleet: true,
+        }),
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
+      });
+      const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
+      expect(onboardingSteps).not.toBeNull();
+    });
+    it('user has endpoint list READ and fleet All and can view entire onboarding screen', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...initialUserPrivilegesState(),
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+          canReadEndpointList: true,
+          canAccessFleet: true,
+        }),
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
+      });
+      const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
+      expect(onboardingSteps).not.toBeNull();
+    });
+    it('user has endpoint list ALL/READ and fleet NONE and can view a modified onboarding screen with no actions link to fleet', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...initialUserPrivilegesState(),
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+          canReadEndpointList: true,
+          canAccessFleet: false,
+        }),
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
+      });
+      const onboardingSteps = await renderResult.findByTestId('policyOnboardingInstructions');
+      expect(onboardingSteps).not.toBeNull();
+      const noPrivilegesPage = await renderResult.findByTestId('noFleetAccess');
+      expect(noPrivilegesPage).not.toBeNull();
+      const startButton = renderResult.queryByTestId('onboardingStartButton');
+      expect(startButton).toBeNull();
     });
   });
 });

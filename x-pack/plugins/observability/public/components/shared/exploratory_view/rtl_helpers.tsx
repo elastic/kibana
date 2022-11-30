@@ -189,7 +189,7 @@ export function render<ExtraCore>(
     url = '/app/observability/exploratory-view/',
     initSeries = {},
   }: RenderRouterOptions<ExtraCore> = {}
-) {
+): any {
   if (url) {
     history = getHistoryFromUrl(url);
   }
@@ -207,7 +207,6 @@ export function render<ExtraCore>(
         <ExploratoryViewContextProvider
           reportTypes={reportTypesList}
           dataTypes={dataTypes}
-          dataViews={{}}
           reportConfigMap={obsvReportConfigMap}
           setHeaderActionMenu={jest.fn()}
           theme$={themeServiceMock.createTheme$()}

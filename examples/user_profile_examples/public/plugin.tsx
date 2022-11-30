@@ -14,6 +14,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { AvatarDemo } from './avatar_demo';
 import { PopoverDemo } from './popover_demo';
 import { SelectableDemo } from './selectable_demo';
+import { ToolTipDemo } from './tooltip_demo';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -38,14 +39,20 @@ export class UserProfilesPlugin implements Plugin<void, void, SetupDeps, StartDe
         // });
 
         ReactDOM.render(
-          <KibanaPageTemplate
-            pageHeader={{
-              pageTitle: 'User profile components',
-            }}
-          >
-            <AvatarDemo />
-            <SelectableDemo />
-            <PopoverDemo />
+          <KibanaPageTemplate>
+            <KibanaPageTemplate.Header pageTitle="User profile components" />
+            <KibanaPageTemplate.Section>
+              <AvatarDemo />
+            </KibanaPageTemplate.Section>
+            <KibanaPageTemplate.Section>
+              <ToolTipDemo />
+            </KibanaPageTemplate.Section>
+            <KibanaPageTemplate.Section>
+              <SelectableDemo />
+            </KibanaPageTemplate.Section>
+            <KibanaPageTemplate.Section>
+              <PopoverDemo />
+            </KibanaPageTemplate.Section>
           </KibanaPageTemplate>,
           element
         );

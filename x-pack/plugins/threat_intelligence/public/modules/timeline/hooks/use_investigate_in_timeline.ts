@@ -8,10 +8,9 @@
 import { useContext } from 'react';
 import moment from 'moment';
 import { DataProvider } from '@kbn/timelines-plugin/common';
-import { generateDataProvider } from '../utils/data_provider';
+import { generateDataProvider } from '../utils';
 import { SecuritySolutionContext } from '../../../containers/security_solution_context';
-import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
-import { unwrapValue } from '../../indicators/utils/unwrap_value';
+import { fieldAndValueValid, getIndicatorFieldAndValue, unwrapValue } from '../../indicators';
 import {
   Indicator,
   IndicatorFieldEventEnrichmentMap,
@@ -43,16 +42,22 @@ export const useInvestigateInTimeline = ({
   const securitySolutionContext = useContext(SecuritySolutionContext);
 
   const { key, value } = getIndicatorFieldAndValue(indicator, RawIndicatorFieldId.Name);
-  if (!fieldAndValueValid(key, value)) {
+  const sourceEventField = IndicatorFieldEventEnrichmentMap[key];
+
+  if (!fieldAndValueValid(key, value) || !sourceEventField) {
     return {} as unknown as UseInvestigateInTimelineValue;
   }
 
-  const dataProviders: DataProvider[] = [...IndicatorFieldEventEnrichmentMap[key], key].map(
-    (e: string) => generateDataProvider(e, value as string)
+  const dataProviders: DataProvider[] = [...sourceEventField, key].map((e: string) =>
+    generateDataProvider(e, value as string)
   );
 
   const to = unwrapValue(indicator, RawIndicatorFieldId.TimeStamp) as string;
   const from = moment(to).subtract(10, 'm').toISOString();
+
+  if (!to || !from) {
+    return {} as unknown as UseInvestigateInTimelineValue;
+  }
 
   const investigateInTimelineFn = securitySolutionContext?.getUseInvestigateInTimeline({
     dataProviders,

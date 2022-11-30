@@ -58,7 +58,7 @@ const bundleCacheEvent$ = Rx.from(BUNDLES).pipe(
 );
 
 beforeEach(async () => {
-  jest.useFakeTimers();
+  jest.useFakeTimers({ legacyFakeTimers: true });
 });
 
 afterEach(async () => {

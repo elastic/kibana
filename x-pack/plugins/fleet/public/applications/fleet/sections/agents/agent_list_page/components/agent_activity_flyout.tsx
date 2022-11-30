@@ -254,6 +254,26 @@ const actionNames: {
     cancelledText: 'update tags',
   },
   CANCEL: { inProgressText: 'Cancelling', completedText: 'cancelled', cancelledText: '' },
+  REQUEST_DIAGNOSTICS: {
+    inProgressText: 'Requesting diagnostics for',
+    completedText: 'requested diagnostics',
+    cancelledText: 'request diagnostics',
+  },
+  SETTINGS: {
+    inProgressText: 'Updating settings of',
+    completedText: 'updated settings',
+    cancelledText: 'update settings',
+  },
+  POLICY_CHANGE: {
+    inProgressText: 'Changing policy of',
+    completedText: 'changed policy',
+    cancelledText: 'change policy',
+  },
+  INPUT_ACTION: {
+    inProgressText: 'Input action in progress of',
+    completedText: 'input action completed',
+    cancelledText: 'input action',
+  },
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
 };
 

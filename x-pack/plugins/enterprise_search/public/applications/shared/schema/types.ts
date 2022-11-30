@@ -16,6 +16,8 @@ export enum SchemaType {
   Date = 'date',
   Nested = 'nested',
 }
+// Certain Schema types may have to be ignored from showing up, these types could be added to this list
+export const IgnoreSchemaTypes = [SchemaType.Nested];
 // Certain API endpoints will use these internal type names, which map to the external names above
 export enum InternalSchemaType {
   String = 'string',

@@ -12,6 +12,8 @@ import type { FleetServerAgentAction, ActionStatus, ListWithKuery } from '../../
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 import { appContextService } from '..';
 
+const PRECISION_THRESHOLD = 40000;
+
 /**
  * Return current bulk actions
  */
@@ -42,7 +44,7 @@ export async function getActionStatuses(
             agent_count: {
               cardinality: {
                 field: 'agent_id',
-                precision_threshold: 40000, // max value
+                precision_threshold: PRECISION_THRESHOLD, // max value
               },
             },
           },
@@ -64,12 +66,16 @@ export async function getActionStatuses(
     const matchingBucket = (acks?.aggregations?.ack_counts as any)?.buckets?.find(
       (bucket: any) => bucket.key === action.actionId
     );
+    const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
+    const cardinalityCount = (matchingBucket?.agent_count as any)?.value ?? 0;
+    const docCount = matchingBucket?.doc_count ?? 0;
     const nbAgentsAck = Math.min(
-      matchingBucket?.doc_count ?? 0,
-      (matchingBucket?.agent_count as any)?.value ?? 0
+      docCount,
+      // only using cardinality count when count lower than precision threshold
+      docCount > PRECISION_THRESHOLD ? docCount : cardinalityCount,
+      nbAgentsActioned
     );
     const completionTime = (matchingBucket?.max_timestamp as any)?.value_as_string;
-    const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
     const complete = nbAgentsAck >= nbAgentsActioned;
     const cancelledAction = cancelledActions.find((a) => a.actionId === action.actionId);
 

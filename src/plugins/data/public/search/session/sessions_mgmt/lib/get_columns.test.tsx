@@ -77,6 +77,7 @@ describe('Search Sessions Management table column factory', () => {
       initialState: {},
       restoreState: {},
       version: '7.14.0',
+      idMapping: {},
     };
   });
 

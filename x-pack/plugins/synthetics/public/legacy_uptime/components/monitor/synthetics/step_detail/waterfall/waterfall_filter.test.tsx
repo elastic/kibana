@@ -19,7 +19,7 @@ import {
 } from '../../waterfall/components/translations';
 
 describe('waterfall filter', () => {
-  jest.useFakeTimers();
+  jest.useFakeTimers({ legacyFakeTimers: true });
 
   it('renders correctly', () => {
     const { getByLabelText, getByTitle } = render(
@@ -61,17 +61,19 @@ describe('waterfall filter', () => {
 
     fireEvent.click(getByTitle('XHR'));
 
-    expect(getByLabelText(FILTER_POPOVER_OPEN_LABEL)).toHaveAttribute(
-      'class',
-      'euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall'
+    expect(getByLabelText(FILTER_POPOVER_OPEN_LABEL).classList[2]).toContain(
+      'euiButtonIcon-empty-primary-hoverStyles'
     );
 
     // toggle it back to inactive
     fireEvent.click(getByTitle('XHR'));
 
-    expect(getByLabelText(FILTER_POPOVER_OPEN_LABEL)).toHaveAttribute(
-      'class',
-      'euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall'
+    expect(getByLabelText(FILTER_POPOVER_OPEN_LABEL).classList[1]).toContain(
+      'euiButtonIcon--xSmall'
+    );
+
+    expect(getByLabelText(FILTER_POPOVER_OPEN_LABEL).classList[2]).toContain(
+      'euiButtonIcon-empty-text-hoverStyles'
     );
   });
 

@@ -21,7 +21,7 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
-import { registerApmAlerts } from './routes/alerts/register_apm_alerts';
+import { registerApmRuleTypes } from './routes/alerts/register_apm_rule_types';
 import { registerFleetPolicyCallbacks } from './routes/fleet/register_fleet_policy_callbacks';
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { APMEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
@@ -51,7 +51,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../common/elasticsearch_fieldnames';
+} from '../common/es_fields/apm';
 import { tutorialProvider } from './tutorial';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
 
@@ -92,11 +92,12 @@ export class APMPlugin
     ) {
       createApmTelemetry({
         core,
-        config$,
+        config: currentConfig,
         usageCollector: plugins.usageCollection,
         taskManager: plugins.taskManager,
         logger: this.logger,
         kibanaVersion: this.initContext.env.packageInfo.version,
+        isProd: this.initContext.env.mode.prod,
       });
     }
 
@@ -188,13 +189,14 @@ export class APMPlugin
     });
 
     if (plugins.alerting) {
-      registerApmAlerts({
-        ruleDataClient,
+      registerApmRuleTypes({
         alerting: plugins.alerting,
-        ml: plugins.ml,
+        basePath: core.http.basePath,
         config$,
         logger: this.logger!.get('rule'),
-        basePath: core.http.basePath,
+        ml: plugins.ml,
+        observability: plugins.observability,
+        ruleDataClient,
       });
     }
 
@@ -233,6 +235,7 @@ export class APMPlugin
           indices,
           options: {
             includeFrozen,
+            forceSyntheticSource: currentConfig.forceSyntheticSource,
           },
         });
       },

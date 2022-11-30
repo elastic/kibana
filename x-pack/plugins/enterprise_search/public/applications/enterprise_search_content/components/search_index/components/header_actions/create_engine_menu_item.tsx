@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiBetaBadge, EuiContextMenuItem, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiContextMenuItem, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -19,11 +19,13 @@ import { KibanaLogic } from '../../../../../shared/kibana';
 
 export interface CreateEngineMenuItemProps {
   indexName?: string;
+  ingestionMethod: string;
   isHiddenIndex?: boolean;
 }
 
 export const CreateEngineMenuItem: React.FC<CreateEngineMenuItemProps> = ({
   indexName,
+  ingestionMethod,
   isHiddenIndex,
 }) => {
   const engineCreationPath = !indexName
@@ -37,6 +39,7 @@ export const CreateEngineMenuItem: React.FC<CreateEngineMenuItemProps> = ({
     <EuiFlexGroup alignItems="center" gutterSize="xs">
       <EuiFlexItem>
         <EuiContextMenuItem
+          data-telemetry-id={`entSearchContent-${ingestionMethod}-header-createEngine-createEngine`}
           size="s"
           icon="plusInCircle"
           onClick={() => {
@@ -54,9 +57,6 @@ export const CreateEngineMenuItem: React.FC<CreateEngineMenuItemProps> = ({
             </p>
           </EuiText>
         </EuiContextMenuItem>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ paddingTop: '.125rem' }}>
-        <EuiBetaBadge label="Beta" size="s" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

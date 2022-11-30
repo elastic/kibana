@@ -14,9 +14,13 @@ import type {
   FleetServerAgent,
   FleetServerAgentComponentStatus,
 } from '@kbn/fleet-plugin/common';
-import { AGENTS_INDEX, FleetServerAgentComponentStatuses } from '@kbn/fleet-plugin/common';
+import { FleetServerAgentComponentStatuses, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import moment from 'moment';
 import { BaseDataGenerator } from './base_data_generator';
+import { ENDPOINT_ERROR_CODES } from '../constants';
 
+// List of computed (as in, done in code is kibana via
+// https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/common/services/agent_status.ts#L13-L44
 const agentStatusList: readonly AgentStatus[] = [
   'offline',
   'error',
@@ -27,6 +31,13 @@ const agentStatusList: readonly AgentStatus[] = [
   'unenrolling',
   'updating',
   'degraded',
+];
+
+const lastCheckinStatusList: ReadonlyArray<FleetServerAgent['last_checkin_status']> = [
+  'error',
+  'online',
+  'degraded',
+  'updating',
 ];
 
 export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
@@ -81,7 +92,7 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
       componentStatus === 'failed'
         ? {
             error: {
-              code: 123,
+              code: ENDPOINT_ERROR_CODES.ES_CONNECTION_ERROR,
               message: 'Unable to connect to Elasticsearch',
             },
           }
@@ -138,8 +149,6 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
           policy_id: this.randomUUID(),
           type: 'PERMANENT',
           default_api_key: 'so3dWnkBj1tiuAw9yAm3:t7jNlnPnR6azEI_YpXuBXQ',
-          // policy_output_permissions_hash:
-          //   '81b3d070dddec145fafcbdfb6f22888495a12edc31881f6b0511fa10de66daa7',
           default_api_key_id: 'so3dWnkBj1tiuAw9yAm3',
           updated_at: now,
           last_checkin: now,
@@ -171,13 +180,76 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
               ],
             },
           ],
+          last_checkin_status: this.randomChoice(lastCheckinStatusList),
+          upgraded_at: null,
+          upgrade_started_at: null,
+          unenrolled_at: undefined,
+          unenrollment_started_at: undefined,
         },
       },
       overrides
     );
   }
 
-  private randomAgentStatus() {
+  generateEsHitWithStatus(
+    status: AgentStatus,
+    overrides: DeepPartial<estypes.SearchHit<FleetServerAgent>> = {}
+  ) {
+    const esHit = this.generateEsHit(overrides);
+
+    // Basically: reverse engineer the Fleet `getAgentStatus()` utility:
+    // https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/common/services/agent_status.ts#L13-L44
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const fleetServerAgent = esHit._source!;
+
+    // Reset the `last_checkin_status since we're controlling the agent status here
+    fleetServerAgent.last_checkin_status = 'online';
+
+    switch (status) {
+      case 'degraded':
+        fleetServerAgent.last_checkin_status = 'degraded';
+        break;
+
+      case 'enrolling':
+        fleetServerAgent.last_checkin = undefined;
+
+        break;
+      case 'error':
+        fleetServerAgent.last_checkin_status = 'error';
+        break;
+
+      case 'inactive':
+        fleetServerAgent.active = false;
+        break;
+
+      case 'offline':
+        // current fleet timeout interface for offline is 5 minutes
+        // https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/common/services/agent_status.ts#L11
+        fleetServerAgent.last_checkin = moment().subtract(6, 'minutes').toISOString();
+        break;
+
+      case 'unenrolling':
+        fleetServerAgent.unenrollment_started_at = fleetServerAgent.updated_at;
+        fleetServerAgent.unenrolled_at = undefined;
+        break;
+
+      case 'updating':
+        fleetServerAgent.upgrade_started_at = fleetServerAgent.updated_at;
+        fleetServerAgent.upgraded_at = undefined;
+        break;
+
+      case 'warning':
+        // NOt able to find anything in fleet
+        break;
+
+      // default is `online`, which is also the default returned by `generateEsHit()`
+    }
+
+    return esHit;
+  }
+
+  public randomAgentStatus() {
     return this.randomChoice(agentStatusList);
   }
 }

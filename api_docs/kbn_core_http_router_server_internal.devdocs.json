@@ -157,9 +157,21 @@
         "description": [],
         "signature": [
           "(headers: ",
-          "Headers",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.Headers",
+            "text": "Headers"
+          },
           ", fieldsToKeep: string[], fieldsToExclude: string[]) => ",
-          "Headers"
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.Headers",
+            "text": "Headers"
+          }
         ],
         "path": "packages/core/http/core-http-router-server-internal/src/headers.ts",
         "deprecated": false,
@@ -173,7 +185,13 @@
             "label": "headers",
             "description": [],
             "signature": [
-              "Headers"
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.Headers",
+                "text": "Headers"
+              }
             ],
             "path": "packages/core/http/core-http-router-server-internal/src/headers.ts",
             "deprecated": false,
@@ -256,7 +274,13 @@
         "description": [],
         "signature": [
           "(method: ",
-          "RouteMethod",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouteMethod",
+            "text": "RouteMethod"
+          },
           ") => boolean"
         ],
         "path": "packages/core/http/core-http-router-server-internal/src/route.ts",
@@ -271,7 +295,13 @@
             "label": "method",
             "description": [],
             "signature": [
-              "RouteMethod"
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouteMethod",
+                "text": "RouteMethod"
+              }
             ],
             "path": "packages/core/http/core-http-router-server-internal/src/route.ts",
             "deprecated": false,
@@ -351,9 +381,21 @@
               "<T extends string | Record<string, any> | Error | ",
               "Stream",
               " | Buffer | { message: string | Error; attributes?: ",
-              "ResponseErrorAttributes",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
+              },
               " | undefined; } | undefined>(options: ",
-              "CustomHttpResponseOptions",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.CustomHttpResponseOptions",
+                "text": "CustomHttpResponseOptions"
+              },
               "<T>) => ",
               "KibanaResponse",
               "<T>"
@@ -370,7 +412,13 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "CustomHttpResponseOptions",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-server.CustomHttpResponseOptions",
+                    "text": "CustomHttpResponseOptions"
+                  },
                   "<T>"
                 ],
                 "path": "packages/core/http/core-http-router-server-internal/src/response.ts",

@@ -1,0 +1,16 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "kbn_references": [
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../charts/tsconfig.json" },
+    { "path": "../data/tsconfig.json" },
+    { "path": "../data_views/tsconfig.json" },
+    { "path": "../saved_search/tsconfig.json" }
+  ]
+}

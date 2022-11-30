@@ -61,6 +61,7 @@ export const CrawlerDomainDetail: React.FC = () => {
         rightSideItems: [
           <CrawlerStatusIndicator />,
           <EuiButton
+            data-telemetry-id="entSearchContent-crawler-domainDetail-header-deleteDomain"
             isLoading={getLoading}
             color="danger"
             onClick={() => {
@@ -78,6 +79,7 @@ export const CrawlerDomainDetail: React.FC = () => {
     >
       <CrawlerStatusBanner />
       <EuiButtonTo
+        data-telemetry-id="entSearchContent-crawler-domainDetail-header-allDomains"
         size="s"
         color="text"
         iconType="arrowLeft"

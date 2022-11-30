@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { SavedObjectsUpdateResponse } from '@kbn/core/server';
-import { SavedObject, SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectsUpdateResponse } from '@kbn/core/server';
+import type { SavedObject, SavedObjectReference } from '@kbn/core/types';
 import { isEqual, uniqWith } from 'lodash';
-import {
+import type {
   CommentAttributesNoSO,
   CommentRequest,
   CommentAttributes,
   CommentPatchAttributes,
   CommentAttributesWithoutRefs,
 } from '../../common/api';
-import { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import {
   injectPersistableReferencesToSO,
   extractPersistableStateReferencesFromSO,

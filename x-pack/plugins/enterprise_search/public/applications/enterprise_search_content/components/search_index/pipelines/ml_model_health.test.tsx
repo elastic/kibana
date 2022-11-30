@@ -24,8 +24,10 @@ describe('TrainedModelHealth', () => {
   });
 
   const commonModelData: InferencePipeline = {
+    modelId: 'sample-bert-ner-model',
     modelState: TrainedModelState.NotDeployed,
     pipelineName: 'Sample Processor',
+    pipelineReferences: [],
     types: ['pytorch'],
   };
   it('renders model started', () => {
@@ -33,7 +35,10 @@ describe('TrainedModelHealth', () => {
       ...commonModelData,
       modelState: TrainedModelState.Started,
     };
-    const wrapper = shallow(<TrainedModelHealth {...pipeline} />);
+    const { modelState, modelStateReason } = pipeline;
+    const wrapper = shallow(
+      <TrainedModelHealth modelState={modelState} modelStateReason={modelStateReason} />
+    );
     const health = wrapper.find(EuiHealth);
     expect(health.prop('children')).toEqual('Started');
     expect(health.prop('color')).toEqual('success');
@@ -42,7 +47,10 @@ describe('TrainedModelHealth', () => {
     const pipeline: InferencePipeline = {
       ...commonModelData,
     };
-    const wrapper = shallow(<TrainedModelHealth {...pipeline} />);
+    const { modelState, modelStateReason } = pipeline;
+    const wrapper = shallow(
+      <TrainedModelHealth modelState={modelState} modelStateReason={modelStateReason} />
+    );
     const health = wrapper.find(EuiHealth);
     expect(health.prop('children')).toEqual('Not deployed');
     expect(health.prop('color')).toEqual('danger');
@@ -52,7 +60,10 @@ describe('TrainedModelHealth', () => {
       ...commonModelData,
       modelState: TrainedModelState.Stopping,
     };
-    const wrapper = shallow(<TrainedModelHealth {...pipeline} />);
+    const { modelState, modelStateReason } = pipeline;
+    const wrapper = shallow(
+      <TrainedModelHealth modelState={modelState} modelStateReason={modelStateReason} />
+    );
     const health = wrapper.find(EuiHealth);
     expect(health.prop('children')).toEqual('Stopping');
     expect(health.prop('color')).toEqual('warning');
@@ -62,7 +73,10 @@ describe('TrainedModelHealth', () => {
       ...commonModelData,
       modelState: TrainedModelState.Starting,
     };
-    const wrapper = shallow(<TrainedModelHealth {...pipeline} />);
+    const { modelState, modelStateReason } = pipeline;
+    const wrapper = shallow(
+      <TrainedModelHealth modelState={modelState} modelStateReason={modelStateReason} />
+    );
     const health = wrapper.find(EuiHealth);
     expect(health.prop('children')).toEqual('Starting');
     expect(health.prop('color')).toEqual('warning');
@@ -73,7 +87,10 @@ describe('TrainedModelHealth', () => {
       modelState: TrainedModelState.Failed,
       modelStateReason: 'Model start boom.',
     };
-    const wrapper = shallow(<TrainedModelHealth {...pipeline} />);
+    const { modelState, modelStateReason } = pipeline;
+    const wrapper = shallow(
+      <TrainedModelHealth modelState={modelState} modelStateReason={modelStateReason} />
+    );
     const health = wrapper.find(EuiHealth);
     expect(health.prop('children')).toEqual('Deployment failed');
     expect(health.prop('color')).toEqual('danger');

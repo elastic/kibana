@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { PlatinumLicenseCallout } from './platinum_callout';
 
 describe('PlatinumLicenseCallout ', () => {

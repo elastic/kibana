@@ -12,6 +12,7 @@ import { getContext } from 'kea';
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
+import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 
@@ -27,8 +28,9 @@ describe('renderApp', () => {
     params: coreMock.createAppMountParameters(),
     core: coreMock.createStart(),
     plugins: {
-      licensing: licensingMock.createStart(),
       charts: chartPluginMock.createStartContract(),
+      guidedOnboarding: guidedOnboardingMock.createStart(),
+      licensing: licensingMock.createStart(),
       security: securityMock.createStart(),
     },
   } as any;

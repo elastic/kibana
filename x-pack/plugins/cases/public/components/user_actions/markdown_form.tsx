@@ -9,9 +9,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/e
 import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 
+import { Form, useForm, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from '../case_view/translations';
-import { Form, useForm, UseField } from '../../common/shared_imports';
-import { schema, Content } from './schema';
+import type { Content } from './schema';
+import { schema } from './schema';
 import { MarkdownRenderer, MarkdownEditorForm } from '../markdown_editor';
 
 export const ContentWrapper = styled.div`

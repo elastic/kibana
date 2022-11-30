@@ -295,7 +295,7 @@ export function getUiSettings(
       name: i18n.translate('data.advancedSettings.histogram.maxBarsTitle', {
         defaultMessage: 'Maximum buckets',
       }),
-      value: 100,
+      value: 1000,
       description: i18n.translate('data.advancedSettings.histogram.maxBarsText', {
         defaultMessage: `
           Limits the density of date and number histograms across Kibana
@@ -346,8 +346,18 @@ export function getUiSettings(
   "to": "now"
 }`,
       type: 'json',
-      description: i18n.translate('data.advancedSettings.timepicker.timeDefaultsText', {
-        defaultMessage: 'The timefilter selection to use when Kibana is started without one',
+      description: i18n.translate('data.advancedSettings.timepicker.timeDefaultsDescription', {
+        defaultMessage:
+          'The timefilter selection to use when Kibana is started without one. Must be an object containing "from" and "to" (see {acceptedFormatsLink}).',
+        values: {
+          acceptedFormatsLink:
+            `<a href=${docLinks.links.date.dateMath}
+            target="_blank" rel="noopener">` +
+            i18n.translate('data.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText', {
+              defaultMessage: 'accepted formats',
+            }) +
+            '</a>',
+        },
       }),
       requiresPageReload: true,
       schema: schema.object({

@@ -8,7 +8,10 @@
 import { Plugin, CoreSetup, CoreStart, Logger, PluginInitializerContext } from '@kbn/core/server';
 import { firstValueFrom, Subject } from 'rxjs';
 import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
-import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server/plugin';
+import {
+  PluginStartContract as AlertingPluginsStart,
+  PluginSetupContract as AlertingPluginSetup,
+} from '@kbn/alerting-plugin/server/plugin';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -30,6 +33,7 @@ export interface FixtureSetupDeps {
 }
 
 export interface FixtureStartDeps {
+  alerting: AlertingPluginsStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;

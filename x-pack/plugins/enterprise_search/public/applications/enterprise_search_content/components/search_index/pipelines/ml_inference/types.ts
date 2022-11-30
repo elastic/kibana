@@ -7,6 +7,7 @@
 
 export interface InferencePipelineConfiguration {
   destinationField: string;
+  existingPipeline?: boolean;
   modelID: string;
   pipelineName: string;
   sourceField: string;

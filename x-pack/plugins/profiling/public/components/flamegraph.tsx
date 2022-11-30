@@ -6,16 +6,23 @@
  */
 
 import { Chart, Datum, Flame, FlameLayerValue, PartialTheme, Settings } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSwitch, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiTextColor,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Maybe } from '@kbn/observability-plugin/common/typings';
 import { isNumber } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../common/flamegraph';
-import { useAsync } from '../hooks/use_async';
 import { asPercentage } from '../utils/formatters/as_percentage';
 import { getFlamegraphModel } from '../utils/get_flamegraph_model';
-import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlamegraphInformationWindow } from './flame_graphs_view/flamegraph_information_window';
 
 function TooltipRow({
@@ -31,48 +38,62 @@ function TooltipRow({
   formatAsPercentage: boolean;
   showChange: boolean;
 }) {
-  const valueLabel = formatAsPercentage ? asPercentage(value, 2) : value.toString();
+  const valueLabel = formatAsPercentage ? asPercentage(Math.abs(value)) : value.toString();
   const comparisonLabel =
-    formatAsPercentage && isNumber(comparison)
-      ? asPercentage(comparison, 2)
-      : comparison?.toString();
+    formatAsPercentage && isNumber(comparison) ? asPercentage(comparison) : comparison?.toString();
 
-  const diff = showChange && isNumber(comparison) ? comparison - value : undefined;
+  let diff: number | undefined;
+  let diffLabel = '';
+  let color = '';
 
-  let diffLabel: string | undefined = diff?.toString();
-
-  if (diff === 0) {
-    diffLabel = i18n.translate('xpack.profiling.flameGraphToolTip.diffNoChange', {
-      defaultMessage: 'no change',
-    });
-  } else if (formatAsPercentage && diff !== undefined) {
-    diffLabel = asPercentage(diff, 2);
+  if (isNumber(comparison)) {
+    if (showChange) {
+      color = value < comparison ? 'danger' : 'success';
+      if (formatAsPercentage) {
+        // CPU percent values
+        diff = comparison - value;
+        diffLabel =
+          '(' + (diff > 0 ? '+' : diff < 0 ? '-' : '') + asPercentage(Math.abs(diff)) + ')';
+      } else {
+        // Sample counts
+        diff = 1 - comparison / value;
+        diffLabel =
+          '(' + (diff > 0 ? '-' : diff < 0 ? '+' : '') + asPercentage(Math.abs(diff)) + ')';
+      }
+      if (Math.abs(diff) < 0.0001) {
+        diffLabel = '';
+      }
+    }
   }
 
   return (
-    <EuiFlexItem style={{ width: 200, overflowWrap: 'anywhere' }}>
+    <EuiFlexItem style={{ width: 256, overflowWrap: 'anywhere' }}>
       <EuiFlexGroup direction="row" gutterSize="xs">
-        <EuiFlexItem grow={false} style={{ fontWeight: 'bold' }}>
-          {label}
-        </EuiFlexItem>
         <EuiFlexItem style={{}}>
-          {comparison
-            ? i18n.translate('xpack.profiling.flameGraphTooltip.valueLabel', {
-                defaultMessage: `{value} vs {comparison}`,
-                values: {
-                  value: valueLabel,
-                  comparison: comparisonLabel,
-                },
-              })
-            : valueLabel}
-          {diffLabel ? ` (${diffLabel})` : ''}
+          <EuiText size="xs">
+            <strong>{label}</strong>
+          </EuiText>
+          <EuiText size="xs" style={{ marginLeft: '20px' }}>
+            {comparison !== undefined
+              ? i18n.translate('xpack.profiling.flameGraphTooltip.valueLabel', {
+                  defaultMessage: `{value} vs {comparison}`,
+                  values: {
+                    value: valueLabel,
+                    comparison: comparisonLabel,
+                  },
+                })
+              : valueLabel}
+            <EuiTextColor color={color}> {diffLabel}</EuiTextColor>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="xs" />
     </EuiFlexItem>
   );
 }
 
 function FlameGraphTooltip({
+  isRoot,
   label,
   countInclusive,
   countExclusive,
@@ -83,6 +104,7 @@ function FlameGraphTooltip({
   comparisonSamples,
   comparisonTotalSamples,
 }: {
+  isRoot: boolean;
   samples: number;
   label: string;
   countInclusive: number;
@@ -105,40 +127,44 @@ function FlameGraphTooltip({
         <EuiFlexItem>{label}</EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="xs">
-            <TooltipRow
-              label={i18n.translate('xpack.profiling.flameGraphTooltip.inclusiveCpuLabel', {
-                defaultMessage: `Inclusive CPU:`,
-              })}
-              value={countInclusive / totalSamples}
-              comparison={
-                isNumber(comparisonCountInclusive) && isNumber(comparisonTotalSamples)
-                  ? comparisonCountInclusive / comparisonTotalSamples
-                  : undefined
-              }
-              formatAsPercentage
-              showChange
-            />
-            <TooltipRow
-              label={i18n.translate('xpack.profiling.flameGraphTooltip.exclusiveCpuLabel', {
-                defaultMessage: `Exclusive CPU:`,
-              })}
-              value={countExclusive / totalSamples}
-              comparison={
-                isNumber(comparisonCountExclusive) && isNumber(comparisonTotalSamples)
-                  ? comparisonCountExclusive / comparisonTotalSamples
-                  : undefined
-              }
-              formatAsPercentage
-              showChange
-            />
+            {isRoot === false && (
+              <>
+                <TooltipRow
+                  label={i18n.translate('xpack.profiling.flameGraphTooltip.inclusiveCpuLabel', {
+                    defaultMessage: `CPU incl. subfunctions`,
+                  })}
+                  value={countInclusive / totalSamples}
+                  comparison={
+                    isNumber(comparisonCountInclusive) && isNumber(comparisonTotalSamples)
+                      ? comparisonCountInclusive / comparisonTotalSamples
+                      : undefined
+                  }
+                  formatAsPercentage
+                  showChange
+                />
+                <TooltipRow
+                  label={i18n.translate('xpack.profiling.flameGraphTooltip.exclusiveCpuLabel', {
+                    defaultMessage: `CPU`,
+                  })}
+                  value={countExclusive / totalSamples}
+                  comparison={
+                    isNumber(comparisonCountExclusive) && isNumber(comparisonTotalSamples)
+                      ? comparisonCountExclusive / comparisonTotalSamples
+                      : undefined
+                  }
+                  formatAsPercentage
+                  showChange
+                />
+              </>
+            )}
             <TooltipRow
               label={i18n.translate('xpack.profiling.flameGraphTooltip.samplesLabel', {
-                defaultMessage: `Samples:`,
+                defaultMessage: `Samples`,
               })}
-              value={samples}
-              comparison={comparisonSamples}
+              value={countInclusive}
+              comparison={comparisonCountInclusive}
               formatAsPercentage={false}
-              showChange={false}
+              showChange
             />
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -149,7 +175,6 @@ function FlameGraphTooltip({
 
 export interface FlameGraphProps {
   id: string;
-  height: number | string;
   comparisonMode: FlameGraphComparisonMode;
   primaryFlamegraph?: ElasticFlameGraph;
   comparisonFlamegraph?: ElasticFlameGraph;
@@ -157,16 +182,11 @@ export interface FlameGraphProps {
 
 export const FlameGraph: React.FC<FlameGraphProps> = ({
   id,
-  height,
   comparisonMode,
   primaryFlamegraph,
   comparisonFlamegraph,
 }) => {
   const theme = useEuiTheme();
-
-  const {
-    services: { fetchFrameInformation },
-  } = useProfilingDependencies();
 
   const columnarData = useMemo(() => {
     return getFlamegraphModel({
@@ -195,41 +215,18 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
 
   const [highlightedVmIndex, setHighlightedVmIndex] = useState<number | undefined>(undefined);
 
-  const highlightedFrameQueryParams = useMemo(() => {
-    if (!primaryFlamegraph || highlightedVmIndex === undefined || highlightedVmIndex === 0) {
-      return undefined;
-    }
-
-    const frameID = primaryFlamegraph.FrameID[highlightedVmIndex];
-    const executableID = primaryFlamegraph.ExecutableID[highlightedVmIndex];
-
-    return {
-      frameID,
-      executableID,
-    };
-  }, [primaryFlamegraph, highlightedVmIndex]);
-
-  const { data: highlightedFrame, status: highlightedFrameStatus } = useAsync(() => {
-    if (!highlightedFrameQueryParams) {
-      return Promise.resolve(undefined);
-    }
-
-    return fetchFrameInformation({
-      frameID: highlightedFrameQueryParams.frameID,
-      executableID: highlightedFrameQueryParams.executableID,
-    });
-  }, [highlightedFrameQueryParams, fetchFrameInformation]);
-
   const selected: undefined | React.ComponentProps<typeof FlamegraphInformationWindow>['frame'] =
-    primaryFlamegraph && highlightedFrame && highlightedVmIndex !== undefined
+    primaryFlamegraph && highlightedVmIndex !== undefined
       ? {
-          exeFileName: highlightedFrame.ExeFileName,
-          sourceFileName: highlightedFrame.SourceFilename,
-          functionName: highlightedFrame.FunctionName,
-          samples: primaryFlamegraph.Samples[highlightedVmIndex],
-          childSamples:
-            primaryFlamegraph.Samples[highlightedVmIndex] -
-            primaryFlamegraph.CountExclusive[highlightedVmIndex],
+          fileID: primaryFlamegraph.FileID[highlightedVmIndex],
+          frameType: primaryFlamegraph.FrameType[highlightedVmIndex],
+          exeFileName: primaryFlamegraph.ExeFilename[highlightedVmIndex],
+          addressOrLine: primaryFlamegraph.AddressOrLine[highlightedVmIndex],
+          functionName: primaryFlamegraph.FunctionName[highlightedVmIndex],
+          sourceFileName: primaryFlamegraph.SourceFilename[highlightedVmIndex],
+          sourceLine: primaryFlamegraph.SourceLine[highlightedVmIndex],
+          countInclusive: primaryFlamegraph.CountInclusive[highlightedVmIndex],
+          countExclusive: primaryFlamegraph.CountExclusive[highlightedVmIndex],
         }
       : undefined;
 
@@ -275,7 +272,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
 
                       const valueIndex = props.values[0].valueAccessor as number;
                       const label = primaryFlamegraph.Label[valueIndex];
-                      const samples = primaryFlamegraph.Samples[valueIndex];
+                      const samples = primaryFlamegraph.CountInclusive[valueIndex];
                       const countInclusive = primaryFlamegraph.CountInclusive[valueIndex];
                       const countExclusive = primaryFlamegraph.CountExclusive[valueIndex];
                       const nodeID = primaryFlamegraph.ID[valueIndex];
@@ -284,6 +281,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
 
                       return (
                         <FlameGraphTooltip
+                          isRoot={valueIndex === 0}
                           label={label}
                           samples={samples}
                           countInclusive={countInclusive}
@@ -291,8 +289,8 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
                           comparisonCountInclusive={comparisonNode?.CountInclusive}
                           comparisonCountExclusive={comparisonNode?.CountExclusive}
                           totalSamples={totalSamples}
-                          comparisonTotalSamples={comparisonFlamegraph?.Samples[0]}
-                          comparisonSamples={comparisonNode?.Samples}
+                          comparisonTotalSamples={comparisonFlamegraph?.CountInclusive[0]}
+                          comparisonSamples={comparisonNode?.CountInclusive}
                         />
                       );
                     },
@@ -313,10 +311,8 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
             <EuiFlexItem grow={false}>
               <FlamegraphInformationWindow
                 frame={selected}
-                status={highlightedFrameStatus}
                 totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
-                totalTraces={primaryFlamegraph?.TotalTraces ?? 0}
-                sampledTraces={primaryFlamegraph?.SampledTraces ?? 0}
+                totalSamples={totalSamples}
                 onClose={() => {
                   setShowInformationWindow(false);
                 }}

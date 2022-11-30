@@ -12,10 +12,10 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import { AcknowledgeResponse } from '.';
+import type { AcknowledgeResponse } from '.';
 import {
   catchRetryableEsClientErrors,
-  RetryableEsClientError,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 import {
   DEFAULT_TIMEOUT,
@@ -97,7 +97,6 @@ export const createIndex = ({
             // Bump priority so that recovery happens before newer indices
             priority: 10,
             // Increase the fields limit beyond the default of 1000
-            // @ts-expect-error https://github.com/elastic/elasticsearch/issues/89381
             mapping: {
               total_fields: { limit: 1500 },
             },

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SingleCaseMetricsResponse } from '../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../common/api';
 import { AggregationHandler } from './aggregation_handler';
-import { AggregationBuilder, SingleCaseBaseHandlerCommonOptions } from './types';
+import type { AggregationBuilder, SingleCaseBaseHandlerCommonOptions } from './types';
 
 export abstract class SingleCaseAggregationHandler extends AggregationHandler<SingleCaseMetricsResponse> {
   protected readonly caseId: string;

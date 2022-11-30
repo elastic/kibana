@@ -10,9 +10,9 @@ import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../../common/constants';
-import { ESCaseAttributes } from '../../services/cases/types';
+import type { ESCaseAttributes } from '../../services/cases/types';
 import { OWNERS } from '../constants';
-import {
+import type {
   CollectTelemetryDataParams,
   Buckets,
   CasesTelemetry,

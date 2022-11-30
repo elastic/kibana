@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "common/**/*",
@@ -15,7 +14,7 @@
     "server/legacy_uptime/lib/requests/__fixtures__/monitor_charts_mock.json",
     "../../../typings/**/*"
   ],
-  "references": [
+  "kbn_references": [
     {
       "path": "../alerting/tsconfig.json"
     },
@@ -33,6 +32,10 @@
     },
     {
       "path": "../../../src/plugins/unified_search/tsconfig.json"
+    }
+  ,
+    {
+      "path": "../index_lifecycle_management/tsconfig.json"
     }
   ]
 }

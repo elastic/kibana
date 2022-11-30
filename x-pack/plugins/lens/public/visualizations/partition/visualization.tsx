@@ -15,6 +15,8 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   Visualization,
   OperationMetadata,
@@ -22,37 +24,38 @@ import type {
   VisualizationDimensionGroupConfig,
   Suggestion,
   VisualizeEditorContext,
+  VisualizationInfo,
 } from '../../types';
 import { getSortedGroups, toExpression, toPreviewExpression } from './to_expression';
-import { CategoryDisplay, layerTypes, LegendDisplay, NumberDisplay } from '../../../common';
+import {
+  CategoryDisplay,
+  LegendDisplay,
+  NumberDisplay,
+  PieChartTypes,
+  PieLayerState,
+  PieVisualizationState,
+} from '../../../common';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { DimensionEditor, PieToolbar } from './toolbar';
+import { DimensionDataExtraEditor, DimensionEditor, PieToolbar } from './toolbar';
+import { LayerSettings } from './layer_settings';
 import { checkTableForContainsSmallValues } from './render_helpers';
-import { PieChartTypes, PieLayerState, PieVisualizationState } from '../../../common';
-import { IndexPatternLayer } from '../..';
 
-interface DatatableDatasourceState {
-  [prop: string]: unknown;
-  layers: IndexPatternLayer[];
-}
-
-export interface PartitionSuggestion extends Suggestion {
-  datasourceState: DatatableDatasourceState;
-  visualizationState: PieVisualizationState;
-}
+const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
+  defaultMessage: 'Metric',
+});
 
 function newLayerState(layerId: string): PieLayerState {
   return {
     layerId,
     primaryGroups: [],
     secondaryGroups: undefined,
-    metric: undefined,
+    metrics: [],
     numberDisplay: NumberDisplay.PERCENT,
     categoryDisplay: CategoryDisplay.DEFAULT,
     legendDisplay: LegendDisplay.DEFAULT,
     nestedLegend: false,
-    layerType: layerTypes.DATA,
+    layerType: LayerTypes.DATA,
   };
 }
 
@@ -69,25 +72,22 @@ const numberMetricOperations = (op: OperationMetadata) =>
 export const isCollapsed = (columnId: string, layer: PieLayerState) =>
   Boolean(layer.collapseFns?.[columnId]);
 
-const applyPaletteToColumnConfig = (
+const applyPaletteToAccessorConfigs = (
   columns: AccessorConfig[],
   layer: PieLayerState,
   palette: PieVisualizationState['palette'],
   paletteService: PaletteRegistry
 ) => {
-  const firstNonCollapsedColumnIdx = columns.findIndex(
-    (column) => !isCollapsed(column.columnId, layer)
-  );
+  const firstNonCollapsedColumnId = layer.primaryGroups.find((id) => !isCollapsed(id, layer));
 
-  if (firstNonCollapsedColumnIdx > -1) {
-    columns[firstNonCollapsedColumnIdx] = {
-      columnId: columns[firstNonCollapsedColumnIdx].columnId,
-      triggerIcon: 'colorBy',
-      palette: paletteService
+  columns.forEach((accessorConfig) => {
+    if (firstNonCollapsedColumnId === accessorConfig.columnId) {
+      accessorConfig.triggerIcon = 'colorBy';
+      accessorConfig.palette = paletteService
         .get(palette?.name || 'default')
-        .getCategoricalColors(10, palette?.params),
-    };
-  }
+        .getCategoricalColors(10, palette?.params);
+    }
+  });
 };
 
 export const getPieVisualization = ({
@@ -164,21 +164,45 @@ export const getPieVisualization = ({
       }));
 
       if (accessors.length) {
-        applyPaletteToColumnConfig(accessors, layer, state.palette, paletteService);
+        applyPaletteToAccessorConfigs(accessors, layer, state.palette, paletteService);
       }
 
       const primaryGroupConfigBaseProps = {
-        requiredMinDimensionCount: 1,
         groupId: 'primaryGroups',
         accessors,
         enableDimensionEditor: true,
         filterOperations: bucketedOperations,
       };
 
-      const totalNonCollapsedAccessors = accessors.reduce(
-        (total, { columnId }) => total + (isCollapsed(columnId, layer) ? 0 : 1),
-        0
-      );
+      // We count multiple metrics as a bucket dimension.
+      //
+      // However, if this is a mosaic chart, we don't support multiple metrics
+      // so if there is more than one metric we got here via a chart switch from
+      // a subtype that supports multi-metrics e.g. pie.
+      //
+      // The user will be prompted to remove the extra metric dimensions and we don't
+      // count multiple metrics as a bucket dimension so that the rest of the dimension
+      // groups UI behaves correctly.
+      const multiMetricsBucketDimensionCount =
+        layer.metrics.length > 1 && state.shape !== 'mosaic' ? 1 : 0;
+
+      const totalNonCollapsedAccessors =
+        accessors.reduce(
+          (total, { columnId }) => total + (isCollapsed(columnId, layer) ? 0 : 1),
+          0
+        ) + multiMetricsBucketDimensionCount;
+
+      const fakeFinalAccessor =
+        layer.metrics.length > 1 && layer.allowMultipleMetrics
+          ? {
+              label: i18n.translate('xpack.lens.pie.multiMetricAccessorLabel', {
+                defaultMessage: '{number} metrics',
+                values: {
+                  number: layer.metrics.length,
+                },
+              }),
+            }
+          : undefined;
 
       switch (state.shape) {
         case 'donut':
@@ -191,9 +215,11 @@ export const getPieVisualization = ({
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.sliceDimensionGroupLabel', {
               defaultMessage: 'Slice',
             }),
+            fakeFinalAccessor,
             supportsMoreColumns: totalNonCollapsedAccessors < PartitionChartsMeta.pie.maxBuckets,
             dimensionsTooMany: totalNonCollapsedAccessors - PartitionChartsMeta.pie.maxBuckets,
             dataTestSubj: 'lnsPie_sliceByDimensionPanel',
+            hideGrouping: true,
           };
         case 'mosaic':
           return {
@@ -217,11 +243,13 @@ export const getPieVisualization = ({
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.treemapDimensionGroupLabel', {
               defaultMessage: 'Group',
             }),
+            fakeFinalAccessor,
             supportsMoreColumns:
               totalNonCollapsedAccessors < PartitionChartsMeta[state.shape].maxBuckets,
             dimensionsTooMany:
               totalNonCollapsedAccessors - PartitionChartsMeta[state.shape].maxBuckets,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
+            hideGrouping: state.shape === 'treemap',
           };
       }
     };
@@ -268,25 +296,34 @@ export const getPieVisualization = ({
       }
     };
 
-    const getMetricGroupConfig = (): VisualizationDimensionGroupConfig => ({
-      groupId: 'metric',
-      groupLabel: i18n.translate('xpack.lens.pie.groupsizeLabel', {
-        defaultMessage: 'Size by',
-      }),
-      dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.groupSizeLabel', {
-        defaultMessage: 'Size',
-      }),
-      paramEditorCustomProps: {
-        headingLabel: i18n.translate('xpack.lens.pie.headingLabel', {
-          defaultMessage: 'Value',
-        }),
-      },
-      accessors: layer.metric ? [{ columnId: layer.metric }] : [],
-      supportsMoreColumns: !layer.metric,
-      filterOperations: numberMetricOperations,
-      requiredMinDimensionCount: 1,
-      dataTestSubj: 'lnsPie_sizeByDimensionPanel',
-    });
+    const getMetricGroupConfig = (): VisualizationDimensionGroupConfig => {
+      const accessors = layer.metrics.map((columnId) => ({ columnId }));
+      applyPaletteToAccessorConfigs(accessors, layer, state.palette, paletteService);
+
+      const groupLabel = layer.allowMultipleMetrics
+        ? i18n.translate('xpack.lens.pie.groupMetricLabel', {
+            defaultMessage: 'Metrics',
+          })
+        : metricLabel;
+
+      return {
+        groupId: 'metric',
+        groupLabel,
+        dimensionEditorGroupLabel: groupLabel,
+        paramEditorCustomProps: {
+          headingLabel: i18n.translate('xpack.lens.pie.headingLabel', {
+            defaultMessage: 'Value',
+          }),
+        },
+        accessors,
+        supportsMoreColumns: layer.metrics.length === 0 || Boolean(layer.allowMultipleMetrics),
+        filterOperations: numberMetricOperations,
+        requiredMinDimensionCount: 1,
+        dimensionsTooMany: layer.allowMultipleMetrics ? 0 : layer.metrics.length - 1,
+        dataTestSubj: 'lnsPie_sizeByDimensionPanel',
+        enableDimensionEditor: true,
+      };
+    };
 
     return {
       groups: [getPrimaryGroupConfig(), getSecondaryGroupConfig(), getMetricGroupConfig()].filter(
@@ -317,35 +354,48 @@ export const getPieVisualization = ({
             ],
           };
         }
-        return { ...l, metric: columnId };
+        return { ...l, metrics: [...l.metrics.filter((metric) => metric !== columnId), columnId] };
       }),
     };
   },
   removeDimension({ prevState, layerId, columnId }) {
+    const newState = { ...prevState };
+
+    const layerToChange = prevState.layers.find((l) => l.layerId === layerId);
+
+    if (!layerToChange) {
+      return prevState;
+    }
+
+    if (
+      layerToChange.primaryGroups.includes(columnId) &&
+      layerToChange.primaryGroups.length === 1 &&
+      layerToChange.allowMultipleMetrics &&
+      layerToChange.metrics.length
+    ) {
+      // we don't support palette selection for multiple metrics without a slice-by dimension
+      // so revert to default if the last slice-by is removed
+      delete newState.palette;
+    }
+
+    let newLayer = { ...layerToChange };
+
+    if (layerToChange.collapseFns?.[columnId]) {
+      const newCollapseFns = { ...layerToChange.collapseFns };
+      delete newCollapseFns[columnId];
+      newLayer.collapseFns = newCollapseFns;
+    }
+
+    newLayer = {
+      ...newLayer,
+      primaryGroups: newLayer.primaryGroups.filter((c) => c !== columnId),
+      secondaryGroups: newLayer.secondaryGroups?.filter((c) => c !== columnId) ?? undefined,
+      metrics: newLayer.metrics.filter((c) => c !== columnId),
+    };
+
     return {
-      ...prevState,
-      layers: prevState.layers.map((l) => {
-        if (l.layerId !== layerId) {
-          return l;
-        }
-
-        const newLayer = { ...l };
-
-        if (l.collapseFns?.[columnId]) {
-          const newCollapseFns = { ...l.collapseFns };
-          delete newCollapseFns[columnId];
-          newLayer.collapseFns = newCollapseFns;
-        }
-
-        if (newLayer.metric === columnId) {
-          return { ...newLayer, metric: undefined };
-        }
-        return {
-          ...newLayer,
-          primaryGroups: newLayer.primaryGroups.filter((c) => c !== columnId),
-          secondaryGroups: newLayer.secondaryGroups?.filter((c) => c !== columnId) ?? undefined,
-        };
-      }),
+      ...newState,
+      layers: newState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
     };
   },
   renderDimensionEditor(domElement, props) {
@@ -358,11 +408,21 @@ export const getPieVisualization = ({
       domElement
     );
   },
+  renderDimensionEditorDataExtra(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <DimensionDataExtraEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
+  },
 
   getSupportedLayers() {
     return [
       {
-        type: layerTypes.DATA,
+        type: LayerTypes.DATA,
         label: i18n.translate('xpack.lens.pie.addLayer', {
           defaultMessage: 'Visualization',
         }),
@@ -391,6 +451,17 @@ export const getPieVisualization = ({
     );
   },
 
+  renderLayerSettings(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <LayerSettings {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
+  },
+
   getWarningMessages(state, frame) {
     if (state?.layers.length === 0 || !frame.activeData) {
       return;
@@ -398,13 +469,13 @@ export const getPieVisualization = ({
     const warningMessages = [];
 
     for (const layer of state.layers) {
-      const { layerId, metric } = layer;
+      const { layerId, metrics } = layer;
       const rows = frame.activeData[layerId]?.rows;
       const numericColumn = frame.activeData[layerId]?.columns.find(
         ({ meta }) => meta?.type === 'number'
       );
 
-      if (!rows || !metric) {
+      if (!rows || !metrics.length) {
         break;
       }
 
@@ -422,17 +493,26 @@ export const getPieVisualization = ({
         );
       }
 
-      const columnToLabel = frame.datasourceLayers[layerId]?.getOperationForColumnId(metric)?.label;
-      const hasArrayValues = rows.some((row) => Array.isArray(row[metric]));
-      if (hasArrayValues) {
+      const metricsWithArrayValues = metrics
+        .map((metricColId) => {
+          if (rows.some((row) => Array.isArray(row[metricColId]))) {
+            return metricColId;
+          }
+        })
+        .filter(Boolean) as string[];
+
+      if (metricsWithArrayValues.length) {
+        const labels = metricsWithArrayValues.map(
+          (colId) => frame.datasourceLayers[layerId]?.getOperationForColumnId(colId)?.label || colId
+        );
         warningMessages.push(
           <FormattedMessage
-            key={columnToLabel || metric}
+            key={labels.join(',')}
             id="xpack.lens.pie.arrayValues"
-            defaultMessage="{label} contains array values. Your visualization may not render as
+            defaultMessage="The following dimensions contain array values: {label}. Your visualization may not render as
         expected."
             values={{
-              label: <strong>{columnToLabel || metric}</strong>,
+              label: <strong>{labels.join(', ')}</strong>,
             }}
           />
         );
@@ -450,29 +530,33 @@ export const getPieVisualization = ({
     if (!props.suggestions.length) {
       return;
     }
-    const suggestionByShape = (props.suggestions as PartitionSuggestion[]).find(
-      (suggestion) => suggestion.visualizationState.shape === context.configuration.shape
-    );
+    const suggestionByShape = (
+      props.suggestions as Array<Suggestion<PieVisualizationState, FormBasedPersistedState>>
+    ).find((suggestion) => suggestion.visualizationState.shape === context.configuration.shape);
     if (!suggestionByShape) {
       return;
     }
-    return {
+    const suggestion: Suggestion<PieVisualizationState, FormBasedPersistedState> = {
       ...suggestionByShape,
       visualizationState: {
         ...suggestionByShape.visualizationState,
         ...context.configuration,
       },
     };
+    return suggestion;
   },
 
   getErrorMessages(state) {
     const hasTooManyBucketDimensions = state.layers
-      .map(
-        (layer) =>
+      .map((layer) => {
+        const totalBucketDimensions =
           Array.from(new Set([...layer.primaryGroups, ...(layer.secondaryGroups ?? [])])).filter(
             (columnId) => !isCollapsed(columnId, layer)
-          ).length > PartitionChartsMeta[state.shape].maxBuckets
-      )
+          ).length +
+          // multiple metrics counts as a dimension
+          (layer.metrics.length > 1 ? 1 : 0);
+        return totalBucketDimensions > PartitionChartsMeta[state.shape].maxBuckets;
+      })
       .some(Boolean);
 
     return hasTooManyBucketDimensions
@@ -496,5 +580,62 @@ export const getPieVisualization = ({
           },
         ]
       : [];
+  },
+
+  getVisualizationInfo(state: PieVisualizationState) {
+    const layer = state.layers[0];
+    const dimensions: VisualizationInfo['layers'][number]['dimensions'] = [];
+
+    layer.metrics.forEach((metric) => {
+      dimensions.push({
+        id: metric,
+        name: metricLabel,
+      });
+    });
+
+    if (state.shape === 'mosaic' && layer.secondaryGroups && layer.secondaryGroups.length) {
+      layer.secondaryGroups.forEach((accessor) => {
+        dimensions.push({
+          name: i18n.translate('xpack.lens.pie.horizontalAxisLabel', {
+            defaultMessage: 'Horizontal axis',
+          }),
+          id: accessor,
+        });
+      });
+    }
+
+    if (layer.primaryGroups && layer.primaryGroups.length) {
+      let name = i18n.translate('xpack.lens.pie.treemapGroupLabel', {
+        defaultMessage: 'Group by',
+      });
+      if (state.shape === 'mosaic') {
+        name = i18n.translate('xpack.lens.pie.verticalAxisLabel', {
+          defaultMessage: 'Vertical axis',
+        });
+      }
+      if (state.shape === 'donut' || state.shape === 'pie') {
+        name = i18n.translate('xpack.lens.pie.sliceGroupLabel', {
+          defaultMessage: 'Slice by',
+        });
+      }
+      layer.primaryGroups.forEach((accessor) => {
+        dimensions.push({
+          name,
+          id: accessor,
+        });
+      });
+    }
+
+    return {
+      layers: [
+        {
+          layerId: layer.layerId,
+          layerType: layer.layerType,
+          chartType: state.shape,
+          ...this.getDescription(state),
+          dimensions,
+        },
+      ],
+    };
   },
 });

@@ -19,6 +19,7 @@ import {
 import {
   INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
   ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
+  ADD_RULE_ACTIONS_MENU_ITEM,
   DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
   TAGS_RULE_BULK_MENU_ITEM,
   ADD_TAGS_RULE_BULK_MENU_ITEM,
@@ -37,6 +38,8 @@ import {
   UPDATE_SCHEDULE_TIME_UNIT_SELECT,
   UPDATE_SCHEDULE_LOOKBACK_INPUT,
   RULES_BULK_EDIT_SCHEDULES_WARNING,
+  RULES_BULK_EDIT_OVERWRITE_ACTIONS_CHECKBOX,
+  RULES_BULK_EDIT_ACTIONS_THROTTLE_INPUT,
 } from '../screens/rules_bulk_edit';
 import { SCHEDULE_DETAILS } from '../screens/rule_details';
 
@@ -45,12 +48,12 @@ export const clickApplyTimelineTemplatesMenuItem = () => {
   cy.get(APPLY_TIMELINE_RULE_BULK_MENU_ITEM).click().should('not.exist');
 };
 
-export const clickIndexPatternsMenuItem = () => {
+const clickIndexPatternsMenuItem = () => {
   cy.get(BULK_ACTIONS_BTN).click();
   cy.get(INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click().should('not.exist');
 };
 
-export const clickTagsMenuItem = () => {
+const clickTagsMenuItem = () => {
   cy.get(BULK_ACTIONS_BTN).click();
   cy.get(TAGS_RULE_BULK_MENU_ITEM).click();
 };
@@ -70,15 +73,17 @@ export const clickAddIndexPatternsMenuItem = () => {
   cy.get(ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click();
 };
 
-export const clickDeleteIndexPatternsMenuItem = () => {
-  clickIndexPatternsMenuItem();
-  cy.get(DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click().should('not.exist');
-};
-
 export const openBulkEditAddIndexPatternsForm = () => {
   clickAddIndexPatternsMenuItem();
 
   cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Add index patterns');
+};
+
+export const openBulkEditRuleActionsForm = () => {
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(ADD_RULE_ACTIONS_MENU_ITEM).click();
+
+  cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Add rule actions');
 };
 
 export const openBulkEditDeleteIndexPatternsForm = () => {
@@ -160,6 +165,14 @@ export const checkOverwriteIndexPatternsCheckbox = () => {
     .should('be.checked');
 };
 
+export const checkOverwriteRuleActionsCheckbox = () => {
+  cy.get(RULES_BULK_EDIT_OVERWRITE_ACTIONS_CHECKBOX)
+    .should('have.text', 'Overwrite all selected rules actions')
+    .find('input')
+    .click({ force: true })
+    .should('be.checked');
+};
+
 export const checkOverwriteDataViewCheckbox = () => {
   cy.get(RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX)
     .should('have.text', 'Apply changes to rules configured with data views')
@@ -194,6 +207,7 @@ export const typeScheduleInterval = (interval: string) => {
     .type(interval.toString())
     .blur();
 };
+
 export const typeScheduleLookback = (lookback: string) => {
   cy.get(UPDATE_SCHEDULE_LOOKBACK_INPUT)
     .find('input')
@@ -244,4 +258,8 @@ export const assertRuleScheduleValues = ({ interval, lookback }: RuleSchedule) =
     cy.get('dd').eq(0).should('contain.text', interval);
     cy.get('dd').eq(1).should('contain.text', lookback);
   });
+};
+
+export const pickActionFrequency = (frequency: string) => {
+  cy.get(RULES_BULK_EDIT_ACTIONS_THROTTLE_INPUT).select(frequency);
 };

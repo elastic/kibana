@@ -7,8 +7,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
-import { FlexGridColumns } from '@elastic/eui/src/components/flex/flex_grid';
+import { EuiFlexGrid, EuiFlexGridProps, EuiFlexItem } from '@elastic/eui';
 import { SampleDataCard } from '@kbn/home-sample-data-card';
 
 import { useList } from './hooks';
@@ -18,7 +17,7 @@ import { useList } from './hooks';
  */
 export interface Props {
   /** Number of columns, defaults to 3. */
-  columns?: FlexGridColumns;
+  columns?: EuiFlexGridProps['columns'];
 }
 
 /**

@@ -4,17 +4,18 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
     "isolatedModules": true
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts", ".storybook/**/*"],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../data_views/tsconfig.json" },
     { "path": "../custom_integrations/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../share/tsconfig.json" },
     { "path": "../url_forwarding/tsconfig.json" },
-    { "path": "../usage_collection/tsconfig.json" }
+    { "path": "../usage_collection/tsconfig.json" },
+    { "path": "../guided_onboarding/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/cloud/tsconfig.json" },
   ]
 }

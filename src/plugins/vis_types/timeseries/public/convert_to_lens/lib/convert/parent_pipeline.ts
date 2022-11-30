@@ -237,7 +237,11 @@ const convertMovingAvgOrDerivativeToColumns = (
   const [nestedFieldId, _] = subMetricField?.split('[') ?? [];
   // support nested aggs with formula
   const additionalSubFunction = metrics.find(({ id }) => id === nestedFieldId);
-  if (additionalSubFunction || pipelineAgg.name === 'counter_rate') {
+  if (
+    additionalSubFunction ||
+    pipelineAgg.name === 'counter_rate' ||
+    subFunctionMetric.type === 'variance'
+  ) {
     const formula = getPipelineSeriesFormula(metric, metrics, subFunctionMetric, {
       metaValue,
       reducedTimeRange,

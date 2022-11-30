@@ -29,6 +29,7 @@ describe('MonitorStatusList component', () => {
           id: 'myMonitor',
           type: 'icmp',
           duration: { us: 123 },
+          check_group: 'test-group',
         },
         observer: {
           geo: {},
@@ -44,6 +45,7 @@ describe('MonitorStatusList component', () => {
           id: 'myMonitor',
           type: 'icmp',
           duration: { us: 123 },
+          check_group: 'test-group',
         },
         observer: {
           geo: {},
@@ -59,6 +61,7 @@ describe('MonitorStatusList component', () => {
           id: 'myUpMonitor',
           type: 'icmp',
           duration: { us: 234 },
+          check_group: 'test-group',
         },
         observer: {
           geo: {
@@ -165,6 +168,7 @@ describe('MonitorStatusList component', () => {
           id: 'myMonitor',
           type: 'icmp',
           duration: { us: 234 },
+          check_group: 'test-group',
         },
         observer: {
           geo: {
@@ -182,6 +186,7 @@ describe('MonitorStatusList component', () => {
           id: 'myMonitor',
           type: 'icmp',
           duration: { us: 234 },
+          check_group: 'test-group',
         },
         observer: {
           geo: {
@@ -199,6 +204,7 @@ describe('MonitorStatusList component', () => {
           id: 'myMonitor',
           type: 'icmp',
           duration: { us: 234 },
+          check_group: 'test-group',
         },
         observer: {
           geo: {

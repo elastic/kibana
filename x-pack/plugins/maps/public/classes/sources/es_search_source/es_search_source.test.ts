@@ -37,6 +37,7 @@ describe('ESSearchSource', () => {
       const mockIndexPatternService = {
         get() {
           return {
+            getIndexPattern: () => 'foobar-title-*',
             title: 'foobar-title-*',
             fields: {
               getByName() {

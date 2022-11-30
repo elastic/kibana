@@ -44,19 +44,21 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
   }
 
   const { getColumnsFromVis } = await convertToLensModule;
-  const result = getColumnsFromVis(vis, timefilter, dataView, {
+  const layers = getColumnsFromVis(vis, timefilter, dataView, {
     buckets: [],
     splits: ['segment'],
     unsupported: ['split_row', 'split_column'],
   });
 
-  if (result === null) {
+  if (layers === null) {
     return null;
   }
 
+  const [layerConfig] = layers;
+
   // doesn't support more than three split slice levels
   // doesn't support pie without at least one split slice
-  if (result.buckets.length > 3 || !result.buckets.length) {
+  if (layerConfig.buckets.all.length > 3 || !layerConfig.buckets.all.length) {
     return null;
   }
 
@@ -69,11 +71,11 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
       {
         indexPatternId,
         layerId,
-        columns: result.columns.map(excludeMetaFromColumn),
+        columns: layerConfig.columns.map(excludeMetaFromColumn),
         columnOrder: [],
       },
     ],
-    configuration: getConfiguration(layerId, vis, result),
+    configuration: getConfiguration(layerId, vis, layerConfig),
     indexPatternIds: [indexPatternId],
   };
 };
