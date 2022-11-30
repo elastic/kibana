@@ -81,6 +81,11 @@ export interface ProviderLoginAttempt {
    * Login attempt can have any form and defined by the specific provider.
    */
   value: unknown;
+
+  /**
+   * The tenant the login attempt is targeted for.
+   */
+  tenantId: string;
 }
 
 export interface AuthenticatorOptions {
@@ -337,6 +342,7 @@ export class Authenticator {
       if (!authenticationResult.notHandled()) {
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
+          tenantId: attempt.tenantId,
           authenticationResult,
           existingSessionValue,
         });
@@ -414,6 +420,7 @@ export class Authenticator {
       if (!authenticationResult.notHandled()) {
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
+          tenantId: existingSession.value!.tenantId!,
           authenticationResult,
           existingSessionValue: existingSession.value,
         });
@@ -515,6 +522,7 @@ export class Authenticator {
     if (!authenticationResult.notHandled()) {
       const sessionUpdateResult = await this.updateSessionValue(request, {
         provider: existingSessionValue.provider,
+        tenantId: existingSessionValue.tenantId!,
         authenticationResult,
         existingSessionValue,
       });
@@ -709,10 +717,12 @@ export class Authenticator {
       provider,
       authenticationResult,
       existingSessionValue,
+      tenantId,
     }: {
       provider: AuthenticationProvider;
       authenticationResult: AuthenticationResult;
       existingSessionValue: Readonly<SessionValue> | null;
+      tenantId: string;
     }
   ) {
     // Log failed `user_login` attempt only if creating a brand new session or if the existing session is
@@ -835,6 +845,7 @@ export class Authenticator {
         username: authenticationResult.user?.username,
         userProfileId,
         provider,
+        tenantId,
         state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
       });
 
@@ -860,6 +871,7 @@ export class Authenticator {
       newSessionValue = await this.session.update(request, {
         ...existingSessionValue,
         userProfileId,
+        tenantId,
         state: authenticationResult.shouldUpdateState()
           ? authenticationResult.state
           : existingSessionValue.state,
@@ -1040,17 +1052,26 @@ export function enrichWithUserProfileId(
   authenticationResult: AuthenticationResult,
   sessionValue: SessionValue | null
 ) {
+  // TODO: not sure this is really the best place to inject the tenant_id
+  //       but that's the only place where we reconcile the session value and the user atm,
+  //       so hopefully that's good enough for the hacky approach
   if (
     !authenticationResult.user ||
     !sessionValue?.userProfileId ||
     authenticationResult.user.profile_uid === sessionValue.userProfileId
   ) {
-    return authenticationResult;
+    return {
+      ...authenticationResult,
+      user: authenticationResult.user
+        ? { ...authenticationResult.user, tenant_id: sessionValue?.tenantId }
+        : undefined,
+    } as AuthenticationResult;
   }
 
   const enrichedUser: AuthenticatedUser = {
     ...authenticationResult.user,
     profile_uid: sessionValue.userProfileId,
+    tenant_id: sessionValue.tenantId,
   };
 
   if (authenticationResult.redirected()) {

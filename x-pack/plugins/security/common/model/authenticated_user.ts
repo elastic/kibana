@@ -62,6 +62,11 @@ export interface AuthenticatedUser extends User {
    * User profile ID of this user.
    */
   profile_uid?: string;
+
+  /**
+   * Tenant the user is bound to.
+   */
+  tenant_id?: string;
 }
 
 export function isUserAnonymous(user: Pick<AuthenticatedUser, 'authentication_provider'>) {

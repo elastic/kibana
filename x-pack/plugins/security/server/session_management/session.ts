@@ -35,6 +35,11 @@ export interface SessionValue {
   username?: string;
 
   /**
+   * Tenant this session is bound to
+   */
+  tenantId?: string;
+
+  /**
    * Name and type of the provider this session belongs to.
    */
   provider: AuthenticationProvider;

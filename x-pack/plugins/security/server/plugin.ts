@@ -264,6 +264,7 @@ export class SecurityPlugin
     this.authenticationService.setup({
       http: core.http,
       elasticsearch: core.elasticsearch,
+      multitenancy: core.multitenancy,
       config,
       license,
       buildNumber: this.initializerContext.env.packageInfo.buildNum,

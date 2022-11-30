@@ -13,6 +13,8 @@ import type {
   KibanaRequest,
   Logger,
   LoggerFactory,
+  MultitenancyServiceSetup,
+  TenantResolver,
 } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -38,6 +40,7 @@ import { renderUnauthenticatedPage } from './unauthenticated_page';
 interface AuthenticationServiceSetupParams {
   http: Pick<HttpServiceSetup, 'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse'>;
   elasticsearch: Pick<ElasticsearchServiceSetup, 'setUnauthorizedErrorHandler'>;
+  multitenancy: MultitenancyServiceSetup;
   config: ConfigType;
   license: SecurityLicense;
   buildNumber: number;
@@ -93,10 +96,18 @@ export class AuthenticationService {
   private license!: SecurityLicense;
   private authenticator?: Authenticator;
   private session?: PublicMethodsOf<Session>;
+  private tenantResolver?: TenantResolver;
 
   constructor(private readonly logger: Logger) {}
 
-  setup({ config, http, license, buildNumber, elasticsearch }: AuthenticationServiceSetupParams) {
+  setup({
+    config,
+    http,
+    license,
+    buildNumber,
+    elasticsearch,
+    multitenancy,
+  }: AuthenticationServiceSetupParams) {
     this.license = license;
 
     // If we cannot automatically authenticate users we should redirect them straight to the login
@@ -226,6 +237,13 @@ export class AuthenticationService {
       });
     });
 
+    multitenancy.registerTenantResolver((request: KibanaRequest) => {
+      if (!this.tenantResolver) {
+        throw new Error('tenant resolver not ready yet');
+      }
+      return this.tenantResolver!(request);
+    });
+
     elasticsearch.setUnauthorizedErrorHandler(async ({ error, request }, toolkit) => {
       if (!this.authenticator) {
         this.logger.error('Authentication sub-system is not fully initialized yet.');
@@ -330,6 +348,11 @@ export class AuthenticationService {
 
     const getCurrentUser = (request: KibanaRequest) =>
       http.auth.get<AuthenticatedUser>(request).state ?? null;
+
+    this.tenantResolver = async (request: KibanaRequest) => {
+      const user = getCurrentUser(request);
+      return user.tenant_id;
+    };
 
     this.session = session;
     this.authenticator = new Authenticator({
