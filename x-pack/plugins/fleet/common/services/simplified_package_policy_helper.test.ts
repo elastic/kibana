@@ -131,6 +131,7 @@ describe('toPackagePolicy', () => {
               data_stream: 'logs-nginx.access',
               features: {
                 synthetic_source: true,
+                tsdb: false,
               },
             },
           ],
@@ -142,6 +143,7 @@ describe('toPackagePolicy', () => {
           data_stream: 'logs-nginx.access',
           features: {
             synthetic_source: true,
+            tsdb: false,
           },
         },
       ]);

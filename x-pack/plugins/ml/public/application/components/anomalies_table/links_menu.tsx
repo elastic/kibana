@@ -253,11 +253,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
       const url = await discoverLocator.getRedirectUrl({
         indexPatternId: dataViewId,
-        refreshInterval: {
-          display: 'Off',
-          pause: true,
-          value: 0,
-        },
         timeRange: {
           from,
           to,
@@ -271,7 +266,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           dataViewId === null
             ? []
             : getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
-        sort: [['timestamp, asc']],
       });
 
       if (!unmounted) {

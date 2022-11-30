@@ -46,7 +46,8 @@
     "Host",
     "Linux",
     "Threat Detection",
-    "Execution"
+    "Execution",
+    "Investigation Guide"
   ],
   "threat": [
     {

@@ -6,15 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiTitle,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiSpacer,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiTitle, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LoadWhenInView } from '@kbn/observability-plugin/public';
 
@@ -34,14 +26,10 @@ import { MonitorErrorsCount } from './monitor_errors_count';
 import { useAbsoluteDate } from '../../../hooks';
 
 export const MonitorSummary = () => {
-  const { from: fromRelative, loading } = useEarliestStartDate();
+  const { from: fromRelative } = useEarliestStartDate();
   const toRelative = 'now';
 
   const { from, to } = useAbsoluteDate({ from: fromRelative, to: toRelative });
-
-  if (loading) {
-    return <LoadingState />;
-  }
 
   const dateLabel = from === 'now-30d/d' ? LAST_30_DAYS_LABEL : TO_DATE_LABEL;
 
@@ -132,16 +120,6 @@ export const MonitorSummary = () => {
     </>
   );
 };
-
-function LoadingState({ height }: { height?: string }) {
-  return (
-    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: height ?? '100%' }}>
-      <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size="xl" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
 
 const SUMMARY_LABEL = i18n.translate('xpack.synthetics.detailsPanel.summary', {
   defaultMessage: 'Summary',

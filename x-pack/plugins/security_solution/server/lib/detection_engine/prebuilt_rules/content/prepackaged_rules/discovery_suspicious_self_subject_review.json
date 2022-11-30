@@ -13,13 +13,29 @@
   "license": "Elastic License v2",
   "name": "Kubernetes Suspicious Self-Subject Review",
   "note": "",
-  "query": "kubernetes.audit.verb:\"create\"\nand kubernetes.audit.objectRef.resource:(\"selfsubjectaccessreviews\" or \"selfsubjectrulesreviews\")\nand kubernetes.audit.user.username:(system\\:serviceaccount\\:* or system\\:node\\:*) or kubernetes.audit.impersonatedUser.username:(system\\:serviceaccount\\:* or system\\:node\\:*)\n",
+  "query": "event.dataset : \"kubernetes.audit_logs\" \n  and kubernetes.audit.annotations.authorization_k8s_io/decision:\"allow\"\n  and kubernetes.audit.verb:\"create\"\n  and kubernetes.audit.objectRef.resource:(\"selfsubjectaccessreviews\" or \"selfsubjectrulesreviews\")\n  and (kubernetes.audit.user.username:(system\\:serviceaccount\\:* or system\\:node\\:*) \n  or kubernetes.audit.impersonatedUser.username:(system\\:serviceaccount\\:* or system\\:node\\:*))\n",
   "references": [
     "https://www.paloaltonetworks.com/apps/pan/public/downloadResource?pagePath=/content/pan/en_US/resources/whitepapers/kubernetes-privilege-escalation-excessive-permissions-in-popular-platforms",
     "https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access",
     "https://techcommunity.microsoft.com/t5/microsoft-defender-for-cloud/detecting-identity-attacks-in-kubernetes/ba-p/3232340"
   ],
+  "related_integrations": [
+    {
+      "package": "kubernetes",
+      "version": "^1.4.1"
+    }
+  ],
   "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "kubernetes.audit.annotations.authorization_k8s_io/decision",
+      "type": "unknown"
+    },
     {
       "ecs": false,
       "name": "kubernetes.audit.impersonatedUser.username",
@@ -70,5 +86,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 100
+  "version": 200
 }
