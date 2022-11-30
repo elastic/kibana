@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { APMRouteHandlerResources } from '../typings';
 
 export type ApmAlertsClient = Awaited<ReturnType<typeof getApmAlertsClient>>;
@@ -21,6 +22,10 @@ export async function getApmAlertsClient({
     'apm',
   ]);
 
+  if (!apmAlertsIndices || isEmpty(apmAlertsIndices)) {
+    throw Error('No alert indices exist for "apm". Please fix it');
+  }
+
   type ApmAlertsClientSearchParams = Omit<
     Parameters<typeof alertsClient.find>[0],
     'index'
@@ -29,7 +34,7 @@ export async function getApmAlertsClient({
   return {
     search(searchParams: ApmAlertsClientSearchParams) {
       return alertsClient.find({
-        index: apmAlertsIndices?.join(',') ?? '.alerts*',
+        index: apmAlertsIndices.join(','),
         ...searchParams,
       });
     },
