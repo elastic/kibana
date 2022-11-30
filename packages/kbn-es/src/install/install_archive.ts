@@ -10,6 +10,7 @@ import fs from 'fs';
 import path from 'path';
 
 import chalk from 'chalk';
+import execa from 'execa';
 import del from 'del';
 import { extract } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -99,7 +100,6 @@ export async function installArchive(archive: string, options: InstallArchiveOpt
       await appendToConfig(installPath, 'tracing.apm.agent.server_url', apmSettings.apmServerUrl);
       await appendToConfig(installPath, 'tracing.apm.agent.log_level', apmSettings.logLevel);
     }
-    await createKeystore(installPath);
     await configureKeystore(installPath, log, [
       ['bootstrap.password', password],
       ...apmKeystore,

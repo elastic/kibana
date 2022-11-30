@@ -15,7 +15,7 @@ export function getElasticsearchApmSettings(log: ToolingLog): ElasticsearchAPMSe
     enabled,
     apmSecretToken: process.env.ELASTIC_APM_SECRET_TOKEN || '',
     apmServerUrl: process.env.ELASTIC_APM_SERVER_URL || '',
-    samplingRate: parseInt(process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE || '0'),
+    samplingRate: parseInt(process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE || '0', 10),
     logLevel: 'debug',
   };
 
