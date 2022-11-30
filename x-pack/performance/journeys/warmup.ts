@@ -94,11 +94,11 @@ export const journey = new Journey({})
   .step('Open Kibana and skip welcome screen', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`/app/home`));
     const btn = await page.waitForSelector('[data-test-subj="skipWelcomeScreen"]');
-    await btn.click()
+    await btn.click();
   })
   .step('Load homepage', async ({ page, kbnUrl }) => {
-    await page.waitForSelector('.homDataAdd'); 
-    await new Promise(f => setTimeout(f, 1000));
+    await page.waitForSelector('.homDataAdd');
+    await new Promise((f) => setTimeout(f, 1000));
   })
   .step('Cleanup', async ({ esClient }) => {
     const resp = await esClient.indices.delete({
