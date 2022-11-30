@@ -115,7 +115,6 @@ export class Cache {
     if (file.map != null) {
       this.safePut(this.sourceMaps, key, JSON.stringify(file.map));
     }
-
   }
 
   close() {
