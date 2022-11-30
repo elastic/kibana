@@ -9,9 +9,11 @@ import React, { memo, useCallback, useState } from 'react';
 import { EuiButtonEmpty, EuiConfirmModal, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 
 export const CommandInputClearHistory = memo(() => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const dispatch = useConsoleStateDispatch();
 
   const handleClearInputHistory = useCallback(() => {
     setShowConfirmModal(true);
@@ -22,8 +24,9 @@ export const CommandInputClearHistory = memo(() => {
   }, []);
 
   const handleConfirmModalConfirm = useCallback(() => {
-    //
-  }, []);
+    dispatch({ type: 'clearInputHistoryState' });
+    setShowConfirmModal(false);
+  }, [dispatch]);
 
   return (
     <>

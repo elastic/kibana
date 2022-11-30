@@ -21,6 +21,7 @@ type InputAreaStateAction = ConsoleDataAction & {
   type:
     | 'updateInputPopoverState'
     | 'updateInputHistoryState'
+    | 'clearInputHistoryState'
     | 'updateInputTextEnteredState'
     | 'updateInputPlaceholderState'
     | 'setInputState';
@@ -50,6 +51,15 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
           ...state.input,
           // Keeping the last 100 entries only for now
           history: [{ id: uuidV4(), input: payload.command }, ...state.input.history.slice(0, 99)],
+        },
+      };
+
+    case 'clearInputHistoryState':
+      return {
+        ...state,
+        input: {
+          ...state.input,
+          history: [],
         },
       };
 

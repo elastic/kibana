@@ -98,6 +98,7 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
 
     case 'updateInputPopoverState':
     case 'updateInputHistoryState':
+    case 'clearInputHistoryState':
     case 'updateInputTextEnteredState':
     case 'updateInputPlaceholderState':
     case 'setInputState':
