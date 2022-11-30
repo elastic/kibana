@@ -112,7 +112,7 @@ export const getAlertUtils = (
 
     return {
       query: searchSource.getField('query') || data.query.queryString.getDefaultQuery(),
-      dataViewSpec: { ...dataView.toSpec(false), id: undefined }, // make adhoc data view
+      dataViewSpec: dataView.toSpec(false),
       timeRange: buildTimeRangeFilter(dataView, alert, timeFieldName),
       filters: searchSource.getField('filter') as Filter[],
     };
