@@ -8,7 +8,7 @@
 import semverMajor from 'semver/functions/major';
 import { LOGSTASH } from '../../../common/constants';
 
-export function isPipelineMonitoringSupportedInVersion(logstashVersion) {
+export function isPipelineMonitoringSupportedInVersion(logstashVersion: string) {
   const major = semverMajor(logstashVersion);
   return major >= LOGSTASH.MAJOR_VER_REQD_FOR_PIPELINES;
 }

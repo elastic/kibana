@@ -100,7 +100,7 @@ export async function upgradeBatch(
   const now = new Date().toISOString();
   const data = {
     version: options.version,
-    source_uri: options.sourceUri,
+    sourceURI: options.sourceUri,
   };
 
   const rollingUpgradeOptions = getRollingUpgradeOptions(
