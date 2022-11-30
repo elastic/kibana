@@ -130,6 +130,7 @@ export type {
   PutDownloadSourceRequest,
   GetAvailableVersionsResponse,
   PostHealthCheckRequest,
+  PostHealthCheckResponse,
 } from '../../common/types';
 export {
   entries,

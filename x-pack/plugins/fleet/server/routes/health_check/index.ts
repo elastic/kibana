@@ -88,14 +88,15 @@ export const postHealthCheckHandler: FleetRequestHandler<
       }),
       signal: abortController.signal,
     });
-    const body = await res.json();
+    const bodyRes = await res.json();
+    const body = { ...bodyRes, host };
 
     return response.ok({ body });
   } catch (error) {
     // when the request is aborted, return offline status
     if (error.name === 'AbortError') {
       return response.ok({
-        body: { name: 'fleet-server', status: `OFFLINE` },
+        body: { name: 'fleet-server', status: `OFFLINE`, host: request.body.host },
       });
     }
     return defaultFleetErrorHandler({ error, response });

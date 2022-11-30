@@ -10,3 +10,9 @@ export interface PostHealthCheckRequest {
     host: string;
   };
 }
+
+export interface PostHealthCheckResponse {
+  name: string;
+  host: string;
+  status: string;
+}

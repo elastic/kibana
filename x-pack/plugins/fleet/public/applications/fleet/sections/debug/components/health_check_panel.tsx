@@ -6,55 +6,28 @@
  */
 import React, { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 
-import { EuiSpacer, EuiText, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiText,
+  EuiSuperSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCallOut,
+} from '@elastic/eui';
 
-// import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { sendPostHealthCheck, useGetFleetServerHosts } from '../../../hooks';
 import type { FleetServerHost } from '../../../types';
 
-const POLLING_INTERVAL_MS = 10 * 1000; // 5 sec
-
-export const usePollingStatus = (hostName: string | undefined) => {
-  const timeout = useRef<number | undefined>(undefined);
-  const [status, setStatus] = useState<string>('');
-
-  const pollFleetServerHealth = useCallback(async () => {
-    const request = await sendPostHealthCheck({
-      host: `${hostName}`, // 'https://localhost:8220',
-    });
-
-    setStatus(request.data?.status);
-  }, [hostName]);
-
-  useEffect(() => {
-    let isAborted = false;
-
-    const poll = () => {
-      timeout.current = window.setTimeout(async () => {
-        pollFleetServerHealth();
-        if (!isAborted) {
-          poll();
-        }
-      }, POLLING_INTERVAL_MS);
-    };
-
-    poll();
-
-    if (isAborted) clearTimeout(timeout.current);
-
-    return () => {
-      isAborted = true;
-    };
-  }, [pollFleetServerHealth]);
-  return status;
-};
+const POLLING_INTERVAL_S = 10; // 10 sec
+const POLLING_INTERVAL_MS = POLLING_INTERVAL_S * 1000;
 
 export const HealthCheckPanel: React.FunctionComponent = () => {
   const [selectedFleetServerHost, setSelectedFleetServerHost] = useState<
     FleetServerHost | undefined
   >();
+
   const { data } = useGetFleetServerHosts();
   const fleetServerHosts = useMemo(() => data?.items ?? [], [data?.items]);
 
@@ -65,7 +38,41 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
     }
   }, [fleetServerHosts]);
 
-  const status = usePollingStatus(selectedFleetServerHost?.host_urls[0] || '');
+  const timeout = useRef<number | undefined>(undefined);
+  const hostName = useMemo(
+    () => selectedFleetServerHost?.host_urls[0] || '',
+    [selectedFleetServerHost?.host_urls]
+  );
+
+  const [healthData, setHealthData] = useState<any>();
+
+  const pollFleetServerHealth = useCallback(async () => {
+    const res = await sendPostHealthCheck({
+      host: `${hostName}`,
+    });
+    setHealthData(res);
+  }, [hostName]);
+
+  useEffect(() => {
+    let isAborted = false;
+
+    const poll = () => {
+      timeout.current = window.setTimeout(async () => {
+        pollFleetServerHealth();
+        if (!isAborted && hostName) {
+          poll();
+        }
+      }, POLLING_INTERVAL_MS);
+    };
+
+    poll();
+
+    if (isAborted || !hostName) clearTimeout(timeout.current);
+
+    return () => {
+      isAborted = true;
+    };
+  }, [hostName, pollFleetServerHealth]);
 
   const fleetServerHostsOptions = useMemo(
     () => [
@@ -80,12 +87,26 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
   );
 
   const circleIcon = (statusValue: string) => {
-    if (!status) return;
-    const color = statusValue === 'HEALTHY' ? '#007871' : '#bd271e';
+    if (!statusValue) return null;
+
+    let color;
+    switch (statusValue) {
+      case 'HEALTHY':
+        color = '#007871'; // green
+        break;
+      case 'UNHEALTHY':
+        color = '#ffd200'; // yellow
+        break;
+      case 'OFFLINE':
+        color = '#bd271e'; // red
+        break;
+      default:
+        color = '';
+    }
 
     return (
       <svg width={16} height={16} fill={color}>
-        <circle cx="10" cy="10" r="4" />
+        <circle cx="10" cy="10" r="6" />
       </svg>
     );
   };
@@ -96,13 +117,13 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
         <p>
           <FormattedMessage
             id="xpack.fleet.debug.healthCheckPanel.description"
-            defaultMessage="Select the host used to enroll Fleet Server. Check the connection healthiness below."
+            defaultMessage={`Select the host used to enroll Fleet Server. The connection is refreshed every ${POLLING_INTERVAL_S}s.`}
           />
         </p>
       </EuiText>
 
       <EuiSpacer size="m" />
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiSuperSelect
             fullWidth
@@ -110,32 +131,47 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
             prepend={
               <EuiText size="relative" color={''}>
                 <FormattedMessage
-                  id="xpack.fleet.debug.fleetServerHostsLabel"
+                  id="xpack.fleet.debug.healthCheckPanel.fleetServerHostsLabel"
                   defaultMessage="Fleet Server Hosts"
                 />
               </EuiText>
             }
-            onChange={(fleetServerHostId) =>
+            onChange={(fleetServerHostId) => {
+              setHealthData(undefined);
               setSelectedFleetServerHost(
                 fleetServerHosts.find((fleetServerHost) => fleetServerHost.id === fleetServerHostId)
-              )
-            }
+              );
+            }}
             valueOfSelected={selectedFleetServerHost?.id}
             options={fleetServerHostsOptions}
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <p>
-            <FormattedMessage
-              id="xpack.fleet.debug.healthCheckPanel.status"
-              defaultMessage="Status: "
-            />
-            {status}
-            {circleIcon(status)}
-          </p>
-          {/* <p>{circleIcon(status)}</p> */}
+          {healthData?.data?.status && hostName === healthData?.data?.host ? (
+            <p>
+              <FormattedMessage
+                id="xpack.fleet.debug.healthCheckPanel.status"
+                defaultMessage="Status: "
+              />
+              {healthData?.data?.status}
+              {circleIcon(healthData?.data?.status)}
+            </p>
+          ) : null}
         </EuiFlexItem>
       </EuiFlexGroup>
+      {healthData?.error && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut title="Error" color="danger">
+            {healthData?.error?.message ?? (
+              <FormattedMessage
+                id="xpack.fleet.debug.healthCheckPanel.fetchError"
+                defaultMessage={healthData?.error?.message}
+              />
+            )}
+          </EuiCallOut>
+        </>
+      )}
     </>
   );
 };

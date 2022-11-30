@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { PostHealthCheckRequest } from '../../types';
+import type { PostHealthCheckRequest, PostHealthCheckResponse } from '../../types';
 import { appRoutesService } from '../../services';
 
 import { sendRequest } from './use_request';
 
 export function sendPostHealthCheck(body: PostHealthCheckRequest['body']) {
-  return sendRequest({
+  return sendRequest<PostHealthCheckResponse>({
     method: 'post',
     path: appRoutesService.postHealthCheckPath(),
     body,
