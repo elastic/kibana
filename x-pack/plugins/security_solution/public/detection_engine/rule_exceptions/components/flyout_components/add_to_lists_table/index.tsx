@@ -17,30 +17,6 @@ const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps
   sharedExceptionLists,
   onListSelectionChange,
 }) => {
-  const selectionValue = {
-    onSelectionChange: (selection: ExceptionListRuleReferencesSchema[]) => {
-      if (onListSelectionChange != null) {
-        onListSelectionChange(
-          selection.map(
-            ({
-              referenced_rules: _,
-              namespace_type: namespaceType,
-              os_types: osTypes,
-              tags,
-              ...rest
-            }) => ({
-              ...rest,
-              namespace_type: namespaceType ?? 'single',
-              os_types: osTypes ?? [],
-              tags: tags ?? [],
-            })
-          )
-        );
-      }
-    },
-    initialSelected: [],
-  };
-
   const {
     error,
     isLoading,

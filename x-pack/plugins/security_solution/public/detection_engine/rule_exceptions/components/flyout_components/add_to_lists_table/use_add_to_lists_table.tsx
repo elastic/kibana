@@ -39,7 +39,7 @@ export interface ExceptionsAddToListsComponentProps {
   showAllSharedLists: boolean;
   /* Shared exception lists to display as options to add item to */
   sharedExceptionLists: ListArray;
-  onListSelectionChange?: (listsSelectedToAdd: ExceptionListSchema[]) => void;
+  onListSelectionChange: (listsSelectedToAdd: ExceptionListSchema[]) => void;
 }
 
 export const useAddToSharedListTable = ({
@@ -96,15 +96,54 @@ export const useAddToSharedListTable = ({
     }
   }, [exceptionListReferences, showAllSharedLists]);
 
-  // const [linkedRules, setLinkedRules] = useState<Rule[]>(initiallySelectedRules || []);
+  const selectionValue = {
+    onSelectionChange: (selection: ExceptionListRuleReferencesSchema[]) => {
+      if (onListSelectionChange != null) {
+        onListSelectionChange(
+          selection.map(
+            ({
+              referenced_rules: _,
+              namespace_type: namespaceType,
+              os_types: osTypes,
+              tags,
+              ...rest
+            }) => ({
+              ...rest,
+              namespace_type: namespaceType ?? 'single',
+              os_types: osTypes ?? [],
+              tags: tags ?? [],
+            })
+          )
+        );
+      }
+    },
+    initialSelected: [],
+  };
+  const [linkedLists, setLinkedLists] = useState<ExceptionListRuleReferencesSchema[]>([]); // TODO check later
 
-  // useEffect(() => {
-  //   if (typeof onRuleSelectionChange === 'function') onRuleSelectionChange(linkedRules);
-  // }, [linkedRules, onRuleSelectionChange]);
+  useEffect(() => {
+    onListSelectionChange(
+      linkedLists.map(
+        ({
+          referenced_rules: _,
+          namespace_type: namespaceType,
+          os_types: osTypes,
+          tags,
+          ...rest
+        }) => ({
+          ...rest,
+          namespace_type: namespaceType ?? 'single',
+          os_types: osTypes ?? [],
+          tags: tags ?? [],
+        })
+      )
+    );
+  }, [linkedLists, onListSelectionChange]);
 
+  // ASK
   // const sortedRulesByLinkedRulesOnTop = useMemo(
   //   () =>
-  //     sortBy(rules, [
+  //     sortBy(listsT, [
   //       (rule) => {
   //         return initiallySelectedRules?.find((initRule) => initRule.id === rule.id);
   //       },
@@ -122,12 +161,12 @@ export const useAddToSharedListTable = ({
         align: 'left' as HorizontalAlignment,
         'data-test-subj': 'ruleActionLinkRuleSwitch',
         render: (_, rule: ExceptionListRuleReferencesSchema) => (
-          <LinkListSwitch list={rule} linkedList={[]} onListLinkChange={() => {}} />
+          <LinkListSwitch list={rule} linkedList={linkedLists} onListLinkChange={setLinkedLists} />
         ),
       },
       ...getSharedListsTableColumns(),
     ],
-    []
+    [linkedLists]
   );
   const onTableChange = useCallback(
     ({ page: { index } }: CriteriaWithPagination<never>) =>
