@@ -6,3 +6,4 @@
  */
 
 export { taskManagerAdapter } from './task_manager';
+export { sqsAdapter } from './sqs';

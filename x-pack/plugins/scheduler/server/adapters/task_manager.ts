@@ -10,6 +10,8 @@ import type { Worker } from '../worker_registry';
 import { PluginSetupDeps, PluginStartDeps, Job, Adapter } from '../plugin';
 
 export const taskManagerAdapter: Adapter = {
+  setup() {},
+  start() {},
   registerWorkerAdapter: (worker: Worker<unknown>, plugins: PluginSetupDeps) => {
     plugins.taskManager.registerTaskDefinitions({
       [`plugin:scheduler:${worker.id}`]: {

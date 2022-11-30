@@ -11,11 +11,12 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { Worker, WorkerRegistry } from './worker_registry';
-import { taskManagerAdapter } from './adapters';
+import { taskManagerAdapter, sqsAdapter } from './adapters';
 
 // Set this to whatever one you want to use!
-const CONFIGURED_ADAPTER = 'taskManager';
+const CONFIGURED_ADAPTER = 'sqs';
 const availableAdapters = {
+  sqs: sqsAdapter,
   taskManager: taskManagerAdapter,
 };
 
@@ -42,6 +43,8 @@ export interface PluginStartDeps {
 }
 
 export interface Adapter {
+  setup(plugins: PluginSetupDeps): void;
+  start(plugins: PluginStartDeps): void;
   registerWorkerAdapter(worker: Worker<unknown>, plugins: PluginSetupDeps): void;
   scheduleAdapter(job: Job<unknown>, plugins: PluginStartDeps): Promise<void>;
   unscheduleAdapter(jobId: Job<unknown>['id'], plugins: PluginStartDeps): Promise<void>;
@@ -58,6 +61,7 @@ export class SchedulerPlugin
   }
 
   public setup(core: CoreSetup, plugins: PluginSetupDeps) {
+    this.adapter.setup(plugins);
     return {
       registerWorker: (worker: Worker<unknown>) => {
         this.workerRegistry.register(worker);
@@ -67,6 +71,7 @@ export class SchedulerPlugin
   }
 
   public start(coreStart: CoreStart, plugins: PluginStartDeps) {
+    this.adapter.start(plugins);
     return {
       schedule: async (job: Job<unknown>) => {
         await this.adapter.scheduleAdapter(job, plugins);
