@@ -224,7 +224,7 @@ describe('Discover component', () => {
     expect(
       container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
     ).not.toBeNull();
-  });
+  }, 10000);
 
   test('sql query displays no chart toggle', async () => {
     const container = document.createElement('div');
@@ -249,7 +249,7 @@ describe('Discover component', () => {
     expect(
       component.find('[data-test-subj="discoverSavedSearchTitle"]').getDOMNode()
     ).toHaveFocus();
-  });
+  }, 10000);
 
   describe('sidebar', () => {
     test('should be opened if discover:sidebarClosed was not set', async () => {
