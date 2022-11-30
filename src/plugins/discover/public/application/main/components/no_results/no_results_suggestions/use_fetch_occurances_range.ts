@@ -35,7 +35,7 @@ export const useFetchOccurrencesRange = (
 ): { range: OccurrencesRange | null; refetch: () => Promise<OccurrencesRange | null> } => {
   const data = params.services.data;
   const uiSettings = params.services.uiSettings;
-  const [state, setState] = useState<OccurrencesRange | null>(null);
+  const [range, setRange] = useState<OccurrencesRange | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const mountedRef = useRef<boolean>(true);
 
@@ -67,12 +67,12 @@ export const useFetchOccurrencesRange = (
       }
 
       if (mountedRef.current) {
-        setState(occurrencesRange);
+        setRange(occurrencesRange);
       }
 
       return occurrencesRange;
     },
-    [abortControllerRef, setState, mountedRef, data, uiSettings]
+    [abortControllerRef, setRange, mountedRef, data, uiSettings]
   );
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export const useFetchOccurrencesRange = (
   }, [fetchOccurrences, params.query, params.filters, params.dataView]);
 
   return {
-    range: state,
+    range,
     refetch: () => fetchOccurrences(params.dataView, params.query, params.filters),
   };
 };
