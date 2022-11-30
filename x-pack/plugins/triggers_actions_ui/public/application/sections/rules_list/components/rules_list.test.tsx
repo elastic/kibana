@@ -386,7 +386,7 @@ describe('rules_list component with items', () => {
     expect(loadRuleAggregationsWithKueryFilter).toHaveBeenCalled();
   }
 
-  it('sorts rules when clicking the name column', async () => {
+  it.skip('sorts rules when clicking the name column', async () => {
     await setup();
     wrapper
       .find('[data-test-subj="tableHeaderCell_name_1"] .euiTableHeaderButton')
@@ -408,7 +408,7 @@ describe('rules_list component with items', () => {
     );
   });
 
-  it.skip('does not render edit and delete button when rule type does not allow editing in rules management', async () => {
+  it('does not render edit and delete button when rule type does not allow editing in rules management', async () => {
     await setup(false);
     expect(wrapper.find('[data-test-subj="ruleSidebarEditAction"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="ruleSidebarDeleteAction"]').exists()).toBeTruthy();
