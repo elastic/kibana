@@ -47,7 +47,7 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//react",
-   "@npm//@storybook/addon-actions",
+  "@npm//@storybook/addon-actions",
   "//packages/shared-ux/card/no_data/mocks",
   "//packages/shared-ux/storybook/mock",
 ]

@@ -6,8 +6,10 @@
  */
 
 import { get, groupBy } from 'lodash';
-import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
+import {
+  getIndexPatterns,
+  getElasticsearchDataset,
+} from '../../../../lib/cluster/get_index_patterns';
 import {
   postElasticsearchCcrRequestParamsRT,
   postElasticsearchCcrRequestPayloadRT,
@@ -140,6 +142,13 @@ function buildRequest(
                       },
                     },
                   },
+                  {
+                    term: {
+                      'data_stream.dataset': {
+                        value: getElasticsearchDataset('ccr'),
+                      },
+                    },
+                  },
                 ],
               },
             },
@@ -215,7 +224,14 @@ export function ccrRoute(server: MonitoringCore) {
     async handler(req) {
       const config = server.config;
       const ccs = req.payload.ccs;
-      const esIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
+      const dataset = 'ccr';
+      const moduleType = 'elasticsearch';
+      const esIndexPattern = getIndexPatterns({
+        config,
+        moduleType,
+        dataset,
+        ccs,
+      });
 
       try {
         const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
@@ -293,7 +309,6 @@ export function ccrRoute(server: MonitoringCore) {
                 error: readExceptions.length ? readExceptions[0].exception?.type : null,
                 opsSynced: get(shardBucket, 'ops_synced.value'),
                 syncLagTime:
-                  // @ts-ignore
                   fullLegacyStat?.ccr_stats?.time_since_last_read_millis ??
                   fullMbStat?.elasticsearch?.ccr?.follower?.time_since_last_read?.ms,
                 syncLagOps: get(shardBucket, 'lag_ops.value'),
