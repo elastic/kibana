@@ -255,10 +255,21 @@ export function groupSamplesByCategory({
     rotations: Math.ceil(subcharts.length / 10),
   });
 
+  // We want the mapping from the category string to the color to be constant,
+  // so that the same category string will always map to the same color.
+  const stringhash = (s : string): number => {
+    var hash : number = 0;
+    for (i = 0 ;i<s.length ; i++) {
+      ch = string.charCodeAt(i);
+      hash = ((hash << 5) - hash) + ch;
+      hash = hash & hash;}
+    return hash % len(subcharts);
+  }
+
   return orderBy(subcharts, ['Percentage', 'Category'], ['desc', 'asc']).map((chart, index) => {
     return {
       ...chart,
-      Color: colors[index],
+      Color: colors[stringhash(chart.Category)],
       Index: index + 1,
       Series: chart.Series.map((value) => {
         return {
