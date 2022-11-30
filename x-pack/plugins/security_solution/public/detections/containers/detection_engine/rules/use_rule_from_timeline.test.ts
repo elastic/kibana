@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
 import { act, renderHook } from '@testing-library/react-hooks';
 
-import type { RuleFromTimeline } from './use_rule_from_timeline';
 import { useRuleFromTimeline } from './use_rule_from_timeline';
 import { useGetInitialUrlParamValue } from '../../../../common/utils/global_query_string/helpers';
 import { resolveTimeline } from '../../../../timelines/containers/api';
-import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
-import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
+import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
+import type { TimelineModel } from '../../../..';
 
+jest.mock('../../../../common/utils/global_query_string/helpers');
+jest.mock('../../../../timelines/containers/api');
+jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../common/containers/sourcerer');
 jest.mock('../../../../common/components/link_to', () => {
   const originalModule = jest.requireActual('../../../../common/components/link_to');
   return {
@@ -30,12 +32,7 @@ jest.mock('../../../../common/components/link_to', () => {
   };
 });
 
-jest.mock('../../../../common/utils/global_query_string/helpers');
-jest.mock('../../../../timelines/containers/api');
-jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../../../common/containers/sourcerer');
 const mockDispatch = jest.fn();
-
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
   return {
@@ -48,6 +45,7 @@ const selectedTimeline = {
   data: {
     timeline: {
       ...mockTimeline,
+      indexNames: ['awesome-*'],
       kqlQuery: {
         filterQuery: {
           serializedQuery:
@@ -93,42 +91,35 @@ const selectedTimeline = {
 describe('useRuleFromTimeline', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
   const setRuleQuery = jest.fn();
-  let result: RenderHookResult<void, RuleFromTimeline>['result'];
   beforeEach(() => {
     jest.clearAllMocks();
 
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
-    (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
-
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      ...mockSourcererScope,
+      dataViewId: 'security-solution',
+      selectedPatterns: ['auditbeat-*'],
+    });
     (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => ({
       decodedParam: 'eb2781c0-1df5-11eb-8589-2f13958b79f7',
     }));
     (resolveTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
   });
 
-  it('if no from timeline id, loading: false', async () => {
+  it('if no timeline id in URL, loading: false and query not set', async () => {
     (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => ({
       decodedParam: undefined,
     }));
-    const { result: res } = renderHook(() => useRuleFromTimeline(setRuleQuery));
-    result = res;
+    const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
 
     expect(result.current.loading).toEqual(false);
     expect(setRuleQuery).not.toHaveBeenCalled();
   });
 
-  it('if from timeline id, loading: true', async () => {
-    await act(async () => {
-      const { result: res } = renderHook(() => useRuleFromTimeline(setRuleQuery));
-      result = res;
-    });
+  it('if timeline id in URL, set active timeline data view to from timeline data view', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
     expect(result.current.loading).toEqual(true);
-  });
-
-  it('if from timeline id, set active timeline data view to from timeline data view', async () => {
-    const { result: res, waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
-    result = res;
     await waitForNextUpdate();
     expect(mockDispatch).toHaveBeenCalledTimes(3);
     expect(mockDispatch).toHaveBeenNthCalledWith(1, {
@@ -154,33 +145,68 @@ describe('useRuleFromTimeline', () => {
         isLoading: false,
       },
     });
-
-    expect(result.current.loading).toEqual(true);
   });
 
   it('when from timeline data view id === selected data view id and browser fields is not empty, set rule data to match from timeline query', async () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      ...mockSourcererScope,
-      browserFields: mockBrowserFields,
-      dataViewId: 'security-solution',
-      selectedPatterns: ['auditbeat-*'],
-    });
-
-    const { result: res, waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
-    result = res;
+    const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
     expect(result.current.loading).toEqual(true);
     await waitForNextUpdate();
     expect(result.current.loading).toEqual(false);
     expect(setRuleQuery).toHaveBeenCalledWith({
-      index: [
-        'auditbeat-*',
-        'endgame-*',
-        'filebeat-*',
-        'logs-*',
-        'packetbeat-*',
-        'winlogbeat-*',
-        '.siem-signals-angelachuang-default',
-      ],
+      index: ['awesome-*'],
+      queryBar: {
+        filters: [
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    should: [{ match_phrase: { 'host.name': 'Stephs-MBP.lan' } }],
+                    minimum_should_match: 1,
+                  },
+                },
+                {
+                  bool: {
+                    should: [{ match_phrase: { 'process.args': '--lang=en-US' } }],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+            meta: {
+              alias: 'timeline-filter-drop-area',
+              controlledBy: 'timeline-filter-drop-area',
+              negate: false,
+              disabled: false,
+              type: 'custom',
+              key: 'bool',
+              value:
+                '{"bool":{"should":[{"bool":{"should":[{"match_phrase":{"host.name":"Stephs-MBP.lan"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"process.args":"--lang=en-US"}}],"minimum_should_match":1}}],"minimum_should_match":1}}',
+            },
+            $state: { store: 'appState' },
+          },
+        ],
+        query: { query: 'host.name:* AND user.name:*', language: 'kuery' },
+        saved_id: null,
+      },
+    });
+  });
+
+  it('Sets rule from timeline query via callback', async () => {
+    (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => ({
+      decodedParam: undefined,
+    }));
+    const { result } = renderHook(() => useRuleFromTimeline(setRuleQuery));
+    expect(result.current.loading).toEqual(false);
+    await act(async () => {
+      result.current.onOpenTimeline(selectedTimeline.data.timeline as unknown as TimelineModel);
+    });
+
+    // not loading anything as an external call to onOpenTimeline provides the timeline
+    expect(result.current.loading).toEqual(false);
+    expect(setRuleQuery).toHaveBeenCalledWith({
+      index: ['awesome-*'],
       queryBar: {
         filters: [
           {
