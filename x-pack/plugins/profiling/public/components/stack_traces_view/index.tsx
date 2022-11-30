@@ -81,6 +81,8 @@ export function StackTracesView() {
   const [highlightedSubchart, setHighlightedSubchart] = useState<TopNSubchart | undefined>(
     undefined
   );
+  const [highlightedTopNSample, setHighlightedTopNSample] =
+    useState<TopNSample | undefined>(undefined);
 
   const { data } = state;
 
@@ -144,6 +146,7 @@ export function StackTracesView() {
                       });
                     }}
                     onSampleClick={(sample) => {
+                      setHighlightedTopNSample(sample)
                       setHighlightedSubchart(
                         data?.charts.find((subchart) => subchart.Category === sample.Category)
                       );
@@ -152,6 +155,7 @@ export function StackTracesView() {
                       setHighlightedSubchart(undefined);
                     }}
                     highlightedSubchart={highlightedSubchart}
+                    highlightedTopNSample={highlightedTopNSample}
                     showFrames={topNType === TopNType.Traces}
                   />
                 </AsyncComponent>

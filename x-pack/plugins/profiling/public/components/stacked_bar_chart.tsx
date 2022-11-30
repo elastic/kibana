@@ -27,9 +27,15 @@ import { asPercentage } from '../utils/formatters/as_percentage';
 import { SubChart } from './subchart';
 
 function SubchartTooltip({
+  sample,
   highlightedSubchart,
   showFrames,
-}: TooltipInfo & { highlightedSubchart: TopNSubchart; showFrames: boolean }) {
+}: TooltipInfo & {
+  sample : TopNSample,
+  highlightedSubchart: TopNSubchart;
+  showFrames: boolean }) {
+  // sequential search is fast enough for small arrays.
+  var idx = highlightedSubchart.Series.indexOf(sample);
   // max tooltip width - 2 * padding (16px)
   const width = 224;
   return (
@@ -39,7 +45,9 @@ function SubchartTooltip({
         color={highlightedSubchart.Color}
         category={highlightedSubchart.Category}
         label={highlightedSubchart.Label}
-        percentage={highlightedSubchart.Percentage}
+        percentage={
+          (highlightedSubchart.Series[idx].Count /
+          highlightedSubchart.TotalSamples[idx].Count) * 100.0 }
         data={highlightedSubchart.Series}
         showFrames={showFrames}
         /* we don't show metadata in tooltips */
@@ -72,6 +80,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
   onSampleClick,
   onSampleOut,
   highlightedSubchart,
+  highlightedTopNSample,
   charts,
   showFrames,
 }) => {
@@ -109,6 +118,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
             ? (props) => (
                 <SubchartTooltip
                   {...props}
+                  sample={highlightedTopNSample}
                   showFrames={showFrames}
                   highlightedSubchart={highlightedSubchart}
                 />

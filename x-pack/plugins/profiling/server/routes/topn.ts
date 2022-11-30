@@ -43,7 +43,7 @@ export async function topNElasticSearchQuery({
   const filter = createCommonFilter({ timeFrom, timeTo, kuery });
   const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
-  const bucketWidth = computeBucketWidthFromTimeRangeAndBucketCount(timeFrom, timeTo, 50);
+  const bucketWidth = computeBucketWidthFromTimeRangeAndBucketCount(timeFrom, timeTo, 100);
 
   const eventsIndex = await findDownsampledIndex({
     logger,
