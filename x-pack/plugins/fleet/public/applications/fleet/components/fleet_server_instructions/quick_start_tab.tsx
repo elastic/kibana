@@ -15,15 +15,29 @@ import {
   getConfirmFleetServerConnectionStep,
   getInstallFleetServerStep,
 } from './steps';
+import { useLatestFleetServers } from './hooks/use_latest_fleet_servers';
 
 export const QuickStartTab: React.FunctionComponent = () => {
-  const { fleetServerHost, fleetServerPolicyId, serviceToken, status, error, submit, inputs } =
-    useQuickStartCreateForm();
+  const {
+    fleetServerHost,
+    setFleetServerHost,
+    fleetServerHosts,
+    fleetServerPolicyId,
+    serviceToken,
+    status,
+    error,
+    submit,
+    inputs,
+  } = useQuickStartCreateForm();
+
   const { isFleetServerReady } = useWaitForFleetServer();
+  const { hasRecentlyEnrolledFleetServers } = useLatestFleetServers();
 
   const steps = [
     getGettingStartedStep({
+      fleetServerHosts,
       fleetServerHost,
+      setFleetServerHost,
       fleetServerPolicyId,
       serviceToken,
       status,
@@ -41,7 +55,7 @@ export const QuickStartTab: React.FunctionComponent = () => {
       disabled: status !== 'success',
     }),
     getConfirmFleetServerConnectionStep({
-      isFleetServerReady,
+      hasRecentlyEnrolledFleetServers,
       disabled: status !== 'success',
     }),
   ];

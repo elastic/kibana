@@ -78,9 +78,11 @@ export const getFleetServerPolicyHandler: RequestHandler<
 export const deleteFleetServerPolicyHandler: RequestHandler<
   TypeOf<typeof GetOneFleetServerHostRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
   try {
-    await deleteFleetServerHost(soClient, request.params.itemId);
+    const coreContext = await context.core;
+    const soClient = coreContext.savedObjects.client;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    await deleteFleetServerHost(soClient, esClient, request.params.itemId);
     const body = {
       id: request.params.itemId,
     };
@@ -102,12 +104,21 @@ export const putFleetServerPolicyHandler: RequestHandler<
   undefined,
   TypeOf<typeof PutFleetServerHostRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
   try {
+    const coreContext = await await context.core;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const soClient = coreContext.savedObjects.client;
+
     const item = await updateFleetServerHost(soClient, request.params.itemId, request.body);
     const body = {
       item,
     };
+
+    if (item.is_default) {
+      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+    } else {
+      await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(soClient, esClient, item.id);
+    }
 
     return response.ok({ body });
   } catch (error) {

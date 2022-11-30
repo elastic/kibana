@@ -113,7 +113,10 @@ export const Main = (props: MainProps) => {
       guideId: selectedGuide!,
     };
 
-    const response = await guidedOnboardingApi?.updateGuideState(updatedGuideState, true);
+    const response = await guidedOnboardingApi?.updatePluginState(
+      { status: 'in_progress', guide: updatedGuideState },
+      true
+    );
     if (response) {
       notifications.toasts.addSuccess(
         i18n.translate('guidedOnboardingExample.updateGuideState.toastLabel', {

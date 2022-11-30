@@ -9,12 +9,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 
-import { TimeBuckets } from '../../common/time_buckets';
+import { useTimeBuckets } from './use_time_buckets';
 
 import { useAiopsAppContext } from './use_aiops_app_context';
 import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
@@ -96,14 +95,7 @@ export const useData = (
     lastRefresh,
   ]);
 
-  const _timeBuckets = useMemo(() => {
-    return new TimeBuckets({
-      [UI_SETTINGS.HISTOGRAM_MAX_BARS]: uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-      [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-      dateFormat: uiSettings.get('dateFormat'),
-      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
-    });
-  }, [uiSettings]);
+  const _timeBuckets = useTimeBuckets();
 
   const timefilter = useTimefilter({
     timeRangeSelector: currentDataView?.timeFieldName !== undefined,

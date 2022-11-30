@@ -15,7 +15,7 @@ import { UseMultiFields } from './use_multi_fields';
 
 describe('<UseMultiFields />', () => {
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

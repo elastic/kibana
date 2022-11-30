@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import type { EuiFlexItemProps } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { FlexItemGrowSize } from '@elastic/eui/src/components/flex/flex_item';
 import { HoverVisibilityContainer } from '../../../../../common/components/hover_visibility_container';
 
-export const SummaryColumn: React.FC<{ grow?: FlexItemGrowSize }> = ({ children, grow }) => (
+export const SummaryColumn: React.FC<{ grow?: EuiFlexItemProps['grow'] }> = ({
+  children,
+  grow,
+}) => (
   <EuiFlexItem grow={grow}>
     <EuiFlexGroup
       direction="column"
@@ -25,7 +28,7 @@ export const SummaryColumn: React.FC<{ grow?: FlexItemGrowSize }> = ({ children,
   </EuiFlexItem>
 );
 
-export const SummaryRow: React.FC<{ grow?: FlexItemGrowSize }> = ({ children, grow }) => (
+export const SummaryRow: React.FC<{ grow?: EuiFlexItemProps['grow'] }> = ({ children, grow }) => (
   <EuiFlexItem grow={grow}>
     <EuiFlexGroup direction="row" wrap>
       {children}
@@ -34,11 +37,12 @@ export const SummaryRow: React.FC<{ grow?: FlexItemGrowSize }> = ({ children, gr
 );
 
 export const SummaryPanel: React.FC<{
-  grow?: FlexItemGrowSize;
+  grow?: EuiFlexItemProps['grow'];
   title: string;
+  description?: string;
   actionsClassName?: string;
   renderActionsPopover?: () => JSX.Element;
-}> = ({ actionsClassName, children, grow = false, renderActionsPopover, title }) => (
+}> = ({ actionsClassName, children, description, grow = false, renderActionsPopover, title }) => (
   <EuiFlexItem grow={grow}>
     <EuiPanel hasShadow={false} hasBorder>
       <HoverVisibilityContainer targetClassNames={[actionsClassName ?? '']}>
@@ -47,6 +51,12 @@ export const SummaryPanel: React.FC<{
             <EuiTitle size="s">
               <h3>{title}</h3>
             </EuiTitle>
+            <EuiSpacer size="xs" />
+            {description && (
+              <EuiText color="subdued" size="xs">
+                <p>{description}</p>
+              </EuiText>
+            )}
           </EuiFlexItem>
           {actionsClassName && renderActionsPopover ? (
             <EuiFlexItem grow={false}>{renderActionsPopover()}</EuiFlexItem>

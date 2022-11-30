@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useReducer, useState, useEffect } from 'react';
+import React, { useReducer, useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTitle,
@@ -52,7 +52,7 @@ export const RuleEdit = ({
   onSave,
   ruleTypeRegistry,
   actionTypeRegistry,
-  metadata,
+  metadata: initialMetadata,
   ...props
 }: RuleEditProps) => {
   const onSaveHandler = onSave ?? reloadRules;
@@ -70,6 +70,9 @@ export const RuleEdit = ({
     props.ruleType
   );
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
+
+  const [metadata, setMetadata] = useState(initialMetadata);
+  const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
 
   const {
     http,
@@ -119,7 +122,7 @@ export const RuleEdit = ({
     if (hasRuleChanged(rule, initialRule, true)) {
       setIsConfirmRuleCloseModalOpen(true);
     } else {
-      onClose(RuleFlyoutCloseReason.CANCELED);
+      onClose(RuleFlyoutCloseReason.CANCELED, metadata);
     }
   };
 
@@ -140,9 +143,9 @@ export const RuleEdit = ({
             },
           })
         );
-        onClose(RuleFlyoutCloseReason.SAVED);
+        onClose(RuleFlyoutCloseReason.SAVED, metadata);
         if (onSaveHandler) {
-          onSaveHandler();
+          onSaveHandler(metadata);
         }
       } else {
         setRule(
@@ -214,6 +217,7 @@ export const RuleEdit = ({
                   }
                 )}
                 metadata={metadata}
+                onChangeMetaData={onChangeMetaData}
               />
             </EuiFlyoutBody>
             <EuiFlyoutFooter>
@@ -280,7 +284,7 @@ export const RuleEdit = ({
           <ConfirmRuleClose
             onConfirm={() => {
               setIsConfirmRuleCloseModalOpen(false);
-              onClose(RuleFlyoutCloseReason.CANCELED);
+              onClose(RuleFlyoutCloseReason.CANCELED, metadata);
             }}
             onCancel={() => {
               setIsConfirmRuleCloseModalOpen(false);

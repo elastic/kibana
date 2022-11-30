@@ -10,7 +10,7 @@ import {
   INSUFFICIENT_FLEET_PERMISSIONS,
   ProjectMonitorFormatter,
 } from './project_monitor_formatter';
-import { DataStream, LocationStatus } from '../../../common/runtime_types';
+import { ConfigKey, DataStream, LocationStatus } from '../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { times } from 'lodash';
 import { SyntheticsService } from '../synthetics_service';
@@ -18,7 +18,6 @@ import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { Subject } from 'rxjs';
 import { formatSecrets } from '../utils';
 
 import * as telemetryHooks from '../../routes/telemetry/monitor_upgrade_sender';
@@ -141,14 +140,9 @@ describe('ProjectMonitorFormatter', () => {
   const monitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
 
   it('should return errors', async () => {
-    const testSubject = new Subject();
-
-    testSubject.next = jest.fn();
-
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      keepStale: false,
       locations,
       privateLocations,
       encryptedSavedObjectsClient,
@@ -157,32 +151,18 @@ describe('ProjectMonitorFormatter', () => {
       server: serverMock,
       syntheticsMonitorClient: monitorClient,
       request: kibanaRequest,
-      subject: testSubject,
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
 
     await pushMonitorFormatter.configureAllProjectMonitors();
 
-    expect(testSubject.next).toHaveBeenNthCalledWith(
-      1,
-      'check if title is present 10 0: failed to create or update monitor'
-    );
-    expect(testSubject.next).toHaveBeenNthCalledWith(
-      2,
-      'check if title is present 10 1: failed to create or update monitor'
-    );
-
     expect({
       createdMonitors: pushMonitorFormatter.createdMonitors,
       updatedMonitors: pushMonitorFormatter.updatedMonitors,
-      staleMonitors: pushMonitorFormatter.staleMonitors,
-      deletedMonitors: pushMonitorFormatter.deletedMonitors,
       failedMonitors: pushMonitorFormatter.failedMonitors,
-      failedStaleMonitors: pushMonitorFormatter.failedStaleMonitors,
     }).toStrictEqual({
       createdMonitors: [],
-      deletedMonitors: [],
       failedMonitors: [
         {
           details: "Cannot read properties of undefined (reading 'authz')",
@@ -197,15 +177,11 @@ describe('ProjectMonitorFormatter', () => {
           reason: 'Failed to create or update monitor',
         },
       ],
-      failedStaleMonitors: [],
-      staleMonitors: [],
       updatedMonitors: [],
     });
   });
 
   it('throws fleet permission error', async () => {
-    const testSubject = new Subject();
-
     serverMock.fleet = {
       authz: {
         fromRequest: jest
@@ -217,7 +193,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      keepStale: false,
       locations,
       privateLocations,
       encryptedSavedObjectsClient,
@@ -226,7 +201,6 @@ describe('ProjectMonitorFormatter', () => {
       server: serverMock,
       syntheticsMonitorClient: monitorClient,
       request: kibanaRequest,
-      subject: testSubject,
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
@@ -236,13 +210,9 @@ describe('ProjectMonitorFormatter', () => {
     expect({
       createdMonitors: pushMonitorFormatter.createdMonitors,
       updatedMonitors: pushMonitorFormatter.updatedMonitors,
-      staleMonitors: pushMonitorFormatter.staleMonitors,
-      deletedMonitors: pushMonitorFormatter.deletedMonitors,
       failedMonitors: pushMonitorFormatter.failedMonitors,
-      failedStaleMonitors: pushMonitorFormatter.failedStaleMonitors,
     }).toStrictEqual({
       createdMonitors: [],
-      deletedMonitors: [],
       failedMonitors: [
         {
           details: INSUFFICIENT_FLEET_PERMISSIONS,
@@ -257,15 +227,11 @@ describe('ProjectMonitorFormatter', () => {
           reason: 'Failed to create or update monitor',
         },
       ],
-      failedStaleMonitors: [],
-      staleMonitors: [],
       updatedMonitors: [],
     });
   });
 
   it('catches errors from bulk edit method', async () => {
-    const testSubject = new Subject();
-
     serverMock.fleet = {
       authz: {
         fromRequest: jest
@@ -277,7 +243,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      keepStale: false,
       locations,
       privateLocations,
       encryptedSavedObjectsClient,
@@ -286,7 +251,6 @@ describe('ProjectMonitorFormatter', () => {
       server: serverMock,
       syntheticsMonitorClient: monitorClient,
       request: kibanaRequest,
-      subject: testSubject,
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
@@ -296,15 +260,10 @@ describe('ProjectMonitorFormatter', () => {
     expect({
       createdMonitors: pushMonitorFormatter.createdMonitors,
       updatedMonitors: pushMonitorFormatter.updatedMonitors,
-      staleMonitors: pushMonitorFormatter.staleMonitors,
-      deletedMonitors: pushMonitorFormatter.deletedMonitors,
       failedMonitors: pushMonitorFormatter.failedMonitors,
-      failedStaleMonitors: pushMonitorFormatter.failedStaleMonitors,
     }).toEqual({
       createdMonitors: [],
       updatedMonitors: [],
-      staleMonitors: [],
-      deletedMonitors: [],
       failedMonitors: [
         {
           details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
@@ -312,13 +271,10 @@ describe('ProjectMonitorFormatter', () => {
           reason: 'Failed to create 2 monitors',
         },
       ],
-      failedStaleMonitors: [],
     });
   });
 
   it('configures project monitors when there are errors', async () => {
-    const testSubject = new Subject();
-
     serverMock.fleet = {
       authz: {
         fromRequest: jest
@@ -332,7 +288,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      keepStale: false,
       locations,
       privateLocations,
       encryptedSavedObjectsClient,
@@ -341,7 +296,6 @@ describe('ProjectMonitorFormatter', () => {
       server: serverMock,
       syntheticsMonitorClient: monitorClient,
       request: kibanaRequest,
-      subject: testSubject,
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
@@ -351,15 +305,10 @@ describe('ProjectMonitorFormatter', () => {
     expect({
       createdMonitors: pushMonitorFormatter.createdMonitors,
       updatedMonitors: pushMonitorFormatter.updatedMonitors,
-      staleMonitors: pushMonitorFormatter.staleMonitors,
-      deletedMonitors: pushMonitorFormatter.deletedMonitors,
       failedMonitors: pushMonitorFormatter.failedMonitors,
-      failedStaleMonitors: pushMonitorFormatter.failedStaleMonitors,
     }).toEqual({
       createdMonitors: [],
       updatedMonitors: [],
-      staleMonitors: [],
-      deletedMonitors: [],
       failedMonitors: [
         {
           details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
@@ -367,13 +316,10 @@ describe('ProjectMonitorFormatter', () => {
           reason: 'Failed to create 2 monitors',
         },
       ],
-      failedStaleMonitors: [],
     });
   });
 
   it('shows errors thrown by fleet api', async () => {
-    const testSubject = new Subject();
-
     serverMock.fleet = {
       authz: {
         fromRequest: jest
@@ -388,7 +334,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      keepStale: false,
       locations,
       privateLocations,
       encryptedSavedObjectsClient,
@@ -397,7 +342,6 @@ describe('ProjectMonitorFormatter', () => {
       server: serverMock,
       syntheticsMonitorClient: monitorClient,
       request: kibanaRequest,
-      subject: testSubject,
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
@@ -407,15 +351,10 @@ describe('ProjectMonitorFormatter', () => {
     expect({
       createdMonitors: pushMonitorFormatter.createdMonitors,
       updatedMonitors: pushMonitorFormatter.updatedMonitors,
-      staleMonitors: pushMonitorFormatter.staleMonitors,
-      deletedMonitors: pushMonitorFormatter.deletedMonitors,
       failedMonitors: pushMonitorFormatter.failedMonitors,
-      failedStaleMonitors: pushMonitorFormatter.failedStaleMonitors,
     }).toEqual({
       createdMonitors: [],
       updatedMonitors: [],
-      staleMonitors: [],
-      deletedMonitors: [],
       failedMonitors: [
         {
           details:
@@ -424,13 +363,10 @@ describe('ProjectMonitorFormatter', () => {
           payload: payloadData,
         },
       ],
-      failedStaleMonitors: [],
     });
   });
 
   it('creates project monitors when no errors', async () => {
-    const testSubject = new Subject();
-
     serverMock.fleet = {
       authz: {
         fromRequest: jest
@@ -450,7 +386,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      keepStale: false,
       locations,
       privateLocations,
       encryptedSavedObjectsClient,
@@ -459,7 +394,6 @@ describe('ProjectMonitorFormatter', () => {
       server: serverMock,
       syntheticsMonitorClient: monitorClient,
       request: kibanaRequest,
-      subject: testSubject,
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
@@ -468,8 +402,22 @@ describe('ProjectMonitorFormatter', () => {
 
     expect(soClient.bulkCreate).toHaveBeenCalledWith(
       expect.arrayContaining([
-        expect.objectContaining(soData[0]),
-        expect.objectContaining(soData[1]),
+        expect.objectContaining({
+          ...soData[0],
+          attributes: {
+            ...soData[0].attributes,
+            [ConfigKey.MONITOR_QUERY_ID]: expect.any(String),
+            [ConfigKey.CONFIG_ID]: expect.any(String),
+          },
+        }),
+        expect.objectContaining({
+          ...soData[1],
+          attributes: {
+            ...soData[1].attributes,
+            [ConfigKey.MONITOR_QUERY_ID]: expect.any(String),
+            [ConfigKey.CONFIG_ID]: expect.any(String),
+          },
+        }),
       ])
     );
 
@@ -478,17 +426,11 @@ describe('ProjectMonitorFormatter', () => {
     expect({
       createdMonitors: pushMonitorFormatter.createdMonitors,
       updatedMonitors: pushMonitorFormatter.updatedMonitors,
-      staleMonitors: pushMonitorFormatter.staleMonitors,
-      deletedMonitors: pushMonitorFormatter.deletedMonitors,
       failedMonitors: pushMonitorFormatter.failedMonitors,
-      failedStaleMonitors: pushMonitorFormatter.failedStaleMonitors,
     }).toEqual({
       createdMonitors: ['check if title is present 10 0', 'check if title is present 10 1'],
       updatedMonitors: [],
-      staleMonitors: [],
-      deletedMonitors: [],
       failedMonitors: [],
-      failedStaleMonitors: [],
     });
   });
 });

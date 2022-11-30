@@ -53,15 +53,16 @@ const SearchField = ({
   useDebounce(() => search(localValue), SEARCH_DEBOUNCE_MS, [localValue]);
 
   return (
-    <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
+    <EuiFlexItem grow={true} style={{ alignItems: 'flex-end', maxWidth: 500 }}>
       <EuiFieldSearch
         isLoading={isSearching}
         placeholder={i18n.translate('xpack.csp.rules.rulesTable.searchPlaceholder', {
-          defaultMessage: 'Search',
+          defaultMessage: 'Search by rule name',
         })}
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}
         style={{ minWidth: 150 }}
+        fullWidth
       />
     </EuiFlexItem>
   );

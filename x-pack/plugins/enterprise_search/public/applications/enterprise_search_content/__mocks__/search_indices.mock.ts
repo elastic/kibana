@@ -35,6 +35,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       configuration: { foo: { label: 'bar', value: 'barbar' } },
       description: null,
       error: null,
+      features: null,
       filtering: [
         {
           active: {
@@ -115,27 +116,12 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
     },
   },
   {
-    count: 1,
-    crawler: {
-      id: '3',
-      index_name: 'crawler',
-    },
-    hidden: false,
-    name: 'crawler',
-    total: {
-      docs: {
-        count: 1,
-        deleted: 0,
-      },
-      store: { size_in_bytes: '8024' },
-    },
-  },
-  {
     connector: {
       api_key_id: null,
       configuration: { foo: { label: 'bar', value: 'barbar' } },
       description: null,
       error: null,
+      features: null,
       filtering: [
         {
           active: {
@@ -188,14 +174,14 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
         },
       ],
       id: '4',
-      index_name: 'connector-crawler',
+      index_name: 'crawler',
       is_native: true,
       language: 'en',
       last_seen: null,
       last_sync_error: null,
       last_sync_status: SyncStatus.COMPLETED,
       last_synced: null,
-      name: 'connector-crawler',
+      name: 'crawler',
       scheduling: {
         enabled: false,
         interval: '',
@@ -207,10 +193,10 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
     count: 1,
     crawler: {
       id: '5',
-      index_name: 'crawler',
+      index_name: 'connector-crawler',
     },
     hidden: false,
-    name: 'connector-crawler',
+    name: 'crawler',
     total: {
       docs: {
         count: 1,

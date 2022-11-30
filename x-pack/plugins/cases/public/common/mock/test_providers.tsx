@@ -8,6 +8,7 @@
 /* eslint-disable no-console */
 
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
@@ -73,17 +74,19 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <QueryClientProvider client={queryClient}>
-            <CasesProvider
-              value={{
-                externalReferenceAttachmentTypeRegistry,
-                persistableStateAttachmentTypeRegistry,
-                features,
-                owner,
-                permissions,
-              }}
-            >
-              {children}
-            </CasesProvider>
+            <MemoryRouter>
+              <CasesProvider
+                value={{
+                  externalReferenceAttachmentTypeRegistry,
+                  persistableStateAttachmentTypeRegistry,
+                  features,
+                  owner,
+                  permissions,
+                }}
+              >
+                {children}
+              </CasesProvider>
+            </MemoryRouter>
           </QueryClientProvider>
         </ThemeProvider>
       </KibanaContextProvider>
@@ -149,18 +152,20 @@ export const createAppMockRenderer = ({
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <QueryClientProvider client={queryClient}>
-            <CasesProvider
-              value={{
-                externalReferenceAttachmentTypeRegistry,
-                persistableStateAttachmentTypeRegistry,
-                features,
-                owner,
-                permissions,
-                releasePhase,
-              }}
-            >
-              {children}
-            </CasesProvider>
+            <MemoryRouter>
+              <CasesProvider
+                value={{
+                  externalReferenceAttachmentTypeRegistry,
+                  persistableStateAttachmentTypeRegistry,
+                  features,
+                  owner,
+                  permissions,
+                  releasePhase,
+                }}
+              >
+                {children}
+              </CasesProvider>
+            </MemoryRouter>
           </QueryClientProvider>
         </ThemeProvider>
       </KibanaContextProvider>

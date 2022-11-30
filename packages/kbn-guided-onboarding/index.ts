@@ -6,6 +6,13 @@
  * Side Public License, v 1.
  */
 
-export type { GuideState, GuideId, GuideStepIds, StepStatus, GuideStep } from './src/types';
+export type {
+  GuideState,
+  GuideId,
+  GuideStepIds,
+  StepStatus,
+  GuideStep,
+  GuideStatus,
+} from './src/types';
 export { GuideCard, ObservabilityLinkCard } from './src/components/landing_page';
 export type { UseCase } from './src/components/landing_page';

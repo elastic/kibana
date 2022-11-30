@@ -75,19 +75,19 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.APM_SERVICE_NAME]: t.string,
     [ConfigKey.TAGS]: t.array(t.string),
     [ConfigKey.LOCATIONS]: t.array(t.union([MonitorServiceLocationCodec, PrivateLocationCodec])),
+    [ConfigKey.MONITOR_QUERY_ID]: t.string,
+    [ConfigKey.CONFIG_ID]: t.string,
   }),
   t.partial({
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorTypeCodec,
     [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
     [ConfigKey.REVISION]: t.number,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
-    [ConfigKey.CONFIG_ID]: t.string,
     [ConfigKey.CONFIG_HASH]: t.string,
     [ConfigKey.JOURNEY_ID]: t.string,
     [ConfigKey.PROJECT_ID]: t.string,
     [ConfigKey.ORIGINAL_SPACE]: t.string,
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
-    [ConfigKey.ID]: t.string,
   }),
 ]);
 
@@ -349,7 +349,7 @@ export const EncryptedSyntheticsMonitorWithIdCodec = t.intersection([
 // TODO: Remove EncryptedSyntheticsMonitorWithIdCodec (as well as SyntheticsMonitorWithIdCodec if possible) along with respective TypeScript types in favor of EncryptedSyntheticsSavedMonitorCodec
 export const EncryptedSyntheticsSavedMonitorCodec = t.intersection([
   EncryptedSyntheticsMonitorCodec,
-  t.interface({ id: t.string, updated_at: t.string }),
+  t.interface({ id: t.string, updated_at: t.string, created_at: t.string }),
 ]);
 
 export type SyntheticsMonitorWithId = t.TypeOf<typeof SyntheticsMonitorWithIdCodec>;
@@ -377,6 +377,7 @@ export const MonitorManagementListResultCodec = t.type({
       id: t.string,
       attributes: EncryptedSyntheticsMonitorCodec,
       updated_at: t.string,
+      created_at: t.string,
     })
   ),
   page: t.number,
@@ -391,6 +392,7 @@ export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListR
 export const MonitorOverviewItemCodec = t.interface({
   name: t.string,
   id: t.string,
+  configId: t.string,
   location: MonitorServiceLocationCodec,
   isEnabled: t.boolean,
 });
@@ -400,7 +402,7 @@ export type MonitorOverviewItem = t.TypeOf<typeof MonitorOverviewItemCodec>;
 export const MonitorOverviewResultCodec = t.type({
   total: t.number,
   allMonitorIds: t.array(t.string),
-  pages: t.record(t.string, t.array(MonitorOverviewItemCodec)),
+  monitors: t.array(MonitorOverviewItemCodec),
 });
 
 export type MonitorOverviewResult = t.TypeOf<typeof MonitorOverviewResultCodec>;

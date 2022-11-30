@@ -118,7 +118,7 @@ export const createNewSavedObjectMonitor = async ({
   savedObjectsClient,
   normalizedMonitor,
 }: {
-  id?: string;
+  id: string;
   savedObjectsClient: SavedObjectsClientContract;
   normalizedMonitor: SyntheticsMonitor;
 }) => {
@@ -126,6 +126,8 @@ export const createNewSavedObjectMonitor = async ({
     syntheticsMonitorType,
     formatSecrets({
       ...normalizedMonitor,
+      [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
+      [ConfigKey.CONFIG_ID]: id,
       revision: 1,
     }),
     id
@@ -165,6 +167,8 @@ export const syncNewMonitor = async ({
   let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor> | null = null;
   const monitorWithNamespace = {
     ...normalizedMonitor,
+    [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || newMonitorId,
+    [ConfigKey.CONFIG_ID]: newMonitorId,
     [ConfigKey.NAMESPACE]: preserveNamespace
       ? normalizedMonitor[ConfigKey.NAMESPACE]
       : getMonitorNamespace(server, request, normalizedMonitor[ConfigKey.NAMESPACE]),

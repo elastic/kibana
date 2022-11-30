@@ -14,7 +14,10 @@ import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import { GuidedOnboardingTourStep } from '../../../../../common/components/guided_onboarding_tour/tour_step';
 import { isDetectionsAlertsTable } from '../../../../../common/components/top_n/helpers';
 import { useTourContext } from '../../../../../common/components/guided_onboarding_tour';
-import { SecurityStepId } from '../../../../../common/components/guided_onboarding_tour/tour_config';
+import {
+  AlertsCasesTourSteps,
+  SecurityStepId,
+} from '../../../../../common/components/guided_onboarding_tour/tour_config';
 import { getScopedActions, isTimelineScope } from '../../../../../helpers';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { eventHasNotes, getEventType, getPinOnClick } from '../helpers';
@@ -215,8 +218,11 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
 
   const onExpandEvent = useCallback(() => {
-    const isStep2Active = activeStep === 2 && isTourShown(SecurityStepId.alertsCases);
-    if (isTourAnchor && isStep2Active) {
+    if (
+      isTourAnchor &&
+      activeStep === AlertsCasesTourSteps.expandEvent &&
+      isTourShown(SecurityStepId.alertsCases)
+    ) {
       incrementStep(SecurityStepId.alertsCases);
     }
     onEventDetailsPanelOpened();
@@ -243,8 +249,9 @@ const ActionsComponent: React.FC<ActionProps> = ({
       )}
       <GuidedOnboardingTourStep
         isTourAnchor={isTourAnchor}
-        step={2}
-        stepId={SecurityStepId.alertsCases}
+        onClick={onExpandEvent}
+        step={AlertsCasesTourSteps.expandEvent}
+        tourId={SecurityStepId.alertsCases}
       >
         <div key="expand-event">
           <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>

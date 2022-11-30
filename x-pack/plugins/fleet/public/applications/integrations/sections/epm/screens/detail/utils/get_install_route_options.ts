@@ -14,7 +14,6 @@ const EXCLUDED_PACKAGES = [
   'cloud_security_posture',
   'dga',
   'fleet_server',
-  'kubernetes',
   'osquery_manager',
   'problemchild',
   'security_detection_engine',

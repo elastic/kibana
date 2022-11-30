@@ -38,8 +38,9 @@ const createStartMock = () => {
   const mock: jest.Mocked<PluginStartContract> = {
     isActionTypeEnabled: jest.fn(),
     isActionExecutable: jest.fn(),
+    getAllTypes: jest.fn(),
     getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientMock.create()),
-    getUnsecuredActionsClient: jest.fn().mockResolvedValue(unsecuredActionsClientMock.create()),
+    getUnsecuredActionsClient: jest.fn().mockReturnValue(unsecuredActionsClientMock.create()),
     getActionsAuthorizationWithRequest: jest
       .fn()
       .mockReturnValue(actionsAuthorizationMock.create()),

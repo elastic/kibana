@@ -41,3 +41,14 @@ export type PaletteExpressionFunctionDefinition = ExpressionFunctionDefinition<
   CustomPaletteArguments,
   Promise<PaletteOutput<CustomPaletteState>>
 >;
+
+export interface SystemPaletteArguments {
+  name: string;
+}
+
+export type SystemPaletteExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  'system_palette',
+  null,
+  SystemPaletteArguments,
+  PaletteOutput
+>;

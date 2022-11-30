@@ -189,7 +189,7 @@ export function render<ExtraCore>(
     url = '/app/observability/exploratory-view/',
     initSeries = {},
   }: RenderRouterOptions<ExtraCore> = {}
-) {
+): any {
   if (url) {
     history = getHistoryFromUrl(url);
   }

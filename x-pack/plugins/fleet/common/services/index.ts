@@ -48,3 +48,5 @@ export {
   getRegistryDataStreamAssetBaseName,
   getComponentTemplateNameForDatastream,
 } from './datastream_es_name';
+
+export * from './file_storage';

@@ -22,7 +22,7 @@ describe('FieldTypeIcon', () => {
   // TODO: Broken with Jest 27
   test.skip(`render with tooltip and test hovering`, () => {
     // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     const typeIconComponent = mount(
       <FieldTypeIcon type={SUPPORTED_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />
@@ -44,7 +44,7 @@ describe('FieldTypeIcon', () => {
     jest.runAllTimers();
 
     typeIconComponent.update();
-    expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(1);
+    expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(2);
 
     // Clearing all mocks will also reset fake timers.
     jest.clearAllMocks();

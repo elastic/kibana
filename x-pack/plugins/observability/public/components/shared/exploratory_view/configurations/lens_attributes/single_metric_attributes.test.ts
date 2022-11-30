@@ -15,8 +15,8 @@ import { LayerConfig, LensAttributes } from '../lens_attributes';
 import { TRANSACTION_DURATION } from '../constants/elasticsearch_fieldnames';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
-import { DataTypes } from '../constants';
 import { sampleMetricFormulaAttribute } from '../test_data/test_formula_metric_attribute';
+import { DataTypes } from '../..';
 
 describe('SingleMetricAttributes', () => {
   mockAppDataView();

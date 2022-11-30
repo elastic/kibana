@@ -41,7 +41,7 @@ describe('getUserRiskScoreColumns', () => {
     expect(queryByTestId('users-link-anchor')).toHaveTextContent(username);
   });
 
-  test('should render user score truncated', () => {
+  test('should render user score rounded', () => {
     const columns: UserRiskScoreColumns = getUserRiskScoreColumns(defaultProps);
 
     const riskScore = 10.11111111;
@@ -50,6 +50,6 @@ describe('getUserRiskScoreColumns', () => {
 
     const { queryByTestId } = render(<TestProviders>{renderedColumn}</TestProviders>);
 
-    expect(queryByTestId('risk-score-truncate')).toHaveTextContent('10.11');
+    expect(queryByTestId('risk-score-truncate')).toHaveTextContent('10');
   });
 });

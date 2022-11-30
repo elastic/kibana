@@ -101,6 +101,7 @@ The following table describes the properties of the `options` object.
 |isExportable|Whether the rule type is exportable from the Saved Objects Management UI.|boolean|
 |defaultScheduleInterval|The default interval that will show up in the UI when creating a rule of this rule type.|boolean|
 |doesSetRecoveryContext|Whether the rule type will set context variables for recovered alerts. Defaults to `false`. If this is set to true, context variables are made available for the recovery action group and executors will be provided with the ability to set recovery context.|boolean|
+|getSummarizedAlerts|(Optional) When developing a rule type, you can choose to implement this hook for retrieving summarized alerts based on execution UUID or time range. This hook will be invoked when an alert summary action is configured for the rule.|Function|
 
 ### Executor
 
@@ -120,13 +121,9 @@ This is the primary function for a rule type. Whenever the rule needs to execute
 |previousStartedAt|The previous date and time the rule type started a successful execution.|
 |params|Parameters for the execution. This is where the parameters you require will be passed in. (e.g. threshold). Use rule type validation to ensure values are set before execution.|
 |state|State returned from the previous execution. This is the rule level state. What the executor returns will be serialized and provided here at the next execution.|
-|alertId|The id of this rule.|
 |spaceId|The id of the space of this rule.|
 |namespace|The namespace of the space of this rule. This is the same as `spaceId`, unless `spaceId === "default"`, in which case the namespace = `undefined`.|
-|name|The name of this rule. This will eventually be removed in favor of `rule.name`.|
-|tags|The tags associated with this rule. This will eventually be removed in favor of `rule.tags`.|
-|createdBy|The user ID of the user that created this rule. This will eventually be removed in favor of `rule.createdBy`.|
-|updatedBy|The user ID of the user that last updated this rule. This will eventually be removed in favor of `rule.updatedBy`.|
+|rule.id|The id of this rule.|
 |rule.name|The name of this rule.|
 |rule.tags|The tags associated with this rule.|
 |rule.consumer|The consumer of this rule type.|

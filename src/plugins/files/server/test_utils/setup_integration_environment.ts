@@ -11,7 +11,7 @@ import {
   createRootWithCorePlugins,
   createTestServers,
   request,
-} from '@kbn/core/test_helpers/kbn_server';
+} from '@kbn/core-test-helpers-kbn-server';
 import pRetry from 'p-retry';
 import { FileJSON } from '../../common';
 import { getFileKindsRegistry } from '../../common/file_kinds_registry';
@@ -32,7 +32,8 @@ export async function setupIntegrationEnvironment() {
       alt: string;
       meta: Record<string, any>;
       mimeType: string;
-    }> = {}
+    }> = {},
+    { deleteAfterTest = true }: { deleteAfterTest?: boolean } = {}
   ): Promise<FileJSON> => {
     const result = await request
       .post(root, `/api/files/files/${fileKind}`)
@@ -45,12 +46,14 @@ export async function setupIntegrationEnvironment() {
         })
       )
       .expect(200);
-    disposables.push(async () => {
-      await request
-        .delete(root, `/api/files/files/${fileKind}/${result.body.file.id}`)
-        .send()
-        .expect(200);
-    });
+    if (deleteAfterTest) {
+      disposables.push(async () => {
+        await request
+          .delete(root, `/api/files/files/${fileKind}/${result.body.file.id}`)
+          .send()
+          .expect(200);
+      });
+    }
     return result.body.file;
   };
 

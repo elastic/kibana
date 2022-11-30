@@ -47,10 +47,12 @@ exports[`renders DashboardCloneModal 1`] = `
       />
     </EuiButtonEmpty>
     <EuiButton
+      color="primary"
       data-test-subj="cloneConfirmButton"
       fill={true}
       isLoading={false}
       onClick={[Function]}
+      size="m"
     >
       <FormattedMessage
         defaultMessage="Confirm Clone"

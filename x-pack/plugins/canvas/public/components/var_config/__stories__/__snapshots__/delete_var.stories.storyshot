@@ -61,21 +61,16 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--danger euiButton--small euiButton--fill"
+            className="euiButton emotion-euiButtonDisplay-s-s-fill-danger"
             disabled={false}
             onClick={[Function]}
-            style={
-              Object {
-                "minWidth": undefined,
-              }
-            }
             type="button"
           >
             <span
-              className="euiButtonContent euiButton__content"
+              className="emotion-euiButtonDisplayContent"
             >
               <span
-                className="euiButtonContent__icon"
+                className="emotion-euiButtonDisplayContent__icon-m"
                 color="inherit"
                 data-euiicon-type="trash"
                 size="m"
@@ -83,7 +78,7 @@ Array [
                 
               </span>
               <span
-                className="euiButton__text"
+                className="eui-textTruncate"
               >
                 Delete variable
               </span>
@@ -94,7 +89,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            className="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
             disabled={false}
             onClick={[Function]}
             type="button"

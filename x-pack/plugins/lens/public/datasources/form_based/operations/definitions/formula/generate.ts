@@ -54,7 +54,11 @@ export function generateFormula(
       previousFormula += `${previousColumn.operationType}(${metric.operationType}(${fieldName})`;
     }
   } else {
-    if (previousColumn && 'sourceField' in previousColumn && previousColumn.dataType === 'number') {
+    if (
+      previousColumn &&
+      'sourceField' in previousColumn &&
+      (previousColumn.dataType === 'number' || previousColumn.dataType === 'date')
+    ) {
       previousFormula += `${previousColumn.operationType}(${getSafeFieldName(previousColumn)}`;
     } else {
       // couldn't find formula function to call, exit early because adding args is going to fail anyway

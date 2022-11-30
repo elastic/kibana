@@ -5,44 +5,9 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import expect from '@kbn/expect';
+import { setTimeout } from 'timers/promises';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-const multiFieldsIndexDeprecation: estypes.IndicesCreateRequest = {
-  index: 'nested_multi_fields',
-  body: {
-    mappings: {
-      properties: {
-        text: {
-          type: 'text',
-          fields: {
-            english: {
-              type: 'text',
-              analyzer: 'english',
-              fields: {
-                english: {
-                  type: 'text',
-                  analyzer: 'english',
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  },
-};
-
-const translogSettingsIndexDeprecation: estypes.IndicesCreateRequest = {
-  index: 'deprecated_settings',
-  body: {
-    settings: {
-      'translog.retention.size': '1b',
-      'translog.retention.age': '5m',
-      'index.soft_deletes.enabled': true,
-    },
-  },
-};
 
 export default function upgradeAssistantFunctionalTests({
   getService,
@@ -55,29 +20,79 @@ export default function upgradeAssistantFunctionalTests({
   const security = getService('security');
   const log = getService('log');
 
-  describe.skip('Deprecation pages', function () {
+  describe('Deprecation pages', function () {
     this.tags('skipFirefox');
 
     before(async () => {
-      await security.testUser.setRoles(['global_upgrade_assistant_role']);
+      await security.testUser.setRoles(['superuser']);
 
+      // Cluster readiness checks
       try {
-        // Create two indices that will trigger deprecation warnings to test the ES deprecations page
-        await es.indices.create(multiFieldsIndexDeprecation);
-        await es.indices.create(translogSettingsIndexDeprecation);
+        // Trigger "Total shards" ES Upgrade readiness check
+        await es.cluster.putSettings({
+          body: {
+            persistent: {
+              cluster: {
+                max_shards_per_node: '9',
+              },
+            },
+          },
+        });
+
+        // Trigger "Low disk watermark" ES Upgrade readiness check
+        await es.cluster.putSettings({
+          body: {
+            persistent: {
+              cluster: {
+                // push allocation changes to nodes quickly during tests
+                info: {
+                  update: { interval: '10s' },
+                },
+                routing: {
+                  allocation: {
+                    disk: {
+                      threshold_enabled: true,
+                      watermark: { low: '30%' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        // Wait for the cluster settings to be reflected to the ES nodes
+        await setTimeout(12000);
       } catch (e) {
-        log.debug('[Setup error] Error creating indices');
+        log.debug('[Setup error] Error updating cluster settings');
         throw e;
       }
     });
 
     after(async () => {
       try {
-        await es.indices.delete({
-          index: [multiFieldsIndexDeprecation.index, translogSettingsIndexDeprecation.index],
+        await es.cluster.putSettings({
+          body: {
+            persistent: {
+              cluster: {
+                info: {
+                  update: { interval: null },
+                },
+                max_shards_per_node: null,
+                routing: {
+                  allocation: {
+                    disk: {
+                      threshold_enabled: false,
+                      watermark: { low: null },
+                    },
+                  },
+                },
+              },
+            },
+          },
         });
       } catch (e) {
-        log.debug('[Cleanup error] Error deleting indices');
+        log.debug('[Cleanup error] Error reseting cluster settings');
         throw e;
       }
 
@@ -91,6 +106,15 @@ export default function upgradeAssistantFunctionalTests({
       await retry.waitFor('Elasticsearch deprecations table to be visible', async () => {
         return testSubjects.exists('esDeprecationsTable');
       });
+    });
+
+    it('renders the Elasticsearch upgrade readiness deprecations', async () => {
+      const deprecationMessages = await testSubjects.getVisibleTextAll('defaultTableCell-message');
+
+      expect(deprecationMessages).to.contain('Disk usage exceeds low watermark');
+      expect(deprecationMessages).to.contain(
+        'The cluster has too many shards to be able to upgrade'
+      );
     });
 
     it('renders the Kibana deprecations page', async () => {

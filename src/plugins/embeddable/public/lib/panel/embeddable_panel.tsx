@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiContextMenuPanelDescriptor,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import React, { ReactNode } from 'react';
 import { Subscription } from 'rxjs';
@@ -27,11 +33,11 @@ import {
   contextMenuTrigger,
 } from '../triggers';
 import {
-  IEmbeddable,
-  EmbeddableOutput,
-  EmbeddableError,
+  EmbeddableErrorHandler,
   EmbeddableInput,
-} from '../embeddables/i_embeddable';
+  EmbeddableOutput,
+  IEmbeddable,
+} from '../embeddables';
 import { ViewMode } from '../types';
 
 import { EmbeddablePanelError } from './embeddable_panel_error';
@@ -105,7 +111,7 @@ interface State {
   badges: Array<Action<EmbeddableContext>>;
   notifications: Array<Action<EmbeddableContext>>;
   loading?: boolean;
-  error?: EmbeddableError;
+  error?: Error;
   destroyError?(): void;
   node?: ReactNode;
 }
@@ -301,11 +307,24 @@ export class EmbeddablePanel extends React.Component<Props, State> {
           />
         )}
         {this.state.error && (
-          <EmbeddablePanelError
-            editPanelAction={this.state.universalActions.editPanel}
-            embeddable={this.props.embeddable}
-            error={this.state.error}
-          />
+          <EuiFlexGroup
+            alignItems="center"
+            className="eui-fullHeight embPanel__error"
+            data-test-subj="embeddableError"
+            justifyContent="center"
+          >
+            <EuiFlexItem>
+              <EmbeddableErrorHandler embeddable={this.props.embeddable} error={this.state.error}>
+                {(error) => (
+                  <EmbeddablePanelError
+                    editPanelAction={this.state.universalActions.editPanel}
+                    embeddable={this.props.embeddable}
+                    error={error}
+                  />
+                )}
+              </EmbeddableErrorHandler>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
         <div className="embPanel__content" ref={this.embeddableRoot} {...contentAttrs}>
           {this.state.node}

@@ -15,7 +15,7 @@ import {
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
 } from '../../../assets/constants';
-import { APMTransactionErrorRateIndicator, SLO } from '../../../types/models';
+import { APMTransactionErrorRateIndicator, SLO } from '../../../domain/models';
 
 const APM_SOURCE_INDEX = 'metrics-apm*';
 const ALLOWED_STATUS_CODES = ['2xx', '3xx', '4xx', '5xx'];
@@ -32,7 +32,8 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
       this.buildCommonGroupBy(slo),
-      this.buildAggregations(slo, slo.indicator)
+      this.buildAggregations(slo, slo.indicator),
+      this.buildSettings(slo)
     );
   }
 

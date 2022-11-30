@@ -35,6 +35,7 @@ interface CreateAlertEventLogRecordParams {
     typeId: string;
     relation?: string;
   }>;
+  flapping?: boolean;
 }
 
 export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecordParams): Event {
@@ -50,6 +51,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     namespace,
     consumer,
     spaceId,
+    flapping,
   } = params;
   const alerting =
     params.instanceId || group
@@ -72,6 +74,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     },
     kibana: {
       alert: {
+        ...(flapping !== undefined ? { flapping } : {}),
         rule: {
           rule_type_id: ruleType.id,
           ...(consumer ? { consumer } : {}),

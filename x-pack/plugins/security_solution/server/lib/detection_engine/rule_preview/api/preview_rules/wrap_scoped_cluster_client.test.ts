@@ -15,7 +15,7 @@ const esQuery = {
 
 describe('wrapScopedClusterClient', () => {
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

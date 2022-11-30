@@ -6,31 +6,17 @@
  */
 
 import { useMemo } from 'react';
-import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { isNil, isEmpty } from 'lodash';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { termQuery } from '../../../../../common/utils/term_query';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
-  PROCESSOR_EVENT,
   HOST_OS_VERSION,
-  DEVICE_MODEL_IDENTIFIER,
+  DEVICE_MODEL_NAME,
   NETWORK_CONNECTION_TYPE,
   SERVICE_VERSION,
-} from '../../../../../common/elasticsearch_fieldnames';
-
-function termQuery<T extends string>(
-  field: T,
-  value: string | boolean | number | undefined | null
-): QueryDslQueryContainer[] {
-  if (isNil(value) || isEmpty(value)) {
-    return [];
-  }
-
-  return [{ term: { [field]: value } }];
-}
+} from '../../../../../common/es_fields/apm';
 
 export function useFiltersForMobileCharts() {
   const {
@@ -48,11 +34,10 @@ export function useFiltersForMobileCharts() {
   return useMemo(
     () =>
       [
-        ...termQuery(PROCESSOR_EVENT, ProcessorEvent.transaction),
         ...termQuery(SERVICE_NAME, serviceName),
         ...termQuery(TRANSACTION_TYPE, transactionType),
         ...termQuery(HOST_OS_VERSION, osVersion),
-        ...termQuery(DEVICE_MODEL_IDENTIFIER, device),
+        ...termQuery(DEVICE_MODEL_NAME, device),
         ...termQuery(NETWORK_CONNECTION_TYPE, netConnectionType),
         ...termQuery(SERVICE_VERSION, appVersion),
         ...environmentQuery(environment),

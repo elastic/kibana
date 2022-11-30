@@ -15,11 +15,11 @@ export const securityConfig: GuideConfig = {
   }),
   guideName: 'Security',
   completedGuideRedirectLocation: {
-    appID: 'security',
-    path: '/app/security/dashboards',
+    appID: 'securitySolutionUI',
+    path: '/dashboards',
   },
   description: i18n.translate('guidedOnboarding.securityGuide.description', {
-    defaultMessage: `We'll help you get set up quickly, using Elastic's out-of-the-box integrations.`,
+    defaultMessage: `We'll help you get set up quickly, using Elastic Defend.`,
   }),
   steps: [
     {
@@ -29,10 +29,10 @@ export const securityConfig: GuideConfig = {
       }),
       descriptionList: [
         i18n.translate('guidedOnboarding.securityGuide.addDataStep.description1', {
-          defaultMessage: 'Select the Elastic Defend integration to add your data.',
+          defaultMessage: 'Use Elastic Defend to add your data.',
         }),
         i18n.translate('guidedOnboarding.securityGuide.addDataStep.description2', {
-          defaultMessage: 'Make sure your data looks good.',
+          defaultMessage: 'See data coming in to your SIEM.',
         }),
       ],
       integration: 'endpoint',
@@ -48,20 +48,23 @@ export const securityConfig: GuideConfig = {
       }),
       descriptionList: [
         i18n.translate('guidedOnboarding.securityGuide.rulesStep.description1', {
-          defaultMessage: 'Load the prebuilt rules.',
+          defaultMessage: 'Load the Elastic prebuilt rules.',
         }),
         i18n.translate('guidedOnboarding.securityGuide.rulesStep.description2', {
-          defaultMessage: 'Select the rules that you want.',
+          defaultMessage: 'Select and enable rules.',
+        }),
+        i18n.translate('guidedOnboarding.securityGuide.rulesStep.description3', {
+          defaultMessage: 'Enable rules to generate alerts.',
         }),
       ],
       manualCompletion: {
         title: i18n.translate('guidedOnboarding.securityGuide.rulesStep.manualCompletion.title', {
-          defaultMessage: 'Continue with the tour',
+          defaultMessage: 'Continue with the guide',
         }),
         description: i18n.translate(
           'guidedOnboarding.securityGuide.rulesStep.manualCompletion.description',
           {
-            defaultMessage: 'After you’ve enabled the rules you want, click here to continue.',
+            defaultMessage: 'After you’ve enabled the rules you need, continue.',
           }
         ),
       },
@@ -86,6 +89,17 @@ export const securityConfig: GuideConfig = {
       location: {
         appID: 'securitySolutionUI',
         path: '/alerts',
+      },
+      manualCompletion: {
+        title: i18n.translate('guidedOnboarding.securityGuide.alertsStep.manualCompletion.title', {
+          defaultMessage: 'Continue the guide',
+        }),
+        description: i18n.translate(
+          'guidedOnboarding.securityGuide.alertsStep.manualCompletion.description',
+          {
+            defaultMessage: `After you've explored the case, continue.`,
+          }
+        ),
       },
     },
   ],

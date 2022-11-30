@@ -4,8 +4,6 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "outDir": "target_types",
-    "rootDir": ".",
-    "stripInternal": false,
     "types": [
       "jest",
       "node"

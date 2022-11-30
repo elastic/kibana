@@ -306,12 +306,14 @@ function getArgumentSuggestions(
       operationDefinitionMap
     );
     // TODO: This only allow numeric functions, will reject last_value(string) for example.
-    const validOperation = available.find(
+    const validOperation = available.filter(
       ({ operationMetaData }) =>
-        operationMetaData.dataType === 'number' && !operationMetaData.isBucketed
+        (operationMetaData.dataType === 'number' || operationMetaData.dataType === 'date') &&
+        !operationMetaData.isBucketed
     );
-    if (validOperation) {
-      const fields = validOperation.operations
+    if (validOperation.length) {
+      const fields = validOperation
+        .flatMap((op) => op.operations)
         .filter((op) => op.operationType === operation.type)
         .map((op) => ('field' in op ? op.field : undefined))
         .filter(nonNullable);

@@ -14,7 +14,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { css } from '@emotion/react';
 import { ProfilingDependenciesContextProvider } from './components/contexts/profiling_dependencies/profiling_dependencies_context';
 import { RedirectWithDefaultDateRange } from './components/redirect_with_default_date_range';
 import { profilingRouter } from './routing';
@@ -32,11 +31,6 @@ interface Props {
   theme$: AppMountParameters['theme$'];
   history: AppMountParameters['history'];
 }
-
-const redirectAppLinksCss = css`
-  display: flex;
-  flex-grow: 1;
-`;
 
 const storage = new Storage(localStorage);
 
@@ -69,11 +63,7 @@ function App({
     <KibanaThemeProvider theme$={theme$}>
       <KibanaContextProvider services={{ ...coreStart, ...pluginsStart, storage }}>
         <i18nCore.Context>
-          <RedirectAppLinks
-            coreStart={coreStart}
-            currentAppId="profiling"
-            css={redirectAppLinksCss}
-          >
+          <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
             <RouterProvider router={profilingRouter as any} history={history}>
               <TimeRangeContextProvider>
                 <ProfilingDependenciesContextProvider value={profilingDependencies}>

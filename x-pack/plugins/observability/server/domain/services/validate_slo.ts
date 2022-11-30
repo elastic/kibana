@@ -6,8 +6,8 @@
  */
 
 import { IllegalArgumentError } from '../../errors';
-import { SLO } from '../../types/models';
-import { Duration, DurationUnit } from '../../types/models/duration';
+import { SLO } from '../models';
+import { Duration, DurationUnit } from '../models/duration';
 import { timeslicesBudgetingMethodSchema } from '../../types/schema';
 
 /**
@@ -41,21 +41,57 @@ export function validateSLO(slo: SLO) {
       throw new IllegalArgumentError('Invalid objective.timeslice_window');
     }
   }
+
+  validateSettings(slo);
+}
+
+function validateSettings(slo: SLO) {
+  if (!isValidFrequencySettings(slo.settings.frequency)) {
+    throw new IllegalArgumentError('Invalid settings.frequency');
+  }
+
+  if (!isValidSyncDelaySettings(slo.settings.sync_delay)) {
+    throw new IllegalArgumentError('Invalid settings.sync_delay');
+  }
 }
 
 function isValidTargetNumber(value: number): boolean {
-  return value > 0 && value <= 1;
+  return value > 0 && value < 1;
 }
 
 function isValidTimeWindowDuration(duration: Duration): boolean {
-  return [DurationUnit.d, DurationUnit.w, DurationUnit.M, DurationUnit.Q, DurationUnit.Y].includes(
-    duration.unit
-  );
+  return [
+    DurationUnit.Day,
+    DurationUnit.Week,
+    DurationUnit.Month,
+    DurationUnit.Quarter,
+    DurationUnit.Year,
+  ].includes(duration.unit);
 }
 
 function isValidTimesliceWindowDuration(timesliceWindow: Duration, timeWindow: Duration): boolean {
   return (
-    [DurationUnit.m, DurationUnit.h].includes(timesliceWindow.unit) &&
+    [DurationUnit.Minute, DurationUnit.Hour].includes(timesliceWindow.unit) &&
     timesliceWindow.isShorterThan(timeWindow)
+  );
+}
+
+/**
+ * validate that 1 minute <= frequency < 1 hour
+ */
+function isValidFrequencySettings(frequency: Duration): boolean {
+  return (
+    frequency.isLongerOrEqualThan(new Duration(1, DurationUnit.Minute)) &&
+    frequency.isShorterThan(new Duration(1, DurationUnit.Hour))
+  );
+}
+
+/**
+ * validate that 1 minute <= sync_delay < 6 hour
+ */
+function isValidSyncDelaySettings(syncDelay: Duration): boolean {
+  return (
+    syncDelay.isLongerOrEqualThan(new Duration(1, DurationUnit.Minute)) &&
+    syncDelay.isShorterThan(new Duration(6, DurationUnit.Hour))
   );
 }

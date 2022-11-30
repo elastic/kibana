@@ -57,13 +57,13 @@ describe('deleteAnalyticsCollectionLogic', () => {
     it('calls makeRequest on deleteAnalyticsCollections', async () => {
       const collectionName = 'name';
 
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
       DeleteAnalyticsCollectionLogic.actions.makeRequest = jest.fn();
       DeleteAnalyticsCollectionLogic.actions.deleteAnalyticsCollection(collectionName);
       jest.advanceTimersByTime(150);
       await nextTick();
       expect(DeleteAnalyticsCollectionLogic.actions.makeRequest).toHaveBeenCalledWith({
-        name: collectionName,
+        id: collectionName,
       });
     });
   });

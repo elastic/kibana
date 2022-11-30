@@ -193,6 +193,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   event,
                   `created new alert: 'instance'`,
                   false,
+                  false,
                   currentExecutionId
                 );
                 break;
@@ -202,6 +203,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   event,
                   `alert 'instance' has recovered`,
                   true,
+                  false,
                   currentExecutionId
                 );
                 break;
@@ -210,6 +212,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 validateInstanceEvent(
                   event,
                   `active alert: 'instance' in actionGroup: 'default'`,
+                  false,
                   false,
                   currentExecutionId
                 );
@@ -259,33 +262,11 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             });
           });
 
-          for (const event of actionEvents) {
-            switch (event?.event?.action) {
-              case 'execute':
-                expect(event?.kibana?.alert?.rule?.execution?.uuid).not.to.be(undefined);
-                expect(
-                  executionIds.indexOf(event?.kibana?.alert?.rule?.execution?.uuid)
-                ).to.be.greaterThan(-1);
-                validateEvent(event, {
-                  spaceId: space.id,
-                  savedObjects: [
-                    { type: 'action', id: createdAction.id, rel: 'primary', type_id: 'test.noop' },
-                  ],
-                  message: `action executed: test.noop:${createdAction.id}: MY action`,
-                  outcome: 'success',
-                  shouldHaveTask: true,
-                  ruleTypeId: response.body.rule_type_id,
-                  rule: undefined,
-                  consumer: 'alertsFixture',
-                });
-                break;
-            }
-          }
-
           function validateInstanceEvent(
             event: IValidatedEvent,
             subMessage: string,
             shouldHaveEventEnd: boolean,
+            flapping: boolean,
             executionId?: string
           ) {
             validateEvent(event, {
@@ -307,7 +288,31 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 name: response.body.name,
               },
               consumer: 'alertsFixture',
+              flapping,
             });
+          }
+
+          for (const event of actionEvents) {
+            switch (event?.event?.action) {
+              case 'execute':
+                expect(event?.kibana?.alert?.rule?.execution?.uuid).not.to.be(undefined);
+                expect(
+                  executionIds.indexOf(event?.kibana?.alert?.rule?.execution?.uuid)
+                ).to.be.greaterThan(-1);
+                validateEvent(event, {
+                  spaceId: space.id,
+                  savedObjects: [
+                    { type: 'action', id: createdAction.id, rel: 'primary', type_id: 'test.noop' },
+                  ],
+                  message: `action executed: test.noop:${createdAction.id}: MY action`,
+                  outcome: 'success',
+                  shouldHaveTask: true,
+                  ruleTypeId: response.body.rule_type_id,
+                  rule: undefined,
+                  consumer: 'alertsFixture',
+                });
+                break;
+            }
           }
         });
 
@@ -525,6 +530,153 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             numRecoveredAlerts: 0,
           });
         });
+
+        it('should generate expected events for flapping alerts that are mainly active', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
+          // pattern of when the alert should fire
+          const instance = [true, false, true, false].concat(new Array(22).fill(true));
+          const pattern = {
+            instance,
+          };
+
+          const response = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                rule_type_id: 'test.patternFiring',
+                schedule: { interval: '1s' },
+                throttle: null,
+                params: {
+                  pattern,
+                },
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+              })
+            );
+
+          expect(response.status).to.eql(200);
+          const alertId = response.body.id;
+          objectRemover.add(space.id, alertId, 'rule', 'alerting');
+
+          // get the events we're expecting
+          const events = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([
+                // make sure the counts of the # of events per type are as expected
+                ['execute-start', { gte: 25 }],
+                ['execute', { gte: 25 }],
+                ['execute-action', { equal: 23 }],
+                ['new-instance', { equal: 3 }],
+                ['active-instance', { gte: 23 }],
+                ['recovered-instance', { equal: 2 }],
+              ]),
+            });
+          });
+
+          const flapping = events
+            .filter(
+              (event) =>
+                event?.event?.action === 'active-instance' ||
+                event?.event?.action === 'recovered-instance'
+            )
+            .map((event) => event?.kibana?.alert?.flapping);
+          const result = [false, false, false].concat(new Array(21).fill(true)).concat([false]);
+          expect(flapping).to.eql(result);
+        });
+
+        it('should generate expected events for flapping alerts that are mainly recovered', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
+          // pattern of when the alert should fire
+          const instance = [true, false, true].concat(new Array(18).fill(false)).concat(true);
+          const pattern = {
+            instance,
+          };
+
+          const response = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                rule_type_id: 'test.patternFiring',
+                schedule: { interval: '1s' },
+                throttle: null,
+                params: {
+                  pattern,
+                },
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+              })
+            );
+
+          expect(response.status).to.eql(200);
+          const alertId = response.body.id;
+          objectRemover.add(space.id, alertId, 'rule', 'alerting');
+
+          // get the events we're expecting
+          const events = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([
+                // make sure the counts of the # of events per type are as expected
+                ['execute-start', { gte: 20 }],
+                ['execute', { gte: 20 }],
+                ['execute-action', { equal: 3 }],
+                ['new-instance', { equal: 3 }],
+                ['active-instance', { gte: 3 }],
+                ['recovered-instance', { equal: 3 }],
+              ]),
+            });
+          });
+
+          const flapping = events
+            .filter(
+              (event) =>
+                event?.event?.action === 'active-instance' ||
+                event?.event?.action === 'recovered-instance'
+            )
+            .map((event) => event?.kibana?.alert?.flapping);
+          expect(flapping).to.eql([false, false, false, true, false, false]);
+        });
       });
     }
   });
@@ -567,6 +719,7 @@ interface ValidateEventLogParams {
     ruleset?: string;
     namespace?: string;
   };
+  flapping?: boolean;
 }
 
 export function validateEvent(event: IValidatedEvent, params: ValidateEventLogParams): void {
@@ -585,6 +738,7 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
     numRecoveredAlerts,
     consumer,
     ruleTypeId,
+    flapping,
   } = params;
   const { status, actionGroupId, instanceId, reason, shouldHaveEventEnd } = params;
 
@@ -632,6 +786,10 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
 
   if (numNewAlerts) {
     expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.new).to.be(numNewAlerts);
+  }
+
+  if (flapping !== undefined) {
+    expect(event?.kibana?.alert?.flapping).to.be(flapping);
   }
 
   expect(event?.kibana?.alert?.rule?.rule_type_id).to.be(ruleTypeId);

@@ -703,18 +703,25 @@ describe('AlertSummaryView', () => {
         values: ['127.0.0.1'],
         originalValue: ['127.0.0.1'],
       },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.rule.parameters.new_terms_fields',
+        values: ['host.ip'],
+        originalValue: ['host.ip'],
+      },
     ] as TimelineEventsDetailsItem[];
     const renderProps = {
       ...props,
       data: enhancedData,
     };
+
     const { getByText } = render(
       <TestProvidersComponent>
         <AlertSummaryView {...renderProps} />
       </TestProvidersComponent>
     );
 
-    ['New Terms'].forEach((fieldId) => {
+    ['New Terms', '127.0.0.1', 'New Terms fields', 'host.ip'].forEach((fieldId) => {
       expect(getByText(fieldId));
     });
   });

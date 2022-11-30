@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { isValidOwner } from '../../common/utils/owner';
 import {
   CASE_VIEW_COMMENT_PATH,
@@ -23,7 +24,7 @@ import {
   OWNER_INFO,
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
-import type { AlertInfo } from './types';
+import type { AlertInfo, CaseSavedObject } from './types';
 
 import type {
   CaseAttributes,
@@ -117,7 +118,7 @@ export const flattenCaseSavedObject = ({
   totalComment = comments.length,
   totalAlerts = 0,
 }: {
-  savedObject: SavedObject<CaseAttributes>;
+  savedObject: CaseSavedObject;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
@@ -420,6 +421,7 @@ export const getApplicationRoute = (
 
 export const getCaseViewPath = (params: {
   publicBaseUrl: NonNullable<IBasePath['publicBaseUrl']>;
+  spaceId: string;
   caseId: string;
   owner: string;
   commentId?: string;
@@ -429,11 +431,12 @@ export const getCaseViewPath = (params: {
   const removeEndingSlash = (path: string): string =>
     path.endsWith('/') ? path.slice(0, -1) : path;
 
-  const { publicBaseUrl, caseId, owner, commentId, tabId } = params;
+  const { publicBaseUrl, caseId, owner, commentId, tabId, spaceId } = params;
 
   const publicBaseUrlWithoutEndingSlash = removeEndingSlash(publicBaseUrl);
+  const publicBaseUrlWithSpace = addSpaceIdToPath(publicBaseUrlWithoutEndingSlash, spaceId);
   const appRoute = getApplicationRoute(OWNER_INFO, owner);
-  const basePath = `${publicBaseUrlWithoutEndingSlash}${appRoute}/cases`;
+  const basePath = `${publicBaseUrlWithSpace}${appRoute}/cases`;
 
   if (commentId) {
     const commentPath = normalizePath(

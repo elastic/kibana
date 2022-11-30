@@ -268,7 +268,7 @@ describe(`UserActions`, () => {
 
     wrapper
       .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="user-action-save-markdown"]`
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] button[data-test-subj="user-action-save-markdown"]`
       )
       .first()
       .simulate('click');
@@ -316,7 +316,9 @@ describe(`UserActions`, () => {
       });
 
     wrapper
-      .find(`[data-test-subj="description-action"] [data-test-subj="user-action-save-markdown"]`)
+      .find(
+        `[data-test-subj="description-action"] button[data-test-subj="user-action-save-markdown"]`
+      )
       .first()
       .simulate('click');
 

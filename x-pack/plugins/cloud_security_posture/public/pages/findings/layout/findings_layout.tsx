@@ -6,11 +6,12 @@
  */
 import React from 'react';
 import {
-  EuiBadge,
+  EuiBottomBar,
   EuiButtonIcon,
   EuiSpacer,
   EuiTableActionsColumnType,
   EuiTableFieldDataColumnType,
+  EuiText,
   EuiTitle,
   EuiToolTip,
   PropsOf,
@@ -19,7 +20,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Serializable } from '@kbn/utility-types';
-import { getPrimaryRuleTags } from '../../../common/utils/get_primary_rule_tags';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
@@ -157,20 +159,6 @@ const baseColumns = [
     ),
   },
   {
-    field: 'rule.tags',
-    name: i18n.translate(
-      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleTagsColumnLabel',
-      { defaultMessage: 'Rule Tags' }
-    ),
-    width: '15%',
-    sortable: false,
-    truncateText: true,
-    render: (tags: string[]) => {
-      const primaryTags = getPrimaryRuleTags(tags);
-      return primaryTags.map((tag) => <EuiBadge key={tag}>{tag}</EuiBadge>);
-    },
-  },
-  {
     field: 'cluster_id',
     name: (
       <ColumnNameWithTooltip
@@ -251,7 +239,9 @@ const FilterableCell: React.FC<{
       }
     `}
   >
-    <div className="__filter_value eui-textTruncate">{children}</div>
+    <div className="__filter_value eui-textTruncate" data-test-subj="filter_cell_value">
+      {children}
+    </div>
     <div
       className="__filter_buttons"
       css={css`
@@ -282,4 +272,21 @@ const FilterableCell: React.FC<{
       />
     </div>
   </div>
+);
+
+export const LimitedResultsBar = () => (
+  <>
+    <EuiSpacer size="xxl" />
+    <EuiBottomBar data-test-subj="test-bottom-bar">
+      <EuiText textAlign="center">
+        <FormattedMessage
+          id="xpack.csp.findings..bottomBarLabel"
+          defaultMessage="These are the first {maxItems} findings matching your search, refine your search to see others."
+          values={{
+            maxItems: MAX_FINDINGS_TO_LOAD,
+          }}
+        />
+      </EuiText>
+    </EuiBottomBar>
+  </>
 );

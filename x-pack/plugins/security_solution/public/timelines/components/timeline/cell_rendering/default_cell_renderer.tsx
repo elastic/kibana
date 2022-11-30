@@ -36,6 +36,8 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   setCellProps,
   scopeId,
   truncate,
+  closeCellPopover,
+  enableActions = true,
 }) => {
   const asPlainText = useMemo(() => {
     return getLinkColumnDefinition(header.id, header.type, undefined) !== undefined && !isTimeline;
@@ -66,12 +68,13 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
           values,
         })}
       </StyledContent>
-      {isDetails && hasCellActions(header.id) && (
+      {enableActions && isDetails && hasCellActions(header.id) && (
         <ExpandedCellValueActions
           field={header}
           globalFilters={globalFilters}
           scopeId={scopeId}
           value={values}
+          closeCellPopover={closeCellPopover}
         />
       )}
     </>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { toDateRange } from '../../domain/services';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { GetSLO } from './get_slo';
 import { createSLIClientMock, createSLORepositoryMock } from './mocks';
@@ -26,7 +27,13 @@ describe('GetSLO', () => {
     it('retrieves the SLO from the repository', async () => {
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
       mockRepository.findById.mockResolvedValueOnce(slo);
-      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce({ good: 9999, total: 10000 });
+      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce({
+        [slo.id]: {
+          good: 9999,
+          total: 10000,
+          date_range: toDateRange(slo.time_window),
+        },
+      });
 
       const result = await getSLO.execute(slo.id);
 
@@ -44,7 +51,7 @@ describe('GetSLO', () => {
             transaction_name: 'irrelevant',
             transaction_type: 'irrelevant',
           },
-          type: 'slo.apm.transaction_error_rate',
+          type: 'sli.apm.transaction_error_rate',
         },
         objective: {
           target: 0.999,
@@ -53,13 +60,18 @@ describe('GetSLO', () => {
           duration: '7d',
           is_rolling: true,
         },
-
+        settings: {
+          timestamp_field: '@timestamp',
+          sync_delay: '1m',
+          frequency: '1m',
+        },
         summary: {
           sli_value: 0.9999,
           error_budget: {
             initial: 0.001,
             consumed: 0.1,
             remaining: 0.9,
+            is_estimated: false,
           },
         },
         created_at: slo.created_at.toISOString(),

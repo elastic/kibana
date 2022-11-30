@@ -18,6 +18,7 @@ export async function loadRulesWithKueryFilter({
   typesFilter,
   actionTypesFilter,
   ruleExecutionStatusesFilter,
+  ruleLastRunOutcomesFilter,
   ruleStatusesFilter,
   tagsFilter,
   sort = { field: 'name', direction: 'asc' },
@@ -32,6 +33,7 @@ export async function loadRulesWithKueryFilter({
     actionTypesFilter,
     tagsFilter,
     ruleExecutionStatusesFilter,
+    ruleLastRunOutcomesFilter,
     ruleStatusesFilter,
     searchText,
   });

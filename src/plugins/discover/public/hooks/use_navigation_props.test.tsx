@@ -6,90 +6,99 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactElement } from 'react';
+import React, { MouseEvent } from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { getContextHash, useNavigationProps, UseNavigationProps } from './use_navigation_props';
-import { Router } from 'react-router-dom';
-import { createMemoryHistory } from 'history';
+import { useNavigationProps } from './use_navigation_props';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { MemoryRouter } from 'react-router-dom';
 
-const filterManager = createFilterManagerMock();
-const defaultProps = {
-  dataViewId: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-  rowIndex: 'kibana_sample_data_ecommerce',
-  rowId: 'QmsYdX0BQ6gV8MTfoPYE',
-  columns: ['customer_first_name', 'products.manufacturer'],
-  filterManager,
-  addBasePath: jest.fn(),
-} as UseNavigationProps;
-const basePathPrefix = 'localhost:5601/xqj';
-
-const getSearch = () => {
-  return `?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))
-  &_a=(columns:!(${defaultProps.columns.join()}),filters:!(),index:${defaultProps.dataViewId}
-  ,interval:auto,query:(language:kuery,query:''),sort:!(!(order_date,desc)))`;
+const mockServices = {
+  singleDocLocator: { getRedirectUrl: jest.fn(() => 'mock-doc-redirect-url'), navigate: jest.fn() },
+  contextLocator: {
+    getRedirectUrl: jest.fn(() => 'mock-context-redirect-url'),
+    navigate: jest.fn(),
+  },
+  locator: {
+    getUrl: jest.fn(() => Promise.resolve('mock-referrer')),
+    useUrl: jest.fn(() => 'mock-referrer'),
+  },
+  filterManager: {
+    getAppFilters: jest.fn(() => []),
+    getGlobalFilters: jest.fn(() => []),
+  },
+  data: {
+    query: {
+      queryString: { getQuery: jest.fn(() => ({ query: 'response:200', language: 'kuery' })) },
+      timefilter: { timefilter: { getTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })) } },
+    },
+  },
 };
 
-const getSingeDocRoute = () => {
-  return `/doc/${defaultProps.dataViewId}/${defaultProps.rowIndex}`;
-};
+const dataViewMock = {
+  id: '1',
+  title: 'test',
+  fields: [],
+  isPersisted: () => false,
+  toSpec: () => ({
+    id: '1',
+    title: 'test',
+    fields: [],
+  }),
+} as unknown as DataView;
 
-const getContextRoute = () => {
-  return `/context/${defaultProps.dataViewId}/${defaultProps.rowId}`;
-};
-
-const render = (withRouter = true, props?: Partial<UseNavigationProps>) => {
-  const history = createMemoryHistory({
-    initialEntries: ['/' + getSearch()],
-  });
-  const wrapper = ({ children }: { children: ReactElement }) => (
-    <KibanaContextProvider services={{ history: () => history }}>
-      {withRouter ? <Router history={history}>{children}</Router> : children}
-    </KibanaContextProvider>
+const render = async () => {
+  const renderResult = renderHook(
+    () =>
+      useNavigationProps({
+        dataView: dataViewMock,
+        rowIndex: 'mock-index',
+        rowId: 'mock-id',
+        columns: ['mock-column'],
+      }),
+    {
+      wrapper: ({ children }) => (
+        <MemoryRouter initialEntries={['/']}>
+          <KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>
+        </MemoryRouter>
+      ),
+    }
   );
-  return {
-    result: renderHook(() => useNavigationProps({ ...defaultProps, ...props }), { wrapper }).result,
-    history,
-  };
+  await renderResult.waitForNextUpdate();
+  return renderResult;
 };
 
 describe('useNavigationProps', () => {
-  test('should provide valid breadcrumb for single doc page from main view', () => {
-    const { result, history } = render();
+  it('should call context and single doc callbacks with correct params', async () => {
+    const { result } = await render();
+    const commonParams = {
+      index: {
+        id: '1',
+        title: 'test',
+        fields: [],
+      },
+      rowId: 'mock-id',
+      referrer: 'mock-referrer',
+    };
 
-    // @ts-expect-error
-    result.current.singleDocProps.onClick();
-    expect(history.location.pathname).toEqual(getSingeDocRoute());
-    expect(history.location.search).toEqual(
-      `?id=${defaultProps.rowId}&breadcrumb=${encodeURIComponent(`#/${getSearch()}`)}`
-    );
+    await result.current.onOpenContextView({ preventDefault: jest.fn() } as unknown as MouseEvent);
+    expect(mockServices.contextLocator.navigate.mock.calls[0][0]).toEqual({
+      ...commonParams,
+      columns: ['mock-column'],
+      filters: [],
+    });
+
+    await result.current.onOpenSingleDoc({ preventDefault: jest.fn() } as unknown as MouseEvent);
+    expect(mockServices.singleDocLocator.navigate.mock.calls[0][0]).toEqual({
+      ...commonParams,
+      rowIndex: 'mock-index',
+    });
   });
 
-  test('should provide valid breadcrumb for context page from main view', () => {
-    const { result, history } = render();
+  test('should create valid links to the context and single doc pages', async () => {
+    const { result } = await render();
 
-    // @ts-expect-error
-    result.current.surrDocsProps.onClick();
-    expect(history.location.pathname).toEqual(getContextRoute());
-    expect(history.location.search).toEqual(
-      `?${getContextHash(defaultProps.columns, filterManager)}&breadcrumb=${encodeURIComponent(
-        `#/${getSearch()}`
-      )}`
-    );
-  });
-
-  test('should create valid links to the context and single doc pages from embeddable', () => {
-    const { result } = render(false, { addBasePath: (val: string) => `${basePathPrefix}${val}` });
-
-    expect(result.current.singleDocProps.href!).toEqual(
-      `${basePathPrefix}/app/discover#${getSingeDocRoute()}?id=${defaultProps.rowId}`
-    );
-    expect(result.current.surrDocsProps.href!).toEqual(
-      `${basePathPrefix}/app/discover#${getContextRoute()}?${getContextHash(
-        defaultProps.columns,
-        filterManager
-      )}`
-    );
+    expect(result.current.singleDocHref).toMatchInlineSnapshot(`"mock-doc-redirect-url"`);
+    expect(result.current.contextViewHref).toMatchInlineSnapshot(`"mock-context-redirect-url"`);
   });
 });

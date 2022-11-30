@@ -143,6 +143,7 @@ describe('alert_form', () => {
               operation="create"
               actionTypeRegistry={actionTypeRegistry}
               ruleTypeRegistry={ruleTypeRegistry}
+              onChangeMetaData={() => {}}
             />
           </KibanaReactContext.Provider>
         </I18nProvider>

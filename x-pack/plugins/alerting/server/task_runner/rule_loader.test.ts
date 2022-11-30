@@ -79,7 +79,7 @@ describe('rule_loader', () => {
         expect(result.rule.alertTypeId).toBe(ruleTypeId);
         expect(result.rule.name).toBe(ruleName);
         expect(result.rule.params).toBe(ruleParams);
-        expect(result.rule.monitoring?.execution.history.length).toBe(MONITORING_HISTORY_LIMIT - 1);
+        expect(result.rule.monitoring?.run.history.length).toBe(MONITORING_HISTORY_LIMIT - 1);
       });
 
       test('without API key, any execution history, or validator', async () => {
@@ -102,7 +102,7 @@ describe('rule_loader', () => {
         expect(result.rule.alertTypeId).toBe(ruleTypeId);
         expect(result.rule.name).toBe(ruleName);
         expect(result.rule.params).toBe(ruleParams);
-        expect(result.rule.monitoring?.execution.history.length).toBe(0);
+        expect(result.rule.monitoring?.run.history.length).toBe(0);
       });
     });
 
@@ -348,7 +348,7 @@ function getTaskRunnerContext(ruleParameters: unknown, historyElements: number) 
         alertTypeId: ruleTypeId,
         params: ruleParameters,
         monitoring: {
-          execution: {
+          run: {
             history: new Array(historyElements),
           },
         },

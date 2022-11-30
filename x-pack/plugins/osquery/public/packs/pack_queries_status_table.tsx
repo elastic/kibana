@@ -114,7 +114,7 @@ function getLensAttributes(
         legendDisplay: 'default',
         nestedLegend: false,
         layerId: 'layer1',
-        metric: 'ed999e9d-204c-465b-897f-fe1a125b39ed',
+        metrics: ['ed999e9d-204c-465b-897f-fe1a125b39ed'],
         numberDisplay: 'percent',
         primaryGroups: ['8690befd-fd69-4246-af4a-dd485d2a3b38'],
         categoryDisplay: 'default',
@@ -211,7 +211,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
 }) => {
   const lensService = useKibana().services.lens;
   const isLensAvailable = lensService?.canUseEditor();
-  const { data: logsDataView } = useLogsDataView({ skip: !actionId });
+  const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
 
   const handleClick = useCallback(
     (event) => {
@@ -274,7 +274,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   const { discover, application } = useKibana().services;
   const locator = discover?.locator;
   const discoverPermissions = application.capabilities.discover;
-  const { data: logsDataView } = useLogsDataView({ skip: !actionId });
+  const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
 
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 

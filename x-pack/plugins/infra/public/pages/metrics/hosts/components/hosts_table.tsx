@@ -23,12 +23,13 @@ const HOST_METRICS: Array<{ type: SnapshotMetricType }> = [
   { type: 'tx' },
   { type: 'memory' },
   { type: 'cpuCores' },
+  { type: 'diskLatency' },
   { type: 'memoryTotal' },
 ];
 
 export const HostsTable = () => {
   const { sourceId } = useSourceContext();
-  const { esQuery, dateRangeTimestamp } = useUnifiedSearchContext();
+  const { buildQuery, dateRangeTimestamp, panelFilters } = useUnifiedSearchContext();
 
   const timeRange: InfraTimerangeInput = {
     from: dateRangeTimestamp.from,
@@ -36,6 +37,8 @@ export const HostsTable = () => {
     interval: '1m',
     ignoreLookback: true,
   };
+
+  const esQuery = buildQuery();
 
   // Snapshot endpoint internally uses the indices stored in source.configuration.metricAlias.
   // For the Unified Search, we create a data view, which for now will be built off of source.configuration.metricAlias too
@@ -58,7 +61,7 @@ export const HostsTable = () => {
 
   return (
     <>
-      {loading ? (
+      {loading || !panelFilters ? (
         <InfraLoadingPanel
           height="100%"
           width="auto"

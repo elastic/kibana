@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
-import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
+import { DataViewListItem, DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -38,6 +38,8 @@ export type DiscoverTopNavProps = Pick<
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
   adHocDataViewList: DataView[];
+  savedDataViewList: DataViewListItem[];
+  updateDataViewList: (DataViewEditorStart: DataView[]) => Promise<void>;
 };
 
 export const DiscoverTopNav = ({
@@ -58,6 +60,8 @@ export const DiscoverTopNav = ({
   persistDataView,
   updateAdHocDataViewId,
   adHocDataViewList,
+  savedDataViewList,
+  updateDataViewList,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
 
@@ -161,6 +165,8 @@ export const DiscoverTopNav = ({
         searchSource,
         onOpenSavedSearch,
         isPlainRecord,
+        adHocDataViews: adHocDataViewList,
+        updateDataViewList,
         persistDataView,
         updateAdHocDataViewId,
       }),
@@ -174,8 +180,10 @@ export const DiscoverTopNav = ({
       searchSource,
       onOpenSavedSearch,
       isPlainRecord,
+      adHocDataViewList,
       persistDataView,
       updateAdHocDataViewId,
+      updateDataViewList,
     ]
   );
 
@@ -213,6 +221,7 @@ export const DiscoverTopNav = ({
     onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
     adHocDataViews: adHocDataViewList,
+    savedDataViewList,
   };
 
   const onTextBasedSavedAndExit = useCallback(

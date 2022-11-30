@@ -16,18 +16,23 @@ import { WithMemoryRouter, WithRoute } from '../router_helpers';
 import { WithStore } from '../redux_helpers';
 import { MemoryRouterConfig } from './types';
 
-interface Config {
-  Component: ComponentType;
+interface Config<T extends object = Record<string, any>> {
+  Component: ComponentType<T>;
   memoryRouter: MemoryRouterConfig;
   store: Store | null;
-  props: any;
+  props: T;
   onRouter: (router: any) => void;
 }
 
-const getCompFromConfig = ({ Component, memoryRouter, store, onRouter }: Config): ComponentType => {
+function getCompFromConfig<T extends object = Record<string, any>>({
+  Component,
+  memoryRouter,
+  store,
+  onRouter,
+}: Config<T>): ComponentType<T> {
   const wrapWithRouter = memoryRouter.wrapComponent !== false;
 
-  let Comp: ComponentType = store !== null ? WithStore(store)(Component) : Component;
+  let Comp: ComponentType<T> = store !== null ? WithStore<T>(store)(Component) : Component;
 
   if (wrapWithRouter) {
     const { componentRoutePath, initialEntries, initialIndex } = memoryRouter!;
@@ -36,18 +41,22 @@ const getCompFromConfig = ({ Component, memoryRouter, store, onRouter }: Config)
     Comp = WithMemoryRouter(
       initialEntries,
       initialIndex
-    )(WithRoute(componentRoutePath, onRouter)(Comp));
+    )(WithRoute<T>(componentRoutePath, onRouter)(Comp));
   }
 
   return Comp;
-};
+}
 
-export const mountComponentSync = (config: Config): ReactWrapper => {
-  const Comp = getCompFromConfig(config);
+export function mountComponentSync<T extends object = Record<string, any>>(
+  config: Config<T>
+): ReactWrapper {
+  const Comp = getCompFromConfig<T>(config);
   return mountWithIntl(<Comp {...config.props} />);
-};
+}
 
-export const mountComponentAsync = async (config: Config): Promise<ReactWrapper> => {
+export async function mountComponentAsync<T extends object = Record<string, any>>(
+  config: Config<T>
+): Promise<ReactWrapper> {
   const Comp = getCompFromConfig(config);
 
   let component: ReactWrapper;
@@ -56,10 +65,12 @@ export const mountComponentAsync = async (config: Config): Promise<ReactWrapper>
     component = mountWithIntl(<Comp {...config.props} />);
   });
 
-  // @ts-ignore
-  return component.update();
-};
+  return component!.update();
+}
 
-export const getJSXComponentWithProps = (Component: ComponentType, props: any) => (
-  <Component {...props} />
-);
+export function getJSXComponentWithProps<T extends object = Record<string, any>>(
+  Component: ComponentType<T>,
+  props: T
+) {
+  return <Component {...props} />;
+}

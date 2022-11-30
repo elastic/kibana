@@ -7,7 +7,6 @@
 import React, { useState, useMemo } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   extractErrorMessage,
   createCspRuleSearchFilterByPackagePolicy,
@@ -23,7 +22,8 @@ import {
 } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
-import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../../common/constants';
+import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';
+import { usePageSize } from '../../common/hooks/use_page_size';
 
 interface RulesPageData {
   rules_page: RuleSavedObject[];
@@ -70,7 +70,7 @@ export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;
 export const RulesContainer = () => {
   const params = useParams<PageUrlParams>();
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
-  const [pageSize, setPageSize] = useLocalStorage<number>(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY, 10);
+  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
     filter: createCspRuleSearchFilterByPackagePolicy({
       packagePolicyId: params.packagePolicyId,
@@ -95,7 +95,7 @@ export const RulesContainer = () => {
 
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
-      <EuiPanel hasBorder hasShadow={false}>
+      <EuiPanel hasBorder={false} hasShadow={false}>
         <RulesTableHeader
           search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
           searchValue={rulesQuery.search}

@@ -12,7 +12,7 @@ import {
   EncryptedSyntheticsMonitor,
   SyntheticsMonitor,
 } from '../../../../common/runtime_types';
-import { syntheticsMonitor, syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
+import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
 import { normalizeSecrets } from '../../../synthetics_service/utils/secrets';
 
 export const getSyntheticsMonitor = async ({
@@ -32,7 +32,7 @@ export const getSyntheticsMonitor = async ({
 
     const decryptedMonitor =
       await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
-        syntheticsMonitor.name,
+        syntheticsMonitorType,
         monitorId,
         {
           namespace: encryptedMonitor.namespaces?.[0],

@@ -10,7 +10,7 @@ import { Reducer, useEffect, useReducer, useRef } from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import { executeAction } from '../lib/action_connector_api';
 
-interface UseSubActionParams<P> {
+export interface UseSubActionParams<P> {
   connectorId?: string;
   subAction?: string;
   subActionParams?: P;
@@ -23,14 +23,16 @@ interface SubActionsState<R> {
   error: Error | null;
 }
 
-const enum SubActionsActionsList {
+enum SubActionsActionsList {
   START,
+  STOP,
   SUCCESS,
   ERROR,
 }
 
 type Action<R> =
   | { type: SubActionsActionsList.START }
+  | { type: SubActionsActionsList.STOP }
   | { type: SubActionsActionsList.SUCCESS; payload: R | undefined }
   | { type: SubActionsActionsList.ERROR; payload: Error | null };
 
@@ -40,6 +42,12 @@ const dataFetchReducer = <R,>(state: SubActionsState<R>, action: Action<R>): Sub
       return {
         ...state,
         isLoading: true,
+        error: null,
+      };
+    case SubActionsActionsList.STOP:
+      return {
+        ...state,
+        isLoading: false,
         error: null,
       };
     case SubActionsActionsList.SUCCESS:
@@ -86,11 +94,12 @@ export const useSubAction = <P, R>({
 
   useEffect(() => {
     if (disabled || !connectorId || !subAction) {
+      dispatch({ type: SubActionsActionsList.STOP });
       return;
     }
 
     const abortCtrl = new AbortController();
-    let isMounted = true;
+    let isActive = true;
 
     const executeSubAction = async () => {
       try {
@@ -106,7 +115,7 @@ export const useSubAction = <P, R>({
           signal: abortCtrl.signal,
         });
 
-        if (isMounted) {
+        if (isActive) {
           if (res.status && res.status === 'ok') {
             dispatch({ type: SubActionsActionsList.SUCCESS, payload: res.data });
           } else {
@@ -117,11 +126,11 @@ export const useSubAction = <P, R>({
           }
         }
         return res.data;
-      } catch (e) {
-        if (isMounted && !abortCtrl.signal.aborted) {
+      } catch (err) {
+        if (isActive) {
           dispatch({
             type: SubActionsActionsList.ERROR,
-            payload: e,
+            payload: err,
           });
         }
       }
@@ -130,7 +139,7 @@ export const useSubAction = <P, R>({
     executeSubAction();
 
     return () => {
-      isMounted = false;
+      isActive = false;
       abortCtrl.abort();
     };
   }, [memoParams, disabled, connectorId, subAction, http]);

@@ -138,7 +138,7 @@ describe('FieldTable', () => {
 
   describe('pagination', () => {
     const isAtFirstPage = (result: RenderResult) =>
-      result.getByTestId('pagination-button-0').classList.contains('euiPaginationButton-isActive');
+      result.getByTestId('pagination-button-0').hasAttribute('aria-current');
 
     const changePage = (result: RenderResult) => {
       result.getByTestId('pagination-button-1').click();

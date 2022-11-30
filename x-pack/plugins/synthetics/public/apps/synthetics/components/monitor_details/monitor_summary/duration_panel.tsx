@@ -9,9 +9,8 @@ import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes } from '@kbn/observability-plugin/public';
 import { ClientPluginsStart } from '../../../../../plugin';
-
-import { KpiWrapper } from './kpi_wrapper';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
 interface DurationPanelProps {
   from: string;
@@ -24,22 +23,31 @@ export const DurationPanel = (props: DurationPanelProps) => {
       observability: { ExploratoryViewEmbeddable },
     },
   } = useKibana<ClientPluginsStart>();
+  const selectedLocation = useSelectedLocation();
+
   const monitorId = useMonitorQueryId();
 
+  if (!selectedLocation || !monitorId) {
+    return null;
+  }
+
   return (
-    <KpiWrapper>
-      <ExploratoryViewEmbeddable
-        reportType={ReportTypes.SINGLE_METRIC}
-        attributes={[
-          {
-            time: props,
-            name: 'Monitor duration',
-            dataType: 'synthetics',
-            selectedMetricField: 'monitor_duration',
-            reportDefinitions: { 'monitor.id': [monitorId] },
+    <ExploratoryViewEmbeddable
+      align="left"
+      customHeight="70px"
+      reportType={ReportTypes.SINGLE_METRIC}
+      attributes={[
+        {
+          time: props,
+          name: 'Monitor duration',
+          dataType: 'synthetics',
+          selectedMetricField: 'monitor_duration',
+          reportDefinitions: {
+            'monitor.id': [monitorId],
+            'observer.geo.name': [selectedLocation?.label],
           },
-        ]}
-      />
-    </KpiWrapper>
+        },
+      ]}
+    />
   );
 };

@@ -17,7 +17,7 @@ import {
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
 } from '../../../assets/constants';
-import { KQLCustomIndicator, SLO } from '../../../types/models';
+import { KQLCustomIndicator, SLO } from '../../../domain/models';
 
 export class KQLCustomTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
@@ -30,7 +30,8 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
       this.buildCommonGroupBy(slo),
-      this.buildAggregations(slo, slo.indicator)
+      this.buildAggregations(slo, slo.indicator),
+      this.buildSettings(slo)
     );
   }
 

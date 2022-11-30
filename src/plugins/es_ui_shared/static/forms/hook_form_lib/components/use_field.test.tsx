@@ -19,7 +19,7 @@ import { UseField } from './use_field';
 
 describe('<UseField />', () => {
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
@@ -175,7 +175,6 @@ describe('<UseField />', () => {
         typeof value === 'string' ? value : JSON.stringify(value);
 
       const setup = registerTestBed(TestComp, {
-        defaultProps: { onStateChangeSpy },
         memoryRouter: { wrapComponent: false },
       });
 
