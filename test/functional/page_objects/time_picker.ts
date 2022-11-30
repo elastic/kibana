@@ -177,7 +177,9 @@ export class TimePickerPageObject extends FtrService {
 
       await this.retry.waitFor('Timepicker popover to close', async () => {
         await this.browser.pressKeys(this.browser.keys.ESCAPE);
-        return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput', { timeout: 50 }));
+        return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput', {
+          timeout: 50,
+        }));
       });
 
       const superDatePickerApplyButtonExists = await this.testSubjects.exists(
