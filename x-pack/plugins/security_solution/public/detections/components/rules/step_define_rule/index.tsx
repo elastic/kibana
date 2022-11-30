@@ -179,15 +179,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       }
     },
   });
-  const { handleReset, onOpenTimeline, ...ruleFromTimelineData } = useRuleFromTimeline();
-  useEffect(() => {
-    if (ruleFromTimelineData.updated) {
-      setFieldValue('index', ruleFromTimelineData.index);
-      setFieldValue('queryBar', ruleFromTimelineData.queryBar);
-      handleReset();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ruleFromTimelineData.updated]);
+
+  const handleSetRuleFromTimeline = useCallback(
+    ({ index: timelineIndex, queryBar: timelineQueryBar }) => {
+      setFieldValue('index', timelineIndex);
+      setFieldValue('queryBar', timelineQueryBar);
+    },
+    [setFieldValue]
+  );
+  const { onOpenTimeline, loading: timelineQueryLoading } =
+    useRuleFromTimeline(handleSetRuleFromTimeline);
 
   const {
     index: formIndex,
@@ -593,8 +594,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   euiFieldProps: {
                     fullWidth: true,
                     placeholder: '',
-                    isDisabled: ruleFromTimelineData.loading,
-                    isLoading: ruleFromTimelineData.loading,
+                    isDisabled: timelineQueryLoading,
+                    isLoading: timelineQueryLoading,
                   },
                 }}
               />
@@ -604,7 +605,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       </RuleTypeEuiFormRow>
     );
   }, [
-    ruleFromTimelineData.loading,
+    timelineQueryLoading,
     dataSourceType,
     onChangeDataSource,
     dataViewIndexPatternToggleButtonOptions,
@@ -637,9 +638,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             browserFields,
             idAria: 'detectionEngineStepDefineRuleQueryBar',
             indexPattern,
-            isDisabled: isLoading || formShouldLoadQueryDynamically || ruleFromTimelineData.loading,
+            isDisabled: isLoading || formShouldLoadQueryDynamically || timelineQueryLoading,
             resetToSavedQuery: formShouldLoadQueryDynamically,
-            isLoading: isIndexPatternLoading || ruleFromTimelineData.loading,
+            isLoading: isIndexPatternLoading || timelineQueryLoading,
             dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
             openTimelineSearch,
             onValidityChange: setIsQueryBarValid,
@@ -657,7 +658,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       browserFields,
       indexPattern,
       isLoading,
-      ruleFromTimelineData.loading,
+      timelineQueryLoading,
       isIndexPatternLoading,
       openTimelineSearch,
       handleCloseTimelineSearch,

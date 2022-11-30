@@ -13,6 +13,8 @@ import {
 } from '@kbn/timelines-plugin/public';
 import { useDispatch } from 'react-redux';
 
+import { i18n } from '@kbn/i18n';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { TimelineModel } from '../../../..';
 import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
@@ -28,14 +30,9 @@ import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 export const RULE_FROM_TIMELINE_URL_PARAM = 'createRuleFromTimeline';
 
-interface RuleFromTimeline {
-  index: string[];
+export interface RuleFromTimeline {
   loading: boolean;
   onOpenTimeline: (timeline: TimelineModel) => void;
-  // callback to reset the updated state after update has happened
-  handleReset: () => void;
-  queryBar: FieldValueQueryBar;
-  updated: boolean;
 }
 
 export const initialState = {
@@ -45,28 +42,30 @@ export const initialState = {
     filters: [],
     saved_id: null,
   },
-  updated: false,
 };
+
+type SetRuleQuery = ({
+  index,
+  queryBar,
+}: {
+  index: string[];
+  queryBar: FieldValueQueryBar;
+}) => void;
 
 /**
  * When returned property updated === true,
  * the index and queryBar properties have been updated from timeline data
  * queried either from id in the url param or by passing a timeline to returned callback onOpenTimeline
  */
-export const useRuleFromTimeline = (): RuleFromTimeline => {
+export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimeline => {
   const dispatch = useDispatch();
+  const { addError } = useAppToasts();
 
   // selectedTimeline = timeline to set rule from
   const [selectedTimeline, setRuleFromTimeline] = useState<TimelineModel | null>(null);
 
   // start RuleFromTimeline definition
   const [loading, setLoading] = useState(true);
-
-  const [ruleData, setRuleData] = useState<{
-    index: string[];
-    queryBar: FieldValueQueryBar;
-    updated: boolean;
-  }>(initialState);
 
   const onOpenTimeline = useCallback(
     (timeline: TimelineModel) => {
@@ -118,32 +117,44 @@ export const useRuleFromTimeline = (): RuleFromTimeline => {
       query: selectedTimeline.kqlQuery.filterQuery?.kuery?.expression ?? '',
       language: selectedTimeline.kqlQuery.filterQuery?.kuery?.kind ?? 'kuery',
     };
-    const dataProvidersDsl =
-      selectedTimeline.dataProviders != null && selectedTimeline.dataProviders.length > 0
-        ? convertKueryToElasticSearchQuery(
-            buildGlobalQuery(selectedTimeline.dataProviders, selectedDataViewBrowserFields),
-            { fields: [], title: indexPattern.join(',') }
-          )
-        : '';
-
     const newFilters = selectedTimeline.filters ?? [];
-    // if something goes wrong and we don't hit this
-    // the create new rule page will be unusable
-    // probably need to add some sort of timer and in case we don't hit it we show error???
-    setLoading(false);
+    try {
+      const dataProvidersDsl =
+        selectedTimeline.dataProviders != null && selectedTimeline.dataProviders.length > 0
+          ? convertKueryToElasticSearchQuery(
+              buildGlobalQuery(selectedTimeline.dataProviders, selectedDataViewBrowserFields),
+              { fields: [], title: indexPattern.join(',') }
+            )
+          : '';
 
-    setRuleData({
-      index: indexPattern,
-      queryBar: {
-        filters:
-          dataProvidersDsl !== ''
-            ? [...newFilters, getDataProviderFilter(dataProvidersDsl)]
-            : newFilters,
-        query: newQuery,
-        saved_id: null,
-      },
-      updated: true,
-    });
+      setLoading(false);
+
+      setRuleQuery({
+        index: indexPattern,
+        queryBar: {
+          filters:
+            dataProvidersDsl !== ''
+              ? [...newFilters, getDataProviderFilter(dataProvidersDsl)]
+              : newFilters,
+          query: newQuery,
+          saved_id: null,
+        },
+      });
+    } catch (error) {
+      setLoading(false);
+      addError(error, {
+        toastMessage: i18n.translate('xpack.securitySolution.ruleFromTimeline.error.toastMessage', {
+          defaultMessage: 'Failed to create rule from timeline with id: {id}',
+          values: {
+            id: selectedTimeline.id,
+          },
+        }),
+        title: i18n.translate('xpack.securitySolution.ruleFromTimeline.error.title', {
+          defaultMessage: 'Failed to import rule from timeline',
+        }),
+      });
+    }
+
     // reset timeline data view once complete
     if (ogDataView.dataViewId !== dataViewId) {
       dispatch(
@@ -155,13 +166,15 @@ export const useRuleFromTimeline = (): RuleFromTimeline => {
       );
     }
   }, [
-    selectedTimeline,
-    selectedDataViewBrowserFields,
-    selectedPatterns,
-    ogDataView.dataViewId,
-    ogDataView.selectedPatterns,
+    addError,
     dataViewId,
     dispatch,
+    ogDataView.dataViewId,
+    ogDataView.selectedPatterns,
+    selectedDataViewBrowserFields,
+    selectedPatterns,
+    selectedTimeline,
+    setRuleQuery,
   ]);
 
   useEffect(() => {
@@ -206,9 +219,5 @@ export const useRuleFromTimeline = (): RuleFromTimeline => {
   }, [timelineIdFromUrl]);
   // end handle set rule from timeline id
 
-  const handleReset = useCallback(() => {
-    setRuleData(initialState);
-  }, []);
-
-  return { ...ruleData, loading, onOpenTimeline, handleReset };
+  return { loading, onOpenTimeline };
 };

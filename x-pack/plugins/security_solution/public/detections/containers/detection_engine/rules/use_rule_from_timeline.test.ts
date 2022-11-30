@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 
-import { initialState, useRuleFromTimeline } from './use_rule_from_timeline';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import type { RuleFromTimeline } from './use_rule_from_timeline';
+import { useRuleFromTimeline } from './use_rule_from_timeline';
 import { useGetInitialUrlParamValue } from '../../../../common/utils/global_query_string/helpers';
 import { resolveTimeline } from '../../../../timelines/containers/api';
 import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
@@ -27,6 +30,10 @@ jest.mock('../../../../common/components/link_to', () => {
   };
 });
 
+jest.mock('../../../../common/utils/global_query_string/helpers');
+jest.mock('../../../../timelines/containers/api');
+jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../common/containers/sourcerer');
 const mockDispatch = jest.fn();
 
 jest.mock('react-redux', () => {
@@ -36,11 +43,6 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-
-jest.mock('../../../../common/utils/global_query_string/helpers');
-jest.mock('../../../../common/hooks/use_selector');
-jest.mock('../../../../common/hooks/use_app_toasts');
-jest.mock('../../../../timelines/containers/api');
 
 const selectedTimeline = {
   data: {
@@ -90,55 +92,43 @@ const selectedTimeline = {
 
 describe('useRuleFromTimeline', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
-
+  const setRuleQuery = jest.fn();
+  let result: RenderHookResult<void, RuleFromTimeline>['result'];
   beforeEach(() => {
     jest.clearAllMocks();
+
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({
-      selectedDataView: {
-        id: 'not-the one',
-        browserFields: mockBrowserFields,
-        patternList: [],
-      },
-      sourcererScope: {
-        selectedDataViewId: 'cool-data-view-id',
-        selectedPatterns: ['auditbeat-*'],
-      },
-    });
+    (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
+
     (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => ({
       decodedParam: 'eb2781c0-1df5-11eb-8589-2f13958b79f7',
     }));
     (resolveTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
   });
 
-  it('if no from timeline id, updated: false and loading: false', async () => {
+  it('if no from timeline id, loading: false', async () => {
     (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => ({
       decodedParam: undefined,
     }));
-    const { result } = renderHook(() => useRuleFromTimeline());
+    const { result: res } = renderHook(() => useRuleFromTimeline(setRuleQuery));
+    result = res;
 
-    const { onOpenTimeline, ...hookData } = result.current;
-    expect(hookData).toEqual({
-      ...initialState,
-      updated: false,
-      loading: false,
-    });
+    expect(result.current.loading).toEqual(false);
+    expect(setRuleQuery).not.toHaveBeenCalled();
   });
 
-  it('if from timeline id, updated: false and loading: true', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimeline());
-    const { onOpenTimeline, ...hookData } = result.current;
-    expect(hookData).toEqual({
-      ...initialState,
-      updated: false,
-      loading: true,
+  it('if from timeline id, loading: true', async () => {
+    await act(async () => {
+      const { result: res } = renderHook(() => useRuleFromTimeline(setRuleQuery));
+      result = res;
     });
-    await waitForNextUpdate();
+    expect(result.current.loading).toEqual(true);
   });
 
   it('if from timeline id, set active timeline data view to from timeline data view', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimeline());
+    const { result: res, waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
+    result = res;
     await waitForNextUpdate();
     expect(mockDispatch).toHaveBeenCalledTimes(3);
     expect(mockDispatch).toHaveBeenNthCalledWith(1, {
@@ -165,31 +155,23 @@ describe('useRuleFromTimeline', () => {
       },
     });
 
-    const { onOpenTimeline, ...hookData } = result.current;
-    expect(hookData).toEqual({
-      ...initialState,
-      updated: false,
-      loading: true,
-    });
+    expect(result.current.loading).toEqual(true);
   });
 
   it('when from timeline data view id === selected data view id and browser fields is not empty, set rule data to match from timeline query', async () => {
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({
-      selectedDataView: {
-        id: 'security-solution',
-        browserFields: mockBrowserFields,
-        patternList: [],
-      },
-      sourcererScope: {
-        selectedDataViewId: 'security-solution',
-        selectedPatterns: ['auditbeat-*'],
-      },
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      ...mockSourcererScope,
+      browserFields: mockBrowserFields,
+      dataViewId: 'security-solution',
+      selectedPatterns: ['auditbeat-*'],
     });
-    const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimeline());
-    await waitForNextUpdate();
 
-    const { onOpenTimeline, ...hookData } = result.current;
-    expect(hookData).toEqual({
+    const { result: res, waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
+    result = res;
+    expect(result.current.loading).toEqual(true);
+    await waitForNextUpdate();
+    expect(result.current.loading).toEqual(false);
+    expect(setRuleQuery).toHaveBeenCalledWith({
       index: [
         'auditbeat-*',
         'endgame-*',
@@ -235,8 +217,6 @@ describe('useRuleFromTimeline', () => {
         query: { query: 'host.name:* AND user.name:*', language: 'kuery' },
         saved_id: null,
       },
-      updated: true,
-      loading: false,
     });
   });
 });
