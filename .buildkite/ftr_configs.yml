@@ -7,6 +7,7 @@ disabled:
   - x-pack/test/functional/config.base.js
   - x-pack/test/detection_engine_api_integration/security_and_spaces/config.base.ts
   - x-pack/test/functional_enterprise_search/base_config.ts
+  - x-pack/test/localization/config.base.ts
   - test/server_integration/config.base.js
 
   # QA suites that are run out-of-band
