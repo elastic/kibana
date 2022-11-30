@@ -28,6 +28,7 @@
     "time_field": "@timestamp"
   },
   "custom_settings": {
-    "created_by": "ml-module-siem-cloudtrail"
+    "created_by": "ml-module-security-cloudtrail",
+    "security_app_display_name": "Rare AWS Error Code"
   }
 }

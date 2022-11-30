@@ -30,6 +30,7 @@
     "time_field": "@timestamp"
   },
   "custom_settings": {
-    "created_by": "ml-module-security-network"
+    "created_by": "ml-module-security-network",
+    "security_app_display_name": "Network Traffic to Rare Destination Country"
   }
 }

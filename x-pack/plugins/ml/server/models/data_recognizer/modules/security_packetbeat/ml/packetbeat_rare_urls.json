@@ -28,12 +28,13 @@
     "time_field": "@timestamp"
   },
   "custom_settings": {
-    "created_by": "ml-module-siem-packetbeat",
+    "created_by": "ml-module-security-packetbeat",
     "custom_urls": [
       {
         "url_name": "Host Details",
         "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       }
-    ]
+    ],
+    "security_app_display_name": "Unusual Web Request"
   }
 }

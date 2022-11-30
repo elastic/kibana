@@ -1,5 +1,5 @@
 {
-  "id": "siem_cloudtrail",
+  "id": "security_cloudtrail",
   "title": "Security: Cloudtrail",
   "description": "Detect suspicious activity recorded in your cloudtrail logs.",
   "type": "Filebeat data",
