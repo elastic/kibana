@@ -58,13 +58,7 @@ describe('epicLocalStorage', () => {
   let testProps = {} as EventsViewerProps;
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     const from = '2019-08-27T22:10:56.794Z';
     const to = '2019-08-26T22:10:56.791Z';
     const ACTION_BUTTON_COUNT = 4;

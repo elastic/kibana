@@ -74,13 +74,7 @@ describe('OverviewHost', () => {
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
     const myState = cloneDeep(state);
     useHostOverviewMock.mockReturnValue([false, MOCKED_RESPONSE]);
-    store = createStore(
-      myState,
-      SUB_PLUGINS_REDUCER,
-
-      kibanaObservable,
-      storage
-    );
+    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   test('it renders the expected widget title', () => {

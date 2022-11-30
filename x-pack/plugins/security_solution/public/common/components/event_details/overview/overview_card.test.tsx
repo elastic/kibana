@@ -34,13 +34,7 @@ const state: State = {
 };
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(
-  state,
-  SUB_PLUGINS_REDUCER,
-
-  kibanaObservable,
-  storage
-);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 const props = {
   title: 'Severity',

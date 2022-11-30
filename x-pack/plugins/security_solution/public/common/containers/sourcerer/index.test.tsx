@@ -111,13 +111,7 @@ describe('Sourcerer Hooks', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
-    store = createStore(
-      mockGlobalState,
-      SUB_PLUGINS_REDUCER,
-
-      kibanaObservable,
-      storage
-    );
+    store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     mockUseUserInfo.mockImplementation(() => userInfoState);
   });
   it('initializes loading default and timeline index patterns', async () => {
@@ -163,7 +157,6 @@ describe('Sourcerer Hooks', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-
       kibanaObservable,
       storage
     );
@@ -266,7 +259,6 @@ describe('Sourcerer Hooks', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-
       kibanaObservable,
       storage
     );
@@ -337,7 +329,6 @@ describe('Sourcerer Hooks', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-
       kibanaObservable,
       storage
     );
@@ -396,7 +387,6 @@ describe('Sourcerer Hooks', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-
         kibanaObservable,
         storage
       );
@@ -438,7 +428,6 @@ describe('Sourcerer Hooks', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-
         kibanaObservable,
         storage
       );
@@ -481,7 +470,6 @@ describe('Sourcerer Hooks', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-
         kibanaObservable,
         storage
       );
@@ -528,7 +516,6 @@ describe('Sourcerer Hooks', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-
         kibanaObservable,
         storage
       );
@@ -577,7 +564,6 @@ describe('Sourcerer Hooks', () => {
             },
           },
           SUB_PLUGINS_REDUCER,
-
           kibanaObservable,
           storage
         );

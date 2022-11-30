@@ -59,13 +59,7 @@ describe('Hosts Table', () => {
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   describe('rendering', () => {

@@ -45,13 +45,7 @@ describe('CtiEnabledModule', () => {
 
   beforeEach(() => {
     const myState = cloneDeep(state);
-    store = createStore(
-      myState,
-      SUB_PLUGINS_REDUCER,
-
-      kibanaObservable,
-      storage
-    );
+    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   it('renders CtiWithEvents when there are events', () => {

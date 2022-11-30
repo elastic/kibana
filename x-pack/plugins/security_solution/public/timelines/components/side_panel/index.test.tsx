@@ -103,13 +103,7 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel: rendering', () => {
     beforeEach(() => {
-      store = createStore(
-        state,
-        SUB_PLUGINS_REDUCER,
-
-        kibanaObservable,
-        storage
-      );
+      store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
     test('it should not render the DetailsPanel if no expanded detail has been set in the reducer', () => {
@@ -158,13 +152,7 @@ describe('Details Panel Component', () => {
       };
       mockState.timeline.timelineById[TimelineId.active].expandedDetail = eventExpandedDetail;
       mockState.timeline.timelineById[TimelineId.test].expandedDetail = eventExpandedDetail;
-      store = createStore(
-        mockState,
-        SUB_PLUGINS_REDUCER,
-
-        kibanaObservable,
-        storage
-      );
+      store = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
       mockUseSearchStrategy.mockReturnValue({
         loading: true,
@@ -228,13 +216,7 @@ describe('Details Panel Component', () => {
       };
       newState.timeline.timelineById[TimelineId.active].activeTab = TimelineTabs.query;
       newState.timeline.timelineById[TimelineId.active].expandedDetail = eventExpandedDetail;
-      store = createStore(
-        newState,
-        SUB_PLUGINS_REDUCER,
-
-        kibanaObservable,
-        storage
-      );
+      store = createStore(newState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
       const wrapper = mount(
         <TestProviders store={store}>
           <DetailsPanel {...currentProps} />
@@ -260,13 +242,7 @@ describe('Details Panel Component', () => {
       mockState.timeline.timelineById[TimelineId.active].expandedDetail = eventPinnedExpandedDetail;
       mockState.timeline.timelineById[TimelineId.test].expandedDetail = eventPinnedExpandedDetail;
       mockState.timeline.timelineById[TimelineId.test].activeTab = TimelineTabs.pinned;
-      store = createStore(
-        mockState,
-        SUB_PLUGINS_REDUCER,
-
-        kibanaObservable,
-        storage
-      );
+      store = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
     test('it should have the attributes isDraggable to be false when timelineId !== "active" and activeTab === "pinned"', () => {
@@ -320,13 +296,7 @@ describe('Details Panel Component', () => {
       };
       mockState.timeline.timelineById[TimelineId.test].expandedDetail = hostExpandedDetail;
       mockState.timeline.timelineById[TimelineId.active].expandedDetail = hostExpandedDetail;
-      store = createStore(
-        mockState,
-        SUB_PLUGINS_REDUCER,
-
-        kibanaObservable,
-        storage
-      );
+      store = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
     afterEach(() => {
@@ -367,13 +337,7 @@ describe('Details Panel Component', () => {
       };
       mockState.timeline.timelineById[TimelineId.test].expandedDetail = networkExpandedDetail;
       mockState.timeline.timelineById[TimelineId.active].expandedDetail = networkExpandedDetail;
-      store = createStore(
-        mockState,
-        SUB_PLUGINS_REDUCER,
-
-        kibanaObservable,
-        storage
-      );
+      store = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
     afterEach(() => {

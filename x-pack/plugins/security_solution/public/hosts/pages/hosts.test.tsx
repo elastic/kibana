@@ -90,13 +90,7 @@ const mockHistory = {
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 const myState: State = mockGlobalState;
 const { storage } = createSecuritySolutionStorageMock();
-const myStore = createStore(
-  myState,
-  SUB_PLUGINS_REDUCER,
-
-  kibanaObservable,
-  storage
-);
+const myStore = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 describe('Hosts - rendering', () => {
   beforeEach(() => {

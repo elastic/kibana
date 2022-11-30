@@ -18,8 +18,7 @@ import { EuiDataGrid, EuiProgress } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, { useCallback, useEffect, useMemo, useContext, useRef } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import styled, { ThemeContext } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
@@ -46,17 +45,18 @@ import {
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import { REMOVE_COLUMN } from './column_headers/translations';
 import { dataTableActions, dataTableSelectors } from '../../store/data_table';
-import type { DataTableState, DataTableModel } from '../../store/data_table/types';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { useKibana } from '../../lib/kibana';
 import { getPageRowIndex } from './pagination';
 import { UnitCount } from '../toolbar/unit';
+import { useShallowEqualSelector } from '../../hooks/use_selector';
+import { tableDefaults } from '../../store/data_table/defaults';
 
 const DATA_TABLE_ARIA_LABEL = i18n.translate('xpack.securitySolution.dataTable.ariaLabel', {
   defaultMessage: 'Alerts',
 });
 
-interface OwnProps {
+export interface DataTableProps {
   additionalControls?: React.ReactNode;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
@@ -70,7 +70,7 @@ interface OwnProps {
   loadPage: (newActivePage: number) => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
-  hasAlertsCrud?: boolean;
+  hasCrudPermissions?: boolean;
   unitCountText: string;
   pagination: EuiDataGridPaginationProps;
   totalItems: number;
@@ -88,42 +88,40 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
   }
 `;
 
-export type StatefulDataTableProps = OwnProps & PropsFromRedux;
-
-/**
- * The Body component is used everywhere timeline is used within the security application. It is the highest level component
- * that is shared across all implementations of the timeline.
- */
-
-export const DataTableComponent = React.memo<StatefulDataTableProps>(
+export const DataTableComponent = React.memo<DataTableProps>(
   ({
     additionalControls,
     browserFields,
     bulkActions = true,
-    columnHeaders,
     data,
     defaultCellActions,
     disabledCellActions,
     fieldBrowserOptions,
     filters,
-    hasAlertsCrud,
+    hasCrudPermissions,
     id,
-    isLoading,
     leadingControlColumns,
     loadPage,
     renderCellValue,
     rowRenderers,
-    selectedEventIds,
-    showCheckboxes,
-    sort,
     pagination,
-    defaultColumns,
     unitCountText,
     totalItems,
   }) => {
     const {
       triggersActionsUi: { getFieldBrowser },
     } = useKibana().services;
+    const memoizedColumnHeaders: (
+      headers: ColumnHeaderOptions[],
+      browserFields: BrowserFields
+    ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
+
+    const getDataTable = dataTableSelectors.getTableByIdSelector();
+    const dataTable = useShallowEqualSelector((state) => getDataTable(state, id) ?? tableDefaults);
+    const { columns, selectedEventIds, showCheckboxes, sort, isLoading, defaultColumns } =
+      dataTable;
+    const columnHeaders = memoizedColumnHeaders(columns, browserFields);
+
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
     const dispatch = useDispatch();
@@ -133,7 +131,7 @@ export const DataTableComponent = React.memo<StatefulDataTableProps>(
     const theme: EuiTheme = useContext(ThemeContext);
 
     const showBulkActions = useMemo(() => {
-      if (!hasAlertsCrud) {
+      if (!hasCrudPermissions) {
         return false;
       }
 
@@ -144,7 +142,7 @@ export const DataTableComponent = React.memo<StatefulDataTableProps>(
         return bulkActions;
       }
       return (bulkActions?.customBulkActions?.length || bulkActions?.alertStatusActions) ?? true;
-    }, [hasAlertsCrud, selectedCount, showCheckboxes, bulkActions]);
+    }, [hasCrudPermissions, selectedCount, showCheckboxes, bulkActions]);
 
     const onResetColumns = useCallback(() => {
       dispatch(dataTableActions.updateColumns({ id, columns: defaultColumns }));
@@ -425,43 +423,3 @@ export const DataTableComponent = React.memo<StatefulDataTableProps>(
 );
 
 DataTableComponent.displayName = 'DataTableComponent';
-
-const makeMapStateToProps = () => {
-  const memoizedColumnHeaders: (
-    headers: ColumnHeaderOptions[],
-    browserFields: BrowserFields
-  ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
-
-  const getDataTable = dataTableSelectors.getTableByIdSelector();
-  const mapStateToProps = (
-    state: DataTableState,
-    { browserFields, id, hasAlertsCrud }: OwnProps
-  ) => {
-    const dataTable: DataTableModel = getDataTable(state, id);
-    const { columns, selectedEventIds, showCheckboxes, sort, isLoading, defaultColumns } =
-      dataTable;
-
-    return {
-      columnHeaders: memoizedColumnHeaders(columns, browserFields),
-      isLoading,
-      id,
-      selectedEventIds,
-      showCheckboxes: hasAlertsCrud === true && showCheckboxes,
-      sort,
-      defaultColumns,
-    };
-  };
-  return mapStateToProps;
-};
-
-const mapDispatchToProps = {
-  clearSelected: dataTableActions.clearSelected,
-  setSelected: dataTableActions.setSelected,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const StatefulDataTableComponent: React.FunctionComponent<OwnProps> =
-  connector(DataTableComponent);

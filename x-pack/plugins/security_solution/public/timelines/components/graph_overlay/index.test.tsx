@@ -135,7 +135,6 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-
             kibanaObservable,
             storage
           )}
@@ -219,7 +218,6 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-
             kibanaObservable,
             storage
           )}
@@ -262,7 +260,6 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-
             kibanaObservable,
             storage
           )}
@@ -304,7 +301,6 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-
             kibanaObservable,
             storage
           )}

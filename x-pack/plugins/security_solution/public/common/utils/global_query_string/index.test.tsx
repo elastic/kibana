@@ -65,7 +65,6 @@ describe('global query string', () => {
         globalUrlParam,
       },
       SUB_PLUGINS_REDUCER,
-
       kibanaObservable,
       storage
     );
@@ -194,7 +193,6 @@ describe('global query string', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-
         kibanaObservable,
         storage
       );

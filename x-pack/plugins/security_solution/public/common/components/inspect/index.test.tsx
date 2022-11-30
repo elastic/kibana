@@ -159,13 +159,7 @@ describe('Inspect Button', () => {
       const myQuery = cloneDeep(newQuery);
       myQuery.inspect = null;
       myState.inputs = upsertQuery(myQuery);
-      store = createStore(
-        myState,
-        SUB_PLUGINS_REDUCER,
-
-        kibanaObservable,
-        storage
-      );
+      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -182,13 +176,7 @@ describe('Inspect Button', () => {
         response: ['my response'],
       };
       myState.inputs = upsertQuery(myQuery);
-      store = createStore(
-        myState,
-        SUB_PLUGINS_REDUCER,
-
-        kibanaObservable,
-        storage
-      );
+      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -205,13 +193,7 @@ describe('Inspect Button', () => {
         response: [],
       };
       myState.inputs = upsertQuery(myQuery);
-      store = createStore(
-        myState,
-        SUB_PLUGINS_REDUCER,
-
-        kibanaObservable,
-        storage
-      );
+      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -230,13 +212,7 @@ describe('Inspect Button', () => {
         response: ['my response'],
       };
       myState.inputs = upsertQuery(myQuery);
-      store = createStore(
-        myState,
-        SUB_PLUGINS_REDUCER,
-
-        kibanaObservable,
-        storage
-      );
+      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
     test('Open Inspect Modal', () => {
       const wrapper = mount(
@@ -281,13 +257,7 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = true;
-      store = createStore(
-        myState,
-        SUB_PLUGINS_REDUCER,
-
-        kibanaObservable,
-        storage
-      );
+      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -306,13 +276,7 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = false;
-      store = createStore(
-        myState,
-        SUB_PLUGINS_REDUCER,
-
-        kibanaObservable,
-        storage
-      );
+      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -331,13 +295,7 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = true;
-      store = createStore(
-        myState,
-        SUB_PLUGINS_REDUCER,
-
-        kibanaObservable,
-        storage
-      );
+      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -356,13 +314,7 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = true;
-      store = createStore(
-        myState,
-        SUB_PLUGINS_REDUCER,
-
-        kibanaObservable,
-        storage
-      );
+      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />

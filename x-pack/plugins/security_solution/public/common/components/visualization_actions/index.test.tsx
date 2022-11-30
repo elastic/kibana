@@ -118,13 +118,7 @@ describe('VisualizationActions', () => {
     });
     const myState = cloneDeep(state);
     myState.inputs = upsertQuery(newQuery);
-    store = createStore(
-      myState,
-      SUB_PLUGINS_REDUCER,
-
-      kibanaObservable,
-      storage
-    );
+    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   test('Should render VisualizationActions button', () => {

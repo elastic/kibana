@@ -47,7 +47,6 @@ import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
 import type { SecurityDataView } from '../containers/sourcerer/api';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { dataTableReducer } from './data_table/reducer';
 
 type ComposeType = typeof compose;
 declare global {
@@ -154,7 +153,6 @@ export const createStoreFactory = async (
     ...subPlugins.network.store.reducer,
     timeline: timelineReducer,
     ...subPlugins.management.store.reducer,
-    ...dataTableReducer,
   };
 
   return createStore(initialState, rootReducer, libs$.pipe(pluck('kibana')), storage, [
@@ -191,7 +189,7 @@ export const createStore = (
   );
 
   store = createReduxStore(
-    createReducer(pluginsReducer, { dataTable: dataTableReducer }),
+    createReducer(pluginsReducer),
     state as PreloadedState<State>,
     composeEnhancers(
       applyMiddleware(epicMiddleware, telemetryMiddleware, ...(additionalMiddleware ?? []))

@@ -113,13 +113,7 @@ const state: State = {
 };
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(
-  state,
-  SUB_PLUGINS_REDUCER,
-
-  kibanaObservable,
-  storage
-);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 jest.mock('../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline', () => ({
   useAddBulkToTimelineAction: jest.fn(() => {}),

@@ -56,7 +56,7 @@ import { getDefaultViewSelection, getCombinedFilterQuery } from './helpers';
 import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../event_rendered_view/helpers';
 import { useTimelineEvents } from './use_timelines_events';
 import { TableContext, EmptyTable, TableLoading } from './shared';
-import { StatefulDataTableComponent } from '../data_table';
+import { DataTableComponent } from '../data_table';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import type { AlertWorkflowStatus } from '../../types';
 import { EventRenderedView } from '../event_rendered_view';
@@ -542,7 +542,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                       <ScrollableFlexItem grow={1}>
                         <StatefulEventContext.Provider value={activeStatefulEventContext}>
                           {tableView === 'gridView' && (
-                            <StatefulDataTableComponent
+                            <DataTableComponent
                               additionalControls={alertBulkActions}
                               unitCountText={unitCountText}
                               browserFields={browserFields}
@@ -556,7 +556,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                               bulkActions={bulkActions}
                               fieldBrowserOptions={fieldBrowserOptions}
                               defaultCellActions={defaultCellActions}
-                              hasAlertsCrud={hasCrudPermissions}
+                              hasCrudPermissions={hasCrudPermissions}
                               filters={filters}
                               leadingControlColumns={transformedLeadingControlColumns}
                               pagination={{

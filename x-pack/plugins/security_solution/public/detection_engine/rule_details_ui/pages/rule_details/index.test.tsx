@@ -161,13 +161,7 @@ const mockRule = {
   exceptions_list: [],
 };
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(
-  state,
-  SUB_PLUGINS_REDUCER,
-
-  kibanaObservable,
-  storage
-);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 describe('RuleDetailsPageComponent', () => {
   beforeAll(() => {

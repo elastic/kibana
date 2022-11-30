@@ -149,7 +149,6 @@ describe('Favorite Button', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-
         kibanaObservable,
         storage
       );
@@ -186,7 +185,6 @@ describe('Favorite Button', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-
         kibanaObservable,
         storage
       );
@@ -222,7 +220,6 @@ describe('Favorite Button', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-
         kibanaObservable,
         storage
       );

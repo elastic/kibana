@@ -47,7 +47,6 @@ const store = createStore(
     },
   },
   SUB_PLUGINS_REDUCER,
-
   kibanaObservable,
   storage
 );

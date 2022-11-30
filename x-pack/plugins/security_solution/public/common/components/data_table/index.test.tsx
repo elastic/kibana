@@ -8,27 +8,17 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 
-import type { StatefulDataTableProps } from '.';
+import type { DataTableProps } from '.';
 import { DataTableComponent } from '.';
 import { REMOVE_COLUMN } from './column_headers/translations';
-import { Direction } from '../../../../common/search_strategy';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { defaultHeaders, mockGlobalState, mockTimelineData, TestProviders } from '../../mock';
 import { defaultColumnHeaderType } from '../../store/data_table/defaults';
 import { mockBrowserFields } from '../../containers/source/mock';
-import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import { getMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import type { CellValueElementProps } from '../../../../common/types';
-
-const mockSort: Sort[] = [
-  {
-    columnId: '@timestamp',
-    columnType: 'date',
-    esTypes: ['date'],
-    sortDirection: Direction.desc,
-  },
-];
+import { TableId } from '../../../../common/types';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -87,25 +77,17 @@ export const TestCellRenderer: React.FC<CellValueElementProps> = ({ columnId, da
 
 describe('DataTable', () => {
   const mount = useMountAppended();
-  const props: StatefulDataTableProps = {
+  const props: DataTableProps = {
     browserFields: mockBrowserFields,
-    clearSelected: jest.fn() as unknown as StatefulDataTableProps['clearSelected'],
-    columnHeaders: defaultHeaders,
     data: mockTimelineData,
     defaultCellActions: [],
     disabledCellActions: ['signal.rule.risk_score', 'signal.reason'],
-    id: 'timeline-test',
-    isLoading: false,
+    id: TableId.test,
     loadPage: jest.fn(),
     renderCellValue: TestCellRenderer,
     rowRenderers: [],
-    selectedEventIds: {},
-    setSelected: jest.fn() as unknown as StatefulDataTableProps['setSelected'],
-    sort: mockSort,
-    showCheckboxes: false,
     totalItems: 1,
     leadingControlColumns: [],
-    defaultColumns: defaultHeaders,
     unitCountText: '10 events',
     pagination: {
       pageSize: 25,
@@ -332,7 +314,7 @@ describe('DataTable', () => {
     fireEvent.click(await screen.getByText(REMOVE_COLUMN));
 
     expect(mockDispatch).toBeCalledWith({
-      payload: { columnId: '@timestamp', id: 'timeline-test' },
+      payload: { columnId: '@timestamp', id: 'table-test' },
       type: 'x-pack/security_solution/data-table/REMOVE_COLUMN',
     });
   });
@@ -350,7 +332,7 @@ describe('DataTable', () => {
     fireEvent.mouseUp(screen.getAllByTestId('dataGridColumnResizer')[0]);
 
     expect(mockDispatch).toBeCalledWith({
-      payload: { columnId: '@timestamp', id: 'timeline-test', width: NaN },
+      payload: { columnId: '@timestamp', id: 'table-test', width: NaN },
       type: 'x-pack/security_solution/data-table/UPDATE_COLUMN_WIDTH',
     });
   });

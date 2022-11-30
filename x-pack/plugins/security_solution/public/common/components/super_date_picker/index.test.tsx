@@ -84,23 +84,11 @@ describe('SIEM Super Date Picker', () => {
   describe('#SuperDatePicker', () => {
     const state: State = mockGlobalState;
     const { storage } = createSecuritySolutionStorageMock();
-    let store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-
-      kibanaObservable,
-      storage
-    );
+    let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
     beforeEach(() => {
       jest.clearAllMocks();
-      store = createStore(
-        state,
-        SUB_PLUGINS_REDUCER,
-
-        kibanaObservable,
-        storage
-      );
+      store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
       mockUseUiSetting$.mockImplementation((key, defaultValue) => {
         const useUiSetting$Mock = createUseUiSetting$Mock();
 

@@ -45,13 +45,7 @@ describe('ThreatIntelLinkPanel', () => {
 
   beforeEach(() => {
     const myState = cloneDeep(state);
-    store = createStore(
-      myState,
-      SUB_PLUGINS_REDUCER,
-
-      kibanaObservable,
-      storage
-    );
+    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   it('renders CtiEnabledModule when Threat Intel module is enabled', () => {

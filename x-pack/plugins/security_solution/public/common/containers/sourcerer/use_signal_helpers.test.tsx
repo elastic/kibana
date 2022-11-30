@@ -53,13 +53,7 @@ describe('useSignalHelpers', () => {
       },
     };
     const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-
-      kibanaObservable,
-      storage
-    );
+    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
         wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
@@ -89,13 +83,7 @@ describe('useSignalHelpers', () => {
       },
     };
     const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-
-      kibanaObservable,
-      storage
-    );
+    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
         wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,

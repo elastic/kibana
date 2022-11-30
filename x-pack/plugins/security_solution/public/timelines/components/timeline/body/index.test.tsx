@@ -253,13 +253,7 @@ describe('Body', () => {
         },
       };
 
-      const store = createStore(
-        state,
-        SUB_PLUGINS_REDUCER,
-
-        kibanaObservable,
-        storage
-      );
+      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
       const wrapper = await getWrapper(<StatefulBody {...props} />, { store });
 
       headersJustTimestamp.forEach(() => {
@@ -335,13 +329,7 @@ describe('Body', () => {
         },
       };
 
-      const store = createStore(
-        state,
-        SUB_PLUGINS_REDUCER,
-
-        kibanaObservable,
-        storage
-      );
+      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
       const Proxy = (proxyProps: Props) => <StatefulBody {...proxyProps} />;
 

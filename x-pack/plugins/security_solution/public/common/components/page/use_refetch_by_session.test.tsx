@@ -25,13 +25,7 @@ import type { Refetch } from '../../store/inputs/model';
 const state: State = mockGlobalState;
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(
-  state,
-  SUB_PLUGINS_REDUCER,
-
-  kibanaObservable,
-  storage
-);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders store={store}>{children}</TestProviders>

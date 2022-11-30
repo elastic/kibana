@@ -179,7 +179,6 @@ describe('StatefulTimeline', () => {
             },
           },
           SUB_PLUGINS_REDUCER,
-
           kibanaObservable,
           storage
         )}
@@ -217,7 +216,6 @@ describe('StatefulTimeline', () => {
             },
           },
           SUB_PLUGINS_REDUCER,
-
           kibanaObservable,
           storage
         )}
