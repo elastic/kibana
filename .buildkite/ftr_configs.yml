@@ -116,6 +116,9 @@ enabled:
   - test/server_integration/http/ssl/config.js
   - test/ui_capabilities/newsfeed_err/config.ts
   - x-pack/test/accessibility/config.ts
+  - x-pack/test/localization/config.ja-JP.ts
+  - x-pack/test/localization/config.fr-FR.ts
+  - x-pack/test/localization/config.zh-CN.ts
   - x-pack/test/alerting_api_integration/basic/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group1/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/config.ts
