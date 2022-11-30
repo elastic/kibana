@@ -49,6 +49,7 @@ import { useRefresh } from '../../routing/use_refresh';
 import { BUILT_IN_MODEL_TYPE } from '../../../../common/constants/trained_models';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
 import { TestTrainedModelFlyout } from './test_models';
+import { UploadTrainedModelFlyout } from './upload_model';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -117,6 +118,7 @@ export const ModelsList: FC<Props> = ({
     {}
   );
   const [showTestFlyout, setShowTestFlyout] = useState<string | null>(null);
+  const [showUploadFlyout, setShowUploadFlyout] = useState<boolean>(false);
 
   const isBuiltInModel = useCallback(
     (item: ModelItem) => item.tags.includes(BUILT_IN_MODEL_TAG),
@@ -497,6 +499,11 @@ export const ModelsList: FC<Props> = ({
                 Import trained model from Hugging Face
               </EuiButtonEmpty>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={() => setShowUploadFlyout(!showUploadFlyout)}>
+                Import trained model from Hugging Face
+              </EuiButtonEmpty>
+            </EuiFlexItem>
           </>
         )}
       </EuiFlexGroup>
@@ -540,6 +547,14 @@ export const ModelsList: FC<Props> = ({
           onClose={setShowTestFlyout.bind(null, null)}
         />
       )}
+      {showUploadFlyout ? (
+        <UploadTrainedModelFlyout
+          onClose={() => {
+            setShowUploadFlyout(false);
+            fetchModelsData();
+          }}
+        />
+      ) : null}
       {showUploadFlyout ? (
         <UploadTrainedModelFlyout
           onClose={() => {
