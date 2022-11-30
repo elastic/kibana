@@ -20,12 +20,12 @@ describe('DeleteAnalyticsCollectionApiLogic', () => {
   describe('DeleteAnalyticsCollectionsApiLogic', () => {
     it('calls the analytics collections list api', async () => {
       const promise = Promise.resolve();
-      const name = 'collection';
+      const id = 'collection';
       http.delete.mockReturnValue(promise);
-      const result = deleteAnalyticsCollection({ name });
+      const result = deleteAnalyticsCollection({ id });
       await nextTick();
       expect(http.delete).toHaveBeenCalledWith(
-        `/internal/enterprise_search/analytics/collections/${name}`
+        `/internal/enterprise_search/analytics/collections/${id}`
       );
       await expect(result).resolves.toEqual(undefined);
     });
