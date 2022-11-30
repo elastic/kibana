@@ -47,6 +47,22 @@ exports[`Error DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Error DEVICE_MODEL_NAME 1`] = `undefined`;
 
+exports[`Error ERROR 1`] = `
+Object {
+  "culprit": "handleOopsie",
+  "exception": Array [
+    Object {
+      "handled": false,
+      "message": "sonic boom",
+      "module": "errors",
+      "type": "errorString",
+    },
+  ],
+  "grouping_key": "grouping key",
+  "id": "error id",
+}
+`;
+
 exports[`Error ERROR_CULPRIT 1`] = `"handleOopsie"`;
 
 exports[`Error ERROR_EXC_HANDLED 1`] = `undefined`;
@@ -225,6 +241,8 @@ exports[`Error SPAN_TYPE 1`] = `undefined`;
 
 exports[`Error TIER 1`] = `undefined`;
 
+exports[`Error TIMESTAMP 1`] = `"Wed Nov 30 2022 09:42:21 GMT-0500 (Eastern Standard Time)"`;
+
 exports[`Error TRACE_ID 1`] = `"trace id"`;
 
 exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
@@ -305,6 +323,8 @@ exports[`Span CONTAINER_IMAGE 1`] = `undefined`;
 exports[`Span DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Span DEVICE_MODEL_NAME 1`] = `undefined`;
+
+exports[`Span ERROR 1`] = `undefined`;
 
 exports[`Span ERROR_CULPRIT 1`] = `undefined`;
 
@@ -476,6 +496,8 @@ exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
 exports[`Span TIER 1`] = `undefined`;
 
+exports[`Span TIMESTAMP 1`] = `"Wed Nov 30 2022 09:42:21 GMT-0500 (Eastern Standard Time)"`;
+
 exports[`Span TRACE_ID 1`] = `"trace id"`;
 
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
@@ -560,6 +582,8 @@ exports[`Transaction CONTAINER_IMAGE 1`] = `undefined`;
 exports[`Transaction DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Transaction DEVICE_MODEL_NAME 1`] = `undefined`;
+
+exports[`Transaction ERROR 1`] = `undefined`;
 
 exports[`Transaction ERROR_CULPRIT 1`] = `undefined`;
 
@@ -744,6 +768,8 @@ exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
 exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 
 exports[`Transaction TIER 1`] = `undefined`;
+
+exports[`Transaction TIMESTAMP 1`] = `"Wed Nov 30 2022 09:42:21 GMT-0500 (Eastern Standard Time)"`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
 

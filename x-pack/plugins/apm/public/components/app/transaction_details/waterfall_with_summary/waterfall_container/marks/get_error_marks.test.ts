@@ -23,6 +23,7 @@ describe('getErrorMarks', () => {
         skew: 5,
         doc: { error: { id: 1 }, service: { name: 'opbeans-java' } },
         color: 'red',
+        id: 1,
       } as unknown,
       {
         docType: 'error',
@@ -30,6 +31,7 @@ describe('getErrorMarks', () => {
         skew: 0,
         doc: { error: { id: 2 }, service: { name: 'opbeans-node' } },
         color: 'blue',
+        id: 2,
       } as unknown,
     ] as IWaterfallError[];
     expect(getErrorMarks(items)).toEqual([
@@ -60,6 +62,7 @@ describe('getErrorMarks', () => {
         skew: 5,
         doc: { error: { id: 1 }, service: { name: 'opbeans-java' } },
         color: '',
+        id: 1,
       } as unknown,
       {
         docType: 'error',
@@ -67,6 +70,7 @@ describe('getErrorMarks', () => {
         skew: 0,
         doc: { error: { id: 2 }, service: { name: 'opbeans-node' } },
         color: '',
+        id: 2,
       } as unknown,
     ] as IWaterfallError[];
     expect(getErrorMarks(items)).toEqual([
