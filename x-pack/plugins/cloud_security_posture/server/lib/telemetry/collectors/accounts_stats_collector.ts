@@ -6,15 +6,50 @@
  */
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
+import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { calculatePostureScore } from '../../../routes/compliance_dashboard/get_stats';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
-import { ResourceStats, ResourceType, StatsEntity, AccountsBucket } from './foo';
 import type { CspmAccountsStats } from './types';
 
-// TODO: define returned types
-// TODO: understand and reorganized Object.entries etc
 // TODO: test with multiple accounts
 // TODO: naming, naming, naming
+
+export interface Accounts {
+  accounts: {
+    buckets: AccountEntity[];
+  };
+}
+
+export interface AccountEntity {
+  key: string; // account_id
+  doc_count: number;
+  resource_type: {
+    buckets: ResourceType[];
+  };
+}
+
+export interface ResourceType {
+  key: string;
+  doc_count: number;
+  evaluation: { buckets: StatsEntity[] };
+}
+
+export interface StatsEntity {
+  key: string;
+  doc_count: number;
+  agents: Agents;
+}
+export interface Agents {
+  value: number;
+}
+
+export interface ResourceStats {
+  [key: string]: {
+    doc_count: number;
+    passed: number;
+    failed: number;
+  };
+}
 
 export const getAccountsStats = async (
   esClient: ElasticsearchClient,
@@ -36,13 +71,12 @@ export const getAccountsStats = async (
   }
 };
 
-const getClusterScore = (evaluationByResourceType: ResourceStats) => {
+const getClusterScore = (evaluationByResourceType: ResourceStats): number => {
   let passed = 0;
   let failed = 0;
-  console.log({ evaluationByResourceType });
   Object.entries(evaluationByResourceType).forEach(([key, value], index) => {
-    passed += value.passed ? value.passed : 0 + passed;
-    failed += value.failed ? value.failed : 0 + failed;
+    passed += value.passed ? value.passed : 0;
+    failed += value.failed ? value.failed : 0;
   });
   return calculatePostureScore(passed, failed);
 };
@@ -52,7 +86,7 @@ const getAccountStatsByResourceType = async (
   index: string
 ): Promise<CspmAccountsStats[]> => {
   let agents = 1;
-  const accountsStats = await esClient.search<unknown, AccountsBucket>(getAccountStatsQuery(index));
+  const accountsStats = await esClient.search<unknown, Accounts>(getAccountStatsQuery(index));
 
   const accountsBucket = accountsStats.aggregations?.accounts.buckets
     ? accountsStats.aggregations?.accounts.buckets
@@ -86,21 +120,19 @@ const getAccountStatsByResourceType = async (
       : {};
     const accountScore = getClusterScore(parsedEvaluationByResourceType);
 
-    const account1 = {
+    return {
       account_id: account.key,
       account_score: accountScore,
       latest_findings_doc_count: account.doc_count,
       resource_type: parsedEvaluationByResourceType,
       agents_count: agents,
     };
-
-    return account1;
   });
 
   return accounts;
 };
 
-const getAccountStatsQuery = (index: string) => ({
+const getAccountStatsQuery = (index: string): SearchRequest => ({
   index,
   query: {
     match_all: {},
@@ -114,7 +146,7 @@ const getAccountStatsQuery = (index: string) => ({
       aggs: {
         resource_type: {
           terms: {
-            field: 'resource.type',
+            field: 'resource.sub_type',
             order: {
               _count: 'desc',
             },
