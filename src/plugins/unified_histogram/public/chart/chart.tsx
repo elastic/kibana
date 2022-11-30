@@ -151,6 +151,7 @@ export function Chart({
 
   const {
     resultCountCss,
+    resultCountInnerCss,
     resultCountTitleCss,
     resultCountToggleCss,
     histogramCss,
@@ -191,7 +192,12 @@ export function Chart({
       responsive={false}
     >
       <EuiFlexItem grow={false} css={resultCountCss}>
-        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          gutterSize="none"
+          responsive={false}
+          css={resultCountInnerCss}
+        >
           <EuiFlexItem
             grow={false}
             className="eui-textTruncate eui-textNoWrap"

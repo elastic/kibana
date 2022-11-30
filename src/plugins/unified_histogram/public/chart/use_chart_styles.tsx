@@ -16,12 +16,22 @@ export const useChartStyles = (chartVisible: boolean) => {
       ${euiTheme.size.s};
     min-height: ${euiTheme.base * 2.5}px;
   `;
+  const resultCountInnerCss = css`
+    ${useEuiBreakpoint(['xs', 's'])} {
+      align-items: center;
+    }
+  `;
   const resultCountTitleCss = css`
+    flex-basis: auto;
+
     ${useEuiBreakpoint(['xs', 's'])} {
       margin-bottom: 0 !important;
     }
   `;
   const resultCountToggleCss = css`
+    flex-basis: auto;
+    min-width: 0;
+
     ${useEuiBreakpoint(['xs', 's'])} {
       align-items: flex-end;
     }
@@ -42,6 +52,7 @@ export const useChartStyles = (chartVisible: boolean) => {
     width: 100%;
   `;
   const breakdownFieldSelectorItemCss = css`
+    min-width: 0;
     align-items: flex-end;
     padding-left: ${euiTheme.size.s};
   `;
@@ -53,6 +64,7 @@ export const useChartStyles = (chartVisible: boolean) => {
 
   return {
     resultCountCss,
+    resultCountInnerCss,
     resultCountTitleCss,
     resultCountToggleCss,
     histogramCss,
