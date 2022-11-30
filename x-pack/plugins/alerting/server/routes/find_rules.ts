@@ -8,16 +8,11 @@
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
+import snakecaseKeys from 'snakecase-keys';
 import { ILicenseState } from '../lib';
-import { FindOptions, FindResult } from '../rules_client';
+import { FindOptions } from '../rules_client';
+import { RewriteRequestCase, verifyAccessAndContext } from './lib';
 import {
-  RewriteRequestCase,
-  RewriteResponseCase,
-  verifyAccessAndContext,
-  rewriteRule,
-} from './lib';
-import {
-  RuleTypeParams,
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
@@ -66,17 +61,6 @@ const rewriteQueryReq: RewriteRequestCase<FindOptions> = ({
   ...(hasReference ? { hasReference } : {}),
   ...(searchFields ? { searchFields } : {}),
 });
-const rewriteBodyRes: RewriteResponseCase<FindResult<RuleTypeParams>> = ({
-  perPage,
-  data,
-  ...restOfResult
-}) => {
-  return {
-    ...restOfResult,
-    per_page: perPage,
-    data: data.map(rewriteRule),
-  };
-};
 
 interface BuildFindRulesRouteParams {
   licenseState: ILicenseState;
@@ -131,7 +115,7 @@ const buildFindRulesRoute = ({
           includeSnoozeData: true,
         });
         return res.ok({
-          body: rewriteBodyRes(findResult),
+          body: snakecaseKeys(findResult),
         });
       })
     )

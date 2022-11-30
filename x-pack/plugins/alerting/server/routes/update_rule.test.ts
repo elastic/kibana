@@ -65,7 +65,7 @@ describe('updateRuleRoute', () => {
     ],
   };
 
-  const updateResult: AsApiContract<PartialRule<{ otherField: boolean }>> = {
+  const updateResult: AsApiContract<PartialRule<{ other_field: boolean }>> = {
     ...updateRequest,
     id: mockedAlert.id,
     updated_at: mockedAlert.updatedAt,
@@ -75,6 +75,7 @@ describe('updateRuleRoute', () => {
       ...rest,
       connector_type_id: actionTypeId,
     })),
+    params: { other_field: false },
   };
 
   it('updates a rule with proper parameters', async () => {

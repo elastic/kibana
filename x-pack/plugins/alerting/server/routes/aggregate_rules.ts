@@ -8,9 +8,10 @@
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import snakecaseKeys from 'snakecase-keys';
 import { ILicenseState } from '../lib';
-import { AggregateResult, AggregateOptions } from '../rules_client';
-import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
+import { AggregateOptions } from '../rules_client';
+import { RewriteRequestCase, verifyAccessAndContext, alertToRule } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { trackLegacyTerminology } from './lib/track_legacy_terminology';
 
@@ -45,23 +46,6 @@ const rewriteQueryReq: RewriteRequestCase<AggregateOptions> = ({
   ...(hasReference ? { hasReference } : {}),
   ...(searchFields ? { searchFields } : {}),
 });
-const rewriteBodyRes: RewriteResponseCase<AggregateResult> = ({
-  alertExecutionStatus,
-  ruleLastRunOutcome,
-  ruleEnabledStatus,
-  ruleMutedStatus,
-  ruleSnoozedStatus,
-  ruleTags,
-  ...rest
-}) => ({
-  ...rest,
-  rule_execution_status: alertExecutionStatus,
-  rule_last_run_outcome: ruleLastRunOutcome,
-  rule_enabled_status: ruleEnabledStatus,
-  rule_muted_status: ruleMutedStatus,
-  rule_snoozed_status: ruleSnoozedStatus,
-  rule_tags: ruleTags,
-});
 
 export const aggregateRulesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -88,7 +72,7 @@ export const aggregateRulesRoute = (
         );
         const aggregateResult = await rulesClient.aggregate({ options });
         return res.ok({
-          body: rewriteBodyRes(aggregateResult),
+          body: snakecaseKeys(alertToRule(aggregateResult)),
         });
       })
     )

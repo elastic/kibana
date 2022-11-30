@@ -77,9 +77,7 @@ describe('getRuleAlertSummaryRoute', () => {
     expect(rulesClient.getAlertSummary.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "dateStart": undefined,
           "id": "1",
-          "numberOfExecutions": undefined,
         },
       ]
     `);

@@ -6,42 +6,10 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import snakecaseKeys from 'snakecase-keys';
 import { ILicenseState } from '../lib';
-import { RegistryAlertTypeWithAuth } from '../authorization';
-import { RewriteResponseCase, verifyAccessAndContext } from './lib';
+import { verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
-
-const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (results) => {
-  return results.map(
-    ({
-      enabledInLicense,
-      recoveryActionGroup,
-      actionGroups,
-      defaultActionGroupId,
-      minimumLicenseRequired,
-      isExportable,
-      ruleTaskTimeout,
-      actionVariables,
-      authorizedConsumers,
-      defaultScheduleInterval,
-      doesSetRecoveryContext,
-      ...rest
-    }) => ({
-      ...rest,
-      enabled_in_license: enabledInLicense,
-      recovery_action_group: recoveryActionGroup,
-      action_groups: actionGroups,
-      default_action_group_id: defaultActionGroupId,
-      minimum_license_required: minimumLicenseRequired,
-      is_exportable: isExportable,
-      rule_task_timeout: ruleTaskTimeout,
-      action_variables: actionVariables,
-      authorized_consumers: authorizedConsumers,
-      default_schedule_interval: defaultScheduleInterval,
-      does_set_recovery_context: doesSetRecoveryContext,
-    })
-  );
-};
 
 export const ruleTypesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -57,7 +25,7 @@ export const ruleTypesRoute = (
         const rulesClient = (await context.alerting).getRulesClient();
         const ruleTypes = Array.from(await rulesClient.listAlertTypes());
         return res.ok({
-          body: rewriteBodyRes(ruleTypes),
+          body: snakecaseKeys(ruleTypes),
         });
       })
     )

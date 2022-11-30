@@ -6,9 +6,9 @@
  */
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import camelcaseKeys from 'camelcase-keys';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { RewriteRequestCase, verifyAccessAndContext } from './lib';
-import { GetRuleExecutionKPIParams } from '../rules_client';
+import { verifyAccessAndContext } from './lib';
 import { ILicenseState } from '../lib';
 
 const paramSchema = schema.object({
@@ -19,16 +19,6 @@ const querySchema = schema.object({
   date_start: schema.string(),
   date_end: schema.maybe(schema.string()),
   filter: schema.maybe(schema.string()),
-});
-
-const rewriteReq: RewriteRequestCase<GetRuleExecutionKPIParams> = ({
-  date_start: dateStart,
-  date_end: dateEnd,
-  ...rest
-}) => ({
-  ...rest,
-  dateStart,
-  dateEnd,
 });
 
 export const getRuleExecutionKPIRoute = (
@@ -48,7 +38,7 @@ export const getRuleExecutionKPIRoute = (
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         return res.ok({
-          body: await rulesClient.getRuleExecutionKPI(rewriteReq({ id, ...req.query })),
+          body: await rulesClient.getRuleExecutionKPI(camelcaseKeys({ id, ...req.query })),
         });
       })
     )

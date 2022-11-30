@@ -8,8 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 
+import snakecaseKeys from 'snakecase-keys';
 import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '../lib';
-import { verifyAccessAndContext, rewriteRule, handleDisabledApiKeysError } from './lib';
+import { verifyAccessAndContext, handleDisabledApiKeysError, alertToRule } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { snoozeScheduleSchema } from './snooze_rule';
 import { scheduleIdsSchema } from './unsnooze_rule';
@@ -108,7 +109,10 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
               operations,
             });
             return res.ok({
-              body: { ...bulkEditResults, rules: bulkEditResults.rules.map(rewriteRule) },
+              body: {
+                ...bulkEditResults,
+                rules: bulkEditResults.rules.map((rule) => snakecaseKeys(alertToRule(rule))),
+              },
             });
           } catch (e) {
             if (e instanceof RuleTypeDisabledError) {

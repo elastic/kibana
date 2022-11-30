@@ -6,24 +6,21 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import camelcaseKeys from 'camelcase-keys';
+import snakecaseKeys from 'snakecase-keys';
+import { alertToRule, ruleToAlert } from './lib';
 import { validateDurationSchema, RuleTypeDisabledError } from '../lib';
-import { CreateOptions } from '../rules_client';
 import {
-  RewriteRequestCase,
-  RewriteResponseCase,
-  rewriteActions,
   handleDisabledApiKeysError,
   verifyAccessAndContext,
   countUsageOfPredefinedIds,
   actionsSchema,
-  rewriteRuleLastRun,
 } from './lib';
 import {
   SanitizedRule,
   validateNotifyWhenType,
   RuleTypeParams,
   BASE_ALERTING_API_PATH,
-  RuleNotifyWhenType,
 } from '../types';
 import { RouteOptions } from '.';
 
@@ -40,61 +37,6 @@ export const bodySchema = schema.object({
   }),
   actions: actionsSchema,
   notify_when: schema.maybe(schema.string({ validate: validateNotifyWhenType })),
-});
-
-const rewriteBodyReq: RewriteRequestCase<CreateOptions<RuleTypeParams>['data']> = ({
-  rule_type_id: alertTypeId,
-  notify_when: notifyWhen,
-  ...rest
-}) => ({
-  ...rest,
-  alertTypeId,
-  notifyWhen,
-});
-
-const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
-  actions,
-  alertTypeId,
-  scheduledTaskId,
-  createdBy,
-  updatedBy,
-  createdAt,
-  updatedAt,
-  apiKeyOwner,
-  notifyWhen,
-  muteAll,
-  mutedInstanceIds,
-  snoozeSchedule,
-  lastRun,
-  nextRun,
-  executionStatus: { lastExecutionDate, lastDuration, ...executionStatus },
-  ...rest
-}) => ({
-  ...rest,
-  rule_type_id: alertTypeId,
-  scheduled_task_id: scheduledTaskId,
-  snooze_schedule: snoozeSchedule,
-  created_by: createdBy,
-  updated_by: updatedBy,
-  created_at: createdAt,
-  updated_at: updatedAt,
-  api_key_owner: apiKeyOwner,
-  notify_when: notifyWhen,
-  mute_all: muteAll,
-  muted_alert_ids: mutedInstanceIds,
-  execution_status: {
-    ...executionStatus,
-    last_execution_date: lastExecutionDate,
-    last_duration: lastDuration,
-  },
-  actions: actions.map(({ group, id, actionTypeId, params }) => ({
-    group,
-    id,
-    params,
-    connector_type_id: actionTypeId,
-  })),
-  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
-  ...(nextRun ? { next_run: nextRun } : {}),
 });
 
 export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
@@ -126,15 +68,12 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           try {
             const createdRule: SanitizedRule<RuleTypeParams> =
               await rulesClient.create<RuleTypeParams>({
-                data: rewriteBodyReq({
-                  ...rule,
-                  actions: rewriteActions(rule.actions),
-                  notify_when: rule.notify_when as RuleNotifyWhenType,
-                }),
+                // @ts-ignore
+                data: camelcaseKeys(ruleToAlert(rule)),
                 options: { id: params?.id },
               });
             return res.ok({
-              body: rewriteBodyRes(createdRule),
+              body: snakecaseKeys(alertToRule(createdRule)),
             });
           } catch (e) {
             if (e instanceof RuleTypeDisabledError) {

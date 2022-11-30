@@ -7,9 +7,9 @@
 
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import camelcaseKeys from 'camelcase-keys';
 import { ILicenseState } from '../lib';
-import { GetExecutionLogByIdParams } from '../rules_client';
-import { RewriteRequestCase, verifyAccessAndContext } from './lib';
+import { verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
 const paramSchema = schema.object({
@@ -44,18 +44,6 @@ const querySchema = schema.object({
   sort: sortFieldsSchema,
 });
 
-const rewriteReq: RewriteRequestCase<GetExecutionLogByIdParams> = ({
-  date_start: dateStart,
-  date_end: dateEnd,
-  per_page: perPage,
-  ...rest
-}) => ({
-  ...rest,
-  dateStart,
-  dateEnd,
-  perPage,
-});
-
 export const getRuleExecutionLogRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
@@ -73,7 +61,7 @@ export const getRuleExecutionLogRoute = (
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         return res.ok({
-          body: await rulesClient.getExecutionLogForRule(rewriteReq({ id, ...req.query })),
+          body: await rulesClient.getExecutionLogForRule(camelcaseKeys({ id, ...req.query })),
         });
       })
     )

@@ -7,14 +7,11 @@
 
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import camelcaseKeys from 'camelcase-keys';
+import snakecaseKeys from 'snakecase-keys';
 import { ILicenseState } from '../lib';
-import { GetAlertSummaryParams } from '../rules_client';
-import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
-import {
-  AlertingRequestHandlerContext,
-  INTERNAL_BASE_ALERTING_API_PATH,
-  AlertSummary,
-} from '../types';
+import { alertToRule, verifyAccessAndContext } from './lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -23,39 +20,6 @@ const paramSchema = schema.object({
 const querySchema = schema.object({
   date_start: schema.maybe(schema.string()),
   number_of_executions: schema.maybe(schema.number()),
-});
-
-const rewriteReq: RewriteRequestCase<GetAlertSummaryParams> = ({
-  date_start: dateStart,
-  number_of_executions: numberOfExecutions,
-  ...rest
-}) => ({
-  ...rest,
-  numberOfExecutions,
-  dateStart,
-});
-
-const rewriteBodyRes: RewriteResponseCase<AlertSummary> = ({
-  ruleTypeId,
-  muteAll,
-  statusStartDate,
-  statusEndDate,
-  errorMessages,
-  lastRun,
-  executionDuration: { valuesWithTimestamp, ...executionDuration },
-  ...rest
-}) => ({
-  ...rest,
-  rule_type_id: ruleTypeId,
-  mute_all: muteAll,
-  status_start_date: statusStartDate,
-  status_end_date: statusEndDate,
-  error_messages: errorMessages,
-  last_run: lastRun,
-  execution_duration: {
-    ...executionDuration,
-    values_with_timestamp: valuesWithTimestamp,
-  },
 });
 
 export const getRuleAlertSummaryRoute = (
@@ -74,8 +38,8 @@ export const getRuleAlertSummaryRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
-        const summary = await rulesClient.getAlertSummary(rewriteReq({ id, ...req.query }));
-        return res.ok({ body: rewriteBodyRes(summary) });
+        const summary = await rulesClient.getAlertSummary(camelcaseKeys({ id, ...req.query }));
+        return res.ok({ body: snakecaseKeys(alertToRule(summary)) });
       })
     )
   );

@@ -7,9 +7,9 @@
 
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import camelcaseKeys from 'camelcase-keys';
 import { ILicenseState } from '../lib';
-import { GetActionErrorLogByIdParams } from '../rules_client';
-import { RewriteRequestCase, verifyAccessAndContext } from './lib';
+import { verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
 const paramSchema = schema.object({
@@ -38,20 +38,6 @@ const querySchema = schema.object({
   with_auth: schema.maybe(schema.boolean()),
 });
 
-const rewriteReq: RewriteRequestCase<GetActionErrorLogByIdParams> = ({
-  date_start: dateStart,
-  date_end: dateEnd,
-  per_page: perPage,
-  namespace,
-  ...rest
-}) => ({
-  ...rest,
-  namespace,
-  dateStart,
-  dateEnd,
-  perPage,
-});
-
 export const getActionErrorLogRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
@@ -69,7 +55,7 @@ export const getActionErrorLogRoute = (
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         const withAuth = req.query.with_auth;
-        const rewrittenReq = rewriteReq({ id, ...req.query });
+        const rewrittenReq = camelcaseKeys({ id, ...req.query });
         const getter = (
           withAuth ? rulesClient.getActionErrorLogWithAuth : rulesClient.getActionErrorLog
         ).bind(rulesClient);

@@ -7,22 +7,15 @@
 
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import camelcaseKeys from 'camelcase-keys';
+import { ruleToAlertParams } from './lib/rule_alert_rename';
 import { ILicenseState, RuleTypeDisabledError } from '../lib';
-import { MuteOptions } from '../rules_client';
-import { RewriteRequestCase, verifyAccessAndContext } from './lib';
+import { verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
 
 const paramSchema = schema.object({
   rule_id: schema.string(),
   alert_id: schema.string(),
-});
-
-const rewriteParamsReq: RewriteRequestCase<MuteOptions> = ({
-  rule_id: alertId,
-  alert_id: alertInstanceId,
-}) => ({
-  alertId,
-  alertInstanceId,
 });
 
 export const unmuteAlertRoute = (
@@ -39,7 +32,7 @@ export const unmuteAlertRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const params = rewriteParamsReq(req.params);
+        const params = camelcaseKeys(ruleToAlertParams(req.params));
         try {
           await rulesClient.unmuteInstance(params);
           return res.noContent();
