@@ -428,6 +428,42 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      it('should not update a rule if trying to add default rule exception list which attached to another', async () => {
+        const ruleWithException = await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          exceptions_list: [
+            {
+              id: '2',
+              list_id: '123',
+              namespace_type: 'single',
+              type: ExceptionListTypeEnum.RULE_DEFAULT,
+            },
+          ],
+        });
+        await createRule(supertest, log, getSimpleRule('rule-2'));
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...getSimpleRule('rule-2'),
+            exceptions_list: [
+              {
+                id: '2',
+                list_id: '123',
+                namespace_type: 'single',
+                type: ExceptionListTypeEnum.RULE_DEFAULT,
+              },
+            ],
+          })
+          .expect(409);
+
+        expect(body).to.eql({
+          message: `default exception list already exists in rule(s): ${ruleWithException.id}`,
+          status_code: 409,
+        });
+      });
+
       describe('threshold validation', () => {
         it('should result in 400 error if no threshold-specific fields are provided', async () => {
           const existingRule = getThresholdRuleForSignalTesting(['*']);
