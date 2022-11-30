@@ -231,7 +231,7 @@ describe('UserActionMarkdown ', () => {
       });
     });
 
-    it('Cancel button click calls storage remove', async () => {
+    it('Cancel button click clears session storage', async () => {
       const wrapper = mount(
         <TestProviders>
           <UserActionMarkdown {...defaultProps} />

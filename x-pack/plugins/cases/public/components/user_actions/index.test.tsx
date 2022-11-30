@@ -386,7 +386,7 @@ describe(`UserActions`, () => {
     });
   });
 
-  it('it should persist the draft comment while old comment is updated', async () => {
+  it('it should persist the draft of new comment while existing old comment is updated', async () => {
     const editedComment = 'it is an edited comment';
     const newComment = 'another cool comment';
     const ourActions = [getUserAction('comment', Actions.create)];
@@ -454,7 +454,7 @@ describe(`UserActions`, () => {
     expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe(newComment);
   });
 
-  it('it should persist the draft comment while description is updated', async () => {
+  it('it should persist the draft of new comment while description is updated', async () => {
     const newComment = 'another cool comment';
     const wrapper = mount(
       <TestProviders>
