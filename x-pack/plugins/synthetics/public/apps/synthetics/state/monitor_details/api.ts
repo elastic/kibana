@@ -15,12 +15,6 @@ import {
 } from '../../../../../common/runtime_types';
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
-export interface QueryParams {
-  monitorId: string;
-  dateStart: string;
-  dateEnd: string;
-}
-
 export const fetchMonitorLastRun = async ({
   monitorId,
   locationId,

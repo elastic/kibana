@@ -206,14 +206,22 @@ export interface BulkActionAggregatedError {
   rules: Array<{ id: string; name?: string }>;
 }
 
+export interface BulkActionAttributes {
+  summary: BulkActionSummary;
+  results: BulkActionResult;
+  errors?: BulkActionAggregatedError[];
+}
+
 export interface BulkActionResponse {
   success?: boolean;
   rules_count?: number;
-  attributes: {
-    summary: BulkActionSummary;
-    results: BulkActionResult;
-    errors?: BulkActionAggregatedError[];
-  };
+  attributes: BulkActionAttributes;
+}
+
+export interface BulkActionErrorResponse {
+  message: string;
+  status_code: number;
+  attributes?: BulkActionAttributes;
 }
 
 export type QueryOrIds = { query: string; ids?: undefined } | { query?: undefined; ids: string[] };
