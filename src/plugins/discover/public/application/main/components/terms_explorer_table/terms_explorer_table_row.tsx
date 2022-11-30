@@ -15,18 +15,21 @@ import {
   useEuiTheme,
   EuiTableBody,
   EuiTable,
+  EuiTableHeader,
+  EuiTableHeaderCell,
 } from '@elastic/eui';
 import { TestColumnType, TestRowType } from './terms_explorer_table';
 
 interface Props {
   row: TestRowType;
   columns: TestColumnType[];
+  expandedColumnName?: string;
 }
 
-export const TermsExplorerTableRow = ({ row, columns }: Props) => {
+export const TermsExplorerTableRow = ({ row, columns, expandedColumnName }: Props) => {
   const { euiTheme } = useEuiTheme();
 
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [expandedColumn, setExpandedColumn] = useState(expandedColumnName);
 
   const expandedRowStyle = useMemo(
     () => css`
@@ -48,8 +51,20 @@ export const TermsExplorerTableRow = ({ row, columns }: Props) => {
       }
 
       return (
-        <EuiTableRowCell truncateText={column.truncateText} key={column.id} align={column.align}>
+        <EuiTableRowCell
+          truncateText={column.truncateText}
+          key={column.id}
+          align={column.align}
+          isExpander={true}
+        >
           {child}
+          <EuiButtonEmpty
+            iconType={column.field === expandedColumn ? 'arrowUp' : 'arrowDown'}
+            aria-expanded={Boolean(expandedColumn)}
+            onClick={() =>
+              setExpandedColumn(column.field === expandedColumn ? undefined : column.field)
+            }
+          />
         </EuiTableRowCell>
       );
     });
@@ -57,8 +72,17 @@ export const TermsExplorerTableRow = ({ row, columns }: Props) => {
 
   const ExpandedRow = () => {
     return (
-      <EuiTableRowCell colSpan={columns.length + 1} css={expandedRowStyle}>
-        <EuiTable>
+      <EuiTableRowCell colSpan={columns.length} css={expandedRowStyle}>
+        <EuiTable title="test">
+          <EuiTableHeader>
+            <EuiTableHeaderCell colSpan={columns.length}>
+              {`Expanded on ${
+                expandedColumn
+                  ? `${expandedColumn} with value of ${row[expandedColumn]}`
+                  : 'nothing'
+              }`}
+            </EuiTableHeaderCell>
+          </EuiTableHeader>
           <EuiTableBody>
             <TermsExplorerTableRow
               row={row}
@@ -75,18 +99,9 @@ export const TermsExplorerTableRow = ({ row, columns }: Props) => {
 
   return (
     <>
-      <EuiTableRow>
-        {renderCells()}
-        <EuiTableRowCell isExpander textOnly={false}>
-          <EuiButtonEmpty
-            iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
-            aria-expanded={isExpanded}
-            onClick={() => setIsExpanded(!isExpanded)}
-          />
-        </EuiTableRowCell>
-      </EuiTableRow>
-      <EuiTableRow isExpandable isExpandedRow={isExpanded}>
-        {isExpanded && <ExpandedRow />}
+      <EuiTableRow>{renderCells()}</EuiTableRow>
+      <EuiTableRow isExpandable isExpandedRow={Boolean(expandedColumn)}>
+        {Boolean(expandedColumn) && <ExpandedRow />}
       </EuiTableRow>
     </>
   );
