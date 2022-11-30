@@ -193,9 +193,10 @@ Dashboard::
 * Adds "Exists" functionality to options list {kibana-pull}143762[#143762]
 * Adds `excludes` toggle to options list {kibana-pull}142780[#142780]
 * Adds support for IP field to options list {kibana-pull}142507[#142507]
+* Adds option to disable cursor sync on dashboards {kibana-pull}143355[#143355]
 
 Discover::
-* Adds the ability to edit ad-hoc data views without permissions {kibana-pull}142723[#142723]
+* Adds the ability to edit ad hoc data views without permissions {kibana-pull}142723[#142723]
 * Enables `esQuery` alert for adhoc data views {kibana-pull}140885[#140885]
 
 Elastic Security::
@@ -243,6 +244,7 @@ Lens & Visualizations::
 * Adds the ability to open aggregation-based pie visualizations in *Lens* {kibana-pull}140879[#140879]
 * Adds the ability to open *TSVB* metric visualizations in *Lens* {kibana-pull}140878[#140878]
 * Adds the ability to open aggregation-based table visualizations in *Lens* {kibana-pull}140791[#140791]
+* Adds the ability to allow date functions in formula {kibana-pull}143632[#143632]
 
 Machine Learning::
 * Data Frame Analytics: Highlight filtered data in scatterplot charts {kibana-pull}144871[#144871]
@@ -269,9 +271,7 @@ Observability::
 * Adds histogram support for avg, max, min, sum and percentiles {kibana-pull}139770[#139770]
 
 Platform::
-* Allow date functions in formula {kibana-pull}143632[#143632]
-* Adds option to disable cursor sync on dashboards {kibana-pull}143355[#143355]
-* Adds maxIdleSockets and idleSocketTimeout to Elasticsearch config {kibana-pull}142019[#142019]
+Adds maxIdleSockets and idleSocketTimeout to Elasticsearch config {kibana-pull}142019[#142019]
 
 Security::
 * Adds a read-only mode to the User management screen for users with `read_security` cluster privilege {kibana-pull}143438[#143438]
@@ -305,7 +305,7 @@ APM::
 * Fixes metadata API environment filter {kibana-pull}144472[#144472]
 
 Dashboard::
-* Skip First Reload {kibana-pull}142868[#142868]
+* The extra reload caused by Controls is now skipped {kibana-pull}142868[#142868]
 * Modifies the state shared in dashboard permalinks {kibana-pull}141985[#141985]
 
 Discover::
