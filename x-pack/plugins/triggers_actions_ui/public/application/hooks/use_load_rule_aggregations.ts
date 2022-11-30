@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useState, useCallback, useMemo } from 'react';
 import { RuleExecutionStatusValues, RuleLastRunOutcomeValues } from '@kbn/alerting-plugin/common';
+import { useQuery } from '@tanstack/react-query';
 import type { LoadRuleAggregationsProps } from '../lib/rule_api';
 import { loadRuleAggregationsWithKueryFilter } from '../lib/rule_api/aggregate_kuery_filter';
 import { useKibana } from '../../common/lib/kibana';
@@ -38,70 +38,54 @@ export function useLoadRuleAggregations({
 }: UseLoadRuleAggregationsProps) {
   const { http } = useKibana().services;
 
-  const [rulesStatusesTotal, setRulesStatusesTotal] = useState<Record<string, number>>(
-    initializeAggregationResult(RuleExecutionStatusValues)
-  );
+  const initialData = () => ({
+    ruleExecutionStatus: initializeAggregationResult(RuleExecutionStatusValues),
+    ruleLastRunOutcome: initializeAggregationResult(RuleLastRunOutcomeValues),
+  });
 
-  const [rulesLastRunOutcomesTotal, setRulesLastRunOutcomesTotal] = useState<
-    Record<string, number>
-  >(initializeAggregationResult(RuleLastRunOutcomeValues));
+  const internalLoadRuleAggregations = () => {
+    return loadRuleAggregationsWithKueryFilter({
+      http,
+      searchText,
+      typesFilter,
+      actionTypesFilter,
+      ruleExecutionStatusesFilter,
+      ruleLastRunOutcomesFilter,
+      ruleStatusesFilter,
+      tagsFilter,
+    });
+  };
 
-  const internalLoadRuleAggregations = useCallback(async () => {
-    try {
-      const rulesAggs = await loadRuleAggregationsWithKueryFilter({
-        http,
-        searchText,
-        typesFilter,
-        actionTypesFilter,
-        ruleExecutionStatusesFilter,
-        ruleLastRunOutcomesFilter,
-        ruleStatusesFilter,
-        tagsFilter,
-      });
-      if (rulesAggs?.ruleExecutionStatus) {
-        setRulesStatusesTotal(rulesAggs.ruleExecutionStatus);
-      }
-      if (rulesAggs?.ruleLastRunOutcome) {
-        setRulesLastRunOutcomesTotal(rulesAggs.ruleLastRunOutcome);
-      }
-    } catch (e) {
-      onError(
-        i18n.translate(
-          'xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleStatusInfoMessage',
-          {
-            defaultMessage: 'Unable to load rule status info',
-          }
-        )
-      );
-    }
-  }, [
-    http,
-    searchText,
-    typesFilter,
-    actionTypesFilter,
-    ruleExecutionStatusesFilter,
-    ruleLastRunOutcomesFilter,
-    ruleStatusesFilter,
-    tagsFilter,
-    onError,
-    setRulesStatusesTotal,
-    setRulesLastRunOutcomesTotal,
-  ]);
+  const onErrorFn = () => {
+    onError(
+      i18n.translate(
+        'xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleStatusInfoMessage',
+        {
+          defaultMessage: 'Unable to load rule status info',
+        }
+      )
+    );
+  };
 
-  return useMemo(
-    () => ({
-      loadRuleAggregations: internalLoadRuleAggregations,
-      rulesStatusesTotal,
-      rulesLastRunOutcomesTotal,
-      setRulesStatusesTotal,
-      setRulesLastRunOutcomesTotal,
-    }),
-    [
-      internalLoadRuleAggregations,
-      rulesStatusesTotal,
-      rulesLastRunOutcomesTotal,
-      setRulesStatusesTotal,
-      setRulesLastRunOutcomesTotal,
-    ]
-  );
+  const { data, refetch } = useQuery({
+    queryKey: [
+      'loadRuleAggregationsWithKueryFilter',
+      typesFilter,
+      searchText,
+      actionTypesFilter,
+      ruleExecutionStatusesFilter,
+      ruleLastRunOutcomesFilter,
+      ruleStatusesFilter,
+      tagsFilter,
+    ],
+    queryFn: internalLoadRuleAggregations,
+    initialData,
+    onError: onErrorFn,
+  });
+
+  return {
+    loadRuleAggregations: refetch,
+    rulesStatusesTotal: data?.ruleExecutionStatus ?? {},
+    rulesLastRunOutcomesTotal: data?.ruleLastRunOutcome ?? {},
+  };
 }

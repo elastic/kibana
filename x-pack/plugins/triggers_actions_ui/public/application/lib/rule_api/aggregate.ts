@@ -21,6 +21,7 @@ export async function loadRuleTags({ http }: { http: HttpSetup }): Promise<RuleT
   const res = await http.get<AsApiContract<RuleAggregations>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`
   );
+
   return rewriteTagsBodyRes(res);
 }
 

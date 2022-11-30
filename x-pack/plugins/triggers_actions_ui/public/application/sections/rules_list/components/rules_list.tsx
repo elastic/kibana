@@ -285,7 +285,7 @@ export const RulesList = ({
     return [typesFilter, false];
   }, [typesFilter, authorizedRuleTypes]);
 
-  const { rulesState, setRulesState, loadRules, noData, initialLoad } = useLoadRules({
+  const { rulesState, loadRules, noData, initialLoad } = useLoadRules({
     page,
     searchText,
     typesFilter: rulesTypesFilter,
@@ -360,9 +360,10 @@ export const RulesList = ({
     });
   }, [ruleTypesState, rulesState.data, canExecuteActions, config]);
 
+  // TODO: Revisit this logic, a prop to call a callback? mmmmhh..
   useEffect(() => {
     refreshRules();
-  }, [refreshRules, refresh, percentileOptions]);
+  }, [refresh, percentileOptions]);
 
   useEffect(() => {
     (async () => {
@@ -1111,9 +1112,10 @@ export const RulesList = ({
         idsToUpdateFilter={rulesToUpdateAPIKeyFilter}
         numberOfSelectedRules={numberOfSelectedItems}
         apiUpdateApiKeyCall={bulkUpdateAPIKey}
-        setIsLoadingState={(isLoading: boolean) => {
+        setIsLoadingState={async (isLoading: boolean) => {
           setIsUpdatingRuleAPIKeys(isLoading);
-          setRulesState({ ...rulesState, isLoading });
+          // TODO: Revisit this logic
+          await refreshRules();
         }}
         onUpdated={async () => {
           clearRulesToUpdateAPIKey();
