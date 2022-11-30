@@ -179,14 +179,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       }
     },
   });
-  const { onOpenTimeline, ...ruleFromTimelineData } = useRuleFromTimeline();
-
+  const { handleReset, onOpenTimeline, ...ruleFromTimelineData } = useRuleFromTimeline();
   useEffect(() => {
     if (ruleFromTimelineData.updated) {
       setFieldValue('index', ruleFromTimelineData.index);
       setFieldValue('queryBar', ruleFromTimelineData.queryBar);
+      handleReset();
     }
-  }, [ruleFromTimelineData, setFieldValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ruleFromTimelineData.updated]);
 
   const {
     index: formIndex,

@@ -6,23 +6,17 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   convertKueryToElasticSearchQuery,
   updateIsLoading as dispatchUpdateIsLoading,
 } from '@kbn/timelines-plugin/public';
 import { useDispatch } from 'react-redux';
-import { EuiLink } from '@elastic/eui';
 
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { TimelineModel } from '../../../..';
 import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
-import { getTimelineUrl, useFormatUrl } from '../../../../common/components/link_to';
-import { SecurityPageName } from '../../../../../common/constants';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { sourcererActions } from '../../../../common/store/sourcerer';
-import { sourcererSelectors } from '../../../../common/store';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import {
   dispatchUpdateTimeline,
   queryTimelineById,
@@ -31,7 +25,6 @@ import { useGetInitialUrlParamValue } from '../../../../common/utils/global_quer
 import { buildGlobalQuery } from '../../../../timelines/components/timeline/helpers';
 import { getDataProviderFilter } from '../../../../timelines/components/timeline/query_bar';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import * as i18n from './translations';
 
 export const RULE_FROM_TIMELINE_URL_PARAM = 'createRuleFromTimeline';
 
@@ -39,6 +32,8 @@ interface RuleFromTimeline {
   index: string[];
   loading: boolean;
   onOpenTimeline: (timeline: TimelineModel) => void;
+  // callback to reset the updated state after update has happened
+  handleReset: () => void;
   queryBar: FieldValueQueryBar;
   updated: boolean;
 }
@@ -60,7 +55,6 @@ export const initialState = {
  */
 export const useRuleFromTimeline = (): RuleFromTimeline => {
   const dispatch = useDispatch();
-  const toasts = useAppToasts();
 
   // selectedTimeline = timeline to set rule from
   const [selectedTimeline, setRuleFromTimeline] = useState<TimelineModel | null>(null);
@@ -78,67 +72,48 @@ export const useRuleFromTimeline = (): RuleFromTimeline => {
     (timeline: TimelineModel) => {
       setRuleFromTimeline(timeline);
 
-      // let sourcerer manage the selected browser fields by setting timeline scope to the selected timeline data view
-      // sourcerer handles the logic of if the fields have been fetched or need to be fetched
-      dispatch(
-        sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.timeline,
-          selectedDataViewId: timeline.dataViewId,
-          selectedPatterns: timeline.indexNames,
-        })
-      );
+      if (!isEmpty(timeline.indexNames)) {
+        // let sourcerer manage the selected browser fields by setting timeline scope to the selected timeline data view
+        // sourcerer handles the logic of if the fields have been fetched or need to be fetched
+        dispatch(
+          sourcererActions.setSelectedDataView({
+            id: SourcererScopeName.timeline,
+            selectedDataViewId: timeline.dataViewId,
+            selectedPatterns: timeline.indexNames,
+          })
+        );
+      }
     },
     [dispatch]
   );
   // end RuleFromTimeline definition
 
   // start browser field management
-  const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
-  const { selectedDataView, sourcererScope } = useDeepEqualSelector((state) =>
-    sourcererScopeSelector(state, SourcererScopeName.timeline)
+  const { browserFields, dataViewId, selectedPatterns } = useSourcererDataView(
+    SourcererScopeName.timeline
   );
-  const [ogDataView] = useState({ selectedDataView, sourcererScope });
 
-  const selectedDataViewBrowserFields = useMemo(() => {
-    if (sourcererScope.selectedDataViewId === '') {
-      // still loading initial state
-      return null;
-    }
-    if (selectedDataView == null) {
-      // the timeline data view is deleted, user must fix timeline to use with rule
-      setLoading(false);
-      setIsError(true);
+  const [ogDataView] = useState({ dataViewId, selectedPatterns });
 
-      return null;
-    }
-
-    if (
+  const selectedDataViewBrowserFields = useMemo(
+    () =>
       selectedTimeline == null ||
-      selectedTimeline.dataViewId == null ||
-      selectedDataView.id !== selectedTimeline.dataViewId
-    ) {
-      return null;
-    }
-
-    if (isEmpty(selectedDataView.browserFields)) {
-      return null;
-    }
-
-    return selectedDataView.browserFields;
-  }, [selectedDataView, selectedTimeline, sourcererScope]);
+      isEmpty(browserFields) ||
+      (selectedTimeline.dataViewId !== null &&
+        dataViewId !== null &&
+        dataViewId !== selectedTimeline.dataViewId)
+        ? null
+        : browserFields,
+    [browserFields, dataViewId, selectedTimeline]
+  );
   // end browser field management
 
   // start set rule
   const handleSetRuleFromTimeline = useCallback(() => {
-    if (
-      selectedTimeline == null ||
-      selectedDataView == null ||
-      selectedDataViewBrowserFields == null
-    )
-      return;
+    if (selectedTimeline == null || selectedDataViewBrowserFields == null) return;
     const indexPattern = selectedTimeline.indexNames.length
       ? selectedTimeline.indexNames
-      : selectedDataView.patternList;
+      : selectedPatterns;
     const newQuery = {
       query: selectedTimeline.kqlQuery.filterQuery?.kuery?.expression ?? '',
       language: selectedTimeline.kqlQuery.filterQuery?.kuery?.kind ?? 'kuery',
@@ -170,19 +145,24 @@ export const useRuleFromTimeline = (): RuleFromTimeline => {
       updated: true,
     });
     // reset timeline data view once complete
-    if (
-      ogDataView.selectedDataView != null &&
-      ogDataView.selectedDataView.id !== selectedDataView.id
-    ) {
+    if (ogDataView.dataViewId !== dataViewId) {
       dispatch(
         sourcererActions.setSelectedDataView({
           id: SourcererScopeName.timeline,
-          selectedDataViewId: ogDataView.sourcererScope.selectedDataViewId,
-          selectedPatterns: ogDataView.sourcererScope.selectedPatterns,
+          selectedDataViewId: ogDataView.dataViewId,
+          selectedPatterns: ogDataView.selectedPatterns,
         })
       );
     }
-  }, [selectedTimeline, selectedDataView, selectedDataViewBrowserFields, ogDataView, dispatch]);
+  }, [
+    selectedTimeline,
+    selectedDataViewBrowserFields,
+    selectedPatterns,
+    ogDataView.dataViewId,
+    ogDataView.selectedPatterns,
+    dataViewId,
+    dispatch,
+  ]);
 
   useEffect(() => {
     // ensure browser fields are correct before updating the rule
@@ -226,54 +206,9 @@ export const useRuleFromTimeline = (): RuleFromTimeline => {
   }, [timelineIdFromUrl]);
   // end handle set rule from timeline id
 
-  // start handle error
-  const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
-  const getTimelineLink = useCallback(
-    (id: string) =>
-      formatUrl(getTimelineUrl(id), {
-        absolute: true,
-        skipSearch: true,
-      }),
-    [formatUrl]
-  );
+  const handleReset = useCallback(() => {
+    setRuleData(initialState);
+  }, []);
 
-  const [isError, setIsError] = useState(false);
-
-  const addError = useCallback(
-    () =>
-      toasts.addError(
-        `${i18n.RULE_FROM_TIMELINE_ERROR_TITLE}, ${i18n.RULE_FROM_TIMELINE_ERROR_ACTION}`,
-        {
-          title: i18n.RULE_FROM_TIMELINE_ERROR_TITLE,
-          toastMessage: (
-            <>
-              <FormattedMessage
-                id="xpack.securitySolution.detectionEngine.createRule.selectedTimelineErrorToast"
-                defaultMessage="There is an issue with the data view used with this saved timeline. To create a rule from this timeline, you must {link}."
-                values={{
-                  link: timelineIdFromUrl ? (
-                    <EuiLink href={getTimelineLink(timelineIdFromUrl)}>
-                      {i18n.RULE_FROM_TIMELINE_ERROR_ACTION}
-                    </EuiLink>
-                  ) : (
-                    i18n.RULE_FROM_TIMELINE_ERROR_ACTION
-                  ),
-                }}
-              />
-            </>
-          ) as unknown as string,
-        }
-      ),
-    [getTimelineLink, timelineIdFromUrl, toasts]
-  );
-
-  useEffect(() => {
-    if (isError) {
-      addError();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isError]);
-  // end handle error
-
-  return { ...ruleData, loading, onOpenTimeline };
+  return { ...ruleData, loading, onOpenTimeline, handleReset };
 };
