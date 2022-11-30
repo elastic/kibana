@@ -205,7 +205,8 @@ async function mountComponent(
   return component;
 }
 
-describe('Discover component', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/145894
+describe.skip('Discover component', () => {
   test('selected data view without time field displays no chart toggle', async () => {
     const container = document.createElement('div');
     await mountComponent(dataViewMock, undefined, { attachTo: container });

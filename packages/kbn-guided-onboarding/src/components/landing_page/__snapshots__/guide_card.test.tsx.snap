@@ -37,7 +37,7 @@ exports[`guide card snapshots should render use case card component for search 1
 exports[`guide card snapshots should render use case card component for security 1`] = `
 <UseCaseCard
   addBasePath={[MockFunction]}
-  description="Defend your environment against threats by unifying SIEM, endpoint security, and cloud security."
+  description="Investigate threats and get your SIEM up and running by installing the Elastic Defend integration."
   footer={
     <GuideCardFooter
       activateGuide={[MockFunction]}
