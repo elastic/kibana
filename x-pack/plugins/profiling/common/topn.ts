@@ -257,14 +257,15 @@ export function groupSamplesByCategory({
 
   // We want the mapping from the category string to the color to be constant,
   // so that the same category string will always map to the same color.
-  const stringhash = (s : string): number => {
-    var hash : number = 0;
-    for (i = 0 ;i<s.length ; i++) {
+  const stringhash = (s: string): number => {
+    let hash: number = 0;
+    for (i = 0; i < s.length; i++) {
       ch = string.charCodeAt(i);
-      hash = ((hash << 5) - hash) + ch; //eslint-disable-line no-bitwise
-      hash = hash & hash;} //eslint-disable-line no-bitwise
+      hash = (hash << 5) - hash + ch; // eslint-disable-line no-bitwise
+      hash = hash & hash;
+    } // eslint-disable-line no-bitwise
     return hash % len(subcharts);
-  }
+  };
 
   return orderBy(subcharts, ['Percentage', 'Category'], ['desc', 'asc']).map((chart, index) => {
     return {
