@@ -29,17 +29,8 @@ interface AnalyticsCollectionIntegrateProps {
 export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrateProps> = ({
   collection,
 }) => {
-  const analyticsDNSUrl = getEnterpriseSearchUrl(`/analytics/api/collections/${collection.name}`);
+  const analyticsDNSUrl = getEnterpriseSearchUrl(`/analytics/api/collections/${collection.id}`);
   const credentials = [
-    {
-      title: i18n.translate(
-        'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.credentials.collectionName',
-        {
-          defaultMessage: 'Collection name',
-        }
-      ),
-      description: collection.name,
-    },
     {
       title: i18n.translate(
         'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.credentials.collectionDns',

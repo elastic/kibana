@@ -47,3 +47,5 @@ export type { BulkUpdateAPIKeyProps } from './update_api_key';
 export { updateAPIKey, bulkUpdateAPIKey } from './update_api_key';
 export { runSoon } from './run_soon';
 export { bulkDeleteRules } from './bulk_delete';
+export { bulkEnableRules } from './bulk_enable';
+export { bulkDisableRules } from './bulk_disable';
