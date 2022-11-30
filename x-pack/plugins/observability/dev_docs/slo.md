@@ -288,7 +288,7 @@ curl --request POST \
 			"index": "high-cardinality-data-fake_logs*",
 			"good": "latency < 300",
 			"total": "",
-			"query_filter": "labels.groupId: group-0"
+			"filter": "labels.groupId: group-0"
 		}
 	},
 	"time_window": {
