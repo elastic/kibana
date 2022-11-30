@@ -6,37 +6,130 @@
  * Side Public License, v 1.
  */
 
+import { euiThemeVars } from '@kbn/ui-theme';
+import { tokenPostfix } from './esql_constants';
 import { monaco } from '../../../monaco_imports';
 
-// @todo: not fully implemented. just for testing
-export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => {
-  const getRuleGroup = (tokens: string[], color: string) =>
-    tokens.map((i) => ({
-      token: i + '.esql',
-      foreground: color,
-    }));
+const getRuleGroup = (tokens: string[], color: string, isBold: boolean = false) =>
+  tokens.map((i) => ({
+    token: i + tokenPostfix,
+    foreground: color,
+    fontStyle: isBold ? 'bold' : '',
+  }));
 
-  return {
-    base: 'vs',
-    inherit: false,
-    rules: [
-      ...getRuleGroup(
-        [
-          'unquoted_identifier',
-          'eval',
-          'explain',
-          'from',
-          'row',
-          'stats',
-          'where',
-          'sort',
-          'limit',
-          'project',
-        ],
-        '#1d67bd'
-      ),
-      ...getRuleGroup(['eq', 'minus', 'by', 'lp'], '#bd781d'),
-    ],
-    colors: {},
-  };
-};
+export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
+  base: 'vs',
+  inherit: false,
+  rules: [
+    // base
+    ...getRuleGroup(
+      [
+        'explain',
+        'row',
+        'limit',
+        'project',
+        'ws',
+        'assign',
+        'comma',
+        'dot',
+        'first',
+        'last',
+        'opening_bracket',
+        'closing_bracket',
+        'quoted_identifier',
+        'src_ws',
+        'unquoted_identifier',
+      ],
+      euiThemeVars.euiTextColor
+    ),
+
+    // commands
+    ...getRuleGroup(
+      [
+        'from',
+        'stats',
+        'eval',
+        'sort',
+        'by',
+        'where',
+        'unknown_cmd',
+        'expr_ws',
+        'row',
+        'limit',
+        'asc',
+        'desc',
+      ],
+      euiThemeVars.euiColorPrimaryText
+    ),
+
+    // values
+    ...getRuleGroup(
+      [
+        'pipe',
+        'true',
+        'not',
+        'null',
+        'nulls',
+        'false',
+        'src_unquoted_identifier',
+        'src_quoted_identifier',
+        'string',
+      ],
+      euiThemeVars.euiTextColor,
+      true
+    ),
+
+    // values #2
+    ...getRuleGroup(
+      [
+        'true',
+        'not',
+        'null',
+        'nulls',
+        'false',
+        'not',
+        'null',
+        'percent',
+        'integer_literal',
+        'decimal_literal',
+      ],
+      euiThemeVars.euiColorPrimaryText,
+      true
+    ),
+
+    // operators
+    ...getRuleGroup(
+      [
+        'or',
+        'and',
+        'rp',
+        'eq',
+        'neq',
+        'lp',
+        'lt',
+        'lte',
+        'gt',
+        'gte',
+        'plus',
+        'minus',
+        'asterisk',
+        'slash',
+      ],
+      euiThemeVars.euiTextSubduedColor
+    ),
+
+    // comments
+    ...getRuleGroup(
+      [
+        'line_comment',
+        'multiline_comment',
+        'expr_line_comment',
+        'expr_multiline_comment',
+        'src_line_comment',
+        'src_multiline_comment',
+      ],
+      euiThemeVars.euiColorMediumShade
+    ),
+  ],
+  colors: {},
+});

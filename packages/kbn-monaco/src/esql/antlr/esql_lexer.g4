@@ -9,7 +9,6 @@ WHERE : 'where' -> pushMode(EXPRESSION);
 SORT : 'sort' -> pushMode(EXPRESSION);
 LIMIT : 'limit' -> pushMode(EXPRESSION);
 PROJECT : 'project' -> pushMode(SOURCE_IDENTIFIERS);
-UNKNOWN_CMD : ~[ \r\n\t[\]/]+ -> pushMode(EXPRESSION);
 
 LINE_COMMENT
     : '//' ~[\r\n]* '\r'? '\n'? -> channel(HIDDEN)
@@ -152,3 +151,5 @@ SRC_MULTILINE_COMMENT
 SRC_WS
     : WS -> channel(HIDDEN)
     ;
+
+UNKNOWN_CMD : ~[ \r\n\t[\]/]+ -> pushMode(EXPRESSION);
