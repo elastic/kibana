@@ -171,6 +171,12 @@ export async function getStatus(
         sortField: 'name.keyword',
         sortOrder: 'asc',
         query,
+        fields: [
+          ConfigKey.ENABLED,
+          ConfigKey.LOCATIONS,
+          ConfigKey.MONITOR_QUERY_ID,
+          ConfigKey.SCHEDULE,
+        ],
       },
       syntheticsMonitorClient.syntheticsService,
       savedObjectsClient
@@ -181,8 +187,8 @@ export async function getStatus(
         disabledCount += monitor.attributes[ConfigKey.LOCATIONS].length;
       } else {
         enabledIds.push(monitor.attributes[ConfigKey.MONITOR_QUERY_ID]);
-        maxLocations = Math.max(maxLocations, monitor.attributes.locations.length);
-        maxPeriod = Math.max(maxPeriod, periodToMs(monitor.attributes.schedule));
+        maxLocations = Math.max(maxLocations, monitor.attributes[ConfigKey.LOCATIONS].length);
+        maxPeriod = Math.max(maxPeriod, periodToMs(monitor.attributes[ConfigKey.SCHEDULE]));
       }
     });
   } while (monitors.saved_objects.length === monitors.per_page);
