@@ -101,11 +101,11 @@ export function getRuleErrors(
 }
 
 export async function getRuleActionErrors(
-  rule: Rule,
+  actions: RuleAction[],
   actionTypeRegistry: ActionTypeRegistryContract
 ): Promise<IErrorObject[]> {
   return await Promise.all(
-    rule.actions.map(
+    actions.map(
       async (ruleAction: RuleAction) =>
         (
           await actionTypeRegistry.get(ruleAction.actionTypeId)?.validateParams(ruleAction.params)
