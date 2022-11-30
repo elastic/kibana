@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { toSentenceCase } from '@elastic/eui';
 import { GlobalSearchProviderResult } from '@kbn/global-search-plugin/server';
 import uuid from 'uuid';
 
 export const mapToResults = (term: string, response: Response): GlobalSearchProviderResult[] => {
+  const isKibanaDoc = response.url.startsWith('https://www.elastic.co/guide/en/kibana/');
   return [
     {
       id: uuid.v4(),
-      title: `Search for "${term}" in the docs`,
+      title: isKibanaDoc ? `${toSentenceCase(term)} docs` : `Search for "${term}" in the docs`,
       type: 'documentation',
-      icon: 'document',
+      icon: isKibanaDoc ? 'documentation' : 'search',
       url: response.url,
-      score: 100,
+      score: isKibanaDoc ? 100 : 99,
     },
   ];
 };

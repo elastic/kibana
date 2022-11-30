@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { from, of } from 'rxjs';
+import { from, of, merge } from 'rxjs';
 import fetch from 'node-fetch';
 import { URLSearchParams } from 'url';
 
@@ -20,15 +20,18 @@ export const createDocsResultProvider = (): GlobalSearchResultProvider => {
       if (!docs || docs.length <= 0) return of([]);
       const term = docs[0];
 
-      const url = new URL('https://www.elastic.co/search');
-      url.search = new URLSearchParams([
+      const searchUrl = new URL('https://www.elastic.co/search');
+      searchUrl.search = new URLSearchParams([
         ['q', term],
         ['filters[0][field]', 'website_area'],
         ['filters[0][values][0]', 'documentation'],
       ]).toString();
-      const responsePromise = fetch(url);
+      const searchResponsePromise = fetch(searchUrl);
 
-      return from(responsePromise).pipe(
+      const kibanaDocsUrl = `https://www.elastic.co/guide/en/kibana/current/${term}.html`;
+      const kibanaDocsResponsePromise = fetch(kibanaDocsUrl);
+
+      return merge(from(kibanaDocsResponsePromise), from(searchResponsePromise)).pipe(
         takeUntil(aborted$),
         filter((res) => res.status === 200),
         map((res) => mapToResults(term ?? '', res))

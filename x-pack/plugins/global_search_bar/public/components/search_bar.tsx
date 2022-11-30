@@ -275,7 +275,7 @@ export const SearchBar: FC<SearchBarProps> = ({
   );
 
   const placeholderText = i18n.translate('xpack.globalSearchBar.searchBar.placeholder', {
-    defaultMessage: 'Find apps, content, and more.',
+    defaultMessage: 'Find apps, content, docs, and more.',
   });
   const keyboardShortcutTooltip = `${i18n.translate(
     'xpack.globalSearchBar.searchBar.shortcutTooltip.description',
