@@ -71,7 +71,7 @@ describe('useTimeRange', () => {
       })
     );
     expect(result.current.timeRangeText).toMatchInlineSnapshot(
-      `"2022-11-17T00:00:00.000Z - 2022-11-17T12:00:00.000Z (interval: Auto - loading...)"`
+      `"2022-11-17T00:00:00.000Z - 2022-11-17T12:00:00.000Z (interval: Auto - Loading)"`
     );
   });
 
