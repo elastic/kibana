@@ -15,6 +15,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaExecutionContext } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
 import { TimelionVisDependencies } from './plugin';
 import { TimelionRenderValue } from './timelion_vis_fn';
 import { getUsageCollection } from './helpers/plugin_services';
@@ -84,27 +85,31 @@ export const getTimelionVisRenderer: (
     };
 
     render(
-      <VisualizationContainer
-        renderComplete={renderComplete}
-        handlers={handlers}
-        showNoResult={showNoResult}
-      >
+      <I18nProvider>
         <KibanaThemeProvider theme$={deps.theme.theme$}>
-          <KibanaContextProvider services={{ ...deps }}>
-            {seriesList && (
-              <LazyTimelionVisComponent
-                interval={visParams.interval}
-                ariaLabel={visParams.ariaLabel}
-                seriesList={seriesList}
-                renderComplete={renderComplete}
-                onBrushEvent={onBrushEvent}
-                syncTooltips={syncTooltips}
-                syncCursor={syncCursor}
-              />
-            )}
-          </KibanaContextProvider>
+          <VisualizationContainer
+            renderComplete={renderComplete}
+            handlers={handlers}
+            showNoResult={showNoResult}
+          >
+            <KibanaThemeProvider theme$={deps.theme.theme$}>
+              <KibanaContextProvider services={{ ...deps }}>
+                {seriesList && (
+                  <LazyTimelionVisComponent
+                    interval={visParams.interval}
+                    ariaLabel={visParams.ariaLabel}
+                    seriesList={seriesList}
+                    renderComplete={renderComplete}
+                    onBrushEvent={onBrushEvent}
+                    syncTooltips={syncTooltips}
+                    syncCursor={syncCursor}
+                  />
+                )}
+              </KibanaContextProvider>
+            </KibanaThemeProvider>
+          </VisualizationContainer>
         </KibanaThemeProvider>
-      </VisualizationContainer>,
+      </I18nProvider>,
       domNode
     );
   },
