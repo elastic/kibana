@@ -14,6 +14,7 @@ export const casesQueriesKeys = {
   all: ['cases'] as const,
   users: ['users'] as const,
   connectors: ['connectors'] as const,
+  feautures: ['features'] as const,
   connectorsList: () => [...casesQueriesKeys.connectors, 'list'] as const,
   casesList: () => [...casesQueriesKeys.all, 'list'] as const,
   casesMetrics: () => [...casesQueriesKeys.casesList(), 'metrics'] as const,
@@ -32,6 +33,8 @@ export const casesQueriesKeys = {
   connectorTypes: () => [...casesQueriesKeys.connectors, 'types'] as const,
   license: () => [...casesQueriesKeys.connectors, 'license'] as const,
   tags: () => [...casesQueriesKeys.all, 'tags'] as const,
+  featureIds: (alertRegistrationContexts: string[]) =>
+    [...casesQueriesKeys.feautures, alertRegistrationContexts] as const,
 };
 
 export const casesMutationsKeys = {
