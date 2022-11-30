@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { from, of, merge } from 'rxjs';
+import { from, of, merge, zip } from 'rxjs';
 import fetch from 'node-fetch';
 import { URLSearchParams } from 'url';
 
-import { map, takeUntil, filter } from 'rxjs/operators';
+import { map, takeUntil, filter, first, take } from 'rxjs/operators';
 import { GlobalSearchResultProvider } from '@kbn/global-search-plugin/server';
 import { mapToResults } from './map_doc_to_result';
 
@@ -20,6 +20,9 @@ export const createDocsResultProvider = (): GlobalSearchResultProvider => {
       if (!docs || docs.length <= 0) return of([]);
       const term = docs[0];
 
+      const kibanaDocsUrl = `https://www.elastic.co/guide/en/kibana/current/${term}.html`;
+      const kibanaDocsResponsePromise = fetch(kibanaDocsUrl);
+
       const searchUrl = new URL('https://www.elastic.co/search');
       searchUrl.search = new URLSearchParams([
         ['q', term],
@@ -28,13 +31,11 @@ export const createDocsResultProvider = (): GlobalSearchResultProvider => {
       ]).toString();
       const searchResponsePromise = fetch(searchUrl);
 
-      const kibanaDocsUrl = `https://www.elastic.co/guide/en/kibana/current/${term}.html`;
-      const kibanaDocsResponsePromise = fetch(kibanaDocsUrl);
-
-      return merge(from(kibanaDocsResponsePromise), from(searchResponsePromise)).pipe(
+      return zip(from(kibanaDocsResponsePromise), from(searchResponsePromise)).pipe(
         takeUntil(aborted$),
-        filter((res) => res.status === 200),
-        map((res) => mapToResults(term ?? '', res))
+        map(([res1, res2]) =>
+          res1.status === 200 ? mapToResults(term ?? '', res1) : mapToResults(term ?? '', res2)
+        )
       );
     },
     getSearchableTypes: () => [],
