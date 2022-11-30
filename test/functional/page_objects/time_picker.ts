@@ -169,9 +169,7 @@ export class TimePickerPageObject extends FtrService {
       const actualFromTime = await this.testSubjects.getVisibleText(
         'superDatePickerstartDatePopoverButton'
       );
-      this.log.debug(
-        `Validating 'startDate' - expected: '${fromTime}, actual: ${actualFromTime}'`
-      );
+      this.log.debug(`Validating 'startDate' - expected: '${fromTime}, actual: ${actualFromTime}'`);
       return fromTime === actualFromTime;
     });
 
