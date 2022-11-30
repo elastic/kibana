@@ -21,7 +21,7 @@ describe('encoding', () => {
   });
   it('throws if it received undefined', () => {
     expect(() => Rison.encode(undefined)).toThrowErrorMatchingInlineSnapshot(
-      `"unable to encode value into rison, expected a primative value or a potentially recursive array/object of primative values"`
+      `"unable to encode value into rison, expected a primative value array or object"`
     );
   });
   it('encodes a complex object', () => {
