@@ -19,6 +19,7 @@ const DAY = 24 * HOUR;
 export const GAINSIGHT_LIBRARY_PATH = path.join(__dirname, '..', 'assets', 'gainsight_library.js');
 export const GAINSIGHT_WIDGET_PATH = path.join(__dirname, '..', 'assets', 'gainsight_widget.js');
 export const GAINSIGHT_STYLE_PATH = path.join(__dirname, '..', 'assets', 'gainsight_style.css');
+export const GAINSIGHT_EDITOR_STYLE_PATH = path.join(__dirname, '..', 'assets', 'editor.css');
 export const GAINSIGHT_EDITOR_PATH = path.join(__dirname, '..', 'assets', 'guide_editor.js');
 
 /** @internal exported for testing */
@@ -183,6 +184,43 @@ export const registerGainsightProxyRoute = ({
     async (context, req, res) => {
       try {
         return res.renderJs(await renderGainsightEditor());
+      } catch (e) {
+        return res.customError({
+          body: `Could not load Gainsight library from disk due to error: ${e.toString()}`,
+          statusCode: 500,
+        });
+      }
+    }
+  );
+};
+
+export const registerGainsightEditorStyleRoute = ({
+  httpResources,
+  packageInfo,
+}: {
+  httpResources: HttpResources;
+  packageInfo: Readonly<PackageInfo>;
+}) => {
+  const renderGainsightLibrary = renderGainsightLibraryFactory(
+    packageInfo.dist,
+    GAINSIGHT_EDITOR_STYLE_PATH
+  );
+
+  /**
+   * Register a custom endpoint in order to achieve best caching possible with `max-age` similar to plugin bundles.
+   */
+  httpResources.register(
+    {
+      // Use the build number in the URL path to leverage max-age caching on production builds
+      path: `/internal/cloud/${packageInfo.buildNum}/editor.css`,
+      validate: false,
+      options: {
+        authRequired: false,
+      },
+    },
+    async (context, req, res) => {
+      try {
+        return res.renderCss(await renderGainsightLibrary());
       } catch (e) {
         return res.customError({
           body: `Could not load Gainsight library from disk due to error: ${e.toString()}`,

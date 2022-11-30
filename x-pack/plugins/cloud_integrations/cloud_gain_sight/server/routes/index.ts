@@ -9,4 +9,6 @@ export {
   registerGainsightRoute,
   registerGainsightStyleRoute,
   registerGainsightWidgetRoute,
+  registerGainsightProxyRoute,
+  registerGainsightEditorStyleRoute,
 } from './gainsight';
