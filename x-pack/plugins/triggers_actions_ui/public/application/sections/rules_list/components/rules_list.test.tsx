@@ -11,15 +11,13 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-import { RulesList, percentileFields } from './rules_list';
-import { RuleTypeModel, ValidationResult, Percentiles } from '../../../../types';
+import { RulesList } from './rules_list';
+import { RuleTypeModel, ValidationResult } from '../../../../types';
 import {
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
   ALERTS_FEATURE_ID,
-  parseDuration,
 } from '@kbn/alerting-plugin/common';
-import { getFormattedDuration, getFormattedMilliseconds } from '../../../lib/monitoring_utils';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 import { useKibana } from '../../../../common/lib/kibana';
