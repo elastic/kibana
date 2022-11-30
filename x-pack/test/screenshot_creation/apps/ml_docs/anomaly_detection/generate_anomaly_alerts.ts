@@ -98,8 +98,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await ml.alerting.cleanAnomalyDetectionRules();
     });
 
-    describe.only('overview page alert flyout controls', () => {
-      it('can create an anomaly detection alert', async () => {
+    describe('overview page alert flyout controls', () => {
+      it('alert flyout screenshot', async () => {
         await ml.navigation.navigateToAlertsAndAction();
         await pageObjects.triggersActionsUI.clickCreateAlertButton();
         await ml.alerting.setRuleName('test-ecommerce');
@@ -129,6 +129,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await ml.testExecution.logTestStep('take screenshot');
         await commonScreenshots.takeScreenshot(
           'ml-anomaly-alert-severity',
+          screenshotDirectories,
+          1920,
+          1400
+        );
+        await ml.alerting.selectSlackConnectorType();
+        await ml.testExecution.logTestStep('should open connectors');
+        await ml.alerting.clickCreateConnectorButton();
+        await ml.alerting.setConnectorName('test-connector');
+        await ml.alerting.setWebhookUrl('https://www.elastic.co');
+        await ml.alerting.clickSaveActionButton();
+        await ml.alerting.openAddRuleVariable();
+        await ml.testExecution.logTestStep('take screenshot');
+        await commonScreenshots.takeScreenshot(
+          'ml-anomaly-alert-messages',
           screenshotDirectories,
           1920,
           1400

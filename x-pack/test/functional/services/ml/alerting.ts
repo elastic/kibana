@@ -189,5 +189,41 @@ export function MachineLearningAlertingProvider(
     async scrollRuleNameIntoView() {
       await testSubjects.scrollIntoView('ruleNameInput');
     },
+
+    async selectSlackConnectorType() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
+        await testSubjects.existOrFail('createActionConnectorButton-0', { timeout: 1000 });
+      });
+    },
+
+    async clickCreateConnectorButton() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('createActionConnectorButton-0');
+        await testSubjects.existOrFail('connectorAddModal', { timeout: 1000 });
+      });
+    },
+
+    async setConnectorName(connectorname: string) {
+      await testSubjects.setValue('nameInput', connectorname);
+    },
+
+    async setWebhookUrl(webhookurl: string) {
+      await testSubjects.setValue('slackWebhookUrlInput', webhookurl);
+    },
+
+    async clickSaveActionButton() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('saveActionButtonModal');
+        await testSubjects.existOrFail('addNewActionConnectorActionGroup-0', { timeout: 1000 });
+      });
+    },
+
+    async openAddRuleVariable() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('messageAddVariableButton');
+        await testSubjects.existOrFail('variableMenuButton-alert.actionGroup', { timeout: 1000 });
+      });
+    },
   };
 }
