@@ -39,7 +39,8 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Privilege Escalation"
+    "Privilege Escalation",
+    "Sysmon Only"
   ],
   "threat": [
     {
@@ -60,5 +61,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 100
+  "version": 101
 }
