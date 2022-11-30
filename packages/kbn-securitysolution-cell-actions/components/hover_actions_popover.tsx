@@ -9,7 +9,6 @@
 import { EuiPopover } from '@elastic/eui';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { css } from '@emotion/react';
 // TODO move it to another package? security-solution-ui??
 
 /** This class is added to the document body while dragging */
@@ -19,12 +18,6 @@ export const IS_DRAGGING_CLASS_NAME = 'is-dragging';
  * To avoid expensive changes to the DOM, delay showing the popover menu
  */
 const HOVER_INTENT_DELAY = 100; // ms
-
-const euiPopoverCSS = css`
-  .euiPopover__anchor {
-    width: 100%;
-  }
-`;
 
 interface Props {
   children: React.ReactNode;
@@ -55,6 +48,8 @@ interface Props {
    * intent to close the hover menu.
    */
   onCloseRequested?: () => void;
+
+  panelStyle?: React.CSSProperties;
 }
 
 /**
@@ -74,7 +69,7 @@ interface Props {
  * reader users to navigate to and from your popover.
  */
 export const HoverActionsPopover = React.memo<Props>(
-  ({ closePopOverTrigger, getHoverContent, onCloseRequested, children }) => {
+  ({ closePopOverTrigger, getHoverContent, onCloseRequested, children, panelStyle }) => {
     const [showHoverContent, setShowHoverContent] = useState(false);
     const [, setHoverTimeout] = useState<number | undefined>(undefined);
     const popoverRef = useRef<EuiPopover>(null);
@@ -149,7 +144,7 @@ export const HoverActionsPopover = React.memo<Props>(
     return (
       <div onMouseLeave={onMouseLeave}>
         <EuiPopover
-          css={euiPopoverCSS}
+          panelStyle={panelStyle}
           ref={popoverRef}
           anchorPosition={'downCenter'}
           button={content}
@@ -167,4 +162,4 @@ export const HoverActionsPopover = React.memo<Props>(
   }
 );
 
-HoverActionsPopover.displayName = 'WithHoverActions';
+HoverActionsPopover.displayName = 'HoverActionsPopover';

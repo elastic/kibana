@@ -6,13 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { ActionItem } from './cell_action_item';
 import { usePartitionActions } from '../hooks/actions';
 import { ExtraActionsPopOver } from './extra_actions_popover';
+import { ExtraActionsButton } from './extra_actions_button';
+import { CellActionConfig } from '.';
 
 interface InlineActionsProps {
+  config: CellActionConfig;
   getActions: () => Action[];
   actionContext: ActionExecutionContext;
   showTooltip: boolean;
@@ -24,29 +27,41 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
   actionContext,
   showTooltip,
   showMoreActionsFrom,
+  config,
 }) => {
   const allActions = useMemo(() => getActions(), [getActions]);
-
   const { extraActions, visibleActions } = usePartitionActions(allActions, showMoreActionsFrom);
   const getPartitionedActions = useCallback(
     () => ({ extraActions, visibleActions }),
     [extraActions, visibleActions]
   );
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const togglePopOver = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
+  const closePopOver = useCallback(() => setIsPopoverOpen(false), []);
+  const popOverAnchorRef = useRef<HTMLElement>(null);
+  const button = useMemo(
+    () => <ExtraActionsButton onClick={togglePopOver} showTooltip={showTooltip} />,
+    [togglePopOver, showTooltip]
+  );
 
   return (
-    <>
+    <span>
       {visibleActions.map((action) => (
         <ActionItem action={action} actionContext={actionContext} showTooltip={showTooltip} />
       ))}
-      <ExtraActionsPopOver
-        getPartitionedActions={getPartitionedActions}
-        showMoreActionsFrom={showMoreActionsFrom}
-        anchorRef={contentRef}
-        actionContext={actionContext}
-        config={config}
-        closePopOver={closeExtraActions}
-        isOpen={isExtraActionsPopoverOpen}
-      />
-    </>
+      {extraActions.length > 0 ? (
+        <ExtraActionsPopOver
+          getPartitionedActions={getPartitionedActions}
+          anchorRef={popOverAnchorRef}
+          actionContext={actionContext}
+          config={config}
+          button={button}
+          closePopOver={closePopOver}
+          isOpen={isPopoverOpen}
+        />
+      ) : null}
+    </span>
   );
 };
+
+InlineActions.displayName = 'InlineActions';

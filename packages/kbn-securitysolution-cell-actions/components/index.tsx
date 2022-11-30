@@ -85,6 +85,7 @@ export const CellActions: React.FC<CellActionsProps> = ({
       <>
         {children}
         <InlineActions
+          config={config}
           getActions={getActions}
           actionContext={actionContext}
           showTooltip={showTooltip}
@@ -96,3 +97,5 @@ export const CellActions: React.FC<CellActionsProps> = ({
     return <>Not implemented</>;
   }
 };
+
+CellActions.displayName = 'CellActions';

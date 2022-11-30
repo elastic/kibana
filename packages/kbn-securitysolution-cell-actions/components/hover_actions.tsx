@@ -9,87 +9,19 @@
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useCallback, useRef, useState } from 'react';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { HoverActionsPopover } from './hover_actions_popover';
 import { ActionItem } from './cell_action_item';
 import { CellActionConfig } from '.';
-import { ExtraActionsPopOver } from './extra_actions_popover';
+import { ExtraActionsPopOverWithAnchor } from './extra_actions_popover';
 import { useGetPartitionedActions } from '../hooks/actions';
 import { ExtraActionsButton } from './extra_actions_button';
-// FIXME can't import plugin from package
+import { YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
 
-export const SHOW_TOP_N_KEYBOARD_SHORTCUT = 't';
-
-// import { useHoverActionItems } from './use_hover_action_items';
-
-export const YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS = (fieldName: string) =>
-  i18n.translate(
-    'xpack.securitySolution.cellActions.youAreInADialogContainingOptionsScreenReaderOnly',
-    {
-      values: { fieldName },
-      defaultMessage: `You are in a dialog, containing options for field {fieldName}. Press tab to navigate options. Press escape to exit.`,
-    }
-  );
-
-export const additionalContentCSS = css`
+// const SHOW_TOP_N_KEYBOARD_SHORTCUT = 't';
+const additionalContentCSS = css`
   padding: 2px;
 `;
-
-// const StyledHoverActionsContainer = styled.div<{
-//   $showTopN: boolean;
-//   $showOwnFocus: boolean;
-//   $hiddenActionsCount: number;
-//   $isActive: boolean;
-// }>`
-//   display: flex;
-
-//   ${(props) =>
-//     props.$isActive
-//       ? `
-//     .hoverActions-active {
-//       .timelines__hoverActionButton,
-//       .securitySolution__hoverActionButton {
-//         opacity: 1;
-//       }
-//     }
-//   `
-//       : ''}
-
-//   ${(props) =>
-//     props.$showOwnFocus
-//       ? `
-//     &:focus-within {
-//       .timelines__hoverActionButton,
-//       .securitySolution__hoverActionButton {
-//         opacity: 1;
-//       }
-//     }
-
-//     &:hover {
-//       .timelines__hoverActionButton,
-//       .securitySolution__hoverActionButton {
-//         opacity: 1;
-//       }
-//     }
-
-//   .timelines__hoverActionButton,
-//   .securitySolution__hoverActionButton {
-//     opacity: ${props.$showTopN ? 1 : 0};
-
-//       &:focus {
-//         opacity: 1;
-//       }
-//     }
-//   `
-//       : ''}
-// `;
-
-// const StyledHoverActionsContainerWithPaddingsAndMinWidth = styled(StyledHoverActionsContainer)`
-//   min-width: ${({ $hiddenActionsCount }) => `${138 - $hiddenActionsCount * 26}px`};
-//   padding: ${(props) => `0 ${props.theme.eui.euiSizeS}`};
-//   position: relative;
-// `;
 
 interface Props {
   additionalContent?: React.ReactNode;
@@ -100,25 +32,13 @@ interface Props {
   showMoreActionsFrom: number;
 }
 
-/** Returns a value for the `disabled` prop of `EuiFocusTrap` */
-// const isFocusTrapDisabled = ({
-//   ownFocus,
-//   showTopN,
-// }: {
-//   ownFocus: boolean;
-//   showTopN: boolean;
-// }): boolean => {
-//   if (showTopN) {
-//     return false; // we *always* want to trap focus when showing Top N
-//   }
-
-//   return !ownFocus;
-// };
-
 export const stopPropagationAndPreventDefault = (event: React.KeyboardEvent) => {
   event.stopPropagation();
   event.preventDefault();
 };
+
+// Overwrite Popover default minWidth to avoid displaying empty space
+const PANEL_STYLE = { minWidth: `24px` };
 
 export const HoverActions: React.FC<Props> = React.memo(
   ({
@@ -136,14 +56,6 @@ export const HoverActions: React.FC<Props> = React.memo(
       () => setIsExtraActionsPopoverOpen(false),
       [setIsExtraActionsPopoverOpen]
     );
-
-    // useEffect(() => {
-    //   if (ownFocus) {
-    //     setTimeout(() => {
-    //       defaultFocusedButtonRef.current?.focus();
-    //     }, 0);
-    //   }
-    // }, [ownFocus]);
 
     // onKeyDown SHORTCUTS
     //   {showHoverContent ? <div onKeyDown={onKeyDown}>{hoverContent}</div> : null}
@@ -170,11 +82,6 @@ export const HoverActions: React.FC<Props> = React.memo(
     //   [ownFocus]
     // );
 
-    // const Container =
-    // applyWidthAndPadding
-    //   ? StyledHoverActionsContainerWithPaddingsAndMinWidth
-    //   : StyledHoverActionsContainer;
-
     const getPartitionedActions = useGetPartitionedActions(getActions, showMoreActionsFrom);
 
     const getHoverContent = useCallback(
@@ -185,7 +92,6 @@ export const HoverActions: React.FC<Props> = React.memo(
           setIsExtraActionsPopoverOpen(true);
           closeHoverPopOver();
         };
-
         return (
           <div>
             <EuiScreenReaderOnly>
@@ -201,7 +107,7 @@ export const HoverActions: React.FC<Props> = React.memo(
               />
             ))}
             {extraActions.length > 0 ? (
-              <ExtraActionsButton onClick={onShowExtraActionsClick} showTooltip={false} />
+              <ExtraActionsButton onClick={onShowExtraActionsClick} showTooltip={showTooltip} />
             ) : null}
           </div>
         );
@@ -215,14 +121,14 @@ export const HoverActions: React.FC<Props> = React.memo(
         actionContext,
       ]
     );
+
     return (
       <>
-        <HoverActionsPopover getHoverContent={getHoverContent}>
+        <HoverActionsPopover getHoverContent={getHoverContent} panelStyle={PANEL_STYLE}>
           <div ref={contentRef}>{children}</div>
         </HoverActionsPopover>
-        <ExtraActionsPopOver
-          getExtraActions={getExtraActions}
-          showMoreActionsFrom={showMoreActionsFrom}
+        <ExtraActionsPopOverWithAnchor
+          getPartitionedActions={getPartitionedActions}
           anchorRef={contentRef}
           actionContext={actionContext}
           config={config}

@@ -22,14 +22,13 @@ export const SHOW_MORE_ACTIONS = i18n.translate(
   }
 );
 
-export const ExtraActionsButton: React.FC<ExtraActionsButtonProps> = ({ onClick, showTooltip }) => {
-  return showTooltip ? (
+export const ExtraActionsButton: React.FC<ExtraActionsButtonProps> = ({ onClick, showTooltip }) =>
+  showTooltip ? (
     <EuiToolTip content={SHOW_MORE_ACTIONS}>
       <EuiButtonIcon aria-label={SHOW_MORE_ACTIONS} iconType="boxesHorizontal" onClick={onClick} />
     </EuiToolTip>
   ) : (
     <EuiButtonIcon aria-label={SHOW_MORE_ACTIONS} iconType="boxesHorizontal" onClick={onClick} />
   );
-};
 
 ExtraActionsButton.displayName = 'ExtraActionsButton';
