@@ -286,8 +286,8 @@ curl --request POST \
 		"type": "sli.kql.custom",
 		"params": {
 			"index": "high-cardinality-data-fake_logs*",
-			"numerator": "latency < 300",
-			"denominator": "",
+			"good": "latency < 300",
+			"total": "",
 			"query_filter": "labels.groupId: group-0"
 		}
 	},
