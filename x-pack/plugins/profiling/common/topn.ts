@@ -262,7 +262,7 @@ export function groupSamplesByCategory({
     for (i = 0 ;i<s.length ; i++) {
       ch = string.charCodeAt(i);
       hash = ((hash << 5) - hash) + ch; //eslint-disable-line no-bitwise
-      hash = hash & hash;}
+      hash = hash & hash;} //eslint-disable-line no-bitwise
     return hash % len(subcharts);
   }
 
