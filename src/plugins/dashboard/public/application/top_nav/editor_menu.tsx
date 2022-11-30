@@ -52,7 +52,9 @@ interface UnwrappedEmbeddableFactory {
 
 export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
   const {
+    data: { search },
     embeddable,
+    embeddableLinks,
     notifications: { toasts },
     settings: { uiSettings },
     usageCollection,
@@ -253,45 +255,66 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
   });
 
   const getEditorMenuPanels = (closePopover: () => void) => {
-    return [
-      {
+    const registry = embeddableLinks.embeddableLinksRegistry.get();
+    const stateTransfer = embeddable.getStateTransfer();
+
+    return registry.map(({ appId, label }) => {
+      return {
         id: 0,
         items: [
-          ...visTypeAliases.map(getVisTypeAliasMenuItem),
-          ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
-            name: appName,
-            icon,
-            panel: panelId,
-            'data-test-subj': `dashboardEditorMenu-${id}Group`,
-          })),
-          ...ungroupedFactories.map((factory) => {
-            return getEmbeddableFactoryMenuItem(factory, closePopover);
-          }),
-          ...promotedVisTypes.map(getVisTypeMenuItem),
           {
-            name: aggsPanelTitle,
-            icon: 'visualizeApp',
-            panel: aggBasedPanelID,
-            'data-test-subj': `dashboardEditorAggBasedMenuItem`,
+            name: label,
+            onClick: () => {
+              stateTransfer.navigateToEditor(appId, {
+                state: {
+                  originatingApp: DashboardConstants.DASHBOARDS_ID,
+                  searchSessionId: search.session.getSessionId(),
+                },
+              });
+            },
           },
-          ...toolVisTypes.map(getVisTypeMenuItem),
         ],
-      },
-      {
-        id: aggBasedPanelID,
-        title: aggsPanelTitle,
-        items: aggsBasedVisTypes.map(getVisTypeMenuItem),
-      },
-      ...Object.values(factoryGroupMap).map(
-        ({ appName, panelId, factories: groupFactories }: FactoryGroup) => ({
-          id: panelId,
-          title: appName,
-          items: groupFactories.map((factory) => {
-            return getEmbeddableFactoryMenuItem(factory, closePopover);
-          }),
-        })
-      ),
-    ];
+      };
+    });
+    // return [
+    //   {
+    //     id: 0,
+    //     items: [
+    //       ...visTypeAliases.map(getVisTypeAliasMenuItem),
+    //       ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
+    //         name: appName,
+    //         icon,
+    //         panel: panelId,
+    //         'data-test-subj': `dashboardEditorMenu-${id}Group`,
+    //       })),
+    //       ...ungroupedFactories.map((factory) => {
+    //         return getEmbeddableFactoryMenuItem(factory, closePopover);
+    //       }),
+    //       ...promotedVisTypes.map(getVisTypeMenuItem),
+    //       {
+    //         name: aggsPanelTitle,
+    //         icon: 'visualizeApp',
+    //         panel: aggBasedPanelID,
+    //         'data-test-subj': `dashboardEditorAggBasedMenuItem`,
+    //       },
+    //       ...toolVisTypes.map(getVisTypeMenuItem),
+    //     ],
+    //   },
+    //   {
+    //     id: aggBasedPanelID,
+    //     title: aggsPanelTitle,
+    //     items: aggsBasedVisTypes.map(getVisTypeMenuItem),
+    //   },
+    //   ...Object.values(factoryGroupMap).map(
+    //     ({ appName, panelId, factories: groupFactories }: FactoryGroup) => ({
+    //       id: panelId,
+    //       title: appName,
+    //       items: groupFactories.map((factory) => {
+    //         return getEmbeddableFactoryMenuItem(factory, closePopover);
+    //       }),
+    //     })
+    //   ),
+    // ];
   };
   return (
     <SolutionToolbarPopover

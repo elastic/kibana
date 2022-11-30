@@ -21,6 +21,7 @@ import { DashboardDataService } from './data/types';
 import { DashboardDataViewEditorService } from './data_view_editor/types';
 import { DashboardDocumentationLinksService } from './documentation_links/types';
 import { DashboardEmbeddableService } from './embeddable/types';
+import { DashboardEmbeddableLinksService } from './embeddable_links/types';
 import { DashboardHTTPService } from './http/types';
 import { DashboardInitializerContextService } from './initializer_context/types';
 import { DashboardNavigationService } from './navigation/types';
@@ -51,6 +52,7 @@ export interface DashboardServices {
   dataViewEditor: DashboardDataViewEditorService; // this service is used only for the no data state
   documentationLinks: DashboardDocumentationLinksService;
   embeddable: DashboardEmbeddableService;
+  embeddableLinks: DashboardEmbeddableLinksService;
   http: DashboardHTTPService;
   initializerContext: DashboardInitializerContextService;
   navigation: DashboardNavigationService;

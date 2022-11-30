@@ -283,6 +283,11 @@ export class LensPlugin {
         setUsageCollectionStart(plugins.usageCollection);
       }
 
+      plugins.presentationUtil.embeddableLinksRegistry.register({
+        appId: APP_ID,
+        label: NOT_INTERNATIONALIZED_PRODUCT_NAME,
+      });
+
       initMemoizedErrorNotification(coreStart);
 
       return {
