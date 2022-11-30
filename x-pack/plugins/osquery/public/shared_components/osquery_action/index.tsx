@@ -50,7 +50,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
         body={
           <p>
             <FormattedMessage
-              id="xpack.osquery.action.missingPrivilleges"
+              id="xpack.osquery.action.missingPrivileges"
               defaultMessage="To access this page, ask your administrator for {osquery} Kibana privileges."
               // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
               values={{

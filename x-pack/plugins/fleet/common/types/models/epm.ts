@@ -435,6 +435,7 @@ export interface IntegrationCardItem {
   categories: string[];
   fromIntegrations?: string;
   isUnverified?: boolean;
+  isUpdateAvailable?: boolean;
   showLabels?: boolean;
 }
 
