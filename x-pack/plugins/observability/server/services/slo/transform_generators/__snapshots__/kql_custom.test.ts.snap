@@ -242,7 +242,7 @@ Object {
   },
   "sync": Object {
     "time": Object {
-      "delay": "60s",
+      "delay": "1m",
       "field": "@timestamp",
     },
   },
