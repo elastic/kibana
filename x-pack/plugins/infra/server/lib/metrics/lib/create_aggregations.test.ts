@@ -42,9 +42,35 @@ describe('createAggregations(options)', () => {
       }),
     });
   });
+
+  it('should return groupings aggregation without date histogram', () => {
+    const optionsWithGroupBy: MetricsAPIRequest = {
+      ...options,
+      groupBy: ['host.name'],
+      includeTimeseries: false,
+    };
+    expect(createCompositeAggregations(optionsWithGroupBy)).toEqual({
+      groupings: expect.objectContaining({
+        aggs: {
+          metric_0: {
+            avg: {
+              field: 'system.cpu.user.pct',
+            },
+          },
+          metricsets: {
+            terms: {
+              field: 'metricset.name',
+            },
+          },
+        },
+      }),
+    });
+  });
+
   it('should return just histogram aggregation without groupBy', () => {
     expect(createAggregations(options)).toMatchSnapshot();
   });
+
   it('should return add offset to histogram', () => {
     const optionsWithAlignDataToEnd = {
       ...options,
