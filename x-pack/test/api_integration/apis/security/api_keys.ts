@@ -12,11 +12,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const security = getService('security');
-  const es = getService('es');
-  const config = getService('config');
-  const basic = config.get('esTestCluster.license') === 'basic';
 
   describe('API Keys', () => {
     describe('GET /internal/security/api_key/_enabled', () => {
