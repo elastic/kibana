@@ -61,14 +61,14 @@ export const NoResultsSuggestionWhenTimeRange: React.FC<Props> = ({ dataView, qu
     <EuiDescriptionList compressed>
       <EuiDescriptionListTitle data-test-subj="discoverNoResultsTimefilter">
         <FormattedMessage
-          id="discover.noResults.expandYourTimeRangeTitle"
-          defaultMessage="Expand your time range"
+          id="discover.noResults.searchOverLongerPeriodTitle"
+          defaultMessage="Search over a longer period of time"
         />
       </EuiDescriptionListTitle>
       <EuiDescriptionListDescription>
         <FormattedMessage
           id="discover.noResults.expandYourTimeRangeDescription"
-          defaultMessage="{showAllLink} or search over a longer period of time."
+          defaultMessage="{showAllLink} or change the current range via the time picker above."
           values={{
             showAllLink: (
               <EuiLink
@@ -77,7 +77,7 @@ export const NoResultsSuggestionWhenTimeRange: React.FC<Props> = ({ dataView, qu
               >
                 <FormattedMessage
                   id="discover.noResults.findAllOccurrencesLinkText"
-                  defaultMessage="Discover all occurrences"
+                  defaultMessage="Expand the time range to see all matches"
                 />
               </EuiLink>
             ),

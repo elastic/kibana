@@ -22,8 +22,8 @@ export function NoResultsSuggestionWhenQuery() {
       </EuiDescriptionListTitle>
       <EuiDescriptionListDescription>
         <FormattedMessage
-          id="discover.noResults.trySearchingForDifferentCombination"
-          defaultMessage="Try searching for a different combination of terms."
+          id="discover.noResults.tryUpdatingYourSearchQuery"
+          defaultMessage="Try changing or clearing your search query."
         />
       </EuiDescriptionListDescription>
     </EuiDescriptionList>
