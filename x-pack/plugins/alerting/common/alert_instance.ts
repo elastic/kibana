@@ -18,6 +18,12 @@ const metaSchema = t.partial({
       date: DateFromString,
     }),
   ]),
+  // an array used to track changes in alert state, the order is based on the rule executions (oldest to most recent)
+  // true - alert has changed from active/recovered
+  // false - the status has remained either active or recovered
+  flappingHistory: t.array(t.boolean),
+  // flapping flag that indicates whether the alert is flapping
+  flapping: t.boolean,
 });
 export type AlertInstanceMeta = t.TypeOf<typeof metaSchema>;
 
