@@ -103,12 +103,26 @@ export interface SavedObjectsRepositoryFactory {
     includedHiddenTypes?: string[],
     extensions?: SavedObjectsExtensions
   ) => ISavedObjectsRepository;
+
+  /**
+   * Create a repository scoped to the given tenant.
+   *
+   * // TODO: doc
+   */
+  createTenantRepository: (
+    tenantId: string,
+    includedHiddenTypes?: string[],
+    extensions?: SavedObjectsExtensions
+  ) => ISavedObjectsRepository;
+
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the internal Kibana user for authenticating with Elasticsearch.
    *
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    * @param extensions - Extensions that the repository should use (for encryption, security, and spaces).
+   *
+   * @deprecated cannot be used with multitenancy
    */
   createInternalRepository: (
     includedHiddenTypes?: string[],

@@ -351,7 +351,7 @@ export class AuthenticationService {
 
     this.tenantResolver = (request: KibanaRequest) => {
       const user = getCurrentUser(request);
-      return user.tenant_id;
+      return user?.tenant_id;
     };
 
     this.session = session;

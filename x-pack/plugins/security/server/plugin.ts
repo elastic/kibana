@@ -312,6 +312,7 @@ export class SecurityPlugin
       audit: this.auditSetup,
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
+      multitenancy: core.multitenancy,
     });
 
     this.registerDeprecations(core, license);

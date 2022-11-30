@@ -177,6 +177,12 @@ export class ElasticsearchService
   }
 
   private getTenantClient(tenantId: string, baseConfig: ElasticsearchClientConfig): ClusterClient {
+    // TODO: some consumers (e.g fleet setup) are currently still scoping ES/SO services to fake requests
+    //       of course, fake request are not bound to any tenant so it resolves to tenantId undefined.
+    //       this is just a safeguard for the application to boot.
+    if (!tenantId) {
+      return this.client!;
+    }
     if (!this.tenantClients.has(tenantId)) {
       const tenant = this.multitenancyApi!.getTenantConfig(tenantId);
       const tenantClientConfig = createTenantConfig(tenant.config.elasticsearch, baseConfig);

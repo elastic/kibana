@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup, MultitenancyServiceSetup } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
 import type { AuditServiceSetup } from '../audit';
@@ -19,20 +19,31 @@ interface SetupSavedObjectsParams {
     'mode' | 'actions' | 'checkSavedObjectsPrivilegesWithRequest'
   >;
   savedObjects: CoreSetup['savedObjects'];
+  multitenancy: MultitenancyServiceSetup;
 }
 
-export function setupSavedObjects({ audit, authz, savedObjects }: SetupSavedObjectsParams) {
+export function setupSavedObjects({
+  audit,
+  authz,
+  savedObjects,
+  multitenancy,
+}: SetupSavedObjectsParams) {
   savedObjects.setClientFactoryProvider(
     // This is not used by Kibana itself, but it can be leveraged for Kibana to use a third-party authentication header if there is a custom
     // authentication layer sitting between Kibana and Elasticsearch, and if Elasticsearch security is disabled. It's unclear if it's even
     // possible for that to function anymore, perhaps we should deprecate this custom client factory provider and remove it in 9.0?
     (repositoryFactory) =>
       ({ request, includedHiddenTypes, extensions }) => {
-        return new SavedObjectsClient(
-          authz.mode.useRbacForRequest(request)
-            ? repositoryFactory.createInternalRepository(includedHiddenTypes, extensions)
-            : repositoryFactory.createScopedRepository(request, includedHiddenTypes, extensions)
-        );
+        if (authz.mode.useRbacForRequest(request)) {
+          const tenantId = multitenancy.getTenantIdFromRequest(request);
+          return repositoryFactory.createTenantRepository(
+            tenantId,
+            includedHiddenTypes,
+            extensions
+          );
+        } else {
+          return repositoryFactory.createScopedRepository(request, includedHiddenTypes, extensions);
+        }
       }
   );
 

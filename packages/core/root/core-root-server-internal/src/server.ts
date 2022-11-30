@@ -396,6 +396,7 @@ export class Server {
       pluginsInitialized: this.#pluginsInitialized,
       docLinks: docLinkStart,
       node: await this.node.start(),
+      multitenancy: multitenancyStart,
     });
     await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
 

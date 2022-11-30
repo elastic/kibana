@@ -51,6 +51,7 @@ import {
 } from '@kbn/core-saved-objects-import-export-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
+import type { InternalMultitenancyServiceStart } from '@kbn/core-multitenancy-server-internal';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
@@ -84,6 +85,7 @@ export interface SavedObjectsStartDeps {
   pluginsInitialized?: boolean;
   docLinks: DocLinksServiceStart;
   node: NodeInfo;
+  multitenancy: InternalMultitenancyServiceStart;
 }
 
 export class SavedObjectsService
@@ -204,6 +206,7 @@ export class SavedObjectsService
     pluginsInitialized = true,
     docLinks,
     node,
+    multitenancy,
   }: SavedObjectsStartDeps): Promise<InternalSavedObjectsServiceStart> {
     if (!this.setupDeps || !this.config) {
       throw new Error('#setup() needs to be run first');
@@ -286,15 +289,34 @@ export class SavedObjectsService
     };
 
     const repositoryFactory: SavedObjectsRepositoryFactory = {
+      /** @deprecated */
       createInternalRepository: (
         includedHiddenTypes?: string[],
         extensions?: SavedObjectsExtensions | undefined
-      ) => createRepository(client.asInternalUser, includedHiddenTypes, extensions),
+      ) => {
+        return createRepository(client.asInternalUser, includedHiddenTypes, extensions);
+      },
+      createTenantRepository: (
+        tenantId: string,
+        includedHiddenTypes?: string[],
+        extensions?: SavedObjectsExtensions
+      ) => {
+        const tenantClient = elasticsearch.getTenantClient(tenantId);
+        return createRepository(tenantClient.asInternalUser, includedHiddenTypes, extensions);
+      },
       createScopedRepository: (
         req: KibanaRequest,
         includedHiddenTypes?: string[],
         extensions?: SavedObjectsExtensions
-      ) => createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes, extensions),
+      ) => {
+        const tenantId = multitenancy.getTenantIdFromRequest(req);
+        const tenantClient = elasticsearch.getTenantClient(tenantId);
+        return createRepository(
+          tenantClient.asScoped(req).asCurrentUser,
+          includedHiddenTypes,
+          extensions
+        );
+      },
     };
 
     const clientProvider = new SavedObjectsClientProvider({
