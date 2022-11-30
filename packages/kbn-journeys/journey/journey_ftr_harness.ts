@@ -119,7 +119,7 @@ export class JourneyFtrHarness {
   private async onSetup() {
     await this.setupBrowserAndPage();
 
-    if (process.env.TEST_PERFORMANCE_PHASE === 'WARMUP') {
+    if (process.env.TEST_PERFORMANCE_PHASE === 'WARMUP' || process.env.TEST_PERFORMANCE_PHASE === undefined) {
       await Promise.all([
         asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
           await this.esArchiver.load(esArchive);
@@ -193,7 +193,7 @@ export class JourneyFtrHarness {
     // by Kibana running under test.
     await this.teardownApm();
 
-    if (process.env.TEST_PERFORMANCE_PHASE === 'TEST') {
+    if (process.env.TEST_PERFORMANCE_PHASE === 'TEST' || process.env.TEST_PERFORMANCE_PHASE === undefined) {
       // unload data
       await asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
         await this.esArchiver.unload(esArchive);
