@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { EuiPageHeaderProps, EuiPageTemplateProps, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -40,15 +40,15 @@ export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps>
   const isMobile = useIsWithinMaxBreakpoint('s');
 
   const PageTemplateComponent = observability.navigation.PageTemplate;
-  const StyledPageTemplateComponent = useMemo(() => {
-    return styled(PageTemplateComponent)<{ isMobile: boolean }>`
-      .euiPageHeaderContent > .euiFlexGroup {
-        flex-wrap: wrap;
-      }
 
-      ${(props) => (props.isMobile ? mobileCenteredHeader : '')}
-    `;
-  }, [PageTemplateComponent]);
+  // TODO: this throws a warning in the console, as `styled` is being called dynamically in a render method.
+  const StyledPageTemplateComponent = styled(PageTemplateComponent)<{ isMobile: boolean }>`
+    .euiPageHeaderContent > .euiFlexGroup {
+      flex-wrap: wrap;
+    }
+
+    ${(styledProps) => (styledProps.isMobile ? mobileCenteredHeader : '')}
+  `;
 
   const noDataConfig = useNoDataConfig();
 

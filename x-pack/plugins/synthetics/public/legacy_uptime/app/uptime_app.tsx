@@ -102,17 +102,17 @@ const Application = (props: UptimeAppProps) => {
   store.dispatch(setBasePath(basePath));
 
   return (
-    <EuiErrorBoundary>
-      <i18nCore.Context>
-        <KibanaThemeProvider
-          theme$={props.appMountParameters.theme$}
-          modify={{
-            breakpoint: {
-              xxl: 1600,
-              xxxl: 2000,
-            },
-          }}
-        >
+    <i18nCore.Context>
+      <KibanaThemeProvider
+        theme$={props.appMountParameters.theme$}
+        modify={{
+          breakpoint: {
+            xxl: 1600,
+            xxxl: 2000,
+          },
+        }}
+      >
+        <EuiErrorBoundary>
           <ReduxProvider store={store}>
             <KibanaContextProvider
               services={{
@@ -155,9 +155,9 @@ const Application = (props: UptimeAppProps) => {
               </Router>
             </KibanaContextProvider>
           </ReduxProvider>
-        </KibanaThemeProvider>
-      </i18nCore.Context>
-    </EuiErrorBoundary>
+        </EuiErrorBoundary>
+      </KibanaThemeProvider>
+    </i18nCore.Context>
   );
 };
 
