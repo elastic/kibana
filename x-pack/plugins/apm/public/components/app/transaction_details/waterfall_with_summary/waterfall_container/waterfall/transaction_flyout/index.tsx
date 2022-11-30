@@ -105,7 +105,9 @@ export function TransactionFlyout({
                 content: (
                   <>
                     <EuiSpacer size="m" />
-                    <TransactionMetadata transaction={transactionDoc} />
+                    <TransactionMetadata
+                      transactionId={transactionDoc.transaction.id}
+                    />
                   </>
                 ),
               },
