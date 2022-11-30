@@ -14,7 +14,7 @@ interface Context {
   alerts: Array<Record<string, unknown>>;
 }
 
-export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> = (
+export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> = async (
   params,
   variables
 ) => {

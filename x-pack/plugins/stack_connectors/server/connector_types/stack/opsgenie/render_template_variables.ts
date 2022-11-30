@@ -13,18 +13,18 @@ import { RULE_TAGS_TEMPLATE } from '../../../../common/opsgenie';
 import { OpsgenieSubActions } from '../../../../common';
 import { CreateAlertSubActionParams } from './types';
 
-export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> = (
+export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> = async (
   params,
   variables
 ) => {
   if (!isCreateAlertSubAction(params) || !params.subActionParams.tags) {
-    return renderMustacheObject(params, variables);
+    return await renderMustacheObject(params, variables);
   }
 
   const foundRuleTagsTemplate = params.subActionParams.tags.includes(RULE_TAGS_TEMPLATE);
 
   if (!foundRuleTagsTemplate) {
-    return renderMustacheObject(params, variables);
+    return await renderMustacheObject(params, variables);
   }
 
   const paramsCopy = cloneDeep(params);
@@ -38,7 +38,7 @@ export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> 
     ...getRuleTags(variables),
   ]);
 
-  return renderMustacheObject(paramsCopy, variables);
+  return await renderMustacheObject(paramsCopy, variables);
 };
 
 type CreateAlertParams = CreateAlertSubActionParams & Record<string, unknown>;

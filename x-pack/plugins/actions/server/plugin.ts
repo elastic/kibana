@@ -152,7 +152,7 @@ export interface PluginStartContract {
     actionId: string,
     params: Params,
     variables: Record<string, unknown>
-  ): Params;
+  ): Promise<Params>;
 }
 
 export interface ActionsPluginsSetup {
@@ -560,8 +560,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       getActionsClientWithRequest: secureGetActionsClientWithRequest,
       getUnsecuredActionsClient,
       preconfiguredActions,
-      renderActionParameterTemplates: (...args) =>
-        renderActionParameterTemplates(actionTypeRegistry, ...args),
+      renderActionParameterTemplates: async (...args) =>
+        await renderActionParameterTemplates(actionTypeRegistry, ...args),
     };
   }
 
@@ -687,17 +687,19 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   }
 }
 
-export function renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
+export async function renderActionParameterTemplates<
+  Params extends ActionTypeParams = ActionTypeParams
+>(
   actionTypeRegistry: ActionTypeRegistry | undefined,
   actionTypeId: string,
   actionId: string,
   params: Params,
   variables: Record<string, unknown>
-): Params {
+): Promise<Params> {
   const actionType = actionTypeRegistry?.get(actionTypeId);
   if (actionType?.renderParameterTemplates) {
-    return actionType.renderParameterTemplates(params, variables, actionId) as Params;
+    return (await actionType.renderParameterTemplates(params, variables, actionId)) as Params;
   } else {
-    return renderMustacheObject(params, variables);
+    return await renderMustacheObject(params, variables);
   }
 }

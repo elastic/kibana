@@ -114,7 +114,7 @@ export type RenderParameterTemplates<Params extends ActionTypeParams> = (
   params: Params,
   variables: Record<string, unknown>,
   actionId?: string
-) => Params;
+) => Promise<Params>;
 
 export interface ActionType<
   Config extends ActionTypeConfig = ActionTypeConfig,

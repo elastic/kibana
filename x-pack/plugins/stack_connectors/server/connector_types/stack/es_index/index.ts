@@ -140,12 +140,15 @@ async function executor(
   }
 }
 
-function renderParameterTemplates(
+async function renderParameterTemplates(
   params: ActionParamsType,
   variables: Record<string, unknown>,
   actionId?: string
-): ActionParamsType {
-  const { documents, indexOverride } = renderMustacheObject<ActionParamsType>(params, variables);
+): Promise<ActionParamsType> {
+  const { documents, indexOverride } = await renderMustacheObject<ActionParamsType>(
+    params,
+    variables
+  );
 
   if (actionId === AlertHistoryEsIndexConnectorId) {
     const alertHistoryDoc = buildAlertHistoryDocument(variables);

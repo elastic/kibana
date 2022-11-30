@@ -92,12 +92,12 @@ export function getConnectorType({
   };
 }
 
-function renderParameterTemplates(
+async function renderParameterTemplates(
   params: ActionParamsType,
   variables: Record<string, unknown>
-): ActionParamsType {
+): Promise<ActionParamsType> {
   return {
-    message: renderMustacheString(params.message, variables, 'slack'),
+    message: await renderMustacheString(params.message, variables, 'slack'),
   };
 }
 

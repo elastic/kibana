@@ -124,7 +124,7 @@ export const createExternalService = (
         configurationUtilities,
         'Create case URL'
       );
-      const json = renderMustacheStringNoEscape(
+      const json = await renderMustacheStringNoEscape(
         createIncidentJson,
         stringifyObjValues({
           title,
@@ -199,7 +199,7 @@ export const createExternalService = (
 
       const { tags, title, description } = incident;
 
-      const json = renderMustacheStringNoEscape(updateIncidentJson, {
+      const json = await renderMustacheStringNoEscape(updateIncidentJson, {
         ...stringifyObjValues({
           title,
           description: description ?? '',
@@ -275,7 +275,7 @@ export const createExternalService = (
         'Create comment URL'
       );
 
-      const json = renderMustacheStringNoEscape(createCommentJson, {
+      const json = await renderMustacheStringNoEscape(createCommentJson, {
         ...stringifyObjValues({ comment: comment.comment }),
         external: {
           system: {

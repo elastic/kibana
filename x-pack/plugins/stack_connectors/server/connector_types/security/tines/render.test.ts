@@ -57,14 +57,14 @@ const variables = {
 
 describe('Tines body render', () => {
   describe('renderParameterTemplates', () => {
-    it('should not render body on test action', () => {
+    it('should not render body on test action', async () => {
       const testParams = { subAction: 'test', subActionParams: { body: 'test_json' } };
-      const result = renderParameterTemplates(testParams, variables);
+      const result = await renderParameterTemplates(testParams, variables);
       expect(result).toEqual(testParams);
     });
 
-    it('should rendered body from variables with cleaned alerts on run action', () => {
-      const result = renderParameterTemplates(params, variables);
+    it('should rendered body from variables with cleaned alerts on run action', async () => {
+      const result = await renderParameterTemplates(params, variables);
 
       expect(result.subActionParams.body).toEqual(
         JSON.stringify({
@@ -77,26 +77,26 @@ describe('Tines body render', () => {
       );
     });
 
-    it('should rendered body from variables on run action without context.alerts', () => {
+    it('should rendered body from variables on run action without context.alerts', async () => {
       const variablesWithoutAlerts = set('context.alerts', undefined, variables);
-      const result = renderParameterTemplates(params, variablesWithoutAlerts);
+      const result = await renderParameterTemplates(params, variablesWithoutAlerts);
 
       expect(result.subActionParams.body).toEqual(JSON.stringify(variablesWithoutAlerts));
     });
 
-    it('should rendered body from variables on run action without context', () => {
+    it('should rendered body from variables on run action without context', async () => {
       const variablesWithoutContext = set('context', undefined, variables);
-      const result = renderParameterTemplates(params, variablesWithoutContext);
+      const result = await renderParameterTemplates(params, variablesWithoutContext);
 
       expect(result.subActionParams.body).toEqual(JSON.stringify(variablesWithoutContext));
     });
 
-    it('should render error body', () => {
+    it('should render error body', async () => {
       const errorMessage = 'test error';
       jest.spyOn(JSON, 'stringify').mockImplementationOnce(() => {
         throw new Error(errorMessage);
       });
-      const result = renderParameterTemplates(params, variables);
+      const result = await renderParameterTemplates(params, variables);
       expect(result.subActionParams.body).toEqual(
         JSON.stringify({ error: { message: errorMessage } })
       );

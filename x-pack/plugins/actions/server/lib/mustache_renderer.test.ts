@@ -36,91 +36,95 @@ const variables = {
   vl: '|',
 };
 
-describe.only('mustache_renderer', () => {
+describe('mustache_renderer', () => {
   describe('renderMustacheString()', () => {
     for (const escapeVal of ['none', 'slack', 'markdown', 'json']) {
       const escape = escapeVal as Escape;
 
-      it(`handles basic templating that does not need escaping for ${escape}`, () => {
-        expect(renderMustacheString('', variables, escape)).toBe('');
-        expect(renderMustacheString('{{a}}', variables, escape)).toBe('1');
-        expect(renderMustacheString('{{b}}', variables, escape)).toBe('2');
-        expect(renderMustacheString('{{c}}', variables, escape)).toBe('false');
-        expect(renderMustacheString('{{d}}', variables, escape)).toBe('');
-        expect(renderMustacheString('{{e}}', variables, escape)).toBe('');
+      it(`handles basic templating that does not need escaping for ${escape}`, async () => {
+        expect(await renderMustacheString('', variables, escape)).toBe('');
+        expect(await renderMustacheString('{{a}}', variables, escape)).toBe('1');
+        expect(await renderMustacheString('{{b}}', variables, escape)).toBe('2');
+        expect(await renderMustacheString('{{c}}', variables, escape)).toBe('false');
+        expect(await renderMustacheString('{{d}}', variables, escape)).toBe('');
+        expect(await renderMustacheString('{{e}}', variables, escape)).toBe('');
         if (escape === 'json') {
-          expect(renderMustacheString('{{f}}', variables, escape)).toBe('{\\"g\\":3,\\"h\\":null}');
+          expect(await renderMustacheString('{{f}}', variables, escape)).toBe(
+            '{\\"g\\":3,\\"h\\":null}'
+          );
         } else if (escape === 'markdown') {
-          expect(renderMustacheString('{{f}}', variables, escape)).toBe('\\{"g":3,"h":null\\}');
+          expect(await renderMustacheString('{{f}}', variables, escape)).toBe(
+            '\\{"g":3,"h":null\\}'
+          );
         } else {
-          expect(renderMustacheString('{{f}}', variables, escape)).toBe('{"g":3,"h":null}');
+          expect(await renderMustacheString('{{f}}', variables, escape)).toBe('{"g":3,"h":null}');
         }
-        expect(renderMustacheString('{{f.g}}', variables, escape)).toBe('3');
-        expect(renderMustacheString('{{f.h}}', variables, escape)).toBe('');
-        expect(renderMustacheString('{{i}}', variables, escape)).toBe('42,43,44');
+        expect(await renderMustacheString('{{f.g}}', variables, escape)).toBe('3');
+        expect(await renderMustacheString('{{f.h}}', variables, escape)).toBe('');
+        expect(await renderMustacheString('{{i}}', variables, escape)).toBe('42,43,44');
       });
     }
 
-    it('handles escape:none with commonly escaped strings', () => {
-      expect(renderMustacheString('{{lt}}', variables, 'none')).toBe(variables.lt);
-      expect(renderMustacheString('{{gt}}', variables, 'none')).toBe(variables.gt);
-      expect(renderMustacheString('{{amp}}', variables, 'none')).toBe(variables.amp);
-      expect(renderMustacheString('{{nl}}', variables, 'none')).toBe(variables.nl);
-      expect(renderMustacheString('{{dq}}', variables, 'none')).toBe(variables.dq);
-      expect(renderMustacheString('{{bt}}', variables, 'none')).toBe(variables.bt);
-      expect(renderMustacheString('{{bs}}', variables, 'none')).toBe(variables.bs);
-      expect(renderMustacheString('{{st}}', variables, 'none')).toBe(variables.st);
-      expect(renderMustacheString('{{ul}}', variables, 'none')).toBe(variables.ul);
+    it('handles escape:none with commonly escaped strings', async () => {
+      expect(await renderMustacheString('{{lt}}', variables, 'none')).toBe(variables.lt);
+      expect(await renderMustacheString('{{gt}}', variables, 'none')).toBe(variables.gt);
+      expect(await renderMustacheString('{{amp}}', variables, 'none')).toBe(variables.amp);
+      expect(await renderMustacheString('{{nl}}', variables, 'none')).toBe(variables.nl);
+      expect(await renderMustacheString('{{dq}}', variables, 'none')).toBe(variables.dq);
+      expect(await renderMustacheString('{{bt}}', variables, 'none')).toBe(variables.bt);
+      expect(await renderMustacheString('{{bs}}', variables, 'none')).toBe(variables.bs);
+      expect(await renderMustacheString('{{st}}', variables, 'none')).toBe(variables.st);
+      expect(await renderMustacheString('{{ul}}', variables, 'none')).toBe(variables.ul);
     });
 
-    it('handles escape:markdown with commonly escaped strings', () => {
-      expect(renderMustacheString('{{lt}}', variables, 'markdown')).toBe(variables.lt);
-      expect(renderMustacheString('{{gt}}', variables, 'markdown')).toBe(variables.gt);
-      expect(renderMustacheString('{{amp}}', variables, 'markdown')).toBe(variables.amp);
-      expect(renderMustacheString('{{nl}}', variables, 'markdown')).toBe(variables.nl);
-      expect(renderMustacheString('{{dq}}', variables, 'markdown')).toBe(variables.dq);
-      expect(renderMustacheString('{{bt}}', variables, 'markdown')).toBe('\\' + variables.bt);
-      expect(renderMustacheString('{{bs}}', variables, 'markdown')).toBe('\\' + variables.bs);
-      expect(renderMustacheString('{{st}}', variables, 'markdown')).toBe('\\' + variables.st);
-      expect(renderMustacheString('{{ul}}', variables, 'markdown')).toBe('\\' + variables.ul);
-      expect(renderMustacheString('{{vl}}', variables, 'markdown')).toBe('\\' + variables.vl);
+    it('handles escape:markdown with commonly escaped strings', async () => {
+      expect(await renderMustacheString('{{lt}}', variables, 'markdown')).toBe(variables.lt);
+      expect(await renderMustacheString('{{gt}}', variables, 'markdown')).toBe(variables.gt);
+      expect(await renderMustacheString('{{amp}}', variables, 'markdown')).toBe(variables.amp);
+      expect(await renderMustacheString('{{nl}}', variables, 'markdown')).toBe(variables.nl);
+      expect(await renderMustacheString('{{dq}}', variables, 'markdown')).toBe(variables.dq);
+      expect(await renderMustacheString('{{bt}}', variables, 'markdown')).toBe('\\' + variables.bt);
+      expect(await renderMustacheString('{{bs}}', variables, 'markdown')).toBe('\\' + variables.bs);
+      expect(await renderMustacheString('{{st}}', variables, 'markdown')).toBe('\\' + variables.st);
+      expect(await renderMustacheString('{{ul}}', variables, 'markdown')).toBe('\\' + variables.ul);
+      expect(await renderMustacheString('{{vl}}', variables, 'markdown')).toBe('\\' + variables.vl);
     });
 
-    it('handles triple escapes', () => {
-      expect(renderMustacheString('{{{bt}}}', variables, 'markdown')).toBe(variables.bt);
-      expect(renderMustacheString('{{{bs}}}', variables, 'markdown')).toBe(variables.bs);
-      expect(renderMustacheString('{{{st}}}', variables, 'markdown')).toBe(variables.st);
-      expect(renderMustacheString('{{{ul}}}', variables, 'markdown')).toBe(variables.ul);
+    it('handles triple escapes', async () => {
+      expect(await renderMustacheString('{{{bt}}}', variables, 'markdown')).toBe(variables.bt);
+      expect(await renderMustacheString('{{{bs}}}', variables, 'markdown')).toBe(variables.bs);
+      expect(await renderMustacheString('{{{st}}}', variables, 'markdown')).toBe(variables.st);
+      expect(await renderMustacheString('{{{ul}}}', variables, 'markdown')).toBe(variables.ul);
     });
 
-    it('handles escape:slack with commonly escaped strings', () => {
-      expect(renderMustacheString('{{lt}}', variables, 'slack')).toBe('&lt;');
-      expect(renderMustacheString('{{gt}}', variables, 'slack')).toBe('&gt;');
-      expect(renderMustacheString('{{amp}}', variables, 'slack')).toBe('&amp;');
-      expect(renderMustacheString('{{nl}}', variables, 'slack')).toBe(variables.nl);
-      expect(renderMustacheString('{{dq}}', variables, 'slack')).toBe(variables.dq);
-      expect(renderMustacheString('{{bt}}', variables, 'slack')).toBe(`'`);
-      expect(renderMustacheString('{{bs}}', variables, 'slack')).toBe(variables.bs);
-      expect(renderMustacheString('{{st}}', variables, 'slack')).toBe('`*`');
-      expect(renderMustacheString('{{ul}}', variables, 'slack')).toBe('`_`');
+    it('handles escape:slack with commonly escaped strings', async () => {
+      expect(await renderMustacheString('{{lt}}', variables, 'slack')).toBe('&lt;');
+      expect(await renderMustacheString('{{gt}}', variables, 'slack')).toBe('&gt;');
+      expect(await renderMustacheString('{{amp}}', variables, 'slack')).toBe('&amp;');
+      expect(await renderMustacheString('{{nl}}', variables, 'slack')).toBe(variables.nl);
+      expect(await renderMustacheString('{{dq}}', variables, 'slack')).toBe(variables.dq);
+      expect(await renderMustacheString('{{bt}}', variables, 'slack')).toBe(`'`);
+      expect(await renderMustacheString('{{bs}}', variables, 'slack')).toBe(variables.bs);
+      expect(await renderMustacheString('{{st}}', variables, 'slack')).toBe('`*`');
+      expect(await renderMustacheString('{{ul}}', variables, 'slack')).toBe('`_`');
       // html escapes not needed when using backtic escaping
-      expect(renderMustacheString('{{st_lt}}', variables, 'slack')).toBe('`*<`');
+      expect(await renderMustacheString('{{st_lt}}', variables, 'slack')).toBe('`*<`');
     });
 
-    it('handles escape:json with commonly escaped strings', () => {
-      expect(renderMustacheString('{{lt}}', variables, 'json')).toBe(variables.lt);
-      expect(renderMustacheString('{{gt}}', variables, 'json')).toBe(variables.gt);
-      expect(renderMustacheString('{{amp}}', variables, 'json')).toBe(variables.amp);
-      expect(renderMustacheString('{{nl}}', variables, 'json')).toBe('\\n');
-      expect(renderMustacheString('{{dq}}', variables, 'json')).toBe('\\"');
-      expect(renderMustacheString('{{bt}}', variables, 'json')).toBe(variables.bt);
-      expect(renderMustacheString('{{bs}}', variables, 'json')).toBe('\\\\');
-      expect(renderMustacheString('{{st}}', variables, 'json')).toBe(variables.st);
-      expect(renderMustacheString('{{ul}}', variables, 'json')).toBe(variables.ul);
+    it('handles escape:json with commonly escaped strings', async () => {
+      expect(await renderMustacheString('{{lt}}', variables, 'json')).toBe(variables.lt);
+      expect(await renderMustacheString('{{gt}}', variables, 'json')).toBe(variables.gt);
+      expect(await renderMustacheString('{{amp}}', variables, 'json')).toBe(variables.amp);
+      expect(await renderMustacheString('{{nl}}', variables, 'json')).toBe('\\n');
+      expect(await renderMustacheString('{{dq}}', variables, 'json')).toBe('\\"');
+      expect(await renderMustacheString('{{bt}}', variables, 'json')).toBe(variables.bt);
+      expect(await renderMustacheString('{{bs}}', variables, 'json')).toBe('\\\\');
+      expect(await renderMustacheString('{{st}}', variables, 'json')).toBe(variables.st);
+      expect(await renderMustacheString('{{ul}}', variables, 'json')).toBe(variables.ul);
     });
 
-    it('handles errors', () => {
-      expect(renderMustacheString('{{a}', variables, 'none')).toMatch(
+    it('handles errors', async () => {
+      expect(await renderMustacheString('{{a}', variables, 'none')).toMatch(
         `error rendering mustache template \"{{a}\":`
       );
     });
@@ -167,7 +171,7 @@ describe.only('mustache_renderer', () => {
         tags: JSON.stringify(tags),
       },
     };
-    it('Inserts variables into string without quotes', () => {
+    it('Inserts variables into string without quotes', async () => {
       const urlVariables = {
         external: {
           system: {
@@ -176,11 +180,11 @@ describe.only('mustache_renderer', () => {
           },
         },
       };
-      expect(renderMustacheStringNoEscape(str, urlVariables)).toBe(
+      expect(await renderMustacheStringNoEscape(str, urlVariables)).toBe(
         `https://coolsite.net/browse/cool_title`
       );
     });
-    it('Inserts variables into url with quotes whens stringified', () => {
+    it('Inserts variables into url with quotes whens stringified', async () => {
       const urlVariablesStr = {
         external: {
           system: {
@@ -189,12 +193,12 @@ describe.only('mustache_renderer', () => {
           },
         },
       };
-      expect(renderMustacheStringNoEscape(str, urlVariablesStr)).toBe(
+      expect(await renderMustacheStringNoEscape(str, urlVariablesStr)).toBe(
         `https://coolsite.net/browse/"cool_title"`
       );
     });
-    it('Inserts variables into JSON non-escaped when triple brackets and JSON.stringified variables', () => {
-      expect(renderMustacheStringNoEscape(objStr, caseVariablesStr)).toBe(
+    it('Inserts variables into JSON non-escaped when triple brackets and JSON.stringified variables', async () => {
+      expect(await renderMustacheStringNoEscape(objStr, caseVariablesStr)).toBe(
         `{
 \t"fields": {
 \t  "summary": "A cool good summary",
@@ -206,8 +210,8 @@ describe.only('mustache_renderer', () => {
 }`
       );
     });
-    it('Inserts variables into JSON without quotes when triple brackets and NON stringified variables', () => {
-      expect(renderMustacheStringNoEscape(objStr, caseVariables)).toBe(
+    it('Inserts variables into JSON without quotes when triple brackets and NON stringified variables', async () => {
+      expect(await renderMustacheStringNoEscape(objStr, caseVariables)).toBe(
         `{
 \t"fields": {
 \t  "summary": A cool good summary,
@@ -219,8 +223,8 @@ describe.only('mustache_renderer', () => {
 }`
       );
     });
-    it('Inserts variables into JSON escaped when double brackets and JSON.stringified variables', () => {
-      expect(renderMustacheStringNoEscape(objStrDouble, caseVariablesStr)).toBe(
+    it('Inserts variables into JSON escaped when double brackets and JSON.stringified variables', async () => {
+      expect(await renderMustacheStringNoEscape(objStrDouble, caseVariablesStr)).toBe(
         `{
 \t"fields": {
 \t  "summary": &quot;A cool good summary&quot;,
@@ -232,8 +236,8 @@ describe.only('mustache_renderer', () => {
 }`
       );
     });
-    it('Inserts variables into JSON without quotes when double brackets and NON stringified variables', () => {
-      expect(renderMustacheStringNoEscape(objStrDouble, caseVariables)).toBe(
+    it('Inserts variables into JSON without quotes when double brackets and NON stringified variables', async () => {
+      expect(await renderMustacheStringNoEscape(objStrDouble, caseVariables)).toBe(
         `{
 \t"fields": {
 \t  "summary": A cool good summary,
@@ -246,14 +250,14 @@ describe.only('mustache_renderer', () => {
       );
     });
 
-    it('handles errors triple bracket', () => {
-      expect(renderMustacheStringNoEscape('{{{a}}', variables)).toMatchInlineSnapshot(
+    it('handles errors triple bracket', async () => {
+      expect(await renderMustacheStringNoEscape('{{{a}}', variables)).toMatchInlineSnapshot(
         `"error rendering mustache template \\"{{{a}}\\": Unclosed tag at 6"`
       );
     });
 
-    it('handles errors double bracket', () => {
-      expect(renderMustacheStringNoEscape('{{a}', variables)).toMatchInlineSnapshot(
+    it('handles errors double bracket', async () => {
+      expect(await renderMustacheStringNoEscape('{{a}', variables)).toMatchInlineSnapshot(
         `"error rendering mustache template \\"{{a}\\": Unclosed tag at 4"`
       );
     });
@@ -276,8 +280,8 @@ describe.only('mustache_renderer', () => {
   };
 
   describe('renderMustacheObject()', () => {
-    it('handles deep objects', () => {
-      expect(renderMustacheObject(object, variables)).toMatchInlineSnapshot(`
+    it('handles deep objects', async () => {
+      expect(await renderMustacheObject(object, variables)).toMatchInlineSnapshot(`
         Object {
           "list": Array [
             "1",
@@ -302,45 +306,49 @@ describe.only('mustache_renderer', () => {
       `);
     });
 
-    it('handles primitive objects', () => {
-      expect(renderMustacheObject(undefined, variables)).toMatchInlineSnapshot(`undefined`);
-      expect(renderMustacheObject(null, variables)).toMatchInlineSnapshot(`null`);
-      expect(renderMustacheObject(0, variables)).toMatchInlineSnapshot(`0`);
-      expect(renderMustacheObject(true, variables)).toMatchInlineSnapshot(`true`);
-      expect(renderMustacheObject('{{a}}', variables)).toMatchInlineSnapshot(`"1"`);
-      expect(renderMustacheObject(['{{a}}'], variables)).toMatchInlineSnapshot(`
+    it('handles primitive objects', async () => {
+      expect(await renderMustacheObject(undefined, variables)).toMatchInlineSnapshot(`undefined`);
+      expect(await renderMustacheObject(null, variables)).toMatchInlineSnapshot(`null`);
+      expect(await renderMustacheObject(0, variables)).toMatchInlineSnapshot(`0`);
+      expect(await renderMustacheObject(true, variables)).toMatchInlineSnapshot(`true`);
+      expect(await renderMustacheObject('{{a}}', variables)).toMatchInlineSnapshot(`"1"`);
+      expect(await renderMustacheObject(['{{a}}'], variables)).toMatchInlineSnapshot(`
         Array [
           "1",
         ]
       `);
     });
 
-    it('handles errors', () => {
-      expect(renderMustacheObject({ a: '{{a}' }, variables).a).toMatch(
+    it('handles errors', async () => {
+      expect((await renderMustacheObject({ a: '{{a}' }, variables)).a).toMatch(
         `error rendering mustache template \"{{a}\":`
       );
     });
   });
 
   describe('augmented object variables', () => {
-    const deepVariables = {
-      a: 1,
-      b: { c: 2, d: [3, 4] },
-      e: [5, { f: 6, g: 7 }],
-    };
-    expect(renderMustacheObject({ x: '{{a}} - {{b}} -- {{e}} ' }, deepVariables))
-      .toMatchInlineSnapshot(`
-      Object {
-        "x": "1 - {\\"c\\":2,\\"d\\":[3,4]} -- 5,{\\"f\\":6,\\"g\\":7} ",
-      }
-    `);
+    it('works', async () => {
+      const deepVariables = {
+        a: 1,
+        b: { c: 2, d: [3, 4] },
+        e: [5, { f: 6, g: 7 }],
+      };
+      expect(await renderMustacheObject({ x: '{{a}} - {{b}} -- {{e}} ' }, deepVariables))
+        .toMatchInlineSnapshot(`
+        Object {
+          "x": "1 - {\\"c\\":2,\\"d\\":[3,4]} -- 5,{\\"f\\":6,\\"g\\":7} ",
+        }
+      `);
 
-    const expected = '1 - {"c":2,"d":[3,4]} -- 5,{"f":6,"g":7}';
-    expect(renderMustacheString('{{a}} - {{b}} -- {{e}}', deepVariables, 'none')).toEqual(expected);
+      const expected = '1 - {"c":2,"d":[3,4]} -- 5,{"f":6,"g":7}';
+      expect(await renderMustacheString('{{a}} - {{b}} -- {{e}}', deepVariables, 'none')).toEqual(
+        expected
+      );
+    });
   });
 
   describe('converting dot variables', () => {
-    it('handles multiple dots', () => {
+    it('handles multiple dots', async () => {
       const dotVariables = {
         context: [
           {
@@ -379,7 +387,7 @@ describe.only('mustache_renderer', () => {
       };
 
       expect(
-        renderMustacheObject(
+        await renderMustacheObject(
           {
             x: '{{context.0._source.kibana.alert.rule.category}} - {{context.0._score.test}} - {{context.0._source.kibana.alert.time_range.gte}}',
           },
@@ -392,7 +400,7 @@ describe.only('mustache_renderer', () => {
       `);
 
       expect(
-        renderMustacheString(
+        await renderMustacheString(
           '{{context.0._source.kibana.alert.rule.category}} - {{context.0._score.test}} - {{context.0._source.kibana.alert.time_range.gte}}',
           dotVariables,
           'none'
@@ -400,13 +408,13 @@ describe.only('mustache_renderer', () => {
       ).toEqual('Metric threshold - 1 - 2022-10-26T13:37:26.591Z');
     });
 
-    it('should replace single value with the object', () => {
-      expect(renderMustacheObject({ x: '{{a}}' }, { a: 1, 'a.b': 2 })).toMatchInlineSnapshot(`
+    it('should replace single value with the object', async () => {
+      expect(await renderMustacheObject({ x: '{{a}}' }, { a: 1, 'a.b': 2 })).toMatchInlineSnapshot(`
         Object {
           "x": "{\\"b\\":2}",
         }
       `);
-      expect(renderMustacheString('{{a}}', { a: 1, 'a.b': 2 }, 'none')).toEqual('{"b":2}');
+      expect(await renderMustacheString('{{a}}', { a: 1, 'a.b': 2 }, 'none')).toEqual('{"b":2}');
     });
   });
 });

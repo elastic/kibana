@@ -713,7 +713,10 @@ describe('execute()', () => {
     const variables = {
       rogue: '*bold*',
     };
-    const renderedParams = connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
+    const renderedParams = await connectorType.renderParameterTemplates!(
+      paramsWithTemplates,
+      variables
+    );
     // Yes, this is tested in the snapshot below, but it's double-escaped there,
     // so easier to see here that the escaping is correct.
     expect(renderedParams.message).toBe('\\*bold\\*');

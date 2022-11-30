@@ -21,7 +21,7 @@ beforeEach(() => {
   );
 });
 
-test('skips non string parameters', () => {
+test('skips non string parameters', async () => {
   const actionParams = {
     boolean: true,
     number: 1,
@@ -30,7 +30,7 @@ test('skips non string parameters', () => {
     date: '2019-02-12T21:01:22.479Z',
     message: 'Value "{{params.foo}}" exists',
   };
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,
@@ -61,12 +61,12 @@ test('skips non string parameters', () => {
     `);
 });
 
-test('missing parameters get emptied out', () => {
+test('missing parameters get emptied out', async () => {
   const actionParams = {
     message1: '{{context.value}}',
     message2: 'This message "{{context.value2}}" is missing',
   };
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,
@@ -91,11 +91,11 @@ test('missing parameters get emptied out', () => {
     `);
 });
 
-test('context parameters are passed to templates', () => {
+test('context parameters are passed to templates', async () => {
   const actionParams = {
     message: 'Value "{{context.foo}}" exists',
   };
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,
@@ -119,11 +119,11 @@ test('context parameters are passed to templates', () => {
     `);
 });
 
-test('state parameters are passed to templates', () => {
+test('state parameters are passed to templates', async () => {
   const actionParams = {
     message: 'Value "{{state.bar}}" exists',
   };
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,
@@ -147,11 +147,11 @@ test('state parameters are passed to templates', () => {
     `);
 });
 
-test('alertId is passed to templates', () => {
+test('alertId is passed to templates', async () => {
   const actionParams = {
     message: 'Value "{{alertId}}" exists',
   };
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,
@@ -175,11 +175,11 @@ test('alertId is passed to templates', () => {
   `);
 });
 
-test('alertName is passed to templates', () => {
+test('alertName is passed to templates', async () => {
   const actionParams = {
     message: 'Value "{{alertName}}" exists',
   };
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,
@@ -203,11 +203,11 @@ test('alertName is passed to templates', () => {
   `);
 });
 
-test('tags is passed to templates', () => {
+test('tags is passed to templates', async () => {
   const actionParams = {
     message: 'Value "{{tags}}" exists',
   };
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,
@@ -231,11 +231,11 @@ test('tags is passed to templates', () => {
   `);
 });
 
-test('undefined tags is passed to templates', () => {
+test('undefined tags is passed to templates', async () => {
   const actionParams = {
     message: 'Value "{{tags}}" is undefined and renders as empty string',
   };
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,
@@ -258,11 +258,11 @@ test('undefined tags is passed to templates', () => {
   `);
 });
 
-test('empty tags is passed to templates', () => {
+test('empty tags is passed to templates', async () => {
   const actionParams = {
     message: 'Value "{{tags}}" is an empty array and renders as empty string',
   };
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,
@@ -286,11 +286,11 @@ test('empty tags is passed to templates', () => {
   `);
 });
 
-test('spaceId is passed to templates', () => {
+test('spaceId is passed to templates', async () => {
   const actionParams = {
     message: 'Value "{{spaceId}}" exists',
   };
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,
@@ -314,11 +314,11 @@ test('spaceId is passed to templates', () => {
   `);
 });
 
-test('alertInstanceId is passed to templates', () => {
+test('alertInstanceId is passed to templates', async () => {
   const actionParams = {
     message: 'Value "{{alertInstanceId}}" exists',
   };
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,
@@ -342,11 +342,11 @@ test('alertInstanceId is passed to templates', () => {
   `);
 });
 
-test('alertActionGroup is passed to templates', () => {
+test('alertActionGroup is passed to templates', async () => {
   const actionParams = {
     message: 'Value "{{alertActionGroup}}" exists',
   };
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,
@@ -370,11 +370,11 @@ test('alertActionGroup is passed to templates', () => {
   `);
 });
 
-test('alertActionGroupName is passed to templates', () => {
+test('alertActionGroupName is passed to templates', async () => {
   const actionParams = {
     message: 'Value "{{alertActionGroupName}}" exists',
   };
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,
@@ -398,11 +398,11 @@ test('alertActionGroupName is passed to templates', () => {
   `);
 });
 
-test('rule variables are passed to templates', () => {
+test('rule variables are passed to templates', async () => {
   const actionParams = {
     message: 'Value "{{rule.id}}", "{{rule.name}}", "{{rule.spaceId}}" and "{{rule.tags}}" exist',
   };
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,
@@ -426,11 +426,11 @@ test('rule variables are passed to templates', () => {
   `);
 });
 
-test('rule alert variables are passed to templates', () => {
+test('rule alert variables are passed to templates', async () => {
   const actionParams = {
     message: 'Value "{{alert.id}}", "{{alert.actionGroup}}" and "{{alert.actionGroupName}}" exist',
   };
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,
@@ -454,12 +454,12 @@ test('rule alert variables are passed to templates', () => {
   `);
 });
 
-test('date is passed to templates', () => {
+test('date is passed to templates', async () => {
   const actionParams = {
     message: '{{date}}',
   };
   const dateBefore = Date.now();
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,
@@ -483,13 +483,13 @@ test('date is passed to templates', () => {
   expect(dateVariable).toBeLessThanOrEqual(dateAfter);
 });
 
-test('works recursively', () => {
+test('works recursively', async () => {
   const actionParams = {
     body: {
       message: 'State: "{{state.value}}", Context: "{{context.value}}"',
     },
   };
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,
@@ -515,13 +515,13 @@ test('works recursively', () => {
     `);
 });
 
-test('works recursively with arrays', () => {
+test('works recursively with arrays', async () => {
   const actionParams = {
     body: {
       messages: ['State: "{{state.value}}", Context: "{{context.value}}"'],
     },
   };
-  const result = transformActionParams({
+  const result = await transformActionParams({
     actionsPlugin,
     actionTypeId,
     actionParams,

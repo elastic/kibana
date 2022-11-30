@@ -191,7 +191,7 @@ describe('Task Runner', () => {
       actionsClient
     );
     taskRunnerFactoryInitializerParams.actionsPlugin.renderActionParameterTemplates.mockImplementation(
-      (actionTypeId, actionId, params) => params
+      async (actionTypeId, actionId, params) => params
     );
     ruleTypeRegistry.get.mockReturnValue(ruleType);
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>

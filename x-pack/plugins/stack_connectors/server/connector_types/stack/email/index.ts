@@ -247,15 +247,15 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
   };
 }
 
-function renderParameterTemplates(
+async function renderParameterTemplates(
   params: ActionParamsType,
   variables: Record<string, unknown>
-): ActionParamsType {
+): Promise<ActionParamsType> {
   return {
     // most of the params need no escaping
-    ...renderMustacheObject(params, variables),
+    ...(await renderMustacheObject(params, variables)),
     // message however, needs to escaped as markdown
-    message: renderMustacheString(params.message, variables, 'markdown'),
+    message: await renderMustacheString(params.message, variables, 'markdown'),
   };
 }
 
