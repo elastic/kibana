@@ -9,7 +9,7 @@ import { Observable, of } from 'rxjs';
 import { monaco } from '../monaco_imports';
 
 import { EditorStateService } from './lib';
-import { LangValidation, SyntaxErrors, WorkerAccessor } from '../types';
+import { LangValidation, SyntaxErrors } from '../types';
 import { ID } from './constants';
 import { PainlessContext, PainlessAutocompleteField } from './types';
 import { PainlessWorker } from './worker';
@@ -19,7 +19,7 @@ import { DiagnosticsAdapter, WorkerProxyService } from '../common';
 const workerProxyService = new WorkerProxyService<PainlessWorker>();
 const editorStateService = new EditorStateService();
 
-const worker: WorkerAccessor<PainlessWorker> = (...uris: monaco.Uri[]): Promise<PainlessWorker> => {
+const worker = (...uris: monaco.Uri[]): Promise<PainlessWorker> => {
   return workerProxyService.getWorker(uris);
 };
 

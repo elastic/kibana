@@ -47,7 +47,3 @@ export interface SyntaxErrors {
 export interface BaseWorkerDefinition {
   getSyntaxErrors: (modelUri: string) => Promise<EditorError[] | undefined>;
 }
-
-export type WorkerAccessor<TWorker extends BaseWorkerDefinition> = (
-  ...uris: monaco.Uri[]
-) => Promise<TWorker>;
