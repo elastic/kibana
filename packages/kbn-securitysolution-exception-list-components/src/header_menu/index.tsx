@@ -18,8 +18,6 @@ import {
   PanelPaddingSize,
   PopoverAnchorPosition,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { ButtonContentIconSide } from '@elastic/eui/src/components/button/_button_content_deprecated';
 
@@ -31,9 +29,6 @@ export interface Action {
   onClick: (e: React.MouseEvent<Element, MouseEvent>) => void;
 }
 
-export const containerCss = css`
-  border-bottom: 1px solid ${euiThemeVars.euiColorLightShade};
-`;
 interface HeaderMenuComponentProps {
   disableActions: boolean;
   actions: Action[] | ReactElement[] | null;
