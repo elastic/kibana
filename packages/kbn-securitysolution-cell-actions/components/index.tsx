@@ -9,10 +9,9 @@
 import { orderBy } from 'lodash/fp';
 import React, { useCallback, useContext, useMemo } from 'react';
 
-import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { CellActionsContext } from './cell_actions_context';
 import { HoverActions } from './hover_actions';
-import { ActionItem } from './cell_action_item';
+import { InlineActions } from './inline_actions';
 
 // TODO Define an shared interface for all actions configuration
 export interface CellActionConfig {
@@ -96,28 +95,4 @@ export const CellActions: React.FC<CellActionsProps> = ({
   } else {
     return <>Not implemented</>;
   }
-};
-
-interface InlineActionsProps {
-  getActions: () => Action[];
-  actionContext: ActionExecutionContext;
-  showTooltip: boolean;
-  showMoreActionsFrom: number;
-}
-
-const InlineActions: React.FC<InlineActionsProps> = ({
-  getActions,
-  actionContext,
-  showTooltip,
-  showMoreActionsFrom,
-}) => {
-  const actions = useMemo(() => getActions(), [getActions]);
-
-  return (
-    <>
-      {actions.map((action) => (
-        <ActionItem action={action} actionContext={actionContext} showTooltip={showTooltip} />
-      ))}
-    </>
-  );
 };

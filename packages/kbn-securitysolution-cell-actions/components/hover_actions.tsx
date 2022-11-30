@@ -6,21 +6,17 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiScreenReaderOnly,
-  EuiToolTip,
-  EuiWrappingPopover,
-} from '@elastic/eui';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { EuiScreenReaderOnly } from '@elastic/eui';
+import React, { useCallback, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { HoverActionsPopover } from './hover_actions_popover';
 import { ActionItem } from './cell_action_item';
 import { CellActionConfig } from '.';
+import { ExtraActionsPopOver } from './extra_actions_popover';
+import { useGetPartitionedActions } from '../hooks/actions';
+import { ExtraActionsButton } from './extra_actions_button';
 // FIXME can't import plugin from package
 
 export const SHOW_TOP_N_KEYBOARD_SHORTCUT = 't';
@@ -35,13 +31,6 @@ export const YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS = (fieldName: string) =>
       defaultMessage: `You are in a dialog, containing options for field {fieldName}. Press tab to navigate options. Press escape to exit.`,
     }
   );
-
-export const SHOW_MORE_ACTIONS = i18n.translate(
-  'xpack.securitySolution.cellActions.showMoreActionsLabel',
-  {
-    defaultMessage: 'More actions',
-  }
-);
 
 export const additionalContentCSS = css`
   padding: 2px;
@@ -141,12 +130,12 @@ export const HoverActions: React.FC<Props> = React.memo(
     showTooltip,
     showMoreActionsFrom,
   }) => {
+    const contentRef = useRef<HTMLDivElement>(null);
     const [isExtraActionsPopoverOpen, setIsExtraActionsPopoverOpen] = useState(false);
     const closeExtraActions = useCallback(
       () => setIsExtraActionsPopoverOpen(false),
       [setIsExtraActionsPopoverOpen]
     );
-    const contentRef = useRef<HTMLDivElement>(null);
 
     // useEffect(() => {
     //   if (ownFocus) {
@@ -186,76 +175,16 @@ export const HoverActions: React.FC<Props> = React.memo(
     //   ? StyledHoverActionsContainerWithPaddingsAndMinWidth
     //   : StyledHoverActionsContainer;
 
-    const getExtraActions = useCallback(() => {
-      const allActions = getActions();
-      return allActions.length > showMoreActionsFrom
-        ? allActions.slice(showMoreActionsFrom - 1, allActions.length)
-        : [];
-    }, [getActions, showMoreActionsFrom]);
-
-    const extraActionsPopover = useMemo(
-      () =>
-        isExtraActionsPopoverOpen ? (
-          <EuiWrappingPopover
-            button={contentRef.current!} // ref is not nullable when popover is open
-            isOpen={isExtraActionsPopoverOpen}
-            closePopover={closeExtraActions}
-            panelPaddingSize="s"
-            anchorPosition={'downCenter'}
-            hasArrow={false}
-            repositionOnScroll
-            ownFocus
-            attachToAnchor={false}
-          >
-            <EuiScreenReaderOnly>
-              <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(config.field)}</p>
-            </EuiScreenReaderOnly>
-            <EuiContextMenuPanel
-              size="s"
-              items={getExtraActions().map((action) => (
-                <EuiContextMenuItem
-                  key={action.id}
-                  icon={action.getIconType(actionContext)}
-                  aria-label={action.getDisplayName(actionContext)}
-                  onClick={() => {
-                    closeExtraActions();
-                    action.execute(actionContext);
-                  }}
-                >
-                  {action.getDisplayName(actionContext)}
-                </EuiContextMenuItem>
-              ))}
-            />
-          </EuiWrappingPopover>
-        ) : null,
-      [actionContext, closeExtraActions, config.field, getExtraActions, isExtraActionsPopoverOpen]
-    );
+    const getPartitionedActions = useGetPartitionedActions(getActions, showMoreActionsFrom);
 
     const getHoverContent = useCallback(
       (closeHoverPopOver: () => void) => {
-        closeExtraActions(); // Make sure extra actions are closed when opening hover actions
-        const allActions = getActions();
-        const visibleActions =
-          allActions.length > showMoreActionsFrom
-            ? allActions.slice(0, showMoreActionsFrom - 1)
-            : allActions;
-
-        const button = (
-          <EuiButtonIcon
-            aria-label={SHOW_MORE_ACTIONS}
-            iconType="boxesHorizontal"
-            onClick={() => {
-              setIsExtraActionsPopoverOpen(true);
-              closeHoverPopOver();
-            }}
-          />
-        );
-
-        const extraActionsButton = showTooltip ? (
-          <EuiToolTip content={SHOW_MORE_ACTIONS}>{button}</EuiToolTip>
-        ) : (
-          button
-        );
+        closeExtraActions(); // Closed extra actions when opening hover actions
+        const { visibleActions, extraActions } = getPartitionedActions();
+        const onShowExtraActionsClick = () => {
+          setIsExtraActionsPopoverOpen(true);
+          closeHoverPopOver();
+        };
 
         return (
           <div>
@@ -271,14 +200,15 @@ export const HoverActions: React.FC<Props> = React.memo(
                 showTooltip={showTooltip}
               />
             ))}
-            {allActions.length > visibleActions.length ? extraActionsButton : null}
+            {extraActions.length > 0 ? (
+              <ExtraActionsButton onClick={onShowExtraActionsClick} showTooltip={false} />
+            ) : null}
           </div>
         );
       },
       [
         closeExtraActions,
-        getActions,
-        showMoreActionsFrom,
+        getPartitionedActions,
         showTooltip,
         config.field,
         additionalContent,
@@ -290,7 +220,15 @@ export const HoverActions: React.FC<Props> = React.memo(
         <HoverActionsPopover getHoverContent={getHoverContent}>
           <div ref={contentRef}>{children}</div>
         </HoverActionsPopover>
-        {extraActionsPopover}
+        <ExtraActionsPopOver
+          getExtraActions={getExtraActions}
+          showMoreActionsFrom={showMoreActionsFrom}
+          anchorRef={contentRef}
+          actionContext={actionContext}
+          config={config}
+          closePopOver={closeExtraActions}
+          isOpen={isExtraActionsPopoverOpen}
+        />
       </>
     );
   }

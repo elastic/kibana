@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './cell_actions';
-export * from './cell_actions/cell_actions_context';
+export * from './components';
+export * from './components/cell_actions_context';
