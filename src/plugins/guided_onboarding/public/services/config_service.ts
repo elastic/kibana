@@ -7,15 +7,10 @@
  */
 
 import { HttpSetup } from '@kbn/core-http-browser';
-import { GuideId, GuideState, GuideStatus, GuideStepIds } from '@kbn/guided-onboarding';
-import type { GuideConfig, GuidesConfig, StepConfig } from '../../common';
+import { GuideId, GuideState, GuideStatus } from '@kbn/guided-onboarding';
+import type { GuideConfig, GuidesConfig } from '../../common';
 import { API_BASE_PATH } from '../../common';
-import {
-  findGuideConfigByGuideId,
-  isLastStep,
-  isStepReadyToComplete,
-  getInProgressStepConfig,
-} from './helpers';
+import { findGuideConfigByGuideId, getInProgressStepConfig } from './helpers';
 
 export class ConfigService {
   private client: HttpSetup | undefined;
@@ -48,31 +43,21 @@ export class ConfigService {
     return findGuideConfigByGuideId(this.configs, guideId);
   }
 
-  public async getStepConfig(
-    guideId: GuideId,
-    stepId: GuideStepIds
-  ): Promise<StepConfig | undefined> {
-    const guideConfig = await this.getGuideConfig(guideId);
-    return guideConfig?.steps.find((step) => step.id === stepId);
-  }
-
-  public async getGuideStatusOnStepCompletion(
-    guideState: GuideState | undefined,
-    guideId: GuideId,
-    stepId: GuideStepIds
-  ): Promise<GuideStatus> {
-    const stepConfig = await this.getStepConfig(guideId, stepId);
-    const isManualCompletion = stepConfig?.manualCompletion || false;
-    const guideConfig = await this.getGuideConfig(guideId);
-    const isLastStepInGuide = isLastStep(guideConfig, guideId, stepId);
-    const isCurrentStepReadyToComplete = isStepReadyToComplete(guideState, guideId, stepId);
-
+  public async getGuideStatusOnStepCompletion({
+    isLastStepInGuide,
+    isManualCompletion,
+    isStepReadyToComplete,
+  }: {
+    isLastStepInGuide: boolean;
+    isManualCompletion: boolean;
+    isStepReadyToComplete: boolean;
+  }): Promise<GuideStatus> {
     // We want to set the guide status to 'ready_to_complete' if the current step is the last step in the guide
     // and the step is not configured for manual completion
     // or if the current step is configured for manual completion and the last step is ready to complete
     if (
       (isLastStepInGuide && !isManualCompletion) ||
-      (isLastStepInGuide && isManualCompletion && isCurrentStepReadyToComplete)
+      (isLastStepInGuide && isManualCompletion && isStepReadyToComplete)
     ) {
       return 'ready_to_complete';
     }

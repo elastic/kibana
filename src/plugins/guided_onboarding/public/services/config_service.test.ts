@@ -8,16 +8,12 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { GuideState } from '@kbn/guided-onboarding';
 import { API_BASE_PATH, testGuideConfig } from '../../common';
 import {
   testGuide,
-  testGuideFirstStep,
-  testGuideLastStep,
   testGuideNotActiveState,
   testGuideStep1InProgressState,
   testGuideStep2InProgressState,
-  testGuideStep3ActiveState,
   testIntegration,
   wrongIntegration,
 } from './api.mocks';
@@ -61,72 +57,31 @@ describe('GuidedOnboarding ConfigService', () => {
     });
   });
 
-  describe('getStepConfig', () => {
-    it('returns undefined if the config is not found', async () => {
-      httpClient.get.mockResolvedValueOnce({
-        configs: {},
-      });
-      configService.setup(httpClient);
-      const config = await configService.getStepConfig(testGuide, testGuideFirstStep);
-      expect(config).toBeUndefined();
-    });
-
-    it('returns the config for the step', async () => {
-      const config = await configService.getStepConfig(testGuide, testGuideFirstStep);
-      expect(config).toHaveProperty('title');
-    });
-  });
-
   describe('getGuideStatusOnStepCompletion', () => {
-    it('returns in_progress when there is no guide state', async () => {
-      const status = await configService.getGuideStatusOnStepCompletion(
-        undefined,
-        testGuide,
-        testGuideFirstStep
-      );
-      expect(status).toBe('in_progress');
-    });
-
     it('returns in_progress when completing not the last step', async () => {
-      const status = await configService.getGuideStatusOnStepCompletion(
-        testGuideStep1InProgressState,
-        testGuide,
-        testGuideFirstStep
-      );
+      const status = await configService.getGuideStatusOnStepCompletion({
+        isLastStepInGuide: false,
+        isManualCompletion: true,
+        isStepReadyToComplete: true,
+      });
       expect(status).toBe('in_progress');
     });
 
     it('when completing the last step that is configured for manual completion, returns in_progress if the step is in progress', async () => {
-      const testGuideStep3InProgressState: GuideState = {
-        ...testGuideStep3ActiveState,
-        steps: [
-          testGuideStep3ActiveState.steps[0],
-          testGuideStep3ActiveState.steps[1],
-          { ...testGuideStep3ActiveState.steps[2], status: 'in_progress' },
-        ],
-      };
-      const status = await configService.getGuideStatusOnStepCompletion(
-        testGuideStep3InProgressState,
-        testGuide,
-        testGuideLastStep
-      );
+      const status = await configService.getGuideStatusOnStepCompletion({
+        isLastStepInGuide: true,
+        isManualCompletion: true,
+        isStepReadyToComplete: false,
+      });
       expect(status).toBe('in_progress');
     });
 
     it('when completing the last step that is configured for manual completion, returns ready_to_complete if the step is ready_to_complete', async () => {
-      const testGuideStep3InProgressState: GuideState = {
-        ...testGuideStep3ActiveState,
-        steps: [
-          testGuideStep3ActiveState.steps[0],
-          testGuideStep3ActiveState.steps[1],
-          { ...testGuideStep3ActiveState.steps[2], status: 'ready_to_complete' },
-        ],
-      };
-      const status = await configService.getGuideStatusOnStepCompletion(
-        testGuideStep3InProgressState,
-        testGuide,
-        testGuideLastStep
-      );
+      const status = await configService.getGuideStatusOnStepCompletion({
+        isLastStepInGuide: true,
+        isManualCompletion: true,
+        isStepReadyToComplete: true,
+      });
       expect(status).toBe('ready_to_complete');
     });
   });

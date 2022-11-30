@@ -13,6 +13,7 @@ import {
   getCompletedSteps,
   getInProgressStepConfig,
   getInProgressStepId,
+  getStepConfig,
   isGuideActive,
   isLastStep,
   isStepInProgress,
@@ -47,6 +48,18 @@ describe('GuidedOnboarding ApiService helpers', () => {
         testGuide
       );
       expect(config).not.toBeUndefined();
+    });
+  });
+
+  describe('getStepConfig', () => {
+    it('returns undefined if the config is not found', async () => {
+      const config = getStepConfig(undefined, testGuide, testGuideFirstStep);
+      expect(config).toBeUndefined();
+    });
+
+    it('returns the config for the step', async () => {
+      const config = getStepConfig(testGuideConfig, testGuide, testGuideFirstStep);
+      expect(config).toHaveProperty('title');
     });
   });
 

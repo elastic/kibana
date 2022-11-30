@@ -28,6 +28,8 @@ import {
   isStepInProgress,
   isStepReadyToComplete,
   isGuideActive,
+  getStepConfig,
+  isLastStep,
 } from './helpers';
 import { ConfigService } from './config_service';
 
@@ -342,8 +344,10 @@ export class ApiService implements GuidedOnboardingApi {
     const isCurrentStepInProgress = isStepInProgress(activeGuide, guideId, stepId);
     const isCurrentStepReadyToComplete = isStepReadyToComplete(activeGuide, guideId, stepId);
 
-    const stepConfig = await this.configService.getStepConfig(activeGuide!.guideId, stepId);
+    const guideConfig = await this.configService.getGuideConfig(guideId);
+    const stepConfig = getStepConfig(guideConfig, activeGuide!.guideId, stepId);
     const isManualCompletion = stepConfig ? !!stepConfig.manualCompletion : false;
+    const isLastStepInGuide = isLastStep(guideConfig, guideId, stepId);
 
     if (isCurrentStepInProgress || isCurrentStepReadyToComplete) {
       const updatedSteps = getCompletedSteps(
@@ -354,11 +358,11 @@ export class ApiService implements GuidedOnboardingApi {
         isManualCompletion && isCurrentStepInProgress
       );
 
-      const status = await this.configService.getGuideStatusOnStepCompletion(
-        activeGuide,
-        guideId,
-        stepId
-      );
+      const status = await this.configService.getGuideStatusOnStepCompletion({
+        isLastStepInGuide,
+        isManualCompletion,
+        isStepReadyToComplete: isCurrentStepReadyToComplete,
+      });
       const currentGuide: GuideState = {
         guideId,
         isActive: true,

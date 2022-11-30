@@ -24,6 +24,14 @@ export const findGuideConfigByGuideId = (
   }
 };
 
+export const getStepConfig = (
+  guideConfig: GuideConfig | undefined,
+  guideId: GuideId,
+  stepId: GuideStepIds
+): StepConfig | undefined => {
+  return guideConfig?.steps.find((step) => step.id === stepId);
+};
+
 const getStepIndex = (
   guideConfig: GuideConfig | undefined,
   guideId: GuideId,
