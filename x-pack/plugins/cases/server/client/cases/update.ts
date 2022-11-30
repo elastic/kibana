@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import { performance } from 'perf_hooks';
 
 import type {
   SavedObject,
@@ -20,6 +21,8 @@ import type {
 
 import { nodeBuilder } from '@kbn/es-query';
 
+import type * as rt from 'io-ts';
+import { CasesPatchRequest as CasesPatchRequestZod } from '../../../common/api/cases/case_zod';
 import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
 import type {
   CaseAssignees,
@@ -63,6 +66,7 @@ import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObject } from '../../common/types';
+import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -295,6 +299,20 @@ interface UpdateRequestWithOriginalCase {
   originalCase: CaseSavedObject;
 }
 
+export const decodeSchema = <T>(schema: rt.Type<T>, data: unknown): T => {
+  const onLeft = (errors: rt.Errors) => {
+    throw new Error(formatErrors(errors).join());
+  };
+
+  const onRight = (schemaType: T): T => identity(schemaType);
+
+  return pipe(
+    schema.decode(data),
+    (decoded) => exactCheck(data, decoded),
+    fold(throwErrors(Boom.badRequest), identity)
+  );
+};
+
 /**
  * Updates the specified cases with new values
  *
@@ -318,10 +336,20 @@ export const update = async (
     authorization,
   } = clientArgs;
 
-  const query = pipe(
-    excess(CasesPatchRequestRt).decode(cases),
-    fold(throwErrors(Boom.badRequest), identity)
-  );
+  const beforeDecode = performance.now();
+
+  const query = CasesPatchRequestZod.parse(cases);
+  // const query = pipe(
+  //   excess(CasesPatchRequestRt).decode(cases),
+  //   fold(throwErrors(Boom.badRequest), identity)
+  // );
+
+  // const query = decodeSchema(CasesPatchRequestRt, cases);
+
+  const afterDecode = performance.now();
+
+  const total = afterDecode - beforeDecode;
+  console.log(`Performance of decode ${total} milliseconds`);
 
   try {
     const myCases = await caseService.getCases({
@@ -467,8 +495,13 @@ export const update = async (
       version: caseInfo.version,
     }));
 
+    // throw createCaseError({
+    //   message: `Failed to update case, ids: ${JSON.stringify(idVersions)}: ${error}`,
+    //   error,
+    //   logger,
+    // });
     throw createCaseError({
-      message: `Failed to update case, ids: ${JSON.stringify(idVersions)}: ${error}`,
+      message: `Failed to update case`,
       error,
       logger,
     });

@@ -688,7 +688,8 @@
     "xml2js": "^0.4.22",
     "xterm": "^5.0.0",
     "yauzl": "^2.10.0",
-    "yazl": "^2.5.1"
+    "yazl": "^2.5.1",
+    "zod": "^3.19.1"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.0.3",

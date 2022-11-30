@@ -280,14 +280,14 @@ export const CasesFindResponseRt = rt.intersection([
 ]);
 
 export const CasePatchRequestRt = rt.intersection([
-  rt.partial(CaseBasicRt.props),
+  rt.exact(rt.partial(CaseBasicRt.props)),
   /**
    * The saved object ID and version
    */
-  rt.type({ id: rt.string, version: rt.string }),
+  rt.strict({ id: rt.string, version: rt.string }),
 ]);
 
-export const CasesPatchRequestRt = rt.type({ cases: rt.array(CasePatchRequestRt) });
+export const CasesPatchRequestRt = rt.strict({ cases: rt.array(CasePatchRequestRt) });
 export const CasesResponseRt = rt.array(CaseResponseRt);
 
 export const CasePushRequestParamsRt = rt.type({

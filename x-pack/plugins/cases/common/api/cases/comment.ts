@@ -40,12 +40,29 @@ export const ContextTypeUserRt = rt.type({
   owner: rt.string,
 });
 
+export const ContextTypeUserRt2 = rt.strict({
+  comment: rt.string,
+  type: rt.literal(CommentType.user),
+  owner: rt.string,
+});
+
 /**
  * This defines the structure of how alerts (generated or user attached) are stored in saved objects documents. It also
  * represents of an alert after it has been transformed. A generated alert will be transformed by the connector so that
  * it matches this structure. User attached alerts do not need to be transformed.
  */
 export const AlertCommentRequestRt = rt.type({
+  type: rt.literal(CommentType.alert),
+  alertId: rt.union([rt.array(rt.string), rt.string]),
+  index: rt.union([rt.array(rt.string), rt.string]),
+  rule: rt.type({
+    id: rt.union([rt.string, rt.null]),
+    name: rt.union([rt.string, rt.null]),
+  }),
+  owner: rt.string,
+});
+
+export const AlertCommentRequestRt2 = rt.strict({
   type: rt.literal(CommentType.alert),
   alertId: rt.union([rt.array(rt.string), rt.string]),
   index: rt.union([rt.array(rt.string), rt.string]),
@@ -71,16 +88,31 @@ export const ActionsCommentRequestRt = rt.type({
   owner: rt.string,
 });
 
+export const ActionsCommentRequestRt2 = rt.strict({
+  type: rt.literal(CommentType.actions),
+  comment: rt.string,
+  actions: rt.type({
+    targets: rt.array(
+      rt.type({
+        hostname: rt.string,
+        endpointId: rt.string,
+      })
+    ),
+    type: rt.string,
+  }),
+  owner: rt.string,
+});
+
 export enum ExternalReferenceStorageType {
   savedObject = 'savedObject',
   elasticSearchDoc = 'elasticSearchDoc',
 }
 
-const ExternalReferenceStorageNoSORt = rt.type({
+const ExternalReferenceStorageNoSORt = rt.strict({
   type: rt.literal(ExternalReferenceStorageType.elasticSearchDoc),
 });
 
-const ExternalReferenceStorageSORt = rt.type({
+const ExternalReferenceStorageSORt = rt.strict({
   type: rt.literal(ExternalReferenceStorageType.savedObject),
   soType: rt.string,
 });
@@ -98,7 +130,19 @@ export const ExternalReferenceNoSORt = rt.type({
   externalReferenceStorage: ExternalReferenceStorageNoSORt,
 });
 
+export const ExternalReferenceNoSORt2 = rt.strict({
+  ...ExternalReferenceBaseRt.props,
+  externalReferenceId: rt.string,
+  externalReferenceStorage: ExternalReferenceStorageNoSORt,
+});
+
 export const ExternalReferenceSORt = rt.type({
+  ...ExternalReferenceBaseRt.props,
+  externalReferenceId: rt.string,
+  externalReferenceStorage: ExternalReferenceStorageSORt,
+});
+
+export const ExternalReferenceSORt2 = rt.strict({
   ...ExternalReferenceBaseRt.props,
   externalReferenceId: rt.string,
   externalReferenceStorage: ExternalReferenceStorageSORt,
@@ -117,6 +161,13 @@ export const ExternalReferenceWithoutRefsRt = rt.union([
 ]);
 
 export const PersistableStateAttachmentRt = rt.type({
+  type: rt.literal(CommentType.persistableState),
+  owner: rt.string,
+  persistableStateAttachmentTypeId: rt.string,
+  persistableStateAttachmentState: rt.record(rt.string, jsonValueRt),
+});
+
+export const PersistableStateAttachmentRt2 = rt.strict({
   type: rt.literal(CommentType.persistableState),
   owner: rt.string,
   persistableStateAttachmentTypeId: rt.string,
@@ -175,12 +226,12 @@ const CommentAttributesWithoutRefsRt = rt.union([
 ]);
 
 export const CommentRequestRt = rt.union([
-  ContextTypeUserRt,
-  AlertCommentRequestRt,
-  ActionsCommentRequestRt,
-  ExternalReferenceNoSORt,
-  ExternalReferenceSORt,
-  PersistableStateAttachmentRt,
+  ContextTypeUserRt2,
+  AlertCommentRequestRt2,
+  ActionsCommentRequestRt2,
+  ExternalReferenceNoSORt2,
+  ExternalReferenceSORt2,
+  PersistableStateAttachmentRt2,
 ]);
 
 export const CommentResponseRt = rt.intersection([
