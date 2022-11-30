@@ -14,14 +14,21 @@ import { Escape, getEscape } from './mustache_renderer';
 
 type Variables = Record<string, unknown>;
 
+interface TemplateDirectives {
+  format: string; // mustache or handlebars
+  timeZone?: string; // https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  dateFormat?: string; // https://momentjs.com/docs/#/displaying/format/
+  expressions: string[]; // kibana expressions
+}
+
 export function renderTemplate(
   originalTemplate: string,
   variables: Variables,
   escape: Escape
 ): string {
-  const { template, properties } = getPropertiesFromTemplate(originalTemplate);
+  const { template, directives } = getTemplateDirectives(originalTemplate);
   // presumably we'll default to mustache, but trying defaulting to handlebars
-  const format = properties.get('format') || 'handlebars';
+  const format = directives.format;
 
   switch (format) {
     case 'mustache':
@@ -34,10 +41,8 @@ export function renderTemplate(
       }
 
     case 'handlebars':
-      // list: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-      const timeZone = properties.get('timeZone');
-      // list: https://momentjs.com/docs/#/displaying/format/
-      const dateFormat = properties.get('dateFormat');
+      const timeZone = directives.timeZone;
+      const dateFormat = directives.dateFormat;
 
       const handlebars = Handlebars.create();
 
@@ -70,9 +75,9 @@ export function renderTemplate(
   }
 }
 
-interface GetPropertiesFromTemplate {
+interface GetTemplateDirectives {
   template: string;
-  properties: Map<string, string>;
+  directives: TemplateDirectives;
 }
 
 // match lines like {{!@ ... }}
@@ -81,10 +86,17 @@ const commentPattern = /^\s*\{\{\!@(.*)\}\}\s*$/;
 // match lines like foo : bar car
 const propertyPattern = /^\s*(\w+)\s*:\s*(.*)\s*$/;
 
-function getPropertiesFromTemplate(template: string): GetPropertiesFromTemplate {
+function getTemplateDirectives(template: string): GetTemplateDirectives {
   const lines = template.split('\n');
   const templateLines: string[] = [];
-  const properties = new Map<string, string>();
+  const directives: TemplateDirectives = {
+    format: 'mustache',
+    expressions: [],
+  };
+
+  // just trying this as default "for fun", but presumably we'd ship
+  // mustache as the default, like a few lines ^^^
+  directives.format = 'mustache';
 
   for (const line of lines) {
     const match = line.match(commentPattern);
@@ -99,12 +111,26 @@ function getPropertiesFromTemplate(template: string): GetPropertiesFromTemplate 
       continue; // should log a warning
     }
     const [_, key, val] = propMatch;
-    properties.set(key, val);
+
+    switch (key) {
+      case 'format':
+        directives.format = val;
+        break;
+      case 'timeZone':
+        directives.timeZone = val;
+        break;
+      case 'dateFormat':
+        directives.dateFormat = val;
+        break;
+      case 'expr':
+        directives.expressions.push(val);
+        break;
+    }
   }
 
   const result = {
     template: templateLines.join('\n'),
-    properties,
+    directives,
   };
 
   return result;
