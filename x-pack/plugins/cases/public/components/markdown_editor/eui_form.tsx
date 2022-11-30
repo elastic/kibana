@@ -32,6 +32,8 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   initialValue?: string;
 };
 
+const STORAGE_DEBOUNCE_TIME = 500;
+
 const BottomContentWrapper = styled(EuiFlexGroup)`
   ${({ theme }) => `
     padding: ${theme.eui.euiSizeM} 0;
@@ -87,7 +89,7 @@ export const MarkdownEditorForm = React.memo(
         () => {
           if (draftCommentStorageKey) storage.set(draftCommentStorageKey, field.value);
         },
-        500,
+        STORAGE_DEBOUNCE_TIME,
         [field.value]
       );
 
