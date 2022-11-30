@@ -32,7 +32,7 @@ import {
 import {
   useAuthz,
   useLink,
-  usePackageInstallations,
+  usePackageInstallationsQuery,
   usePermissionCheck,
   useStartServices,
 } from '../../../../../hooks';
@@ -62,7 +62,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   const { application } = useStartServices();
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
-  const { updatableIntegrations } = usePackageInstallations();
+  const { updatableIntegrations } = usePackageInstallationsQuery();
   const { getHref } = useLink();
 
   const permissionCheck = usePermissionCheck();

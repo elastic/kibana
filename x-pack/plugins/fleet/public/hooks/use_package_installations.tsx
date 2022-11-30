@@ -26,7 +26,7 @@ interface UpdatableIntegration {
   }>;
 }
 
-export const usePackageInstallations = () => {
+export const usePackageInstallationsQuery = () => {
   const { data: allPackages, isLoading: isLoadingPackages } = useGetPackagesQuery({
     prerelease: true,
   });

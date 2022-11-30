@@ -10,6 +10,8 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { useState } from 'react';
 
+import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
+
 import { epmRouteService, isVerificationError } from '../../services';
 import type {
   GetCategoriesRequest,
@@ -161,6 +163,12 @@ export const useGetFileByPath = (filePath: string) => {
     path: epmRouteService.getFilePath(filePath),
     method: 'get',
   });
+};
+
+export const useGetFileByPathQuery = (filePath: string) => {
+  return useQuery<SendRequestResponse<string>, RequestError>(['get-file', filePath], () =>
+    sendRequest<string>({ path: epmRouteService.getFilePath(filePath), method: 'get' })
+  );
 };
 
 export const sendGetFileByPath = (filePath: string) => {

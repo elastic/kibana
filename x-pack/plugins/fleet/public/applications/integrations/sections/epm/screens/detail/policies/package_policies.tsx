@@ -27,7 +27,7 @@ import {
   useUrlPagination,
   useGetPackageInstallStatus,
   AgentPolicyRefreshContext,
-  usePackageInstallations,
+  usePackageInstallationsQuery,
   useAuthz,
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
@@ -99,6 +99,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
+
   const {
     data,
     isLoading,
@@ -108,7 +109,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     perPage: pagination.pageSize,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${name}`,
   });
-  const { updatableIntegrations } = usePackageInstallations();
+  const { updatableIntegrations } = usePackageInstallationsQuery();
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
 
