@@ -94,7 +94,7 @@ export class ExceptionsListApiClient {
     return this.http === coreHttp;
   }
 
-  public getHttp(): HttpStart {
+  protected getHttp(): HttpStart {
     return this.http;
   }
 
