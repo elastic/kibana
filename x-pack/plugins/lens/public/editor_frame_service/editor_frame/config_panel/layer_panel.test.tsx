@@ -164,15 +164,6 @@ describe('LayerPanel', () => {
       ).toContain('Delete layer');
     });
 
-    it('should show to reset visualization for visualizations only allowing a single layer', async () => {
-      const layerPanelAttributes = getDefaultProps();
-      delete layerPanelAttributes.activeVisualization.removeLayer;
-      const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
-      expect(
-        instance.find('[data-test-subj="lnsLayerRemove--0"]').first().props()['aria-label']
-      ).toContain('Reset visualization');
-    });
-
     it('should call the clear callback', async () => {
       const cb = jest.fn();
       const { instance } = await mountWithProvider(
