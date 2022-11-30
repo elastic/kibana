@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
 import { find } from 'lodash/fp';
@@ -121,6 +121,11 @@ export const Insights = React.memo<Props>(
               <div>
                 <EuiIcon type="layers" style={{ marginLeft: '4px', marginRight: '8px' }} />
                 {i18n.SUPPRESSED_ALERTS_COUNT(parseInt(alertSuppressionField.values[0], 10))}
+                <EuiBetaBadge
+                  label={i18n.SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW}
+                  style={{ verticalAlign: 'middle', marginLeft: '8px' }}
+                  size="s"
+                />
               </div>
             </StyledInsightItem>
           )}

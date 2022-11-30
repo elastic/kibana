@@ -155,3 +155,10 @@ export const SUPPRESSED_ALERTS_COUNT = (count?: number) =>
     defaultMessage: '{count} suppressed {count, plural, =1 {alert} other {alerts}}',
     values: { count },
   });
+
+export const SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.insights.suppressedAlertsCountTechnicalPreview',
+  {
+    defaultMessage: 'Technical Preview',
+  }
+);
