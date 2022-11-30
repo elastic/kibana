@@ -36,7 +36,7 @@ const variables = {
   vl: '|',
 };
 
-describe('mustache_renderer', () => {
+describe.only('mustache_renderer', () => {
   describe('renderMustacheString()', () => {
     for (const escapeVal of ['none', 'slack', 'markdown', 'json']) {
       const escape = escapeVal as Escape;
@@ -408,68 +408,5 @@ describe('mustache_renderer', () => {
       `);
       expect(renderMustacheString('{{a}}', { a: 1, 'a.b': 2 }, 'none')).toEqual('{"b":2}');
     });
-  });
-
-  describe('using handlebars', () => {
-    it('is supported with a format comment directive', () => {
-      const template = `
-{{!@ format: handlebars}}
-{{#if x}}{{x}}{{/if}}
-      `.trim();
-
-      expect(renderMustacheString(template, { x: 1 }, 'none')).toEqual('1');
-    });
-
-    it('has a date helper', () => {
-      const timeStamp = '2022-11-29T15:52:44Z';
-      const template = `
-{{!@ format: handlebars}}
-{{date timeStamp}}
-      `.trim();
-
-      expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual('2022-11-29 03:52pm');
-    });
-
-    it('date with a time zone is successful', () => {
-      const timeStamp = '2022-11-29T15:52:44Z';
-      const timeZone = 'America/New_York';
-      const template = `
-{{!@ format: handlebars}}
-{{!@ timeZone: ${timeZone}}}
-{{date timeStamp}}
-      `.trim();
-
-      expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual('2022-11-29 10:52am');
-    });
-
-    it('date with a format is successful', () => {
-      const timeStamp = '2022-11-29T15:52:44Z';
-      const dateFormat = 'dddd MMM Do YYYY HH:mm:ss.SSS';
-      const template = `
-{{!@ format: handlebars}}
-{{!@ dateFormat: ${dateFormat}}}
-{{date timeStamp}}
-      `.trim();
-
-      expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual(
-        'Tuesday Nov 29th 2022 15:52:44.000'
-      );
-    });
-  });
-
-  it('date with a format and timezone is successful', () => {
-    const timeStamp = '2022-11-29T15:52:44Z';
-    const dateFormat = 'dddd MMM Do YYYY HH:mm:ss.SSS';
-    const timeZone = 'America/New_York';
-    const template = `
-{{!@ format: handlebars}}
-{{!@ dateFormat: ${dateFormat}}}
-{{!@ timeZone: ${timeZone}}}
-{{date timeStamp}}
-    `.trim();
-
-    expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual(
-      'Tuesday Nov 29th 2022 10:52:44.000'
-    );
   });
 });

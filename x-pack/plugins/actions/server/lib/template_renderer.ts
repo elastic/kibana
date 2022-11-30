@@ -6,8 +6,9 @@
  */
 
 import Mustache from 'mustache';
-import Handlebars from '@kbn/handlebars';
 import moment from 'moment-timezone';
+import Handlebars from '@kbn/handlebars';
+import * as tinymath from '@kbn/tinymath';
 
 import { Escape, getEscape } from './mustache_renderer';
 
@@ -39,7 +40,23 @@ export function renderTemplate(
       const dateFormat = properties.get('dateFormat');
 
       const handlebars = Handlebars.create();
-      handlebars.registerHelper('date', (s: string) => formatDate(s, timeZone, dateFormat));
+
+      handlebars.registerHelper('date', function (this: Variables, o: unknown) {
+        return formatDate(o, this, timeZone, dateFormat);
+      });
+      handlebars.registerHelper('json', function (this: Variables, o: unknown) {
+        return jsonize(o, this, false);
+      });
+      handlebars.registerHelper('jsonl', function (this: Variables, o: unknown) {
+        return jsonize(o, this, true);
+      });
+      handlebars.registerHelper('math', function (this: Variables, o: unknown) {
+        return math(o, this);
+      });
+
+      // see: https://github.com/handlebars-lang/handlebars.js/pull/1523
+      // and issues linked to it, for a better approach to customizing
+      // escaping functions
       const previousHandlebarsEscape = handlebars.Utils.escapeExpression;
       handlebars.Utils.escapeExpression = getEscape(escape);
       try {
@@ -95,10 +112,33 @@ function getPropertiesFromTemplate(template: string): GetPropertiesFromTemplate 
 
 const DefaultFormat = 'YYYY-MM-DD hh:mma';
 
-function formatDate(date: string, timeZone: string = 'UTC', format?: string): string {
-  const mDate = moment(date);
+function formatDate(
+  o: unknown,
+  vars: Variables,
+  timeZone: string = 'UTC',
+  format?: string
+): string {
+  const mDate = moment(`${o}`);
   if (timeZone) {
     mDate.tz(timeZone);
   }
   return mDate.format(format ?? DefaultFormat);
+}
+
+function jsonize(o: unknown, vars: Variables, pretty: boolean): string {
+  if (pretty) {
+    return JSON.stringify(o, null, 4);
+  } else {
+    return JSON.stringify(o);
+  }
+}
+
+function math(o: unknown, vars: Variables): string {
+  const expr = `${o}`;
+  try {
+    const result = tinymath.evaluate(expr, vars);
+    return `${result}`;
+  } catch (err) {
+    throw new Error(`error evaluating tinymath expression "${expr}": ${err.message}`);
+  }
 }
