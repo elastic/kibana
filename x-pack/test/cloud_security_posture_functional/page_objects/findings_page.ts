@@ -18,6 +18,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
+  const flyoutService = getService('flyout');
 
   /**
    * required before indexing findings
@@ -44,6 +45,26 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
           })
         )
       );
+    },
+  };
+
+  const flyout = {
+    isFlyoutOpen: () => retry.try(() => testSubjects.exists('findings_flyout')),
+    closeFlyout: () => flyoutService.close('findings_flyout'),
+    navigateToJSONTab: () => testSubjects.click('findings_flyout_tab_json'),
+    copyJSONToClipboard: async () => {
+      const element = await testSubjects.find('findings_flyout');
+      const copyButton = await element.findByCssSelector('button[aria-label="Copy"]');
+      await copyButton.click();
+    },
+    openRowIndexFlyout: async (rowIndex: number) => {
+      const element = await table.getElement();
+      const buttons = await element.findAllByCssSelector(
+        'button[data-test-subj="findings_table_expand_column"]'
+      );
+      const button = buttons[rowIndex - 1];
+      expect(button).to.not.be(undefined);
+      await button.click();
     },
   };
 
@@ -160,5 +181,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     navigateToFindingsPage,
     table,
     index,
+    flyout,
   };
 }

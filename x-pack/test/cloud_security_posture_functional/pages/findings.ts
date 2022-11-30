@@ -13,6 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const retry = getService('retry');
+  const browser = getService('browser');
   const pageObjects = getPageObjects(['common', 'findings']);
 
   const data = Array.from({ length: 2 }, (_, id) => {
@@ -24,6 +25,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         section: 'Kubelet',
         tags: ['Kubernetes'],
         type: 'process',
+        benchmark: {
+          name: 'CIS Kubernetes V1.23',
+          id: 'cis_k8s',
+          version: 'v1.0.0',
+        },
       },
     };
   });
@@ -34,10 +40,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Findings Page', () => {
     let findings: typeof pageObjects.findings;
     let table: typeof pageObjects.findings.table;
+    let flyout: typeof pageObjects.findings.flyout;
 
     before(async () => {
       findings = pageObjects.findings;
       table = pageObjects.findings.table;
+      flyout = pageObjects.findings.flyout;
 
       await findings.index.add(data);
       await findings.navigateToFindingsPage();
@@ -106,6 +114,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('sorts by resource name', async () => {
         await table.toggleColumnSortOrFail('Resource Name', 'desc');
+      });
+    });
+
+    describe.only('Flyout', () => {
+      it('opens flyout', async () => {
+        await flyout.openRowIndexFlyout(1);
+
+        expect(await flyout.isFlyoutOpen()).to.be(true);
+      });
+
+      it('closes flyout', async () => {
+        await flyout.closeFlyout();
+
+        expect(await flyout.isFlyoutOpen()).to.be(false);
+      });
+
+      it('copies raw JSON to clipboard', async () => {
+        await flyout.openRowIndexFlyout(1);
+        await flyout.navigateToJSONTab();
+        await flyout.copyJSONToClipboard();
+        const name = JSON.parse(await browser.getClipboardValue()).rule.name;
+        expect(name).to.eql(data[0].rule.name);
       });
     });
   });

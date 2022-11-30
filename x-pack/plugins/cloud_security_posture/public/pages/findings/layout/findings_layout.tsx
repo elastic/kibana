@@ -51,6 +51,7 @@ export const getExpandColumn = <T extends unknown>({
   width: '40px',
   actions: [
     {
+      ['data-test-subj']: 'findings_table_expand_column',
       name: i18n.translate('xpack.csp.expandColumnNameLabel', { defaultMessage: 'Expand' }),
       description: i18n.translate('xpack.csp.expandColumnDescriptionLabel', {
         defaultMessage: 'Expand',
