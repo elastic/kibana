@@ -391,7 +391,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await retry.try(async () => {
           const stats = await getSecurityTelemetryStats(supertest, log);
-          expect(stats.detection_rules).length(2);
+          expect(stats.detection_rules).length(1);
           const detectionRule = stats.detection_rules[0][0];
           expect(detectionRule['@timestamp']).to.be.a('string');
           expect(detectionRule.cluster_uuid).to.be.a('string');
@@ -787,21 +787,6 @@ export default ({ getService }: FtrProviderContext) => {
             });
 
           expect(detectionRules).to.eql([
-            {
-              created_at: detectionRules[1].created_at,
-              entries: [
-                {
-                  field: 'keyword',
-                  operator: 'included',
-                  type: 'match',
-                  value: 'something 1',
-                },
-              ],
-              id: detectionRules[1].id,
-              name: 'endpoint description 1',
-              os_types: [],
-              rule_version: detectionRules[1].rule_version,
-            },
             {
               name: 'Security Solution Detection Rule Lists Telemetry',
               passed: true,
