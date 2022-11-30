@@ -11,19 +11,19 @@ import { REPO_ROOT } from '@kbn/utils';
 import Fsp from 'fs/promises';
 import path from 'path';
 
+// These "secret" values are intentionally written in the source. We would make the APM server accept anonymous traffic if we could
+const APM_SERVER_URL = 'https://kibana-ops-e2e-perf.apm.us-central1.gcp.cloud.es.io:443';
+const APM_PUBLIC_TOKEN = 'CTs9y3cvcfq13bQqsB';
+const apmEnv = {
+  ELASTIC_APM_ACTIVE: 'true',
+  ELASTIC_APM_SERVER_URL: APM_SERVER_URL,
+  ELASTIC_APM_SECRET_TOKEN: APM_PUBLIC_TOKEN,
+  ELASTIC_APM_TRANSACTION_SAMPLE_RATE: "1.0",
+};
+
 run(
   async ({ log, flagsReader, procRunner }) => {
     async function runFunctionalTest(journey: string, phase: 'TEST' | 'WARMUP') {
-      // Pass in a clean APM environment, so that FTR can later
-      // set it's own values.
-      const cleanApmEnv = {
-        ELASTIC_APM_TRANSACTION_SAMPLE_RATE: undefined,
-        ELASTIC_APM_SERVER_URL: undefined,
-        ELASTIC_APM_SECRET_TOKEN: undefined,
-        ELASTIC_APM_ACTIVE: undefined,
-        ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: undefined,
-        ELASTIC_APM_GLOBAL_LABELS: undefined,
-      };
 
       await procRunner.run('functional-tests', {
         cmd: 'node',
@@ -40,18 +40,20 @@ run(
           TEST_PERFORMANCE_PHASE: phase,
           TEST_ES_URL: 'http://elastic:changeme@localhost:9200',
           TEST_ES_DISABLE_STARTUP: 'true',
-          ...cleanApmEnv,
+          ...apmEnv,
         },
       });
     }
 
     async function startEs() {
       process.stdout.write(`--- Starting ES\n`);
+
       await procRunner.run('es', {
         cmd: 'node',
         args: ['scripts/es', 'snapshot'],
         cwd: REPO_ROOT,
         wait: /kbn\/es setup complete/,
+        env: apmEnv,
       });
 
       log.info(`✅ ES is ready and will run in the background`);
