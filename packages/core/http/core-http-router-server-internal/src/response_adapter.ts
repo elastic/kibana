@@ -10,6 +10,8 @@ import {
   ResponseObject as HapiResponseObject,
   ResponseToolkit as HapiResponseToolkit,
 } from '@hapi/hapi';
+// import the types so they extend @hapi/hapi, but label as types so this import is dropped
+import type {} from '@hapi/inert';
 import typeDetect from 'type-detect';
 import Boom from '@hapi/boom';
 import * as stream from 'stream';
@@ -17,17 +19,30 @@ import {
   ElasticsearchErrorDetails,
   isResponseError as isElasticsearchResponseError,
 } from '@kbn/es-errors';
+import { REPO_ROOT } from '@kbn/utils';
 import { HttpResponsePayload, ResponseError, ResponseErrorAttributes } from '@kbn/core-http-server';
-import { KibanaResponse } from './response';
+import { KibanaResponse } from './kibana_response/kibana_response';
+import { KibanaFileResponse } from './kibana_response/kibana_file_response';
+
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
 
 function setHeaders(response: HapiResponseObject, headers: Record<string, string | string[]> = {}) {
   Object.entries(headers).forEach(([header, value]) => {
-    if (value !== undefined) {
+    if (value === undefined) {
+      return;
+    }
+
+    if (header.toLowerCase() === 'etag') {
+      response.etag(Array.isArray(value) ? value[0] : value);
+    } else {
       // Hapi typings for header accept only strings, although string[] is a valid value
       response.header(header, value as any);
     }
   });
-  applyEtag(response, headers);
+
   return response;
 }
 
@@ -82,6 +97,9 @@ export class HapiResponseAdapter {
     if (statusHelpers.isRedirect(kibanaResponse.status)) {
       return this.toRedirect(kibanaResponse);
     }
+    if (kibanaResponse instanceof KibanaFileResponse) {
+      return this.toFile(kibanaResponse);
+    }
     throw new Error(
       `Unexpected Http status code. Expected from 100 to 599, but given: ${kibanaResponse.status}.`
     );
@@ -92,6 +110,25 @@ export class HapiResponseAdapter {
       .response(kibanaResponse.payload)
       .code(kibanaResponse.status);
     setHeaders(response, kibanaResponse.options.headers);
+    return response;
+  }
+
+  private toFile(kibanaResponse: KibanaFileResponse) {
+    const response = this.responseToolkit.file(kibanaResponse.path, {
+      etagMethod: 'simple',
+      mode: 'inline',
+      confine: REPO_ROOT,
+    });
+    setHeaders(response, kibanaResponse.options.headers);
+
+    if (!response.headers['cache-control']) {
+      if (kibanaResponse.options.immutable) {
+        response.header('cache-control', `max-age=${365 * DAY}, immutable, stale-if-error`);
+      } else {
+        response.header('cache-control', 'must-revalidate');
+      }
+    }
+
     return response;
   }
 
@@ -162,11 +199,4 @@ function getErrorMessage(payload?: ResponseError): string {
 
 function getErrorAttributes(payload?: ResponseError): ResponseErrorAttributes | undefined {
   return typeof payload === 'object' && 'attributes' in payload ? payload.attributes : undefined;
-}
-
-function applyEtag(response: HapiResponseObject, headers: Record<string, string | string[]>) {
-  const etagHeader = Object.keys(headers).find((header) => header.toLowerCase() === 'etag');
-  if (etagHeader) {
-    response.etag(headers[etagHeader] as string);
-  }
 }

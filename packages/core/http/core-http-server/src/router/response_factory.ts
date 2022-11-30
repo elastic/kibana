@@ -15,6 +15,7 @@ import type {
   RedirectResponseOptions,
   ResponseError,
   ErrorHttpResponseOptions,
+  KibanaFileResponseOptions,
 } from './response';
 
 /**
@@ -41,6 +42,21 @@ export interface KibanaSuccessResponseFactory {
    * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
    */
   noContent(options?: HttpResponseOptions): IKibanaResponse;
+}
+
+/**
+ * @public
+ */
+export interface KibanaFileResponseFactory {
+  /**
+   * The request is for a file on the filesystem. If the file exists
+   * then it will be served the same as a normal static file, including
+   * etag and related header support. If the file does not exist a 404
+   * will be sent.
+   * @param path - The absolute path to the file which should be served
+   * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
+   */
+  file(path: string, options?: KibanaFileResponseOptions): IKibanaResponse;
 }
 
 /**
@@ -195,7 +211,8 @@ export interface KibanaErrorResponseFactory {
  */
 export type KibanaResponseFactory = KibanaSuccessResponseFactory &
   KibanaRedirectionResponseFactory &
-  KibanaErrorResponseFactory & {
+  KibanaErrorResponseFactory &
+  KibanaFileResponseFactory & {
     /**
      * Creates a response with defined status code and payload.
      * @param options - {@link CustomHttpResponseOptions} configures HTTP response parameters.

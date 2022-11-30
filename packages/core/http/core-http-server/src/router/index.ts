@@ -40,6 +40,7 @@ export type {
   RedirectResponseOptions,
   ResponseErrorAttributes,
   ErrorHttpResponseOptions,
+  KibanaFileResponseOptions,
 } from './response';
 export type {
   RouteConfigOptions,
@@ -68,4 +69,5 @@ export type {
   KibanaSuccessResponseFactory,
   KibanaResponseFactory,
   LifecycleResponseFactory,
+  KibanaFileResponseFactory,
 } from './response_factory';

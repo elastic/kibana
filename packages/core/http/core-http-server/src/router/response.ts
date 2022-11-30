@@ -23,6 +23,21 @@ export interface HttpResponseOptions {
 }
 
 /**
+ * HTTP response options valid for file() responses
+ * @public
+ */
+export type KibanaFileResponseOptions = Pick<HttpResponseOptions, 'headers'> & {
+  /**
+   * Set to true in order to enable caching for immutable URLs. This means that the
+   * response for the current URL will never change and there isn't any point in the
+   * user requesting the asset again, it should just be cached forever. Only do this
+   * for URLs which include highly-specific information about the response, like hashes
+   * or version numbers, as there is no way to clear that caches on user's machines
+   */
+  immutable?: boolean;
+};
+
+/**
  * Data send to the client as a response payload.
  * @public
  */

@@ -19,25 +19,14 @@ import type {
   KibanaRedirectionResponseFactory,
   KibanaSuccessResponseFactory,
   KibanaResponseFactory,
+  KibanaFileResponseFactory,
   LifecycleResponseFactory,
 } from '@kbn/core-http-server';
+import { KibanaResponse } from './kibana_response/kibana_response';
+import { KibanaFileResponse } from './kibana_response/kibana_file_response';
 
 export function isKibanaResponse(response: Record<string, any>): response is IKibanaResponse {
   return typeof response.status === 'number' && typeof response.options === 'object';
-}
-
-/**
- * A response data object, expected to returned as a result of {@link RequestHandler} execution
- * @internal
- */
-export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any>
-  implements IKibanaResponse<T>
-{
-  constructor(
-    public readonly status: number,
-    public readonly payload?: T,
-    public readonly options: HttpResponseOptions = {}
-  ) {}
 }
 
 const successResponseFactory: KibanaSuccessResponseFactory = {
@@ -48,6 +37,10 @@ const successResponseFactory: KibanaSuccessResponseFactory = {
 
 const redirectionResponseFactory: KibanaRedirectionResponseFactory = {
   redirected: (options: RedirectResponseOptions) => new KibanaResponse(302, options.body, options),
+};
+
+const fileResponseFactory: KibanaFileResponseFactory = {
+  file: (path: string, options?: HttpResponseOptions) => new KibanaFileResponse(path, options),
 };
 
 const errorResponseFactory: KibanaErrorResponseFactory = {
@@ -80,6 +73,7 @@ export const kibanaResponseFactory: KibanaResponseFactory = {
   ...successResponseFactory,
   ...redirectionResponseFactory,
   ...errorResponseFactory,
+  ...fileResponseFactory,
   custom: <T extends HttpResponsePayload | ResponseError>(
     options: CustomHttpResponseOptions<T>
   ) => {
