@@ -161,6 +161,8 @@
           "AggregationsHistogramAggregation",
           "; ip_range: ",
           "AggregationsIpRangeAggregation",
+          "; ip_prefix: ",
+          "AggregationsIpPrefixAggregation",
           "; inference: ",
           "AggregationsInferenceAggregation",
           "; line: ",

@@ -229,6 +229,7 @@ describe('Session', () => {
         value: {
           idleTimeoutExpiration: now + 1,
           lifespanExpiration: now + 1,
+          createdAt: 1234567890,
           metadata: { index: mockSessionIndexValue },
           provider: { name: 'basic1', type: 'basic' },
           sid: 'some-long-sid',
@@ -262,10 +263,49 @@ describe('Session', () => {
         value: {
           idleTimeoutExpiration: now + 1,
           lifespanExpiration: now + 1,
+          createdAt: 1234567890,
           metadata: { index: mockSessionIndexValue },
           provider: { name: 'basic1', type: 'basic' },
           sid: 'some-long-sid',
           state: 'some-state',
+        },
+      });
+      expect(mockSessionCookie.clear).not.toHaveBeenCalled();
+      expect(mockSessionIndex.invalidate).not.toHaveBeenCalled();
+    });
+
+    it('returns session value with 0 as `createdAt` if it is not set', async () => {
+      mockSessionCookie.get.mockResolvedValue(
+        sessionCookieMock.createValue({
+          aad: mockAAD,
+          idleTimeoutExpiration: now + 1,
+          lifespanExpiration: now + 1,
+        })
+      );
+
+      const mockSessionIndexValue = sessionIndexMock.createValue({
+        idleTimeoutExpiration: now - 1,
+        lifespanExpiration: now + 1,
+        createdAt: undefined,
+        content: await encryptContent(
+          { username: 'some-user', state: 'some-state', userProfileId: 'uid' },
+          mockAAD
+        ),
+      });
+      mockSessionIndex.get.mockResolvedValue(mockSessionIndexValue);
+
+      await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toEqual({
+        error: null,
+        value: {
+          idleTimeoutExpiration: now + 1,
+          lifespanExpiration: now + 1,
+          createdAt: 0,
+          metadata: { index: mockSessionIndexValue },
+          provider: { name: 'basic1', type: 'basic' },
+          sid: 'some-long-sid',
+          state: 'some-state',
+          username: 'some-user',
+          userProfileId: 'uid',
         },
       });
       expect(mockSessionCookie.clear).not.toHaveBeenCalled();
@@ -282,6 +322,7 @@ describe('Session', () => {
         sid: mockSID,
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 456,
+        createdAt: 123456,
       });
       mockSessionIndex.create.mockResolvedValue(mockSessionIndexValue);
 
@@ -301,6 +342,7 @@ describe('Session', () => {
         provider: { name: 'basic1', type: 'basic' },
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 456,
+        createdAt: 123456,
         metadata: { index: mockSessionIndexValue },
       });
 
@@ -314,6 +356,7 @@ describe('Session', () => {
         usernameHash: '8ac76453d769d4fd14b3f41ad4933f9bd64321972cd002de9b847e117435b08b',
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 456,
+        createdAt: 123456,
       });
 
       // Properly creates session cookie value.
@@ -334,6 +377,7 @@ describe('Session', () => {
         sid: mockSID,
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 456,
+        createdAt: 123456,
       });
       mockSessionIndex.create.mockResolvedValue(mockSessionIndexValue);
 
@@ -349,6 +393,7 @@ describe('Session', () => {
         provider: { name: 'basic1', type: 'basic' },
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 456,
+        createdAt: 123456,
         metadata: { index: mockSessionIndexValue },
       });
 
@@ -361,6 +406,7 @@ describe('Session', () => {
         provider: { name: 'basic1', type: 'basic' },
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 456,
+        createdAt: 123456,
       });
 
       // Properly creates session cookie value.
@@ -442,6 +488,7 @@ describe('Session', () => {
         provider: { name: 'basic1', type: 'basic' },
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 1,
+        createdAt: 1234567890,
         metadata: { index: mockSessionIndexValue },
       });
 
@@ -455,6 +502,7 @@ describe('Session', () => {
         usernameHash: '35133597af273830c3f139c72501e676338f28a39dca8ff62d5c2b8bfba75f69',
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 1,
+        createdAt: 1234567890,
         metadata: { primaryTerm: 1, sequenceNumber: 1 },
       });
 
@@ -501,6 +549,7 @@ describe('Session', () => {
         provider: { name: 'basic1', type: 'basic' },
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 1,
+        createdAt: 1234567890,
         metadata: { index: mockSessionIndexValue },
       });
 
@@ -513,6 +562,7 @@ describe('Session', () => {
         provider: { name: 'basic1', type: 'basic' },
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 1,
+        createdAt: 1234567890,
         metadata: { primaryTerm: 1, sequenceNumber: 1 },
       });
 

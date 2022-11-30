@@ -18,7 +18,6 @@ import {
   reduce,
   trim,
   get,
-  reject,
 } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
@@ -40,7 +39,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
-import type { InternalFieldErrors, UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
+import type { FieldErrors, UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
 import { useForm, useController, useFieldArray, useFormContext } from 'react-hook-form';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
@@ -55,6 +54,7 @@ import osquerySchema from '../../common/schemas/osquery/v5.5.1.json';
 import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
+import { overflowCss } from '../utils';
 
 export type ECSMappingFormReturn = UseFormReturn<{ ecsMappingArray: ECSMappingArray }>;
 
@@ -572,8 +572,10 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
       isDisabled={euiFieldProps.isDisabled}
     >
       <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem grow={false}>{Prepend}</EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={overflowCss} grow={false}>
+          {Prepend}
+        </EuiFlexItem>
+        <EuiFlexItem css={overflowCss}>
           <ResultComboBox
             error={resultFieldState.error?.message}
             // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
@@ -591,6 +593,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
             idAria={idAria}
             helpText={selectedOptions[0]?.value?.description}
             {...euiFieldProps}
+            data-test-subj="osqueryColumnValueSelect"
             options={(resultTypeField.value === 'field' && euiFieldProps.options) || EMPTY_ARRAY}
           />
         </EuiFlexItem>
@@ -643,9 +646,9 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
   return (
     <>
       <EuiFlexGroup data-test-subj="ECSMappingEditorForm" alignItems="flexStart" gutterSize="s">
-        <EuiFlexItem>
+        <EuiFlexItem css={overflowCss}>
           <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
-            <EuiFlexItem>
+            <EuiFlexItem css={overflowCss}>
               <ECSComboboxField
                 control={control}
                 watch={watch}
@@ -663,7 +666,7 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={overflowCss}>
           <EuiFlexGroup alignItems="flexStart" gutterSize="s" wrap>
             <ECSFieldWrapper>
               <OsqueryColumnField
@@ -728,12 +731,14 @@ interface OsqueryColumn {
 
 export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEditorFieldProps) => {
   const {
+    setError,
+    clearErrors,
     watch: watchRoot,
     register: registerRoot,
     setValue: setValueRoot,
-    formState: { errors: errorsRoot },
   } = useFormContext<{ query: string; ecs_mapping: ECSMapping }>();
 
+  const latestErrors = useRef<FieldErrors<ECSMappingArray> | undefined>(undefined);
   const [query, ecsMapping] = watchRoot(['query', 'ecs_mapping']);
   const { control, trigger, watch, formState, resetField, getFieldState } = useForm<{
     ecsMappingArray: ECSMappingArray;
@@ -756,14 +761,20 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
   const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
 
   useEffect(() => {
-    registerRoot('ecs_mapping', {
-      validate: () => {
-        const nonEmptyErrors = reject(ecsMappingArrayState.error, isEmpty) as InternalFieldErrors[];
+    registerRoot('ecs_mapping');
+  }, [registerRoot]);
 
-        return !nonEmptyErrors.length;
-      },
-    });
-  }, [ecsMappingArrayState.error, errorsRoot, registerRoot]);
+  useEffect(() => {
+    if (!deepEqual(latestErrors.current, formState.errors.ecsMappingArray)) {
+      // @ts-expect-error update types
+      latestErrors.current = formState.errors.ecsMappingArray;
+      if (formState.errors.ecsMappingArray?.length && formState.errors.ecsMappingArray[0]?.key) {
+        setError('ecs_mapping', formState.errors.ecsMappingArray[0].key);
+      } else {
+        clearErrors('ecs_mapping');
+      }
+    }
+  }, [formState, setError, clearErrors]);
 
   useEffect(() => {
     const subscription = watchRoot((data, payload) => {

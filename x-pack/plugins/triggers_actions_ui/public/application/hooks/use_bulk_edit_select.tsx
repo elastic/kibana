@@ -235,7 +235,7 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
 
   return useMemo(() => {
     return {
-      selectedIds: state.selectedIds,
+      selectedIds: [...state.selectedIds],
       isAllSelected: state.isAllSelected,
       isPageSelected,
       numberOfSelectedItems,
