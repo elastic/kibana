@@ -177,7 +177,8 @@ describe('Fleet preconfiguration reset', () => {
     await stopServers();
   });
 
-  describe('Reset all policy', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/124779
+  describe.skip('Reset all policy', () => {
     it('Works and reset all preconfigured policies', async () => {
       const resetAPI = getSupertestWithAdminUser(
         kbnServer.root,
