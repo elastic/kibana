@@ -493,6 +493,10 @@ export const getPieVisualization = ({
     );
   },
 
+  hasLayerSettings(props) {
+    return props.state.shape !== 'mosaic';
+  },
+
   renderLayerSettings(domElement, props) {
     render(
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>

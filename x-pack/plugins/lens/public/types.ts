@@ -1150,6 +1150,11 @@ export interface Visualization<T = unknown, P = unknown> {
     dropProps: GetDropPropsArgs
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
 
+  /**
+   * Allows the visualization to announce whether or not it has any settings to show
+   */
+  hasLayerSettings?: (props: VisualizationConfigProps<T>) => boolean;
+
   renderLayerSettings?: (
     domElement: Element,
     props: VisualizationLayerSettingsProps<T>
