@@ -28,9 +28,11 @@ describe('GetSLO', () => {
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
       mockRepository.findById.mockResolvedValueOnce(slo);
       mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce({
-        good: 9999,
-        total: 10000,
-        date_range: toDateRange(slo.time_window),
+        [slo.id]: {
+          good: 9999,
+          total: 10000,
+          date_range: toDateRange(slo.time_window),
+        },
       });
 
       const result = await getSLO.execute(slo.id);
@@ -58,13 +60,18 @@ describe('GetSLO', () => {
           duration: '7d',
           is_rolling: true,
         },
-
+        settings: {
+          timestamp_field: '@timestamp',
+          sync_delay: '1m',
+          frequency: '1m',
+        },
         summary: {
           sli_value: 0.9999,
           error_budget: {
             initial: 0.001,
             consumed: 0.1,
             remaining: 0.9,
+            is_estimated: false,
           },
         },
         created_at: slo.created_at.toISOString(),
