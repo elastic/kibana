@@ -6,16 +6,38 @@
  */
 
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
-import { isEmpty, capitalize } from 'lodash';
+import { capitalize } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
-import { StatusIcon } from '../status_icon';
-import { AlertsStatus } from '../../alerts/status';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { StatusIcon, StatusIconProps } from '../status_icon';
+import { AlertsStatus } from '../../alerts/status';
+import type { AlertsByName } from '../../alerts/types';
 import './summary_status.scss';
 
-const wrapChild = ({ label, value, ...props }, index) => (
+interface Metrics {
+  label: string;
+  value: string | number;
+  [key: string]: unknown;
+}
+
+interface SummaryProps {
+  StatusIndicator?: typeof DefaultStatusIndicator;
+  status?: string;
+  isOnline?: boolean;
+  IconComponent?: typeof DefaultIconComponent;
+  alerts?: AlertsByName;
+  metrics: Metrics[];
+  'data-test-subj': string;
+}
+
+interface IndicatorProps {
+  status?: string;
+  isOnline?: boolean;
+  IconComponent: typeof DefaultIconComponent;
+}
+
+const wrapChild = ({ label, value, ...props }: Metrics, index: number) => (
   <EuiFlexItem
     style={{ maxWidth: 200 }}
     key={`summary-status-item-${index}`}
@@ -32,7 +54,12 @@ const wrapChild = ({ label, value, ...props }, index) => (
   </EuiFlexItem>
 );
 
-const DefaultIconComponent = ({ status }) => (
+interface IconProps {
+  status: string;
+  isOnline?: boolean;
+}
+
+const DefaultIconComponent = ({ status }: IconProps) => (
   <Fragment>
     <FormattedMessage
       id="xpack.monitoring.summaryStatus.statusIconTitle"
@@ -40,7 +67,7 @@ const DefaultIconComponent = ({ status }) => (
       values={{
         statusIcon: (
           <StatusIcon
-            type={status.toUpperCase()}
+            type={status.toUpperCase() as StatusIconProps['type']}
             label={i18n.translate('xpack.monitoring.summaryStatus.statusIconLabel', {
               defaultMessage: 'Status: {status}',
               values: {
@@ -54,8 +81,12 @@ const DefaultIconComponent = ({ status }) => (
   </Fragment>
 );
 
-export const DefaultStatusIndicator = ({ status, isOnline, IconComponent }) => {
-  if (isEmpty(status)) {
+export const DefaultStatusIndicator = ({
+  status,
+  IconComponent,
+  isOnline = false,
+}: IndicatorProps) => {
+  if (!status?.length) {
     return null;
   }
 
@@ -80,14 +111,14 @@ export const DefaultStatusIndicator = ({ status, isOnline, IconComponent }) => {
 };
 
 export function SummaryStatus({
-  StatusIndicator = DefaultStatusIndicator,
-  status,
-  isOnline,
-  IconComponent = DefaultIconComponent,
-  alerts,
   metrics,
+  alerts,
+  status,
+  isOnline = false,
+  IconComponent = DefaultIconComponent,
+  StatusIndicator = DefaultStatusIndicator,
   ...props
-}) {
+}: SummaryProps) {
   return (
     <div {...props} className="monSummaryStatusNoWrap">
       <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="spaceBetween">
@@ -117,7 +148,3 @@ export function SummaryStatus({
     </div>
   );
 }
-
-SummaryStatus.propTypes = {
-  metrics: PropTypes.array.isRequired,
-};
