@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { from, of, merge, zip } from 'rxjs';
 import fetch from 'node-fetch';
+import { from, of, zip } from 'rxjs';
 import { URLSearchParams } from 'url';
+import { map, takeUntil } from 'rxjs/operators';
 
-import { map, takeUntil, filter, first, take } from 'rxjs/operators';
 import { GlobalSearchResultProvider } from '@kbn/global-search-plugin/server';
+
 import { mapToResults } from './map_doc_to_result';
 
 export const createDocsResultProvider = (): GlobalSearchResultProvider => {

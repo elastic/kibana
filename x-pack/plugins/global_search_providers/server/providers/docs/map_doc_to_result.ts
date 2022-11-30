@@ -14,9 +14,9 @@ export const mapToResults = (term: string, response: Response): GlobalSearchProv
   return [
     {
       id: uuid.v4(),
-      title: isKibanaDoc ? `${toSentenceCase(term)} docs` : `Search for "${term}" on elastic.co`,
+      title: isKibanaDoc ? `${toSentenceCase(term)} docs` : `Search for "${term}" in the docs`,
       type: 'documentation',
-      icon: isKibanaDoc ? 'documentation' : 'search',
+      icon: 'documentation',
       url: response.url,
       score: isKibanaDoc ? 100 : 99,
     },
