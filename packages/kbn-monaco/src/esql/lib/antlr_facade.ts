@@ -8,7 +8,7 @@
 
 import { CommonTokenStream, CodePointCharStream } from 'antlr4ts';
 
-import { ANTLREErrorListener } from '../../commmon';
+import { ANTLREErrorListener } from '../../common/worker/error_listener';
 
 import { esql_lexer as ESQLLexer } from '../antlr/esql_lexer';
 import { esql_parser as ESQLParser } from '../antlr/esql_parser';

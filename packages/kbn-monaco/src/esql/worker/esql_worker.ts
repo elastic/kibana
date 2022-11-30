@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { CharStreams } from 'antlr4ts';
 import { monaco } from '../../monaco_imports';
 import type { BaseWorkerDefinition } from '../../types';
+import { getErrors } from '../lib/antlr_facade';
 
 export class ESQLWorker implements BaseWorkerDefinition {
   private _ctx: monaco.worker.IWorkerContext;
@@ -26,8 +28,9 @@ export class ESQLWorker implements BaseWorkerDefinition {
     const code = this.getTextDocument(modelUri);
 
     if (code) {
-      // @todo
-      return undefined;
+      const inputStream = CharStreams.fromString(code);
+
+      return getErrors(inputStream);
     }
   }
 }

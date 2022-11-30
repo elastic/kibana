@@ -10,7 +10,7 @@ import { CommonTokenStream, CharStreams } from 'antlr4ts';
 import { painless_parser as PainlessParser, SourceContext } from '../../antlr/painless_parser';
 import { PainlessLexerEnhanced } from './lexer';
 import { EditorError } from '../../../types';
-import { ANTLREErrorListener } from '../../../commmon/worker/error_listener';
+import { ANTLREErrorListener } from '../../../common/worker/error_listener';
 
 const parse = (
   code: string

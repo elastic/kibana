@@ -9,19 +9,17 @@ import { Observable, of } from 'rxjs';
 import { monaco } from '../monaco_imports';
 
 import { EditorStateService } from './lib';
-import { LangValidation, SyntaxErrors } from '../types';
+import { LangValidation, SyntaxErrors, WorkerAccessor } from '../types';
 import { ID } from './constants';
 import { PainlessContext, PainlessAutocompleteField } from './types';
 import { PainlessWorker } from './worker';
 import { PainlessCompletionAdapter } from './completion_adapter';
-import { DiagnosticsAdapter, WorkerProxyService } from '../commmon';
+import { DiagnosticsAdapter, WorkerProxyService } from '../common';
 
 const workerProxyService = new WorkerProxyService<PainlessWorker>();
 const editorStateService = new EditorStateService();
 
-export type WorkerAccessor = (...uris: monaco.Uri[]) => Promise<PainlessWorker>;
-
-const worker: WorkerAccessor = (...uris: monaco.Uri[]): Promise<PainlessWorker> => {
+const worker: WorkerAccessor<PainlessWorker> = (...uris: monaco.Uri[]): Promise<PainlessWorker> => {
   return workerProxyService.getWorker(uris);
 };
 
