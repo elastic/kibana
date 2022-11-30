@@ -4,31 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 export interface AccountsBucket {
-  accounts: Accounts;
+  accounts: {
+    buckets: AccountEntity[];
+  };
 }
-export interface Accounts {
-  buckets?: AccountEntity[] | null;
-}
+
 export interface AccountEntity {
   key: string; // account_id
   doc_count: number;
-  resource_type?: ResourceEntity | null;
-}
-
-export interface ResourceEntity {
-  buckets: ResourceType[];
+  resource_type?: {
+    buckets: ResourceType[];
+  };
 }
 
 export interface ResourceType {
   key: string;
   doc_count: number;
-  evaluation: Evaluation;
+  evaluation: { buckets: StatsEntity[] };
 }
-export interface Evaluation {
-  buckets?: StatsEntity[] | null;
-}
+
 export interface StatsEntity {
   key: string;
   doc_count: number;
@@ -38,12 +33,10 @@ export interface Agents {
   value: number;
 }
 
-export interface Resource1 {
-  [key: string]: Evaluation1;
-}
-
-export interface Evaluation1 {
-  doc_count: number;
-  passed: number;
-  failed: number;
+export interface ResourceStats {
+  [key: string]: {
+    doc_count: number;
+    passed: number;
+    failed: number;
+  };
 }

@@ -27,9 +27,10 @@ export function registerCspmUsageCollector(
     isReady: () => true,
     fetch: async (collectorFetchContext: CollectorFetchContext) => {
       const indicesStats = await getIndicesStats(collectorFetchContext.esClient, logger);
-      await getAccountsStats(collectorFetchContext.esClient, logger);
+      const accountsStats = await getAccountsStats(collectorFetchContext.esClient, logger);
       return {
         indices: indicesStats,
+        accounts: accountsStats,
       };
     },
     schema: cspmUsageSchema,
