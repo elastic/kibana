@@ -182,7 +182,7 @@ Object {
             >
               <div>
                 <button
-                  class="euiContextMenuItem euiContextMenuItem--small css-es0s2t"
+                  class="euiContextMenuItem euiContextMenuItem--small"
                   data-test-subj="ActionItemedit"
                   type="button"
                 >
@@ -202,7 +202,7 @@ Object {
                   </span>
                 </button>
                 <button
-                  class="euiContextMenuItem euiContextMenuItem--small euiContextMenuItem-isDisabled css-es0s2t"
+                  class="euiContextMenuItem euiContextMenuItem--small euiContextMenuItem-isDisabled"
                   data-test-subj="ActionItemdelete"
                   disabled=""
                   type="button"

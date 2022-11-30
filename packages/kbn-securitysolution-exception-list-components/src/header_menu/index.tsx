@@ -68,7 +68,6 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
     if (useCustomActions || actions === null) return actions;
     return (actions as Action[]).map((action) => (
       <EuiContextMenuItem
-        css={actions.length > 1 ? containerCss : ''}
         data-test-subj={`${dataTestSubj || ''}ActionItem${action.key}`}
         key={action.key}
         icon={action.icon}
