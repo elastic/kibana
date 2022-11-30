@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import snakecaseKeys from 'snakecase-keys';
 import { ILicenseState } from '../lib';
 import { FindOptions } from '../rules_client';
-import { RewriteRequestCase, verifyAccessAndContext } from './lib';
+import { alertToRule, RewriteRequestCase, verifyAccessAndContext } from './lib';
 import {
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
@@ -115,7 +115,16 @@ const buildFindRulesRoute = ({
           includeSnoozeData: true,
         });
         return res.ok({
-          body: snakecaseKeys(findResult),
+          body: snakecaseKeys({
+            ...findResult,
+            data: findResult.data.map((rule) =>
+              alertToRule({
+                ...rule,
+                ...(rule.isSnoozedUntil != null ? { is_snoozed_until: rule.isSnoozedUntil } : {}),
+                ...(rule.activeSnoozes != null ? { active_snoozes: rule.activeSnoozes } : {}),
+              })
+            ),
+          }),
         });
       })
     )
