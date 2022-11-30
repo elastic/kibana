@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSelectable } from '@elastic/eui';
+import { EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InputHistoryItem } from '../../console_state/types';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
@@ -16,6 +16,7 @@ import { UserCommandInput } from '../../user_command_input';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputHistory } from '../../../hooks/state_selectors/use_with_input_history';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
+import { CommandInputClearHistory } from './command_input_clear_history';
 
 const NO_HISTORY_EMPTY_MESSAGE = i18n.translate(
   'xpack.securitySolution.commandInputHistory.noHistoryEmptyMessage',
@@ -38,8 +39,6 @@ export const CommandInputHistory = memo(() => {
   const [priorInputState] = useState(useWithInputTextEntered());
   const optionWasSelected = useRef(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
-  const showFilterBar = inputHistory.length > 9;
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const selectableHistoryOptions = useMemo(() => {
     return inputHistory.map<EuiSelectableProps['options'][number]>((inputItem, index) => {
@@ -54,6 +53,7 @@ export const CommandInputHistory = memo(() => {
   const selectableListProps: EuiSelectableProps['listProps'] = useMemo(() => {
     return {
       showIcons: false,
+      bordered: true,
     };
   }, []);
 
@@ -65,12 +65,9 @@ export const CommandInputHistory = memo(() => {
     };
   }, []);
 
-  const renderSelectionContent: EuiSelectableProps['children'] = useCallback(
-    (list, search) => {
-      return showFilterBar ? [list, search] : list;
-    },
-    [showFilterBar]
-  );
+  const renderSelectionContent: EuiSelectableProps['children'] = useCallback((list, search) => {
+    return [list, search];
+  }, []);
 
   const handleSelectableOnChange: EuiSelectableProps['onChange'] = useCallback(
     (items: EuiSelectableOption[]) => {
@@ -129,16 +126,8 @@ export const CommandInputHistory = memo(() => {
   }, [dispatch, optionWasSelected, priorInputState]);
 
   return (
-    <div ref={containerRef}>
-      {inputHistory.length > 0 && (
-        <EuiFlexGroup responsive={false} justifyContent="flexEnd" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="xs" tabIndex={-1}>
-              {'Clear input history'}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+    <div>
+      {inputHistory.length > 0 && <CommandInputClearHistory />}
 
       <EuiSelectable
         options={selectableHistoryOptions}
@@ -152,6 +141,7 @@ export const CommandInputHistory = memo(() => {
         emptyMessage={NO_HISTORY_EMPTY_MESSAGE}
         noMatchesMessage={NO_FILTERED_MATCHES}
         data-test-subj={getTestId('inputHistorySelector')}
+        data-console-input-history={true}
       >
         {renderSelectionContent}
       </EuiSelectable>
