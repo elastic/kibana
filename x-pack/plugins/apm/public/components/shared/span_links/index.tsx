@@ -17,11 +17,11 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { SpanLinksCount } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { KueryBar } from '../kuery_bar';
 import { SpanLinksCallout } from './span_links_callout';
 import { SpanLinksTable } from './span_links_table';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
+import type { SpanLinksCount } from '../../../../common/waterfall_helper/typings';
 
 interface Props {
   spanLinksCount: SpanLinksCount;

@@ -9,10 +9,10 @@ import { EuiSpacer, EuiTab, EuiTabs, EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LogStream } from '@kbn/infra-plugin/public';
 import React from 'react';
+import type { IWaterfall } from '../../../../../common/waterfall_helper/typings';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionMetadata } from '../../../shared/metadata_table/transaction_metadata';
 import { WaterfallContainer } from './waterfall_container';
-import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 interface Props {
   transaction?: Transaction;

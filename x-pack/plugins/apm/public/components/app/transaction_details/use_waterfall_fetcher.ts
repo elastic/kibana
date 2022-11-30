@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { INITIAL_DATA } from '../../../../common/watefall';
+import { INITIAL_DATA } from '../../../../common/waterfall_helper';
 import { useFetcher } from '../../../hooks/use_fetcher';
 
 export type WaterfallFetchResult = ReturnType<typeof useWaterfallFetcher>;

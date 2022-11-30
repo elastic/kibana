@@ -8,7 +8,7 @@
 import type {
   IWaterfall,
   IWaterfallSpanOrTransaction,
-} from '../../public/components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+} from '../waterfall_helper/typings';
 import { CriticalPath, CriticalPathSegment } from './types';
 
 export function getCriticalPath(waterfall: IWaterfall): CriticalPath {

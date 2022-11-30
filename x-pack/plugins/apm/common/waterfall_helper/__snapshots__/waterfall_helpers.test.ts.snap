@@ -5,7 +5,7 @@ Object {
   "childrenByParentId": Object {
     "mySpanIdA": Array [
       Object {
-        "color": "",
+        "color": "#6092C0",
         "doc": Object {
           "parent": Object {
             "id": "mySpanIdA",
@@ -42,7 +42,7 @@ Object {
         },
         "offset": 41627,
         "parent": Object {
-          "color": "",
+          "color": "#6092C0",
           "doc": Object {
             "parent": Object {
               "id": "myTransactionId2",
@@ -79,7 +79,7 @@ Object {
           },
           "offset": 40498,
           "parent": Object {
-            "color": "",
+            "color": "#6092C0",
             "doc": Object {
               "parent": Object {
                 "id": "mySpanIdD",
@@ -120,7 +120,7 @@ Object {
             },
             "offset": 39298,
             "parent": Object {
-              "color": "",
+              "color": "#54B399",
               "doc": Object {
                 "parent": Object {
                   "id": "myTransactionId1",
@@ -157,7 +157,7 @@ Object {
               },
               "offset": 1754,
               "parent": Object {
-                "color": "",
+                "color": "#54B399",
                 "doc": Object {
                   "processor": Object {
                     "event": "transaction",
@@ -224,7 +224,7 @@ Object {
         },
       },
       Object {
-        "color": "",
+        "color": "#6092C0",
         "doc": Object {
           "parent": Object {
             "id": "mySpanIdA",
@@ -261,7 +261,7 @@ Object {
         },
         "offset": 43899,
         "parent": Object {
-          "color": "",
+          "color": "#6092C0",
           "doc": Object {
             "parent": Object {
               "id": "myTransactionId2",
@@ -298,7 +298,7 @@ Object {
           },
           "offset": 40498,
           "parent": Object {
-            "color": "",
+            "color": "#6092C0",
             "doc": Object {
               "parent": Object {
                 "id": "mySpanIdD",
@@ -339,7 +339,7 @@ Object {
             },
             "offset": 39298,
             "parent": Object {
-              "color": "",
+              "color": "#54B399",
               "doc": Object {
                 "parent": Object {
                   "id": "myTransactionId1",
@@ -376,7 +376,7 @@ Object {
               },
               "offset": 1754,
               "parent": Object {
-                "color": "",
+                "color": "#54B399",
                 "doc": Object {
                   "processor": Object {
                     "event": "transaction",
@@ -445,7 +445,7 @@ Object {
     ],
     "mySpanIdD": Array [
       Object {
-        "color": "",
+        "color": "#6092C0",
         "doc": Object {
           "parent": Object {
             "id": "mySpanIdD",
@@ -486,7 +486,7 @@ Object {
         },
         "offset": 39298,
         "parent": Object {
-          "color": "",
+          "color": "#54B399",
           "doc": Object {
             "parent": Object {
               "id": "myTransactionId1",
@@ -523,7 +523,7 @@ Object {
           },
           "offset": 1754,
           "parent": Object {
-            "color": "",
+            "color": "#54B399",
             "doc": Object {
               "processor": Object {
                 "event": "transaction",
@@ -578,7 +578,7 @@ Object {
     ],
     "myTransactionId1": Array [
       Object {
-        "color": "",
+        "color": "#54B399",
         "doc": Object {
           "parent": Object {
             "id": "myTransactionId1",
@@ -615,7 +615,7 @@ Object {
         },
         "offset": 1754,
         "parent": Object {
-          "color": "",
+          "color": "#54B399",
           "doc": Object {
             "processor": Object {
               "event": "transaction",
@@ -663,7 +663,7 @@ Object {
     ],
     "myTransactionId2": Array [
       Object {
-        "color": "",
+        "color": "#6092C0",
         "doc": Object {
           "parent": Object {
             "id": "myTransactionId2",
@@ -700,7 +700,7 @@ Object {
         },
         "offset": 40498,
         "parent": Object {
-          "color": "",
+          "color": "#6092C0",
           "doc": Object {
             "parent": Object {
               "id": "mySpanIdD",
@@ -741,7 +741,7 @@ Object {
           },
           "offset": 39298,
           "parent": Object {
-            "color": "",
+            "color": "#54B399",
             "doc": Object {
               "parent": Object {
                 "id": "myTransactionId1",
@@ -778,7 +778,7 @@ Object {
             },
             "offset": 1754,
             "parent": Object {
-              "color": "",
+              "color": "#54B399",
               "doc": Object {
                 "processor": Object {
                   "event": "transaction",
@@ -840,7 +840,7 @@ Object {
     ],
     "root": Array [
       Object {
-        "color": "",
+        "color": "#54B399",
         "doc": Object {
           "processor": Object {
             "event": "transaction",
@@ -882,7 +882,7 @@ Object {
   },
   "duration": 49660,
   "entryWaterfallTransaction": Object {
-    "color": "",
+    "color": "#54B399",
     "doc": Object {
       "processor": Object {
         "event": "transaction",
@@ -920,14 +920,13 @@ Object {
       "linkedParents": 0,
     },
   },
+  "errorCountById": Object {
+    "myTransactionId1": 1,
+  },
   "errorItems": Array [
     Object {
       "color": "",
       "doc": Object {
-        "agent": Object {
-          "name": "ruby",
-          "version": "2",
-        },
         "error": Object {
           "grouping_key": "errorGroupingKey1",
           "id": "error1",
@@ -937,9 +936,6 @@ Object {
         },
         "parent": Object {
           "id": "myTransactionId1",
-        },
-        "processor": Object {
-          "event": "error",
         },
         "service": Object {
           "name": "opbeans-ruby",
@@ -958,7 +954,7 @@ Object {
       "id": "error1",
       "offset": 25994,
       "parent": Object {
-        "color": "",
+        "color": "#54B399",
         "doc": Object {
           "processor": Object {
             "event": "transaction",
@@ -1000,10 +996,10 @@ Object {
       "skew": 0,
     },
   ],
-  "getErrorCount": [Function],
+  "exceedsMax": false,
   "items": Array [
     Object {
-      "color": "",
+      "color": "#54B399",
       "doc": Object {
         "processor": Object {
           "event": "transaction",
@@ -1042,7 +1038,7 @@ Object {
       },
     },
     Object {
-      "color": "",
+      "color": "#54B399",
       "doc": Object {
         "parent": Object {
           "id": "myTransactionId1",
@@ -1079,7 +1075,7 @@ Object {
       },
       "offset": 1754,
       "parent": Object {
-        "color": "",
+        "color": "#54B399",
         "doc": Object {
           "processor": Object {
             "event": "transaction",
@@ -1125,7 +1121,7 @@ Object {
       },
     },
     Object {
-      "color": "",
+      "color": "#6092C0",
       "doc": Object {
         "parent": Object {
           "id": "mySpanIdD",
@@ -1166,7 +1162,7 @@ Object {
       },
       "offset": 39298,
       "parent": Object {
-        "color": "",
+        "color": "#54B399",
         "doc": Object {
           "parent": Object {
             "id": "myTransactionId1",
@@ -1203,7 +1199,7 @@ Object {
         },
         "offset": 1754,
         "parent": Object {
-          "color": "",
+          "color": "#54B399",
           "doc": Object {
             "processor": Object {
               "event": "transaction",
@@ -1256,7 +1252,7 @@ Object {
       },
     },
     Object {
-      "color": "",
+      "color": "#6092C0",
       "doc": Object {
         "parent": Object {
           "id": "myTransactionId2",
@@ -1293,7 +1289,7 @@ Object {
       },
       "offset": 40498,
       "parent": Object {
-        "color": "",
+        "color": "#6092C0",
         "doc": Object {
           "parent": Object {
             "id": "mySpanIdD",
@@ -1334,7 +1330,7 @@ Object {
         },
         "offset": 39298,
         "parent": Object {
-          "color": "",
+          "color": "#54B399",
           "doc": Object {
             "parent": Object {
               "id": "myTransactionId1",
@@ -1371,7 +1367,7 @@ Object {
           },
           "offset": 1754,
           "parent": Object {
-            "color": "",
+            "color": "#54B399",
             "doc": Object {
               "processor": Object {
                 "event": "transaction",
@@ -1431,7 +1427,7 @@ Object {
       },
     },
     Object {
-      "color": "",
+      "color": "#6092C0",
       "doc": Object {
         "parent": Object {
           "id": "mySpanIdA",
@@ -1468,7 +1464,7 @@ Object {
       },
       "offset": 41627,
       "parent": Object {
-        "color": "",
+        "color": "#6092C0",
         "doc": Object {
           "parent": Object {
             "id": "myTransactionId2",
@@ -1505,7 +1501,7 @@ Object {
         },
         "offset": 40498,
         "parent": Object {
-          "color": "",
+          "color": "#6092C0",
           "doc": Object {
             "parent": Object {
               "id": "mySpanIdD",
@@ -1546,7 +1542,7 @@ Object {
           },
           "offset": 39298,
           "parent": Object {
-            "color": "",
+            "color": "#54B399",
             "doc": Object {
               "parent": Object {
                 "id": "myTransactionId1",
@@ -1583,7 +1579,7 @@ Object {
             },
             "offset": 1754,
             "parent": Object {
-              "color": "",
+              "color": "#54B399",
               "doc": Object {
                 "processor": Object {
                   "event": "transaction",
@@ -1650,7 +1646,7 @@ Object {
       },
     },
     Object {
-      "color": "",
+      "color": "#6092C0",
       "doc": Object {
         "parent": Object {
           "id": "mySpanIdA",
@@ -1687,7 +1683,7 @@ Object {
       },
       "offset": 43899,
       "parent": Object {
-        "color": "",
+        "color": "#6092C0",
         "doc": Object {
           "parent": Object {
             "id": "myTransactionId2",
@@ -1724,7 +1720,7 @@ Object {
         },
         "offset": 40498,
         "parent": Object {
-          "color": "",
+          "color": "#6092C0",
           "doc": Object {
             "parent": Object {
               "id": "mySpanIdD",
@@ -1765,7 +1761,7 @@ Object {
           },
           "offset": 39298,
           "parent": Object {
-            "color": "",
+            "color": "#54B399",
             "doc": Object {
               "parent": Object {
                 "id": "myTransactionId1",
@@ -1802,7 +1798,7 @@ Object {
             },
             "offset": 1754,
             "parent": Object {
-              "color": "",
+              "color": "#54B399",
               "doc": Object {
                 "processor": Object {
                   "event": "transaction",
@@ -1892,14 +1888,9 @@ Object {
     },
   ],
   "rootTransaction": Object {
-    "processor": Object {
-      "event": "transaction",
-    },
     "service": Object {
+      "environment": undefined,
       "name": "opbeans-node",
-    },
-    "timestamp": Object {
-      "us": 1549324795784006,
     },
     "trace": Object {
       "id": "myTraceId",
@@ -1910,8 +1901,10 @@ Object {
       },
       "id": "myTransactionId1",
       "name": "GET /api",
+      "type": undefined,
     },
   },
+  "totalErrorsCount": 1,
 }
 `;
 
@@ -1920,7 +1913,7 @@ Object {
   "childrenByParentId": Object {
     "mySpanIdA": Array [
       Object {
-        "color": "",
+        "color": "#6092C0",
         "doc": Object {
           "parent": Object {
             "id": "mySpanIdA",
@@ -1957,7 +1950,7 @@ Object {
         },
         "offset": 2329,
         "parent": Object {
-          "color": "",
+          "color": "#6092C0",
           "doc": Object {
             "parent": Object {
               "id": "myTransactionId2",
@@ -1994,7 +1987,7 @@ Object {
           },
           "offset": 1200,
           "parent": Object {
-            "color": "",
+            "color": "#54B399",
             "doc": Object {
               "parent": Object {
                 "id": "mySpanIdD",
@@ -2057,7 +2050,7 @@ Object {
         },
       },
       Object {
-        "color": "",
+        "color": "#6092C0",
         "doc": Object {
           "parent": Object {
             "id": "mySpanIdA",
@@ -2094,7 +2087,7 @@ Object {
         },
         "offset": 4601,
         "parent": Object {
-          "color": "",
+          "color": "#6092C0",
           "doc": Object {
             "parent": Object {
               "id": "myTransactionId2",
@@ -2131,7 +2124,7 @@ Object {
           },
           "offset": 1200,
           "parent": Object {
-            "color": "",
+            "color": "#54B399",
             "doc": Object {
               "parent": Object {
                 "id": "mySpanIdD",
@@ -2196,7 +2189,7 @@ Object {
     ],
     "mySpanIdD": Array [
       Object {
-        "color": "",
+        "color": "#54B399",
         "doc": Object {
           "parent": Object {
             "id": "mySpanIdD",
@@ -2247,7 +2240,7 @@ Object {
     ],
     "myTransactionId2": Array [
       Object {
-        "color": "",
+        "color": "#6092C0",
         "doc": Object {
           "parent": Object {
             "id": "myTransactionId2",
@@ -2284,7 +2277,7 @@ Object {
         },
         "offset": 1200,
         "parent": Object {
-          "color": "",
+          "color": "#54B399",
           "doc": Object {
             "parent": Object {
               "id": "mySpanIdD",
@@ -2343,7 +2336,7 @@ Object {
   },
   "duration": 8634,
   "entryWaterfallTransaction": Object {
-    "color": "",
+    "color": "#54B399",
     "doc": Object {
       "parent": Object {
         "id": "mySpanIdD",
@@ -2391,11 +2384,14 @@ Object {
       "linkedParents": 0,
     },
   },
+  "errorCountById": Object {
+    "myTransactionId1": 1,
+  },
   "errorItems": Array [],
-  "getErrorCount": [Function],
+  "exceedsMax": false,
   "items": Array [
     Object {
-      "color": "",
+      "color": "#54B399",
       "doc": Object {
         "parent": Object {
           "id": "mySpanIdD",
@@ -2444,7 +2440,7 @@ Object {
       },
     },
     Object {
-      "color": "",
+      "color": "#6092C0",
       "doc": Object {
         "parent": Object {
           "id": "myTransactionId2",
@@ -2481,7 +2477,7 @@ Object {
       },
       "offset": 1200,
       "parent": Object {
-        "color": "",
+        "color": "#54B399",
         "doc": Object {
           "parent": Object {
             "id": "mySpanIdD",
@@ -2537,7 +2533,7 @@ Object {
       },
     },
     Object {
-      "color": "",
+      "color": "#6092C0",
       "doc": Object {
         "parent": Object {
           "id": "mySpanIdA",
@@ -2574,7 +2570,7 @@ Object {
       },
       "offset": 2329,
       "parent": Object {
-        "color": "",
+        "color": "#6092C0",
         "doc": Object {
           "parent": Object {
             "id": "myTransactionId2",
@@ -2611,7 +2607,7 @@ Object {
         },
         "offset": 1200,
         "parent": Object {
-          "color": "",
+          "color": "#54B399",
           "doc": Object {
             "parent": Object {
               "id": "mySpanIdD",
@@ -2674,7 +2670,7 @@ Object {
       },
     },
     Object {
-      "color": "",
+      "color": "#6092C0",
       "doc": Object {
         "parent": Object {
           "id": "mySpanIdA",
@@ -2711,7 +2707,7 @@ Object {
       },
       "offset": 4601,
       "parent": Object {
-        "color": "",
+        "color": "#6092C0",
         "doc": Object {
           "parent": Object {
             "id": "myTransactionId2",
@@ -2748,7 +2744,7 @@ Object {
         },
         "offset": 1200,
         "parent": Object {
-          "color": "",
+          "color": "#54B399",
           "doc": Object {
             "parent": Object {
               "id": "mySpanIdD",
@@ -2829,14 +2825,9 @@ Object {
     },
   ],
   "rootTransaction": Object {
-    "processor": Object {
-      "event": "transaction",
-    },
     "service": Object {
+      "environment": undefined,
       "name": "opbeans-node",
-    },
-    "timestamp": Object {
-      "us": 1549324795784006,
     },
     "trace": Object {
       "id": "myTraceId",
@@ -2847,8 +2838,10 @@ Object {
       },
       "id": "myTransactionId1",
       "name": "GET /api",
+      "type": undefined,
     },
   },
+  "totalErrorsCount": 1,
 }
 `;
 

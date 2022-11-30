@@ -18,13 +18,13 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { groupBy } from 'lodash';
 import { transparentize } from 'polished';
 import { Margins } from '../../../../../shared/charts/timeline';
-import {
-  IWaterfall,
-  IWaterfallSpanOrTransaction,
-} from './waterfall_helpers/waterfall_helpers';
 import { WaterfallItem } from './waterfall_item';
 import { getCriticalPath } from '../../../../../../../common/critical_path/get_critical_path';
 import { useTheme } from '../../../../../../hooks/use_theme';
+import type {
+  IWaterfall,
+  IWaterfallSpanOrTransaction,
+} from '../../../../../../../common/waterfall_helper/typings';
 
 interface AccordionWaterfallProps {
   isOpen: boolean;

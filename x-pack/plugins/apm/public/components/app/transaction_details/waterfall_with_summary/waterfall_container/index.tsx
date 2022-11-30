@@ -8,13 +8,13 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useCriticalPathFeatureEnabledSetting } from '../../../../../hooks/use_critical_path_feature_enabled_setting';
-import { TechnicalPreviewBadge } from '../../../../shared/technical_preview_badge';
-import { Waterfall } from './waterfall';
 import {
   IWaterfall,
   WaterfallLegendType,
-} from './waterfall/waterfall_helpers/waterfall_helpers';
+} from '../../../../../../common/waterfall_helper/typings';
+import { useCriticalPathFeatureEnabledSetting } from '../../../../../hooks/use_critical_path_feature_enabled_setting';
+import { TechnicalPreviewBadge } from '../../../../shared/technical_preview_badge';
+import { Waterfall } from './waterfall';
 import { WaterfallLegends } from './waterfall_legends';
 
 interface Props {

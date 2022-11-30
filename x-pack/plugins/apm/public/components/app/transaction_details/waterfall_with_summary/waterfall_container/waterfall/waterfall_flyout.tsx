@@ -8,9 +8,9 @@
 import { History } from 'history';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import type { IWaterfall } from '../../../../../../../common/waterfall_helper/typings';
 import { SpanFlyout } from './span_flyout';
 import { TransactionFlyout } from './transaction_flyout';
-import { IWaterfall } from './waterfall_helpers/waterfall_helpers';
 
 interface Props {
   waterfallItemId?: string;

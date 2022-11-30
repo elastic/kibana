@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import React from 'react';
+import type { SpanLinksCount } from '../../../../../../../../common/waterfall_helper/typings';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { TransactionMetadata } from '../../../../../../shared/metadata_table/transaction_metadata';
 import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
@@ -26,7 +27,6 @@ import { TransactionSummary } from '../../../../../../shared/summary/transaction
 import { TransactionActionMenu } from '../../../../../../shared/transaction_action_menu/transaction_action_menu';
 import { FlyoutTopLevelProperties } from '../flyout_top_level_properties';
 import { ResponsiveFlyout } from '../responsive_flyout';
-import { SpanLinksCount } from '../waterfall_helpers/waterfall_helpers';
 import { DroppedSpansWarning } from './dropped_spans_warning';
 
 interface Props {

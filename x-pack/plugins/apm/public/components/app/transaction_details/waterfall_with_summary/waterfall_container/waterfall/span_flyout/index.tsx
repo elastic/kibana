@@ -24,6 +24,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
+import type { SpanLinksCount } from '../../../../../../../../common/waterfall_helper/typings';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { DiscoverSpanLink } from '../../../../../../shared/links/discover_links/discover_span_link';
@@ -38,7 +39,6 @@ import { TimestampTooltip } from '../../../../../../shared/timestamp_tooltip';
 import { SyncBadge } from '../badge/sync_badge';
 import { FailureBadge } from '../failure_badge';
 import { ResponsiveFlyout } from '../responsive_flyout';
-import { SpanLinksCount } from '../waterfall_helpers/waterfall_helpers';
 import { SpanDatabase } from './span_db';
 import { StickySpanProperties } from './sticky_span_properties';
 

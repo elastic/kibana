@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { apm, ApmFields, dedot } from '@kbn/apm-synthtrace';
-import { getWaterfall } from '../../public/components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { Span } from '../../typings/es_schemas/ui/span';
 import { Transaction } from '../../typings/es_schemas/ui/transaction';
+import { getWaterfall } from '../waterfall_helper';
 import { getCriticalPath } from './get_critical_path';
 
 describe('getCriticalPath', () => {

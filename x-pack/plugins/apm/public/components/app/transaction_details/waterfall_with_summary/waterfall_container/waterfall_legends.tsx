@@ -10,11 +10,11 @@ import { EuiFlexItem } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Legend } from '../../../../shared/charts/timeline/legend';
 import {
   IWaterfallLegend,
   WaterfallLegendType,
-} from './waterfall/waterfall_helpers/waterfall_helpers';
+} from '../../../../../../common/waterfall_helper/typings';
+import { Legend } from '../../../../shared/charts/timeline/legend';
 
 interface Props {
   legends: IWaterfallLegend[];

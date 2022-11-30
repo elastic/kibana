@@ -17,10 +17,10 @@ import { getAgentMarks } from '../marks/get_agent_marks';
 import { getErrorMarks } from '../marks/get_error_marks';
 import { AccordionWaterfall } from './accordion_waterfall';
 import { WaterfallFlyout } from './waterfall_flyout';
-import {
+import type {
   IWaterfall,
   IWaterfallItem,
-} from './waterfall_helpers/waterfall_helpers';
+} from '../../../../../../../common/waterfall_helper/typings';
 
 const Container = euiStyled.div`
   transition: 0.1s padding ease;

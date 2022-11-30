@@ -21,8 +21,7 @@ import { getLinkedChildrenCountBySpanId } from '../span_links/get_linked_childre
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { APMConfig } from '../..';
 import { getErrorDocs } from './get_error_docs';
-
-export type TraceItems = Awaited<ReturnType<typeof getTraceItems>>;
+import { TraceItems } from '../../../common/waterfall_helper/typings';
 
 export async function getTraceItems(
   traceId: string,
@@ -30,7 +29,7 @@ export async function getTraceItems(
   apmEventClient: APMEventClient,
   start: number,
   end: number
-) {
+): Promise<TraceItems> {
   const maxTraceItems = config.ui.maxTraceItems;
 
   const traceResponsePromise = apmEventClient.search('get_trace_docs', {

@@ -6,18 +6,16 @@
  */
 
 import { groupBy } from 'lodash';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import {
-  getClockSkew,
-  getOrderedWaterfallItems,
-  getWaterfall,
+import { Span } from '../../typings/es_schemas/ui/span';
+import { Transaction } from '../../typings/es_schemas/ui/transaction';
+import { getClockSkew, getOrderedWaterfallItems, getWaterfall } from '.';
+import type {
+  WaterfallErrorDoc,
   IWaterfallItem,
   IWaterfallTransaction,
   IWaterfallError,
   IWaterfallSpanOrTransaction,
-} from './waterfall_helpers';
-import { WaterfallErrorDoc } from '../../../../../../../../common/watefall';
+} from './typings';
 
 describe('waterfall_helpers', () => {
   describe('getWaterfall', () => {
@@ -136,7 +134,7 @@ describe('waterfall_helpers', () => {
       expect(waterfall.items.length).toBe(6);
       expect(waterfall.items[0].id).toBe('myTransactionId1');
       expect(waterfall.errorItems.length).toBe(1);
-      expect(waterfall.getErrorCount('myTransactionId1')).toEqual(1);
+      expect(waterfall.errorCountById.myTransactionId1).toEqual(1);
       expect(waterfall).toMatchSnapshot();
     });
 
@@ -154,7 +152,7 @@ describe('waterfall_helpers', () => {
       expect(waterfall.items.length).toBe(4);
       expect(waterfall.items[0].id).toBe('myTransactionId2');
       expect(waterfall.errorItems.length).toBe(0);
-      expect(waterfall.getErrorCount('myTransactionId2')).toEqual(0);
+      expect(waterfall.errorCountById.myTransactionId2).toBeUndefined();
       expect(waterfall).toMatchSnapshot();
     });
     it('should reparent spans', () => {
@@ -261,7 +259,7 @@ describe('waterfall_helpers', () => {
         parentId: 'mySpanIdB',
       });
       expect(waterfall.errorItems.length).toBe(0);
-      expect(waterfall.getErrorCount('myTransactionId1')).toEqual(0);
+      expect(waterfall.errorCountById.myTransactionId1).toBeUndefined();
     });
 
     it("shouldn't reparent spans when child id isn't found", () => {
@@ -367,7 +365,7 @@ describe('waterfall_helpers', () => {
         parentId: 'mySpanIdB',
       });
       expect(waterfall.errorItems.length).toBe(0);
-      expect(waterfall.getErrorCount('myTransactionId1')).toEqual(0);
+      expect(waterfall.errorCountById.myTransactionId1).toBeUndefined();
     });
   });
 

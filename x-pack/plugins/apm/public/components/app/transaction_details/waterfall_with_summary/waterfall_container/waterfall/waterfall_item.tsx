@@ -21,10 +21,10 @@ import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip
 import { SyncBadge } from './badge/sync_badge';
 import { SpanLinksBadge } from './badge/span_links_badge';
 import { ColdStartBadge } from './badge/cold_start_badge';
-import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 import { FailureBadge } from './failure_badge';
 import { useApmRouter } from '../../../../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
+import type { IWaterfallSpanOrTransaction } from '../../../../../../../common/waterfall_helper/typings';
 
 type ItemType = 'transaction' | 'span' | 'error';
 

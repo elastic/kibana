@@ -27,7 +27,8 @@ import {
   CriticalPathResponse,
   getAggregatedCriticalPath,
 } from './get_aggregated_critical_path';
-import { getWaterfall, IWaterfall } from './waterfall_helper';
+import { getWaterfall } from '../../../common/waterfall_helper';
+import type { IWaterfall } from '../../../common/waterfall_helper/typings';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',

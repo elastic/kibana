@@ -11,10 +11,10 @@ import React from 'react';
 import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
 import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
-import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { Environment } from '../../../../../common/environment_rt';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import type { IWaterfall } from '../../../../../common/waterfall_helper/typings';
 
 function FullTraceButton({
   isLoading,

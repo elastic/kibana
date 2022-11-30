@@ -11,7 +11,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { noop } from 'lodash';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { WaterfallContainer } from '.';
-import { getWaterfall } from './waterfall/waterfall_helpers/waterfall_helpers';
 import {
   inferredSpans,
   manyChildrenWithSameLength,
@@ -20,6 +19,7 @@ import {
   traceWithErrors,
 } from './waterfall_container.stories.data';
 import type { ApmPluginContextValue } from '../../../../../context/apm_plugin/apm_plugin_context';
+import { getWaterfall } from '../../../../../../common/waterfall_helper';
 
 type Args = ComponentProps<typeof WaterfallContainer>;
 

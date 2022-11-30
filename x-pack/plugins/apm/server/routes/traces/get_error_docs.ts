@@ -17,7 +17,7 @@ import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../common/es_fields/apm';
-import { WaterfallErrorDoc } from '../../../common/watefall';
+import type { WaterfallErrorDoc } from '../../../common/waterfall_helper/typings';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getErrorDocs(

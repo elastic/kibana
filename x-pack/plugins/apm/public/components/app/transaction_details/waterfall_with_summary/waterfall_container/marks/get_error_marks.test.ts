@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IWaterfallError } from '../waterfall/waterfall_helpers/waterfall_helpers';
+import type { IWaterfallError } from '../../../../../../../common/waterfall_helper/typings';
 import { getErrorMarks } from './get_error_marks';
 
 describe('getErrorMarks', () => {
