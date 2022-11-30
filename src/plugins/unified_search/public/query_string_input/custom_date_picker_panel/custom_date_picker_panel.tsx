@@ -81,7 +81,7 @@ export const CustomDatePickerPanel: React.FC<Props> = ({ data, currentDataViewId
         >
           <FormattedMessage
             id="unifiedSearch.queryBarTopRow.customQuickSelectDatePickerPanel.wholePeriodLinkText"
-            defaultMessage="Historical period"
+            defaultMessage="Historical range"
           />
         </EuiLink>
       </EuiFlexItem>
