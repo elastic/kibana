@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { Plugin, CoreSetup, CoreStart, RequestHandlerContext } from '@kbn/core/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { Worker, WorkerRegistry } from './worker_registry';
 import { taskManagerAdapter, sqsAdapter } from './adapters';
+import { registerRoutes } from './routes';
 
 // Set this to whatever one you want to use!
 const CONFIGURED_ADAPTER = 'sqs';
@@ -62,6 +63,8 @@ export class SchedulerPlugin
 
   public setup(core: CoreSetup, plugins: PluginSetupDeps) {
     this.adapter.setup(plugins);
+    const router = core.http.createRouter<RequestHandlerContext>();
+    registerRoutes(router);
     return {
       registerWorker: (worker: Worker<unknown>) => {
         this.workerRegistry.register(worker);

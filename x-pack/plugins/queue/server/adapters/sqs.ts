@@ -49,6 +49,7 @@ export const sqsAdapter: Adapter = {
               const abortController = new AbortController();
               const worker = workers[job.workerId];
               try {
+                console.log('Run queued job');
                 await worker.run(job.params, abortController.signal);
                 try {
                   await sqs
@@ -63,9 +64,9 @@ export const sqsAdapter: Adapter = {
             })
           );
         } catch (e) {
-          console.log('Failed to get a message from SQS', e);
-          // Exit while true
-          throw e;
+          console.log('Failed to get a message from SQS, will try again in 10s', e);
+          await new Promise((resolve) => setTimeout(resolve, 10000));
+          sqs = new AWS.SQS();
         }
       }
     })();
@@ -91,7 +92,8 @@ export const sqsAdapter: Adapter = {
             MessageBody: JSON.stringify(job),
           })),
         };
-        await sqs.sendMessageBatch(params).promise();
+        const result = await sqs.sendMessageBatch(params).promise();
+        console.log('Bulk enqueue result', result);
       })
     );
   },
