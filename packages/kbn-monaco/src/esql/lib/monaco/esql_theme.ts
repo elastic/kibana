@@ -10,7 +10,7 @@ import { euiThemeVars, darkMode } from '@kbn/ui-theme';
 import { tokenPostfix } from './esql_constants';
 import { monaco } from '../../../monaco_imports';
 
-const getRuleGroup = (tokens: string[], color: string, isBold: boolean = false) =>
+const buildRuleGroup = (tokens: string[], color: string, isBold: boolean = false) =>
   tokens.map((i) => ({
     token: i + tokenPostfix,
     foreground: color,
@@ -22,7 +22,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
   inherit: true,
   rules: [
     // base
-    ...getRuleGroup(
+    ...buildRuleGroup(
       [
         'explain',
         'row',
@@ -44,7 +44,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     ),
 
     // commands
-    ...getRuleGroup(
+    ...buildRuleGroup(
       [
         'from',
         'stats',
@@ -63,7 +63,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     ),
 
     // values
-    ...getRuleGroup(
+    ...buildRuleGroup(
       [
         'pipe',
         'true',
@@ -80,7 +80,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     ),
 
     // values #2
-    ...getRuleGroup(
+    ...buildRuleGroup(
       [
         'true',
         'not',
@@ -98,7 +98,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     ),
 
     // operators
-    ...getRuleGroup(
+    ...buildRuleGroup(
       [
         'or',
         'and',
@@ -119,7 +119,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     ),
 
     // comments
-    ...getRuleGroup(
+    ...buildRuleGroup(
       [
         'line_comment',
         'multiline_comment',
