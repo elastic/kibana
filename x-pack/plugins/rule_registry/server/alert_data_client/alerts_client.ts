@@ -11,11 +11,14 @@ import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import {
   AlertConsumers,
+  ALERT_TIME_RANGE,
+  ALERT_STATUS,
   getEsQueryConfig,
   getSafeSortIds,
   isValidFeatureId,
   STATUS_VALUES,
   ValidFeatureId,
+  ALERT_STATUS_RECOVERED,
 } from '@kbn/rule-data-utils';
 
 import {
@@ -32,6 +35,7 @@ import {
 import { Logger, ElasticsearchClient, EcsEventOutcome } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { isEmpty } from 'lodash';
 import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
@@ -89,6 +93,16 @@ export interface BulkUpdateOptions<Params extends RuleTypeParams> {
 
 interface GetAlertParams {
   id: string;
+  index?: string;
+}
+
+interface GetAlertSummaryParams {
+  id?: string;
+  gte: string;
+  lte: string;
+  featureIds?: string | string[];
+  filter?: object;
+  fixedInterval?: string;
   index?: string;
 }
 
@@ -500,6 +514,102 @@ export class AlertsClient {
     }
   }
 
+  public async getAlertSummary({
+    gte,
+    lte,
+    featureIds,
+    filter,
+    fixedInterval = '1m',
+    index,
+  }: GetAlertSummaryParams) {
+    try {
+      let indexToUse = index;
+      if (featureIds && !isEmpty(featureIds)) {
+        indexToUse = (
+          (await this.getAuthorizedAlertsIndices(
+            Array.isArray(featureIds) ? featureIds : [featureIds]
+          )) ?? []
+        ).join(',');
+      }
+      const dateHistogramAgg = {
+        date_histogram: {
+          field: ALERT_TIME_RANGE,
+          fixed_interval: fixedInterval,
+          hard_bounds: {
+            min: gte,
+            max: lte,
+          },
+          extended_bounds: {
+            min: gte,
+            max: lte,
+          },
+        },
+      };
+      const timeRange = {
+        range: {
+          [ALERT_TIME_RANGE]: {
+            gt: gte,
+            lt: lte,
+          },
+        },
+      };
+
+      // first search for the alert by id, then use the alert info to check if user has access to it
+      const [activeResponse, recoveredResponse] = await Promise.all([
+        this.singleSearchAfterAndAudit({
+          index: indexToUse,
+          operation: ReadOperations.Get,
+          aggs: {
+            active_alerts_bucket: dateHistogramAgg,
+          },
+          query: {
+            bool: {
+              filter: [timeRange, ...(filter ? [filter] : [])],
+            },
+          },
+          size: 0,
+        }),
+        this.singleSearchAfterAndAudit({
+          index: indexToUse,
+          operation: ReadOperations.Get,
+          aggs: {
+            recovered_alerts_bucket: dateHistogramAgg,
+          },
+          query: {
+            bool: {
+              filter: [
+                timeRange,
+                {
+                  term: {
+                    [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+                  },
+                },
+                ...(filter ? [filter] : []),
+              ],
+            },
+          },
+          size: 0,
+        }),
+      ]);
+
+      return {
+        activeAlerts:
+          (
+            activeResponse.aggregations
+              ?.active_alerts_bucket as estypes.AggregationsAutoDateHistogramAggregate
+          )?.buckets ?? [],
+        recoveredAlerts:
+          (
+            recoveredResponse.aggregations
+              ?.recovered_alerts_bucket as estypes.AggregationsAutoDateHistogramAggregate
+          )?.buckets ?? [],
+      };
+    } catch (error) {
+      this.logger.error(`get threw an error: ${error}`);
+      throw error;
+    }
+  }
+
   public async update<Params extends RuleTypeParams = never>({
     id,
     status,
@@ -674,7 +784,7 @@ export class AlertsClient {
           throw new Error(`This feature id ${feature} should be associated to an alert index`);
         }
         return (
-          index?.getPrimaryAlias(feature === AlertConsumers.SIEM ? this.spaceId ?? '*' : '*') ?? ''
+          index?.getPrimaryAlias(feature === AlertConsumers.SIEM ? this.spaceId ?? '*' : '') ?? ''
         );
       });
 
