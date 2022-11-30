@@ -7,15 +7,19 @@
  */
 
 import uuid from 'uuid';
-import { ControlPanelState, getDefaultControlGroupInput } from '../../common';
+import { ControlPanelState } from '../../common';
 import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
 } from '../../common/control_group/control_group_constants';
-import { OPTIONS_LIST_CONTROL } from '..';
+import {
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL
+} from '..';
 import { getCompatibleControlType, getNextPanelOrder } from './embeddable/control_group_helpers';
 
-export type AddDataControlProps = {
+export interface AddDataControlProps {
   controlId?: string;
   dataViewId: string;
   fieldName: string;
@@ -26,12 +30,12 @@ export type AddDataControlProps = {
 
 export type AddOptionsListControlProps = AddDataControlProps & {
   selectedOptions?: string[];
-}
+};
 
 export const controlGroupInputBuilder = {
   addDataControlFromField: async (
     initialInput: Partial<ControlGroupInput>,
-    controlProps: AddDataControlFromFieldProps,
+    controlProps: AddDataControlFromFieldProps
   ) => {
     const { controlId, dataViewId, fieldName, title } = controlProps;
     const panelId = controlId ? controlId : uuid.v4();
@@ -43,9 +47,9 @@ export const controlGroupInputBuilder = {
         grow: getGrow(initialInput, controlProps),
         width: getWidth(initialInput, controlProps),
         explicitInput: {
-          id: panelId, 
-          dataViewId, 
-          fieldName, 
+          id: panelId,
+          dataViewId,
+          fieldName,
           title: controlProps.title ?? fieldName,
         },
       } as ControlPanelState<DataControlInput>,
@@ -53,7 +57,7 @@ export const controlGroupInputBuilder = {
   },
   addOptionsListControl: (
     initialInput: Partial<ControlGroupInput>,
-    controlProps: AddOptionsListControlProps,
+    controlProps: AddOptionsListControlProps
   ) => {
     const { controlId, dataViewId, fieldName, selectedOptions, title } = controlProps;
     const panelId = controlId ? controlId : uuid.v4();
@@ -66,7 +70,7 @@ export const controlGroupInputBuilder = {
         width: getWidth(initialInput, controlProps),
         explicitInput: {
           id: panelId,
-          dataViewId, 
+          dataViewId,
           fieldName,
           selectedOptions,
           title: controlProps.title ?? fieldName,
@@ -76,7 +80,7 @@ export const controlGroupInputBuilder = {
   },
   addRangeSliderControl: (
     initialInput: Partial<ControlGroupInput>,
-    controlProps: AddDataControlProps,
+    controlProps: AddDataControlProps
   ) => {
     const { controlId, dataViewId, fieldName, selectedOptions, title } = controlProps;
     const panelId = controlId ? controlId : uuid.v4();
@@ -89,7 +93,7 @@ export const controlGroupInputBuilder = {
         width: getWidth(initialInput, controlProps),
         explicitInput: {
           id: panelId,
-          dataViewId, 
+          dataViewId,
           fieldName,
           title: controlProps.title ?? fieldName,
         },

@@ -31,7 +31,6 @@ const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 export const BasicReduxExample = ({ dataViewId }: { dataViewId?: string }) => {
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
-  const [currentControlStyle, setCurrentControlStyle] = useState<ControlStyle>('oneLine');
 
   const ControlGroupReduxWrapper = useMemo(() => {
     if (controlGroup) return controlGroup.getReduxEmbeddableTools().Wrapper;
@@ -40,9 +39,13 @@ export const BasicReduxExample = ({ dataViewId }: { dataViewId?: string }) => {
   const ButtonControls = () => {
     const {
       useEmbeddableDispatch,
+      useEmbeddableSelector: select,
       actions: { setControlStyle },
     } = useControlGroupContainerContext();
     const dispatch = useEmbeddableDispatch();
+    const controlStyle = select((state) => {
+      return state.explicitInput.controlStyle;
+    });
 
     return (
       <>
@@ -67,9 +70,8 @@ export const BasicReduxExample = ({ dataViewId }: { dataViewId?: string }) => {
                   value: 'twoLine' as ControlStyle,
                 },
               ]}
-              idSelected={currentControlStyle}
+              idSelected={controlStyle}
               onChange={(id, value) => {
-                setCurrentControlStyle(value);
                 dispatch(setControlStyle(value));
               }}
               type="single"

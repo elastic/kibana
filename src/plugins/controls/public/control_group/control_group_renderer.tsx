@@ -14,7 +14,7 @@ import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 
 import { pluginServices } from '../services';
-import { ControlPanelState, getDefaultControlGroupInput } from '../../common';
+import { getDefaultControlGroupInput } from '../../common';
 import {
   ControlGroupInput,
   ControlGroupOutput,
@@ -22,8 +22,6 @@ import {
   CONTROL_GROUP_TYPE,
 } from './types';
 import { ControlGroupContainer } from './embeddable/control_group_container';
-import { DataControlInput } from '../types';
-import { getCompatibleControlType, getNextPanelOrder } from './embeddable/control_group_helpers';
 import { controlGroupReducers } from './state/control_group_reducers';
 import { controlGroupInputBuilder } from './control_group_input_builder';
 
@@ -31,7 +29,7 @@ export interface ControlGroupRendererProps {
   onLoadComplete?: (controlGroup: ControlGroupContainer) => void;
   getInitialInput: (
     initialInput: Partial<ControlGroupInput>,
-    builder: typeof controlGroupInputBuilder,
+    builder: typeof controlGroupInputBuilder
   ) => Promise<Partial<ControlGroupInput>>;
 }
 
