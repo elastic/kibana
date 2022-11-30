@@ -186,7 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should not return timeseries data', async () => {
+      it('should not return timeseries data - with groupBy', async () => {
         const resp = fetchSnapshot({
           sourceId: 'default',
           timerange: {
@@ -224,6 +224,43 @@ export default function ({ getService }: FtrProviderContext) {
               'value',
               'gke-observability-8--observability-8--bc1afd95-f0zc'
             );
+            expect(firstNode).to.have.property('metrics');
+            expect(firstNode.metrics).to.eql([expected]);
+          }
+        });
+      });
+
+      it('should not return timeseries data - without groupBy', async () => {
+        const resp = fetchSnapshot({
+          sourceId: 'default',
+          timerange: {
+            to: max,
+            from: min,
+            interval: '1m',
+          },
+          metrics: [{ type: 'cpu' }],
+          nodeType: 'host',
+          groupBy: null,
+          includeTimeseries: false,
+        });
+
+        const expected = {
+          name: 'cpu',
+          value: null,
+          max: 0.47105555555555556,
+          avg: 0.0672936507936508,
+        };
+
+        return resp.then((data) => {
+          const snapshot = data;
+          expect(snapshot).to.have.property('nodes');
+          if (snapshot) {
+            const { nodes } = snapshot;
+            expect(nodes.length).to.equal(1);
+            const firstNode = nodes[0] as any;
+            expect(firstNode).to.have.property('path');
+            expect(firstNode.path.length).to.equal(1);
+            expect(firstNode.path[0]).to.have.property('value', '*');
             expect(firstNode).to.have.property('metrics');
             expect(firstNode.metrics).to.eql([expected]);
           }
