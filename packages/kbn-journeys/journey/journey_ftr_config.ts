@@ -44,7 +44,7 @@ export function makeFtrConfigProvider(
       throw new Error('invalid GITHUB_PR_NUMBER environment variable');
     }
 
-    const telemetryLabels: Record<string, string | boolean | undefined | number> = {
+    const labels: Record<string, string | boolean | undefined | number> = {
       branch: process.env.BUILDKITE_BRANCH,
       ciBuildId: process.env.BUILDKITE_BUILD_ID,
       ciBuildJobId: process.env.BUILDKITE_JOB_ID,
@@ -54,6 +54,7 @@ export function makeFtrConfigProvider(
       ...(prId !== undefined ? { prId } : {}),
       ciBuildName: process.env.BUILDKITE_PIPELINE_SLUG,
       journeyName: config.getName(),
+      performancePhase: process.env.TEST_PERFORMANCE_PHASE,
     };
 
     return {
@@ -80,12 +81,12 @@ export function makeFtrConfigProvider(
       kbnTestServer: {
         ...baseConfig.kbnTestServer,
         // delay shutdown to ensure that APM can report the data it collects during test execution
-        delayShutdown: process.env.TEST_PERFORMANCE_PHASE === 'TEST' ? 15_000 : 0,
+        delayShutdown: process.env.TEST_PERFORMANCE_PHASE === 'TEST' ? 5_000 : 0,
 
         serverArgs: [
           ...baseConfig.kbnTestServer.serverArgs,
           `--telemetry.optIn=${process.env.TEST_PERFORMANCE_PHASE === 'TEST'}`,
-          `--telemetry.labels=${JSON.stringify(telemetryLabels)}`,
+          `--telemetry.labels=${JSON.stringify(labels)}`,
           '--csp.strict=false',
           '--csp.warnLegacyBrowsers=false',
         ],
@@ -96,12 +97,7 @@ export function makeFtrConfigProvider(
             ...config.getExtraApmLabels(),
             testJobId,
             testBuildId,
-            journeyName: config.getName(),
-            ftrConfig: config.getRepoRelPath(),
-            performancePhase: process.env.TEST_PERFORMANCE_PHASE,
-            branch: process.env.BUILDKITE_BRANCH,
-            gitRev: process.env.BUILDKITE_COMMIT,
-            ciBuildName: process.env.BUILDKITE_PIPELINE_SLUG,
+            ...labels,
           })
             .flatMap(([key, value]) => (value == null ? [] : `${key}=${value}`))
             .join(','),
