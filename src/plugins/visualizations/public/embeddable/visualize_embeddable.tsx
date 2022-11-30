@@ -364,7 +364,12 @@ export class VisualizeEmbeddable
     }
 
     if (this.warningDomNode) {
-      render(<Warnings warnings={warnings || []} />, this.warningDomNode);
+      render(
+        <KibanaThemeProvider theme$={this.deps.start().core.theme.theme$}>
+          <Warnings warnings={warnings || []} />
+        </KibanaThemeProvider>,
+        this.warningDomNode
+      );
     }
   }
 
