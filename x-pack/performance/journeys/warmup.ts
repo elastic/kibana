@@ -11,8 +11,7 @@ import expect from '@kbn/expect';
 
 const WARMUP_INDEX_NAME = 'warmup-index';
 
-export const journey = new Journey({
-})
+export const journey = new Journey({})
   .step('Setup warmup index', async ({ esClient }) => {
     await esClient.indices.create({
       index: WARMUP_INDEX_NAME,

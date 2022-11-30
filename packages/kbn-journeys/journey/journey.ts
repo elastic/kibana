@@ -14,6 +14,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { FtrConfigProvider } from '@kbn/test';
 import { FtrProviderContext, KibanaServer } from '@kbn/ftr-common-functional-services';
 
+import { Client } from '@elastic/elasticsearch';
 import { Auth } from '../services/auth';
 import { InputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
@@ -21,7 +22,6 @@ import { KibanaUrl } from '../services/kibana_url';
 import { JourneyFtrHarness } from './journey_ftr_harness';
 import { makeFtrConfigProvider } from './journey_ftr_config';
 import { JourneyConfig, JourneyConfigOptions } from './journey_config';
-import { Client } from '@elastic/elasticsearch';
 
 export interface BaseStepCtx {
   page: Page;
