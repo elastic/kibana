@@ -113,13 +113,16 @@ const generateCommonLabelsAstArgs: GenerateLabelsAstArguments = (
   const percentDecimals = layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS;
   const colorOverrides =
     layer.allowMultipleMetrics && !layer.primaryGroups.length
-      ? Object.entries(columnToLabelMap).reduce((acc, [columnId, label]) => {
-          const color = layer.colorsByDimension?.[columnId];
-          if(color){
-            acc[label] = color;
-          }
-          return acc;
-        }, {})
+      ? Object.entries(columnToLabelMap).reduce<Record<string, string>>(
+          (acc, [columnId, label]) => {
+            const color = layer.colorsByDimension?.[columnId];
+            if (color) {
+              acc[label] = color;
+            }
+            return acc;
+          },
+          {}
+        )
       : {};
 
   const partitionLabelsFn = buildExpressionFunction<PartitionLabelsExpressionFunctionDefinition>(
