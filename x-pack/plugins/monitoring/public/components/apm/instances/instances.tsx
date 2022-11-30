@@ -8,7 +8,6 @@
 import React, { Fragment } from 'react';
 import moment from 'moment';
 import { uniq, get } from 'lodash';
-import { EuiMonitoringTable } from '../../table';
 import {
   EuiLink,
   EuiPage,
@@ -18,33 +17,37 @@ import {
   EuiScreenReaderOnly,
   EuiPanel,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiMonitoringTable } from '../../table';
 import { Status } from './status';
 import { formatMetric } from '../../../lib/format_number';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { formatTimestampToDuration } from '../../../../common';
-import { i18n } from '@kbn/i18n';
 import { APM_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { SetupModeBadge } from '../../setup_mode/badge';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
+import type { AlertsByName } from '../../../alerts/types';
+import type { Sorting, Pagination, TableChange } from '../../../application/hooks/use_table';
+import type { SetupMode } from '../../setup_mode/types';
 
-function getColumns(alerts, setupMode, cgroup) {
+function getColumns(setupMode: SetupMode, cgroup: unknown) {
   const memoryField = cgroup
     ? {
         name: i18n.translate('xpack.monitoring.apm.instances.cgroupMemoryUsageTitle', {
           defaultMessage: 'Memory Usage (cgroup)',
         }),
         field: 'cgroup_memory',
-        render: (value) => formatMetric(value, 'byte'),
+        render: (value: number) => formatMetric(value, 'byte'),
       }
     : {
         name: i18n.translate('xpack.monitoring.apm.instances.allocatedMemoryTitle', {
           defaultMessage: 'Allocated Memory',
         }),
         field: 'memory',
-        render: (value) => formatMetric(value, 'byte'),
+        render: (value: number) => formatMetric(value, 'byte'),
       };
   return [
     {
@@ -52,7 +55,7 @@ function getColumns(alerts, setupMode, cgroup) {
         defaultMessage: 'Name',
       }),
       field: 'name',
-      render: (name, apm) => {
+      render: (name: string, apm: { uuid: string; name: string }) => {
         let setupModeStatus = null;
         if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
           const list = get(setupMode, 'data.byUuid', {});
@@ -98,28 +101,28 @@ function getColumns(alerts, setupMode, cgroup) {
         defaultMessage: 'Total Events Rate',
       }),
       field: 'total_events_rate',
-      render: (value) => formatMetric(value, '', '/s'),
+      render: (value: number) => formatMetric(value, '', '/s'),
     },
     {
       name: i18n.translate('xpack.monitoring.apm.instances.bytesSentRateTitle', {
         defaultMessage: 'Bytes Sent Rate',
       }),
       field: 'bytes_sent_rate',
-      render: (value) => formatMetric(value, 'byte', '/s'),
+      render: (value: number) => formatMetric(value, 'byte', '/s'),
     },
     {
       name: i18n.translate('xpack.monitoring.apm.instances.outputErrorsTitle', {
         defaultMessage: 'Output Errors',
       }),
       field: 'errors',
-      render: (value) => formatMetric(value, '0'),
+      render: (value: string) => formatMetric(value, '0'),
     },
     {
       name: i18n.translate('xpack.monitoring.apm.instances.lastEventTitle', {
         defaultMessage: 'Last Event',
       }),
       field: 'time_of_last_event',
-      render: (value) =>
+      render: (value: number) =>
         i18n.translate('xpack.monitoring.apm.instances.lastEventValue', {
           defaultMessage: '{timeOfLastEvent} ago',
           values: {
@@ -137,17 +140,29 @@ function getColumns(alerts, setupMode, cgroup) {
   ];
 }
 
-export function ApmServerInstances({ apms, alerts, setupMode }) {
+interface Props {
+  apms: {
+    data: {
+      apms: Array<{
+        version: string;
+      }>;
+      cgroup: unknown;
+      stats: unknown;
+    };
+    pagination: Pagination;
+    sorting: Sorting;
+    onTableChange: (e: TableChange) => void;
+  };
+  setupMode: SetupMode;
+  alerts?: AlertsByName;
+}
+export function ApmServerInstances({ apms, setupMode, alerts }: Props) {
   const { pagination, sorting, onTableChange, data } = apms;
 
   let setupModeCallout = null;
   if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
     setupModeCallout = (
-      <ListingCallOut
-        setupModeData={setupMode.data}
-        useNodeIdentifier={false}
-        productName={APM_SYSTEM_ID}
-      />
+      <ListingCallOut setupModeData={setupMode.data} productName={APM_SYSTEM_ID} />
     );
   }
 
@@ -175,7 +190,7 @@ export function ApmServerInstances({ apms, alerts, setupMode }) {
           <EuiMonitoringTable
             className="apmInstancesTable"
             rows={data.apms}
-            columns={getColumns(alerts, setupMode, data.cgroup)}
+            columns={getColumns(setupMode, data.cgroup)}
             sorting={sorting}
             pagination={pagination}
             setupMode={setupMode}
