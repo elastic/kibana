@@ -6,47 +6,62 @@
  * Side Public License, v 1.
  */
 
-import { chain, isEmpty, startCase } from 'lodash';
+import { castArray, chain, isEmpty, startCase } from 'lodash';
+import { filter as filterBy } from 'lodash/fp';
+import { run } from '@kbn/dev-cli-runner';
 import { ComplexityReportGenerator } from './complexity';
 import { Lookup } from './lookup';
 
-const OPTIONS = ['package', 'plugin', 'owner'];
-const OPTIONS_PATTERN = new RegExp(`--(${OPTIONS.join('|')})=(.*)$`);
+export function generateComplexityReport(): Promise<void> {
+  return run(
+    async ({ log, flags }) => {
+      const lookup = new Lookup();
+      const complexityReportGenerator = new ComplexityReportGenerator({ complexity: 1 });
 
-export async function generateComplexityReport() {
-  const lookup = new Lookup();
-  const complexityReportGenerator = new ComplexityReportGenerator({ complexity: 1 });
+      const filter = chain(flags)
+        .pick('owner', 'package', 'plugin')
+        .mapValues(castArray)
+        .mapValues(filterBy<string>(Boolean))
+        .omitBy(isEmpty)
+        .value();
+      const pattern = chain(flags)
+        .pick('pattern', '_')
+        .map(castArray)
+        .flatten()
+        .filter(Boolean)
+        .uniq()
+        .value() as string[];
 
-  const { pattern, ...filter } = chain(process.argv)
-    .drop(2)
-    .map((arg) => {
-      const parameter = OPTIONS_PATTERN.exec(arg);
-      if (!parameter) {
-        return ['pattern', arg];
+      const table = {} as Record<string, Record<string, number>>;
+
+      for (const { name, path } of [
+        ...(isEmpty(filter) && isEmpty(pattern) ? await lookup.lookup() : []),
+        ...(!isEmpty(filter) ? await lookup.lookup(filter) : []),
+        ...(!isEmpty(pattern) ? [{ name: '', path: pattern }] : []),
+      ]) {
+        log.debug(`Gathering metrics for '${castArray(path).join("', '")}'.`);
+        const report = await complexityReportGenerator.generate(path);
+        table[name] = chain(report)
+          .mapKeys((value, key) => startCase(key))
+          .mapValues((value) => Math.round(value * 100) / 100)
+          .value();
       }
 
-      const [, key, value] = parameter;
-
-      return [key, value];
-    })
-    .groupBy('0')
-    .mapValues((values) => values.map(([, value]) => value))
-    .value();
-
-  const table = {} as Record<string, Record<string, number>>;
-
-  for (const { name, path } of [
-    ...(isEmpty(filter) && isEmpty(pattern) ? await lookup.lookup() : []),
-    ...(!isEmpty(filter) ? await lookup.lookup(filter) : []),
-    ...(!isEmpty(pattern) ? [{ name: '', path: pattern }] : []),
-  ]) {
-    const report = await complexityReportGenerator.generate(path);
-    table[name] = chain(report)
-      .mapKeys((value, key) => startCase(key))
-      .mapValues((value) => Math.round(value * 100) / 100)
-      .value();
-  }
-
-  // eslint-disable-next-line no-console
-  console.table(table);
+      // eslint-disable-next-line no-console
+      console.table(table);
+    },
+    {
+      flags: {
+        alias: { team: 'owner' },
+        string: ['owner', 'plugin', 'package', 'pattern'],
+        help: `
+          --owner, --team    Filter by team.
+          --pattern          Filter by path pattern.
+          --package          Filter by package name.
+          --plugin           Filter by plugin name.
+        `,
+      },
+      description: 'Generates a complexity report for the code.',
+    }
+  );
 }
