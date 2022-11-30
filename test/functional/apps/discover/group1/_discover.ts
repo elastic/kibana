@@ -26,8 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/146223
-  describe.skip('discover test', function describeIndexTests() {
+  describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -152,6 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show correct initial chart interval of Auto', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await testSubjects.click('unifiedHistogramQueryHits'); // to cancel out tooltips
         const actualInterval = await PageObjects.discover.getChartInterval();
 
         const expectedInterval = 'Auto';
