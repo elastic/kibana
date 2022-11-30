@@ -11,7 +11,11 @@ export enum ArchiverMethod {
   UNLOAD = 'unload',
 }
 
-export const runKbnArchiverScript = (method: ArchiverMethod, fileName: string, space?: string) => {
+export const runKbnArchiverScript = (
+  method: ArchiverMethod,
+  fileName: string,
+  space = 'default'
+) => {
   const {
     ELASTICSEARCH_USERNAME,
     ELASTICSEARCH_PASSWORD,
