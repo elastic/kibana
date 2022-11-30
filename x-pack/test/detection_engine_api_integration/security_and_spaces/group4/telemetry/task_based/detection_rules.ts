@@ -9,7 +9,6 @@
 
 import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import moment from 'moment';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createRule,
@@ -37,8 +36,6 @@ export default ({ getService }: FtrProviderContext) => {
   // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint_security.json
   // This rule has an existing exceptions_list that we are going to use.
   const IMMUTABLE_RULE_ID = '9a1a2dae-0b5f-4c3d-8305-a268d404c306';
-
-  const CREATED_AT = moment().subtract(1, 'hour').toISOString();
 
   describe('Detection rule task telemetry', async () => {
     before(async () => {
@@ -459,21 +456,6 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(detectionRules).to.eql([
             {
-              created_at: detectionRules[0].created_at,
-              entries: [
-                {
-                  field: 'keyword',
-                  operator: 'included',
-                  type: 'match',
-                  value: 'something',
-                },
-              ],
-              id: detectionRules[0].id,
-              name: 'endpoint description',
-              os_types: [],
-              rule_version: detectionRules[0].rule_version,
-            },
-            {
               name: 'Security Solution Detection Rule Lists Telemetry',
               passed: true,
             },
@@ -534,21 +516,6 @@ export default ({ getService }: FtrProviderContext) => {
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
 
           expect(detectionRules).to.eql([
-            {
-              created_at: detectionRules[0].created_at,
-              entries: [
-                {
-                  field: 'keyword',
-                  operator: 'included',
-                  type: 'match',
-                  value: 'something',
-                },
-              ],
-              id: detectionRules[0].id,
-              name: 'endpoint description',
-              os_types: [],
-              rule_version: detectionRules[0].rule_version,
-            },
             {
               name: 'Security Solution Detection Rule Lists Telemetry',
               passed: true,
@@ -611,21 +578,6 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(detectionRules).to.eql([
             {
-              created_at: detectionRules[0].created_at,
-              entries: [
-                {
-                  field: 'keyword',
-                  operator: 'included',
-                  type: 'match',
-                  value: 'something',
-                },
-              ],
-              id: detectionRules[0].id,
-              name: 'endpoint description',
-              os_types: [],
-              rule_version: detectionRules[0].rule_version,
-            },
-            {
               name: 'Security Solution Detection Rule Lists Telemetry',
               passed: true,
             },
@@ -687,21 +639,6 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(detectionRules).to.eql([
             {
-              created_at: detectionRules[0].created_at,
-              entries: [
-                {
-                  field: 'keyword',
-                  operator: 'included',
-                  type: 'match',
-                  value: 'something',
-                },
-              ],
-              id: detectionRules[0].id,
-              name: 'endpoint description',
-              os_types: [],
-              rule_version: detectionRules[0].rule_version,
-            },
-            {
               name: 'Security Solution Detection Rule Lists Telemetry',
               passed: true,
             },
@@ -762,21 +699,6 @@ export default ({ getService }: FtrProviderContext) => {
             .map((obj: any) => (obj.passed != null ? obj : obj.detection_rule));
 
           expect(detectionRules).to.eql([
-            {
-              created_at: detectionRules[0].created_at,
-              entries: [
-                {
-                  field: 'keyword',
-                  operator: 'included',
-                  type: 'match',
-                  value: 'something',
-                },
-              ],
-              id: detectionRules[0].id,
-              name: 'endpoint description',
-              os_types: [],
-              rule_version: detectionRules[0].rule_version,
-            },
             {
               name: 'Security Solution Detection Rule Lists Telemetry',
               passed: true,
@@ -865,21 +787,6 @@ export default ({ getService }: FtrProviderContext) => {
             });
 
           expect(detectionRules).to.eql([
-            {
-              created_at: detectionRules[0].created_at,
-              entries: [
-                {
-                  field: 'keyword',
-                  operator: 'included',
-                  type: 'match',
-                  value: 'something 2',
-                },
-              ],
-              id: detectionRules[0].id,
-              name: 'endpoint description 2',
-              os_types: [],
-              rule_version: detectionRules[0].rule_version,
-            },
             {
               created_at: detectionRules[1].created_at,
               entries: [
