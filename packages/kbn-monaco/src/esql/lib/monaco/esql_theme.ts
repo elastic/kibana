@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars, darkMode } from '@kbn/ui-theme';
 import { tokenPostfix } from './esql_constants';
 import { monaco } from '../../../monaco_imports';
 
@@ -18,8 +18,8 @@ const getRuleGroup = (tokens: string[], color: string, isBold: boolean = false) 
   }));
 
 export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
-  base: 'vs',
-  inherit: false,
+  base: darkMode ? 'vs-dark' : 'vs',
+  inherit: true,
   rules: [
     // base
     ...getRuleGroup(
