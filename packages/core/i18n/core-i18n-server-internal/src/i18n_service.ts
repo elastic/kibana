@@ -30,6 +30,10 @@ export interface SetupDeps {
   pluginPaths: string[];
 }
 
+// TODO: not even sure this is necessary, maybe we should just load all files
+//       but anyway, this was simpler for now.
+const SUPPORTED_LOCALES = ['en', 'fr-FR', 'zh-CN', 'ja-JP'];
+
 export class I18nService {
   private readonly log: Logger;
   private readonly configService: IConfigService;
@@ -40,15 +44,15 @@ export class I18nService {
   }
 
   public async preboot({ pluginPaths, http }: PrebootDeps) {
-    const { locale } = await this.initTranslations(pluginPaths);
-    http.registerRoutes('', (router) => registerRoutes({ router, locale }));
+    await this.initTranslations(pluginPaths);
+    http.registerRoutes('', (router) => registerRoutes({ router, locales: SUPPORTED_LOCALES }));
   }
 
   public async setup({ pluginPaths, http }: SetupDeps): Promise<I18nServiceSetup> {
     const { locale, translationFiles } = await this.initTranslations(pluginPaths);
 
     const router = http.createRouter('');
-    registerRoutes({ router, locale });
+    registerRoutes({ router, locales: SUPPORTED_LOCALES });
 
     return {
       getLocale: () => locale,
@@ -62,12 +66,12 @@ export class I18nService {
     );
 
     const locale = i18nConfig.locale;
-    this.log.debug(`Using locale: ${locale}`);
+    this.log.debug(`Using default locale: ${locale}`);
 
-    const translationFiles = await getKibanaTranslationFiles(locale, pluginPaths);
+    const translationFiles = await getKibanaTranslationFiles(SUPPORTED_LOCALES, pluginPaths);
 
     this.log.debug(`Using translation files: [${translationFiles.join(', ')}]`);
-    await initTranslations(locale, translationFiles);
+    await initTranslations(SUPPORTED_LOCALES, locale, translationFiles);
 
     return { locale, translationFiles };
   }

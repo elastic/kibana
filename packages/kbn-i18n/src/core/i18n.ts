@@ -46,6 +46,12 @@ function normalizeLocale(locale: string) {
   return locale.toLowerCase();
 }
 
+export function addTranslations(translationsRecord: Record<string, Translation>) {
+  Object.entries(translationsRecord).forEach(([locale, translation]) => {
+    addTranslation(translation, locale);
+  });
+}
+
 /**
  * Provides a way to register translations with the engine
  * @param newTranslation
@@ -78,8 +84,8 @@ export function addTranslation(newTranslation: Translation, locale = newTranslat
 /**
  * Returns messages for the current language
  */
-export function getTranslation(): Translation {
-  return translationsForLocale[currentLocale] || { messages: {} };
+export function getTranslation(locale?: string): Translation {
+  return translationsForLocale[locale ?? currentLocale] || { messages: {} };
 }
 
 /**

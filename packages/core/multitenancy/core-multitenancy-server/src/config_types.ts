@@ -19,4 +19,9 @@ export interface TenantConfig {
 
 export interface TenantCustomConfig {
   elasticsearch: TenantElasticsearchConfig;
+  i18n: TenantI18NConfig;
+}
+
+export interface TenantI18NConfig {
+  locale: string;
 }

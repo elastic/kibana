@@ -21,6 +21,9 @@ export const tenantSchema = schema.object({
       serviceAccountToken: schema.maybe(schema.string()),
       customHeaders: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
     }),
+    i18n: schema.object({
+      locale: schema.string({ defaultValue: 'en' }),
+    }),
   }),
 });
 

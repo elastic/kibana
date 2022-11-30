@@ -165,7 +165,7 @@
 # This value must be a whole number greater than zero. Defaults to 100_000
 #unifiedSearch.autocomplete.valueSuggestions.terminateAfter: 100000
 
-logging.root.level: 'warn'
+# logging.root.level: 'warn'
 
 multitenancy:
   tenants:
@@ -175,9 +175,13 @@ multitenancy:
           hosts: ['http://localhost:9200']
           username: 'elastic'
           password: 'changeme'
+        i18n:
+          locale: 'fr-FR'
     - id: tenantB
       config:
         elasticsearch:
           hosts: ['http://localhost:9300']
           username: 'elastic'
           password: 'changeme'
+        i18n:
+          locale: 'en'

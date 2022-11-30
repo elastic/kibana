@@ -105,6 +105,8 @@ export class RenderingService {
       user: isAnonymousPage ? {} : await uiSettings.getUserProvided(),
     };
 
+    const tenantConfig = tenantId ? multitenancy!.getTenantConfig(tenantId) : undefined;
+
     let clusterInfo = {};
     try {
       // Only provide the clusterInfo if the request is authenticated and the elasticsearch service is available.
@@ -130,6 +132,7 @@ export class RenderingService {
       buildNum,
     });
 
+    const usedLocale = tenantConfig ? tenantConfig.config.i18n.locale : i18n.getLocale();
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
@@ -137,7 +140,7 @@ export class RenderingService {
       uiPublicUrl: `${basePath}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       i18n: i18n.translate,
-      locale: i18n.getLocale(),
+      locale: usedLocale,
       darkMode,
       themeVersion,
       stylesheetPaths,
@@ -153,7 +156,7 @@ export class RenderingService {
         clusterInfo,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
-          translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
+          translationsUrl: `${basePath}/translations/${usedLocale}.json`,
         },
         theme: {
           darkMode,

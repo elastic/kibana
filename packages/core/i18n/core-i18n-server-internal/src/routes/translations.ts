@@ -16,8 +16,8 @@ interface TranslationCache {
   hash: string;
 }
 
-export const registerTranslationsRoute = (router: IRouter, locale: string) => {
-  let translationCache: TranslationCache;
+export const registerTranslationsRoute = (router: IRouter, locales: string[]) => {
+  const translationCache: Record<string, TranslationCache> = {};
 
   router.get(
     {
@@ -32,15 +32,16 @@ export const registerTranslationsRoute = (router: IRouter, locale: string) => {
       },
     },
     (ctx, req, res) => {
-      if (req.params.locale.toLowerCase() !== locale.toLowerCase()) {
+      const requestedLocale = req.params.locale.toLowerCase();
+      if (!locales.find((locale) => locale.toLowerCase() === requestedLocale)) {
         return res.notFound({
-          body: `Unknown locale: ${req.params.locale}`,
+          body: `Unknown locale: ${requestedLocale}`,
         });
       }
-      if (!translationCache) {
-        const translations = JSON.stringify(i18n.getTranslation());
+      if (!translationCache[requestedLocale]) {
+        const translations = JSON.stringify(i18n.getTranslation(requestedLocale));
         const hash = createHash('sha1').update(translations).digest('hex');
-        translationCache = {
+        translationCache[requestedLocale] = {
           translations,
           hash,
         };
@@ -49,9 +50,9 @@ export const registerTranslationsRoute = (router: IRouter, locale: string) => {
         headers: {
           'content-type': 'application/json',
           'cache-control': 'must-revalidate',
-          etag: translationCache.hash,
+          etag: translationCache[requestedLocale].hash,
         },
-        body: translationCache.translations,
+        body: translationCache[requestedLocale].translations,
       });
     }
   );

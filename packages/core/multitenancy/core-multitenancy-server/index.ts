@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-export type { MultitenancyConfig, TenantConfig, TenantCustomConfig } from './src/config_types';
+export type {
+  MultitenancyConfig,
+  TenantConfig,
+  TenantCustomConfig,
+  TenantI18NConfig,
+} from './src/config_types';
 export type {
   MultitenancyApi,
   MultitenancyServiceSetup,
