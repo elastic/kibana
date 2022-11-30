@@ -9,7 +9,7 @@
 const dedent = require('dedent');
 const getopts = require('getopts');
 const { Cluster } = require('../cluster');
-const { parseTimeoutToMs, getApmSettings } = require('../utils');
+const { parseTimeoutToMs, getElasticsearchApmSettings } = require('../utils');
 import { log as defaultLog } from '../utils/log';
 
 exports.description = 'Build and run from source';
@@ -33,8 +33,6 @@ exports.help = (defaults = {}) => {
       -E                Additional key=value settings to pass to Elasticsearch
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
-      --apm-secret-token Secret token for the APM Server
-      --apm-server-url  URL of APM server
 
     Example:
 
@@ -54,8 +52,6 @@ exports.run = async (defaults = {}) => {
       readyTimeout: 'ready-timeout',
       secureFiles: 'secure-files',
       esArgs: 'E',
-      apmServerUrl: 'apm-server-url',
-      apmSecretToken: 'apm-secret-token',
     },
 
     string: ['ready-timeout'],
@@ -68,7 +64,7 @@ exports.run = async (defaults = {}) => {
 
   const { installPath } = await cluster.installSource({
     ...options,
-    ...getApmSettings(defaultLog, apmServerUrl, apmSecretToken),
+    ...getElasticsearchApmSettings(defaultLog),
   });
 
   if (options.dataArchive) {

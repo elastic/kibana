@@ -11,7 +11,7 @@ const getopts = require('getopts');
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 const { Cluster } = require('../cluster');
-const { parseTimeoutToMs, getApmSettings } = require('../utils');
+const { parseTimeoutToMs, getElasticsearchApmSettings } = require('../utils');
 
 exports.description = 'Downloads and run from a nightly snapshot';
 
@@ -35,8 +35,6 @@ exports.help = (defaults = {}) => {
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
       --plugins         Comma seperated list of Elasticsearch plugins to install
-      --apm-secret-token Secret token for the APM Server
-      --apm-server-url  URL of APM server
 
     Example:
 
@@ -82,7 +80,7 @@ exports.run = async (defaults = {}) => {
 
     const { installPath } = await cluster.installSnapshot({
       ...options,
-      ...getApmSettings(log, apmServerUrl, apmSecretToken),
+      ...getElasticsearchApmSettings(log),
     });
 
     if (options.dataArchive) {

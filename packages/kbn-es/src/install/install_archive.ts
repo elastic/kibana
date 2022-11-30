@@ -86,9 +86,10 @@ export async function installArchive(archive: string, options: InstallArchiveOpt
     const apmKeystore: Array<[string, string]> = [];
     if (apmSettings) {
       apmKeystore.push(['tracing.apm.secret_token', apmSettings.apmSecretToken]);
-      await appendToConfig(installPath, 'tracing.apm.enabled', 'true');
-      await appendToConfig(installPath, 'tracing.apm.agent.transaction_sample_rate', '1.0');
+      await appendToConfig(installPath, 'tracing.apm.enabled', apmSettings.enabled ? 'true' : 'false');
+      await appendToConfig(installPath, 'tracing.apm.agent.transaction_sample_rate', apmSettings.samplingRate.toString());
       await appendToConfig(installPath, 'tracing.apm.agent.server_url', apmSettings.apmServerUrl);
+      await appendToConfig(installPath, 'tracing.apm.agent.log_level', apmSettings.logLevel);
     }
     await createKeystore(installPath);
     await configureKeystore(installPath, log, [

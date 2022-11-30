@@ -6,25 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-
 export interface ElasticsearchAPMSettings {
+  enabled: boolean;
   apmSecretToken: string;
   apmServerUrl: string;
-}
-
-export function getApmSettings(
-  log: ToolingLog,
-  apmServerUrl?: string,
-  apmSecretToken?: string
-): ElasticsearchAPMSettings | undefined {
-  if (apmServerUrl && apmSecretToken) {
-    log.info(`Elasticsearch APM is enabled. Reporting to ${apmServerUrl}`);
-    return {
-      apmSecretToken,
-      apmServerUrl,
-    };
-  } else {
-    log.info('Elasticsearch APM is disabled');
-  }
+  samplingRate: number;
+  logLevel: string;
 }
