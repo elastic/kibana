@@ -19,7 +19,7 @@ enum LookupType {
 interface LookupResult {
   type: LookupType;
   name: string;
-  owner: string;
+  owner: string[];
   path: string;
 }
 
@@ -34,7 +34,7 @@ export class Lookup {
     return ({ name, owner, type }: LookupResult) =>
       (type === LookupType.Package && filter.package?.includes(name)) ||
       (type === LookupType.Plugin && filter.plugin?.includes(name)) ||
-      filter.owner?.includes(owner);
+      owner.some((item) => filter.owner?.includes(item));
   }
 
   private static async lookupPackages() {
@@ -59,7 +59,7 @@ export class Lookup {
     ).map<LookupResult>(({ directory, manifest }) => ({
       type: LookupType.Plugin,
       name: manifest.id,
-      owner: manifest.owner.name,
+      owner: [manifest.owner.name],
       path: directory,
     }));
   }
