@@ -70,6 +70,13 @@ const defaultServices = {
       getUseCasesAddToNewCaseFlyout: () => {},
       getUseCasesAddToExistingCaseModal: () => {},
     },
+    helpers: {
+      canUseCases: () => ({
+        create: true,
+        read: true,
+        push: true,
+      }),
+    },
   },
 } as unknown as CoreStart;
 
