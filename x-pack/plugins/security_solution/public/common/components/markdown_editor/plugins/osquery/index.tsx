@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pickBy, isEmpty } from 'lodash';
+import { pickBy, isEmpty, reduce } from 'lodash';
 import type { Plugin } from 'unified';
 import React, { useContext, useMemo, useState, useCallback } from 'react';
 import type { RemarkTokenizer } from '@elastic/eui';
@@ -24,7 +24,8 @@ import styled from 'styled-components';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { replaceParamsQuery } from './replace_params_query';
+import { replaceParamsQuery } from '../../../../../../common/utils/replace_params_query';
+import { expandDottedObject } from '../../../../../../common/utils/expand_dotted';
 import { useKibana } from '../../../../lib/kibana';
 import { LabelField } from './label_field';
 import OsqueryLogo from './osquery_icon/osquery.svg';
@@ -269,10 +270,19 @@ const RunOsqueryButtonRenderer = ({
 
   const handleClose = useCallback(() => setShowFlyout(false), [setShowFlyout]);
 
-  const replacedParamsQuery = useMemo(
-    () => replaceParamsQuery(configuration.query, data),
-    [configuration.query, data]
-  );
+  const replacedParamsQuery = useMemo(() => {
+    const fieldsMap: Record<string, string> = reduce(
+      data,
+      (acc, eventDetailItem) => ({
+        ...acc,
+        [eventDetailItem.field]: eventDetailItem?.values?.[0],
+      }),
+      {}
+    );
+    const expandedEventObject = expandDottedObject(fieldsMap);
+
+    return replaceParamsQuery(configuration.query, expandedEventObject);
+  }, [configuration.query, data]);
 
   return (
     <>

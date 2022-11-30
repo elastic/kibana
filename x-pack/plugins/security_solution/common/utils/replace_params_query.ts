@@ -5,26 +5,17 @@
  * 2.0.
  */
 
-import { each, reduce } from 'lodash';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { each, get } from 'lodash';
 
-export const replaceParamsQuery = (query: string, data?: TimelineEventsDetailsItem[] | null) => {
+export const replaceParamsQuery = (query: string, data: object) => {
   const regex = /[^{\}]+(?=})/g;
   const matchedBraces = query.match(regex);
   let resultQuery = query;
 
   if (matchedBraces) {
-    const fieldsMap: Record<string, string> = reduce(
-      data,
-      (acc, eventDetailItem) => ({
-        ...acc,
-        [eventDetailItem.field]: eventDetailItem?.values?.[0],
-      }),
-      {}
-    );
     each(matchedBraces, (bracesText: string) => {
       if (resultQuery.includes(`{${bracesText}}`)) {
-        const foundFieldValue = fieldsMap[bracesText];
+        const foundFieldValue = get(data, bracesText);
         if (foundFieldValue) {
           resultQuery = resultQuery.replace(`{${bracesText}}`, foundFieldValue);
         }

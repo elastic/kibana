@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { map, uniq } from 'lodash';
+import { find, map, uniq } from 'lodash';
+import { replaceParamsQuery } from '../../../../common/utils/replace_params_query';
 import type { RuleResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import type { SetupPlugins } from '../../../plugin_contract';
@@ -29,12 +30,15 @@ export const scheduleNotificationResponseActions = (
   const agentIds = uniq(filteredAlerts.map((alert: IAlert) => alert.agent?.id));
   const alertIds = map(filteredAlerts, '_id');
 
+  const foundAlert = find(filteredAlerts, (alert) => alert.agent.id === agentIds?.[0]);
+
   responseActions.forEach((responseAction) => {
     if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY && osqueryCreateAction) {
-      const { savedQueryId, packId, queries, ecsMapping, ...rest } = responseAction.params;
+      const { savedQueryId, packId, queries, ecsMapping, query, ...rest } = responseAction.params;
 
       return osqueryCreateAction({
         ...rest,
+        ...(query ? { query: replaceParamsQuery(query, foundAlert as object) } : {}),
         queries,
         ecs_mapping: ecsMapping,
         saved_query_id: savedQueryId,
