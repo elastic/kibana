@@ -61,10 +61,16 @@ export class KbnClientImportExport {
     this.log.info('importing', objects.length, 'saved objects', { space: options?.space });
 
     const formData = new FormData();
-    formData.append('file', objects.map((obj) => {
-      this.log.info('loading', obj.id, obj.type, 'saved object');
-      return JSON.stringify(obj)
-    }).join('\n'), 'import.ndjson');
+    formData.append(
+      'file',
+      objects
+        .map((obj) => {
+          this.log.info('loading', obj.id, obj.type, 'saved object');
+          return JSON.stringify(obj);
+        })
+        .join('\n'),
+      'import.ndjson'
+    );
 
     // TODO: should we clear out the existing saved objects?
     const resp = await this.req<ImportApiResponse>(options?.space, {
