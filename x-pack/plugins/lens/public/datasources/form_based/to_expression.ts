@@ -142,7 +142,7 @@ function getExpressionForLayer(
       if (def.input !== 'fullReference' && def.input !== 'managedReference') {
         const aggId = String(index);
 
-        const wrapInFilter = Boolean(def.filterable && col.filter);
+        const wrapInFilter = Boolean(def.filterable && col.filter?.query);
         const wrapInTimeFilter =
           def.canReduceTimeRange &&
           !hasDateHistogram &&
