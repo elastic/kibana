@@ -6,33 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React from 'react';
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import {
-  EmbeddableInput,
-  EmbeddableOutput,
-  ErrorEmbeddable,
-  IEmbeddable,
-  isErrorEmbeddable,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import {
-  EuiBasicTable,
-  EuiButtonIcon,
-  EuiDescriptionList,
-  EuiFlexItem,
-  EuiHealth,
-  EuiScreenReaderOnly,
-  EuiTableRow,
-  formatDate,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { EuiTable, EuiTableBody, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
 import type { GetStateReturn } from '../../services/discover_state';
 import { AvailableFields$, DataRefetch$, DataTotalHits$ } from '../../hooks/use_saved_search';
+import { TermsExplorerTableRow } from './terms_explorer_table_row';
 export interface RandomSamplingOption {
   mode: 'random_sampling';
   seed: string;
@@ -120,7 +102,28 @@ export interface TermsExplorerTableProps {
   savedSearchDataTotalHits$?: DataTotalHits$;
 }
 
-const TestUsers = [
+export interface TestRowType {
+  id: string;
+  firstName: string;
+  lastName: string;
+  github: string;
+  dateOfBirth: Date | number;
+  nationality: string;
+  online: boolean;
+}
+
+export interface TestColumnType {
+  align?: typeof RIGHT_ALIGNMENT | typeof LEFT_ALIGNMENT;
+  field: keyof TestRowType;
+  truncateText?: boolean;
+  sortable?: boolean;
+  render?: Function;
+  schema?: string;
+  name: string;
+  id: string;
+}
+
+const TestUsers: TestRowType[] = [
   {
     id: '1',
     firstName: 'john',
@@ -141,165 +144,42 @@ const TestUsers = [
   },
 ];
 
-const TestCountries = {
-  ['NL']: { name: 'Netherlands', flag: '🇳🇱' },
-  ['UK']: { name: 'United Kingdom', flag: '🇬🇧' },
-};
-
 export const TermsExplorerTable = (props: TermsExplorerTableProps) => {
-  const [primaryItemIdToExpandedRowMap, setPrimaryItemIdToExpandedRowMap] = useState({});
-  const [secondaryItemIdToExpandedRowMap, setSecondaryItemIdToExpandedRowMap] = useState({});
-
-  const toggleSecondaryDetails = useCallback(
-    (item) => {
-      console.log('secondary', item);
-      const itemIdToExpandedRowMapValues = { ...secondaryItemIdToExpandedRowMap };
-      console.log('---> before: ', itemIdToExpandedRowMapValues);
-      if (itemIdToExpandedRowMapValues[item.id]) {
-        console.log('delete');
-        delete itemIdToExpandedRowMapValues[item.id];
-      } else {
-        const { online } = item;
-        const color = online ? 'success' : 'danger';
-        const label = online ? 'Online' : 'Offline';
-        const listItems = [
-          {
-            title: 'Online',
-            description: <EuiHealth color={color}>{label}</EuiHealth>,
-          },
-        ];
-        itemIdToExpandedRowMapValues[item.id] = <EuiDescriptionList listItems={listItems} />;
-      }
-      console.log('---> after: ', itemIdToExpandedRowMapValues);
-
-      setSecondaryItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  const columns: TestColumnType[] = [
+    {
+      id: 'firstName',
+      field: 'firstName',
+      name: 'First Name',
+      sortable: true,
+      truncateText: true,
+      align: LEFT_ALIGNMENT,
     },
-    [secondaryItemIdToExpandedRowMap]
-  );
-
-  const getPrimaryColumns = useMemo(() => {
-    console.log('here', secondaryItemIdToExpandedRowMap);
-    return [
-      {
-        field: 'nationality',
-        name: 'Nationality',
-      },
-      {
-        field: 'dateOfBirth',
-        name: 'Date of Birth',
-        schema: 'date',
-        render: (date) => formatDate(date, 'dobLong'),
-      },
-      {
-        align: RIGHT_ALIGNMENT,
-        width: '40px',
-        isExpander: true,
-        name: (
-          <EuiScreenReaderOnly>
-            <span>Expand rows</span>
-          </EuiScreenReaderOnly>
-        ),
-        render: (item) => (
-          <EuiButtonIcon
-            onClick={() => toggleSecondaryDetails(item)}
-            aria-label={secondaryItemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
-            iconType={secondaryItemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
-          />
-        ),
-      },
-    ];
-  }, [secondaryItemIdToExpandedRowMap, toggleSecondaryDetails]);
-
-  const togglePrimaryDetails = useCallback(
-    (item) => {
-      console.log('primary', item);
-      const itemIdToExpandedRowMapValues = { ...primaryItemIdToExpandedRowMap };
-      console.log('---> before: ', itemIdToExpandedRowMapValues);
-      console.log('---> secondary:', secondaryItemIdToExpandedRowMap);
-      if (itemIdToExpandedRowMapValues[item.id]) {
-        delete itemIdToExpandedRowMapValues[item.id];
-      } else {
-        const { nationality, dateOfBirth } = item;
-        const country = TestCountries[nationality];
-        const listItems = [
-          {
-            ...item,
-            nationality: `${country.flag} ${country.name}`,
-            id: `${item.id}-secondary`,
-          },
-        ];
-        itemIdToExpandedRowMapValues[item.id] = (
-          <EuiBasicTable
-            tableCaption="Demo of EuiBasicTable"
-            items={listItems}
-            rowHeader="firstName"
-            itemId={''}
-            itemIdToExpandedRowMap={secondaryItemIdToExpandedRowMap}
-            isExpandable={true}
-            columns={getPrimaryColumns}
-          />
-        );
-      }
-      console.log('---> after: ', itemIdToExpandedRowMapValues);
-
-      setPrimaryItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+    {
+      id: 'lastName',
+      field: 'lastName',
+      name: 'Last Name',
+      align: LEFT_ALIGNMENT,
+      truncateText: true,
     },
-    [primaryItemIdToExpandedRowMap, secondaryItemIdToExpandedRowMap, getPrimaryColumns]
-  );
+  ];
 
-  console.log('render');
+  const renderRows = () => {
+    const rows = [];
+
+    for (const row of TestUsers) {
+      rows.push(<TermsExplorerTableRow row={row} columns={columns} />);
+    }
+
+    return rows;
+  };
 
   return (
-    <EuiBasicTable
-      tableCaption="Demo of EuiBasicTable with expanding rows"
-      items={TestUsers}
-      itemId="id"
-      itemIdToExpandedRowMap={primaryItemIdToExpandedRowMap}
-      isExpandable={true}
-      columns={[
-        {
-          field: 'firstName',
-          name: 'First Name',
-          sortable: true,
-          truncateText: true,
-          mobileOptions: {
-            render: (item) => (
-              <span>
-                {item.firstName} {item.lastName}
-              </span>
-            ),
-            header: false,
-            truncateText: false,
-            enlarge: true,
-            width: '100%',
-          },
-        },
-        {
-          field: 'lastName',
-          name: 'Last Name',
-          truncateText: true,
-          mobileOptions: {
-            show: false,
-          },
-        },
-        {
-          align: RIGHT_ALIGNMENT,
-          width: '40px',
-          isExpander: true,
-          name: (
-            <EuiScreenReaderOnly>
-              <span>Expand rows</span>
-            </EuiScreenReaderOnly>
-          ),
-          render: (item) => (
-            <EuiButtonIcon
-              onClick={() => togglePrimaryDetails(item)}
-              aria-label={primaryItemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
-              iconType={primaryItemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
-            />
-          ),
-        },
-      ]}
-    />
+    <EuiTable id={'table-id'}>
+      {/* <EuiTableHeader>{this.renderHeaderCells()}</EuiTableHeader> */}
+
+      <EuiTableBody>{renderRows()}</EuiTableBody>
+
+      {/* <EuiTableFooter>{this.renderFooterCells()}</EuiTableFooter> */}
+    </EuiTable>
   );
 };
