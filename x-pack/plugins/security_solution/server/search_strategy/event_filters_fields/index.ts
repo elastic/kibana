@@ -21,6 +21,7 @@ import type {
   IndexFieldsStrategyResponse,
 } from '../../../common/search_strategy';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
+import { EndpointAuthorizationError } from '../../endpoint/errors';
 
 /**
  * EventFiltersFieldProvider mimics indexField provider from timeline plugin: x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts
@@ -53,7 +54,7 @@ export const requestEventFiltersFieldsSearch = async (
   const { canWriteEventFilters } = await context.getEndpointAuthz(deps.request);
 
   if (!canWriteEventFilters) {
-    throw new Error('Endpoint authz error');
+    throw new EndpointAuthorizationError();
   }
 
   if (request.indices.length > 1 || request.indices[0] !== eventsIndexPattern) {

@@ -15,6 +15,7 @@ import { requestEventFiltersFieldsSearch } from '.';
 import { createMockEndpointAppContextService } from '../../endpoint/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
 import { eventsIndexPattern } from '../../../common/endpoint/constants';
+import { EndpointAuthorizationError } from '../../endpoint/errors';
 
 describe('Event filters fields', () => {
   const getFieldsForWildcardMock = jest.fn();
@@ -162,7 +163,7 @@ describe('Event filters fields', () => {
           beatFields,
           IndexPatterns
         );
-      }).rejects.toThrowError('Endpoint authz error');
+      }).rejects.toThrowError(new EndpointAuthorizationError());
     });
   });
 });
