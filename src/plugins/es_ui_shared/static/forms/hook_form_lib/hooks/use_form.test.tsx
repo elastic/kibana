@@ -629,6 +629,54 @@ describe('useForm() hook', () => {
 
       expect(isValid).toBe(false);
     });
+
+    test('should return correct state when validating a form field (combo box)', async () => {
+      let fieldHook: FieldHook<string[], unknown>;
+
+      const TestComp = () => {
+        const { form } = useForm();
+        formHook = form;
+
+        return (
+          <Form form={form}>
+            <UseField
+              path="test-path"
+              defaultValue={['foo']}
+              config={{
+                validations: [
+                  {
+                    validator: emptyField('error-message'),
+                  },
+                ],
+              }}
+            >
+              {(field) => {
+                fieldHook = field;
+                return <ComboBoxField field={field as FieldHook} />;
+              }}
+            </UseField>
+          </Form>
+        );
+      };
+
+      registerTestBed(TestComp)();
+
+      let isValid: boolean = false;
+
+      await act(async () => {
+        fieldHook.setValue([]);
+        isValid = await formHook!.validate();
+      });
+
+      expect(isValid).toBe(false);
+
+      await act(async () => {
+        fieldHook.setValue(['bar']);
+        isValid = await formHook!.validate();
+      });
+
+      expect(isValid).toBe(true);
+    });
   });
 
   describe('form.getErrors()', () => {

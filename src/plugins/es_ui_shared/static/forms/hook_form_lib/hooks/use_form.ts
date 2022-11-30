@@ -233,9 +233,9 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
 
   const waitForFieldsToFinishValidating = useCallback(async () => {
     let areSomeFieldValidating = fieldsToArray().some((field) => field.isValidating);
-    // If there are some fields that are validating, we wait for them to finish validating.
-    if (areSomeFieldValidating) {
-      return new Promise<void>((resolve) => {
+
+    return new Promise<void>((resolve) => {
+      if (areSomeFieldValidating) {
         setTimeout(() => {
           areSomeFieldValidating = fieldsToArray().some((field) => field.isValidating);
           if (areSomeFieldValidating) {
@@ -244,16 +244,9 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
           }
           resolve();
         }, 100);
-      });
-    }
-
-    // Otherwise, we return a resolved promise.
-    return new Promise<void>((resolve) => {
-      // We use a setTimeout to ensure that the promise is resolved after the current call stack and
-      // after validation is triggered within the useField hook.
-      setTimeout(() => {
+      } else {
         resolve();
-      }, 0);
+      }
     });
   }, [fieldsToArray]);
 
