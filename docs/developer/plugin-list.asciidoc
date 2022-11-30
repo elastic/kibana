@@ -153,7 +153,7 @@ by the user. The final output of the expression pipeline can be rendered using
 one of the *renderers* registered in `expressions` plugin.
 
 All the arguments to expression functions need to be serializable, as well as input and output.
-Expression functions should try to stay 'pure'. This makes functions easy to reuse and also 
+Expression functions should try to stay 'pure'. This makes functions easy to reuse and also
 make it possible to serialize the whole chain as well as output at every step of execution.
 
 It is possible to add comments to expressions by starting them with a `//` sequence
@@ -668,7 +668,7 @@ Elastic.
 |This plugin allows for other plugins to add data to Kibana stack monitoring documents.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/notifications/README.md[notifications]
+|{kib-repo}blob/{branch}/x-pack/plugins/notifications/README.mdx[notifications]
 |The Notifications plugin provides a set of services to help Solutions and plugins send notifications to users.
 
 
