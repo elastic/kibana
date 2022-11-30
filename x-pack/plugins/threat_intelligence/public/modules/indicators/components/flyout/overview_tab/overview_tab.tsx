@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, VFC } from 'react';
+import { useIndicatorsFlyoutContext } from '../use_context';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../../../common/types/indicator';
 import { unwrapValue } from '../../../utils';
@@ -42,6 +43,8 @@ export const IndicatorsFlyoutOverview: VFC<IndicatorsFlyoutOverviewProps> = ({
   indicator,
   onViewAllFieldsInTable,
 }) => {
+  const { indicatorName } = useIndicatorsFlyoutContext();
+
   const indicatorType = unwrapValue(indicator, RawIndicatorFieldId.Type);
 
   const highLevelBlocks = useMemo(
@@ -67,7 +70,10 @@ export const IndicatorsFlyoutOverview: VFC<IndicatorsFlyoutOverviewProps> = ({
     return unwrappedDescription ? <EuiText>{unwrappedDescription}</EuiText> : null;
   }, [indicator]);
 
-  const indicatorName = unwrapValue(indicator, RawIndicatorFieldId.Name) || EMPTY_VALUE;
+  const title =
+    indicatorName != null
+      ? indicatorName
+      : unwrapValue(indicator, RawIndicatorFieldId.Name) || EMPTY_VALUE;
 
   if (!indicatorType) {
     return <IndicatorEmptyPrompt />;
@@ -76,7 +82,7 @@ export const IndicatorsFlyoutOverview: VFC<IndicatorsFlyoutOverviewProps> = ({
   return (
     <>
       <EuiTitle>
-        <h2>{indicatorName}</h2>
+        <h2>{title}</h2>
       </EuiTitle>
 
       {indicatorDescription}
