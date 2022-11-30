@@ -46,6 +46,7 @@ import {
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { TextBasedLanguagesEditor } from './text_based_languages_editor';
+import { CustomDatePickerPanel } from './custom_date_picker_panel/custom_date_picker_panel';
 import './query_bar.scss';
 
 const SuperDatePicker = React.memo(
@@ -250,6 +251,25 @@ export const QueryBarTopRow = React.memo(
       );
     });
 
+    const currentDataViewId = props.dataViewPickerComponentProps?.currentDataViewId;
+    const customQuickSelectPanels = useMemo(
+      () =>
+        currentDataViewId
+          ? [
+              {
+                title: i18n.translate(
+                  'unifiedSearch.queryBarTopRow.customQuickSelectDatePickerPanelTitle',
+                  {
+                    defaultMessage: 'Time range of documents in the data view',
+                  }
+                ),
+                content: <CustomDatePickerPanel currentDataViewId={currentDataViewId} />,
+              },
+            ]
+          : undefined,
+      [currentDataViewId]
+    );
+
     const onSubmit = useCallback(
       ({ query, dateRange }: { query?: Query | QT; dateRange: TimeRange }) => {
         if (timeHistory) {
@@ -390,6 +410,7 @@ export const QueryBarTopRow = React.memo(
             showUpdateButton={false}
             recentlyUsedRanges={recentlyUsedRanges}
             commonlyUsedRanges={commonlyUsedRanges}
+            customQuickSelectPanels={customQuickSelectPanels}
             dateFormat={uiSettings.get('dateFormat')}
             isAutoRefreshOnly={showAutoRefreshOnly}
             className="kbnQueryBar__datePicker"
