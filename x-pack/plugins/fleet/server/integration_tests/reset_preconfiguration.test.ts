@@ -208,6 +208,7 @@ describe('Fleet preconfiguration reset', () => {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/124780
+  // FLAKY: https://github.com/elastic/kibana/issues/124781
   describe.skip('Reset one preconfigured policy', () => {
     const POLICY_ID = 'test-12345';
 
