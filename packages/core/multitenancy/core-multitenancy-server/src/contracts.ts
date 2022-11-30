@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { TenantConfig } from './config_types';
 
@@ -34,4 +33,4 @@ export type MultitenancyServiceStart = MultitenancyApi;
  * Function returning the tenant bound to a given request.
  * @public
  **/
-export type TenantResolver = (request: KibanaRequest) => MaybePromise<string | undefined>;
+export type TenantResolver = (request: KibanaRequest) => string | undefined;

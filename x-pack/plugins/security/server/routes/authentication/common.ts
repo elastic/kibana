@@ -143,7 +143,9 @@ export function defineCommonRoutes({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const { providerType, providerName, currentURL, params, tenantId } = request.body;
-      logger.info(`Logging in with provider "${providerName}" (${providerType})`);
+      logger.info(
+        `Logging in with provider "${providerName}" (${providerType}) and tenant "${tenantId}"`
+      );
 
       const redirectURL = parseNext(currentURL, basePath.serverBasePath);
       const authenticationResult = await getAuthenticationService().login(request, {

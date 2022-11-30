@@ -93,6 +93,7 @@ export function getSessionIndexSettings({
         lifespanExpiration: { type: 'date' },
         accessAgreementAcknowledged: { type: 'boolean' },
         content: { type: 'binary' },
+        tenantId: { type: 'keyword' },
       },
     },
   });

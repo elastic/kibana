@@ -293,6 +293,7 @@ export class Server {
       analytics: analyticsSetup,
       http: httpSetup,
       executionContext: executionContextSetup,
+      multitenancy: multitenancySetup,
     });
 
     const metricsSetup = await this.metrics.setup({

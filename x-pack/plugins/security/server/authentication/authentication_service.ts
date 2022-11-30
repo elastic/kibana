@@ -349,7 +349,7 @@ export class AuthenticationService {
     const getCurrentUser = (request: KibanaRequest) =>
       http.auth.get<AuthenticatedUser>(request).state ?? null;
 
-    this.tenantResolver = async (request: KibanaRequest) => {
+    this.tenantResolver = (request: KibanaRequest) => {
       const user = getCurrentUser(request);
       return user.tenant_id;
     };

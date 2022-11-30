@@ -30,6 +30,10 @@ export class CoreElasticsearchRouteHandlerContext implements ElasticsearchReques
   public get client() {
     if (this.#client == null) {
       const tenantId = this.multitenancyContext.getTenantId();
+
+      // TODO: remove
+      console.log('**** ES route handler context => ', tenantId);
+
       this.#client = this.elasticsearchStart.getTenantClient(tenantId).asScoped(this.request);
     }
     return this.#client;
