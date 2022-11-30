@@ -36,6 +36,9 @@ export class InjectedMetadataService {
 
   public setup(): InternalInjectedMetadataStart {
     return {
+      getTenantId: () => {
+        return this.state.tenantId;
+      },
       getBasePath: () => {
         return this.state.basePath;
       },

@@ -35,6 +35,7 @@ export interface InjectedMetadataExternalUrlPolicy {
 
 /** @internal */
 export interface InjectedMetadata {
+  tenantId?: string;
   version: string;
   buildNumber: number;
   branch: string;

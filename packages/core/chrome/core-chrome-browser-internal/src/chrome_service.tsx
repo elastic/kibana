@@ -207,6 +207,7 @@ export class ChromeService {
 
       getHeaderComponent: () => (
         <Header
+          tenantId={injectedMetadata.getTenantId()}
           loadingCount$={http.getLoadingCount$()}
           application={application}
           headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}

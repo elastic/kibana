@@ -15,6 +15,7 @@ import {
   EuiHideFor,
   EuiIcon,
   EuiShowFor,
+  EuiText,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -48,6 +49,7 @@ import { HeaderExtension } from './header_extension';
 import { HeaderTopBanner } from './header_top_banner';
 
 export interface HeaderProps {
+  tenantId?: string;
   kibanaVersion: string;
   application: InternalApplicationStart;
   headerBanner$: Observable<ChromeUserBanner | undefined>;
@@ -75,6 +77,7 @@ export interface HeaderProps {
 }
 
 export function Header({
+  tenantId,
   kibanaVersion,
   kibanaDocLink,
   application,
@@ -138,6 +141,9 @@ export function Header({
               },
               {
                 items: [
+                  <>
+                    <EuiText style={{ color: 'white', fontWeight: 'bold' }}>{tenantId}</EuiText>
+                  </>,
                   <EuiHideFor sizes={['m', 'l', 'xl']}>
                     <>
                       <HeaderNavControls navControls$={observables.navControlsExtension$} />

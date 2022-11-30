@@ -336,6 +336,7 @@ export class Server {
       http: httpSetup,
       status: statusSetup,
       uiPlugins,
+      multitenancy: multitenancySetup,
     });
 
     const httpResourcesSetup = this.httpResources.setup({

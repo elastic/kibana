@@ -32,7 +32,7 @@ import { filterUiPlugins } from './filter_ui_plugins';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
 type RenderOptions =
-  | (RenderingPrebootDeps & { status?: never; elasticsearch?: never })
+  | (RenderingPrebootDeps & { status?: never; elasticsearch?: never; multitenancy?: never })
   | RenderingSetupDeps;
 
 /** @internal */
@@ -65,6 +65,7 @@ export class RenderingService {
     http,
     status,
     uiPlugins,
+    multitenancy,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -77,12 +78,12 @@ export class RenderingService {
     });
 
     return {
-      render: this.render.bind(this, { elasticsearch, http, uiPlugins, status }),
+      render: this.render.bind(this, { elasticsearch, http, uiPlugins, status, multitenancy }),
     };
   }
 
   private async render(
-    { elasticsearch, http, uiPlugins, status }: RenderOptions,
+    { elasticsearch, http, uiPlugins, status, multitenancy }: RenderOptions,
     request: KibanaRequest,
     uiSettings: IUiSettingsClient,
     { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
@@ -93,6 +94,11 @@ export class RenderingService {
     };
     const buildNum = env.packageInfo.buildNum;
     const basePath = http.basePath.get(request);
+    const tenantId =
+      isAuthenticated(http.auth, request) && multitenancy
+        ? multitenancy.getTenantIdFromRequest(request)
+        : undefined;
+
     const { serverBasePath, publicBaseUrl } = http.basePath;
     const settings = {
       defaults: uiSettings.getRegistered() ?? {},
@@ -136,6 +142,7 @@ export class RenderingService {
       themeVersion,
       stylesheetPaths,
       injectedMetadata: {
+        tenantId,
         version: env.packageInfo.version,
         buildNumber: env.packageInfo.buildNum,
         branch: env.packageInfo.branch,

@@ -25,6 +25,7 @@ export interface InjectedMetadataParams {
  * @internal
  */
 export interface InternalInjectedMetadataSetup {
+  getTenantId: () => string | undefined;
   getBasePath: () => string;
   getServerBasePath: () => string;
   getPublicBaseUrl: () => string | undefined;

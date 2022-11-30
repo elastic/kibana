@@ -18,6 +18,7 @@ import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-
 import type { InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
+import type { InternalMultitenancyServiceSetup } from '@kbn/core-multitenancy-server-internal';
 
 /** @internal */
 export interface RenderingMetadata {
@@ -44,6 +45,7 @@ export interface RenderingSetupDeps {
   http: InternalHttpServiceSetup;
   status: InternalStatusServiceSetup;
   uiPlugins: UiPlugins;
+  multitenancy: InternalMultitenancyServiceSetup;
 }
 
 /** @internal */
