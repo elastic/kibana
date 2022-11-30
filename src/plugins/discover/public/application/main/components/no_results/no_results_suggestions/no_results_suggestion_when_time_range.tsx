@@ -31,7 +31,7 @@ export const NoResultsSuggestionWhenTimeRange: React.FC<Props> = ({ dataView, qu
   const { range: occurrencesRange, refetch } = useFetchOccurrencesRange({
     dataView,
     query,
-    filters, // TODO: include pinned filters too
+    filters,
     services: {
       data,
       uiSettings,

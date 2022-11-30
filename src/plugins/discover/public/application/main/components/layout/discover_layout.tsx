@@ -299,8 +299,6 @@ export function DiscoverLayout({
                   data={data}
                   error={dataState.error}
                   dataView={dataView}
-                  query={state.query}
-                  filters={state.filters}
                   onDisableFilters={onDisableFilters}
                 />
               )}

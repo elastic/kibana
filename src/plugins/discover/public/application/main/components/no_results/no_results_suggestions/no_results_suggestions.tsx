@@ -9,8 +9,9 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { isOfQueryType } from '@kbn/es-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
 import { NoResultsSuggestionDefault } from './no_results_suggestion_default';
 import {
   NoResultsSuggestionWhenFilters,
@@ -21,20 +22,19 @@ import { NoResultsSuggestionWhenTimeRange } from './no_results_suggestion_when_t
 import { hasActiveFilter } from '../../layout/utils';
 
 interface NoResultsSuggestionProps {
+  data: DataPublicPluginStart;
   dataView: DataView;
-  query?: Query | AggregateQuery;
-  filters?: Filter[];
   isTimeBased?: boolean;
   onDisableFilters: NoResultsSuggestionWhenFiltersProps['onDisableFilters'];
 }
 
 export function NoResultsSuggestions({
+  data,
   dataView,
-  query,
-  filters,
   isTimeBased,
   onDisableFilters,
 }: NoResultsSuggestionProps) {
+  const { query, filters } = useQuerySubscriber({ data });
   const hasQuery = isOfQueryType(query) && !!query?.query;
   const hasFilters = hasActiveFilter(filters);
   const canAdjustSearchCriteria = isTimeBased || hasFilters || hasQuery;
