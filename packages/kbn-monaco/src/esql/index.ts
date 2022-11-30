@@ -32,9 +32,7 @@ export const ESQLLang: LangModuleType = {
     monaco.languages.setTokensProvider(ID, getTokenProviderAsync());
     monaco.editor.createWebWorker({ label: ID, moduleId: '' });
 
-    const diagnosticsAdapter = new DiagnosticsAdapter(ID, (...uris) =>
-      workerProxyService.getWorker(uris)
-    );
+    new DiagnosticsAdapter(ID, (...uris) => workerProxyService.getWorker(uris));
   },
 };
 
