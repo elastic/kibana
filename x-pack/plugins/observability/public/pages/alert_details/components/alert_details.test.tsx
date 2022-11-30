@@ -13,6 +13,7 @@ import { waitFor } from '@testing-library/react';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 
+import { Subset } from '../../../typings';
 import { render } from '../../../utils/test_helper';
 import { useKibana } from '../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
@@ -69,7 +70,7 @@ const params = {
   alertId: chance.guid(),
 };
 
-const config = {
+const config: Subset<ConfigSchema> = {
   unsafe: {
     alertDetails: {
       apm: { enabled: true },
@@ -78,7 +79,7 @@ const config = {
       uptime: { enabled: true },
     },
   },
-} as ConfigSchema;
+};
 
 describe('Alert details', () => {
   jest

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export * from './eui_draggable';
-export * from './fetch_overview_data';
-export * from './slo';
-export * from './utils';
+/**
+ * Allow partial of nested object
+ */
+export type Subset<K> = {
+  [attr in keyof K]?: K[attr] extends object ? Subset<K[attr]> : K[attr];
+};
