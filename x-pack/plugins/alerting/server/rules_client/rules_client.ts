@@ -2775,125 +2775,145 @@ export class RulesClient {
   };
 
   private bulkEnableRulesWithOCC = async ({ filter }: { filter: KueryNode | null }) => {
-    const rulesFinder =
-      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
-        {
-          filter,
-          type: 'alert',
-          perPage: 100,
-          ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
-        }
-      );
+    const rulesFinder = await withSpan(
+      {
+        name: 'encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser',
+        type: 'rules',
+      },
+      async () =>
+        await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
+          {
+            filter,
+            type: 'alert',
+            perPage: 100,
+            ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
+          }
+        )
+    );
 
     const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
-    const taskIdsToEnable: string[] = [];
     const errors: BulkOperationError[] = [];
     const ruleNameToRuleIdMapping: Record<string, string> = {};
 
-    for await (const response of rulesFinder.find()) {
-      await pMap(response.saved_objects, async (rule) => {
-        try {
-          if (rule.attributes.actions.length) {
+    await withSpan(
+      { name: 'Get rules, collect them and their attributes', type: 'rules' },
+      async () => {
+        for await (const response of rulesFinder.find()) {
+          await pMap(response.saved_objects, async (rule) => {
             try {
-              await this.actionsAuthorization.ensureAuthorized('execute');
+              if (rule.attributes.actions.length) {
+                try {
+                  await withSpan(
+                    { name: 'actionsAuthorization.ensureAuthorized', type: 'rules' },
+                    async () => await this.actionsAuthorization.ensureAuthorized('execute')
+                  );
+                } catch (error) {
+                  throw Error(`Rule not authorized for bulk enable - ${error.message}`);
+                }
+              }
+              if (rule.attributes.enabled === true) return;
+              if (rule.attributes.name) {
+                ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+              }
+
+              const username = await this.getUserName();
+
+              const updatedAttributes = this.updateMeta({
+                ...rule.attributes,
+                ...(!rule.attributes.apiKey &&
+                  (await this.createNewAPIKeySet({ attributes: rule.attributes, username }))),
+                enabled: true,
+                updatedBy: username,
+                updatedAt: new Date().toISOString(),
+                executionStatus: {
+                  status: 'pending',
+                  lastDuration: 0,
+                  lastExecutionDate: new Date().toISOString(),
+                  error: null,
+                  warning: null,
+                },
+              });
+
+              const shouldScheduleTask = await this.getShouldScheduleTask(
+                rule.attributes.scheduledTaskId
+              );
+
+              let scheduledTaskId;
+              if (shouldScheduleTask) {
+                const scheduledTask = await this.scheduleTask({
+                  id: rule.id,
+                  consumer: rule.attributes.consumer,
+                  ruleTypeId: rule.attributes.alertTypeId,
+                  schedule: rule.attributes.schedule as IntervalSchedule,
+                  throwOnConflict: false,
+                });
+                scheduledTaskId = scheduledTask.id;
+              }
+
+              rulesToEnable.push({
+                ...rule,
+                attributes: {
+                  ...updatedAttributes,
+                  ...(scheduledTaskId ? { scheduledTaskId } : undefined),
+                },
+              });
+
+              this.auditLogger?.log(
+                ruleAuditEvent({
+                  action: RuleAuditAction.ENABLE,
+                  outcome: 'unknown',
+                  savedObject: { type: 'alert', id: rule.id },
+                })
+              );
             } catch (error) {
-              throw Error(`Rule not authorized for bulk enable - ${error.message}`);
+              errors.push({
+                message: error.message,
+                rule: {
+                  id: rule.id,
+                  name: rule.attributes?.name,
+                },
+              });
+              this.auditLogger?.log(
+                ruleAuditEvent({
+                  action: RuleAuditAction.ENABLE,
+                  error,
+                })
+              );
             }
-          }
-          if (rule.attributes.enabled === true) return;
-          if (rule.attributes.name) {
-            ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
-          }
-
-          const username = await this.getUserName();
-
-          const updatedAttributes = this.updateMeta({
-            ...rule.attributes,
-            ...(!rule.attributes.apiKey &&
-              (await this.createNewAPIKeySet({ attributes: rule.attributes, username }))),
-            enabled: true,
-            updatedBy: username,
-            updatedAt: new Date().toISOString(),
-            executionStatus: {
-              status: 'pending',
-              lastDuration: 0,
-              lastExecutionDate: new Date().toISOString(),
-              error: null,
-              warning: null,
-            },
           });
-
-          const shouldScheduleTask = await this.getShouldScheduleTask(
-            rule.attributes.scheduledTaskId
-          );
-
-          let scheduledTaskId;
-          if (shouldScheduleTask) {
-            const scheduledTask = await this.scheduleTask({
-              id: rule.id,
-              consumer: rule.attributes.consumer,
-              ruleTypeId: rule.attributes.alertTypeId,
-              schedule: rule.attributes.schedule as IntervalSchedule,
-              throwOnConflict: false,
-            });
-            scheduledTaskId = scheduledTask.id;
-          }
-
-          rulesToEnable.push({
-            ...rule,
-            attributes: {
-              ...updatedAttributes,
-              ...(scheduledTaskId ? { scheduledTaskId } : undefined),
-            },
-          });
-
-          this.auditLogger?.log(
-            ruleAuditEvent({
-              action: RuleAuditAction.ENABLE,
-              outcome: 'unknown',
-              savedObject: { type: 'alert', id: rule.id },
-            })
-          );
-        } catch (error) {
-          errors.push({
-            message: error.message,
-            rule: {
-              id: rule.id,
-              name: rule.attributes?.name,
-            },
-          });
-          this.auditLogger?.log(
-            ruleAuditEvent({
-              action: RuleAuditAction.ENABLE,
-              error,
-            })
-          );
         }
-      });
-    }
+      }
+    );
 
-    const result = await this.unsecuredSavedObjectsClient.bulkCreate(rulesToEnable, {
-      overwrite: true,
-    });
+    const result = await withSpan(
+      { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
+      () =>
+        this.unsecuredSavedObjectsClient.bulkCreate(rulesToEnable, {
+          overwrite: true,
+        })
+    );
 
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+    const taskIdsToEnable: string[] = [];
 
-    result.saved_objects.forEach((rule) => {
-      if (rule.error === undefined) {
-        if (rule.attributes.scheduledTaskId) {
-          taskIdsToEnable.push(rule.attributes.scheduledTaskId);
+    withSpan({ name: 'Collect errors, task ids to enable', type: 'rules' }, async () => {
+      result.saved_objects.forEach((rule) => {
+        if (rule.error === undefined) {
+          if (rule.attributes.scheduledTaskId) {
+            taskIdsToEnable.push(rule.attributes.scheduledTaskId);
+          }
+          rules.push(rule);
+        } else {
+          errors.push({
+            message: rule.error.message ?? 'n/a',
+            status: rule.error.statusCode,
+            rule: {
+              id: rule.id,
+              name: ruleNameToRuleIdMapping[rule.id] ?? 'n/a',
+            },
+          });
         }
-        rules.push(rule);
-      } else {
-        errors.push({
-          message: rule.error.message ?? 'n/a',
-          status: rule.error.statusCode,
-          rule: {
-            id: rule.id,
-            name: ruleNameToRuleIdMapping[rule.id] ?? 'n/a',
-          },
-        });
-      }
+      });
     });
     return { errors, rules, accListSpecificForBulkOperation: [taskIdsToEnable] };
   };
@@ -2964,11 +2984,15 @@ export class RulesClient {
       action: 'DISABLE',
     });
 
-    const { errors, rules, taskIdsToDisable, taskIdsToDelete } = await retryIfBulkDisableConflicts(
-      this.logger,
-      (filterKueryNode: KueryNode | null) =>
-        this.bulkDisableRulesWithOCC({ filter: filterKueryNode }),
-      kueryNodeFilterWithAuth
+    const { errors, rules, taskIdsToDisable, taskIdsToDelete } = await withSpan(
+      { name: 'retryIfBulkDisableConflicts', type: 'rules' },
+      () =>
+        retryIfBulkDisableConflicts(
+          this.logger,
+          (filterKueryNode: KueryNode | null) =>
+            this.bulkDisableRulesWithOCC({ filter: filterKueryNode }),
+          kueryNodeFilterWithAuth
+        )
     );
 
     if (taskIdsToDisable.length > 0) {
