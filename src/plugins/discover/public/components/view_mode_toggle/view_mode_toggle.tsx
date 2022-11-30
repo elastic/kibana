@@ -41,6 +41,10 @@ export const DocumentViewModeToggle = ({
     margin-left: ${useEuiPaddingSize('s')};
   `;
 
+  const betaBadgeCss = css`
+    vertical-align: middle;
+  `;
+
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
 
   if (!showViewModeToggle) {
@@ -77,6 +81,7 @@ export const DocumentViewModeToggle = ({
               })}
               size="s"
               className="fieldStatsBetaBadge"
+              css={betaBadgeCss}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

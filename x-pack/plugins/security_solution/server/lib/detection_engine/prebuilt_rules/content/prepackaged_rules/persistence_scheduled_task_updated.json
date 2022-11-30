@@ -14,7 +14,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "A scheduled task was updated",
-  "query": "iam where event.action == \"scheduled-task-updated\" and\n\n /* excluding tasks created by the computer account */\n not user.name : \"*$\" and\n not winlog.event_data.TaskName :\n          (\"\\\\User_Feed_Synchronization-*\",\n           \"\\\\OneDrive Reporting Task-S-1-5-21*\",\n           \"\\\\Hewlett-Packard\\\\HP Web Products Detection\",\n           \"\\\\Hewlett-Packard\\\\HPDeviceCheck\")\n",
+  "query": "iam where event.action == \"scheduled-task-updated\" and\n\n /* excluding tasks created by the computer account */\n not user.name : \"*$\" and\n not winlog.event_data.TaskName :\n          (\"\\\\User_Feed_Synchronization-*\",\n           \"\\\\OneDrive Reporting Task-S-1-5-21*\",\n           \"\\\\OneDrive Reporting Task-S-1-12-1-*\",\n           \"\\\\Hewlett-Packard\\\\HP Web Products Detection\",\n           \"\\\\Hewlett-Packard\\\\HPDeviceCheck\")\n",
   "references": [
     "https://docs.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4698"
   ],
@@ -71,5 +71,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }
