@@ -466,7 +466,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       return new UnsecuredActionsClient({
         internalSavedObjectsRepository,
         executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({
-          taskManager: plugins.taskManager,
+          queue: plugins.queue,
           connectorTypeRegistry: actionTypeRegistry!,
           preconfiguredConnectors: preconfiguredActions,
         }),

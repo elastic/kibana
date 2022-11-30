@@ -6,7 +6,7 @@
  */
 
 import { ISavedObjectsRepository, SavedObjectsBulkResponse } from '@kbn/core/server';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { QueuePluginStart } from '@kbn/queue-plugin/server';
 import {
   ActionTypeRegistryContract as ConnectorTypeRegistryContract,
   PreConfiguredAction as PreconfiguredConnector,
@@ -19,7 +19,7 @@ import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './li
 // execution.
 const ALLOWED_CONNECTOR_TYPE_IDS = ['.email'];
 interface CreateBulkUnsecuredExecuteFunctionOptions {
-  taskManager: TaskManagerStartContract;
+  queue: QueuePluginStart;
   connectorTypeRegistry: ConnectorTypeRegistryContract;
   preconfiguredConnectors: PreconfiguredConnector[];
 }
@@ -40,7 +40,7 @@ export type BulkUnsecuredExecutionEnqueuer<T> = (
 ) => Promise<T>;
 
 export function createBulkUnsecuredExecutionEnqueuerFunction({
-  taskManager,
+  queue,
   connectorTypeRegistry,
   preconfiguredConnectors,
 }: CreateBulkUnsecuredExecuteFunctionOptions): BulkUnsecuredExecutionEnqueuer<void> {
@@ -117,20 +117,15 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
     });
     const actionTaskParamsRecords: SavedObjectsBulkResponse<ActionTaskParams> =
       await internalSavedObjectsRepository.bulkCreate(actions);
-
-    const taskInstances = actionTaskParamsRecords.saved_objects.map((so) => {
-      const actionId = so.attributes.actionId;
-      return {
-        taskType: `actions:${connectorTypeIds[actionId]}`,
+    await queue.bulkEnqueue(
+      actionTaskParamsRecords.saved_objects.map((so) => ({
+        workerId: `actions:${connectorTypeIds[so.attributes.actionId]}`,
         params: {
           spaceId: 'default',
           actionTaskParamsId: so.id,
         },
-        state: {},
-        scope: ['actions'],
-      };
-    });
-    await taskManager.bulkSchedule(taskInstances);
+      }))
+    );
   };
 }
 
