@@ -47,6 +47,14 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
   };
 
+  const distributionBar = {
+    filterBy: async (type: 'passed' | 'failed') => {
+      await testSubjects.click(
+        type === 'failed' ? 'distribution_bar_failed' : 'distribution_bar_passed'
+      );
+    },
+  };
+
   const table = {
     getElement: () => testSubjects.find('findings_table'),
 
@@ -160,5 +168,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     navigateToFindingsPage,
     table,
     index,
+    distributionBar,
   };
 }

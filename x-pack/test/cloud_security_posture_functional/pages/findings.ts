@@ -18,7 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const data = Array.from({ length: 2 }, (_, id) => {
     return {
       resource: { id, name: `Resource ${id}` },
-      result: { evaluation: 'passed' },
+      result: { evaluation: id === 0 ? 'passed' : 'failed' },
       rule: {
         name: `Rule ${id}`,
         section: 'Kubelet',
@@ -34,10 +34,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Findings Page', () => {
     let findings: typeof pageObjects.findings;
     let table: typeof pageObjects.findings.table;
+    let distributionBar: typeof pageObjects.findings.distributionBar;
 
     before(async () => {
       findings = pageObjects.findings;
       table = pageObjects.findings.table;
+      distributionBar = pageObjects.findings.distributionBar;
 
       await findings.index.add(data);
       await findings.navigateToFindingsPage();
@@ -106,6 +108,32 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('sorts by resource name', async () => {
         await table.toggleColumnSortOrFail('Resource Name', 'desc');
+      });
+    });
+
+    describe('DistributionBar', () => {
+      it('filters by passed findings', async () => {
+        await distributionBar.filterBy('passed');
+
+        const passed = data
+          .filter(({ result }) => result.evaluation === 'passed')
+          .map(() => 'Pass');
+
+        expect(await table.getColumnValues('Result')).to.eql(passed);
+
+        await filterBar.removeFilter('result.evaluation');
+      });
+
+      it('filters by failed findings', async () => {
+        await distributionBar.filterBy('failed');
+
+        const failed = data
+          .filter(({ result }) => result.evaluation === 'failed')
+          .map(() => 'Fail');
+
+        expect(await table.getColumnValues('Result')).to.eql(failed);
+
+        await filterBar.removeFilter('result.evaluation');
       });
     });
   });
