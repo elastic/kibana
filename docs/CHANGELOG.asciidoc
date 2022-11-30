@@ -281,11 +281,13 @@ Alerting::
 * Move save button into connector config form {kibana-pull}141361[#141361]
 
 APM::
-* Show recommended minimum size when going below 5 minutes {kibana-pull}144170[#144170]
-* Fixes ml permissions by removing usage of `canAccessML` {kibana-pull}143631[#143631]
-* Fallback to terms agg search if terms enum doesn’t return results {kibana-pull}143619[#143619]
+* Show a recommended minimum size when going below 5 minutes {kibana-pull}144170[#144170]
+* Fixes ML permissions by removing usage of `canAccessML` {kibana-pull}143631[#143631]
+* Fallback to terms aggregation search if terms enum doesn’t return results {kibana-pull}143619[#143619]
 * Fixes bug that causes alert expression to not close {kibana-pull}143531[#143531]
-* Fixes apm.transaction_duration alert to aggregrate over service environment {kibana-pull}143238[#143238]
+* Fixes `apm.transaction_duration` alert to aggregrate over service environment {kibana-pull}143238[#143238]
+* Fixes broken latency and services layout {kibana-pull}143453[#143453]
+* Fixes metadata API environment filter {kibana-pull}144472[#144472]
 
 Dashboard::
 * Skip First Reload {kibana-pull}142868[#142868]
