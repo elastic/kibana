@@ -82,7 +82,9 @@
         "label": "Props",
         "description": [],
         "signature": [
-          "{ meta?: any; } & ",
+          "{ meta?: ",
+          "FileImageMetadata",
+          " | undefined; } & ",
           "EuiImageProps"
         ],
         "path": "packages/shared-ux/file/image/impl/src/image.tsx",
