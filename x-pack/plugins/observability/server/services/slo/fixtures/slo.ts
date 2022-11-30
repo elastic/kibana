@@ -61,8 +61,8 @@ export const createKQLCustomIndicator = (
   params: {
     index: 'my-index*',
     query_filter: 'labels.groupId: group-3',
-    numerator: 'latency < 300',
-    denominator: '',
+    good: 'latency < 300',
+    total: '',
     ...params,
   },
 });

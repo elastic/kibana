@@ -56,8 +56,8 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
   }
 
   private buildAggregations(slo: SLO, indicator: KQLCustomIndicator) {
-    const numerator = getElastichsearchQueryOrThrow(indicator.params.numerator);
-    const denominator = getElastichsearchQueryOrThrow(indicator.params.denominator);
+    const numerator = getElastichsearchQueryOrThrow(indicator.params.good);
+    const denominator = getElastichsearchQueryOrThrow(indicator.params.total);
     return {
       'slo.numerator': {
         filter: numerator,

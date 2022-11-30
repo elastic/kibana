@@ -14,13 +14,13 @@ describe('KQL Custom Transform Generator', () => {
   describe('validation', () => {
     it('throws when the KQL numerator is invalid', () => {
       const anSLO = createSLO({
-        indicator: createKQLCustomIndicator({ numerator: '{ kql.query: invalid' }),
+        indicator: createKQLCustomIndicator({ good: '{ kql.query: invalid' }),
       });
       expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL/);
     });
     it('throws when the KQL denominator is invalid', () => {
       const anSLO = createSLO({
-        indicator: createKQLCustomIndicator({ denominator: '{ kql.query: invalid' }),
+        indicator: createKQLCustomIndicator({ total: '{ kql.query: invalid' }),
       });
       expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL/);
     });
@@ -70,8 +70,7 @@ describe('KQL Custom Transform Generator', () => {
   it('aggregates using the numerator kql', async () => {
     const anSLO = createSLO({
       indicator: createKQLCustomIndicator({
-        numerator:
-          'latency < 400 and (http.status_code: 2xx or http.status_code: 3xx or http.status_code: 4xx)',
+        good: 'latency < 400 and (http.status_code: 2xx or http.status_code: 3xx or http.status_code: 4xx)',
       }),
     });
     const transform = generator.getTransformParams(anSLO);
@@ -82,7 +81,7 @@ describe('KQL Custom Transform Generator', () => {
   it('aggregates using the denominator kql', async () => {
     const anSLO = createSLO({
       indicator: createKQLCustomIndicator({
-        denominator: 'http.status_code: *',
+        total: 'http.status_code: *',
       }),
     });
     const transform = generator.getTransformParams(anSLO);
