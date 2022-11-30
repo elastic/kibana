@@ -117,7 +117,10 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
         <p>
           <FormattedMessage
             id="xpack.fleet.debug.healthCheckPanel.description"
-            defaultMessage={`Select the host used to enroll Fleet Server. The connection is refreshed every ${POLLING_INTERVAL_S}s.`}
+            defaultMessage="Select the host used to enroll Fleet Server. The connection is refreshed every {interval}s."
+            values={{
+              interval: POLLING_INTERVAL_S,
+            }}
           />
         </p>
       </EuiText>
@@ -166,7 +169,10 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
             {healthData?.error?.message ?? (
               <FormattedMessage
                 id="xpack.fleet.debug.healthCheckPanel.fetchError"
-                defaultMessage={healthData?.error?.message}
+                defaultMessage="errorMessage"
+                values={{
+                  errorMessage: healthData?.error?.message,
+                }}
               />
             )}
           </EuiCallOut>
