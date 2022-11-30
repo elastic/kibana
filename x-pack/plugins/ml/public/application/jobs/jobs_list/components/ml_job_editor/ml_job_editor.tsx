@@ -8,7 +8,9 @@
 import React, { FC } from 'react';
 import { monaco, XJsonLang } from '@kbn/monaco';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import { expandLiteralStrings, EuiCodeEditorProps } from '../../../../../../shared_imports';
+import { type EuiCodeEditorProps, XJson } from '@kbn/es-ui-shared-plugin/public';
+
+const { expandLiteralStrings } = XJson;
 
 export const ML_EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: XJsonLang.ID };
 
@@ -21,6 +23,7 @@ interface MlJobEditorProps {
   syntaxChecking?: boolean;
   theme?: string;
   onChange?: EuiCodeEditorProps['onChange'];
+  schema?: object;
 }
 export const MLJobEditor: FC<MlJobEditorProps> = ({
   value,
@@ -31,6 +34,7 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
   syntaxChecking = true,
   theme = 'textmate',
   onChange = () => {},
+  schema,
 }) => {
   if (mode === ML_EDITOR_MODE.XJSON) {
     try {
@@ -49,27 +53,19 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
       height={height}
       onChange={onChange}
       languageConfiguration={{}}
-      editorDidMount={(editor) => {
-        monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-          validate: true,
-          schemas: [
-            {
-              uri: editor.getModel()!.uri.toString(),
-              fileMatch: ['*'],
-              schema: {
-                type: 'object',
-                properties: {
-                  p1: {
-                    enum: ['v1', 'v2'],
-                  },
-                  p2: {
-                    $ref: 'http://myserver/bar-schema.json',
-                  },
-                },
+      editorDidMount={(editor: monaco.editor.IStandaloneCodeEditor) => {
+        if (schema) {
+          monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+            validate: true,
+            schemas: [
+              {
+                uri: editor.getModel()?.uri.toString() ?? '',
+                fileMatch: ['*'],
+                schema,
               },
-            },
-          ],
-        });
+            ],
+          });
+        }
       }}
     />
   );
