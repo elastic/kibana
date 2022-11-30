@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiDescriptionList,
@@ -17,7 +17,7 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
-import { useFetchOccurrencesRange, type OccurrencesRange } from './use_fetch_occurances_range';
+import { useFetchOccurrencesRange } from './use_fetch_occurances_range';
 
 export interface Props {
   dataView: DataView;
@@ -28,26 +28,22 @@ export const NoResultsSuggestionWhenTimeRange: React.FC<Props> = ({ dataView, qu
   const services = useDiscoverServices();
   const { data, uiSettings, timefilter } = services;
 
-  // TODO: include pinned filters
-  const occurrencesRange = useFetchOccurrencesRange({
+  const { range: occurrencesRange, refetch } = useFetchOccurrencesRange({
     dataView,
     query,
-    filters,
+    filters, // TODO: include pinned filters too
     services: {
       data,
       uiSettings,
     },
   });
 
-  const expandTimeRange = useCallback(
-    (range: OccurrencesRange) => {
-      // TODO: refetch the range at this moment
-      if (range.from && range.to) {
-        timefilter.setTime({ from: range.from, to: range.to });
-      }
-    },
-    [timefilter]
-  );
+  const expandTimeRange = async () => {
+    const range = await refetch();
+    if (range?.from && range?.to) {
+      timefilter.setTime({ from: range.from, to: range.to });
+    }
+  };
 
   if (!occurrencesRange?.from || !occurrencesRange?.to) {
     return null;
@@ -69,7 +65,7 @@ export const NoResultsSuggestionWhenTimeRange: React.FC<Props> = ({ dataView, qu
             showAllLink: (
               <EuiLink
                 data-test-subj="discoverNoResultsShowAllOccurrences"
-                onClick={() => expandTimeRange(occurrencesRange)}
+                onClick={expandTimeRange}
               >
                 <FormattedMessage
                   id="discover.noResults.findAllOccurrencesLinkText"

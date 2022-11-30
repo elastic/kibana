@@ -30,7 +30,9 @@ export interface OccurrencesRange {
   to: string;
 }
 
-export const useFetchOccurrencesRange = (params: Params): OccurrencesRange | null => {
+export const useFetchOccurrencesRange = (
+  params: Params
+): { range: OccurrencesRange | null; refetch: () => Promise<OccurrencesRange | null> } => {
   const data = params.services.data;
   const uiSettings = params.services.uiSettings;
   const [state, setState] = useState<OccurrencesRange | null>(null);
@@ -39,8 +41,9 @@ export const useFetchOccurrencesRange = (params: Params): OccurrencesRange | nul
 
   const fetchOccurrences = useCallback(
     async (dataView?: DataView, query?: Query | AggregateQuery, filters?: Filter[]) => {
+      let occurrencesRange = null;
       if (!dataView?.timeFieldName || !query) {
-        return;
+        return null;
       }
 
       abortControllerRef.current?.abort();
@@ -53,21 +56,21 @@ export const useFetchOccurrencesRange = (params: Params): OccurrencesRange | nul
           filters ?? [],
           getEsQueryConfig(uiSettings)
         );
-        const occurrencesRange = await getDocumentsTimeRange({
+        occurrencesRange = await getDocumentsTimeRange({
           data,
           dataView,
           dslQuery,
           abortSignal: abortControllerRef.current?.signal,
         });
-
-        if (mountedRef.current) {
-          setState(occurrencesRange);
-        }
       } catch (error) {
-        if (mountedRef.current) {
-          setState(null);
-        }
+        //
       }
+
+      if (mountedRef.current) {
+        setState(occurrencesRange);
+      }
+
+      return occurrencesRange;
     },
     [abortControllerRef, setState, mountedRef, data, uiSettings]
   );
@@ -83,5 +86,8 @@ export const useFetchOccurrencesRange = (params: Params): OccurrencesRange | nul
     fetchOccurrences(params.dataView, params.query, params.filters);
   }, [fetchOccurrences, params.query, params.filters, params.dataView]);
 
-  return state;
+  return {
+    range: state,
+    refetch: () => fetchOccurrences(params.dataView, params.query, params.filters),
+  };
 };
