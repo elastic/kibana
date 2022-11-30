@@ -136,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
                   conditions: 'env does not equal test',
                   group: 'dev',
                   groupByKeys: {
-                    'env': 'dev'
+                    env: 'dev',
                   },
                   isRatio: false,
                   matchingDocuments: 2,
@@ -196,7 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
                   conditions: 'env does not equal test',
                   group: 'dev',
                   groupByKeys: {
-                    'env': 'dev'
+                    env: 'dev',
                   },
                   isRatio: false,
                   matchingDocuments: 2,
@@ -313,9 +313,9 @@ export default function ({ getService }: FtrProviderContext) {
                   denominatorConditions: 'event.dataset does not equal nginx.error',
                   group: 'web',
                   groupByKeys: {
-                    'event': {
-                      'category': 'web'
-                    }
+                    event: {
+                      category: 'web',
+                    },
                   },
                   isRatio: true,
                   numeratorConditions: 'event.dataset equals nginx.error',
