@@ -2093,11 +2093,7 @@ export class RulesClient {
     });
   };
 
-  private processTasksForBulkDelete = async ({
-    taskIdsToDelete,
-  }: {
-    taskIdsToDelete: string[];
-  }) => {
+  private tryToRemoveTasks = async ({ taskIdsToDelete }: { taskIdsToDelete: string[] }) => {
     const taskIdsFailedToBeDeleted: string[] = [];
     const taskIdsSuccessfullyDeleted: string[] = [];
     return await withSpan({ name: 'taskManager.bulkRemoveIfExist', type: 'rules' }, async () => {
@@ -2125,7 +2121,6 @@ export class RulesClient {
               )}`
             );
           }
-          return taskIdsFailedToBeDeleted;
         } catch (error) {
           this.logger.error(
             `Failure to delete schedules for underlying tasks: ${taskIdsToDelete.join(
@@ -2134,6 +2129,7 @@ export class RulesClient {
           );
         }
       }
+      return taskIdsFailedToBeDeleted;
     });
   };
 
@@ -2164,8 +2160,8 @@ export class RulesClient {
         )
     );
 
-    const [taskIdsFailedToBeDeleted] = await Promise.all([
-      this.processTasksForBulkDelete({ taskIdsToDelete }),
+    const [result] = await Promise.allSettled([
+      this.tryToRemoveTasks({ taskIdsToDelete }),
       bulkMarkApiKeysForInvalidation(
         { apiKeys: apiKeysToInvalidate },
         this.logger,
@@ -2173,7 +2169,11 @@ export class RulesClient {
       ),
     ]);
 
-    return { errors, total, taskIdsFailedToBeDeleted };
+    if (result.status === 'fulfilled') {
+      return { errors, total, taskIdsFailedToBeDeleted: result.value };
+    } else {
+      return { errors, total, taskIdsFailedToBeDeleted: [] };
+    }
   };
 
   private bulkDeleteWithOCC = async ({ filter }: { filter: KueryNode | null }) => {
@@ -2695,6 +2695,42 @@ export class RulesClient {
     }
   };
 
+  private tryToEnableTasks = async ({ taskIdsToEnable }: { taskIdsToEnable: string[] }) => {
+    const taskIdsFailedToBeEnabled: string[] = [];
+    return await withSpan({ name: 'taskManager.bulkEnable', type: 'rules' }, async () => {
+      if (taskIdsToEnable.length > 0) {
+        try {
+          const resultFromEnablingTasks = await this.taskManager.bulkEnable(taskIdsToEnable);
+          resultFromEnablingTasks?.errors?.forEach((error) => {
+            taskIdsFailedToBeEnabled.push(error.task.id);
+          });
+          if (resultFromEnablingTasks.tasks.length) {
+            this.logger.debug(
+              `Successfully enabled schedules for underlying tasks: ${resultFromEnablingTasks.tasks
+                .map((task) => task.id)
+                .join(', ')}`
+            );
+          }
+          if (resultFromEnablingTasks.errors.length) {
+            this.logger.error(
+              `Failure to enable schedules for underlying tasks: ${resultFromEnablingTasks.errors
+                .map((error) => error.task.id)
+                .join(', ')}`
+            );
+          }
+        } catch (error) {
+          taskIdsFailedToBeEnabled.push(...taskIdsToEnable);
+          this.logger.error(
+            `Failure to enable schedules for underlying tasks: ${taskIdsToEnable.join(
+              ', '
+            )}. TaskManager bulkEnable failed with Error: ${error.message}`
+          );
+        }
+      }
+      return taskIdsFailedToBeEnabled;
+    });
+  };
+
   public bulkEnableRules = async (options: BulkOptions) => {
     const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
 
@@ -2721,46 +2757,19 @@ export class RulesClient {
 
     const [taskIdsToEnable] = accListSpecificForBulkOperation;
 
-    const taskIdsFailedToBeEnabled: string[] = [];
-    if (taskIdsToEnable.length > 0) {
-      try {
-        const resultFromEnablingTasks = await this.taskManager.bulkEnable(taskIdsToEnable);
-        resultFromEnablingTasks?.errors?.forEach((error) => {
-          taskIdsFailedToBeEnabled.push(error.task.id);
-        });
-        if (resultFromEnablingTasks.tasks.length) {
-          this.logger.debug(
-            `Successfully enabled schedules for underlying tasks: ${resultFromEnablingTasks.tasks
-              .map((task) => task.id)
-              .join(', ')}`
-          );
-        }
-        if (resultFromEnablingTasks.errors.length) {
-          this.logger.error(
-            `Failure to enable schedules for underlying tasks: ${resultFromEnablingTasks.errors
-              .map((error) => error.task.id)
-              .join(', ')}`
-          );
-        }
-      } catch (error) {
-        taskIdsFailedToBeEnabled.push(...taskIdsToEnable);
-        this.logger.error(
-          `Failure to enable schedules for underlying tasks: ${taskIdsToEnable.join(
-            ', '
-          )}. TaskManager bulkEnable failed with Error: ${error.message}`
-        );
-      }
-    }
+    const taskIdsFailedToBeEnabled = await this.tryToEnableTasks({ taskIdsToEnable });
 
-    const updatedRules = rules.map(({ id, attributes, references }) => {
-      return this.getAlertFromRaw(
-        id,
-        attributes.alertTypeId as string,
-        attributes as RawRule,
-        references,
-        false
-      );
-    });
+    const updatedRules = await withSpan({ name: 'getAlertFromRaw', type: 'rules' }, async () =>
+      rules.map(({ id, attributes, references }) =>
+        this.getAlertFromRaw(
+          id,
+          attributes.alertTypeId as string,
+          attributes as RawRule,
+          references,
+          false
+        )
+      )
+    );
 
     return { errors, rules: updatedRules, total, taskIdsFailedToBeEnabled };
   };

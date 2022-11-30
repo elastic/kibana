@@ -271,7 +271,7 @@ describe('bulkEnableRules', () => {
     });
   });
 
-  test('should thow an error if number of matched rules greater than 10,000', async () => {
+  test('should throw an error if number of matched rules greater than 10,000', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       aggregations: {
         alertTypeId: {
@@ -305,7 +305,7 @@ describe('bulkEnableRules', () => {
     );
   });
 
-  test('should thow if there are actions, but do not have execute permissions', async () => {
+  test('should throw if there are actions, but do not have execute permissions', async () => {
     actionsAuthorization.ensureAuthorized.mockImplementation(() => {
       throw new Error('UPS');
     });
