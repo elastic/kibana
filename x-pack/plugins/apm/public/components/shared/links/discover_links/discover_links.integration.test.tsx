@@ -8,7 +8,6 @@
 import { Location } from 'history';
 import React from 'react';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { getRenderedHref } from '../../../../utils/test_helpers';
 import { DiscoverErrorLink } from './discover_error_link';
@@ -40,16 +39,13 @@ describe('DiscoverLinks', () => {
   });
 
   it('produces the correct URL for a span', async () => {
-    const span = {
-      span: {
-        id: 'test-span-id',
-      },
-    } as Span;
-
-    const href = await getRenderedHref(() => <DiscoverSpanLink span={span} />, {
-      search:
-        '?rangeFrom=now/w&rangeTo=now&refreshPaused=true&refreshInterval=0',
-    } as Location);
+    const href = await getRenderedHref(
+      () => <DiscoverSpanLink spanId="test-span-id" />,
+      {
+        search:
+          '?rangeFrom=now/w&rangeTo=now&refreshPaused=true&refreshInterval=0',
+      } as Location
+    );
 
     expect(href).toMatchInlineSnapshot(
       `"/basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:'span.id:\\"test-span-id\\"'))"`

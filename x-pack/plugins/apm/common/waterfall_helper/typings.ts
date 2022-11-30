@@ -6,7 +6,12 @@
  */
 
 import { ErrorRaw } from '../../typings/es_schemas/raw/error_raw';
+import { EventOutcome } from '../../typings/es_schemas/raw/fields/event_outcome';
+import { Http } from '../../typings/es_schemas/raw/fields/http';
+import { Stackframe } from '../../typings/es_schemas/raw/fields/stackframe';
 import { TimestampUs } from '../../typings/es_schemas/raw/fields/timestamp_us';
+import { Url } from '../../typings/es_schemas/raw/fields/url';
+import { Agent } from '../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../typings/es_schemas/ui/span';
 import { Transaction } from '../../typings/es_schemas/ui/transaction';
 
@@ -17,22 +22,6 @@ export interface TraceItems {
   errorDocs: WaterfallErrorDoc[];
   linkedChildrenOfSpanCountBySpanId: Record<string, number>;
 }
-
-export interface WaterfallErrorDoc {
-  timestamp: TimestampUs;
-  trace: { id?: string };
-  transaction: {
-    id?: string;
-  };
-  parent: { id?: string };
-  error: ErrorRaw['error'];
-  service: {
-    name: string;
-  };
-}
-
-// export interface WaterfallTransactionDoc {}
-// export interface WaterfallSpanDoc {}
 
 interface IWaterfallItemBase<TDocument, TDoctype> {
   doc: TDocument;
@@ -51,9 +40,7 @@ interface IWaterfallItemBase<TDocument, TDoctype> {
   skew: number;
 }
 
-export type IWaterfallError = IWaterfallItemBase<WaterfallErrorDoc, 'error'>;
-
-interface IWaterfallSpanItemBase<TDocument, TDoctype>
+interface IWaterfallTransactionSpanItemBase<TDocument, TDoctype>
   extends IWaterfallItemBase<TDocument, TDoctype> {
   /**
    * Latency in us
@@ -62,17 +49,99 @@ interface IWaterfallSpanItemBase<TDocument, TDoctype>
   legendValues: Record<WaterfallLegendType, string>;
   spanLinksCount: SpanLinksCount;
 }
-export type IWaterfallTransaction = IWaterfallSpanItemBase<
+
+/*
+ * Custom waterfall error doc
+ */
+export interface WaterfallErrorDoc {
+  timestamp: TimestampUs;
+  trace: { id?: string };
+  transaction: {
+    id?: string;
+  };
+  parent: { id?: string };
+  error: ErrorRaw['error'];
+  service: {
+    name: string;
+  };
+}
+export type IWaterfallError = IWaterfallItemBase<WaterfallErrorDoc, 'error'>;
+
+interface WaterfallTransactionSpanBaseDoc {
+  timestamp: TimestampUs;
+  trace: { id: string };
+  service: {
+    name: string;
+  };
+}
+
+/*
+ * Custom waterfall transaction doc
+ */
+export interface WaterfallTransactionDoc
+  extends WaterfallTransactionSpanBaseDoc {
+  transaction: {};
+}
+export type IWaterfallTransaction = IWaterfallTransactionSpanItemBase<
   Transaction,
   'transaction'
 >;
-export type IWaterfallSpan = IWaterfallSpanItemBase<Span, 'span'>;
+
+/*
+ * Custom waterfall span doc
+ */
+export interface WaterfallSpanDoc extends WaterfallTransactionSpanBaseDoc {
+  span: {
+    subtype?: string;
+    type: string;
+    action?: string;
+    name: string;
+    composite?: {
+      count: number;
+      sum: { us: number };
+      compression_strategy: string;
+    };
+    sync?: boolean;
+    duration: { us: number };
+    // from this point on all fields are used in the flyout
+    stacktrace?: Stackframe[];
+    db?: {
+      statement?: string;
+      type?: string;
+    };
+    http?: {
+      url?: {
+        original?: string;
+      };
+      response: {
+        status_code: number;
+      };
+      method?: string;
+    };
+    id: string;
+    destination?: {
+      service: {
+        resource: string;
+      };
+    };
+  };
+  agent: Agent;
+  child?: { id: string[] };
+  event?: { outcome?: EventOutcome };
+  // from this point on all fields are used in the flyout
+  url?: Url;
+  http?: Http;
+}
+export type IWaterfallSpan = IWaterfallTransactionSpanItemBase<
+  WaterfallSpanDoc,
+  'span'
+>;
 
 export type IWaterfallSpanOrTransaction =
   | IWaterfallTransaction
   | IWaterfallSpan;
 
-export type EntryWaterfallTransaction = IWaterfallSpanItemBase<
+export type EntryWaterfallTransaction = IWaterfallTransactionSpanItemBase<
   Transaction,
   'transaction'
 >;

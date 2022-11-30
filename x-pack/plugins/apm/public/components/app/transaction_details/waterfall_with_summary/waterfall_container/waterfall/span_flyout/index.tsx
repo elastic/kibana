@@ -24,8 +24,10 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
-import type { SpanLinksCount } from '../../../../../../../../common/waterfall_helper/typings';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
+import type {
+  SpanLinksCount,
+  WaterfallSpanDoc,
+} from '../../../../../../../../common/waterfall_helper/typings';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { DiscoverSpanLink } from '../../../../../../shared/links/discover_links/discover_span_link';
 import { SpanMetadata } from '../../../../../../shared/metadata_table/span_metadata';
@@ -67,7 +69,7 @@ function formatSubtype(subtype: string | undefined) {
   }
 }
 
-function getSpanTypes(span: Span) {
+function getSpanTypes(span: WaterfallSpanDoc) {
   const { type, subtype, action } = span.span;
 
   return {
@@ -85,7 +87,7 @@ const ContainerWithMarginRight = euiStyled.div`
 `;
 
 interface Props {
-  span?: Span;
+  span?: WaterfallSpanDoc;
   parentTransaction?: Transaction;
   totalDuration?: number;
   onClose: () => void;
@@ -137,12 +139,10 @@ export function SpanFlyout({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <DiscoverSpanLink span={span}>
+              <DiscoverSpanLink spanId={span.span.id}>
                 {i18n.translate(
                   'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
-                  {
-                    defaultMessage: 'View span in Discover',
-                  }
+                  { defaultMessage: 'View span in Discover' }
                 )}
               </DiscoverSpanLink>
             </EuiFlexItem>
@@ -240,7 +240,7 @@ export function SpanFlyout({
                 content: (
                   <Fragment>
                     <EuiSpacer size="m" />
-                    <SpanMetadata span={span} />
+                    <SpanMetadata spanId={span.span.id} />
                   </Fragment>
                 ),
               },

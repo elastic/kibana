@@ -14,6 +14,7 @@ import type {
   IWaterfallTransaction,
   IWaterfallError,
   IWaterfallSpanOrTransaction,
+  WaterfallSpanDoc,
 } from './typings';
 
 describe('waterfall_helpers', () => {
@@ -528,7 +529,7 @@ describe('waterfall_helpers', () => {
             },
             parent: { id: 'a' },
             timestamp: { us: 20 },
-          } as unknown as Span,
+          } as unknown as WaterfallSpanDoc,
         } as IWaterfallSpanOrTransaction,
       ];
       const childrenByParentId = groupBy(items, (hit) =>

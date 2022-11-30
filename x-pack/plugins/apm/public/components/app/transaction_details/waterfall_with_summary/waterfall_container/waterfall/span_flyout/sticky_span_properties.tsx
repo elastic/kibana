@@ -16,7 +16,6 @@ import {
 } from '../../../../../../../../common/es_fields/apm';
 import { getNextEnvironmentUrlParam } from '../../../../../../../../common/environment_filter_values';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useAnyOfApmParams } from '../../../../../../../hooks/use_apm_params';
 import { DependencyLink } from '../../../../../../shared/dependency_link';
@@ -24,9 +23,10 @@ import { TransactionDetailLink } from '../../../../../../shared/links/apm/transa
 import { ServiceLink } from '../../../../../../shared/service_link';
 import { StickyProperties } from '../../../../../../shared/sticky_properties';
 import { LatencyAggregationType } from '../../../../../../../../common/latency_aggregation_types';
+import { WaterfallSpanDoc } from '../../../../../../../../common/waterfall_helper/typings';
 
 interface Props {
-  span: Span;
+  span: WaterfallSpanDoc;
   transaction?: Transaction;
 }
 
