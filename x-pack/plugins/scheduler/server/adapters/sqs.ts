@@ -12,6 +12,7 @@ import { PluginSetupDeps, PluginStartDeps, Job, Adapter } from '../plugin';
 let sqs: AWS.SQS;
 const workers: Record<string, Worker<unknown>> = {};
 const QUEUE_URL = 'https://sqs.us-east-2.amazonaws.com/946960629917/ResponseOps-scheduler';
+const MAX_WORKERS = 10;
 
 export const sqsAdapter: Adapter = {
   setup() {
@@ -19,60 +20,59 @@ export const sqsAdapter: Adapter = {
     sqs = new AWS.SQS();
   },
   start() {
-    (async () => {
-      while (true) {
-        console.log('SQS: Loop - scheduler');
-        try {
-          const data = await sqs
-            .receiveMessage({
-              QueueUrl: QUEUE_URL,
-              MaxNumberOfMessages: 10, // Up to 10 messages in the messages array
-              VisibilityTimeout: 5 * 60, // 5 minute run timeout
-              WaitTimeSeconds: 20, // Wait 20 seconds after queue is emtpy before stopping to look for messages
-            })
-            .promise();
-          console.log('SQS: scheduler MESSAGE:', JSON.stringify(data));
-          if (!data.Messages) {
-            return;
-          }
-          await Promise.all(
-            data.Messages.map(async (message) => {
-              const { ReceiptHandle, Body } = message;
-              const job = Body ? JSON.parse(Body) : {};
-              const abortController = new AbortController();
-              const worker = workers[job.workerId];
-              try {
-                console.log('SQS: Run scheduled job');
-                await worker.run(job.params, abortController.signal);
+    for (let i = 0; i < MAX_WORKERS; i++) {
+      (async () => {
+        while (true) {
+          try {
+            const data = await sqs
+              .receiveMessage({
+                QueueUrl: QUEUE_URL,
+                MaxNumberOfMessages: 1, // Up to 10 messages in the messages array
+                VisibilityTimeout: 5 * 60, // 5 minute run timeout
+                WaitTimeSeconds: 20, // Wait 20 seconds after queue is emtpy before stopping to look for messages
+              })
+              .promise();
+            if (!data.Messages) {
+              return;
+            }
+            await Promise.all(
+              data.Messages.map(async (message) => {
+                const { ReceiptHandle, Body } = message;
+                const job = Body ? JSON.parse(Body) : {};
+                const abortController = new AbortController();
+                const worker = workers[job.workerId];
                 try {
-                  const params = {
-                    MessageBody: JSON.stringify(job),
-                    QueueUrl: QUEUE_URL,
-                    DelaySeconds: job.interval / 1000,
-                  };
-                  await sqs.sendMessage(params).promise();
+                  await worker.run(job.params, abortController.signal);
                   try {
-                    await sqs
-                      .deleteMessage({ QueueUrl: QUEUE_URL, ReceiptHandle: ReceiptHandle! })
-                      .promise();
+                    const params = {
+                      MessageBody: JSON.stringify(job),
+                      QueueUrl: QUEUE_URL,
+                      DelaySeconds: job.interval / 1000,
+                    };
+                    await sqs.sendMessage(params).promise();
+                    try {
+                      await sqs
+                        .deleteMessage({ QueueUrl: QUEUE_URL, ReceiptHandle: ReceiptHandle! })
+                        .promise();
+                    } catch (e) {
+                      console.log('SQS: Failed to delete message:', e);
+                    }
                   } catch (e) {
-                    console.log('SQS: Failed to delete message:', e);
+                    console.log('SQS: Failed to re-schedule job', e);
                   }
                 } catch (e) {
-                  console.log('SQS: Failed to re-schedule job', e);
+                  console.log('SQS: Failed to run: ', e);
                 }
-              } catch (e) {
-                console.log('SQS: Failed to run: ', e);
-              }
-            })
-          );
-        } catch (e) {
-          console.log('SQS: Failed to get a message from SQS, will try again in 10s', e);
-          await new Promise((resolve) => setTimeout(resolve, 10000));
-          sqs = new AWS.SQS();
+              })
+            );
+          } catch (e) {
+            console.log('SQS: Failed to get a message from SQS, will try again in 10s', e);
+            await new Promise((resolve) => setTimeout(resolve, 10000));
+            sqs = new AWS.SQS();
+          }
         }
-      }
-    })();
+      })();
+    }
   },
   registerWorkerAdapter: (worker: Worker<unknown>, plugins: PluginSetupDeps) => {
     workers[worker.id] = worker;
