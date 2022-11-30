@@ -11,7 +11,6 @@ import { Transaction } from '../../typings/es_schemas/ui/transaction';
 import { getClockSkew, getOrderedWaterfallItems, getWaterfall } from '.';
 import type {
   WaterfallErrorDoc,
-  IWaterfallItem,
   IWaterfallTransaction,
   IWaterfallError,
   IWaterfallSpanOrTransaction,
@@ -232,7 +231,7 @@ describe('waterfall_helpers', () => {
         },
         entryTransactionId
       );
-      const getIdAndParentId = (item: IWaterfallItem) => ({
+      const getIdAndParentId = (item: IWaterfallSpanOrTransaction) => ({
         id: item.id,
         parentId: item.parent?.id,
       });
@@ -339,7 +338,7 @@ describe('waterfall_helpers', () => {
         },
         entryTransactionId
       );
-      const getIdAndParentId = (item: IWaterfallItem) => ({
+      const getIdAndParentId = (item: IWaterfallSpanOrTransaction) => ({
         id: item.id,
         parentId: item.parent?.id,
       });
@@ -610,7 +609,7 @@ describe('waterfall_helpers', () => {
     it('should return parent skew for spans', () => {
       const child = {
         docType: 'span',
-      } as IWaterfallItem;
+      } as IWaterfallSpanOrTransaction;
 
       const parent = {
         docType: 'span',
@@ -644,7 +643,7 @@ describe('waterfall_helpers', () => {
     it('should handle missing parent', () => {
       const child = {
         docType: 'transaction',
-      } as IWaterfallItem;
+      } as IWaterfallSpanOrTransaction;
 
       const parent = undefined;
 

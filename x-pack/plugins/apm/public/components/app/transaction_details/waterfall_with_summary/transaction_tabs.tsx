@@ -30,7 +30,6 @@ interface Props {
   onTabClick: (tab: TransactionTab) => void;
   showCriticalPath: boolean;
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
-  traceId?: string;
 }
 
 export function TransactionTabs({
@@ -43,7 +42,6 @@ export function TransactionTabs({
   onTabClick,
   showCriticalPath,
   onShowCriticalPathChange,
-  traceId,
 }: Props) {
   const tabs: Record<
     TransactionTab,
@@ -61,7 +59,6 @@ export function TransactionTabs({
             waterfall={waterfall}
             showCriticalPath={showCriticalPath}
             onShowCriticalPathChange={onShowCriticalPathChange}
-            traceId={traceId}
           />
         ),
       },
@@ -101,7 +98,6 @@ export function TransactionTabs({
       transaction,
       waterfall,
       waterfallItemId,
-      traceId,
     ]
   );
 
@@ -143,14 +139,12 @@ function TimelineTabContent({
   serviceName,
   showCriticalPath,
   onShowCriticalPathChange,
-  traceId,
 }: {
   waterfallItemId?: string;
   serviceName?: string;
   waterfall: IWaterfall;
   showCriticalPath: boolean;
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
-  traceId?: string;
 }) {
   return (
     <WaterfallContainer
@@ -159,7 +153,6 @@ function TimelineTabContent({
       waterfall={waterfall}
       showCriticalPath={showCriticalPath}
       onShowCriticalPathChange={onShowCriticalPathChange}
-      traceId={traceId}
     />
   );
 }

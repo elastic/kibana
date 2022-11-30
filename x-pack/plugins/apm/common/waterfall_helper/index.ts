@@ -13,7 +13,6 @@ import type { Transaction } from '../../typings/es_schemas/ui/transaction';
 import {
   IWaterfall,
   IWaterfallError,
-  IWaterfallItem,
   IWaterfallSpan,
   IWaterfallSpanOrTransaction,
   IWaterfallTransaction,
@@ -84,7 +83,7 @@ function getSpanItem(
 
 function getErrorItem(
   waterfallErrorDoc: WaterfallErrorDoc,
-  items: IWaterfallItem[],
+  items: IWaterfallSpanOrTransaction[],
   entryWaterfallTransaction?: IWaterfallTransaction
 ): IWaterfallError {
   const entryTimestamp = entryWaterfallTransaction?.doc.timestamp.us ?? 0;
@@ -110,7 +109,7 @@ function getErrorItem(
 }
 
 export function getClockSkew(
-  item: IWaterfallItem | IWaterfallError,
+  item: IWaterfallSpanOrTransaction | IWaterfallError,
   parentItem?: IWaterfallSpanOrTransaction
 ) {
   if (!parentItem) {
@@ -200,7 +199,7 @@ function getRootTransaction(
   }
 }
 
-function getLegends(waterfallItems: IWaterfallItem[]) {
+function getLegends(waterfallItems: IWaterfallSpanOrTransaction[]) {
   const onlyBaseSpanItems = waterfallItems.filter(
     (item) => item.docType === 'span' || item.docType === 'transaction'
   ) as IWaterfallSpanOrTransaction[];
@@ -227,7 +226,7 @@ function getLegends(waterfallItems: IWaterfallItem[]) {
   return legends;
 }
 
-const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
+const getWaterfallDuration = (waterfallItems: IWaterfallSpanOrTransaction[]) =>
   Math.max(
     ...waterfallItems.map(
       (item) =>
@@ -294,7 +293,7 @@ const getChildrenGroupedByParentId = (
 
 const getEntryWaterfallTransaction = (
   entryTransactionId: string,
-  waterfallItems: IWaterfallItem[]
+  waterfallItems: IWaterfallSpanOrTransaction[]
 ): IWaterfallTransaction | undefined =>
   waterfallItems.find(
     (item) => item.docType === 'transaction' && item.id === entryTransactionId
@@ -317,7 +316,7 @@ function isInEntryTransaction(
 
 function getWaterfallErrors(
   errorDocs: WaterfallErrorDoc[],
-  items: IWaterfallItem[],
+  items: IWaterfallSpanOrTransaction[],
   entryWaterfallTransaction?: IWaterfallTransaction
 ) {
   const errorItems = errorDocs.map((errorDoc) =>

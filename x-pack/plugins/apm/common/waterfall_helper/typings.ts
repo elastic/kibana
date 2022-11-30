@@ -10,6 +10,7 @@ import { TimestampUs } from '../../typings/es_schemas/raw/fields/timestamp_us';
 import { Span } from '../../typings/es_schemas/ui/span';
 import { Transaction } from '../../typings/es_schemas/ui/transaction';
 
+// API return type
 export interface TraceItems {
   exceedsMax: boolean;
   traceDocs: Array<Transaction | Span>;
@@ -30,37 +31,14 @@ export interface WaterfallErrorDoc {
   };
 }
 
-export interface RootTransaction {
-  trace: { id: string };
-  transaction: {
-    duration: TimestampUs;
-    id: string;
-    name: string;
-    type: string;
-  };
-  service: {
-    name: string;
-    environment?: string;
-  };
-}
-
-export interface SpanLinksCount {
-  linkedChildren: number;
-  linkedParents: number;
-}
-
-export enum WaterfallLegendType {
-  ServiceName = 'serviceName',
-  SpanType = 'spanType',
-}
+// export interface WaterfallTransactionDoc {}
+// export interface WaterfallSpanDoc {}
 
 interface IWaterfallItemBase<TDocument, TDoctype> {
   doc: TDocument;
   docType: TDoctype;
   id: string;
-  // TODO: fix it
-  // parent?: IWaterfallSpanOrTransaction;
-  parent?: any;
+  parent?: IWaterfallSpanOrTransaction;
   parentId?: string;
   color: string;
   /**
@@ -90,30 +68,66 @@ export type IWaterfallTransaction = IWaterfallSpanItemBase<
 >;
 export type IWaterfallSpan = IWaterfallSpanItemBase<Span, 'span'>;
 
-export interface IWaterfallLegend {
-  type: WaterfallLegendType;
-  value: string | undefined;
-  color: string;
-}
-
 export type IWaterfallSpanOrTransaction =
   | IWaterfallTransaction
   | IWaterfallSpan;
-export type IWaterfallItem = IWaterfallSpanOrTransaction;
+
+export type EntryWaterfallTransaction = IWaterfallSpanItemBase<
+  Transaction,
+  'transaction'
+>;
+
+export interface RootTransaction {
+  trace: { id: string };
+  transaction: {
+    duration: TimestampUs;
+    id: string;
+    name: string;
+    type: string;
+  };
+  service: {
+    name: string;
+    environment?: string;
+  };
+}
 
 export interface IWaterfall {
-  entryWaterfallTransaction?: IWaterfallTransaction;
+  entryWaterfallTransaction?: EntryWaterfallTransaction;
   rootTransaction?: RootTransaction;
 
   /**
    * Latency in us
    */
   duration: number;
-  items: IWaterfallItem[];
+  items: IWaterfallSpanOrTransaction[];
   childrenByParentId: Record<string | number, IWaterfallSpanOrTransaction[]>;
   errorCountById: Record<string, number>;
   legends: IWaterfallLegend[];
   errorItems: IWaterfallError[];
   exceedsMax: boolean;
   totalErrorsCount: number;
+}
+
+/*
+ * Legends types
+ */
+
+export enum WaterfallLegendType {
+  ServiceName = 'serviceName',
+  SpanType = 'spanType',
+}
+
+export interface IWaterfallLegend {
+  type: WaterfallLegendType;
+  value: string | undefined;
+  color: string;
+}
+
+/*
+ * Span links type
+ */
+
+export interface SpanLinksCount {
+  linkedChildren: number;
+  linkedParents: number;
 }

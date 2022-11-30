@@ -19,7 +19,7 @@ import { AccordionWaterfall } from './accordion_waterfall';
 import { WaterfallFlyout } from './waterfall_flyout';
 import type {
   IWaterfall,
-  IWaterfallItem,
+  IWaterfallSpanOrTransaction,
 } from '../../../../../../../common/waterfall_helper/typings';
 
 const Container = euiStyled.div`
@@ -33,7 +33,7 @@ const toggleFlyout = ({
   item,
 }: {
   history: History;
-  item?: IWaterfallItem;
+  item?: IWaterfallSpanOrTransaction;
 }) => {
   history.replace({
     ...history.location,
@@ -122,7 +122,7 @@ export function Waterfall({
               duration={duration}
               waterfall={waterfall}
               timelineMargins={timelineMargins}
-              onClickWaterfallItem={(item: IWaterfallItem) =>
+              onClickWaterfallItem={(item: IWaterfallSpanOrTransaction) =>
                 toggleFlyout({ history, item })
               }
               showCriticalPath={showCriticalPath}
