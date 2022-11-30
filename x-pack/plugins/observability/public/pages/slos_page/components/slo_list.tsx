@@ -14,7 +14,7 @@ export function SloList() {
   const [isLoading, sloList] = useFetchSloList();
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="sloList">
       <EuiFlexItem>{!isLoading && <pre>{JSON.stringify(sloList, null, 2)}</pre>}</EuiFlexItem>
     </EuiFlexGroup>
   );
