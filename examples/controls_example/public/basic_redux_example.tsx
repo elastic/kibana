@@ -11,12 +11,10 @@ import React, { useMemo, useState } from 'react';
 import {
   LazyControlGroupRenderer,
   ControlGroupContainer,
-  ControlGroupInput,
   useControlGroupContainerContext,
   ControlStyle,
 } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiButtonGroup,
   EuiFlexGroup,

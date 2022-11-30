@@ -12,11 +12,7 @@ import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
 } from '../../common/control_group/control_group_constants';
-import {
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-  TIME_SLIDER_CONTROL
-} from '..';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL, TIME_SLIDER_CONTROL } from '..';
 import { getCompatibleControlType, getNextPanelOrder } from './embeddable/control_group_helpers';
 
 export interface AddDataControlProps {
