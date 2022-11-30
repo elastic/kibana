@@ -31,11 +31,12 @@ function SubchartTooltip({
   highlightedSubchart,
   showFrames,
 }: TooltipInfo & {
-  sample : TopNSample,
+  sample: TopNSample;
   highlightedSubchart: TopNSubchart;
-  showFrames: boolean }) {
+  showFrames: boolean;
+}) {
   // sequential search is fast enough for small arrays.
-  var idx = highlightedSubchart.Series.indexOf(sample);
+  const idx = highlightedSubchart.Series.indexOf(sample);
   // max tooltip width - 2 * padding (16px)
   const width = 224;
   return (
@@ -46,8 +47,9 @@ function SubchartTooltip({
         category={highlightedSubchart.Category}
         label={highlightedSubchart.Label}
         percentage={
-          (highlightedSubchart.Series[idx].Count /
-          highlightedSubchart.TotalSamples[idx].Count) * 100.0 }
+          (highlightedSubchart.Series[idx].Count / highlightedSubchart.TotalSamples[idx].Count) *
+          100.0
+        }
         data={highlightedSubchart.Series}
         showFrames={showFrames}
         /* we don't show metadata in tooltips */
