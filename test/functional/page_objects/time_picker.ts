@@ -123,85 +123,80 @@ export class TimePickerPageObject extends FtrService {
   /**
    * @param {String} fromTime MMM D, YYYY @ HH:mm:ss.SSS
    * @param {String} toTime MMM D, YYYY @ HH:mm:ss.SSS
+   * @param {Boolean} force time picker force update, default is false
    */
-  public async setAbsoluteRange(fromTime: string, toTime: string) {
-    // setAbsoluteRange used to always set the timepicker.  This version checks if the
-    // required times are already in the URL and, if so, returns to save testing time.
-    const currentUrl = await this.browser.getCurrentUrl();
-    const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
-    const startMoment = moment.utc(fromTime, DEFAULT_DATE_FORMAT).toISOString();
-    const endMoment = moment.utc(toTime, DEFAULT_DATE_FORMAT).toISOString();
-    if (currentUrl.includes(startMoment) && currentUrl.includes(endMoment)) {
-      this.log.debug(
-        `We already have the desired start (${fromTime}) and end (${toTime}) in the URL, returning from setAbsoluteRange`
-      );
-      return;
+  public async setAbsoluteRange(fromTime: string, toTime: string, force = false) {
+    if (!force) {
+      const currentUrl = await this.browser.getCurrentUrl();
+      const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+      const startMoment = moment.utc(fromTime, DEFAULT_DATE_FORMAT).toISOString();
+      const endMoment = moment.utc(toTime, DEFAULT_DATE_FORMAT).toISOString();
+      if (currentUrl.includes(startMoment) && currentUrl.includes(endMoment)) {
+        this.log.debug(
+          `We already have the desired start (${fromTime}) and end (${toTime}) in the URL, returning from setAbsoluteRange`
+        );
+        return;
+      }
     } else {
       this.log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
-      return await this.setAbsoluteRangeAlways(fromTime, toTime);
-    }
-  }
+      await this.showStartEndTimes();
+      let panel!: WebElementWrapper;
 
-  /**
-   * @param {String} fromTime MMM D, YYYY @ HH:mm:ss.SSS
-   * @param {String} toTime MMM D, YYYY @ HH:mm:ss.SSS
-   */
-  public async setAbsoluteRangeAlways(fromTime: string, toTime: string) {
-    await this.showStartEndTimes();
-    let panel!: WebElementWrapper;
+      // set to time
+      await this.retry.waitFor(`endDate is set to ${toTime}`, async () => {
+        await this.testSubjects.click('superDatePickerendDatePopoverButton');
+        panel = await this.getTimePickerPanel();
+        await this.testSubjects.click('superDatePickerAbsoluteTab');
+        await this.testSubjects.click('superDatePickerAbsoluteDateInput');
+        await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
+        await this.testSubjects.click('superDatePickerendDatePopoverButton'); // close popover because sometimes browser can't find start input
+        const actualToTime = await this.testSubjects.getVisibleText(
+          'superDatePickerendDatePopoverButton'
+        );
+        this.log.debug(`Validating 'endDate' - expected: '${toTime}, actual: ${actualToTime}'`);
+        return toTime === actualToTime;
+      });
 
-    // set to time
-    await this.retry.waitFor(`endDate is set to ${toTime}`, async () => {
-      await this.testSubjects.click('superDatePickerendDatePopoverButton');
-      panel = await this.getTimePickerPanel();
-      await this.testSubjects.click('superDatePickerAbsoluteTab');
-      await this.testSubjects.click('superDatePickerAbsoluteDateInput');
-      await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
-      await this.testSubjects.click('superDatePickerendDatePopoverButton'); // close popover because sometimes browser can't find start input
-      const actualToTime = await this.testSubjects.getVisibleText(
-        'superDatePickerendDatePopoverButton'
+      // set from time
+      await this.retry.waitFor(`startDate is set to ${fromTime}`, async () => {
+        await this.testSubjects.click('superDatePickerstartDatePopoverButton');
+        await this.waitPanelIsGone(panel);
+        panel = await this.getTimePickerPanel();
+        await this.testSubjects.click('superDatePickerAbsoluteTab');
+        await this.testSubjects.click('superDatePickerAbsoluteDateInput');
+        await this.inputValue('superDatePickerAbsoluteDateInput', fromTime);
+        await this.browser.pressKeys(this.browser.keys.ESCAPE);
+        const actualFromTime = await this.testSubjects.getVisibleText(
+          'superDatePickerstartDatePopoverButton'
+        );
+        this.log.debug(
+          `Validating 'startDate' - expected: '${fromTime}, actual: ${actualFromTime}'`
+        );
+        return fromTime === actualFromTime;
+      });
+
+      await this.retry.waitFor('Timepicker popover to close', async () => {
+        await this.browser.pressKeys(this.browser.keys.ESCAPE);
+        return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput', { timeout: 50 }));
+      });
+
+      const superDatePickerApplyButtonExists = await this.testSubjects.exists(
+        'superDatePickerApplyTimeButton',
+        { timeout: 100 }
       );
-      this.log.debug(`Validating 'endDate' - expected: '${toTime}, actual: ${actualToTime}'`);
-      return toTime === actualToTime;
-    });
+      if (superDatePickerApplyButtonExists) {
+        // Timepicker is in top nav
+        // Click super date picker apply button to apply time range
+        await this.testSubjects.click('superDatePickerApplyTimeButton');
+      } else {
+        // Timepicker is embedded in query bar
+        // click query bar submit button to apply time range
+        await this.testSubjects.click('querySubmitButton');
+      }
 
-    // set from time
-    await this.retry.waitFor(`startDate is set to ${fromTime}`, async () => {
-      await this.testSubjects.click('superDatePickerstartDatePopoverButton');
       await this.waitPanelIsGone(panel);
-      panel = await this.getTimePickerPanel();
-      await this.testSubjects.click('superDatePickerAbsoluteTab');
-      await this.testSubjects.click('superDatePickerAbsoluteDateInput');
-      await this.inputValue('superDatePickerAbsoluteDateInput', fromTime);
-      await this.browser.pressKeys(this.browser.keys.ESCAPE);
-      const actualFromTime = await this.testSubjects.getVisibleText(
-        'superDatePickerstartDatePopoverButton'
-      );
-      this.log.debug(`Validating 'startDate' - expected: '${fromTime}, actual: ${actualFromTime}'`);
-      return fromTime === actualFromTime;
-    });
-
-    await this.retry.waitFor('Timepicker popover to close', async () => {
-      await this.browser.pressKeys(this.browser.keys.ESCAPE);
-      return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput', { timeout: 50 }));
-    });
-
-    const superDatePickerApplyButtonExists = await this.testSubjects.exists(
-      'superDatePickerApplyTimeButton',
-      { timeout: 100 }
-    );
-    if (superDatePickerApplyButtonExists) {
-      // Timepicker is in top nav
-      // Click super date picker apply button to apply time range
-      await this.testSubjects.click('superDatePickerApplyTimeButton');
-    } else {
-      // Timepicker is embedded in query bar
-      // click query bar submit button to apply time range
-      await this.testSubjects.click('querySubmitButton');
+      await this.header.awaitGlobalLoadingIndicatorHidden();
     }
-
-    await this.waitPanelIsGone(panel);
-    await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
   public async isOff() {
