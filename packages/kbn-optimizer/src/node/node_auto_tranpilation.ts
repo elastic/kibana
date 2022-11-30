@@ -79,7 +79,7 @@ export function registerNodeAutoTranspilation() {
 
   const cacheDir = Path.resolve(
     REPO_ROOT,
-    'data/node_auto_transpilation_cache_v5',
+    'data/node_auto_transpilation_cache_v6',
     UPSTREAM_BRANCH
   );
 

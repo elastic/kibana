@@ -7,6 +7,7 @@
 
 import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_logic';
 
+import { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { HttpError, Status } from '../../../../../common/types/api';
 
 import { AnalyticsCollectionsLogic } from './analytics_collections_logic';
@@ -48,8 +49,13 @@ describe('analyticsCollectionsLogic', () => {
       });
 
       it('updates to false when apiSuccess returns analytics collections array', () => {
-        const collections = [
-          { event_retention_day_length: 19, id: 'collection1', name: 'collection1' },
+        const collections: AnalyticsCollection[] = [
+          {
+            event_retention_day_length: 19,
+            events_datastream: 'collection1-events',
+            id: 'collection1',
+            name: 'collection1',
+          },
         ];
         AnalyticsCollectionsLogic.actions.apiSuccess(collections);
         expect(AnalyticsCollectionsLogic.values.hasNoAnalyticsCollections).toBe(false);
