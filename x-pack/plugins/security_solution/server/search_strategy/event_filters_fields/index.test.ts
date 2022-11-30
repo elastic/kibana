@@ -5,24 +5,58 @@
  * 2.0.
  */
 
-import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
+import type {
+  SearchStrategyDependencies,
+  DataViewsServerPluginStart,
+} from '@kbn/data-plugin/server';
 import { fieldsBeat as beatFields } from '@kbn/timelines-plugin/server/utils/beat_schema/fields';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { requestEventFiltersFieldsSearch } from '.';
 import { createMockEndpointAppContextService } from '../../endpoint/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
+import { eventsIndexPattern } from '../../../common/endpoint/constants';
 
 describe('Event filters fields', () => {
   const getFieldsForWildcardMock = jest.fn();
   const esClientSearchMock = jest.fn();
   const esClientFieldCapsMock = jest.fn();
   const endpointAppContextService = createMockEndpointAppContextService();
+  let IndexPatterns: DataViewsServerPluginStart;
 
   const deps = {
     esClient: {
       asInternalUser: { search: esClientSearchMock, fieldCaps: esClientFieldCapsMock },
     },
   } as unknown as SearchStrategyDependencies;
+
+  const mockPattern = {
+    title: 'test',
+    fields: {
+      toSpec: () => ({
+        coolio: {
+          name: 'name_test',
+          type: 'type_test',
+          searchable: true,
+          aggregatable: true,
+        },
+      }),
+    },
+    toSpec: () => ({
+      runtimeFieldMap: { runtimeField: { type: 'keyword' } },
+    }),
+  };
+  const getStartServices = jest.fn().mockReturnValue([
+    null,
+    {
+      data: {
+        indexPatterns: {
+          dataViewsServiceFactory: () => ({
+            get: jest.fn().mockReturnValue(mockPattern),
+          }),
+        },
+      },
+    },
+  ]);
 
   beforeAll(() => {
     getFieldsForWildcardMock.mockResolvedValue([]);
@@ -31,7 +65,14 @@ describe('Event filters fields', () => {
     IndexPatternsFetcher.prototype.getFieldsForWildcard = getFieldsForWildcardMock;
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    const [
+      ,
+      {
+        data: { indexPatterns },
+      },
+    ] = await getStartServices();
+    IndexPatterns = indexPatterns;
     getFieldsForWildcardMock.mockClear();
     esClientSearchMock.mockClear();
     esClientFieldCapsMock.mockClear();
@@ -42,34 +83,36 @@ describe('Event filters fields', () => {
   });
   describe('with right privileges', () => {
     it('should check index exists', async () => {
-      const indices = ['logs-endpoint.events.*'];
+      const indices = [eventsIndexPattern];
       const request = {
         indices,
         onlyCheckIfIndicesExist: true,
       };
 
       const response = await requestEventFiltersFieldsSearch(
+        endpointAppContextService,
         request,
         deps,
         beatFields,
-        endpointAppContextService
+        IndexPatterns
       );
       expect(response.indexFields).toHaveLength(0);
       expect(response.indicesExist).toEqual(indices);
     });
 
     it('should search index fields', async () => {
-      const indices = ['logs-endpoint.events.*'];
+      const indices = [eventsIndexPattern];
       const request = {
         indices,
         onlyCheckIfIndicesExist: false,
       };
 
       const response = await requestEventFiltersFieldsSearch(
+        endpointAppContextService,
         request,
         deps,
         beatFields,
-        endpointAppContextService
+        IndexPatterns
       );
 
       expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
@@ -86,7 +129,13 @@ describe('Event filters fields', () => {
       };
 
       await expect(async () => {
-        await requestEventFiltersFieldsSearch(request, deps, beatFields, endpointAppContextService);
+        await requestEventFiltersFieldsSearch(
+          endpointAppContextService,
+          request,
+          deps,
+          beatFields,
+          IndexPatterns
+        );
       }).rejects.toThrowError('Invalid indices request invalid');
     });
   });
@@ -99,14 +148,20 @@ describe('Event filters fields', () => {
     });
 
     it('should throw because not enough privileges', async () => {
-      const indices = ['logs-endpoint.events.*'];
+      const indices = [eventsIndexPattern];
       const request = {
         indices,
         onlyCheckIfIndicesExist: false,
       };
 
       await expect(async () => {
-        await requestEventFiltersFieldsSearch(request, deps, beatFields, endpointAppContextService);
+        await requestEventFiltersFieldsSearch(
+          endpointAppContextService,
+          request,
+          deps,
+          beatFields,
+          IndexPatterns
+        );
       }).rejects.toThrowError('Endpoint authz error');
     });
   });

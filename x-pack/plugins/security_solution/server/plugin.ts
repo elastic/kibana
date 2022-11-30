@@ -357,7 +357,10 @@ export class Plugin implements ISecuritySolutionPlugin {
         config,
       });
 
-      const eventFiltersFieldsStrategy = eventFiltersFieldsProvider(this.endpointAppContextService);
+      const eventFiltersFieldsStrategy = eventFiltersFieldsProvider(
+        this.endpointAppContextService,
+        depsStart.data.indexPatterns
+      );
       plugins.data.search.registerSearchStrategy('eventFiltersFields', eventFiltersFieldsStrategy);
 
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(

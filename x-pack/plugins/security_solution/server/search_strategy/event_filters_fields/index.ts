@@ -6,19 +6,17 @@
  */
 
 import { from } from 'rxjs';
-import type { ISearchStrategy, SearchStrategyDependencies } from '@kbn/data-plugin/server';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import type {
+  DataViewsServerPluginStart,
+  ISearchStrategy,
+  SearchStrategyDependencies,
+} from '@kbn/data-plugin/server';
 
-import {
-  formatIndexFields,
-  dedupeIndexName,
-  findExistingIndices,
-} from '@kbn/timelines-plugin/server/search_strategy/index_fields';
+import { requestIndexFieldSearch } from '@kbn/timelines-plugin/server/search_strategy/index_fields';
 
 import { eventsIndexPattern } from '../../../common/endpoint/constants';
 import type {
   BeatFields,
-  IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '../../../common/search_strategy';
@@ -30,7 +28,8 @@ import type { EndpointAppContextService } from '../../endpoint/endpoint_app_cont
  * It is used to retrieve index patterns for event filters form.
  */
 export const eventFiltersFieldsProvider = (
-  context: EndpointAppContextService
+  context: EndpointAppContextService,
+  indexPatterns: DataViewsServerPluginStart
 ): ISearchStrategy<IndexFieldsStrategyRequest<'indices'>, IndexFieldsStrategyResponse> => {
   // require the fields once we actually need them, rather than ahead of time, and pass
   // them to createFieldItem to reduce the amount of work done as much as possible
@@ -40,17 +39,18 @@ export const eventFiltersFieldsProvider = (
 
   return {
     search: (request, _, deps) =>
-      from(requestEventFiltersFieldsSearch(request, deps, beatFields, context)),
+      from(requestEventFiltersFieldsSearch(context, request, deps, beatFields, indexPatterns)),
   };
 };
 
 export const requestEventFiltersFieldsSearch = async (
+  context: EndpointAppContextService,
   request: IndexFieldsStrategyRequest<'indices'>,
-  { esClient, request: kibanaRequest }: SearchStrategyDependencies,
+  deps: SearchStrategyDependencies,
   beatFields: BeatFields,
-  context: EndpointAppContextService
+  indexPatterns: DataViewsServerPluginStart
 ): Promise<IndexFieldsStrategyResponse> => {
-  const { canWriteEventFilters } = await context.getEndpointAuthz(kibanaRequest);
+  const { canWriteEventFilters } = await context.getEndpointAuthz(deps.request);
 
   if (!canWriteEventFilters) {
     throw new Error('Endpoint authz error');
@@ -59,55 +59,5 @@ export const requestEventFiltersFieldsSearch = async (
   if (request.indices.length > 1 || request.indices[0] !== eventsIndexPattern) {
     throw new Error(`Invalid indices request ${request.indices.join(', ')}`);
   }
-
-  const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
-
-  let indicesExist: string[] = [];
-  let indexFields: IndexField[] = [];
-
-  const patternList = dedupeIndexName(request.indices);
-  indicesExist = (await findExistingIndices(patternList, esClient.asInternalUser)).reduce(
-    (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
-    []
-  );
-  if (!request.onlyCheckIfIndicesExist) {
-    const fieldDescriptor = (
-      await Promise.all(
-        indicesExist.map(async (index) =>
-          indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
-            pattern: index,
-          })
-        )
-      )
-    ).map((response) => response.fields || []);
-    indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
-  }
-
-  return {
-    indexFields,
-    runtimeMappings: {},
-    indicesExist,
-    rawResponse: {
-      timed_out: false,
-      took: -1,
-      _shards: {
-        total: -1,
-        successful: -1,
-        failed: -1,
-        skipped: -1,
-      },
-      hits: {
-        total: -1,
-        max_score: -1,
-        hits: [
-          {
-            _index: '',
-            _id: '',
-            _score: -1,
-            fields: {},
-          },
-        ],
-      },
-    },
-  };
+  return requestIndexFieldSearch(request, deps, beatFields, indexPatterns, true);
 };
