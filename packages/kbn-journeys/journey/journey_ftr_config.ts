@@ -92,11 +92,11 @@ export function makeFtrConfigProvider(
         env: {
           ...getAPMSettings(),
           ELASTIC_APM_GLOBAL_LABELS: Object.entries({
-            ...config.getExtraApmLabels(),
+            ...labels,
             testJobId,
             testBuildId,
             performancePhase: process.env.TEST_PERFORMANCE_PHASE,
-            ...labels,
+            ...config.getExtraApmLabels(),
           })
             .flatMap(([key, value]) => (value == null ? [] : `${key}=${value}`))
             .join(','),

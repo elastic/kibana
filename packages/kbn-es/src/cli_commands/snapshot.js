@@ -35,6 +35,7 @@ exports.help = (defaults = {}) => {
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
       --plugins         Comma seperated list of Elasticsearch plugins to install
+      --secure-files     Comma seperated list of secure_setting_name=/path pairs
 
     Example:
 
@@ -87,7 +88,6 @@ exports.run = async (defaults = {}) => {
     if (options.plugins) {
       await cluster.installPlugins(installPath, options.plugins, options);
     }
-
     if (options.secureFiles) {
       const pairs = options.secureFiles.split(',').map((kv) => kv.split('=').map((v) => v.trim()));
       await cluster.configureKeystoreWithSecureSettingsFiles(installPath, pairs);
