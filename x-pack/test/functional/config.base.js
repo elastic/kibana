@@ -11,11 +11,11 @@ import { services } from './services';
 import { pageObjects } from './page_objects';
 
 // Docker image to use for Fleet API integration tests.
-// This hash comes from the latest successful build of the Snapshot Distribution of the Package Registry, for
-// example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
-// It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
+// This hash comes from the latest successful build of the Production Distribution of the Package Registry, for
+// example: https://internal-ci.elastic.co/blue/organizations/jenkins/package_storage%2Findexing-job/detail/main/1884/pipeline/147.
+// It should be updated any time there is a new package published.
 export const dockerImage =
-  'docker.elastic.co/package-registry/distribution:production-v2-experimental';
+  'docker.elastic.co/package-registry/distribution:production';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
