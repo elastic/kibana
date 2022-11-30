@@ -162,13 +162,16 @@ Alerting::
 * Update rule status {kibana-pull}140882[#140882]
 
 APM::
-* Mobile most used pie charts with Lens {kibana-pull}144232[#144232]
-* Multi metric partition charts {kibana-pull}143966[#143966]
-* Adds missing options to APM central config {kibana-pull}143668[#143668]
-* Adds waterfall to dependency operations {kibana-pull}143257[#143257]
-* Display configuration table above code sample {kibana-pull}143178[#143178]
-* Implement improvements to AWS Lambda metrics view {kibana-pull}143113[#143113]
-* Display featured integrations at top of integrations list per category {kibana-pull}142771[#142771]
+* Adds pie charts displaying the most used mobile devices, operating systems, etc. {kibana-pull}144232[#144232]
+* Adds the ability to filter mobile APM views {kibana-pull}144172[#144172]
+* Adds average latency map to the mobile service overview {kibana-pull}144127[#144127]
+* Adds new options to APM central configuration {kibana-pull}143668[#143668]
+* Adds a trace waterfall to the dependency operation detail view {kibana-pull}143257[#143257]
+* Adds a configuration table above code sample in getting started guide {kibana-pull}143178[#143178]
+* Adds improvements to the AWS Lambda metrics view {kibana-pull}143113[#143113]
+* Adds total APM size and perecent of disk space used to storage explorer {kibana-pull}143179[#143179]
+* [Technical preview] Adds the ability to display a critical path for a single trace {kibana-pull}143735[#143735]
+* [Technical preview] Adds the agent explorer inventory and detail page {kibana-pull}143844[#143844]
 
 Dashboard::
 * Adds unmapped runtime field support to options list {kibana-pull}144947[#144947]
