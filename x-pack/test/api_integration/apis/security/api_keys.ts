@@ -12,7 +12,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const security = getService('security');
   const es = getService('es');
+  const config = getService('config');
+  const basic = config.get('esTestCluster.license') === 'basic';
 
   describe('API Keys', () => {
     describe('GET /internal/security/api_key/_enabled', () => {
@@ -70,7 +74,19 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('PUT /internal/security/api_key', () => {
       it('should allow an API Key to be updated', async () => {
-        const { id } = await es.security.createApiKey({ name: 'test_key' });
+        let id = '';
+
+        await supertest
+          .post('/internal/security/api_key')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            name: 'test_api_key',
+            expiration: '12d',
+          })
+          .expect(200)
+          .then((response: Record<string, any>) => {
+            id = response.body.id;
+          });
 
         await supertest
           .put('/internal/security/api_key')
