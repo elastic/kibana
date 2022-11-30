@@ -120,10 +120,15 @@ export function Detail() {
   const canInstallPackages = useAuthz().integrations.installPackages;
   const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
   const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
-  const { data: permissionCheck, isLoading: isPermissionCheckLoading } = usePermissionCheckQuery();
+
+  const {
+    data: permissionCheck,
+    error: permissionCheckError,
+    isLoading: isPermissionCheckLoading,
+  } = usePermissionCheckQuery();
   const missingSecurityConfiguration =
-    !permissionCheck?.data?.success && permissionCheck?.data?.error === 'MISSING_SECURITY';
-  const userCanInstallPackages = canInstallPackages && permissionCheck?.data?.success;
+    !permissionCheck?.success && permissionCheckError === 'MISSING_SECURITY';
+  const userCanInstallPackages = canInstallPackages && permissionCheck?.success;
 
   const services = useStartServices();
   const isCloud = !!services?.cloud?.cloudId;
@@ -166,14 +171,15 @@ export function Detail() {
   const { data: settings } = useGetSettingsQuery();
 
   useEffect(() => {
-    const isEnabled = Boolean(settings?.data?.item.prerelease_integrations_enabled);
+    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
     setPrereleaseIntegrationsEnabled(isEnabled);
-  }, [settings?.data?.item.prerelease_integrations_enabled]);
+  }, [settings?.item.prerelease_integrations_enabled]);
 
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
   const {
     data: packageInfoData,
+    error: packageInfoError,
     isLoading: packageInfoLoading,
     refetch: refetchPackageInfo,
   } = useGetPackageInfoByKeyQuery(pkgName, pkgVersion, {
@@ -189,12 +195,12 @@ export function Detail() {
   });
 
   useEffect(() => {
-    const pkg = packageInfoLatestGAData?.data?.item;
+    const pkg = packageInfoLatestGAData?.item;
     const isGAVersion = pkg && !isPackagePrerelease(pkg.version);
     if (isGAVersion) {
       setLatestGAVersion(pkg.version);
     }
-  }, [packageInfoLatestGAData?.data?.item]);
+  }, [packageInfoLatestGAData?.item]);
 
   // fetch latest Prerelease version (prerelease=true)
   const { data: packageInfoLatestPrereleaseData } = useGetPackageInfoByKeyQuery(pkgName, '', {
@@ -202,8 +208,8 @@ export function Detail() {
   });
 
   useEffect(() => {
-    setLatestPrereleaseVersion(packageInfoLatestPrereleaseData?.data?.item.version);
-  }, [packageInfoLatestPrereleaseData?.data?.item.version]);
+    setLatestPrereleaseVersion(packageInfoLatestPrereleaseData?.item.version);
+  }, [packageInfoLatestPrereleaseData?.item.version]);
 
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
     useIsFirstTimeAgentUserQuery();
@@ -225,16 +231,16 @@ export function Detail() {
   const isLoading = packageInfoLoading || isPermissionCheckLoading || firstTimeUserLoading;
 
   const showCustomTab =
-    useUIExtension(packageInfoData?.data?.item?.name ?? '', 'package-detail-custom') !== undefined;
+    useUIExtension(packageInfoData?.item?.name ?? '', 'package-detail-custom') !== undefined;
 
   // Track install status state
   useEffect(() => {
-    if (packageInfoData?.data?.item) {
-      const packageInfoResponse = packageInfoData.data?.item;
+    if (packageInfoData?.item) {
+      const packageInfoResponse = packageInfoData.item;
       setPackageInfo(packageInfoResponse);
 
       let installedVersion;
-      const { name } = packageInfoData.data?.item;
+      const { name } = packageInfoData.item;
       if ('savedObject' in packageInfoResponse) {
         installedVersion = packageInfoResponse.savedObject.attributes.version;
       }
@@ -685,7 +691,7 @@ export function Detail() {
       {integrationInfo || packageInfo ? (
         <Breadcrumbs packageTitle={integrationInfo?.title || packageInfo?.title || ''} />
       ) : null}
-      {packageInfoData?.error ? (
+      {packageInfoError ? (
         <Error
           title={
             <FormattedMessage
@@ -693,7 +699,7 @@ export function Detail() {
               defaultMessage="Error loading integration details"
             />
           }
-          error={packageInfoData?.error.message}
+          error={packageInfoError.message}
         />
       ) : isLoading || !packageInfo ? (
         <Loading />

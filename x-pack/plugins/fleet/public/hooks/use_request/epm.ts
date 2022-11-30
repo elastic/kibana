@@ -6,7 +6,7 @@
  */
 
 import useAsync from 'react-use/lib/useAsync';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { useState } from 'react';
 
@@ -29,7 +29,8 @@ import { getCustomIntegrations } from '../../services/custom_integrations';
 
 import { useConfirmOpenUnverified } from '../../applications/integrations/hooks/use_confirm_open_unverified';
 
-import { useRequest, sendRequest } from './use_request';
+import type { RequestError } from './use_request';
+import { useRequest, sendRequest, sendRequestForRq } from './use_request';
 
 export function useGetAppendCustomIntegrations() {
   const customIntegrations = getCustomIntegrations();
@@ -68,7 +69,13 @@ export const useGetPackages = (query: GetPackagesRequest['query'] = {}) => {
 };
 
 export const useGetPackagesQuery = (query: GetPackagesRequest['query']) => {
-  return useQuery(['get-packages', query.prerelease], () => sendGetPackages(query));
+  return useQuery<GetPackagesResponse, RequestError>(['get-packages', query.prerelease], () =>
+    sendRequestForRq<GetPackagesResponse>({
+      path: epmRouteService.getListPath(),
+      method: 'get',
+      query,
+    })
+  );
 };
 
 export const sendGetPackages = (query: GetPackagesRequest['query'] = {}) => {
@@ -100,8 +107,8 @@ export const useGetPackageInfoByKeyQuery = (
     options?.ignoreUnverified
   );
 
-  const response = useQuery([pkgName, pkgVersion, options], () =>
-    sendRequest<GetInfoResponse>({
+  const response = useQuery<GetInfoResponse, RequestError>([pkgName, pkgVersion, options], () =>
+    sendRequestForRq<GetInfoResponse>({
       path: epmRouteService.getInfoPath(pkgName, pkgVersion),
       method: 'get',
       query: {
@@ -119,7 +126,7 @@ export const useGetPackageInfoByKeyQuery = (
     }
   };
 
-  if (response?.data?.error && isVerificationError(response?.data?.error)) {
+  if (response?.error && isVerificationError(response?.error)) {
     confirm();
   }
 
@@ -190,6 +197,23 @@ export const sendRemovePackage = (pkgName: string, pkgVersion: string, force: bo
       force,
     },
   });
+};
+
+interface UpdatePackageArgs {
+  pkgName: string;
+  pkgVersion: string;
+  body: UpdatePackageRequest['body'];
+}
+
+export const useUpdatePackageMutation = () => {
+  return useMutation<UpdatePackageResponse, RequestError, UpdatePackageArgs>(
+    ({ pkgName, pkgVersion, body }: UpdatePackageArgs) =>
+      sendRequestForRq<UpdatePackageResponse>({
+        path: epmRouteService.getUpdatePath(pkgName, pkgVersion),
+        method: 'put',
+        body,
+      })
+  );
 };
 
 export const sendUpdatePackage = (

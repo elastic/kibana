@@ -41,7 +41,7 @@ import { PackageInstallProvider, UIExtensionsContext, FlyoutContextProvider } fr
 import { IntegrationsHeader } from './components/header';
 import { AgentEnrollmentFlyout } from './components';
 
-export const queryClient = new QueryClient();
+const queryClient = new QueryClient();
 
 const EmptyContext = () => <></>;
 

@@ -20,7 +20,7 @@ import {
   isIntegrationPolicyTemplate,
 } from '../../../../../../../common/services';
 
-import { useCategoriesQuery, useGetPackagesQuery, useStartServices } from '../../../../hooks';
+import { useGetCategoriesQuery, useGetPackagesQuery, useStartServices } from '../../../../hooks';
 
 import { pagePathGetters } from '../../../../constants';
 import {
@@ -216,13 +216,17 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
     history.replace(pagePathGetters.integrations_all({ searchTerm: search, category })[1]);
   }
 
-  const { data: eprPackages, isLoading: isLoadingAllPackages } = useGetPackagesQuery({
+  const {
+    data: eprPackages,
+    error: eprPackagesError,
+    isLoading: isLoadingAllPackages,
+  } = useGetPackagesQuery({
     prerelease: prereleaseIntegrationsEnabled,
   });
 
   // Remove Kubernetes package granularity
-  if (eprPackages?.data?.items) {
-    eprPackages?.data?.items.forEach(function (element) {
+  if (eprPackages?.items) {
+    eprPackages.items.forEach(function (element) {
       if (element.id === 'kubernetes') {
         element.policy_templates = [];
       }
@@ -230,7 +234,7 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
   }
 
   const eprIntegrationList = useMemo(
-    () => packageListToIntegrationsList(eprPackages?.data?.items || []),
+    () => packageListToIntegrationsList(eprPackages?.items || []),
     [eprPackages]
   );
   const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
@@ -265,9 +269,13 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
     [cards, category]
   );
 
-  const { data: eprCategories, isLoading: isLoadingCategories } = useCategoriesQuery(
-    prereleaseIntegrationsEnabled
-  );
+  const {
+    data: eprCategories,
+    error: eprCategoriesError,
+    isLoading: isLoadingCategories,
+  } = useGetCategoriesQuery({
+    prerelease: prereleaseIntegrationsEnabled,
+  });
 
   const categories: CategoryFacet[] = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories
@@ -324,8 +332,8 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
   }
 
   let noEprCallout;
-  if (eprPackages?.error || eprCategories?.error) {
-    const error = eprPackages?.error || eprCategories?.error;
+  if (eprPackagesError || eprCategoriesError) {
+    const error = eprPackagesError || eprCategories?.error;
     noEprCallout = <NoEprCallout statusCode={error?.statusCode} />;
   }
 

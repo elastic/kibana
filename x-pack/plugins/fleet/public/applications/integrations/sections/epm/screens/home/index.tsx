@@ -116,7 +116,7 @@ export const EPMHomePage: React.FC = () => {
     prerelease: true,
   });
 
-  const installedPackages = (allPackages?.data?.items || []).filter(
+  const installedPackages = (allPackages?.items || []).filter(
     (pkg) => pkg.status === installationStatuses.Installed
   );
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useMutation, useQuery } from '@tanstack/react-query';
+
 import { packagePolicyRouteService } from '../../services';
 import type {
   CreatePackagePolicyRequest,
@@ -22,7 +24,8 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types/rest_spec';
 
-import { sendRequest, useRequest } from './use_request';
+import type { RequestError } from './use_request';
+import { sendRequest, sendRequestForRq, useRequest } from './use_request';
 
 export const sendCreatePackagePolicy = (body: CreatePackagePolicyRequest['body']) => {
   return sendRequest<CreatePackagePolicyResponse>({
@@ -50,6 +53,16 @@ export const sendDeletePackagePolicy = (body: DeletePackagePoliciesRequest['body
     body: JSON.stringify(body),
   });
 };
+
+export function useGetPackagePoliciesQuery(query: GetPackagePoliciesRequest['query']) {
+  return useQuery<GetPackagePoliciesResponse, RequestError>(['packagePolicies'], () =>
+    sendRequestForRq<GetPackagePoliciesResponse>({
+      method: 'get',
+      path: packagePolicyRouteService.getListPath(),
+      query,
+    })
+  );
+}
 
 export function useGetPackagePolicies(query: GetPackagePoliciesRequest['query']) {
   return useRequest<GetPackagePoliciesResponse>({
@@ -81,6 +94,31 @@ export const sendGetOnePackagePolicy = (packagePolicyId: string) => {
   });
 };
 
+export function useUpgradePackagePolicyDryRunQuery(
+  packagePolicyIds: string[],
+  packageVersion?: string,
+  { enabled }: Partial<{ enabled: boolean }> = {}
+) {
+  const body: { packagePolicyIds: string[]; packageVersion?: string } = {
+    packagePolicyIds,
+  };
+
+  if (packageVersion) {
+    body.packageVersion = packageVersion;
+  }
+
+  return useQuery<UpgradePackagePolicyDryRunResponse, RequestError>(
+    ['upgradePackagePolicyDryRun', packagePolicyIds, packageVersion],
+    () =>
+      sendRequestForRq<UpgradePackagePolicyDryRunResponse>({
+        path: packagePolicyRouteService.getDryRunPath(),
+        method: 'post',
+        body: JSON.stringify(body),
+      }),
+    { enabled }
+  );
+}
+
 export function sendUpgradePackagePolicyDryRun(
   packagePolicyIds: string[],
   packageVersion?: string
@@ -98,6 +136,22 @@ export function sendUpgradePackagePolicyDryRun(
     method: 'post',
     body: JSON.stringify(body),
   });
+}
+
+export function useUpgradePackagePoliciesMutation() {
+  return useMutation<
+    UpgradePackagePolicyDryRunResponse,
+    RequestError,
+    { packagePolicyIds: string[] }
+  >(({ packagePolicyIds }) =>
+    sendRequestForRq<UpgradePackagePolicyDryRunResponse>({
+      path: packagePolicyRouteService.getUpgradePath(),
+      method: 'post',
+      body: JSON.stringify({
+        packagePolicyIds,
+      }),
+    })
+  );
 }
 
 export function sendUpgradePackagePolicy(packagePolicyIds: string[]) {

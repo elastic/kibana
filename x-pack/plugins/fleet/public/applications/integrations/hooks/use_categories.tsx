@@ -7,10 +7,17 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { sendGetCategories } from '../../fleet/hooks';
+import type { RequestError } from '../../fleet/hooks';
+import { sendRequestForRq } from '../../fleet/hooks';
+import { epmRouteService } from '../services';
+import type { GetCategoriesRequest, GetCategoriesResponse } from '../types';
 
-export function useCategoriesQuery(prerelease?: boolean) {
-  return useQuery(['categories', prerelease], () =>
-    sendGetCategories({ prerelease, include_policy_templates: true })
+export function useGetCategoriesQuery(query: GetCategoriesRequest['query'] = {}) {
+  return useQuery(['categories', query], () =>
+    sendRequestForRq<GetCategoriesResponse, RequestError>({
+      path: epmRouteService.getCategoriesPath(),
+      method: 'get',
+      query,
+    })
   );
 }

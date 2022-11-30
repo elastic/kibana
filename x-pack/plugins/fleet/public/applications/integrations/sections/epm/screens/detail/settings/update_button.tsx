@@ -35,10 +35,10 @@ import {
   sendGetAgentPolicies,
   useInstallPackage,
   useGetPackageInstallStatus,
-  sendUpgradePackagePolicy,
   useStartServices,
   useAuthz,
   useLink,
+  useUpgradePackagePoliciesMutation,
 } from '../../../../../hooks';
 
 interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'version'> {
@@ -164,6 +164,8 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     await installPackage({ name, version, title, fromUpdate: true });
   }, [installPackage, name, title, version]);
 
+  const upgradePackagePoliciesMutation = useUpgradePackagePoliciesMutation();
+
   const handleClickUpgradePolicies = useCallback(async () => {
     if (isUpgradingPackagePolicies) {
       return;
@@ -174,46 +176,47 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
 
     await installPackage({ name, version, title });
 
-    await sendUpgradePackagePolicy(
-      // Only upgrade policies that don't have conflicts
-      packagePolicyIds.filter(
-        (id) => !dryRunData?.find((dryRunRecord) => dryRunRecord.diff?.[0].id === id)?.hasErrors
-      )
+    upgradePackagePoliciesMutation.mutate(
+      {
+        // Only upgrade policies that don't have conflicts
+        packagePolicyIds: packagePolicyIds.filter(
+          (id) => !dryRunData?.find((dryRunRecord) => dryRunRecord.diff?.[0].id === id)?.hasErrors
+        ),
+      },
+      {
+        onSuccess: () => {
+          notifications.toasts.addSuccess({
+            title: toMountPoint(
+              <FormattedMessage
+                id="xpack.fleet.integrations.packageUpdateSuccessTitle"
+                defaultMessage="Updated {title} and upgraded policies"
+                values={{ title }}
+              />,
+              { theme$ }
+            ),
+            text: toMountPoint(
+              <FormattedMessage
+                id="xpack.fleet.integrations.packageUpdateSuccessDescription"
+                defaultMessage="Successfully updated {title} and upgraded policies"
+                values={{ title }}
+              />,
+              { theme$ }
+            ),
+          });
+        },
+      }
     );
-
-    setIsUpgradingPackagePolicies(false);
-
-    notifications.toasts.addSuccess({
-      title: toMountPoint(
-        <FormattedMessage
-          id="xpack.fleet.integrations.packageUpdateSuccessTitle"
-          defaultMessage="Updated {title} and upgraded policies"
-          values={{ title }}
-        />,
-        { theme$ }
-      ),
-      text: toMountPoint(
-        <FormattedMessage
-          id="xpack.fleet.integrations.packageUpdateSuccessDescription"
-          defaultMessage="Successfully updated {title} and upgraded policies"
-          values={{ title }}
-        />,
-        { theme$ }
-      ),
-    });
-
-    navigateToNewSettingsPage();
   }, [
-    dryRunData,
-    installPackage,
     isUpgradingPackagePolicies,
-    name,
-    navigateToNewSettingsPage,
-    notifications.toasts,
-    packagePolicyIds,
     setIsUpgradingPackagePolicies,
-    title,
+    installPackage,
+    name,
     version,
+    title,
+    upgradePackagePoliciesMutation,
+    packagePolicyIds,
+    dryRunData,
+    notifications.toasts,
     theme$,
   ]);
 
