@@ -6,9 +6,10 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiTextColor, EuiIcon, EuiBadge } from '@elastic/eui';
+import { EuiTextColor, EuiIcon, EuiBadge, EuiBadgeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../common/constants';
+import type { Instance, SetupMode } from './types';
 
 const clickToMonitorWithMetricbeat = i18n.translate(
   'xpack.monitoring.setupMode.clickToMonitorWithMetricbeat',
@@ -35,7 +36,20 @@ const unknown = i18n.translate('xpack.monitoring.setupMode.unknown', {
   defaultMessage: 'N/A',
 });
 
-export function SetupModeBadge({ setupMode, productName, status, instance, clusterUuid }) {
+interface Props {
+  setupMode: SetupMode;
+  productName: string;
+  instance: Instance;
+  clusterUuid?: string;
+  status: {
+    isPartiallyMigrated: boolean;
+    isInternalCollector: boolean;
+    isNetNewUser: boolean;
+    isFullyMigrated: boolean;
+  };
+}
+
+export function SetupModeBadge({ setupMode, productName, status, instance, clusterUuid }: Props) {
   let customAction = null;
   let customText = null;
 
@@ -58,7 +72,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
         <Fragment>
           <EuiIcon type="flag" />
           &nbsp;
-          <EuiTextColor color="warning" size="xs">
+          <EuiTextColor color="warning">
             {i18n.translate('xpack.monitoring.setupMode.monitorAllNodes', {
               defaultMessage: 'Some nodes use only self monitoring',
             })}
@@ -68,7 +82,7 @@ export function SetupModeBadge({ setupMode, productName, status, instance, clust
     }
   }
 
-  const badgeProps = {};
+  const badgeProps = {} as EuiBadgeProps;
   if (status.isInternalCollector || status.isPartiallyMigrated || status.isNetNewUser) {
     badgeProps.onClick = customAction ? customAction : () => setupMode.openFlyout(instance);
   }
