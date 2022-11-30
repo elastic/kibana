@@ -239,7 +239,9 @@ const FilterableCell: React.FC<{
       }
     `}
   >
-    <div className="__filter_value eui-textTruncate">{children}</div>
+    <div className="__filter_value eui-textTruncate" data-test-subj="filter_cell_value">
+      {children}
+    </div>
     <div
       className="__filter_buttons"
       css={css`
