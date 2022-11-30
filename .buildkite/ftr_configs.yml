@@ -274,6 +274,7 @@ enabled:
   - x-pack/test/ui_capabilities/spaces_only/config.ts
   - x-pack/test/upgrade_assistant_integration/config.js
   - x-pack/test/usage_collection/config.ts
+  - x-pack/performance/journeys/warmup.ts
   - x-pack/performance/journeys/ecommerce_dashboard.ts
   - x-pack/performance/journeys/ecommerce_dashboard_map_only.ts
   - x-pack/performance/journeys/flight_dashboard.ts

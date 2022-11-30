@@ -63,7 +63,7 @@ run(
         // Set the phase to WARMUP, this will prevent the functional test server from starting Elasticsearch, opt in to telemetry, etc.
         await runFunctionalTest(journey, 'WARMUP');
       } catch (e) {
-        log.warning(`Warmup for ${journey} failed`);
+        log.warning(`Warmup journey ${journey} failed`);
         throw e;
       }
     }
@@ -81,6 +81,9 @@ run(
     const journeyBasePath = path.resolve(REPO_ROOT, 'x-pack/performance/journeys/');
     const kibanaInstallDir = flagsReader.requiredPath('kibana-install-dir');
     const journeys = await Fsp.readdir(journeyBasePath);
+    const warmupIndex = journeys.indexOf('warmup.ts');
+    const [warmupJourney] = journeys.splice(warmupIndex, 1);
+
     log.info(`Found ${journeys.length} journeys to run`);
 
     const failedJourneys = [];
@@ -88,12 +91,14 @@ run(
     for (const journey of journeys) {
       try {
         await startEs();
-        await runWarmup(journey);
+        // Run the same warmup journey each time
+        await runWarmup(warmupJourney);
         await runTest(journey);
-        await procRunner.stop('es');
       } catch (e) {
         log.error(e);
         failedJourneys.push(journey);
+      } finally {
+        await procRunner.stop('es');
       }
     }
 
