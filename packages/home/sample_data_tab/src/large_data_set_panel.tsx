@@ -19,84 +19,57 @@ import {
   EuiForm,
   EuiFormRow,
   EuiRange,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LargeDataSetParams, useServices } from './services';
+import { useSVG } from './hooks';
 
 const MIN = 10000;
 const MAX = 1000000;
 const STEP = 1000;
 const INDEX_NAME = 'kibana_sample_data_large';
 
-const title = i18n.translate('homePackages.largeDataSetPanel.title', {
-  defaultMessage: 'Generate large data set',
-});
-
-const message = i18n.translate('homePackages.largeDataSetPanel.message', {
-  defaultMessage:
-    'Generate a large data set. Takes about 10 minutes. Turn the switch on to configure the dataset, or leave the switch off to generate a dataset with default parameters',
-});
-
-const datasetGeneratedSuccessMessage = i18n.translate(
-  'homePackages.largeDataSetPanel.toast.success',
-  {
+const i18nTexts = {
+  generateTitle: i18n.translate('homePackages.largeDataSetPanel.generateTitle', {
+    defaultMessage: 'Generate large data set',
+  }),
+  generateSubtitle: i18n.translate('homePackages.largeDataSetPanel.generateSubtitle', {
+    defaultMessage:
+      'Generate a large data set. Takes about 10 minutes. Turn the switch on to configure the dataset, or leave the switch off to generate a dataset with default parameters',
+  }),
+  installButtonText: i18n.translate('homePackages.largeDataSetPanel.button.install', {
+    defaultMessage: 'Generate!',
+  }),
+  unInstallButtonText: i18n.translate('homePackages.largeDataSetPanel.button.uninstall', {
+    defaultMessage: 'Uninstall',
+  }),
+  datasetGeneratedSuccessMessage: i18n.translate('homePackages.largeDataSetPanel.toast.success', {
     defaultMessage: 'Dataset successfully generated.',
-  }
-);
-
-const datasetUninstallErrorMessage = i18n.translate(
-  'homePackages.largeDataSetPanel.toast.uninstall.error',
-  {
-    defaultMessage: 'Error uninstalling dataset',
-  }
-);
-
-const useSVG: () => [string | null, boolean] = () => {
-  const { colorMode } = useEuiTheme();
-  const ref = useRef<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const isDark = colorMode === 'DARK';
-
-  useEffect(() => {
-    setLoading(true);
-    const load = async () => {
-      try {
-        if (isDark) {
-          const { default: svg } = await import('./assets/large-dataset--dark.png');
-          ref.current = svg;
-        } else {
-          const { default: svg } = await import('./assets/large-dataset--light.png');
-          ref.current = svg;
-        }
-      } catch (e) {
-        throw e;
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [isDark]);
-
-  return [ref.current, loading];
+  }),
+  datasetUninstallErrorMessage: i18n.translate(
+    'homePackages.largeDataSetPanel.toast.uninstall.error',
+    {
+      defaultMessage: 'Error uninstalling dataset',
+    }
+  ),
 };
 
 interface Props {
   installDataset: (params: LargeDataSetParams) => Promise<void>;
-  checkInstalled: () => Promise<boolean>;
+  checkInstalled: () => Promise<{ installed: boolean; count: number }>;
   uninstallDataset: () => Promise<void>;
 }
 
 enum Status {
+  EMPTY = 'empty',
   GENERATING = 'generating',
   DONE = 'done',
-  UNINSTALLED = 'uninstalled',
 }
 
 export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDataset }: Props) => {
   const [imageSrc] = useSVG();
-  const [installed, setInstalled] = useState<boolean>(false);
   const [checked, setChecked] = useState<boolean>(false);
+  const [installStatus, setInstallStatus] = useState<Status>(Status.EMPTY);
   const [nrOfDocuments, setNrOfDocuments] = useState<number>(100000);
   const intervalRef = useRef<ReturnType<typeof setTimeout>>();
   const { notifySuccess, notifyError } = useServices();
@@ -104,21 +77,21 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
   const image = imageSrc ? <EuiImage alt={'demo image'} size="l" src={imageSrc} /> : null;
 
   useEffect(() => {
-    let mounted = true;
     const checkIfInstalled = async () => {
-      const responseData = await checkInstalled();
-      if (mounted) {
-        setInstalled(responseData);
-      }
-      if (responseData && sessionStorage.getItem(INDEX_NAME) === Status.GENERATING) {
+      const { installed, count } = await checkInstalled();
+      const prevStatus = sessionStorage.getItem(INDEX_NAME);
+      if (installed && count >= nrOfDocuments && prevStatus === Status.GENERATING) {
+        notifySuccess(i18nTexts.datasetGeneratedSuccessMessage);
         updateSessionStorage(Status.DONE);
-        notifySuccess(datasetGeneratedSuccessMessage);
+      } else if (installed && count < nrOfDocuments) {
+        updateSessionStorage(Status.GENERATING);
+      } else if (!installed && prevStatus !== Status.GENERATING) {
+        updateSessionStorage(Status.EMPTY);
       }
     };
     checkIfInstalled();
     intervalRef.current = setInterval(checkIfInstalled, 30000); // half a minute
     return () => {
-      mounted = false;
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
@@ -128,25 +101,24 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
 
   const updateSessionStorage = (status: Status) => {
     sessionStorage.setItem(INDEX_NAME, status);
+    setInstallStatus(status);
   };
 
   const onInstallClick = async () => {
     try {
-      updateSessionStorage(Status.GENERATING);
       installDataset({ nrOfDocuments });
-      setInstalled(true);
+      updateSessionStorage(Status.GENERATING);
     } catch {
-      notifyError(datasetUninstallErrorMessage);
+      notifyError(i18nTexts.datasetUninstallErrorMessage);
     }
   };
 
   const onUninstallClick = async () => {
     try {
       await uninstallDataset();
-      setInstalled(false);
-      updateSessionStorage(Status.UNINSTALLED);
+      updateSessionStorage(Status.EMPTY);
     } catch {
-      notifyError(datasetUninstallErrorMessage);
+      notifyError(i18nTexts.datasetUninstallErrorMessage);
     }
   };
 
@@ -177,15 +149,30 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
     </EuiPanel>
   );
 
+  const installTitleText =
+    installStatus === Status.GENERATING
+      ? 'Large dataset generation is in progress'
+      : 'Large dataset already generated';
+
+  const installSubtitleText =
+    installStatus === Status.GENERATING
+      ? 'Once it is ready, you will be able to see the dataset in Discover, under the name: '
+      : 'Go to Discover to see the dataset: ';
+
   const installedLayout = (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={1}>
         <EuiText size="s">
-          <h2>Large dataset installed or installation is in progress</h2>
-          <p>You will be able to see your data in Discover once it is ready</p>
-          <EuiButton fill onClick={onUninstallClick} target="_blank">
-            Uninstall
-          </EuiButton>
+          <h2>{installTitleText}</h2>
+          <p>
+            {installSubtitleText}
+            <i>{INDEX_NAME}</i>
+          </p>
+          {installStatus === Status.DONE && (
+            <EuiButton fill onClick={onUninstallClick} target="_blank">
+              {i18nTexts.unInstallButtonText}
+            </EuiButton>
+          )}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={1} style={{ textAlign: 'center' }}>
@@ -194,12 +181,12 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
     </EuiFlexGroup>
   );
 
-  const uninstalledLayout = (
+  const generateLayout = (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={1}>
         <EuiText size="s">
-          <h2>{title}</h2>
-          <p>{message}</p>
+          <h2>{i18nTexts.generateTitle}</h2>
+          <p>{i18nTexts.generateSubtitle}</p>
           <EuiSwitch label="Configure your own data set" checked={checked} onChange={onChange} />
           <EuiSpacer />
           {checked ? configureLayout : null}
@@ -211,7 +198,7 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
             onClick={onInstallClick}
             target="_blank"
           >
-            Generate!
+            {i18nTexts.installButtonText}
           </EuiButton>
         </EuiText>
       </EuiFlexItem>
@@ -223,7 +210,7 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
-      {installed ? installedLayout : uninstalledLayout}
+      {installStatus === Status.EMPTY ? generateLayout : installedLayout}
     </EuiPanel>
   );
 };

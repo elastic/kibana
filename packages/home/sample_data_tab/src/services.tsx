@@ -37,7 +37,7 @@ interface Services {
   notifySuccess: NotifyFn;
   logClick: (metric: string) => void;
   installLargeDataset: (params: LargeDataSetParams) => Promise<void>;
-  checkLargeDatasetInstalled: () => Promise<boolean>;
+  checkLargeDatasetInstalled: () => Promise<{ installed: boolean; count: number }>;
   uninstallLargeDataset: () => Promise<void>;
 }
 
@@ -123,10 +123,7 @@ export const SampleDataTabKibanaProvider: FC<SampleDataTabKibanaDependencies> = 
   };
 
   const checkLargeDatasetInstalled = async () => {
-    const resp = (await http.get(`${URL_SAMPLE_DATA_API}/large_dataset/installed`)) as {
-      installed: boolean;
-    };
-    return resp.installed;
+    return await http.get(`${URL_SAMPLE_DATA_API}/large_dataset/installed`);
   };
 
   const uninstallLargeDataset = async () => {

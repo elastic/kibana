@@ -7,3 +7,4 @@
  */
 
 export { useList } from './use_list';
+export { useSVG } from './use_svg';

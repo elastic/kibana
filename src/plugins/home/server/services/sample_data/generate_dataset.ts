@@ -21,6 +21,8 @@ const l = {
   error: (...args: any[]) => parentPort?.postMessage({ log: LogLevel.error, args }),
 };
 
+const FIELD_TYPES = ['bool', 'str', 'int', 'ipv4', 'ts', 'text'];
+
 export interface WorkerData {
   numberOfDocuments: number;
 }
@@ -50,8 +52,6 @@ function getDataForFormat(format: string): {
 
   const fieldName = parts[0];
   const fieldType = parts[1];
-
-  logger.info(`format ${format}`);
 
   let retVal: any;
   switch (fieldType) {
@@ -93,7 +93,9 @@ function getDataForFormat(format: string): {
       }
       break;
     case 'words':
-    // TODO
+      const count = getRandomInt(1, 10);
+      retVal = faker.random.words(count);
+      break;
     case 'dict':
     // TODO
     case 'text':
@@ -120,8 +122,24 @@ function generateRandomDoc(format: string[]) {
   return res;
 }
 
-function generateTestData() {
-  const format = 'name:str,age:int,last_updated:ts'.split(',');
+const generateFieldType = () => {
+  const index = getRandomInt(0, FIELD_TYPES.length - 1);
+  return FIELD_TYPES[index];
+};
+
+const generateFieldName = () => {
+  return faker.word.noun();
+};
+
+export function generateTestData() {
+  const nrOfFields = 70;
+  // name, age and last_updated should be generated only once
+  const format = 'name:str,age:int,last_updated:ts,ip:ipv4'.split(',');
+  for (let i = 0; i <= nrOfFields; i++) {
+    const fieldType = generateFieldType();
+    const fieldName = generateFieldName();
+    format.push(`${fieldName}:${fieldType}`);
+  }
   const tsStart = Date.now();
   const items = [];
   for (let i = 1; i <= numberOfDocuments; i++) {
@@ -136,8 +154,15 @@ function generateTestData() {
 parentPort!.on('message', async (message) => {
   if (message === 'start') {
     try {
+      const size = 10000;
       const items = generateTestData();
-      parentPort!.postMessage({ status: 'DONE', items: JSON.stringify(items) });
+      let start = 0;
+      const end = Math.round(numberOfDocuments / size);
+      for (let i = 0; i < end; i++) {
+        const subItems = items.slice(start, start + size);
+        start += size;
+        parentPort!.postMessage({ status: 'DONE', items: JSON.stringify(subItems) });
+      }
       process.exit(0);
     } catch (error) {
       parentPort!.postMessage({ status: 'ERROR' });

@@ -18,7 +18,7 @@ const dataView = (indexName: string) => {
   return {
     id: uuid.v4(),
     type: 'index-pattern',
-    updated_at: '2018-05-09T15:49:03.736Z',
+    updated_at: Date.now().toString(),
     version: '1',
     migrationVersion: {},
     attributes: {
@@ -54,12 +54,7 @@ const largeDatasetProvider = function (
   };
 };
 
-export function createLargeDatasetRoute(
-  router: IRouter,
-  logger: Logger,
-  core: CoreSetup,
-  installCompleteCallback?: (id: SampleDatasetSchema) => void
-): void {
+export function createLargeDatasetRoute(router: IRouter, logger: Logger, core: CoreSetup): void {
   router.post(
     {
       path: '/api/sample_data/large_dataset',
@@ -70,25 +65,27 @@ export function createLargeDatasetRoute(
     async (context, req, res) => {
       const { nrOfDocuments } = req.body;
       logger.info(`Called ${nrOfDocuments}`);
-      (async () => {
-        const esClient = (await core.getStartServices())[0].elasticsearch.client;
-        const worker = new Worker(Path.join(__dirname, '../worker.js'), {
-          workerData: {
-            numberOfDocuments: nrOfDocuments,
-          },
-        });
-        await deleteIndex(esClient, LARGE_DATASET_INDEX_NAME);
-        await createIndex(esClient, LARGE_DATASET_INDEX_NAME);
 
-        worker.on('message', async (message) => {
-          if (message.status === 'DONE') {
-            const { items } = message;
-            await bulkUpload(esClient, LARGE_DATASET_INDEX_NAME, items);
-            // TODO: add error handling
-          }
-        });
-        worker.postMessage('start');
-      })();
+      const esClient = (await core.getStartServices())[0].elasticsearch.client;
+      const worker = new Worker(Path.join(__dirname, '../worker.js'), {
+        workerData: {
+          numberOfDocuments: nrOfDocuments,
+        },
+      });
+      await deleteIndex(esClient, LARGE_DATASET_INDEX_NAME);
+      await createIndex(esClient, LARGE_DATASET_INDEX_NAME);
+      worker.on('message', async (message) => {
+        if (message.status === 'DONE') {
+          const { items } = message;
+          logger.info('Received items from worker');
+
+          bulkUpload(esClient, LARGE_DATASET_INDEX_NAME, items);
+          // TODO: add error handling
+        } else if (message.status === 'ERROR') {
+          logger.error('Error occurred while generating documents for ES');
+        }
+      });
+      worker.postMessage('start');
 
       /*
       const core = await context.core;
@@ -156,21 +153,25 @@ export function createIsLargeDataSetInstalledRoute(router: IRouter, core: CoreSe
       const indexExists = await esClient.asInternalUser.indices.exists({
         index: LARGE_DATASET_INDEX_NAME,
       });
+      let count = 0;
+      if (indexExists) {
+        count = (
+          await esClient.asInternalUser.count({
+            index: LARGE_DATASET_INDEX_NAME,
+          })
+        ).count;
+      }
       return res.ok({
         body: {
           installed: indexExists,
+          count,
         },
       });
     }
   );
 }
 
-export function deleteLargeDatasetRoute(
-  router: IRouter,
-  logger: Logger,
-  core: CoreSetup,
-  installCompleteCallback?: (id: SampleDatasetSchema) => void
-): void {
+export function deleteLargeDatasetRoute(router: IRouter, logger: Logger, core: CoreSetup): void {
   router.delete(
     { path: '/api/sample_data/large_dataset', validate: false },
     async (context, _req, res) => {
