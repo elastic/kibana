@@ -93,6 +93,8 @@ run(
       } catch (e) {
         log.error(e);
         failedJourneys.push(journey);
+      } finally {
+        await procRunner.stop('es');
       }
     }
 
