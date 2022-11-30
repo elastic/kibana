@@ -40,7 +40,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
   }
 
   private buildSource(slo: SLO, indicator: KQLCustomIndicator) {
-    const filter = getElastichsearchQueryOrThrow(indicator.params.query_filter);
+    const filter = getElastichsearchQueryOrThrow(indicator.params.filter);
     return {
       index: indicator.params.index,
       runtime_mappings: this.buildCommonRuntimeMappings(slo),

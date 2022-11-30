@@ -26,7 +26,7 @@ describe('KQL Custom Transform Generator', () => {
     });
     it('throws when the KQL query_filter is invalid', () => {
       const anSLO = createSLO({
-        indicator: createKQLCustomIndicator({ query_filter: '{ kql.query: invalid' }),
+        indicator: createKQLCustomIndicator({ filter: '{ kql.query: invalid' }),
       });
       expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL/);
     });
@@ -51,7 +51,7 @@ describe('KQL Custom Transform Generator', () => {
 
   it('filters the source using the kql query', async () => {
     const anSLO = createSLO({
-      indicator: createKQLCustomIndicator({ query_filter: 'labels.groupId: group-4' }),
+      indicator: createKQLCustomIndicator({ filter: 'labels.groupId: group-4' }),
     });
     const transform = generator.getTransformParams(anSLO);
 
