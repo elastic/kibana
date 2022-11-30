@@ -84,10 +84,10 @@ run(
     log.info(`Found ${journeys.length} journeys to run`);
 
     const failedJourneys = [];
+    await startEs();
 
     for (const journey of journeys) {
       try {
-        await startEs();
         await runWarmup(journey);
         await runTest(journey);
       } catch (e) {
@@ -97,6 +97,8 @@ run(
         await procRunner.stop('es');
       }
     }
+
+    await procRunner.stop('es');
 
     if (failedJourneys.length > 0) {
       throw new Error(`${failedJourneys.length} journeys failed: ${failedJourneys.join(',')}`);
