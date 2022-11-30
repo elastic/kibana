@@ -46,7 +46,6 @@ export const sqsAdapter: Adapter = {
                     MessageBody: JSON.stringify(job),
                     QueueUrl: QUEUE_URL,
                     DelaySeconds: job.interval / 1000,
-                    MessageDeduplicationId: job.deduplicationId,
                   };
                   await sqs.sendMessage(params).promise();
                   try {
@@ -79,7 +78,6 @@ export const sqsAdapter: Adapter = {
     const params = {
       MessageBody: JSON.stringify(job),
       QueueUrl: QUEUE_URL,
-      MessageDeduplicationId: job.deduplicationId,
     };
     await sqs.sendMessage(params).promise();
   },
