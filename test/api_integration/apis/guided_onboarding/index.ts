@@ -13,6 +13,6 @@ export default function apiIntegrationTests({ loadTestFile }: FtrProviderContext
     loadTestFile(require.resolve('./get_state'));
     loadTestFile(require.resolve('./put_state'));
     loadTestFile(require.resolve('./get_guides'));
-    loadTestFile(require.resolve('./get_configs'));
+    loadTestFile(require.resolve('./get_config'));
   });
 }

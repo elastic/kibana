@@ -12,31 +12,38 @@ import type { GuideConfig, GuidesConfig } from '../../common';
 import { API_BASE_PATH } from '../../common';
 import { findGuideConfigByGuideId, getInProgressStepConfig } from './helpers';
 
+type ConfigInitialization = {
+  [key in GuideId]: boolean | undefined;
+};
 export class ConfigService {
   private client: HttpSetup | undefined;
   private configs: GuidesConfig | undefined;
-  private isInitialized: boolean | undefined;
+  private isConfigInitialized: ConfigInitialization | undefined;
 
   setup(httpClient: HttpSetup) {
     this.client = httpClient;
-    this.isInitialized = false;
+    this.configs = {} as GuidesConfig;
+    this.isConfigInitialized = {} as ConfigInitialization;
   }
 
   public async getGuideConfig(guideId: GuideId): Promise<GuideConfig | undefined> {
     if (!this.client) {
       throw new Error('ConfigService has not be initialized.');
     }
-    // if not initialized yet, get the configs from the backend
-    if (!this.isInitialized) {
+    // if not initialized yet, get the config from the backend
+    if (!this.isConfigInitialized || !this.isConfigInitialized[guideId]) {
       try {
-        const { configs } = await this.client.get<{ configs: GuidesConfig }>(
-          `${API_BASE_PATH}/configs`
+        const { config } = await this.client.get<{ config: GuideConfig }>(
+          `${API_BASE_PATH}/configs/${guideId}`
         );
-        this.isInitialized = true;
-        this.configs = configs;
+        if (!this.isConfigInitialized) this.isConfigInitialized = {} as ConfigInitialization;
+        this.isConfigInitialized[guideId] = true;
+        if (!this.configs) this.configs = {} as GuidesConfig;
+        this.configs[guideId] = config;
       } catch (e) {
         // if there is an error, set the isInitialized property to avoid multiple requests
-        this.isInitialized = true;
+        if (!this.isConfigInitialized) this.isConfigInitialized = {} as ConfigInitialization;
+        this.isConfigInitialized[guideId] = true;
       }
     }
     // get the config from the configs property

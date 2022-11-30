@@ -14,13 +14,13 @@ export default function testGetGuidesState({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('GET /api/guided_onboarding/configs', () => {
-    it('returns all guide configs', async () => {
-      const response = await supertest.get(getConfigsPath).expect(200);
-      expect(response.body).not.to.be.empty();
-      const { configs } = response.body;
-      // check that all guides are present
-      ['testGuide', 'security', 'search', 'observability'].map((guideId) => {
-        expect(configs).to.have.property(guideId);
+    // check that all guides are present
+    ['testGuide', 'security', 'search', 'observability'].map((guideId) => {
+      it(`returns config for ${guideId}`, async () => {
+        const response = await supertest.get(`${getConfigsPath}/${guideId}`).expect(200);
+        expect(response.body).not.to.be.empty();
+        const { config } = response.body;
+        expect(config).to.not.be.empty();
       });
     });
   });
