@@ -17,11 +17,14 @@ import { css } from '@emotion/react';
  * See https://github.com/elastic/eui/issues/6241 for more details
  */
 export const getGuidePanelStyles = (euiTheme: EuiThemeComputed) => ({
+  setupButton: css`
+    margin-right: ${euiTheme.size.m};
+  `,
   flyoutOverrides: {
     flyoutContainer: css`
       top: 55px !important;
       bottom: 25px !important;
-      right: 128px;
+      right: calc(${euiTheme.size.s} + 128px); // Accounting for margin on button
       border-radius: 6px;
       inline-size: 480px !important;
       height: auto;

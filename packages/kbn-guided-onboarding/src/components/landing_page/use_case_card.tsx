@@ -43,7 +43,7 @@ const constants: UseCaseConstants = {
     betaBadgeLabel: i18n.translate(
       'guidedOnboardingPackage.gettingStarted.security.betaBadgeLabel',
       {
-        defaultMessage: 'security',
+        defaultMessage: 'protect',
       }
     ),
   },
