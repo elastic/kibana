@@ -32,9 +32,12 @@ export {
 } from '../common';
 
 export {
+  type AddDataControlProps,
+  type AddOptionsListControlProps,
   type ControlGroupContainer,
   ControlGroupContainerFactory,
   type ControlGroupInput,
+  controlGroupInputBuilder,
   type ControlGroupOutput,
 } from './control_group';
 
