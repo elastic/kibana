@@ -6,19 +6,13 @@
  */
 
 import { useMemo } from 'react';
-import type { QuerySuggestionGetFn } from '@kbn/unified-search-plugin/public/autocomplete';
+import type { AutocompleteStart } from '@kbn/unified-search-plugin/public/autocomplete';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
-
-interface EndpointAutocompleteService {
-  getQuerySuggestions: QuerySuggestionGetFn;
-  hasQuerySuggestions: (language: string) => boolean;
-  getValueSuggestions: ValueSuggestionsGetFn;
-}
 
 /**
  * Hook to get a memoized suggestions interface
  */
-export function useSuggestions(fn: ValueSuggestionsGetFn): EndpointAutocompleteService {
+export function useSuggestions(fn: ValueSuggestionsGetFn): AutocompleteStart {
   return useMemo(
     () => ({
       getQuerySuggestions: () => undefined,
