@@ -13,7 +13,6 @@ import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useTable } from '../../hooks/use_table';
 import { BeatsTemplate } from './beats_template';
-// @ts-ignore
 import { Listing } from '../../../components/beats/listing';
 import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';

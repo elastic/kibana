@@ -7325,7 +7325,7 @@
             "section": "def-common.RowRenderer",
             "text": "RowRenderer"
           },
-          "[] | undefined; setFlyoutAlert?: ((data: any) => void) | undefined; scopeId: string; truncate?: boolean | undefined; key?: string | undefined; closeCellPopover?: (() => void) | undefined; }"
+          "[] | undefined; setFlyoutAlert?: ((data: any) => void) | undefined; scopeId: string; truncate?: boolean | undefined; key?: string | undefined; closeCellPopover?: (() => void) | undefined; enableActions?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/cells/index.ts",
         "deprecated": false,

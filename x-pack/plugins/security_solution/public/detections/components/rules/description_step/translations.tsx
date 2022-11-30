@@ -161,3 +161,10 @@ export const ALERT_SUPPRESSION_INSUFFICIENT_LICENSE = i18n.translate(
       'Alert suppression is configured but will not be applied due to insufficient licensing',
   }
 );
+
+export const ALERT_SUPPRESSION_TECHNICAL_PREVIEW = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionTechnicalPreview',
+  {
+    defaultMessage: 'Technical Preview',
+  }
+);

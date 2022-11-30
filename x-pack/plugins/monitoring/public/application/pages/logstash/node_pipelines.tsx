@@ -9,15 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-// @ts-expect-error
 import { isPipelineMonitoringSupportedInVersion } from '../../../lib/logstash/pipelines';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 import { LogstashTemplate } from './logstash_template';
-// @ts-expect-error
 import { DetailStatus } from '../../../components/logstash/detail_status';
 import { useTable } from '../../hooks/use_table';
-// @ts-expect-error
 import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
 import { useCharts } from '../../hooks/use_charts';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
