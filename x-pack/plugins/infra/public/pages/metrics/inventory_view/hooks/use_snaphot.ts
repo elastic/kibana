@@ -18,7 +18,7 @@ import {
   InfraTimerangeInput,
 } from '../../../../../common/http_api/snapshot_api';
 
-interface UseSnapshot
+export interface UseSnapshotRequest
   extends Omit<SnapshotRequest, 'filterQuery' | 'timerange' | 'includeTimeseries'> {
   filterQuery: string | null | symbol | undefined;
   currentTime: number;
@@ -32,7 +32,7 @@ export function useSnapshot({
   sendRequestImmediatly = true,
   includeTimeseries = true,
   ...args
-}: UseSnapshot) {
+}: UseSnapshotRequest) {
   const decodeResponse = (response: any) => {
     return pipe(
       SnapshotNodeResponseRT.decode(response),
