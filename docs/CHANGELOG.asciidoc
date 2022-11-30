@@ -120,7 +120,7 @@ Metadata API does not filter by environment {kibana-pull}144474[#144474]
 Discover::
 Improves the performance for getFieldsToShow {kibana-pull}144672[#144672]
 
-Management::
+Machine Learning::
 Adds maxRetries:0 to relevant API calls for transforms {kibana-pull}144603[#144603]
 
 [[release-notes-7.17.7]]
