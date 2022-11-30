@@ -23,13 +23,15 @@ import { TestColumnType, TestRowType } from './terms_explorer_table';
 interface Props {
   row: TestRowType;
   columns: TestColumnType[];
-  expandedColumnName?: string;
+  expandedColumnName?: keyof TestRowType;
 }
 
 export const TermsExplorerTableRow = ({ row, columns, expandedColumnName }: Props) => {
   const { euiTheme } = useEuiTheme();
 
-  const [expandedColumn, setExpandedColumn] = useState(expandedColumnName);
+  const [expandedColumn, setExpandedColumn] = useState<keyof TestRowType | undefined>(
+    expandedColumnName
+  );
 
   const expandedRowStyle = useMemo(
     () => css`
@@ -42,6 +44,7 @@ export const TermsExplorerTableRow = ({ row, columns, expandedColumnName }: Prop
   const renderCells = () => {
     return columns.map((column) => {
       const cell = row[column.field];
+      const isSelectedField = column.field === expandedColumn;
 
       let child;
       if (column.render) {
@@ -56,14 +59,15 @@ export const TermsExplorerTableRow = ({ row, columns, expandedColumnName }: Prop
           key={column.id}
           align={column.align}
           isExpander={true}
+          css={css`
+            font-weight: ${isSelectedField ? '800' : '400'};
+          `}
         >
           {child}
           <EuiButtonEmpty
-            iconType={column.field === expandedColumn ? 'arrowUp' : 'arrowDown'}
+            iconType={isSelectedField ? 'arrowUp' : 'arrowDown'}
             aria-expanded={Boolean(expandedColumn)}
-            onClick={() =>
-              setExpandedColumn(column.field === expandedColumn ? undefined : column.field)
-            }
+            onClick={() => setExpandedColumn(isSelectedField ? undefined : column.field)}
           />
         </EuiTableRowCell>
       );
