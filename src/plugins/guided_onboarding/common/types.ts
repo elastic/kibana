@@ -15,8 +15,15 @@ import { GuideState } from '@kbn/guided-onboarding';
  *  complete: at least one guide has been completed
  *  quit: the user quit a guide before completion
  *  skipped: the user skipped on the landing page
+ *  error: unable to retrieve the plugin state from saved objects
  */
-export type PluginStatus = 'not_started' | 'in_progress' | 'complete' | 'quit' | 'skipped';
+export type PluginStatus =
+  | 'not_started'
+  | 'in_progress'
+  | 'complete'
+  | 'quit'
+  | 'skipped'
+  | 'error';
 
 export interface PluginState {
   status: PluginStatus;
