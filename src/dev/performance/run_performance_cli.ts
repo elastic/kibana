@@ -18,13 +18,12 @@ const apmEnv = {
   ELASTIC_APM_ACTIVE: 'true',
   ELASTIC_APM_SERVER_URL: APM_SERVER_URL,
   ELASTIC_APM_SECRET_TOKEN: APM_PUBLIC_TOKEN,
-  ELASTIC_APM_TRANSACTION_SAMPLE_RATE: "1.0",
+  ELASTIC_APM_TRANSACTION_SAMPLE_RATE: '1.0',
 };
 
 run(
   async ({ log, flagsReader, procRunner }) => {
     async function runFunctionalTest(journey: string, phase: 'TEST' | 'WARMUP') {
-
       await procRunner.run('functional-tests', {
         cmd: 'node',
         args: [
