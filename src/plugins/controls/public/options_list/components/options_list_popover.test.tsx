@@ -14,8 +14,9 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { OptionsListPopover, OptionsListPopoverProps } from './options_list_popover';
 import { OptionsListComponentState, OptionsListReduxState } from '../types';
-import { ControlOutput, OptionsListEmbeddableInput } from '../..';
 import { mockOptionsListReduxEmbeddableTools } from '../../../common/mocks';
+import { OptionsListField } from '../../../common/options_list/types';
+import { ControlOutput, OptionsListEmbeddableInput } from '../..';
 
 describe('Options list popover', () => {
   const defaultProps = {
@@ -100,6 +101,23 @@ describe('Options list popover', () => {
       });
   });
 
+  test('disable search and sort when show only selected toggle is true', async () => {
+    const selections = ['woof', 'bark'];
+    const popover = await mountComponent({
+      explicitInput: { selectedOptions: selections },
+    });
+    let searchBox = findTestSubject(popover, 'optionsList-control-search-input');
+    let sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
+    expect(searchBox.prop('disabled')).toBeFalsy();
+    expect(sortButton.prop('disabled')).toBeFalsy();
+
+    clickShowOnlySelections(popover);
+    searchBox = findTestSubject(popover, 'optionsList-control-search-input');
+    sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
+    expect(searchBox.prop('disabled')).toBe(true);
+    expect(sortButton.prop('disabled')).toBe(true);
+  });
+
   test('should default to exclude = false', async () => {
     const popover = await mountComponent();
     const includeButton = findTestSubject(popover, 'optionsList__includeResults');
@@ -168,5 +186,88 @@ describe('Options list popover', () => {
     clickShowOnlySelections(popover);
     const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
     expect(availableOptionsDiv.children().at(0).text()).toBe('Exists');
+  });
+
+  test('when sorting suggestions, show both sorting types for keyword field', async () => {
+    const popover = await mountComponent({
+      componentState: {
+        field: { name: 'Test keyword field', type: 'keyword' } as OptionsListField,
+      },
+    });
+    const sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
+    sortButton.simulate('click');
+
+    const sortingOptionsDiv = findTestSubject(popover, 'optionsListControl__sortingOptions');
+    const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
+    expect(optionsText).toEqual(['By document count - Checked option.', 'Alphabetically']);
+  });
+
+  test('sorting popover selects appropriate sorting type on load', async () => {
+    const popover = await mountComponent({
+      explicitInput: { sort: { by: '_key', direction: 'asc' } },
+      componentState: {
+        field: { name: 'Test keyword field', type: 'keyword' } as OptionsListField,
+      },
+    });
+    const sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
+    sortButton.simulate('click');
+
+    const sortingOptionsDiv = findTestSubject(popover, 'optionsListControl__sortingOptions');
+    const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
+    expect(optionsText).toEqual(['By document count', 'Alphabetically - Checked option.']);
+
+    const ascendingButton = findTestSubject(popover, 'optionsList__sortOrder_asc').instance();
+    expect(ascendingButton).toHaveClass('euiButtonGroupButton-isSelected');
+    const descendingButton = findTestSubject(popover, 'optionsList__sortOrder_desc').instance();
+    expect(descendingButton).not.toHaveClass('euiButtonGroupButton-isSelected');
+  });
+
+  test('when sorting suggestions, only show document count sorting for IP fields', async () => {
+    const popover = await mountComponent({
+      componentState: { field: { name: 'Test IP field', type: 'ip' } as OptionsListField },
+    });
+    const sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
+    sortButton.simulate('click');
+
+    const sortingOptionsDiv = findTestSubject(popover, 'optionsListControl__sortingOptions');
+    const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
+    expect(optionsText).toEqual(['By document count - Checked option.']);
+  });
+
+  describe('Test advanced settings', () => {
+    const ensureComponentIsHidden = async ({
+      explicitInput,
+      testSubject,
+    }: {
+      explicitInput: Partial<OptionsListEmbeddableInput>;
+      testSubject: string;
+    }) => {
+      const popover = await mountComponent({
+        explicitInput,
+      });
+      const test = findTestSubject(popover, testSubject);
+      expect(test.exists()).toBeFalsy();
+    };
+
+    test('can hide exists option', async () => {
+      ensureComponentIsHidden({
+        explicitInput: { hideExists: true },
+        testSubject: 'optionsList-control-selection-exists',
+      });
+    });
+
+    test('can hide include/exclude toggle', async () => {
+      ensureComponentIsHidden({
+        explicitInput: { hideExclude: true },
+        testSubject: 'optionsList__includeExcludeButtonGroup',
+      });
+    });
+
+    test('can hide sorting button', async () => {
+      ensureComponentIsHidden({
+        explicitInput: { hideSort: true },
+        testSubject: 'optionsListControl__sortingOptionsButton',
+      });
+    });
   });
 });
