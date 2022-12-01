@@ -22,7 +22,7 @@ import {
 } from './types';
 
 export const createPureLogViewStateMachine = (initialContext: LogViewContextWithId) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UBqBLMB3AxADbrZ4CSEAwgBYCGAdjBANoAMAuoqAA6qxYAXLKnpcQAD0QAWAEwAaEAE9EADgDMAOikBOXdplq12lQFYZrKQF9LCtJhwEArtwi0BYNpyQhe-ISLFJBFkFZQR9bQ1WXVYARikANh1WBNY1a1sSBw1Heiw8oVpCLAAvSHxPMV9BYVFvINMTDRM1WNj1ExUAdgSVGVjQxBkZBI1tHpMTYylYk1jddJsQO1JcDWJaCHyoIlRN7YBlRwBjY7BISErvav860CDYmW1Nada2hK6phITBhBkulRjCYmFIJbSPFTdDLLLJ4dZ7LaMXb7RgAMVoWEIlw4VT4NQC9VUHw0I0mKikXRGsVYMikv3+gPGCUmoPBMkhXWhK2yACc4KhCAA3bb4PmwAWOW5HU7nCDYrw8PG3QKIR7PMbkt6xD5fH5KRBdQwaNR9dQM74LLmwtZigXCpG2wiS2rozHy3F+WoqhCxQwyEk6cHRE1SFLyfU+2JdDTai3a1gpeYJRaZexw47UMDHADWhwEbkcsHwGazucYB3zAkL0rOFxYOOuSq9hIQrWjrRkZhpn3+aiSvykUk0UhaEKm2raKZhabWJZzeYLRbnZagFcXrqx9YVPibBPuiDbxseXf+ZkN-YjnUi2jDzPZINaViW3LhjsF5T5GwgL9wV0Vnr3CRVEmZo3g6bpen6AdvhjLptDBMwpD6PttBMK0Z3hFEoA3D8wAEHlFD-HcALuICEEaUC2nAno+gGCM1C6KQxieXoTA+WkkiSdDVg0R1nREHCIFFPCCKIm5m33H0nheTU2m1T54L1MJ+k0NpjBGVIjEmJ9Ux45cFyrWBBOE-DCIbf98VIoIKWjUcRhUBJqXiVgVF+FpIlDBIRjUKYdApWJuOyZxXCEJFgrcQ4TlrOUtw9SzvTVGShzknVFN+PpIkML4ujghMfJkQK4XC0KdmK7ZBLE3crNVaSNWS94FO+X59Cadkg3+Z4GIC6F6FQOV4G8H84uVFsAFolMQUamj0YxtBmLt6sKtZcnyGoilKSBhoksiuhcjRdrUFJwRUOJzFciNhmjYZmWZHLehNTln2tTDESgLbAIeNJ20eBifKjOImoupJ9rSWYGI+YwToSJbeP5IVtne6qfTMWJmlmMwHM6ey1HpHKQcO-QvJMAE+xh-Ty0rQtEe9EII120YfLmk1HJHEdut03k4ffCBqZbYmmmJlR4kMcEvMhAdZFg+DdpMJCNJhr9yoxTdeckzSojA54QUSdpfkMJiIa6doRymSE1B06ceL425BNVsi5MBI3TGmPpk1p5SLBJUHGKFpzmQtn8NHJ1dKaM5XNsbEjvX55oAWFoxtXZc6wlSUZ+lSJDZijcx2ctoKXAixg7c+hijwMQ05l22N0v0KIYjmaJEsejmioLkrbcj+KW1mfo0cmdlmVd9RmopPvehc7VJkMaxrCAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UBqBLMB3AxADbrZ4CSEAwgBYCGAdjBANoAMAuoqAA6qxYAXLKnpcQAD0QBWVgCYAdAGYpixQA4A7ItmKAjGtkA2ADQgAnogC02jfKmyALKwCcrDU8XOHaqQF9fpmiYOAQArtwQtAJgbJxIILz8QiJikgi6rE7yDrpashpqmhrOig6mFgjWmfLFGlJOrHKGzrK6iv6BJCHyofRYfUK0hFgAXpD4sWKJgsKi8WmqivJquoaZUvUuXhrliBlS2RqG9bJum4XOHSBBpLjyxLQQ-VBEqI-PAMqhAMbfYJCQSbxabJOagNJHA6sXQOTwFFx1ZxqXYINRLBzOTGuVb2NqXALXLp4e5vJ6MV7vRgAMVoWEIgI4Uz4MxS82ksgUaPhrAMikMGjqKI5S0xjS0+mcGVhVxu3QATnBUIQAG7PfAK2BK0Kgr6-f4QBlxHjM0GpPY6WxqJFStq1GEotHZLHY46tdTtAmy4kapWq8k+wja2Y0umGplJWZm9Ji5Y6DbOdxyBM7cyIYXyUVuPRWqUezrBYnfahgb4Aa0+AiioVg+CLJfLjA+lYE1d1fwBLEZwJNkbZ6TqCgcUmcUgMMk8qwd6KxUkMaxyegchhlRLudbLFarNfXDagTa3IfpnaNCR7rPBexkumy0P52hKunyKYq6cz4pzmTzhILdwDyvGCoPBAXq4ECxoRueEjmhyyxOD4egnEuZSppUhg1Jk0IZMUCYOO4agrj+JKUlAh4AWAAhymYYGnhBYJQQgTiDg4RguLo9j5C0JgoY4aEaKshh6OonErARtzyAGQYiKREDquRlHUSCvYXggkoKIoBRse4s4clIz5pkuNT8YJVpGGorDLp6q7yDum4trA0myRRVFduBLJ0WkMK6Nepw4oYHIuKOUhCgZfFzsZwmsF+IE9BEURquEkRCI2Pztgax7hm5UaYgofHMUYuRqIYzEopYkryLac7sRsRwGKJ3QJXF5INUlJG0keClnu55oaKw8gCfUGICpFmRcRUlgcmo8iZGimJqE4DjeEVdXEs1zwOYBpIgR1tFRj1ByYl5+gqGOuglY+SxSLkSIjYY+gZBZBL0KgBrwPEIEZaafZeQ45Xqd4ihyIVRz2ihlg5LYchOC0mJ8QKy13L0-QzEMoyQB9Sn0asCi2v9gP8rdyEVPs8gcscKjOH5KjNH4lmEUBzzo5BaS4Qocj2N46yqBiigooYk0aEYKjDvxZkCfD4mKiqDPdjtfbXdk3jDmz3hGDzKErDUgvqHO86XeLNmNs21aM116T-TUQ6wiORiOBsDrXgLZMDcchVRVZf5ozLmV9qc+Qk60MKFEV+RovbmtOwtLsCbI4v09SbWe65n3KbhaG3edum5LILRBShfLYwLI58RTjTmTT+ZiRJoLSSbWV8ST5nqWxxzKKded+eVhdaAmxw5Jo+vFhuhsHgnEC119ivlZdzQtMKzSyCi+ed9n3eQn3Gji6tjDj8pFNp6c4OW7hdug44nKtHNUNFTC3ib7FLU117yeY5PbGrAU6nqNNJUcs4sb6AuI4C1mIb38L4IAA */
   createMachine<LogViewContext, LogViewEvent, LogViewTypestate>(
     {
       context: initialContext,
@@ -99,6 +99,7 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
           },
         },
         resolutionFailed: {
+          entry: 'notifyLoadingFailed',
           on: {
             retry: {
               target: 'resolving',
@@ -106,6 +107,7 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
           },
         },
         checkingStatusFailed: {
+          entry: 'notifyLoadingFailed',
           on: {
             retry: {
               target: 'checkingStatus',
@@ -128,7 +130,14 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
             },
           },
         },
-        updatingFailed: {},
+        updatingFailed: {
+          entry: 'notifyLoadingFailed',
+          on: {
+            reloadLogView: {
+              target: 'loading',
+            },
+          },
+        },
       },
       on: {
         logViewIdChanged: {
