@@ -59,6 +59,7 @@ export const TermsExplorerTab: React.FC<Omit<TermsExplorerTableProps, 'query' | 
       <div className={'kbnTermsExplorerWrapper'}>
         <TermsExplorerTable
           {...props}
+          isTopLevel={true}
           collapseFieldName={collapseField}
           query={querySubscriberResult.query}
           timeRange={querySubscriberResult.timeRange}

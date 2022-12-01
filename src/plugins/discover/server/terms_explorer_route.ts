@@ -99,6 +99,13 @@ export const setupTermsExplorerRoute = ({ http }: CoreSetup) => {
       collapse: {
         field: collapseFieldName,
       },
+      aggs: {
+        totalRows: {
+          cardinality: {
+            field: collapseFieldName,
+          },
+        },
+      },
     };
 
     const rawCollapseResult = await esClient.search(
@@ -109,6 +116,8 @@ export const setupTermsExplorerRoute = ({ http }: CoreSetup) => {
     const rowValues = rawCollapseResult.hits.hits.map((hit) => {
       return (hit._source as { [key: string]: string })[collapseFieldName];
     });
+
+    const totalRows = get(rawCollapseResult, 'aggregations.totalRows.value');
 
     /**
      * Get columns for each row
@@ -220,6 +229,6 @@ export const setupTermsExplorerRoute = ({ http }: CoreSetup) => {
       }
     );
 
-    return { rows: responseRows };
+    return { rows: responseRows, totalRows };
   };
 };
