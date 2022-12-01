@@ -11,6 +11,8 @@ exports[`Error AGENT_NAME 1`] = `"java"`;
 
 exports[`Error AGENT_VERSION 1`] = `"agent version"`;
 
+exports[`Error CHILD_ID 1`] = `undefined`;
+
 exports[`Error CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
 exports[`Error CLOUD 1`] = `
@@ -82,6 +84,8 @@ exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Error EVENT_OUTCOME 1`] = `undefined`;
+
+exports[`Error FAAS 1`] = `undefined`;
 
 exports[`Error FAAS_BILLED_DURATION 1`] = `undefined`;
 
@@ -213,6 +217,8 @@ exports[`Error SERVICE_RUNTIME_VERSION 1`] = `undefined`;
 
 exports[`Error SERVICE_VERSION 1`] = `undefined`;
 
+exports[`Error SPAN 1`] = `undefined`;
+
 exports[`Error SPAN_ACTION 1`] = `undefined`;
 
 exports[`Error SPAN_DESTINATION_SERVICE_RESOURCE 1`] = `undefined`;
@@ -241,9 +247,16 @@ exports[`Error SPAN_TYPE 1`] = `undefined`;
 
 exports[`Error TIER 1`] = `undefined`;
 
-exports[`Error TIMESTAMP 1`] = `"Wed Nov 30 2022 09:42:21 GMT-0500 (Eastern Standard Time)"`;
+exports[`Error TIMESTAMP 1`] = `"Thu Dec 01 2022 16:32:04 GMT-0500 (Eastern Standard Time)"`;
 
 exports[`Error TRACE_ID 1`] = `"trace id"`;
+
+exports[`Error TRANSACTION 1`] = `
+Object {
+  "id": "transaction id",
+  "type": "request",
+}
+`;
 
 exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
 
@@ -287,6 +300,8 @@ Object {
 exports[`Span AGENT_NAME 1`] = `"java"`;
 
 exports[`Span AGENT_VERSION 1`] = `"agent version"`;
+
+exports[`Span CHILD_ID 1`] = `undefined`;
 
 exports[`Span CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
@@ -345,6 +360,8 @@ exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Span EVENT_OUTCOME 1`] = `"unknown"`;
+
+exports[`Span FAAS 1`] = `undefined`;
 
 exports[`Span FAAS_BILLED_DURATION 1`] = `undefined`;
 
@@ -468,6 +485,23 @@ exports[`Span SERVICE_RUNTIME_VERSION 1`] = `undefined`;
 
 exports[`Span SERVICE_VERSION 1`] = `undefined`;
 
+exports[`Span SPAN 1`] = `
+Object {
+  "action": "my action",
+  "db": Object {
+    "statement": "db statement",
+  },
+  "duration": Object {
+    "us": 1337,
+  },
+  "id": "span id",
+  "name": "span name",
+  "subtype": "my subtype",
+  "sync": false,
+  "type": "span type",
+}
+`;
+
 exports[`Span SPAN_ACTION 1`] = `"my action"`;
 
 exports[`Span SPAN_DESTINATION_SERVICE_RESOURCE 1`] = `undefined`;
@@ -496,9 +530,15 @@ exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
 exports[`Span TIER 1`] = `undefined`;
 
-exports[`Span TIMESTAMP 1`] = `"Wed Nov 30 2022 09:42:21 GMT-0500 (Eastern Standard Time)"`;
+exports[`Span TIMESTAMP 1`] = `"Thu Dec 01 2022 16:32:04 GMT-0500 (Eastern Standard Time)"`;
 
 exports[`Span TRACE_ID 1`] = `"trace id"`;
+
+exports[`Span TRANSACTION 1`] = `
+Object {
+  "id": "transaction id",
+}
+`;
 
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
 
@@ -542,6 +582,8 @@ Object {
 exports[`Transaction AGENT_NAME 1`] = `"java"`;
 
 exports[`Transaction AGENT_VERSION 1`] = `"agent version"`;
+
+exports[`Transaction CHILD_ID 1`] = `undefined`;
 
 exports[`Transaction CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
@@ -604,6 +646,8 @@ exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Transaction EVENT_OUTCOME 1`] = `"unknown"`;
+
+exports[`Transaction FAAS 1`] = `undefined`;
 
 exports[`Transaction FAAS_BILLED_DURATION 1`] = `undefined`;
 
@@ -741,6 +785,8 @@ exports[`Transaction SERVICE_RUNTIME_VERSION 1`] = `undefined`;
 
 exports[`Transaction SERVICE_VERSION 1`] = `undefined`;
 
+exports[`Transaction SPAN 1`] = `undefined`;
+
 exports[`Transaction SPAN_ACTION 1`] = `undefined`;
 
 exports[`Transaction SPAN_DESTINATION_SERVICE_RESOURCE 1`] = `undefined`;
@@ -769,9 +815,22 @@ exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 
 exports[`Transaction TIER 1`] = `undefined`;
 
-exports[`Transaction TIMESTAMP 1`] = `"Wed Nov 30 2022 09:42:21 GMT-0500 (Eastern Standard Time)"`;
+exports[`Transaction TIMESTAMP 1`] = `"Thu Dec 01 2022 16:32:04 GMT-0500 (Eastern Standard Time)"`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
+
+exports[`Transaction TRANSACTION 1`] = `
+Object {
+  "duration": Object {
+    "us": 1337,
+  },
+  "id": "transaction id",
+  "name": "transaction name",
+  "result": "transaction result",
+  "sampled": true,
+  "type": "transaction type",
+}
+`;
 
 exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
 

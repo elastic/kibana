@@ -9,6 +9,20 @@ Object {
     ],
   },
   "body": Object {
+    "_source": Array [
+      "@timestamp",
+      "trace.id",
+      "service",
+      "agent",
+      "event.outcome",
+      "parent.id",
+      "processor.event",
+      "transaction",
+      "faas",
+      "span.links",
+      "span",
+      "child.id",
+    ],
     "query": Object {
       "bool": Object {
         "filter": Array [
