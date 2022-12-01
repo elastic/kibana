@@ -12,6 +12,18 @@ read [Kibana Contributing Guide](https://github.com/elastic/kibana/blob/main/CON
 
 read [Kibana Testing Guide](https://www.elastic.co/guide/en/kibana/current/development-tests.html) for more details
 
+Run **TypeScript**:
+
+```bash
+node scripts/type_check.js --project=x-pack/plugins/cloud_security_posture/tsconfig.json
+```
+
+Run **ESLint**:
+
+```bash
+yarn lint:es
+```
+
 Run **Unit Tests**:
 
 ```bash
@@ -36,4 +48,4 @@ yarn test:ftr --config x-pack/test/cloud_security_posture_functional/config.ts
 <br/>
 
 > **Note**
-> in development, run them separately with `ftr:runner` and `yarn ftr:server`
+> in development, run them separately with `ftr:runner` and `ftr:server`
