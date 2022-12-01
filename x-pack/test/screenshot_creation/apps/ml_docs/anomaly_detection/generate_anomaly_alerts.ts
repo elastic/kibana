@@ -68,6 +68,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['triggersActionsUI']);
   const commonScreenshots = getService('commonScreenshots');
   const browser = getService('browser');
+  const actions = getService('actions');
 
   const screenshotDirectories = ['ml_docs', 'anomaly_detection'];
 
@@ -96,9 +97,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await ml.api.deleteAnomalyDetectionJobES(testJobId);
       await ml.api.cleanMlIndices();
       await ml.alerting.cleanAnomalyDetectionRules();
+      await actions.api.deleteAllConnectors();
     });
 
-    describe('overview page alert flyout controls', () => {
+    describe.only('overview page alert flyout controls', () => {
       it('alert flyout screenshot', async () => {
         await ml.navigation.navigateToAlertsAndAction();
         await pageObjects.triggersActionsUI.clickCreateAlertButton();
