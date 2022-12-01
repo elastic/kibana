@@ -62,7 +62,11 @@ export const AdvancedView = ({ policy, onChange }: AdvancedViewDeps) => {
               type: 'object',
               required: ['selectors', 'responses'],
               properties: {
-                selectors: { type: 'array', items: { $ref: '#/$defs/selector' } },
+                selectors: {
+                  type: 'array',
+                  minItems: 1,
+                  items: { $ref: '#/$defs/selector' },
+                },
                 responses: {
                   type: 'array',
                   minItems: 1,
@@ -82,43 +86,50 @@ export const AdvancedView = ({ policy, onChange }: AdvancedViewDeps) => {
                       minItems: 1,
                       items: { enum: ['createExecutable', 'modifyExecutable'] },
                     },
-                    file: {
-                      type: 'object',
-                      properties: {
-                        path: {
-                          type: 'array',
-                          minItems: 1,
-                          items: { type: 'string' },
-                        },
-                        name: {
-                          type: 'array',
-                          minItems: 1,
-                          items: { type: 'string' },
-                        },
-                      },
+                    containerImageName: {
+                      type: 'array',
+                      minItems: 1,
+                      items: { type: 'string' },
                     },
-                    orchestrator: {
-                      type: 'object',
-                      properties: {
-                        cluster: {
-                          type: 'object',
-                          properties: {
-                            id: {
-                              type: 'array',
-                              minItems: 1,
-                              items: { type: 'string' },
-                            },
-                            name: {
-                              type: 'array',
-                              minItems: 1,
-                              items: { type: 'string' },
-                            },
-                          },
-                        },
-                      },
+                    containerImageTag: {
+                      type: 'array',
+                      minItems: 1,
+                      items: { type: 'string' },
                     },
-                    memfd: {
-                      type: 'boolean',
+                    filePath: {
+                      type: 'array',
+                      minItems: 1,
+                      items: { type: 'string' },
+                    },
+                    orchestratorClusterId: {
+                      type: 'array',
+                      minItems: 1,
+                      items: { type: 'string' },
+                    },
+                    orchestratorClusterName: {
+                      type: 'array',
+                      minItems: 1,
+                      items: { type: 'string' },
+                    },
+                    orchestratorNamespace: {
+                      type: 'array',
+                      minItems: 1,
+                      items: { type: 'string' },
+                    },
+                    orchestratorResourceLabel: {
+                      type: 'array',
+                      minItems: 1,
+                      items: { type: 'string' },
+                    },
+                    orchestratorResourceName: {
+                      type: 'array',
+                      minItems: 1,
+                      items: { type: 'string' },
+                    },
+                    orchestratorType: {
+                      type: 'array',
+                      minItems: 1,
+                      items: { enum: ['kubernetes'] },
                     },
                   },
                 },
@@ -128,7 +139,7 @@ export const AdvancedView = ({ policy, onChange }: AdvancedViewDeps) => {
                   properties: {
                     match: { type: 'array', minItems: 1, items: { enum: selectorNames } },
                     exclude: { type: 'array', items: { enum: selectorNames } },
-                    actions: { type: 'array', items: { enum: ['alert', 'block'] } },
+                    actions: { type: 'array', minItems: 1, items: { enum: ['alert', 'block'] } },
                   },
                 },
               },
