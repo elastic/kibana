@@ -8,7 +8,7 @@
 
 import type { GuideState, GuideId, GuideStepIds } from '@kbn/guided-onboarding';
 
-import { PluginState } from '../../common/types';
+import { PluginState } from '../../common';
 
 export const testGuide: GuideId = 'testGuide';
 export const testGuideFirstStep: GuideStepIds = 'step1';
@@ -87,7 +87,7 @@ export const testGuideStep2ReadyToCompleteState: GuideState = {
       status: 'complete',
     },
     {
-      id: testGuideStep1ActiveState.steps[1].id,
+      ...testGuideStep1ActiveState.steps[1],
       status: 'ready_to_complete',
     },
     testGuideStep1ActiveState.steps[2],

@@ -237,7 +237,7 @@ export const uiSettings: Record<string, UiSettings> = {
     value: true,
     requiresPageReload: true,
     type: 'boolean',
-    showInLabs: true,
+    showInLabs: false,
   },
   [apmLabsButton]: {
     category: [observabilityFeatureId],
