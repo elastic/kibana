@@ -8,7 +8,8 @@
 
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
-import { CellActionsContextProvider, CellActions, CellActionsMode, CellActionsProps } from '..';
+import { CellActions, CellActionsMode, CellActionsProps } from '.';
+import { CellActionsContextProvider } from './cell_actions_context';
 
 const makeActions = (actionsName: string, icon: string) => ({
   id: actionsName,
@@ -41,6 +42,7 @@ export default {
           makeActions('Pin field', 'pin'),
         ]}
       >
+        <div style={{ paddingTop: '70px' }} />
         {storyFn()}
       </CellActionsContextProvider>
     ),

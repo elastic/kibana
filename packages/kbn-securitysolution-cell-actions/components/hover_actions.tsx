@@ -10,6 +10,7 @@ import { EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useCallback, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { HoverActionsPopover } from './hover_actions_popover';
 import { ActionItem } from './cell_action_item';
 import { CellActionConfig } from '.';
@@ -21,6 +22,10 @@ import { YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
 // const SHOW_TOP_N_KEYBOARD_SHORTCUT = 't';
 const additionalContentCSS = css`
   padding: 2px;
+`;
+
+const hoverContentWrapperCSS = css`
+  padding: 0 ${euiThemeVars.euiSizeS};
 `;
 
 interface Props {
@@ -93,7 +98,7 @@ export const HoverActions: React.FC<Props> = React.memo(
           closeHoverPopOver();
         };
         return (
-          <div>
+          <div css={hoverContentWrapperCSS}>
             <EuiScreenReaderOnly>
               <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(config.field)}</p>
             </EuiScreenReaderOnly>
