@@ -278,6 +278,7 @@ export const getManagementFilteredLinks = async (
     canReadHostIsolationExceptions,
     canReadEndpointList,
     canReadTrustedApplications,
+    canReadEventFilters,
   } = fleetAuthz
     ? calculateEndpointAuthz(
         licenseService,
@@ -301,8 +302,12 @@ export const getManagementFilteredLinks = async (
     linksToExclude.push(SecurityPageName.hostIsolationExceptions);
   }
 
-  if (endpointRbacEnabled && !canReadTrustedApplications) {
+  if (!canReadTrustedApplications) {
     linksToExclude.push(SecurityPageName.trustedApps);
+  }
+
+  if (!canReadEventFilters) {
+    linksToExclude.push(SecurityPageName.eventFilters);
   }
 
   return excludeLinks(linksToExclude);
