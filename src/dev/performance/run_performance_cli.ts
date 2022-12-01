@@ -83,11 +83,23 @@ run(
     const journeys = await Fsp.readdir(journeyBasePath);
     log.info(`Found ${journeys.length} journeys to run`);
 
+    const failedJourneys = [];
+
     for (const journey of journeys) {
-      await startEs();
-      await runWarmup(journey);
-      await runTest(journey);
-      await procRunner.stop('es');
+      try {
+        await startEs();
+        await runWarmup(journey);
+        await runTest(journey);
+      } catch (e) {
+        log.error(e);
+        failedJourneys.push(journey);
+      } finally {
+        await procRunner.stop('es');
+      }
+    }
+
+    if (failedJourneys.length > 0) {
+      throw new Error(`${failedJourneys.length} journeys failed: ${failedJourneys.join(',')}`);
     }
   },
   {
