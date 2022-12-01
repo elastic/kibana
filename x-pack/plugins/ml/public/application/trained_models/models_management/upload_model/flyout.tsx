@@ -18,16 +18,18 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { UploadModel } from './upload_model';
+import { HuggingFaceModelList } from './hugging_face_model_list';
+
 import logo from './huggingface_logo.svg';
 
 interface Props {
+  refreshModels: () => void;
   onClose: () => void;
 }
-export const UploadTrainedModelFlyout: FC<Props> = ({ onClose }) => {
+export const UploadTrainedModelFlyout: FC<Props> = ({ onClose, refreshModels }) => {
   return (
     <>
-      <EuiFlyout maxWidth={600} onClose={onClose} data-test-subj="mlTestModelsFlyout">
+      <EuiFlyout onClose={onClose} data-test-subj="mlTestModelsFlyout" size={'m'}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <EuiFlexGroup gutterSize="s">
@@ -46,7 +48,7 @@ export const UploadTrainedModelFlyout: FC<Props> = ({ onClose }) => {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <UploadModel onClose={onClose} />
+          <HuggingFaceModelList refreshModels={refreshModels} />
         </EuiFlyoutBody>
       </EuiFlyout>
     </>

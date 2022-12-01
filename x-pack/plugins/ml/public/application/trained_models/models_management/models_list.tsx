@@ -544,14 +544,7 @@ export const ModelsList: FC<Props> = ({
       )}
       {showUploadFlyout ? (
         <UploadTrainedModelFlyout
-          onClose={() => {
-            setShowUploadFlyout(false);
-            fetchModelsData();
-          }}
-        />
-      ) : null}
-      {showUploadFlyout ? (
-        <UploadTrainedModelFlyout
+          refreshModels={() => fetchModelsData()}
           onClose={() => {
             setShowUploadFlyout(false);
             fetchModelsData();
