@@ -97,6 +97,11 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
   viewMode: VIEW_MODE;
 
   showDataViewPicker?: boolean;
+
+  /**
+   * sets which field to collapse by for the term explorer table
+   */
+  setCollapseByField: (collapseByField: string) => void;
 }
 
 export function DiscoverSidebarComponent({
@@ -120,6 +125,7 @@ export function DiscoverSidebarComponent({
   viewMode,
   createNewDataView,
   showDataViewPicker,
+  setCollapseByField,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
@@ -430,6 +436,7 @@ export function DiscoverSidebarComponent({
                                 onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
                                 contextualFields={columns}
+                                setCollapseByField={() => setCollapseByField(field.name)}
                               />
                             </li>
                           );

@@ -41,6 +41,7 @@ export const useColumns = ({
   useNewFieldsApi,
 }: UseColumnsProps) => {
   const [usedColumns, setUsedColumns] = useState(getColumns(state.columns, useNewFieldsApi));
+  const [collapseOnColumn, setCollapseOnColumn] = useState<string | undefined>();
   useEffect(() => {
     const nextColumns = getColumns(state.columns, useNewFieldsApi);
     if (isEqual(usedColumns, nextColumns)) {
@@ -78,6 +79,8 @@ export const useColumns = ({
     onRemoveColumn,
     onMoveColumn,
     onSetColumns,
+    collapseOnColumn,
+    setCollapseOnColumn,
   };
 };
 

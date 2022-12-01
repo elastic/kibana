@@ -96,28 +96,92 @@ interface ActionButtonProps {
   isSelected?: boolean;
   alwaysShow: boolean;
   toggleDisplay: (field: DataViewField, isSelected?: boolean) => void;
+  setCollapseByField?: () => void;
 }
 
 const ActionButton: React.FC<ActionButtonProps> = memo(
-  ({ field, isSelected, alwaysShow, toggleDisplay }) => {
+  ({ field, isSelected, alwaysShow, toggleDisplay, setCollapseByField }) => {
     const actionBtnClassName = classNames('dscSidebarItem__action', {
       ['dscSidebarItem__mobile']: alwaysShow,
     });
     if (field.name === '_source') {
       return null;
     }
+
     if (!isSelected) {
+      return (
+        <EuiToolTip
+          delay="long"
+          content={i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
+            defaultMessage: 'Add field as column',
+          })}
+        >
+          <EuiButtonIcon
+            iconType="plusInCircleFilled"
+            className={actionBtnClassName}
+            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+              if (ev.type === 'click') {
+                ev.currentTarget.focus();
+              }
+              ev.preventDefault();
+              ev.stopPropagation();
+              toggleDisplay(field, isSelected);
+            }}
+            data-test-subj={`fieldToggle-${field.name}`}
+            aria-label={i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
+              defaultMessage: 'Add {field} to table',
+              values: { field: field.name },
+            })}
+          />
+        </EuiToolTip>
+      );
+    } else {
       return (
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiToolTip
               delay="long"
-              content={i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
-                defaultMessage: 'Add field as column',
+              content={i18n.translate(
+                'discover.fieldChooser.discoverField.collapseOnFieldTooltip',
+                {
+                  defaultMessage: 'Collapse on field',
+                }
+              )}
+            >
+              <EuiButtonIcon
+                iconType="fold"
+                className={actionBtnClassName}
+                onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+                  if (ev.type === 'click') {
+                    ev.currentTarget.focus();
+                  }
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  if (setCollapseByField) {
+                    setCollapseByField();
+                  }
+                }}
+                data-test-subj={`groupBy-${field.name}`}
+                aria-label={i18n.translate(
+                  'discover.fieldChooser.discoverField.collapseAriaLabel',
+                  {
+                    defaultMessage: 'Collapse on {field}',
+                    values: { field: field.name },
+                  }
+                )}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              delay="long"
+              content={i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
+                defaultMessage: 'Remove field from table',
               })}
             >
               <EuiButtonIcon
-                iconType="plusInCircleFilled"
+                color="danger"
+                iconType="cross"
                 className={actionBtnClassName}
                 onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
                   if (ev.type === 'click') {
@@ -129,9 +193,9 @@ const ActionButton: React.FC<ActionButtonProps> = memo(
                 }}
                 data-test-subj={`fieldToggle-${field.name}`}
                 aria-label={i18n.translate(
-                  'discover.fieldChooser.discoverField.addButtonAriaLabel',
+                  'discover.fieldChooser.discoverField.removeButtonAriaLabel',
                   {
-                    defaultMessage: 'Add {field} to table',
+                    defaultMessage: 'Remove {field} from table',
                     values: { field: field.name },
                   }
                 )}
@@ -139,37 +203,6 @@ const ActionButton: React.FC<ActionButtonProps> = memo(
             </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
-      );
-    } else {
-      return (
-        <EuiToolTip
-          delay="long"
-          content={i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
-            defaultMessage: 'Remove field from table',
-          })}
-        >
-          <EuiButtonIcon
-            color="danger"
-            iconType="cross"
-            className={actionBtnClassName}
-            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-              if (ev.type === 'click') {
-                ev.currentTarget.focus();
-              }
-              ev.preventDefault();
-              ev.stopPropagation();
-              toggleDisplay(field, isSelected);
-            }}
-            data-test-subj={`fieldToggle-${field.name}`}
-            aria-label={i18n.translate(
-              'discover.fieldChooser.discoverField.removeButtonAriaLabel',
-              {
-                defaultMessage: 'Remove {field} from table',
-                values: { field: field.name },
-              }
-            )}
-          />
-        </EuiToolTip>
       );
     }
   }
@@ -279,6 +312,11 @@ export interface DiscoverFieldProps {
    * Columns
    */
   contextualFields: string[];
+
+  /**
+   * sets current field to collapse by for the term explorer table
+   */
+  setCollapseByField?: () => void;
 }
 
 function DiscoverFieldComponent({
@@ -296,6 +334,7 @@ function DiscoverFieldComponent({
   onDeleteField,
   showFieldStats,
   contextualFields,
+  setCollapseByField,
 }: DiscoverFieldProps) {
   const services = useDiscoverServices();
   const [infoIsOpen, setOpen] = useState(false);
@@ -367,6 +406,7 @@ function DiscoverFieldComponent({
             isSelected={selected}
             alwaysShow={alwaysShowActionButton}
             toggleDisplay={toggleDisplay}
+            setCollapseByField={setCollapseByField}
           />
         }
         fieldName={<FieldName field={field} />}
@@ -388,6 +428,7 @@ function DiscoverFieldComponent({
           isSelected={selected}
           alwaysShow={alwaysShowActionButton}
           toggleDisplay={toggleDisplay}
+          setCollapseByField={setCollapseByField}
         />
       }
       fieldName={<FieldName field={field} />}
