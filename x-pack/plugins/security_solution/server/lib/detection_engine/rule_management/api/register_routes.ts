@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { ConfigType } from '../../../../config';
 import type { SetupPlugins } from '../../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { getRuleManagementFilters } from './filters/route';
 
 import { performBulkActionRoute } from './rules/bulk_actions/route';
 import { bulkCreateRulesRoute } from './rules/bulk_create_rules/route';
@@ -56,4 +57,7 @@ export const registerRuleManagementRoutes = (
 
   // Rule tags
   readTagsRoute(router);
+
+  // Rules filters
+  getRuleManagementFilters(router);
 };
