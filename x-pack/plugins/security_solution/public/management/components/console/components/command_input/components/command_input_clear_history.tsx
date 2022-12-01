@@ -9,11 +9,14 @@ import React, { memo, useCallback, useState } from 'react';
 import { EuiButtonEmpty, EuiConfirmModal, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
+import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 
 export const CommandInputClearHistory = memo(() => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const dispatch = useConsoleStateDispatch();
+  const getTestId = useTestIdGenerator(useDataTestSubj());
 
   const handleClearInputHistory = useCallback(() => {
     setShowConfirmModal(true);
@@ -61,6 +64,7 @@ export const CommandInputClearHistory = memo(() => {
             tabIndex={-1}
             onClick={handleClearInputHistory}
             disabled={showConfirmModal}
+            data-test-subj={getTestId('clearInputHistoryButton')}
           >
             <FormattedMessage
               id="xpack.securitySolution.commandInputClearHistory.clearHistoryButtonLabel"

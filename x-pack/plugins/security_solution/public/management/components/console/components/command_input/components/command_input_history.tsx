@@ -18,7 +18,7 @@ import { useWithInputHistory } from '../../../hooks/state_selectors/use_with_inp
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
 import { CommandInputClearHistory } from './command_input_clear_history';
 
-const NO_HISTORY_EMPTY_MESSAGE = i18n.translate(
+export const NO_HISTORY_EMPTY_MESSAGE = i18n.translate(
   'xpack.securitySolution.commandInputHistory.noHistoryEmptyMessage',
   { defaultMessage: 'No commands have been entered' }
 );
