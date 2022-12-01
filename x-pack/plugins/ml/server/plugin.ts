@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { Observable } from 'rxjs';
 import type {
   CoreSetup,
   CoreStart,
@@ -25,6 +26,7 @@ import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { notificationsRoutes } from './routes/notifications';
 import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
+import type { MlConfigType } from '../config';
 import { PLUGIN_ID } from '../common/constants/app';
 import type { MlCapabilities } from '../common/types/capabilities';
 
@@ -73,6 +75,7 @@ export class MlServerPlugin
   implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup, PluginsStart>
 {
   private log: Logger;
+  private config$: Observable<MlConfigType>;
   private mlLicense: MlLicense;
   private capabilities: CapabilitiesStart | null = null;
   private clusterClient: IClusterClient | null = null;
@@ -88,6 +91,7 @@ export class MlServerPlugin
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
+    this.config$ = ctx.config.create<MlConfigType>();
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
     this.savedObjectsSyncService = new SavedObjectsSyncService(this.log);
@@ -228,7 +232,7 @@ export class MlServerPlugin
       cloud: plugins.cloud,
       resolveMlCapabilities,
     });
-    trainedModelsRoutes(routeInit);
+    trainedModelsRoutes(routeInit, this.config$);
     notificationsRoutes(routeInit);
     alertingRoutes(routeInit, sharedServicesProviders);
 

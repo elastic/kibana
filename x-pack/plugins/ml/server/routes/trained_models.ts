@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
+import type { Observable } from 'rxjs';
 import fetch from 'node-fetch';
 import { queue } from 'async';
-import { spawn } from 'child_process';
+// import { spawn } from 'child_process';
 import { schema } from '@kbn/config-schema';
 import { streamFactory } from '@kbn/aiops-utils';
 // import { readFile } from 'fs/promises';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
+import type { MlConfigType } from '../../config';
 import {
   getInferenceQuerySchema,
   modelIdSchema,
@@ -30,7 +33,10 @@ import { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 
-export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
+export function trainedModelsRoutes(
+  { router, routeGuard }: RouteInitialization,
+  config$: Observable<MlConfigType>
+) {
   /**
    * @apiGroup TrainedModels
    *
@@ -480,87 +486,87 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
    * @api {post} /api/ml/trained_models/hugging_face_import Import hugging face trained model
    * @apiName InferTrainedModelDeployment
    * @apiDescription Import hugging face trained model.
-   */
-  router.post(
-    {
-      path: '/api/ml/trained_models/hugging_face_import_old',
-      validate: {
-        body: huggingFaceImport,
-      },
-      options: {
-        tags: ['access:ml:canTestTrainedModels'],
-      },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-      try {
-        function resetAction() {
-          return { type: 'reset' };
-        }
+  //  */
+  // router.post(
+  //   {
+  //     path: '/api/ml/trained_models/hugging_face_import_old',
+  //     validate: {
+  //       body: huggingFaceImport,
+  //     },
+  //     options: {
+  //       tags: ['access:ml:canTestTrainedModels'],
+  //     },
+  //   },
+  //   routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+  //     try {
+  //       function resetAction() {
+  //         return { type: 'reset' };
+  //       }
 
-        const ELASTICSEARCH_URL = 'http://user:pass@localhost:9200';
+  //       const ELASTICSEARCH_URL = 'http://user:pass@localhost:9200';
 
-        const { end, push, responseWithHeaders } = streamFactory<any>(
-          request.headers,
-          {
-            error: (e: any) => {
-              // eslint-disable-next-line no-console
-              console.log(e);
-            },
-            debug: (e: any) => {
-              // eslint-disable-next-line no-console
-              console.log(e);
-            },
-          } as any,
-          true
-        );
+  //       const { end, push, responseWithHeaders } = streamFactory<any>(
+  //         request.headers,
+  //         {
+  //           error: (e: any) => {
+  //             // eslint-disable-next-line no-console
+  //             console.log(e);
+  //           },
+  //           debug: (e: any) => {
+  //             // eslint-disable-next-line no-console
+  //             console.log(e);
+  //           },
+  //         } as any,
+  //         true
+  //       );
 
-        (async () => {
-          push(resetAction());
-          const { hubModelId, start, clearPrevious, taskType } = request.body;
-          const importCmd = `eland_import_hub_model --url ${ELASTICSEARCH_URL} --hub-model-id ${hubModelId} --task-type ${taskType} ${
-            start ? '--start' : ''
-          } ${clearPrevious ? '--clear-previous' : ''}`;
+  //       (async () => {
+  //         push(resetAction());
+  //         const { hubModelId, start, clearPrevious, taskType } = request.body;
+  //         const importCmd = `eland_import_hub_model --url ${ELASTICSEARCH_URL} --hub-model-id ${hubModelId} --task-type ${taskType} ${
+  //           start ? '--start' : ''
+  //         } ${clearPrevious ? '--clear-previous' : ''}`;
 
-          const cmd = `cd /Users/james/dev/eland && . venv/bin/activate && ${importCmd}`;
+  //         const cmd = `cd /Users/james/dev/eland && . venv/bin/activate && ${importCmd}`;
 
-          const run = async () => {
-            return new Promise<void>((resolve, reject) => {
-              const child = spawn(cmd, [], { shell: true, detached: true });
+  //         const run = async () => {
+  //           return new Promise<void>((resolve, reject) => {
+  //             const child = spawn(cmd, [], { shell: true, detached: true });
 
-              child.stderr.on('data', (data) => {
-                const line: string = data.toString().replace(/\n/g, '');
-                if (line.match(/parts\/s/)) {
-                  const percentageMatch = line.match(/^\r\s?(.*)%/);
-                  if (percentageMatch && percentageMatch.length > 1) {
-                    push({
-                      type: 'progress',
-                      payload: { progress: Number(percentageMatch[1]) },
-                    });
-                  }
-                } else {
-                  push({
-                    type: 'add_messages',
-                    payload: { messages: [line] },
-                  });
-                }
-              });
+  //             child.stderr.on('data', (data) => {
+  //               const line: string = data.toString().replace(/\n/g, '');
+  //               if (line.match(/parts\/s/)) {
+  //                 const percentageMatch = line.match(/^\r\s?(.*)%/);
+  //                 if (percentageMatch && percentageMatch.length > 1) {
+  //                   push({
+  //                     type: 'progress',
+  //                     payload: { progress: Number(percentageMatch[1]) },
+  //                   });
+  //                 }
+  //               } else {
+  //                 push({
+  //                   type: 'add_messages',
+  //                   payload: { messages: [line] },
+  //                 });
+  //               }
+  //             });
 
-              child.on('error', (error) => {});
+  //             child.on('error', (error) => {});
 
-              child.on('close', (code) => {});
-            });
-          };
+  //             child.on('close', (code) => {});
+  //           });
+  //         };
 
-          await run();
-          end();
-        })();
+  //         await run();
+  //         end();
+  //       })();
 
-        return response.ok(responseWithHeaders);
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
-    })
-  );
+  //       return response.ok(responseWithHeaders);
+  //     } catch (e) {
+  //       return response.customError(wrapError(e));
+  //     }
+  //   })
+  // );
 
   /**
    * @apiGroup TrainedModels
@@ -580,24 +586,30 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
-      const { hubModelId, start, clearPrevious, taskType } = request.body;
+      const { hubModelId, start } = request.body;
+
+      const configSubject$ = new BehaviorSubject<MlConfigType>({});
+      config$.subscribe(configSubject$);
+      const { trainedModelsServer } = configSubject$.getValue();
+      if (trainedModelsServer === undefined || trainedModelsServer.url === undefined) {
+        throw new Error('No server configured');
+      }
 
       try {
         function resetAction() {
           return { type: 'reset' };
         }
 
-        // const ELASTICSEARCH_URL = 'http://user:pass@localhost:9200';
-        const MODEL_SERVER_URL = 'http://localhost:3213/catalog/models/';
-        const MAX_CONCURRENT_QUERIES = 5;
-        // const FILE_PATH = '/Users/james/dev/models/';
-        // const CHUNK_COUNT = 103;
-        // const FILE_SIZE = 431281830;
-        // const MODEL_ID = 'dslim__bert-base-ner__ner';
+        // const MODEL_SERVER_URL = 'http://localhost:3213/catalog/models/';
+        const { username, password, url: modelServerUrl } = trainedModelsServer;
+        const MODEL_SERVER_URL = `${modelServerUrl}/catalog/models/`;
 
-        const replaceSlash = (name: string, type: string) => {
-          return name.replaceAll('/', '__').toLocaleLowerCase() + `__${type}`;
+        const AUTH_HEADER = {
+          Authorization:
+            'Basic ' + Buffer.from(`${username}:${password}`, 'binary').toString('base64'),
         };
+
+        const MAX_CONCURRENT_QUERIES = 5;
 
         const { end, push, responseWithHeaders } = streamFactory<any>(
           request.headers,
@@ -616,19 +628,16 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const getMetaData = async (modelId: string) => {
           const resp = await fetch(`${MODEL_SERVER_URL}${modelId}`, {
             method: 'GET',
+            headers: { ...AUTH_HEADER },
           });
           return resp.json();
         };
 
         const getConfig = async (modelId: string) => {
-          // const file = 'models-dslim__bert-base-ner-config.json';
-          // const fileString = await readFile(`${FILE_PATH}${file}`, 'utf8');
-          // return JSON.parse(fileString);
           const url = `${MODEL_SERVER_URL}${modelId}/config`;
-          // console.log(url);
-
           const resp = await fetch(url, {
             method: 'GET',
+            headers: { ...AUTH_HEADER },
           });
           return resp.json();
         };
@@ -648,8 +657,6 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           totalLength: number,
           definition: string
         ) => {
-          // console.log('putting ', partNumber);
-
           return client.asInternalUser.transport.request(
             {
               method: 'PUT',
@@ -665,14 +672,11 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         };
 
         const getVocabulary = async (modelId: string) => {
-          // const file = 'models-dslim__bert-base-ner-vocabulary.json';
-          // const fileString = await readFile(`${FILE_PATH}${file}`, 'utf8');
-          // return JSON.parse(fileString);
-
           const url = `${MODEL_SERVER_URL}${modelId}/vocabulary`;
-          // console.log(url);
+
           const resp = await fetch(url, {
             method: 'GET',
+            headers: { ...AUTH_HEADER },
           });
           return resp.json();
         };
@@ -688,6 +692,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const getDefinitionPart = async (modelId: string, part: number) => {
           const resp = await fetch(`${MODEL_SERVER_URL}${modelId}/definition/part/${part}`, {
             method: 'GET',
+            headers: { ...AUTH_HEADER },
           });
           return resp.buffer();
         };
@@ -695,7 +700,6 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         (async () => {
           push(resetAction());
 
-          // const modelId = replaceSlash(hubModelId, taskType);
           const modelId = hubModelId;
 
           const run = async () => {
@@ -705,14 +709,12 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
               const definitionParts: number = meta.source.total_parts;
 
               const config = await getConfig(modelId);
-              // console.log(config);
 
               push({
                 type: 'get_config',
               });
 
               const vocab = await getVocabulary(modelId);
-              // console.log(vocab);
 
               push({
                 type: 'get_vocabulary',
@@ -744,21 +746,6 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
 
               requestQueue.push(Array.from(Array(definitionParts).keys()));
               await requestQueue.drain();
-
-              // for (let i = 0; i < definitionParts; i++) {
-              //   // const file = String(i).padStart(4, '0');
-              //   // const content = await readFile(`${FILE_PATH}chunked/${file}`);
-              //   const content = await getDefinitionPart(modelId, i);
-              //   const b64 = content.toString('base64');
-
-              //   await putModelPart(modelId, i, definitionParts, definitionSize, b64);
-              //   const progress = Number(i / (definitionParts - 1)) * 100;
-              //   push({
-              //     type: 'put_definition_part',
-              //     payload: { progress },
-              //   });
-              // }
-
               push({
                 type: 'complete',
               });
@@ -795,9 +782,31 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const MODEL_SERVER_URL = 'http://localhost:3213/catalog/models/';
+        const configSubject$ = new BehaviorSubject<MlConfigType>({});
+        config$.subscribe(configSubject$);
+        const { trainedModelsServer } = configSubject$.getValue();
+        if (trainedModelsServer === undefined || trainedModelsServer.url === undefined) {
+          throw new Error('No server configured');
+        }
+
+        const { username, password, url: modelServerUrl } = trainedModelsServer;
+        const MODEL_SERVER_URL = `${modelServerUrl}/catalog/models/`;
+        // const MODEL_SERVER_URL = 'http://localhost:3213/catalog/models/';
+        // const MODEL_SERVER_URL = 'https://mml.ml-qa.com/catalog/models/';
+
+        // const username = 'ml-dev';
+        // const password = '60Xl4wyIPAsMTXD5Vve7FRszSplQg0RzrCCCjg8eews=';
+
+        const AUTH_HEADER = {
+          Authorization:
+            'Basic ' + Buffer.from(`${username}:${password}`, 'binary').toString('base64'),
+        };
+
         const resp = await fetch(MODEL_SERVER_URL, {
           method: 'GET',
+          headers: {
+            ...AUTH_HEADER,
+          },
         });
 
         return response.ok({

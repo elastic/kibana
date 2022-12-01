@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useEffect, useState, useMemo } from 'react';
+import numeral from '@elastic/numeral';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -104,6 +105,12 @@ export const UploadModel: FC<Props> = ({ onClose }) => {
                   <EuiFlexItem>{m.source.metadata.repo_id}</EuiFlexItem>
                 </EuiFlexGroup>
               ) : null}
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem css={{ fontWeight: 'normal', maxWidth: '90px' }}>Size</EuiFlexItem>
+                <EuiFlexItem>
+                  {numeral(m.source.total_definition_length).format('0.0 b')}
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiText>
           </>
         ),
@@ -129,9 +136,9 @@ export const UploadModel: FC<Props> = ({ onClose }) => {
     `${basePath}/api/ml/trained_models/hugging_face_import`,
     {
       hubModelId: selectedModel ? selectedModel.model_id : '',
-      taskType: selectedModel ? selectedModel.task_type : '',
+      // taskType: selectedModel ? selectedModel.task_type : '',
       start: startModel,
-      clearPrevious: true,
+      // clearPrevious: true,
     },
     {
       reducer: streamReducer,
@@ -141,7 +148,9 @@ export const UploadModel: FC<Props> = ({ onClose }) => {
 
   useEffect(() => {
     getHuggingFaceTrainedModels().then((resp) => {
-      setHuggingFaceModels(resp.models);
+      if (resp.models !== undefined) {
+        setHuggingFaceModels(resp.models);
+      }
     });
     getTrainedModels().then((ms) => {
       setExistingTrainedModelsIds(Object.fromEntries(ms.map((m) => [m.model_id, null])));
@@ -467,6 +476,12 @@ export const UploadModel: FC<Props> = ({ onClose }) => {
       items.push({
         title: 'Repo ID',
         description: modelInfo.source.metadata?.repo_id,
+      });
+    }
+    if (modelInfo.source.total_definition_length) {
+      items.push({
+        title: 'Size',
+        description: numeral(modelInfo.source.total_definition_length).format('0.0 b'),
       });
     }
 

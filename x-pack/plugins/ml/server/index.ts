@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { MlServerPlugin } from './plugin';
 export type { MlPluginSetup, MlPluginStart } from './plugin';
+import { configSchema, MlXPackConfig } from '../config';
+
 export type {
   AnomalyRecordDoc as MlAnomalyRecordDoc,
   AnomaliesTableRecord as MlAnomaliesTableRecord,
@@ -29,5 +31,15 @@ export {
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
 } from './shared';
+
+export const config: PluginConfigDescriptor<MlXPackConfig> = {
+  // exposeToBrowser specifies kibana.yml settings to expose to the browser
+  // the value `true` in this context signals configuration is exposed to browser
+  // exposeToBrowser: {
+  //   showMapsInspectorAdapter: true,
+  //   preserveDrawingBuffer: true,
+  // },
+  schema: configSchema,
+};
 
 export const plugin = (ctx: PluginInitializerContext) => new MlServerPlugin(ctx);

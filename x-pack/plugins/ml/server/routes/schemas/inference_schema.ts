@@ -51,9 +51,7 @@ export const inferTrainedModelBody = schema.object({
 
 export const huggingFaceImport = schema.object({
   hubModelId: schema.string(),
-  taskType: schema.string(),
   start: schema.boolean(),
-  clearPrevious: schema.boolean(),
 });
 
 export const pipelineSimulateBody = schema.object({
