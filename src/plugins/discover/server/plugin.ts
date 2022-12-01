@@ -12,6 +12,7 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { getUiSettings } from './ui_settings';
 import { capabilitiesProvider } from './capabilities_provider';
 import { registerSampleData } from './sample_data';
+import { setupTermsExplorerRoute } from './terms_explorer_route';
 
 export class DiscoverServerPlugin implements Plugin<object, object> {
   public setup(
@@ -27,6 +28,8 @@ export class DiscoverServerPlugin implements Plugin<object, object> {
     if (plugins.home) {
       registerSampleData(plugins.home.sampleData);
     }
+
+    setupTermsExplorerRoute(core);
 
     return {};
   }

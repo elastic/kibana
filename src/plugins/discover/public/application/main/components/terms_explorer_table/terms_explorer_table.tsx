@@ -7,6 +7,8 @@
  */
 
 import React from 'react';
+import useMount from 'react-use/lib/useMount';
+
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
@@ -15,6 +17,11 @@ import { EuiTable, EuiTableBody, formatDate, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } f
 import type { GetStateReturn } from '../../services/discover_state';
 import { AvailableFields$, DataRefetch$, DataTotalHits$ } from '../../hooks/use_saved_search';
 import { TermsExplorerTableRow } from './terms_explorer_table_row';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import {
+  TermsExplorerRequest,
+  TermsExplorerResponse,
+} from '../../../../../common/terms_explorer/types';
 export interface RandomSamplingOption {
   mode: 'random_sampling';
   seed: string;
@@ -145,6 +152,42 @@ const TestUsers: TestRowType[] = [
 ];
 
 export const TermsExplorerTable = (props: TermsExplorerTableProps) => {
+  const services = useDiscoverServices();
+
+  const { dataView } = props;
+
+  useMount(() => {
+    (async () => {
+      console.log('firing off request.... hope you have the flights data installed...');
+      const columnNames = [
+        'AvgTicketPrice',
+        'DestCityName',
+        'DestAirportID',
+        'DestRegion',
+        'DistanceKilometers',
+      ];
+      const termsExplorerRequestBody: TermsExplorerRequest = {
+        collapseFieldName: 'DestCountry',
+        columns: columnNames.reduce((acc, columnName) => {
+          if (!acc) acc = {};
+          const fieldSpec = dataView.getFieldByName(columnName)?.toSpec();
+          if (fieldSpec) {
+            acc[columnName] = fieldSpec;
+          }
+          return acc;
+        }, {} as TermsExplorerRequest['columns']),
+      };
+      const response = await services.http.fetch<TermsExplorerResponse>(
+        `/api/kibana/discover/termsExplorer/${dataView.getIndexPattern()}`,
+        {
+          body: JSON.stringify(termsExplorerRequestBody),
+          method: 'POST',
+        }
+      );
+      console.log('got a big old response: ', response);
+    })();
+  });
+
   const columns: TestColumnType[] = [
     {
       id: 'firstName',
@@ -175,7 +218,9 @@ export const TermsExplorerTable = (props: TermsExplorerTableProps) => {
     const rows = [];
 
     for (const row of TestUsers) {
-      rows.push(<TermsExplorerTableRow row={row} columns={columns} />);
+      rows.push(
+        <TermsExplorerTableRow row={row} columns={columns} termsExplorerTableProps={props} />
+      );
     }
 
     return rows;

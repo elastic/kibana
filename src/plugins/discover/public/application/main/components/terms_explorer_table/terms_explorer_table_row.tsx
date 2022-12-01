@@ -8,25 +8,27 @@
 
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import { EuiTableRow, EuiButtonEmpty, EuiTableRowCell, useEuiTheme } from '@elastic/eui';
 import {
-  EuiTableRow,
-  EuiButtonEmpty,
-  EuiTableRowCell,
-  useEuiTheme,
-  EuiTableBody,
-  EuiTable,
-  EuiTableHeader,
-  EuiTableHeaderCell,
-} from '@elastic/eui';
-import { TestColumnType, TestRowType } from './terms_explorer_table';
+  TermsExplorerTable,
+  TermsExplorerTableProps,
+  TestColumnType,
+  TestRowType,
+} from './terms_explorer_table';
 
 interface Props {
   row: TestRowType;
   columns: TestColumnType[];
   expandedColumnName?: keyof TestRowType;
+  termsExplorerTableProps: TermsExplorerTableProps;
 }
 
-export const TermsExplorerTableRow = ({ row, columns, expandedColumnName }: Props) => {
+export const TermsExplorerTableRow = ({
+  termsExplorerTableProps,
+  row,
+  columns,
+  expandedColumnName,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const [expandedColumn, setExpandedColumn] = useState<keyof TestRowType | undefined>(
@@ -77,26 +79,13 @@ export const TermsExplorerTableRow = ({ row, columns, expandedColumnName }: Prop
   const ExpandedRow = () => {
     return (
       <EuiTableRowCell colSpan={columns.length} css={expandedRowStyle}>
-        <EuiTable title="test">
-          <EuiTableHeader>
-            <EuiTableHeaderCell colSpan={columns.length}>
-              {`Expanded on ${
-                expandedColumn
-                  ? `${expandedColumn} with value of ${row[expandedColumn]}`
-                  : 'nothing'
-              }`}
-            </EuiTableHeaderCell>
-          </EuiTableHeader>
-          <EuiTableBody>
-            <TermsExplorerTableRow
-              row={row}
-              columns={columns}
-              css={css`
-                width: 100% !important;
-              `}
-            />
-          </EuiTableBody>
-        </EuiTable>
+        <h3>{`Expanded on ${
+          expandedColumn ? `${expandedColumn} with value of ${row[expandedColumn]}` : 'nothing'
+        }`}</h3>
+        <TermsExplorerTable
+          {...termsExplorerTableProps}
+          filters={[...(termsExplorerTableProps.filters ?? [])]} // TODO: add on the filter we create by opening this table row :)
+        />
       </EuiTableRowCell>
     );
   };

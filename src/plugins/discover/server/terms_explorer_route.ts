@@ -25,7 +25,7 @@ export const setupTermsExplorerRoute = ({ http }: CoreSetup) => {
 
   router.post(
     {
-      path: '/api/kibana/controls/optionsList/{index}',
+      path: '/api/kibana/discover/termsExplorer/{index}',
       validate: {
         params: schema.object(
           {
@@ -161,7 +161,7 @@ export const setupTermsExplorerRoute = ({ http }: CoreSetup) => {
             }, {} as { [key: string]: unknown }),
 
             // all string fields get a cardinality aggregation to determine whether to show the actual value, or a number of unique values.
-            ...numericColumns.reduce((acc, fieldName) => {
+            ...stringColumns.reduce((acc, fieldName) => {
               acc[fieldName] = {
                 cardinality: {
                   field: fieldName,
@@ -189,8 +189,12 @@ export const setupTermsExplorerRoute = ({ http }: CoreSetup) => {
     );
 
     const responseRows = Object.values(get(columnsResult, 'aggregations.rowsAgg.buckets')).map(
-      (bucketValue) => {
+      (bucketValue, rowIndex) => {
         const currentColumnResults: { [key: string]: TermsExplorerResponseColumn } = {};
+        currentColumnResults[collapseFieldName] = {
+          result_type: 'string_value',
+          result: rowValues[rowIndex],
+        };
         for (const numericColumnName of numericColumns) {
           currentColumnResults[numericColumnName] = {
             result_type: 'numeric_aggregation',
