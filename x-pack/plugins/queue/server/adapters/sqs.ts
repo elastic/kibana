@@ -21,7 +21,7 @@ import type { PluginSetupDeps, PluginStartDeps, Job, Adapter } from '../plugin';
 let sqs: AWS.SQS;
 const workers: Record<string, Worker<unknown>> = {};
 const QUEUE_URL = 'https://sqs.us-east-2.amazonaws.com/946960629917/ResponseOps';
-const MAX_WORKERS = 100;
+const MAX_WORKERS = 10;
 
 export const sqsAdapter: Adapter = {
   setup() {
@@ -36,7 +36,7 @@ export const sqsAdapter: Adapter = {
             const data = await sqs
               .receiveMessage({
                 QueueUrl: QUEUE_URL,
-                MaxNumberOfMessages: 1, // Up to 10 messages in the messages array
+                MaxNumberOfMessages: 10, // Up to 10 messages in the messages array
                 VisibilityTimeout: 5 * 60, // 5 minute run timeout
                 WaitTimeSeconds: 20, // Wait 20 seconds after queue is emtpy before stopping to look for messages
               })
