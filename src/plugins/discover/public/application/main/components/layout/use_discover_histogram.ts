@@ -196,15 +196,10 @@ export const useDiscoverHistogram = ({
 
   const onChartHiddenChange = useCallback(
     (chartHidden: boolean) => {
-      // Clear the Lens request adapter when the chart is hidden
-      if (chartHidden) {
-        inspectorAdapters.lensRequests = undefined;
-      }
-
       storage.set(CHART_HIDDEN_KEY, chartHidden);
       stateContainer.setAppState({ hideChart: chartHidden });
     },
-    [inspectorAdapters, stateContainer, storage]
+    [stateContainer, storage]
   );
 
   const onChartLoad = useCallback(

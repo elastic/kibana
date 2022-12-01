@@ -560,29 +560,38 @@ const createThresholdTimeline = async (
   }
 };
 
-const getNewTermsData = (ecsData: Ecs | Ecs[]) => {
+export const getNewTermsData = (ecsData: Ecs | Ecs[]) => {
   const normalizedEcsData: Ecs = Array.isArray(ecsData) ? ecsData[0] : ecsData;
   const originalTimeValue = getField(normalizedEcsData, ALERT_ORIGINAL_TIME);
-  const newTermsField = getField(normalizedEcsData, `${ALERT_RULE_PARAMETERS}.new_terms_fields`)[0];
-  const newTermsValue = getField(normalizedEcsData, ALERT_NEW_TERMS)[0];
-  const newTermsFieldId = newTermsField.replace('.', '-');
-  const dataProviderPartial = {
-    id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${newTermsFieldId}-${newTermsValue}`,
-    name: newTermsField,
-    enabled: true,
-    excluded: false,
-    kqlQuery: '',
-    queryMatch: {
-      field: newTermsField,
-      value: newTermsValue,
-      operator: ':' as const,
-    },
-    and: [],
-  };
+  const newTermsFields: string[] =
+    getField(normalizedEcsData, `${ALERT_RULE_PARAMETERS}.new_terms_fields`) ?? [];
+
+  const dataProviderPartials = newTermsFields.map((newTermsField, index) => {
+    const newTermsFieldId = newTermsField.replace('.', '-');
+    const newTermsValue = getField(normalizedEcsData, ALERT_NEW_TERMS)[index];
+    return {
+      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${newTermsFieldId}-${newTermsValue}`,
+      name: newTermsField,
+      enabled: true,
+      excluded: false,
+      kqlQuery: '',
+      queryMatch: {
+        field: newTermsField,
+        value: newTermsValue,
+        operator: ':' as const,
+      },
+      and: [],
+    };
+  });
+
+  const dataProviders = dataProviderPartials.length
+    ? [{ ...dataProviderPartials[0], and: dataProviderPartials.slice(1) }]
+    : [];
+
   return {
     from: originalTimeValue,
     to: moment().toISOString(),
-    dataProviders: [dataProviderPartial],
+    dataProviders,
   };
 };
 
@@ -713,18 +722,32 @@ const getSuppressedAlertData = (ecsData: Ecs | Ecs[]) => {
   );
   const dataProviderPartials = terms.map((term) => {
     const fieldId = term.field.replace('.', '-');
-    return {
-      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${fieldId}-${term.value}`,
-      name: fieldId,
-      enabled: true,
-      excluded: false,
-      kqlQuery: '',
-      queryMatch: {
-        field: term.field,
-        value: term.value,
-        operator: ':' as const,
-      },
-    };
+    const id = `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${fieldId}-${term.value}`;
+    return term.value == null
+      ? {
+          id,
+          name: fieldId,
+          enabled: true,
+          excluded: true,
+          kqlQuery: '',
+          queryMatch: {
+            field: term.field,
+            value: '',
+            operator: ':*' as const,
+          },
+        }
+      : {
+          id,
+          name: fieldId,
+          enabled: true,
+          excluded: false,
+          kqlQuery: '',
+          queryMatch: {
+            field: term.field,
+            value: term.value,
+            operator: ':' as const,
+          },
+        };
   });
   const dataProvider = {
     ...dataProviderPartials[0],
