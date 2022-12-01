@@ -53,7 +53,7 @@ export class AddToTimelineAction implements Action<CellValueContext> {
 
   public getDisplayName() {
     return i18n.translate('xpack.securitySolution.actions.cellValue.addToTimeline.displayName', {
-      defaultMessage: 'Add To Timeline',
+      defaultMessage: 'Add to timeline',
     });
   }
 

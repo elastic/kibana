@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
+import { EuiInMemoryTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
 import type { Search } from '@elastic/eui';
-import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { DashboardTableItem } from '../../containers/dashboards/use_security_dashboards_table';
 import {
   useSecurityDashboardsTableItems,
   useSecurityDashboardsTableColumns,
 } from '../../containers/dashboards/use_security_dashboards_table';
 import { useAppToasts } from '../../hooks/use_app_toasts';
+import { DashboardEmbedded } from './dashboard_embedded';
 
 export const DASHBOARDS_QUERY_ERROR = i18n.translate(
   'xpack.securitySolution.dashboards.queryError',
@@ -38,12 +40,19 @@ export const DashboardsTable: React.FC = () => {
   const columns = useSecurityDashboardsTableColumns();
   const { addError } = useAppToasts();
 
-  const [filteredItems, setFilteredItems] = useState(items);
   const [searchQuery, setSearchQuery] = useState('');
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
+    {}
+  );
+
+  useEffect(() => {
+    if (error) {
+      addError(error, { title: DASHBOARDS_QUERY_ERROR });
+    }
+  }, [error, addError]);
 
   const search = useMemo<Search>(() => {
     const debouncedSetSearchQuery = debounce(setSearchQuery, INPUT_TIMEOUT);
-
     return {
       onChange: ({ queryText }) => {
         debouncedSetSearchQuery(queryText.toLowerCase() ?? '');
@@ -54,34 +63,66 @@ export const DashboardsTable: React.FC = () => {
     };
   }, []);
 
-  useEffect(() => {
+  const filteredItems = useMemo(() => {
     if (searchQuery.length === 0) {
-      setFilteredItems(items);
+      return items;
     } else {
-      setFilteredItems(
-        items.filter(({ title, description }) => {
-          const normalizedName = `${title} ${description}`.toLowerCase();
-          return normalizedName.includes(searchQuery.replace(/[^\w- ]/g, ''));
-        })
-      );
+      return items.filter(({ title, description }) => {
+        const normalizedName = `${title} ${description}`.toLowerCase();
+        return normalizedName.includes(searchQuery.replace(/[^\w- ]/g, ''));
+      });
     }
   }, [items, searchQuery]);
 
-  useEffect(() => {
-    if (error) {
-      addError(error, { title: DASHBOARDS_QUERY_ERROR });
-    }
-  }, [error, addError]);
+  const toggleEmbedded = useCallback(
+    (item: DashboardTableItem) => {
+      const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+      if (itemIdToExpandedRowMapValues[item.id]) {
+        delete itemIdToExpandedRowMapValues[item.id];
+      } else {
+        itemIdToExpandedRowMapValues[item.id] = <DashboardEmbedded item={item} />;
+      }
+      setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+    },
+    [itemIdToExpandedRowMap]
+  );
+
+  const columnsWithExpandable = useMemo(
+    () => [
+      ...columns,
+      {
+        align: 'right' as const,
+        width: '40px',
+        isExpander: true,
+        name: (
+          <EuiScreenReaderOnly>
+            <span>{'Expand dashboard'}</span>
+          </EuiScreenReaderOnly>
+        ),
+        render: (item: DashboardTableItem) => (
+          <EuiButtonIcon
+            onClick={() => toggleEmbedded(item)}
+            aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+            iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          />
+        ),
+      },
+    ],
+    [columns, itemIdToExpandedRowMap, toggleEmbedded]
+  );
 
   return (
     <EuiInMemoryTable
       data-test-subj="dashboardsTable"
       items={filteredItems}
-      columns={columns}
+      itemId="id"
+      columns={columnsWithExpandable}
       search={search}
       pagination={true}
       sorting={DASHBOARDS_TABLE_SORTING}
       loading={isLoading}
+      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+      isExpandable={true}
     />
   );
 };
