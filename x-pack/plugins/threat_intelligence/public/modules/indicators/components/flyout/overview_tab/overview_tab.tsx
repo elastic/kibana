@@ -31,6 +31,7 @@ const highLevelFields = [
   RawIndicatorFieldId.Confidence,
 ];
 
+export const TI_FLYOUT_OVERVIEW_TITLE = 'tiFlyoutOverviewTitle';
 export const TI_FLYOUT_OVERVIEW_TABLE = 'tiFlyoutOverviewTableRow';
 export const TI_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS = 'tiFlyoutOverviewHighLevelBlocks';
 
@@ -82,7 +83,7 @@ export const IndicatorsFlyoutOverview: VFC<IndicatorsFlyoutOverviewProps> = ({
   return (
     <>
       <EuiTitle>
-        <h2>{title}</h2>
+        <h2 data-test-subj={TI_FLYOUT_OVERVIEW_TITLE}>{title}</h2>
       </EuiTitle>
 
       {indicatorDescription}
