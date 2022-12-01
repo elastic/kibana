@@ -49,6 +49,7 @@ import {
   generateActionOpts,
 } from './fixtures';
 import { EVENT_LOG_ACTIONS } from '../plugin';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -106,6 +107,7 @@ describe('Task Runner Cancel', () => {
   const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
     data: dataPlugin,
     savedObjects: savedObjectsService,
+    share: {} as SharePluginStart,
     uiSettings: uiSettingsService,
     elasticsearch: elasticsearchService,
     actionsPlugin: actionsMock.createStart(),

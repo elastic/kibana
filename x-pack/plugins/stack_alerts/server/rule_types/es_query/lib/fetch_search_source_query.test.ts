@@ -61,6 +61,7 @@ describe('fetchSearchSourceQuery', () => {
 
       const { searchSource, dateStart, dateEnd } = updateSearchSource(
         searchSourceInstance,
+        dataViewMock,
         params,
         undefined
       );
@@ -96,6 +97,7 @@ describe('fetchSearchSourceQuery', () => {
 
       const { searchSource } = updateSearchSource(
         searchSourceInstance,
+        dataViewMock,
         params,
         '2020-02-09T23:12:41.941Z'
       );
@@ -136,6 +138,7 @@ describe('fetchSearchSourceQuery', () => {
 
       const { searchSource } = updateSearchSource(
         searchSourceInstance,
+        dataViewMock,
         params,
         '2020-01-09T22:12:41.941Z'
       );
@@ -169,6 +172,7 @@ describe('fetchSearchSourceQuery', () => {
 
       const { searchSource } = updateSearchSource(
         searchSourceInstance,
+        dataViewMock,
         params,
         '2020-02-09T23:12:41.941Z'
       );

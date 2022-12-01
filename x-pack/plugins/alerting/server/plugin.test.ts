@@ -23,6 +23,7 @@ import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
 import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 
 const generateAlertingConfig = (): AlertingConfig => ({
   healthCheck: {
@@ -225,6 +226,7 @@ describe('Alerting Plugin', () => {
           eventLog: eventLogMock.createStart(),
           taskManager: taskManagerMock.createStart(),
           data: dataPluginMock.createStartContract(),
+          share: {} as SharePluginStart,
         });
 
         expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
@@ -265,6 +267,7 @@ describe('Alerting Plugin', () => {
           eventLog: eventLogMock.createStart(),
           taskManager: taskManagerMock.createStart(),
           data: dataPluginMock.createStartContract(),
+          share: {} as SharePluginStart,
         });
 
         const fakeRequest = {
@@ -316,6 +319,7 @@ describe('Alerting Plugin', () => {
         eventLog: eventLogMock.createStart(),
         taskManager: taskManagerMock.createStart(),
         data: dataPluginMock.createStartContract(),
+        share: {} as SharePluginStart,
       });
 
       const fakeRequest = {

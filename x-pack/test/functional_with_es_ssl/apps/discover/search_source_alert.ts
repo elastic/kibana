@@ -58,16 +58,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const generateNewDocs = async (docsNumber: number) => {
     const mockMessages = Array.from({ length: docsNumber }, (_, i) => `msg-${i}`);
-    // const dateNow = new Date().toISOString();
-    const d1 = new Date();
-    const d2 = new Date(d1);
-    d2.setMinutes(d1.getMinutes() - 10);
+    const dateNow = new Date();
+    const dateToSet = new Date(dateNow);
+    dateToSet.setMinutes(dateNow.getMinutes() - 10);
     for await (const message of mockMessages) {
       es.transport.request({
         path: `/${SOURCE_DATA_VIEW}/_doc`,
         method: 'POST',
         body: {
-          '@timestamp': d2.toISOString(),
+          '@timestamp': dateToSet.toISOString(),
           message,
         },
       });

@@ -102,7 +102,7 @@ export function setStateToKbnUrl<State>(
     useHash: false,
     storeInHashQuery: true,
   },
-  rawUrl: string
+  rawUrl = window.location.href
 ): string {
   const replacer = storeInHashQuery ? replaceUrlHashQuery : replaceUrlQuery;
   return replacer(rawUrl, (query) => {
