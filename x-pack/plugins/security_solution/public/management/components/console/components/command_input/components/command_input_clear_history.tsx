@@ -32,22 +32,25 @@ export const CommandInputClearHistory = memo(() => {
     <>
       {showConfirmModal && (
         <EuiConfirmModal
-          title={i18n.translate('xpack.securitySolution.commandInputClearHistory.title', {
+          title={i18n.translate('xpack.securitySolution.commandInputClearHistory.confirmTitle', {
             defaultMessage: 'Clear input history',
           })}
           cancelButtonText={i18n.translate(
-            'xpack.securitySolution.commandInputClearHistory.cancelButton',
+            'xpack.securitySolution.commandInputClearHistory.confirmCancelButton',
             { defaultMessage: 'Cancel' }
           )}
           confirmButtonText={i18n.translate(
-            'xpack.securitySolution.commandInputClearHistory.confirmButton',
+            'xpack.securitySolution.commandInputClearHistory.confirmSubmitButton',
             { defaultMessage: 'Clear' }
           )}
           buttonColor="danger"
           onCancel={handleConfirmModalCancel}
           onConfirm={handleConfirmModalConfirm}
         >
-          {'This action cannot be undone. Are you sure you wish to continue?'}
+          <FormattedMessage
+            id="xpack.securitySolution.commandInputClearHistory.confirmMessage"
+            defaultMessage="This action cannot be undone. Are you sure you wish to continue?"
+          />
         </EuiConfirmModal>
       )}
 
@@ -60,7 +63,7 @@ export const CommandInputClearHistory = memo(() => {
             disabled={showConfirmModal}
           >
             <FormattedMessage
-              id="xpack.securitySolution.commandInputHistory.clearHistoryButtonLabel"
+              id="xpack.securitySolution.commandInputClearHistory.clearHistoryButtonLabel"
               defaultMessage="Clear input history"
             />
           </EuiButtonEmpty>
