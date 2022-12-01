@@ -14,8 +14,10 @@ export interface LangModuleType {
   ID: string;
   lexerRules?: monaco.languages.IMonarchLanguage;
   languageConfiguration?: monaco.languages.LanguageConfiguration;
-  getSuggestionProvider?: Function;
-  getSyntaxErrors?: Function;
+  customTheme?: {
+    ID: string;
+    themeData: monaco.editor.IStandaloneThemeData;
+  };
   onLanguage?: () => void;
 }
 

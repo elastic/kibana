@@ -6,36 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { ESQLWorker } from './worker/esql_worker';
-import { buildESQlTheme } from './lib/monaco/esql_theme';
-import { ID, ESQL_THEME_ID } from './constants';
-
-import type { LangModuleType } from '../types';
-
-import { monaco } from '../monaco_imports';
-
-import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
-import { WorkerProxyService } from '../common/worker/worker_proxy';
-
-const getTokenProviderAsync = async () => {
-  const { ESQLTokensProvider } = await import('./lib/monaco');
-
-  return new ESQLTokensProvider();
-};
-
-export const ESQLLang: LangModuleType = {
-  ID,
-  async onLanguage() {
-    const workerProxyService = new WorkerProxyService<ESQLWorker>();
-
-    workerProxyService.setup(ID);
-
-    monaco.editor.defineTheme(ESQL_THEME_ID, buildESQlTheme());
-    monaco.languages.setTokensProvider(ID, getTokenProviderAsync());
-    monaco.editor.createWebWorker({ label: ID, moduleId: '' });
-
-    new DiagnosticsAdapter(ID, (...uris) => workerProxyService.getWorker(uris));
-  },
-};
-
-export { ESQL_THEME_ID };
+export { ESQL_LANG_ID, ESQL_THEME_ID } from './constants';
+export { ESQLLang } from './language';

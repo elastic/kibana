@@ -9,9 +9,13 @@ import { monaco } from './monaco_imports';
 import { LangModuleType } from './types';
 
 function registerLanguage(language: LangModuleType) {
-  const { ID, lexerRules, languageConfiguration, onLanguage } = language;
+  const { ID, lexerRules, languageConfiguration, customTheme, onLanguage } = language;
 
   monaco.languages.register({ id: ID });
+
+  if (customTheme) {
+    monaco.editor.defineTheme(customTheme.ID, customTheme.themeData);
+  }
 
   monaco.languages.onLanguage(ID, async () => {
     if (lexerRules) {

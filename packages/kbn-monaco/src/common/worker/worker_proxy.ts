@@ -18,8 +18,7 @@ export class WorkerProxyService<IWorker extends BaseWorkerDefinition> {
     }
 
     await this.worker.withSyncedResources(resources);
-    const proxy = await this.worker.getProxy();
-    return proxy;
+    return await this.worker.getProxy();
   }
 
   public setup(langId: string) {
