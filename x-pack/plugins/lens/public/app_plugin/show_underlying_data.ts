@@ -176,7 +176,9 @@ export function combineQueryAndFilters(
   };
 
   const allQueries = Array.isArray(query) ? query : query && isOfQueryType(query) ? [query] : [];
-  const nonEmptyQueries = allQueries.filter((q) => Boolean(q.query.trim()));
+  const nonEmptyQueries = allQueries.filter((q) =>
+    Boolean(typeof q.query === 'string' ? q.query.trim() : q.query)
+  );
 
   [queries.lucene, queries.kuery] = partition(nonEmptyQueries, (q) => q.language === 'lucene');
 
