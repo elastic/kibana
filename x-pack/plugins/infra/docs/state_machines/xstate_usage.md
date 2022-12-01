@@ -217,3 +217,7 @@ Our usage of Xstate is fully typed. We have opted for a [Typestate](https://xsta
 ## DX Tools
 
 We recommend using the [Xstate VSCode extension](https://marketplace.visualstudio.com/items?itemName=statelyai.stately-vscode), this includes various features, but arguably the most useful is being able to visually work with the machine. Even if you don't work with VSCode day to day it may be worth installing to utilise this extension for Xstate work.
+
+When [devTools](https://xstate.js.org/docs/guides/interpretation.html#options) are enabled you can also make use of the [Redux DevTools extension](https://github.com/reduxjs/redux-devtools) to view information about your running state machines.
+
+You can also use [Stately.ai](https://stately.ai/) directly in the browser.
