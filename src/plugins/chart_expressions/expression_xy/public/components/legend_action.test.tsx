@@ -178,6 +178,7 @@ describe('getLegendAction', function () {
   const Component: ComponentType<LegendActionProps> = getLegendAction(
     [sampleLayer],
     jest.fn(),
+    [],
     {
       first: {
         splitSeriesAccessors: {

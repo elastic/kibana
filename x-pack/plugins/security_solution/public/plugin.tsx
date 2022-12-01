@@ -57,7 +57,6 @@ import { getLazyEndpointGenericErrorsListExtension } from './management/pages/po
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
-import { registerActions } from './actions';
 import type { SecurityAppStore } from './common/store/types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -159,7 +158,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
         const store = await this.store(coreStart, startPlugins, subPlugins);
-        this.registerActions(startPlugins, store);
+        await this.registerActions(startPlugins, store);
 
         const { renderApp } = await this.lazyApplicationDependencies();
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
@@ -335,6 +334,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
   }
 
+  private lazyActions() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "actions" */
+      './actions'
+    );
+  }
+
   /**
    * Lazily instantiated subPlugins. This should be instantiated just once.
    */
@@ -412,8 +422,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return this._store;
   }
 
-  registerActions({ uiActions }: StartPlugins, store: SecurityAppStore) {
+  private async registerActions({ uiActions }: StartPlugins, store: SecurityAppStore) {
     if (!this._actionsRegistered) {
+      const { registerActions } = await this.lazyActions();
       registerActions(uiActions, store);
       this._actionsRegistered = true;
     }

@@ -77,6 +77,7 @@ describe('PartitionVisComponent', function () {
       syncColors: false,
       fireEvent: jest.fn(),
       renderComplete: jest.fn(),
+      columnCellValueActions: [],
       services: {
         data: dataPluginMock.createStartContract(),
         fieldFormats: fieldFormatsServiceMock.createStartContract(),
