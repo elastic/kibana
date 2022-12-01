@@ -7,23 +7,31 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { BehaviorSubject, map, Observable, firstValueFrom, concat, of } from 'rxjs';
+import {
+  BehaviorSubject,
+  map,
+  Observable,
+  firstValueFrom,
+  concatMap,
+  of,
+  concat,
+  from,
+} from 'rxjs';
 import type { GuideState, GuideId, GuideStep, GuideStepIds } from '@kbn/guided-onboarding';
 
-import { API_BASE_PATH } from '../../common/constants';
-import { PluginState, PluginStatus } from '../../common/types';
+import { API_BASE_PATH } from '../../common';
+import type { PluginState, PluginStatus, GuideConfig } from '../../common';
 import { GuidedOnboardingApi } from '../types';
 import {
-  getGuideConfig,
   getInProgressStepId,
-  getStepConfig,
-  getUpdatedSteps,
-  getGuideStatusOnStepCompletion,
-  isIntegrationInGuideStep,
+  getCompletedSteps,
   isStepInProgress,
   isStepReadyToComplete,
   isGuideActive,
+  getStepConfig,
+  isLastStep,
 } from './helpers';
+import { ConfigService } from './config_service';
 
 export class ApiService implements GuidedOnboardingApi {
   private isCloudEnabled: boolean | undefined;
@@ -31,12 +39,14 @@ export class ApiService implements GuidedOnboardingApi {
   private pluginState$!: BehaviorSubject<PluginState | undefined>;
   private isPluginStateLoading: boolean | undefined;
   public isGuidePanelOpen$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  private configService = new ConfigService();
 
   public setup(httpClient: HttpSetup, isCloudEnabled: boolean) {
     this.isCloudEnabled = isCloudEnabled;
     this.client = httpClient;
     this.pluginState$ = new BehaviorSubject<PluginState | undefined>(undefined);
     this.isGuidePanelOpen$ = new BehaviorSubject<boolean>(false);
+    this.configService.setup(httpClient);
   }
 
   private createGetPluginStateObservable(): Observable<PluginState | undefined> {
@@ -55,7 +65,13 @@ export class ApiService implements GuidedOnboardingApi {
         })
         .catch((error) => {
           this.isPluginStateLoading = false;
-          observer.error(error);
+          // if the request fails, we initialize the state with error
+          observer.next({ status: 'error', isActivePeriod: false });
+          this.pluginState$.next({
+            status: 'error',
+            isActivePeriod: false,
+          });
+          observer.complete();
         });
       return () => {
         this.isPluginStateLoading = false;
@@ -169,7 +185,7 @@ export class ApiService implements GuidedOnboardingApi {
     }
 
     // If this is the 1st-time attempt, we need to create the default state
-    const guideConfig = getGuideConfig(guideId);
+    const guideConfig = await this.configService.getGuideConfig(guideId);
 
     if (guideConfig) {
       const updatedSteps: GuideStep[] = guideConfig.steps.map((step, stepIndex) => {
@@ -236,8 +252,7 @@ export class ApiService implements GuidedOnboardingApi {
 
     // All steps should be complete at this point
     // However, we do a final check here as a safeguard
-    const allStepsComplete =
-      Boolean(activeGuide!.steps.find((step) => step.status !== 'complete')) === false;
+    const allStepsComplete = Boolean(activeGuide!.steps.find((step) => step.status === 'complete'));
 
     if (allStepsComplete) {
       const updatedGuide: GuideState = {
@@ -329,11 +344,13 @@ export class ApiService implements GuidedOnboardingApi {
     const isCurrentStepInProgress = isStepInProgress(activeGuide, guideId, stepId);
     const isCurrentStepReadyToComplete = isStepReadyToComplete(activeGuide, guideId, stepId);
 
-    const stepConfig = getStepConfig(activeGuide!.guideId, stepId);
+    const guideConfig = await this.configService.getGuideConfig(guideId);
+    const stepConfig = getStepConfig(guideConfig, activeGuide!.guideId, stepId);
     const isManualCompletion = stepConfig ? !!stepConfig.manualCompletion : false;
+    const isLastStepInGuide = isLastStep(guideConfig, guideId, stepId);
 
     if (isCurrentStepInProgress || isCurrentStepReadyToComplete) {
-      const updatedSteps = getUpdatedSteps(
+      const updatedSteps = getCompletedSteps(
         activeGuide!,
         stepId,
         // if current step is in progress and configured for manual completion,
@@ -341,10 +358,15 @@ export class ApiService implements GuidedOnboardingApi {
         isManualCompletion && isCurrentStepInProgress
       );
 
+      const status = await this.configService.getGuideStatusOnStepCompletion({
+        isLastStepInGuide,
+        isManualCompletion,
+        isStepReadyToComplete: isCurrentStepReadyToComplete,
+      });
       const currentGuide: GuideState = {
         guideId,
         isActive: true,
-        status: getGuideStatusOnStepCompletion(activeGuide, guideId, stepId),
+        status,
         steps: updatedSteps,
       };
 
@@ -371,7 +393,9 @@ export class ApiService implements GuidedOnboardingApi {
    */
   public isGuidedOnboardingActiveForIntegration$(integration?: string): Observable<boolean> {
     return this.fetchPluginState$().pipe(
-      map((state) => isIntegrationInGuideStep(state?.activeGuide, integration))
+      concatMap((state) =>
+        from(this.configService.isIntegrationInGuideStep(state?.activeGuide, integration))
+      )
     );
   }
 
@@ -390,7 +414,10 @@ export class ApiService implements GuidedOnboardingApi {
     const { activeGuide } = pluginState!;
     const inProgressStepId = getInProgressStepId(activeGuide!);
     if (!inProgressStepId) return undefined;
-    const isIntegrationStepActive = isIntegrationInGuideStep(activeGuide!, integration);
+    const isIntegrationStepActive = await this.configService.isIntegrationInGuideStep(
+      activeGuide!,
+      integration
+    );
     if (isIntegrationStepActive) {
       return await this.completeGuideStep(activeGuide!.guideId, inProgressStepId);
     }
@@ -403,6 +430,20 @@ export class ApiService implements GuidedOnboardingApi {
    */
   public async skipGuidedOnboarding(): Promise<{ pluginState: PluginState } | undefined> {
     return await this.updatePluginState({ status: 'skipped' }, false);
+  }
+
+  /**
+   * Gets the config for the guide.
+   * @return {Promise} a promise with the guide config or undefined if the config is not found
+   */
+  public async getGuideConfig(guideId: GuideId): Promise<GuideConfig | undefined> {
+    if (!this.isCloudEnabled) {
+      return undefined;
+    }
+    if (!this.client) {
+      throw new Error('ApiService has not be initialized.');
+    }
+    return await this.configService.getGuideConfig(guideId);
   }
 }
 

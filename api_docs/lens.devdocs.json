@@ -3828,6 +3828,20 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.SharedPieLayerState.colorsByDimension",
+            "type": "Object",
+            "tags": [],
+            "label": "colorsByDimension",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.SharedPieLayerState.collapseFns",
             "type": "Object",
             "tags": [],
@@ -6027,6 +6041,43 @@
                 "signature": [
                   "GetDropPropsArgs",
                   "<unknown>"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.hasLayerSettings",
+            "type": "Function",
+            "tags": [],
+            "label": "hasLayerSettings",
+            "description": [
+              "\nAllows the visualization to announce whether or not it has any settings to show"
+            ],
+            "signature": [
+              "((props: ",
+              "VisualizationConfigProps",
+              "<T>) => boolean) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.hasLayerSettings.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "VisualizationConfigProps",
+                  "<T>"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -12068,6 +12119,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.SharedPieLayerState.colorsByDimension",
+            "type": "Object",
+            "tags": [],
+            "label": "colorsByDimension",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,

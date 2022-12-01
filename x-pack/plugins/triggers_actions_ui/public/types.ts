@@ -175,6 +175,18 @@ export interface BulkDeleteResponse {
   total: number;
 }
 
+export interface BulkEnableResponse {
+  rules: Rule[];
+  errors: BulkOperationError[];
+  total: number;
+}
+
+export interface BulkDisableResponse {
+  rules: Rule[];
+  errors: BulkOperationError[];
+  total: number;
+}
+
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
   index: number;

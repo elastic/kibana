@@ -12,6 +12,7 @@ import type { ExceptionListSchema, OsType } from '@kbn/securitysolution-io-ts-li
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
+import type { HorizontalAlignment } from '@elastic/eui';
 import {
   enrichExceptionItemsWithOS,
   enrichNewExceptionItemsWithComments,
@@ -224,7 +225,7 @@ export const getSharedListsTableColumns = () => [
             <SecuritySolutionLinkAnchor
               data-test-subj="exceptionListActionCell-link"
               deepLinkId={SecurityPageName.exceptions}
-              path={''}
+              path={`/details/${list.list_id}`}
               external
             >
               {i18n.VIEW_LIST_DETAIL_ACTION}
@@ -242,28 +243,26 @@ export const getSharedListsTableColumns = () => [
 export const getRulesTableColumn = () => [
   {
     field: 'name',
+    align: 'left' as HorizontalAlignment,
     name: 'Name',
     sortable: true,
     'data-test-subj': 'ruleNameCell',
+    truncateText: false,
   },
   {
     name: 'Actions',
-    actions: [
-      {
-        'data-test-subj': 'ruleAction-view',
-        render: (rule: Rule) => {
-          return (
-            <SecuritySolutionLinkAnchor
-              data-test-subj="ruleAction-viewDetails"
-              deepLinkId={SecurityPageName.rules}
-              path={getRuleDetailsTabUrl(rule.id, RuleDetailTabs.alerts)}
-              external
-            >
-              {i18n.VIEW_RULE_DETAIL_ACTION}
-            </SecuritySolutionLinkAnchor>
-          );
-        },
-      },
-    ],
+    'data-test-subj': 'ruleAction-view',
+    render: (rule: Rule) => {
+      return (
+        <SecuritySolutionLinkAnchor
+          data-test-subj="ruleAction-viewDetails"
+          deepLinkId={SecurityPageName.rules}
+          path={getRuleDetailsTabUrl(rule.id, RuleDetailTabs.alerts)}
+          external
+        >
+          {i18n.VIEW_RULE_DETAIL_ACTION}
+        </SecuritySolutionLinkAnchor>
+      );
+    },
   },
 ];
