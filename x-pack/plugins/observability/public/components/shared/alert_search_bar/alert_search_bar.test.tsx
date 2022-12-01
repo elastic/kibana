@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
 import { useServices } from './services';
 import { ObservabilityAlertSearchBarProps } from './types';
@@ -65,9 +65,7 @@ describe('ObservabilityAlertSearchBar', () => {
   });
 
   it('should call alert search bar with correct props', () => {
-    act(() => {
-      renderComponent();
-    });
+    renderComponent();
 
     expect(getAlertsSearchBarMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -86,13 +84,11 @@ describe('ObservabilityAlertSearchBar', () => {
     const mockedFrom = '2022-11-15T09:38:13.604Z';
     const mockedTo = '2022-11-15T09:53:13.604Z';
 
-    act(() => {
-      renderComponent({
-        onEsQueryChange: mockedOnEsQueryChange,
-        rangeFrom: mockedFrom,
-        rangeTo: mockedTo,
-        status: 'active',
-      });
+    renderComponent({
+      onEsQueryChange: mockedOnEsQueryChange,
+      rangeFrom: mockedFrom,
+      rangeTo: mockedTo,
+      status: 'active',
     });
 
     expect(mockedOnEsQueryChange).toHaveBeenCalledWith({
@@ -132,14 +128,12 @@ describe('ObservabilityAlertSearchBar', () => {
       },
     ];
 
-    act(() => {
-      renderComponent({
-        onEsQueryChange: mockedOnEsQueryChange,
-        rangeFrom: mockedFrom,
-        rangeTo: mockedTo,
-        defaultSearchQueries,
-        status: 'all',
-      });
+    renderComponent({
+      onEsQueryChange: mockedOnEsQueryChange,
+      rangeFrom: mockedFrom,
+      rangeTo: mockedTo,
+      defaultSearchQueries,
+      status: 'all',
     });
 
     expect(mockedOnEsQueryChange).toHaveBeenCalledWith({
