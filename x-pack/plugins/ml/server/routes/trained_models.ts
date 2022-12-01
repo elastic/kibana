@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import type { Observable } from 'rxjs';
-import fetch from 'node-fetch';
-import { queue } from 'async';
-// import { spawn } from 'child_process';
 import { schema } from '@kbn/config-schema';
-import { streamFactory } from '@kbn/aiops-utils';
-// import { readFile } from 'fs/promises';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import type { MlConfigType } from '../../config';
@@ -32,6 +26,7 @@ import { modelsProvider } from '../models/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
+import { HuggingFace } from '../models/trained_models';
 
 export function trainedModelsRoutes(
   { router, routeGuard }: RouteInitialization,
@@ -486,94 +481,6 @@ export function trainedModelsRoutes(
    * @api {post} /api/ml/trained_models/hugging_face_import Import hugging face trained model
    * @apiName InferTrainedModelDeployment
    * @apiDescription Import hugging face trained model.
-  //  */
-  // router.post(
-  //   {
-  //     path: '/api/ml/trained_models/hugging_face_import_old',
-  //     validate: {
-  //       body: huggingFaceImport,
-  //     },
-  //     options: {
-  //       tags: ['access:ml:canTestTrainedModels'],
-  //     },
-  //   },
-  //   routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-  //     try {
-  //       function resetAction() {
-  //         return { type: 'reset' };
-  //       }
-
-  //       const ELASTICSEARCH_URL = 'http://user:pass@localhost:9200';
-
-  //       const { end, push, responseWithHeaders } = streamFactory<any>(
-  //         request.headers,
-  //         {
-  //           error: (e: any) => {
-  //             // eslint-disable-next-line no-console
-  //             console.log(e);
-  //           },
-  //           debug: (e: any) => {
-  //             // eslint-disable-next-line no-console
-  //             console.log(e);
-  //           },
-  //         } as any,
-  //         true
-  //       );
-
-  //       (async () => {
-  //         push(resetAction());
-  //         const { hubModelId, start, clearPrevious, taskType } = request.body;
-  //         const importCmd = `eland_import_hub_model --url ${ELASTICSEARCH_URL} --hub-model-id ${hubModelId} --task-type ${taskType} ${
-  //           start ? '--start' : ''
-  //         } ${clearPrevious ? '--clear-previous' : ''}`;
-
-  //         const cmd = `cd /Users/james/dev/eland && . venv/bin/activate && ${importCmd}`;
-
-  //         const run = async () => {
-  //           return new Promise<void>((resolve, reject) => {
-  //             const child = spawn(cmd, [], { shell: true, detached: true });
-
-  //             child.stderr.on('data', (data) => {
-  //               const line: string = data.toString().replace(/\n/g, '');
-  //               if (line.match(/parts\/s/)) {
-  //                 const percentageMatch = line.match(/^\r\s?(.*)%/);
-  //                 if (percentageMatch && percentageMatch.length > 1) {
-  //                   push({
-  //                     type: 'progress',
-  //                     payload: { progress: Number(percentageMatch[1]) },
-  //                   });
-  //                 }
-  //               } else {
-  //                 push({
-  //                   type: 'add_messages',
-  //                   payload: { messages: [line] },
-  //                 });
-  //               }
-  //             });
-
-  //             child.on('error', (error) => {});
-
-  //             child.on('close', (code) => {});
-  //           });
-  //         };
-
-  //         await run();
-  //         end();
-  //       })();
-
-  //       return response.ok(responseWithHeaders);
-  //     } catch (e) {
-  //       return response.customError(wrapError(e));
-  //     }
-  //   })
-  // );
-
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {post} /api/ml/trained_models/hugging_face_import Import hugging face trained model
-   * @apiName InferTrainedModelDeployment
-   * @apiDescription Import hugging face trained model.
    */
   router.post(
     {
@@ -587,176 +494,9 @@ export function trainedModelsRoutes(
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       const { hubModelId, start } = request.body;
-
-      const configSubject$ = new BehaviorSubject<MlConfigType>({});
-      config$.subscribe(configSubject$);
-      const { trainedModelsServer } = configSubject$.getValue();
-      if (trainedModelsServer === undefined || trainedModelsServer.url === undefined) {
-        throw new Error('No server configured');
-      }
-
       try {
-        function resetAction() {
-          return { type: 'reset' };
-        }
-
-        // const MODEL_SERVER_URL = 'http://localhost:3213/catalog/models/';
-        const { username, password, url: modelServerUrl } = trainedModelsServer;
-        const MODEL_SERVER_URL = `${modelServerUrl}/catalog/models/`;
-
-        const AUTH_HEADER = {
-          Authorization:
-            'Basic ' + Buffer.from(`${username}:${password}`, 'binary').toString('base64'),
-        };
-
-        const MAX_CONCURRENT_QUERIES = 5;
-
-        const { end, push, responseWithHeaders } = streamFactory<any>(
-          request.headers,
-          {
-            error: (e: any) => {
-              // eslint-disable-next-line no-console
-              console.log(e);
-            },
-            debug: (e: any) => {
-              // console.log(e);
-            },
-          } as any,
-          true
-        );
-
-        const getMetaData = async (modelId: string) => {
-          const resp = await fetch(`${MODEL_SERVER_URL}${modelId}`, {
-            method: 'GET',
-            headers: { ...AUTH_HEADER },
-          });
-          return resp.json();
-        };
-
-        const getConfig = async (modelId: string) => {
-          const url = `${MODEL_SERVER_URL}${modelId}/config`;
-          const resp = await fetch(url, {
-            method: 'GET',
-            headers: { ...AUTH_HEADER },
-          });
-          return resp.json();
-        };
-
-        const putConfig = async (id: string, config: string) => {
-          return client.asInternalUser.transport.request({
-            method: 'PUT',
-            path: `/_ml/trained_models/${id}`,
-            body: config,
-          });
-        };
-
-        const putModelPart = async (
-          id: string,
-          partNumber: number,
-          totalParts: number,
-          totalLength: number,
-          definition: string
-        ) => {
-          return client.asInternalUser.transport.request(
-            {
-              method: 'PUT',
-              path: `/_ml/trained_models/${id}/definition/${partNumber}`,
-              body: {
-                definition,
-                total_definition_length: totalLength,
-                total_parts: totalParts,
-              },
-            },
-            { maxRetries: 0 }
-          );
-        };
-
-        const getVocabulary = async (modelId: string) => {
-          const url = `${MODEL_SERVER_URL}${modelId}/vocabulary`;
-
-          const resp = await fetch(url, {
-            method: 'GET',
-            headers: { ...AUTH_HEADER },
-          });
-          return resp.json();
-        };
-
-        const putVocabulary = async (id: string, config: string) => {
-          return client.asInternalUser.transport.request({
-            method: 'PUT',
-            path: `/_ml/trained_models/${id}/vocabulary`,
-            body: config,
-          });
-        };
-
-        const getDefinitionPart = async (modelId: string, part: number) => {
-          const resp = await fetch(`${MODEL_SERVER_URL}${modelId}/definition/part/${part}`, {
-            method: 'GET',
-            headers: { ...AUTH_HEADER },
-          });
-          return resp.buffer();
-        };
-
-        (async () => {
-          push(resetAction());
-
-          const modelId = hubModelId;
-
-          const run = async () => {
-            try {
-              const meta = await getMetaData(modelId);
-              const definitionSize: number = meta.source.total_definition_length;
-              const definitionParts: number = meta.source.total_parts;
-
-              const config = await getConfig(modelId);
-
-              push({
-                type: 'get_config',
-              });
-
-              const vocab = await getVocabulary(modelId);
-
-              push({
-                type: 'get_vocabulary',
-              });
-
-              await putConfig(modelId, config);
-              push({
-                type: 'put_config',
-              });
-
-              await putVocabulary(modelId, vocab);
-              push({
-                type: 'put_vocabulary',
-              });
-
-              let completedParts = 0;
-              const requestQueue = queue(async function (partNo: number) {
-                const content = await getDefinitionPart(modelId, partNo);
-                const b64 = content.toString('base64');
-
-                await putModelPart(modelId, partNo, definitionParts, definitionSize, b64);
-                const progress = Number(completedParts / (definitionParts - 1)) * 100;
-                completedParts++;
-                push({
-                  type: 'put_definition_part',
-                  payload: { progress },
-                });
-              }, MAX_CONCURRENT_QUERIES);
-
-              requestQueue.push(Array.from(Array(definitionParts).keys()));
-              await requestQueue.drain();
-              push({
-                type: 'complete',
-              });
-            } catch (error) {
-              push({ error });
-            }
-          };
-
-          await run();
-          end();
-        })();
+        const hf = new HuggingFace(config$, request, client);
+        const responseWithHeaders = await hf.importModel(hubModelId);
 
         return response.ok(responseWithHeaders);
       } catch (e) {
@@ -782,35 +522,39 @@ export function trainedModelsRoutes(
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const configSubject$ = new BehaviorSubject<MlConfigType>({});
-        config$.subscribe(configSubject$);
-        const { trainedModelsServer } = configSubject$.getValue();
-        if (trainedModelsServer === undefined || trainedModelsServer.url === undefined) {
-          throw new Error('No server configured');
-        }
-
-        const { username, password, url: modelServerUrl } = trainedModelsServer;
-        const MODEL_SERVER_URL = `${modelServerUrl}/catalog/models/`;
-        // const MODEL_SERVER_URL = 'http://localhost:3213/catalog/models/';
-        // const MODEL_SERVER_URL = 'https://mml.ml-qa.com/catalog/models/';
-
-        // const username = 'ml-dev';
-        // const password = '60Xl4wyIPAsMTXD5Vve7FRszSplQg0RzrCCCjg8eews=';
-
-        const AUTH_HEADER = {
-          Authorization:
-            'Basic ' + Buffer.from(`${username}:${password}`, 'binary').toString('base64'),
-        };
-
-        const resp = await fetch(MODEL_SERVER_URL, {
-          method: 'GET',
-          headers: {
-            ...AUTH_HEADER,
-          },
-        });
+        const hf = new HuggingFace(config$, request, client);
+        const body = await hf.getModelList();
 
         return response.ok({
-          body: await resp.json(),
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /api/ml/trained_models/pipeline_simulate Simulates an ingest pipeline
+   * @apiName SimulateIngestPipeline
+   * @apiDescription Simulates an ingest pipeline.
+   */
+  router.get(
+    {
+      path: '/api/ml/trained_models/hugging_face_server_exists',
+      validate: false,
+      options: {
+        tags: ['access:ml:canTestTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const hf = new HuggingFace(config$, request, client);
+        const exists = await hf.serverExists();
+        return response.ok({
+          body: { exists },
         });
       } catch (e) {
         return response.customError(wrapError(e));

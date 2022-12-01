@@ -21,7 +21,7 @@ function isCompressedSream(arg: unknown): arg is zlib.Gzip {
 
 const FLUSH_PAYLOAD_SIZE = 4 * 1024;
 
-class UncompressedResponseStream extends Stream.PassThrough {}
+export class UncompressedResponseStream extends Stream.PassThrough {}
 
 const DELIMITER = '\n';
 
