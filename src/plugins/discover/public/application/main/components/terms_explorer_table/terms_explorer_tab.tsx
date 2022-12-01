@@ -23,6 +23,7 @@ export const TermsExplorerTab: React.FC<Omit<TermsExplorerTableProps, 'query' | 
       <div className={'kbnTermsExplorerWrapper'}>
         <TermsExplorerTable
           {...props}
+          collapseFieldName={'DestCountry'} // TODO fix this!!
           query={querySubscriberResult.query}
           filters={querySubscriberResult.filters}
         />

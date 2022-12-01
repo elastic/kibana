@@ -8,18 +8,14 @@
 
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiTableRow, EuiButtonEmpty, EuiTableRowCell, useEuiTheme } from '@elastic/eui';
-import {
-  TermsExplorerTable,
-  TermsExplorerTableProps,
-  TestColumnType,
-  TestRowType,
-} from './terms_explorer_table';
+import { EuiTableRow, EuiTableRowCell, useEuiTheme, EuiBadge } from '@elastic/eui';
+import { TermsExplorerTable, TermsExplorerTableProps } from './terms_explorer_table';
+import { TermsExplorerResponseRow } from '../../../../../common/terms_explorer/types';
 
 interface Props {
-  row: TestRowType;
-  columns: TestColumnType[];
-  expandedColumnName?: keyof TestRowType;
+  row: TermsExplorerResponseRow;
+  columns: string[];
+  expandedColumnName?: string;
   termsExplorerTableProps: TermsExplorerTableProps;
 }
 
@@ -31,9 +27,7 @@ export const TermsExplorerTableRow = ({
 }: Props) => {
   const { euiTheme } = useEuiTheme();
 
-  const [expandedColumn, setExpandedColumn] = useState<keyof TestRowType | undefined>(
-    expandedColumnName
-  );
+  const [expandedColumn, setExpandedColumn] = useState<string | undefined>(expandedColumnName);
 
   const expandedRowStyle = useMemo(
     () => css`
@@ -45,32 +39,35 @@ export const TermsExplorerTableRow = ({
 
   const renderCells = () => {
     return columns.map((column) => {
-      const cell = row[column.field];
-      const isSelectedField = column.field === expandedColumn;
+      const cell = row[column];
+      const isSelectedField = column === expandedColumn;
 
-      let child;
-      if (column.render) {
-        child = column.render(row);
-      } else {
-        child = cell;
-      }
+      const child =
+        cell.result_type === 'string_cardinality' ? (
+          <EuiBadge
+            color="hollow"
+            iconType={'arrowDown'}
+            aria-expanded={isSelectedField}
+            onClickAriaLabel="Expand row"
+            onClick={() => setExpandedColumn(isSelectedField ? undefined : column)}
+          >
+            {cell.result} unique values
+          </EuiBadge>
+        ) : (
+          cell.result
+        );
 
       return (
         <EuiTableRowCell
-          truncateText={column.truncateText}
-          key={column.id}
-          align={column.align}
+          truncateText={true}
+          key={column}
+          align={cell.result_type === 'numeric_aggregation' ? 'left' : 'center'}
           isExpander={true}
           css={css`
             font-weight: ${isSelectedField ? '800' : '400'};
           `}
         >
           {child}
-          <EuiButtonEmpty
-            iconType={isSelectedField ? 'arrowUp' : 'arrowDown'}
-            aria-expanded={Boolean(expandedColumn)}
-            onClick={() => setExpandedColumn(isSelectedField ? undefined : column.field)}
-          />
         </EuiTableRowCell>
       );
     });

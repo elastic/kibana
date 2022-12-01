@@ -6,16 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import useMount from 'react-use/lib/useMount';
+import React, { useEffect, useState } from 'react';
 
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { EuiTable, EuiTableBody, formatDate, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
-import type { GetStateReturn } from '../../services/discover_state';
-import { AvailableFields$, DataRefetch$, DataTotalHits$ } from '../../hooks/use_saved_search';
+import { EuiTable, EuiTableBody } from '@elastic/eui';
 import { TermsExplorerTableRow } from './terms_explorer_table_row';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import {
@@ -67,21 +64,13 @@ export interface TermsExplorerTableProps {
    */
   columns: string[];
   /**
+   * Determines which field the table is collapsed on
+   */
+  collapseFieldName: string;
+  /**
    * The used data view
    */
   dataView: DataView;
-  /**
-   * Saved search description
-   */
-  searchDescription?: string;
-  /**
-   * Saved search title
-   */
-  searchTitle?: string;
-  /**
-   * Optional saved search
-   */
-  savedSearch?: SavedSearch;
   /**
    * Optional query to update the table content
    */
@@ -90,91 +79,25 @@ export interface TermsExplorerTableProps {
    * Filters query to update the table content
    */
   filters?: Filter[];
-  /**
-   * State container with persisted settings
-   */
-  stateContainer?: GetStateReturn;
-  /**
-   * Callback to add a filter to filter bar
-   */
-  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
-  /**
-   * Metric tracking function
-   * @param metricType
-   * @param eventName
-   */
-  savedSearchRefetch$?: DataRefetch$;
-  availableFields$?: AvailableFields$;
-  searchSessionId?: string;
-  savedSearchDataTotalHits$?: DataTotalHits$;
 }
 
-export interface TestRowType {
-  id: string;
-  firstName: string;
-  lastName: string;
-  github: string;
-  dateOfBirth: Date | number;
-  nationality: string;
-  online: boolean;
-}
-
-export interface TestColumnType {
-  align?: typeof RIGHT_ALIGNMENT | typeof LEFT_ALIGNMENT;
-  field: keyof TestRowType;
-  truncateText?: boolean;
-  sortable?: boolean;
-  render?: Function;
-  schema?: string;
-  name: string;
-  id: string;
-}
-
-const TestUsers: TestRowType[] = [
-  {
-    id: '1',
-    firstName: 'john',
-    lastName: 'doe',
-    github: 'johndoe',
-    dateOfBirth: Date.now(),
-    nationality: 'NL',
-    online: true,
-  },
-  {
-    id: '2',
-    firstName: 'Clinton',
-    lastName: 'Gormley',
-    github: 'clingorm',
-    dateOfBirth: new Date(Date.now() + 3600 * 1000 * 24),
-    nationality: 'UK',
-    online: false,
-  },
-];
-
-export const TermsExplorerTable = (props: TermsExplorerTableProps) => {
+export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
   const services = useDiscoverServices();
+  const { dataView, columns, collapseFieldName } = tableProps;
 
-  const { dataView } = props;
+  const [rows, setRows] = useState<TermsExplorerResponse['rows'] | undefined>();
 
-  useMount(() => {
+  useEffect(() => {
     (async () => {
-      console.log('firing off request.... hope you have the flights data installed...');
-      const columnNames = [
-        'AvgTicketPrice',
-        'DestCityName',
-        'DestAirportID',
-        'DestRegion',
-        'DistanceKilometers',
-      ];
       const termsExplorerRequestBody: TermsExplorerRequest = {
-        collapseFieldName: 'DestCountry',
-        columns: columnNames.reduce((acc, columnName) => {
-          if (!acc) acc = {};
+        collapseFieldName,
+        columns: columns.reduce((columnsMap, columnName) => {
+          if (!columnsMap) columnsMap = {};
           const fieldSpec = dataView.getFieldByName(columnName)?.toSpec();
           if (fieldSpec) {
-            acc[columnName] = fieldSpec;
+            columnsMap[columnName] = fieldSpec;
           }
-          return acc;
+          return columnsMap;
         }, {} as TermsExplorerRequest['columns']),
       };
       const response = await services.http.fetch<TermsExplorerResponse>(
@@ -184,46 +107,21 @@ export const TermsExplorerTable = (props: TermsExplorerTableProps) => {
           method: 'POST',
         }
       );
-      console.log('got a big old response: ', response);
+      setRows(response.rows);
     })();
-  });
-
-  const columns: TestColumnType[] = [
-    {
-      id: 'firstName',
-      field: 'firstName',
-      name: 'First Name',
-      sortable: true,
-      truncateText: true,
-      align: LEFT_ALIGNMENT,
-    },
-    {
-      id: 'lastName',
-      field: 'lastName',
-      name: 'Last Name',
-      align: LEFT_ALIGNMENT,
-      truncateText: true,
-    },
-    {
-      id: 'dateOfBirth',
-      field: 'dateOfBirth',
-      name: 'Date of Birth',
-      schema: 'date',
-      render: (date: Date) => formatDate(date, 'dobLong'),
-      sortable: true,
-    },
-  ];
+  }, [columns, dataView, services.http, collapseFieldName]);
 
   const renderRows = () => {
-    const rows = [];
+    const renderedRows = [];
+    if (!rows) return;
 
-    for (const row of TestUsers) {
-      rows.push(
-        <TermsExplorerTableRow row={row} columns={columns} termsExplorerTableProps={props} />
+    for (const row of Object.values(rows)) {
+      renderedRows.push(
+        <TermsExplorerTableRow row={row} columns={columns} termsExplorerTableProps={tableProps} />
       );
     }
 
-    return rows;
+    return renderedRows;
   };
 
   return (

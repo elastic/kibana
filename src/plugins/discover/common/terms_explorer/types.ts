@@ -37,6 +37,10 @@ export interface TermsExplorerSingleStringColumnResult {
   result: string;
 }
 
+export interface TermsExplorerResponseRow {
+  [key: string]: TermsExplorerResponseColumn;
+}
+
 export interface TermsExplorerResponse {
-  rows: Array<{ [key: string]: TermsExplorerResponseColumn }>;
+  rows: TermsExplorerResponseRow[];
 }
