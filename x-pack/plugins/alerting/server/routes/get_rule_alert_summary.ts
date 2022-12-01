@@ -38,7 +38,9 @@ export const getRuleAlertSummaryRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
-        const summary = await rulesClient.getAlertSummary(camelcaseKeys({ id, ...req.query }));
+        const summary = await rulesClient.getAlertSummary(
+          camelcaseKeys({ id, ...req.query }, { deep: true })
+        );
         return res.ok({ body: snakecaseKeys(alertToRule(summary)) });
       })
     )

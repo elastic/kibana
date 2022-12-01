@@ -69,7 +69,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
             const createdRule: SanitizedRule<RuleTypeParams> =
               await rulesClient.create<RuleTypeParams>({
                 // @ts-ignore
-                data: camelcaseKeys(ruleToAlert(rule)),
+                data: camelcaseKeys(ruleToAlert(rule), { deep: true }),
                 options: { id: params?.id },
               });
             return res.ok({

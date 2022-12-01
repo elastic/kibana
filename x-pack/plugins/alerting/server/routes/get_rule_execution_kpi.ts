@@ -38,7 +38,9 @@ export const getRuleExecutionKPIRoute = (
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         return res.ok({
-          body: await rulesClient.getRuleExecutionKPI(camelcaseKeys({ id, ...req.query })),
+          body: await rulesClient.getRuleExecutionKPI(
+            camelcaseKeys({ id, ...req.query }, { deep: true })
+          ),
         });
       })
     )

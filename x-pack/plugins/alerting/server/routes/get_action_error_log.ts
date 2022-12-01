@@ -55,7 +55,7 @@ export const getActionErrorLogRoute = (
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         const withAuth = req.query.with_auth;
-        const rewrittenReq = camelcaseKeys({ id, ...req.query });
+        const rewrittenReq = camelcaseKeys({ id, ...req.query }, { deep: true });
         const getter = (
           withAuth ? rulesClient.getActionErrorLogWithAuth : rulesClient.getActionErrorLog
         ).bind(rulesClient);

@@ -32,7 +32,7 @@ export const unmuteAlertRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const params = camelcaseKeys(ruleToAlertParams(req.params));
+        const params = camelcaseKeys(ruleToAlertParams(req.params), { deep: true });
         try {
           await rulesClient.unmuteInstance(params);
           return res.noContent();

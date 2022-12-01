@@ -31,7 +31,7 @@ export const muteAlertRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const params = camelcaseKeys(ruleToAlertParams(req.params));
+        const params = camelcaseKeys(ruleToAlertParams(req.params), { deep: true });
         try {
           await rulesClient.muteInstance(params);
           return res.noContent();

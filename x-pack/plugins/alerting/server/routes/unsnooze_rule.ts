@@ -38,7 +38,7 @@ export const unsnoozeRuleRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
         const params = req.params;
-        const body = camelcaseKeys(req.params);
+        const body = camelcaseKeys(req.body, { deep: true });
         try {
           await rulesClient.unsnooze({ ...params, ...body });
           return res.noContent();

@@ -61,7 +61,7 @@ export const updateRuleRoute = (
             const alertRes = await rulesClient.update({
               id,
               // @ts-ignore
-              data: camelcaseKeys(ruleToAlert(rule)),
+              data: camelcaseKeys(ruleToAlert(rule), { deep: true }),
             });
             return res.ok({
               // @ts-ignore

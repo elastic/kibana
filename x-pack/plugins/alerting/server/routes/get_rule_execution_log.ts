@@ -61,7 +61,9 @@ export const getRuleExecutionLogRoute = (
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         return res.ok({
-          body: await rulesClient.getExecutionLogForRule(camelcaseKeys({ id, ...req.query })),
+          body: await rulesClient.getExecutionLogForRule(
+            camelcaseKeys({ id, ...req.query }, { deep: true })
+          ),
         });
       })
     )
