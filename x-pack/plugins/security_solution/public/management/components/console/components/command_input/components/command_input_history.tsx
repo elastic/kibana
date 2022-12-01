@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
-import { EuiSelectable } from '@elastic/eui';
+import { EuiSelectable, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InputHistoryItem } from '../../console_state/types';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
@@ -66,7 +66,13 @@ export const CommandInputHistory = memo(() => {
   }, []);
 
   const renderSelectionContent: EuiSelectableProps['children'] = useCallback((list, search) => {
-    return [list, search];
+    return (
+      <>
+        {list}
+        <EuiSpacer size="s" />
+        {search}
+      </>
+    );
   }, []);
 
   const handleSelectableOnChange: EuiSelectableProps['onChange'] = useCallback(
