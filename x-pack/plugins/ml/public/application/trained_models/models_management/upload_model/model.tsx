@@ -14,13 +14,14 @@ import {
   EuiSpacer,
   EuiProgress,
   EuiText,
+  EuiLink,
 } from '@elastic/eui';
 
 import './style.scss';
 
 import { useFetchStream } from '@kbn/aiops-utils';
 import { ModelUpload, API_ACTION_NAME } from './types';
-import { streamReducer, initialState } from './utils';
+import { streamReducer, initialState, getHuggingFaceUrl } from './utils';
 import { useMlKibana } from '../../../contexts/kibana';
 import { HuggingFaceTrainedModel } from '../../../../../common/types/trained_models';
 
@@ -176,6 +177,8 @@ export const Model: FC<Props> = ({ model, installed, hidden, refreshModels }) =>
     return null;
   }
 
+  const huggingFaceLink = getHuggingFaceUrl(model);
+
   return (
     <>
       <EuiFlexGroup>
@@ -197,7 +200,11 @@ export const Model: FC<Props> = ({ model, installed, hidden, refreshModels }) =>
             {model.source?.metadata?.repo_id ? (
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem css={{ fontWeight: 'normal', maxWidth: '90px' }}>Repo ID</EuiFlexItem>
-                <EuiFlexItem>{model.source.metadata.repo_id}</EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiLink href={huggingFaceLink.url} target="_blank">
+                    {huggingFaceLink.text}
+                  </EuiLink>
+                </EuiFlexItem>
               </EuiFlexGroup>
             ) : null}
             <EuiFlexGroup gutterSize="s">

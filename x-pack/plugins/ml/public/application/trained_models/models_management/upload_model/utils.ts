@@ -6,7 +6,9 @@
  */
 
 import { ModelUploadApiAction, API_ACTION_NAME } from './types';
+import type { HuggingFaceTrainedModel } from '../../../../../common/types/trained_models';
 
+const HUGGING_FACE_URL = 'https://huggingface.co/';
 interface StreamState {
   type: string;
   progress?: number;
@@ -39,4 +41,9 @@ export function streamReducer(
     default:
       return state;
   }
+}
+
+export function getHugginFaceUrl(model: HuggingFaceTrainedModel) {
+  const id = model.source.metadata.repo_id;
+  return { url: `${HUGGING_FACE_URL}${id}`, text: id };
 }

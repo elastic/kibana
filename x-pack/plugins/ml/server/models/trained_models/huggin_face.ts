@@ -37,12 +37,12 @@ export class HuggingFace {
     this.serverUrl = `${modelServerUrl}/catalog/models/`;
 
     this.authHeader =
-      username !== undefined
-        ? {
+      username === undefined || username === ''
+        ? {}
+        : {
             Authorization:
               'Basic ' + Buffer.from(`${username}:${password ?? ''}`, 'binary').toString('base64'),
-          }
-        : {};
+          };
   }
 
   public async serverExists() {
