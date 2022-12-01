@@ -1,0 +1,117 @@
+{
+  "id": "@kbn/shared-ux-file-context",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-file-context",
+        "id": "def-common.FilesContext",
+        "type": "Function",
+        "tags": [],
+        "label": "FilesContext",
+        "description": [],
+        "signature": [
+          "({ client, children }: React.PropsWithChildren<ContextProps>) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/file/context/src/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-context",
+            "id": "def-common.FilesContext.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ client, children }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<ContextProps>"
+            ],
+            "path": "packages/shared-ux/file/context/src/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-context",
+        "id": "def-common.useFilesContext",
+        "type": "Function",
+        "tags": [],
+        "label": "useFilesContext",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/shared-ux-file-context",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileContextPluginApi",
+            "section": "def-common.FilesContextValue",
+            "text": "FilesContextValue"
+          }
+        ],
+        "path": "packages/shared-ux/file/context/src/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-file-context",
+        "id": "def-common.FilesContextValue",
+        "type": "Interface",
+        "tags": [],
+        "label": "FilesContextValue",
+        "description": [],
+        "path": "packages/shared-ux/file/context/src/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-context",
+            "id": "def-common.FilesContextValue.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [
+              "\nA files client that will be used process uploads."
+            ],
+            "signature": [
+              "BaseFilesClient",
+              "<any>"
+            ],
+            "path": "packages/shared-ux/file/context/src/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
