@@ -418,6 +418,7 @@
     "@kbn/shared-ux-prompt-no-data-views": "link:bazel-bin/packages/shared-ux/prompt/no_data_views/impl",
     "@kbn/shared-ux-prompt-no-data-views-mocks": "link:bazel-bin/packages/shared-ux/prompt/no_data_views/mocks",
     "@kbn/shared-ux-prompt-no-data-views-types": "link:bazel-bin/packages/shared-ux/prompt/no_data_views/types",
+    "@kbn/shared-ux-prompt-not-found": "link:bazel-bin/packages/shared-ux/prompt/not_found",
     "@kbn/shared-ux-router-mocks": "link:bazel-bin/packages/shared-ux/router/mocks",
     "@kbn/shared-ux-services": "link:bazel-bin/packages/kbn-shared-ux-services",
     "@kbn/shared-ux-storybook": "link:bazel-bin/packages/kbn-shared-ux-storybook",
