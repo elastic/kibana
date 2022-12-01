@@ -13,7 +13,9 @@ import { ID, ESQL_THEME_ID } from './constants';
 import type { LangModuleType } from '../types';
 
 import { monaco } from '../monaco_imports';
-import { DiagnosticsAdapter, WorkerProxyService } from '../common';
+
+import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
+import { WorkerProxyService } from '../common/worker/worker_proxy';
 
 const getTokenProviderAsync = async () => {
   const { ESQLTokensProvider } = await import('./lib/monaco');
@@ -23,7 +25,7 @@ const getTokenProviderAsync = async () => {
 
 export const ESQLLang: LangModuleType = {
   ID,
-  onLanguage() {
+  async onLanguage() {
     const workerProxyService = new WorkerProxyService<ESQLWorker>();
 
     workerProxyService.setup(ID);

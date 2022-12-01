@@ -8,39 +8,27 @@
 
 import { CommonTokenStream, CodePointCharStream } from 'antlr4ts';
 
-import { ANTLREErrorListener } from '../../common/worker/error_listener';
-
 import { esql_lexer as ESQLLexer } from '../antlr/esql_lexer';
 import { esql_parser as ESQLParser } from '../antlr/esql_parser';
 
-export const getParser = (
-  inputStream: CodePointCharStream,
-  errorListener = new ANTLREErrorListener()
-) => {
-  const { lexer } = getLexer(inputStream, errorListener);
+import type { ANTLREErrorListener } from '../../common/worker/error_listener';
+
+export const getParser = (inputStream: CodePointCharStream, errorListener: ANTLREErrorListener) => {
+  const lexer = getLexer(inputStream, errorListener);
   const tokenStream = new CommonTokenStream(lexer);
   const parser = new ESQLParser(tokenStream);
 
   parser.removeErrorListeners();
   parser.addErrorListener(errorListener);
 
-  return { parser, lexer, errorListener };
+  return parser;
 };
 
-export const getLexer = (
-  inputStream: CodePointCharStream,
-  errorListener = new ANTLREErrorListener()
-) => {
+export const getLexer = (inputStream: CodePointCharStream, errorListener: ANTLREErrorListener) => {
   const lexer = new ESQLLexer(inputStream);
 
   lexer.removeErrorListeners();
   lexer.addErrorListener(errorListener);
 
-  return { lexer, errorListener };
-};
-
-export const getErrors = (inputStream: CodePointCharStream) => {
-  const { errorListener } = getParser(inputStream);
-
-  return errorListener.getErrors();
+  return lexer;
 };

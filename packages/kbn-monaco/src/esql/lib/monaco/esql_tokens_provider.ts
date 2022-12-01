@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CharStreams } from 'antlr4ts';
+import { CharStreams, Token } from 'antlr4ts';
 import { tokenPostfix } from './esql_constants';
 import { monaco } from '../../../monaco_imports';
 
@@ -15,6 +15,8 @@ import { ESQLLineTokens } from './esql_line_tokens';
 import { ESQLState } from './esql_state';
 
 import { getLexer } from '../antlr_facade';
+
+import { ANTLREErrorListener } from '../../../common/worker/error_listener';
 
 const EOF = -1;
 
@@ -25,14 +27,20 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
 
   tokenize(line: string, state: monaco.languages.IState): monaco.languages.ILineTokens {
     const errorStartingPoints: number[] = [];
+    const errorListener = new ANTLREErrorListener();
     const inputStream = CharStreams.fromString(line);
-    const { lexer } = getLexer(inputStream);
+    const lexer = getLexer(inputStream, errorListener);
 
     let done = false;
     const myTokens: monaco.languages.IToken[] = [];
 
     do {
-      const token = lexer.nextToken();
+      let token: Token | null;
+      try {
+        token = lexer.nextToken();
+      } catch (e) {
+        token = null;
+      }
 
       if (token == null) {
         done = true;

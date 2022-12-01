@@ -13,7 +13,7 @@ function registerLanguage(language: LangModuleType) {
 
   monaco.languages.register({ id: ID });
 
-  monaco.languages.onLanguage(ID, () => {
+  monaco.languages.onLanguage(ID, async () => {
     if (lexerRules) {
       monaco.languages.setMonarchTokensProvider(ID, lexerRules);
     }
@@ -22,7 +22,7 @@ function registerLanguage(language: LangModuleType) {
       monaco.languages.setLanguageConfiguration(ID, languageConfiguration);
     }
 
-    onLanguage?.();
+    await onLanguage?.();
   });
 }
 
