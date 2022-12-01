@@ -113,7 +113,6 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
 }
 
 // needed from Read routes
-export const readEndpointPackagePrivileges: DeepPartialTruthy<FleetAuthz> = Object.freeze({
 export const READ_ENDPOINT_PACKAGE_PRIVILEGES: DeepPartialTruthy<FleetAuthz> = Object.freeze({
   packagePrivileges: {
     endpoint: {
@@ -139,7 +138,6 @@ export const READ_ENDPOINT_PACKAGE_PRIVILEGES: DeepPartialTruthy<FleetAuthz> = O
 });
 
 // needed from CUD routes
-export const writeEndpointPackagePrivileges: DeepPartialTruthy<FleetAuthz> = Object.freeze({
 export const WRITE_ENDPOINT_PACKAGE_PRIVILEGES: DeepPartialTruthy<FleetAuthz> = Object.freeze({
   packagePrivileges: {
     endpoint: {
@@ -196,19 +194,28 @@ export function validateSecurityRbac(
       return acc;
     }, []);
 
-  if (requiredAuthz.any && !requiredAuthz.all) {
-    return getBoolListFromPaths(requiredAuthz.any).some((v) => v);
-  } else if (requiredAuthz.all) {
-    return getBoolListFromPaths(requiredAuthz.all).every((v) => v);
-  } else if (requiredAuthz.any && requiredAuthz.all) {
-    // integration privileges should be all true or any of the endpoint privileges should be true
-    // e.g. epm/BULK_INSTALL_PATTERN
-    return (
+  const invalidAny =
+    !requiredAuthz.all &&
+    requiredAuthz.any &&
+    !getBoolListFromPaths(requiredAuthz.any).some((v) => v);
+  const invalidAll =
+    !requiredAuthz.any &&
+    requiredAuthz.all &&
+    !getBoolListFromPaths(requiredAuthz.all).every((v) => v);
+
+  // integration privileges should be all true or any of the endpoint privileges should be true
+  // e.g. epm/BULK_INSTALL_PATTERN
+  const invalidAnyAndAll =
+    requiredAuthz.any &&
+    !(
       getBoolListFromPaths(requiredAuthz.any).some((v) => v) ||
-      getBoolListFromPaths(requiredAuthz.all).every((v) => v)
+      (requiredAuthz.all && getBoolListFromPaths(requiredAuthz.all).every((v) => v))
     );
+
+  if (invalidAny || invalidAll || invalidAnyAndAll) {
+    return false;
   }
-  return false;
+  return true;
 }
 
 export function doesNotHaveRequiredFleetAuthz(
