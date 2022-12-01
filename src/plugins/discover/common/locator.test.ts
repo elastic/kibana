@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { hashedItemStore, getStatesFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import {
+  hashedItemStore,
+  getStatesFromKbnUrl,
+  setStateToKbnUrl,
+} from '@kbn/kibana-utils-plugin/public';
 import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
 import { FilterStateStore } from '@kbn/es-query';
 import { DiscoverAppLocatorDefinition } from './locator';
@@ -20,7 +24,7 @@ interface SetupParams {
 }
 
 const setup = async ({ useHash = false }: SetupParams = {}) => {
-  const locator = new DiscoverAppLocatorDefinition({ useHash });
+  const locator = new DiscoverAppLocatorDefinition({ useHash, setStateToKbnUrl });
 
   return {
     locator,

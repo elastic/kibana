@@ -20,6 +20,7 @@ import {
   getSavedSearch,
   getSavedSearchFullPathUrl,
 } from '@kbn/saved-search-plugin/public';
+import { MainHistoryLocationState } from '../../../common/locator';
 import { getState } from './services/discover_state';
 import { loadDataView, resolveDataView } from './utils/resolve_data_view';
 import { DiscoverMainApp } from './discover_main_app';
@@ -29,7 +30,6 @@ import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { restoreStateFromSavedSearch } from '../../services/saved_searches/restore_from_saved_search';
-import { MainHistoryLocationState } from '../../locator';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
