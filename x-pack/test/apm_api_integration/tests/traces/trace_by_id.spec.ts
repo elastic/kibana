@@ -6,6 +6,7 @@
  */
 import { apm, EntityArrayIterable, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -21,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     query,
   }: {
     traceId: string;
-    query: { start: string; end: string; _inspect?: boolean };
+    query: { start: string; end: string; _inspect?: boolean; entryTransactionId?: string };
   }) {
     return await apmApiClient.readUser({
       endpoint: `GET /internal/apm/traces/{traceId}`,
@@ -45,15 +46,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(response.status).to.be(200);
       expect(response.body).to.eql({
         exceedsMax: false,
-        traceDocs: [],
-        errorDocs: [],
-        linkedChildrenOfSpanCountBySpanId: {},
+        totalErrorsCount: 0,
+        duration: 0,
+        items: [],
+        legends: [],
+        errorItems: [],
+        childrenByParentId: {},
+        errorCountById: {},
       });
     });
   });
 
   registry.when('Trace exists', { config: 'basic', archives: [] }, () => {
     let serviceATraceId: string;
+    let entryTransactionId: string;
     before(async () => {
       const instanceJava = apm
         .service({ name: 'synth-apple', environment: 'production', agentName: 'java' })
@@ -88,6 +94,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       const entities = events.toArray();
       serviceATraceId = entities.slice(0, 1)[0]['trace.id']!;
+      entryTransactionId = entities[0]['transaction.id']!;
 
       await synthtraceEsClient.index(new EntityArrayIterable(entities));
     });
@@ -99,28 +106,29 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         const response = await fetchTraces({
           traceId: serviceATraceId,
-          query: { start: new Date(start).toISOString(), end: new Date(end).toISOString() },
+          query: {
+            start: new Date(start).toISOString(),
+            end: new Date(end).toISOString(),
+            entryTransactionId,
+          },
         });
         expect(response.status).to.eql(200);
         traces = response.body;
       });
       it('returns some errors', () => {
-        expect(traces.errorDocs.length).to.be.greaterThan(0);
-        expect(traces.errorDocs[0].error.exception?.[0].message).to.eql(
-          '[ResponseError] index_not_found_exception'
-        );
+        expect(traces.totalErrorsCount).to.be.greaterThan(0);
+        expect(traces.entryTransaction?.event?.outcome).to.be('failure');
       });
 
       it('returns some trace docs', () => {
-        expect(traces.traceDocs.length).to.be.greaterThan(0);
+        expect(traces.items.length).to.be.greaterThan(0);
+        expect(traces.rootWaterfallTransaction?.id).to.equal(traces.items[0].id);
         expect(
-          traces.traceDocs.map((item) => {
-            if (item.span && 'name' in item.span) {
-              return item.span.name;
+          traces.items.map((item) => {
+            if (item.docType === ProcessorEvent.span) {
+              return item.doc.span.name;
             }
-            if (item.transaction && 'name' in item.transaction) {
-              return item.transaction.name;
-            }
+            return item.doc.transaction.name;
           })
         ).to.eql(['GET /apple 🍏', 'get_green_apple_🍏']);
       });
