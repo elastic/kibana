@@ -13,6 +13,7 @@ import { INPUT_DEFAULT_PLACEHOLDER_TEXT } from '../console_state/state_update_ha
 import { act, waitFor, createEvent, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NO_HISTORY_EMPTY_MESSAGE } from './components/command_input_history';
+import { UP_ARROW_ACCESS_HISTORY_HINT } from './hooks/use_input_hints';
 
 describe('When entering data into the Console input', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
@@ -91,10 +92,10 @@ describe('When entering data into the Console input', () => {
     expect(renderResult.queryByTestId('test-inputPlaceholder')).toBeNull();
   });
 
-  it('should NOT display any hint text in footer if nothing is displayed', () => {
+  it('should display default hint when nothing is typed into the command inptu area', () => {
     render();
 
-    expect(getFooterText()?.trim()).toBe('');
+    expect(getFooterText()?.trim()).toBe(UP_ARROW_ACCESS_HISTORY_HINT);
   });
 
   it('should display hint when a known command is typed', () => {
