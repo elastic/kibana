@@ -23,7 +23,6 @@ import {
 } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
-import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
 import {
@@ -109,7 +108,6 @@ interface ConstructorOptions {
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
-  getEventLogClient: () => Promise<IEventLogClient>;
 }
 
 export interface UpdateOptions {
@@ -133,7 +131,7 @@ export class ActionsClient {
   private readonly auditLogger?: AuditLogger;
   private readonly usageCounter?: UsageCounter;
   private readonly connectorTokenClient: ConnectorTokenClientContract;
-  private readonly getEventLogClient: () => Promise<IEventLogClient>;
+
   constructor({
     logger,
     actionTypeRegistry,
@@ -150,7 +148,6 @@ export class ActionsClient {
     auditLogger,
     usageCounter,
     connectorTokenClient,
-    getEventLogClient,
   }: ConstructorOptions) {
     this.logger = logger;
     this.actionTypeRegistry = actionTypeRegistry;
@@ -167,7 +164,6 @@ export class ActionsClient {
     this.auditLogger = auditLogger;
     this.usageCounter = usageCounter;
     this.connectorTokenClient = connectorTokenClient;
-    this.getEventLogClient = getEventLogClient;
   }
 
   /**

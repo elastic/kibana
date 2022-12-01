@@ -7,9 +7,24 @@
  * 2.0.
  */
 
+const fs = require('fs');
+const path = require('path');
+
 module.exports = {
   logError,
+  writeGeneratedFile,
 };
+
+const PLUGIN_DIR = path.resolve(path.join(__dirname, '..'));
+
+function writeGeneratedFile(fileName, contents) {
+  const genFileName = path.join(PLUGIN_DIR, fileName);
+  try {
+    fs.writeFileSync(genFileName, contents);
+  } catch (err) {
+    logError(`error writing file: ${genFileName}: ${err.message}`);
+  }
+}
 
 function logError(message) {
   console.log(`error: ${message}`);

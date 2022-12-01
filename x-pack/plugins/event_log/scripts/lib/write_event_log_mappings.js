@@ -7,7 +7,7 @@
  * 2.0.
  */
 
-const { writeGeneratedFile } = require('./write_generated_file');
+const { writeGeneratedFile } = require('./utils');
 
 const EVENT_LOG_MAPPINGS_FILE = '../generated/mappings.json';
 

@@ -9,8 +9,7 @@
 
 const LineWriter = require('./line_writer');
 const { getEventLogTelemetryContents } = require('../template/get_event_log_telemetry_contents');
-const { writeGeneratedFile } = require('./write_generated_file');
-const { logError } = require('./log_error');
+const { logError, writeGeneratedFile } = require('./utils');
 
 const EVENT_LOG_CONFIG_SCHEMA_FILE =
   '../../alerting/server/usage/generated/event_log_telemetry_types.ts';

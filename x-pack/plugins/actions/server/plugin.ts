@@ -33,11 +33,7 @@ import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugi
 import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import {
-  IEventLogClientService,
-  IEventLogger,
-  IEventLogService,
-} from '@kbn/event-log-plugin/server';
+import { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import {
   ensureCleanupFailedExecutionsTaskScheduled,
@@ -176,7 +172,6 @@ export interface ActionsPluginsStart {
   taskManager: TaskManagerStartContract;
   licensing: LicensingPluginStart;
   spaces?: SpacesPluginStart;
-  eventLog: IEventLogClientService;
 }
 
 const includedHiddenTypes = [
@@ -464,9 +459,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           encryptedSavedObjectsClient,
           logger: this.logger,
         }),
-        async getEventLogClient() {
-          return plugins.eventLog.getClient(request);
-        },
       });
     };
 

@@ -9,8 +9,7 @@
 
 const LineWriter = require('./line_writer');
 const { getEventLogSchemaContents } = require('../template/get_event_log_schema_contents');
-const { writeGeneratedFile } = require('./write_generated_file');
-const { logError } = require('./log_error');
+const { logError, writeGeneratedFile } = require('./utils');
 
 const EVENT_LOG_CONFIG_SCHEMA_FILE = '../generated/schemas.ts';
 

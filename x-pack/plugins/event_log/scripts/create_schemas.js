@@ -12,13 +12,11 @@ const path = require('path');
 const { set } = require('@kbn/safer-lodash-set');
 const lodash = require('lodash');
 
-const LineWriter = require('./lib/line_writer');
 const mappings = require('./mappings');
-const { getEventLogSchemaContents } = require('./template/get_event_log_schema_contents');
 const { writeEventLogMappings } = require('./lib/write_event_log_mappings');
 const { writeEventLogConfigSchema } = require('./lib/write_event_log_config_schema');
 const { writeEventLogTelemetrySchema } = require('./lib/write_event_log_telemetry_schema');
-const { logError } = require('./lib/log_error');
+const { logError } = require('./lib/utils');
 
 const PLUGIN_DIR = path.resolve(path.join(__dirname, '..'));
 const ECS_MAPPINGS_FILE = 'generated/elasticsearch/7/template.json';
