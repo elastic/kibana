@@ -34,6 +34,8 @@ import type {
   NormalizedRuleError,
   RuleDetailsInError,
   BulkEditActionResponse,
+  BulkEditActionResults,
+  BulkEditActionSummary,
 } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/response_schema';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -136,7 +138,7 @@ const buildBulkResponse = (
   const numSkipped = skipped.length;
   const numFailed = errors.length;
 
-  const summary = {
+  const summary: BulkEditActionSummary = {
     failed: numFailed,
     succeeded: numSucceeded,
     skipped: numSkipped,
@@ -145,7 +147,7 @@ const buildBulkResponse = (
 
   // if response is for dry_run, empty lists of rules returned, as rules are not actually updated and stored within ES
   // thus, it's impossible to return reliably updated/duplicated/deleted rules
-  const results = isDryRun
+  const results: BulkEditActionResults = isDryRun
     ? {
         updated: [],
         created: [],
@@ -160,30 +162,28 @@ const buildBulkResponse = (
       };
 
   if (numFailed > 0) {
-    return response.custom({
+    return response.custom<BulkEditActionResponse>({
       headers: { 'content-type': 'application/json' },
-      body: Buffer.from(
-        JSON.stringify({
-          message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
-          status_code: 500,
-          attributes: {
-            errors: normalizeErrorResponse(errors),
-            results,
-            summary,
-          },
-        })
-      ),
+      body: {
+        message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
+        status_code: 500,
+        attributes: {
+          errors: normalizeErrorResponse(errors),
+          results,
+          summary,
+        },
+      },
       statusCode: 500,
     });
   }
 
-  return response.ok({
-    body: {
-      success: true,
-      rules_count: summary.total,
-      attributes: { results, summary },
-    },
-  });
+  const responseBody: BulkEditActionResponse = {
+    success: true,
+    rules_count: summary.total,
+    attributes: { results, summary },
+  };
+
+  return response.ok({ body: responseBody });
 };
 
 const fetchRulesByQueryOrIds = async ({

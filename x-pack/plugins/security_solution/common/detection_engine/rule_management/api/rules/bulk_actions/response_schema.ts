@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Rule, BulkActionSkipResult } from '@kbn/alerting-plugin/common';
+import type { BulkActionSkipResult } from '@kbn/alerting-plugin/common';
+import type { RuleResponse } from '../../../../rule_schema';
 import type { BulkActionsDryRunErrCode } from '../../../../../constants';
 
 export interface RuleDetailsInError {
@@ -19,9 +20,9 @@ export interface NormalizedRuleError {
   rules: RuleDetailsInError[];
 }
 export interface BulkEditActionResults {
-  updated: Rule[];
-  created: Rule[];
-  deleted: Rule[];
+  updated: RuleResponse[];
+  created: RuleResponse[];
+  deleted: RuleResponse[];
   skipped: BulkActionSkipResult[];
 }
 
@@ -31,12 +32,22 @@ export interface BulkEditActionSummary {
   succeeded: number;
   total: number;
 }
-export interface BulkEditActionResponse {
-  success?: boolean;
-  rules_count?: number;
+export interface BulkEditActionSuccessResponse {
+  success: boolean;
+  rules_count: number;
+  attributes: {
+    results: BulkEditActionResults;
+    summary: BulkEditActionSummary;
+  };
+}
+export interface BulkEditActionErrorResponse {
+  status_code: number;
+  message: string;
   attributes: {
     results: BulkEditActionResults;
     summary: BulkEditActionSummary;
     errors?: NormalizedRuleError[];
   };
 }
+
+export type BulkEditActionResponse = BulkEditActionSuccessResponse | BulkEditActionErrorResponse;
