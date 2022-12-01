@@ -102,6 +102,7 @@ import {
   goToActionsStepTab,
   goToScheduleStepTab,
   importSavedQuery,
+  removeAlertsIndex,
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
@@ -133,6 +134,7 @@ describe('Custom query rules', () => {
 
       cy.log('Filling define section');
       importSavedQuery(this.timelineId);
+      removeAlertsIndex();
       continueWithNextSection();
 
       cy.log('Filling about section');
@@ -215,10 +217,7 @@ describe('Custom query rules', () => {
       cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
       cy.get(DEFINITION_DETAILS).within(() => {
-        getDetails(INDEX_PATTERNS_DETAILS).should(
-          'have.text',
-          ruleFields.defaultIndexPatterns.join('')
-        );
+        getDetails(INDEX_PATTERNS_DETAILS).should('have.text', 'auditbeat-*');
         getDetails(CUSTOM_QUERY_DETAILS).should('have.text', ruleFields.ruleQuery);
         getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
