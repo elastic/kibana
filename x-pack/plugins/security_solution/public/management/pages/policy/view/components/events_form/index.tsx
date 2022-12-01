@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { ThemeContext } from 'styled-components';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import type {
   PolicyOperatingSystem,
   UIPolicyConfig,
@@ -75,6 +76,7 @@ const InnerEventsForm = <T extends OperatingSystem>({
   onValueSelection,
   supplementalOptions,
 }: EventsFormProps<T>) => {
+  const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
   const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
   const theme = useContext(ThemeContext);
   const countSelected = useCallback(() => {
@@ -122,6 +124,7 @@ const InnerEventsForm = <T extends OperatingSystem>({
             data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
             checked={selection[protectionField]}
             onChange={(event) => onValueSelection(protectionField, event.target.checked)}
+            disabled={!canWritePolicyManagement}
           />
         );
       })}
@@ -165,7 +168,10 @@ const InnerEventsForm = <T extends OperatingSystem>({
                       data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
                       checked={selection[protectionField]}
                       onChange={(event) => onValueSelection(protectionField, event.target.checked)}
-                      disabled={isDisabled ? isDisabled(policyDetailsConfig) : false}
+                      disabled={
+                        !canWritePolicyManagement ||
+                        (isDisabled ? isDisabled(policyDetailsConfig) : false)
+                      }
                     />
                   </EuiFlexItem>
                   {tooltipText && (
