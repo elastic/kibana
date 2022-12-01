@@ -10,7 +10,7 @@ import React, { useMemo, useState } from 'react';
 
 import { css } from '@emotion/react';
 import { PhraseFilter } from '@kbn/es-query';
-import { EuiTableRow, EuiTableRowCell, useEuiTheme, EuiBadge } from '@elastic/eui';
+import { EuiTableRow, EuiTableRowCell, useEuiTheme, EuiBadge, EuiPanel } from '@elastic/eui';
 
 import { TermsExplorerTable, TermsExplorerTableProps } from './terms_explorer_table';
 import { TermsExplorerResponseRow } from '../../../../../common/terms_explorer/types';
@@ -38,6 +38,15 @@ export const TermsExplorerTableRow = ({
       background-color: ${euiTheme.colors.lightestShade};
     `,
     [euiTheme.size.m, euiTheme.colors.lightestShade]
+  );
+
+  const panelStyle = useMemo(
+    () => css`
+      background-color: ${euiTheme.colors.emptyShade};
+      border-left: 1px solid ${euiTheme.colors.lightShade};
+      margin-left: ${euiTheme.size.xxl};
+    `,
+    [euiTheme.colors.emptyShade, euiTheme.colors.lightShade, euiTheme.size.xxl]
   );
 
   const { collapseFieldName, dataView, filters, breadcrumbs } = termsExplorerTableProps;
@@ -103,16 +112,18 @@ export const TermsExplorerTableRow = ({
 
     return (
       <EuiTableRowCell colSpan={columns.length} css={expandedRowStyle}>
-        <TermsExplorerTable
-          {...termsExplorerTableProps}
-          isTopLevel={false}
-          breadcrumbs={[
-            ...(breadcrumbs ?? []),
-            `${collapseFieldName} is ${row[collapseFieldName].result}`,
-          ]}
-          filters={[...(filters ?? []), additionalFilter]}
-          collapseFieldName={expandedColumn}
-        />
+        <div css={panelStyle}>
+          <TermsExplorerTable
+            {...termsExplorerTableProps}
+            isTopLevel={false}
+            breadcrumbs={[
+              ...(breadcrumbs ?? []),
+              `${collapseFieldName} is ${row[collapseFieldName].result}`,
+            ]}
+            filters={[...(filters ?? []), additionalFilter]}
+            collapseFieldName={expandedColumn}
+          />
+        </div>
       </EuiTableRowCell>
     );
   };
