@@ -138,40 +138,41 @@ const ActionButton: React.FC<ActionButtonProps> = memo(
     } else {
       return (
         <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              delay="long"
-              content={i18n.translate(
-                'discover.fieldChooser.discoverField.collapseOnFieldTooltip',
-                {
-                  defaultMessage: 'Collapse on field',
-                }
-              )}
-            >
-              <EuiButtonIcon
-                iconType="fold"
-                className={actionBtnClassName}
-                onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-                  if (ev.type === 'click') {
-                    ev.currentTarget.focus();
-                  }
-                  ev.preventDefault();
-                  ev.stopPropagation();
-                  if (setCollapseByField) {
-                    setCollapseByField();
-                  }
-                }}
-                data-test-subj={`groupBy-${field.name}`}
-                aria-label={i18n.translate(
-                  'discover.fieldChooser.discoverField.collapseAriaLabel',
+          {field.type === 'string' && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                delay="long"
+                content={i18n.translate(
+                  'discover.fieldChooser.discoverField.collapseOnFieldTooltip',
                   {
-                    defaultMessage: 'Collapse on {field}',
-                    values: { field: field.name },
+                    defaultMessage: 'Show unique values of field',
                   }
                 )}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
+              >
+                <EuiButtonIcon
+                  iconType="fold"
+                  className={actionBtnClassName}
+                  onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+                    if (ev.type === 'click') {
+                      ev.currentTarget.focus();
+                    }
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    if (setCollapseByField) {
+                      setCollapseByField();
+                    }
+                  }}
+                  aria-label={i18n.translate(
+                    'discover.fieldChooser.discoverField.collapseAriaLabel',
+                    {
+                      defaultMessage: 'Show unique values of {field}',
+                      values: { field: field.name },
+                    }
+                  )}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiToolTip
               delay="long"
