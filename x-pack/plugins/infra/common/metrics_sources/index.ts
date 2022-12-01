@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { indexPatternRt } from '@kbn/io-ts-utils/index_pattern_rt';
 import * as rt from 'io-ts';
 import { omit } from 'lodash';
 import {
@@ -29,6 +30,14 @@ export const metricsSourceConfigurationPropertiesRT = rt.strict({
 export type MetricsSourceConfigurationProperties = rt.TypeOf<
   typeof metricsSourceConfigurationPropertiesRT
 >;
+
+export const partialMetricsSourceConfigurationReqPayloadRT = rt.partial({
+  ...metricsSourceConfigurationPropertiesRT.type.props,
+  metricAlias: indexPatternRt,
+  fields: rt.partial({
+    ...metricsSourceConfigurationPropertiesRT.type.props.fields.type.props,
+  }),
+});
 
 export const partialMetricsSourceConfigurationPropertiesRT = rt.partial({
   ...metricsSourceConfigurationPropertiesRT.type.props,
