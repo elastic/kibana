@@ -9,6 +9,14 @@ Previous versions: {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8
 | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
 [discrete]
+=== Flexible analysis with temporary data views
+
+Create temporary data views on the fly, allowing you to explore and visualize your data before you’re ready to share your insights with others in your organization. When you’re ready, you can save the data view for a fully collaborative experience. For more information, check <<data-views>>.
+
+[role="screenshot"]
+image::images/highlights-adhoc-data-views.gif[Temporary data views in Lens]
+
+[discrete]
 === Visualization editors
 
 [discrete]
