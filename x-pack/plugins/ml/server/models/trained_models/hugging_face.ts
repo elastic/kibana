@@ -12,6 +12,7 @@ import { streamFactory } from '@kbn/aiops-utils';
 import type { KibanaRequest, IScopedClusterClient } from '@kbn/core/server';
 import { queue } from 'async';
 import type { MlConfigType } from '../../../config';
+import { IMPORT_API_ACTION_NAME } from '../../../common/constants/trained_models';
 
 export class HuggingFace {
   private serverUrl: string;
@@ -67,7 +68,7 @@ export class HuggingFace {
 
   public async importModel(modelId: string) {
     function resetAction() {
-      return { type: 'reset' };
+      return { type: IMPORT_API_ACTION_NAME.RESET };
     }
 
     const MAX_CONCURRENT_QUERIES = 5;
@@ -98,23 +99,23 @@ export class HuggingFace {
           const config = await this.getConfig(modelId);
 
           push({
-            type: 'get_config',
+            type: IMPORT_API_ACTION_NAME.GET_CONFIG,
           });
 
           const vocab = await this.getVocabulary(modelId);
 
           push({
-            type: 'get_vocabulary',
+            type: IMPORT_API_ACTION_NAME.GET_VOCABULARY,
           });
 
           await this.putConfig(modelId, config);
           push({
-            type: 'put_config',
+            type: IMPORT_API_ACTION_NAME.PUT_CONFIG,
           });
 
           await this.putVocabulary(modelId, vocab);
           push({
-            type: 'put_vocabulary',
+            type: IMPORT_API_ACTION_NAME.PUT_VOCABULARY,
           });
 
           let completedParts = 0;
@@ -131,13 +132,23 @@ export class HuggingFace {
             });
           }, MAX_CONCURRENT_QUERIES);
 
-          requestQueue.push(Array.from(Array(definitionParts).keys()));
+          requestQueue.error((error) => {
+            requestQueue.kill();
+          });
+
+          requestQueue.push(Array.from(Array(definitionParts).keys()), (error) => {
+            if (error) {
+              requestQueue.kill();
+              push({ type: IMPORT_API_ACTION_NAME.ERROR, error: error.message });
+              end();
+            }
+          });
           await requestQueue.drain();
           push({
-            type: 'complete',
+            type: IMPORT_API_ACTION_NAME.COMPLETE,
           });
         } catch (error) {
-          push({ error });
+          push({ type: IMPORT_API_ACTION_NAME.ERROR, error: error.message });
         }
       };
 
@@ -161,6 +172,9 @@ export class HuggingFace {
       method: 'GET',
       headers: this.authHeader,
     });
+    if (resp.ok === false) {
+      throw new Error('config not found');
+    }
     return resp.json();
   }
 
@@ -200,6 +214,10 @@ export class HuggingFace {
       method: 'GET',
       headers: this.authHeader,
     });
+
+    if (resp.ok === false) {
+      throw new Error('vocabulary not found');
+    }
     return resp.json();
   }
 
@@ -216,6 +234,9 @@ export class HuggingFace {
       method: 'GET',
       headers: this.authHeader,
     });
+    if (resp.ok === false) {
+      throw new Error('definition part not found');
+    }
     return resp.buffer();
   }
 }

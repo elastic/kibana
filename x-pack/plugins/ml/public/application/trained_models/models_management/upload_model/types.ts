@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IMPORT_API_ACTION_NAME } from '../../../../../common/constants/trained_models';
 import { streamReducer } from './utils';
 
 export const API_ENDPOINT = {
@@ -18,35 +19,30 @@ export interface ModelUpload {
   actions: ModelUploadApiAction;
 }
 
-export const API_ACTION_NAME = {
-  GET_CONFIG: 'get_config',
-  GET_VOCABULARY: 'get_vocabulary',
-  PUT_CONFIG: 'put_config',
-  PUT_VOCABULARY: 'put_vocabulary',
-  PUT_DEFINITION_PART: 'put_definition_part',
-  COMPLETE: 'complete',
-  RESET: 'reset',
-} as const;
-export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
+export type ApiActionName = typeof IMPORT_API_ACTION_NAME[keyof typeof IMPORT_API_ACTION_NAME];
 
 interface ApiActionGetConfig {
-  type: typeof API_ACTION_NAME.GET_CONFIG;
+  type: typeof IMPORT_API_ACTION_NAME.GET_CONFIG;
 }
 interface ApiActionGetVocabulary {
-  type: typeof API_ACTION_NAME.GET_VOCABULARY;
+  type: typeof IMPORT_API_ACTION_NAME.GET_VOCABULARY;
 }
 interface ApiActionPutConfig {
-  type: typeof API_ACTION_NAME.PUT_CONFIG;
+  type: typeof IMPORT_API_ACTION_NAME.PUT_CONFIG;
 }
 interface ApiActionPutVocabulary {
-  type: typeof API_ACTION_NAME.PUT_VOCABULARY;
+  type: typeof IMPORT_API_ACTION_NAME.PUT_VOCABULARY;
 }
 interface ApiActionPutDefinitionPart {
-  type: typeof API_ACTION_NAME.PUT_DEFINITION_PART;
+  type: typeof IMPORT_API_ACTION_NAME.PUT_DEFINITION_PART;
   payload: { progress: number };
 }
 interface ApiActionComplete {
-  type: typeof API_ACTION_NAME.COMPLETE;
+  type: typeof IMPORT_API_ACTION_NAME.COMPLETE;
+}
+interface ApiActionError {
+  type: typeof IMPORT_API_ACTION_NAME.ERROR;
+  error: string;
 }
 
 export type ModelUploadApiAction =
@@ -55,4 +51,5 @@ export type ModelUploadApiAction =
   | ApiActionPutConfig
   | ApiActionPutVocabulary
   | ApiActionPutDefinitionPart
-  | ApiActionComplete;
+  | ApiActionComplete
+  | ApiActionError;

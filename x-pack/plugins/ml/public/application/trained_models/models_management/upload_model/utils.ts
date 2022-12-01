@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { ModelUploadApiAction, API_ACTION_NAME } from './types';
+import { IMPORT_API_ACTION_NAME } from '../../../../../common/constants/trained_models';
+import { ModelUploadApiAction } from './types';
 import type { HuggingFaceTrainedModel } from '../../../../../common/types/trained_models';
 
 const HUGGING_FACE_URL = 'https://huggingface.co/';
 interface StreamState {
   type: string;
   progress?: number;
-  errors?: string[];
+  error?: string;
 }
 
 export const initialState: StreamState = {
@@ -28,15 +29,17 @@ export function streamReducer(
   }
 
   switch (action.type) {
-    case API_ACTION_NAME.GET_CONFIG:
-    case API_ACTION_NAME.GET_VOCABULARY:
-    case API_ACTION_NAME.PUT_CONFIG:
-    case API_ACTION_NAME.PUT_VOCABULARY:
-    case API_ACTION_NAME.COMPLETE:
+    case IMPORT_API_ACTION_NAME.GET_CONFIG:
+    case IMPORT_API_ACTION_NAME.GET_VOCABULARY:
+    case IMPORT_API_ACTION_NAME.PUT_CONFIG:
+    case IMPORT_API_ACTION_NAME.PUT_VOCABULARY:
+    case IMPORT_API_ACTION_NAME.COMPLETE:
       return { ...state, type: action.type };
 
-    case API_ACTION_NAME.PUT_DEFINITION_PART:
+    case IMPORT_API_ACTION_NAME.PUT_DEFINITION_PART:
       return { ...state, type: action.type, progress: action.payload.progress };
+    case IMPORT_API_ACTION_NAME.ERROR:
+      return { ...state, type: action.type, error: action.error };
 
     default:
       return state;

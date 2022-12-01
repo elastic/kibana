@@ -37,3 +37,14 @@ export const BUILT_IN_MODEL_TYPE = i18n.translate(
   'xpack.ml.trainedModels.modelsList.builtInModelLabel',
   { defaultMessage: 'built-in' }
 );
+
+export const IMPORT_API_ACTION_NAME = {
+  GET_CONFIG: 'get_config',
+  GET_VOCABULARY: 'get_vocabulary',
+  PUT_CONFIG: 'put_config',
+  PUT_VOCABULARY: 'put_vocabulary',
+  PUT_DEFINITION_PART: 'put_definition_part',
+  COMPLETE: 'complete',
+  RESET: 'reset',
+  ERROR: 'error',
+} as const;

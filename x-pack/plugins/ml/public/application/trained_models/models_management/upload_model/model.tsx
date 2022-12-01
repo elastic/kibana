@@ -20,10 +20,12 @@ import {
 import './style.scss';
 
 import { useFetchStream } from '@kbn/aiops-utils';
-import { ModelUpload, API_ACTION_NAME } from './types';
+import { IMPORT_API_ACTION_NAME } from '../../../../../common/constants/trained_models';
+import { ModelUpload } from './types';
 import { streamReducer, initialState, getHuggingFaceUrl } from './utils';
 import { useMlKibana } from '../../../contexts/kibana';
 import { HuggingFaceTrainedModel } from '../../../../../common/types/trained_models';
+import { useToastNotificationService } from '../../../services/toast_notification_service';
 
 enum IMPORT_STEP {
   NOT_STARTED,
@@ -34,6 +36,7 @@ enum IMPORT_STEP {
   PUT_DEFINITION_PART,
   SYNCING_SAVED_OBJECTS,
   FINISHED,
+  ERROR,
 }
 
 interface Props {
@@ -53,6 +56,7 @@ export const Model: FC<Props> = ({ model, installed, hidden, refreshModels }) =>
       },
     },
   } = useMlKibana();
+  const { displayErrorToast } = useToastNotificationService();
   const basePath = http.basePath.get() ?? '';
 
   const [startModel, setStartModel] = useState<boolean>(false);
@@ -91,28 +95,33 @@ export const Model: FC<Props> = ({ model, installed, hidden, refreshModels }) =>
 
     let tempStep = currentStep;
     switch (data.type) {
-      case API_ACTION_NAME.GET_CONFIG:
+      case IMPORT_API_ACTION_NAME.GET_CONFIG:
         tempStep = IMPORT_STEP.GET_CONFIG;
         break;
 
-      case API_ACTION_NAME.GET_VOCABULARY:
+      case IMPORT_API_ACTION_NAME.GET_VOCABULARY:
         tempStep = IMPORT_STEP.GET_VOCABULARY;
         break;
 
-      case API_ACTION_NAME.PUT_CONFIG:
+      case IMPORT_API_ACTION_NAME.PUT_CONFIG:
         tempStep = IMPORT_STEP.PUT_CONFIG;
         break;
 
-      case API_ACTION_NAME.PUT_VOCABULARY:
+      case IMPORT_API_ACTION_NAME.PUT_VOCABULARY:
         tempStep = IMPORT_STEP.PUT_VOCABULARY;
         break;
 
-      case API_ACTION_NAME.PUT_DEFINITION_PART:
+      case IMPORT_API_ACTION_NAME.PUT_DEFINITION_PART:
         tempStep = IMPORT_STEP.PUT_DEFINITION_PART;
         break;
 
-      case API_ACTION_NAME.COMPLETE:
+      case IMPORT_API_ACTION_NAME.COMPLETE:
         tempStep = IMPORT_STEP.SYNCING_SAVED_OBJECTS;
+        break;
+
+      case IMPORT_API_ACTION_NAME.ERROR:
+        tempStep = IMPORT_STEP.ERROR;
+
         break;
 
       default:
@@ -125,6 +134,12 @@ export const Model: FC<Props> = ({ model, installed, hidden, refreshModels }) =>
       setProgress(data.progress);
     }
   }, [currentStep, data, isRunning]);
+
+  useEffect(() => {
+    if (data.type === IMPORT_API_ACTION_NAME.ERROR) {
+      displayErrorToast(data.error, 'Error importing model');
+    }
+  }, [data, displayErrorToast]);
 
   useEffect(() => {
     let tempProgress = currentStep === 0 ? 0 : currentStep * 5 - 5;
@@ -144,6 +159,11 @@ export const Model: FC<Props> = ({ model, installed, hidden, refreshModels }) =>
         setGlobalIsRunning(false);
         refreshModels();
       });
+    } else if (currentStep === IMPORT_STEP.ERROR) {
+      setFinished(true);
+      setGlobalIsRunning(false);
+      setOverallProgress(0);
+      setProgress(0);
     }
   }, [currentStep, progress, refreshModels, syncSavedObjects]);
 

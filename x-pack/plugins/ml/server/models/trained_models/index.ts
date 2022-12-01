@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { HuggingFace } from './huggin_face';
+export { HuggingFace } from './hugging_face';
