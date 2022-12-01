@@ -49,7 +49,7 @@ export function ActionsAPIServiceProvider({ getService }: FtrProviderContext) {
 
     async deleteAllConnectors() {
       const { body } = await kbnSupertest
-        .get(`/api/actions/connectors`) 
+        .get(`/api/actions/connectors`)
         .set('kbn-xsrf', 'foo')
         .expect(200);
 

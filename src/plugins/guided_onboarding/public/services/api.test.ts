@@ -11,7 +11,7 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { GuideState } from '@kbn/guided-onboarding';
 import { firstValueFrom, Subscription } from 'rxjs';
 
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH, testGuideConfig } from '../../common';
 import { ApiService } from './api';
 import {
   testGuide,
@@ -129,9 +129,9 @@ describe('GuidedOnboarding ApiService', () => {
 
   describe('activateGuide', () => {
     it('activates a new guide', async () => {
-      // update the mock to no active guides
-      httpClient.get.mockResolvedValue({
-        pluginState: mockPluginStateNotStarted,
+      // mock the get config request
+      httpClient.get.mockResolvedValueOnce({
+        config: testGuideConfig,
       });
       apiService.setup(httpClient, true);
 
@@ -305,8 +305,11 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it(`marks the step as 'ready_to_complete' if it's configured for manual completion`, async () => {
-      httpClient.get.mockResolvedValue({
+      httpClient.get.mockResolvedValueOnce({
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep2InProgressState },
+      });
+      httpClient.get.mockResolvedValueOnce({
+        config: testGuideConfig,
       });
       apiService.setup(httpClient, true);
 
@@ -329,7 +332,7 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('marks the guide as "ready_to_complete" if the current step is the last step in the guide and configured for manual completion', async () => {
-      httpClient.get.mockResolvedValue({
+      httpClient.get.mockResolvedValueOnce({
         pluginState: {
           ...mockPluginStateInProgress,
           activeGuide: {
@@ -340,6 +343,9 @@ describe('GuidedOnboarding ApiService', () => {
             ],
           },
         },
+      });
+      httpClient.get.mockResolvedValueOnce({
+        config: testGuideConfig,
       });
       apiService.setup(httpClient, true);
 
@@ -402,8 +408,11 @@ describe('GuidedOnboarding ApiService', () => {
 
   describe('isGuidedOnboardingActiveForIntegration$', () => {
     it('returns true if the integration is part of the active step', (done) => {
-      httpClient.get.mockResolvedValue({
+      httpClient.get.mockResolvedValueOnce({
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
+      });
+      httpClient.get.mockResolvedValueOnce({
+        config: testGuideConfig,
       });
       apiService.setup(httpClient, true);
       subscription = apiService
@@ -449,8 +458,11 @@ describe('GuidedOnboarding ApiService', () => {
 
   describe('completeGuidedOnboardingForIntegration', () => {
     it(`completes the step if it's active for the integration`, async () => {
-      httpClient.get.mockResolvedValue({
+      httpClient.get.mockResolvedValueOnce({
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
+      });
+      httpClient.get.mockResolvedValueOnce({
+        config: testGuideConfig,
       });
       apiService.setup(httpClient, true);
 
@@ -482,6 +494,26 @@ describe('GuidedOnboarding ApiService', () => {
     });
   });
 
+  describe('skipGuidedOnboarding', () => {
+    it(`sends a request to the put state API`, async () => {
+      await apiService.skipGuidedOnboarding();
+      expect(httpClient.put).toHaveBeenCalledTimes(1);
+      // this assertion depends on the guides config
+      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
+        body: JSON.stringify({ status: 'skipped' }),
+      });
+    });
+  });
+
+  describe('getGuideConfig', () => {
+    it('sends a request to the get config API', async () => {
+      apiService.setup(httpClient, true);
+      await apiService.getGuideConfig(testGuide);
+      expect(httpClient.get).toHaveBeenCalledTimes(1);
+      expect(httpClient.get).toHaveBeenCalledWith(`${API_BASE_PATH}/configs/${testGuide}`);
+    });
+  });
+
   describe('no API requests are sent on self-managed deployments', () => {
     beforeEach(() => {
       apiService.setup(httpClient, false);
@@ -500,6 +532,11 @@ describe('GuidedOnboarding ApiService', () => {
     it('updatePluginState', async () => {
       await apiService.updatePluginState({}, false);
       expect(httpClient.put).not.toHaveBeenCalled();
+    });
+
+    it('getGuideConfig', async () => {
+      await apiService.getGuideConfig(testGuide);
+      expect(httpClient.get).not.toHaveBeenCalled();
     });
   });
 });
