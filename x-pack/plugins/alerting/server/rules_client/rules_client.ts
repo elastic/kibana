@@ -2233,30 +2233,25 @@ export class RulesClient {
     const taskIdsToDelete: string[] = [];
     const errors: BulkOperationError[] = [];
 
-    withSpan(
-      { name: 'Collect errors, api keys and task ids to delete', type: 'rules' },
-      async () => {
-        result.statuses.forEach((status) => {
-          if (status.error === undefined) {
-            if (apiKeyToRuleIdMapping[status.id]) {
-              apiKeysToInvalidate.push(apiKeyToRuleIdMapping[status.id]);
-            }
-            if (taskIdToRuleIdMapping[status.id]) {
-              taskIdsToDelete.push(taskIdToRuleIdMapping[status.id]);
-            }
-          } else {
-            errors.push({
-              message: status.error.message ?? 'n/a',
-              status: status.error.statusCode,
-              rule: {
-                id: status.id,
-                name: ruleNameToRuleIdMapping[status.id] ?? 'n/a',
-              },
-            });
-          }
+    result.statuses.forEach((status) => {
+      if (status.error === undefined) {
+        if (apiKeyToRuleIdMapping[status.id]) {
+          apiKeysToInvalidate.push(apiKeyToRuleIdMapping[status.id]);
+        }
+        if (taskIdToRuleIdMapping[status.id]) {
+          taskIdsToDelete.push(taskIdToRuleIdMapping[status.id]);
+        }
+      } else {
+        errors.push({
+          message: status.error.message ?? 'n/a',
+          status: status.error.statusCode,
+          rule: {
+            id: status.id,
+            name: ruleNameToRuleIdMapping[status.id] ?? 'n/a',
+          },
         });
       }
-    );
+    });
 
     return { apiKeysToInvalidate, errors, taskIdsToDelete };
   };
@@ -2759,15 +2754,13 @@ export class RulesClient {
 
     const taskIdsFailedToBeEnabled = await this.tryToEnableTasks({ taskIdsToEnable });
 
-    const updatedRules = await withSpan({ name: 'getAlertFromRaw', type: 'rules' }, async () =>
-      rules.map(({ id, attributes, references }) =>
-        this.getAlertFromRaw(
-          id,
-          attributes.alertTypeId as string,
-          attributes as RawRule,
-          references,
-          false
-        )
+    const updatedRules = rules.map(({ id, attributes, references }) =>
+      this.getAlertFromRaw(
+        id,
+        attributes.alertTypeId as string,
+        attributes as RawRule,
+        references,
+        false
       )
     );
 
@@ -2803,10 +2796,7 @@ export class RulesClient {
             try {
               if (rule.attributes.actions.length) {
                 try {
-                  await withSpan(
-                    { name: 'actionsAuthorization.ensureAuthorized', type: 'rules' },
-                    async () => await this.actionsAuthorization.ensureAuthorized('execute')
-                  );
+                  await this.actionsAuthorization.ensureAuthorized('execute')
                 } catch (error) {
                   throw Error(`Rule not authorized for bulk enable - ${error.message}`);
                 }
@@ -2840,13 +2830,15 @@ export class RulesClient {
 
               let scheduledTaskId;
               if (shouldScheduleTask) {
-                const scheduledTask = await this.scheduleTask({
-                  id: rule.id,
-                  consumer: rule.attributes.consumer,
-                  ruleTypeId: rule.attributes.alertTypeId,
-                  schedule: rule.attributes.schedule as IntervalSchedule,
-                  throwOnConflict: false,
-                });
+                const scheduledTask = await withSpan({ name: 'scheduleTask', type: 'rules' }, () =>
+                  this.scheduleTask({
+                    id: rule.id,
+                    consumer: rule.attributes.consumer,
+                    ruleTypeId: rule.attributes.alertTypeId,
+                    schedule: rule.attributes.schedule as IntervalSchedule,
+                    throwOnConflict: false,
+                  })
+                );
                 scheduledTaskId = scheduledTask.id;
               }
 
@@ -2896,76 +2888,77 @@ export class RulesClient {
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
     const taskIdsToEnable: string[] = [];
 
-    withSpan({ name: 'Collect errors, task ids to enable', type: 'rules' }, async () => {
-      result.saved_objects.forEach((rule) => {
-        if (rule.error === undefined) {
-          if (rule.attributes.scheduledTaskId) {
-            taskIdsToEnable.push(rule.attributes.scheduledTaskId);
-          }
-          rules.push(rule);
-        } else {
-          errors.push({
-            message: rule.error.message ?? 'n/a',
-            status: rule.error.statusCode,
-            rule: {
-              id: rule.id,
-              name: ruleNameToRuleIdMapping[rule.id] ?? 'n/a',
-            },
-          });
+    result.saved_objects.forEach((rule) => {
+      if (rule.error === undefined) {
+        if (rule.attributes.scheduledTaskId) {
+          taskIdsToEnable.push(rule.attributes.scheduledTaskId);
         }
-      });
+        rules.push(rule);
+      } else {
+        errors.push({
+          message: rule.error.message ?? 'n/a',
+          status: rule.error.statusCode,
+          rule: {
+            id: rule.id,
+            name: ruleNameToRuleIdMapping[rule.id] ?? 'n/a',
+          },
+        });
+      }
     });
+
     return { errors, rules, accListSpecificForBulkOperation: [taskIdsToEnable] };
   };
 
   private recoverRuleAlerts = async (id: string, attributes: RawRule) => {
-    if (!this.eventLogger || !attributes.scheduledTaskId) return;
-    try {
-      const { state } = taskInstanceToAlertTaskInstance(
-        await this.taskManager.get(attributes.scheduledTaskId),
-        attributes as unknown as SanitizedRule
-      );
+    return withSpan({ name: 'recoverRuleAlerts', type: 'rules' }, async () => {
+      if (!this.eventLogger || !attributes.scheduledTaskId) return;
+      try {
+        const { state } = taskInstanceToAlertTaskInstance(
+          await this.taskManager.get(attributes.scheduledTaskId),
+          attributes as unknown as SanitizedRule
+        );
 
-      const recoveredAlerts = mapValues<Record<string, RawAlert>, Alert>(
-        state.alertInstances ?? {},
-        (rawAlertInstance, alertId) => new Alert(alertId, rawAlertInstance)
-      );
-      const recoveredAlertIds = Object.keys(recoveredAlerts);
+        const recoveredAlerts = mapValues<Record<string, RawAlert>, Alert>(
+          state.alertInstances ?? {},
+          (rawAlertInstance, alertId) => new Alert(alertId, rawAlertInstance)
+        );
+        const recoveredAlertIds = Object.keys(recoveredAlerts);
 
-      for (const alertId of recoveredAlertIds) {
-        const { group: actionGroup } = recoveredAlerts[alertId].getLastScheduledActions() ?? {};
-        const instanceState = recoveredAlerts[alertId].getState();
-        const message = `instance '${alertId}' has recovered due to the rule was disabled`;
+        for (const alertId of recoveredAlertIds) {
+          const { group: actionGroup } = recoveredAlerts[alertId].getLastScheduledActions() ?? {};
+          const instanceState = recoveredAlerts[alertId].getState();
+          const message = `instance '${alertId}' has recovered due to the rule was disabled`;
 
-        const event = createAlertEventLogRecordObject({
-          ruleId: id,
-          ruleName: attributes.name,
-          ruleType: this.ruleTypeRegistry.get(attributes.alertTypeId),
-          consumer: attributes.consumer,
-          instanceId: alertId,
-          action: EVENT_LOG_ACTIONS.recoveredInstance,
-          message,
-          state: instanceState,
-          group: actionGroup,
-          namespace: this.namespace,
-          spaceId: this.spaceId,
-          savedObjects: [
-            {
-              id,
-              type: 'alert',
-              typeId: attributes.alertTypeId,
-              relation: SAVED_OBJECT_REL_PRIMARY,
-            },
-          ],
-        });
-        this.eventLogger.logEvent(event);
+          const event = createAlertEventLogRecordObject({
+            ruleId: id,
+            ruleName: attributes.name,
+            ruleType: this.ruleTypeRegistry.get(attributes.alertTypeId),
+            consumer: attributes.consumer,
+            instanceId: alertId,
+            action: EVENT_LOG_ACTIONS.recoveredInstance,
+            message,
+            state: instanceState,
+            group: actionGroup,
+            namespace: this.namespace,
+            spaceId: this.spaceId,
+            savedObjects: [
+              {
+                id,
+                type: 'alert',
+                typeId: attributes.alertTypeId,
+                relation: SAVED_OBJECT_REL_PRIMARY,
+              },
+            ],
+          });
+          this.eventLogger.logEvent(event);
+        }
+      } catch (error) {
+        // this should not block the rest of the disable process
+        this.logger.warn(
+          `rulesClient.disable('${id}') - Could not write recovery events - ${error.message}`
+        );
       }
-    } catch (error) {
-      // this should not block the rest of the disable process
-      this.logger.warn(
-        `rulesClient.disable('${id}') - Could not write recovery events - ${error.message}`
-      );
-    }
+    });
   };
 
   private tryToDisableTasks = async ({ taskIdsToDisable }: { taskIdsToDisable: string[] }) => {
@@ -3081,7 +3074,9 @@ export class RulesClient {
                 ...rule.attributes,
                 enabled: false,
                 scheduledTaskId:
-                  rule.attributes.scheduledTaskId === rule.id ? rule.attributes.scheduledTaskId : null,
+                  rule.attributes.scheduledTaskId === rule.id
+                    ? rule.attributes.scheduledTaskId
+                    : null,
                 updatedBy: username,
                 updatedAt: new Date().toISOString(),
               });
@@ -3132,28 +3127,26 @@ export class RulesClient {
     const taskIdsToDelete: string[] = [];
     const disabledRules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
 
-    withSpan({ name: 'Collect errors, task ids to disable', type: 'rules' }, async () => {
-      result.saved_objects.forEach((rule) => {
-        if (rule.error === undefined) {
-          if (rule.attributes.scheduledTaskId) {
-            if (rule.attributes.scheduledTaskId !== rule.id) {
-              taskIdsToDelete.push(rule.attributes.scheduledTaskId);
-            } else {
-              taskIdsToDisable.push(rule.attributes.scheduledTaskId);
-            }
+    result.saved_objects.forEach((rule) => {
+      if (rule.error === undefined) {
+        if (rule.attributes.scheduledTaskId) {
+          if (rule.attributes.scheduledTaskId !== rule.id) {
+            taskIdsToDelete.push(rule.attributes.scheduledTaskId);
+          } else {
+            taskIdsToDisable.push(rule.attributes.scheduledTaskId);
           }
-          disabledRules.push(rule);
-        } else {
-          errors.push({
-            message: rule.error.message ?? 'n/a',
-            status: rule.error.statusCode,
-            rule: {
-              id: rule.id,
-              name: ruleNameToRuleIdMapping[rule.id] ?? 'n/a',
-            },
-          });
         }
-      });
+        disabledRules.push(rule);
+      } else {
+        errors.push({
+          message: rule.error.message ?? 'n/a',
+          status: rule.error.statusCode,
+          rule: {
+            id: rule.id,
+            name: ruleNameToRuleIdMapping[rule.id] ?? 'n/a',
+          },
+        });
+      }
     });
 
     return { errors, rules: disabledRules, taskIdsToDisable, taskIdsToDelete };
