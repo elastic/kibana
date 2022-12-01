@@ -80,7 +80,7 @@ You can do that by selecting *Use without saving* in the *Create {data-source}* 
 or *Lens*. With a temporary {data-source}, you can
 do everything you'd do with a saved
 {data-source},
-including adding fields and creating an {es} query alert. Your work won't be visible to others in your space.
+such as adding fields and creating {es} query alerts. Your work won't be visible to others in your space.
 
 A temporary {data-source} remains in your space until you change apps, or until you save it.
 Temporary {data-sources} are not available in *Stack Management.*
