@@ -8,7 +8,6 @@
 export {
   ComparatorFns,
   getComparatorScript,
-  getComparatorSchemaType,
   ComparatorFnNames,
   getHumanReadableComparator,
 } from './comparator';

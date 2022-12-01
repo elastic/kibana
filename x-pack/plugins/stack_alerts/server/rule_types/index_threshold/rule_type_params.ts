@@ -11,8 +11,9 @@ import {
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
 } from '@kbn/triggers-actions-ui-plugin/server';
-import { ComparatorFnNames, getComparatorSchemaType } from '../../../common';
+import { ComparatorFnNames } from '../../../common';
 import { Comparator } from '../../../common/comparator_types';
+import { getComparatorSchemaType } from '../lib/comparator';
 
 // rule type parameters
 
