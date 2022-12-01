@@ -20,7 +20,7 @@ kbnEs
     'source-path': resolve(__dirname, '../../elasticsearch'),
     'base-path': resolve(__dirname, '../.es/es-2'),
     ssl: false,
-    esArgs: ['http.port=8200'/*, 'network.publish_host=8300'*/, 'cluster.name=cluster2'],
+    esArgs: ['http.port=8200' /*, 'network.publish_host=8300'*/, 'cluster.name=cluster2'],
   })
   .catch(function (e) {
     console.error(e);
