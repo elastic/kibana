@@ -789,4 +789,15 @@ export class DashboardPageObject extends FtrService {
   public async getPanelChartDebugState(panelIndex: number) {
     return await this.elasticChart.getChartDebugData(undefined, panelIndex);
   }
+
+  public async isNotificationExists(panelIndex = 0) {
+    const panel = (await this.getDashboardPanels())[panelIndex];
+    try {
+      const notification = await panel.findByClassName('embPanel__optionsMenuPopover-notification');
+      return Boolean(notification);
+    } catch (e) {
+      // if not found then this is false
+      return false;
+    }
+  }
 }

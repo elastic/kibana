@@ -17,7 +17,7 @@ import { IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { VisualizeEmbeddable } from '../embeddable';
 import { DASHBOARD_VISUALIZATION_PANEL_TRIGGER } from '../triggers';
-import { getUiActions, getApplication } from '../services';
+import { getUiActions, getApplication, getEmbeddable } from '../services';
 
 export const ACTION_EDIT_IN_LENS = 'ACTION_EDIT_IN_LENS';
 
@@ -65,6 +65,9 @@ export class EditInLensAction implements Action<EditInLensContext> {
       application.currentAppId$
         .pipe(take(1))
         .subscribe((appId: string | undefined) => (this.currentAppId = appId));
+      application.currentAppId$.subscribe(() => {
+        getEmbeddable().getStateTransfer().isTransferInProgress = false;
+      });
     }
     const { embeddable } = context;
     if (isVisualizeEmbeddable(embeddable)) {
@@ -89,6 +92,7 @@ export class EditInLensAction implements Action<EditInLensContext> {
         searchQuery,
       };
       if (navigateToLensConfig) {
+        getEmbeddable().getStateTransfer().isTransferInProgress = true;
         getUiActions().getTrigger(DASHBOARD_VISUALIZATION_PANEL_TRIGGER).exec(updatedWithMeta);
       }
     }
