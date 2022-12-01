@@ -212,7 +212,7 @@ describe('aggregate()', () => {
             },
           },
           tags: {
-            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
+            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: 50 },
           },
         },
       },
@@ -267,7 +267,7 @@ describe('aggregate()', () => {
             },
           },
           tags: {
-            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
+            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: 50 },
           },
         },
       },

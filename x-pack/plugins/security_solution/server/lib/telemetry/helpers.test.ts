@@ -946,7 +946,7 @@ describe('test create task metrics', () => {
       end_time: endTime,
       ...rest
     } = response;
-    expect(timeExecutedInMs).toBeGreaterThan(10);
+    expect(timeExecutedInMs).toBeGreaterThanOrEqual(10);
     expect(rest).toEqual({
       name: 'test',
       passed: true,
