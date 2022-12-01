@@ -9,10 +9,13 @@
 import type { IRouter } from '@kbn/core/server';
 import { registerGetGuideStateRoute } from './guide_state_routes';
 import { registerGetPluginStateRoute, registerPutPluginStateRoute } from './plugin_state_routes';
+import { registerGetConfigRoute } from './config_routes';
 
 export function defineRoutes(router: IRouter) {
   registerGetGuideStateRoute(router);
 
   registerGetPluginStateRoute(router);
   registerPutPluginStateRoute(router);
+
+  registerGetConfigRoute(router);
 }

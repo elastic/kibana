@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export const nodesByIndices: () => (shards: any, nodes: any) => any;
+import type { FtrProviderContext } from '../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Sanity checks', () => {
+    loadTestFile(require.resolve('./login_page'));
+  });
+}
