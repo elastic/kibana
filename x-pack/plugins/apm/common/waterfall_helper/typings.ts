@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { ErrorRaw } from '../../typings/es_schemas/raw/error_raw';
 import { EventOutcome } from '../../typings/es_schemas/raw/fields/event_outcome';
+import { Faas } from '../../typings/es_schemas/raw/fields/faas';
 import { Http } from '../../typings/es_schemas/raw/fields/http';
+import { Service } from '../../typings/es_schemas/raw/fields/service';
+import { SpanLink } from '../../typings/es_schemas/raw/fields/span_links';
 import { Stackframe } from '../../typings/es_schemas/raw/fields/stackframe';
 import { TimestampUs } from '../../typings/es_schemas/raw/fields/timestamp_us';
 import { Url } from '../../typings/es_schemas/raw/fields/url';
 import { Agent } from '../../typings/es_schemas/ui/fields/agent';
-import { Span } from '../../typings/es_schemas/ui/span';
 import { Transaction } from '../../typings/es_schemas/ui/transaction';
 
 // API return type
 export interface TraceItems {
   exceedsMax: boolean;
-  traceDocs: Array<Transaction | Span>;
+  traceDocs: Array<WaterfallTransactionDoc | WaterfallSpanDoc>;
   errorDocs: WaterfallErrorDoc[];
   linkedChildrenOfSpanCountBySpanId: Record<string, number>;
 }
@@ -68,11 +71,13 @@ export interface WaterfallErrorDoc {
 export type IWaterfallError = IWaterfallItemBase<WaterfallErrorDoc, 'error'>;
 
 interface WaterfallTransactionSpanBaseDoc {
+  '@timestamp': number;
   timestamp: TimestampUs;
   trace: { id: string };
-  service: {
-    name: string;
-  };
+  service: Service;
+  agent: Agent;
+  event?: { outcome?: EventOutcome };
+  parent?: { id: string };
 }
 
 /*
@@ -80,10 +85,21 @@ interface WaterfallTransactionSpanBaseDoc {
  */
 export interface WaterfallTransactionDoc
   extends WaterfallTransactionSpanBaseDoc {
-  transaction: {};
+  processor: { event: ProcessorEvent.transaction };
+  transaction: {
+    duration: { us: number };
+    id: string;
+    name: string;
+    type: string;
+    result?: string;
+  };
+  faas?: Faas;
+  span?: {
+    links?: SpanLink[];
+  };
 }
 export type IWaterfallTransaction = IWaterfallTransactionSpanItemBase<
-  Transaction,
+  WaterfallTransactionDoc,
   'transaction'
 >;
 
@@ -91,6 +107,7 @@ export type IWaterfallTransaction = IWaterfallTransactionSpanItemBase<
  * Custom waterfall span doc
  */
 export interface WaterfallSpanDoc extends WaterfallTransactionSpanBaseDoc {
+  processor: { event: ProcessorEvent.span };
   span: {
     subtype?: string;
     type: string;
@@ -103,6 +120,7 @@ export interface WaterfallSpanDoc extends WaterfallTransactionSpanBaseDoc {
     };
     sync?: boolean;
     duration: { us: number };
+    links?: SpanLink[];
     // from this point on all fields are used in the flyout
     stacktrace?: Stackframe[];
     db?: {
@@ -125,9 +143,7 @@ export interface WaterfallSpanDoc extends WaterfallTransactionSpanBaseDoc {
       };
     };
   };
-  agent: Agent;
   child?: { id: string[] };
-  event?: { outcome?: EventOutcome };
   // from this point on all fields are used in the flyout
   url?: Url;
   http?: Http;

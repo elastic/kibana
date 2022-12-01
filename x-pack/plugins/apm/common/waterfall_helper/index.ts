@@ -8,9 +8,9 @@
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { first, flatten, groupBy, isEmpty, keyBy, sortBy, uniq } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import type { Span } from '../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../typings/es_schemas/ui/transaction';
 import {
+  EntryWaterfallTransaction,
   IWaterfall,
   IWaterfallError,
   IWaterfallSpan,
@@ -19,6 +19,8 @@ import {
   RootTransaction,
   WaterfallErrorDoc,
   WaterfallLegendType,
+  WaterfallSpanDoc,
+  WaterfallTransactionDoc,
 } from './typings';
 import type { TraceItems } from './typings';
 
@@ -28,19 +30,21 @@ interface IWaterfallGroup {
 
 const ROOT_ID = 'root';
 
-function getLegendValues(transactionOrSpan: Transaction | Span) {
+function getLegendValues(
+  transactionOrSpan: WaterfallTransactionDoc | WaterfallSpanDoc
+) {
   return {
     [WaterfallLegendType.ServiceName]: transactionOrSpan.service.name,
     [WaterfallLegendType.SpanType]:
       transactionOrSpan.processor.event === ProcessorEvent.span
-        ? (transactionOrSpan as Span).span.subtype ||
-          (transactionOrSpan as Span).span.type
+        ? (transactionOrSpan as WaterfallSpanDoc).span.subtype ||
+          (transactionOrSpan as WaterfallSpanDoc).span.type
         : '',
   };
 }
 
 function getTransactionItem(
-  transaction: Transaction,
+  transaction: WaterfallTransactionDoc,
   linkedChildrenCount: number = 0
 ): IWaterfallTransaction {
   return {
@@ -61,7 +65,7 @@ function getTransactionItem(
 }
 
 function getSpanItem(
-  span: Span,
+  span: WaterfallSpanDoc,
   linkedChildrenCount: number = 0
 ): IWaterfallSpan {
   return {
@@ -139,7 +143,7 @@ export function getClockSkew(
 
 export function getOrderedWaterfallItems(
   childrenByParentId: IWaterfallGroup,
-  entryWaterfallTransaction?: IWaterfallTransaction
+  entryWaterfallTransaction?: EntryWaterfallTransaction
 ) {
   if (!entryWaterfallTransaction) {
     return [];
@@ -236,21 +240,20 @@ const getWaterfallDuration = (waterfallItems: IWaterfallSpanOrTransaction[]) =>
   );
 
 const getWaterfallItems = (
-  items: Array<Transaction | Span>,
+  items: Array<WaterfallTransactionDoc | WaterfallSpanDoc>,
   linkedChildrenOfSpanCountBySpanId: Record<string, number>
 ) =>
   items.map((item) => {
-    const docType: 'span' | 'transaction' = item.processor.event;
-    switch (docType) {
-      case 'span': {
-        const span = item as Span;
+    switch (item.processor.event) {
+      case ProcessorEvent.span: {
+        const span = item as WaterfallSpanDoc;
         return getSpanItem(
           span,
           linkedChildrenOfSpanCountBySpanId[span.span.id]
         );
       }
-      case 'transaction':
-        const transaction = item as Transaction;
+      case ProcessorEvent.transaction:
+        const transaction = item as WaterfallTransactionDoc;
         return getTransactionItem(
           transaction,
           linkedChildrenOfSpanCountBySpanId[transaction.transaction.id]
@@ -294,10 +297,10 @@ const getChildrenGroupedByParentId = (
 const getEntryWaterfallTransaction = (
   entryTransactionId: string,
   waterfallItems: IWaterfallSpanOrTransaction[]
-): IWaterfallTransaction | undefined =>
+): EntryWaterfallTransaction | undefined =>
   waterfallItems.find(
     (item) => item.docType === 'transaction' && item.id === entryTransactionId
-  ) as IWaterfallTransaction;
+  ) as EntryWaterfallTransaction;
 
 function isInEntryTransaction(
   parentIdLookup: Map<string, string>,
