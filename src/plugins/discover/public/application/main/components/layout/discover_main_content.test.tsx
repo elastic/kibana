@@ -20,7 +20,7 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../hooks/use_saved_search';
-import { discoverServiceMock } from '../../../../__mocks__/services';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
@@ -41,10 +41,7 @@ const mountComponent = async ({
   isPlainRecord?: boolean;
   viewMode?: VIEW_MODE;
 } = {}) => {
-  const services = discoverServiceMock;
-  services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
-    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-  };
+  const services = createDiscoverServicesMock();
 
   (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
     language: 'kuery',
