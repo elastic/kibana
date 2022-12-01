@@ -4,104 +4,105 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// @ts-nocheck // REMOVE
-import React, { FC } from 'react';
-// import { EuiSpacer } from '@elastic/eui';
-// import { JobCreatorContext } from '../../../job_creator_context';
-// import { RareJobCreator } from '../../../../../common/job_creator';
-// import { Results, Anomaly } from '../../../../../common/results_loader';
-// import { LineChartPoint } from '../../../../../common/chart_loader';
-// import { EventRateChart } from '../../../charts/event_rate_chart';
 
-// import { RARE_DETECTOR_TYPE } from './rare_view';
-// import { DetectorDescription } from './detector_description';
-
-// const DTR_IDX = 0;
+import React, { FC, useContext, useEffect, useState } from 'react';
+import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
+import { GeoJobCreator } from '../../../../../common/job_creator';
+import { JobCreatorContext } from '../../../job_creator_context';
+import { SplitCards, useAnimateSplit } from '../split_cards';
+import { MlEmbeddedMapComponent } from '../../../../../../../components/ml_embedded_map';
+import { useMlKibana } from '../../../../../../../contexts/kibana';
+import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
+import { DetectorTitle } from '../detector_title';
 
 export const GeoDetectorsSummary: FC = () => {
-  // const {
-  //   jobCreator: jc,
-  //   chartLoader,
-  //   resultsLoader,
-  //   chartInterval,
-  //   jobCreatorUpdated,
-  // } = useContext(JobCreatorContext);
-  // const jobCreator = jc as RareJobCreator;
+  const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
+  const [fieldValues, setFieldValues] = useState<string[]>([]);
 
-  // const [loadingData, setLoadingData] = useState(false);
-  // const [anomalyData, setAnomalyData] = useState<Anomaly[]>([]);
-  // const [eventRateChartData, setEventRateChartData] = useState<LineChartPoint[]>([]);
-  // const [jobIsRunning, setJobIsRunning] = useState(false);
+  const { jobCreator: jc, chartLoader } = useContext(JobCreatorContext);
+  const jobCreator = jc as GeoJobCreator;
+  const geoField = jobCreator.geoField;
+  const splitField = jobCreator.splitField;
+  const dataViewId = jobCreator.indexPatternId;
 
-  // const rareDetectorType = useMemo(() => {
-  //   if (jobCreator.rareField !== null) {
-  //     if (jobCreator.populationField === null) {
-  //       return RARE_DETECTOR_TYPE.RARE;
-  //     } else {
-  //       return jobCreator.frequentlyRare
-  //         ? RARE_DETECTOR_TYPE.FREQ_RARE_POPULATION
-  //         : RARE_DETECTOR_TYPE.RARE_POPULATION;
-  //     }
-  //   } else {
-  //     return RARE_DETECTOR_TYPE.RARE;
-  //   }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [jobCreatorUpdated]);
+  const {
+    services: { maps: mapsPlugin, data, notifications },
+  } = useMlKibana();
+  const animateSplit = useAnimateSplit();
 
-  // function setResultsWrapper(results: Results) {
-  //   const anomalies = results.anomalies[DTR_IDX];
-  //   if (anomalies !== undefined) {
-  //     setAnomalyData(anomalies);
-  //   }
-  // }
+  // Load example field values when split field changes
+  // changes to fieldValues here will trigger the card effect
+  useEffect(() => {
+    if (jobCreator.splitField !== null) {
+      chartLoader
+        .loadFieldExampleValues(
+          jobCreator.splitField,
+          jobCreator.runtimeMappings,
+          jobCreator.datafeedConfig.indices_options
+        )
+        .then(setFieldValues)
+        .catch((error) => {
+          // @ts-ignore
+          notifications.toasts.addDanger({
+            title: i18n.translate('xpack.ml.newJob.geoWizard.fieldValuesFetchErrorTitle', {
+              defaultMessage: 'Error fetching field example values: {error}',
+              values: { error },
+            }),
+          });
+        });
+    } else {
+      setFieldValues([]);
+    }
+  }, []);
 
-  // function watchProgress(progress: number) {
-  //   setJobIsRunning(progress > 0);
-  // }
+  // Update the layer list  with updated geo points upon refresh
+  useEffect(() => {
+    async function getMapLayersForGeoJob() {
+      if (dataViewId !== undefined && geoField) {
+        const params: any = {
+          indexPatternId: dataViewId,
+          geoFieldName: geoField.name,
+          geoFieldType: geoField.type as unknown as ES_GEO_FIELD_TYPE,
+          filters: data.query.filterManager.getFilters() ?? [],
+          ...(fieldValues.length && splitField
+            ? { query: { query: `${splitField.name}:${fieldValues[0]}`, language: 'kuery' } }
+            : {}),
+        };
 
-  // useEffect(() => {
-  //   // subscribe to progress and results
-  //   const resultsSubscription = resultsLoader.subscribeToResults(setResultsWrapper);
-  //   jobCreator.subscribeToProgress(watchProgress);
-  //   loadChart();
+        const searchLayerDescriptor = mapsPlugin
+          ? await mapsPlugin.createLayerDescriptors.createESSearchSourceLayerDescriptor(params)
+          : null;
 
-  //   return () => {
-  //     resultsSubscription.unsubscribe();
-  //   };
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-
-  // async function loadChart() {
-  //   setLoadingData(true);
-  //   try {
-  //     const resp = await chartLoader.loadEventRateChart(
-  //       jobCreator.start,
-  //       jobCreator.end,
-  //       chartInterval.getInterval().asMilliseconds(),
-  //       jobCreator.runtimeMappings ?? undefined,
-  //       jobCreator.datafeedConfig.indices_options
-  //     );
-  //     setEventRateChartData(resp);
-  //   } catch (error) {
-  //     setEventRateChartData([]);
-  //   }
-  //   setLoadingData(false);
-  // }
+        if (searchLayerDescriptor) {
+          setLayerList([searchLayerDescriptor]);
+        }
+      }
+    }
+    getMapLayersForGeoJob();
+  }, [fieldValues]);
 
   return (
-    <>
-      <div>BOB</div>
-      {/* <DetectorDescription detectorType={rareDetectorType} />
-      <EuiSpacer size="s" />
-      <EventRateChart
-        eventRateChartData={eventRateChartData}
-        anomalyData={anomalyData}
-        height="300px"
-        width="100%"
-        showAxis={true}
-        loading={loadingData}
-        fadeChart={jobIsRunning}
-      /> */}
-    </>
+    <SplitCards
+      fieldValues={fieldValues}
+      splitField={splitField}
+      numberOfDetectors={fieldValues.length}
+      jobType={JOB_TYPE.GEO}
+      animate={animateSplit}
+    >
+      <EuiFlexGrid columns={1}>
+        <EuiFlexItem data-test-subj={'mlGeoMap'} grow={false}>
+          <>
+            {jobCreator.geoAgg && geoField ? (
+              <DetectorTitle index={0} agg={jobCreator.geoAgg} field={geoField} />
+            ) : null}
+            <span data-test-subj="mlGeoJobWizardMap" style={{ width: '100%', height: 300 }}>
+              <MlEmbeddedMapComponent layerList={layerList} />
+            </span>
+          </>
+        </EuiFlexItem>
+      </EuiFlexGrid>
+    </SplitCards>
   );
 };

@@ -5,23 +5,31 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react'; // useCallback, useMemo,
-import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import React, { FC, useEffect, useState } from 'react';
+import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
 import { SplitCards, useAnimateSplit } from '../split_cards';
 import { MlEmbeddedMapComponent } from '../../../../../../../components/ml_embedded_map';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
-import { Field, SplitField } from '../../../../../../../../../common/types/fields';
+import { Aggregation, Field, SplitField } from '../../../../../../../../../common/types/fields';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
+import { DetectorTitle } from '../detector_title';
 
 interface Props {
   dataViewId?: string;
   geoField: Field;
   splitField: SplitField;
   fieldValues: string[];
+  geoAgg: Aggregation | null;
 }
 
-export const GeoMapExamples: FC<Props> = ({ dataViewId, geoField, splitField, fieldValues }) => {
+export const GeoMapExamples: FC<Props> = ({
+  dataViewId,
+  geoField,
+  splitField,
+  fieldValues,
+  geoAgg,
+}) => {
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
 
   const {
@@ -67,13 +75,9 @@ export const GeoMapExamples: FC<Props> = ({ dataViewId, geoField, splitField, fi
       <EuiFlexGrid columns={1}>
         <EuiFlexItem data-test-subj={'mlGeoMap'} grow={false}>
           <>
-            {/* <DetectorTitle
-                index={i}
-                agg={aggFieldPairList[i].agg}
-                field={aggFieldPairList[i].field}
-                deleteDetector={deleteDetector}
-              /> */}
-            <span data-test-subj="mlGeoJobWizardMap" style={{ width: '100%', height: 300 }}>
+            {geoAgg && geoField ? <DetectorTitle index={0} agg={geoAgg} field={geoField} /> : null}
+            <EuiSpacer size="s" />
+            <span data-test-subj="mlGeoJobWizardMap" style={{ width: '100%', height: 400 }}>
               <MlEmbeddedMapComponent layerList={layerList} />
             </span>
           </>

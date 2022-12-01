@@ -6,14 +6,14 @@
  */
 
 import React, { FC, useContext, useEffect, useState } from 'react';
-// import { i18n } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui'; // EuiHorizontalRule
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { GeoJobCreator } from '../../../../../common/job_creator';
 import { GeoField } from './geo_field';
 import { GeoMapExamples } from './geo_map_examples';
-// import { useMlKibana } from '../../../../../../../contexts/kibana';
+import { useMlKibana } from '../../../../../../../contexts/kibana';
 
 interface Props {
   setIsValid: (na: boolean) => void;
@@ -25,9 +25,9 @@ export const GeoDetector: FC<Props> = ({ setIsValid }) => {
 
   const [fieldValues, setFieldValues] = useState<string[]>([]);
 
-  // const {
-  //   services: { notifications: toasts },
-  // } = useMlKibana();
+  const {
+    services: { notifications: toasts },
+  } = useMlKibana();
 
   useEffect(() => {
     let valid = false;
@@ -49,12 +49,13 @@ export const GeoDetector: FC<Props> = ({ setIsValid }) => {
         )
         .then(setFieldValues)
         .catch((error) => {
-          // toasts.addDanger({
-          //   title: i18n.translate('xpack.ml.newJob.geoWizard.fieldValuesFetchErrorTitle', {
-          //     defaultMessage: 'Error fetching field example values: {error}',
-          //     values: { error }
-          //   })
-          // });
+          // @ts-ignore
+          toasts.addDanger({
+            title: i18n.translate('xpack.ml.newJob.geoWizard.fieldValuesFetchErrorTitle', {
+              defaultMessage: 'Error fetching field example values: {error}',
+              values: { error },
+            }),
+          });
         });
     } else {
       setFieldValues([]);
@@ -71,6 +72,7 @@ export const GeoDetector: FC<Props> = ({ setIsValid }) => {
             geoField={jobCreator.geoField}
             splitField={jobCreator.splitField}
             fieldValues={fieldValues}
+            geoAgg={jobCreator.geoAgg}
           />
           <EuiSpacer />
         </>

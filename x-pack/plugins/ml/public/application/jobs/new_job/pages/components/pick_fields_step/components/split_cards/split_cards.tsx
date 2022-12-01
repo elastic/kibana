@@ -94,21 +94,22 @@ export const SplitCards: FC<Props> = memo(
           {(fieldValues.length === 0 || numberOfDetectors === 0) && <>{children}</>}
           {fieldValues.length > 0 && numberOfDetectors > 0 && splitField !== null && (
             <Fragment>
-              {jobType === JOB_TYPE.MULTI_METRIC && (
-                <Fragment>
-                  <div
-                    style={{ fontSize: 'small' }}
-                    data-test-subj={`mlDataSplitTitle ${splitField.name}`}
-                  >
-                    <FormattedMessage
-                      id="xpack.ml.newJob.wizard.pickFieldsStep.splitCards.dataSplitBy"
-                      defaultMessage="Data split by {field}"
-                      values={{ field: splitField.name }}
-                    />
-                  </div>
-                  <EuiSpacer size="m" />
-                </Fragment>
-              )}
+              {jobType === JOB_TYPE.MULTI_METRIC ||
+                (jobType === JOB_TYPE.GEO && (
+                  <Fragment>
+                    <div
+                      style={{ fontSize: 'small' }}
+                      data-test-subj={`mlDataSplitTitle ${splitField.name}`}
+                    >
+                      <FormattedMessage
+                        id="xpack.ml.newJob.wizard.pickFieldsStep.splitCards.dataSplitBy"
+                        defaultMessage="Data split by {field}"
+                        values={{ field: splitField.name }}
+                      />
+                    </div>
+                    <EuiSpacer size="m" />
+                  </Fragment>
+                ))}
 
               {getBackPanels()}
               <EuiPanel

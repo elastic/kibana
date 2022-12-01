@@ -50,6 +50,10 @@ export class GeoJobCreator extends JobCreator {
     return this._geoField;
   }
 
+  public get geoAgg() {
+    return this._geoAgg;
+  }
+
   public setGeoField(field: Field | null) {
     this._geoField = field;
 
