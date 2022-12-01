@@ -188,6 +188,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, [selectedDataView, dispatchSidebarStateAction, selectedDataViewRef]);
 
   const querySubscriberResult = useQuerySubscriber({ data });
+  const isAffectedByGlobalFilter = Boolean(querySubscriberResult.filters?.length);
   const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
     disableAutoFetching: true,
     dataViews: !isPlainRecord && sidebarState.dataView ? [sidebarState.dataView] : [],
@@ -323,6 +324,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             editField={editField}
             createNewDataView={createNewDataView}
             showFieldList={showFieldList}
+            isAffectedByGlobalFilter={isAffectedByGlobalFilter}
           />
         </EuiHideFor>
       )}
@@ -389,6 +391,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                 createNewDataView={createNewDataView}
                 showDataViewPicker={true}
                 showFieldList={showFieldList}
+                isAffectedByGlobalFilter={isAffectedByGlobalFilter}
               />
             </EuiFlyout>
           </EuiPortal>

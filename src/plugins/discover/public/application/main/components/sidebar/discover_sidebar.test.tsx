@@ -103,6 +103,7 @@ function getCompProps(): DiscoverSidebarProps {
     availableFields$,
     useNewFieldsApi: true,
     showFieldList: true,
+    isAffectedByGlobalFilter: false,
   };
 }
 

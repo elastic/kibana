@@ -101,6 +101,11 @@ export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
    * Whether to render the field list or not (we don't show it unless documents are loaded)
    */
   showFieldList?: boolean;
+
+  /**
+   * Whether filters are applied
+   */
+  isAffectedByGlobalFilter: boolean;
 }
 
 export function DiscoverSidebarComponent({
@@ -125,13 +130,13 @@ export function DiscoverSidebarComponent({
   createNewDataView,
   showDataViewPicker,
   showFieldList,
+  isAffectedByGlobalFilter,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor, dataViews } = useDiscoverServices();
   const isPlainRecord = useAppStateSelector(
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
   const query = useAppStateSelector((state) => state.query);
-  const isGlobalFilterApplied = useAppStateSelector((state) => Boolean(state.filters?.length));
 
   const onChangeFieldSearch = useCallback(
     (filterName: string, value: string | boolean | undefined) => {
@@ -270,7 +275,7 @@ export function DiscoverSidebarComponent({
     allFields,
     popularFieldsLimit: !isPlainRecord ? popularFieldsLimit : 0,
     sortedSelectedFields: selectedFieldsState.selectedFields,
-    isAffectedByGlobalFilter: isGlobalFilterApplied,
+    isAffectedByGlobalFilter,
     services: {
       dataViews,
     },
