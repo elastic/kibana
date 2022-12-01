@@ -29,6 +29,7 @@ const MAX = 1000000;
 const STEP = 1000;
 const INDEX_NAME = 'kibana_sample_data_large';
 const NOTIFICATION_KEY = 'largedatasetPanel:notificationShown';
+const EXPECTED_NR_OF_DOCUMENTS_KEY = 'largedatasetPanel:expectedNrOfDocuments';
 
 const i18nTexts = {
   generateTitle: i18n.translate('homePackages.largeDatasetPanel.generateTitle', {
@@ -51,6 +52,12 @@ const i18nTexts = {
     'homePackages.largeDatasetPanel.toast.uninstall.error',
     {
       defaultMessage: 'Error uninstalling dataset',
+    }
+  ),
+  datasetUninstallSuccess: i18n.translate(
+    'homePackages.largeDatasetPanel.toast.uninstall.success',
+    {
+      defaultMessage: 'Dataset successfully uninstalled',
     }
   ),
   datasetGenerationInProgress: i18n.translate(
@@ -103,7 +110,12 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
     const checkIfInstalled = async () => {
       const { installed, count } = await checkInstalled();
       const prevStatus = sessionStorage.getItem(INDEX_NAME);
-      if (installed && count >= nrOfDocuments) {
+      const expectedNrOfDocuments = Number.parseInt(
+        sessionStorage.getItem(EXPECTED_NR_OF_DOCUMENTS_KEY) || `${nrOfDocuments}`,
+        10
+      );
+      const adjustedNrOfDocuments = 0.9 * expectedNrOfDocuments; // allow for some documents to fail generation
+      if (installed && count >= adjustedNrOfDocuments) {
         if (!sessionStorage.getItem(NOTIFICATION_KEY)) {
           notifySuccess(i18nTexts.datasetGeneratedSuccessMessage);
           sessionStorage.setItem(NOTIFICATION_KEY, 'true');
@@ -115,6 +127,7 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
         updateSessionStorage(Status.EMPTY);
       }
     };
+    sessionStorage.setItem(EXPECTED_NR_OF_DOCUMENTS_KEY, nrOfDocuments.toString(10));
     checkIfInstalled();
     intervalRef.current = setInterval(checkIfInstalled, 30000); // half a minute
     return () => {
@@ -143,6 +156,7 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
     try {
       await uninstallDataset();
       updateSessionStorage(Status.EMPTY);
+      notifySuccess(i18nTexts.datasetUninstallSuccess);
     } catch {
       notifyError(i18nTexts.datasetUninstallErrorMessage);
     }
@@ -153,7 +167,9 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
   };
 
   const onNrOfDocumentsChange = (target: EventTarget | (EventTarget & HTMLInputElement)) => {
-    setNrOfDocuments(Number((target as HTMLInputElement).value));
+    const value = Number((target as HTMLInputElement).value);
+    setNrOfDocuments(value);
+    sessionStorage.setItem(EXPECTED_NR_OF_DOCUMENTS_KEY, nrOfDocuments.toString(10));
   };
 
   const configureLayout = (
@@ -192,11 +208,9 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
             {installSubtitleText}
             <i>{INDEX_NAME}</i>
           </p>
-          {installStatus === Status.DONE && (
-            <EuiButton fill onClick={onUninstallClick} target="_blank">
-              {i18nTexts.unInstallButtonText}
-            </EuiButton>
-          )}
+          <EuiButton fill onClick={onUninstallClick} target="_blank">
+            {i18nTexts.unInstallButtonText}
+          </EuiButton>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={1} style={{ textAlign: 'center' }}>

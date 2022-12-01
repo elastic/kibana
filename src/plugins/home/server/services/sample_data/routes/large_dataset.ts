@@ -5,56 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import uuid from 'uuid';
 import Path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import { Worker } from 'worker_threads';
-import { Readable } from 'stream';
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger, SavedObject } from '@kbn/core/server';
-import { CoreSetup } from '@kbn/core/server';
-import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
-import { deleteIndex, createIndex, bulkUpload } from '../lib';
+import { IRouter, Logger, CoreSetup } from '@kbn/core/server';
+import {
+  deleteIndex,
+  createIndex,
+  bulkUpload,
+  createDataView,
+  findAndDeleteDataView,
+} from '../lib';
 import { getSavedObjectsClient } from './utils';
 
-const dataView = (indexName: string) => {
-  return {
-    id: uuid.v4(),
-    type: 'index-pattern',
-    updated_at: Date.now().toString(),
-    version: '1',
-    migrationVersion: {},
-    attributes: {
-      title: indexName,
-      name: 'Kibana Sample Data Large',
-      timeFieldName: 'last_updated',
-    },
-    references: [],
-  };
-};
-
-const LARGE_DATASET_ID = 'large_dataset';
 const LARGE_DATASET_INDEX_NAME = 'kibana_sample_data_large';
-
-const largeDatasetProvider = function (
-  name: string,
-  description: string,
-  defaultIndex: string,
-  savedObjects: SavedObject[]
-): SampleDatasetSchema {
-  return {
-    id: LARGE_DATASET_ID,
-    name,
-    description,
-    previewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard.webp',
-    darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard_dark.webp',
-    overviewDashboard: '',
-    defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-    savedObjects,
-    dataIndices: [],
-    status: 'installed',
-    iconPath: '/plugins/home/assets/sample_data_resources/flights/icon.svg',
-  };
-};
+const workerState = {} as Record<string, any>;
+let id: string | undefined;
 
 export function createLargeDatasetRoute(router: IRouter, logger: Logger, core: CoreSetup): void {
   router.post(
@@ -67,11 +34,13 @@ export function createLargeDatasetRoute(router: IRouter, logger: Logger, core: C
     async (context, req, res) => {
       const { nrOfDocuments } = req.body;
       const esClient = (await core.getStartServices())[0].elasticsearch.client;
+      id = uuidv4();
       const worker = new Worker(Path.join(__dirname, '../worker.js'), {
         workerData: {
           numberOfDocuments: nrOfDocuments,
         },
       });
+      workerState[id] = worker;
       try {
         await deleteIndex(esClient, LARGE_DATASET_INDEX_NAME);
         await createIndex(esClient, LARGE_DATASET_INDEX_NAME);
@@ -88,25 +57,22 @@ export function createLargeDatasetRoute(router: IRouter, logger: Logger, core: C
               // backoff, kinda
               index++;
               delay = delay + index * 1000;
+            } else if (message.status === 'DONE') {
+              const { savedObjects } = await context.core;
+              const savedObjectsClient = await getSavedObjectsClient(context, ['index-pattern']);
+              const result = await createDataView(savedObjects, savedObjectsClient);
+              if (result.errors.length > 0) {
+                logger.error('Error occurred while creating a data view');
+              }
             } else if (message.status === 'ERROR') {
               logger.error('Error occurred while generating documents for ES');
-            } else if (message.status === 'DONE') {
-              const { getImporter } = (await context.core).savedObjects;
-              const objectTypes = ['index-pattern'];
-              const savedObjectsClient = await getSavedObjectsClient(context, objectTypes);
-              const soImporter = getImporter(savedObjectsClient);
-
-              const savedObjects = [dataView(LARGE_DATASET_INDEX_NAME)];
-              const readStream = Readable.from(savedObjects);
-              const { errors = [] } = await soImporter.import({
-                readStream,
-                overwrite: true,
-                createNewCopies: false,
-              });
             }
           } catch (e) {
             logger.error('Error occurred while generating documents for ES');
           }
+        });
+        worker.on('error', (message) => {
+          logger.error(message);
         });
         worker.postMessage('start');
       } catch (e) {
@@ -155,8 +121,17 @@ export function deleteLargeDatasetRoute(router: IRouter, logger: Logger, core: C
   router.delete(
     { path: '/api/sample_data/large_dataset', validate: false },
     async (context, _req, res) => {
-      const esClient = (await core.getStartServices())[0].elasticsearch.client;
-      await deleteIndex(esClient, LARGE_DATASET_INDEX_NAME);
+      if (id) {
+        workerState[id].postMessage('stop');
+      }
+      try {
+        const esClient = (await core.getStartServices())[0].elasticsearch.client;
+        const savedObjectsClient = await getSavedObjectsClient(context, ['index-pattern']);
+        await deleteIndex(esClient, LARGE_DATASET_INDEX_NAME);
+        await findAndDeleteDataView(savedObjectsClient);
+      } catch (e) {
+        return res.customError({ statusCode: 500, body: 'An error occurred.' });
+      }
       return res.noContent();
     }
   );

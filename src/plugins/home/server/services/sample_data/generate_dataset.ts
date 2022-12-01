@@ -12,19 +12,11 @@ import { sample } from 'lodash';
 import { faker } from '@faker-js/faker';
 import { createLogger, LogLevel } from './lib/util/create_logger';
 
-const l = {
-  perf: <T extends any>(name: string, cb: () => T): T => {
-    return cb();
-  },
-  debug: (...args: any[]) => parentPort?.postMessage({ log: LogLevel.debug, args }),
-  info: (...args: any[]) => parentPort?.postMessage({ log: LogLevel.info, args }),
-  error: (...args: any[]) => parentPort?.postMessage({ log: LogLevel.error, args }),
-};
-
 const FIELD_TYPES = ['bool', 'str', 'int', 'ipv4', 'ts', 'text'];
 
 export interface WorkerData {
   numberOfDocuments: number;
+  id: string;
 }
 
 const { numberOfDocuments } = workerData as WorkerData;
@@ -163,19 +155,18 @@ parentPort!.on('message', async (message) => {
       for (let i = 0; i < end; i++) {
         const subItems = items.slice(start, start + size);
         start += size;
-        logger.info('Sending message');
-
-        logger.info('Hello');
         parentPort!.postMessage({ status: 'GENERATED_ITEMS', items: JSON.stringify(subItems) });
-
         logger.info('Sent message');
       }
       parentPort!.postMessage({ status: 'DONE' });
       process.exit(0);
     } catch (error) {
       parentPort!.postMessage({ status: 'ERROR' });
-      l.info(error);
+      logger.info(error);
       process.exit(2);
     }
+  } else if (message === 'stop') {
+    logger.info('Stopping worker...');
+    process.exit(0);
   }
 });

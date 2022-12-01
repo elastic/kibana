@@ -7,3 +7,4 @@
  */
 
 export { deleteIndex, createIndex, checkIfIndexExists, bulkUpload } from './util/es_operations';
+export { createDataView, findAndDeleteDataView } from './util/data_view_operations';
