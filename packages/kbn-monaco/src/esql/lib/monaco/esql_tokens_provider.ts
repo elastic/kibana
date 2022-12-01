@@ -16,7 +16,7 @@ import { ESQLState } from './esql_state';
 
 import { getLexer } from '../antlr_facade';
 
-import { ANTLREErrorListener } from '../../../common/worker/error_listener';
+import { ANTLREErrorListener } from '../../../common/error_listener';
 
 const EOF = -1;
 

@@ -15,7 +15,7 @@ import { PainlessContext, PainlessAutocompleteField } from './types';
 import { PainlessWorker } from './worker';
 import { PainlessCompletionAdapter } from './completion_adapter';
 import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
-import { WorkerProxyService } from '../common/worker/worker_proxy';
+import { WorkerProxyService } from '../common/worker_proxy';
 
 const workerProxyService = new WorkerProxyService<PainlessWorker>();
 const editorStateService = new EditorStateService();

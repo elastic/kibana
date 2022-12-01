@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { monaco } from '../../monaco_imports';
-import type { BaseWorkerDefinition } from '../../types';
+import { monaco } from '../monaco_imports';
+import type { BaseWorkerDefinition } from '../types';
 
 export class WorkerProxyService<IWorker extends BaseWorkerDefinition> {
   private worker: monaco.editor.MonacoWebWorker<IWorker> | undefined;

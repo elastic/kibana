@@ -7,7 +7,7 @@
  */
 
 import { ANTLRErrorListener, RecognitionException, Recognizer } from 'antlr4ts';
-import type { EditorError } from '../../types';
+import type { EditorError } from '../types';
 
 export class ANTLREErrorListener implements ANTLRErrorListener<any> {
   private errors: EditorError[] = [];

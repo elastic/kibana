@@ -10,7 +10,7 @@ import { CharStreams } from 'antlr4ts';
 import { monaco } from '../../monaco_imports';
 import type { BaseWorkerDefinition } from '../../types';
 import { getParser } from '../lib/antlr_facade';
-import { ANTLREErrorListener } from '../../common/worker/error_listener';
+import { ANTLREErrorListener } from '../../common/error_listener';
 
 export class ESQLWorker implements BaseWorkerDefinition {
   private readonly _ctx: monaco.worker.IWorkerContext;

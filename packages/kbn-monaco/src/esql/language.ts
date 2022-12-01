@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { ESQLWorker } from './worker/esql_worker';
+import { monaco } from '../monaco_imports';
+
 import { buildESQlTheme } from './lib/monaco/esql_theme';
 import { ESQL_LANG_ID, ESQL_THEME_ID } from './constants';
 
 import type { LangModuleType } from '../types';
-
-import { monaco } from '../monaco_imports';
+import type { ESQLWorker } from './worker/esql_worker';
 
 import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
-import { WorkerProxyService } from '../common/worker/worker_proxy';
+import { WorkerProxyService } from '../common/worker_proxy';
 
 export const ESQLLang: LangModuleType = {
   ID: ESQL_LANG_ID,
@@ -25,7 +25,6 @@ export const ESQLLang: LangModuleType = {
   },
   async onLanguage() {
     const { ESQLTokensProvider } = await import('./lib/monaco');
-
     const workerProxyService = new WorkerProxyService<ESQLWorker>();
 
     workerProxyService.setup(ESQL_LANG_ID);

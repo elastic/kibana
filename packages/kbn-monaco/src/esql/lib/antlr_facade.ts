@@ -11,7 +11,7 @@ import { CommonTokenStream, CodePointCharStream } from 'antlr4ts';
 import { esql_lexer as ESQLLexer } from '../antlr/esql_lexer';
 import { esql_parser as ESQLParser } from '../antlr/esql_parser';
 
-import type { ANTLREErrorListener } from '../../common/worker/error_listener';
+import type { ANTLREErrorListener } from '../../common/error_listener';
 
 export const getParser = (inputStream: CodePointCharStream, errorListener: ANTLREErrorListener) => {
   const lexer = getLexer(inputStream, errorListener);
