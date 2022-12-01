@@ -20846,7 +20846,6 @@
     "xpack.ml.newJob.fromLens.createJob.error.colsNoSourceField": "一部の列にはソースフィールドがありません。",
     "xpack.ml.newJob.fromLens.createJob.error.colsUsingFilterTimeSift": "ML検知器に対応していない設定が列に含まれています。時間シフトとフィルター条件はサポートされていません。",
     "xpack.ml.newJob.fromLens.createJob.error.incompatibleLayerType": "レイヤーに互換性がありません。グラフレイヤーのみを使用できます。",
-    "xpack.ml.newJob.fromLens.createJob.error.noCompatibleLayers": "ビジュアライゼーションには、異常検知ジョブを作成するために使用できるレイヤーがありません。",
     "xpack.ml.newJob.fromLens.createJob.error.noDataViews": "ビジュアライゼーションでデータビューが見つかりません。",
     "xpack.ml.newJob.fromLens.createJob.error.noDateField": "日付フィールドが見つかりません。",
     "xpack.ml.newJob.fromLens.createJob.error.noTimeRange": "時間範囲が指定されていません。",
