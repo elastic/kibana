@@ -8,6 +8,10 @@ import { apm, ApmFields, dedot } from '@kbn/apm-synthtrace';
 import { Span } from '../../typings/es_schemas/ui/span';
 import { Transaction } from '../../typings/es_schemas/ui/transaction';
 import { getWaterfall } from '../waterfall_helper';
+import {
+  WaterfallSpanDoc,
+  WaterfallTransactionDoc,
+} from '../waterfall_helper/typings';
 import { getCriticalPath } from './get_critical_path';
 
 describe('getCriticalPath', () => {
@@ -15,13 +19,14 @@ describe('getCriticalPath', () => {
     const waterfall = getWaterfall(
       {
         traceDocs: events.map(
-          (event) => dedot(event, {}) as Transaction | Span
+          (event) =>
+            dedot(event, {}) as WaterfallTransactionDoc | WaterfallSpanDoc
         ),
         errorDocs: [],
         exceedsMax: false,
         linkedChildrenOfSpanCountBySpanId: {},
       },
-      events[0]['transaction.id']!
+      dedot(events[0]!, {}) as Transaction
     );
 
     return {
