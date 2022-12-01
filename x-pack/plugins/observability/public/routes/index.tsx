@@ -20,7 +20,7 @@ import { RuleDetailsPage } from '../pages/rule_details';
 import { AlertingPages } from '../config';
 import { AlertDetails } from '../pages/alert_details';
 import { DatePickerContextProvider } from '../context/date_picker_context';
-import { SlosPage } from '../pages/slos_page';
+import { SlosPage } from '../pages/slos';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
