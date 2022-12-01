@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
-import { EuiPageTemplate } from '@elastic/eui';
 
 import { SloList as Component } from './slo_list';
 
@@ -19,16 +18,7 @@ export default {
 
 const Template: ComponentStory<typeof Component> = () => <Component />;
 
-const TemplateWithPageTemplate: ComponentStory<typeof Component> = () => (
-  <EuiPageTemplate>
-    <Component />
-  </EuiPageTemplate>
-);
-
 const defaultProps = {};
 
 export const SloList = Template.bind({});
 SloList.args = defaultProps;
-
-export const SloListUsedWithinPageTemplate = TemplateWithPageTemplate.bind({});
-SloListUsedWithinPageTemplate.args = defaultProps;
