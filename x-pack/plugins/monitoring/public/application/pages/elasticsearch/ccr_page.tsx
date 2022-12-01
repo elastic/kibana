@@ -10,7 +10,6 @@ import { find } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ElasticsearchTemplate } from './elasticsearch_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-// @ts-ignore
 import { Ccr } from '../../../components/elasticsearch/ccr';
 import { ComponentProps } from '../../route_init';
 import { SetupModeRenderer } from '../../../components/renderers/setup_mode';

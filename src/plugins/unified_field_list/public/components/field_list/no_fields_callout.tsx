@@ -23,12 +23,14 @@ export const NoFieldsCallout = ({
   isAffectedByFieldFilter = false,
   isAffectedByTimerange = false,
   isAffectedByGlobalFilter = false,
+  'data-test-subj': dataTestSubject = 'noFieldsCallout',
 }: {
   fieldsExistInIndex: boolean;
   isAffectedByFieldFilter?: boolean;
   defaultNoFieldsMessage?: string;
   isAffectedByTimerange?: boolean;
   isAffectedByGlobalFilter?: boolean;
+  'data-test-subj'?: string;
 }) => {
   if (!fieldsExistInIndex) {
     return (
@@ -38,6 +40,7 @@ export const NoFieldsCallout = ({
         title={i18n.translate('unifiedFieldList.fieldList.noFieldsCallout.noFieldsLabel', {
           defaultMessage: 'No fields exist in this data view.',
         })}
+        data-test-subj={`${dataTestSubject}-noFieldsExist`}
       />
     );
   }
@@ -53,6 +56,7 @@ export const NoFieldsCallout = ({
             })
           : defaultNoFieldsMessage
       }
+      data-test-subj={`${dataTestSubject}-noFieldsMatch`}
     >
       {(isAffectedByTimerange || isAffectedByFieldFilter || isAffectedByGlobalFilter) && (
         <>
