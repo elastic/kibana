@@ -41,9 +41,7 @@ export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
       actions: { setControlStyle },
     } = useControlGroupContainerContext();
     const dispatch = useEmbeddableDispatch();
-    const controlStyle = select((state) => {
-      return state.explicitInput.controlStyle;
-    });
+    const controlStyle = select((state) => state.explicitInput.controlStyle);
 
     return (
       <>
