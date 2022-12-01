@@ -151,6 +151,7 @@ export type ConsoleDataAction =
     }
   | {
       type: 'clearInputHistoryState';
+      payload: never;
     };
 
 type PayloadValueOrFunction<T extends object = object> = T | ((options: Required<T>) => T);
