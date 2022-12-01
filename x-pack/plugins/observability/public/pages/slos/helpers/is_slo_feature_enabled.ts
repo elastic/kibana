@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { isSloFeatureEnabled } from './is_slo_feature_enabled';
+import { ConfigSchema } from '../../../plugin';
+
+export function isSloFeatureEnabled(config: ConfigSchema): boolean {
+  return config.unsafe.slo.enabled === true;
+}
