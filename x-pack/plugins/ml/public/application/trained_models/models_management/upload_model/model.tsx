@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiProgress,
-  EuiHorizontalRule,
   EuiText,
 } from '@elastic/eui';
 
@@ -227,8 +226,6 @@ export const Model: FC<Props> = ({ model, installed, hidden, refreshModels }) =>
           <EuiProgress valueText={true} value={overallProgress.toFixed()} max={100} size="m" />
         </>
       ) : null}
-
-      <EuiHorizontalRule />
     </>
   );
 };
