@@ -100,7 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await actions.api.deleteAllConnectors();
     });
 
-    describe.only('overview page alert flyout controls', () => {
+    describe('overview page alert flyout controls', () => {
       it('alert flyout screenshot', async () => {
         await ml.navigation.navigateToAlertsAndAction();
         await pageObjects.triggersActionsUI.clickCreateAlertButton();
