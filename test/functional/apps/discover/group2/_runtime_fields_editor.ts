@@ -48,6 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['saved-search'] });
     });
 
+    // why is this breaking?
     it('allows adding custom label to existing fields', async function () {
       const customLabel = 'megabytes';
       await PageObjects.discover.editField('bytes');

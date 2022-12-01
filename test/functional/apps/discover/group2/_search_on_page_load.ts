@@ -134,6 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
       });
 
+      // why is this breaking?
       it('should reset state after opening a saved search and pressing New', async function () {
         await PageObjects.discover.loadSavedSearch(savedSearchName);
         await PageObjects.header.waitUntilLoadingHasFinished();
