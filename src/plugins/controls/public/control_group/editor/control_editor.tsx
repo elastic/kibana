@@ -52,7 +52,7 @@ import {
 } from '../../types';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
 import { pluginServices } from '../../services';
-import { loadFieldRegistryFromDataViewId } from './data_control_editor_tools';
+import { getDataControlFieldRegistry } from './data_control_editor_tools';
 interface EditControlProps {
   embeddable?: ControlEmbeddable<DataControlInput>;
   isCreate: boolean;
@@ -116,10 +116,10 @@ export const ControlEditor = ({
   useEffect(() => {
     (async () => {
       if (state.selectedDataView?.id) {
-        setFieldRegistry(await loadFieldRegistryFromDataViewId(state.selectedDataView.id));
+        setFieldRegistry(await getDataControlFieldRegistry(await get(state.selectedDataView.id)));
       }
     })();
-  }, [state.selectedDataView]);
+  }, [state.selectedDataView?.id, get]);
 
   useMount(() => {
     let mounted = true;
@@ -243,34 +243,41 @@ export const ControlEditor = ({
             />
           </EuiFormRow>
           <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
-            <EuiButtonGroup
-              color="primary"
-              legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-              options={CONTROL_WIDTH_OPTIONS}
-              idSelected={currentWidth}
-              onChange={(newWidth: string) => {
-                setCurrentWidth(newWidth as ControlWidth);
-                updateWidth(newWidth as ControlWidth);
-              }}
-            />
-          </EuiFormRow>
-          {updateGrow ? (
-            <EuiFormRow>
-              <EuiSwitch
-                label={ControlGroupStrings.manageControl.getGrowSwitchTitle()}
+            <>
+              <EuiButtonGroup
                 color="primary"
-                checked={currentGrow}
-                onChange={() => {
-                  setCurrentGrow(!currentGrow);
-                  updateGrow(!currentGrow);
+                legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
+                options={CONTROL_WIDTH_OPTIONS}
+                idSelected={currentWidth}
+                onChange={(newWidth: string) => {
+                  setCurrentWidth(newWidth as ControlWidth);
+                  updateWidth(newWidth as ControlWidth);
                 }}
-                data-test-subj="control-editor-grow-switch"
               />
-            </EuiFormRow>
-          ) : null}
+              {updateGrow && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiSwitch
+                    label={ControlGroupStrings.manageControl.getGrowSwitchTitle()}
+                    color="primary"
+                    checked={currentGrow}
+                    onChange={() => {
+                      setCurrentGrow(!currentGrow);
+                      updateGrow(!currentGrow);
+                    }}
+                    data-test-subj="control-editor-grow-switch"
+                  />
+                </>
+              )}
+            </>
+          </EuiFormRow>
           {CustomSettings && (factory as IEditableControlFactory).controlEditorOptionsComponent && (
             <EuiFormRow label={ControlGroupStrings.manageControl.getControlSettingsTitle()}>
-              <CustomSettings onChange={onTypeEditorChange} initialInput={embeddable?.getInput()} />
+              <CustomSettings
+                onChange={onTypeEditorChange}
+                initialInput={embeddable?.getInput()}
+                fieldType={fieldRegistry[selectedField].field.type}
+              />
             </EuiFormRow>
           )}
           {removeControl && (

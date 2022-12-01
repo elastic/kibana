@@ -69,7 +69,7 @@ export interface MetricOption {
   timeScale?: string;
   showPercentileAnnotations?: boolean;
   formula?: string;
-  metricStateOptions?: Pick<MetricState, 'colorMode' | 'palette' | 'titlePosition'>;
+  metricStateOptions?: Pick<MetricState, 'colorMode' | 'palette' | 'titlePosition' | 'textAlign'>;
   palette?: PaletteOutput;
   format?: 'percent' | 'number';
 }

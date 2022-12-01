@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { fireEvent, render } from '@testing-library/react';
+import { createEvent, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { HeaderMenu } from '.';
 import { actions, actionsWithDisabledDelete } from '../mocks/header.mock';
@@ -90,7 +90,6 @@ describe('HeaderMenu', () => {
     expect(wrapper.queryByTestId('ActionItemedit')).not.toBeInTheDocument();
     expect(wrapper.queryByTestId('MenuPanel')).not.toBeInTheDocument();
   });
-
   it('should call onEdit if action has onClick', () => {
     const onEdit = jest.fn();
     const customAction = [...actions];
@@ -112,5 +111,17 @@ describe('HeaderMenu', () => {
     expect(wrapper.getByTestId('EmptyButton')).toBeInTheDocument();
     fireEvent.click(wrapper.getByTestId('EmptyButton'));
     expect(wrapper.queryByTestId('MenuPanel')).toBeInTheDocument();
+  });
+  it('should stop propagation when clicking on the menu', () => {
+    const onEdit = jest.fn();
+    const customAction = [...actions];
+    customAction[0].onClick = onEdit;
+    const wrapper = render(
+      <HeaderMenu dataTestSubj="headerMenu" disableActions={false} actions={actions} />
+    );
+    const headerMenu = wrapper.getByTestId('headerMenuItems');
+    const click = createEvent.click(headerMenu);
+    const result = fireEvent(headerMenu, click);
+    expect(result).toBe(true);
   });
 });

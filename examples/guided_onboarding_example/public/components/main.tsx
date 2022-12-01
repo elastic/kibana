@@ -27,7 +27,6 @@ import {
 } from '@elastic/eui';
 import type { GuideState, GuideStepIds, GuideId, GuideStep } from '@kbn/guided-onboarding';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { guidesConfig } from '@kbn/guided-onboarding-plugin/public';
 
 interface MainProps {
   guidedOnboarding: GuidedOnboardingPluginStart;
@@ -75,7 +74,15 @@ export const Main = (props: MainProps) => {
   };
 
   const updateGuideState = async () => {
-    const selectedGuideConfig = guidesConfig[selectedGuide!];
+    if (!selectedGuide) {
+      return;
+    }
+
+    const selectedGuideConfig = await guidedOnboardingApi?.getGuideConfig(selectedGuide);
+
+    if (!selectedGuideConfig) {
+      return;
+    }
     const selectedStepIndex = selectedGuideConfig.steps.findIndex(
       (step) => step.id === selectedStep!
     );
@@ -113,7 +120,10 @@ export const Main = (props: MainProps) => {
       guideId: selectedGuide!,
     };
 
-    const response = await guidedOnboardingApi?.updateGuideState(updatedGuideState, true);
+    const response = await guidedOnboardingApi?.updatePluginState(
+      { status: 'in_progress', guide: updatedGuideState },
+      true
+    );
     if (response) {
       notifications.toasts.addSuccess(
         i18n.translate('guidedOnboardingExample.updateGuideState.toastLabel', {
@@ -196,7 +206,7 @@ export const Main = (props: MainProps) => {
         </EuiText>
         <EuiSpacer />
         <EuiFlexGroup>
-          {(Object.keys(guidesConfig) as GuideId[]).map((guideId) => {
+          {(['search', 'security', 'observability', 'testGuide'] as GuideId[]).map((guideId) => {
             const guideState = guidesState?.find((guide) => guide.guideId === guideId);
             return (
               <EuiFlexItem>

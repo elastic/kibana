@@ -202,7 +202,7 @@
             "label": "stage",
             "description": [],
             "signature": [
-              "\"experimental\" | \"beta\" | \"production\""
+              "\"beta\" | \"experimental\" | \"production\""
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
@@ -1887,6 +1887,24 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.getExpressionVariables$",
+            "type": "Function",
+            "tags": [],
+            "label": "getExpressionVariables$",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<Record<string, unknown> | undefined>"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-public.VisualizeEmbeddable.inputIsRefType",
             "type": "Function",
             "tags": [],
@@ -3165,7 +3183,7 @@
             "label": "group",
             "description": [],
             "signature": [
-              "\"none\" | \"buckets\" | \"metrics\""
+              "\"none\" | \"metrics\" | \"buckets\""
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
@@ -4482,7 +4500,7 @@
             "label": "stage",
             "description": [],
             "signature": [
-              "\"experimental\" | \"beta\" | \"production\""
+              "\"beta\" | \"experimental\" | \"production\""
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
@@ -4948,7 +4966,7 @@
               "\nDescribes the visualization stage"
             ],
             "signature": [
-              "\"experimental\" | \"beta\" | \"production\" | undefined"
+              "\"beta\" | \"experimental\" | \"production\" | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
@@ -5527,7 +5545,7 @@
             "label": "stage",
             "description": [],
             "signature": [
-              "\"experimental\" | \"beta\" | \"production\""
+              "\"beta\" | \"experimental\" | \"production\""
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
@@ -6188,7 +6206,7 @@
         "label": "VisualizationStage",
         "description": [],
         "signature": [
-          "\"experimental\" | \"beta\" | \"production\""
+          "\"beta\" | \"experimental\" | \"production\""
         ],
         "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
         "deprecated": false,
@@ -6352,7 +6370,9 @@
             "section": "def-public.ExpressionRenderError",
             "text": "ExpressionRenderError"
           },
-          ") => void; reload: () => Promise<void>; supportedTriggers: () => string[]; inputIsRefType: (input: ",
+          ") => void; reload: () => Promise<void>; supportedTriggers: () => string[]; getExpressionVariables$: () => ",
+          "Observable",
+          "<Record<string, unknown> | undefined>; inputIsRefType: (input: ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -10705,6 +10725,20 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.metrics",
+            "type": "Array",
+            "tags": [],
+            "label": "metrics",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-common.PartitionLayerState.primaryGroups",
             "type": "Array",
             "tags": [],
@@ -10726,20 +10760,6 @@
             "description": [],
             "signature": [
               "string[] | undefined"
-            ],
-            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-common.PartitionLayerState.metric",
-            "type": "string",
-            "tags": [],
-            "label": "metric",
-            "description": [],
-            "signature": [
-              "string | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,

@@ -30,10 +30,13 @@ import {
   createScopedLogger,
   AdditionalContext,
   getAlertDetailsUrl,
+  getContextForRecoveredAlerts,
   getViewInMetricsAppUrl,
   UNGROUPED_FACTORY_KEY,
   hasAdditionalContext,
   validGroupByForContext,
+  flattenAdditionalContext,
+  getGroupByObject,
 } from '../common/utils';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
@@ -96,14 +99,14 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       executionId,
     });
 
-    const { alertWithLifecycle, savedObjectsClient, getAlertUuid } = services;
+    const { alertWithLifecycle, savedObjectsClient, getAlertUuid, getAlertByAlertUuid } = services;
 
     const alertFactory: MetricThresholdAlertFactory = (id, reason, additionalContext) =>
       alertWithLifecycle({
         id,
         fields: {
           [ALERT_REASON]: reason,
-          ...additionalContext,
+          ...flattenAdditionalContext(additionalContext),
         },
       });
 
@@ -185,6 +188,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       }
     }
 
+    const groupByKeysObjectMapping = getGroupByObject(params.groupBy, resultGroupSet);
     const groups = [...resultGroupSet];
     const nextMissingGroups = new Set<MissingGroupsRecord>();
     const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
@@ -275,6 +279,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
           alertState: stateToAlertMessage[nextState],
           group,
+          groupByKeys: groupByKeysObjectMapping[group],
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
           reason,
           threshold: mapToConditionsLookup(
@@ -299,6 +304,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       const recoveredAlertId = alert.getId();
       const alertUuid = getAlertUuid(recoveredAlertId);
 
+      const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
+      const additionalContext = getContextForRecoveredAlerts(alertHits);
+
       alert.setContext({
         alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
         alertState: stateToAlertMessage[AlertStates.OK],
@@ -307,6 +315,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         timestamp: startedAt.toISOString(),
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
+        ...additionalContext,
       });
     }
 

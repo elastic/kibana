@@ -217,6 +217,7 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
         canEnable: state.enablement?.canEnable || false,
         areApiKeysEnabled: state.enablement?.areApiKeysEnabled || false,
         isEnabled: false,
+        isValidApiKey: state.enablement?.isValidApiKey || false,
       },
     }))
     .addCase(
@@ -240,23 +241,21 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
         enablement: true,
       },
     }))
-    .addCase(enableSyntheticsSuccess, (state: WritableDraft<MonitorManagementList>) => ({
-      ...state,
-      loading: {
-        ...state.loading,
-        enablement: false,
-      },
-      error: {
-        ...state.error,
-        enablement: null,
-      },
-      enablement: {
-        canManageApiKeys: state.enablement?.canManageApiKeys || false,
-        canEnable: state.enablement?.canEnable || false,
-        areApiKeysEnabled: state.enablement?.areApiKeysEnabled || false,
-        isEnabled: true,
-      },
-    }))
+    .addCase(
+      enableSyntheticsSuccess,
+      (state: WritableDraft<MonitorManagementList>, action: PayloadAction<any>) => ({
+        ...state,
+        loading: {
+          ...state.loading,
+          enablement: false,
+        },
+        error: {
+          ...state.error,
+          enablement: null,
+        },
+        enablement: action.payload,
+      })
+    )
     .addCase(
       enableSyntheticsFailure,
       (state: WritableDraft<MonitorManagementList>, action: PayloadAction<Error>) => ({

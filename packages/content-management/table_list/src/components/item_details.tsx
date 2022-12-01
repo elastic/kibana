@@ -7,11 +7,13 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiText, EuiLink, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiLink, EuiTitle, EuiSpacer, EuiHighlight } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
+import type { Tag } from '../types';
 import { useServices } from '../services';
 import type { UserContentCommonSchema, Props as TableListViewProps } from '../table_list_view';
+import { TagBadge } from './tag_badge';
 
 type InheritedProps<T extends UserContentCommonSchema> = Pick<
   TableListViewProps<T>,
@@ -20,14 +22,15 @@ type InheritedProps<T extends UserContentCommonSchema> = Pick<
 interface Props<T extends UserContentCommonSchema> extends InheritedProps<T> {
   item: T;
   searchTerm?: string;
+  onClickTag: (tag: Tag, isCtrlKey: boolean) => void;
 }
 
 /**
  * Copied from https://stackoverflow.com/a/9310752
  */
-// const escapeRegExp = (text: string) => {
-//   return text.replace(/[-\[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-// };
+const escapeRegExp = (text: string) => {
+  return text.replace(/[-\[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+};
 
 export function ItemDetails<T extends UserContentCommonSchema>({
   id,
@@ -35,6 +38,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
   searchTerm = '',
   getDetailViewLink,
   onClickTitle,
+  onClickTag,
 }: Props<T>) {
   const {
     references,
@@ -79,7 +83,9 @@ export function ItemDetails<T extends UserContentCommonSchema>({
           onClick={onClickTitleHandler}
           data-test-subj={`${id}ListingTitleLink-${item.attributes.title.split(' ').join('-')}`}
         >
-          {title}
+          <EuiHighlight highlightAll search={escapeRegExp(searchTerm)}>
+            {title}
+          </EuiHighlight>
         </EuiLink>
       </RedirectAppLinks>
     );
@@ -90,6 +96,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
     onClickTitle,
     onClickTitleHandler,
     redirectAppLinksCoreStart,
+    searchTerm,
     title,
   ]);
 
@@ -100,13 +107,20 @@ export function ItemDetails<T extends UserContentCommonSchema>({
       <EuiTitle size="xs">{renderTitle()}</EuiTitle>
       {Boolean(description) && (
         <EuiText size="s">
-          <p>{description!}</p>
+          <p>
+            <EuiHighlight highlightAll search={escapeRegExp(searchTerm)}>
+              {description!}
+            </EuiHighlight>
+          </p>
         </EuiText>
       )}
       {hasTags && (
         <>
           <EuiSpacer size="s" />
-          <TagList references={references} />
+          <TagList
+            references={references}
+            tagRender={(tag) => <TagBadge key={tag.name} tag={tag} onClick={onClickTag} />}
+          />
         </>
       )}
     </div>

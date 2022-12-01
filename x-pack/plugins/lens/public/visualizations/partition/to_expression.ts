@@ -61,8 +61,23 @@ type GenerateExpressionAstFunction = (
 type GenerateLabelsAstArguments = (
   state: PieVisualizationState,
   attributes: Attributes,
-  layer: PieLayerState
+  layer: PieLayerState,
+  columnToLabelMap: Record<string, string>
 ) => [Ast];
+
+export const getColumnToLabelMap = (
+  columnIds: string[],
+  datasource: DatasourcePublicAPI | undefined
+) => {
+  const columnToLabel: Record<string, string> = {};
+  columnIds.forEach((accessor) => {
+    const operation = datasource?.getOperationForColumnId(accessor);
+    if (operation?.label) {
+      columnToLabel[accessor] = operation.label;
+    }
+  });
+  return columnToLabel;
+};
 
 export const getSortedGroups = (
   datasource: DatasourcePublicAPI | undefined,
@@ -83,7 +98,12 @@ const prepareDimension = (accessor: string) =>
     buildExpressionFunction<ExpressionFunctionVisDimension>('visdimension', { accessor }),
   ]).toAst();
 
-const generateCommonLabelsAstArgs: GenerateLabelsAstArguments = (state, attributes, layer) => {
+const generateCommonLabelsAstArgs: GenerateLabelsAstArguments = (
+  state,
+  attributes,
+  layer,
+  columnToLabelMap
+) => {
   const show = !attributes.isPreview && layer.categoryDisplay !== CategoryDisplay.HIDE;
   const position =
     layer.categoryDisplay !== CategoryDisplay.HIDE ? (layer.categoryDisplay as LabelPositions) : [];
@@ -91,9 +111,30 @@ const generateCommonLabelsAstArgs: GenerateLabelsAstArguments = (state, attribut
   const valuesFormat =
     layer.numberDisplay !== NumberDisplay.HIDDEN ? (layer.numberDisplay as ValueFormats) : [];
   const percentDecimals = layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS;
+  const colorOverrides =
+    layer.allowMultipleMetrics && !layer.primaryGroups.length
+      ? Object.entries(columnToLabelMap).reduce<Record<string, string>>(
+          (acc, [columnId, label]) => {
+            const color = layer.colorsByDimension?.[columnId];
+            if (color) {
+              acc[label] = color;
+            }
+            return acc;
+          },
+          {}
+        )
+      : {};
+
   const partitionLabelsFn = buildExpressionFunction<PartitionLabelsExpressionFunctionDefinition>(
     'partitionLabels',
-    { show, position, values, valuesFormat, percentDecimals }
+    {
+      show,
+      position,
+      values,
+      valuesFormat,
+      percentDecimals,
+      colorOverrides: JSON.stringify(colorOverrides),
+    }
   );
 
   return [buildExpression([partitionLabelsFn]).toAst()];
@@ -133,13 +174,18 @@ const generateCommonArguments = (
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry
 ) => {
+  const columnToLabelMap = getColumnToLabelMap(layer.metrics, datasourceLayers[layer.layerId]);
+
   return {
-    labels: generateCommonLabelsAstArgs(state, attributes, layer),
+    labels: generateCommonLabelsAstArgs(state, attributes, layer, columnToLabelMap),
     buckets: operations
       .filter(({ columnId }) => !isCollapsed(columnId, layer))
       .map(({ columnId }) => columnId)
       .map(prepareDimension),
-    metric: layer.metric ? prepareDimension(layer.metric) : '',
+    metrics: (layer.allowMultipleMetrics ? layer.metrics : [layer.metrics[0]]).map(
+      prepareDimension
+    ),
+    metricsToLabels: JSON.stringify(columnToLabelMap),
     legendDisplay: (attributes.isPreview
       ? LegendDisplay.HIDE
       : layer.legendDisplay) as PartitionVisLegendDisplay,
@@ -150,7 +196,7 @@ const generateCommonArguments = (
     truncateLegend:
       layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
     palette: generatePaletteAstArguments(paletteService, state.palette),
-    addTooltip: false,
+    addTooltip: true,
   };
 };
 
@@ -189,10 +235,13 @@ const generateTreemapVisAst: GenerateExpressionAstFunction = (...rest) => {
   ]).toAst();
 };
 
-const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) =>
-  buildExpression([
+const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) => {
+  const { metrics, ...args } = generateCommonArguments(...rest);
+
+  return buildExpression([
     buildExpressionFunction<MosaicVisExpressionFunctionDefinition>('mosaicVis', {
-      ...generateCommonArguments(...rest),
+      ...{ ...args, metricsToLabels: undefined },
+      metric: metrics,
       // flip order of bucket dimensions so the rows are fetched before the columns to keep them stable
       buckets: rest[2]
         .filter(({ columnId }) => !isCollapsed(columnId, rest[3]))
@@ -201,16 +250,22 @@ const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) =>
         .map(prepareDimension),
     }),
   ]).toAst();
+};
 
 const generateWaffleVisAst: GenerateExpressionAstFunction = (...rest) => {
   const { buckets, nestedLegend, ...args } = generateCommonArguments(...rest);
-  const [state, attributes, , layer] = rest;
+  const [state, attributes, , layer, datasourceLayers] = rest;
 
   return buildExpression([
     buildExpressionFunction<WaffleVisExpressionFunctionDefinition>('waffleVis', {
       ...args,
       bucket: buckets,
-      labels: generateWaffleLabelsAstArguments(state, attributes, layer),
+      labels: generateWaffleLabelsAstArguments(
+        state,
+        attributes,
+        layer,
+        getColumnToLabelMap(layer.metrics, datasourceLayers[layer.layerId])
+      ),
       showValuesInLegend: shouldShowValuesInLegend(layer, state.shape),
     }),
   ]).toAst();
@@ -251,7 +306,7 @@ function expressionHelper(
     }))
     .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
 
-  if (!layer.metric || !operations.length) {
+  if (!layer.metrics.length) {
     return null;
   }
   const visualizationAst = generateExprAst(
@@ -273,7 +328,7 @@ function expressionHelper(
         .map((columnId) => {
           return buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
             by: groups.filter((chk) => chk !== columnId),
-            metric: layer.metric ? [layer.metric] : [],
+            metric: layer.metrics,
             fn: [layer.collapseFns![columnId]!],
           }).toAst();
         }),

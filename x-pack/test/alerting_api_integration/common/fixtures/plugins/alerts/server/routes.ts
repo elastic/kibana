@@ -23,6 +23,7 @@ import {
   TaskInstance,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { FixtureStartDeps } from './plugin';
 import { retryIfConflicts } from './lib/retry_if_conflicts';
 
@@ -85,7 +86,7 @@ export function defineRoutes(
       const savedObjectsWithAlerts = await savedObjects.getScopedClient(req, {
         // Exclude the security and spaces wrappers to get around the safeguards those have in place to prevent
         // us from doing what we want to do - brute force replace the ApiKey
-        excludedWrappers: ['security', 'spaces'],
+        excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
         includedHiddenTypes: ['alert'],
       });
 
@@ -424,6 +425,27 @@ export function defineRoutes(
         return res.ok({ body: { apiKey, apiKeyOwner } });
       } catch (err) {
         return res.badRequest({ body: err });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/api/alerts_fixture/registered_connector_types',
+      validate: {},
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const [_, { actions }] = await core.getStartServices();
+        return res.ok({
+          body: actions.getAllTypes(),
+        });
+      } catch (e) {
+        return res.badRequest({ body: e });
       }
     }
   );

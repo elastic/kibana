@@ -167,8 +167,17 @@ const createMonitorJourney = ({
         expect(isSuccessful).toBeTruthy();
       });
 
-      step(`create ${monitorName}`, async () => {
+      step('handles validation', async () => {
         await syntheticsApp.navigateToAddMonitor();
+        await syntheticsApp.ensureIsOnMonitorConfigPage();
+        await syntheticsApp.clickByTestSubj('syntheticsMonitorConfigSubmitButton');
+        await page.waitForSelector('text=Monitor name is required');
+        await page.waitForSelector('text=Monitor script is required');
+        const success = page.locator('text=Monitor added successfully.');
+        expect(await success.count()).toBe(0);
+      });
+
+      step(`create ${monitorName}`, async () => {
         await syntheticsApp.createMonitor({ monitorConfig, monitorType });
         const isSuccessful = await syntheticsApp.confirmAndSave();
         expect(isSuccessful).toBeTruthy();
@@ -188,6 +197,15 @@ const createMonitorJourney = ({
           monitorType
         );
         expect(hasFailure).toBeFalsy();
+      });
+
+      step('cannot save monitor with the same name', async () => {
+        await syntheticsApp.navigateToAddMonitor();
+        await syntheticsApp.createMonitor({ monitorConfig, monitorType });
+        await page.waitForSelector('text=Monitor name already exists');
+        await syntheticsApp.clickByTestSubj('syntheticsMonitorConfigSubmitButton');
+        const success = page.locator('text=Monitor added successfully.');
+        expect(await success.count()).toBe(0);
       });
 
       step('delete monitor', async () => {

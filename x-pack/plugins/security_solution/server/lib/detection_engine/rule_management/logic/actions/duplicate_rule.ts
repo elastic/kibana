@@ -9,7 +9,6 @@ import uuid from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
-
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import type { InternalRuleCreate, RuleParams } from '../../../rule_schema';
 
@@ -20,7 +19,11 @@ const DUPLICATE_TITLE = i18n.translate(
   }
 );
 
-export const duplicateRule = (rule: SanitizedRule<RuleParams>): InternalRuleCreate => {
+interface DuplicateRuleParams {
+  rule: SanitizedRule<RuleParams>;
+}
+
+export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<InternalRuleCreate> => {
   // Generate a new static ruleId
   const ruleId = uuid.v4();
 
@@ -43,6 +46,7 @@ export const duplicateRule = (rule: SanitizedRule<RuleParams>): InternalRuleCrea
       relatedIntegrations,
       requiredFields,
       setup,
+      exceptionsList: [],
     },
     schedule: rule.schedule,
     enabled: false,

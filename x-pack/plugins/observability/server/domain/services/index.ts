@@ -7,5 +7,6 @@
 
 export * from './compute_error_budget';
 export * from './compute_sli';
+export * from './compute_burn_rate';
 export * from './date_range';
 export * from './validate_slo';

@@ -39,6 +39,7 @@ export {
   updateGraphEventId,
   updateSessionViewConfig,
   createTGrid,
+  updateTotalCount,
 } from './store/t_grid/actions';
 
 export { tGridReducer } from './store/t_grid/reducer';

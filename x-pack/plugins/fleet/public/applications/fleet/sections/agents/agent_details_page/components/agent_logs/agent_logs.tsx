@@ -10,7 +10,7 @@ import { stringify } from 'querystring';
 
 import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 import {
   EuiFlexGroup,
   EuiFlexItem,

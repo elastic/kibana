@@ -17,7 +17,11 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+import {
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../../constants';
 import { ElasticsearchAssetType } from '../../../types';
 import type {
   AssetReference,
@@ -48,16 +52,30 @@ export async function removeInstallation(options: {
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
 
-  const { total } = await packagePolicyService.list(savedObjectsClient, {
+  const { total, items } = await packagePolicyService.list(savedObjectsClient, {
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
-    page: 0,
-    perPage: 0,
+    page: 1,
+    perPage: options.force ? SO_SEARCH_LIMIT : 0,
   });
 
-  if (total > 0)
-    throw Boom.badRequest(
-      `unable to remove package with existing package policy(s) in use by agent(s)`
-    );
+  if (total > 0) {
+    if (options.force) {
+      // delete package policies
+      const ids = items.map((item) => item.id);
+      appContextService
+        .getLogger()
+        .info(
+          `deleting package policies of ${pkgName} package because force flag was enabled: ${ids}`
+        );
+      await packagePolicyService.delete(savedObjectsClient, esClient, ids, {
+        force: options.force,
+      });
+    } else {
+      throw Boom.badRequest(
+        `unable to remove package with existing package policy(s) in use by agent(s)`
+      );
+    }
+  }
 
   // Delete the installed assets. Don't include installation.package_assets. Those are irrelevant to users
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];

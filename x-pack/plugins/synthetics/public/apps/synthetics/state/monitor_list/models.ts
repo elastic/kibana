@@ -10,7 +10,7 @@ import {
   FetchMonitorManagementListQueryArgs,
 } from '../../../../../common/runtime_types';
 
-export type MonitorListSortField = `${keyof EncryptedSyntheticsSavedMonitor}.keyword`;
+export type MonitorListSortField = `${keyof EncryptedSyntheticsSavedMonitor}.keyword` | 'enabled';
 
 export interface MonitorListPageState {
   query?: string;

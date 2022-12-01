@@ -77,7 +77,6 @@ export const MonitorManagementList = ({
     () =>
       list.monitors.map((monitor) => ({
         ...monitor.attributes,
-        id: monitor.id,
       })),
     [list.monitors]
   );
@@ -127,7 +126,7 @@ export const MonitorManagementList = ({
       render: (name: string, monitor: EncryptedSyntheticsMonitorWithId) => (
         <EuiLink
           href={`${basePath}/app/uptime/monitor/${btoa(
-            (monitor as unknown as BrowserFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitor.id
+            (monitor as unknown as BrowserFields)[ConfigKey.MONITOR_QUERY_ID]
           )}`}
         >
           {name}
@@ -192,7 +191,7 @@ export const MonitorManagementList = ({
       }),
       render: (_enabled: boolean, monitor: EncryptedSyntheticsMonitorWithId) => (
         <MonitorEnabled
-          id={monitor.id}
+          id={monitor[ConfigKey.CONFIG_ID]}
           monitor={monitor}
           isDisabled={!canEdit}
           onUpdate={onUpdate}
@@ -206,7 +205,7 @@ export const MonitorManagementList = ({
       }),
       render: (fields: EncryptedSyntheticsMonitorWithId) => (
         <Actions
-          id={fields.id}
+          configId={fields[ConfigKey.CONFIG_ID]}
           name={fields[ConfigKey.NAME]}
           isDisabled={!canEdit}
           onUpdate={onUpdate}

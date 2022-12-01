@@ -221,6 +221,7 @@ describe('get_export_by_object_ids', () => {
             timestamp_override_fallback_disabled: undefined,
             namespace: undefined,
             data_view_id: undefined,
+            alert_suppression: undefined,
           },
         ],
       };

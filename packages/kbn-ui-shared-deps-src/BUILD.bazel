@@ -50,6 +50,8 @@ RUNTIME_DEPS = [
   "//packages/kbn-std",
   "//packages/kbn-ui-shared-deps-npm",
   "//packages/kbn-ui-theme",
+  "//packages/kbn-peggy-loader",
+  "//packages/kbn-rison",
 ]
 
 TYPES_DEPS = [
@@ -106,7 +108,7 @@ webpack(
     "$(location webpack.config.js)",
     "--output-path",
     "$(@D)",
-    "--no-stats"
+    "--stats=errors-only"
   ],
 )
 

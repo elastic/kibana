@@ -26,6 +26,7 @@ import { initPlugin as initWebhook } from './webhook_simulation';
 import { initPlugin as initMSExchange } from './ms_exchage_server_simulation';
 import { initPlugin as initXmatters } from './xmatters_simulation';
 import { initPlugin as initUnsecuredAction } from './unsecured_actions_simulation';
+import { initPlugin as initTines } from './tines_simulation';
 
 export const NAME = 'actions-FTS-external-service-simulators';
 
@@ -40,12 +41,14 @@ export enum ExternalServiceSimulator {
   WEBHOOK = 'webhook',
   MS_EXCHANGE = 'exchange',
   XMATTERS = 'xmatters',
+  TINES = 'tines',
 }
 
 export function getExternalServiceSimulatorPath(service: ExternalServiceSimulator): string {
   return `/api/_${NAME}/${service}`;
 }
 
+// list all urls for server.xsrf.allowlist config
 export function getAllExternalServiceSimulatorPaths(): string[] {
   const allPaths = Object.values(ExternalServiceSimulator).map((service) =>
     getExternalServiceSimulatorPath(service)
@@ -56,6 +59,7 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.MS_EXCHANGE}/users/test@/sendMail`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.MS_EXCHANGE}/1234567/oauth2/v2.0/token`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/oauth_token.do`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.TINES}/webhook/path/secret`);
   return allPaths;
 }
 
@@ -142,6 +146,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       router,
       getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
     );
+    initTines(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.TINES));
     initUnsecuredAction(router, core);
   }
 

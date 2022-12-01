@@ -7,7 +7,6 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UnifiedFieldListPluginSetup {}
 
@@ -30,14 +29,17 @@ export interface FieldListItem {
   name: DataViewField['name'];
   type?: DataViewField['type'];
   displayName?: DataViewField['displayName'];
+  count?: DataViewField['count'];
 }
 
 export enum FieldsGroupNames {
   SpecialFields = 'SpecialFields',
   SelectedFields = 'SelectedFields',
+  PopularFields = 'PopularFields',
   AvailableFields = 'AvailableFields',
   EmptyFields = 'EmptyFields',
   MetaFields = 'MetaFields',
+  UnmappedFields = 'UnmappedFields',
 }
 
 export interface FieldsGroupDetails {

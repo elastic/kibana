@@ -403,6 +403,7 @@ export const mockGlobalState: State = {
         updated: 1663882629000,
         isLoading: false,
         queryFields: [],
+        totalCount: 0,
       },
     },
   },

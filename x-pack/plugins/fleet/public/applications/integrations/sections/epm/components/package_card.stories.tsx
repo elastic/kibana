@@ -30,6 +30,7 @@ const args: Args = {
   integration: '',
   categories: ['foobar'],
   isUnverified: false,
+  isUpdateAvailable: false,
 };
 
 const argTypes = {
@@ -40,6 +41,9 @@ const argTypes = {
     },
   },
   isUnverified: {
+    control: 'boolean',
+  },
+  isUpdateAvailable: {
     control: 'boolean',
   },
 };

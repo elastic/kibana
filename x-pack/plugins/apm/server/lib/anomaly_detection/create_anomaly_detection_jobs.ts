@@ -12,10 +12,7 @@ import moment from 'moment';
 import uuid from 'uuid/v4';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
-import {
-  METRICSET_NAME,
-  PROCESSOR_EVENT,
-} from '../../../common/elasticsearch_fieldnames';
+import { METRICSET_NAME, PROCESSOR_EVENT } from '../../../common/es_fields/apm';
 import { Environment } from '../../../common/environment_rt';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
