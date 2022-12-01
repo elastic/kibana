@@ -33,10 +33,10 @@ export function getAgentStatus(agent: Agent | FleetServerAgent): AgentStatus {
     return 'unenrolling';
   }
 
-  if (agent.last_checkin_status === 'error') {
+  if (agent.last_checkin_status?.toLowerCase() === 'error') {
     return 'error';
   }
-  if (agent.last_checkin_status === 'degraded') {
+  if (agent.last_checkin_status?.toLowerCase() === 'degraded') {
     return 'degraded';
   }
 
@@ -61,10 +61,10 @@ export function getPreviousAgentStatusForOfflineAgents(
     return 'unenrolling';
   }
 
-  if (agent.last_checkin_status === 'error') {
+  if (agent.last_checkin_status?.toLowerCase() === 'error') {
     return 'error';
   }
-  if (agent.last_checkin_status === 'degraded') {
+  if (agent.last_checkin_status?.toLowerCase() === 'degraded') {
     return 'degraded';
   }
 
@@ -96,7 +96,7 @@ export function buildKueryForOnlineAgents(path: string = ''): string {
 }
 
 export function buildKueryForErrorAgents(path: string = ''): string {
-  return `(${path}last_checkin_status:error or ${path}last_checkin_status:degraded) ${addExclusiveKueryFilter(
+  return `(${path}last_checkin_status:error or ${path}last_checkin_status:degraded or ${path}last_checkin_status:DEGRADED or ${path}last_checkin_status:ERROR) ${addExclusiveKueryFilter(
     [buildKueryForOfflineAgents, buildKueryForUnenrollingAgents],
     path
   )}`;
