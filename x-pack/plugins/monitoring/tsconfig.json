@@ -3,18 +3,9 @@
   "compilerOptions": {
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
-    "declaration": true,
-    // there is still a decent amount of JS in this plugin and we are taking
-    // advantage of the fact that TS doesn't know the types of that code and
-    // gives us `any`. Once that code is converted to .ts we can remove this
-    // and allow TS to infer types from any JS file imported.
-    "allowJs": false
+    "declaration": true
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*"
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "server/**/*.json"],
   "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
@@ -33,6 +24,6 @@
     { "path": "../license_management/tsconfig.json" },
     { "path": "../observability/tsconfig.json" },
     { "path": "../telemetry_collection_xpack/tsconfig.json" },
-    { "path": "../triggers_actions_ui/tsconfig.json" },
+    { "path": "../triggers_actions_ui/tsconfig.json" }
   ]
 }

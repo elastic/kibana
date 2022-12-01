@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { GuidesConfig } from '../../types';
+import type { GuidesConfig } from '../../../common';
+import { testGuideConfig } from '../../../common';
 import { securityConfig } from './security';
 import { observabilityConfig } from './observability';
 import { searchConfig } from './search';
-import { testGuideConfig } from './test_guide';
 
 export const guidesConfig: GuidesConfig = {
   security: securityConfig,
