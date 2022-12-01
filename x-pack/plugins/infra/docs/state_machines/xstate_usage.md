@@ -4,7 +4,7 @@ Within the Infra plugin (specifically Logs) we use [Xstate](https://xstate.js.or
 
 ## Optional actions / exposing events
 
-Xstate has methods and means for parent <-> child communication, and when we want to communicate from child to parent the most convenient method is to use `sendParent()`. In cases where the parent <-> child relationship is "baked in" this is by far the easiest and most direct method to use. However, there are occasions where you might have a more generic machine that you want to compose within another machine so that it (the parent) can respond to certain events. In this case blindly responding to the events that result from `sendParent()` would require knowing about the internals of that machine, even though the relationship is more generic in nature (and the child machine may well be used elsewhere). In this case it is nice to have a more explicit contract, so that we can say "hello actor, what events do you emit?" and then we can selectively respond to those.
+Xstate has methods and means for parent <-> child communication, and when we want to communicate from child to parent the most convenient method is to use [`sendParent()`](https://xstate.js.org/docs/guides/communication.html#sending-events). In cases where the parent <-> child relationship is "baked in" this is by far the easiest and most direct method to use. However, there are occasions where you might have a more generic machine that you want to compose within another machine so that it (the parent) can respond to certain events. In this case blindly responding to the events that result from `sendParent()` would require knowing about the internals of that machine, even though the relationship is more generic in nature (and the child machine may well be used elsewhere). In this case it is nice to have a more explicit contract, so that we can say "hello actor, what events do you emit?" and then we can selectively respond to those.
 
 The pattern we have used to deal with this involves assigning the actions in an optional manner, with them being a no-op by default.
 
@@ -73,7 +73,7 @@ The consumer can now choose to respond to this event in some way.
 
 ## Event notifications from outside of a machine
 
-Xstate has several mechanisms for parent <-> child communication, a parent can (for example) `invoke` a child actor, or `spawn` an actor and assign it to `context`. However, we might need to communicate with an actor that was instantiated outside of the machine, here the parent -> child relationship is less obvious, but we still want to enforce a pattern that makes this obvious and "contractual".
+Xstate has several mechanisms for parent <-> child communication, a parent can (for example) [`invoke`](https://xstate.js.org/docs/guides/communication.html#the-invoke-property) a child actor, or [`spawn`](https://xstate.js.org/docs/guides/actors.html#spawning-actors) an actor and assign it to `context`. However, we might need to communicate with an actor that was instantiated outside of the machine, here the parent -> child relationship is less obvious, but we still want to enforce a pattern that makes this obvious and "contractual".
 
 In our real `LogView` -> `Stream` example the `LogView` machine is actually instantiated in a very different part of the React hierarchy to the stream machine, but we still want to respond to these events. The problem is the stream machine will no longer be directly spawning or invoking the `LogView` machine, so there is no strict parent <-> child relationship.
 
@@ -176,10 +176,44 @@ export const createLogStreamPageStateMachine = ({
 
 Here we call `withConfig()` which returns a new instance with our overrides, in this case we inject the correct services.
 
+## Pairing with React
+
+There is a [`@xstate/react` library](https://xstate.js.org/docs/recipes/react.html#usage-with-react) that provides some helpful hooks and utilities for combining React and Xstate.
+
+We have opted to use a provider approach for providing state to the React hierarchy, e.g.:
+
+```ts
+export const useLogStreamPageState = ({
+  logViewStateNotifications,
+}: {
+  logViewStateNotifications: LogViewNotificationChannel;
+}) => {
+  const logStreamPageStateService = useInterpret(
+    () =>
+      createLogStreamPageStateMachine({
+        logViewStateNotifications,
+      })
+  );
+
+  return logStreamPageStateService;
+};
+
+export const [LogStreamPageStateProvider, useLogStreamPageStateContext] =
+  createContainer(useLogStreamPageState);
+```
+
+[`useInterpret`](https://xstate.js.org/docs/packages/xstate-react/#useinterpret-machine-options-observer) returns a **static** reference:
+
+> returns a static reference (to just the interpreted machine) which will not rerender when its state changes
+
+When dealing with state it is best to use [selectors](https://xstate.js.org/docs/packages/xstate-react/#useselector-actor-selector-compare-getsnapshot), the `useSelector` hook can significantly increase performance over `useMachine`:
+
+> This hook will only cause a rerender if the selected value changes, as determined by the optional compare function.
+
 ## TypeScript usage
 
-TODO
+Our usage of Xstate is fully typed. We have opted for a [Typestate](https://xstate.js.org/docs/guides/typescript.html#typestates) approach, which allows us to narrow down the shape of `context` based on the state `value`. [Typegen](https://xstate.js.org/docs/guides/typescript.html#typegen) may be a possible solution in the future, but at the time of writing this causes some friction with the way we work.
 
-## Tools
+## DX Tools
 
-TODO: VS code plugin etc
+We recommend using the [Xstate VSCode extension](https://marketplace.visualstudio.com/items?itemName=statelyai.stately-vscode), this includes various features, but arguably the most useful is being able to visually work with the machine. Even if you don't work with VSCode day to day it may be worth installing to utilise this extension for Xstate work.
