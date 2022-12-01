@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import jexl from 'jexl';
 import Mustache from 'mustache';
 import moment from 'moment-timezone';
 import Handlebars from '@kbn/handlebars';
@@ -56,7 +57,10 @@ export function renderTemplate(
         return jsonize(o, this, true);
       });
       handlebars.registerHelper('math', function (this: Variables, o: unknown) {
-        return math(o, this);
+        return tinymathRunner(o, this);
+      });
+      handlebars.registerHelper('jexl', function (this: Variables, o: unknown) {
+        return jexlRunner(o, this);
       });
 
       // see: https://github.com/handlebars-lang/handlebars.js/pull/1523
@@ -159,12 +163,42 @@ function jsonize(o: unknown, vars: Variables, pretty: boolean): string {
   }
 }
 
-function math(o: unknown, vars: Variables): string {
+function tinymathRunner(o: unknown, vars: Variables): string {
   const expr = `${o}`;
   try {
     const result = tinymath.evaluate(expr, vars);
     return `${result}`;
   } catch (err) {
     throw new Error(`error evaluating tinymath expression "${expr}": ${err.message}`);
+  }
+}
+
+// https://github.com/TomFrost/jexl
+function jexlRunner(o: unknown, vars: Variables): string {
+  const expr = `${o}`;
+  const jexlEnv = new jexl.Jexl();
+  jexlEnv.addTransform('concat', (val, arg) => `${val}`.concat(`${arg}`));
+  jexlEnv.addTransform('endsWith', (val, arg) => `${val}`.endsWith(`${arg}`));
+  jexlEnv.addTransform('includes', (val, arg) => `${val}`.includes(`${arg}`));
+  jexlEnv.addTransform('padEnd', (val, len, str) =>
+    `${val}`.padEnd(len, str ? `${str}` : undefined)
+  );
+  jexlEnv.addTransform('padStart', (val, len, str) => `${val}`.padStart(len, `${str}`));
+  jexlEnv.addTransform('replace', (val, tgt, rpl) => `${val}`.replace(`${tgt}`, `${rpl}`));
+  jexlEnv.addTransform('replaceAll', (val, tgt, rpl) => `${val}`.replaceAll(`${tgt}`, `${rpl}`));
+  jexlEnv.addTransform('slice', (val, sta, end) => `${val}`.slice(sta, end));
+  jexlEnv.addTransform('split', (val, str) => `${val}`.split(`${str}`));
+  jexlEnv.addTransform('startsWith', (val, str) => `${val}`.startsWith(`${str}`));
+  jexlEnv.addTransform('toLowerCase', (val) => `${val}`.toLowerCase());
+  jexlEnv.addTransform('toUpperCase', (val) => `${val}`.toUpperCase());
+  jexlEnv.addTransform('trim', (val) => `${val}`.trim());
+  jexlEnv.addTransform('trimEnd', (val) => `${val}`.trimEnd());
+  jexlEnv.addTransform('trimStart', (val) => `${val}`.trimStart());
+
+  try {
+    const result = jexlEnv.evalSync(expr, vars);
+    return `${result}`;
+  } catch (err) {
+    throw new Error(`error evaluating jexl expression "${expr}": ${err.message}`);
   }
 }

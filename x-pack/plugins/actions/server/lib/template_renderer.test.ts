@@ -8,6 +8,7 @@
 import { renderMustacheString } from './mustache_renderer';
 
 describe('using handlebars', () => {
+  // -------------------------------------------------------------------
   it('is supported with a format comment directive', () => {
     const template = `
 {{!@ format: handlebars}}
@@ -17,6 +18,7 @@ describe('using handlebars', () => {
     expect(renderMustacheString(template, { x: 1 }, 'none')).toEqual('1');
   });
 
+  // -------------------------------------------------------------------
   it('has a date helper', () => {
     const timeStamp = '2022-11-29T15:52:44Z';
     const template = `
@@ -27,6 +29,7 @@ describe('using handlebars', () => {
     expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual('2022-11-29 03:52pm');
   });
 
+  // -------------------------------------------------------------------
   it('date with a time zone is successful', () => {
     const timeStamp = '2022-11-29T15:52:44Z';
     const timeZone = 'America/New_York';
@@ -39,6 +42,7 @@ describe('using handlebars', () => {
     expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual('2022-11-29 10:52am');
   });
 
+  // -------------------------------------------------------------------
   it('date with a format is successful', () => {
     const timeStamp = '2022-11-29T15:52:44Z';
     const dateFormat = 'dddd MMM Do YYYY HH:mm:ss.SSS';
@@ -53,6 +57,7 @@ describe('using handlebars', () => {
     );
   });
 
+  // -------------------------------------------------------------------
   it('date with a format and timezone is successful', () => {
     const timeStamp = '2022-11-29T15:52:44Z';
     const dateFormat = 'dddd MMM Do YYYY HH:mm:ss.SSS';
@@ -69,6 +74,7 @@ describe('using handlebars', () => {
     );
   });
 
+  // -------------------------------------------------------------------
   it('json is successful', () => {
     const vars = {
       context: {
@@ -88,6 +94,7 @@ describe('using handlebars', () => {
     expect(renderMustacheString(template, vars, 'none')).toEqual('{"a":{"b":1},"c":{"d":2}}');
   });
 
+  // -------------------------------------------------------------------
   it('json with arrays works', () => {
     const vars = {
       context: {
@@ -111,6 +118,7 @@ describe('using handlebars', () => {
     expect(renderMustacheString(template2, vars, 'none')).toEqual('17,42');
   });
 
+  // -------------------------------------------------------------------
   it('jsonl is successful', () => {
     const vars = {
       context: {
@@ -137,6 +145,7 @@ describe('using handlebars', () => {
 }`);
   });
 
+  // -------------------------------------------------------------------
   it('math is successful', () => {
     const vars = {
       context: {
@@ -155,5 +164,31 @@ describe('using handlebars', () => {
 
     const result = renderMustacheString(template, vars, 'none');
     expect(result).toEqual(`1\n2\n3\n`);
+  });
+
+  // -------------------------------------------------------------------
+  it('jexl is successful', () => {
+    const vars = {
+      context: {
+        a: { b: 1 },
+        c: { d: 2 },
+        e: {
+          firstName: 'Jim',
+          lastName: 'Bob',
+        },
+      },
+    };
+    const template = `
+{{!@ format: handlebars}}
+{{jexl '1 + 0'}}
+{{jexl '1 + context.a.b'}}
+{{#context}}
+{{jexl '1 + c.d'}}
+{{jexl 'e.firstName|toLowerCase + " " + e.lastName|toUpperCase'}}
+{{/context}}
+    `.trim();
+
+    const result = renderMustacheString(template, vars, 'none');
+    expect(result).toEqual(`1\n2\n3\n\jim BOB\n`);
   });
 });
