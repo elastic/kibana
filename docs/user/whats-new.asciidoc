@@ -34,7 +34,7 @@ image::images/highlights-metric-vis.png[Trend lines on metric visualizations]
 ==== Partition charts with multiple metrics
 
 Making sense of your data just got a whole lot easier. In Lens, you can create partition
-charts in Lens, you can now visualize multiple metrics.
+charts with multiple metrics, which is helpful for when you want a complete view of your data, such as the rate of errors by type under different conditions.
 
 [role="screenshot"]
 image::images/highlights-partition-charts.png[Multiple metrics in a partition chart]
