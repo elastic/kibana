@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { forwardRef, useEffect, useMemo } from 'react';
+import React, { forwardRef, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import type { EuiMarkdownEditorProps } from '@elastic/eui';
 import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
@@ -59,6 +59,7 @@ export const MarkdownEditorForm = React.memo(
     ) => {
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
       const storage = useMemo(() => new Storage(window.sessionStorage), []);
+      const isFirstRender = useRef(true);
 
       const commentEditorContextValue = useMemo(
         () => ({
@@ -87,7 +88,17 @@ export const MarkdownEditorForm = React.memo(
 
       useDebounce(
         () => {
-          if (draftCommentStorageKey) storage.set(draftCommentStorageKey, field.value);
+          if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+          }
+          if (draftCommentStorageKey) {
+            if (field.value !== '') {
+              storage.set(draftCommentStorageKey, field.value);
+            } else {
+              storage.remove(draftCommentStorageKey);
+            }
+          }
         },
         STORAGE_DEBOUNCE_TIME,
         [field.value]
