@@ -324,12 +324,3 @@ export const internalRuleUpdate = t.intersection([
   internalRuleUpdateRequired,
 ]);
 export type InternalRuleUpdate = t.TypeOf<typeof internalRuleUpdate>;
-
-// Rule params of rules with index and dataViewId properties
-export type IndexPatternRuleParams =
-  | EqlRuleParams
-  | ThreatRuleParams
-  | QueryRuleParams
-  | SavedQueryRuleParams
-  | ThresholdRuleParams
-  | NewTermsRuleParams;

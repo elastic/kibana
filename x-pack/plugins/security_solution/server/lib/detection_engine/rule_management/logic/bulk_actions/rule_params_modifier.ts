@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { parseInterval } from '@kbn/data-plugin/common/search/aggs/utils/date_interval_utils';
 import type { RuleParamsModifierResult } from '@kbn/alerting-plugin/server/rules_client';
-import type { IndexPatternRuleParams, RuleAlertType } from '../../../rule_schema';
+import type { RuleAlertType } from '../../../rule_schema';
 import type {
   BulkActionEditForRuleParams,
   BulkActionEditPayloadIndexPatterns,
@@ -27,36 +27,37 @@ export const deleteItemsFromArray = <T>(arr: T[], items: T[]): T[] => {
 // Check if current params have a configured data view id
 // and the action is not set to overwrite data views
 const isDataViewExistsAndNotOverriden = (
-  ruleParams: IndexPatternRuleParams,
+  dataViewId: string | undefined,
   action: BulkActionEditPayloadIndexPatterns
-) => ruleParams.dataViewId != null && !action.overwrite_data_views;
+) => dataViewId != null && !action.overwrite_data_views;
 
 // Check if the index patterns added to the rule already exist in it
 const hasIndexPatterns = (
-  ruleParams: IndexPatternRuleParams,
+  indexPatterns: string[] | undefined,
   action: BulkActionEditPayloadIndexPatterns
-) => action.value.every((indexPattern) => ruleParams.index?.includes(indexPattern));
+) => action.value.every((indexPattern) => indexPatterns?.includes(indexPattern));
 
 // Check if the index patterns to be deleted don't exist in the rule
 const hasNotIndexPattern = (
-  ruleParams: IndexPatternRuleParams,
+  indexPatterns: string[] | undefined,
   action: BulkActionEditPayloadIndexPatterns
-) => action.value.every((indexPattern) => !ruleParams.index?.includes(indexPattern));
+) => action.value.every((indexPattern) => !indexPatterns?.includes(indexPattern));
 
 const shouldSkipIndexPatternsBulkAction = (
-  ruleParams: IndexPatternRuleParams,
+  indexPatterns: string[] | undefined,
+  dataViewId: string | undefined,
   action: BulkActionEditPayloadIndexPatterns
 ) => {
-  if (isDataViewExistsAndNotOverriden(ruleParams, action)) {
+  if (isDataViewExistsAndNotOverriden(dataViewId, action)) {
     return true;
   }
 
   if (action.type === BulkActionEditType.add_index_patterns) {
-    return hasIndexPatterns(ruleParams, action);
+    return hasIndexPatterns(indexPatterns, action);
   }
 
   if (action.type === BulkActionEditType.delete_index_patterns) {
-    return hasNotIndexPattern(ruleParams, action);
+    return hasNotIndexPattern(indexPatterns, action);
   }
 
   return false;
@@ -85,7 +86,7 @@ const applyBulkActionEditToRuleParams = (
         "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
       );
 
-      if (shouldSkipIndexPatternsBulkAction(ruleParams, action)) {
+      if (shouldSkipIndexPatternsBulkAction(ruleParams.index, ruleParams.dataViewId, action)) {
         isActionSkipped = true;
         break;
       }
@@ -103,7 +104,10 @@ const applyBulkActionEditToRuleParams = (
         "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
       );
 
-      if (!action.overwrite_data_views && shouldSkipIndexPatternsBulkAction(ruleParams, action)) {
+      if (
+        !action.overwrite_data_views &&
+        shouldSkipIndexPatternsBulkAction(ruleParams.index, ruleParams.dataViewId, action)
+      ) {
         isActionSkipped = true;
         break;
       }
@@ -123,7 +127,7 @@ const applyBulkActionEditToRuleParams = (
         "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
       );
 
-      if (shouldSkipIndexPatternsBulkAction(ruleParams, action)) {
+      if (shouldSkipIndexPatternsBulkAction(ruleParams.index, ruleParams.dataViewId, action)) {
         isActionSkipped = true;
         break;
       }
