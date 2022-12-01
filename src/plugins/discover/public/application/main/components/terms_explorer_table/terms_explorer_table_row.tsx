@@ -78,7 +78,9 @@ export const TermsExplorerTableRow = ({
           align={cell?.result_type === 'numeric_aggregation' ? 'left' : 'center'}
           isExpander={true}
           css={css`
-            ${column === collapseFieldName ? 'background-color: #d2f3ea;' : ''}
+            ${column === collapseFieldName && columns.length > 1
+              ? 'background-color: #d2f3ea;'
+              : ''}
           `}
         >
           {child}

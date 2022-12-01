@@ -6,15 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { EuiEmptyPrompt } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+
 import { useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
-import { TermsExplorerTable, type TermsExplorerTableProps } from './terms_explorer_table';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import './terms_explorer.scss';
+
 import {
   FieldCardinalityRequest,
   FieldCardinalityResponse,
 } from '../../../../../common/terms_explorer/types';
+import './terms_explorer.scss';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { TermsExplorerTable, type TermsExplorerTableProps } from './terms_explorer_table';
 
 export const TermsExplorerTab: React.FC<Omit<TermsExplorerTableProps, 'query' | 'filters'>> =
   React.memo(({ collapseFieldName, ...props }) => {
@@ -57,6 +60,15 @@ export const TermsExplorerTab: React.FC<Omit<TermsExplorerTableProps, 'query' | 
       })();
     }, [props.columns, props.dataView, services.http, collapseFieldName]);
 
+    if (!collapseField || props.columns?.length === 0) {
+      return (
+        <EuiEmptyPrompt
+          iconType="fold"
+          title={<h2>Start adding columns</h2>}
+          body={<p>Choose a field on the left to show its unique values</p>}
+        />
+      );
+    }
     return (
       <div className={'kbnTermsExplorerWrapper'}>
         <TermsExplorerTable
