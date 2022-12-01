@@ -34,6 +34,9 @@ export type MetricsSourceConfigurationProperties = rt.TypeOf<
 export const partialMetricsSourceConfigurationReqPayloadRT = rt.partial({
   ...metricsSourceConfigurationPropertiesRT.type.props,
   metricAlias: indexPatternRt,
+  fields: rt.partial({
+    ...metricsSourceConfigurationPropertiesRT.type.props.fields.type.props,
+  }),
 });
 
 export const partialMetricsSourceConfigurationPropertiesRT = rt.partial({
