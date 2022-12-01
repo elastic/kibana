@@ -6,7 +6,6 @@
  */
 
 import { groupBy } from 'lodash';
-import { Span } from '../../typings/es_schemas/ui/span';
 import { Transaction } from '../../typings/es_schemas/ui/transaction';
 import { getClockSkew, getOrderedWaterfallItems, getWaterfall } from '.';
 import type {
@@ -14,94 +13,116 @@ import type {
   IWaterfallTransaction,
   IWaterfallError,
   IWaterfallSpanOrTransaction,
+  IWaterfallSpan,
   WaterfallSpanDoc,
+  WaterfallTransactionDoc,
 } from './typings';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 
 describe('waterfall_helpers', () => {
   describe('getWaterfall', () => {
-    const hits = [
+    const hits: Array<WaterfallTransactionDoc | WaterfallSpanDoc> = [
       {
-        processor: { event: 'transaction' },
+        processor: { event: ProcessorEvent.transaction },
         trace: { id: 'myTraceId' },
         service: { name: 'opbeans-node' },
+        timestamp: { us: 1549324795784006 },
+        agent: {
+          name: 'nodejs',
+          version: '1.0.0',
+        },
         transaction: {
           duration: { us: 49660 },
           name: 'GET /api',
           id: 'myTransactionId1',
+          type: 'request',
         },
-        timestamp: { us: 1549324795784006 },
-      } as Transaction,
+      },
       {
         parent: { id: 'mySpanIdA' },
-        processor: { event: 'span' },
+        processor: { event: ProcessorEvent.span },
         trace: { id: 'myTraceId' },
         service: { name: 'opbeans-ruby' },
-        transaction: { id: 'myTransactionId2' },
         timestamp: { us: 1549324795825633 },
+        agent: {
+          name: 'ruby',
+          version: '1.0.0',
+        },
         span: {
           duration: { us: 481 },
           name: 'SELECT FROM products',
           id: 'mySpanIdB',
+          type: 'db',
         },
-      } as Span,
+      },
       {
         parent: { id: 'myTransactionId2' },
-        processor: { event: 'span' },
+        processor: { event: ProcessorEvent.span },
         trace: { id: 'myTraceId' },
         service: { name: 'opbeans-ruby' },
-        transaction: { id: 'myTransactionId2' },
+        agent: {
+          name: 'ruby',
+          version: '1.0.0',
+        },
         span: {
           duration: { us: 6161 },
           name: 'Api::ProductsController#index',
           id: 'mySpanIdA',
+          type: 'external',
         },
         timestamp: { us: 1549324795824504 },
-      } as Span,
+      },
       {
         parent: { id: 'mySpanIdA' },
-        processor: { event: 'span' },
+        processor: { event: ProcessorEvent.span },
         trace: { id: 'myTraceId' },
         service: { name: 'opbeans-ruby' },
-        transaction: { id: 'myTransactionId2' },
+        agent: {
+          name: 'ruby',
+          version: '1.0.0',
+        },
         span: {
           duration: { us: 532 },
           name: 'SELECT FROM product',
           id: 'mySpanIdC',
+          type: 'db',
         },
         timestamp: { us: 1549324795827905 },
-      } as Span,
+      },
       {
         parent: { id: 'myTransactionId1' },
-        processor: { event: 'span' },
+        processor: { event: ProcessorEvent.span },
         trace: { id: 'myTraceId' },
         service: { name: 'opbeans-node' },
-        transaction: { id: 'myTransactionId1' },
+        agent: {
+          name: 'nodejs',
+          version: '1.0.0',
+        },
         span: {
           duration: { us: 47557 },
           name: 'GET opbeans-ruby:3000/api/products',
           id: 'mySpanIdD',
+          type: 'external',
         },
         timestamp: { us: 1549324795785760 },
-      } as Span,
+      },
       {
         parent: { id: 'mySpanIdD' },
-        processor: { event: 'transaction' },
+        processor: { event: ProcessorEvent.transaction },
         trace: { id: 'myTraceId' },
         service: { name: 'opbeans-ruby' },
+        agent: {
+          name: 'ruby',
+          version: '1.0.0',
+        },
         transaction: {
           duration: { us: 8634 },
           name: 'Api::ProductsController#index',
           id: 'myTransactionId2',
-          marks: {
-            agent: {
-              domInteractive: 382,
-              domComplete: 383,
-              timeToFirstByte: 14,
-            },
-          },
+          type: 'request',
         },
         timestamp: { us: 1549324795823304 },
-      } as unknown as Transaction,
+      },
     ];
     const errorDocs = [
       {
@@ -121,14 +142,36 @@ describe('waterfall_helpers', () => {
     ];
 
     it('should return full waterfall', () => {
-      const entryTransactionId = 'myTransactionId1';
+      const entryTransaction = {
+        processor: { event: ProcessorEvent.transaction },
+        trace: { id: 'myTraceId' },
+        service: { name: 'opbeans-node' },
+        timestamp: { us: 1549324795784006 },
+        agent: {
+          name: 'nodejs',
+          version: '1.0.0',
+        },
+        transaction: {
+          duration: { us: 49660 },
+          name: 'GET /api',
+          id: 'myTransactionId1',
+          type: 'request',
+          marks: {
+            agent: {
+              domInteractive: 382,
+              domComplete: 383,
+              timeToFirstByte: 14,
+            },
+          },
+        },
+      } as unknown as Transaction;
       const apiResp = {
         traceDocs: hits,
         errorDocs,
         exceedsMax: false,
         linkedChildrenOfSpanCountBySpanId: {},
       };
-      const waterfall = getWaterfall(apiResp, entryTransactionId);
+      const waterfall = getWaterfall(apiResp, entryTransaction);
 
       expect(waterfall.exceedsMax).toBeFalsy();
       expect(waterfall.items.length).toBe(6);
@@ -139,14 +182,31 @@ describe('waterfall_helpers', () => {
     });
 
     it('should return partial waterfall', () => {
-      const entryTransactionId = 'myTransactionId2';
+      const entryTransaction = {
+        parent: { id: 'mySpanIdD' },
+        processor: { event: ProcessorEvent.transaction },
+        trace: { id: 'myTraceId' },
+        service: { name: 'opbeans-ruby' },
+        agent: {
+          name: 'ruby',
+          version: '1.0.0',
+        },
+        transaction: {
+          duration: { us: 8634 },
+          name: 'Api::ProductsController#index',
+          id: 'myTransactionId2',
+          type: 'request',
+        },
+        timestamp: { us: 1549324795823304 },
+      } as unknown as Transaction;
+
       const apiResp = {
         traceDocs: hits,
         errorDocs,
         exceedsMax: false,
         linkedChildrenOfSpanCountBySpanId: {},
       };
-      const waterfall = getWaterfall(apiResp, entryTransactionId);
+      const waterfall = getWaterfall(apiResp, entryTransaction);
 
       expect(waterfall.exceedsMax).toBeFalsy();
       expect(waterfall.items.length).toBe(4);
@@ -156,73 +216,109 @@ describe('waterfall_helpers', () => {
       expect(waterfall).toMatchSnapshot();
     });
     it('should reparent spans', () => {
-      const traceItems = [
+      const traceItems: Array<WaterfallTransactionDoc | WaterfallSpanDoc> = [
         {
-          processor: { event: 'transaction' },
+          processor: { event: ProcessorEvent.transaction },
           trace: { id: 'myTraceId' },
           service: { name: 'opbeans-node' },
+          agent: {
+            name: 'nodejs',
+            version: '1.0.0',
+          },
           transaction: {
             duration: { us: 49660 },
             name: 'GET /api',
             id: 'myTransactionId1',
+            type: 'request',
           },
           timestamp: { us: 1549324795784006 },
-        } as Transaction,
+        },
         {
           parent: { id: 'mySpanIdD' },
-          processor: { event: 'span' },
+          processor: { event: ProcessorEvent.span },
           trace: { id: 'myTraceId' },
           service: { name: 'opbeans-ruby' },
-          transaction: { id: 'myTransactionId1' },
           timestamp: { us: 1549324795825633 },
+          agent: {
+            name: 'ruby',
+            version: '1.0.0',
+          },
           span: {
             duration: { us: 481 },
             name: 'SELECT FROM products',
             id: 'mySpanIdB',
+            type: 'db',
           },
           child: { id: ['mySpanIdA', 'mySpanIdC'] },
-        } as Span,
+        },
         {
           parent: { id: 'mySpanIdD' },
-          processor: { event: 'span' },
+          processor: { event: ProcessorEvent.span },
           trace: { id: 'myTraceId' },
           service: { name: 'opbeans-ruby' },
-          transaction: { id: 'myTransactionId1' },
+          agent: {
+            name: 'ruby',
+            version: '1.0.0',
+          },
           span: {
             duration: { us: 6161 },
             name: 'Api::ProductsController#index',
             id: 'mySpanIdA',
+            type: 'externa;',
           },
           timestamp: { us: 1549324795824504 },
-        } as Span,
+        },
         {
           parent: { id: 'mySpanIdD' },
-          processor: { event: 'span' },
+          processor: { event: ProcessorEvent.span },
           trace: { id: 'myTraceId' },
           service: { name: 'opbeans-ruby' },
-          transaction: { id: 'myTransactionId1' },
+          agent: {
+            name: 'ruby',
+            version: '1.0.0',
+          },
           span: {
             duration: { us: 532 },
             name: 'SELECT FROM product',
             id: 'mySpanIdC',
+            type: 'db',
           },
           timestamp: { us: 1549324795827905 },
-        } as Span,
+        },
         {
           parent: { id: 'myTransactionId1' },
-          processor: { event: 'span' },
+          processor: { event: ProcessorEvent.span },
           trace: { id: 'myTraceId' },
           service: { name: 'opbeans-node' },
-          transaction: { id: 'myTransactionId1' },
+          agent: {
+            name: 'nodejs',
+            version: '1.0.0',
+          },
           span: {
             duration: { us: 47557 },
             name: 'GET opbeans-ruby:3000/api/products',
             id: 'mySpanIdD',
+            type: 'external',
           },
           timestamp: { us: 1549324795785760 },
-        } as Span,
+        },
       ];
-      const entryTransactionId = 'myTransactionId1';
+      const entryTransaction = {
+        processor: { event: ProcessorEvent.transaction },
+        trace: { id: 'myTraceId' },
+        service: { name: 'opbeans-node' },
+        agent: {
+          name: 'nodejs',
+          version: '1.0.0',
+        },
+        transaction: {
+          duration: { us: 49660 },
+          name: 'GET /api',
+          id: 'myTransactionId1',
+          type: 'request',
+        },
+        timestamp: { us: 1549324795784006 },
+      } as unknown as Transaction;
       const waterfall = getWaterfall(
         {
           traceDocs: traceItems,
@@ -230,7 +326,7 @@ describe('waterfall_helpers', () => {
           exceedsMax: false,
           linkedChildrenOfSpanCountBySpanId: {},
         },
-        entryTransactionId
+        entryTransaction
       );
       const getIdAndParentId = (item: IWaterfallSpanOrTransaction) => ({
         id: item.id,
@@ -263,73 +359,109 @@ describe('waterfall_helpers', () => {
     });
 
     it("shouldn't reparent spans when child id isn't found", () => {
-      const traceItems = [
+      const traceItems: Array<WaterfallTransactionDoc | WaterfallSpanDoc> = [
         {
-          processor: { event: 'transaction' },
+          processor: { event: ProcessorEvent.transaction },
           trace: { id: 'myTraceId' },
           service: { name: 'opbeans-node' },
+          agent: {
+            name: 'nodejs',
+            version: '1.0.0',
+          },
           transaction: {
             duration: { us: 49660 },
             name: 'GET /api',
             id: 'myTransactionId1',
+            type: 'request',
           },
           timestamp: { us: 1549324795784006 },
-        } as Transaction,
+        },
         {
           parent: { id: 'mySpanIdD' },
-          processor: { event: 'span' },
+          processor: { event: ProcessorEvent.span },
           trace: { id: 'myTraceId' },
           service: { name: 'opbeans-ruby' },
-          transaction: { id: 'myTransactionId1' },
+          agent: {
+            name: 'ruby',
+            version: '1.0.0',
+          },
           timestamp: { us: 1549324795825633 },
           span: {
             duration: { us: 481 },
             name: 'SELECT FROM products',
             id: 'mySpanIdB',
+            type: 'db',
           },
           child: { id: ['incorrectId', 'mySpanIdC'] },
-        } as Span,
+        },
         {
           parent: { id: 'mySpanIdD' },
-          processor: { event: 'span' },
+          processor: { event: ProcessorEvent.span },
           trace: { id: 'myTraceId' },
           service: { name: 'opbeans-ruby' },
-          transaction: { id: 'myTransactionId1' },
+          agent: {
+            name: 'ruby',
+            version: '1.0.0',
+          },
           span: {
             duration: { us: 6161 },
             name: 'Api::ProductsController#index',
             id: 'mySpanIdA',
+            type: 'external',
           },
           timestamp: { us: 1549324795824504 },
-        } as Span,
+        },
         {
           parent: { id: 'mySpanIdD' },
-          processor: { event: 'span' },
+          processor: { event: ProcessorEvent.span },
           trace: { id: 'myTraceId' },
           service: { name: 'opbeans-ruby' },
-          transaction: { id: 'myTransactionId1' },
+          agent: {
+            name: 'ruby',
+            version: '1.0.0',
+          },
           span: {
             duration: { us: 532 },
             name: 'SELECT FROM product',
             id: 'mySpanIdC',
+            type: 'db',
           },
           timestamp: { us: 1549324795827905 },
-        } as Span,
+        },
         {
           parent: { id: 'myTransactionId1' },
-          processor: { event: 'span' },
+          processor: { event: ProcessorEvent.span },
           trace: { id: 'myTraceId' },
           service: { name: 'opbeans-node' },
-          transaction: { id: 'myTransactionId1' },
+          agent: {
+            name: 'nodejs',
+            version: '1.0.0',
+          },
           span: {
             duration: { us: 47557 },
             name: 'GET opbeans-ruby:3000/api/products',
             id: 'mySpanIdD',
+            type: 'external',
           },
           timestamp: { us: 1549324795785760 },
-        } as Span,
+        },
       ];
-      const entryTransactionId = 'myTransactionId1';
+      const entryTransaction = {
+        processor: { event: ProcessorEvent.transaction },
+        trace: { id: 'myTraceId' },
+        service: { name: 'opbeans-node' },
+        agent: {
+          name: 'nodejs',
+          version: '1.0.0',
+        },
+        transaction: {
+          duration: { us: 49660 },
+          name: 'GET /api',
+          id: 'myTransactionId1',
+          type: 'request',
+        },
+        timestamp: { us: 1549324795784006 },
+      } as unknown as Transaction;
       const waterfall = getWaterfall(
         {
           traceDocs: traceItems,
@@ -337,7 +469,7 @@ describe('waterfall_helpers', () => {
           exceedsMax: false,
           linkedChildrenOfSpanCountBySpanId: {},
         },
-        entryTransactionId
+        entryTransaction
       );
       const getIdAndParentId = (item: IWaterfallSpanOrTransaction) => ({
         id: item.id,
@@ -378,19 +510,24 @@ describe('waterfall_helpers', () => {
 
       const items: IWaterfallSpanOrTransaction[] = [
         {
-          docType: 'span',
+          docType: ProcessorEvent.span,
           doc: {
+            trace: { id: '1' },
+            processor: { event: ProcessorEvent.span },
             parent: { id: 'c' },
             service: { name: 'opbeans-java' },
-            transaction: {
-              id: 'c',
-            },
             timestamp: { us: 1536763736371000 },
+            agent: {
+              name: 'java',
+              version: '1.0.0',
+            },
             span: {
               id: 'd',
               name: 'SELECT',
+              type: 'db',
+              duration: { us: 47557 },
             },
-          } as Span,
+          },
           id: 'd',
           parentId: 'c',
           duration: 210,
@@ -404,19 +541,24 @@ describe('waterfall_helpers', () => {
           },
         },
         {
-          docType: 'span',
+          docType: ProcessorEvent.span,
           doc: {
+            trace: { id: '1' },
+            processor: { event: ProcessorEvent.span },
             parent: { id: 'a' },
             service: { name: 'opbeans-java' },
-            transaction: {
-              id: 'a',
+            agent: {
+              name: 'java',
+              version: '1.0.0',
             },
             timestamp: { us: 1536763736368000 },
             span: {
               id: 'b',
               name: 'GET [0:0:0:0:0:0:0:1]',
+              type: 'external',
+              duration: { us: 47557 },
             },
-          } as Span,
+          },
           id: 'b',
           parentId: 'a',
           duration: 4694,
@@ -430,19 +572,24 @@ describe('waterfall_helpers', () => {
           },
         },
         {
-          docType: 'span',
+          docType: ProcessorEvent.span,
           doc: {
+            trace: { id: '1' },
+            processor: { event: ProcessorEvent.span },
             parent: { id: 'a' },
             service: { name: 'opbeans-java' },
-            transaction: {
-              id: 'a',
-            },
             timestamp: { us: 1536763736367000 },
+            agent: {
+              name: 'java',
+              version: '1.0.0',
+            },
             span: {
               id: 'b2',
               name: 'GET [0:0:0:0:0:0:0:1]',
+              type: 'external',
+              duration: { us: 47557 },
             },
-          } as Span,
+          },
           id: 'b2',
           parentId: 'a',
           duration: 4694,
@@ -456,13 +603,24 @@ describe('waterfall_helpers', () => {
           },
         },
         {
-          docType: 'transaction',
+          docType: ProcessorEvent.transaction,
           doc: {
+            trace: { id: '1' },
+            processor: { event: ProcessorEvent.transaction },
             parent: { id: 'b' },
             service: { name: 'opbeans-java' },
             timestamp: { us: 1536763736369000 },
-            transaction: { id: 'c', name: 'APIRestController#productsRemote' },
-          } as Transaction,
+            agent: {
+              name: 'java',
+              version: '1.0.0',
+            },
+            transaction: {
+              id: 'c',
+              name: 'APIRestController#productsRemote',
+              type: 'request',
+              duration: { us: 47557 },
+            },
+          },
           id: 'c',
           parentId: 'b',
           duration: 3581,
@@ -476,15 +634,23 @@ describe('waterfall_helpers', () => {
           },
         },
         {
-          docType: 'transaction',
+          docType: ProcessorEvent.transaction,
           doc: {
+            trace: { id: '1' },
+            processor: { event: ProcessorEvent.transaction },
             service: { name: 'opbeans-java' },
+            agent: {
+              name: 'java',
+              version: '1.0.0',
+            },
             timestamp: { us: 1536763736366000 },
             transaction: {
               id: 'a',
               name: 'APIRestController#products',
+              type: 'request',
+              duration: { us: 47557 },
             },
-          } as Transaction,
+          },
           id: 'a',
           duration: 9480,
           offset: 0,
@@ -510,17 +676,17 @@ describe('waterfall_helpers', () => {
     });
 
     it('should handle cyclic references', () => {
-      const items = [
+      const items: IWaterfallSpanOrTransaction[] = [
         {
-          docType: 'transaction',
+          docType: ProcessorEvent.transaction,
           id: 'a',
           doc: {
             transaction: { id: 'a' },
             timestamp: { us: 10 },
-          } as unknown as Transaction,
-        } as IWaterfallSpanOrTransaction,
+          },
+        } as unknown as IWaterfallTransaction,
         {
-          docType: 'span',
+          docType: ProcessorEvent.span,
           id: 'b',
           parentId: 'a',
           doc: {
@@ -529,8 +695,8 @@ describe('waterfall_helpers', () => {
             },
             parent: { id: 'a' },
             timestamp: { us: 20 },
-          } as unknown as WaterfallSpanDoc,
-        } as IWaterfallSpanOrTransaction,
+          },
+        } as unknown as IWaterfallSpan,
       ];
       const childrenByParentId = groupBy(items, (hit) =>
         hit.parentId ? hit.parentId : 'root'
@@ -546,7 +712,7 @@ describe('waterfall_helpers', () => {
   describe('getClockSkew', () => {
     it('should adjust when child starts before parent', () => {
       const child = {
-        docType: 'transaction',
+        docType: ProcessorEvent.transaction,
         doc: {
           timestamp: { us: 0 },
         },
@@ -554,7 +720,7 @@ describe('waterfall_helpers', () => {
       } as IWaterfallSpanOrTransaction;
 
       const parent = {
-        docType: 'transaction',
+        docType: ProcessorEvent.transaction,
         doc: {
           timestamp: { us: 100 },
         },
@@ -567,7 +733,7 @@ describe('waterfall_helpers', () => {
 
     it('should not adjust when child starts after parent has ended', () => {
       const child = {
-        docType: 'transaction',
+        docType: ProcessorEvent.transaction,
         doc: {
           timestamp: { us: 250 },
         },
@@ -575,7 +741,7 @@ describe('waterfall_helpers', () => {
       } as IWaterfallSpanOrTransaction;
 
       const parent = {
-        docType: 'transaction',
+        docType: ProcessorEvent.transaction,
         doc: {
           timestamp: { us: 100 },
         },
@@ -588,7 +754,7 @@ describe('waterfall_helpers', () => {
 
     it('should not adjust when child starts within parent duration', () => {
       const child = {
-        docType: 'transaction',
+        docType: ProcessorEvent.transaction,
         doc: {
           timestamp: { us: 150 },
         },
@@ -596,7 +762,7 @@ describe('waterfall_helpers', () => {
       } as IWaterfallSpanOrTransaction;
 
       const parent = {
-        docType: 'transaction',
+        docType: ProcessorEvent.transaction,
         doc: {
           timestamp: { us: 100 },
         },
@@ -609,11 +775,11 @@ describe('waterfall_helpers', () => {
 
     it('should return parent skew for spans', () => {
       const child = {
-        docType: 'span',
+        docType: ProcessorEvent.span,
       } as IWaterfallSpanOrTransaction;
 
       const parent = {
-        docType: 'span',
+        docType: ProcessorEvent.span,
         doc: {
           timestamp: { us: 100 },
         },
@@ -630,7 +796,7 @@ describe('waterfall_helpers', () => {
       } as IWaterfallError;
 
       const parent = {
-        docType: 'transaction',
+        docType: ProcessorEvent.transaction,
         doc: {
           timestamp: { us: 100 },
         },
@@ -643,7 +809,7 @@ describe('waterfall_helpers', () => {
 
     it('should handle missing parent', () => {
       const child = {
-        docType: 'transaction',
+        docType: ProcessorEvent.transaction,
       } as IWaterfallSpanOrTransaction;
 
       const parent = undefined;

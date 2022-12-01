@@ -70,8 +70,8 @@ export interface WaterfallTransactionSpanBaseDoc {
   trace: { id: string };
   service: Service;
   agent: Agent;
-  event: { outcome?: EventOutcome };
-  parent: { id?: string };
+  event?: { outcome?: EventOutcome };
+  parent?: { id?: string };
 }
 
 /*
@@ -88,7 +88,7 @@ export interface WaterfallTransactionDoc
     result?: string;
   };
   faas?: Faas;
-  span: {
+  span?: {
     links?: SpanLink[];
   };
 }
