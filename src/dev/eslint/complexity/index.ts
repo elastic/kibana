@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { castArray, chain, isEmpty, startCase } from 'lodash';
+import { castArray, chain, isEmpty, map, startCase } from 'lodash';
 import { filter as filterBy } from 'lodash/fp';
 import { run } from '@kbn/dev-cli-runner';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { ComplexityReportGenerator } from './complexity';
 import { Lookup } from './lookup';
 
@@ -33,18 +34,32 @@ export function generateComplexityReport(): Promise<void> {
         .value() as string[];
 
       const table = {} as Record<string, Record<string, number>>;
+      const reporter = CiStatsReporter.fromEnv(log);
 
-      for (const { name, path } of [
+      for (const { name, owner, path } of [
         ...(isEmpty(filter) && isEmpty(pattern) ? await lookup.lookup() : []),
         ...(!isEmpty(filter) ? await lookup.lookup(filter) : []),
         ...(!isEmpty(pattern) ? [{ name: '', path: pattern }] : []),
       ]) {
         log.debug(`Gathering metrics for '${castArray(path).join("', '")}'.`);
         const report = await complexityReportGenerator.generate(path);
-        table[name] = chain(report)
+        const metrics = chain(report)
           .mapKeys((value, key) => startCase(key))
           .mapValues((value) => Math.round(value * 100) / 100)
           .value();
+
+        if (name) {
+          reporter.metrics(
+            map(metrics, (value, group) => ({
+              group,
+              value,
+              id: name,
+              meta: { pluginTeam: owner?.[0] },
+            }))
+          );
+        }
+
+        table[name] = metrics;
       }
 
       // eslint-disable-next-line no-console
