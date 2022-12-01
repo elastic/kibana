@@ -117,7 +117,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe.only('Flyout', () => {
+    describe('Flyout', () => {
       it('opens flyout', async () => {
         await flyout.openRowIndexFlyout(1);
 
