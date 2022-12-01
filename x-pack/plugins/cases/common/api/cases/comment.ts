@@ -9,16 +9,16 @@ import * as rt from 'io-ts';
 import { jsonValueRt } from '../runtime_types';
 import { SavedObjectFindOptionsRt } from '../saved_object';
 
-import { UserRT } from '../user';
+import { UserSchema } from '../user';
 
 export const CommentAttributesBasicRt = rt.type({
   created_at: rt.string,
-  created_by: UserRT,
+  created_by: UserSchema,
   owner: rt.string,
   pushed_at: rt.union([rt.string, rt.null]),
-  pushed_by: rt.union([UserRT, rt.null]),
+  pushed_by: rt.union([UserSchema, rt.null]),
   updated_at: rt.union([rt.string, rt.null]),
-  updated_by: rt.union([UserRT, rt.null]),
+  updated_by: rt.union([UserSchema, rt.null]),
 });
 
 export enum CommentType {

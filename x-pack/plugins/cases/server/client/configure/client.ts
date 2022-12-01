@@ -16,7 +16,7 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type {
+import {
   CasesConfigurationsResponse,
   CasesConfigureAttributes,
   CasesConfigurePatch,
@@ -25,15 +25,10 @@ import type {
   ConnectorMappings,
   ConnectorMappingsAttributes,
   GetConfigureFindRequest,
+  GetConfigureFindRequestSchema,
 } from '../../../common/api';
-import {
-  CaseConfigurationsResponseRt,
-  CaseConfigureResponseRt,
-  CasesConfigurePatchRt,
-  excess,
-  GetConfigureFindRequestRt,
-  throwErrors,
-} from '../../../common/api';
+import { CasesConfigurePatchSchema, decodeSchema } from '../../../common/api';
+
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import type { CasesClientInternal } from '../client_internal';
@@ -142,10 +137,7 @@ async function get(
     authorization,
   } = clientArgs;
   try {
-    const queryParams = pipe(
-      excess(GetConfigureFindRequestRt).decode(params),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const queryParams = decodeSchema(GetConfigureFindRequestSchema, params);
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findConfigurations);
@@ -201,7 +193,7 @@ async function get(
       }
     );
 
-    return CaseConfigurationsResponseRt.encode(configurations);
+    return configurations;
   } catch (error) {
     throw createCaseError({ message: `Failed to get case configure: ${error}`, error, logger });
   }
@@ -251,24 +243,9 @@ async function update(
   } = clientArgs;
 
   try {
-    const request = pipe(
-      CasesConfigurePatchRt.decode(req),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const request = decodeSchema(CasesConfigurePatchSchema, req);
 
     const { version, ...queryWithoutVersion } = request;
-
-    /**
-     * Excess function does not supports union or intersection types.
-     * For that reason we need to check manually for excess properties
-     * in the partial attributes.
-     *
-     * The owner attribute should not be allowed.
-     */
-    pipe(
-      excess(CasesConfigurePatchRt.types[0]).decode(queryWithoutVersion),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
 
     const configuration = await caseConfigureService.get({
       unsecuredSavedObjectsClient,
@@ -333,7 +310,7 @@ async function update(
       originalConfiguration: configuration,
     });
 
-    return CaseConfigureResponseRt.encode({
+    return {
       ...configuration.attributes,
       ...patch.attributes,
       connector: patch.attributes.connector ?? configuration.attributes.connector,
@@ -341,7 +318,7 @@ async function update(
       version: patch.version ?? '',
       error,
       id: patch.id,
-    });
+    };
   } catch (error) {
     throw createCaseError({
       message: `Failed to get patch configure in route: ${error}`,
@@ -443,7 +420,7 @@ async function create(
       id: savedObjectID,
     });
 
-    return CaseConfigureResponseRt.encode({
+    return {
       ...post.attributes,
       // Reserve for future implementations
       connector: post.attributes.connector,
@@ -451,7 +428,7 @@ async function create(
       version: post.version ?? '',
       error,
       id: post.id,
-    });
+    };
   } catch (error) {
     throw createCaseError({
       message: `Failed to create case configuration: ${error}`,

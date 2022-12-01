@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from 'zod';
 
-export const JiraFieldsRT = rt.type({
-  issueType: rt.union([rt.string, rt.null]),
-  priority: rt.union([rt.string, rt.null]),
-  parent: rt.union([rt.string, rt.null]),
-});
+export const JiraFieldsSchema = z
+  .object({
+    issueType: z.nullable(z.string()),
+    priority: z.nullable(z.string()),
+    parent: z.nullable(z.string()),
+  })
+  .strict();
 
-export type JiraFieldsType = rt.TypeOf<typeof JiraFieldsRT>;
+export type JiraFieldsType = z.infer<typeof JiraFieldsSchema>;

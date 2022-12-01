@@ -9,6 +9,7 @@ import { isObject, transform, snakeCase, isEmpty } from 'lodash';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
+import type { z } from 'zod';
 
 import type { ToastInputFields } from '@kbn/core/public';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
@@ -24,15 +25,14 @@ import type {
   User,
 } from '../../common/api';
 import {
+  CaseConfigureResponseSchema,
   CaseResponseRt,
-  CasesResponseRt,
-  throwErrors,
-  CaseConfigurationsResponseRt,
-  CaseConfigureResponseRt,
-  CaseUserActionsResponseRt,
-  CommentType,
   CaseResolveResponseRt,
+  throwErrors,
   SingleCaseMetricsResponseRt,
+  CasesResponseRt,
+  CaseConfigurationsResponseSchema,
+  CaseUserActionsResponseRt,
 } from '../../common/api';
 import type { Case, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
@@ -44,6 +44,25 @@ export const covertToSnakeCase = (obj: Record<string, unknown>) =>
     const camelKey = Array.isArray(target) ? key : snakeCase(key);
     acc[camelKey] = isObject(value) ? covertToSnakeCase(value as Record<string, unknown>) : value;
   });
+
+// TODO: refactor duplicateish code in runtime_types.ts
+export const decodeSchema = <T>(schema: z.Schema<T>, data: unknown): T => {
+  try {
+    const parseRes = schema.safeParse(data);
+
+    if (!parseRes.success) {
+      const errors = parseRes.error.issues
+        .map((issue) => `Field: ${issue.path.join('.')} error: ${issue.message}`)
+        .join('\n');
+
+      throw createToasterPlainError(errors);
+    } else {
+      return parseRes.data;
+    }
+  } catch (error) {
+    throw createToasterPlainError(error.message);
+  }
+};
 
 export const createToasterPlainError = (message: string) => new ToasterError([message]);
 
@@ -66,17 +85,11 @@ export const decodeCasesResponse = (respCase?: CasesResponse) =>
   pipe(CasesResponseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCaseConfigurationsResponse = (respCase?: CasesConfigurationsResponse) => {
-  return pipe(
-    CaseConfigurationsResponseRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+  return decodeSchema(CaseConfigurationsResponseSchema, respCase);
 };
 
 export const decodeCaseConfigureResponse = (respCase?: CasesConfigureResponse) =>
-  pipe(
-    CaseConfigureResponseRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+  decodeSchema(CaseConfigureResponseSchema, respCase);
 
 export const decodeCaseUserActionsResponse = (respUserActions?: CaseUserActionsResponse) =>
   pipe(

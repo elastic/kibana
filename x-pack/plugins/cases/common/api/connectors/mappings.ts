@@ -5,49 +5,44 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from 'zod';
 
-const ActionTypeRT = rt.union([
-  rt.literal('append'),
-  rt.literal('nothing'),
-  rt.literal('overwrite'),
-]);
-const CaseFieldRT = rt.union([
-  rt.literal('title'),
-  rt.literal('description'),
-  rt.literal('comments'),
-]);
+const ActionTypeSchema = z.enum(['append', 'nothing', 'overwrite']);
+const CaseFieldSchema = z.enum(['title', 'description', 'comments']);
 
-const ThirdPartyFieldRT = rt.union([rt.string, rt.literal('not_mapped')]);
-export type ActionType = rt.TypeOf<typeof ActionTypeRT>;
-export type CaseField = rt.TypeOf<typeof CaseFieldRT>;
-export type ThirdPartyField = rt.TypeOf<typeof ThirdPartyFieldRT>;
+const ThirdPartyFieldSchema = z.string();
+export type ActionType = z.infer<typeof ActionTypeSchema>;
+export type CaseField = z.infer<typeof CaseFieldSchema>;
+export type ThirdPartyField = z.infer<typeof ThirdPartyFieldSchema>;
 
-export const ConnectorMappingsAttributesRT = rt.type({
-  action_type: ActionTypeRT,
-  source: CaseFieldRT,
-  target: ThirdPartyFieldRT,
+export const ConnectorMappingsAttributesSchema = z
+  .object({
+    action_type: ActionTypeSchema,
+    source: CaseFieldSchema,
+    // TODO: this used to be string | not_mapped, do we need that?
+    target: z.string(),
+  })
+  .strict();
+
+export const ConnectorMappingsSchema = z
+  .object({
+    mappings: z.array(ConnectorMappingsAttributesSchema),
+    owner: z.string(),
+  })
+  .strict();
+
+export type ConnectorMappingsAttributes = z.infer<typeof ConnectorMappingsAttributesSchema>;
+export type ConnectorMappings = z.infer<typeof ConnectorMappingsSchema>;
+
+const ConnectorFieldSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  required: z.boolean(),
+  type: z.enum(['text', 'textarea']),
 });
 
-export const ConnectorMappingsRt = rt.type({
-  mappings: rt.array(ConnectorMappingsAttributesRT),
-  owner: rt.string,
-});
+export type ConnectorField = z.infer<typeof ConnectorFieldSchema>;
 
-export type ConnectorMappingsAttributes = rt.TypeOf<typeof ConnectorMappingsAttributesRT>;
-export type ConnectorMappings = rt.TypeOf<typeof ConnectorMappingsRt>;
+const GetDefaultMappingsResponseSchema = z.array(ConnectorMappingsAttributesSchema);
 
-const FieldTypeRT = rt.union([rt.literal('text'), rt.literal('textarea')]);
-
-const ConnectorFieldRt = rt.type({
-  id: rt.string,
-  name: rt.string,
-  required: rt.boolean,
-  type: FieldTypeRT,
-});
-
-export type ConnectorField = rt.TypeOf<typeof ConnectorFieldRt>;
-
-const GetDefaultMappingsResponseRt = rt.array(ConnectorMappingsAttributesRT);
-
-export type GetDefaultMappingsResponse = rt.TypeOf<typeof GetDefaultMappingsResponseRt>;
+export type GetDefaultMappingsResponse = z.infer<typeof GetDefaultMappingsResponseSchema>;

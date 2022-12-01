@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from 'zod';
 
-const AlertRt = rt.type({
-  id: rt.string,
-  index: rt.string,
-  attached_at: rt.string,
-});
+const AlertSchema = z
+  .object({
+    id: z.string(),
+    index: z.string(),
+    attached_at: z.string(),
+  })
+  .strict();
 
-export const AlertResponseRt = rt.array(AlertRt);
-export type AlertResponse = rt.TypeOf<typeof AlertResponseRt>;
+const AlertResponseSchema = z.array(AlertSchema);
+export type AlertResponse = z.infer<typeof AlertResponseSchema>;

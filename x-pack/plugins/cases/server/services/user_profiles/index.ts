@@ -6,9 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -16,7 +13,7 @@ import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { excess, SuggestUserProfilesRequestRt, throwErrors } from '../../../common/api';
+import { decodeSchema, SuggestUserProfilesRequestSchema } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { LicensingService } from '../licensing';
@@ -72,10 +69,7 @@ export class UserProfileService {
   }
 
   public async suggest(request: KibanaRequest): Promise<UserProfile[]> {
-    const params = pipe(
-      excess(SuggestUserProfilesRequestRt).decode(request.body),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const params = decodeSchema(SuggestUserProfilesRequestSchema, request.body);
 
     const { name, size, owners } = params;
 

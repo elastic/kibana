@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from 'zod';
 
-export const ServiceNowSIRFieldsRT = rt.type({
-  category: rt.union([rt.string, rt.null]),
-  destIp: rt.union([rt.boolean, rt.null]),
-  malwareHash: rt.union([rt.boolean, rt.null]),
-  malwareUrl: rt.union([rt.boolean, rt.null]),
-  priority: rt.union([rt.string, rt.null]),
-  sourceIp: rt.union([rt.boolean, rt.null]),
-  subcategory: rt.union([rt.string, rt.null]),
-});
+export const ServiceNowSIRFieldsSchema = z
+  .object({
+    category: z.nullable(z.string()),
+    destIp: z.nullable(z.boolean()),
+    malwareHash: z.nullable(z.boolean()),
+    malwareUrl: z.nullable(z.boolean()),
+    priority: z.nullable(z.string()),
+    sourceIp: z.nullable(z.boolean()),
+    subcategory: z.nullable(z.string()),
+  })
+  .strict();
 
-export type ServiceNowSIRFieldsType = rt.TypeOf<typeof ServiceNowSIRFieldsRT>;
+export type ServiceNowSIRFieldsType = z.infer<typeof ServiceNowSIRFieldsSchema>;

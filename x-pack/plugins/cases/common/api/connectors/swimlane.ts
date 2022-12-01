@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from 'zod';
 
-export const SwimlaneFieldsRT = rt.type({
-  caseId: rt.union([rt.string, rt.null]),
-});
+export const SwimlaneFieldsSchema = z
+  .object({
+    caseId: z.nullable(z.string()),
+  })
+  .strict();
 
 export enum SwimlaneConnectorType {
   All = 'all',
@@ -17,4 +19,4 @@ export enum SwimlaneConnectorType {
   Cases = 'cases',
 }
 
-export type SwimlaneFieldsType = rt.TypeOf<typeof SwimlaneFieldsRT>;
+export type SwimlaneFieldsType = z.infer<typeof SwimlaneFieldsSchema>;

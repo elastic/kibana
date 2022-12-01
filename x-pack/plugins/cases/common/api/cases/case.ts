@@ -8,11 +8,11 @@
 import * as rt from 'io-ts';
 
 import { NumberFromString } from '../saved_object';
-import { UserRT } from '../user';
+import { UserSchema } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt } from '../connectors';
-import { CaseAssigneesRt } from './assignee';
+import { CaseAssigneesSchema } from './assignee';
 
 export const AttachmentTotalsRt = rt.type({
   alerts: rt.number,
@@ -84,7 +84,7 @@ const CaseBasicRt = rt.type({
   /**
    * The users assigned to this case
    */
-  assignees: CaseAssigneesRt,
+  assignees: CaseAssigneesSchema,
 });
 
 /**
@@ -97,7 +97,7 @@ export const CaseUserActionExternalServiceRt = rt.type({
   external_title: rt.string,
   external_url: rt.string,
   pushed_at: rt.string,
-  pushed_by: UserRT,
+  pushed_by: UserSchema,
 });
 
 export const CaseExternalServiceBasicRt = rt.intersection([
@@ -114,12 +114,12 @@ export const CaseAttributesRt = rt.intersection([
   rt.type({
     duration: rt.union([rt.number, rt.null]),
     closed_at: rt.union([rt.string, rt.null]),
-    closed_by: rt.union([UserRT, rt.null]),
+    closed_by: rt.union([UserSchema, rt.null]),
     created_at: rt.string,
-    created_by: UserRT,
+    created_by: UserSchema,
     external_service: CaseFullExternalServiceRt,
     updated_at: rt.union([rt.string, rt.null]),
-    updated_by: rt.union([UserRT, rt.null]),
+    updated_by: rt.union([UserSchema, rt.null]),
   }),
 ]);
 
@@ -155,7 +155,7 @@ export const CasePostRequestRt = rt.intersection([
     /**
      * The users assigned to the case
      */
-    assignees: CaseAssigneesRt,
+    assignees: CaseAssigneesSchema,
     /**
      * The severity of the case. The severity is
      * default it to "low" if not provided.

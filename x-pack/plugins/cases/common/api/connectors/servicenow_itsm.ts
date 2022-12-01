@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from 'zod';
 
-export const ServiceNowITSMFieldsRT = rt.type({
-  impact: rt.union([rt.string, rt.null]),
-  severity: rt.union([rt.string, rt.null]),
-  urgency: rt.union([rt.string, rt.null]),
-  category: rt.union([rt.string, rt.null]),
-  subcategory: rt.union([rt.string, rt.null]),
-});
+export const ServiceNowITSMFieldsSchema = z
+  .object({
+    impact: z.nullable(z.string()),
+    severity: z.nullable(z.string()),
+    urgency: z.nullable(z.string()),
+    category: z.nullable(z.string()),
+    subcategory: z.nullable(z.string()),
+  })
+  .strict();
 
-export type ServiceNowITSMFieldsType = rt.TypeOf<typeof ServiceNowITSMFieldsRT>;
+export type ServiceNowITSMFieldsType = z.infer<typeof ServiceNowITSMFieldsSchema>;

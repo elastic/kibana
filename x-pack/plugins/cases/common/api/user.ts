@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from 'zod';
 
-export const UserRT = rt.intersection([
-  rt.type({
-    email: rt.union([rt.undefined, rt.null, rt.string]),
-    full_name: rt.union([rt.undefined, rt.null, rt.string]),
-    username: rt.union([rt.undefined, rt.null, rt.string]),
-  }),
-  rt.partial({ profile_uid: rt.string }),
-]);
+export const UserSchema = z
+  .object({
+    email: z.string().nullish(),
+    full_name: z.string().nullish(),
+    username: z.string().nullish(),
+    profile_uid: z.optional(z.string()),
+  })
+  .strict();
 
-export const UsersRt = rt.array(UserRT);
+export const UsersSchema = z.array(UserSchema);
 
-export type User = rt.TypeOf<typeof UserRT>;
+export type User = z.infer<typeof UserSchema>;

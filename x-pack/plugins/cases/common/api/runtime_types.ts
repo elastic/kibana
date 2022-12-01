@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+import type { z } from 'zod';
 import * as rt from 'io-ts';
 import { either, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
@@ -12,6 +14,25 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
+
+// TODO: rename to decodeOrThrow?
+export const decodeSchema = <T>(schema: z.Schema<T>, data: unknown): T => {
+  try {
+    const parseRes = schema.safeParse(data);
+
+    if (!parseRes.success) {
+      const errors = parseRes.error.issues
+        .map((issue) => `Field: ${issue.path.join('.')} error: ${issue.message}`)
+        .join('\n');
+
+      throw Boom.badRequest(errors);
+    } else {
+      return parseRes.data;
+    }
+  } catch (error) {
+    throw Boom.badRequest(error.message);
+  }
+};
 
 type ErrorFactory = (message: string) => Error;
 export type GenericIntersectionC =

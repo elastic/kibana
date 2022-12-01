@@ -5,82 +5,81 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from 'zod';
 
-import { UserRT } from '../user';
-import { CaseConnectorRt, ConnectorMappingsRt } from '../connectors';
+import { UserSchema } from '../user';
+import { ConnectorMappingsSchema } from '../connectors';
 
-// TODO: we will need to add this type rt.literal('close-by-third-party')
-const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
+const ClosureTypeSchema = z.enum(['close-by-user', 'close-by-push']);
 
-const CasesConfigureBasicWithoutOwnerRt = rt.type({
-  /**
-   * The external connector
-   */
-  connector: CaseConnectorRt,
-  /**
-   * Whether to close the case after it has been synced with the external system
-   */
-  closure_type: ClosureTypeRT,
-});
-
-const CasesConfigureBasicRt = rt.intersection([
-  CasesConfigureBasicWithoutOwnerRt,
-  rt.type({
+const CasesConfigureBasicSchema = z
+  .object({
+    // TODO:
+    /**
+     * The external connector
+     */
+    connector: z.null(),
+    /**
+     * Whether to close the case after it has been synced with the external system
+     */
+    closure_type: ClosureTypeSchema,
     /**
      * The plugin owner that manages this configuration
      */
-    owner: rt.string,
-  }),
-]);
+    owner: z.string(),
+  })
+  .strict();
 
-export const CasesConfigureRequestRt = CasesConfigureBasicRt;
-export const CasesConfigurePatchRt = rt.intersection([
-  rt.partial(CasesConfigureBasicWithoutOwnerRt.props),
-  rt.type({ version: rt.string }),
-]);
+export const CasesConfigureRequestSchema = CasesConfigureBasicSchema;
 
-export const CaseConfigureAttributesRt = rt.intersection([
-  CasesConfigureBasicRt,
-  rt.type({
-    created_at: rt.string,
-    created_by: UserRT,
-    updated_at: rt.union([rt.string, rt.null]),
-    updated_by: rt.union([UserRT, rt.null]),
-  }),
-]);
+export const CasesConfigurePatchSchema = z
+  .object({ version: z.string() })
+  .merge(CasesConfigureBasicSchema.omit({ owner: true }).partial())
+  .strict();
 
-export const CaseConfigureResponseRt = rt.intersection([
-  CaseConfigureAttributesRt,
-  ConnectorMappingsRt,
-  rt.type({
-    id: rt.string,
-    version: rt.string,
-    error: rt.union([rt.string, rt.null]),
-    owner: rt.string,
-  }),
-]);
+const CaseConfigureAttributesSchema = CasesConfigureBasicSchema.merge(
+  z.object({
+    created_at: z.string(),
+    created_by: UserSchema,
+    updated_at: z.nullable(z.string()),
+    updated_by: z.nullable(UserSchema),
+  })
+).strict();
 
-export const GetConfigureFindRequestRt = rt.partial({
-  /**
-   * The configuration plugin owner to filter the search by. If this is left empty the results will include all configurations
-   * that the user has permissions to access
-   */
-  owner: rt.union([rt.array(rt.string), rt.string]),
-});
+export const CaseConfigureResponseSchema = CaseConfigureAttributesSchema.merge(
+  CaseConfigureAttributesSchema
+)
+  .merge(ConnectorMappingsSchema)
+  .merge(
+    z.object({
+      id: z.string(),
+      version: z.string(),
+      error: z.nullable(z.string()),
+      owner: z.string(),
+    })
+  )
+  .strict();
 
-export const CaseConfigureRequestParamsRt = rt.type({
-  configuration_id: rt.string,
-});
+export const GetConfigureFindRequestSchema = z
+  .object({
+    owner: z.union([z.array(z.string()), z.string()]),
+  })
+  .strict();
 
-export const CaseConfigurationsResponseRt = rt.array(CaseConfigureResponseRt);
+export const CaseConfigureRequestParamsSchema = z
+  .object({
+    configuration_id: z.string(),
+  })
+  .strict();
 
-export type ClosureType = rt.TypeOf<typeof ClosureTypeRT>;
-export type CasesConfigure = rt.TypeOf<typeof CasesConfigureBasicRt>;
-export type CasesConfigureRequest = rt.TypeOf<typeof CasesConfigureRequestRt>;
-export type CasesConfigurePatch = rt.TypeOf<typeof CasesConfigurePatchRt>;
-export type CasesConfigureAttributes = rt.TypeOf<typeof CaseConfigureAttributesRt>;
-export type CasesConfigureResponse = rt.TypeOf<typeof CaseConfigureResponseRt>;
-export type CasesConfigurationsResponse = rt.TypeOf<typeof CaseConfigurationsResponseRt>;
+export const CaseConfigurationsResponseSchema = z.array(CaseConfigureResponseSchema);
 
-export type GetConfigureFindRequest = rt.TypeOf<typeof GetConfigureFindRequestRt>;
+export type ClosureType = z.infer<typeof ClosureTypeSchema>;
+export type CasesConfigure = z.infer<typeof CasesConfigureBasicSchema>;
+export type CasesConfigureRequest = z.infer<typeof CasesConfigureRequestSchema>;
+export type CasesConfigurePatch = z.infer<typeof CasesConfigurePatchSchema>;
+export type CasesConfigureAttributes = z.infer<typeof CaseConfigureAttributesSchema>;
+export type CasesConfigureResponse = z.infer<typeof CaseConfigureResponseSchema>;
+export type CasesConfigurationsResponse = z.infer<typeof CaseConfigurationsResponseSchema>;
+
+export type GetConfigureFindRequest = z.infer<typeof GetConfigureFindRequestSchema>;

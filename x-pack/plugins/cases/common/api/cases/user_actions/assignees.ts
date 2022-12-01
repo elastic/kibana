@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { CaseAssigneesRt } from '../assignee';
+import { z } from 'zod';
+import { CaseAssigneesSchema } from '../assignee';
 import type { UserActionWithAttributes } from './common';
 import { ActionTypes } from './common';
 
-export const AssigneesUserActionPayloadRt = rt.type({ assignees: CaseAssigneesRt });
+export const AssigneesUserActionPayloadSchema = z
+  .object({ assignees: CaseAssigneesSchema })
+  .strict();
 
-export const AssigneesUserActionRt = rt.type({
-  type: rt.literal(ActionTypes.assignees),
-  payload: AssigneesUserActionPayloadRt,
-});
+export const AssigneesUserActionSchema = z
+  .object({
+    type: z.literal(ActionTypes.assignees),
+    payload: AssigneesUserActionPayloadSchema,
+  })
+  .strict();
 
-export type AssigneesUserAction = UserActionWithAttributes<rt.TypeOf<typeof AssigneesUserActionRt>>;
+export type AssigneesUserAction = UserActionWithAttributes<
+  z.infer<typeof AssigneesUserActionSchema>
+>;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { CaseUserProfileRt } from './user_profiles';
+import { z } from 'zod';
+import { CaseUserProfileSchema } from './user_profiles';
 
-export const CaseAssigneesRt = rt.array(CaseUserProfileRt);
+export const CaseAssigneesSchema = z.array(CaseUserProfileSchema);
 
-export type CaseAssignees = rt.TypeOf<typeof CaseAssigneesRt>;
+export type CaseAssignees = z.infer<typeof CaseAssigneesSchema>;

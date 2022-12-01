@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from 'zod';
 
-export const ResilientFieldsRT = rt.type({
-  incidentTypes: rt.union([rt.array(rt.string), rt.null]),
-  severityCode: rt.union([rt.string, rt.null]),
-});
+export const ResilientFieldsSchema = z
+  .object({
+    incidentTypes: z.nullable(z.array(z.string())),
+    severityCode: z.nullable(z.string()),
+  })
+  .strict();
 
-export type ResilientFieldsType = rt.TypeOf<typeof ResilientFieldsRT>;
+export type ResilientFieldsType = z.infer<typeof ResilientFieldsSchema>;

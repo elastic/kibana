@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { UserRT } from '../../user';
+import { UserSchema } from '../../user';
 
 export const ActionTypes = {
   assignees: 'assignees',
@@ -45,7 +45,7 @@ export const ActionsRt = rt.keyof(Actions);
 
 export const UserActionCommonAttributesRt = rt.type({
   created_at: rt.string,
-  created_by: UserRT,
+  created_by: UserSchema,
   owner: rt.string,
   action: ActionsRt,
 });

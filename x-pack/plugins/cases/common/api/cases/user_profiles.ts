@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z } from 'zod';
 
-export const SuggestUserProfilesRequestRt = rt.intersection([
-  rt.type({
-    name: rt.string,
-    owners: rt.array(rt.string),
-  }),
-  rt.partial({ size: rt.number }),
-]);
+export const SuggestUserProfilesRequestSchema = z
+  .object({
+    name: z.string(),
+    owners: z.array(z.string()),
+    size: z.optional(z.number()),
+  })
+  .strict();
 
-export type SuggestUserProfilesRequest = rt.TypeOf<typeof SuggestUserProfilesRequestRt>;
+export type SuggestUserProfilesRequest = z.infer<typeof SuggestUserProfilesRequestSchema>;
 
-export const CaseUserProfileRt = rt.type({
-  uid: rt.string,
-});
+export const CaseUserProfileSchema = z.object({ uid: z.string() }).strict();
 
-export type CaseUserProfile = rt.TypeOf<typeof CaseUserProfileRt>;
+export type CaseUserProfile = z.infer<typeof CaseUserProfileSchema>;
