@@ -393,11 +393,11 @@ async function main() {
   if (argv.rbacUser) {
     // Add roles and users with response actions kibana privileges
     for (const role of Object.keys(rolesMapping)) {
-      const withRole = await addRole(kbnClient, {
+      const addedRole = await addRole(kbnClient, {
         name: role,
         ...rolesMapping[role],
       });
-      if (withRole) {
+      if (addedRole) {
         console.log(`Successfully added ${role} role`);
         await addUser(client, { username: role, password: 'changeme', roles: [role] });
       } else {
