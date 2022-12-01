@@ -11,23 +11,8 @@ import {
   ExpressionAstFunctionBuilder,
 } from '@kbn/expressions-plugin/common';
 import { GenericOperationDefinition } from './operations';
+import { groupByKey } from './operations/definitions/get_group_by_key';
 import { extractAggId, OriginalColumn } from './to_expression';
-
-function groupByKey<T>(items: T[], getKey: (item: T) => string | undefined): Record<string, T[]> {
-  const groups: Record<string, T[]> = {};
-
-  items.forEach((item) => {
-    const key = getKey(item);
-    if (key) {
-      if (!(key in groups)) {
-        groups[key] = [];
-      }
-      groups[key].push(item);
-    }
-  });
-
-  return groups;
-}
 
 /**
  * Consolidates duplicate agg expression builders to increase performance

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export * from './use_absolute_date';
 export * from './use_url_params';
 export * from './use_breadcrumbs';
 export * from './use_service_allowed';
