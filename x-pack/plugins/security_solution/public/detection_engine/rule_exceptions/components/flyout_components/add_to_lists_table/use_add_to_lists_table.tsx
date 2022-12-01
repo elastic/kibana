@@ -55,6 +55,9 @@ export const useAddToSharedListTable = ({
     return showAllSharedLists ? [] : sharedExceptionLists;
   }, [showAllSharedLists, sharedExceptionLists]);
 
+  // here we don't have initial selected lists as they component is used only in the Add Exception Flyout
+  const [linkedLists, setLinkedLists] = useState<ExceptionListRuleReferencesSchema[]>([]);
+
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     initialPageSize: 5,
@@ -96,8 +99,6 @@ export const useAddToSharedListTable = ({
     }
   }, [exceptionListReferences, showAllSharedLists]);
 
-  const [linkedLists, setLinkedLists] = useState<ExceptionListRuleReferencesSchema[]>([]); // TODO check later
-
   useEffect(() => {
     onListSelectionChange(
       linkedLists.map(
@@ -116,17 +117,6 @@ export const useAddToSharedListTable = ({
       )
     );
   }, [linkedLists, onListSelectionChange]);
-
-  // ASK
-  // const sortedRulesByLinkedRulesOnTop = useMemo(
-  //   () =>
-  //     sortBy(listsT, [
-  //       (rule) => {
-  //         return initiallySelectedRules?.find((initRule) => initRule.id === rule.id);
-  //       },
-  //     ]),
-  //   [initiallySelectedRules, rules]
-  // );
 
   const listTableColumnsWithLinkSwitch: Array<
     EuiBasicTableColumn<ExceptionListRuleReferencesSchema>
