@@ -16,6 +16,7 @@ import jsonWorkerSrc from '!!raw-loader!../../target_workers/json.editor.worker.
 import xJsonWorkerSrc from '!!raw-loader!../../target_workers/xjson.editor.worker.js';
 import defaultWorkerSrc from '!!raw-loader!../../target_workers/default.editor.worker.js';
 import painlessWorkerSrc from '!!raw-loader!../../target_workers/painless.editor.worker.js';
+import yamlWorkerSrc from '!!raw-loader!../../target_workers/yaml.editor.worker.js';
 
 /**
  * Register languages and lexer rules
@@ -31,6 +32,7 @@ const mapLanguageIdToWorker: { [key: string]: any } = {
   [XJsonLang.ID]: xJsonWorkerSrc,
   [PainlessLang.ID]: painlessWorkerSrc,
   [monaco.languages.json.jsonDefaults.languageId]: jsonWorkerSrc,
+  yaml: yamlWorkerSrc,
 };
 
 // @ts-ignore

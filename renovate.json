@@ -249,6 +249,15 @@
       "labels": ["Team: AWP: Visualization", "release_note:skip", "backport:skip"],
       "enabled": true,
       "prCreation": "immediate"
+    },
+    {
+      "groupName": "Cloud Defend",
+      "matchPackageNames": ["monaco-yaml"],
+      "reviewers": ["team:awp-viz"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team: AWP: Visualization", "release_note:skip", "backport:skip"],
+      "enabled": true,
+      "prCreation": "immediate"
     }
   ]
 }
