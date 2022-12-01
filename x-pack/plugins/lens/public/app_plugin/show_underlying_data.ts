@@ -137,10 +137,22 @@ export function getLayerMetaInfo(
   }
 
   const uniqueFields = [...new Set(columnsWithNoTimeShifts.map(({ fields }) => fields).flat())];
+  const dataViewId = datasourceAPI.getSourceId() ?? '';
+
+  // for usability reasons we want to order the date fields first
+  // the fields order responds to the columns order in Discover
+  const dateFieldsFirst = uniqueFields.reduce((acc: string[], fieldName) => {
+    const field = indexPatterns[dataViewId].getFieldByName(fieldName);
+    if (field?.type === 'date') {
+      return [fieldName, ...acc];
+    }
+    return [...acc, fieldName];
+  }, []);
+
   return {
     meta: {
       id: datasourceAPI.getSourceId()!,
-      columns: uniqueFields,
+      columns: dateFieldsFirst,
       filters: filtersOrError,
     },
     error: undefined,

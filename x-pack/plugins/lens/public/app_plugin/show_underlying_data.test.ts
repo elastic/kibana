@@ -9,6 +9,7 @@ import { createMockDatasource } from '../mocks';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { Filter } from '@kbn/es-query';
 import { DatasourcePublicAPI } from '../types';
+import { createMockedIndexPattern } from '../datasources/form_based/mocks';
 
 describe('getLayerMetaInfo', () => {
   const capabilities = {
@@ -174,7 +175,7 @@ describe('getLayerMetaInfo', () => {
       getOperationForColumnId: jest.fn(),
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
       getVisualDefaults: jest.fn(),
-      getSourceId: jest.fn(),
+      getSourceId: jest.fn(() => '1'),
       getMaxPossibleNumValues: jest.fn(),
       isTextBasedLanguage: jest.fn(() => false),
       getFilters: jest.fn(() => ({
@@ -187,13 +188,16 @@ describe('getLayerMetaInfo', () => {
       hasDefaultTimeField: jest.fn(() => true),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
+    const sampleIndexPatternsFromService = {
+      '1': createMockedIndexPattern(),
+    };
     const { error, meta } = getLayerMetaInfo(
       mockDatasource,
       {}, // the publicAPI has been mocked, so no need for a state here
       {
         datatable1: { type: 'datatable', columns: [], rows: [] },
       },
-      {},
+      sampleIndexPatternsFromService,
       undefined,
       capabilities
     );
@@ -213,6 +217,42 @@ describe('getLayerMetaInfo', () => {
       },
       disabled: { kuery: [], lucene: [] },
     });
+  });
+
+  it('should order date fields first', () => {
+    const mockDatasource = createMockDatasource('testDatasource');
+    const updatedPublicAPI: DatasourcePublicAPI = {
+      datasourceId: 'formBased',
+      getOperationForColumnId: jest.fn(),
+      getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes', 'timestamp'] }]),
+      getVisualDefaults: jest.fn(),
+      getSourceId: jest.fn(() => '1'),
+      getMaxPossibleNumValues: jest.fn(),
+      isTextBasedLanguage: jest.fn(() => false),
+      getFilters: jest.fn(() => ({
+        enabled: {
+          kuery: [[{ language: 'kuery', query: 'memory > 40000' }]],
+          lucene: [],
+        },
+        disabled: { kuery: [], lucene: [] },
+      })),
+      hasDefaultTimeField: jest.fn(() => true),
+    };
+    mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
+    const sampleIndexPatternsFromService = {
+      '1': createMockedIndexPattern(),
+    };
+    const { meta } = getLayerMetaInfo(
+      mockDatasource,
+      {}, // the publicAPI has been mocked, so no need for a state here
+      {
+        datatable1: { type: 'datatable', columns: [], rows: [] },
+      },
+      sampleIndexPatternsFromService,
+      undefined,
+      capabilities
+    );
+    expect(meta?.columns).toEqual(['timestamp', 'bytes']);
   });
 });
 describe('combineQueryAndFilters', () => {
