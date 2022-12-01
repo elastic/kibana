@@ -33,7 +33,7 @@ image::images/highlights-metric-vis.png[Trend lines on metric visualizations]
 [discrete]
 ==== Partition charts with multiple metrics
 
-Getting a complete view of your data just got easier. When you create partition
+Making sense of your data just got a whole lot easier. In Lens, you can create partition
 charts in Lens, you can now visualize multiple metrics.
 
 [role="screenshot"]
