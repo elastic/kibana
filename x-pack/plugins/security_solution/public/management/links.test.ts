@@ -102,6 +102,7 @@ describe('links', () => {
         canReadEndpointList: true,
         canReadTrustedApplications: true,
         canReadEventFilters: true,
+        canReadBlocklist: true,
       });
 
       const filteredLinks = await getManagementFilteredLinks(
@@ -120,6 +121,7 @@ describe('links', () => {
         canReadEndpointList: true,
         canReadTrustedApplications: true,
         canReadEventFilters: true,
+        canReadBlocklist: true,
       });
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
 
@@ -139,6 +141,7 @@ describe('links', () => {
         canReadEndpointList: true,
         canReadTrustedApplications: true,
         canReadEventFilters: true,
+        canReadBlocklist: true,
       });
       fakeHttpServices.get.mockResolvedValue({ total: 1 });
 
@@ -172,6 +175,7 @@ describe('links', () => {
         canReadEndpointList: true,
         canReadTrustedApplications: true,
         canReadEventFilters: true,
+        canReadBlocklist: true,
       });
       fakeHttpServices.get.mockRejectedValue(new Error());
 
@@ -190,6 +194,7 @@ describe('links', () => {
         canReadEndpointList: true,
         canReadTrustedApplications: true,
         canReadEventFilters: true,
+        canReadBlocklist: true,
       });
       fakeHttpServices.get.mockRejectedValue(new Error());
 
@@ -228,6 +233,18 @@ describe('links', () => {
     const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
 
     expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.eventFilters));
+  });
+
+  it('should hide Blocklist for user without privilege', async () => {
+    (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+      getEndpointAuthzInitialStateMock({
+        canReadBlocklist: false,
+      })
+    );
+
+    const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
+
+    expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.blocklist));
   });
 
   describe('Endpoint List', () => {
