@@ -45,7 +45,7 @@ export function createLargeDatasetRoute(router: IRouter, logger: Logger, core: C
       try {
         await deleteIndex(esClient, LARGE_DATASET_INDEX_NAME);
         await createIndex(esClient, LARGE_DATASET_INDEX_NAME);
-        let delay = 100;
+        let delay = 0;
         let index = 0;
         worker.on('message', async (message) => {
           try {
@@ -54,10 +54,10 @@ export function createLargeDatasetRoute(router: IRouter, logger: Logger, core: C
               logger.info('Received items from worker at index ' + index);
               setTimeout(() => {
                 bulkUpload(esClient, LARGE_DATASET_INDEX_NAME, items);
-              }, delay + index * 1000);
+              }, delay);
               // backoff, kinda
               index++;
-              delay = delay + index * 1000;
+              delay = index * 500;
             } else if (message.status === 'DONE') {
               const { savedObjects } = await context.core;
               const savedObjectsClient = await getSavedObjectsClient(context, ['index-pattern']);

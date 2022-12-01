@@ -123,7 +123,7 @@ const generateFieldName = () => {
   return faker.word.noun();
 };
 
-export function generateTestData() {
+const generateFormat = () => {
   // name, age and last_updated should be generated only once
   const format = 'name:str,age:int,last_updated:ts,ip:ipv4'.split(',');
   const fieldNames = new Set();
@@ -137,16 +137,20 @@ export function generateTestData() {
     fieldNames.add(fieldName);
     format.push(`${fieldName}:${fieldType}`);
   }
+  return format;
+};
+
+const generateTestData = (format: string[], size: number) => {
   const tsStart = new Date().toISOString();
   const items = [];
-  for (let i = 1; i <= numberOfDocuments; i++) {
+  for (let i = 1; i <= size; i++) {
     const item = generateRandomDoc(format);
     items.push(item);
   }
   const tsEnd = new Date().toISOString();
   logger.info(`Started at: ${tsStart} and ended at: ${tsEnd}`);
   return items;
-}
+};
 
 const getSize = () => {
   if (numberOfDocuments <= 100000 && numberOfFields < 100) {
@@ -155,25 +159,17 @@ const getSize = () => {
   if (numberOfDocuments <= 100000 && numberOfFields <= 200) {
     return 5000;
   }
-  if (numberOfDocuments <= 100000) {
-    return 10000 - numberOfFields;
-  }
-  return 500;
+  return 1000;
 };
 
 parentPort!.on('message', async (message) => {
   if (message === 'start') {
     try {
       const size = getSize();
-      const items = generateTestData();
-      let start = 0;
-      const end = Math.round(numberOfDocuments / size);
-      logger.info('End ' + end);
-      // const remain = numberOfDocuments % size;
-      for (let i = 0; i < end; i++) {
-        const subItems = items.slice(start, start + size);
-        start += size;
-        parentPort!.postMessage({ status: 'GENERATED_ITEMS', items: JSON.stringify(subItems) });
+      const format = generateFormat();
+      for (let i = 0; i < numberOfDocuments; i += size) {
+        const items = generateTestData(format, size);
+        parentPort!.postMessage({ status: 'GENERATED_ITEMS', items: JSON.stringify(items) });
         logger.info('Sent message');
       }
       parentPort!.postMessage({ status: 'DONE' });

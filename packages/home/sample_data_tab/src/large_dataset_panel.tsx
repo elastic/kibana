@@ -32,7 +32,7 @@ const STEP_DOCUMENTS = 5000;
 const MIN_FIELDS = 10;
 const MAX_FIELDS = 500;
 const STEP_FIELDS = 5;
-const INDEX_NAME = 'kibana_sample_data_large';
+const INDEX_NAME = '';
 const NOTIFICATION_KEY = 'largedatasetPanel:notificationShown';
 const EXPECTED_NR_OF_DOCUMENTS_KEY = 'largedatasetPanel:expectedNrOfDocuments';
 
