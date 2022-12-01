@@ -34,9 +34,9 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
   const { zoomInfo, onBrush } = useCharts();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
-  const [data, setData] = useState({} as any);
-  const [indexLabel, setIndexLabel] = useState(labels.index as any);
-  const [nodesByIndicesData, setNodesByIndicesData] = useState([]);
+  const [data, setData] = useState<any>({});
+  const [indexLabel, setIndexLabel] = useState(labels.index);
+  const [nodesByIndicesData, setNodesByIndicesData] = useState<any[]>([]);
   const [alerts, setAlerts] = useState<AlertsByName>({});
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,

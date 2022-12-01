@@ -45,7 +45,7 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
 
   const { node }: { node: string } = useParams();
   const { services } = useKibana<{ data: any }>();
-  const [data, setData] = useState({} as any);
+  const [data, setData] = useState<any>({});
 
   const clusterUuid = globalState.cluster_uuid;
   const cluster = find(clusters, {
@@ -62,7 +62,7 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
     }
   }, [cluster, generateBreadcrumbs, data?.nodeSummary?.name]);
   const ccs = globalState.ccs;
-  const [nodesByIndicesData, setNodesByIndicesData] = useState([]);
+  const [nodesByIndicesData, setNodesByIndicesData] = useState<any[]>([]);
 
   const title = i18n.translate('xpack.monitoring.elasticsearch.node.overview.title', {
     defaultMessage: 'Elasticsearch - Nodes - {nodeName} - Overview',
