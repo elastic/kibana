@@ -65,15 +65,24 @@ export const CommandInputHistory = memo(() => {
     };
   }, []);
 
-  const renderSelectionContent: EuiSelectableProps['children'] = useCallback((list, search) => {
-    return (
-      <>
-        {list}
-        <EuiSpacer size="s" />
-        {search}
-      </>
-    );
-  }, []);
+  const renderSelectionContent: EuiSelectableProps['children'] = useCallback(
+    (list, search) => {
+      return (
+        <>
+          {list}
+          <EuiSpacer size="s" />
+          {/*
+            The empty DIV below helps with a strange behaviour around losing the focus from inside the
+            popover's Portal. Normally, the `search` input will force the focus to behave as expected, but
+            if no input history exists, we don't want to show the search bar. In that case, we insert this
+            div with `tabindex` which seems to get around the issue.
+          */}
+          {inputHistory.length > 0 ? search : <div tabIndex={-1} />}
+        </>
+      );
+    },
+    [inputHistory.length]
+  );
 
   const handleSelectableOnChange: EuiSelectableProps['onChange'] = useCallback(
     (items: EuiSelectableOption[]) => {
