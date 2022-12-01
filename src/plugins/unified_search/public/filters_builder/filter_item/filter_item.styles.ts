@@ -43,3 +43,9 @@ export const actionButtonCss = css`
     }
   }
 `;
+
+export const disabledDraggableCss = css`
+  &.euiDraggable .euiDraggable__item.euiDraggable__item--isDisabled {
+    cursor: unset;
+  }
+`;
