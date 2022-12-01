@@ -13,11 +13,22 @@
   "license": "Elastic License v2",
   "name": "Kubernetes Anonymous Request Authorized",
   "note": "",
-  "query": "kubernetes.audit.annotations.authorization_k8s_io/decision:\"allow\" \n  and (kubernetes.audit.user.username:(\"system:anonymous\" or \"system:unauthenticated\") or not kubernetes.audit.user.username:*)\n  and not kubernetes.audit.objectRef.resource:(\"healthz\" or \"livez\" or \"readyz\")\n",
+  "query": "event.dataset : \"kubernetes.audit_logs\" \n  and kubernetes.audit.annotations.authorization_k8s_io/decision:\"allow\" \n  and (kubernetes.audit.user.username:(\"system:anonymous\" or \"system:unauthenticated\") or not kubernetes.audit.user.username:*)\n  and not kubernetes.audit.objectRef.resource:(\"healthz\" or \"livez\" or \"readyz\")\n",
   "references": [
     "https://media.defense.gov/2022/Aug/29/2003066362/-1/-1/0/CTR_KUBERNETES_HARDENING_GUIDANCE_1.2_20220829.PDF"
   ],
+  "related_integrations": [
+    {
+      "package": "kubernetes",
+      "version": "^1.4.1"
+    }
+  ],
   "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
     {
       "ecs": false,
       "name": "kubernetes.audit.annotations.authorization_k8s_io/decision",
@@ -72,5 +83,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 2
 }
