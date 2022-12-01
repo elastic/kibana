@@ -41,6 +41,7 @@ import {
   fieldAndParamCss,
   getGrabIconCss,
   operationCss,
+  disabledDraggableCss,
 } from './filter_item.styles';
 import { Tooltip } from './tooltip';
 
@@ -228,6 +229,8 @@ export function FilterItem({
             draggableId={`${path}`}
             customDragHandle={true}
             hasInteractiveChildren={true}
+            disableInteractiveElementBlocking
+            className={cx(disabledDraggableCss)}
           >
             {(provided) => (
               <EuiFlexGroup
