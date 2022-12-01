@@ -16,12 +16,19 @@ import type {
   AggregationsBuckets,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import mappings from '@kbn/event-log-plugin/generated/mappings.json';
+import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import {
   NUM_ALERTING_RULE_TYPES,
   NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES,
 } from '../alerting_usage_collector';
 import { replaceDotSymbols } from './replace_dots_with_underscores';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
+import {
+  EventUsageAggregations,
+  EventUsageAggregationType,
+  EventUsageSchema,
+} from '../generated/event_log_telemetry_types';
 
 const Millis2Nanos = 1000 * 1000;
 const percentileFieldNameMapping: Record<string, string> = {
@@ -36,7 +43,7 @@ interface Opts {
   logger: Logger;
 }
 
-interface GetExecutionsPerDayCountResults {
+interface GetExecutionsPerDayCountResults extends EventUsageSchema {
   hasErrors: boolean;
   errorMessage?: string;
   countTotalRuleExecutions: number;
@@ -44,16 +51,6 @@ interface GetExecutionsPerDayCountResults {
   countTotalFailedExecutions: number;
   countFailedExecutionsByReason: Record<string, number>;
   countFailedExecutionsByReasonByType: Record<string, Record<string, number>>;
-  avgExecutionTime: number;
-  avgExecutionTimeByType: Record<string, number>;
-  avgEsSearchDuration: number;
-  avgEsSearchDurationByType: Record<string, number>;
-  avgTotalSearchDuration: number;
-  avgTotalSearchDurationByType: Record<string, number>;
-  generatedActionsPercentiles: Record<string, number>;
-  generatedActionsPercentilesByType: Record<string, Record<string, number>>;
-  alertsPercentiles: Record<string, number>;
-  alertsPercentilesByType: Record<string, Record<string, number>>;
   countRulesByExecutionStatus: Record<string, number>;
 }
 interface GetExecutionTimeoutsPerDayCountResults {
@@ -78,6 +75,103 @@ interface IGetExecutionFailures extends AggregationsSingleBucketAggregateBase {
   by_reason: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
 }
 
+interface IAggResult extends EventUsageAggregationType, Record<string, AggregationsAggregate> {
+  by_rule_type_id: AggregationsTermsAggregateBase<GetExecutionCountsAggregationBucket>;
+  execution_failures: IGetExecutionFailures;
+  by_execution_status: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
+}
+
+const numericMappingTypes = ['integer', 'long', 'float'];
+
+function parseMappingHelper(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  _mappings: any,
+  accumulatedFieldMappings: string[] = [],
+  fieldName: string = ''
+) {
+  if (_mappings.properties) {
+    Object.keys(_mappings.properties).forEach((field: string) => {
+      const numericField = parseMappingHelper(
+        _mappings.properties[field],
+        accumulatedFieldMappings,
+        fieldName.length > 0 ? `${fieldName}.${field}` : field
+      );
+      if (numericField) {
+        accumulatedFieldMappings.push(numericField);
+      }
+    });
+  } else {
+    if (_mappings.type && numericMappingTypes.includes(_mappings.type)) {
+      return fieldName;
+    } else {
+      return null;
+    }
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function parseNumericMappings(_mappings: any) {
+  const numericFields: string[] = [];
+  parseMappingHelper(_mappings, numericFields);
+  return numericFields;
+}
+
+function getAggNameFromField(fieldName: string) {
+  // remove 'kibana.alert.rule.execution.metrics.' prefix if it exists
+  return fieldName.replace('kibana.alert.rule.execution.metrics.', '').replaceAll('.', '_');
+}
+
+const excludeList = [
+  'event.risk_score',
+  'event.risk_score_norm',
+  'event.sequence',
+  'event.severity',
+  'kibana.alert.rule.execution.status_order',
+];
+
+const aggTypeMapping: Record<string, string> = {
+  'kibana.alert.rule.execution.metrics.number_of_generated_actions': 'percentile',
+  'kibana.alert.rule.execution.metrics.alert_counts.active': 'percentile',
+};
+
+export function buildEventLogAggsFromMapping() {
+  const numericEventLogFields = parseNumericMappings(mappings);
+  return numericEventLogFields.reduce((acc, fieldName: string) => {
+    if (excludeList.includes(fieldName)) {
+      return acc;
+    }
+
+    const aggName = getAggNameFromField(fieldName);
+    const aggType = aggTypeMapping[fieldName];
+
+    let agg;
+    switch (aggType) {
+      case 'percentile':
+        agg = {
+          [`percentile_${aggName}`]: {
+            percentiles: {
+              field: fieldName,
+              percents: [50, 90, 99],
+            },
+          },
+        };
+        break;
+      default:
+        agg = {
+          [`avg_${aggName}`]: {
+            avg: {
+              field: fieldName,
+            },
+          },
+        };
+    }
+    return {
+      ...acc,
+      ...agg,
+    };
+  }, {});
+}
+
 export async function getExecutionsPerDayCount({
   esClient,
   eventLogIndex,
@@ -85,34 +179,6 @@ export async function getExecutionsPerDayCount({
 }: Opts): Promise<GetExecutionsPerDayCountResults> {
   try {
     const eventLogAggs = {
-      avg_execution_time: {
-        avg: {
-          field: 'event.duration',
-        },
-      },
-      avg_es_search_duration: {
-        avg: {
-          field: 'kibana.alert.rule.execution.metrics.es_search_duration_ms',
-        },
-      },
-      avg_total_search_duration: {
-        avg: {
-          field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms',
-        },
-      },
-
-      percentile_scheduled_actions: {
-        percentiles: {
-          field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
-          percents: [50, 90, 99],
-        },
-      },
-      percentile_alerts: {
-        percentiles: {
-          field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
-          percents: [50, 90, 99],
-        },
-      },
       execution_failures: {
         filter: {
           term: {
@@ -128,6 +194,7 @@ export async function getExecutionsPerDayCount({
           },
         },
       },
+      ...EventUsageAggregations,
     };
 
     const query = {
@@ -161,17 +228,7 @@ export async function getExecutionsPerDayCount({
     const totalRuleExecutions =
       typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
 
-    const aggregations = results.aggregations as {
-      by_rule_type_id: AggregationsTermsAggregateBase<GetExecutionCountsAggregationBucket>;
-      execution_failures: IGetExecutionFailures;
-      percentile_scheduled_actions: AggregationsPercentilesAggregateBase;
-      percentile_alerts: AggregationsPercentilesAggregateBase;
-      avg_execution_time: AggregationsSingleMetricAggregateBase;
-      avg_es_search_duration: AggregationsSingleMetricAggregateBase;
-      avg_total_search_duration: AggregationsSingleMetricAggregateBase;
-      by_execution_status: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
-    };
-
+    const aggregations = results.aggregations as IAggResult;
     const aggregationsByRuleTypeId: AggregationsBuckets<GetExecutionCountsAggregationBucket> =
       aggregations.by_rule_type_id.buckets as GetExecutionCountsAggregationBucket[];
 
@@ -535,14 +592,9 @@ export function parsePercentileAggs(
  *     value: 28.630434782608695,
  *   },
  */
-export function parseExecutionCountAggregationResults(results: {
-  execution_failures: IGetExecutionFailures;
-  percentile_scheduled_actions: AggregationsPercentilesAggregateBase;
-  percentile_alerts: AggregationsPercentilesAggregateBase;
-  avg_execution_time: AggregationsSingleMetricAggregateBase;
-  avg_es_search_duration: AggregationsSingleMetricAggregateBase;
-  avg_total_search_duration: AggregationsSingleMetricAggregateBase;
-}): Pick<
+export function parseExecutionCountAggregationResults(
+  results: IAggResult
+): Pick<
   GetExecutionsPerDayCountResults,
   | 'countTotalFailedExecutions'
   | 'countFailedExecutionsByReason'

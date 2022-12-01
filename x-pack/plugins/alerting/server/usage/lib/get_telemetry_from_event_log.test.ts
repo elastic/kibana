@@ -13,7 +13,10 @@ import {
   parsePercentileAggs,
   parseExecutionCountAggregationResults,
   getExecutionTimeoutsPerDayCount,
+  parseNumericMappings,
+  buildEventLogAggsFromMapping,
 } from './get_telemetry_from_event_log';
+import mappings from '@kbn/event-log-plugin/generated/mappings.json';
 
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;
@@ -22,6 +25,145 @@ const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemM
 describe('event log telemetry', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+  });
+
+  describe('parseNumericMappings', () => {
+    test('should correctly extract numeric fields from mapping', () => {
+      expect(parseNumericMappings(mappings)).toEqual([
+        'event.duration',
+        'event.risk_score',
+        'event.risk_score_norm',
+        'event.sequence',
+        'event.severity',
+        'kibana.task.schedule_delay',
+        'kibana.alert.rule.execution.status_order',
+        'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+        'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+        'kibana.alert.rule.execution.metrics.alert_counts.active',
+        'kibana.alert.rule.execution.metrics.alert_counts.new',
+        'kibana.alert.rule.execution.metrics.alert_counts.recovered',
+        'kibana.alert.rule.execution.metrics.number_of_searches',
+        'kibana.alert.rule.execution.metrics.total_indexing_duration_ms',
+        'kibana.alert.rule.execution.metrics.es_search_duration_ms',
+        'kibana.alert.rule.execution.metrics.total_search_duration_ms',
+        'kibana.alert.rule.execution.metrics.execution_gap_duration_s',
+        'kibana.alert.rule.execution.metrics.rule_type_run_duration_ms',
+        'kibana.alert.rule.execution.metrics.process_alerts_duration_ms',
+        'kibana.alert.rule.execution.metrics.trigger_actions_duration_ms',
+        'kibana.alert.rule.execution.metrics.process_rule_duration_ms',
+        'kibana.alert.rule.execution.metrics.claim_to_start_duration_ms',
+        'kibana.alert.rule.execution.metrics.prepare_rule_duration_ms',
+        'kibana.alert.rule.execution.metrics.total_run_duration_ms',
+        'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
+      ]);
+    });
+
+    test('should correctly build aggregation from mapping', () => {
+      expect(buildEventLogAggsFromMapping()).toEqual({
+        avg_event_duration: {
+          avg: {
+            field: 'event.duration',
+          },
+        },
+        avg_kibana_task_schedule_delay: {
+          avg: {
+            field: 'kibana.task.schedule_delay',
+          },
+        },
+        avg_number_of_triggered_actions: {
+          avg: {
+            field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+          },
+        },
+        percentile_number_of_generated_actions: {
+          percentiles: {
+            field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+            percents: [50, 90, 99],
+          },
+        },
+        percentile_alert_counts_active: {
+          percentiles: {
+            field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
+            percents: [50, 90, 99],
+          },
+        },
+        avg_alert_counts_new: {
+          avg: {
+            field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
+          },
+        },
+        avg_alert_counts_recovered: {
+          avg: {
+            field: 'kibana.alert.rule.execution.metrics.alert_counts.recovered',
+          },
+        },
+        avg_number_of_searches: {
+          avg: {
+            field: 'kibana.alert.rule.execution.metrics.number_of_searches',
+          },
+        },
+        avg_total_indexing_duration_ms: {
+          avg: {
+            field: 'kibana.alert.rule.execution.metrics.total_indexing_duration_ms',
+          },
+        },
+        avg_es_search_duration_ms: {
+          avg: {
+            field: 'kibana.alert.rule.execution.metrics.es_search_duration_ms',
+          },
+        },
+        avg_total_search_duration_ms: {
+          avg: {
+            field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms',
+          },
+        },
+        avg_execution_gap_duration_s: {
+          avg: {
+            field: 'kibana.alert.rule.execution.metrics.execution_gap_duration_s',
+          },
+        },
+        avg_rule_type_run_duration_ms: {
+          avg: {
+            field: 'kibana.alert.rule.execution.metrics.rule_type_run_duration_ms',
+          },
+        },
+        avg_process_alerts_duration_ms: {
+          avg: {
+            field: 'kibana.alert.rule.execution.metrics.process_alerts_duration_ms',
+          },
+        },
+        avg_trigger_actions_duration_ms: {
+          avg: {
+            field: 'kibana.alert.rule.execution.metrics.trigger_actions_duration_ms',
+          },
+        },
+        avg_process_rule_duration_ms: {
+          avg: {
+            field: 'kibana.alert.rule.execution.metrics.process_rule_duration_ms',
+          },
+        },
+        avg_claim_to_start_duration_ms: {
+          avg: {
+            field: 'kibana.alert.rule.execution.metrics.claim_to_start_duration_ms',
+          },
+        },
+        avg_prepare_rule_duration_ms: {
+          avg: {
+            field: 'kibana.alert.rule.execution.metrics.prepare_rule_duration_ms',
+          },
+        },
+        avg_total_run_duration_ms: {
+          avg: {
+            field: 'kibana.alert.rule.execution.metrics.total_run_duration_ms',
+          },
+        },
+        avg_total_enrichment_duration_ms: {
+          avg: {
+            field: 'kibana.alert.rule.execution.metrics.total_enrichment_duration_ms',
+          },
+        },
+      });
+    });
   });
 
   describe('parseRuleTypeBucket', () => {

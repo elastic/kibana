@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export interface AlertingUsage {
+import { EventSchema } from './generated/event_log_telemetry_types';
+
+export interface AlertingLegacyUsage {
   has_errors: boolean;
   error_messages?: string[];
   count_total: number;
@@ -43,32 +45,6 @@ export interface AlertingUsage {
   count_rules_muted: number;
   count_rules_with_muted_alerts: number;
   count_rules_by_execution_status_per_day: Record<string, number>;
-  percentile_num_generated_actions_per_day: {
-    p50: number;
-    p90: number;
-    p99: number;
-  };
-  percentile_num_generated_actions_by_type_per_day: {
-    p50: Record<string, number>;
-    p90: Record<string, number>;
-    p99: Record<string, number>;
-  };
-  percentile_num_alerts_per_day: {
-    p50: number;
-    p90: number;
-    p99: number;
-  };
-  percentile_num_alerts_by_type_per_day: {
-    p50: Record<string, number>;
-    p90: Record<string, number>;
-    p99: Record<string, number>;
-  };
-  avg_execution_time_per_day: number;
-  avg_execution_time_by_type_per_day: Record<string, number>;
-  avg_es_search_duration_per_day: number;
-  avg_es_search_duration_by_type_per_day: Record<string, number>;
-  avg_total_search_duration_per_day: number;
-  avg_total_search_duration_by_type_per_day: Record<string, number>;
   throttle_time: {
     min: string;
     avg: string;
@@ -95,3 +71,5 @@ export interface AlertingUsage {
     max: number;
   };
 }
+
+export type AlertingUsage = AlertingLegacyUsage & EventSchema;
