@@ -62,7 +62,7 @@ export const AddToExistingCase: VFC<AddToExistingCaseProps> = ({
   // disable the item if there is no indicator name or if the user doesn't have the right permission
   // in the case's attachment, the indicator name is the link to open the flyout
   const invalidIndicatorName: boolean = attachmentMetadata.indicatorName === EMPTY_VALUE;
-  const hasUpdatePermission: boolean = permissions.read && permissions.push;
+  const hasUpdatePermission: boolean = permissions.create && permissions.update;
   const disabled: boolean = invalidIndicatorName || !hasUpdatePermission;
 
   const menuItemClicked = () => {

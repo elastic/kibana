@@ -73,8 +73,7 @@ const defaultServices = {
     helpers: {
       canUseCases: () => ({
         create: true,
-        read: true,
-        push: true,
+        update: true,
       }),
     },
   },
