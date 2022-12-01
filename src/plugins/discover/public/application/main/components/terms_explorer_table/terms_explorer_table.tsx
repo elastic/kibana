@@ -6,57 +6,26 @@
  * Side Public License, v 1.
  */
 
+import { css } from '@emotion/react';
 import React, { useEffect, useState } from 'react';
 
-import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { EuiTable, EuiTableBody } from '@elastic/eui';
+import { Filter, Query, AggregateQuery, buildEsQuery, TimeRange } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import {
+  EuiSpacer,
+  EuiTitle,
+  EuiTable,
+  EuiTableBody,
+  EuiTableHeader,
+  EuiTableHeaderCell,
+  EuiBadge,
+} from '@elastic/eui';
 import { TermsExplorerTableRow } from './terms_explorer_table_row';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import {
   TermsExplorerRequest,
   TermsExplorerResponse,
 } from '../../../../../common/terms_explorer/types';
-export interface RandomSamplingOption {
-  mode: 'random_sampling';
-  seed: string;
-  probability: number;
-}
-
-export interface NormalSamplingOption {
-  mode: 'normal_sampling';
-  seed: string;
-  shardSize: number;
-}
-
-export interface NoSamplingOption {
-  mode: 'no_sampling';
-  seed: string;
-}
-
-export type SamplingOption = RandomSamplingOption | NormalSamplingOption | NoSamplingOption;
-
-export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
-  dataView: DataView;
-  savedSearch?: SavedSearch;
-  query?: Query | AggregateQuery;
-  visibleFieldNames?: string[];
-  filters?: Filter[];
-  showPreviewByDefault?: boolean;
-  /**
-   * Callback to add a filter to filter bar
-   */
-  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
-  sessionId?: string;
-  fieldsToFetch?: string[];
-  totalDocuments?: number;
-  samplingOption?: SamplingOption;
-}
-export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
-  showDistributions?: boolean;
-}
 
 export interface TermsExplorerTableProps {
   /**
@@ -79,18 +48,46 @@ export interface TermsExplorerTableProps {
    * Filters query to update the table content
    */
   filters?: Filter[];
+
+  timeRange?: TimeRange;
+
+  breadcrumbs?: string[];
 }
 
 export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
+  const { dataView, columns, collapseFieldName, timeRange, filters, query, breadcrumbs } =
+    tableProps;
+
   const services = useDiscoverServices();
-  const { dataView, columns, collapseFieldName } = tableProps;
+  const {
+    http,
+    data: {
+      query: {
+        timefilter: { timefilter: timeService },
+      },
+    },
+  } = services;
 
   const [rows, setRows] = useState<TermsExplorerResponse['rows'] | undefined>();
 
+  const renderHeaderCells = () => {
+    return columns.map((column) => (
+      <EuiTableHeaderCell key={column} align={'center'}>
+        {column}
+      </EuiTableHeaderCell>
+    ));
+  };
+
   useEffect(() => {
+    const timeFilter = timeRange ? timeService.createFilter(dataView, timeRange) : undefined;
+    const filtersToUse = [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])];
+    const esFilters = [buildEsQuery(dataView, query ?? [], filtersToUse ?? [])];
+
     (async () => {
       const termsExplorerRequestBody: TermsExplorerRequest = {
+        size: 20,
         collapseFieldName,
+        filters: esFilters,
         columns: columns.reduce((columnsMap, columnName) => {
           if (!columnsMap) columnsMap = {};
           const fieldSpec = dataView.getFieldByName(columnName)?.toSpec();
@@ -100,7 +97,7 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
           return columnsMap;
         }, {} as TermsExplorerRequest['columns']),
       };
-      const response = await services.http.fetch<TermsExplorerResponse>(
+      const response = await http.fetch<TermsExplorerResponse>(
         `/api/kibana/discover/termsExplorer/${dataView.getIndexPattern()}`,
         {
           body: JSON.stringify(termsExplorerRequestBody),
@@ -109,7 +106,7 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
       );
       setRows(response.rows);
     })();
-  }, [columns, dataView, services.http, collapseFieldName]);
+  }, [columns, dataView, http, collapseFieldName, timeRange, timeService, filters, query]);
 
   const renderRows = () => {
     const renderedRows = [];
@@ -124,13 +121,37 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
     return renderedRows;
   };
 
+  const crumbs = breadcrumbs
+    ?.map<React.ReactNode>((crumb) => <EuiBadge>{crumb}</EuiBadge>)
+    .reduce((prev, current) => [prev, <span> and </span>, current]);
+
   return (
-    <EuiTable id={'table-id'}>
-      {/* <EuiTableHeader>{this.renderHeaderCells()}</EuiTableHeader> */}
+    <>
+      <EuiSpacer size="xl" />
+      <EuiTitle
+        size="xxs"
+        css={css`
+          margin-left: 15px;
+        `}
+      >
+        <p>
+          <span>
+            Unique values of <EuiBadge>{collapseFieldName}</EuiBadge>
+          </span>
+          <span>
+            {crumbs ? ' where ' : ''} {crumbs}
+          </span>
+        </p>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <EuiTable id={'table-id'}>
+        <EuiTableHeader>{renderHeaderCells()}</EuiTableHeader>
 
-      <EuiTableBody>{renderRows()}</EuiTableBody>
+        <EuiTableBody>{renderRows()}</EuiTableBody>
 
-      {/* <EuiTableFooter>{this.renderFooterCells()}</EuiTableFooter> */}
-    </EuiTable>
+        {/* <EuiTableFooter>{this.renderFooterCells()}</EuiTableFooter> */}
+      </EuiTable>
+      <EuiSpacer size="xl" />
+    </>
   );
 };

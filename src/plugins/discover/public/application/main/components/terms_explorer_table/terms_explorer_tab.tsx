@@ -25,6 +25,7 @@ export const TermsExplorerTab: React.FC<Omit<TermsExplorerTableProps, 'query' | 
           {...props}
           collapseFieldName={'DestCountry'} // TODO fix this!!
           query={querySubscriberResult.query}
+          timeRange={querySubscriberResult.timeRange}
           filters={querySubscriberResult.filters}
         />
       </div>

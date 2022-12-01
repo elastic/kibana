@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import type { AggregateQuery, Query, Filter, TimeRange } from '@kbn/es-query';
 
 /**
  * Hook params
@@ -23,6 +23,7 @@ export interface QuerySubscriberParams {
 export interface QuerySubscriberResult {
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
+  timeRange: TimeRange | undefined;
 }
 
 /**
@@ -35,6 +36,7 @@ export const useQuerySubscriber = ({ data }: QuerySubscriberParams) => {
     return {
       query: state?.query,
       filters: state?.filters,
+      timeRange: state?.time,
     };
   });
 
@@ -44,6 +46,7 @@ export const useQuerySubscriber = ({ data }: QuerySubscriberParams) => {
         ...prevState,
         query: state.query,
         filters: state.filters,
+        timeRange: state.time,
       }));
     });
 

@@ -7,8 +7,11 @@
  */
 
 import React, { useMemo, useState } from 'react';
+
 import { css } from '@emotion/react';
+import { PhraseFilter } from '@kbn/es-query';
 import { EuiTableRow, EuiTableRowCell, useEuiTheme, EuiBadge } from '@elastic/eui';
+
 import { TermsExplorerTable, TermsExplorerTableProps } from './terms_explorer_table';
 import { TermsExplorerResponseRow } from '../../../../../common/terms_explorer/types';
 
@@ -37,34 +40,43 @@ export const TermsExplorerTableRow = ({
     [euiTheme.size.m, euiTheme.colors.lightestShade]
   );
 
+  const { collapseFieldName, dataView, filters, breadcrumbs } = termsExplorerTableProps;
+
   const renderCells = () => {
     return columns.map((column) => {
       const cell = row[column];
+
       const isSelectedField = column === expandedColumn;
 
-      const child =
-        cell.result_type === 'string_cardinality' ? (
-          <EuiBadge
-            color="hollow"
-            iconType={'arrowDown'}
-            aria-expanded={isSelectedField}
-            onClickAriaLabel="Expand row"
-            onClick={() => setExpandedColumn(isSelectedField ? undefined : column)}
-          >
-            {cell.result} unique values
-          </EuiBadge>
-        ) : (
-          cell.result
-        );
+      const child = (() => {
+        if (!cell) return '¯\\_(ツ)_/¯';
+        if (cell?.result_type === 'string_cardinality') {
+          return (
+            <EuiBadge
+              color={isSelectedField ? 'accent' : 'hollow'}
+              iconType={isSelectedField ? 'arrowUp' : 'arrowDown'}
+              aria-expanded={isSelectedField}
+              onClickAriaLabel="Expand row"
+              onClick={() => setExpandedColumn(isSelectedField ? undefined : column)}
+              css={css`
+                font-weight: ${isSelectedField ? '800' : '400'};
+              `}
+            >
+              {cell.result} values
+            </EuiBadge>
+          );
+        }
+        return cell.result;
+      })();
 
       return (
         <EuiTableRowCell
           truncateText={true}
           key={column}
-          align={cell.result_type === 'numeric_aggregation' ? 'left' : 'center'}
+          align={cell?.result_type === 'numeric_aggregation' ? 'left' : 'center'}
           isExpander={true}
           css={css`
-            font-weight: ${isSelectedField ? '800' : '400'};
+            ${column === collapseFieldName ? 'background-color: #d2f3ea;' : ''}
           `}
         >
           {child}
@@ -74,14 +86,27 @@ export const TermsExplorerTableRow = ({
   };
 
   const ExpandedRow = () => {
+    if (!expandedColumn) return <></>;
+    // expanding a row adds an additional filter to the context.
+    const additionalFilter: PhraseFilter = {
+      meta: { index: dataView.getIndexPattern() },
+      query: {
+        match_phrase: {
+          [collapseFieldName]: row[collapseFieldName].result as string, // we know this is a string because the group by column is always of type 'string_value'
+        },
+      },
+    };
+
     return (
       <EuiTableRowCell colSpan={columns.length} css={expandedRowStyle}>
-        <h3>{`Expanded on ${
-          expandedColumn ? `${expandedColumn} with value of ${row[expandedColumn]}` : 'nothing'
-        }`}</h3>
         <TermsExplorerTable
           {...termsExplorerTableProps}
-          filters={[...(termsExplorerTableProps.filters ?? [])]} // TODO: add on the filter we create by opening this table row :)
+          breadcrumbs={[
+            ...(breadcrumbs ?? []),
+            `${collapseFieldName} is ${row[collapseFieldName].result}`,
+          ]}
+          filters={[...(filters ?? []), additionalFilter]}
+          collapseFieldName={expandedColumn}
         />
       </EuiTableRowCell>
     );
