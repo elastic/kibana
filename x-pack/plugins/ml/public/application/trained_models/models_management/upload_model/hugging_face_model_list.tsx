@@ -95,7 +95,7 @@ export const HuggingFaceModelList: FC<Props> = ({ refreshModels }) => {
     <>
       {visibleTaskTypes.map((t) => (
         <>
-          <div css={{ backgroundColor: colors.lightShade, padding: '4px' }}>
+          <div css={{ backgroundColor: colors.lightShade, padding: '6px', borderRadius: '2px' }}>
             <EuiTitle size="s">
               <h3>{readableTaskType(t)}</h3>
             </EuiTitle>

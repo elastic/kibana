@@ -118,6 +118,7 @@ export const ModelsList: FC<Props> = ({
     {}
   );
   const [showTestFlyout, setShowTestFlyout] = useState<string | null>(null);
+  const [showUploadButton, setShowUploadButton] = useState<boolean>(false);
   const [showUploadFlyout, setShowUploadFlyout] = useState<boolean>(false);
 
   const isBuiltInModel = useCallback(
@@ -194,6 +195,15 @@ export const ModelsList: FC<Props> = ({
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [refresh]
+  );
+
+  useEffect(
+    function checkHuggingFaceServer() {
+      trainedModelsApiService.huggingFaceServerExists().then(({ exists }) => {
+        setShowUploadButton(exists);
+      });
+    },
+    [trainedModelsApiService]
   );
 
   const modelsStats: ModelsBarStats = useMemo(() => {
@@ -494,11 +504,13 @@ export const ModelsList: FC<Props> = ({
             <EuiFlexItem grow={false}>
               <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => setShowUploadFlyout(!showUploadFlyout)}>
-                Import trained model
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+            {showUploadButton ? (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={() => setShowUploadFlyout(!showUploadFlyout)}>
+                  Import trained model
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            ) : null}
           </>
         )}
       </EuiFlexGroup>

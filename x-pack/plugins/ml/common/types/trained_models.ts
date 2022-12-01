@@ -239,6 +239,8 @@ export interface NodesOverviewResponse {
 
 export interface HuggingFaceTrainedModel {
   model_id: string;
+  title: string;
+  description: string;
   model_type: string;
   task_type: string;
   source: {

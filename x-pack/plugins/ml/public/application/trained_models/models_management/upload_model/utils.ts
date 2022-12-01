@@ -43,7 +43,7 @@ export function streamReducer(
   }
 }
 
-export function getHugginFaceUrl(model: HuggingFaceTrainedModel) {
+export function getHuggingFaceUrl(model: HuggingFaceTrainedModel) {
   const id = model.source.metadata.repo_id;
   return { url: `${HUGGING_FACE_URL}${id}`, text: id };
 }

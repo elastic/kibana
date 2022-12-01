@@ -193,6 +193,13 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         method: 'GET',
       });
     },
+
+    huggingFaceServerExists() {
+      return httpService.http<{ exists: boolean }>({
+        path: `${apiBasePath}/trained_models/hugging_face_server_exists`,
+        method: 'GET',
+      });
+    },
   };
 }
 

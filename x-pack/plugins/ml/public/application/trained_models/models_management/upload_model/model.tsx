@@ -127,7 +127,7 @@ export const Model: FC<Props> = ({ model, installed, hidden, refreshModels }) =>
   }, [currentStep, data, isRunning]);
 
   useEffect(() => {
-    let tempProgress = currentStep * 5 - 5;
+    let tempProgress = currentStep === 0 ? 0 : currentStep * 5 - 5;
 
     if (progress > 0) {
       tempProgress += progress * 0.75;
@@ -183,30 +183,52 @@ export const Model: FC<Props> = ({ model, installed, hidden, refreshModels }) =>
     <>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <strong>{model.model_id}</strong>
+          <strong>{model.title}</strong>
+          <EuiSpacer size="s" />
           <EuiText size="xs">
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem css={{ fontWeight: 'normal', maxWidth: '90px' }}>Task type</EuiFlexItem>
-              <EuiFlexItem>{model.task_type}</EuiFlexItem>
-            </EuiFlexGroup>
+            {model.description ? (
+              <>
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem css={{ fontWeight: 'normal', maxWidth: '90px' }}>
+                    Description
+                  </EuiFlexItem>
+                  <EuiFlexItem>{model.description}</EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="xs" />
+              </>
+            ) : null}
+
             {model.source?.metadata?.repo_id ? (
+              <>
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem css={{ fontWeight: 'normal', maxWidth: '90px' }}>
+                    Repo ID
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiLink href={huggingFaceLink.url} target="_blank">
+                      {huggingFaceLink.text}
+                    </EuiLink>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="xs" />
+              </>
+            ) : null}
+
+            {/* {model.source?.last_modified ? (
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem css={{ fontWeight: 'normal', maxWidth: '90px' }}>
                   Last modified
                 </EuiFlexItem>
                 <EuiFlexItem>{model.source.last_modified}</EuiFlexItem>
               </EuiFlexGroup>
-            ) : null}
-            {model.source?.metadata?.repo_id ? (
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem css={{ fontWeight: 'normal', maxWidth: '90px' }}>Repo ID</EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiLink href={huggingFaceLink.url} target="_blank">
-                    {huggingFaceLink.text}
-                  </EuiLink>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : null}
+            ) : null} */}
+
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem css={{ fontWeight: 'normal', maxWidth: '90px' }}>Task type</EuiFlexItem>
+              <EuiFlexItem>{model.task_type}</EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem css={{ fontWeight: 'normal', maxWidth: '90px' }}>Size</EuiFlexItem>
               <EuiFlexItem>
