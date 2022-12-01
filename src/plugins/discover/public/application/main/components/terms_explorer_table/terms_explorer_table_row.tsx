@@ -66,7 +66,9 @@ export const TermsExplorerTableRow = ({
             </EuiBadge>
           );
         }
-        return cell.result;
+        const field = dataView.getFieldByName(column);
+        const fieldFormatter = field && dataView.getFormatterForField(field);
+        return fieldFormatter ? fieldFormatter.getConverterFor('text')(cell.result) : cell.result;
       })();
 
       return (
@@ -101,6 +103,7 @@ export const TermsExplorerTableRow = ({
       <EuiTableRowCell colSpan={columns.length} css={expandedRowStyle}>
         <TermsExplorerTable
           {...termsExplorerTableProps}
+          isTopLevel={false}
           breadcrumbs={[
             ...(breadcrumbs ?? []),
             `${collapseFieldName} is ${row[collapseFieldName].result}`,

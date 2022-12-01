@@ -7,7 +7,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { Filter, Query, AggregateQuery, buildEsQuery, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -19,6 +19,8 @@ import {
   EuiTableHeader,
   EuiTableHeaderCell,
   EuiBadge,
+  EuiButtonIcon,
+  EuiText,
 } from '@elastic/eui';
 import { TermsExplorerTableRow } from './terms_explorer_table_row';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -35,7 +37,7 @@ export interface TermsExplorerTableProps {
   /**
    * Determines which field the table is collapsed on
    */
-  collapseFieldName?: string;
+  collapseFieldName: string;
   /**
    * The used data view
    */
@@ -52,11 +54,21 @@ export interface TermsExplorerTableProps {
   timeRange?: TimeRange;
 
   breadcrumbs?: string[];
+
+  isTopLevel: boolean;
 }
 
 export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
-  const { dataView, columns, collapseFieldName, timeRange, filters, query, breadcrumbs } =
-    tableProps;
+  const {
+    dataView,
+    columns,
+    collapseFieldName,
+    timeRange,
+    filters,
+    query,
+    breadcrumbs,
+    isTopLevel,
+  } = tableProps;
 
   const services = useDiscoverServices();
   const {
@@ -69,6 +81,8 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
   } = services;
 
   const [rows, setRows] = useState<TermsExplorerResponse['rows'] | undefined>();
+  const [totalRows, setTotalRows] = useState<number>(0);
+  const [currentFrom, setCurrentFrom] = useState<number>(0);
 
   const renderHeaderCells = () => {
     return columns.map((column) => (
@@ -77,6 +91,8 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
       </EuiTableHeaderCell>
     ));
   };
+
+  const pageSize = useMemo(() => (isTopLevel ? 20 : 10), [isTopLevel]);
 
   useEffect(() => {
     const timeFilter = timeRange ? timeService.createFilter(dataView, timeRange) : undefined;
@@ -87,7 +103,8 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
       if (!collapseFieldName) return;
 
       const termsExplorerRequestBody: TermsExplorerRequest = {
-        size: 20,
+        from: currentFrom,
+        size: pageSize,
         collapseFieldName,
         filters: esFilters,
         columns: columns.reduce((columnsMap, columnName) => {
@@ -107,8 +124,20 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
         }
       );
       setRows(response.rows);
+      setTotalRows(response.totalRows);
     })();
-  }, [columns, dataView, http, collapseFieldName, timeRange, timeService, filters, query]);
+  }, [
+    collapseFieldName,
+    timeService,
+    currentFrom,
+    timeRange,
+    dataView,
+    pageSize,
+    filters,
+    columns,
+    query,
+    http,
+  ]);
 
   const renderRows = () => {
     const renderedRows = [];
@@ -153,6 +182,48 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
 
         {/* <EuiTableFooter>{this.renderFooterCells()}</EuiTableFooter> */}
       </EuiTable>
+      <div
+        css={css`
+          background-color: white;
+          width: 100%;
+          display: flex;
+          justify-content: end;
+          align-items: center;
+          padding: 5px;
+        `}
+      >
+        <EuiButtonIcon
+          iconType="arrowStart"
+          display="empty"
+          disabled={currentFrom === 0}
+          onClick={() => setCurrentFrom(0)}
+        />
+        <EuiButtonIcon
+          iconType="arrowLeft"
+          display="empty"
+          disabled={currentFrom === 0}
+          onClick={() =>
+            setCurrentFrom((from) => {
+              return from - pageSize;
+            })
+          }
+        />
+        <EuiText size="xs">
+          <p>
+            {currentFrom + 1}-{Math.min(currentFrom + pageSize, totalRows)} of {totalRows}
+          </p>
+        </EuiText>
+        <EuiButtonIcon
+          iconType="arrowRight"
+          display="empty"
+          disabled={currentFrom + pageSize >= totalRows}
+          onClick={() =>
+            setCurrentFrom((from) => {
+              return from + pageSize;
+            })
+          }
+        />
+      </div>
       <EuiSpacer size="xl" />
     </>
   );

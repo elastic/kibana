@@ -54,4 +54,5 @@ export interface TermsExplorerResponseRow {
 
 export interface TermsExplorerResponse {
   rows: TermsExplorerResponseRow[];
+  totalRows: number;
 }
