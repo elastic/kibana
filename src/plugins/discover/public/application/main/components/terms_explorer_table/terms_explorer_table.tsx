@@ -35,7 +35,7 @@ export interface TermsExplorerTableProps {
   /**
    * Determines which field the table is collapsed on
    */
-  collapseFieldName: string;
+  collapseFieldName?: string;
   /**
    * The used data view
    */
@@ -84,6 +84,8 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
     const esFilters = [buildEsQuery(dataView, query ?? [], filtersToUse ?? [])];
 
     (async () => {
+      if (!collapseFieldName) return;
+
       const termsExplorerRequestBody: TermsExplorerRequest = {
         size: 20,
         collapseFieldName,

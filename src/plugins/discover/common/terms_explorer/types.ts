@@ -18,6 +18,17 @@ export interface TermsExplorerRequest {
   sortDirection?: 'asc' | 'desc';
 }
 
+export interface FieldCardinalityRequest {
+  fieldName: string;
+  filters?: Array<{ bool: BoolQuery }>;
+  from?: number;
+  size?: number;
+}
+
+export interface FieldCardinalityResponse {
+  cardinality: number;
+}
+
 export type TermsExplorerResponseColumn =
   | TermsExplorerNumericColumnResult
   | TermsExplorerCardinalityColumnResult
