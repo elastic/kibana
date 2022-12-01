@@ -20865,7 +20865,6 @@
     "xpack.ml.newJob.fromLens.createJob.error.colsNoSourceField": "Certaines colonnes ne contiennent pas de champ source.",
     "xpack.ml.newJob.fromLens.createJob.error.colsUsingFilterTimeSift": "Les colonnes contenant des paramètres incompatibles avec les détecteurs de ML, le décalage temporel et la fonction Filtrer par ne sont pas prises en charge.",
     "xpack.ml.newJob.fromLens.createJob.error.incompatibleLayerType": "Le calque n'est pas compatible. Seuls les calques de graphique peuvent être utilisés.",
-    "xpack.ml.newJob.fromLens.createJob.error.noCompatibleLayers": "La visualisation ne contient aucun calque pouvant être utilisé pour la création d'une tâche de détection des anomalies.",
     "xpack.ml.newJob.fromLens.createJob.error.noDataViews": "Aucune vue de données n'a été trouvée dans la visualisation.",
     "xpack.ml.newJob.fromLens.createJob.error.noDateField": "Impossible de trouver un champ de date.",
     "xpack.ml.newJob.fromLens.createJob.error.noTimeRange": "Plage temporelle non spécifiée.",

@@ -14,10 +14,10 @@ import { ml } from '../../../services/ml_api_service';
 
 import {
   getUiSettings,
-  getDataViews,
   getSavedObjectsClient,
   getTimefilter,
   getShare,
+  getLens,
 } from '../../../util/dependency_cache';
 import { getDefaultQuery } from '../utils/new_job_utils';
 
@@ -72,7 +72,7 @@ export async function resolver(
   }
 
   const jobCreator = new QuickJobCreator(
-    getDataViews(),
+    getLens(),
     getUiSettings(),
     getTimefilter(),
     getShare(),
