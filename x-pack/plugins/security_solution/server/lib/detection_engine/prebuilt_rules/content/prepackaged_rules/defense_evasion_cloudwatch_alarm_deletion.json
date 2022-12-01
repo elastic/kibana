@@ -61,7 +61,7 @@
     "Continuous Monitoring",
     "SecOps",
     "Monitoring",
-    "has_guide"
+    "Investigation Guide"
   ],
   "threat": [
     {
@@ -89,5 +89,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 102
+  "version": 103
 }
