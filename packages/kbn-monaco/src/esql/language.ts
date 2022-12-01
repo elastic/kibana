@@ -8,8 +8,7 @@
 
 import { monaco } from '../monaco_imports';
 
-import { buildESQlTheme } from './lib/monaco/esql_theme';
-import { ESQL_LANG_ID, ESQL_THEME_ID } from './constants';
+import { ESQL_LANG_ID } from './constants';
 
 import type { LangModuleType } from '../types';
 import type { ESQLWorker } from './worker/esql_worker';
@@ -19,10 +18,6 @@ import { WorkerProxyService } from '../common/worker_proxy';
 
 export const ESQLLang: LangModuleType = {
   ID: ESQL_LANG_ID,
-  customTheme: {
-    ID: ESQL_THEME_ID,
-    themeData: buildESQlTheme(),
-  },
   async onLanguage() {
     const { ESQLTokensProvider } = await import('./lib/monaco');
     const workerProxyService = new WorkerProxyService<ESQLWorker>();

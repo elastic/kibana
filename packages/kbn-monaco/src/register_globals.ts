@@ -10,9 +10,9 @@ import { XJsonLang } from './xjson';
 import { PainlessLang } from './painless';
 import { SQLLang } from './sql';
 import { monaco } from './monaco_imports';
-import { ESQLLang } from './esql';
+import { ESQL_THEME_ID, ESQLLang, buildESQlTheme } from './esql';
 
-import { registerLanguage } from './helpers';
+import { registerLanguage, registerTheme } from './helpers';
 
 import jsonWorkerSrc from '!!raw-loader!../../target_workers/json.editor.worker.js';
 import xJsonWorkerSrc from '!!raw-loader!../../target_workers/xjson.editor.worker.js';
@@ -27,6 +27,11 @@ registerLanguage(XJsonLang);
 registerLanguage(PainlessLang);
 registerLanguage(SQLLang);
 registerLanguage(ESQLLang);
+
+/**
+ * Register custom themes
+ */
+registerTheme(ESQL_THEME_ID, buildESQlTheme());
 
 /**
  * Create web workers by language ID

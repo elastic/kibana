@@ -7,12 +7,12 @@
  */
 import { Observable, of } from 'rxjs';
 import { monaco } from '../monaco_imports';
-
-import { EditorStateService } from './lib';
-import { LangValidation, SyntaxErrors } from '../types';
 import { ID } from './constants';
-import { PainlessContext, PainlessAutocompleteField } from './types';
-import { PainlessWorker } from './worker';
+
+import type { LangValidation, SyntaxErrors } from '../types';
+import type { PainlessContext, PainlessAutocompleteField } from './types';
+import type { PainlessWorker } from './worker';
+import { EditorStateService } from './lib';
 import { PainlessCompletionAdapter } from './completion_adapter';
 import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
 import { WorkerProxyService } from '../common/worker_proxy';

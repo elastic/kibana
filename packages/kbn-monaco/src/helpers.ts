@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 import { monaco } from './monaco_imports';
-import { LangModuleType } from './types';
+import type { LangModuleType } from './types';
 
-function registerLanguage(language: LangModuleType) {
-  const { ID, lexerRules, languageConfiguration, customTheme, onLanguage } = language;
+export function registerLanguage(language: LangModuleType) {
+  const { ID, lexerRules, languageConfiguration, onLanguage } = language;
 
   monaco.languages.register({ id: ID });
-
-  if (customTheme) {
-    monaco.editor.defineTheme(customTheme.ID, customTheme.themeData);
-  }
 
   monaco.languages.onLanguage(ID, async () => {
     if (lexerRules) {
@@ -30,4 +26,10 @@ function registerLanguage(language: LangModuleType) {
   });
 }
 
-export { registerLanguage };
+export function registerTheme(id: string, themeData: monaco.editor.IStandaloneThemeData) {
+  try {
+    monaco.editor.defineTheme(id, themeData);
+  } catch (e) {
+    // nothing to be here
+  }
+}

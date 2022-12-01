@@ -8,3 +8,5 @@
 
 export { ESQL_LANG_ID, ESQL_THEME_ID } from './constants';
 export { ESQLLang } from './language';
+
+export { buildESQlTheme } from './lib/monaco/esql_theme';
