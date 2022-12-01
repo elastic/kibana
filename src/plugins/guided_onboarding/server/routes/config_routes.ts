@@ -10,9 +10,9 @@ import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { GuideId } from '@kbn/guided-onboarding';
 import { API_BASE_PATH } from '../../common';
-import { guidesConfig } from '../helpers/guides_config';
+import type { GuidesConfig } from '../../common';
 
-export const registerGetConfigRoute = (router: IRouter) => {
+export const registerGetConfigRoute = (router: IRouter, guidesConfig: GuidesConfig) => {
   // Fetch the config of the guide
   router.get(
     {

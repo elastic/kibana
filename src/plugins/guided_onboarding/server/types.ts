@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GuidedOnboardingPluginSetup {}
+import type { GuideId } from '@kbn/guided-onboarding';
+import type { GuideConfig } from '../common';
+
+export interface GuidedOnboardingPluginSetup {
+  registerGuideConfig: (guideId: GuideId, guideConfig: GuideConfig) => void;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GuidedOnboardingPluginStart {}

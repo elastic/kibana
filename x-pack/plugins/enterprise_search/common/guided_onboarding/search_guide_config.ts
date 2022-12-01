@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type { GuideConfig } from '@kbn/guided-onboarding-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { GuideConfig } from '../../../common';
 
-export const searchConfig: GuideConfig = {
+export const searchGuideId = 'search';
+export const searchGuideConfig: GuideConfig = {
   title: i18n.translate('guidedOnboarding.searchGuide.title', {
     defaultMessage: 'Search my data',
   }),
   description: i18n.translate('guidedOnboarding.searchGuide.description', {
-    defaultMessage: `Build custom search experiences with your data using Elastic’s out-of-the-box web crawler, connectors, and robust APIs. Gain deep insights from the built-in search analytics to curate results and optimize relevance.`,
+    defaultMessage:
+      'Build custom search experiences with your data using Elastic’s out-of-the-box web crawler, connectors, and robust APIs. Gain deep insights from the built-in search analytics to curate results and optimize relevance.',
   }),
   guideName: 'Enterprise Search',
   steps: [
@@ -70,7 +71,8 @@ export const searchConfig: GuideConfig = {
         description: i18n.translate(
           'guidedOnboarding.searchGuide.searchExperienceStep.manualCompletionPopoverDescription',
           {
-            defaultMessage: `Take your time to explore how to use Search UI to build world-class search experiences. When you’re ready, click the Setup guide button to continue.`,
+            defaultMessage:
+              'Take your time to explore how to use Search UI to build world-class search experiences. When you’re ready, click the Setup guide button to continue.',
           }
         ),
         readyToCompleteOnNavigation: true,
