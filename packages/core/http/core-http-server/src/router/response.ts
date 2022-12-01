@@ -23,10 +23,14 @@ export interface HttpResponseOptions {
 }
 
 /**
- * HTTP response options valid for file() responses
+ * HTTP response options for file() responses
  * @public
  */
-export type KibanaFileResponseOptions = Pick<HttpResponseOptions, 'headers'> & {
+export interface KibanaFileResponseOptions {
+  /**
+   * HTTP Headers to be sent with the response
+   */
+  headers?: ResponseHeaders;
   /**
    * Set to true in order to enable caching for immutable URLs. This means that the
    * response for the current URL will never change and there isn't any point in the
@@ -51,7 +55,7 @@ export type KibanaFileResponseOptions = Pick<HttpResponseOptions, 'headers'> & {
    * way that indicates the file should be rendered in the web browser and not saved locally.
    */
   download?: { filename: string };
-};
+}
 
 /**
  * Data send to the client as a response payload.
