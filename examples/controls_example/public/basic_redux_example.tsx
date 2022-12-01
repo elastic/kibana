@@ -27,7 +27,7 @@ import {
 
 const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
-export const BasicReduxExample = ({ dataViewId }: { dataViewId?: string }) => {
+export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
 
   const ControlGroupReduxWrapper = useMemo(() => {

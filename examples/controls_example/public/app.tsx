@@ -9,7 +9,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ControlsExampleStartDeps } from './plugin';
