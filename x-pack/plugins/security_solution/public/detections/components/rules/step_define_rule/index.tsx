@@ -146,7 +146,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     schema,
   });
 
-  const { getFields, getFormData, reset, submit } = form;
+  const { getFields, getFormData, reset, validate } = form;
   const [formData] = useFormData<DefineStepRule>({
     form,
     watch: [
@@ -167,6 +167,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'newTermsFields',
       'historyWindowSize',
       'shouldLoadQueryDynamically',
+      'groupByFields',
     ],
     onChange: (data: DefineStepRule) => {
       if (onRuleDataChange) {
@@ -392,21 +393,23 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [onSubmit]);
 
   const getData = useCallback(async () => {
-    const result = await submit();
-    result.data = {
-      ...result.data,
-      eqlOptions: optionsSelected,
+    // validate doesn't return actual state of form
+    // more details here: https://github.com/elastic/kibana/issues/144322#issuecomment-1321838136
+    // wrapping in setTimeout is a workaround until solution within forms-lib can be found
+    const isValid = await new Promise<boolean>((resolve) => {
+      setTimeout(async () => {
+        const valid = await validate();
+        resolve(valid);
+      }, 0);
+    });
+    return {
+      isValid,
+      data: {
+        ...getFormData(),
+        eqlOptions: optionsSelected,
+      },
     };
-    return result.isValid
-      ? result
-      : {
-          isValid: false,
-          data: {
-            ...getFormData(),
-            eqlOptions: optionsSelected,
-          },
-        };
-  }, [getFormData, optionsSelected, submit]);
+  }, [getFormData, optionsSelected, validate]);
 
   useEffect(() => {
     let didCancel = false;

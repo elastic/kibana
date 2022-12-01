@@ -9,7 +9,6 @@
 import { DataViewField } from '@kbn/data-views-plugin/public';
 
 export interface FieldFilterState {
-  missing: boolean;
   type: string;
   name: string;
   aggregatable: null | boolean;
@@ -18,7 +17,6 @@ export interface FieldFilterState {
 
 export function getDefaultFieldFilter(): FieldFilterState {
   return {
-    missing: true,
     type: 'any',
     name: '',
     aggregatable: null,
@@ -32,9 +30,7 @@ export function setFieldFilterProp(
   value: string | boolean | null | undefined
 ): FieldFilterState {
   const newState = { ...state };
-  if (name === 'missing') {
-    newState.missing = Boolean(value);
-  } else if (name === 'aggregatable') {
+  if (name === 'aggregatable') {
     newState.aggregatable = typeof value !== 'boolean' ? null : value;
   } else if (name === 'searchable') {
     newState.searchable = typeof value !== 'boolean' ? null : value;
@@ -46,25 +42,18 @@ export function setFieldFilterProp(
   return newState;
 }
 
-export function isFieldFiltered(
+export function doesFieldMatchFilters(
   field: DataViewField,
-  filterState: FieldFilterState,
-  fieldCounts: Record<string, number>
+  filterState: FieldFilterState
 ): boolean {
   const matchFilter = filterState.type === 'any' || field.type === filterState.type;
   const isAggregatable =
     filterState.aggregatable === null || field.aggregatable === filterState.aggregatable;
   const isSearchable =
     filterState.searchable === null || field.searchable === filterState.searchable;
-  const scriptedOrMissing =
-    !filterState.missing ||
-    field.type === '_source' ||
-    field.type === 'unknown_selected' ||
-    field.scripted ||
-    fieldCounts[field.name] > 0;
   const needle = filterState.name ? filterState.name.toLowerCase() : '';
   const haystack = `${field.name}${field.displayName || ''}`.toLowerCase();
   const matchName = !filterState.name || haystack.indexOf(needle) !== -1;
 
-  return matchFilter && isAggregatable && isSearchable && scriptedOrMissing && matchName;
+  return matchFilter && isAggregatable && isSearchable && matchName;
 }

@@ -174,6 +174,18 @@ export interface BulkDeleteResponse {
   total: number;
 }
 
+export interface BulkEnableResponse {
+  rules: Rule[];
+  errors: BulkOperationError[];
+  total: number;
+}
+
+export interface BulkDisableResponse {
+  rules: Rule[];
+  errors: BulkOperationError[];
+  total: number;
+}
+
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
   index: number;
@@ -352,6 +364,9 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   requiresAppContext: boolean;
   defaultActionMessage?: string;
   defaultRecoveryMessage?: string;
+  alertDetailsAppSection?:
+    | React.FunctionComponent<any>
+    | React.LazyExoticComponent<ComponentType<any>>;
 }
 
 export interface IErrorObject {
