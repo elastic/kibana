@@ -21,7 +21,7 @@ import {
   CLOSE_SINGLE_ALERT_CHECKBOX,
   ADD_TO_RULE_RADIO_LABEL,
   ADD_TO_SHARED_LIST_RADIO_LABEL,
-  SHARED_LIST_CHECKBOX,
+  SHARED_LIST_SWITCH,
   OS_SELECTION_SECTION,
   OS_INPUT,
 } from '../screens/exceptions';
@@ -124,10 +124,9 @@ export const selectAddToRuleRadio = () => {
 export const selectSharedListToAddExceptionTo = (numListsToCheck = 1) => {
   cy.get(ADD_TO_SHARED_LIST_RADIO_LABEL).click();
   for (let i = 0; i < numListsToCheck; i++) {
-    cy.get(SHARED_LIST_CHECKBOX)
+    cy.get(SHARED_LIST_SWITCH)
       .eq(i)
-      .pipe(($el) => $el.trigger('click'))
-      .should('be.checked');
+      .pipe(($el) => $el.trigger('click'));
   }
 };
 

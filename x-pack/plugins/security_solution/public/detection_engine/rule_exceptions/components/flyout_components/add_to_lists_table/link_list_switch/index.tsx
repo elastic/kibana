@@ -13,9 +13,11 @@ export const LinkListSwitch = memo(
     list,
     linkedList,
     onListLinkChange,
+    dataTestSubj,
   }: {
     list: ExceptionListRuleReferencesSchema;
     linkedList: ExceptionListRuleReferencesSchema[];
+    dataTestSubj: string;
     onListLinkChange?: (listSelectedToAdd: ExceptionListRuleReferencesSchema[]) => void;
   }) => {
     const isListLinked = useMemo(
@@ -34,7 +36,12 @@ export const LinkListSwitch = memo(
 
     return (
       <EuiFlexItem grow={false}>
-        <EuiSwitch onChange={onLinkOrUnlinkList} label="" checked={isListLinked} />
+        <EuiSwitch
+          data-test-subj={dataTestSubj}
+          onChange={onLinkOrUnlinkList}
+          label=""
+          checked={isListLinked}
+        />
       </EuiFlexItem>
     );
   }

@@ -128,7 +128,12 @@ export const useAddToSharedListTable = ({
         align: 'left' as HorizontalAlignment,
         'data-test-subj': 'ruleActionLinkRuleSwitch',
         render: (_, rule: ExceptionListRuleReferencesSchema) => (
-          <LinkListSwitch list={rule} linkedList={linkedLists} onListLinkChange={setLinkedLists} />
+          <LinkListSwitch
+            dataTestSubj="addToSharedListSwitch"
+            list={rule}
+            linkedList={linkedLists}
+            onListLinkChange={setLinkedLists}
+          />
         ),
       },
       ...getSharedListsTableColumns(),
