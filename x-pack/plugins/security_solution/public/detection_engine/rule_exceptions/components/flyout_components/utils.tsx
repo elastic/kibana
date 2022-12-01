@@ -211,7 +211,7 @@ export const getSharedListsTableColumns = () => [
     ),
   },
   {
-    name: 'Actions',
+    name: 'Action',
 
     'data-test-subj': 'exceptionListRulesActionCell',
     render: (list: ExceptionListRuleReferencesSchema) => {
@@ -242,7 +242,7 @@ export const getRulesTableColumn = () => [
     truncateText: false,
   },
   {
-    name: 'Actions',
+    name: 'Action',
     'data-test-subj': 'ruleAction-view',
     render: (rule: Rule) => {
       return (
