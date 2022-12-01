@@ -45,6 +45,7 @@ export interface DiscoverMainContentProps {
   columns: string[];
   resizeRef: RefObject<HTMLDivElement>;
   collapseOnColumn?: string;
+  setCollapseOnColumn: React.Dispatch<string | undefined>;
 }
 
 export const DiscoverMainContent = ({
@@ -66,6 +67,7 @@ export const DiscoverMainContent = ({
   columns,
   resizeRef,
   collapseOnColumn,
+  setCollapseOnColumn,
 }: DiscoverMainContentProps) => {
   const services = useDiscoverServices();
   const { trackUiMetric } = services;
@@ -175,15 +177,10 @@ export const DiscoverMainContent = ({
           />
         ) : (
           <TermsExplorerTab
-            availableFields$={savedSearchData$.availableFields$}
-            savedSearch={savedSearch}
             dataView={dataView}
             columns={columns}
-            stateContainer={stateContainer}
-            onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-            savedSearchRefetch$={savedSearchRefetch$}
-            savedSearchDataTotalHits$={savedSearchData$.totalHits$}
-            collapseFieldName={collapseOnColumn}
+            collapseOnColumn={collapseOnColumn}
+            setCollapseOnColumn={setCollapseOnColumn}
           />
         )}
       </EuiFlexGroup>

@@ -330,6 +330,7 @@ export function DiscoverLayout({
                   columns={columns}
                   resizeRef={resizeRef}
                   collapseOnColumn={collapseOnColumn}
+                  setCollapseOnColumn={setCollapseOnColumn}
                 />
               )}
             </EuiPageContent>

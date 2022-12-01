@@ -7,7 +7,7 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
 
@@ -19,66 +19,73 @@ import './terms_explorer.scss';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { TermsExplorerTable, type TermsExplorerTableProps } from './terms_explorer_table';
 
-export const TermsExplorerTab: React.FC<Omit<TermsExplorerTableProps, 'query' | 'filters'>> =
-  React.memo(({ collapseFieldName, ...props }) => {
-    const services = useDiscoverServices();
-    const querySubscriberResult = useQuerySubscriber({
-      data: services.data,
-    });
-
-    const [collapseField, setCollapseField] = useState<string | undefined>();
-
-    useEffect(() => {
-      (async () => {
-        if (!collapseFieldName) {
-          let fieldWithMinCardinality = {
-            field: 'n/a',
-            cardinality: Number.MAX_SAFE_INTEGER,
-          };
-          for (const columnName of props.columns) {
-            const cardinalityRequestBody: FieldCardinalityRequest = {
-              fieldName: columnName,
-            };
-            const response = await services.http.fetch<FieldCardinalityResponse>(
-              `/api/kibana/discover/fieldCardinality/${props.dataView.getIndexPattern()}`,
-              {
-                body: JSON.stringify(cardinalityRequestBody),
-                method: 'POST',
-              }
-            );
-            if (response.cardinality < fieldWithMinCardinality.cardinality) {
-              fieldWithMinCardinality = {
-                field: columnName,
-                cardinality: response.cardinality,
-              };
-            }
-          }
-          setCollapseField(fieldWithMinCardinality.field);
-        } else {
-          setCollapseField(collapseFieldName);
-        }
-      })();
-    }, [props.columns, props.dataView, services.http, collapseFieldName]);
-
-    if (!collapseField || props.columns?.length === 0) {
-      return (
-        <EuiEmptyPrompt
-          iconType="fold"
-          title={<h2>Start adding columns</h2>}
-          body={<p>Choose a field on the left to show its unique values</p>}
-        />
-      );
-    }
-    return (
-      <div className={'kbnTermsExplorerWrapper'}>
-        <TermsExplorerTable
-          {...props}
-          isTopLevel={true}
-          collapseFieldName={collapseField}
-          query={querySubscriberResult.query}
-          timeRange={querySubscriberResult.timeRange}
-          filters={querySubscriberResult.filters}
-        />
-      </div>
-    );
+export const TermsExplorerTab: React.FC<
+  Omit<TermsExplorerTableProps, 'query' | 'filters' | 'collapseFieldName' | 'isTopLevel'> & {
+    setCollapseOnColumn: React.Dispatch<string | undefined>;
+    collapseOnColumn?: string;
+  }
+> = React.memo(({ setCollapseOnColumn, collapseOnColumn, ...props }) => {
+  const services = useDiscoverServices();
+  const querySubscriberResult = useQuerySubscriber({
+    data: services.data,
   });
+
+  useEffect(() => {
+    if (props.columns.length === 0) {
+      setCollapseOnColumn(undefined);
+    }
+  }, [props.columns.length, setCollapseOnColumn]);
+
+  useEffect(() => {
+    if (props.columns?.length === 0) return;
+    (async () => {
+      if (!collapseOnColumn) {
+        let fieldWithMinCardinality = {
+          field: 'n/a',
+          cardinality: Number.MAX_SAFE_INTEGER,
+        };
+        for (const columnName of props.columns) {
+          const cardinalityRequestBody: FieldCardinalityRequest = {
+            fieldName: columnName,
+          };
+          const response = await services.http.fetch<FieldCardinalityResponse>(
+            `/api/kibana/discover/fieldCardinality/${props.dataView.getIndexPattern()}`,
+            {
+              body: JSON.stringify(cardinalityRequestBody),
+              method: 'POST',
+            }
+          );
+          if (response.cardinality < fieldWithMinCardinality.cardinality) {
+            fieldWithMinCardinality = {
+              field: columnName,
+              cardinality: response.cardinality,
+            };
+          }
+        }
+        setCollapseOnColumn(fieldWithMinCardinality.field);
+      }
+    })();
+  }, [props.columns, props.dataView, services.http, collapseOnColumn, setCollapseOnColumn]);
+
+  if (!collapseOnColumn || props.columns?.length === 0) {
+    return (
+      <EuiEmptyPrompt
+        iconType="fold"
+        title={<h2>Start adding columns</h2>}
+        body={<p>Choose a field on the left to show its unique values</p>}
+      />
+    );
+  }
+  return (
+    <div className={'kbnTermsExplorerWrapper'}>
+      <TermsExplorerTable
+        {...props}
+        isTopLevel={true}
+        collapseFieldName={collapseOnColumn}
+        query={querySubscriberResult.query}
+        timeRange={querySubscriberResult.timeRange}
+        filters={querySubscriberResult.filters}
+      />
+    </div>
+  );
+});
