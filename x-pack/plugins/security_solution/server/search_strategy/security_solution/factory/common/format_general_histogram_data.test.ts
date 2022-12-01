@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { KpiGeneralHistogramCount, KpiHistogram } from '../../../../../common/search_strategy';
 import { formatGeneralHistogramData } from './format_general_histogram_data';
-import type { KpiGeneralHistogramCount, KpiHistogram } from '../types';
 
 describe('formatGeneralHistogramData', () => {
   test('Picks up data from count.value', () => {

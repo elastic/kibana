@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { KpiGeneralHistogramCount, KpiHistogram, KpiHistogramData } from '../types';
+import type {
+  KpiHistogramData,
+  KpiGeneralHistogramCount,
+  KpiHistogram,
+} from '../../../../../common/search_strategy';
 
 export const formatGeneralHistogramData = (
   data: Array<KpiHistogram<KpiGeneralHistogramCount>>

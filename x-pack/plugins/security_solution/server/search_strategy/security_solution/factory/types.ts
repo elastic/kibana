@@ -12,30 +12,12 @@ import type {
 } from '@kbn/core/server';
 import type { IEsSearchResponse, ISearchRequestParams } from '@kbn/data-plugin/common';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type { Maybe } from '../../../../common/search_strategy';
 import type {
   FactoryQueryTypes,
   StrategyRequestType,
   StrategyResponseType,
 } from '../../../../common/search_strategy/security_solution';
 import type { EndpointAppContext } from '../../../endpoint/types';
-
-export interface KpiHistogramData {
-  x?: Maybe<number>;
-  y?: Maybe<number>;
-}
-
-export interface KpiHistogram<T> {
-  key_as_string: string;
-  key: number;
-  doc_count: number;
-  count: T;
-}
-
-export interface KpiGeneralHistogramCount {
-  value?: number;
-  doc_count?: number;
-}
 
 export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
   buildDsl: (options: StrategyRequestType<T>) => ISearchRequestParams;
