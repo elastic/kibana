@@ -3785,6 +3785,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/rison@link:bazel-bin/packages/kbn-rison":
+  version "0.0.0"
+  uid ""
+
 "@kbn/rule-data-utils@link:bazel-bin/packages/kbn-rule-data-utils":
   version "0.0.0"
   uid ""

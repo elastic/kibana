@@ -6,7 +6,6 @@
  */
 import { useEffect, useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import type { RisonObject } from 'rison-node';
 import { decodeQuery, encodeQuery } from '../navigation/query_utils';
 
 /**
@@ -35,7 +34,7 @@ export const useUrlQuery = <T extends object>(getDefaultQuery: () => T) => {
   useEffect(() => {
     if (search) return;
 
-    replace({ search: encodeQuery(getDefaultQuery() as RisonObject) });
+    replace({ search: encodeQuery(getDefaultQuery()) });
   }, [getDefaultQuery, search, replace]);
 
   return {

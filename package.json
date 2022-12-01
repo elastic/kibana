@@ -356,6 +356,7 @@
     "@kbn/osquery-io-ts-types": "link:bazel-bin/packages/kbn-osquery-io-ts-types",
     "@kbn/plugin-discovery": "link:bazel-bin/packages/kbn-plugin-discovery",
     "@kbn/react-field": "link:bazel-bin/packages/kbn-react-field",
+    "@kbn/rison": "link:bazel-bin/packages/kbn-rison",
     "@kbn/rule-data-utils": "link:bazel-bin/packages/kbn-rule-data-utils",
     "@kbn/safer-lodash-set": "link:bazel-bin/packages/kbn-safer-lodash-set",
     "@kbn/securitysolution-autocomplete": "link:bazel-bin/packages/kbn-securitysolution-autocomplete",

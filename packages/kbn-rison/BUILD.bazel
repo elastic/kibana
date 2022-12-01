@@ -1,15 +1,13 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
-load("@npm//webpack-cli:index.bzl", webpack = "webpack_cli")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "kbn-ui-shared-deps-src"
-PKG_REQUIRE_NAME = "@kbn/ui-shared-deps-src"
+PKG_DIRNAME = "kbn-rison"
+PKG_REQUIRE_NAME = "@kbn/rison"
 
 SOURCE_FILES = glob(
   [
     "**/*.ts",
-    "**/*.js",
   ],
   exclude = [
     "**/*.config.js",
@@ -37,34 +35,32 @@ NPM_MODULE_EXTRA_FILES = [
   "package.json",
 ]
 
+# In this array place runtime dependencies, including other packages and NPM packages
+# which must be available for this code to run.
+#
+#  To reference other packages use:
+#    "//repo/relative/path/to/package"
+#    eg. "//packages/kbn-utils"
+#
+#  To reference a NPM package use:
+#    "@npm//name-of-package"
+#    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "//packages/kbn-safer-lodash-set",
-  "//packages/kbn-analytics",
-  "//packages/kbn-babel-preset",
-  "//packages/kbn-datemath",
-  "//packages/kbn-es-query",
-  "//packages/kbn-flot-charts",
-  "//packages/kbn-i18n",
-  "//packages/kbn-i18n-react",
-  "//packages/kbn-monaco",
-  "//packages/kbn-std",
-  "//packages/kbn-ui-shared-deps-npm",
-  "//packages/kbn-ui-theme",
-  "//packages/kbn-peggy-loader",
-  "//packages/kbn-rison",
+  "@npm//rison-node",
 ]
 
+# In this array place dependencies necessary to build the types, which will include the
+# :npm_module_types target of other packages and packages from NPM, including @types/*
+# packages.
+#
+#  To reference the types for another package use:
+#    "//repo/relative/path/to/package:npm_module_types"
+#    eg. "//packages/kbn-utils:npm_module_types"
+#
+#  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
-  "//packages/kbn-safer-lodash-set:npm_module_types",
-  "//packages/kbn-analytics:npm_module_types",
-  "//packages/kbn-datemath:npm_module_types",
-  "//packages/kbn-i18n:npm_module_types",
-  "//packages/kbn-i18n-react:npm_module_types",
-  "//packages/kbn-monaco:npm_module_types",
-  "//packages/kbn-std:npm_module_types",
-  "//packages/kbn-ui-shared-deps-npm:npm_module_types",
-  "//packages/kbn-ui-theme:npm_module_types",
-  "@npm//webpack",
+  "@npm//@types/node",
+  "@npm//@types/jest",
 ]
 
 jsts_transpiler(
@@ -87,35 +83,16 @@ ts_project(
   args = ['--pretty'],
   srcs = SRCS,
   deps = TYPES_DEPS,
-  allow_js = True,
   declaration = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   tsconfig = ":tsconfig",
 )
 
-webpack(
-  name = "shared_built_assets",
-  data = RUNTIME_DEPS + [
-    "//:package.json",
-    ":srcs",
-    ":tsconfig",
-    ":webpack.config.js",
-  ],
-  output_dir = True,
-  args = [
-    "--config",
-    "$(location webpack.config.js)",
-    "--output-path",
-    "$(@D)",
-    "--stats=errors-only"
-  ],
-)
-
 js_library(
   name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":shared_built_assets"],
+  deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -123,7 +100,7 @@ js_library(
 js_library(
   name = "npm_module_types",
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":shared_built_assets", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -135,14 +112,12 @@ pkg_npm(
 
 filegroup(
   name = "build",
-  srcs = [
-    ":npm_module",
-  ],
+  srcs = [":npm_module"],
   visibility = ["//visibility:public"],
 )
 
-pkg_npm(
+filegroup(
   name = "build_types",
-  deps = [":npm_module_types"],
+  srcs = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )
