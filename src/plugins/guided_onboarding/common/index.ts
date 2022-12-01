@@ -6,13 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { GuidedOnboardingPlugin } from './plugin';
-
-export function plugin() {
-  return new GuidedOnboardingPlugin();
-}
-export type {
-  GuidedOnboardingPluginSetup,
-  GuidedOnboardingPluginStart,
-  GuidedOnboardingApi,
-} from './types';
+export { PLUGIN_ID, PLUGIN_NAME, API_BASE_PATH } from './constants';
+export { testGuideConfig } from './test_guide_config';
+export type { PluginStatus, PluginState, StepConfig, GuideConfig, GuidesConfig } from './types';
