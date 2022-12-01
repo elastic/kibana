@@ -16,7 +16,7 @@ import type { SavedObjectReference } from '@kbn/core/public';
 import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ExpressionsStart, DatatableColumnType } from '@kbn/expressions-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
@@ -707,7 +707,14 @@ export function getTextBasedDatasource({
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
     getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
     isEqual: () => true,
-    getDatasourceInfo: (state, references, indexPatterns) => {
+    getDatasourceInfo: async (state, references, dataViewsService) => {
+      const indexPatterns: DataView[] = [];
+      for (const { index } of Object.values(state.layers)) {
+        const dataView = await dataViewsService?.get(index);
+        if (dataView) {
+          indexPatterns.push(dataView);
+        }
+      }
       return Object.entries(state.layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
         const columns = Object.entries(layer.columns).map(([colId, col]) => {
           return {
@@ -719,6 +726,9 @@ export function getTextBasedDatasource({
               isBucketed: Boolean(col?.meta?.type !== 'number'),
               hasTimeShift: false,
               hasReducedTimeRange: false,
+              fields: [col.fieldName],
+              type: col.meta?.type || 'unknown',
+              filter: undefined,
             },
           };
         });
