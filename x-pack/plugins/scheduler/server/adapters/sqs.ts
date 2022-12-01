@@ -32,6 +32,7 @@ export const sqsAdapter: Adapter = {
                 WaitTimeSeconds: 20, // Wait 20 seconds after queue is emtpy before stopping to look for messages
               })
               .promise();
+            console.log('SQS: Received message: ', JSON.stringify(data));
             if (!data.Messages) {
               return;
             }
