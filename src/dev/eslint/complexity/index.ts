@@ -42,24 +42,32 @@ export function generateComplexityReport(): Promise<void> {
         ...(!isEmpty(pattern) ? [{ name: '', path: pattern }] : []),
       ]) {
         log.debug(`Gathering metrics for '${castArray(path).join("', '")}'.`);
-        const report = await complexityReportGenerator.generate(path);
-        const metrics = chain(report)
-          .mapKeys((value, key) => startCase(key))
-          .mapValues((value) => Math.round(value * 100) / 100)
-          .value();
+        try {
+          const report = await complexityReportGenerator.generate(path);
+          const metrics = chain(report)
+            .mapKeys((value, key) => startCase(key))
+            .mapValues((value) => Math.round(value * 100) / 100)
+            .value();
 
-        if (name) {
-          reporter.metrics(
-            map(metrics, (value, group) => ({
-              group,
-              value,
-              id: name,
-              meta: { pluginTeam: owner?.[0] },
-            }))
-          );
+          if (name) {
+            reporter.metrics(
+              map(metrics, (value, group) => ({
+                group,
+                value,
+                id: name,
+                meta: { pluginTeam: owner?.[0] },
+              }))
+            );
+          }
+
+          table[name] = metrics;
+        } catch (error) {
+          if (['AllFilesIgnoredError', 'NoFilesFoundError'].includes(error.constructor.name)) {
+            log.info(`Skipping empty '${castArray(path).join("', '")}'.`);
+          } else {
+            log.error(error);
+          }
         }
-
-        table[name] = metrics;
       }
 
       // eslint-disable-next-line no-console
