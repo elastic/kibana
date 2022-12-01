@@ -93,7 +93,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   const visibleState = useWithInputVisibleState();
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
-  const isPopoverOpen = Boolean(useWithInputShowPopover());
+  const isPopoverOpen = !!useWithInputShowPopover();
   const [commandToExecute, setCommandToExecute] = useState('');
   const [popoverWidth, setPopoverWidth] = useState('94vw');
 
@@ -143,8 +143,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       if (keyCaptureFocusRef.current) {
         keyCaptureFocusRef.current.focus();
       }
+
+      if (isPopoverOpen) {
+        dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
+      }
     },
-    [keyCaptureFocusRef]
+    [dispatch, isPopoverOpen, keyCaptureFocusRef]
   );
 
   const handleInputCapture = useCallback<InputCaptureProps['onCapture']>(
