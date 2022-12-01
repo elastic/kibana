@@ -273,10 +273,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const checkInitialDataViewState = async (dataView: string) => {
-    // validate field filter
+    // validate prev field filter
     await testSubjects.existOrFail(`field-message-showDetails`); // still exists
 
-    // validate updated title
+    // validate prev title
     await PageObjects.discover.clickIndexPatternActions();
     await testSubjects.click('indexPattern-manage-field');
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -287,7 +287,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const checkUpdatedDataViewState = async (dataView: string) => {
     // validate updated field filter
-    await testSubjects.missingOrFail(`field-message-showDetails`); // still exists
+    await testSubjects.missingOrFail(`field-message-showDetails`);
 
     // validate updated title
     await PageObjects.discover.clickIndexPatternActions();
