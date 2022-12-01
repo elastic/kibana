@@ -22,6 +22,7 @@ import { Subject } from 'rxjs';
 import { formatSecrets } from '../utils';
 
 import * as telemetryHooks from '../../routes/telemetry/monitor_upgrade_sender';
+import { formatLocation } from '../../../common/utils/location_formatter';
 
 const testMonitors = [
   {
@@ -525,7 +526,7 @@ const payloadData = [
     form_monitor_type: 'multistep',
     ignore_https_errors: false,
     journey_id: 'check if title is present 10 0',
-    locations: privateLocations,
+    locations: privateLocations.map((l) => formatLocation(l)),
     name: 'check if title is present 10 0',
     namespace: 'default_space',
     origin: 'project',
@@ -587,7 +588,7 @@ const payloadData = [
     form_monitor_type: 'multistep',
     ignore_https_errors: false,
     journey_id: 'check if title is present 10 1',
-    locations: privateLocations,
+    locations: privateLocations.map((l) => formatLocation(l)),
     name: 'check if title is present 10 1',
     namespace: 'default_space',
     origin: 'project',
