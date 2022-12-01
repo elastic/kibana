@@ -81,10 +81,22 @@ const PAGE_OVERLAY_CSS_CLASSNAME = 'securitySolution-pageOverlay';
 export const PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-isVisible`;
 export const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-lock`;
 export const PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-fullScreen`;
+export const PAGE_OVERLAY_DOCUMENT_BODY_OVER_PAGE_WRAPPER_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-overSecuritySolutionPageWrapper`;
 
 const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
   body.${PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME} {
     overflow: hidden;
+  }
+
+  //-------------------------------------------------------------------------------------------
+  // Style overrides for when Page Overlay is shown over SecuritySolutionPageWrapper component
+  //-------------------------------------------------------------------------------------------
+  // That page wrapper includes several global EUI styles that can conflict with content shown
+  // from inside of this Page Overlay component.
+  //-------------------------------------------------------------------------------------------
+  // Eui Confirm Dialog mask overlay should be displayed above any other popovers
+  body.${PAGE_OVERLAY_DOCUMENT_BODY_OVER_PAGE_WRAPPER_CLASSNAME} .euiOverlayMask[data-relative-to-header="above"] {
+    z-index: ${TIMELINE_EUI_POPOVER_PANEL_ZINDEX};
   }
 
   //-------------------------------------------------------------------------------------------
@@ -146,6 +158,14 @@ const setDocumentBodyFullScreen = () => {
 
 const unSetDocumentBodyFullScreen = () => {
   document.body.classList.remove(PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME);
+};
+
+const setDocumentBodyOverPageWrapper = () => {
+  document.body.classList.add(PAGE_OVERLAY_DOCUMENT_BODY_OVER_PAGE_WRAPPER_CLASSNAME);
+};
+
+const unSetDocumentBodyOverPageWrapper = () => {
+  document.body.classList.remove(PAGE_OVERLAY_DOCUMENT_BODY_OVER_PAGE_WRAPPER_CLASSNAME);
 };
 
 export interface PageOverlayProps {
@@ -291,10 +311,15 @@ export const PageOverlay = memo<PageOverlayProps>(
     // Handle adding class names to the `document.body` DOM element
     useEffect(() => {
       if (isMounted()) {
+        const isOverSecuritySolutionPageWrapper = Boolean(
+          document.querySelector('.securitySolutionWrapper')
+        );
+
         if (isHidden) {
           unSetDocumentBodyOverlayIsVisible();
           unSetDocumentBodyLock();
           unSetDocumentBodyFullScreen();
+          unSetDocumentBodyOverPageWrapper();
         } else {
           setDocumentBodyOverlayIsVisible();
 
@@ -304,6 +329,10 @@ export const PageOverlay = memo<PageOverlayProps>(
 
           if (showInFullScreen) {
             setDocumentBodyFullScreen();
+          }
+
+          if (isOverSecuritySolutionPageWrapper) {
+            setDocumentBodyOverPageWrapper();
           }
         }
       }
