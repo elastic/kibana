@@ -91,7 +91,7 @@ export const previewRulesRoute = async (
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
-        const [, { data, security: securityService }] = await getStartServices();
+        const [, { data, security: securityService, share }] = await getStartServices();
         const searchSourceClient = await data.search.searchSource.asScoped(request);
         const savedObjectsClient = coreContext.savedObjects.client;
         const siemClient = (await context.securitySolution).getAppClient();
@@ -251,6 +251,7 @@ export const previewRulesRoute = async (
                   searchSourceClient,
                 }),
                 uiSettingsClient: coreContext.uiSettings.client,
+                share,
               },
               spaceId,
               startedAt: startedAt.toDate(),

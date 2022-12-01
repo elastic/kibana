@@ -37,6 +37,7 @@ import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-
 import type { OsqueryPluginSetup } from '@kbn/osquery-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingPluginSetup;
@@ -70,6 +71,7 @@ export interface SecuritySolutionPluginStartDependencies {
   spaces?: SpacesPluginStart;
   taskManager?: TaskManagerPluginStart;
   telemetry?: TelemetryPluginStart;
+  share: SharePluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

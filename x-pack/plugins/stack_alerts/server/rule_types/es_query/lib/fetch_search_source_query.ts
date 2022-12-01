@@ -53,7 +53,7 @@ export async function fetchSearchSourceQuery(
 
   const discoverLocator = services.share.url.locators.get('DISCOVER_APP_LOCATOR');
   const redirectUrlParams = {
-    dataViewSpec: { ...index.toSpec(false), id: undefined }, // make separate adhoc data view
+    dataViewSpec: { ...index.toSpec(false), id: undefined, version: undefined }, // make separate adhoc data view
     filters: initialSearchSource.getField('filter') as Filter[],
     query: initialSearchSource.getField('query'),
     timeRange: { from: dateStart, to: dateEnd },
