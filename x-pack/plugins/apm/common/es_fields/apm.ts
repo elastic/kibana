@@ -22,6 +22,8 @@ export const CLOUD_INSTANCE_ID = 'cloud.instance.id';
 export const CLOUD_INSTANCE_NAME = 'cloud.instance.name';
 export const CLOUD_SERVICE_NAME = 'cloud.service.name';
 
+export const CHILD_ID = 'child.id';
+
 export const SERVICE = 'service';
 export const SERVICE_NAME = 'service.name';
 export const SERVICE_ENVIRONMENT = 'service.environment';
@@ -45,6 +47,7 @@ export const OBSERVER_HOSTNAME = 'observer.hostname';
 export const OBSERVER_LISTENING = 'observer.listening';
 export const PROCESSOR_EVENT = 'processor.event';
 
+export const TRANSACTION = 'transaction';
 export const TRANSACTION_DURATION = 'transaction.duration.us';
 export const TRANSACTION_DURATION_HISTOGRAM = 'transaction.duration.histogram';
 export const TRANSACTION_DURATION_SUMMARY = 'transaction.duration.summary';
@@ -63,6 +66,7 @@ export const EVENT_OUTCOME = 'event.outcome';
 
 export const TRACE_ID = 'trace.id';
 
+export const SPAN = 'span';
 export const SPAN_DURATION = 'span.duration.us';
 export const SPAN_TYPE = 'span.type';
 export const SPAN_SUBTYPE = 'span.subtype';
@@ -138,6 +142,7 @@ export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 
 export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
 
+export const FAAS = 'faas';
 export const FAAS_ID = 'faas.id';
 export const FAAS_NAME = 'faas.name';
 export const FAAS_COLDSTART = 'faas.coldstart';

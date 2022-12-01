@@ -57,28 +57,21 @@ interface IWaterfallTransactionSpanItemBase<TDocument, TDoctype>
 export interface WaterfallErrorDoc {
   timestamp: TimestampUs;
   trace: { id?: string };
-  transaction: {
-    id?: string;
-  };
+  transaction: { id?: string };
   parent: { id?: string };
   error: ErrorRaw['error'];
   service: {
     name: string;
   };
 }
-export type IWaterfallError = IWaterfallItemBase<
-  WaterfallErrorDoc,
-  ProcessorEvent.error
->;
 
-interface WaterfallTransactionSpanBaseDoc {
-  '@timestamp': number;
+export interface WaterfallTransactionSpanBaseDoc {
   timestamp: TimestampUs;
   trace: { id: string };
   service: Service;
   agent: Agent;
-  event?: { outcome?: EventOutcome };
-  parent?: { id: string };
+  event: { outcome?: EventOutcome };
+  parent: { id?: string };
 }
 
 /*
@@ -95,14 +88,10 @@ export interface WaterfallTransactionDoc
     result?: string;
   };
   faas?: Faas;
-  span?: {
+  span: {
     links?: SpanLink[];
   };
 }
-export type IWaterfallTransaction = IWaterfallTransactionSpanItemBase<
-  WaterfallTransactionDoc,
-  ProcessorEvent.transaction
->;
 
 /*
  * Custom waterfall span doc
@@ -111,8 +100,8 @@ export interface WaterfallSpanDoc extends WaterfallTransactionSpanBaseDoc {
   processor: { event: ProcessorEvent.span };
   span: {
     id: string;
-    subtype?: string;
     type: string;
+    subtype?: string;
     action?: string;
     name: string;
     composite?: {
@@ -126,9 +115,20 @@ export interface WaterfallSpanDoc extends WaterfallTransactionSpanBaseDoc {
   };
   child?: { id: string[] };
 }
+
+export type IWaterfallError = IWaterfallItemBase<
+  WaterfallErrorDoc,
+  ProcessorEvent.error
+>;
+
 export type IWaterfallSpan = IWaterfallTransactionSpanItemBase<
   WaterfallSpanDoc,
   ProcessorEvent.span
+>;
+
+export type IWaterfallTransaction = IWaterfallTransactionSpanItemBase<
+  WaterfallTransactionDoc,
+  ProcessorEvent.transaction
 >;
 
 export type IWaterfallSpanOrTransaction =
