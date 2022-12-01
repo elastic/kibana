@@ -23,7 +23,6 @@ import { push, replace } from '../../shared/links/url_helpers';
 import { SortFunction } from '../../shared/managed_table';
 import { useWaterfallFetcher } from '../transaction_details/use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../transaction_details/waterfall_with_summary';
-import { DependencyOperationDetailTraceList } from './dependency_operation_detail_trace_list';
 import { DependencyOperationDistributionChart } from './dependency_operation_distribution_chart';
 import { maybeRedirectToAvailableSpanSample } from './maybe_redirect_to_available_span_sample';
 
@@ -165,14 +164,6 @@ export function DependencyOperationDetailView() {
       <EuiFlexItem>
         <EuiPanel hasBorder>
           <DependencyOperationDistributionChart />
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiPanel hasBorder>
-          <DependencyOperationDetailTraceList
-            spanFetch={spanFetch}
-            sortFn={getSortedSamples}
-          />
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
