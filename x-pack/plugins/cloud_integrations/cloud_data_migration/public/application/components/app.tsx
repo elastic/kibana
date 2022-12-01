@@ -96,7 +96,7 @@ export const CloudDataMigrationApp = ({
                 <h4>
                   <FormattedMessage
                     id="cloudMigration.migrateToCloudTitle"
-                    defaultMessage="Save time & money by moving your deployment to Elastic Cloud."
+                    defaultMessage="Elastic Cloud helps your data work harder."
                   />
                 </h4>
               </EuiTitle>
@@ -162,18 +162,10 @@ export const CloudDataMigrationApp = ({
               <EuiSpacer size="l" />
 
               <div>
-                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-                <EuiButton
-                  fill={true}
-                  fullWidth={false}
-                  href={`${basePath}#/cloud_migration`}
-                  onClick={() => {
-                    console.log('Navigate to info page');
-                  }}
-                >
+                <EuiButton fill={true} fullWidth={false} href={`${basePath}#/cloud_migration`}>
                   <FormattedMessage
                     id="cloudMigration.readInstructionsButtonLabel"
-                    defaultMessage="Read migration instructions"
+                    defaultMessage="Help me move"
                   />
                 </EuiButton>
               </div>
