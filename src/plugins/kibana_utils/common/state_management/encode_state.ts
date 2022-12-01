@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import rison, { RisonValue } from 'rison-node';
+import rison, { RisonValue } from '@kbn/rison';
 import { createStateHash } from './state_hash';
 
 /**
