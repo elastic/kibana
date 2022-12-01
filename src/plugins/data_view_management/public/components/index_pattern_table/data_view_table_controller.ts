@@ -55,29 +55,29 @@ export class DataViewTableController {
   private dataViews: DataViewsPublicPluginStart;
   private defaultDataView: string;
 
+  private updateState = (newState: Partial<DataViewTableControllerState>) => {
+    this.state = { ...this.state, ...newState };
+    this.stateInternal$.next(this.state);
+  };
+
   private loadHasData = async () => {
     const hasDataViewPromise = this.dataViews.hasData.hasDataView().then((hasDataView) => {
-      this.state.hasDataView = hasDataView;
-      this.stateInternal$.next(this.state);
+      this.updateState({ hasDataView });
     });
 
     const hasESDataPromise = this.dataViews.hasData.hasESData().then((hasEsData) => {
-      this.state.hasEsData = hasEsData;
-      this.stateInternal$.next(this.state);
+      this.updateState({ hasEsData });
     });
 
     return Promise.all([hasDataViewPromise, hasESDataPromise]).then(() => {
-      this.state.isLoadingHasData = false;
-      this.stateInternal$.next(this.state);
+      this.updateState({ isLoadingHasData: false });
     });
   };
 
   private getDataViews = async () => {
-    this.state.isLoadingDataViews = true;
-    this.stateInternal$.next(this.state);
-    this.state.dataViews = await getIndexPatterns(this.defaultDataView, this.dataViews);
-    this.state.isLoadingDataViews = false;
-    this.stateInternal$.next(this.state);
+    this.updateState({ isLoadingDataViews: true });
+    const dataViews = await getIndexPatterns(this.defaultDataView, this.dataViews);
+    this.updateState({ dataViews, isLoadingDataViews: false });
   };
 
   loadDataViews = async () => {

@@ -17,6 +17,7 @@ import {
   EuiBasicTableColumn,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
 import React, { useState, useMemo } from 'react';
@@ -108,7 +109,7 @@ export const IndexPatternTable = ({
   );
 
   const isLoadingIndexPatterns = useStateSelector<boolean>(selectIsLoadingIndexPatterns, false);
-  const indexPatterns = useStateSelector(selectIndexPattern, []);
+  const indexPatterns = useStateSelector(selectIndexPattern, [], isEqual);
   const isLoadingDataState = useStateSelector(selectIsLoadingDataState, true);
   const hasDataView = useStateSelector(selectHasDataView, false);
   const hasESData = useStateSelector(selectHasEsData, false);
