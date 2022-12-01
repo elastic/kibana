@@ -35,6 +35,7 @@ import {
 } from './executor';
 import { aStoredSLO, createSLO } from '../../../services/slo/fixtures/slo';
 import { SLO } from '../../../domain/models';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 
 const commonEsResponse = {
   took: 100,
@@ -93,6 +94,7 @@ describe('BurnRateRuleExecutor', () => {
       getAlertStartedDate: jest.fn(),
       getAlertUuid: jest.fn(),
       getAlertByAlertUuid: jest.fn(),
+      share: {} as SharePluginStart,
     };
   });
 
