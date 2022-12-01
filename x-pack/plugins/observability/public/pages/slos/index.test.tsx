@@ -13,7 +13,7 @@ import { Subset } from '../../typings';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
-import { SlosPage } from './slos_page';
+import { SlosPage } from '.';
 import { useFetchSloList } from './hooks/use_fetch_slo_list';
 import { emptySloList } from './mocks/slo_list';
 
