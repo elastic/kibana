@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
-import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
 
+import { ALERT_RULE_TYPE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { getTimeZone } from '../../../utils/get_time_zone';
+import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { useKibana } from '../../../utils/kibana_react';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
@@ -27,19 +31,31 @@ import { paths } from '../../../config/paths';
 
 export function AlertDetails() {
   const {
+    uiSettings,
     http,
     cases: {
       helpers: { canUseCases },
       ui: { getCasesContext },
     },
+    triggersActionsUi: { ruleTypeRegistry },
   } = useKibana<ObservabilityAppServices>().services;
+
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
   const [isLoading, alert] = useFetchAlertDetail(alertId);
-
+  const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const CasesContext = getCasesContext();
   const userCasesPermissions = canUseCases();
+  const { rule } = useFetchRule({
+    ruleId: alert?.fields[ALERT_RULE_UUID],
+    http,
+  });
 
+  useEffect(() => {
+    if (alert) {
+      setRuleTypeModel(ruleTypeRegistry.get(alert?.fields[ALERT_RULE_TYPE_ID]!));
+    }
+  }, [alert, ruleTypeRegistry]);
   useBreadcrumbs([
     {
       href: http.basePath.prepend(paths.observability.alerts),
@@ -81,7 +97,8 @@ export function AlertDetails() {
         />
       </EuiPanel>
     );
-
+  const AlertDetailsAppSection = ruleTypeModel ? ruleTypeModel.alertDetailsAppSection : null;
+  const timeZone = getTimeZone(uiSettings);
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -100,6 +117,10 @@ export function AlertDetails() {
       data-test-subj="alertDetails"
     >
       <AlertSummary alert={alert} />
+      <EuiSpacer size="l" />
+      {AlertDetailsAppSection && rule && (
+        <AlertDetailsAppSection alert={alert} rule={rule} timeZone={timeZone} />
+      )}
     </ObservabilityPageTemplate>
   );
 }
