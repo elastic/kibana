@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { GuideConfig } from '../../types';
+import type { GuideConfig } from '../../../common';
 
 export const securityConfig: GuideConfig = {
   title: i18n.translate('guidedOnboarding.securityGuide.title', {

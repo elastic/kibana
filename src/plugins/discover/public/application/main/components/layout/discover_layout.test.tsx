@@ -28,7 +28,7 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../hooks/use_saved_search';
-import { discoverServiceMock } from '../../../../__mocks__/services';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
@@ -118,14 +118,11 @@ async function mountComponent(
 ) {
   const searchSourceMock = createSearchSourceMock({});
   const services = {
-    ...discoverServiceMock,
+    ...createDiscoverServicesMock(),
     storage: new LocalStorageMock({
       [SIDEBAR_CLOSED_KEY]: prevSidebarClosed,
     }) as unknown as Storage,
   } as unknown as DiscoverServices;
-  services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
-    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-  };
 
   const dataViewList = [dataView];
 
@@ -204,12 +201,12 @@ async function mountComponent(
   // DiscoverMainContent uses UnifiedHistogramLayout which
   // is lazy loaded, so we need to wait for it to be loaded
   await act(() => setTimeout(0));
+  await component.update();
 
   return component;
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/145894
-describe.skip('Discover component', () => {
+describe('Discover component', () => {
   test('selected data view without time field displays no chart toggle', async () => {
     const container = document.createElement('div');
     await mountComponent(dataViewMock, undefined, { attachTo: container });
@@ -224,7 +221,7 @@ describe.skip('Discover component', () => {
     expect(
       container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
     ).not.toBeNull();
-  });
+  }, 10000);
 
   test('sql query displays no chart toggle', async () => {
     const container = document.createElement('div');
@@ -249,7 +246,7 @@ describe.skip('Discover component', () => {
     expect(
       component.find('[data-test-subj="discoverSavedSearchTitle"]').getDOMNode()
     ).toHaveFocus();
-  });
+  }, 10000);
 
   describe('sidebar', () => {
     test('should be opened if discover:sidebarClosed was not set', async () => {

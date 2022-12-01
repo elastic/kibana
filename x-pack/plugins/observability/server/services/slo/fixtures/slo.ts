@@ -60,9 +60,9 @@ export const createKQLCustomIndicator = (
   type: 'sli.kql.custom',
   params: {
     index: 'my-index*',
-    query_filter: 'labels.groupId: group-3',
-    numerator: 'latency < 300',
-    denominator: '',
+    filter: 'labels.groupId: group-3',
+    good: 'latency < 300',
+    total: '',
     ...params,
   },
 });
