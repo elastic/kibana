@@ -7,52 +7,51 @@
 
 import { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
-import { RulesClientContext } from './types';
+import { RulesClientContext, BulkOptions, MuteOptions } from './types';
 
-import { clone, CloneArguments } from './clone';
-import { create, CreateOptions } from './create';
-import { get, GetParams } from './get';
-import { resolve, ResolveParams } from './resolve';
-import { getAlertState, GetAlertStateParams } from './get_alert_state';
-import { getAlertSummary, GetAlertSummaryParams } from './get_alert_summary';
+import { clone, CloneArguments } from './methods/clone';
+import { create, CreateOptions } from './methods/create';
+import { get, GetParams } from './methods/get';
+import { resolve, ResolveParams } from './methods/resolve';
+import { getAlertState, GetAlertStateParams } from './methods/get_alert_state';
+import { getAlertSummary, GetAlertSummaryParams } from './methods/get_alert_summary';
 import {
   GetExecutionLogByIdParams,
   getExecutionLogForRule,
   GetGlobalExecutionLogParams,
   getGlobalExecutionLogWithAuth,
-} from './get_execution_log';
+} from './methods/get_execution_log';
 import {
   getActionErrorLog,
   GetActionErrorLogByIdParams,
   getActionErrorLogWithAuth,
-} from './get_action_error_log';
+} from './methods/get_action_error_log';
 import {
   GetGlobalExecutionKPIParams,
   getGlobalExecutionKpiWithAuth,
   getRuleExecutionKPI,
   GetRuleExecutionKPIParams,
-} from './get_execution_kpi';
-import { find, FindParams } from './find';
-import { aggregate, AggregateOptions } from './aggregate';
-import { deleteRule } from './delete';
-import { update, UpdateOptions } from './update';
-import { bulkDeleteRules } from './bulk_delete';
-import { BulkOptions, MuteOptions } from './types';
-import { bulkEdit, BulkEditOptions } from './bulk_edit';
-import { bulkEnableRules } from './bulk_enable';
-import { bulkDisableRules } from './bulk_disable';
-import { updateApiKey } from './update_api_key';
-import { enable } from './enable';
-import { disable } from './disable';
-import { snooze, SnoozeParams } from './snooze';
-import { unsnooze, UnsnoozeParams } from './unsnooze';
-import { clearExpiredSnoozes } from './clear_expired_snoozes';
-import { muteAll } from './mute_all';
-import { unmuteAll } from './unmute_all';
-import { muteInstance } from './mute_instance';
-import { unmuteInstance } from './unmute_instance';
-import { runSoon } from './run_soon';
-import { listAlertTypes } from './list_alert_types';
+} from './methods/get_execution_kpi';
+import { find, FindParams } from './methods/find';
+import { aggregate, AggregateOptions } from './methods/aggregate';
+import { deleteRule } from './methods/delete';
+import { update, UpdateOptions } from './methods/update';
+import { bulkDeleteRules } from './methods/bulk_delete';
+import { bulkEdit, BulkEditOptions } from './methods/bulk_edit';
+import { bulkEnableRules } from './methods/bulk_enable';
+import { bulkDisableRules } from './methods/bulk_disable';
+import { updateApiKey } from './methods/update_api_key';
+import { enable } from './methods/enable';
+import { disable } from './methods/disable';
+import { snooze, SnoozeParams } from './methods/snooze';
+import { unsnooze, UnsnoozeParams } from './methods/unsnooze';
+import { clearExpiredSnoozes } from './methods/clear_expired_snoozes';
+import { muteAll } from './methods/mute_all';
+import { unmuteAll } from './methods/unmute_all';
+import { muteInstance } from './methods/mute_instance';
+import { unmuteInstance } from './methods/unmute_instance';
+import { runSoon } from './methods/run_soon';
+import { listAlertTypes } from './methods/list_alert_types';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,

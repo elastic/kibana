@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RuleTaskState } from '../types';
-import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
-import { ReadOperations, AlertingAuthorizationEntity } from '../authorization';
-import { RulesClientContext } from './types';
+import { RuleTaskState } from '../../types';
+import { taskInstanceToAlertTaskInstance } from '../../task_runner/alert_task_instance';
+import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { RulesClientContext } from '../types';
 import { get } from './get';
 
 export interface GetAlertStateParams {

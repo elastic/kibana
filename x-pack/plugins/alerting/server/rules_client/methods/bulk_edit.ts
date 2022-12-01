@@ -11,17 +11,17 @@ import { cloneDeep } from 'lodash';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
-import { RawRule, SanitizedRule, RuleTypeParams, Rule, RuleSnoozeSchedule } from '../types';
+import { RawRule, SanitizedRule, RuleTypeParams, Rule, RuleSnoozeSchedule } from '../../types';
 import {
   validateRuleTypeParams,
   getRuleNotifyWhenType,
   validateMutatedRuleTypeParams,
   convertRuleIdsToKueryNode,
-} from '../lib';
-import { WriteOperations, AlertingAuthorizationEntity } from '../authorization';
-import { parseDuration } from '../../common/parse_duration';
-import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
+} from '../../lib';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { parseDuration } from '../../../common/parse_duration';
+import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import {
   retryIfBulkEditConflicts,
   applyBulkEditOperation,
@@ -32,17 +32,21 @@ import {
   getBulkSnoozeAttributes,
   getBulkUnsnoozeAttributes,
   verifySnoozeScheduleLimit,
-} from './common';
+} from '../common';
 import {
   alertingAuthorizationFilterOpts,
   MAX_RULES_NUMBER_FOR_BULK_OPERATION,
   RULE_TYPE_CHECKS_CONCURRENCY,
   API_KEY_GENERATE_CONCURRENCY,
-} from './common/constants';
-import { getMappedParams } from './common/mapped_params_utils';
-import { getAlertFromRaw, extractReferences, validateActions, updateMeta } from './lib';
-import { NormalizedAlertAction, BulkOperationError, RuleBulkOperationAggregation } from './types';
-import { RulesClientContext } from './types';
+} from '../common/constants';
+import { getMappedParams } from '../common/mapped_params_utils';
+import { getAlertFromRaw, extractReferences, validateActions, updateMeta } from '../lib';
+import {
+  NormalizedAlertAction,
+  BulkOperationError,
+  RuleBulkOperationAggregation,
+  RulesClientContext,
+} from '../types';
 
 export type BulkEditFields = keyof Pick<
   Rule,

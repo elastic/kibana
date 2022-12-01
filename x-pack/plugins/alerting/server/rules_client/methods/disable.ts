@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { RawRule } from '../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../authorization';
-import { retryIfConflicts } from '../lib/retry_if_conflicts';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
-import { RulesClientContext } from './types';
-import { recoverRuleAlerts, updateMeta } from './lib';
+import { RawRule } from '../../types';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { retryIfConflicts } from '../../lib/retry_if_conflicts';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { RulesClientContext } from '../types';
+import { recoverRuleAlerts, updateMeta } from '../lib';
 
 export async function disable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(

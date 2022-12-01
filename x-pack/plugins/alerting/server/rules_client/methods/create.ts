@@ -7,15 +7,15 @@
 import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import { parseDuration } from '../../common/parse_duration';
-import { RawRule, SanitizedRule, RuleTypeParams, RuleAction, Rule } from '../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../authorization';
-import { validateRuleTypeParams, getRuleNotifyWhenType, getDefaultMonitoring } from '../lib';
-import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
-import { createRuleSavedObject, extractReferences, validateActions } from './lib';
-import { generateAPIKeyName, getMappedParams, apiKeyAsAlertAttributes } from './common';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
-import { RulesClientContext } from './types';
+import { parseDuration } from '../../../common/parse_duration';
+import { RawRule, SanitizedRule, RuleTypeParams, RuleAction, Rule } from '../../types';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { validateRuleTypeParams, getRuleNotifyWhenType, getDefaultMonitoring } from '../../lib';
+import { getRuleExecutionStatusPending } from '../../lib/rule_execution_status';
+import { createRuleSavedObject, extractReferences, validateActions } from '../lib';
+import { generateAPIKeyName, getMappedParams, apiKeyAsAlertAttributes } from '../common';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { RulesClientContext } from '../types';
 
 type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
 interface SavedObjectOptions {

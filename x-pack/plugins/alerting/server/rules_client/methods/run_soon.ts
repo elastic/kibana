@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { Rule } from '../types';
-import { ReadOperations, AlertingAuthorizationEntity } from '../authorization';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
-import { RulesClientContext } from './types';
+import { Rule } from '../../types';
+import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { RulesClientContext } from '../types';
 
 export async function runSoon(context: RulesClientContext, { id }: { id: string }) {
   const { attributes } = await context.unsecuredSavedObjectsClient.get<Rule>('alert', id);

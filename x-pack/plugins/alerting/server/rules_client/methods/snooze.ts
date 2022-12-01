@@ -6,16 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
-import { RawRule, RuleSnoozeSchedule } from '../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../authorization';
-import { retryIfConflicts } from '../lib/retry_if_conflicts';
-import { partiallyUpdateAlert } from '../saved_objects';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
-import { validateSnoozeStartDate } from '../lib/validate_snooze_date';
-import { RuleMutedError } from '../lib/errors/rule_muted';
-import { RulesClientContext } from './types';
-import { getSnoozeAttributes, verifySnoozeScheduleLimit } from './common';
-import { updateMeta } from './lib';
+import { RawRule, RuleSnoozeSchedule } from '../../types';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { retryIfConflicts } from '../../lib/retry_if_conflicts';
+import { partiallyUpdateAlert } from '../../saved_objects';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { validateSnoozeStartDate } from '../../lib/validate_snooze_date';
+import { RuleMutedError } from '../../lib/errors/rule_muted';
+import { RulesClientContext } from '../types';
+import { getSnoozeAttributes, verifySnoozeScheduleLimit } from '../common';
+import { updateMeta } from '../lib';
 
 export interface SnoozeParams {
   id: string;

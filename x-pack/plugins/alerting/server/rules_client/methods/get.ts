@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { RawRule, SanitizedRule, RuleTypeParams, SanitizedRuleWithLegacyId } from '../types';
-import { ReadOperations, AlertingAuthorizationEntity } from '../authorization';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
-import { getAlertFromRaw } from './lib/get_alert_from_raw';
-import { RulesClientContext } from './types';
+import { RawRule, SanitizedRule, RuleTypeParams, SanitizedRuleWithLegacyId } from '../../types';
+import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { getAlertFromRaw } from '../lib/get_alert_from_raw';
+import { RulesClientContext } from '../types';
 
 export interface GetParams {
   id: string;

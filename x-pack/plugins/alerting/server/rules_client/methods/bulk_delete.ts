@@ -7,18 +7,17 @@
 
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkDeleteObject } from '@kbn/core/server';
-import { RawRule } from '../types';
-import { convertRuleIdsToKueryNode } from '../lib';
-import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
-import { getAuthorizationFilter, checkAuthorizationAndGetTotal } from './lib';
+import { RawRule } from '../../types';
+import { convertRuleIdsToKueryNode } from '../../lib';
+import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { getAuthorizationFilter, checkAuthorizationAndGetTotal } from '../lib';
 import {
   retryIfBulkDeleteConflicts,
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
-} from './common';
-import { BulkOptions, BulkOperationError } from './types';
-import { RulesClientContext } from './types';
+} from '../common';
+import { BulkOptions, BulkOperationError, RulesClientContext } from '../types';
 
 export const bulkDeleteRules = async (context: RulesClientContext, options: BulkOptions) => {
   const { ids, filter } = getAndValidateCommonBulkOptions(options);

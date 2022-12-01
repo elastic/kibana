@@ -14,18 +14,17 @@ import {
   RuleTypeParams,
   RuleNotifyWhenType,
   IntervalSchedule,
-} from '../types';
-import { validateRuleTypeParams, getRuleNotifyWhenType } from '../lib';
-import { WriteOperations, AlertingAuthorizationEntity } from '../authorization';
-import { parseDuration } from '../../common/parse_duration';
-import { retryIfConflicts } from '../lib/retry_if_conflicts';
-import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
-import { getMappedParams } from './common/mapped_params_utils';
-import { RulesClientContext } from './types';
-import { NormalizedAlertAction } from './types';
-import { validateActions, extractReferences, updateMeta, getPartialRuleFromRaw } from './lib';
-import { generateAPIKeyName, apiKeyAsAlertAttributes } from './common';
+} from '../../types';
+import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../lib';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { parseDuration } from '../../../common/parse_duration';
+import { retryIfConflicts } from '../../lib/retry_if_conflicts';
+import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { getMappedParams } from '../common/mapped_params_utils';
+import { NormalizedAlertAction, RulesClientContext } from '../types';
+import { validateActions, extractReferences, updateMeta, getPartialRuleFromRaw } from '../lib';
+import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;

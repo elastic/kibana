@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import { KueryNode } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SanitizedRuleWithLegacyId } from '../types';
-import { convertEsSortToEventLogSort } from '../lib';
+import { KueryNode } from '@kbn/es-query';
+import { SanitizedRuleWithLegacyId } from '../../types';
 import {
   ReadOperations,
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
-} from '../authorization';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
-import { IExecutionErrorsResult } from '../../common';
-import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
-import { parseDate } from './common';
-import { RulesClientContext } from './types';
+} from '../../authorization';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import {
+  formatExecutionLogResult,
+  getExecutionLogAggregation,
+} from '../../lib/get_execution_log_aggregation';
+import { IExecutionLogResult } from '../../../common';
+import { parseDate } from '../common';
+import { RulesClientContext } from '../types';
 import { get } from './get';
 
-const actionErrorLogDefaultFilter =
-  'event.provider:actions AND ((event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout))';
-
-export interface GetActionErrorLogByIdParams {
+export interface GetExecutionLogByIdParams {
   id: string;
   dateStart: string;
   dateEnd?: string;
@@ -32,27 +31,37 @@ export interface GetActionErrorLogByIdParams {
   page: number;
   perPage: number;
   sort: estypes.Sort;
-  namespace?: string;
 }
 
-export async function getActionErrorLog(
+export interface GetGlobalExecutionLogParams {
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
+  page: number;
+  perPage: number;
+  sort: estypes.Sort;
+  namespaces?: Array<string | undefined>;
+}
+
+export async function getExecutionLogForRule(
   context: RulesClientContext,
-  { id, dateStart, dateEnd, filter, page, perPage, sort }: GetActionErrorLogByIdParams
-): Promise<IExecutionErrorsResult> {
-  context.logger.debug(`getActionErrorLog(): getting action error logs for rule ${id}`);
+  { id, dateStart, dateEnd, filter, page, perPage, sort }: GetExecutionLogByIdParams
+): Promise<IExecutionLogResult> {
+  context.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
   const rule = (await get(context, { id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
   try {
+    // Make sure user has access to this rule
     await context.authorization.ensureAuthorized({
       ruleTypeId: rule.alertTypeId,
       consumer: rule.consumer,
-      operation: ReadOperations.GetActionErrorLog,
+      operation: ReadOperations.GetExecutionLog,
       entity: AlertingAuthorizationEntity.Rule,
     });
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
-        action: RuleAuditAction.GET_ACTION_ERROR_LOG,
+        action: RuleAuditAction.GET_EXECUTION_LOG,
         savedObject: { type: 'alert', id },
         error,
       })
@@ -62,7 +71,7 @@ export async function getActionErrorLog(
 
   context.auditLogger?.log(
     ruleAuditEvent({
-      action: RuleAuditAction.GET_ACTION_ERROR_LOG,
+      action: RuleAuditAction.GET_EXECUTION_LOG,
       savedObject: { type: 'alert', id },
     })
   );
@@ -75,35 +84,36 @@ export async function getActionErrorLog(
   const eventLogClient = await context.getEventLogClient();
 
   try {
-    const errorResult = await eventLogClient.findEventsBySavedObjectIds(
+    const aggResult = await eventLogClient.aggregateEventsBySavedObjectIds(
       'alert',
       [id],
       {
         start: parsedDateStart.toISOString(),
         end: parsedDateEnd.toISOString(),
-        page,
-        per_page: perPage,
-        filter: filter
-          ? `(${actionErrorLogDefaultFilter}) AND (${filter})`
-          : actionErrorLogDefaultFilter,
-        sort: convertEsSortToEventLogSort(sort),
+        aggs: getExecutionLogAggregation({
+          filter,
+          page,
+          perPage,
+          sort,
+        }),
       },
       rule.legacyId !== null ? [rule.legacyId] : undefined
     );
-    return formatExecutionErrorsResult(errorResult);
+
+    return formatExecutionLogResult(aggResult);
   } catch (err) {
     context.logger.debug(
-      `rulesClient.getActionErrorLog(): error searching event log for rule ${id}: ${err.message}`
+      `rulesClient.getExecutionLogForRule(): error searching event log for rule ${id}: ${err.message}`
     );
     throw err;
   }
 }
 
-export async function getActionErrorLogWithAuth(
+export async function getGlobalExecutionLogWithAuth(
   context: RulesClientContext,
-  { id, dateStart, dateEnd, filter, page, perPage, sort, namespace }: GetActionErrorLogByIdParams
-): Promise<IExecutionErrorsResult> {
-  context.logger.debug(`getActionErrorLogWithAuth(): getting action error logs for rule ${id}`);
+  { dateStart, dateEnd, filter, page, perPage, sort, namespaces }: GetGlobalExecutionLogParams
+): Promise<IExecutionLogResult> {
+  context.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
   let authorizationTuple;
   try {
@@ -120,7 +130,7 @@ export async function getActionErrorLogWithAuth(
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
-        action: RuleAuditAction.GET_ACTION_ERROR_LOG,
+        action: RuleAuditAction.GET_GLOBAL_EXECUTION_LOG,
         error,
       })
     );
@@ -129,12 +139,10 @@ export async function getActionErrorLogWithAuth(
 
   context.auditLogger?.log(
     ruleAuditEvent({
-      action: RuleAuditAction.GET_ACTION_ERROR_LOG,
-      savedObject: { type: 'alert', id },
+      action: RuleAuditAction.GET_GLOBAL_EXECUTION_LOG,
     })
   );
 
-  // default duration of instance summary is 60 * rule interval
   const dateNow = new Date();
   const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
   const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
@@ -142,26 +150,26 @@ export async function getActionErrorLogWithAuth(
   const eventLogClient = await context.getEventLogClient();
 
   try {
-    const errorResult = await eventLogClient.findEventsWithAuthFilter(
+    const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
       'alert',
-      [id],
       authorizationTuple.filter as KueryNode,
-      namespace,
       {
         start: parsedDateStart.toISOString(),
         end: parsedDateEnd.toISOString(),
-        page,
-        per_page: perPage,
-        filter: filter
-          ? `(${actionErrorLogDefaultFilter}) AND (${filter})`
-          : actionErrorLogDefaultFilter,
-        sort: convertEsSortToEventLogSort(sort),
-      }
+        aggs: getExecutionLogAggregation({
+          filter,
+          page,
+          perPage,
+          sort,
+        }),
+      },
+      namespaces
     );
-    return formatExecutionErrorsResult(errorResult);
+
+    return formatExecutionLogResult(aggResult);
   } catch (err) {
     context.logger.debug(
-      `rulesClient.getActionErrorLog(): error searching event log for rule ${id}: ${err.message}`
+      `rulesClient.getGlobalExecutionLogWithAuth(): error searching global event log: ${err.message}`
     );
     throw err;
   }

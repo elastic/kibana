@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { RawRule } from '../types';
-import { partiallyUpdateAlert } from '../saved_objects';
-import { isSnoozeExpired } from '../lib';
-import { RulesClientContext } from './types';
-import { updateMeta } from './lib';
+import { RawRule } from '../../types';
+import { partiallyUpdateAlert } from '../../saved_objects';
+import { isSnoozeExpired } from '../../lib';
+import { RulesClientContext } from '../types';
+import { updateMeta } from '../lib';
 
 export async function clearExpiredSnoozes(
   context: RulesClientContext,

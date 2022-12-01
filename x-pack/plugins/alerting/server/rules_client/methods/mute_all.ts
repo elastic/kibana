@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { RawRule } from '../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../authorization';
-import { retryIfConflicts } from '../lib/retry_if_conflicts';
-import { partiallyUpdateAlert } from '../saved_objects';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
-import { RulesClientContext } from './types';
-import { updateMeta } from './lib';
-import { clearUnscheduledSnooze } from './common';
+import { RawRule } from '../../types';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { retryIfConflicts } from '../../lib/retry_if_conflicts';
+import { partiallyUpdateAlert } from '../../saved_objects';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { RulesClientContext } from '../types';
+import { updateMeta } from '../lib';
+import { clearUnscheduledSnooze } from '../common';
 
 export async function muteAll(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(

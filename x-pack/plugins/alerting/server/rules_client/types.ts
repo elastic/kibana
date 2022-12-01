@@ -33,15 +33,21 @@ export type {
   BulkEditOptions,
   BulkEditOptionsFilter,
   BulkEditOptionsIds,
-} from './bulk_edit';
-export type { CreateOptions } from './create';
-export type { FindOptions, FindResult } from './find';
-export type { UpdateOptions } from './update';
-export type { AggregateOptions, AggregateResult } from './aggregate';
-export type { GetAlertSummaryParams } from './get_alert_summary';
-export type { GetExecutionLogByIdParams, GetGlobalExecutionLogParams } from './get_execution_log';
-export type { GetGlobalExecutionKPIParams, GetRuleExecutionKPIParams } from './get_execution_kpi';
-export type { GetActionErrorLogByIdParams } from './get_action_error_log';
+} from './methods/bulk_edit';
+export type { CreateOptions } from './methods/create';
+export type { FindOptions, FindResult } from './methods/find';
+export type { UpdateOptions } from './methods/update';
+export type { AggregateOptions, AggregateResult } from './methods/aggregate';
+export type { GetAlertSummaryParams } from './methods/get_alert_summary';
+export type {
+  GetExecutionLogByIdParams,
+  GetGlobalExecutionLogParams,
+} from './methods/get_execution_log';
+export type {
+  GetGlobalExecutionKPIParams,
+  GetRuleExecutionKPIParams,
+} from './methods/get_execution_kpi';
+export type { GetActionErrorLogByIdParams } from './methods/get_action_error_log';
 
 export interface RulesClientContext {
   readonly logger: Logger;

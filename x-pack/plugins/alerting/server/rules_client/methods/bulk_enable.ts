@@ -8,14 +8,14 @@
 import pMap from 'p-map';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
-import { RawRule, IntervalSchedule } from '../types';
-import { convertRuleIdsToKueryNode } from '../lib';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
+import { RawRule, IntervalSchedule } from '../../types';
+import { convertRuleIdsToKueryNode } from '../../lib';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import {
   retryIfBulkOperationConflicts,
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
-} from './common';
+} from '../common';
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
@@ -23,9 +23,8 @@ import {
   scheduleTask,
   updateMeta,
   createNewAPIKeySet,
-} from './lib';
-import { RulesClientContext } from './types';
-import { BulkOperationError, BulkOptions } from './types';
+} from '../lib';
+import { RulesClientContext, BulkOperationError, BulkOptions } from '../types';
 
 const getShouldScheduleTask = async (
   context: RulesClientContext,

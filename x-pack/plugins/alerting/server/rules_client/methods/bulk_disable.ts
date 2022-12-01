@@ -8,23 +8,22 @@
 import pMap from 'p-map';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
-import { RawRule } from '../types';
-import { convertRuleIdsToKueryNode } from '../lib';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
+import { RawRule } from '../../types';
+import { convertRuleIdsToKueryNode } from '../../lib';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import {
   retryIfBulkDisableConflicts,
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
-} from './common';
+} from '../common';
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
   getAlertFromRaw,
   recoverRuleAlerts,
   updateMeta,
-} from './lib';
-import { BulkOptions, BulkOperationError } from './types';
-import { RulesClientContext } from './types';
+} from '../lib';
+import { BulkOptions, BulkOperationError, RulesClientContext } from '../types';
 
 export const bulkDisableRules = async (context: RulesClientContext, options: BulkOptions) => {
   const { ids, filter } = getAndValidateCommonBulkOptions(options);

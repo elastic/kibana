@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Rule } from '../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../authorization';
-import { retryIfConflicts } from '../lib/retry_if_conflicts';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
-import { MuteOptions } from './types';
-import { RulesClientContext } from './types';
-import { updateMeta } from './lib';
+import { Rule } from '../../types';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { retryIfConflicts } from '../../lib/retry_if_conflicts';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { MuteOptions } from '../types';
+import { RulesClientContext } from '../types';
+import { updateMeta } from '../lib';
 
 export async function muteInstance(
   context: RulesClientContext,

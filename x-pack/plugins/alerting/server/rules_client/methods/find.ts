@@ -9,25 +9,24 @@ import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { pick } from 'lodash';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { RawRule, RuleTypeParams, SanitizedRule } from '../types';
-import { AlertingAuthorizationEntity } from '../authorization';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
+import { RawRule, RuleTypeParams, SanitizedRule } from '../../types';
+import { AlertingAuthorizationEntity } from '../../authorization';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import {
   mapSortField,
   validateOperationOnAttributes,
   buildKueryNodeFilter,
   includeFieldsRequiredForAuthentication,
-} from './common';
+} from '../common';
 import {
   getModifiedField,
   getModifiedSearchFields,
   getModifiedSearch,
   modifyFilterKueryNode,
-} from './common/mapped_params_utils';
-import { alertingAuthorizationFilterOpts } from './common/constants';
-import { getAlertFromRaw } from './lib/get_alert_from_raw';
-import type { IndexType } from './types';
-import { RulesClientContext } from './types';
+} from '../common/mapped_params_utils';
+import { alertingAuthorizationFilterOpts } from '../common/constants';
+import { getAlertFromRaw } from '../lib/get_alert_from_raw';
+import type { IndexType, RulesClientContext } from '../types';
 
 export interface FindParams {
   options?: FindOptions;

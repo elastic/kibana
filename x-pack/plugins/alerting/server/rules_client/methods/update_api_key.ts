@@ -6,14 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
-import { RawRule } from '../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../authorization';
-import { retryIfConflicts } from '../lib/retry_if_conflicts';
-import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
-import { generateAPIKeyName, apiKeyAsAlertAttributes } from './common';
-import { updateMeta } from './lib';
-import { RulesClientContext } from './types';
+import { RawRule } from '../../types';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { retryIfConflicts } from '../../lib/retry_if_conflicts';
+import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
+import { updateMeta } from '../lib';
+import { RulesClientContext } from '../types';
 
 export async function updateApiKey(
   context: RulesClientContext,

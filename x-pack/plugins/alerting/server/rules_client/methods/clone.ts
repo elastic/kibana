@@ -9,16 +9,16 @@ import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
-import { RawRule, SanitizedRule, RuleTypeParams } from '../types';
-import { getDefaultMonitoring } from '../lib';
-import { WriteOperations, AlertingAuthorizationEntity } from '../authorization';
-import { parseDuration } from '../../common/parse_duration';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
-import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
-import { isDetectionEngineAADRuleType } from '../saved_objects/migrations/utils';
-import { generateAPIKeyName, apiKeyAsAlertAttributes } from './common';
-import { createRuleSavedObject } from './lib';
-import { RulesClientContext } from './types';
+import { RawRule, SanitizedRule, RuleTypeParams } from '../../types';
+import { getDefaultMonitoring } from '../../lib';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { parseDuration } from '../../../common/parse_duration';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { getRuleExecutionStatusPending } from '../../lib/rule_execution_status';
+import { isDetectionEngineAADRuleType } from '../../saved_objects/migrations/utils';
+import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
+import { createRuleSavedObject } from '../lib';
+import { RulesClientContext } from '../types';
 
 export type CloneArguments = [string, { newId?: string }];
 

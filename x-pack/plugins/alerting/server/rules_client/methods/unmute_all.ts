@@ -5,32 +5,27 @@
  * 2.0.
  */
 
-import { RawRule } from '../types';
-import { WriteOperations, AlertingAuthorizationEntity } from '../authorization';
-import { retryIfConflicts } from '../lib/retry_if_conflicts';
-import { partiallyUpdateAlert } from '../saved_objects';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
-import { RulesClientContext } from './types';
-import { updateMeta } from './lib';
-import { getUnsnoozeAttributes } from './common';
+import { RawRule } from '../../types';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { retryIfConflicts } from '../../lib/retry_if_conflicts';
+import { partiallyUpdateAlert } from '../../saved_objects';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { RulesClientContext } from '../types';
+import { updateMeta } from '../lib';
+import { clearUnscheduledSnooze } from '../common';
 
-export interface UnsnoozeParams {
-  id: string;
-  scheduleIds?: string[];
-}
-
-export async function unsnooze(
+export async function unmuteAll(
   context: RulesClientContext,
-  { id, scheduleIds }: UnsnoozeParams
+  { id }: { id: string }
 ): Promise<void> {
   return await retryIfConflicts(
     context.logger,
-    `rulesClient.unsnooze('${id}')`,
-    async () => await unsnoozeWithOCC(context, { id, scheduleIds })
+    `rulesClient.unmuteAll('${id}')`,
+    async () => await unmuteAllWithOCC(context, { id })
   );
 }
 
-async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }: UnsnoozeParams) {
+async function unmuteAllWithOCC(context: RulesClientContext, { id }: { id: string }) {
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<RawRule>(
     'alert',
     id
@@ -40,7 +35,7 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
     await context.authorization.ensureAuthorized({
       ruleTypeId: attributes.alertTypeId,
       consumer: attributes.consumer,
-      operation: WriteOperations.Unsnooze,
+      operation: WriteOperations.UnmuteAll,
       entity: AlertingAuthorizationEntity.Rule,
     });
 
@@ -50,7 +45,7 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
-        action: RuleAuditAction.UNSNOOZE,
+        action: RuleAuditAction.UNMUTE,
         savedObject: { type: 'alert', id },
         error,
       })
@@ -60,17 +55,18 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
 
   context.auditLogger?.log(
     ruleAuditEvent({
-      action: RuleAuditAction.UNSNOOZE,
+      action: RuleAuditAction.UNMUTE,
       outcome: 'unknown',
       savedObject: { type: 'alert', id },
     })
   );
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
-  const newAttrs = getUnsnoozeAttributes(attributes, scheduleIds);
 
   const updateAttributes = updateMeta(context, {
-    ...newAttrs,
+    muteAll: false,
+    mutedInstanceIds: [],
+    snoozeSchedule: clearUnscheduledSnooze(attributes),
     updatedBy: await context.getUserName(),
     updatedAt: new Date().toISOString(),
   });

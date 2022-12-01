@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { RawRule, IntervalSchedule } from '../types';
-import { updateMonitoring, getNextRun } from '../lib';
-import { WriteOperations, AlertingAuthorizationEntity } from '../authorization';
-import { retryIfConflicts } from '../lib/retry_if_conflicts';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
-import { RulesClientContext } from './types';
-import { updateMeta, createNewAPIKeySet, scheduleTask } from './lib';
+import { RawRule, IntervalSchedule } from '../../types';
+import { updateMonitoring, getNextRun } from '../../lib';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { retryIfConflicts } from '../../lib/retry_if_conflicts';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { RulesClientContext } from '../types';
+import { updateMeta, createNewAPIKeySet, scheduleTask } from '../lib';
 
 export async function enable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(

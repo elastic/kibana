@@ -6,12 +6,12 @@
  */
 
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { RawRule, RuleExecutionStatusValues, RuleLastRunOutcomeValues } from '../types';
-import { AlertingAuthorizationEntity } from '../authorization';
-import { ruleAuditEvent, RuleAuditAction } from './common/audit_events';
-import { buildKueryNodeFilter } from './common';
-import { alertingAuthorizationFilterOpts } from './common/constants';
-import { RulesClientContext } from './types';
+import { RawRule, RuleExecutionStatusValues, RuleLastRunOutcomeValues } from '../../types';
+import { AlertingAuthorizationEntity } from '../../authorization';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { buildKueryNodeFilter } from '../common';
+import { alertingAuthorizationFilterOpts } from '../common/constants';
+import { RulesClientContext } from '../types';
 
 export interface AggregateOptions extends IndexType {
   search?: string;
