@@ -9,6 +9,7 @@ import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useRef, useState, useEffect } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
 import {
@@ -191,7 +192,7 @@ function HttpStatusCode({ item }: { item: IWaterfallSpanOrTransaction }) {
 
 function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
   switch (item.docType) {
-    case 'span':
+    case ProcessorEvent.span:
       let name = item.doc.span.name;
       if (item.doc.span.composite) {
         const compositePrefix =
@@ -205,7 +206,7 @@ function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
           <TruncateWithTooltip content={name} text={name} />
         </EuiText>
       );
-    case 'transaction':
+    case ProcessorEvent.transaction:
       return (
         <EuiTitle size="xxs">
           <h5>{item.doc.transaction.name}</h5>

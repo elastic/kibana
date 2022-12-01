@@ -42,7 +42,7 @@ function getTransactionItem(
   linkedChildrenCount: number = 0
 ): IWaterfallTransaction {
   return {
-    docType: 'transaction',
+    docType: ProcessorEvent.transaction,
     doc: transaction,
     id: transaction.transaction.id,
     parentId: transaction.parent?.id,
@@ -63,7 +63,7 @@ function getSpanItem(
   linkedChildrenCount: number = 0
 ): IWaterfallSpan {
   return {
-    docType: 'span',
+    docType: ProcessorEvent.span,
     doc: span,
     id: span.span.id,
     parentId: span.parent?.id,
@@ -90,7 +90,7 @@ function getErrorItem(
   ) as IWaterfallSpanOrTransaction | undefined;
 
   const errorItem: IWaterfallError = {
-    docType: 'error',
+    docType: ProcessorEvent.error,
     doc: waterfallErrorDoc,
     id: waterfallErrorDoc.error.id,
     parent,
@@ -115,11 +115,11 @@ export function getClockSkew(
   }
   switch (item.docType) {
     // don't calculate skew for spans and errors. Just use parent's skew
-    case 'error':
-    case 'span':
+    case ProcessorEvent.error:
+    case ProcessorEvent.span:
       return parentItem.skew;
     // transaction is the inital entry in a service. Calculate skew for this, and it will be propogated to all child spans
-    case 'transaction': {
+    case ProcessorEvent.transaction: {
       const parentStart = parentItem.doc.timestamp.us + parentItem.skew;
 
       // determine if child starts before the parent

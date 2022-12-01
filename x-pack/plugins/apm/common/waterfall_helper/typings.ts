@@ -66,7 +66,10 @@ export interface WaterfallErrorDoc {
     name: string;
   };
 }
-export type IWaterfallError = IWaterfallItemBase<WaterfallErrorDoc, 'error'>;
+export type IWaterfallError = IWaterfallItemBase<
+  WaterfallErrorDoc,
+  ProcessorEvent.error
+>;
 
 interface WaterfallTransactionSpanBaseDoc {
   '@timestamp': number;
@@ -98,7 +101,7 @@ export interface WaterfallTransactionDoc
 }
 export type IWaterfallTransaction = IWaterfallTransactionSpanItemBase<
   WaterfallTransactionDoc,
-  'transaction'
+  ProcessorEvent.transaction
 >;
 
 /*
@@ -125,7 +128,7 @@ export interface WaterfallSpanDoc extends WaterfallTransactionSpanBaseDoc {
 }
 export type IWaterfallSpan = IWaterfallTransactionSpanItemBase<
   WaterfallSpanDoc,
-  'span'
+  ProcessorEvent.span
 >;
 
 export type IWaterfallSpanOrTransaction =
