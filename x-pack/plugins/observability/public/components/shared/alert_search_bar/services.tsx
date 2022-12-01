@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useMemo } from 'react';
+import React, { FC, useContext } from 'react';
 import { ObservabilityAlertSearchBarDependencies, Services } from './types';
 
 const ObservabilityAlertSearchBarContext = React.createContext<Services | null>(null);
@@ -20,14 +20,11 @@ export const ObservabilityAlertSearchBarProvider: FC<ObservabilityAlertSearchBar
   useToasts,
   triggersActionsUi: { getAlertsSearchBar: AlertsSearchBar },
 }) => {
-  const services = useMemo<Services>(
-    () => ({
-      timeFilterService,
-      useToasts,
-      AlertsSearchBar,
-    }),
-    [timeFilterService, useToasts, AlertsSearchBar]
-  );
+  const services = {
+    timeFilterService,
+    useToasts,
+    AlertsSearchBar,
+  };
   return (
     <ObservabilityAlertSearchBarContext.Provider value={services}>
       {children}
