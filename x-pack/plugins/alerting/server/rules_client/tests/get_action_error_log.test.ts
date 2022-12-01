@@ -6,7 +6,7 @@
  */
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { GetActionErrorLogByIdParams } from '../get_action_error_log';
+import { GetActionErrorLogByIdParams } from '../../get_action_error_log';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { fromKueryExpression } from '@kbn/es-query';

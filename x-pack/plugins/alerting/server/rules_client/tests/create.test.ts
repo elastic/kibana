@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CreateOptions } from '../create';
+import { CreateOptions } from '../methodscreate';
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
