@@ -2796,7 +2796,7 @@ export class RulesClient {
             try {
               if (rule.attributes.actions.length) {
                 try {
-                  await this.actionsAuthorization.ensureAuthorized('execute')
+                  await this.actionsAuthorization.ensureAuthorized('execute');
                 } catch (error) {
                   throw Error(`Rule not authorized for bulk enable - ${error.message}`);
                 }
