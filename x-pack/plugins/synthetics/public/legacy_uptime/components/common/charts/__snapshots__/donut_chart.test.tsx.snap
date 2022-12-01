@@ -377,6 +377,15 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "width": "auto",
               },
             },
+            "highlighter": Object {
+              "point": Object {
+                "fill": "__use__empty__color__",
+                "opacity": 1,
+                "radius": 10,
+                "stroke": "__use__series__color__",
+                "strokeWidth": 4,
+              },
+            },
             "legend": Object {
               "horizontalHeight": 64,
               "labelOptions": Object {
@@ -489,6 +498,11 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "unhighlighted": Object {
                 "opacity": 0.25,
               },
+            },
+            "tooltip": Object {
+              "defaultDotColor": "black",
+              "maxTableHeight": 120,
+              "maxWidth": 260,
             },
           }
         }
