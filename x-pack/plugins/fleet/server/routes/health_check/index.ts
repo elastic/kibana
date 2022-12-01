@@ -16,17 +16,6 @@ import { defaultFleetErrorHandler } from '../../errors';
 import { PostHealthCheckRequestSchema } from '../../types';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
-  router.get(
-    {
-      path: APP_API_ROUTES.HEALTH_CHECK_PATTERN,
-      validate: {},
-      fleetAuthz: {
-        fleet: { all: true },
-      },
-    },
-    getHealthCheckHandler
-  );
-
   // get fleet server health check by host
   router.post(
     {
@@ -38,29 +27,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     },
     postHealthCheckHandler
   );
-};
-
-export const getHealthCheckHandler: FleetRequestHandler<undefined, undefined, undefined> = async (
-  context,
-  request,
-  response
-) => {
-  try {
-    const res = await fetch(`https://localhost:8220/api/status`, {
-      headers: {
-        accept: '*/*',
-      },
-      method: 'GET',
-      agent: new https.Agent({
-        rejectUnauthorized: false,
-      }),
-    });
-    const body = await res.json();
-
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
 };
 
 export const postHealthCheckHandler: FleetRequestHandler<

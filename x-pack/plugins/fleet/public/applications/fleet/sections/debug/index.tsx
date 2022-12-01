@@ -25,6 +25,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { RequestError } from '../../hooks';
 import { useLink, useStartServices } from '../../hooks';
 
 import {
@@ -93,7 +94,10 @@ const panels = [
   },
 ];
 
-export const DebugPage: React.FunctionComponent = () => {
+export const DebugPage: React.FunctionComponent<{
+  isInitialized: boolean;
+  setupError: RequestError | null;
+}> = ({ isInitialized, setupError }) => {
   const { chrome } = useStartServices();
   const { getHref } = useLink();
 
@@ -137,6 +141,22 @@ export const DebugPage: React.FunctionComponent = () => {
                 />
               </EuiText>
             </EuiCallOut>
+            {!isInitialized && setupError?.message && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut color="danger" iconType="alert" title="Setup error">
+                  <EuiText grow={false}>
+                    <FormattedMessage
+                      id="xpack.fleet.debug.initializationError.description"
+                      defaultMessage="{message}. You can use this page to debug the error."
+                      values={{
+                        message: setupError?.message,
+                      }}
+                    />
+                  </EuiText>
+                </EuiCallOut>
+              </>
+            )}
           </EuiPageSection>
 
           <EuiSpacer size="m" />
