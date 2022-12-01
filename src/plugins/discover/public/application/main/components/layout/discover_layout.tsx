@@ -89,7 +89,6 @@ export function DiscoverLayout({
   } = useDiscoverServices();
   const { main$ } = savedSearchData$;
   const dataState: DataMainMsg = useDataState(main$);
-
   const viewMode = useMemo(() => {
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
@@ -131,15 +130,16 @@ export function DiscoverLayout({
     savedSearch,
   });
 
-  const { columns, onAddColumn, onRemoveColumn } = useColumns({
-    capabilities,
-    config: uiSettings,
-    dataView,
-    dataViews,
-    setAppState: stateContainer.setAppState,
-    state,
-    useNewFieldsApi,
-  });
+  const { columns, onAddColumn, onRemoveColumn, collapseOnColumn, setCollapseOnColumn } =
+    useColumns({
+      capabilities,
+      config: uiSettings,
+      dataView,
+      dataViews,
+      setAppState: stateContainer.setAppState,
+      state,
+      useNewFieldsApi,
+    });
 
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
@@ -248,6 +248,7 @@ export function DiscoverLayout({
           <EuiFlexItem grow={false}>
             <SidebarMemoized
               columns={columns}
+              setCollapseByField={setCollapseOnColumn}
               documents$={savedSearchData$.documents$}
               dataViewList={dataViewList}
               onAddField={onAddColumn}
@@ -328,6 +329,7 @@ export function DiscoverLayout({
                   onFieldEdited={onFieldEdited}
                   columns={columns}
                   resizeRef={resizeRef}
+                  collapseOnColumn={collapseOnColumn}
                 />
               )}
             </EuiPageContent>

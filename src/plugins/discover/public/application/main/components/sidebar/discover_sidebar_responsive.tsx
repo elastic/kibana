@@ -102,6 +102,10 @@ export interface DiscoverSidebarResponsiveProps {
    * list of available fields fetched from ES
    */
   availableFields$: AvailableFields$;
+  /**
+   * sets which field to collapse by for the term explorer table
+   */
+  setCollapseByField: (collapseByField: string) => void;
 }
 
 /**
@@ -267,6 +271,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             setFieldFilter={setFieldFilter}
             editField={editField}
             createNewDataView={createNewDataView}
+            setCollapseByField={props.setCollapseByField}
           />
         </EuiHideFor>
       )}

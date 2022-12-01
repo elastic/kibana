@@ -23,11 +23,11 @@ export const TermsExplorerTab: React.FC<Omit<TermsExplorerTableProps, 'query' | 
       data: services.data,
     });
 
-    const [collapseField, setCollapseField] = useState(collapseFieldName);
+    const [collapseField, setCollapseField] = useState<string | undefined>();
 
     useEffect(() => {
       (async () => {
-        if (!collapseField) {
+        if (!collapseFieldName) {
           let fieldWithMinCardinality = {
             field: 'n/a',
             cardinality: Number.MAX_SAFE_INTEGER,
@@ -51,9 +51,11 @@ export const TermsExplorerTab: React.FC<Omit<TermsExplorerTableProps, 'query' | 
             }
           }
           setCollapseField(fieldWithMinCardinality.field);
+        } else {
+          setCollapseField(collapseFieldName);
         }
       })();
-    }, [props.columns, props.dataView, services.http, collapseField]);
+    }, [props.columns, props.dataView, services.http, collapseFieldName]);
 
     return (
       <div className={'kbnTermsExplorerWrapper'}>

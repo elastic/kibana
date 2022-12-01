@@ -44,6 +44,7 @@ export interface DiscoverMainContentProps {
   onFieldEdited: () => Promise<void>;
   columns: string[];
   resizeRef: RefObject<HTMLDivElement>;
+  collapseOnColumn?: string;
 }
 
 export const DiscoverMainContent = ({
@@ -64,6 +65,7 @@ export const DiscoverMainContent = ({
   onFieldEdited,
   columns,
   resizeRef,
+  collapseOnColumn,
 }: DiscoverMainContentProps) => {
   const services = useDiscoverServices();
   const { trackUiMetric } = services;
@@ -181,6 +183,7 @@ export const DiscoverMainContent = ({
             onAddFilter={!isPlainRecord ? onAddFilter : undefined}
             savedSearchRefetch$={savedSearchRefetch$}
             savedSearchDataTotalHits$={savedSearchData$.totalHits$}
+            collapseFieldName={collapseOnColumn}
           />
         )}
       </EuiFlexGroup>
