@@ -40,7 +40,7 @@ export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => 
   const [layerResults, setLayerResults] = useState<LayerResult[]>([]);
 
   useEffect(() => {
-    const visExtractor = new VisualizationExtractor(data.dataViews);
+    const visExtractor = new VisualizationExtractor();
     visExtractor
       .getResultLayersFromEmbeddable(embeddable, lens)
       .then(setLayerResults)

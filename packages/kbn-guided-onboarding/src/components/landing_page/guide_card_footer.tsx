@@ -90,6 +90,9 @@ export const GuideCardFooter = ({ guides, useCase, activateGuide }: GuideCardFoo
           max={numberSteps}
           size="s"
           label={completedLabel}
+          labelProps={{
+            css: progressBarLabelCss,
+          }}
         />
         <EuiSpacer size="l" />
         {viewGuideButton}

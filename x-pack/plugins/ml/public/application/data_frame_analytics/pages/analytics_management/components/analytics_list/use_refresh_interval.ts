@@ -38,9 +38,9 @@ export const useRefreshInterval = (
 
     function initAutoRefresh() {
       const interval = globalState?.refreshInterval ?? timefilter.getRefreshInterval();
-      const { value } = interval;
+      const { pause, value } = interval;
 
-      if (value === 0) {
+      if (pause === true || value === 0) {
         // the auto refresher starts in an off state
         // so switch it on and set the interval to 30s
         timefilter.setRefreshInterval({

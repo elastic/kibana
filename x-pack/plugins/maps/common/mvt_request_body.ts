@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { RisonValue } from 'rison-node';
-import rison from 'rison-node';
+import rison from '@kbn/rison';
 import { RENDER_AS } from './constants';
 
 export function decodeMvtResponseBody(encodedRequestBody: string): object {
@@ -18,7 +17,7 @@ export function encodeMvtResponseBody(unencodedRequestBody: object): string {
   // encodeURIComponent does not encode '%'
   // This causes preexisting '%' to break decoding because they are not valid URL encoding
   // To prevent this, properly url encode '%' before calling encodeURIComponent
-  return encodeURIComponent(rison.encode(unencodedRequestBody as RisonValue).replace('%', '%25'));
+  return encodeURIComponent(rison.encode(unencodedRequestBody).replace('%', '%25'));
 }
 
 export function getAggsTileRequest({

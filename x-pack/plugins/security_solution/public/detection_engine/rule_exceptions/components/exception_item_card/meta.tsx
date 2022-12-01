@@ -133,9 +133,9 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
                     <EuiToolTip content={listAndReferences.name} anchorClassName="eui-textTruncate">
                       <SecuritySolutionLinkAnchor
                         data-test-subj="ruleName"
-                        deepLinkId={SecurityPageName.rules}
+                        deepLinkId={SecurityPageName.exceptions}
                         // TODO: Update to list details URL once available
-                        path={getRuleDetailsTabUrl(listAndReferences.id, RuleDetailTabs.alerts)}
+                        path={`/details/${listAndReferences?.list_id}`}
                         external
                       >
                         {listAndReferences.name}
