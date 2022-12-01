@@ -6,41 +6,20 @@
  */
 
 import type { Role } from '@kbn/security-plugin/common';
+import { getNoResponseActionsRole } from './without_response_actions_role';
 
-export const getThreadIntelligenceAnalyst: () => Omit<Role, 'name'> = () => ({
-  elasticsearch: {
-    cluster: ['manage'],
-    indices: [
+export const getThreadIntelligenceAnalyst: () => Omit<Role, 'name'> = () => {
+  const noResponseActionsRole = getNoResponseActionsRole();
+  return {
+    ...noResponseActionsRole,
+    kibana: [
       {
-        names: [
-          '.alerts-security.alerts-default',
-          '.alerts-security.alerts-*',
-          '.siem-signals-*',
-          '.items-*',
-          '.lists-*',
-        ],
-        privileges: ['manage', 'write', 'read', 'view_index_metadata'],
+        ...noResponseActionsRole.kibana[0],
+        feature: {
+          ...noResponseActionsRole.kibana[0].feature,
+          siem: ['minimal_all', 'actions_log_management_read'],
+        },
       },
     ],
-    run_as: [],
-  },
-  kibana: [
-    {
-      base: [],
-      feature: {
-        actions: ['all'],
-        advancedSettings: ['all'],
-        dev_tools: ['all'],
-        fleet: ['all'],
-        generalCases: ['all'],
-        indexPatterns: ['all'],
-        osquery: ['all'],
-        savedObjectsManagement: ['all'],
-        savedObjectsTagging: ['all'],
-        siem: ['minimal_all', 'actions_log_management_read'],
-        stackAlerts: ['all'],
-      },
-      spaces: ['*'],
-    },
-  ],
-});
+  };
+};
