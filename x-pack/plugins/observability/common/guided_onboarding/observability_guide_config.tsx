@@ -49,12 +49,9 @@ export const observabilityGuideConfig: GuideConfig = {
       title: i18n.translate('xpack.observability.guideConfig.viewDashboardStep.title', {
         defaultMessage: 'Explore Kubernetes metrics',
       }),
-      description: i18n.translate(
-        'xpack.observability.guideConfig.viewDashboardStep.description',
-        {
-          defaultMessage: 'Stream, visualize, and analyze your Kubernetes infrastructure metrics.',
-        }
-      ),
+      description: i18n.translate('xpack.observability.guideConfig.viewDashboardStep.description', {
+        defaultMessage: 'Stream, visualize, and analyze your Kubernetes infrastructure metrics.',
+      }),
       location: {
         appID: 'dashboards',
         path: '#/view/kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
