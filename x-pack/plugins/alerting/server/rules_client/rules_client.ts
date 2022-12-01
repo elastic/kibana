@@ -2968,6 +2968,36 @@ export class RulesClient {
     }
   };
 
+  private tryToDisableTasks = async ({ taskIdsToDisable }: { taskIdsToDisable: string[] }) => {
+    return await withSpan({ name: 'taskManager.bulkDisable', type: 'rules' }, async () => {
+      if (taskIdsToDisable.length > 0) {
+        try {
+          const resultFromDisablingTasks = await this.taskManager.bulkDisable(taskIdsToDisable);
+          if (resultFromDisablingTasks.tasks.length) {
+            this.logger.debug(
+              `Successfully disabled schedules for underlying tasks: ${resultFromDisablingTasks.tasks
+                .map((task) => task.id)
+                .join(', ')}`
+            );
+          }
+          if (resultFromDisablingTasks.errors.length) {
+            this.logger.error(
+              `Failure to disable schedules for underlying tasks: ${resultFromDisablingTasks.errors
+                .map((error) => error.task.id)
+                .join(', ')}`
+            );
+          }
+        } catch (error) {
+          this.logger.error(
+            `Failure to disable schedules for underlying tasks: ${taskIdsToDisable.join(
+              ', '
+            )}. TaskManager bulkDisable failed with Error: ${error.message}`
+          );
+        }
+      }
+    });
+  };
+
   public bulkDisableRules = async (options: BulkOptions) => {
     const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
 
@@ -2995,67 +3025,10 @@ export class RulesClient {
         )
     );
 
-    if (taskIdsToDisable.length > 0) {
-      try {
-        const resultFromDisablingTasks = await this.taskManager.bulkDisable(taskIdsToDisable);
-        if (resultFromDisablingTasks.tasks.length) {
-          this.logger.debug(
-            `Successfully disabled schedules for underlying tasks: ${resultFromDisablingTasks.tasks
-              .map((task) => task.id)
-              .join(', ')}`
-          );
-        }
-        if (resultFromDisablingTasks.errors.length) {
-          this.logger.error(
-            `Failure to disable schedules for underlying tasks: ${resultFromDisablingTasks.errors
-              .map((error) => error.task.id)
-              .join(', ')}`
-          );
-        }
-      } catch (error) {
-        this.logger.error(
-          `Failure to disable schedules for underlying tasks: ${taskIdsToDisable.join(
-            ', '
-          )}. TaskManager bulkDisable failed with Error: ${error.message}`
-        );
-      }
-    }
-
-    const taskIdsFailedToBeDeleted: string[] = [];
-    const taskIdsSuccessfullyDeleted: string[] = [];
-
-    if (taskIdsToDelete.length > 0) {
-      try {
-        const resultFromDeletingTasks = await this.taskManager.bulkRemoveIfExist(taskIdsToDelete);
-        resultFromDeletingTasks?.statuses.forEach((status) => {
-          if (status.success) {
-            taskIdsSuccessfullyDeleted.push(status.id);
-          } else {
-            taskIdsFailedToBeDeleted.push(status.id);
-          }
-        });
-        if (taskIdsSuccessfullyDeleted.length) {
-          this.logger.debug(
-            `Successfully deleted schedules for underlying tasks: ${taskIdsSuccessfullyDeleted.join(
-              ', '
-            )}`
-          );
-        }
-        if (taskIdsFailedToBeDeleted.length) {
-          this.logger.error(
-            `Failure to delete schedules for underlying tasks: ${taskIdsFailedToBeDeleted.join(
-              ', '
-            )}`
-          );
-        }
-      } catch (error) {
-        this.logger.error(
-          `Failure to delete schedules for underlying tasks: ${taskIdsToDelete.join(
-            ', '
-          )}. TaskManager bulkRemoveIfExist failed with Error: ${error.message}`
-        );
-      }
-    }
+    await Promise.allSettled([
+      this.tryToDisableTasks({ taskIdsToDisable }),
+      this.tryToRemoveTasks({ taskIdsToDelete }),
+    ]);
 
     const updatedRules = rules.map(({ id, attributes, references }) => {
       return this.getAlertFromRaw(
@@ -3071,101 +3044,116 @@ export class RulesClient {
   };
 
   private bulkDisableRulesWithOCC = async ({ filter }: { filter: KueryNode | null }) => {
-    const rulesFinder =
-      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
-        {
+    const rulesFinder = await withSpan(
+      {
+        name: 'encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser',
+        type: 'rules',
+      },
+      () =>
+        this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
           filter,
           type: 'alert',
           perPage: 100,
           ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
-        }
-      );
+        })
+    );
 
     const rulesToDisable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
     const errors: BulkOperationError[] = [];
     const ruleNameToRuleIdMapping: Record<string, string> = {};
 
-    for await (const response of rulesFinder.find()) {
-      await pMap(response.saved_objects, async (rule) => {
-        try {
-          if (rule.attributes.enabled === false) return;
+    await withSpan(
+      { name: 'Get rules, collect them and their attributes', type: 'rules' },
+      async () => {
+        for await (const response of rulesFinder.find()) {
+          await pMap(response.saved_objects, async (rule) => {
+            try {
+              if (rule.attributes.enabled === false) return;
 
-          this.recoverRuleAlerts(rule.id, rule.attributes);
+              this.recoverRuleAlerts(rule.id, rule.attributes);
 
-          if (rule.attributes.name) {
-            ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
-          }
+              if (rule.attributes.name) {
+                ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+              }
 
-          const username = await this.getUserName();
-          const updatedAttributes = this.updateMeta({
-            ...rule.attributes,
-            enabled: false,
-            scheduledTaskId:
-              rule.attributes.scheduledTaskId === rule.id ? rule.attributes.scheduledTaskId : null,
-            updatedBy: username,
-            updatedAt: new Date().toISOString(),
+              const username = await this.getUserName();
+              const updatedAttributes = this.updateMeta({
+                ...rule.attributes,
+                enabled: false,
+                scheduledTaskId:
+                  rule.attributes.scheduledTaskId === rule.id ? rule.attributes.scheduledTaskId : null,
+                updatedBy: username,
+                updatedAt: new Date().toISOString(),
+              });
+
+              rulesToDisable.push({
+                ...rule,
+                attributes: {
+                  ...updatedAttributes,
+                },
+              });
+
+              this.auditLogger?.log(
+                ruleAuditEvent({
+                  action: RuleAuditAction.DISABLE,
+                  outcome: 'unknown',
+                  savedObject: { type: 'alert', id: rule.id },
+                })
+              );
+            } catch (error) {
+              errors.push({
+                message: error.message,
+                rule: {
+                  id: rule.id,
+                  name: rule.attributes?.name,
+                },
+              });
+              this.auditLogger?.log(
+                ruleAuditEvent({
+                  action: RuleAuditAction.DISABLE,
+                  error,
+                })
+              );
+            }
           });
-
-          rulesToDisable.push({
-            ...rule,
-            attributes: {
-              ...updatedAttributes,
-            },
-          });
-
-          this.auditLogger?.log(
-            ruleAuditEvent({
-              action: RuleAuditAction.DISABLE,
-              outcome: 'unknown',
-              savedObject: { type: 'alert', id: rule.id },
-            })
-          );
-        } catch (error) {
-          errors.push({
-            message: error.message,
-            rule: {
-              id: rule.id,
-              name: rule.attributes?.name,
-            },
-          });
-          this.auditLogger?.log(
-            ruleAuditEvent({
-              action: RuleAuditAction.DISABLE,
-              error,
-            })
-          );
         }
-      });
-    }
+      }
+    );
 
-    const result = await this.unsecuredSavedObjectsClient.bulkCreate(rulesToDisable, {
-      overwrite: true,
-    });
+    const result = await withSpan(
+      { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
+      () =>
+        this.unsecuredSavedObjectsClient.bulkCreate(rulesToDisable, {
+          overwrite: true,
+        })
+    );
 
     const taskIdsToDisable: string[] = [];
     const taskIdsToDelete: string[] = [];
     const disabledRules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
 
-    result.saved_objects.forEach((rule) => {
-      if (rule.error === undefined) {
-        if (rule.attributes.scheduledTaskId) {
-          if (rule.attributes.scheduledTaskId !== rule.id) {
-            taskIdsToDelete.push(rule.attributes.scheduledTaskId);
-          } else {
-            taskIdsToDisable.push(rule.attributes.scheduledTaskId);
+    withSpan({ name: 'Collect errors, task ids to disable', type: 'rules' }, async () => {
+      result.saved_objects.forEach((rule) => {
+        if (rule.error === undefined) {
+          if (rule.attributes.scheduledTaskId) {
+            if (rule.attributes.scheduledTaskId !== rule.id) {
+              taskIdsToDelete.push(rule.attributes.scheduledTaskId);
+            } else {
+              taskIdsToDisable.push(rule.attributes.scheduledTaskId);
+            }
           }
+          disabledRules.push(rule);
+        } else {
+          errors.push({
+            message: rule.error.message ?? 'n/a',
+            status: rule.error.statusCode,
+            rule: {
+              id: rule.id,
+              name: ruleNameToRuleIdMapping[rule.id] ?? 'n/a',
+            },
+          });
         }
-        disabledRules.push(rule);
-      } else {
-        errors.push({
-          message: rule.error.message ?? 'n/a',
-          status: rule.error.statusCode,
-          rule: {
-            id: rule.id,
-            name: ruleNameToRuleIdMapping[rule.id] ?? 'n/a',
-          },
-        });
-      }
+      });
     });
 
     return { errors, rules: disabledRules, taskIdsToDisable, taskIdsToDelete };
