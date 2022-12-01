@@ -83,7 +83,7 @@ do everything you'd do with a saved
 such as adding fields and creating {es} query alerts. Your work won't be visible to others in your space.
 
 A temporary {data-source} remains in your space until you change apps, or until you save it.
-Temporary {data-sources} are not available in *Stack Management.*
+The temporary {data-sources} you create are unavailable in *Stack Management.*
 
 [role="screenshot"]
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte3a4f3994c44c0cc/637eb0c95834861044c21a25/ad-hoc-data-view.gif[how to create an ad-hoc data view]
