@@ -30,7 +30,10 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
-import { securityGuideId, securityGuideConfig } from '../common/guided_onboarding/security_guide_config';
+import {
+  securityGuideId,
+  securityGuideConfig,
+} from '../common/guided_onboarding/security_guide_config';
 import {
   createEqlAlertType,
   createIndicatorMatchAlertType,
