@@ -13,7 +13,8 @@ import type {
   KibanaRequest,
   RequestHandler,
 } from '@kbn/core-http-server';
-import { kibanaResponseFactory, KibanaResponse } from './response';
+import { kibanaResponseFactory } from './response';
+import { KibanaResponse } from './kibana_response/kibana_response';
 import { wrapErrors } from './error_wrapper';
 
 const createHandler =
