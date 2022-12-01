@@ -16,10 +16,10 @@ const FIELD_TYPES = ['bool', 'str', 'int', 'ipv4', 'ts', 'text'];
 
 export interface WorkerData {
   numberOfDocuments: number;
-  id: string;
+  numberOfFields: number;
 }
 
-const { numberOfDocuments } = workerData as WorkerData;
+const { numberOfDocuments, numberOfFields } = workerData as WorkerData;
 const logger = createLogger(LogLevel.info);
 
 function getRandomInt(min: number, max: number) {
@@ -124,12 +124,17 @@ const generateFieldName = () => {
 };
 
 export function generateTestData() {
-  const nrOfFields = 70;
   // name, age and last_updated should be generated only once
   const format = 'name:str,age:int,last_updated:ts,ip:ipv4'.split(',');
-  for (let i = 0; i <= nrOfFields; i++) {
+  const fieldNames = new Set();
+  for (let i = 0; i <= numberOfFields; i++) {
     const fieldType = generateFieldType();
-    const fieldName = generateFieldName();
+    let fieldName = generateFieldName();
+    // this is to avoid generating two fields with the same name
+    if (fieldNames.has(fieldName)) {
+      fieldName = fieldName + faker.random.alphaNumeric(4);
+    }
+    fieldNames.add(fieldName);
     format.push(`${fieldName}:${fieldType}`);
   }
   const tsStart = new Date().toISOString();
@@ -143,10 +148,23 @@ export function generateTestData() {
   return items;
 }
 
+const getSize = () => {
+  if (numberOfDocuments <= 100000 && numberOfFields < 100) {
+    return 10000;
+  }
+  if (numberOfDocuments <= 100000 && numberOfFields <= 200) {
+    return 5000;
+  }
+  if (numberOfDocuments <= 100000) {
+    return 10000 - numberOfFields;
+  }
+  return 500;
+};
+
 parentPort!.on('message', async (message) => {
   if (message === 'start') {
     try {
-      const size = 5000;
+      const size = getSize();
       const items = generateTestData();
       let start = 0;
       const end = Math.round(numberOfDocuments / size);

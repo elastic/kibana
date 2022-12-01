@@ -39,6 +39,8 @@ interface Services {
   installLargeDataset: (params: LargeDataSetParams) => Promise<void>;
   checkLargeDatasetInstalled: () => Promise<{ installed: boolean; count: number }>;
   uninstallLargeDataset: () => Promise<void>;
+  // TODO: import type
+  getDiscoverLocator: () => unknown;
 }
 
 /**
@@ -50,6 +52,7 @@ const Context = React.createContext<Services | null>(null);
 
 export interface LargeDataSetParams {
   nrOfDocuments: number;
+  nrOfFields: number;
 }
 
 /**
@@ -64,6 +67,7 @@ export const SampleDataTabProvider: FC<SampleDataTabServices> = ({ children, ...
     installLargeDataset,
     checkLargeDatasetInstalled,
     uninstallLargeDataset,
+    getDiscoverLocator,
   } = services;
   return (
     <Context.Provider
@@ -75,6 +79,7 @@ export const SampleDataTabProvider: FC<SampleDataTabServices> = ({ children, ...
         installLargeDataset,
         checkLargeDatasetInstalled,
         uninstallLargeDataset,
+        getDiscoverLocator,
       }}
     >
       <SampleDataCardProvider {...services}>{children}</SampleDataCardProvider>
@@ -95,6 +100,7 @@ interface KibanaDependencies {
       };
     };
   };
+  getDiscoverLocator: () => unknown;
   // TODO: clintandrewhall - This is using a type from the home plugin.  I'd prefer we
   // use the type directly from Kibana instead.
   trackUiMetric: (type: string, eventNames: string | string[], count?: number) => void;
@@ -112,13 +118,12 @@ export const SampleDataTabKibanaProvider: FC<SampleDataTabKibanaDependencies> = 
   children,
   ...dependencies
 }) => {
-  const { coreStart, trackUiMetric } = dependencies;
+  const { coreStart, trackUiMetric, getDiscoverLocator } = dependencies;
   const { http, notifications } = coreStart;
 
   const installLargeDataset = async (params: LargeDataSetParams) => {
-    const { nrOfDocuments } = params;
     await http.post(`${URL_SAMPLE_DATA_API}/large_dataset`, {
-      body: JSON.stringify({ nrOfDocuments }),
+      body: JSON.stringify(params),
     });
   };
 
@@ -141,6 +146,7 @@ export const SampleDataTabKibanaProvider: FC<SampleDataTabKibanaDependencies> = 
     installLargeDataset,
     checkLargeDatasetInstalled,
     uninstallLargeDataset,
+    getDiscoverLocator,
   };
 
   return (

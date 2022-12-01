@@ -19,14 +19,19 @@ import {
   EuiForm,
   EuiFormRow,
   EuiRange,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { LargeDataSetParams, useServices } from './services';
 import { useSVG } from './hooks';
 
-const MIN = 10000;
-const MAX = 1000000;
-const STEP = 1000;
+const MIN_DOCUMENTS = 10000;
+const MAX_DOCUMENTS = 500000;
+const STEP_DOCUMENTS = 5000;
+const MIN_FIELDS = 10;
+const MAX_FIELDS = 500;
+const STEP_FIELDS = 5;
 const INDEX_NAME = 'kibana_sample_data_large';
 const NOTIFICATION_KEY = 'largedatasetPanel:notificationShown';
 const EXPECTED_NR_OF_DOCUMENTS_KEY = 'largedatasetPanel:expectedNrOfDocuments';
@@ -72,9 +77,6 @@ const i18nTexts = {
       defaultMessage: 'Large dataset already generated.',
     }
   ),
-  goToDiscover: i18n.translate('homePackages.largeDatasetPanel.goToDiscover.info', {
-    defaultMessage: 'Go to Discover to see the dataset: ',
-  }),
   seeItInDiscover: i18n.translate('homePackages.largeDatasetPanel.seeItInDiscover.info', {
     defaultMessage:
       'Once it is ready, you will be able to see the dataset in Discover, under the name: ',
@@ -101,10 +103,14 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
   const [checked, setChecked] = useState<boolean>(false);
   const [installStatus, setInstallStatus] = useState<Status>(Status.EMPTY);
   const [nrOfDocuments, setNrOfDocuments] = useState<number>(100000);
+  const [nrOfFields, setNrOfFields] = useState<number>(70);
+  const [discoverUrl, setDiscoverUrl] = useState<string>('#');
   const intervalRef = useRef<ReturnType<typeof setTimeout>>();
-  const { notifySuccess, notifyError } = useServices();
+  const { notifySuccess, notifyError, getDiscoverLocator } = useServices();
 
   const image = imageSrc ? <EuiImage alt={'demo image'} size="l" src={imageSrc} /> : null;
+
+  const discoverLocator = getDiscoverLocator();
 
   useEffect(() => {
     const checkIfInstalled = async () => {
@@ -127,9 +133,16 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
         updateSessionStorage(Status.EMPTY);
       }
     };
+    const getDiscoverUrl = async () => {
+      // @ts-expect-error
+      const url = await discoverLocator.getRedirectUrl({ indexPatternId: null });
+      setDiscoverUrl(url);
+    };
     sessionStorage.setItem(EXPECTED_NR_OF_DOCUMENTS_KEY, nrOfDocuments.toString(10));
     checkIfInstalled();
+    getDiscoverUrl();
     intervalRef.current = setInterval(checkIfInstalled, 30000); // half a minute
+
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -145,7 +158,7 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
 
   const onInstallClick = async () => {
     try {
-      installDataset({ nrOfDocuments });
+      installDataset({ nrOfDocuments, nrOfFields });
       updateSessionStorage(Status.GENERATING);
     } catch {
       notifyError(i18nTexts.datasetUninstallErrorMessage);
@@ -172,16 +185,32 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
     sessionStorage.setItem(EXPECTED_NR_OF_DOCUMENTS_KEY, nrOfDocuments.toString(10));
   };
 
+  const onNrOfFieldsChange = (target: EventTarget | (EventTarget & HTMLInputElement)) => {
+    const value = Number((target as HTMLInputElement).value);
+    setNrOfFields(value);
+  };
+
   const configureLayout = (
     <EuiPanel>
       <EuiForm component="form">
-        <EuiFormRow label="Number of documents">
+        <EuiFormRow label="Desired number of documents">
           <EuiRange
-            min={MIN}
-            max={MAX}
-            step={STEP}
+            min={MIN_DOCUMENTS}
+            max={MAX_DOCUMENTS}
+            step={STEP_DOCUMENTS}
             value={nrOfDocuments}
             onChange={(e) => onNrOfDocumentsChange(e.target)}
+            showLabels
+            showValue
+          />
+        </EuiFormRow>
+        <EuiFormRow label="Desired number of fields">
+          <EuiRange
+            min={MIN_FIELDS}
+            max={MAX_FIELDS}
+            step={STEP_FIELDS}
+            value={nrOfFields}
+            onChange={(e) => onNrOfFieldsChange(e.target)}
             showLabels
             showValue
           />
@@ -197,7 +226,31 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
       : i18nTexts.datasetAlreadyGenerated;
 
   const installSubtitleText =
-    installStatus === Status.GENERATING ? i18nTexts.seeItInDiscover : i18nTexts.goToDiscover;
+    installStatus === Status.GENERATING ? (
+      <FormattedMessage
+        id="homePackages.largeDatasetPanel.seeItInDiscover.info"
+        defaultMessage="Once it is ready, you will be able to see the dataset in {discoverLink}, under the name: "
+        values={{
+          discoverLink: (
+            <EuiLink href={discoverUrl} target="_blank" external>
+              Discover
+            </EuiLink>
+          ),
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        id="homePackages.largeDatasetPanel.goToDiscover.info"
+        defaultMessage="Go to {discoverLink} to see the dataset: "
+        values={{
+          discoverLink: (
+            <EuiLink href={discoverUrl} target="_blank" external>
+              Discover
+            </EuiLink>
+          ),
+        }}
+      />
+    );
 
   const datasetInstalledLayout = (
     <EuiFlexGroup alignItems="center">

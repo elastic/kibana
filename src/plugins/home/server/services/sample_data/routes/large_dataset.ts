@@ -28,23 +28,24 @@ export function createLargeDatasetRoute(router: IRouter, logger: Logger, core: C
     {
       path: '/api/sample_data/large_dataset',
       validate: {
-        body: schema.object({ nrOfDocuments: schema.number() }),
+        body: schema.object({ nrOfDocuments: schema.number(), nrOfFields: schema.number() }),
       },
     },
     async (context, req, res) => {
-      const { nrOfDocuments } = req.body;
+      const { nrOfDocuments, nrOfFields } = req.body;
       const esClient = (await core.getStartServices())[0].elasticsearch.client;
       id = uuidv4();
       const worker = new Worker(Path.join(__dirname, '../worker.js'), {
         workerData: {
           numberOfDocuments: nrOfDocuments,
+          numberOfFields: nrOfFields,
         },
       });
       workerState[id] = worker;
       try {
         await deleteIndex(esClient, LARGE_DATASET_INDEX_NAME);
         await createIndex(esClient, LARGE_DATASET_INDEX_NAME);
-        let delay = 1000;
+        let delay = 100;
         let index = 0;
         worker.on('message', async (message) => {
           try {

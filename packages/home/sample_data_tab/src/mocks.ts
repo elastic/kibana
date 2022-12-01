@@ -40,6 +40,7 @@ export const getStoryServices = (params: Params) => {
     installLargeDataset: () => new Promise(() => {}),
     checkLargeDatasetInstalled: () => new Promise(() => false),
     uninstallLargeDataset: () => new Promise(() => {}),
+    getDiscoverLocator: () => {},
   };
 
   return services;
