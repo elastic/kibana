@@ -10,7 +10,6 @@ import { first, flatten, groupBy, isEmpty, keyBy, sortBy, uniq } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { Transaction } from '../../typings/es_schemas/ui/transaction';
 import {
-  EntryWaterfallTransaction,
   IWaterfall,
   IWaterfallError,
   IWaterfallSpan,
@@ -23,10 +22,6 @@ import {
   WaterfallTransactionDoc,
 } from './typings';
 import type { TraceItems } from './typings';
-
-interface IWaterfallGroup {
-  [key: string]: IWaterfallSpanOrTransaction[];
-}
 
 const ROOT_ID = 'root';
 
@@ -142,8 +137,8 @@ export function getClockSkew(
 }
 
 export function getOrderedWaterfallItems(
-  childrenByParentId: IWaterfallGroup,
-  entryWaterfallTransaction?: EntryWaterfallTransaction
+  childrenByParentId: Record<string, IWaterfallSpanOrTransaction[]>,
+  entryWaterfallTransaction?: IWaterfallTransaction
 ) {
   if (!entryWaterfallTransaction) {
     return [];
@@ -181,7 +176,7 @@ export function getOrderedWaterfallItems(
 }
 
 function getRootTransaction(
-  childrenByParentId: IWaterfallGroup
+  childrenByParentId: Record<string, IWaterfallSpanOrTransaction[]>
 ): RootTransaction | undefined {
   const item = first(childrenByParentId.root);
   if (item && item.docType === 'transaction') {
@@ -297,10 +292,10 @@ const getChildrenGroupedByParentId = (
 const getEntryWaterfallTransaction = (
   entryTransactionId: string,
   waterfallItems: IWaterfallSpanOrTransaction[]
-): EntryWaterfallTransaction | undefined =>
+): IWaterfallTransaction | undefined =>
   waterfallItems.find(
     (item) => item.docType === 'transaction' && item.id === entryTransactionId
-  ) as EntryWaterfallTransaction;
+  ) as IWaterfallTransaction;
 
 function isInEntryTransaction(
   parentIdLookup: Map<string, string>,
@@ -408,6 +403,7 @@ function addColorToItems({
 
 export const INITIAL_DATA: IWaterfall = {
   entryWaterfallTransaction: undefined,
+  entryTransaction: undefined,
   rootTransaction: undefined,
   exceedsMax: false,
   totalErrorsCount: 0,
@@ -421,9 +417,9 @@ export const INITIAL_DATA: IWaterfall = {
 
 export function getWaterfall(
   traceItems: TraceItems,
-  entryTransactionId?: Transaction['transaction']['id']
+  entryTransaction?: Transaction
 ): IWaterfall {
-  if (isEmpty(traceItems.traceDocs) || !entryTransactionId) {
+  if (isEmpty(traceItems.traceDocs) || !entryTransaction) {
     return INITIAL_DATA;
   }
 
@@ -439,7 +435,7 @@ export function getWaterfall(
   );
 
   const entryWaterfallTransaction = getEntryWaterfallTransaction(
-    entryTransactionId,
+    entryTransaction.transaction.id,
     waterfallItems
   );
 
@@ -462,6 +458,7 @@ export function getWaterfall(
     exceedsMax: traceItems.exceedsMax,
     totalErrorsCount: traceItems.errorDocs.length,
     entryWaterfallTransaction,
+    entryTransaction,
     rootTransaction,
     duration,
     items,

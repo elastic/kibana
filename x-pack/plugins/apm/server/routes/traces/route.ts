@@ -102,14 +102,17 @@ const tracesByIdRoute = createApmServerRoute({
     const { params, config } = resources;
     const { traceId } = params.path;
     const { start, end, entryTransactionId } = params.query;
-    const traceItems = await getTraceItems(
-      traceId,
-      config,
-      apmEventClient,
-      start,
-      end
-    );
-    const waterfall = getWaterfall(traceItems, entryTransactionId);
+    const [traceItems, entryTransaction] = await Promise.all([
+      getTraceItems(traceId, config, apmEventClient, start, end),
+      entryTransactionId
+        ? getTransaction({
+            apmEventClient,
+            transactionId: entryTransactionId,
+            traceId,
+          })
+        : undefined,
+    ]);
+    const waterfall = getWaterfall(traceItems, entryTransaction);
     return waterfall;
   },
 });

@@ -24,12 +24,11 @@ import { useTheme } from '../../../../../../hooks/use_theme';
 import type {
   IWaterfall,
   IWaterfallSpanOrTransaction,
-  EntryWaterfallTransaction,
 } from '../../../../../../../common/waterfall_helper/typings';
 
 interface AccordionWaterfallProps {
   isOpen: boolean;
-  item: EntryWaterfallTransaction;
+  item: IWaterfallSpanOrTransaction;
   level: number;
   duration: IWaterfall['duration'];
   waterfallItemId?: string;

@@ -9,12 +9,9 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { ErrorRaw } from '../../typings/es_schemas/raw/error_raw';
 import { EventOutcome } from '../../typings/es_schemas/raw/fields/event_outcome';
 import { Faas } from '../../typings/es_schemas/raw/fields/faas';
-import { Http } from '../../typings/es_schemas/raw/fields/http';
 import { Service } from '../../typings/es_schemas/raw/fields/service';
 import { SpanLink } from '../../typings/es_schemas/raw/fields/span_links';
-import { Stackframe } from '../../typings/es_schemas/raw/fields/stackframe';
 import { TimestampUs } from '../../typings/es_schemas/raw/fields/timestamp_us';
-import { Url } from '../../typings/es_schemas/raw/fields/url';
 import { Agent } from '../../typings/es_schemas/ui/fields/agent';
 import { Transaction } from '../../typings/es_schemas/ui/transaction';
 
@@ -109,6 +106,7 @@ export type IWaterfallTransaction = IWaterfallTransactionSpanItemBase<
 export interface WaterfallSpanDoc extends WaterfallTransactionSpanBaseDoc {
   processor: { event: ProcessorEvent.span };
   span: {
+    id: string;
     subtype?: string;
     type: string;
     action?: string;
@@ -121,32 +119,8 @@ export interface WaterfallSpanDoc extends WaterfallTransactionSpanBaseDoc {
     sync?: boolean;
     duration: { us: number };
     links?: SpanLink[];
-    // from this point on all fields are used in the flyout
-    stacktrace?: Stackframe[];
-    db?: {
-      statement?: string;
-      type?: string;
-    };
-    http?: {
-      url?: {
-        original?: string;
-      };
-      response: {
-        status_code: number;
-      };
-      method?: string;
-    };
-    id: string;
-    destination?: {
-      service: {
-        resource: string;
-      };
-    };
   };
   child?: { id: string[] };
-  // from this point on all fields are used in the flyout
-  url?: Url;
-  http?: Http;
 }
 export type IWaterfallSpan = IWaterfallTransactionSpanItemBase<
   WaterfallSpanDoc,
@@ -156,11 +130,6 @@ export type IWaterfallSpan = IWaterfallTransactionSpanItemBase<
 export type IWaterfallSpanOrTransaction =
   | IWaterfallTransaction
   | IWaterfallSpan;
-
-export type EntryWaterfallTransaction = IWaterfallTransactionSpanItemBase<
-  Transaction,
-  'transaction'
->;
 
 export interface RootTransaction {
   trace: { id: string };
@@ -177,7 +146,8 @@ export interface RootTransaction {
 }
 
 export interface IWaterfall {
-  entryWaterfallTransaction?: EntryWaterfallTransaction;
+  entryWaterfallTransaction?: IWaterfallTransaction;
+  entryTransaction?: Transaction;
   rootTransaction?: RootTransaction;
 
   /**

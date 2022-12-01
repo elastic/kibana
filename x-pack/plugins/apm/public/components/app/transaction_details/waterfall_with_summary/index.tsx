@@ -84,9 +84,9 @@ export function WaterfallWithSummary<TSample extends {}>({
       : 0
     : sampleActivePage;
 
-  const { entryWaterfallTransaction } = waterfallFetchResult.waterfall;
+  const { entryTransaction } = waterfallFetchResult.waterfall;
 
-  if (!entryWaterfallTransaction && traceSamples?.length === 0 && isSucceded) {
+  if (!entryTransaction && traceSamples?.length === 0 && isSucceded) {
     return (
       <EuiEmptyPrompt
         title={
@@ -100,8 +100,6 @@ export function WaterfallWithSummary<TSample extends {}>({
       />
     );
   }
-
-  const entryTransaction = entryWaterfallTransaction?.doc;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
