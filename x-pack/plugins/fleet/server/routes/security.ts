@@ -114,6 +114,7 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
 
 // needed from Read routes
 export const readEndpointPackagePrivileges: DeepPartialTruthy<FleetAuthz> = Object.freeze({
+export const READ_ENDPOINT_PACKAGE_PRIVILEGES: DeepPartialTruthy<FleetAuthz> = Object.freeze({
   packagePrivileges: {
     endpoint: {
       actions: {
@@ -139,6 +140,7 @@ export const readEndpointPackagePrivileges: DeepPartialTruthy<FleetAuthz> = Obje
 
 // needed from CUD routes
 export const writeEndpointPackagePrivileges: DeepPartialTruthy<FleetAuthz> = Object.freeze({
+export const WRITE_ENDPOINT_PACKAGE_PRIVILEGES: DeepPartialTruthy<FleetAuthz> = Object.freeze({
   packagePrivileges: {
     endpoint: {
       actions: {

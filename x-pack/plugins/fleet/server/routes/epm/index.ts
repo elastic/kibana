@@ -35,8 +35,8 @@ import {
 } from '../../types';
 import {
   type FleetAuthzRouter,
-  readEndpointPackagePrivileges,
-  writeEndpointPackagePrivileges,
+  READ_ENDPOINT_PACKAGE_PRIVILEGES,
+  WRITE_ENDPOINT_PACKAGE_PRIVILEGES,
   validateSecurityRbac,
 } from '../security';
 
@@ -76,7 +76,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         validateSecurityRbac(fleetAuthz, {
           any: {
             integrations: { readPackageInfo: true },
-            ...readEndpointPackagePrivileges,
+            ...READ_ENDPOINT_PACKAGE_PRIVILEGES,
           },
         }),
     },
@@ -160,7 +160,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             integrations: { installPackages: true, upgradePackages: true },
           },
           any: {
-            ...writeEndpointPackagePrivileges,
+            ...WRITE_ENDPOINT_PACKAGE_PRIVILEGES,
           },
         }),
     },
