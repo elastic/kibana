@@ -38,10 +38,22 @@ steps:
     depends_on:
       - build
       - build_api_docs
+      - complexity
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
+
+  - command: .buildkite/scripts/steps/complexity.sh
+    label: 'Code Complexity'
+    agents:
+      queue: n2-4-spot
+    key: complexity
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
