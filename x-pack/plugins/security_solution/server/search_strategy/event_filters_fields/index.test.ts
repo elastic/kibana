@@ -139,6 +139,24 @@ describe('Event filters fields', () => {
         );
       }).rejects.toThrowError('Invalid indices request invalid');
     });
+
+    it('should throw when more than one index', async () => {
+      const indices = ['invalid', 'invalid2'];
+      const request = {
+        indices,
+        onlyCheckIfIndicesExist: false,
+      };
+
+      await expect(async () => {
+        await requestEventFiltersFieldsSearch(
+          endpointAppContextService,
+          request,
+          deps,
+          beatFields,
+          IndexPatterns
+        );
+      }).rejects.toThrowError('Invalid indices request invalid, invalid2');
+    });
   });
 
   describe('without right privileges', () => {
