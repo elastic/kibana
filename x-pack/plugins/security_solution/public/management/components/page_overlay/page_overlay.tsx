@@ -17,6 +17,7 @@ import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useHasFullScreenContent } from '../../../common/containers/use_full_screen';
 import {
   FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET,
+  TIMELINE_EUI_POPOVER_PANEL_ZINDEX,
   TIMELINE_OVERRIDES_CSS_STYLESHEET,
 } from '../../../common/components/page';
 import {
@@ -110,6 +111,11 @@ const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
     .euiOverlayMask,
     .euiFlyout {
       z-index: ${({ theme: { eui } }) => eui[TIMELINE_EUI_THEME_ZINDEX_LEVEL]};
+    }
+
+    // Confirm Dialog mask overlay should be displayed above any other popover
+    .euiOverlayMask[data-relative-to-header="above"] {
+      z-index: ${TIMELINE_EUI_POPOVER_PANEL_ZINDEX};
     }
 
     // Other Timeline overrides from AppGlobalStyle:
