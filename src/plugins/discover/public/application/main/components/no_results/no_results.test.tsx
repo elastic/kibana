@@ -12,13 +12,12 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import * as QueryApi from '@kbn/unified-field-list-plugin/public/hooks/use_query_subscriber';
 import * as SearchApi from '@kbn/unified-search-plugin/public/query_string_input/custom_date_picker_panel/get_documents_time_range';
 import { DiscoverNoResults, DiscoverNoResultsProps } from './no_results';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 
-const data = dataPluginMock.createStartContract();
 const dataView = stubDataView;
 
 jest.spyOn(QueryApi, 'useQuerySubscriber');
@@ -27,25 +26,18 @@ jest.spyOn(SearchApi, 'getDocumentsTimeRange');
 async function mountAndFindSubjects(
   props: Omit<DiscoverNoResultsProps, 'onDisableFilters' | 'data' | 'dataView'>
 ) {
-  const services = {
-    docLinks: {
-      links: {
-        query: {
-          luceneQuerySyntax: 'documentation-link',
-        },
-      },
-    },
-    uiSettings: {
-      get: jest.fn().mockReturnValue(true),
-    },
-  };
-
+  const services = createDiscoverServicesMock();
   let component: ReactWrapper;
 
   await act(async () => {
     component = await mountWithIntl(
       <KibanaContextProvider services={services}>
-        <DiscoverNoResults data={data} dataView={dataView} onDisableFilters={() => {}} {...props} />
+        <DiscoverNoResults
+          data={services.data}
+          dataView={dataView}
+          onDisableFilters={() => {}}
+          {...props}
+        />
       </KibanaContextProvider>
     );
   });
