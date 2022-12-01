@@ -20,7 +20,7 @@ import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import { TimeseriesChart } from '../timeseries_chart';
+import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -161,7 +161,7 @@ export function TransactionColdstartRateChart({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <TimeseriesChart
+      <TimeseriesChartWithContext
         id="coldstartRate"
         height={height}
         showAnnotations={showAnnotations}
