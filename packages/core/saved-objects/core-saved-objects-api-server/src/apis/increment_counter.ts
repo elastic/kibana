@@ -10,6 +10,8 @@ import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-commo
 import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 
 /**
+ * Options for the increment counter operation
+ *
  * @public
  */
 export interface SavedObjectsIncrementCounterOptions<Attributes = unknown>
@@ -33,6 +35,8 @@ export interface SavedObjectsIncrementCounterOptions<Attributes = unknown>
 }
 
 /**
+ * The field and increment details for the increment counter operation
+ *
  * @public
  */
 export interface SavedObjectsIncrementCounterField {

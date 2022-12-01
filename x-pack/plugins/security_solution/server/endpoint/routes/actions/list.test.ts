@@ -40,7 +40,13 @@ interface CallApiRouteInterface {
   authz?: Partial<EndpointAuthz>;
 }
 
-const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
+const Enterprise = licenseMock.createLicense({
+  license: { type: 'enterprise', mode: 'enterprise' },
+});
+
+const Platinum = licenseMock.createLicense({
+  license: { type: 'platinum', mode: 'platinum' },
+});
 const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
 
 describe('Action List Route', () => {
@@ -94,20 +100,19 @@ describe('Action List Route', () => {
 
       const ctx = createRouteHandlerContext(mockScopedClient, mockSavedObjectClient);
 
-      const withLicense = license ? license : Platinum;
+      const withLicense = license ? license : Enterprise;
       licenseEmitter.next(withLicense);
 
-      ctx.securitySolution.endpointAuthz = {
+      ctx.securitySolution.getEndpointAuthz.mockResolvedValue({
         ...getEndpointAuthzInitialStateMock({
-          canReadActionsLogManagement:
-            // mimicking the behavior of the EndpointAuthz class
-            // just so we can test the license check here
-            // since getEndpointAuthzInitialStateMock sets all keys to true
-            ctx.securitySolution.endpointAuthz.canAccessEndpointManagement &&
-            licenseService.isPlatinumPlus(),
+          // mimicking the behavior of the EndpointAuthz class
+          // just so we can test the license check here
+          // since getEndpointAuthzInitialStateMock sets all keys to true
+          canReadActionsLogManagement: licenseService.isEnterprise(),
+          canAccessEndpointActionsLogManagement: licenseService.isPlatinumPlus(),
         }),
         ...authz,
-      };
+      });
 
       const mockRequest = httpServerMock.createKibanaRequest({ query });
       const [, routeHandler]: [
@@ -137,11 +142,25 @@ describe('Action List Route', () => {
       expect(mockResponse.ok).toBeCalled();
     });
 
-    it('does not allow user without `canReadActionsLogManagement` access for API requests', async () => {
+    it('allows user with `canAccessEndpointActionsLogManagement` access for API requests', async () => {
       await callApiRoute(ENDPOINTS_ACTION_LIST_ROUTE, {
-        authz: { canReadActionsLogManagement: false },
+        authz: { canAccessEndpointActionsLogManagement: true },
+      });
+      expect(mockResponse.ok).toBeCalled();
+    });
+
+    it('does not allow user without `canReadActionsLogManagement` or `canAccessEndpointActionsLogManagement` access for API requests', async () => {
+      await callApiRoute(ENDPOINTS_ACTION_LIST_ROUTE, {
+        authz: { canReadActionsLogManagement: false, canAccessEndpointActionsLogManagement: false },
       });
       expect(mockResponse.forbidden).toBeCalled();
+    });
+
+    it('does allow user access to API requests if license is at least platinum', async () => {
+      await callApiRoute(ENDPOINTS_ACTION_LIST_ROUTE, {
+        license: Platinum,
+      });
+      expect(mockResponse.ok).toBeCalled();
     });
 
     it('does not allow user access to API requests if license is below platinum', async () => {

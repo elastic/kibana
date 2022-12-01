@@ -13,7 +13,7 @@ import {
   FAAS_BILLED_DURATION,
   FAAS_ID,
   METRICSET_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { getVizColorForIndex } from '../../../../common/viz_colors';

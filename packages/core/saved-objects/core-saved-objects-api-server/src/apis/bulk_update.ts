@@ -10,6 +10,7 @@ import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from '.
 import type { SavedObjectsUpdateOptions, SavedObjectsUpdateResponse } from './update';
 
 /**
+ * Object parameters for the bulk update operation
  *
  * @public
  */
@@ -31,6 +32,7 @@ export interface SavedObjectsBulkUpdateObject<T = unknown>
 }
 
 /**
+ * Options for the saved objects bulk update operation
  *
  * @public
  */
@@ -40,9 +42,11 @@ export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
 }
 
 /**
+ * Return type of the Saved Objects `bulkUpdate()` method.
  *
  * @public
  */
 export interface SavedObjectsBulkUpdateResponse<T = unknown> {
+  /** array of {@link SavedObjectsUpdateResponse} */
   saved_objects: Array<SavedObjectsUpdateResponse<T>>;
 }

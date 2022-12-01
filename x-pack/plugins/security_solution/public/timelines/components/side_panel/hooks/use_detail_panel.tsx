@@ -84,15 +84,13 @@ export const useDetailPanel = ({
   const loadDetailsPanel = useCallback(
     (panelConfig?: TimelineExpandedDetailType) => {
       if (panelConfig && scopedActions) {
-        if (isTimelineScope(scopeId)) {
-          dispatch(
-            scopedActions.toggleDetailPanel({
-              ...panelConfig,
-              tabType,
-              id: scopeId,
-            })
-          );
-        }
+        dispatch(
+          scopedActions.toggleDetailPanel({
+            ...panelConfig,
+            tabType,
+            id: scopeId,
+          })
+        );
       }
     },
     [scopedActions, scopeId, dispatch, tabType]

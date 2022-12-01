@@ -12,6 +12,7 @@ import { upperFirst } from 'lodash';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlCommonUI } from './common_ui';
+import { MappedInputParams, MappedOutput, ModelType, TrainedModelsActions } from './trained_models';
 
 export interface TrainedModelRowData {
   id: string;
@@ -23,7 +24,8 @@ export type MlTrainedModelsTable = ProvidedType<typeof TrainedModelsTableProvide
 
 export function TrainedModelsTableProvider(
   { getService }: FtrProviderContext,
-  mlCommonUI: MlCommonUI
+  mlCommonUI: MlCommonUI,
+  trainedModelsActions: TrainedModelsActions
 ) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -180,6 +182,34 @@ export function TrainedModelsTableProvider(
       );
     }
 
+    public async assertModelTestButtonExists(modelId: string, expectedValue: boolean) {
+      const actionExists = await testSubjects.exists(
+        this.rowSelector(modelId, 'mlModelsTableRowTestAction')
+      );
+      expect(actionExists).to.eql(
+        expectedValue,
+        `Expected test action button for trained model '${modelId}' to be ${
+          expectedValue ? 'visible' : 'hidden'
+        } (got ${actionExists ? 'visible' : 'hidden'})`
+      );
+    }
+
+    public async testModel(
+      modelType: ModelType,
+      modelId: string,
+      inputParams: MappedInputParams[typeof modelType],
+      expectedResult: MappedOutput[typeof modelType]
+    ) {
+      await mlCommonUI.invokeTableRowAction(
+        this.rowSelector(modelId),
+        'mlModelsTableRowTestAction',
+        false
+      );
+      await this.assertTestFlyoutExists();
+
+      await trainedModelsActions.testModelOutput(modelType, inputParams, expectedResult);
+    }
+
     public async deleteModel(modelId: string) {
       await mlCommonUI.invokeTableRowAction(
         this.rowSelector(modelId),
@@ -206,6 +236,10 @@ export function TrainedModelsTableProvider(
 
     public async assertDeleteModalExists() {
       await testSubjects.existOrFail('mlModelsDeleteModal', { timeout: 60 * 1000 });
+    }
+
+    public async assertTestFlyoutExists() {
+      await testSubjects.existOrFail('mlTestModelsFlyout', { timeout: 60 * 1000 });
     }
 
     public async assertStartDeploymentModalExists(expectExist = true) {
@@ -249,6 +283,13 @@ export function TrainedModelsTableProvider(
       await this.assertNumOfAllocations(value);
     }
 
+    public async setPriority(value: 'low' | 'normal') {
+      await mlCommonUI.selectButtonGroupValue(
+        'mlModelsStartDeploymentModalPriority',
+        value.toString()
+      );
+    }
+
     public async setThreadsPerAllocation(value: number) {
       await mlCommonUI.selectButtonGroupValue(
         'mlModelsStartDeploymentModalThreadsPerAllocation',
@@ -258,10 +299,11 @@ export function TrainedModelsTableProvider(
 
     public async startDeploymentWithParams(
       modelId: string,
-      params: { numOfAllocations: number; threadsPerAllocation: number }
+      params: { priority: 'low' | 'normal'; numOfAllocations: number; threadsPerAllocation: number }
     ) {
       await this.openStartDeploymentModal(modelId);
 
+      await this.setPriority(params.priority);
       await this.setNumOfAllocations(params.numOfAllocations);
       await this.setThreadsPerAllocation(params.threadsPerAllocation);
 

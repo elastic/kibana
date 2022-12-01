@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { allOrAnyString, dateRangeSchema } from './common';
 
-const apmTransactionDurationIndicatorTypeSchema = t.literal('slo.apm.transaction_duration');
+const apmTransactionDurationIndicatorTypeSchema = t.literal('sli.apm.transaction_duration');
 const apmTransactionDurationIndicatorSchema = t.type({
   type: apmTransactionDurationIndicatorTypeSchema,
   params: t.type({
@@ -20,7 +20,7 @@ const apmTransactionDurationIndicatorSchema = t.type({
   }),
 });
 
-const apmTransactionErrorRateIndicatorTypeSchema = t.literal('slo.apm.transaction_error_rate');
+const apmTransactionErrorRateIndicatorTypeSchema = t.literal('sli.apm.transaction_error_rate');
 const apmTransactionErrorRateIndicatorSchema = t.type({
   type: apmTransactionErrorRateIndicatorTypeSchema,
   params: t.intersection([
@@ -38,14 +38,14 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
   ]),
 });
 
-const kqlCustomIndicatorTypeSchema = t.literal('slo.kql.custom');
+const kqlCustomIndicatorTypeSchema = t.literal('sli.kql.custom');
 const kqlCustomIndicatorSchema = t.type({
   type: kqlCustomIndicatorTypeSchema,
   params: t.type({
     index: t.string,
-    query_filter: t.string,
-    numerator: t.string,
-    denominator: t.string,
+    filter: t.string,
+    good: t.string,
+    total: t.string,
   }),
 });
 

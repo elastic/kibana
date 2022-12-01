@@ -535,7 +535,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
               <>
                 <EuiSpacer size={'m'} />
                 <AnnotationsTable
-                  jobIds={selectedJobIds}
+                  // @ts-ignore inferred js types are incorrect
                   annotations={annotationsData}
                   drillDown={true}
                   numberBadge={false}
@@ -589,6 +589,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
           <EuiSpacer size="m" />
 
           {showCharts ? (
+            // @ts-ignore inferred js types are incorrect
             <ExplorerChartsContainer
               {...{
                 ...chartsData,

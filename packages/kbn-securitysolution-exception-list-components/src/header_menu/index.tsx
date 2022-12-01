@@ -20,12 +20,12 @@ import {
 } from '@elastic/eui';
 import { ButtonContentIconSide } from '@elastic/eui/src/components/button/_button_content_deprecated';
 
-interface Action {
+export interface Action {
   key: string;
   icon: string;
   label: string | boolean;
   disabled?: boolean;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent<Element, MouseEvent>) => void;
 }
 interface HeaderMenuComponentProps {
   disableActions: boolean;
@@ -66,9 +66,9 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
         icon={action.icon}
         disabled={action.disabled}
         layoutAlign="center"
-        onClick={() => {
+        onClick={(e) => {
           onClosePopover();
-          if (typeof action.onClick === 'function') action.onClick();
+          if (typeof action.onClick === 'function') action.onClick(e);
         }}
       >
         {action.label}
@@ -103,6 +103,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
             </EuiButtonIcon>
           )
         }
+        onClick={(e) => e.stopPropagation()}
         panelPaddingSize={panelPaddingSize}
         isOpen={isPopoverOpen}
         closePopover={onClosePopover}

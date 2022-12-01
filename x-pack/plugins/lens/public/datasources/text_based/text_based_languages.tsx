@@ -18,6 +18,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ExpressionsStart, DatatableColumnType } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 import {
   DatasourceDimensionEditorProps,
   DatasourceDataPanelProps,
@@ -26,6 +27,7 @@ import {
   DataType,
   TableChangeType,
   DatasourceDimensionTriggerProps,
+  DataSourceInfo,
 } from '../../types';
 import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
@@ -482,6 +484,16 @@ export function getTextBasedDatasource({
               }}
             />
           </EuiFormRow>
+          {props.dataSectionExtra && (
+            <div
+              style={{
+                paddingLeft: euiThemeVars.euiSize,
+                paddingRight: euiThemeVars.euiSize,
+              }}
+            >
+              {props.dataSectionExtra}
+            </div>
+          )}
         </KibanaThemeProvider>,
         domElement
       );
@@ -695,6 +707,31 @@ export function getTextBasedDatasource({
     getDatasourceSuggestionsFromCurrentState: getSuggestionsForState,
     getDatasourceSuggestionsForVisualizeCharts: getSuggestionsForState,
     isEqual: () => true,
+    getDatasourceInfo: (state, references, indexPatterns) => {
+      return Object.entries(state.layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
+        const columns = Object.entries(layer.columns).map(([colId, col]) => {
+          return {
+            id: colId,
+            role: col.meta?.type !== 'number' ? ('split' as const) : ('metric' as const),
+            operation: {
+              dataType: col?.meta?.type as DataType,
+              label: col.fieldName,
+              isBucketed: Boolean(col?.meta?.type !== 'number'),
+              hasTimeShift: false,
+              hasReducedTimeRange: false,
+            },
+          };
+        });
+
+        acc.push({
+          layerId: key,
+          columns,
+          dataView: indexPatterns?.find((dataView) => dataView.id === layer.index),
+        });
+
+        return acc;
+      }, []);
+    },
   };
 
   return TextBasedDatasource;

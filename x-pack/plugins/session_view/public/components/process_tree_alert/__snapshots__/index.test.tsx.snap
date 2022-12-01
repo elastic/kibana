@@ -10,11 +10,11 @@ Object {
         data-id="6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
           data-test-subj="sessionView:sessionViewAlertDetail-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <button
               aria-label="expand"
@@ -31,24 +31,33 @@ Object {
             </button>
           </div>
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <span
-              color="danger"
-              data-euiicon-type="alert"
-            />
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <span
+                color="danger"
+                data-euiicon-type="gear"
+              />
+            </span>
           </div>
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <div
-              class="euiText emotion-EuiText"
+              css="[object Object]"
             >
-              cmd test alert
+              <div
+                class="euiText emotion-EuiText"
+                data-test-subj="sessionView:sessionViewAlertDetailRuleName-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38-text"
+              >
+                cmd test alert
+              </div>
             </div>
           </div>
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <span
               class="euiBadge emotion-EuiInnerText"
@@ -67,7 +76,7 @@ Object {
             </span>
           </div>
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <span
               class="euiBadge emotion-EuiInnerText"
@@ -95,11 +104,11 @@ Object {
       data-id="6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
         data-test-subj="sessionView:sessionViewAlertDetail-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <button
             aria-label="expand"
@@ -116,24 +125,33 @@ Object {
           </button>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <span
-            color="danger"
-            data-euiicon-type="alert"
-          />
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          >
+            <span
+              color="danger"
+              data-euiicon-type="gear"
+            />
+          </span>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiText emotion-EuiText"
+            css="[object Object]"
           >
-            cmd test alert
+            <div
+              class="euiText emotion-EuiText"
+              data-test-subj="sessionView:sessionViewAlertDetailRuleName-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38-text"
+            >
+              cmd test alert
+            </div>
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <span
             class="euiBadge emotion-EuiInnerText"
@@ -152,7 +170,7 @@ Object {
           </span>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <span
             class="euiBadge emotion-EuiInnerText"

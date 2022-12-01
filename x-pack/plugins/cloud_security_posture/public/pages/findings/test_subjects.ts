@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export const FINDINGS_SEARCH_BAR = 'findings_search_bar';
 export const FINDINGS_TABLE = 'findings_table';
 export const FINDINGS_BY_RESOURCE_TABLE_NO_FINDINGS_EMPTY_STATE =
   'findings-by-resource-table-no-findings-empty-state';

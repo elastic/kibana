@@ -30,4 +30,6 @@ export type CellValueElementProps = EuiDataGridCellValueElementProps & {
   scopeId: string;
   truncate?: boolean;
   key?: string;
+  closeCellPopover?: () => void;
+  enableActions?: boolean;
 };

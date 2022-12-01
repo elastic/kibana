@@ -25,6 +25,7 @@ export type {
   Output,
   DownloadSource,
   FleetServerHost,
+  FleetProxy,
   DataStream,
   Settings,
   ActionStatus,

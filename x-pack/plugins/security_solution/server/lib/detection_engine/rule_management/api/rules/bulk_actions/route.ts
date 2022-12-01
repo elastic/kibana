@@ -35,6 +35,7 @@ import { initPromisePool } from '../../../../../../utils/promise_pool';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { deleteRules } from '../../../logic/crud/delete_rules';
 import { duplicateRule } from '../../../logic/actions/duplicate_rule';
+import { duplicateExceptions } from '../../../logic/actions/duplicate_exceptions';
 import { findRules } from '../../../logic/search/find_rules';
 import { readRules } from '../../../logic/crud/read_rules';
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
@@ -497,18 +498,46 @@ export const performBulkActionRoute = (
                 if (isDryRun) {
                   return rule;
                 }
-
                 const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
                   rule,
                 });
+                let shouldDuplicateExceptions = true;
+                if (body.duplicate !== undefined) {
+                  shouldDuplicateExceptions = body.duplicate.include_exceptions;
+                }
 
-                const createdRule = await rulesClient.create({
-                  data: duplicateRule(migratedRule),
+                const duplicateRuleToCreate = await duplicateRule({
+                  rule: migratedRule,
                 });
 
-                return createdRule;
+                const createdRule = await rulesClient.create({
+                  data: duplicateRuleToCreate,
+                });
+
+                // we try to create exceptions after rule created, and then update rule
+                const exceptions = shouldDuplicateExceptions
+                  ? await duplicateExceptions({
+                      ruleId: rule.params.ruleId,
+                      exceptionLists: rule.params.exceptionsList,
+                      exceptionsClient,
+                    })
+                  : [];
+
+                const updatedRule = await rulesClient.update({
+                  id: createdRule.id,
+                  data: {
+                    ...duplicateRuleToCreate,
+                    params: {
+                      ...duplicateRuleToCreate.params,
+                      exceptionsList: exceptions,
+                    },
+                  },
+                });
+
+                // TODO: figureout why types can't return just updatedRule
+                return { ...createdRule, ...updatedRule };
               },
               abortSignal: abortController.signal,
             });

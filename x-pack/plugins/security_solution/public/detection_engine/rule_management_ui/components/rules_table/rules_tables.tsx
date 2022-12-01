@@ -36,6 +36,9 @@ import { RulesTableUtilityBar } from './rules_table_utility_bar';
 import { useMonitoringColumns, useRulesColumns } from './use_columns';
 import { useUserData } from '../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
+import { useBulkDuplicateExceptionsConfirmation } from './bulk_actions/use_bulk_duplicate_confirmation';
+import { BulkActionDuplicateExceptionsConfirmation } from './bulk_actions/bulk_duplicate_exceptions_confirmation';
+import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -69,7 +72,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     state: {
       rules,
       filterOptions,
-      isActionInProgress,
+      isPreflightInProgress,
       isAllSelected,
       isFetched,
       isLoading,
@@ -101,6 +104,13 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   } = useBulkActionsConfirmation();
 
   const {
+    isBulkDuplicateConfirmationVisible,
+    showBulkDuplicateConfirmation,
+    cancelRuleDuplication,
+    confirmRuleDuplication,
+  } = useBulkDuplicateExceptionsConfirmation();
+
+  const {
     bulkEditActionType,
     isBulkEditFlyoutVisible,
     handleBulkEditFormConfirm,
@@ -114,6 +124,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     filterOptions,
     confirmDeletion,
     showBulkActionConfirmation,
+    showBulkDuplicateConfirmation,
     completeBulkEditForm,
     executeBulkActionsDryRun,
   });
@@ -140,8 +151,21 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     [setPage, setPerPage, setSortingOptions]
   );
 
-  const rulesColumns = useRulesColumns({ hasCRUDPermissions: hasPermissions });
-  const monitoringColumns = useMonitoringColumns({ hasCRUDPermissions: hasPermissions });
+  const { loading: isLoadingJobs, jobs: mlJobs, startMlJobs } = useStartMlJobs();
+  const rulesColumns = useRulesColumns({
+    hasCRUDPermissions: hasPermissions,
+    isLoadingJobs,
+    mlJobs,
+    startMlJobs,
+    showExceptionsDuplicateConfirmation: showBulkDuplicateConfirmation,
+  });
+  const monitoringColumns = useMonitoringColumns({
+    hasCRUDPermissions: hasPermissions,
+    isLoadingJobs,
+    mlJobs,
+    startMlJobs,
+    showExceptionsDuplicateConfirmation: showBulkDuplicateConfirmation,
+  });
 
   const isSelectAllCalled = useRef(false);
 
@@ -205,7 +229,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       : { 'data-test-subj': 'monitoring-table', columns: monitoringColumns };
 
   const shouldShowLinearProgress = isFetched && isRefetching;
-  const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isActionInProgress;
+  const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isPreflightInProgress;
 
   return (
     <>
@@ -245,6 +269,13 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           result={bulkActionsDryRunResult}
           onCancel={cancelBulkActionConfirmation}
           onConfirm={approveBulkActionConfirmation}
+        />
+      )}
+      {isBulkDuplicateConfirmationVisible && (
+        <BulkActionDuplicateExceptionsConfirmation
+          onCancel={cancelRuleDuplication}
+          onConfirm={confirmRuleDuplication}
+          rulesCount={selectedRuleIds?.length ? selectedRuleIds?.length : 1}
         />
       )}
       {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (

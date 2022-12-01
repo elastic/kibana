@@ -9,6 +9,7 @@ exports[`LayerWizardSelect Should render layer select after layer wizards are lo
     <EuiFacetButton
       isSelected={true}
       key="all"
+      minWidth={false}
       onClick={[Function]}
     >
       <FormattedMessage
@@ -20,6 +21,7 @@ exports[`LayerWizardSelect Should render layer select after layer wizards are lo
     <EuiFacetButton
       isSelected={false}
       key="ELASTICSEARCH"
+      minWidth={false}
       onClick={[Function]}
     >
       Elasticsearch
@@ -27,6 +29,7 @@ exports[`LayerWizardSelect Should render layer select after layer wizards are lo
     <EuiFacetButton
       isSelected={false}
       key="SOLUTIONS"
+      minWidth={false}
       onClick={[Function]}
     >
       Solutions

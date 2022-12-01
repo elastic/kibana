@@ -7,9 +7,8 @@
 
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, useEuiTheme, EuiTitle } from '@elastic/eui';
-import { PartitionElementEvent } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ChartPanel } from '../../../components/chart_panel';
+import { i18n } from '@kbn/i18n';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
@@ -26,11 +25,7 @@ export const CloudBenchmarksSection = ({
   const { euiTheme } = useEuiTheme();
   const navToFindings = useNavigateFindings();
 
-  const handleElementClick = (clusterId: string, elements: PartitionElementEvent[]) => {
-    const [element] = elements;
-    const [layerValue] = element;
-    const evaluation = layerValue[0].groupByRollup as Evaluation;
-
+  const handleEvalCounterClick = (clusterId: string, evaluation: Evaluation) => {
     navToFindings({ cluster_id: clusterId, 'result.evaluation': evaluation });
   };
 
@@ -54,7 +49,7 @@ export const CloudBenchmarksSection = ({
         style={{
           borderBottom: euiTheme.border.thick,
           borderBottomColor: euiTheme.colors.text,
-          marginBottom: euiTheme.size.l,
+          marginBottom: euiTheme.size.m,
           paddingBottom: euiTheme.size.s,
         }}
       >
@@ -105,28 +100,40 @@ export const CloudBenchmarksSection = ({
             <ClusterDetailsBox cluster={cluster} />
           </EuiFlexItem>
           <EuiFlexItem grow={dashboardColumnsGrow.second}>
-            <ChartPanel hasBorder={false}>
+            <div
+              style={{
+                paddingLeft: euiTheme.size.base,
+                paddingRight: euiTheme.size.base,
+                height: '100%',
+              }}
+            >
               <CloudPostureScoreChart
+                compact
                 id={`${cluster.meta.clusterId}_score_chart`}
                 data={cluster.stats}
                 trend={cluster.trend}
-                partitionOnElementClick={(elements) =>
-                  handleElementClick(cluster.meta.clusterId, elements)
+                onEvalCounterClick={(evaluation) =>
+                  handleEvalCounterClick(cluster.meta.clusterId, evaluation)
                 }
               />
-            </ChartPanel>
+            </div>
           </EuiFlexItem>
           <EuiFlexItem grow={dashboardColumnsGrow.third}>
-            <ChartPanel hasBorder={false}>
+            <div style={{ paddingLeft: euiTheme.size.base, paddingRight: euiTheme.size.base }}>
               <RisksTable
+                compact
                 data={cluster.groupedFindingsEvaluation}
                 maxItems={3}
                 onCellClick={(resourceTypeName) =>
                   handleCellClick(cluster.meta.clusterId, resourceTypeName)
                 }
+                viewAllButtonTitle={i18n.translate(
+                  'xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle',
+                  { defaultMessage: 'View all failed findings for this cluster' }
+                )}
                 onViewAllClick={() => handleViewAllClick(cluster.meta.clusterId)}
               />
-            </ChartPanel>
+            </div>
           </EuiFlexItem>
         </EuiFlexGroup>
       ))}

@@ -35,10 +35,31 @@ const getFindingsQuery = (queryValue: Query['query']): Pick<FindingsBaseURLQuery
 export const useNavigateFindings = () => {
   const history = useHistory();
 
-  return (query?: Query['query']) => {
+  return (query: Query['query'] = {}) => {
     history.push({
       pathname: findingsNavigation.findings_default.path,
-      ...(query && { search: encodeQuery(getFindingsQuery(query)) }),
+      ...(query && {
+        search: encodeQuery({
+          ...getFindingsQuery(query),
+          filters: [],
+        }),
+      }),
+    });
+  };
+};
+
+export const useNavigateFindingsByResource = () => {
+  const history = useHistory();
+
+  return (query: Query['query'] = {}) => {
+    history.push({
+      pathname: findingsNavigation.findings_by_resource.path,
+      ...(query && {
+        search: encodeQuery({
+          ...getFindingsQuery(query),
+          filters: [],
+        }),
+      }),
     });
   };
 };

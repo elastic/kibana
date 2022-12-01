@@ -8,8 +8,10 @@
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { EXPRESSION_ERRORS } from './constants';
 
 export interface Comparator {
@@ -30,6 +32,11 @@ export interface CommonRuleParams extends RuleTypeParams {
   timeWindowSize: number;
   timeWindowUnit: string;
   excludeHitsFromPreviousRun: boolean;
+}
+
+export interface EsQueryRuleMetaData {
+  adHocDataViewList: DataView[];
+  isManagementPage?: boolean;
 }
 
 export type EsQueryRuleParams<T = SearchType> = T extends SearchType.searchSource
@@ -55,6 +62,8 @@ export type ExpressionErrors = typeof EXPRESSION_ERRORS;
 export type ErrorKey = keyof ExpressionErrors & unknown;
 
 export interface TriggersAndActionsUiDeps {
+  dataViews: DataViewsPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   data: DataPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
 }

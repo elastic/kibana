@@ -77,12 +77,6 @@ describe('#resolve()', () => {
   });
 
   it('returns ignore results for known unresolvable but okay import statements', () => {
-    expect(resolver.resolve('../../grammar/built_grammar.js', FIXTURES_DIR)).toMatchInlineSnapshot(`
-      Object {
-        "type": "ignore",
-      }
-    `);
-
     expect(resolver.resolve('kibana-buildkite-library', FIXTURES_DIR)).toMatchInlineSnapshot(`
       Object {
         "type": "ignore",

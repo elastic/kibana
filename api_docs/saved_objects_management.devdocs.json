@@ -302,7 +302,7 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ") => React.ReactNode) | undefined; hidden?: boolean | undefined; color?: string | undefined; id?: string | undefined; className?: string | undefined; title?: string | undefined; onChange?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; security?: string | undefined; field: (string & {}) | keyof ",
+              ") => React.ReactNode) | undefined; hidden?: boolean | undefined; color?: string | undefined; id?: string | undefined; className?: string | undefined; title?: string | undefined; onChange?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; width?: string | undefined; security?: string | undefined; field: (string & {}) | keyof ",
               {
                 "pluginId": "savedObjectsManagement",
                 "scope": "public",
@@ -314,7 +314,7 @@
               "Interpolation",
               "<",
               "Theme",
-              ">; height?: string | number | undefined; width?: string | undefined; readOnly?: boolean | undefined; align?: ",
+              ">; height?: string | number | undefined; readOnly?: boolean | undefined; align?: ",
               "HorizontalAlignment",
               " | undefined; abbr?: string | undefined; footer?: string | React.ReactElement<any, string | React.JSXElementConstructor<any>> | ((props: ",
               "EuiTableFooterProps",

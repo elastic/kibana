@@ -9,7 +9,6 @@ import { memoize } from 'lodash';
 
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
-import type { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
@@ -25,13 +24,6 @@ import type {
 } from './types';
 import type { Immutable } from '../common/endpoint/types';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
-import {
-  calculateEndpointAuthz,
-  calculatePermissionsFromPrivileges,
-  defaultEndpointPermissions,
-  getEndpointAuthzInitialState,
-} from '../common/endpoint/service/authz';
-import { licenseService } from './lib/license';
 import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 
 export interface IRequestContextFactory {
@@ -67,56 +59,24 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const [, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, security, request);
+    const coreContext = await context.core;
+
     appClientFactory.setup({
       getSpaceId: startPlugins.spaces?.spacesService?.getSpaceId,
       config,
     });
 
+    // List of endpoint authz for the current request's user. Will be initialized the first
+    // time it is requested (see `getEndpointAuthz()` below)
     let endpointAuthz: Immutable<EndpointAuthz>;
-    let fleetAuthz: FleetAuthz;
-
-    // If Fleet is enabled, then get its Authz
-    if (startPlugins.fleet) {
-      fleetAuthz =
-        (await context.fleet)?.authz ?? (await startPlugins.fleet?.authz.fromRequest(request));
-    }
-
-    const coreContext = await context.core;
-
-    let endpointPermissions = defaultEndpointPermissions();
-    if (endpointAppContextService.security) {
-      const checkPrivileges =
-        endpointAppContextService.security.authz.checkPrivilegesDynamicallyWithRequest(request);
-      const { privileges } = await checkPrivileges({
-        kibana: [
-          endpointAppContextService.security.authz.actions.ui.get('siem', 'crud'),
-          endpointAppContextService.security.authz.actions.ui.get('siem', 'show'),
-        ],
-      });
-      endpointPermissions = calculatePermissionsFromPrivileges(privileges.kibana);
-    }
 
     return {
       core: coreContext,
 
-      get endpointAuthz(): Immutable<EndpointAuthz> {
-        // Lazy getter of endpoint Authz. No point in defining it if it is never used.
+      getEndpointAuthz: async (): Promise<Immutable<EndpointAuthz>> => {
         if (!endpointAuthz) {
-          // If no fleet (fleet plugin is optional in the configuration), then just turn off all permissions
-          if (!startPlugins.fleet) {
-            endpointAuthz = getEndpointAuthzInitialState();
-          } else {
-            const { endpointRbacEnabled, endpointRbacV1Enabled } =
-              endpointAppContextService.experimentalFeatures;
-            const userRoles = security?.authc.getCurrentUser(request)?.roles ?? [];
-            endpointAuthz = calculateEndpointAuthz(
-              licenseService,
-              fleetAuthz,
-              userRoles,
-              endpointRbacEnabled || endpointRbacV1Enabled,
-              endpointPermissions
-            );
-          }
+          // eslint-disable-next-line require-atomic-updates
+          endpointAuthz = await endpointAppContextService.getEndpointAuthz(request);
         }
 
         return endpointAuthz;

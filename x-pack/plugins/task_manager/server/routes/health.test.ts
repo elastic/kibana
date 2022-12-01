@@ -208,6 +208,7 @@ describe('healthRoute', () => {
         monitored_stats_required_freshness: 1000,
         monitored_stats_health_verbose_log: {
           enabled: true,
+          level: 'debug',
           warn_delayed_task_start_in_seconds: 100,
         },
         monitored_aggregated_stats_refresh_rate: 60000,
@@ -267,6 +268,7 @@ describe('healthRoute', () => {
         monitored_stats_required_freshness: 1000,
         monitored_stats_health_verbose_log: {
           enabled: true,
+          level: 'debug',
           warn_delayed_task_start_in_seconds: 120,
         },
         monitored_aggregated_stats_refresh_rate: 60000,
@@ -344,6 +346,7 @@ describe('healthRoute', () => {
         monitored_stats_required_freshness: 1000,
         monitored_stats_health_verbose_log: {
           enabled: true,
+          level: 'debug',
           warn_delayed_task_start_in_seconds: 120,
         },
         monitored_aggregated_stats_refresh_rate: 60000,

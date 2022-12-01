@@ -90,7 +90,7 @@ describe('dateMath', function () {
     let now;
 
     beforeEach(function () {
-      jest.useFakeTimers('modern');
+      jest.useFakeTimers();
       jest.setSystemTime(unix);
       now = moment();
       mmnt = moment(anchor);
@@ -128,7 +128,7 @@ describe('dateMath', function () {
     let anchored;
 
     beforeEach(function () {
-      jest.useFakeTimers('modern');
+      jest.useFakeTimers();
       jest.setSystemTime(unix);
       now = moment();
       anchored = moment(anchor);
@@ -166,7 +166,7 @@ describe('dateMath', function () {
     let anchored;
 
     beforeEach(function () {
-      jest.useFakeTimers('modern');
+      jest.useFakeTimers();
       jest.setSystemTime(unix);
       now = moment();
       anchored = moment(anchor);
@@ -205,7 +205,7 @@ describe('dateMath', function () {
     let anchored;
 
     beforeEach(function () {
-      jest.useFakeTimers('modern');
+      jest.useFakeTimers();
       jest.setSystemTime(unix);
       now = moment();
       anchored = moment(anchor);
@@ -247,7 +247,7 @@ describe('dateMath', function () {
     let anchored;
 
     beforeEach(function () {
-      jest.useFakeTimers('modern');
+      jest.useFakeTimers();
       jest.setSystemTime(unix);
       now = moment();
       anchored = moment(anchor);

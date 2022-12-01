@@ -16,6 +16,7 @@ const SubmitCaseButtonComponent: React.FC = () => {
 
   return (
     <EuiButton
+      tour-step="create-case-submit"
       data-test-subj="create-case-submit"
       fill
       iconType="plusInCircle"

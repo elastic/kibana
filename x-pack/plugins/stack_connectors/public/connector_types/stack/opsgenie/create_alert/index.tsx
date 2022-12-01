@@ -44,6 +44,7 @@ const FormView: React.FC<FormViewProps> = ({
   messageVariables,
   subActionParams,
   showSaveError,
+  executionMode,
 }) => {
   const isMessageInvalid =
     (errors['subActionParams.message'] !== undefined &&
@@ -72,7 +73,11 @@ const FormView: React.FC<FormViewProps> = ({
       <EuiSpacer size={'m'} />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <Tags values={subActionParams?.tags ?? []} onChange={editOptionalSubAction} />
+          <Tags
+            values={subActionParams?.tags ?? []}
+            onChange={editOptionalSubAction}
+            executionMode={executionMode}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <Priority priority={subActionParams?.priority} onChange={editOptionalSubAction} />
@@ -87,7 +92,12 @@ const FormView: React.FC<FormViewProps> = ({
         inputTargetValue={subActionParams?.description}
         label={i18n.DESCRIPTION_FIELD_LABEL}
       />
-      <EuiFormRow data-test-subj="opsgenie-alias-row" fullWidth label={i18n.ALIAS_FIELD_LABEL}>
+      <EuiFormRow
+        data-test-subj="opsgenie-alias-row"
+        fullWidth
+        label={i18n.ALIAS_FIELD_LABEL}
+        helpText={i18n.OPSGENIE_ALIAS_HELP}
+      >
         <TextFieldWithMessageVariables
           index={index}
           editAction={editOptionalSubAction}
@@ -104,7 +114,7 @@ FormView.displayName = 'FormView';
 
 export type CreateAlertProps = Pick<
   ActionParamsProps<OpsgenieActionParams>,
-  'errors' | 'index' | 'messageVariables' | 'editAction'
+  'errors' | 'index' | 'messageVariables' | 'editAction' | 'executionMode'
 > & {
   subActionParams?: Partial<OpsgenieCreateAlertParams>;
   editSubAction: EditActionCallback;
@@ -121,6 +131,7 @@ const CreateAlertComponent: React.FC<CreateAlertProps> = ({
   messageVariables,
   subActionParams,
   showSaveError,
+  executionMode,
 }) => {
   const [showingMoreOptions, setShowingMoreOptions] = useState<boolean>(false);
   const [showJsonEditor, setShowJsonEditor] = useState<boolean>(false);
@@ -196,3 +207,5 @@ const CreateAlertComponent: React.FC<CreateAlertProps> = ({
 CreateAlertComponent.displayName = 'CreateAlert';
 
 export const CreateAlert = React.memo(CreateAlertComponent);
+
+export { isPartialCreateAlertSchema } from './schema';

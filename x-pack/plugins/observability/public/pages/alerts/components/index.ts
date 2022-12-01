@@ -11,4 +11,3 @@ export * from './severity_badge';
 export * from './workflow_status_filter';
 export * from './filter_for_value';
 export * from './parse_alert';
-export * from './alerts_status_filter';

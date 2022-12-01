@@ -58,7 +58,8 @@ export const OverviewGrid = memo(() => {
   const dispatch = useDispatch();
 
   const setFlyoutConfigCallback = useCallback(
-    (monitorId: string, location: string) => dispatch(setFlyoutConfig({ monitorId, location })),
+    ({ configId, id, location }: { configId: string; id: string; location: string }) =>
+      dispatch(setFlyoutConfig({ configId, id, location })),
     [dispatch]
   );
   const hideFlyout = useCallback(() => dispatch(setFlyoutConfig(null)), [dispatch]);
@@ -100,7 +101,7 @@ export const OverviewGrid = memo(() => {
 
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline" responsive={false}>
         <EuiFlexItem grow={false}>
           <OverviewPaginationInfo
             page={page}
@@ -112,9 +113,13 @@ export const OverviewGrid = memo(() => {
           <SortFields onSortChange={() => setPage(1)} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
+      <EuiSpacer size="m" />
       {loaded && currentMonitors.length ? (
-        <EuiFlexGrid columns={4} data-test-subj="syntheticsOverviewGridItemContainer">
+        <EuiFlexGrid
+          columns={4}
+          gutterSize="m"
+          data-test-subj="syntheticsOverviewGridItemContainer"
+        >
           {currentMonitors.map((monitor) => (
             <EuiFlexItem
               key={`${monitor.id}-${monitor.location?.id}`}
@@ -127,9 +132,9 @@ export const OverviewGrid = memo(() => {
       ) : (
         <OverviewLoader />
       )}
-      <span ref={intersectionRef}>
+      <div ref={intersectionRef}>
         <EuiSpacer size="l" />
-      </span>
+      </div>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         {currentMonitors.length === monitors.length && (
           <EuiFlexItem grow={false}>
@@ -149,9 +154,10 @@ export const OverviewGrid = memo(() => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {flyoutConfig?.monitorId && flyoutConfig?.location && (
+      {flyoutConfig?.configId && flyoutConfig?.location && (
         <MonitorDetailFlyout
-          id={flyoutConfig.monitorId}
+          configId={flyoutConfig.configId}
+          id={flyoutConfig.id}
           location={flyoutConfig.location}
           onClose={hideFlyout}
           onEnabledChange={forceRefreshCallback}

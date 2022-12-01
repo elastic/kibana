@@ -39,6 +39,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./cases'));
     loadTestFile(require.resolve('./monitoring_collection'));
     loadTestFile(require.resolve('./cloud_security_posture'));
-    loadTestFile(require.resolve('./guided_onboarding'));
   });
 }

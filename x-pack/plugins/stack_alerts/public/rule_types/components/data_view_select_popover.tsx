@@ -14,56 +14,97 @@ import {
   EuiExpression,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiText,
   useEuiPaddingCSS,
 } from '@elastic/eui';
-import { DataViewsList } from '@kbn/unified-search-plugin/public';
-import { DataViewListItem } from '@kbn/data-views-plugin/public';
-import { useTriggersAndActionsUiDeps } from '../es_query/util';
+import type { DataViewListItem, DataView } from '@kbn/data-views-plugin/public';
+import { DataViewSelector } from '@kbn/unified-search-plugin/public';
+import { useTriggerUiActionServices } from '../es_query/util';
+import { EsQueryRuleMetaData } from '../es_query/types';
 
 export interface DataViewSelectPopoverProps {
-  onSelectDataView: (newDataViewId: string) => void;
-  dataViewName?: string;
-  dataViewId?: string;
+  dataView?: DataView;
+  metadata?: EsQueryRuleMetaData;
+  onSelectDataView: (selectedDataView: DataView) => void;
+  onChangeMetaData: (metadata: EsQueryRuleMetaData) => void;
 }
 
+const toDataViewListItem = (dataView: DataView): DataViewListItem => {
+  return {
+    id: dataView.id!,
+    title: dataView.title,
+    name: dataView.name,
+  };
+};
+
 export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopoverProps> = ({
+  metadata = { adHocDataViewList: [], isManagementPage: true },
+  dataView,
   onSelectDataView,
-  dataViewName,
-  dataViewId,
+  onChangeMetaData,
 }) => {
-  const { data, dataViewEditor } = useTriggersAndActionsUiDeps();
-  const [dataViewItems, setDataViewsItems] = useState<DataViewListItem[]>();
+  const { dataViews, dataViewEditor } = useTriggerUiActionServices();
+  const [dataViewItems, setDataViewsItems] = useState<DataViewListItem[]>([]);
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
 
   const closeDataViewEditor = useRef<() => void | undefined>();
 
-  const loadDataViews = useCallback(async () => {
-    const fetchedDataViewItems = await data.dataViews.getIdsWithTitle();
-    setDataViewsItems(fetchedDataViewItems);
-  }, [setDataViewsItems, data.dataViews]);
+  const allDataViewItems = useMemo(
+    () => [...dataViewItems, ...metadata.adHocDataViewList.map(toDataViewListItem)],
+    [dataViewItems, metadata.adHocDataViewList]
+  );
 
   const closeDataViewPopover = useCallback(() => setDataViewPopoverOpen(false), []);
 
+  const onChangeDataView = useCallback(
+    async (selectedDataViewId: string) => {
+      const selectedDataView = await dataViews.get(selectedDataViewId);
+      onSelectDataView(selectedDataView);
+      closeDataViewPopover();
+    },
+    [closeDataViewPopover, dataViews, onSelectDataView]
+  );
+
+  const loadPersistedDataViews = useCallback(async () => {
+    const ids = await dataViews.getIds();
+    const dataViewsList = await Promise.all(ids.map((id) => dataViews.get(id)));
+
+    setDataViewsItems(dataViewsList.map(toDataViewListItem));
+  }, [dataViews]);
+
+  const onAddAdHocDataView = useCallback(
+    (adHocDataView: DataView) => {
+      onChangeMetaData({
+        ...metadata,
+        adHocDataViewList: [...metadata.adHocDataViewList, adHocDataView],
+      });
+    },
+    [metadata, onChangeMetaData]
+  );
+
   const createDataView = useMemo(
     () =>
-      dataViewEditor?.userPermissions.editDataView()
+      dataViewEditor.userPermissions.editDataView()
         ? () => {
             closeDataViewEditor.current = dataViewEditor.openEditor({
               onSave: async (createdDataView) => {
                 if (createdDataView.id) {
-                  await onSelectDataView(createdDataView.id);
-                  await loadDataViews();
+                  if (!createdDataView.isPersisted()) {
+                    onAddAdHocDataView(createdDataView);
+                  }
+
+                  await loadPersistedDataViews();
+                  await onChangeDataView(createdDataView.id);
                 }
               },
+              allowAdHocDataView: true,
             });
           }
         : undefined,
-    [dataViewEditor, onSelectDataView, loadDataViews]
+    [dataViewEditor, loadPersistedDataViews, onChangeDataView, onAddAdHocDataView]
   );
 
   useEffect(() => {
@@ -76,12 +117,25 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   }, []);
 
   useEffect(() => {
-    loadDataViews();
-  }, [loadDataViews]);
+    loadPersistedDataViews();
+  }, [loadPersistedDataViews]);
 
   const createDataViewButtonPadding = useEuiPaddingCSS('left');
 
-  if (!dataViewItems) {
+  const onCreateDefaultAdHocDataView = useCallback(
+    async (pattern: string) => {
+      const newDataView = await dataViews.create({ title: pattern });
+      if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
+        newDataView.timeFieldName = '@timestamp';
+      }
+
+      onAddAdHocDataView(newDataView);
+      onChangeDataView(newDataView.id!);
+    },
+    [dataViews, onAddAdHocDataView, onChangeDataView]
+  );
+
+  if (!allDataViewItems) {
     return null;
   }
 
@@ -96,7 +150,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
             defaultMessage: 'data view',
           })}
           value={
-            dataViewName ??
+            dataView?.getName() ??
             i18n.translate('xpack.stackAlerts.components.ui.alertParams.dataViewPlaceholder', {
               defaultMessage: 'Select a data view',
             })
@@ -105,7 +159,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
           onClick={() => {
             setDataViewPopoverOpen(true);
           }}
-          isInvalid={!dataViewId}
+          isInvalid={!dataView?.id}
         />
       }
       isOpen={dataViewPopoverOpen}
@@ -136,24 +190,14 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverTitle>
-        <EuiFormRow
-          id="indexSelectSearchBox"
-          fullWidth
-          css={`
-            .euiPanel {
-              padding: 0;
-            }
-          `}
-        >
-          <DataViewsList
-            dataViewsList={dataViewItems}
-            onChangeDataView={(newId) => {
-              onSelectDataView(newId);
-              closeDataViewPopover();
-            }}
-            currentDataViewId={dataViewId}
-          />
-        </EuiFormRow>
+        <DataViewSelector
+          currentDataViewId={dataView?.id}
+          dataViewsList={allDataViewItems}
+          setPopoverIsOpen={setDataViewPopoverOpen}
+          onChangeDataView={onChangeDataView}
+          onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
+          isTextBasedLangSelected={false}
+        />
         {createDataView ? (
           <EuiPopoverFooter paddingSize="none">
             <EuiButtonEmpty

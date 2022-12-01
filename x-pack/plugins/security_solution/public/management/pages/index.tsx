@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ComponentType } from 'react';
 import React, { memo } from 'react';
 import { Switch, Redirect } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
@@ -32,7 +31,7 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
 import { BlocklistContainer } from './blocklist';
 import { ResponseActionsContainer } from './response_actions';
-import { NoPermissions } from '../components/no_permissons';
+import { PrivilegedRoute } from '../components/privileged_route';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
@@ -76,16 +75,6 @@ const ResponseActionsTelemetry = () => (
   </TrackApplicationView>
 );
 
-interface PrivilegedRouteProps {
-  path: string;
-  component: ComponentType<{}>;
-  privilege: boolean;
-}
-
-const PrivilegedRoute = ({ component, privilege, path }: PrivilegedRouteProps) => {
-  return <Route path={path} component={privilege ? component : NoPermissions} />;
-};
-
 export const ManagementContainer = memo(() => {
   const {
     loading,
@@ -95,6 +84,7 @@ export const ManagementContainer = memo(() => {
     canReadEventFilters,
     canReadActionsLogManagement,
     canReadEndpointList,
+    canReadHostIsolationExceptions,
   } = useUserPrivileges().endpointPrivileges;
 
   // Lets wait until we can verify permissions
@@ -107,36 +97,37 @@ export const ManagementContainer = memo(() => {
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_ENDPOINTS_PATH}
         component={EndpointTelemetry}
-        privilege={canReadEndpointList}
+        hasPrivilege={canReadEndpointList}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_POLICIES_PATH}
         component={PolicyTelemetry}
-        privilege={canReadPolicyManagement}
+        hasPrivilege={canReadPolicyManagement}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH}
         component={TrustedAppTelemetry}
-        privilege={canReadTrustedApplications}
+        hasPrivilege={canReadTrustedApplications}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH}
         component={EventFilterTelemetry}
-        privilege={canReadEventFilters}
+        hasPrivilege={canReadEventFilters}
       />
-      <Route
+      <PrivilegedRoute
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         component={HostIsolationExceptionsTelemetry}
+        hasPrivilege={canReadHostIsolationExceptions}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_BLOCKLIST_PATH}
         component={BlocklistContainer}
-        privilege={canReadBlocklist}
+        hasPrivilege={canReadBlocklist}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
         component={ResponseActionsTelemetry}
-        privilege={canReadActionsLogManagement}
+        hasPrivilege={canReadActionsLogManagement}
       />
 
       {canReadEndpointList && (

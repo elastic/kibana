@@ -311,7 +311,6 @@ export class SecurityPlugin
       audit: this.auditSetup,
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
-      getSpacesService: () => spaces?.spacesService,
     });
 
     this.registerDeprecations(core, license);

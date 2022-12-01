@@ -188,6 +188,8 @@ async function mountComponent(
     persistDataView: jest.fn(),
     updateAdHocDataViewId: jest.fn(),
     adHocDataViewList: [],
+    savedDataViewList: [],
+    updateDataViewList: jest.fn(),
   };
 
   const component = mountWithIntl(
@@ -202,6 +204,7 @@ async function mountComponent(
   // DiscoverMainContent uses UnifiedHistogramLayout which
   // is lazy loaded, so we need to wait for it to be loaded
   await act(() => setTimeout(0));
+  await component.update();
 
   return component;
 }
@@ -221,7 +224,7 @@ describe('Discover component', () => {
     expect(
       container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
     ).not.toBeNull();
-  });
+  }, 10000);
 
   test('sql query displays no chart toggle', async () => {
     const container = document.createElement('div');
@@ -246,7 +249,7 @@ describe('Discover component', () => {
     expect(
       component.find('[data-test-subj="discoverSavedSearchTitle"]').getDOMNode()
     ).toHaveFocus();
-  });
+  }, 10000);
 
   describe('sidebar', () => {
     test('should be opened if discover:sidebarClosed was not set', async () => {

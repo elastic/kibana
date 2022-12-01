@@ -4,14 +4,6 @@ exports[`telemetry_ops_stats should return something when there is a metric 1`] 
 Object {
   "concurrent_connections": 1,
   "elasticsearch_client": Object {
-    "averageActiveSocketsPerNode": 8,
-    "averageIdleSocketsPerNode": 0.5,
-    "connectedNodes": 3,
-    "mostActiveNodeSockets": 15,
-    "mostIdleNodeSockets": 2,
-    "nodesWithActiveSockets": 3,
-    "nodesWithIdleSockets": 1,
-    "protocol": "https",
     "totalActiveSockets": 25,
     "totalIdleSockets": 2,
     "totalQueuedRequests": 0,
