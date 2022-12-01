@@ -37,7 +37,10 @@ import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
+import {
+  ExpressionRendererEvent,
+  ReactExpressionRendererType,
+} from '@kbn/expressions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 
 import {
@@ -79,7 +82,6 @@ import {
   DatasourceMap,
   Datasource,
   IndexPatternMap,
-  LensRendererEvent,
   GetCompatibleCellValueActions,
 } from '../types';
 
@@ -752,7 +754,9 @@ export class Embeddable
     );
   }
 
-  private readonly hasCompatibleActions = async (event: LensRendererEvent): Promise<boolean> => {
+  private readonly hasCompatibleActions = async (
+    event: ExpressionRendererEvent
+  ): Promise<boolean> => {
     if (isLensTableRowContextMenuClickEvent(event) || isLensFilterEvent(event)) {
       const { getTriggerCompatibleActions } = this.deps;
       if (!getTriggerCompatibleActions) {
@@ -830,7 +834,7 @@ export class Embeddable
     return this.deps.visualizationMap[visType].onEditAction;
   }
 
-  handleEvent = async (event: LensRendererEvent) => {
+  handleEvent = async (event: ExpressionRendererEvent) => {
     if (!this.deps.getTrigger || this.input.disableTriggers) {
       return;
     }

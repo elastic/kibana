@@ -15,6 +15,7 @@ import type {
   ExpressionAstExpression,
   IInterpreterRenderHandlers,
   Datatable,
+  ExpressionRendererEvent,
 } from '@kbn/expressions-plugin/public';
 import type { Configuration, NavigateToLensContext } from '@kbn/visualizations-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/public';
@@ -1311,28 +1312,22 @@ export interface LensTableRowContextMenuEvent {
   data: RowClickContext['data'];
 }
 
-export type LensRendererEvent =
-  | ClickTriggerEvent
-  | BrushTriggerEvent
-  | LensEditEvent<LensEditSupportedActions>
-  | LensTableRowContextMenuEvent;
-
-export function isLensFilterEvent(event: LensRendererEvent): event is ClickTriggerEvent {
+export function isLensFilterEvent(event: ExpressionRendererEvent): event is ClickTriggerEvent {
   return event.name === 'filter';
 }
 
-export function isLensBrushEvent(event: LensRendererEvent): event is BrushTriggerEvent {
+export function isLensBrushEvent(event: ExpressionRendererEvent): event is BrushTriggerEvent {
   return event.name === 'brush';
 }
 
 export function isLensEditEvent<T extends LensEditSupportedActions>(
-  event: LensRendererEvent
+  event: ExpressionRendererEvent
 ): event is LensEditEvent<T> {
   return event.name === 'edit';
 }
 
 export function isLensTableRowContextMenuClickEvent(
-  event: LensRendererEvent
+  event: ExpressionRendererEvent
 ): event is LensTableRowContextMenuEvent {
   return event.name === 'tableRowContextMenuClick';
 }
@@ -1343,7 +1338,13 @@ export function isLensTableRowContextMenuClickEvent(
  * used, dispatched events will be handled correctly.
  */
 export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
-  event: (event: LensRendererEvent) => void;
+  event: (
+    event:
+      | ClickTriggerEvent
+      | BrushTriggerEvent
+      | LensEditEvent<LensEditSupportedActions>
+      | LensTableRowContextMenuEvent
+  ) => void;
 }
 
 export interface SharingSavedObjectProps {
