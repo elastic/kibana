@@ -19,7 +19,7 @@ export enum SearchType {
   searchSource = 'searchSource',
 }
 
-export interface CommonRuleParams extends RuleTypeParams {
+export interface CommonRuleParams {
   size: number;
   thresholdComparator?: string;
   threshold: number[];
@@ -33,14 +33,16 @@ export interface CommonRuleParams extends RuleTypeParams {
   excludeHitsFromPreviousRun: boolean;
 }
 
+export interface CommonEsQueryRuleParams extends RuleTypeParams, CommonRuleParams {}
+
 export interface EsQueryRuleMetaData {
   adHocDataViewList: DataView[];
   isManagementPage?: boolean;
 }
 
 export type EsQueryRuleParams<T = SearchType> = T extends SearchType.searchSource
-  ? CommonRuleParams & OnlySearchSourceRuleParams
-  : CommonRuleParams & OnlyEsQueryRuleParams;
+  ? CommonEsQueryRuleParams & OnlySearchSourceRuleParams
+  : CommonEsQueryRuleParams & OnlyEsQueryRuleParams;
 
 export interface OnlyEsQueryRuleParams {
   esQuery: string;

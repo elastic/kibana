@@ -16,7 +16,7 @@ import {
   TIME_UNITS,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { DEFAULT_VALUES } from '../constants';
-import { CommonRuleParams } from '../types';
+import { CommonEsQueryRuleParams } from '../types';
 
 const errors = {
   index: new Array<string>(),
@@ -47,7 +47,7 @@ describe('RuleCommonExpressions', () => {
       aggType: 'count',
       size: 100,
       ...overrides,
-    } as unknown as CommonRuleParams;
+    } as unknown as CommonEsQueryRuleParams;
   }
 
   async function setup({
@@ -55,7 +55,7 @@ describe('RuleCommonExpressions', () => {
     hasValidationErrors = false,
     excludeHitsFromPreviousRun = true,
   }: {
-    ruleParams: CommonRuleParams;
+    ruleParams: CommonEsQueryRuleParams;
     hasValidationErrors?: boolean;
     excludeHitsFromPreviousRun?: boolean;
   }) {

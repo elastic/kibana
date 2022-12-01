@@ -43,39 +43,14 @@ const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = 
   'disableFilter',
 ];
 
-interface LocalState {
+interface LocalState extends CommonRuleParams {
   index?: DataView;
   filter: Filter[];
   query: Query;
-  thresholdComparator: CommonRuleParams['thresholdComparator'];
-  threshold: CommonRuleParams['threshold'];
-  timeWindowSize: CommonRuleParams['timeWindowSize'];
-  timeWindowUnit: CommonRuleParams['timeWindowUnit'];
-  size: CommonRuleParams['size'];
-  aggType: CommonRuleParams['aggType'];
-  aggField: CommonRuleParams['aggField'];
-  groupBy: CommonRuleParams['groupBy'];
-  termSize: CommonRuleParams['termSize'];
-  termField: CommonRuleParams['termField'];
-  excludeHitsFromPreviousRun: CommonRuleParams['excludeHitsFromPreviousRun'];
 }
 
 interface LocalStateAction {
-  type:
-    | SearchSourceParamsAction['type']
-    | (
-        | 'threshold'
-        | 'thresholdComparator'
-        | 'timeWindowSize'
-        | 'timeWindowUnit'
-        | 'size'
-        | 'aggType'
-        | 'aggField'
-        | 'groupBy'
-        | 'termSize'
-        | 'termField'
-        | 'excludeHitsFromPreviousRun'
-      );
+  type: SearchSourceParamsAction['type'] | keyof CommonRuleParams;
   payload: SearchSourceParamsAction['payload'] | (number[] | number | string | boolean | undefined);
 }
 
@@ -105,7 +80,6 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   const unifiedSearch = services.unifiedSearch;
   const { searchSource, errors, initialSavedQuery, setParam, ruleParams } = props;
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
-  const [esFields, setEsFields] = useState<FieldOption[]>([]);
 
   useEffect(() => setSavedQuery(initialSavedQuery), [initialSavedQuery]);
 
@@ -140,11 +114,9 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   const { index: dataView, query, filter: filters } = ruleConfiguration;
   const dataViews = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 
-  useEffect(() => {
-    if (dataView) {
-      setEsFields(convertFieldSpecToFieldOption(dataView.fields.map((field) => field.toSpec())));
-    }
-  }, [dataView]);
+  const [esFields, setEsFields] = useState<FieldOption[]>(
+    dataView ? convertFieldSpecToFieldOption(dataView.fields.map((field) => field.toSpec())) : []
+  );
 
   const onSelectDataView = useCallback((newDataView: DataView) => {
     setEsFields(convertFieldSpecToFieldOption(newDataView.fields.map((field) => field.toSpec())));

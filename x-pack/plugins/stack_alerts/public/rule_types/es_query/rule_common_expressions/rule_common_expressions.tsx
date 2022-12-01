@@ -33,19 +33,8 @@ import { DEFAULT_VALUES } from '../constants';
 import { TestQueryRow, TestQueryRowProps } from '../test_query_row';
 import { QueryThresholdHelpPopover } from './threshold_help_popover';
 
-export interface RuleCommonExpressionsProps {
-  thresholdComparator?: CommonRuleParams['thresholdComparator'];
-  threshold?: CommonRuleParams['threshold'];
-  timeWindowSize: CommonRuleParams['timeWindowSize'];
-  timeWindowUnit: CommonRuleParams['timeWindowUnit'];
-  size: CommonRuleParams['size'];
+export interface RuleCommonExpressionsProps extends CommonRuleParams {
   esFields: FieldOption[];
-  aggType: CommonRuleParams['aggType'];
-  aggField: CommonRuleParams['aggField'];
-  groupBy: CommonRuleParams['groupBy'];
-  termSize: CommonRuleParams['termSize'];
-  termField: CommonRuleParams['termField'];
-  excludeHitsFromPreviousRun: CommonRuleParams['excludeHitsFromPreviousRun'];
   errors: IErrorObject;
   hasValidationErrors: boolean;
   onChangeSelectedAggField: Parameters<typeof OfExpression>[0]['onChangeSelectedAggField'];
