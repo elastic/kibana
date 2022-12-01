@@ -7,18 +7,37 @@
  */
 
 import { difference } from 'lodash';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/public';
 import { isNestedFieldParent } from '../../../utils/nested_fields';
 
-export function getDataViewFieldList(dataView?: DataView, fieldCounts?: Record<string, number>) {
-  if (!dataView || !fieldCounts) return [];
+export function getDataViewFieldList(
+  dataView: DataView | undefined | null,
+  fieldCounts: Record<string, number> | undefined | null,
+  isPlainRecord: boolean
+): DataViewField[] | null {
+  if (isPlainRecord && !fieldCounts) {
+    // still loading data
+    return null;
+  }
 
-  const fieldNamesInDocs = Object.keys(fieldCounts);
-  const fieldNamesInDataView = dataView.fields.getAll().map((fld) => fld.name);
+  const currentFieldCounts = fieldCounts || {};
+  const sourceFiltersValues = dataView?.getSourceFiltering?.()?.excludes;
+  let dataViewFields: DataViewField[] = dataView?.fields.getAll() || [];
+
+  if (sourceFiltersValues) {
+    const filter = fieldWildcardFilter(sourceFiltersValues, dataView.metaFields);
+    dataViewFields = dataViewFields.filter((field) => {
+      return filter(field.name) || currentFieldCounts[field.name]; // don't filter out a field which was present in hits (ex. for text-based queries, selected fields)
+    });
+  }
+
+  const fieldNamesInDocs = Object.keys(currentFieldCounts);
+  const fieldNamesInDataView = dataViewFields.map((fld) => fld.name);
   const unknownFields: DataViewField[] = [];
 
   difference(fieldNamesInDocs, fieldNamesInDataView).forEach((unknownFieldName) => {
-    if (isNestedFieldParent(unknownFieldName, dataView)) {
+    if (dataView && isNestedFieldParent(unknownFieldName, dataView)) {
       unknownFields.push({
         displayName: String(unknownFieldName),
         name: String(unknownFieldName),
@@ -33,5 +52,10 @@ export function getDataViewFieldList(dataView?: DataView, fieldCounts?: Record<s
     }
   });
 
-  return [...dataView.fields.getAll(), ...unknownFields];
+  return [
+    ...(isPlainRecord
+      ? dataViewFields.filter((field) => currentFieldCounts[field.name])
+      : dataViewFields),
+    ...unknownFields,
+  ];
 }

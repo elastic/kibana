@@ -39,7 +39,7 @@ export async function sendUpgradeAgentAction({
   const now = new Date().toISOString();
   const data = {
     version,
-    source_uri: sourceUri,
+    sourceURI: sourceUri,
   };
 
   const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
