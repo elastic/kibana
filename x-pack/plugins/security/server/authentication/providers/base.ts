@@ -33,6 +33,7 @@ export interface AuthenticationProviderOptions {
     additionalQueryStringParameters?: Array<[string, string]>
   ) => string;
   client: IClusterClient;
+  getTenantClient: (tenantId: string) => IClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
   urls: {
@@ -122,10 +123,11 @@ export abstract class BaseAuthenticationProvider {
    * @param request Request instance.
    * @param [authHeaders] Optional `Headers` dictionary to send with the request.
    */
-  protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
+  protected async getUser(request: KibanaRequest, authHeaders: Headers = {}, tenantId?: string) {
+    const client = tenantId ? this.options.getTenantClient(tenantId) : this.options.client;
     return this.authenticationInfoToAuthenticatedUser(
       // @ts-expect-error Metadata is defined as Record<string, any>
-      await this.options.client
+      await client
         .asScoped({ headers: { ...request.headers, ...authHeaders } })
         .asCurrentUser.security.authenticate()
     );

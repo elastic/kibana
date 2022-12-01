@@ -23,6 +23,7 @@ import { BaseAuthenticationProvider } from './base';
 interface ProviderLoginAttempt {
   username: string;
   password: string;
+  tenantId: string;
 }
 
 /**
@@ -64,7 +65,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
    */
   public async login(
     request: KibanaRequest,
-    { username, password }: ProviderLoginAttempt,
+    { username, password, tenantId }: ProviderLoginAttempt,
     state?: ProviderState | null
   ) {
     this.logger.debug('Trying to perform a login.');
@@ -77,7 +78,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
     };
 
     try {
-      const user = await this.getUser(request, authHeaders);
+      const user = await this.getUser(request, authHeaders, tenantId);
 
       this.logger.debug('Login has been successfully performed.');
       return AuthenticationResult.succeeded(user, {

@@ -387,6 +387,7 @@ export class SecurityPlugin
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
       clusterClient,
+      getTenantClient: (tenantId: string) => core.elasticsearch.getTenantClient(tenantId),
       config,
       featureUsageService: this.featureUsageServiceStart,
       userProfileService: this.userProfileStart,

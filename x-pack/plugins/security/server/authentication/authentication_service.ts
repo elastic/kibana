@@ -50,6 +50,7 @@ interface AuthenticationServiceStartParams {
   http: Pick<HttpServiceStart, 'auth' | 'basePath' | 'getServerInfo'>;
   config: ConfigType;
   clusterClient: IClusterClient;
+  getTenantClient: (tenantId: string) => IClusterClient;
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
   userProfileService: UserProfileServiceStartInternal;
@@ -318,6 +319,7 @@ export class AuthenticationService {
     audit,
     config,
     clusterClient,
+    getTenantClient,
     featureUsageService,
     userProfileService,
     http,
@@ -359,6 +361,7 @@ export class AuthenticationService {
       audit,
       loggers,
       clusterClient,
+      getTenantClient,
       basePath: http.basePath,
       config: {
         authc: config.authc,

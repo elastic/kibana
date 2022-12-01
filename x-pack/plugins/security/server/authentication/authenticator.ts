@@ -98,6 +98,7 @@ export interface AuthenticatorOptions {
   license: SecurityLicense;
   loggers: LoggerFactory;
   clusterClient: IClusterClient;
+  getTenantClient: (tenantId: string) => IClusterClient;
   session: PublicMethodsOf<Session>;
   getServerBaseURL: () => string;
   isElasticCloudDeployment: () => boolean;
@@ -241,6 +242,7 @@ export class Authenticator {
 
     const providerCommonOptions = {
       client: this.options.clusterClient,
+      getTenantClient: this.options.getTenantClient,
       basePath: this.options.basePath,
       getRequestOriginalURL: this.getRequestOriginalURL.bind(this),
       tokens: new Tokens({
@@ -335,7 +337,7 @@ export class Authenticator {
 
       const authenticationResult = await provider.login(
         request,
-        attempt.value,
+        { ...(attempt.value as object), tenantId: attempt.tenantId },
         ownsSession ? existingSessionValue!.state : null
       );
 
@@ -420,7 +422,7 @@ export class Authenticator {
       if (!authenticationResult.notHandled()) {
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
-          tenantId: existingSession.value!.tenantId!,
+          tenantId: existingSession.value?.tenantId ?? (undefined as any), // TODO: yea, ugly I know
           authenticationResult,
           existingSessionValue: existingSession.value,
         });
@@ -1060,12 +1062,11 @@ export function enrichWithUserProfileId(
     !sessionValue?.userProfileId ||
     authenticationResult.user.profile_uid === sessionValue.userProfileId
   ) {
-    return {
-      ...authenticationResult,
-      user: authenticationResult.user
-        ? { ...authenticationResult.user, tenant_id: sessionValue?.tenantId }
-        : undefined,
-    } as AuthenticationResult;
+    // mutation is ugly, but spreading don't work given authenticationResult has a prototype
+    if (sessionValue?.tenantId && authenticationResult.user) {
+      authenticationResult.user.tenant_id = sessionValue.tenantId;
+    }
+    return authenticationResult;
   }
 
   const enrichedUser: AuthenticatedUser = {
