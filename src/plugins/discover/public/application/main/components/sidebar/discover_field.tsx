@@ -138,25 +138,6 @@ const ActionButton: React.FC<ActionButtonProps> = memo(
               />
             </EuiToolTip>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="listAdd"
-              className={actionBtnClassName}
-              onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-                if (ev.type === 'click') {
-                  ev.currentTarget.focus();
-                }
-                ev.preventDefault();
-                ev.stopPropagation();
-                toggleDisplay(field, isSelected);
-              }}
-              data-test-subj={`fieldToggle-${field.name}`}
-              aria-label={i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
-                defaultMessage: 'Add {field} to table',
-                values: { field: field.name },
-              })}
-            />
-          </EuiFlexItem>
         </EuiFlexGroup>
       );
     } else {

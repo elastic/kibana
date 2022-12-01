@@ -13,6 +13,7 @@ import { getUiSettings } from './ui_settings';
 import { capabilitiesProvider } from './capabilities_provider';
 import { registerSampleData } from './sample_data';
 import { setupTermsExplorerRoute } from './terms_explorer_route';
+import { setupFieldCardinalityRoute } from './field_cardinality_route';
 
 export class DiscoverServerPlugin implements Plugin<object, object> {
   public setup(
@@ -30,6 +31,7 @@ export class DiscoverServerPlugin implements Plugin<object, object> {
     }
 
     setupTermsExplorerRoute(core);
+    setupFieldCardinalityRoute(core);
 
     return {};
   }
