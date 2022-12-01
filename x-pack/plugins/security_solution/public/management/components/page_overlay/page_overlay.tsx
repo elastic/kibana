@@ -341,6 +341,7 @@ export const PageOverlay = memo<PageOverlayProps>(
         unSetDocumentBodyLock();
         unSetDocumentBodyOverlayIsVisible();
         unSetDocumentBodyFullScreen();
+        unSetDocumentBodyOverPageWrapper();
       };
     }, [isHidden, isMounted, lockDocumentBody, showInFullScreen]);
 
