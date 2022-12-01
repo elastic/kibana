@@ -104,6 +104,7 @@ import type { SaveModalContainerProps } from './app_plugin/save_modal_container'
 import { setupExpressions } from './expressions';
 import { getSearchProvider } from './search_provider';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
+import { ChartInfoApi } from './chart_info_api';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -223,6 +224,7 @@ export interface LensPublicStart {
    */
   stateHelperApi: () => Promise<{
     formula: FormulaPublicApi;
+    chartInfo: ChartInfoApi;
   }>;
 }
 
@@ -242,6 +244,7 @@ export class LensPlugin {
   private topNavMenuEntries: LensTopNavMenuEntryGenerator[] = [];
   private hasDiscoverAccess: boolean = false;
   private dataViewsService: DataViewsPublicPluginStart | undefined;
+  private initDependenciesForApi: () => void = () => {};
 
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
@@ -396,6 +399,19 @@ export class LensPlugin {
 
     urlForwarding.forwardApp('lens', 'lens');
 
+    this.initDependenciesForApi = async () => {
+      const { plugins } = startServices();
+      await this.initParts(
+        core,
+        data,
+        charts,
+        expressions,
+        fieldFormats,
+        plugins.fieldFormats.deserialize,
+        eventAnnotation
+      );
+    };
+
     return {
       registerVisualization: (vis: Visualization | (() => Promise<Visualization>)) => {
         if (this.editorFrameSetup) {
@@ -540,10 +556,13 @@ export class LensPlugin {
       },
 
       stateHelperApi: async () => {
-        const { createFormulaPublicApi } = await import('./async_services');
-
+        const { createFormulaPublicApi, createChartInfoApi } = await import('./async_services');
+        if (!this.editorFrameService) {
+          await this.initDependenciesForApi();
+        }
         return {
           formula: createFormulaPublicApi(),
+          chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
         };
       },
     };
