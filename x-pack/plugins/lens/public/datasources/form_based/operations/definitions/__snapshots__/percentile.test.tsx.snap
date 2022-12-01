@@ -1,0 +1,157 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`percentile optimizeEsAggs should collapse percentile dimensions with matching parameters 1`] = `
+Array [
+  Object {
+    "findFunction": [Function],
+    "functions": Array [
+      Object {
+        "addArgument": [Function],
+        "arguments": Object {
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "foo",
+          ],
+          "id": Array [
+            "1",
+          ],
+          "percents": Array [
+            10,
+            20,
+            30,
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "getArgument": [Function],
+        "name": "aggPercentiles",
+        "removeArgument": [Function],
+        "replaceArgument": [Function],
+        "toAst": [Function],
+        "toString": [Function],
+        "type": "expression_function_builder",
+      },
+    ],
+    "toAst": [Function],
+    "toString": [Function],
+    "type": "expression_builder",
+  },
+  Object {
+    "findFunction": [Function],
+    "functions": Array [
+      Object {
+        "addArgument": [Function],
+        "arguments": Object {
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "bar",
+          ],
+          "id": Array [
+            "4",
+          ],
+          "percents": Array [
+            10,
+            40,
+          ],
+          "schema": Array [
+            "metric",
+          ],
+        },
+        "getArgument": [Function],
+        "name": "aggPercentiles",
+        "removeArgument": [Function],
+        "replaceArgument": [Function],
+        "toAst": [Function],
+        "toString": [Function],
+        "type": "expression_function_builder",
+      },
+    ],
+    "toAst": [Function],
+    "toString": [Function],
+    "type": "expression_builder",
+  },
+  Object {
+    "findFunction": [Function],
+    "functions": Array [
+      Object {
+        "addArgument": [Function],
+        "arguments": Object {
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "bar",
+          ],
+          "id": Array [
+            "6",
+          ],
+          "percents": Array [
+            50,
+            60,
+          ],
+          "schema": Array [
+            "metric",
+          ],
+          "timeShift": Array [
+            "1d",
+          ],
+        },
+        "getArgument": [Function],
+        "name": "aggPercentiles",
+        "removeArgument": [Function],
+        "replaceArgument": [Function],
+        "toAst": [Function],
+        "toString": [Function],
+        "type": "expression_function_builder",
+      },
+    ],
+    "toAst": [Function],
+    "toString": [Function],
+    "type": "expression_builder",
+  },
+  Object {
+    "findFunction": [Function],
+    "functions": Array [
+      Object {
+        "addArgument": [Function],
+        "arguments": Object {
+          "enabled": Array [
+            true,
+          ],
+          "field": Array [
+            "bar",
+          ],
+          "id": Array [
+            "8",
+          ],
+          "percents": Array [
+            70,
+            80,
+          ],
+          "schema": Array [
+            "metric",
+          ],
+          "timeShift": Array [
+            "2d",
+          ],
+        },
+        "getArgument": [Function],
+        "name": "aggPercentiles",
+        "removeArgument": [Function],
+        "replaceArgument": [Function],
+        "toAst": [Function],
+        "toString": [Function],
+        "type": "expression_function_builder",
+      },
+    ],
+    "toAst": [Function],
+    "toString": [Function],
+    "type": "expression_builder",
+  },
+]
+`;

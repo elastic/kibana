@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 import type { PanelViewAndParameters } from '../types';
 
 /**
