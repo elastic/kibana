@@ -48,11 +48,8 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   };
 
   const distributionBar = {
-    filterBy: async (type: 'passed' | 'failed') => {
-      await testSubjects.click(
-        type === 'failed' ? 'distribution_bar_failed' : 'distribution_bar_passed'
-      );
-    },
+    filterBy: async (type: 'passed' | 'failed') =>
+      testSubjects.click(type === 'failed' ? 'distribution_bar_failed' : 'distribution_bar_passed'),
   };
 
   const table = {
@@ -82,6 +79,12 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       const element = await table.getElement();
       const rows = await element.findAllByCssSelector('tbody tr');
       return rows.length;
+    },
+
+    getFindingsCount: async (type: 'passed' | 'failed') => {
+      const element = await table.getElement();
+      const items = await element.findAllByCssSelector(`span[data-test-subj="${type}_finding"]`);
+      return items.length;
     },
 
     getRowIndexForValue: async (columnName: string, value: string) => {

@@ -112,28 +112,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('DistributionBar', () => {
-      it('filters by passed findings', async () => {
-        await distributionBar.filterBy('passed');
+      (['passed', 'failed'] as const).forEach((type) => {
+        it(`filters by ${type} findings`, async () => {
+          await distributionBar.filterBy(type);
 
-        const passed = data
-          .filter(({ result }) => result.evaluation === 'passed')
-          .map(() => 'Pass');
+          const items = data.filter(({ result }) => result.evaluation === type);
+          expect(await table.getFindingsCount(type)).to.eql(items.length);
 
-        expect(await table.getColumnValues('Result')).to.eql(passed);
-
-        await filterBar.removeFilter('result.evaluation');
-      });
-
-      it('filters by failed findings', async () => {
-        await distributionBar.filterBy('failed');
-
-        const failed = data
-          .filter(({ result }) => result.evaluation === 'failed')
-          .map(() => 'Fail');
-
-        expect(await table.getColumnValues('Result')).to.eql(failed);
-
-        await filterBar.removeFilter('result.evaluation');
+          await filterBar.removeFilter('result.evaluation');
+        });
       });
     });
   });
