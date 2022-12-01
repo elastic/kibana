@@ -25,7 +25,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
-import type { SpanLinksCount } from '../../../../../../../../common/waterfall_helper/typings';
+import type { SpanLinksCount } from '../../../../../../../../common/span_links';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';

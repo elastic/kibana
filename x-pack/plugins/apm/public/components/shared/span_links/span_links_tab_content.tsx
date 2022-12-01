@@ -10,7 +10,7 @@ import React from 'react';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { SpanLinks } from '.';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
-import type { SpanLinksCount } from '../../../../common/waterfall_helper/typings';
+import type { SpanLinksCount } from '../../../../common/span_links';
 
 interface Props {
   spanLinksCount: SpanLinksCount;

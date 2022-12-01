@@ -14,6 +14,7 @@ import { SpanLink } from '../../typings/es_schemas/raw/fields/span_links';
 import { TimestampUs } from '../../typings/es_schemas/raw/fields/timestamp_us';
 import { Agent } from '../../typings/es_schemas/ui/fields/agent';
 import { Transaction } from '../../typings/es_schemas/ui/transaction';
+import { SpanLinksCount } from '../span_links';
 
 // API return type
 export interface TraceItems {
@@ -176,13 +177,4 @@ export interface IWaterfallLegend {
   type: WaterfallLegendType;
   value: string | undefined;
   color: string;
-}
-
-/*
- * Span links type
- */
-
-export interface SpanLinksCount {
-  linkedChildren: number;
-  linkedParents: number;
 }

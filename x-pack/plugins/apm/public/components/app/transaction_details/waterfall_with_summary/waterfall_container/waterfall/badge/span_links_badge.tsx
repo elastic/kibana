@@ -7,7 +7,7 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { SpanLinksCount } from '../../../../../../../../common/waterfall_helper/typings';
+import type { SpanLinksCount } from '../../../../../../../../common/span_links';
 
 type Props = SpanLinksCount & { id: string };
 

@@ -22,3 +22,8 @@ export interface SpanLinkDetails {
     spanType?: string;
   };
 }
+
+export interface SpanLinksCount {
+  linkedChildren: number;
+  linkedParents: number;
+}

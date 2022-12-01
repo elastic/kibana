@@ -21,7 +21,7 @@ import { KueryBar } from '../kuery_bar';
 import { SpanLinksCallout } from './span_links_callout';
 import { SpanLinksTable } from './span_links_table';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
-import type { SpanLinksCount } from '../../../../common/waterfall_helper/typings';
+import type { SpanLinksCount } from '../../../../common/span_links';
 
 interface Props {
   spanLinksCount: SpanLinksCount;
