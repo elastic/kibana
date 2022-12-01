@@ -41,7 +41,7 @@ const toDataViewListItem = (dataView: DataView): DataViewListItem => {
 };
 
 export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopoverProps> = ({
-  metadata = { adHocDataViewList: [], isManagementPage: true },
+  metadata,
   dataView,
   onSelectDataView,
   onChangeMetaData,
@@ -50,11 +50,16 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   const [dataViewItems, setDataViewsItems] = useState<DataViewListItem[]>([]);
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
 
+  const adhocDataViewList = useMemo(
+    () => metadata?.adHocDataViewList || [],
+    [metadata?.adHocDataViewList]
+  );
+
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   const allDataViewItems = useMemo(
-    () => [...dataViewItems, ...metadata.adHocDataViewList.map(toDataViewListItem)],
-    [dataViewItems, metadata.adHocDataViewList]
+    () => [...dataViewItems, ...adhocDataViewList.map(toDataViewListItem)],
+    [dataViewItems, adhocDataViewList]
   );
 
   const closeDataViewPopover = useCallback(() => setDataViewPopoverOpen(false), []);
@@ -79,10 +84,10 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
     (adHocDataView: DataView) => {
       onChangeMetaData({
         ...metadata,
-        adHocDataViewList: [...metadata.adHocDataViewList, adHocDataView],
+        adHocDataViewList: [...adhocDataViewList, adHocDataView],
       });
     },
-    [metadata, onChangeMetaData]
+    [adhocDataViewList, metadata, onChangeMetaData]
   );
 
   const createDataView = useMemo(

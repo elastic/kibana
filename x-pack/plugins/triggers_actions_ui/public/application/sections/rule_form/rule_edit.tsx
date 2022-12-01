@@ -114,19 +114,12 @@ export const RuleEdit = ({
     }
   }, [props.ruleType, ruleType.id, serverRuleType, http]);
 
-  const [{ ruleBaseErrors, ruleErrors, ruleParamsErrors }, setErrors] = useState<{
-    ruleBaseErrors: IErrorObject;
-    ruleErrors: IErrorObject;
-    ruleParamsErrors: IErrorObject;
-  }>({
-    ruleBaseErrors: {},
-    ruleErrors: {},
-    ruleParamsErrors: {},
-  });
-
-  useEffect(() => {
-    getRuleErrors(rule as Rule, ruleType, config, services).then(setErrors);
-  }, [config, rule, ruleType, services]);
+  const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = getRuleErrors(
+    rule as Rule,
+    ruleType,
+    config,
+    metadata
+  );
 
   const checkForChangesAndCloseFlyout = () => {
     if (hasRuleChanged(rule, initialRule, true)) {

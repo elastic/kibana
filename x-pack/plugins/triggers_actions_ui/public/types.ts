@@ -73,7 +73,6 @@ import type {
 } from './application/sections/field_browser/types';
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
-import { TriggersAndActionsUiServices } from './application/app';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -358,10 +357,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   description: string;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
-  validate: (
-    ruleParams: Params,
-    services: TriggersAndActionsUiServices
-  ) => Promise<ValidationResult> | ValidationResult;
+  validate: (ruleParams: Params) => ValidationResult;
   ruleParamsExpression:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<RuleTypeParamsExpressionProps<Params>>>;
@@ -402,6 +398,8 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
   onSave?: (metadata?: MetaData) => Promise<void>;
+  // be aware, `moreParamsErrors` prop of metadata is used to pass
+  // errors which can't be validated syncronously within `validate` function
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
   filteredRuleTypes?: string[];

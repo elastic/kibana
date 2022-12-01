@@ -16,7 +16,7 @@ import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
-import { hasExpressionValidationErrors } from '../validation';
+import { validateExpression } from '../validation';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
 import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
@@ -26,6 +26,13 @@ import { totalHitsToNumber } from '../test_query_row';
 import { useTriggerUiActionServices } from '../util';
 
 const { useXJsonMode } = XJson;
+
+const hasExpressionValidationErrors = (ruleParams: EsQueryRuleParams) => {
+  const { errors: validationErrors } = validateExpression(ruleParams);
+  return Object.keys(validationErrors).some(
+    (key) => validationErrors[key] && validationErrors[key].length
+  );
+};
 
 export const EsQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esQuery>, EsQueryRuleMetaData>
@@ -103,15 +110,9 @@ export const EsQueryExpression: React.FC<
     }
   };
 
-  const [hasValidationErrors, setHasValidationErrors] = useState(false);
-
-  useEffect(() => {
-    hasExpressionValidationErrors(currentRuleParams, services).then(setHasValidationErrors);
-  }, [currentRuleParams, services]);
-
   const onTestQuery = useCallback(async () => {
     const window = `${timeWindowSize}${timeWindowUnit}`;
-    if (hasValidationErrors) {
+    if (hasExpressionValidationErrors(currentRuleParams)) {
       return { nrOfDocs: 0, timeWindow: window };
     }
     const timeWindow = parseDuration(window);
@@ -134,7 +135,7 @@ export const EsQueryExpression: React.FC<
 
     const hits = rawResponse.hits;
     return { nrOfDocs: totalHitsToNumber(hits.total), timeWindow: window };
-  }, [data.search, esQuery, index, timeField, timeWindowSize, timeWindowUnit, hasValidationErrors]);
+  }, [timeWindowSize, timeWindowUnit, currentRuleParams, esQuery, data.search, index, timeField]);
 
   return (
     <Fragment>
@@ -249,7 +250,7 @@ export const EsQueryExpression: React.FC<
           setParam('size', updatedValue);
         }}
         errors={errors}
-        hasValidationErrors={hasValidationErrors}
+        hasValidationErrors={hasExpressionValidationErrors(currentRuleParams)}
         onTestFetch={onTestQuery}
         excludeHitsFromPreviousRun={excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={(exclude) => {

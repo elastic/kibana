@@ -63,6 +63,8 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
     return errors[errorKey]?.length >= 1 && ruleParams[errorKey] !== undefined;
   });
 
+  const hasEsExpressionErrors = !!errorParam;
+
   const expressionError = !!errorParam && (
     <>
       <EuiCallOut
@@ -92,7 +94,11 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
       )}
 
       {ruleParams.searchType && isSearchSource && (
-        <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
+        <SearchSourceExpressionMemoized
+          {...props}
+          ruleParams={ruleParams}
+          hasValidationErrors={hasEsExpressionErrors}
+        />
       )}
 
       {ruleParams.searchType && !isSearchSource && (

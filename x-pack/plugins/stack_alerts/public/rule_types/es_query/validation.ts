@@ -7,11 +7,8 @@
 
 import { defaultsDeep, isNil } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  ValidationResult,
-  builtInComparators,
-  TriggersAndActionsUiServices,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { ValidationResult, builtInComparators } from '@kbn/triggers-actions-ui-plugin/public';
+import { ISearchSource } from '@kbn/data-plugin/public';
 import { EsQueryRuleParams, OnlySearchSourceRuleParams, OnlyEsQueryRuleParams } from './types';
 import { isSearchSourceRule } from './util';
 import {
@@ -88,16 +85,16 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
   return errors;
 };
 
-const validateSearchSourceParams = async (
+export const validateSearchSourceParams = (
   ruleParams: OnlySearchSourceRuleParams,
-  services: TriggersAndActionsUiServices
+  searchSource?: ISearchSource
 ) => {
   const errors: typeof SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS = defaultsDeep(
     {},
     SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS
   );
 
-  if (!ruleParams.searchConfiguration) {
+  if (!ruleParams.searchConfiguration || !searchSource) {
     errors.searchConfiguration.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredSearchConfiguration', {
         defaultMessage: 'Search source configuration is required.',
@@ -106,19 +103,7 @@ const validateSearchSourceParams = async (
     return errors;
   }
 
-  let searchSource;
-  try {
-    searchSource = await services.data.search.searchSource.create(ruleParams.searchConfiguration);
-  } catch (e) {
-    errors.searchConfiguration.push(
-      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.searchConfigError', {
-        defaultMessage: 'Search source configuration is invalid.',
-      })
-    );
-    return errors;
-  }
-
-  const dataView = searchSource?.getField('index');
+  const dataView = searchSource.getField('index');
   if (!dataView) {
     errors.searchConfiguration.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewText', {
@@ -192,10 +177,7 @@ const validateEsQueryParams = (ruleParams: OnlyEsQueryRuleParams) => {
   return errors;
 };
 
-export const validateExpression = async (
-  ruleParams: EsQueryRuleParams,
-  services: TriggersAndActionsUiServices
-): Promise<ValidationResult> => {
+export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationResult => {
   const validationResult = { errors: {} };
 
   const commonErrors = validateCommonParams(ruleParams);
@@ -210,22 +192,15 @@ export const validateExpression = async (
    */
   const isSearchSource = isSearchSourceRule(ruleParams);
   if (isSearchSource) {
-    const searchSourceParamsErrors = await validateSearchSourceParams(ruleParams, services);
-    validationResult.errors = { ...validationResult.errors, ...searchSourceParamsErrors };
+    validationResult.errors = {
+      ...validationResult.errors,
+      ...defaultsDeep({}, SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS),
+    };
+    // skip searchConfiguration check here, since it will be checked in by updating metadata
     return validationResult;
   }
 
   const esQueryErrors = validateEsQueryParams(ruleParams as OnlyEsQueryRuleParams);
   validationResult.errors = { ...validationResult.errors, ...esQueryErrors };
   return validationResult;
-};
-
-export const hasExpressionValidationErrors = async (
-  ruleParams: EsQueryRuleParams,
-  services: TriggersAndActionsUiServices
-) => {
-  const { errors: validationErrors } = await validateExpression(ruleParams, services);
-  return Object.keys(validationErrors).some(
-    (key) => validationErrors[key] && validationErrors[key].length
-  );
 };

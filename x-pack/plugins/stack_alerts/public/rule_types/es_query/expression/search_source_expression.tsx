@@ -11,15 +11,23 @@ import { EuiSpacer, EuiLoadingSpinner, EuiEmptyPrompt, EuiCallOut } from '@elast
 import { ISearchSource } from '@kbn/data-plugin/common';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { SavedQuery } from '@kbn/data-plugin/public';
-import { EsQueryRuleMetaData, EsQueryRuleParams, SearchType } from '../types';
+import {
+  EsQueryRuleMetaData,
+  EsQueryRuleParams,
+  OnlySearchSourceRuleParams,
+  SearchType,
+} from '../types';
 import { SearchSourceExpressionForm } from './search_source_expression_form';
 import { DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
+import { validateSearchSourceParams } from '../validation';
 
 export type SearchSourceExpressionProps = RuleTypeParamsExpressionProps<
   EsQueryRuleParams<SearchType.searchSource>,
   EsQueryRuleMetaData
->;
+> & {
+  hasValidationErrors: boolean;
+};
 
 export const SearchSourceExpression = ({
   ruleParams,
@@ -27,6 +35,7 @@ export const SearchSourceExpression = ({
   setRuleParams,
   setRuleProperty,
   metadata,
+  hasValidationErrors,
   onChangeMetaData,
 }: SearchSourceExpressionProps) => {
   const {
@@ -47,9 +56,18 @@ export const SearchSourceExpression = ({
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
+      if (paramField === 'searchConfiguration') {
+        onChangeMetaData({
+          ...metadata,
+          moreParamsErrors: validateSearchSourceParams(
+            ruleParams as OnlySearchSourceRuleParams,
+            searchSource
+          ),
+        });
+      }
       setRuleParams(paramField, paramValue);
     },
-    [setRuleParams]
+    [metadata, onChangeMetaData, ruleParams, searchSource, setRuleParams]
   );
 
   useEffect(() => {
@@ -119,6 +137,7 @@ export const SearchSourceExpression = ({
       setParam={setParam}
       metadata={metadata}
       onChangeMetaData={onChangeMetaData}
+      hasValidationErrors={hasValidationErrors}
     />
   );
 };

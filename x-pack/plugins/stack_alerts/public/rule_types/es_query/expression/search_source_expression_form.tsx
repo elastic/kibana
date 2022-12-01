@@ -26,7 +26,6 @@ import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { RuleCommonExpressions } from '../rule_common_expressions';
 import { totalHitsToNumber } from '../test_query_row';
-import { hasExpressionValidationErrors } from '../validation';
 import { useTriggerUiActionServices } from '../util';
 
 const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = [
@@ -71,6 +70,7 @@ interface SearchSourceExpressionFormProps {
   searchSource: ISearchSource;
   ruleParams: EsQueryRuleParams<SearchType.searchSource>;
   errors: IErrorObject;
+  hasValidationErrors: boolean;
   metadata?: EsQueryRuleMetaData;
   initialSavedQuery?: SavedQuery;
   setParam: (paramField: string, paramValue: unknown) => void;
@@ -112,6 +112,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         ruleParams.excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
     }
   );
+
   const { index: dataView, query, filter: filters } = ruleConfiguration;
   const dataViews = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 
@@ -217,11 +218,6 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     return { nrOfDocs: totalHitsToNumber(rawResponse.hits.total), timeWindow };
   }, [timeWindow, createTestSearchSource]);
 
-  const [hasValidationErrors, setHasValidationErrors] = useState(false);
-  useEffect(() => {
-    hasExpressionValidationErrors(ruleParams, services).then(setHasValidationErrors);
-  }, [ruleParams, services]);
-
   return (
     <Fragment>
       <EuiTitle size="xs">
@@ -295,7 +291,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         onChangeWindowUnit={onChangeWindowUnit}
         onChangeSizeValue={onChangeSizeValue}
         errors={errors}
-        hasValidationErrors={hasValidationErrors}
+        hasValidationErrors={props.hasValidationErrors}
         onTestFetch={onTestFetch}
         onCopyQuery={onCopyQuery}
         excludeHitsFromPreviousRun={ruleConfiguration.excludeHitsFromPreviousRun}
