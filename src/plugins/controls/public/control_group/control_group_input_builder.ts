@@ -105,7 +105,7 @@ export const controlGroupInputBuilder = {
           dataViewId,
           fieldName,
           title: title ?? fieldName,
-          value: value ? value : ['', '']
+          value: value ? value : ['', ''],
         },
       } as ControlPanelState<DataControlInput>,
     };
