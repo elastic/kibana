@@ -12,6 +12,7 @@ import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
 } from '../../common/control_group/control_group_constants';
+import { RangeValue } from '../../common/range_slider/types';
 import {
   ControlInput,
   ControlWidth,
@@ -34,6 +35,10 @@ export interface AddDataControlProps {
 
 export type AddOptionsListControlProps = AddDataControlProps & {
   selectedOptions?: string[];
+};
+
+export type AddRangeSliderControlProps = AddDataControlProps & {
+  value?: RangeValue;
 };
 
 export const controlGroupInputBuilder = {
@@ -84,9 +89,9 @@ export const controlGroupInputBuilder = {
   },
   addRangeSliderControl: (
     initialInput: Partial<ControlGroupInput>,
-    controlProps: AddDataControlProps
+    controlProps: AddRangeSliderControlProps
   ) => {
-    const { controlId, dataViewId, fieldName, title } = controlProps;
+    const { controlId, dataViewId, fieldName, title, value } = controlProps;
     const panelId = controlId ? controlId : uuid.v4();
     initialInput.panels = {
       ...initialInput.panels,
@@ -100,6 +105,7 @@ export const controlGroupInputBuilder = {
           dataViewId,
           fieldName,
           title: title ?? fieldName,
+          value: value ? value : ['', '']
         },
       } as ControlPanelState<DataControlInput>,
     };
