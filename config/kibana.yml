@@ -180,7 +180,7 @@ multitenancy:
     - id: tenantB
       config:
         elasticsearch:
-          hosts: ['http://localhost:9300']
+          hosts: ['http://localhost:8200']
           username: 'elastic'
           password: 'changeme'
         i18n:
