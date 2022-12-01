@@ -15,19 +15,17 @@ import { ControlsExampleStartDeps } from './plugin';
 import { BasicReduxExample } from './basic_redux_example';
 
 const ControlsExamples = ({ dataViewId }: { dataViewId?: string }) => {
-  const examples = dataViewId
-    ? <>
-        <BasicReduxExample dataViewId={dataViewId} />
-      </>
-    : <div>
-        {"Please install e-commerce sample data to run controls examples."}
-      </div>
+  const examples = dataViewId ? (
+    <>
+      <BasicReduxExample dataViewId={dataViewId} />
+    </>
+  ) : (
+    <div>{'Please install e-commerce sample data to run controls examples.'}</div>
+  );
   return (
     <KibanaPageTemplate>
       <KibanaPageTemplate.Header pageTitle="Controls as a Building Block" />
-      <KibanaPageTemplate.Section>
-        {examples}
-      </KibanaPageTemplate.Section>
+      <KibanaPageTemplate.Section>{examples}</KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
 };
