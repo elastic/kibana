@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-
-import { EuiLink } from '@elastic/eui';
-import type { GuideConfig } from '../../types';
+import type { GuideConfig } from '../../../common';
 
 export const observabilityConfig: GuideConfig = {
   title: i18n.translate('guidedOnboarding.observabilityGuide.title', {
@@ -36,21 +31,10 @@ export const observabilityConfig: GuideConfig = {
       }),
       integration: 'kubernetes',
       descriptionList: [
-        <FormattedMessage
-          id="guidedOnboarding.observabilityGuide.addDataStep.descriptionList.item1"
-          defaultMessage="Deploy {kubeStateMetricsLink} service to your Kubernetes."
-          values={{
-            kubeStateMetricsLink: (
-              <EuiLink
-                external
-                target="_blank"
-                href="https://github.com/kubernetes/kube-state-metrics"
-              >
-                kube-state-metrics
-              </EuiLink>
-            ),
-          }}
-        />,
+        i18n.translate('guidedOnboarding.observabilityGuide.addDataStep.descriptionList.item1', {
+          // TODO add the link to the docs, when markdown support is implemented https://github.com/elastic/kibana/issues/146404
+          defaultMessage: 'Deploy kube-state-metrics service to your Kubernetes.',
+        }),
         i18n.translate('guidedOnboarding.observabilityGuide.addDataStep.descriptionList.item2', {
           defaultMessage: 'Add the Elastic Kubernetes integration.',
         }),

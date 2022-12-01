@@ -514,6 +514,7 @@ export const getHeatmapVisualization = ({
       dimensions.push({
         id: state.xAccessor,
         name: getAxisName(GROUP_ID.X),
+        dimensionType: 'x',
       });
     }
 
@@ -521,6 +522,7 @@ export const getHeatmapVisualization = ({
       dimensions.push({
         id: state.yAccessor,
         name: getAxisName(GROUP_ID.Y),
+        dimensionType: 'y',
       });
     }
 
@@ -530,6 +532,7 @@ export const getHeatmapVisualization = ({
         name: i18n.translate('xpack.lens.heatmap.cellValueLabel', {
           defaultMessage: 'Cell value',
         }),
+        dimensionType: 'value',
       });
     }
 

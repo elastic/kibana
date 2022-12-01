@@ -204,12 +204,12 @@ async function mountComponent(
   // DiscoverMainContent uses UnifiedHistogramLayout which
   // is lazy loaded, so we need to wait for it to be loaded
   await act(() => setTimeout(0));
+  await component.update();
 
   return component;
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/145894
-describe.skip('Discover component', () => {
+describe('Discover component', () => {
   test('selected data view without time field displays no chart toggle', async () => {
     const container = document.createElement('div');
     await mountComponent(dataViewMock, undefined, { attachTo: container });
@@ -224,7 +224,7 @@ describe.skip('Discover component', () => {
     expect(
       container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
     ).not.toBeNull();
-  });
+  }, 10000);
 
   test('sql query displays no chart toggle', async () => {
     const container = document.createElement('div');
@@ -249,7 +249,7 @@ describe.skip('Discover component', () => {
     expect(
       component.find('[data-test-subj="discoverSavedSearchTitle"]').getDOMNode()
     ).toHaveFocus();
-  });
+  }, 10000);
 
   describe('sidebar', () => {
     test('should be opened if discover:sidebarClosed was not set', async () => {
