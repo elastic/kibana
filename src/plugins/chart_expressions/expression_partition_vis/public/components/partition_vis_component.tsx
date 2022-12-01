@@ -68,7 +68,7 @@ import {
 } from './partition_vis_component.styles';
 import { ChartTypes } from '../../common/types';
 import { filterOutConfig } from '../utils/filter_out_config';
-import { FilterEvent, StartDeps } from '../types';
+import { ColumnCellValueActions, FilterEvent, StartDeps } from '../types';
 
 declare global {
   interface Window {
@@ -89,10 +89,12 @@ export interface PartitionVisComponentProps {
   palettesRegistry: PaletteRegistry;
   services: Pick<StartDeps, 'data' | 'fieldFormats'>;
   syncColors: boolean;
+  columnCellValueActions: ColumnCellValueActions;
 }
 
 const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const {
+    columnCellValueActions,
     visData: originalVisData,
     visParams: preVisParams,
     visType,
@@ -223,6 +225,18 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     },
     [props]
   );
+
+  // handles legend cell value action event data
+  // const getCellValueActionData = useCallback(
+  //   (vData: Datatable) => (series: SeriesIdentifier) => {
+  //     const data = getCellValueEventData(vData, series);
+  //     props.fireEvent({
+  //       name: 'cellValue',
+  //       data,
+  //     });
+  //   },
+  //   [props]
+  // );
 
   const toggleLegend = useCallback(() => {
     setShowLegend((value) => {
@@ -449,6 +463,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   canFilter,
                   getLegendActionEventData(visData),
                   handleLegendAction,
+                  columnCellValueActions,
                   visParams,
                   visData,
                   services.data.actions,

@@ -21,7 +21,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DatatableComponent } from './components/table_basic';
 
-import type { ILensInterpreterRenderHandlers } from '../../types';
+import type { ILensInterpreterRenderHandlers, LensCellValueAction } from '../../types';
 import type { FormatFactory } from '../../../common';
 import type { DatatableProps } from '../../../common/expressions';
 
@@ -71,7 +71,7 @@ export const getDatatableRenderer = (dependencies: {
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
 
     const resolvedGetType = await dependencies.getType;
-    const { hasCompatibleActions, isInteractive } = handlers;
+    const { hasCompatibleActions, isInteractive, getCompatibleCellValueActions } = handlers;
 
     const renderComplete = () => {
       trackUiCounterEvents('table', handlers.getExecutionContext());
@@ -104,6 +104,23 @@ export const getDatatableRenderer = (dependencies: {
       }
     }
 
+    let columnCellValueActions: LensCellValueAction[][] = [];
+    if (getCompatibleCellValueActions) {
+      if (!!config.data) {
+        columnCellValueActions = await Promise.all(
+          config.data.columns.map(({ meta: columnMeta }) => {
+            try {
+              return getCompatibleCellValueActions([{ columnMeta }]) as Promise<
+                LensCellValueAction[]
+              >;
+            } catch {
+              return [];
+            }
+          })
+        );
+      }
+    }
+
     ReactDOM.render(
       <KibanaThemeProvider theme$={dependencies.theme.theme$}>
         <I18nProvider>
@@ -115,6 +132,7 @@ export const getDatatableRenderer = (dependencies: {
             paletteService={dependencies.paletteService}
             getType={resolvedGetType}
             rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
+            columnCellValueActions={columnCellValueActions}
             columnFilterable={await columnsFilterable(config.data, handlers)}
             interactive={isInteractive()}
             uiSettings={dependencies.uiSettings}

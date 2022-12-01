@@ -16,7 +16,8 @@ import { Datatable } from '@kbn/expressions-plugin/public';
 import { getFormatByAccessor, getAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { PartitionVisParams } from '../../common/types';
-import { FilterEvent } from '../types';
+import { ColumnCellValueActions, FilterEvent } from '../types';
+import { getSeriesValueColumnIndex } from './filter_helpers';
 
 export const getLegendActions = (
   canFilter: (
@@ -25,6 +26,7 @@ export const getLegendActions = (
   ) => Promise<boolean>,
   getFilterEventData: (series: SeriesIdentifier) => FilterEvent | null,
   onFilter: (data: FilterEvent, negate?: any) => void,
+  columnCellValueActions: ColumnCellValueActions,
   visParams: PartitionVisParams,
   visData: Datatable,
   actions: DataPublicPluginStart['actions'],
@@ -32,58 +34,87 @@ export const getLegendActions = (
 ): LegendAction => {
   return ({ series: [pieSeries] }) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
-    const [isfilterable, setIsfilterable] = useState(true);
+    const [isFilterable, setIsFilterable] = useState(true);
     const filterData = useMemo(() => getFilterEventData(pieSeries), [pieSeries]);
+    const columnIndex = useMemo(
+      () => getSeriesValueColumnIndex(pieSeries.key, visData),
+      [pieSeries]
+    );
     const [ref, onClose] = useLegendAction<HTMLDivElement>();
 
     useEffect(() => {
-      (async () => setIsfilterable(await canFilter(filterData, actions)))();
+      (async () => setIsFilterable(await canFilter(filterData, actions)))();
     }, [filterData]);
 
-    if (!isfilterable || !filterData) {
+    if (columnIndex === -1) {
       return null;
     }
 
     let formattedTitle = '';
     if (visParams.dimensions.buckets) {
       const accessor = visParams.dimensions.buckets.find(
-        (bucket) => getAccessor(bucket) === filterData.data.data[0].column
+        (bucket) => getAccessor(bucket) === columnIndex
       );
       formattedTitle =
         formatter
           .deserialize(accessor ? getFormatByAccessor(accessor, visData.columns) : undefined)
           .convert(pieSeries.key) ?? '';
     }
-
     const title = formattedTitle || pieSeries.key;
+
+    const panelItems: EuiContextMenuPanelDescriptor['items'] = [];
+
+    if (isFilterable && filterData) {
+      panelItems.push(
+        {
+          name: i18n.translate('expressionPartitionVis.legend.filterForValueButtonAriaLabel', {
+            defaultMessage: 'Filter for value',
+          }),
+          'data-test-subj': `legend-${title}-filterIn`,
+          icon: <EuiIcon type="plusInCircle" size="m" />,
+          onClick: () => {
+            setPopoverOpen(false);
+            onFilter(filterData);
+          },
+        },
+        {
+          name: i18n.translate('expressionPartitionVis.legend.filterOutValueButtonAriaLabel', {
+            defaultMessage: 'Filter out value',
+          }),
+          'data-test-subj': `legend-${title}-filterOut`,
+          icon: <EuiIcon type="minusInCircle" size="m" />,
+          onClick: () => {
+            setPopoverOpen(false);
+            onFilter(filterData, true);
+          },
+        }
+      );
+    }
+
+    if (columnCellValueActions[columnIndex]) {
+      const columnMeta = visData.columns[columnIndex].meta;
+      columnCellValueActions[columnIndex].forEach((action) => {
+        panelItems.push({
+          name: action.displayName,
+          'data-test-subj': `legend-${title}-${action.id}`,
+          icon: <EuiIcon type={action.iconType} size="m" />,
+          onClick: () => {
+            action.execute([{ columnMeta, value: pieSeries.key }]);
+            setPopoverOpen(false);
+          },
+        });
+      });
+    }
+
+    if (panelItems.length === 0) {
+      return null;
+    }
+
     const panels: EuiContextMenuPanelDescriptor[] = [
       {
         id: 'main',
-        title: `${title}`,
-        items: [
-          {
-            name: i18n.translate('expressionPartitionVis.legend.filterForValueButtonAriaLabel', {
-              defaultMessage: 'Filter for value',
-            }),
-            'data-test-subj': `legend-${title}-filterIn`,
-            icon: <EuiIcon type="plusInCircle" size="m" />,
-            onClick: () => {
-              setPopoverOpen(false);
-              onFilter(filterData);
-            },
-          },
-          {
-            name: i18n.translate('expressionPartitionVis.legend.filterOutValueButtonAriaLabel', {
-              defaultMessage: 'Filter out value',
-            }),
-            'data-test-subj': `legend-${title}-filterOut`,
-            icon: <EuiIcon type="minusInCircle" size="m" />,
-            onClick: () => {
-              setPopoverOpen(false);
-              onFilter(filterData, true);
-            },
-          },
-        ],
+        title,
+        items: panelItems,
       },
     ];
 

@@ -9,11 +9,7 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon, EuiEmptyPrompt } from '@elastic/eui';
-import {
-  ExpressionRendererEvent,
-  ReactExpressionRendererType,
-  ReactExpressionRendererProps,
-} from '@kbn/expressions-plugin/public';
+import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ExecutionContextSearch } from '@kbn/data-plugin/public';
 import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
@@ -21,6 +17,7 @@ import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
 import { ErrorMessage } from '../editor_frame_service/types';
 import { LensInspector } from '../lens_inspector_service';
+import { ILensInterpreterRenderHandlers, LensRendererEvent } from '../types';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -30,7 +27,7 @@ export interface ExpressionWrapperProps {
   interactive?: boolean;
   searchContext: ExecutionContextSearch;
   searchSessionId?: string;
-  handleEvent: (event: ExpressionRendererEvent) => void;
+  handleEvent: (event: LensRendererEvent) => void;
   onData$: (
     data: unknown,
     inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
@@ -40,7 +37,8 @@ export interface ExpressionWrapperProps {
   syncColors?: boolean;
   syncTooltips?: boolean;
   syncCursor?: boolean;
-  hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
+  hasCompatibleActions?: ILensInterpreterRenderHandlers['hasCompatibleActions'];
+  getCompatibleCellValueActions?: ILensInterpreterRenderHandlers['getCompatibleCellValueActions'];
   style?: React.CSSProperties;
   className?: string;
   canEdit: boolean;
@@ -116,6 +114,7 @@ export function ExpressionWrapper({
   syncTooltips,
   syncCursor,
   hasCompatibleActions,
+  getCompatibleCellValueActions,
   style,
   className,
   errors,
@@ -168,6 +167,7 @@ export function ExpressionWrapper({
             }}
             onEvent={handleEvent}
             hasCompatibleActions={hasCompatibleActions}
+            getCompatibleCellValueActions={getCompatibleCellValueActions}
           />
         </div>
       )}

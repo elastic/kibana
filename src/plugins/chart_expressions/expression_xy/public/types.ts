@@ -11,7 +11,11 @@ import { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
+import type {
+  CellValueContext,
+  RangeSelectContext,
+  ValueClickContext,
+} from '@kbn/embeddable-plugin/public';
 import { ExpressionsServiceStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
 
 export interface SetupDeps {
@@ -114,3 +118,16 @@ export interface AccessorConfig {
   color?: string;
   palette?: string[] | Array<{ color: string; stop: number }>;
 }
+
+export interface CellValueAction {
+  id: string;
+  iconType: string;
+  displayName: string;
+  execute: (data: CellValueContext['data']) => void;
+}
+
+export type LayerCellValueActions = CellValueAction[][];
+
+export type GetCompatibleCellValueActions = (
+  data: CellValueContext['data']
+) => Promise<CellValueAction[]>;

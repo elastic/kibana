@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Action, Store } from 'redux';
 import type { Subscription } from 'rxjs';
 import { Subject } from 'rxjs';
 import { combineLatestWith } from 'rxjs/operators';
@@ -58,11 +57,9 @@ import { getLazyEndpointGenericErrorsListExtension } from './management/pages/po
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
-import type { State } from './common/store/types';
-/**
- * The Redux store type for the Security app.
- */
-export type SecurityAppStore = Store<State, Action>;
+import { registerActions } from './actions';
+import type { SecurityAppStore } from './common/store/types';
+
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
   private config: SecuritySolutionUiConfigType;
@@ -88,6 +85,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    * See `store` method.
    */
   private _store?: SecurityAppStore;
+  private _actionsRegistered?: boolean = false;
 
   public setup(
     core: CoreSetup<StartPluginsDependencies, PluginStart>,
@@ -160,12 +158,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
+        const store = await this.store(coreStart, startPlugins, subPlugins);
+        this.registerActions(startPlugins, store);
+
         const { renderApp } = await this.lazyApplicationDependencies();
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
         return renderApp({
           ...params,
           services: await startServices(params),
-          store: await this.store(coreStart, startPlugins, subPlugins),
+          store,
           usageCollection: plugins.usageCollection,
           subPluginRoutes: getSubPluginRoutesByCapabilities(
             subPlugins,
@@ -409,6 +410,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       startPlugins.timelines.setTGridEmbeddedStore(this._store);
     }
     return this._store;
+  }
+
+  registerActions({ uiActions }: StartPlugins, store: SecurityAppStore) {
+    if (!this._actionsRegistered) {
+      registerActions(uiActions, store);
+      this._actionsRegistered = true;
+    }
   }
 
   /**

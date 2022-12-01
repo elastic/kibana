@@ -16,11 +16,13 @@ import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { VisTypePieDependencies } from '../plugin';
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
 import { ChartTypes, RenderValue } from '../../common/types';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { extractContainerType, extractVisualizationType } from '../../../common';
+import { CellValueAction, ColumnCellValueActions } from '../types';
 
 export const strings = {
   getDisplayName: () =>
@@ -60,6 +62,25 @@ export const getPartitionVisRenderer: (
       unmountComponentAtNode(domNode);
     });
 
+    const { getCompatibleCellValueActions } = handlers;
+    let columnCellValueActions: ColumnCellValueActions = [];
+
+    if (getCompatibleCellValueActions && Array.isArray(visConfig.dimensions.buckets)) {
+      columnCellValueActions = await Promise.all(
+        visConfig.dimensions.buckets.reduce<Array<Promise<CellValueAction[]>>>((acc, accessor) => {
+          const column = getColumnByAccessor(accessor, visData.columns);
+          if (column) {
+            acc.push(
+              getCompatibleCellValueActions([{ columnMeta: column.meta }]) as Promise<
+                CellValueAction[]
+              >
+            );
+          }
+          return acc;
+        }, [])
+      );
+    }
+
     const renderComplete = () => {
       const executionContext = handlers.getExecutionContext();
       const containerType = extractContainerType(executionContext);
@@ -93,6 +114,7 @@ export const getPartitionVisRenderer: (
               uiState={handlers.uiState as PersistedState}
               services={{ data: plugins.data, fieldFormats: plugins.fieldFormats }}
               syncColors={syncColors}
+              columnCellValueActions={columnCellValueActions}
             />
           </div>
         </KibanaThemeProvider>

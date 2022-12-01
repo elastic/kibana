@@ -87,19 +87,14 @@ export class AddToTimelineAction implements Action<CellValueContext> {
       return acc;
     }, []);
 
-    if (dataProviders.length) {
-      this.store.dispatch(
-        addProvider({
-          id: TimelineId.active,
-          providers: dataProviders,
-        })
-      );
+    if (dataProviders.length > 0) {
+      this.store.dispatch(addProvider({ id: TimelineId.active, providers: dataProviders }));
       this.store.dispatch(showTimeline({ id: TimelineId.active, show: true }));
     } else {
       this.toastsService.addWarning({
         title: i18n.translate(
           'xpack.securitySolution.actions.cellValue.addToTimeline.warningTitle',
-          { defaultMessage: 'Can not add to timeline' }
+          { defaultMessage: 'Unable to add to timeline' }
         ),
         text: i18n.translate(
           'xpack.securitySolution.actions.cellValue.addToTimeline.warningMessage',

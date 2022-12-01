@@ -9,7 +9,7 @@
 import { LayerValue, SeriesIdentifier } from '@elastic/charts';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ValueClickContext } from '@kbn/embeddable-plugin/public';
+import { CellValueContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { BucketColumns } from '../../common/types';
 import { FilterEvent } from '../types';
@@ -125,3 +125,34 @@ export const getFilterEventData = (
     return acc;
   }, []);
 };
+
+export const getSeriesValueColumnIndex = (value: string, visData: Datatable): number => {
+  return visData.columns.findIndex(({ id }) => !!visData.rows.find((r) => r[id] === value));
+};
+
+export const getCellValueEventData = (
+  visData: Datatable,
+  series: SeriesIdentifier
+): CellValueContext['data'] => {
+  return visData.columns.reduce<CellValueContext['data']>((acc, { id, meta }) => {
+    const value = series.key;
+    const row = visData.rows.findIndex((r) => r[id] === value);
+    if (row > -1) {
+      acc.push({
+        columnMeta: meta,
+        value,
+      });
+    }
+    return acc;
+  }, []);
+};
+
+// export const getCellValueEventData = (
+//   visData: Datatable,
+//   series: SeriesIdentifier
+// ): CellValueContext['data'] => {
+//   const column = visData.columns[0]; // TODO, get first column only by now
+//   const { field, type } = column.meta;
+//   const value = series.key;
+//   return { field: field!, type, value };
+// };

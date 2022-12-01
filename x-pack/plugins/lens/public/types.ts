@@ -13,7 +13,6 @@ import type { MutableRefObject } from 'react';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
-  ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
 } from '@kbn/expressions-plugin/public';
@@ -34,6 +33,7 @@ import type { EuiButtonIconProps } from '@elastic/eui';
 import { SearchRequest } from '@kbn/data-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
+import { CellValueContext } from '@kbn/embeddable-plugin/public';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
@@ -1301,23 +1301,29 @@ export interface LensTableRowContextMenuEvent {
   data: RowClickContext['data'];
 }
 
-export function isLensFilterEvent(event: ExpressionRendererEvent): event is ClickTriggerEvent {
+export type LensRendererEvent =
+  | ClickTriggerEvent
+  | BrushTriggerEvent
+  | LensEditEvent<LensEditSupportedActions>
+  | LensTableRowContextMenuEvent;
+
+export function isLensFilterEvent(event: LensRendererEvent): event is ClickTriggerEvent {
   return event.name === 'filter';
 }
 
-export function isLensBrushEvent(event: ExpressionRendererEvent): event is BrushTriggerEvent {
+export function isLensBrushEvent(event: LensRendererEvent): event is BrushTriggerEvent {
   return event.name === 'brush';
 }
 
 export function isLensEditEvent<T extends LensEditSupportedActions>(
-  event: ExpressionRendererEvent
+  event: LensRendererEvent
 ): event is LensEditEvent<T> {
   return event.name === 'edit';
 }
 
 export function isLensTableRowContextMenuClickEvent(
-  event: ExpressionRendererEvent
-): event is BrushTriggerEvent {
+  event: LensRendererEvent
+): event is LensTableRowContextMenuEvent {
   return event.name === 'tableRowContextMenuClick';
 }
 
@@ -1327,13 +1333,7 @@ export function isLensTableRowContextMenuClickEvent(
  * used, dispatched events will be handled correctly.
  */
 export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
-  event: (
-    event:
-      | ClickTriggerEvent
-      | BrushTriggerEvent
-      | LensEditEvent<LensEditSupportedActions>
-      | LensTableRowContextMenuEvent
-  ) => void;
+  event: (event: LensRendererEvent) => void;
 }
 
 export interface SharingSavedObjectProps {
@@ -1358,3 +1358,14 @@ export type LensTopNavMenuEntryGenerator = (props: {
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   currentDoc: Document | undefined;
 }) => undefined | TopNavMenuData;
+
+export interface LensCellValueAction {
+  id: string;
+  iconType: string;
+  displayName: string;
+  execute: (data: CellValueContext['data']) => void;
+}
+
+export type GetCompatibleCellValueActions = (
+  data: CellValueContext['data']
+) => Promise<LensCellValueAction[]>;

@@ -310,6 +310,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         alignments,
         headerRowHeight,
         headerRowLines,
+        props.columnCellValueActions,
         dataGridRef.current?.closeCellPopover,
         props.columnFilterable
       ),
@@ -328,6 +329,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       headerRowHeight,
       headerRowLines,
       props.columnFilterable,
+      props.columnCellValueActions,
     ]
   );
 

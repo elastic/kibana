@@ -38,10 +38,7 @@ import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import {
-  ExpressionRendererEvent,
-  ReactExpressionRendererType,
-} from '@kbn/expressions-plugin/public';
+import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 
 import {
@@ -53,8 +50,11 @@ import {
   ReferenceOrValueEmbeddable,
   SelfStyledEmbeddable,
   FilterableEmbeddable,
+  cellValueTrigger,
+  CELL_VALUE_TRIGGER,
+  type CellValueContext,
 } from '@kbn/embeddable-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import type {
   Capabilities,
@@ -81,6 +81,8 @@ import {
   Datasource,
   IndexPatternMap,
   OperationDescriptor,
+  LensRendererEvent,
+  GetCompatibleCellValueActions,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
@@ -745,6 +747,7 @@ export class Embeddable
           syncTooltips={input.syncTooltips}
           syncCursor={input.syncCursor}
           hasCompatibleActions={this.hasCompatibleActions}
+          getCompatibleCellValueActions={this.getCompatibleCellValueActions}
           className={input.className}
           style={input.style}
           executionContext={this.getExecutionContext()}
@@ -773,9 +776,7 @@ export class Embeddable
     );
   }
 
-  private readonly hasCompatibleActions = async (
-    event: ExpressionRendererEvent
-  ): Promise<boolean> => {
+  private readonly hasCompatibleActions = async (event: LensRendererEvent): Promise<boolean> => {
     if (isLensTableRowContextMenuClickEvent(event) || isLensFilterEvent(event)) {
       const { getTriggerCompatibleActions } = this.deps;
       if (!getTriggerCompatibleActions) {
@@ -790,6 +791,27 @@ export class Embeddable
     }
 
     return false;
+  };
+
+  private readonly getCompatibleCellValueActions: GetCompatibleCellValueActions = async (data) => {
+    const { getTriggerCompatibleActions } = this.deps;
+    if (getTriggerCompatibleActions) {
+      const embeddable = this;
+      const actions: Array<Action<CellValueContext>> = await getTriggerCompatibleActions(
+        CELL_VALUE_TRIGGER,
+        { data, embeddable }
+      );
+      return actions
+        .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity))
+        .map((action) => ({
+          id: action.id,
+          iconType: action.getIconType({ embeddable, data, trigger: cellValueTrigger })!,
+          displayName: action.getDisplayName({ embeddable, data, trigger: cellValueTrigger }),
+          execute: (cellData) =>
+            action.execute({ embeddable, data: cellData, trigger: cellValueTrigger }),
+        }));
+    }
+    return [];
   };
 
   /**
@@ -832,7 +854,7 @@ export class Embeddable
     return this.deps.visualizationMap[visType].onEditAction;
   }
 
-  handleEvent = async (event: ExpressionRendererEvent) => {
+  handleEvent = async (event: LensRendererEvent) => {
     if (!this.deps.getTrigger || this.input.disableTriggers) {
       return;
     }

@@ -27,7 +27,7 @@ import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { getDataLayers } from '../helpers';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
 import type { XYChartProps } from '../../common';
-import type { BrushEvent, FilterEvent } from '../types';
+import type { BrushEvent, CellValueAction, FilterEvent, LayerCellValueActions } from '../types';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { extractContainerType, extractVisualizationType } from '../../../common';
 
@@ -184,6 +184,22 @@ export const getXyChartRenderer = ({
       handlers.event({ name: 'brush', data });
     };
 
+    const { getCompatibleCellValueActions } = handlers;
+
+    let layerCellValueActions: LayerCellValueActions = [];
+    if (getCompatibleCellValueActions) {
+      layerCellValueActions = await Promise.all(
+        getDataLayers(config.args.layers).map((layer) => {
+          const data =
+            layer.splitAccessors?.map((accessor) => {
+              const column = layer.table.columns.find(({ id }) => id === accessor);
+              return { columnMeta: column?.meta };
+            }) ?? [];
+          return getCompatibleCellValueActions(data) as Promise<CellValueAction[]>;
+        })
+      );
+    }
+
     const renderComplete = () => {
       const executionContext = handlers.getExecutionContext();
       const containerType = extractContainerType(executionContext);
@@ -231,6 +247,7 @@ export const getXyChartRenderer = ({
               minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
               interactive={handlers.isInteractive()}
               onClickValue={onClickValue}
+              layerCellValueActions={layerCellValueActions}
               onSelectRange={onSelectRange}
               renderMode={handlers.getRenderMode()}
               syncColors={config.syncColors}
