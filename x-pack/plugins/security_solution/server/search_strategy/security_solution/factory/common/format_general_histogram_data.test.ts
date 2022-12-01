@@ -22,7 +22,14 @@ describe('formatGeneralHistogramData', () => {
     ];
     const result = formatGeneralHistogramData(mockHistogramData);
 
-    expect(result).toMatchInlineSnapshot();
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "x": 1669852800000,
+          "y": 4,
+        },
+      ]
+    `);
   });
 
   test('Picks up data from count.doc_count - userAuthentications', () => {
@@ -38,6 +45,13 @@ describe('formatGeneralHistogramData', () => {
     ];
     const result = formatGeneralHistogramData(mockUserAuthentications);
 
-    expect(result).toMatchInlineSnapshot();
+    expect(result).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "x": 1669867200000,
+          "y": 1,
+        },
+      ]
+    `);
   });
 });
