@@ -169,7 +169,7 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
             {healthData?.error?.message ?? (
               <FormattedMessage
                 id="xpack.fleet.debug.healthCheckPanel.fetchError"
-                defaultMessage="errorMessage"
+                defaultMessage="Message: {errorMessage}"
                 values={{
                   errorMessage: healthData?.error?.message,
                 }}

@@ -27,7 +27,6 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
-  ASSETS_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
 } from '../../../../../../common/constants';
@@ -92,12 +91,6 @@ export const SavedObjectDebugger: React.FunctionComponent = () => {
       value: `${PACKAGES_SAVED_OBJECT_TYPE}`,
       text: i18n.translate('xpack.fleet.debug.savedObjectDebugger.packageLabel', {
         defaultMessage: 'Packages',
-      }),
-    },
-    {
-      value: `${ASSETS_SAVED_OBJECT_TYPE}`,
-      text: i18n.translate('xpack.fleet.debug.savedObjectDebugger.packagesAssetsLabel', {
-        defaultMessage: 'Packages Assets',
       }),
     },
     {
