@@ -65,9 +65,9 @@ export function MaybeViewTraceLink({
     return <FullTraceButton isLoading={isLoading} />;
   }
 
-  const { rootTransaction } = waterfall;
+  const { rootWaterfallTransaction } = waterfall;
   // the traceroot cannot be found, so we cannot link to it
-  if (!rootTransaction) {
+  if (!rootWaterfallTransaction) {
     return (
       <EuiToolTip
         content={i18n.translate(
@@ -81,7 +81,7 @@ export function MaybeViewTraceLink({
       </EuiToolTip>
     );
   }
-
+  const rootTransaction = rootWaterfallTransaction.doc;
   const isRoot = transaction.transaction.id === rootTransaction.transaction.id;
 
   // the user is already viewing the full trace, so don't link to it

@@ -158,8 +158,7 @@ export function WaterfallWithSummary<TSample extends {}>({
           <TransactionSummary
             errorCount={waterfallFetchResult.waterfall.totalErrorsCount}
             totalDuration={
-              waterfallFetchResult.waterfall.rootTransaction?.transaction
-                .duration.us
+              waterfallFetchResult.waterfall.rootWaterfallTransaction?.duration
             }
             transaction={entryTransaction}
           />

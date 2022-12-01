@@ -15,7 +15,6 @@ import {
   IWaterfallSpan,
   IWaterfallSpanOrTransaction,
   IWaterfallTransaction,
-  RootTransaction,
   WaterfallErrorDoc,
   WaterfallLegendType,
   WaterfallSpanDoc,
@@ -177,24 +176,10 @@ export function getOrderedWaterfallItems(
 
 function getRootTransaction(
   childrenByParentId: Record<string, IWaterfallSpanOrTransaction[]>
-): RootTransaction | undefined {
+) {
   const item = first(childrenByParentId.root);
   if (item && item.docType === 'transaction') {
-    return {
-      transaction: {
-        duration: item.doc.transaction.duration,
-        id: item.doc.transaction.id,
-        name: item.doc.transaction.name,
-        type: item.doc.transaction.type,
-      },
-      trace: {
-        id: item.doc.trace.id,
-      },
-      service: {
-        name: item.doc.service.name,
-        environment: item.doc.service.environment,
-      },
-    };
+    return item;
   }
 }
 
@@ -402,9 +387,9 @@ function addColorToItems({
 }
 
 export const INITIAL_DATA: IWaterfall = {
-  entryWaterfallTransaction: undefined,
   entryTransaction: undefined,
-  rootTransaction: undefined,
+  entryWaterfallTransaction: undefined,
+  rootWaterfallTransaction: undefined,
   exceedsMax: false,
   totalErrorsCount: 0,
   duration: 0,
@@ -449,7 +434,7 @@ export function getWaterfall(
     entryWaterfallTransaction
   );
 
-  const rootTransaction = getRootTransaction(childrenByParentId);
+  const rootWaterfallTransaction = getRootTransaction(childrenByParentId);
   const duration = getWaterfallDuration(items);
   const legends = getLegends(items);
   addColorToItems({ legends, items });
@@ -459,7 +444,7 @@ export function getWaterfall(
     totalErrorsCount: traceItems.errorDocs.length,
     entryWaterfallTransaction,
     entryTransaction,
-    rootTransaction,
+    rootWaterfallTransaction,
     duration,
     items,
     legends,

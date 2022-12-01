@@ -55,9 +55,7 @@ export function WaterfallFlyout({
           transactionId={currentItem.id}
           traceId={currentItem.doc.trace.id}
           onClose={() => toggleFlyout({ history })}
-          rootTransactionDuration={
-            waterfall.rootTransaction?.transaction.duration.us
-          }
+          rootTransactionDuration={waterfall.rootWaterfallTransaction?.duration}
           errorCount={waterfall.errorCountById[currentItem.id]}
           spanLinksCount={currentItem.spanLinksCount}
         />

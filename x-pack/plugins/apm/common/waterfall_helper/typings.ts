@@ -132,29 +132,10 @@ export type IWaterfallSpanOrTransaction =
   | IWaterfallTransaction
   | IWaterfallSpan;
 
-export interface RootTransaction {
-  trace: { id: string };
-  transaction: {
-    duration: TimestampUs;
-    id: string;
-    name: string;
-    type: string;
-  };
-  service: {
-    name: string;
-    environment?: string;
-  };
-}
-
 export interface IWaterfall {
-  entryWaterfallTransaction?: IWaterfallTransaction;
   entryTransaction?: Transaction;
-  rootTransaction?: RootTransaction;
-
-  /**
-   * Latency in us
-   */
-  duration: number;
+  entryWaterfallTransaction?: IWaterfallTransaction;
+  rootWaterfallTransaction?: IWaterfallTransaction;
   items: IWaterfallSpanOrTransaction[];
   childrenByParentId: Record<string | number, IWaterfallSpanOrTransaction[]>;
   errorCountById: Record<string, number>;
@@ -162,6 +143,10 @@ export interface IWaterfall {
   errorItems: IWaterfallError[];
   exceedsMax: boolean;
   totalErrorsCount: number;
+  /**
+   * Latency in us
+   */
+  duration: number;
 }
 
 /*
