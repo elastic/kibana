@@ -325,6 +325,7 @@ export const getLegacyMetricVisualization = ({
         name: i18n.translate('xpack.lens.metric.label', {
           defaultMessage: 'Metric',
         }),
+        dimensionType: 'metric',
       });
     }
 

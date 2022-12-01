@@ -17,7 +17,6 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
-  ExistenceFetchStatus,
   FieldListGrouped,
   FieldListGroupedProps,
   FieldsGroupNames,
@@ -108,9 +107,9 @@ export function TextBasedDataPanel({
     }
   }, []);
 
-  const { fieldGroups } = useGroupedFields<DatatableColumn>({
+  const fieldListGroupedProps = useGroupedFields<DatatableColumn>({
     dataViewId: null,
-    allFields: fieldList,
+    allFields: dataHasLoaded ? fieldList : null,
     services: {
       dataViews,
     },
@@ -195,11 +194,7 @@ export function TextBasedDataPanel({
           </EuiFlexItem>
           <EuiFlexItem>
             <FieldListGrouped<DatatableColumn>
-              fieldGroups={fieldGroups}
-              fieldsExistenceStatus={
-                dataHasLoaded ? ExistenceFetchStatus.succeeded : ExistenceFetchStatus.unknown
-              }
-              fieldsExistInIndex={Boolean(fieldList.length)}
+              {...fieldListGroupedProps}
               renderFieldItem={renderFieldItem}
               screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
               data-test-subj="lnsTextBasedLanguages"
