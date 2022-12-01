@@ -10,7 +10,15 @@ import React, { useMemo, useState } from 'react';
 
 import { css } from '@emotion/react';
 import { PhraseFilter } from '@kbn/es-query';
-import { EuiTableRow, EuiTableRowCell, useEuiTheme, EuiBadge, EuiPanel } from '@elastic/eui';
+import {
+  EuiTableRow,
+  EuiTableRowCell,
+  useEuiTheme,
+  EuiBadge,
+  EuiPanel,
+  tint,
+  transparentize,
+} from '@elastic/eui';
 
 import { TermsExplorerTable, TermsExplorerTableProps } from './terms_explorer_table';
 import { TermsExplorerResponseRow } from '../../../../../common/terms_explorer/types';
@@ -88,7 +96,7 @@ export const TermsExplorerTableRow = ({
           isExpander={true}
           css={css`
             ${column === collapseFieldName && columns.length > 1
-              ? 'background-color: #d2f3ea;'
+              ? `background-color: ${transparentize(euiTheme.colors.success, 0.2)};`
               : ''}
           `}
         >

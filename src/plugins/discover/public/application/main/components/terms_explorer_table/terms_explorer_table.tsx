@@ -184,7 +184,6 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
       </EuiTable>
       <div
         css={css`
-          background-color: white;
           width: 100%;
           display: flex;
           justify-content: end;
