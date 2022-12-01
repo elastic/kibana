@@ -28,30 +28,53 @@ const MIN = 10000;
 const MAX = 1000000;
 const STEP = 1000;
 const INDEX_NAME = 'kibana_sample_data_large';
+const NOTIFICATION_KEY = 'largedatasetPanel:notificationShown';
 
 const i18nTexts = {
-  generateTitle: i18n.translate('homePackages.largeDataSetPanel.generateTitle', {
+  generateTitle: i18n.translate('homePackages.largeDatasetPanel.generateTitle', {
     defaultMessage: 'Generate large data set',
   }),
-  generateSubtitle: i18n.translate('homePackages.largeDataSetPanel.generateSubtitle', {
+  generateSubtitle: i18n.translate('homePackages.largeDatasetPanel.generateSubtitle', {
     defaultMessage:
       'Generate a large data set. Takes about 10 minutes. Turn the switch on to configure the dataset, or leave the switch off to generate a dataset with default parameters',
   }),
-  installButtonText: i18n.translate('homePackages.largeDataSetPanel.button.install', {
+  installButtonText: i18n.translate('homePackages.largeDatasetPanel.button.install', {
     defaultMessage: 'Generate!',
   }),
-  unInstallButtonText: i18n.translate('homePackages.largeDataSetPanel.button.uninstall', {
+  unInstallButtonText: i18n.translate('homePackages.largeDatasetPanel.button.uninstall', {
     defaultMessage: 'Uninstall',
   }),
-  datasetGeneratedSuccessMessage: i18n.translate('homePackages.largeDataSetPanel.toast.success', {
+  datasetGeneratedSuccessMessage: i18n.translate('homePackages.largeDatasetPanel.toast.success', {
     defaultMessage: 'Dataset successfully generated.',
   }),
   datasetUninstallErrorMessage: i18n.translate(
-    'homePackages.largeDataSetPanel.toast.uninstall.error',
+    'homePackages.largeDatasetPanel.toast.uninstall.error',
     {
       defaultMessage: 'Error uninstalling dataset',
     }
   ),
+  datasetGenerationInProgress: i18n.translate(
+    'homePackages.largeDatasetPanel.datasetGenerationInProgress.info',
+    {
+      defaultMessage: 'Dataset generation in progress.',
+    }
+  ),
+  datasetAlreadyGenerated: i18n.translate(
+    'homePackages.largeDatasetPanel.datasetAlreadyGenerated.info',
+    {
+      defaultMessage: 'Large dataset already generated.',
+    }
+  ),
+  goToDiscover: i18n.translate('homePackages.largeDatasetPanel.goToDiscover.info', {
+    defaultMessage: 'Go to Discover to see the dataset: ',
+  }),
+  seeItInDiscover: i18n.translate('homePackages.largeDatasetPanel.seeItInDiscover.info', {
+    defaultMessage:
+      'Once it is ready, you will be able to see the dataset in Discover, under the name: ',
+  }),
+  configure: i18n.translate('homePackages.largeDatasetPanel.configureSwitch.label', {
+    defaultMessage: 'Configure your dataset: ',
+  }),
 };
 
 interface Props {
@@ -80,10 +103,13 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
     const checkIfInstalled = async () => {
       const { installed, count } = await checkInstalled();
       const prevStatus = sessionStorage.getItem(INDEX_NAME);
-      if (installed && count >= nrOfDocuments && prevStatus === Status.GENERATING) {
-        notifySuccess(i18nTexts.datasetGeneratedSuccessMessage);
+      if (installed && count >= nrOfDocuments) {
+        if (!sessionStorage.getItem(NOTIFICATION_KEY)) {
+          notifySuccess(i18nTexts.datasetGeneratedSuccessMessage);
+          sessionStorage.setItem(NOTIFICATION_KEY, 'true');
+        }
         updateSessionStorage(Status.DONE);
-      } else if (installed && count < nrOfDocuments) {
+      } else if (installed && prevStatus !== Status.DONE) {
         updateSessionStorage(Status.GENERATING);
       } else if (!installed && prevStatus !== Status.GENERATING) {
         updateSessionStorage(Status.EMPTY);
@@ -151,15 +177,13 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
 
   const installTitleText =
     installStatus === Status.GENERATING
-      ? 'Large dataset generation is in progress'
-      : 'Large dataset already generated';
+      ? i18nTexts.datasetGenerationInProgress
+      : i18nTexts.datasetAlreadyGenerated;
 
   const installSubtitleText =
-    installStatus === Status.GENERATING
-      ? 'Once it is ready, you will be able to see the dataset in Discover, under the name: '
-      : 'Go to Discover to see the dataset: ';
+    installStatus === Status.GENERATING ? i18nTexts.seeItInDiscover : i18nTexts.goToDiscover;
 
-  const installedLayout = (
+  const datasetInstalledLayout = (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={1}>
         <EuiText size="s">
@@ -181,13 +205,13 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
     </EuiFlexGroup>
   );
 
-  const generateLayout = (
+  const generateDatasetLayout = (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={1}>
         <EuiText size="s">
           <h2>{i18nTexts.generateTitle}</h2>
           <p>{i18nTexts.generateSubtitle}</p>
-          <EuiSwitch label="Configure your own data set" checked={checked} onChange={onChange} />
+          <EuiSwitch label={i18nTexts.configure} checked={checked} onChange={onChange} />
           <EuiSpacer />
           {checked ? configureLayout : null}
           {checked ? <EuiSpacer /> : null}
@@ -210,7 +234,7 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
-      {installStatus === Status.EMPTY ? generateLayout : installedLayout}
+      {installStatus === Status.EMPTY ? generateDatasetLayout : datasetInstalledLayout}
     </EuiPanel>
   );
 };

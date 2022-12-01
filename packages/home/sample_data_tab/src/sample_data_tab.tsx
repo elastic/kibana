@@ -12,7 +12,7 @@ import { EuiAccordion, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { DemoEnvironmentPanel } from './demo_env_panel';
 import { SampleDataCards } from './sample_data_cards';
-import { LargeDatasetPanel } from './large_data_set_panel';
+import { LargeDatasetPanel } from './large_dataset_panel';
 
 // TODO: clintandrewhall - pull from config.
 import {

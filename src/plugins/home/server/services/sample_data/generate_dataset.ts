@@ -140,29 +140,37 @@ export function generateTestData() {
     const fieldName = generateFieldName();
     format.push(`${fieldName}:${fieldType}`);
   }
-  const tsStart = Date.now();
+  const tsStart = new Date().toISOString();
   const items = [];
   for (let i = 1; i <= numberOfDocuments; i++) {
     const item = generateRandomDoc(format);
     items.push(item);
   }
-  const tsEnd = Date.now();
-  logger.info(`Started at: ${tsStart.toString()} and ended at: ${tsEnd.toString()}`);
+  const tsEnd = new Date().toISOString();
+  logger.info(`Started at: ${tsStart} and ended at: ${tsEnd}`);
   return items;
 }
 
 parentPort!.on('message', async (message) => {
   if (message === 'start') {
     try {
-      const size = 10000;
+      const size = 5000;
       const items = generateTestData();
       let start = 0;
       const end = Math.round(numberOfDocuments / size);
+      logger.info('End ' + end);
+      // const remain = numberOfDocuments % size;
       for (let i = 0; i < end; i++) {
         const subItems = items.slice(start, start + size);
         start += size;
-        parentPort!.postMessage({ status: 'DONE', items: JSON.stringify(subItems) });
+        logger.info('Sending message');
+
+        logger.info('Hello');
+        parentPort!.postMessage({ status: 'GENERATED_ITEMS', items: JSON.stringify(subItems) });
+
+        logger.info('Sent message');
       }
+      parentPort!.postMessage({ status: 'DONE' });
       process.exit(0);
     } catch (error) {
       parentPort!.postMessage({ status: 'ERROR' });

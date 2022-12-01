@@ -8,11 +8,13 @@
 import uuid from 'uuid';
 import Path from 'path';
 import { Worker } from 'worker_threads';
+import { Readable } from 'stream';
 import { schema } from '@kbn/config-schema';
 import { IRouter, Logger, SavedObject } from '@kbn/core/server';
 import { CoreSetup } from '@kbn/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { deleteIndex, createIndex, bulkUpload } from '../lib';
+import { getSavedObjectsClient } from './utils';
 
 const dataView = (indexName: string) => {
   return {
@@ -64,77 +66,55 @@ export function createLargeDatasetRoute(router: IRouter, logger: Logger, core: C
     },
     async (context, req, res) => {
       const { nrOfDocuments } = req.body;
-      logger.info(`Called ${nrOfDocuments}`);
-
       const esClient = (await core.getStartServices())[0].elasticsearch.client;
       const worker = new Worker(Path.join(__dirname, '../worker.js'), {
         workerData: {
           numberOfDocuments: nrOfDocuments,
         },
       });
-      await deleteIndex(esClient, LARGE_DATASET_INDEX_NAME);
-      await createIndex(esClient, LARGE_DATASET_INDEX_NAME);
-      worker.on('message', async (message) => {
-        if (message.status === 'DONE') {
-          const { items } = message;
-          logger.info('Received items from worker');
+      try {
+        await deleteIndex(esClient, LARGE_DATASET_INDEX_NAME);
+        await createIndex(esClient, LARGE_DATASET_INDEX_NAME);
+        let delay = 1000;
+        let index = 0;
+        worker.on('message', async (message) => {
+          try {
+            if (message.status === 'GENERATED_ITEMS') {
+              const { items } = message;
+              logger.info('Received items from worker at index ' + index);
+              setTimeout(() => {
+                bulkUpload(esClient, LARGE_DATASET_INDEX_NAME, items);
+              }, delay + index * 1000);
+              // backoff, kinda
+              index++;
+              delay = delay + index * 1000;
+            } else if (message.status === 'ERROR') {
+              logger.error('Error occurred while generating documents for ES');
+            } else if (message.status === 'DONE') {
+              const { getImporter } = (await context.core).savedObjects;
+              const objectTypes = ['index-pattern'];
+              const savedObjectsClient = await getSavedObjectsClient(context, objectTypes);
+              const soImporter = getImporter(savedObjectsClient);
 
-          bulkUpload(esClient, LARGE_DATASET_INDEX_NAME, items);
-          // TODO: add error handling
-        } else if (message.status === 'ERROR') {
-          logger.error('Error occurred while generating documents for ES');
-        }
-      });
-      worker.postMessage('start');
-
-      /*
-      const core = await context.core;
-      const { getImporter } = core.savedObjects;
-      const objectTypes = ['index-pattern'];
-      const savedObjectsClient = await getSavedObjectsClient(context, objectTypes);
-      const soImporter = getImporter(savedObjectsClient);
-
-      const savedObjects = [dataView(indexName)];
-      const readStream = Readable.from(savedObjects);
-
-      const { errors = [] } = await soImporter.import({
-        readStream,
-        overwrite: true,
-        createNewCopies: false,
-      });
-      logger.info('Started process');
-      if (errors.length > 0) {
-        const errMsg = `sample_data install errors while loading saved objects. Errors: ${JSON.stringify(
-          errors.map(({ type, id }) => ({ type, id })) // discard other fields
-        )}`;
-        logger.warn(errMsg);
-        throw new SampleDataInstallError(errMsg, 500);
-      }
-
-      pythonProcess.stdout.on('data', function (data) {
-        logger.info('stdout: ' + data);
-        installCompleteCallback(
-          largeDatasetProvider(indexName, 'Large dataset', indexName, savedObjects)
-        );
-      });
-
-      if (errorOccured) {
+              const savedObjects = [dataView(LARGE_DATASET_INDEX_NAME)];
+              const readStream = Readable.from(savedObjects);
+              const { errors = [] } = await soImporter.import({
+                readStream,
+                overwrite: true,
+                createNewCopies: false,
+              });
+            }
+          } catch (e) {
+            logger.error('Error occurred while generating documents for ES');
+          }
+        });
+        worker.postMessage('start');
+      } catch (e) {
         return res.customError({
           statusCode: 500,
-          body: {
-            message: 'Error occurred while generating data set',
-          },
+          body: 'An error occurred while calling Elasticsearch',
         });
       }
-      pythonProcess.on('close', function (code) {
-        logger.info('Closed with code ' + code);
-      });
-      return res.ok({
-        body: {
-          elasticsearchIndicesCreated: 1,
-          kibanaSavedObjectsLoaded: 1,
-        },
-      });*/
       return res.ok({
         body: {
           elasticsearchIndicesCreated: 1,

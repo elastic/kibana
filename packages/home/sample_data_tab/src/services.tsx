@@ -123,7 +123,10 @@ export const SampleDataTabKibanaProvider: FC<SampleDataTabKibanaDependencies> = 
   };
 
   const checkLargeDatasetInstalled = async () => {
-    return await http.get(`${URL_SAMPLE_DATA_API}/large_dataset/installed`);
+    return (await http.get(`${URL_SAMPLE_DATA_API}/large_dataset/installed`)) as Promise<{
+      installed: boolean;
+      count: number;
+    }>;
   };
 
   const uninstallLargeDataset = async () => {
