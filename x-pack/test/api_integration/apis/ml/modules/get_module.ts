@@ -30,8 +30,8 @@ const moduleIds = [
   'security_linux_v3',
   'security_network',
   'security_windows_v3',
-  'siem_cloudtrail',
-  'siem_packetbeat',
+  'security_cloudtrail',
+  'security_packetbeat',
   'uptime_heartbeat',
 ];
 

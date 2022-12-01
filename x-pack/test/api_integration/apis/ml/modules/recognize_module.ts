@@ -84,7 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['siem_packetbeat'],
+        moduleIds: ['security_packetbeat'],
       },
     },
     {
@@ -158,7 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['siem_cloudtrail'],
+        moduleIds: ['security_cloudtrail'],
       },
     },
     {
@@ -237,8 +237,7 @@ export default ({ getService }: FtrProviderContext) => {
           const responseModuleIds = rspBody.map((module: { id: string }) => module.id).sort();
           expect(responseModuleIds).to.eql(
             testData.expected.moduleIds.sort(),
-            `Expected matching module ids for index '${
-              testData.indexPattern
+            `Expected matching module ids for index '${testData.indexPattern
             }' to be '${testData.expected.moduleIds.sort()}' (got '${responseModuleIds}')`
           );
         });

@@ -316,7 +316,7 @@ export default ({ getService }: FtrProviderContext) => {
         'for siem_packetbeat with prefix, startDatafeed true and estimateModelMemory true',
       sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_packetbeat',
       indexPattern: { name: 'ft_module_siem_packetbeat', timeField: '@timestamp' },
-      module: 'siem_packetbeat',
+      module: 'security_packetbeat',
       user: USER.ML_POWERUSER,
       requestBody: {
         prefix: 'pf12_',
@@ -501,7 +501,7 @@ export default ({ getService }: FtrProviderContext) => {
         'for siem_cloudtrail with prefix, startDatafeed true and estimateModelMemory true',
       sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_cloudtrail',
       indexPattern: { name: 'ft_module_siem_cloudtrail', timeField: '@timestamp' },
-      module: 'siem_cloudtrail',
+      module: 'security_cloudtrail',
       user: USER.ML_POWERUSER,
       requestBody: {
         prefix: 'pf20_',
