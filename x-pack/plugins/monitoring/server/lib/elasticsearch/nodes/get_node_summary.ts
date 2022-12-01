@@ -6,15 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import { createQuery } from '../../create_query';
-// @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
-// @ts-ignore
 import { getDefaultNodeFromId, isDefaultNode } from './get_default_node_from_id';
-// @ts-ignore
 import { calculateNodeType } from './calculate_node_type';
-// @ts-ignore
 import { getNodeTypeClassLabel } from './get_node_type_class_label';
 import {
   ElasticsearchSource,

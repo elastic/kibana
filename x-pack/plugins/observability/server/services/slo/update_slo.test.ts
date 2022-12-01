@@ -47,6 +47,25 @@ describe('UpdateSLO', () => {
   });
 
   describe('with breaking changes', () => {
+    it('consideres settings as a breaking change', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+
+      const newSettings = { ...slo.settings, timestamp_field: 'newField' };
+      await updateSLO.execute(slo.id, { settings: newSettings });
+
+      expectDeletionOfObsoleteSLOData(slo);
+      expect(mockRepository.save).toBeCalledWith(
+        expect.objectContaining({
+          ...slo,
+          settings: newSettings,
+          revision: 2,
+          updated_at: expect.anything(),
+        })
+      );
+      expectInstallationOfNewSLOTransform();
+    });
+
     it('removes the obsolete data from the SLO previous revision', async () => {
       const slo = createSLO({
         indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),

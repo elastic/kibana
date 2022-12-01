@@ -9,7 +9,7 @@
 import querystring from 'querystring';
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
-import { decode } from 'rison-node';
+import { decode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
 import type { Immutable, HostMetadata } from '../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../common/endpoint/types';

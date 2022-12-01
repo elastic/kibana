@@ -130,15 +130,13 @@ const createSeriesLayers = (
   return seriesLayers;
 };
 
-const overrideColorForOldVisualization = (
+const overrideColors = (
   seriesLayers: SeriesLayer[],
   overwriteColors: { [key: string]: string },
   name: string
 ) => {
   let overwriteColor;
-  // this is for supporting old visualizations (created by vislib plugin)
-  // it seems that there for some aggs, the uiState saved from vislib is
-  // different than the es-charts handle it
+
   if (overwriteColors.hasOwnProperty(name)) {
     overwriteColor = overwriteColors[name];
   }
@@ -198,9 +196,10 @@ export const getColor = (
 
   const seriesLayers = createSeriesLayers(d, parentSeries, isSplitChart);
 
-  const overwriteColor = overrideColorForOldVisualization(seriesLayers, overwriteColors, name);
-  if (overwriteColor) {
-    return lightenColor(overwriteColor, seriesLayers.length, columns.length);
+  const overriddenColor = overrideColors(seriesLayers, overwriteColors, name);
+  if (overriddenColor) {
+    // this is necessary for supporting some old visualizations that defined their own colors (created by vislib plugin)
+    return lightenColor(overriddenColor, seriesLayers.length, columns.length);
   }
 
   if (chartType === ChartTypes.MOSAIC && byDataPalette && seriesLayers[1]) {

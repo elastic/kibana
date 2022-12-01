@@ -16,7 +16,7 @@ import React, {
   useEffect,
 } from 'react';
 import { isEqual } from 'lodash';
-import { decode, encode } from 'rison-node';
+import { decode, encode } from '@kbn/rison';
 import { useHistory, useLocation } from 'react-router-dom';
 
 import { BehaviorSubject, Observable } from 'rxjs';

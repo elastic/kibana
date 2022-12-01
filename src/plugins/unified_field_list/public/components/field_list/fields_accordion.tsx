@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import type { FieldListItem } from '../../types';
+import { type FieldListItem, FieldsGroupNames } from '../../types';
 import './fields_accordion.scss';
 
 export interface FieldsAccordionProps<T extends FieldListItem> {
@@ -32,12 +32,14 @@ export interface FieldsAccordionProps<T extends FieldListItem> {
   hideDetails?: boolean;
   isFiltered: boolean;
   groupIndex: number;
+  groupName: FieldsGroupNames;
   paginatedFields: T[];
   renderFieldItem: (params: {
     field: T;
     hideDetails?: boolean;
     itemIndex: number;
     groupIndex: number;
+    groupName: FieldsGroupNames;
   }) => JSX.Element;
   renderCallout: () => JSX.Element;
   showExistenceFetchError?: boolean;
@@ -55,6 +57,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   hideDetails,
   isFiltered,
   groupIndex,
+  groupName,
   paginatedFields,
   renderFieldItem,
   renderCallout,
@@ -99,6 +102,9 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
           content={i18n.translate('unifiedFieldList.fieldsAccordion.existenceErrorLabel', {
             defaultMessage: "Field information can't be loaded",
           })}
+          iconProps={{
+            'data-test-subj': `${id}-fetchWarning`,
+          }}
         />
       );
     }
@@ -128,7 +134,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
       );
     }
 
-    return <EuiLoadingSpinner size="m" />;
+    return <EuiLoadingSpinner size="m" data-test-subj={`${id}-countLoading`} />;
   }, [showExistenceFetchError, showExistenceFetchTimeout, hasLoaded, isFiltered, id, fieldsCount]);
 
   return (
@@ -146,8 +152,8 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
           <ul className="unifiedFieldList__fieldsAccordion__fieldItems">
             {paginatedFields &&
               paginatedFields.map((field, index) => (
-                <Fragment key={field.name}>
-                  {renderFieldItem({ field, itemIndex: index, groupIndex, hideDetails })}
+                <Fragment key={getFieldKey(field)}>
+                  {renderFieldItem({ field, itemIndex: index, groupIndex, groupName, hideDetails })}
                 </Fragment>
               ))}
           </ul>
@@ -159,3 +165,6 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
 }
 
 export const FieldsAccordion = React.memo(InnerFieldsAccordion) as typeof InnerFieldsAccordion;
+
+export const getFieldKey = (field: FieldListItem): string =>
+  `${field.name}-${field.displayName}-${field.type}`;
