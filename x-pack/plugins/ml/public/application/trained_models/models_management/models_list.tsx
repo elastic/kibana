@@ -297,7 +297,7 @@ export const ModelsList: FC<Props> = ({
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={itemIdToExpandedRowMap[item.model_id] ? 'arrowUp' : 'arrowDown'}
+          iconType={itemIdToExpandedRowMap[item.model_id] ? 'arrowDown' : 'arrowRight'}
         />
       ),
       'data-test-subj': 'mlModelsTableRowDetailsToggle',
