@@ -26,11 +26,10 @@ export function ApmDatePicker() {
     rangeFrom,
     rangeTo,
     refreshPaused: refreshPausedFromUrl = 'true',
-    refreshInterval: refreshIntervalFromUrl = '0',
+    refreshInterval: refreshIntervalFromUrl = '60000',
   } = query;
 
   const refreshPaused = toBoolean(refreshPausedFromUrl);
-
   const refreshInterval = toNumber(refreshIntervalFromUrl);
 
   const { incrementTimeRangeId } = useTimeRangeId();

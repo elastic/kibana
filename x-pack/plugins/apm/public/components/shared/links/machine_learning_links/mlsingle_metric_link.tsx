@@ -74,7 +74,7 @@ function useSingleMetricHref({
     pageState: {
       jobIds: [jobId],
       timeRange: { from: rangeFrom, to: rangeTo },
-      refreshInterval: { pause: true, value: 10000 },
+      refreshInterval: { pause: true, value: 60000 },
       ...entities,
     },
   });
