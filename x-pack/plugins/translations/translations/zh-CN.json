@@ -20876,7 +20876,6 @@
     "xpack.ml.newJob.fromLens.createJob.error.colsNoSourceField": "某些列不包含源字段。",
     "xpack.ml.newJob.fromLens.createJob.error.colsUsingFilterTimeSift": "列包含与 ML 检测工具不兼容的设置，不支持时间偏移和筛选依据。",
     "xpack.ml.newJob.fromLens.createJob.error.incompatibleLayerType": "图层不兼容。只可以使用图表图层。",
-    "xpack.ml.newJob.fromLens.createJob.error.noCompatibleLayers": "可视化不包含任何可用于创建异常检测作业的图层。",
     "xpack.ml.newJob.fromLens.createJob.error.noDataViews": "在可视化中找不到数据视图。",
     "xpack.ml.newJob.fromLens.createJob.error.noDateField": "找不到日期字段。",
     "xpack.ml.newJob.fromLens.createJob.error.noTimeRange": "未指定时间范围。",
