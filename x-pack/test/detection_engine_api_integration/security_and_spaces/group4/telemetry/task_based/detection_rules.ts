@@ -344,64 +344,6 @@ export default ({ getService }: FtrProviderContext) => {
         await installPrePackagedRules(supertest, log);
       });
 
-      it('should return mutating types such as "id", "@timestamp", etc... for list of type "detection"', async () => {
-        // create an exception list container of type "detection"
-        const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
-          description: 'description',
-          list_id: '123',
-          name: 'test list',
-          type: 'detection',
-        });
-
-        // add 1 item to the exception list
-        await createExceptionListItem(supertest, log, {
-          description: 'endpoint description',
-          entries: [
-            {
-              field: 'keyword',
-              operator: 'included',
-              type: 'match',
-              value: 'something',
-            },
-          ],
-          list_id: '123',
-          name: 'endpoint_list',
-          os_types: [],
-          type: 'simple',
-        });
-
-        // add the exception list to the pre-built/immutable/elastic rule using "PATCH" endpoint
-        const { exceptions_list } = await getRule(supertest, log, IMMUTABLE_RULE_ID);
-        await supertest
-          .patch(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({
-            rule_id: IMMUTABLE_RULE_ID,
-            exceptions_list: [
-              ...exceptions_list,
-              {
-                id,
-                list_id,
-                namespace_type,
-                type,
-              },
-            ],
-          })
-          .expect(200);
-
-        await retry.try(async () => {
-          const stats = await getSecurityTelemetryStats(supertest, log);
-          expect(stats.detection_rules).length(1);
-          const detectionRule = stats.detection_rules[0][0];
-          expect(detectionRule['@timestamp']).to.be.a('string');
-          expect(detectionRule.cluster_uuid).to.be.a('string');
-          expect(detectionRule.cluster_name).to.be.a('string');
-          expect(detectionRule.license_id).to.be.a('string');
-          expect(detectionRule.detection_rule.created_at).to.be.a('string');
-          expect(detectionRule.detection_rule.id).to.be.a('string');
-        });
-      });
-
       it('should give telemetry/stats for an exception list of type "detection"', async () => {
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
