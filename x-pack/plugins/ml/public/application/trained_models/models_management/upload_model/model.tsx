@@ -189,15 +189,15 @@ export const Model: FC<Props> = ({ model, installed, hidden, refreshModels }) =>
             {model.description ? (
               <>
                 <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem css={{ fontWeight: 'normal', maxWidth: '90px' }}>
+                  {/* <EuiFlexItem css={{ fontWeight: 'normal', maxWidth: '90px' }}>
                     Description
-                  </EuiFlexItem>
+                  </EuiFlexItem> */}
                   <EuiFlexItem>{model.description}</EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="xs" />
               </>
             ) : null}
-
+            <EuiSpacer size="s" />
             {model.source?.metadata?.repo_id ? (
               <>
                 <EuiFlexGroup gutterSize="s">
@@ -238,6 +238,7 @@ export const Model: FC<Props> = ({ model, installed, hidden, refreshModels }) =>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          <EuiSpacer />
           <EuiButton
             size="s"
             disabled={installed || globalIsRunning || finished}
