@@ -73,10 +73,10 @@ based on different timestamps.z
 You can manage your data view from *Stack Management*.
 
 [float]
-==== Temporary {data-sources}
+==== Create a temporary {data-source}
 
 Want to explore your data or create a visualization without saving it as a data view?
-You can do that by selecting *Use without saving* in the *Create {data-source}* form in *Discover*
+Select *Use without saving* in the *Create {data-source}* form in *Discover*
 or *Lens*. With a temporary {data-source}, you can
 do everything you'd do with a saved
 {data-source},
@@ -91,7 +91,7 @@ image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte3a4f3994
 
 [float]
 [[rollup-data-view]]
-==== Data views and rolled up data
+==== Use {data-sources} with rolled up data
 
 A {data-source} can match one rollup index.  For a combination rollup
 {data-source} with both raw and rolled up data, use the standard notation:
@@ -103,7 +103,7 @@ For an example, refer to <<rollup-data-tutorial,Create and visualize rolled up d
 
 [float]
 [[management-cross-cluster-search]]
-==== Data views and {ccs}
+==== Use {data-sources} with {ccs}
 
 If your {es} clusters are configured for {ref}/modules-cross-cluster-search.html[{ccs}],
 you can create a {data-source} to search across the clusters of your choosing.
