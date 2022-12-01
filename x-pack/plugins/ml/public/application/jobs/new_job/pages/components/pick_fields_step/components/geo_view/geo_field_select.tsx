@@ -19,19 +19,23 @@ interface DropDownLabel {
 interface Props {
   fields: Field[];
   changeHandler(i: Field | null): void;
-  selectedField: Field | null
+  selectedField: Field | null;
 }
 
 export const GeoFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
   const { jobCreatorUpdated } = useContext(JobCreatorContext);
 
-  const options: EuiComboBoxOptionOption[] = useMemo(() => fields.map(
-    (f) =>
-      ({
-        label: f.name,
-        field: f,
-      } as DropDownLabel)
-  ), [fields, jobCreatorUpdated]);
+  const options: EuiComboBoxOptionOption[] = useMemo(
+    () =>
+      fields.map(
+        (f) =>
+          ({
+            label: f.name,
+            field: f,
+          } as DropDownLabel)
+      ),
+    [fields, jobCreatorUpdated]
+  );
 
   const selection: EuiComboBoxOptionOption[] = useMemo(() => {
     const selectedOptions: EuiComboBoxOptionOption[] = [];
@@ -41,14 +45,17 @@ export const GeoFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField
     return selectedOptions;
   }, [selectedField]);
 
-  const onChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
-    const option = selectedOptions[0] as DropDownLabel;
-    if (typeof option !== 'undefined') {
-      changeHandler(option.field);
-    } else {
-      changeHandler(null);
-    }
-  }, [changeHandler]);
+  const onChange = useCallback(
+    (selectedOptions: EuiComboBoxOptionOption[]) => {
+      const option = selectedOptions[0] as DropDownLabel;
+      if (typeof option !== 'undefined') {
+        changeHandler(option.field);
+      } else {
+        changeHandler(null);
+      }
+    },
+    [changeHandler]
+  );
 
   return (
     <EuiComboBox

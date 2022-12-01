@@ -52,6 +52,7 @@ export class JobCreator {
   protected _savedSearch: SavedSearchSavedObject | null;
   protected _indexPatternTitle: IndexPatternTitle = '';
   protected _indexPatternDisplayName: string = '';
+  protected _indexPatternId: string | undefined = '';
   protected _job_config: Job;
   protected _calendars: Calendar[];
   protected _datafeed_config: Datafeed;
@@ -85,6 +86,7 @@ export class JobCreator {
     const name = this._indexPattern.getName();
     this._indexPatternDisplayName = name === title ? name : `${name} (${title})`;
     this._indexPatternTitle = title;
+    this._indexPatternId = this._indexPattern.id;
 
     this._job_config = createEmptyJob();
     this._calendars = [];
@@ -111,6 +113,10 @@ export class JobCreator {
 
   public get indexPatternDisplayName(): string {
     return this._indexPatternDisplayName;
+  }
+
+  public get indexPatternId(): string | undefined {
+    return this._indexPatternId;
   }
 
   protected _addDetector(detector: Detector, agg: Aggregation, field: Field) {

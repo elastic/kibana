@@ -5,7 +5,7 @@
  * 2.0.
  */
 // @ts-nocheck // REMOVE
-import React, { FC, useContext, useEffect, useState, useMemo } from 'react';
+import React, { FC } from 'react';
 // import { EuiSpacer } from '@elastic/eui';
 // import { JobCreatorContext } from '../../../job_creator_context';
 // import { RareJobCreator } from '../../../../../common/job_creator';
@@ -45,7 +45,7 @@ export const GeoDetectorsSummary: FC = () => {
   //   } else {
   //     return RARE_DETECTOR_TYPE.RARE;
   //   }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [jobCreatorUpdated]);
 
   // function setResultsWrapper(results: Results) {

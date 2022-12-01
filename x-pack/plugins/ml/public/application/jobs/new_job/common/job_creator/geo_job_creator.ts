@@ -68,7 +68,6 @@ export class GeoJobCreator extends JobCreator {
     }
   }
 
-
   // set the split field, applying it to each detector
   public setSplitField(field: SplitField) {
     this._splitField = field;
@@ -125,7 +124,7 @@ export class GeoJobCreator extends JobCreator {
     const detectors = getRichDetectors(job, datafeed, this.additionalFields, false);
 
     this.removeSplitField();
-    this.removeAllDetectors()
+    this.removeAllDetectors();
     this.removeAllDetectors();
 
     if (detectors.length) {

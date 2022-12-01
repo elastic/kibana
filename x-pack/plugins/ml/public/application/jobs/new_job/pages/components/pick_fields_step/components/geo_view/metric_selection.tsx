@@ -5,20 +5,29 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect } from 'react';
-import { EuiHorizontalRule } from '@elastic/eui';
+import React, { FC, useContext, useEffect, useState } from 'react';
+// import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui'; // EuiHorizontalRule
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { GeoJobCreator } from '../../../../../common/job_creator';
 import { GeoField } from './geo_field';
+import { GeoMapExamples } from './geo_map_examples';
+// import { useMlKibana } from '../../../../../../../contexts/kibana';
 
 interface Props {
   setIsValid: (na: boolean) => void;
 }
 
 export const GeoDetector: FC<Props> = ({ setIsValid }) => {
-  const { jobCreator: jc, jobCreatorUpdated } = useContext(JobCreatorContext);
+  const { jobCreator: jc, jobCreatorUpdated, chartLoader } = useContext(JobCreatorContext);
   const jobCreator = jc as GeoJobCreator;
+
+  const [fieldValues, setFieldValues] = useState<string[]>([]);
+
+  // const {
+  //   services: { notifications: toasts },
+  // } = useMlKibana();
 
   useEffect(() => {
     let valid = false;
@@ -28,11 +37,45 @@ export const GeoDetector: FC<Props> = ({ setIsValid }) => {
     setIsValid(valid);
   }, [jobCreatorUpdated]);
 
+  // Load example field values when split field changes
+  // changes to fieldValues here will trigger the card effect
+  useEffect(() => {
+    if (jobCreator.splitField !== null) {
+      chartLoader
+        .loadFieldExampleValues(
+          jobCreator.splitField,
+          jobCreator.runtimeMappings,
+          jobCreator.datafeedConfig.indices_options
+        )
+        .then(setFieldValues)
+        .catch((error) => {
+          // toasts.addDanger({
+          //   title: i18n.translate('xpack.ml.newJob.geoWizard.fieldValuesFetchErrorTitle', {
+          //     defaultMessage: 'Error fetching field example values: {error}',
+          //     values: { error }
+          //   })
+          // });
+        });
+    } else {
+      setFieldValues([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobCreator.splitField]);
+
   return (
     <>
-      <EuiHorizontalRule />
+      {jobCreator.geoField !== null && (
+        <>
+          <GeoMapExamples
+            dataViewId={jobCreator.indexPatternId}
+            geoField={jobCreator.geoField}
+            splitField={jobCreator.splitField}
+            fieldValues={fieldValues}
+          />
+          <EuiSpacer />
+        </>
+      )}
       <GeoField />
-      {/* hereis where we add in the map embeddable once the field is selected */}
     </>
   );
 };

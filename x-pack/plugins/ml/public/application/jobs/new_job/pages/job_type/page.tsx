@@ -213,7 +213,7 @@ export const Page: FC = () => {
     {
       onClick: () => navigateToPath(`/jobs/new_job/geo${getUrlParams()}`),
       icon: {
-        type: RareIcon,
+        type: 'createAdvancedJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.geoAriaLabel', {
           defaultMessage: 'Geo job',
         }),
