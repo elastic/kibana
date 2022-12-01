@@ -18,7 +18,7 @@ export {
   type AddDataControlProps,
   type AddOptionsListControlProps,
   controlGroupInputBuilder,
-} from './control_group_renderer';
+} from './control_group_input_builder';
 
 export {
   type ControlGroupRendererProps,

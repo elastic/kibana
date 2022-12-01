@@ -55,6 +55,7 @@ export const ControlGroupRenderer = ({
         >(CONTROL_GROUP_TYPE);
         const newControlGroup = (await factory?.create({
           id,
+          ...getDefaultControlGroupInput(),
           ...(await getInitialInput(getDefaultControlGroupInput(), controlGroupInputBuilder)),
         })) as ControlGroupContainer;
 
