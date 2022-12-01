@@ -64,13 +64,10 @@ describe('links', () => {
       } as unknown as StartPlugins);
   });
 
-  it('should return all links without filtering when having isolate permission', async () => {
+  it('should return all links for user with all sub-feature privileges', async () => {
     (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
 
-    const filteredLinks = await getManagementFilteredLinks(
-      coreMockStarted,
-      getPlugins(['superuser'])
-    );
+    const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
     expect(filteredLinks).toEqual(links);
   });
 
@@ -87,13 +84,14 @@ describe('links', () => {
         coreMockStarted,
         getPlugins(['superuser'])
       );
-      expect(filteredLinks).toEqual({
-        ...links,
-        links: links.links?.filter((link) => link.id !== SecurityPageName.responseActionsHistory),
-      });
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.responseActionsHistory));
     });
   });
 
+  // todo: these tests should be updated, because in the end, showing/hiding HIE depends on nothing
+  // else but the mock return of `calculateEndpointAuthz`.
+  // These tests should check what is the value of `hasHostIsolationExceptions` which is passed to
+  // `calculateEndpointAuthz`.
   describe('Host Isolation Exception', () => {
     it('should return all but HIE when NO isolation permission due to privilege', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue({
@@ -102,6 +100,8 @@ describe('links', () => {
         canAccessEndpointManagement: true,
         canReadActionsLogManagement: true,
         canReadEndpointList: true,
+        canReadTrustedApplications: true,
+        canReadEventFilters: true,
       });
 
       const filteredLinks = await getManagementFilteredLinks(
@@ -118,6 +118,8 @@ describe('links', () => {
         canAccessEndpointManagement: true,
         canReadActionsLogManagement: true,
         canReadEndpointList: true,
+        canReadTrustedApplications: true,
+        canReadEventFilters: true,
       });
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
 
@@ -135,6 +137,8 @@ describe('links', () => {
         canAccessEndpointManagement: false,
         canReadActionsLogManagement: true,
         canReadEndpointList: true,
+        canReadTrustedApplications: true,
+        canReadEventFilters: true,
       });
       fakeHttpServices.get.mockResolvedValue({ total: 1 });
 
@@ -166,6 +170,8 @@ describe('links', () => {
         canUnIsolateHost: true,
         canReadActionsLogManagement: true,
         canReadEndpointList: true,
+        canReadTrustedApplications: true,
+        canReadEventFilters: true,
       });
       fakeHttpServices.get.mockRejectedValue(new Error());
 
@@ -182,6 +188,8 @@ describe('links', () => {
         canUnIsolateHost: true,
         canReadActionsLogManagement: false,
         canReadEndpointList: true,
+        canReadTrustedApplications: true,
+        canReadEventFilters: true,
       });
       fakeHttpServices.get.mockRejectedValue(new Error());
 
@@ -198,52 +206,30 @@ describe('links', () => {
     });
   });
 
-  // this can be removed after removing endpointRbacEnabled feature flag
-  describe('without endpointRbacEnabled', () => {
-    beforeAll(() => {
-      ExperimentalFeaturesService.init({
-        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: false },
-      });
-    });
+  it('should hide Trusted Applications for user without privilege', async () => {
+    (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+      getEndpointAuthzInitialStateMock({
+        canReadTrustedApplications: false,
+      })
+    );
 
-    it('shows Trusted Applications for non-superuser, too', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
+    const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
 
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
-
-      expect(filteredLinks).toEqual(links);
-    });
+    expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.trustedApps));
   });
 
-  // this can be the default after removing endpointRbacEnabled feature flag
-  describe('with endpointRbacEnabled', () => {
-    beforeAll(() => {
-      ExperimentalFeaturesService.init({
-        experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: true },
-      });
-    });
+  it('should hide Event Filters for user without privilege', async () => {
+    (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+      getEndpointAuthzInitialStateMock({
+        canReadEventFilters: false,
+      })
+    );
 
-    it('hides Trusted Applications for user without privilege', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
-        getEndpointAuthzInitialStateMock({
-          canReadTrustedApplications: false,
-          canReadHostIsolationExceptions: true,
-        })
-      );
+    const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
 
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
-
-      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.trustedApps));
-    });
-
-    it('shows Trusted Applications for user with privilege', async () => {
-      (calculateEndpointAuthz as jest.Mock).mockReturnValue(getEndpointAuthzInitialStateMock());
-
-      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
-
-      expect(filteredLinks).toEqual(links);
-    });
+    expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.eventFilters));
   });
+
   describe('Endpoint List', () => {
     it('should return all but endpoints link when no Endpoint List READ access', async () => {
       (calculateEndpointAuthz as jest.Mock).mockReturnValue(
@@ -255,10 +241,7 @@ describe('links', () => {
         coreMockStarted,
         getPlugins(['superuser'])
       );
-      expect(filteredLinks).toEqual({
-        ...links,
-        links: links.links?.filter((link) => link.id !== SecurityPageName.endpoints),
-      });
+      expect(filteredLinks).toEqual(getLinksWithout(SecurityPageName.endpoints));
     });
   });
 });
