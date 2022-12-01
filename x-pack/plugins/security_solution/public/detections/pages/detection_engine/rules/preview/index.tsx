@@ -24,6 +24,10 @@ import type { AboutStepRule, DefineStepRule, ScheduleStepRule } from '../types';
 
 import * as i18n from './translations';
 
+const StyledEuiFlyout = styled(EuiFlyout)`
+  clip-path: none;
+`;
+
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
   flex: 1;
@@ -51,7 +55,7 @@ const PreviewFlyoutComponent: React.FC<PreviewFlyoutProps> = ({
   onClose,
 }) => {
   return (
-    <EuiFlyout type="push" size="550px" ownFocus={false} onClose={onClose}>
+    <StyledEuiFlyout type="push" size="550px" ownFocus={false} onClose={onClose}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>{i18n.RULE_PREVIEW_TITLE}</h2>
@@ -73,7 +77,7 @@ const PreviewFlyoutComponent: React.FC<PreviewFlyoutProps> = ({
       <EuiFlyoutFooter>
         <EuiButton onClick={onClose}>{i18n.CANCEL_BUTTON_LABEL}</EuiButton>
       </EuiFlyoutFooter>
-    </EuiFlyout>
+    </StyledEuiFlyout>
   );
 };
 
