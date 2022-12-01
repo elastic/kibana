@@ -146,9 +146,9 @@ describe('Alert Event Details', () => {
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
     });
-    cy.intercept('PUT', '/api/detection_engine/rules').as('save1');
+    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRule');
     cy.contains('Save changes').click();
-    cy.wait('@save1').should(({ request }) => {
+    cy.wait('@saveRule').should(({ request }) => {
       const oneQuery = [
         {
           interval: 10,
@@ -172,9 +172,8 @@ describe('Alert Event Details', () => {
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
     });
-    cy.intercept('PUT', '/api/detection_engine/rules').as('save2');
     cy.contains('Save changes').click();
-    cy.wait('@save1').should(({ request }) => {
+    cy.wait('@saveRule').should(({ request }) => {
       const threeQueries = [
         {
           interval: 3600,
