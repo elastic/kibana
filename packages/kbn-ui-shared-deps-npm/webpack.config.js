@@ -100,7 +100,6 @@ module.exports = (_, argv) => {
         'react-router-dom',
         'react-router',
         'react',
-        'rison-node',
         'rxjs',
         'rxjs/operators',
         'styled-components',

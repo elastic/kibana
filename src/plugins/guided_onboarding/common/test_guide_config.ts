@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { GuideConfig } from '../../types';
+import type { GuideConfig } from './types';
 
 export const testGuideConfig: GuideConfig = {
   title: 'Test guide for development',
