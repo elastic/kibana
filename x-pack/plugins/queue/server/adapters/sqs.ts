@@ -19,9 +19,9 @@ import type { Worker } from '../worker_registry';
 import type { PluginSetupDeps, PluginStartDeps, Job, Adapter } from '../plugin';
 
 let sqs: AWS.SQS;
-const MAX_WORKERS = 10;
 const workers: Record<string, Worker<unknown>> = {};
 const QUEUE_URL = 'https://sqs.us-east-2.amazonaws.com/946960629917/ResponseOps';
+const MAX_WORKERS = 100;
 
 export const sqsAdapter: Adapter = {
   setup() {
