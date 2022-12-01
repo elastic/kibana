@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiResizeObserver } from '@el
 import styled from 'styled-components';
 import classNames from 'classnames';
 import type { EuiResizeObserverProps } from '@elastic/eui/src/components/observer/resize_observer/resize_observer';
+import { useWithInputShowPopover } from '../../hooks/state_selectors/use_with_input_show_popover';
 import { EnteredInput } from './lib/entered_input';
 import type { InputCaptureProps } from './components/input_capture';
 import { InputCapture } from './components/input_capture';
@@ -54,6 +55,11 @@ const CommandInputContainer = styled.div`
     background-color: ${({ theme }) => theme.eui.euiTextSubduedColor};
   }
 
+  &.withPopover {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
   &.hasFocus {
     .cursor {
       background-color: ${({ theme: { eui } }) => eui.euiTextColor};
@@ -87,6 +93,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   const visibleState = useWithInputVisibleState();
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
+  const isPopoverOpen = Boolean(useWithInputShowPopover());
   const [commandToExecute, setCommandToExecute] = useState('');
   const [popoverWidth, setPopoverWidth] = useState('94vw');
 
@@ -98,8 +105,9 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       cmdInput: true,
       hasFocus: isKeyInputBeingCaptured,
       error: visibleState === 'error',
+      withPopover: isPopoverOpen,
     });
-  }, [isKeyInputBeingCaptured, visibleState]);
+  }, [isKeyInputBeingCaptured, isPopoverOpen, visibleState]);
 
   const disableArrowButton = useMemo(() => fullTextEntered.trim().length === 0, [fullTextEntered]);
 
