@@ -10,8 +10,7 @@ import {
   ResponseObject as HapiResponseObject,
   ResponseToolkit as HapiResponseToolkit,
 } from '@hapi/hapi';
-// import the types so they extend @hapi/hapi, but label as types so this import is dropped
-import type {} from '@hapi/inert';
+import type { ReplyFileHandlerOptions } from '@hapi/inert';
 import typeDetect from 'type-detect';
 import Boom from '@hapi/boom';
 import * as stream from 'stream';
@@ -28,6 +27,11 @@ const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
+
+const FILE_COMPRESSION_LOOKUP_MAP: NonNullable<ReplyFileHandlerOptions['lookupMap']> = {
+  br: '.br',
+  gzip: '.gz',
+};
 
 function setHeaders(response: HapiResponseObject, headers: Record<string, string | string[]> = {}) {
   Object.entries(headers).forEach(([header, value]) => {
@@ -115,18 +119,21 @@ export class HapiResponseAdapter {
 
   private toFile(kibanaResponse: KibanaFileResponse) {
     const response = this.responseToolkit.file(kibanaResponse.path, {
-      etagMethod: 'simple',
-      mode: 'inline',
+      etagMethod: kibanaResponse.options.etagMethod ?? 'hash',
+      mode: kibanaResponse.options.download ? 'attachment' : false,
+      filename: kibanaResponse.options.download
+        ? kibanaResponse.options.download.filename
+        : undefined,
       confine: REPO_ROOT,
+      lookupMap: FILE_COMPRESSION_LOOKUP_MAP,
     });
+
     setHeaders(response, kibanaResponse.options.headers);
 
-    if (!response.headers['cache-control']) {
-      if (kibanaResponse.options.immutable) {
-        response.header('cache-control', `max-age=${365 * DAY}, immutable, stale-if-error`);
-      } else {
-        response.header('cache-control', 'must-revalidate');
-      }
+    if (kibanaResponse.options.immutable) {
+      response.header('cache-control', `max-age=${365 * DAY}, immutable, stale-if-error`);
+    } else if (!response.headers['cache-control']) {
+      response.header('cache-control', 'must-revalidate');
     }
 
     return response;

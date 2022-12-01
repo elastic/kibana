@@ -35,6 +35,22 @@ export type KibanaFileResponseOptions = Pick<HttpResponseOptions, 'headers'> & {
    * or version numbers, as there is no way to clear that caches on user's machines
    */
   immutable?: boolean;
+  /**
+   * Specifies the method used to calculate the ETag header response. Defaults to 'hash'
+   *
+   * Available values:
+   *  'hash' - SHA1 sum of the file contents, suitable for distributed deployments. Default value.
+   *  false - Disable ETag computation.
+   *
+   */
+  etagMethod?: 'hash' | false;
+  /**
+   * When specified, sends the file in "download" mode, which includes a filename for
+   * the file to use by default and indicates to the user/browser that they should offer
+   * this file for download/saving. The default value, undefined, sends the file in a
+   * way that indicates the file should be rendered in the web browser and not saved locally.
+   */
+  download?: { filename: string };
 };
 
 /**

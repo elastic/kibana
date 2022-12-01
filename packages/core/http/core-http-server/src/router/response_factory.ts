@@ -49,10 +49,12 @@ export interface KibanaSuccessResponseFactory {
  */
 export interface KibanaFileResponseFactory {
   /**
-   * The request is for a file on the filesystem. If the file exists
-   * then it will be served the same as a normal static file, including
-   * etag and related header support. If the file does not exist a 404
-   * will be sent.
+   * Transmits a file from the file system. The 'Content-Type' header defaults to
+   * the matching mime type based on filename extension. A file with a matching path
+   * but with additional `.gz` (for gzip) or `.br` (for brotli) extensions will be served
+   * instead when the browser indicates in the request headers that such encodings are
+   * acceptable.
+   *
    * @param path - The absolute path to the file which should be served
    * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
    */
