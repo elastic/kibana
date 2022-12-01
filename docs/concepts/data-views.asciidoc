@@ -75,7 +75,7 @@ You can manage your data view from *Stack Management*.
 [float]
 ==== Temporary {data-sources}
 
-What if you want to explore your data or create a visualization without first saving it as a data view?
+Want to explore your data or create a visualization without saving it as a data view?
 You can do that by selecting *Use without saving* in the *Create {data-source}* form in *Discover*
 or *Lens*. With a temporary {data-source}, you can
 do everything you'd do with a saved
