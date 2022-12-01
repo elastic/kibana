@@ -102,12 +102,7 @@ const isTypeExistsInTransactionTypesList = ({
 }: {
   transactionType?: string;
   transactionTypes: string[];
-}) => {
-  if (transactionType && transactionTypes.includes(transactionType)) {
-    return true;
-  }
-  return false;
-};
+}): boolean => !!transactionType && transactionTypes.includes(transactionType);
 
 const isNoAgentAndNoTransactionTypes = ({
   transactionTypes,
@@ -115,12 +110,7 @@ const isNoAgentAndNoTransactionTypes = ({
 }: {
   transactionTypes: string[];
   agentName?: string;
-}) => {
-  if (!agentName || transactionTypes.length === 0) {
-    return true;
-  }
-  return false;
-};
+}): boolean => !agentName || transactionTypes.length === 0;
 
 export function getTransactionType({
   transactionType,
