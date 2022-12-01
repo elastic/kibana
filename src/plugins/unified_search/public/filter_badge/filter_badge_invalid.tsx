@@ -6,14 +6,18 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const FilterBadgeInvalidPlaceholder = () => (
-  <EuiBadge iconType="unlink">
-    <FormattedMessage
-      id="unifiedSearch.filter.filterBadgeInvalidPlaceholder.label"
-      defaultMessage="filter value is invalid or incomplete"
-    />
-  </EuiBadge>
-);
+export const FilterBadgeInvalidPlaceholder = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiBadge iconType="unlink" color={euiTheme.colors.lightestShade}>
+      <FormattedMessage
+        id="unifiedSearch.filter.filterBadgeInvalidPlaceholder.label"
+        defaultMessage="filter value is invalid or incomplete"
+      />
+    </EuiBadge>
+  );
+};
