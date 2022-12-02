@@ -7,20 +7,25 @@
 
 import React from 'react';
 
+import { useParams } from 'react-router-dom';
 import { ObservabilityAppServices } from '../../application/types';
 import { paths } from '../../config';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
-
 import PageNotFound from '../404';
 import { SLO_DETAILS_PAGE_TITLE } from './translations';
 import { isSloFeatureEnabled } from '../slos/helpers';
 import { SLOS_BREADCRUMB_TEXT } from '../slos/translations';
+import { SloDetailsPathParams } from './types';
+import { useFetchSloDetails } from './hooks';
 
 export function SloDetails() {
   const { http } = useKibana<ObservabilityAppServices>().services;
   const { ObservabilityPageTemplate, config } = usePluginContext();
+  const { sloId } = useParams<SloDetailsPathParams>();
+
+  const [loading, slo] = useFetchSloDetails(sloId);
 
   useBreadcrumbs([
     {
@@ -32,7 +37,7 @@ export function SloDetails() {
     },
   ]);
 
-  if (!isSloFeatureEnabled(config)) {
+  if (!isSloFeatureEnabled(config) || slo === undefined) {
     return <PageNotFound />;
   }
 
