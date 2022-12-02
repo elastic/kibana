@@ -65,8 +65,11 @@ const LineClampedEuiBadgeGroup = euiStyled(EuiBadgeGroup)`
   word-break: normal;
 `;
 
+// margin-right is required here because -webkit-box-orient: vertical;
+// in the EuiBadgeGroup prevents us from defining gutterSize.
 const StyledEuiBadge = euiStyled(EuiBadge)`
-  max-width: 100px
+  max-width: 100px;
+  margin-right: 5px;
 `; // to allow for ellipsis
 
 const renderStringField = (field: string, dataTestSubj: string) =>
