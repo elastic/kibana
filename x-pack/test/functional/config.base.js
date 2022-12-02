@@ -171,6 +171,9 @@ export default async function ({ readConfigFile }) {
       connectors: {
         pathname: '/app/management/insightsAndAlerting/triggersActions/connectors',
       },
+      triggersActions: {
+        pathname: '/app/management/insightsAndAlerting/triggersActions',
+      },
     },
 
     // choose where screenshots should be saved
