@@ -102,7 +102,6 @@ import {
 } from '../translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import { useRuleTypes } from '../../../hooks/use_rule_types';
-import { useActionTypes } from '../../../hooks/use_action_types';
 
 const ENTER_KEY = 13;
 
