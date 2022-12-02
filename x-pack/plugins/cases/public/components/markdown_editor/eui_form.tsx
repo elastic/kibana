@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { forwardRef, useEffect, useMemo, useRef } from 'react';
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import type { EuiMarkdownEditorProps } from '@elastic/eui';
 import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
@@ -58,6 +58,7 @@ export const MarkdownEditorForm = React.memo(
       ref
     ) => {
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+      const [showVersionConflictWarning, setShowVersionConflictWarning] = useState<boolean>(false);
       const storage = useMemo(() => new Storage(window.sessionStorage), []);
       const isFirstRender = useRef(true);
 
@@ -81,7 +82,7 @@ export const MarkdownEditorForm = React.memo(
 
       useEffect(() => {
         if (initialValue && initialValue !== field.value) {
-          field.setErrors([{ message: i18n.COMMENT_VERSION_CONFLICT_ERROR }]);
+          setShowVersionConflictWarning(true);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [initialValue]);
@@ -111,7 +112,9 @@ export const MarkdownEditorForm = React.memo(
             describedByIds={idAria ? [idAria] : undefined}
             fullWidth
             error={errorMessage}
-            helpText={field.helpText}
+            helpText={
+              showVersionConflictWarning ? i18n.COMMENT_VERSION_CONFLICT_WARNING : field.helpText
+            }
             isInvalid={isInvalid}
             label={field.label}
             labelAppend={field.labelAppend}
