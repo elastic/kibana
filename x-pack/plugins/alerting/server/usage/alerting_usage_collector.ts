@@ -8,12 +8,12 @@
 import { MakeSchemaFrom, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { get } from 'lodash';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { AlertingTelemetry, AlertingUsage } from './types';
+import { AlertingTelemetry } from './types';
 import { byTypeSchema } from './by_type_schema';
 import {
   EmptyEventLogUsage,
   EmptyEventLogUsageByType,
-  EventLogUsage,
+  EventLogUsageMapping,
 } from './generated/event_log_telemetry_types';
 
 export const NUM_ALERTING_RULE_TYPES = Object.keys(byTypeSchema).length;
@@ -86,103 +86,10 @@ export interface PercentileValueByTypeSchema {
   p99: Record<string, number>;
 }
 
-const byPercentileSchema: MakeSchemaFrom<PercentileValueSchema> = {
-  p50: { type: 'long' },
-  p90: { type: 'long' },
-  p99: { type: 'long' },
-};
-
-const byPercentileSchemaByType: MakeSchemaFrom<PercentileValueByTypeSchema> = {
-  p50: byTypeSchema,
-  p90: byTypeSchema,
-  p99: byTypeSchema,
-};
-
 export function createAlertingUsageCollector(
   usageCollection: UsageCollectionSetup,
   taskManager: Promise<TaskManagerStartContract>
 ) {
-  const baseSchema: MakeSchemaFrom<AlertingUsage> = {
-    has_errors: { type: 'boolean' },
-    error_messages: {
-      type: 'array',
-      items: { type: 'text' },
-    },
-    count_total: { type: 'long' },
-    count_active_total: { type: 'long' },
-    count_disabled_total: { type: 'long' },
-    throttle_time: {
-      min: { type: 'keyword' },
-      avg: { type: 'keyword' },
-      max: { type: 'keyword' },
-    },
-    schedule_time: {
-      min: { type: 'keyword' },
-      avg: { type: 'keyword' },
-      max: { type: 'keyword' },
-    },
-    throttle_time_number_s: {
-      min: { type: 'long' },
-      avg: { type: 'float' },
-      max: { type: 'long' },
-    },
-    schedule_time_number_s: {
-      min: { type: 'long' },
-      avg: { type: 'float' },
-      max: { type: 'long' },
-    },
-    connectors_per_alert: {
-      min: { type: 'long' },
-      avg: { type: 'float' },
-      max: { type: 'long' },
-    },
-    count_active_by_type: byTypeSchema,
-    count_by_type: byTypeSchema,
-    count_rules_namespaces: { type: 'long' },
-    count_rules_executions_per_day: { type: 'long' },
-    count_rules_executions_by_type_per_day: byTypeSchema,
-    count_rules_executions_failured_per_day: { type: 'long' },
-    count_rules_executions_failured_by_reason_per_day: byReasonSchema,
-    count_rules_executions_failured_by_reason_by_type_per_day: byReasonSchemaByType,
-    count_rules_executions_timeouts_per_day: { type: 'long' },
-    count_rules_executions_timeouts_by_type_per_day: byTypeSchema,
-    count_failed_and_unrecognized_rule_tasks_per_day: { type: 'long' },
-    count_failed_and_unrecognized_rule_tasks_by_status_per_day: byTaskStatusSchema,
-    count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: byTaskStatusSchemaByType,
-    count_rules_by_execution_status: byStatusSchema,
-    count_rules_with_tags: { type: 'long' },
-    count_rules_by_notify_when: byNotifyWhenSchema,
-    count_rules_snoozed: { type: 'long' },
-    count_rules_muted: { type: 'long' },
-    count_rules_with_muted_alerts: { type: 'long' },
-    count_connector_types_by_consumers: { DYNAMIC_KEY: { DYNAMIC_KEY: { type: 'long' } } },
-    count_rules_by_execution_status_per_day: byStatusPerDaySchema,
-  };
-  const eventLogObj = { ...EmptyEventLogUsage, ...EmptyEventLogUsageByType };
-  const eventLogSchema: MakeSchemaFrom<EventLogUsage> = Object.keys(eventLogObj).reduce(
-    (acc, key) => {
-      let mapping;
-      if (key.startsWith('avg')) {
-        if (key.indexOf('by_type')) {
-          mapping = byTypeSchema;
-        } else {
-          mapping = { type: 'long' };
-        }
-      } else if (key.startsWith('percentile')) {
-        if (key.indexOf('by_type')) {
-          mapping = byPercentileSchemaByType;
-        } else {
-          mapping = byPercentileSchema;
-        }
-      }
-      return {
-        ...acc,
-        [key]: mapping,
-      };
-    },
-    {} as MakeSchemaFrom<EventLogUsage>
-  );
-
   return usageCollection.makeUsageCollector<AlertingTelemetry>({
     type: 'alerts',
     isReady: async () => {
@@ -264,8 +171,61 @@ export function createAlertingUsageCollector(
       }
     },
     schema: {
-      ...baseSchema,
-      ...eventLogSchema,
+      has_errors: { type: 'boolean' },
+      error_messages: {
+        type: 'array',
+        items: { type: 'text' },
+      },
+      count_total: { type: 'long' },
+      count_active_total: { type: 'long' },
+      count_disabled_total: { type: 'long' },
+      throttle_time: {
+        min: { type: 'keyword' },
+        avg: { type: 'keyword' },
+        max: { type: 'keyword' },
+      },
+      schedule_time: {
+        min: { type: 'keyword' },
+        avg: { type: 'keyword' },
+        max: { type: 'keyword' },
+      },
+      throttle_time_number_s: {
+        min: { type: 'long' },
+        avg: { type: 'float' },
+        max: { type: 'long' },
+      },
+      schedule_time_number_s: {
+        min: { type: 'long' },
+        avg: { type: 'float' },
+        max: { type: 'long' },
+      },
+      connectors_per_alert: {
+        min: { type: 'long' },
+        avg: { type: 'float' },
+        max: { type: 'long' },
+      },
+      count_active_by_type: byTypeSchema,
+      count_by_type: byTypeSchema,
+      count_rules_namespaces: { type: 'long' },
+      count_rules_executions_per_day: { type: 'long' },
+      count_rules_executions_by_type_per_day: byTypeSchema,
+      count_rules_executions_failured_per_day: { type: 'long' },
+      count_rules_executions_failured_by_reason_per_day: byReasonSchema,
+      count_rules_executions_failured_by_reason_by_type_per_day: byReasonSchemaByType,
+      count_rules_executions_timeouts_per_day: { type: 'long' },
+      count_rules_executions_timeouts_by_type_per_day: byTypeSchema,
+      count_failed_and_unrecognized_rule_tasks_per_day: { type: 'long' },
+      count_failed_and_unrecognized_rule_tasks_by_status_per_day: byTaskStatusSchema,
+      count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: byTaskStatusSchemaByType,
+      count_rules_by_execution_status: byStatusSchema,
+      count_rules_with_tags: { type: 'long' },
+      count_rules_by_notify_when: byNotifyWhenSchema,
+      count_rules_snoozed: { type: 'long' },
+      count_rules_muted: { type: 'long' },
+      count_rules_with_muted_alerts: { type: 'long' },
+      count_connector_types_by_consumers: { DYNAMIC_KEY: { DYNAMIC_KEY: { type: 'long' } } },
+      count_rules_by_execution_status_per_day: byStatusPerDaySchema,
+      ...EventLogUsageMapping,
     },
   });
 }

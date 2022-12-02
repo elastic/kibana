@@ -150,7 +150,7 @@ const byPercentileSchemaByType: MakeSchemaFrom<PercentileValueByTypeSchema> = {
   p99: byTypeSchema,
 };
 
-export const EventLogUsageMapping = {
+export const EventLogUsageMapping: MakeSchemaFrom<EventLogUsage> = {
   avg_event_duration_per_day: { type: 'long' },
   avg_event_duration_by_type_per_day: byTypeSchema,
   avg_kibana_task_schedule_delay_per_day: { type: 'long' },
