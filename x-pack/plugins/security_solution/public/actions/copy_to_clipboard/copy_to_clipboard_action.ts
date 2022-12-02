@@ -30,14 +30,16 @@ export class CopyToClipboardAction implements Action<CellValueContext> {
 
   private icon = 'copyClipboard';
 
-  private applicationService;
   private toastsService;
+  private currentAppId: string | undefined;
 
   constructor() {
-    ({
-      application: this.applicationService,
-      notifications: { toasts: this.toastsService },
-    } = KibanaServices.get());
+    const { application, notifications } = KibanaServices.get();
+    this.toastsService = notifications.toasts;
+
+    application.currentAppId$.subscribe((currentAppId) => {
+      this.currentAppId = currentAppId;
+    });
   }
 
   public getDisplayName() {
@@ -51,14 +53,12 @@ export class CopyToClipboardAction implements Action<CellValueContext> {
   }
 
   public async isCompatible({ embeddable, data }: CellValueContext) {
-    if (
-      isErrorEmbeddable(embeddable) ||
-      !isLensEmbeddable(embeddable) ||
-      !isDataColumnsValid(data)
-    ) {
-      return false;
-    }
-    return isInSecurityApp(this.applicationService);
+    return (
+      !isErrorEmbeddable(embeddable) &&
+      isLensEmbeddable(embeddable) &&
+      isDataColumnsValid(data) &&
+      isInSecurityApp(this.currentAppId)
+    );
   }
 
   public async execute({ data }: CellValueContext) {

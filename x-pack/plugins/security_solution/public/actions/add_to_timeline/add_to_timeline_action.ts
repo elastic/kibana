@@ -39,16 +39,18 @@ export class AddToTimelineAction implements Action<CellValueContext> {
   public order = 1;
 
   private icon = 'timeline';
-  private applicationService;
   private toastsService;
   private store;
+  private currentAppId: string | undefined;
 
   constructor(store: SecurityAppStore) {
     this.store = store;
-    ({
-      application: this.applicationService,
-      notifications: { toasts: this.toastsService },
-    } = KibanaServices.get());
+    const { application, notifications } = KibanaServices.get();
+    this.toastsService = notifications.toasts;
+
+    application.currentAppId$.subscribe((currentAppId) => {
+      this.currentAppId = currentAppId;
+    });
   }
 
   public getDisplayName() {
@@ -62,15 +64,13 @@ export class AddToTimelineAction implements Action<CellValueContext> {
   }
 
   public async isCompatible({ embeddable, data }: CellValueContext) {
-    if (
-      isErrorEmbeddable(embeddable) ||
-      !isLensEmbeddable(embeddable) ||
-      !isFilterableEmbeddable(embeddable) ||
-      !isDataColumnsFilterable(data)
-    ) {
-      return false;
-    }
-    return isInSecurityApp(this.applicationService);
+    return (
+      !isErrorEmbeddable(embeddable) &&
+      isLensEmbeddable(embeddable) &&
+      isFilterableEmbeddable(embeddable) &&
+      isDataColumnsFilterable(data) &&
+      isInSecurityApp(this.currentAppId)
+    );
   }
 
   public async execute({ data }: CellValueContext) {
