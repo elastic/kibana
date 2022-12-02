@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import { SLO } from '../../../typings';
 
-export interface Props {
-  slo: SLO;
-}
-
-export function SloDetails(props: Props) {
-  const { slo } = props;
-  return <pre data-test-subj="sloDetails">{JSON.stringify(slo, null, 2)}</pre>;
-}
+export const anSLO: SLO = {
+  id: '2f17deb0-725a-11ed-ab7c-4bb641cfc57e',
+  name: 'SLO latency service log',
+  objective: {
+    target: 0.98,
+  },
+  summary: {
+    sliValue: 0.990097,
+    errorBudget: {
+      remaining: 0.504831,
+    },
+  },
+};
