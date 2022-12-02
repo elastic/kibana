@@ -6,7 +6,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
           class="euiPopover emotion-euiPopover"
@@ -35,7 +35,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
       <div
         class="euiPopover emotion-euiPopover"
