@@ -16,11 +16,28 @@ export const journey = new Journey({
   .step('Go to Discover Page and wait for the sidebar', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`/app/discover`));
     await waitForChrome(page);
-    await page.waitForSelector(subj('fieldListGroupedAvailableFields-count'));
+
+    const availableFieldsCountSelector = subj('fieldListGroupedAvailableFields-count');
+    await page.waitForSelector(availableFieldsCountSelector);
+
+    await page.waitForFunction(async function verifyCount(selector) {
+      return document.querySelector(selector)?.innerHTML === '6873';
+    }, availableFieldsCountSelector);
   })
-  .step('Add a field to the table', async ({ page, kbnUrl }) => {
+  .step('Select a field in the sidebar', async ({ page, kbnUrl }) => {
     const fieldName = '_all.primaries.bulk.avg_size_in_bytes';
+    const selectedFieldsCountSelector = subj('fieldListGroupedSelectedFields-count');
+
+    await page.waitForFunction(async function verifyCountBefore(selector) {
+      return !document.querySelector(selector);
+    }, selectedFieldsCountSelector);
+
     await page.locator(subj(`field-${fieldName}`)).hover();
     await page.locator(subj(`fieldToggle-${fieldName}`)).click();
-    await page.waitForSelector(subj('fieldListGroupedSelectedFields-count'));
+
+    await page.waitForSelector(selectedFieldsCountSelector);
+
+    await page.waitForFunction(async function verifyCountAfter(selector) {
+      return document.querySelector(selector)?.innerHTML === '1';
+    }, selectedFieldsCountSelector);
   });
