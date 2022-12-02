@@ -553,12 +553,12 @@ export class RulesClient {
     let ruleSavedObject: SavedObject<RawRule>;
 
     try {
-      ruleSavedObject = await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
-        'alert',
-        id,
-        {
-          namespace: this.namespace,
-        }
+      ruleSavedObject = await withSpan(
+        { name: 'encryptedSavedObjectsClient.getDecryptedAsInternalUser', type: 'rules' },
+        () =>
+          this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
+            namespace: this.namespace,
+          })
       );
     } catch (e) {
       // We'll skip invalidating the API key since we failed to load the decrypted saved object
@@ -566,7 +566,10 @@ export class RulesClient {
         `update(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
       );
       // Still attempt to load the object using SOC
-      ruleSavedObject = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+      ruleSavedObject = await withSpan(
+        { name: 'unsecuredSavedObjectsClient.get', type: 'rules' },
+        () => this.unsecuredSavedObjectsClient.get<RawRule>('alert', id)
+      );
     }
 
     /*
@@ -588,12 +591,14 @@ export class RulesClient {
         : `${ruleSavedObject.attributes.name} [Clone]`;
     const ruleId = newId ?? SavedObjectsUtils.generateId();
     try {
-      await this.authorization.ensureAuthorized({
-        ruleTypeId: ruleSavedObject.attributes.alertTypeId,
-        consumer: ruleSavedObject.attributes.consumer,
-        operation: WriteOperations.Create,
-        entity: AlertingAuthorizationEntity.Rule,
-      });
+      await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, () =>
+        this.authorization.ensureAuthorized({
+          ruleTypeId: ruleSavedObject.attributes.alertTypeId,
+          consumer: ruleSavedObject.attributes.consumer,
+          operation: WriteOperations.Create,
+          entity: AlertingAuthorizationEntity.Rule,
+        })
+      );
     } catch (error) {
       this.auditLogger?.log(
         ruleAuditEvent({
@@ -644,12 +649,14 @@ export class RulesClient {
       })
     );
 
-    return await this.createRuleSavedObject({
-      intervalInMs: parseDuration(rawRule.schedule.interval),
-      rawRule,
-      references: ruleSavedObject.references,
-      ruleId,
-    });
+    return await withSpan({ name: 'createRuleSavedObject', type: 'rules' }, () =>
+      this.createRuleSavedObject({
+        intervalInMs: parseDuration(rawRule.schedule.interval),
+        rawRule,
+        references: ruleSavedObject.references,
+        ruleId,
+      })
+    );
   }
 
   public async create<Params extends RuleTypeParams = never>({
