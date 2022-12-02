@@ -11,12 +11,10 @@ import React, { useMemo, useState } from 'react';
 import {
   LazyControlGroupRenderer,
   ControlGroupContainer,
-  ControlGroupInput,
   useControlGroupContainerContext,
   ControlStyle,
 } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiButtonGroup,
   EuiFlexGroup,
@@ -26,27 +24,24 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 
-interface Props {
-  dataView: DataView;
-}
 const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
-export const BasicReduxExample = ({ dataView }: Props) => {
-  const [myControlGroup, setControlGroup] = useState<ControlGroupContainer>();
-  const [currentControlStyle, setCurrentControlStyle] = useState<ControlStyle>('oneLine');
+export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
+  const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
 
   const ControlGroupReduxWrapper = useMemo(() => {
-    if (myControlGroup) return myControlGroup.getReduxEmbeddableTools().Wrapper;
-  }, [myControlGroup]);
+    if (controlGroup) return controlGroup.getReduxEmbeddableTools().Wrapper;
+  }, [controlGroup]);
 
   const ButtonControls = () => {
     const {
       useEmbeddableDispatch,
+      useEmbeddableSelector: select,
       actions: { setControlStyle },
     } = useControlGroupContainerContext();
     const dispatch = useEmbeddableDispatch();
+    const controlStyle = select((state) => state.explicitInput.controlStyle);
 
     return (
       <>
@@ -71,9 +66,8 @@ export const BasicReduxExample = ({ dataView }: Props) => {
                   value: 'twoLine' as ControlStyle,
                 },
               ]}
-              idSelected={currentControlStyle}
+              idSelected={controlStyle}
               onChange={(id, value) => {
-                setCurrentControlStyle(value);
                 dispatch(setControlStyle(value));
               }}
               type="single"
@@ -105,20 +99,17 @@ export const BasicReduxExample = ({ dataView }: Props) => {
         )}
 
         <ControlGroupRenderer
-          onEmbeddableLoad={async (controlGroup) => {
-            setControlGroup(controlGroup);
+          onLoadComplete={async (newControlGroup) => {
+            setControlGroup(newControlGroup);
           }}
-          getCreationOptions={async (controlGroupInputBuilder) => {
-            const initialInput: Partial<ControlGroupInput> = {
-              ...getDefaultControlGroupInput(),
-              defaultControlWidth: 'small',
-            };
-            await controlGroupInputBuilder.addDataControlFromField(initialInput, {
-              dataViewId: dataView.id ?? 'kibana_sample_data_ecommerce',
+          getInitialInput={async (initialInput, builder) => {
+            await builder.addDataControlFromField(initialInput, {
+              dataViewId,
               fieldName: 'customer_first_name.keyword',
+              width: 'small',
             });
-            await controlGroupInputBuilder.addDataControlFromField(initialInput, {
-              dataViewId: dataView.id ?? 'kibana_sample_data_ecommerce',
+            await builder.addDataControlFromField(initialInput, {
+              dataViewId,
               fieldName: 'customer_last_name.keyword',
               width: 'medium',
               grow: false,

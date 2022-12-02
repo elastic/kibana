@@ -5,19 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-
-import type {
-  Embeddable,
-  LensPublicStart,
-  LensSavedObjectAttributes,
-  FieldBasedIndexPatternColumn,
-  XYDataLayerConfig,
-  FormBasedPersistedState,
-  FormBasedLayer,
-  XYLayerConfig,
-} from '@kbn/lens-plugin/public';
+import type { Embeddable, LensPublicStart, ChartInfo } from '@kbn/lens-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 
 import { i18n } from '@kbn/i18n';
@@ -28,7 +16,6 @@ import {
   getVisTypeFactory,
   isCompatibleLayer,
   hasIncompatibleProperties,
-  hasSourceField,
   isTermsField,
   isCompatibleSplitFieldType,
   getMlFunction,
@@ -40,7 +27,7 @@ type VisualizationType = Awaited<ReturnType<LensPublicStart['getXyVisTypes']>>[n
 
 export interface LayerResult {
   id: string;
-  layerType: typeof layerTypes[keyof typeof layerTypes];
+  layerType: string;
   label: string;
   icon: VisualizationType['icon'];
   isCompatible: boolean;
@@ -49,17 +36,17 @@ export interface LayerResult {
 }
 
 export class VisualizationExtractor {
-  constructor(private dataViewClient: DataViewsContract) {}
+  constructor() {}
 
   public async getResultLayersFromEmbeddable(
     embeddable: Embeddable,
     lens: LensPublicStart
   ): Promise<LayerResult[]> {
-    const { vis } = getJobsItemsFromEmbeddable(embeddable);
-    return this.getLayers(vis, lens);
+    const { chartInfo } = await getJobsItemsFromEmbeddable(embeddable, lens);
+    return this.getLayers(chartInfo, lens);
   }
 
-  public async extractFields(layer: XYLayerConfig, vis: LensSavedObjectAttributes) {
+  public async extractFields(layer: ChartInfo['layers'][number]) {
     if (!isCompatibleLayer(layer)) {
       throw Error(
         i18n.translate('xpack.ml.newJob.fromLens.createJob.error.incompatibleLayerType', {
@@ -68,24 +55,8 @@ export class VisualizationExtractor {
       );
     }
 
-    const indexpattern = vis.state.datasourceStates.formBased as FormBasedPersistedState;
-    const compatibleIndexPatternLayer = Object.entries(indexpattern.layers).find(
-      ([id]) => layer.layerId === id
-    );
-    if (compatibleIndexPatternLayer === undefined) {
-      throw Error(
-        i18n.translate('xpack.ml.newJob.fromLens.createJob.error.noCompatibleLayers', {
-          defaultMessage:
-            'Visualization does not contain any layers which can be used for creating an anomaly detection job.',
-        })
-      );
-    }
-
-    const [layerId, columnsLayer] = compatibleIndexPatternLayer;
-
-    const columns = getColumns(columnsLayer, layer);
-    const timeField = Object.values(columns).find(({ dataType }) => dataType === 'date');
-    if (timeField === undefined) {
+    const timeField = layer.dimensions.find(({ operation }) => operation.dataType === 'date');
+    if (timeField === undefined || !timeField.operation.fields?.length) {
       throw Error(
         i18n.translate('xpack.ml.newJob.fromLens.createJob.error.noDateField', {
           defaultMessage: 'Cannot find a date field.',
@@ -93,14 +64,19 @@ export class VisualizationExtractor {
       );
     }
 
-    const fields = layer.accessors.map((a) => columns[a]);
+    const metricFields = layer.dimensions.filter((dimension) => dimension.role === 'metric');
 
-    const splitField = layer.splitAccessor ? columns[layer.splitAccessor] : null;
+    validateDimensions(metricFields);
+
+    const splitField = layer.dimensions.find(
+      (dimension) => dimension.role === 'split' && dimension.dimensionType === 'breakdown'
+    );
 
     if (
-      splitField !== null &&
+      splitField &&
       isTermsField(splitField) &&
-      splitField.params.secondaryFields?.length
+      splitField.operation.fields &&
+      splitField.operation.fields.length > 1
     ) {
       throw Error(
         i18n.translate('xpack.ml.newJob.fromLens.createJob.error.splitFieldHasMultipleFields', {
@@ -109,7 +85,7 @@ export class VisualizationExtractor {
       );
     }
 
-    if (splitField !== null && isCompatibleSplitFieldType(splitField) === false) {
+    if (splitField && !isCompatibleSplitFieldType(splitField)) {
       throw Error(
         i18n.translate('xpack.ml.newJob.fromLens.createJob.error.splitFieldMustBeString', {
           defaultMessage: 'Selected split field type must be string.',
@@ -117,8 +93,7 @@ export class VisualizationExtractor {
       );
     }
 
-    const dataView = await this.getDataViewFromLens(vis.references, layerId);
-    if (dataView === null) {
+    if (!layer.dataView) {
       throw Error(
         i18n.translate('xpack.ml.newJob.fromLens.createJob.error.noDataViews', {
           defaultMessage: 'No data views can be found in the visualization.',
@@ -126,7 +101,7 @@ export class VisualizationExtractor {
       );
     }
 
-    if (timeField.sourceField !== dataView.timeFieldName) {
+    if (timeField.operation.fields[0] !== layer.dataView.timeFieldName) {
       throw Error(
         i18n.translate('xpack.ml.newJob.fromLens.createJob.error.timeFieldNotInDataView', {
           defaultMessage:
@@ -135,23 +110,19 @@ export class VisualizationExtractor {
       );
     }
 
-    return { fields, timeField, splitField, dataView };
+    return { fields: metricFields, timeField, splitField, dataView: layer.dataView };
   }
 
-  private async getLayers(
-    vis: LensSavedObjectAttributes,
-    lens: LensPublicStart
-  ): Promise<LayerResult[]> {
-    const visualization = vis.state.visualization as { layers: XYLayerConfig[] };
+  private async getLayers(chartInfo: ChartInfo, lens: LensPublicStart): Promise<LayerResult[]> {
     const getVisType = await getVisTypeFactory(lens);
 
     const layers: LayerResult[] = await Promise.all(
-      visualization.layers
+      chartInfo.layers
         .filter(({ layerType }) => layerType === layerTypes.DATA) // remove non chart layers
         .map(async (layer) => {
           const { icon, label } = getVisType(layer);
           try {
-            const { fields, splitField } = await this.extractFields(layer, vis);
+            const { fields, splitField } = await this.extractFields(layer);
             const detectors = createDetectors(fields, splitField);
             const jobType =
               splitField || detectors.length > 1 ? JOB_TYPE.MULTI_METRIC : JOB_TYPE.SINGLE_METRIC;
@@ -180,27 +151,16 @@ export class VisualizationExtractor {
 
     return layers;
   }
-
-  private async getDataViewFromLens(references: SavedObjectReference[], layerId: string) {
-    const dv = references.find(
-      (r) => r.type === 'index-pattern' && r.name === `indexpattern-datasource-layer-${layerId}`
-    );
-    if (!dv) {
-      return null;
-    }
-    return this.dataViewClient.get(dv.id);
-  }
 }
 
-function getColumns({ columns }: Omit<FormBasedLayer, 'indexPatternId'>, layer: XYDataLayerConfig) {
-  layer.accessors.forEach((a) => {
-    const col = columns[a];
+function validateDimensions(dimensions: ChartInfo['layers'][number]['dimensions']) {
+  dimensions.forEach((dimension) => {
     // fail early if any of the cols being used as accessors
     // contain functions we don't support
-    return col.dataType !== 'date' && getMlFunction(col.operationType);
+    return dimension.operation.dataType !== 'date' && getMlFunction(dimension.operation.type);
   });
 
-  if (Object.values(columns).some((c) => hasSourceField(c) === false)) {
+  if (dimensions.some((dimension) => !dimension.operation.fields?.length)) {
     throw Error(
       i18n.translate('xpack.ml.newJob.fromLens.createJob.error.colsNoSourceField', {
         defaultMessage: 'Some columns do not contain a source field.',
@@ -208,7 +168,7 @@ function getColumns({ columns }: Omit<FormBasedLayer, 'indexPatternId'>, layer: 
     );
   }
 
-  if (Object.values(columns).some((c) => hasIncompatibleProperties(c) === true)) {
+  if (dimensions.some((dimension) => hasIncompatibleProperties(dimension))) {
     throw Error(
       i18n.translate('xpack.ml.newJob.fromLens.createJob.error.colsUsingFilterTimeSift', {
         defaultMessage:
@@ -216,6 +176,4 @@ function getColumns({ columns }: Omit<FormBasedLayer, 'indexPatternId'>, layer: 
       })
     );
   }
-
-  return columns as Record<string, FieldBasedIndexPatternColumn>;
 }
