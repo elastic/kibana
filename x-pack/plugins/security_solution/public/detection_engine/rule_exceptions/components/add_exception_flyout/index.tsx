@@ -425,7 +425,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   return (
     <EuiFlyout
       ownFocus
-      maskProps={{ style: 'z-index: 1000' }} // For an edge case to display above the timeline flyout
+      maskProps={{ style: 'z-index: 5000' }} // For an edge case to display above the timeline flyout
       size="l"
       onClose={handleCloseFlyout}
       data-test-subj="addExceptionFlyout"
