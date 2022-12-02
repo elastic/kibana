@@ -9,6 +9,7 @@ import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { useController } from 'react-hook-form';
 
 const StyledEuiCard = styled(EuiCard)`
   padding: 16px 92px 16px 16px !important;
@@ -49,28 +50,29 @@ const StyledEuiCard = styled(EuiCard)`
 `;
 
 interface QueryPackSelectableProps {
-  queryType: string;
-  setQueryType: (type: string) => void;
   canRunSingleQuery: boolean;
   canRunPacks: boolean;
-  resetFormFields?: () => void;
 }
 
 export const QueryPackSelectable = ({
-  queryType,
-  setQueryType,
   canRunSingleQuery,
   canRunPacks,
-  resetFormFields,
 }: QueryPackSelectableProps) => {
+  const {
+    field: { value: queryType, onChange: setQueryType },
+  } = useController({
+    name: 'queryType',
+    defaultValue: 'query',
+    rules: {
+      deps: ['packId', 'query'],
+    },
+  });
+
   const handleChange = useCallback(
     (type) => {
       setQueryType(type);
-      if (resetFormFields) {
-        resetFormFields();
-      }
     },
-    [resetFormFields, setQueryType]
+    [setQueryType]
   );
   const queryCardSelectable = useMemo(
     () => ({

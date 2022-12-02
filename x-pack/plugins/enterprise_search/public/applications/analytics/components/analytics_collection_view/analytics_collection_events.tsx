@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,9 +18,25 @@ interface AnalyticsCollectionEventsProps {
   collection: AnalyticsCollection;
 }
 
+const EVENTS_POLLING_INTERVAL = 30 * 1000;
+
 export const AnalyticsCollectionEvents: React.FC<AnalyticsCollectionEventsProps> = ({
   collection,
 }) => {
+  // Since EntSearchLogStream component doesn't have a poll interval property
+  // but gets reloaded on every filter or query change, it was decided to introduce
+  // a mutable filters state and reset it every 30 seconds to trigger polling
+
+  const [filters, setFilters] = useState([]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFilters([]);
+    }, EVENTS_POLLING_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <EntSearchLogStream
       logView={{
@@ -53,6 +69,7 @@ export const AnalyticsCollectionEvents: React.FC<AnalyticsCollectionEventsProps>
         },
       ]}
       query={`_index: logs-elastic_analytics.events-${collection.name}*`}
+      filters={filters}
     />
   );
 };

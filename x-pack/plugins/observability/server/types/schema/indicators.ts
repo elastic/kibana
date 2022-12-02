@@ -43,9 +43,9 @@ const kqlCustomIndicatorSchema = t.type({
   type: kqlCustomIndicatorTypeSchema,
   params: t.type({
     index: t.string,
-    query_filter: t.string,
-    numerator: t.string,
-    denominator: t.string,
+    filter: t.string,
+    good: t.string,
+    total: t.string,
   }),
 });
 
