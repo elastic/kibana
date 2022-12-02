@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { css } from '@emotion/react';
 import { PhraseFilter } from '@kbn/es-query';
@@ -19,18 +19,34 @@ interface Props {
   row: TermsExplorerResponseRow;
   columns: string[];
   expandedColumnName?: string;
+  expandedRows: Array<() => void>;
+  setExpandedRows: (deselectRows: Array<() => void>) => void;
   termsExplorerTableProps: TermsExplorerTableProps;
 }
 
 export const TermsExplorerTableRow = ({
-  termsExplorerTableProps,
   row,
   columns,
+  expandedRows,
+  setExpandedRows,
   expandedColumnName,
+  termsExplorerTableProps,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const [expandedColumn, setExpandedColumn] = useState<string | undefined>(expandedColumnName);
+
+  const toggleColumn = useCallback(
+    (newExpandedColumn?: string) => {
+      setExpandedColumn(newExpandedColumn);
+      if (newExpandedColumn) {
+        setExpandedRows([...[...expandedRows].slice(0, -1), () => setExpandedColumn(undefined)]);
+      } else {
+        setExpandedRows([...expandedRows].slice(0, -1));
+      }
+    },
+    [setExpandedColumn, setExpandedRows, expandedRows]
+  );
 
   const expandedRowStyle = useMemo(
     () => css`
@@ -66,7 +82,7 @@ export const TermsExplorerTableRow = ({
               iconType={isSelectedField ? 'arrowUp' : 'arrowDown'}
               aria-expanded={isSelectedField}
               onClickAriaLabel="Expand row"
-              onClick={() => setExpandedColumn(isSelectedField ? undefined : column)}
+              onClick={() => toggleColumn(isSelectedField ? undefined : column)}
               css={css`
                 font-weight: ${isSelectedField ? '800' : '400'};
               `}

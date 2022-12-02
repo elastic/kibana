@@ -41,7 +41,7 @@ export const TermsExplorerTab: React.FC<
     (async () => {
       if (!collapseOnColumn) {
         let fieldWithMinCardinality = {
-          field: 'n/a',
+          field: '',
           cardinality: Number.MAX_SAFE_INTEGER,
         };
         for (const columnName of props.columns) {

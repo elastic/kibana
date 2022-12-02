@@ -7,7 +7,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { Filter, Query, AggregateQuery, buildEsQuery, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -78,6 +78,7 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
   const [summaryRow, setSummaryRow] = useState<TermsExplorerResponse['summaryRow'] | undefined>();
   const [totalRows, setTotalRows] = useState<number>(0);
   const [currentFrom, setCurrentFrom] = useState<number>(0);
+  const [expandedRows, setExpandedRows] = useState<Array<() => void>>([]);
 
   const renderHeaderCells = () => {
     return columns.map((column) => (
@@ -88,6 +89,12 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
   };
 
   const pageSize = 10;
+  const collapseAllRows = useCallback(() => {
+    for (const collapseRow of expandedRows) {
+      collapseRow();
+    }
+    setExpandedRows([]);
+  }, [expandedRows, setExpandedRows]);
 
   useEffect(() => {
     const timeFilter = timeRange ? timeService.createFilter(dataView, timeRange) : undefined;
@@ -141,7 +148,13 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
 
     for (const row of Object.values(rows)) {
       renderedRows.push(
-        <TermsExplorerTableRow row={row} columns={columns} termsExplorerTableProps={tableProps} />
+        <TermsExplorerTableRow
+          row={row}
+          columns={columns}
+          termsExplorerTableProps={tableProps}
+          expandedRows={expandedRows}
+          setExpandedRows={setExpandedRows}
+        />
       );
     }
 
@@ -219,17 +232,21 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
           iconType="arrowStart"
           display="empty"
           disabled={currentFrom === 0}
-          onClick={() => setCurrentFrom(0)}
+          onClick={() => {
+            setCurrentFrom(0);
+            collapseAllRows();
+          }}
         />
         <EuiButtonIcon
           iconType="arrowLeft"
           display="empty"
           disabled={currentFrom === 0}
-          onClick={() =>
+          onClick={() => {
             setCurrentFrom((from) => {
               return from - pageSize;
-            })
-          }
+            });
+            collapseAllRows();
+          }}
         />
         <EuiText size="xs">
           <p>
@@ -240,11 +257,12 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
           iconType="arrowRight"
           display="empty"
           disabled={currentFrom + pageSize >= totalRows}
-          onClick={() =>
+          onClick={() => {
             setCurrentFrom((from) => {
               return from + pageSize;
-            })
-          }
+            });
+            collapseAllRows();
+          }}
         />
       </div>
       <EuiSpacer size="xl" />
