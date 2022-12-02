@@ -260,7 +260,7 @@ export const QueryBarTopRow = React.memo(
                 title: i18n.translate(
                   'unifiedSearch.queryBarTopRow.customQuickSelectDatePickerPanelTitle',
                   {
-                    defaultMessage: 'Time range of documents in the data view',
+                    defaultMessage: 'Time range of the data view documents',
                   }
                 ),
                 content: (
