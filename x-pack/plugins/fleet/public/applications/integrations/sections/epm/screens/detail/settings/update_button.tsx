@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,7 +24,6 @@ import type { CoreTheme } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import type {
-  GetAgentPoliciesResponse,
   PackageInfo,
   UpgradePackagePolicyDryRunResponse,
   PackagePolicy,
@@ -32,13 +31,13 @@ import type {
 import { InstallStatus } from '../../../../../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../../constants';
 import {
-  sendGetAgentPolicies,
   useInstallPackage,
   useGetPackageInstallStatus,
   useStartServices,
   useAuthz,
   useLink,
   useUpgradePackagePoliciesMutation,
+  useGetAgentPoliciesQuery,
 } from '../../../../../hooks';
 
 interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'version'> {
@@ -92,26 +91,15 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
 
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState<boolean>(false);
   const [upgradePackagePolicies, setUpgradePackagePolicies] = useState<boolean>(true);
-  const [agentPolicyData, setAgentPolicyData] = useState<GetAgentPoliciesResponse | null>();
 
-  useEffect(() => {
-    const fetchAgentPolicyData = async () => {
-      if (packagePolicyIds && packagePolicyIds.length > 0) {
-        const { data } = await sendGetAgentPolicies({
-          perPage: SO_SEARCH_LIMIT,
-          page: 1,
-          // Fetch all agent policies that include one of the eligible package policies
-          kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:${packagePolicyIds
-            .map((id) => `"${id}"`)
-            .join(' or ')}`,
-        });
-
-        setAgentPolicyData(data);
-      }
-    };
-
-    fetchAgentPolicyData();
-  }, [packagePolicyIds]);
+  const { data: agentPolicyData } = useGetAgentPoliciesQuery({
+    perPage: SO_SEARCH_LIMIT,
+    page: 1,
+    // Fetch all agent policies that include one of the eligible package policies
+    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:${packagePolicyIds
+      .map((id) => `"${id}"`)
+      .join(' or ')}`,
+  });
 
   const packagePolicyCount = useMemo(() => packagePolicyIds.length, [packagePolicyIds]);
 
