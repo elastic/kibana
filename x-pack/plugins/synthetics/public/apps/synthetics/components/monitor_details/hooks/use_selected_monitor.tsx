@@ -21,12 +21,14 @@ export const useSelectedMonitor = () => {
   const { monitorId } = useParams<{ monitorId: string }>();
   const monitorsList = useSelector(selectEncryptedSyntheticsSavedMonitors);
   const { loading: monitorListLoading } = useSelector(selectMonitorListState);
+
   const monitorFromList = useMemo(
     () => monitorsList.find((monitor) => monitor[ConfigKey.CONFIG_ID] === monitorId) ?? null,
     [monitorId, monitorsList]
   );
-  const { lastRefresh } = useSyntheticsRefreshContext();
-  const { syntheticsMonitor, syntheticsMonitorLoading } = useSelector(selectorMonitorDetailsState);
+  const { lastRefresh, refreshInterval } = useSyntheticsRefreshContext();
+  const { syntheticsMonitor, syntheticsMonitorLoading, syntheticsMonitorDispatchedAt } =
+    useSelector(selectorMonitorDetailsState);
   const dispatch = useDispatch();
 
   const isMonitorFromListValid =
@@ -46,8 +48,23 @@ export const useSelectedMonitor = () => {
   }, [dispatch, monitorId, availableMonitor, syntheticsMonitorLoading]);
 
   useEffect(() => {
-    dispatch(getMonitorAction.get({ monitorId }));
-  }, [dispatch, monitorId, lastRefresh]);
+    // Only perform periodic refresh if the last dispatch was earlier enough
+    if (
+      !syntheticsMonitorLoading &&
+      !monitorListLoading &&
+      Date.now() - syntheticsMonitorDispatchedAt > refreshInterval
+    ) {
+      dispatch(getMonitorAction.get({ monitorId }));
+    }
+  }, [
+    dispatch,
+    lastRefresh,
+    refreshInterval,
+    monitorId,
+    monitorListLoading,
+    syntheticsMonitorLoading,
+    syntheticsMonitorDispatchedAt,
+  ]);
 
   return {
     monitor: availableMonitor,

@@ -93,6 +93,7 @@ const MlJobDescriptionComponent: React.FC<{
   });
 
   const jobIdSpan = <span data-test-subj="machineLearningJobId">{jobId}</span>;
+  const isStarted = isJobStarted(job.jobState, job.datafeedState);
 
   const handleJobStateChange = useCallback(
     async (_, latestTimestampMs: number, enable: boolean) => {
@@ -102,7 +103,7 @@ const MlJobDescriptionComponent: React.FC<{
     [enableDatafeed, job, refreshJob]
   );
 
-  return job != null ? (
+  return (
     <Wrapper>
       <div>
         <JobLink href={jobUrl} target="_blank">
@@ -122,12 +123,10 @@ const MlJobDescriptionComponent: React.FC<{
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ marginLeft: '0' }}>
-          {i18n.ML_RUN_JOB_LABEL}
+          {isStarted ? i18n.ML_STOP_JOB_LABEL : i18n.ML_RUN_JOB_LABEL}
         </EuiFlexItem>
       </EuiFlexGroup>
     </Wrapper>
-  ) : (
-    jobIdSpan
   );
 };
 

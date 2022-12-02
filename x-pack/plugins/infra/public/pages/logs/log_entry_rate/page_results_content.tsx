@@ -10,7 +10,7 @@ import type { Query } from '@kbn/es-query';
 import moment from 'moment';
 import { stringify } from 'query-string';
 import React, { useCallback, useMemo } from 'react';
-import { encode, RisonValue } from 'rison-node';
+import { encode } from '@kbn/rison';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
@@ -112,7 +112,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
       const params = {
         logPosition: encode({
           end: moment(timeRange.value.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-          position: timeKey as RisonValue,
+          position: timeKey,
           start: moment(timeRange.value.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
           streamLive: false,
         }),

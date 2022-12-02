@@ -3785,6 +3785,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/rison@link:bazel-bin/packages/kbn-rison":
+  version "0.0.0"
+  uid ""
+
 "@kbn/rule-data-utils@link:bazel-bin/packages/kbn-rule-data-utils":
   version "0.0.0"
   uid ""
@@ -3901,6 +3905,38 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-file-context@link:bazel-bin/packages/shared-ux/file/context":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-file-image-mocks@link:bazel-bin/packages/shared-ux/file/image/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-file-image@link:bazel-bin/packages/shared-ux/file/image/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-file-mocks@link:bazel-bin/packages/shared-ux/file/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-file-picker@link:bazel-bin/packages/shared-ux/file/file_picker/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-file-types@link:bazel-bin/packages/shared-ux/file/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-file-upload@link:bazel-bin/packages/shared-ux/file/file_upload/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-file-util@link:bazel-bin/packages/shared-ux/file/util":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-link-redirect-app-mocks@link:bazel-bin/packages/shared-ux/link/redirect_app/mocks":
   version "0.0.0"
   uid ""
@@ -3986,6 +4022,10 @@
   uid ""
 
 "@kbn/shared-ux-page-solution-nav@link:bazel-bin/packages/shared-ux/page/solution_nav":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-prompt-not-found@link:bazel-bin/packages/shared-ux/prompt/not_found":
   version "0.0.0"
   uid ""
 
@@ -4145,6 +4185,36 @@
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz#b2ac626d6cb9c8718ab459166d4bb405b8ffa78b"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
+
+"@lmdb/lmdb-darwin-arm64@2.6.9":
+  version "2.6.9"
+  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-darwin-arm64/-/lmdb-darwin-arm64-2.6.9.tgz#4b84bb0ad71e78472332920c9cf8603ea3dad0bc"
+  integrity sha512-QxyheKfTP9k5ZVAiddCqGUtp2AD3/BMgYfski96iIbFH0skPFO+MYARMGZuemTgyM9uieT+5oKj4FjigWplpWg==
+
+"@lmdb/lmdb-darwin-x64@2.6.9":
+  version "2.6.9"
+  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-darwin-x64/-/lmdb-darwin-x64-2.6.9.tgz#28b191a9f7a1f30462d8d179cd05598fa66ebbfc"
+  integrity sha512-zJ1oUepZMaqiujvWeWJRG5VHXBS3opJnjAzbd4vTVsQFT0t5rbPhHgAJ2ruR9rVrb2V1BINJZuwpjhIOg9fLCQ==
+
+"@lmdb/lmdb-linux-arm64@2.6.9":
+  version "2.6.9"
+  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-linux-arm64/-/lmdb-linux-arm64-2.6.9.tgz#274dfe11209a70c059cb55c72026c24903dde3e1"
+  integrity sha512-KZRet8POwKowbYZqrRqdYJ+B6l+7cWG18vMCe2sgOSuE41sEMpfRQ1mKcolt3fsr0KVbuP63aPG+dwi0wGpX9w==
+
+"@lmdb/lmdb-linux-arm@2.6.9":
+  version "2.6.9"
+  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-linux-arm/-/lmdb-linux-arm-2.6.9.tgz#7bacd104067e7dbb1bb67c907c1bc642e2d2ac96"
+  integrity sha512-Umw+ikxbsYZHHqr8eMycmApj6IIZCK4k1rp5/pqqx9FvAaPv4/Y63owiMLoKfipjel0YPaNyvSeXAJK3l/8Pbw==
+
+"@lmdb/lmdb-linux-x64@2.6.9":
+  version "2.6.9"
+  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-linux-x64/-/lmdb-linux-x64-2.6.9.tgz#d37b25c9b553c5d5e66055a64d118e3fd42557d9"
+  integrity sha512-11xFQ4kCIPGnYULcfkW4SIMIY1sukA4DHez62DKvYn+tLr4AB1o9jm1Jk6bisKFh5Cql+JUr7klHxeIuxvGZdg==
+
+"@lmdb/lmdb-win32-x64@2.6.9":
+  version "2.6.9"
+  resolved "https://registry.yarnpkg.com/@lmdb/lmdb-win32-x64/-/lmdb-win32-x64-2.6.9.tgz#bf8e647dabd8b672744315f5df3e363b5987a463"
+  integrity sha512-qECZ+1j3PSarYeCmJlYlrxq3TB7S020ICrYmpxyQyphbRiMI9I1Bw4t+vPrMAEKsTqB8UaOzBp21YWUpsiCBfA==
 
 "@loaders.gl/core@2.3.1":
   version "2.3.1"
@@ -5965,33 +6035,33 @@
   dependencies:
     defer-to-connect "^2.0.0"
 
-"@tanstack/match-sorter-utils@8.1.1", "@tanstack/match-sorter-utils@^8.1.1":
+"@tanstack/match-sorter-utils@8.1.1":
   version "8.1.1"
   resolved "https://registry.yarnpkg.com/@tanstack/match-sorter-utils/-/match-sorter-utils-8.1.1.tgz#895f407813254a46082a6bbafad9b39b943dc834"
   integrity sha512-IdmEekEYxQsoLOR0XQyw3jD1GujBpRRYaGJYQUw1eOT1eUugWxdc7jomh1VQ1EKHcdwDLpLaCz/8y4KraU4T9A==
   dependencies:
     remove-accents "0.4.2"
 
-"@tanstack/query-core@4.13.4":
-  version "4.13.4"
-  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-4.13.4.tgz#77043e066586359eca40859803acc4a44e2a2dc8"
-  integrity sha512-DMIy6tgGehYoRUFyoR186+pQspOicyZNSGvBWxPc2CinHjWOQ7DPnGr9zmn/kE9xK4Zd3GXd25Nj3X20+TF6Lw==
+"@tanstack/query-core@4.18.0":
+  version "4.18.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-4.18.0.tgz#3e166ce319fd869c668536384ae94d174ea46a59"
+  integrity sha512-PP4mG8MD08sq64RZCqMfXMYfaj7+Oulwg7xZ/fJoEOdTZNcPIgaOkHajZvUBsNLbi/0ViMvJB4cFkL2Jg2WPbw==
 
-"@tanstack/react-query-devtools@^4.13.4":
-  version "4.13.4"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query-devtools/-/react-query-devtools-4.13.4.tgz#d631961fbb0803d2246cdf39dd2e35f443a88b6e"
-  integrity sha512-G0ZG+ZUk8ktJoi6Mzn4U7LnSOVbVFPyBJGB3dX4+SukkcKhWmErsYv2H1plRCL+V01Cg+dOg9RDfGYqsNbJszQ==
+"@tanstack/react-query-devtools@^4.16.1":
+  version "4.18.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query-devtools/-/react-query-devtools-4.18.0.tgz#3c2d2295d11940a2c3cca356d247c6dd8443419c"
+  integrity sha512-L51D0AUqLTs7J+W7RypJrUEKXsS0y0eEhXAgO+rhcZH6i8jVrKLhcNZStQSnE+UpZqPm73uxt2e8TJgYfzz0nw==
   dependencies:
-    "@tanstack/match-sorter-utils" "^8.1.1"
+    "@tanstack/match-sorter-utils" "8.1.1"
     superjson "^1.10.0"
     use-sync-external-store "^1.2.0"
 
-"@tanstack/react-query@^4.13.4":
-  version "4.13.4"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.13.4.tgz#6264e5513245a8cbec1195ba6ed9647d9230a520"
-  integrity sha512-OHkUulPorHDiWNcUrcSUNxedeZ28z9kCKRG3JY+aJ8dFH/o4fixtac4ys0lwCP/n/VL1XMPnu+/CXEhbXHyJZA==
+"@tanstack/react-query@^4.16.1":
+  version "4.18.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.18.0.tgz#d9c661364b383fca79f5384cb97b445354068faa"
+  integrity sha512-s1kdbGMdVcfUIllzsHUqVUdktBT5uuIRgnvrqFNLjl9TSOXEoBSDrhjsGjao0INQZv8cMpQlgOh3YH9YtN6cKw==
   dependencies:
-    "@tanstack/query-core" "4.13.4"
+    "@tanstack/query-core" "4.18.0"
     use-sync-external-store "^1.2.0"
 
 "@testim/chrome-version@^1.1.3":
@@ -7148,10 +7218,10 @@
     "@types/node" "*"
     form-data "^2.3.3"
 
-"@types/node-forge@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-1.3.0.tgz#c655e951e0fb5c4b53c9f4746c2128d4f93002fd"
-  integrity sha512-yUsIEHG3d81E2c+akGjZAMdVcjbfqMzpMjvpebnTO7pEGfqxCtBzpRV52kR1RETtwJ9fHkLdEjtaM+uMKWpwFA==
+"@types/node-forge@^1.3.1":
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-1.3.1.tgz#49e44432c306970b4e900c3b214157c480af19fa"
+  integrity sha512-hvQ7Wav8I0j9amPXJtGqI/Yx70zeF62UKlAYq8JPm0nHzjKKzZvo9iR3YI2MiOghZRlOI+tQ2f6D+G6vVf4V2Q==
   dependencies:
     "@types/node" "*"
 
@@ -18524,17 +18594,23 @@ listr@^0.14.1:
     p-map "^2.0.0"
     rxjs "^6.3.3"
 
-lmdb-store@^1:
-  version "1.6.11"
-  resolved "https://registry.yarnpkg.com/lmdb-store/-/lmdb-store-1.6.11.tgz#801da597af8c7a01c81f87d5cc7a7497e381236d"
-  integrity sha512-hIvoGmHGsFhb2VRCmfhodA/837ULtJBwRHSHKIzhMB7WtPH6BRLPsvXp1MwD3avqGzuZfMyZDUp3tccLvr721Q==
+lmdb@^2.6.9:
+  version "2.6.9"
+  resolved "https://registry.yarnpkg.com/lmdb/-/lmdb-2.6.9.tgz#aa782ec873bcf70333b251eede9e711819ef5765"
+  integrity sha512-rVA3OchNoKxoD2rYhtc9nooqbJmId+vvfPzTWhanRPhdVr0hbgnF9uB9ZEHFU2lEeYVdh83Pt2H6DudeWuz+JA==
   dependencies:
-    nan "^2.14.2"
-    node-gyp-build "^4.2.3"
-    ordered-binary "^1.0.0"
-    weak-lru-cache "^1.0.0"
+    msgpackr "1.7.2"
+    node-addon-api "^4.3.0"
+    node-gyp-build-optional-packages "5.0.3"
+    ordered-binary "^1.4.0"
+    weak-lru-cache "^1.2.2"
   optionalDependencies:
-    msgpackr "^1.4.7"
+    "@lmdb/lmdb-darwin-arm64" "2.6.9"
+    "@lmdb/lmdb-darwin-x64" "2.6.9"
+    "@lmdb/lmdb-linux-arm" "2.6.9"
+    "@lmdb/lmdb-linux-arm64" "2.6.9"
+    "@lmdb/lmdb-linux-x64" "2.6.9"
+    "@lmdb/lmdb-win32-x64" "2.6.9"
 
 load-json-file@^1.0.0:
   version "1.1.0"
@@ -19880,7 +19956,7 @@ ms@2.1.3, ms@^2.0.0, ms@^2.1.1, ms@^2.1.3:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
   integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
-msgpackr-extract@^2.2.0:
+msgpackr-extract@^2.1.2:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/msgpackr-extract/-/msgpackr-extract-2.2.0.tgz#4bb749b58d9764cfdc0d91c7977a007b08e8f262"
   integrity sha512-0YcvWSv7ZOGl9Od6Y5iJ3XnPww8O7WLcpYMDwX+PAA/uXLDtyw94PJv9GLQV/nnp3cWlDhMoyKZIQLrx33sWog==
@@ -19894,12 +19970,12 @@ msgpackr-extract@^2.2.0:
     "@msgpackr-extract/msgpackr-extract-linux-x64" "2.2.0"
     "@msgpackr-extract/msgpackr-extract-win32-x64" "2.2.0"
 
-msgpackr@^1.4.7:
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/msgpackr/-/msgpackr-1.8.0.tgz#6cf213e88f04c5a358c61085a42a4dbe5542de44"
-  integrity sha512-1Cos3r86XACdjLVY4CN8r72Cgs5lUzxSON6yb81sNZP9vC9nnBrEbu1/ldBhuR9BKejtoYV5C9UhmYUvZFJSNQ==
+msgpackr@1.7.2:
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/msgpackr/-/msgpackr-1.7.2.tgz#68d6debf5999d6b61abb6e7046a689991ebf7261"
+  integrity sha512-mWScyHTtG6TjivXX9vfIy2nBtRupaiAj0HQ2mtmpmYujAmqZmaaEVPaSZ1NKLMvicaMLFzEaMk0ManxMRg8rMQ==
   optionalDependencies:
-    msgpackr-extract "^2.2.0"
+    msgpackr-extract "^2.1.2"
 
 multicast-dns@^7.2.5:
   version "7.2.5"
@@ -19937,7 +20013,7 @@ mute-stream@0.0.8:
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.8.tgz#1630c42b2251ff81e2a283de96a5497ea92e5e0d"
   integrity sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==
 
-nan@^2.13.2, nan@^2.14.2, nan@^2.15.0:
+nan@^2.13.2, nan@^2.15.0:
   version "2.15.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.15.0.tgz#3f34a473ff18e15c1b5626b62903b5ad6e665fee"
   integrity sha512-8ZtvEnA2c5aYCZYd1cvgdnU6cqwixRoYg70xPLWUws5ORTa/lnw+u4amixRS/Ac5U5mQVgp9pnlSUnbNWFaWZQ==
@@ -20107,6 +20183,11 @@ node-addon-api@^3.0.0:
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-3.2.1.tgz#81325e0a2117789c0128dab65e7e38f07ceba161"
   integrity sha512-mmcei9JghVNDYydghQmeDX8KoAm0FAiYyIcUt/N4nhyAipB17pllZQDOJD2fotxABnt4Mdz+dKTO7eftLg4d0A==
 
+node-addon-api@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-4.3.0.tgz#52a1a0b475193e0928e98e0426a0d1254782b77f"
+  integrity sha512-73sE9+3UaLYYFmDsFZnqCInzPyh3MqIwZO9cw58yIqAZhONrrabrYyYe3TuIqtIiOuTXVhsGau8hcrhhwSsDIQ==
+
 node-addon-api@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-5.0.0.tgz#7d7e6f9ef89043befdb20c1989c905ebde18c501"
@@ -20155,7 +20236,7 @@ node-gyp-build-optional-packages@5.0.3:
   resolved "https://registry.yarnpkg.com/node-gyp-build-optional-packages/-/node-gyp-build-optional-packages-5.0.3.tgz#92a89d400352c44ad3975010368072b41ad66c17"
   integrity sha512-k75jcVzk5wnnc/FMxsf4udAoTEUv2jY3ycfdSd3yWu6Cnd1oee6/CfZJApyscA4FJOmdoixWwiwOyf16RzD5JA==
 
-node-gyp-build@^4.2.2, node-gyp-build@^4.2.3:
+node-gyp-build@^4.2.2:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.5.0.tgz#7a64eefa0b21112f89f58379da128ac177f20e40"
   integrity sha512-2iGbaQBV+ITgCz76ZEjmhUKAKVf7xfY1sRl4UiKQspfZMH2h06SyhNsnSVy50cwkFQDGLyif6m/6uFXHkOZ6rg==
@@ -20774,7 +20855,7 @@ ora@^5.4.1:
     strip-ansi "^6.0.0"
     wcwidth "^1.0.1"
 
-ordered-binary@^1.0.0:
+ordered-binary@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/ordered-binary/-/ordered-binary-1.4.0.tgz#6bb53d44925f3b8afc33d1eed0fa15693b211389"
   integrity sha512-EHQ/jk4/a9hLupIKxTfUsQRej1Yd/0QLQs3vGvIqg5ZtCYSzNhkzHoZc7Zf4e4kUlDaC3Uw8Q/1opOLNN2OKRQ==
@@ -22615,10 +22696,10 @@ react-grid-layout@^1.3.4:
     react-draggable "^4.0.0"
     react-resizable "^3.0.4"
 
-react-hook-form@^7.39.1:
-  version "7.39.1"
-  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.39.1.tgz#ded87d4b3f6692d1f9219515f78ca282b6e1ebf7"
-  integrity sha512-MiF9PCILN5KulhSGbnjohMiTOrB47GerDTichMNP0y2cPUu1GTRFqbunOxCE9N1499YTLMV/ne4gFzqCp1rxrQ==
+react-hook-form@^7.39.5:
+  version "7.39.7"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.39.7.tgz#8eabf2dbb9fce5baccfa60f401f6ef99c4e17fb4"
+  integrity sha512-RT0NE1uW1bY3nAuMdzfqHrpv2+sICVFaxBOvNJsCva4if2sxPxcyJy/CSqU56UXqAdRg724CNDhjMYPSHSF3rg==
 
 react-input-autosize@^3.0.0:
   version "3.0.0"
@@ -27522,7 +27603,7 @@ wcwidth@^1.0.1:
   dependencies:
     defaults "^1.0.3"
 
-weak-lru-cache@^1.0.0:
+weak-lru-cache@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/weak-lru-cache/-/weak-lru-cache-1.2.2.tgz#fdbb6741f36bae9540d12f480ce8254060dccd19"
   integrity sha512-DEAoo25RfSYMuTGc9vPJzZcZullwIqRDSI9LOy+fkCJPi6hykCnfKaXTuPBDuXAUcqHXyOgFtHNp/kB2FjYHbw==
