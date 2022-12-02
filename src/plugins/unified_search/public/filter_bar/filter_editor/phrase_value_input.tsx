@@ -14,7 +14,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
-import { TruncatedLabel } from '../../filters_builder/filter_item/truncated_label';
+import { TruncatedLabel } from './truncated_label';
 
 interface PhraseValueInputProps extends PhraseSuggestorProps {
   value?: string;

@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { getFilterableFields } from '../../filter_bar/filter_editor';
 import { FiltersBuilderContextType } from '../context';
-import { TruncatedLabel } from './truncated_label';
+import { TruncatedLabel } from '../../filter_bar/filter_editor';
 
 const DEFAULT_COMBOBOX_WIDTH = 205;
 const COMBOBOX_PADDINGS = 100;

@@ -13,7 +13,7 @@ import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
-import { TruncatedLabel } from '../../filters_builder/filter_item/truncated_label';
+import { TruncatedLabel } from './truncated_label';
 
 export interface PhrasesValuesInputProps extends PhraseSuggestorProps {
   values?: string[];
