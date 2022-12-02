@@ -39,6 +39,7 @@ export const DeleteMonitor = ({
 }) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [fetchStatus, setFetchStatus] = useState(FETCH_STATUS.PENDING);
 
   const onConfirmDelete = () => {
     setIsDeleting(true);
@@ -60,10 +61,11 @@ export const DeleteMonitor = ({
     if (!isDeleting) {
       return;
     }
-    if (status === FETCH_STATUS.SUCCESS || status === FETCH_STATUS.FAILURE) {
-      setIsDeleting(false);
+    if (isDeleting && fetchStatus !== status) {
+      setFetchStatus(status);
+      return;
     }
-    if (status === FETCH_STATUS.FAILURE) {
+    if (fetchStatus === FETCH_STATUS.FAILURE) {
       kibanaService.toasts.addDanger(
         {
           title: toMountPoint(
@@ -72,7 +74,9 @@ export const DeleteMonitor = ({
         },
         { toastLifeTimeMs: 3000 }
       );
-    } else if (status === FETCH_STATUS.SUCCESS) {
+      setFetchStatus(FETCH_STATUS.PENDING);
+      setIsDeleting(false);
+    } else if (fetchStatus === FETCH_STATUS.SUCCESS) {
       onUpdate();
       kibanaService.toasts.addSuccess(
         {
@@ -90,8 +94,10 @@ export const DeleteMonitor = ({
         },
         { toastLifeTimeMs: 3000 }
       );
+      setFetchStatus(FETCH_STATUS.PENDING);
+      setIsDeleting(false);
     }
-  }, [setIsDeleting, onUpdate, status, name, isDeleting]);
+  }, [setIsDeleting, onUpdate, status, name, isDeleting, fetchStatus]);
 
   const destroyModal = (
     <EuiConfirmModal
