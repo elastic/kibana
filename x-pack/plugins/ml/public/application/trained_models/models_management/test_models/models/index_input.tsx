@@ -103,7 +103,15 @@ export function useIndexInput({ inferrer }: { inferrer: InferrerType }) {
   const [selectedDataViewId, setSelectedDataViewId] = useState<string | undefined>(undefined);
   const [selectedDataView, setSelectedDataView] = useState<DataView | null>(null);
   const [fieldNames, setFieldNames] = useState<Array<{ value: string; text: string }>>([]);
-  const [selectedField, setSelectedField] = useState<string | undefined>(undefined);
+  const [selectedField, setSelectedFieldInternal] = useState<string | undefined>(undefined);
+
+  const setSelectedField = useCallback(
+    (fieldName: string) => {
+      setSelectedFieldInternal(fieldName);
+      inferrer.setInputField(fieldName);
+    },
+    [inferrer]
+  );
 
   useEffect(
     function loadDataViewListItems() {
@@ -122,7 +130,7 @@ export function useIndexInput({ inferrer }: { inferrer: InferrerType }) {
     function loadSelectedDataView() {
       inferrer.reset();
       setFieldNames([]);
-      setSelectedField(undefined);
+      setSelectedFieldInternal(undefined);
       if (selectedDataViewId !== undefined) {
         dataViews.get(selectedDataViewId).then((dv) => setSelectedDataView(dv));
       }
@@ -177,11 +185,10 @@ export function useIndexInput({ inferrer }: { inferrer: InferrerType }) {
         if (tempFieldNames.length === 1) {
           const fieldName = tempFieldNames[0].value;
           setSelectedField(fieldName);
-          inferrer.setInputField(fieldName);
         }
       }
     },
-    [selectedDataView, inferrer]
+    [selectedDataView, inferrer, setSelectedField]
   );
 
   useEffect(
@@ -193,6 +200,7 @@ export function useIndexInput({ inferrer }: { inferrer: InferrerType }) {
 
   function reloadExamples() {
     inferrer.reset();
+    inferrer.setInputField(selectedField);
     loadExamples();
   }
 
