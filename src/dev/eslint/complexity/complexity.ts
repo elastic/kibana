@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { chain, map, set } from 'lodash';
+import { chain, flow, fromPairs, map, mergeWith, set } from 'lodash';
 import { ESLint, Linter, Rule } from 'eslint';
+import { Lookup } from './lookup';
 
 enum ComplexityRule {
   Complexity = 'complexity',
@@ -19,7 +20,7 @@ enum ComplexityRule {
   MaxStatements = 'max-statements',
 }
 
-export interface ComplexityReport {
+interface ComplexityMetrics {
   complexity: number;
   depth: number;
   lines: number;
@@ -32,8 +33,15 @@ export interface ComplexityReport {
 interface ComplexityReportMapping {
   rule: ComplexityRule;
   data: string;
-  metric: keyof ComplexityReport;
+  metric: keyof ComplexityMetrics;
 }
+
+interface ComplexityReportGroup {
+  name: string;
+  path: string;
+}
+
+type ComplexityReport = Record<string, ComplexityMetrics>;
 
 export class ComplexityReportGenerator {
   private static mappings: ComplexityReportMapping[] = [
@@ -50,9 +58,11 @@ export class ComplexityReportGenerator {
   private linter = new Linter();
   private count!: ComplexityReport;
   private total!: ComplexityReport;
+  private groups!: ComplexityReportGroup[];
 
-  constructor(threshold: Partial<ComplexityReport> = {}) {
+  constructor(private lookup: Lookup, threshold: Partial<ComplexityMetrics> = {}) {
     this.esLint = new ESLint({
+      errorOnUnmatchedPattern: false,
       overrideConfig: {
         noInlineConfig: true,
         rules: {
@@ -95,7 +105,14 @@ export class ComplexityReportGenerator {
       });
   }
 
-  private process({ id }: Rule.RuleContext, message: Rule.ReportDescriptor) {
+  private async initialize() {
+    this.count = {};
+    this.total = {};
+    this.groups = await this.lookup.lookup();
+  }
+
+  private process(context: Rule.RuleContext, message: Rule.ReportDescriptor) {
+    const { id } = context;
     const mapping = ComplexityReportGenerator.mappings.find(({ rule }) => rule === id);
     if (!mapping) {
       return;
@@ -104,35 +121,41 @@ export class ComplexityReportGenerator {
       return;
     }
 
-    this.total[mapping.metric] += +message.data[mapping.data];
-    this.count[mapping.metric]++;
+    const file = context.getFilename();
+    const group = this.groups.find(({ path }) => file.startsWith(path))?.name ?? '';
+
+    if (!this.count[group] || !this.total[group]) {
+      this.count[group] = chain(ComplexityReportGenerator.mappings)
+        .map(({ metric }) => [metric, 0])
+        .fromPairs()
+        .value() as ComplexityMetrics;
+      this.total[group] = { ...this.count[group] } as ComplexityMetrics;
+    }
+
+    this.total[group][mapping.metric] += +message.data[mapping.data];
+    this.count[group][mapping.metric]++;
   }
 
-  private clear() {
-    this.count = chain(ComplexityReportGenerator.mappings)
-      .map(({ metric }) => [metric, 0])
-      .fromPairs()
-      .value() as typeof this.count;
-    this.total = { ...this.count } as typeof this.total;
-  }
+  private finalize() {
+    const getAverage = flow(
+      (total: ComplexityMetrics, count: ComplexityMetrics) =>
+        map(ComplexityReportGenerator.mappings, ({ metric }) => [
+          metric,
+          count[metric] ? total[metric] / count[metric] : 0,
+        ]),
+      fromPairs
+    );
 
-  private calculate() {
-    return chain(ComplexityReportGenerator.mappings)
-      .map(({ metric }) => [
-        metric,
-        this.count[metric] ? this.total[metric] / this.count[metric] : 0,
-      ])
-      .fromPairs()
-      .value() as ComplexityReport;
+    return mergeWith(this.total, this.count, getAverage) as ComplexityReport;
   }
 
   async generate(patterns: string | string[]): Promise<ComplexityReport> {
     const restore = this.patch();
     try {
-      this.clear();
+      await this.initialize();
       await this.esLint.lintFiles(patterns);
 
-      return this.calculate();
+      return this.finalize();
     } finally {
       restore();
     }

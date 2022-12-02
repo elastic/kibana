@@ -6,8 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { castArray, chain, isEmpty, map, startCase } from 'lodash';
-import { filter as filterBy } from 'lodash/fp';
+import {
+  castArray,
+  chain,
+  find,
+  flip,
+  flow,
+  isEmpty,
+  map,
+  mapValues,
+  round,
+  startCase,
+} from 'lodash';
+import { filter as filterBy, mapKeys as mapKeysWith, mapValues as mapValuesWith } from 'lodash/fp';
 import { run } from '@kbn/dev-cli-runner';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { ComplexityReportGenerator } from './complexity';
@@ -17,7 +28,8 @@ export function generateComplexityReport(): Promise<void> {
   return run(
     async ({ log, flags }) => {
       const lookup = new Lookup();
-      const complexityReportGenerator = new ComplexityReportGenerator({ complexity: 1 });
+      const complexityReportGenerator = new ComplexityReportGenerator(lookup, { complexity: 1 });
+      const reporter = CiStatsReporter.fromEnv(log);
 
       const filter = chain(flags)
         .pick('owner', 'package', 'plugin')
@@ -33,43 +45,33 @@ export function generateComplexityReport(): Promise<void> {
         .uniq()
         .value() as string[];
 
-      const table = {} as Record<string, Record<string, number>>;
-      const reporter = CiStatsReporter.fromEnv(log);
-
-      for (const { name, owner, path } of [
+      const enitities = [
         ...(isEmpty(filter) && isEmpty(pattern) ? await lookup.lookup() : []),
         ...(!isEmpty(filter) ? await lookup.lookup(filter) : []),
-        ...(!isEmpty(pattern) ? [{ name: '', path: pattern }] : []),
-      ]) {
-        log.debug(`Gathering metrics for '${castArray(path).join("', '")}'.`);
-        try {
-          const report = await complexityReportGenerator.generate(path);
-          const metrics = chain(report)
-            .mapKeys((value, key) => startCase(key))
-            .mapValues((value) => Math.round(value * 100) / 100)
-            .value();
+        ...(!isEmpty(pattern) ? [{ name: '', owner: undefined, path: pattern }] : []),
+      ];
+      const report = await complexityReportGenerator.generate(
+        enitities.flatMap(({ path }) => path)
+      );
+      const table = mapValues(
+        report,
+        flow(
+          mapKeysWith(flip(startCase)),
+          mapValuesWith((value) => round(value, 2))
+        )
+      );
 
-          if (name) {
-            reporter.metrics(
-              map(metrics, (value, group) => ({
-                group,
-                value,
-                id: name,
-                meta: { pluginTeam: owner?.[0] },
-              }))
-            );
-          }
+      const metrics = chain(table)
+        .omit('')
+        .mapValues((row, id) => {
+          const pluginTeam = find(enitities, { name: id })?.owner?.[0];
+          return map(row, (value, group) => ({ id, group, value, meta: { pluginTeam } }));
+        })
+        .toArray()
+        .flatten()
+        .value();
 
-          table[name] = metrics;
-        } catch (error) {
-          if (['AllFilesIgnoredError', 'NoFilesFoundError'].includes(error.constructor.name)) {
-            log.info(`Skipping empty '${castArray(path).join("', '")}'.`);
-          } else {
-            log.error(error);
-          }
-        }
-      }
-
+      reporter.metrics(metrics);
       // eslint-disable-next-line no-console
       console.table(table);
     },
