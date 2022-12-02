@@ -41,7 +41,6 @@ const deleteAllServiceGroups = () => {
             'kbn-xsrf': 'e2e_test',
           },
           auth: { user: 'editor', pass: 'changeme' },
-          failOnStatusCode: false,
         });
       }
     });
