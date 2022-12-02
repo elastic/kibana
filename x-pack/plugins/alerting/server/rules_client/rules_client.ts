@@ -659,12 +659,14 @@ export class RulesClient {
     const id = options?.id || SavedObjectsUtils.generateId();
 
     try {
-      await this.authorization.ensureAuthorized({
-        ruleTypeId: data.alertTypeId,
-        consumer: data.consumer,
-        operation: WriteOperations.Create,
-        entity: AlertingAuthorizationEntity.Rule,
-      });
+      await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, () =>
+        this.authorization.ensureAuthorized({
+          ruleTypeId: data.alertTypeId,
+          consumer: data.consumer,
+          operation: WriteOperations.Create,
+          entity: AlertingAuthorizationEntity.Rule,
+        })
+      );
     } catch (error) {
       this.auditLogger?.log(
         ruleAuditEvent({
@@ -687,13 +689,17 @@ export class RulesClient {
     let createdAPIKey = null;
     try {
       createdAPIKey = data.enabled
-        ? await this.createAPIKey(this.generateAPIKeyName(ruleType.id, data.name))
+        ? await withSpan({ name: 'createAPIKey', type: 'rules' }, () =>
+            this.createAPIKey(this.generateAPIKeyName(ruleType.id, data.name))
+          )
         : null;
     } catch (error) {
       throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
     }
 
-    await this.validateActions(ruleType, data);
+    await withSpan({ name: 'validateActions', type: 'rules' }, () =>
+      this.validateActions(ruleType, data)
+    );
 
     // Throw error if schedule interval is less than the minimum and we are enforcing it
     const intervalInMs = parseDuration(data.schedule.interval);
@@ -708,7 +714,9 @@ export class RulesClient {
       references,
       params: updatedParams,
       actions,
-    } = await this.extractReferences(ruleType, data.actions, validatedAlertTypeParams);
+    } = await withSpan({ name: 'extractReferences', type: 'rules' }, () =>
+      this.extractReferences(ruleType, data.actions, validatedAlertTypeParams)
+    );
 
     const createTime = Date.now();
     const lastRunTimestamp = new Date();
@@ -741,13 +749,15 @@ export class RulesClient {
       rawRule.mapped_params = mappedParams;
     }
 
-    return await this.createRuleSavedObject({
-      intervalInMs,
-      rawRule,
-      references,
-      ruleId: id,
-      options,
-    });
+    return await withSpan({ name: 'createRuleSavedObject', type: 'rules' }, () =>
+      this.createRuleSavedObject({
+        intervalInMs,
+        rawRule,
+        references,
+        ruleId: id,
+        options,
+      })
+    );
   }
 
   private async createRuleSavedObject<Params extends RuleTypeParams = never>({
@@ -773,14 +783,14 @@ export class RulesClient {
 
     let createdAlert: SavedObject<RawRule>;
     try {
-      createdAlert = await this.unsecuredSavedObjectsClient.create(
-        'alert',
-        this.updateMeta(rawRule),
-        {
-          ...options,
-          references,
-          id: ruleId,
-        }
+      createdAlert = await withSpan(
+        { name: 'unsecuredSavedObjectsClient.create', type: 'rules' },
+        () =>
+          this.unsecuredSavedObjectsClient.create('alert', this.updateMeta(rawRule), {
+            ...options,
+            references,
+            id: ruleId,
+          })
       );
     } catch (e) {
       // Avoid unused API key
@@ -793,15 +803,16 @@ export class RulesClient {
       throw e;
     }
     if (rawRule.enabled) {
-      let scheduledTask;
+      let scheduledTaskId: string;
       try {
-        scheduledTask = await this.scheduleTask({
+        const scheduledTask = await this.scheduleTask({
           id: createdAlert.id,
           consumer: rawRule.consumer,
           ruleTypeId: rawRule.alertTypeId,
           schedule: rawRule.schedule,
           throwOnConflict: true,
         });
+        scheduledTaskId = scheduledTask.id;
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
         try {
@@ -814,10 +825,12 @@ export class RulesClient {
         }
         throw e;
       }
-      await this.unsecuredSavedObjectsClient.update<RawRule>('alert', createdAlert.id, {
-        scheduledTaskId: scheduledTask.id,
-      });
-      createdAlert.attributes.scheduledTaskId = scheduledTask.id;
+      await withSpan({ name: 'unsecuredSavedObjectsClient.update', type: 'rules' }, () =>
+        this.unsecuredSavedObjectsClient.update<RawRule>('alert', createdAlert.id, {
+          scheduledTaskId,
+        })
+      );
+      createdAlert.attributes.scheduledTaskId = scheduledTaskId;
     }
 
     // Log warning if schedule interval is less than the minimum but we're not enforcing it
@@ -2830,15 +2843,13 @@ export class RulesClient {
 
               let scheduledTaskId;
               if (shouldScheduleTask) {
-                const scheduledTask = await withSpan({ name: 'scheduleTask', type: 'rules' }, () =>
-                  this.scheduleTask({
-                    id: rule.id,
-                    consumer: rule.attributes.consumer,
-                    ruleTypeId: rule.attributes.alertTypeId,
-                    schedule: rule.attributes.schedule as IntervalSchedule,
-                    throwOnConflict: false,
-                  })
-                );
+                const scheduledTask = await this.scheduleTask({
+                  id: rule.id,
+                  consumer: rule.attributes.consumer,
+                  ruleTypeId: rule.attributes.alertTypeId,
+                  schedule: rule.attributes.schedule as IntervalSchedule,
+                  throwOnConflict: false,
+                });
                 scheduledTaskId = scheduledTask.id;
               }
 
@@ -4060,7 +4071,9 @@ export class RulesClient {
       enabled: true,
     };
     try {
-      return await this.taskManager.schedule(taskInstance);
+      return await withSpan({ name: 'taskManager.schedule', type: 'rules' }, () =>
+        this.taskManager.schedule(taskInstance)
+      );
     } catch (err) {
       if (err.statusCode === 409 && !throwOnConflict) {
         return taskInstance;
