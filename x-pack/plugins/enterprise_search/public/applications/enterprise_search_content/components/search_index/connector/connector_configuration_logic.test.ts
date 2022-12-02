@@ -8,6 +8,8 @@
 import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
 import { connectorIndex } from '../../../__mocks__/view_index.mock';
 
+import { ConnectorStatus } from '../../../../../../common/types/connectors';
+
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 import { CachedFetchIndexApiLogic } from '../../../api/index/cached_fetch_index_api_logic';
 
@@ -23,6 +25,7 @@ const DEFAULT_VALUES = {
   isEditing: false,
   localConfigState: {},
   localConfigView: [],
+  shouldStartInEditMode: false,
 };
 
 describe('ConnectorConfigurationLogic', () => {
@@ -145,6 +148,26 @@ describe('ConnectorConfigurationLogic', () => {
           ...DEFAULT_VALUES,
           index: connectorIndex,
           isEditing: true,
+        });
+      });
+      it('should set isEditing if connector has a config definition and shouldStartInEditMode is true', () => {
+        ConnectorConfigurationLogic.actions.setShouldStartInEditMode(true);
+        ConnectorConfigurationLogic.actions.fetchIndexApiSuccess({
+          ...connectorIndex,
+          connector: { ...connectorIndex.connector, status: ConnectorStatus.NEEDS_CONFIGURATION },
+        });
+        expect(ConnectorConfigurationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          configState: connectorIndex.connector.configuration,
+          configView: [{ key: 'foo', label: 'bar', value: 'barbar' }],
+          index: {
+            ...connectorIndex,
+            connector: { ...connectorIndex.connector, status: ConnectorStatus.NEEDS_CONFIGURATION },
+          },
+          isEditing: true,
+          localConfigState: connectorIndex.connector.configuration,
+          localConfigView: [{ key: 'foo', label: 'bar', value: 'barbar' }],
+          shouldStartInEditMode: true,
         });
       });
     });

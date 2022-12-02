@@ -24,7 +24,6 @@ export {
   apmOperationsTab,
   apmLabsButton,
   enableInfrastructureHostsView,
-  enableServiceMetrics,
   enableAwsLambdaMetrics,
   enableAgentExplorerView,
   apmAWSLambdaPriceFactor,
