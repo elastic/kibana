@@ -80,6 +80,8 @@ import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
+import { installTransform } from './transform/install_transform';
+import { ExecLogTransformClient } from './transform/exec_log_transform_client';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -380,6 +382,40 @@ export class AlertingPlugin {
         : undefined;
     };
 
+    installTransform({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger,
+    }).then((success: boolean) => {
+      rulesClientFactory.initialize({
+        ruleTypeRegistry: ruleTypeRegistry!,
+        logger,
+        taskManager: plugins.taskManager,
+        securityPluginSetup: security,
+        securityPluginStart: plugins.security,
+        encryptedSavedObjectsClient,
+        spaceIdToNamespace,
+        getSpaceId(request: KibanaRequest) {
+          return plugins.spaces?.spacesService.getSpaceId(request);
+        },
+        actions: plugins.actions,
+        eventLog: plugins.eventLog,
+        kibanaVersion: this.kibanaVersion,
+        authorization: alertingAuthorizationClientFactory,
+        eventLogger: this.eventLogger,
+        minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
+        getExecLogTransformClientWithRequest(request: KibanaRequest) {
+          return success
+            ? new ExecLogTransformClient({
+                request,
+                logger,
+                esClient: core.elasticsearch.client.asInternalUser,
+                spacesService: plugins.spaces?.spacesService,
+              })
+            : null;
+        },
+      });
+    });
+
     alertingAuthorizationClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
       securityPluginSetup: security,
@@ -391,25 +427,6 @@ export class AlertingPlugin {
         return plugins.spaces.spacesService.getSpaceId(request);
       },
       features: plugins.features,
-    });
-
-    rulesClientFactory.initialize({
-      ruleTypeRegistry: ruleTypeRegistry!,
-      logger,
-      taskManager: plugins.taskManager,
-      securityPluginSetup: security,
-      securityPluginStart: plugins.security,
-      encryptedSavedObjectsClient,
-      spaceIdToNamespace,
-      getSpaceId(request: KibanaRequest) {
-        return plugins.spaces?.spacesService.getSpaceId(request);
-      },
-      actions: plugins.actions,
-      eventLog: plugins.eventLog,
-      kibanaVersion: this.kibanaVersion,
-      authorization: alertingAuthorizationClientFactory,
-      eventLogger: this.eventLogger,
-      minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
     });
 
     const getRulesClientWithRequest = (request: KibanaRequest) => {

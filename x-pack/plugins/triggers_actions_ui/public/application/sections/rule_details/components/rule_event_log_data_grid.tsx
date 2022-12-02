@@ -25,20 +25,12 @@ import {
   EuiText,
   EuiIcon,
 } from '@elastic/eui';
-import {
-  IExecutionLog,
-  executionLogSortableColumns,
-  ExecutionLogSortFields,
-} from '@kbn/alerting-plugin/common';
+import { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { RuleEventLogListCellRenderer, ColumnId } from './rule_event_log_list_cell_renderer';
 import { RuleEventLogPaginationStatus } from './rule_event_log_pagination_status';
 import { RuleActionErrorBadge } from './rule_action_error_badge';
 import './rule_event_log_list.scss';
-
-const getIsColumnSortable = (columnId: string) => {
-  return executionLogSortableColumns.includes(columnId as ExecutionLogSortFields);
-};
 
 const getErroredActionsTranslation = (errors: number) => {
   return i18n.translate(
@@ -197,11 +189,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
                   defaultMessage: 'Rule Id',
                 }
               ),
-              isSortable: getIsColumnSortable('rule_id'),
-              actions: {
-                showSortAsc: false,
-                showSortDesc: false,
-              },
+              isSortable: true,
             },
             {
               id: 'rule_name',
@@ -211,10 +199,8 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
                   defaultMessage: 'Rule',
                 }
               ),
-              isSortable: getIsColumnSortable('rule_name'),
+              isSortable: true,
               actions: {
-                showSortAsc: false,
-                showSortDesc: false,
                 showHide: false,
               },
             },
@@ -230,10 +216,8 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
                   defaultMessage: 'Space',
                 }
               ),
-              isSortable: getIsColumnSortable('space_ids'),
+              isSortable: true,
               actions: {
-                showSortAsc: false,
-                showSortDesc: false,
                 showHide: false,
               },
             },
@@ -247,7 +231,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             defaultMessage: 'Id',
           }
         ),
-        isSortable: getIsColumnSortable('id'),
+        isSortable: true,
       },
       {
         id: 'timestamp',
@@ -257,7 +241,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             defaultMessage: 'Timestamp',
           }
         ),
-        isSortable: getIsColumnSortable('timestamp'),
+        isSortable: true,
         isResizable: false,
         actions: {
           showHide: false,
@@ -272,7 +256,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             defaultMessage: 'Duration',
           }
         ),
-        isSortable: getIsColumnSortable('execution_duration'),
+        isSortable: true,
         isResizable: false,
         actions: {
           showHide: false,
@@ -289,8 +273,6 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
         ),
         actions: {
           showHide: false,
-          showSortAsc: false,
-          showSortDesc: false,
           additional: [
             {
               iconType: 'annotation',
@@ -316,23 +298,19 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             },
           ],
         },
-        isSortable: getIsColumnSortable('status'),
+        isSortable: true,
         isResizable: false,
         initialWidth: 150,
       },
       {
         id: 'message',
-        actions: {
-          showSortAsc: false,
-          showSortDesc: false,
-        },
         displayAsText: i18n.translate(
           'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.message',
           {
             defaultMessage: 'Message',
           }
         ),
-        isSortable: getIsColumnSortable('message'),
+        isSortable: true,
         cellActions: [
           ({ rowIndex, Component }) => {
             const pagedRowIndex = getPaginatedRowIndex(rowIndex);
@@ -361,7 +339,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
           }
         ),
         initialWidth: 140,
-        isSortable: getIsColumnSortable('num_active_alerts'),
+        isSortable: true,
       },
       {
         id: 'num_new_alerts',
@@ -372,7 +350,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
           }
         ),
         initialWidth: 140,
-        isSortable: getIsColumnSortable('num_new_alerts'),
+        isSortable: true,
       },
       {
         id: 'num_recovered_alerts',
@@ -382,35 +360,31 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             defaultMessage: 'Recovered alerts',
           }
         ),
-        isSortable: getIsColumnSortable('num_recovered_alerts'),
+        isSortable: true,
       },
       {
         id: 'num_triggered_actions',
         displayAsText: numTriggeredActionsDisplay,
         display: <ColumnHeaderWithToolTip id="num_triggered_actions" />,
-        isSortable: getIsColumnSortable('num_triggered_actions'),
+        isSortable: true,
       },
       {
         id: 'num_generated_actions',
         displayAsText: numGeneratedActionsDisplay,
         display: <ColumnHeaderWithToolTip id="num_generated_actions" />,
-        isSortable: getIsColumnSortable('num_generated_actions'),
+        isSortable: true,
       },
       {
         id: 'num_succeeded_actions',
         displayAsText: numSucceededActionsDisplay,
         display: <ColumnHeaderWithToolTip id="num_succeeded_actions" />,
-        isSortable: getIsColumnSortable('num_succeeded_actions'),
+        isSortable: true,
       },
       {
         id: 'num_errored_actions',
-        actions: {
-          showSortAsc: false,
-          showSortDesc: false,
-        },
         displayAsText: numErroredActionsDisplay,
         display: <ColumnHeaderWithToolTip id="num_errored_actions" />,
-        isSortable: getIsColumnSortable('num_errored_actions'),
+        isSortable: true,
       },
       {
         id: 'total_search_duration',
@@ -420,7 +394,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             defaultMessage: 'Total search duration',
           }
         ),
-        isSortable: getIsColumnSortable('total_search_duration'),
+        isSortable: true,
       },
       {
         id: 'es_search_duration',
@@ -430,7 +404,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             defaultMessage: 'ES search duration',
           }
         ),
-        isSortable: getIsColumnSortable('es_search_duration'),
+        isSortable: true,
       },
       {
         id: 'schedule_delay',
@@ -440,7 +414,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             defaultMessage: 'Schedule delay',
           }
         ),
-        isSortable: getIsColumnSortable('schedule_delay'),
+        isSortable: true,
       },
       {
         id: 'timed_out',
@@ -450,7 +424,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             defaultMessage: 'Timed out',
           }
         ),
-        isSortable: getIsColumnSortable('timed_out'),
+        isSortable: true,
       },
     ],
     [

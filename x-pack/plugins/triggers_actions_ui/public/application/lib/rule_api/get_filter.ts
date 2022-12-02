@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+const messageFields = [
+  'alerting.doc.message',
+  'alerting.doc.error.message',
+  'actions.doc.message',
+  'actions.doc.error.message',
+];
+
 // TODO (Jiawei): Use node builder instead of strings
 export const getFilter = ({
   message,
@@ -19,7 +26,9 @@ export const getFilter = ({
 
   if (message) {
     const escapedMessage = message.replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&');
-    filter.push(`(message: "${escapedMessage}" OR error.message: "${escapedMessage}")`);
+    filter.push(
+      `(${messageFields.map((field: string) => `${field}: "${escapedMessage}"`).join(' OR ')})`
+    );
   }
 
   if (outcomeFilter && outcomeFilter.length) {

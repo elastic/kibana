@@ -13,34 +13,32 @@ import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { parseDuration } from '.';
 import { IExecutionLog, IExecutionLogResult, EMPTY_EXECUTION_KPI_RESULT } from '../../common';
+import {
+  EVENT_ACTION,
+  KIBANA_ALERTING_OUTCOME,
+  EVENT_DURATION,
+  ERROR_MESSAGE,
+  ES_SEARCH_DURATION_FIELD,
+  EXECUTION_UUID_FIELD,
+  MESSAGE_FIELD,
+  NUMBER_OF_ACTIVE_ALERTS_FIELD,
+  NUMBER_OF_GENERATED_ACTIONS_FIELD,
+  NUMBER_OF_NEW_ALERTS_FIELD,
+  NUMBER_OF_RECOVERED_ALERTS_FIELD,
+  NUMBER_OF_TRIGGERED_ACTIONS_FIELD,
+  OUTCOME_FIELD,
+  PROVIDER_FIELD,
+  RULE_ID_FIELD,
+  RULE_NAME_FIELD,
+  SCHEDULE_DELAY_FIELD,
+  SPACE_ID_FIELD,
+  START_FIELD,
+  TOTAL_SEARCH_DURATION_FIELD,
+  VERSION_FIELD,
+} from '../constants/event_log_fields';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
 const DEFAULT_MAX_KPI_BUCKETS_LIMIT = 10000;
-
-const RULE_ID_FIELD = 'rule.id';
-const SPACE_ID_FIELD = 'kibana.space_ids';
-const RULE_NAME_FIELD = 'rule.name';
-const PROVIDER_FIELD = 'event.provider';
-const START_FIELD = 'event.start';
-const ACTION_FIELD = 'event.action';
-const ALERTING_OUTCOME_FIELD = 'kibana.alerting.outcome';
-const OUTCOME_FIELD = 'event.outcome';
-const DURATION_FIELD = 'event.duration';
-const MESSAGE_FIELD = 'message';
-const VERSION_FIELD = 'kibana.version';
-const ERROR_MESSAGE_FIELD = 'error.message';
-const SCHEDULE_DELAY_FIELD = 'kibana.task.schedule_delay';
-const ES_SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.es_search_duration_ms';
-const TOTAL_SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.total_search_duration_ms';
-const NUMBER_OF_TRIGGERED_ACTIONS_FIELD =
-  'kibana.alert.rule.execution.metrics.number_of_triggered_actions';
-const NUMBER_OF_GENERATED_ACTIONS_FIELD =
-  'kibana.alert.rule.execution.metrics.number_of_generated_actions';
-const NUMBER_OF_ACTIVE_ALERTS_FIELD = 'kibana.alert.rule.execution.metrics.alert_counts.active';
-const NUMBER_OF_NEW_ALERTS_FIELD = 'kibana.alert.rule.execution.metrics.alert_counts.new';
-const NUMBER_OF_RECOVERED_ALERTS_FIELD =
-  'kibana.alert.rule.execution.metrics.alert_counts.recovered';
-const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
 
 const Millis2Nanos = 1000 * 1000;
 
@@ -225,7 +223,7 @@ export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['fil
                     size: 3,
                     terms: [
                       {
-                        field: ALERTING_OUTCOME_FIELD,
+                        field: KIBANA_ALERTING_OUTCOME,
                         missing: '',
                       },
                       {
@@ -290,7 +288,7 @@ export function getExecutionLogAggregation({
           must_not: [
             {
               term: {
-                [ACTION_FIELD]: 'execute-start',
+                [EVENT_ACTION]: 'execute-start',
               },
             },
           ],
@@ -398,7 +396,7 @@ export function getExecutionLogAggregation({
                 },
                 executionDuration: {
                   max: {
-                    field: DURATION_FIELD,
+                    field: EVENT_DURATION,
                   },
                 },
                 outcomeAndMessage: {
@@ -408,12 +406,12 @@ export function getExecutionLogAggregation({
                       includes: [
                         OUTCOME_FIELD,
                         MESSAGE_FIELD,
-                        ERROR_MESSAGE_FIELD,
+                        ERROR_MESSAGE,
                         VERSION_FIELD,
                         RULE_ID_FIELD,
                         SPACE_ID_FIELD,
                         RULE_NAME_FIELD,
-                        ALERTING_OUTCOME_FIELD,
+                        KIBANA_ALERTING_OUTCOME,
                       ],
                     },
                   },
@@ -457,7 +455,7 @@ function getProviderAndActionFilter(provider: string, action: string) {
       must: [
         {
           match: {
-            [ACTION_FIELD]: action,
+            [EVENT_ACTION]: action,
           },
         },
         {
