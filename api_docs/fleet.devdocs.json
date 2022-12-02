@@ -9058,7 +9058,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"active\" | \"inactive\""
+              "\"inactive\" | \"active\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -10647,7 +10647,7 @@
             "label": "agent",
             "description": [],
             "signature": [
-              "{ monitoring: { namespace?: string | undefined; use_output?: string | undefined; enabled: boolean; metrics: boolean; logs: boolean; }; download: { source_uri: string; }; } | undefined"
+              "{ monitoring: { namespace?: string | undefined; use_output?: string | undefined; enabled: boolean; metrics: boolean; logs: boolean; }; download: { sourceURI: string; }; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
