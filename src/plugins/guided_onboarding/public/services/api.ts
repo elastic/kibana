@@ -277,7 +277,10 @@ export class ApiService implements GuidedOnboardingApi {
     return this.fetchPluginState$().pipe(
       map((pluginState) => {
         if (!isGuideActive(pluginState, guideId)) return false;
-        return isStepInProgress(pluginState!.activeGuide, guideId, stepId);
+        return (
+          isStepInProgress(pluginState!.activeGuide, guideId, stepId) ||
+          isStepReadyToComplete(pluginState!.activeGuide, guideId, stepId)
+        );
       })
     );
   }

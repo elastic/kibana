@@ -49,6 +49,18 @@ export const testGuideStep1InProgressState: GuideState = {
   ],
 };
 
+export const testGuideStep1ReadyToCompleteState: GuideState = {
+  ...testGuideStep1ActiveState,
+  steps: [
+    {
+      id: testGuideStep1ActiveState.steps[0].id,
+      status: 'ready_to_complete',
+    },
+    testGuideStep1ActiveState.steps[1],
+    testGuideStep1ActiveState.steps[2],
+  ],
+};
+
 export const testGuideStep2ActiveState: GuideState = {
   ...testGuideStep1ActiveState,
   steps: [

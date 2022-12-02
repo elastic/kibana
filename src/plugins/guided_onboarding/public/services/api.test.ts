@@ -29,6 +29,7 @@ import {
   mockPluginStateInProgress,
   mockPluginStateNotStarted,
   testGuideStep3ActiveState,
+  testGuideStep1ReadyToCompleteState,
 } from './api.mocks';
 
 describe('GuidedOnboarding ApiService', () => {
@@ -246,7 +247,7 @@ describe('GuidedOnboarding ApiService', () => {
   });
 
   describe('isGuideStepActive$', () => {
-    it('returns true if the step has been started', (done) => {
+    it('returns true if the step is in progress', (done) => {
       httpClient.get.mockResolvedValueOnce({
         pluginState: { ...mockPluginStateInProgress, activeGuide: testGuideStep1InProgressState },
       });
@@ -261,7 +262,25 @@ describe('GuidedOnboarding ApiService', () => {
         });
     });
 
-    it('returns false if the step is not been started', (done) => {
+    it('returns true if the step is ready to complete', (done) => {
+      httpClient.get.mockResolvedValueOnce({
+        pluginState: {
+          ...mockPluginStateInProgress,
+          activeGuide: testGuideStep1ReadyToCompleteState,
+        },
+      });
+
+      subscription = apiService
+        .isGuideStepActive$(testGuide, testGuideFirstStep)
+        .subscribe((isStepActive) => {
+          if (isStepActive) {
+            subscription.unsubscribe();
+            done();
+          }
+        });
+    });
+
+    it('returns false if the step has not been started', (done) => {
       subscription = apiService
         .isGuideStepActive$(testGuide, testGuideFirstStep)
         .subscribe((isStepActive) => {

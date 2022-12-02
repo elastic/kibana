@@ -95,7 +95,6 @@ const isStepStatus = (
 ): boolean => {
   if (!guideState || !guideState.isActive || guideState.guideId !== guideId) return false;
 
-  // false if the step is not 'in_progress'
   const selectedStep = guideState.steps.find((step) => step.id === stepId);
   return selectedStep ? selectedStep.status === status : false;
 };
