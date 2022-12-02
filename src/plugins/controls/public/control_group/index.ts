@@ -22,7 +22,6 @@ export {
 
 export {
   type ControlGroupRendererProps,
-  ControlGroupInputBuilder,
   useControlGroupContainerContext,
 } from './control_group_renderer';
 export const LazyControlGroupRenderer = React.lazy(() => import('./control_group_renderer'));

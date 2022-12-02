@@ -58,7 +58,6 @@ export { LazyControlsCallout, type CalloutProps } from './controls_callout';
 export {
   LazyControlGroupRenderer,
   useControlGroupContainerContext,
-  ControlGroupInputBuilder,
   type ControlGroupRendererProps,
 } from './control_group';
 
