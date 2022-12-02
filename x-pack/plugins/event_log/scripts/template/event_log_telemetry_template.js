@@ -50,7 +50,7 @@ const byPercentileSchemaByType: MakeSchemaFrom<PercentileValueByTypeSchema> = {
   p99: byTypeSchema,
 };
 
-export const EventLogUsageMapping = %%MAPPINGS%%;
+export const EventLogUsageMapping: MakeSchemaFrom<EventLogUsage> = %%MAPPINGS%%;
 
 export const EventLogUsageAggregations = %%AGGREGATIONS%%;
 
