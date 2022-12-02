@@ -21,7 +21,7 @@ const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps
     error,
     isLoading,
     pagination,
-    sortedLists,
+    lists,
     listTableColumnsWithLinkSwitch,
     onTableChange,
     addToSelectedListDescription,
@@ -39,7 +39,7 @@ const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps
           tableCaption="Table of exception lists"
           data-test-subj="addExceptionToSharedListsTable"
           error={error}
-          items={sortedLists}
+          items={lists}
           loading={isLoading}
           message={
             isLoading ? (

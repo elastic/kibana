@@ -17,7 +17,6 @@ import type {
   EuiBasicTableColumn,
   HorizontalAlignment,
 } from '@elastic/eui';
-import { EuiLoadingContent } from '@elastic/eui';
 
 import type { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -63,9 +62,6 @@ export const useAddToSharedListTable = ({
     initialPageSize: 5,
     showPerPageOptions: false,
   });
-  const [message, setMessage] = useState<JSX.Element | string | undefined>(
-    <EuiLoadingContent lines={4} data-test-subj="exceptionItemListsTableLoading" />
-  );
 
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -83,21 +79,21 @@ export const useAddToSharedListTable = ({
     }
   }, [listsToFetch]);
 
-  useEffect(() => {
-    getReferences();
-  }, [listsToFetch, getReferences]);
-
-  useEffect(() => {
+  const fillListsToDisplay = useCallback(async () => {
+    await getReferences();
     if (exceptionListReferences) {
       const lists: ExceptionListRuleReferencesSchema[] = [];
       for (const [_, value] of Object.entries(exceptionListReferences))
         if (value.type === ExceptionListTypeEnum.DETECTION) lists.push(value);
 
-      setMessage(undefined);
       setListsToDisplay(lists);
       setIsLoading(false);
     }
-  }, [exceptionListReferences, showAllSharedLists]);
+  }, [exceptionListReferences, getReferences]);
+
+  useEffect(() => {
+    fillListsToDisplay();
+  }, [listsToFetch, getReferences, fillListsToDisplay]);
 
   useEffect(() => {
     onListSelectionChange(
@@ -148,9 +144,8 @@ export const useAddToSharedListTable = ({
   return {
     error,
     isLoading,
-    message,
     pagination,
-    sortedLists: listsToDisplay,
+    lists: listsToDisplay,
     listTableColumnsWithLinkSwitch,
     addToSelectedListDescription: i18n.ADD_TO_LISTS_DESCRIPTION,
     onTableChange,
