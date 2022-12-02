@@ -312,6 +312,7 @@ export class TaskClaiming {
     );
 
     try {
+      console.log('** Update by query w/ size:', size);
       const result = await this.taskStore.updateByQuery(
         {
           query,

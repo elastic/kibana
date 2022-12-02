@@ -141,7 +141,7 @@ export class TaskPollingLifecycle {
               ),
               0
             )
-          : this.pool.availableWorkers,
+          : this.pool.availableQueueSize,
     });
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);
