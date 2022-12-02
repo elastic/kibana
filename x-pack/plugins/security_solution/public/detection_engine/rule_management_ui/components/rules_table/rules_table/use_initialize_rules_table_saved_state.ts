@@ -13,6 +13,7 @@ import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import { useRulesTableContext } from './rules_table_context';
 import type { RulesTableSavedState } from './rules_table_saved_state';
+import { RuleSource } from './rules_table_saved_state';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_SORTING_OPTIONS } from './rules_table_defaults';
 
 export function useInitializeRulesTableSavedState(): void {
@@ -34,7 +35,7 @@ export function useInitializeRulesTableSavedState(): void {
     }
 
     const searchTerm = urlState?.searchTerm ?? storageState?.searchTerm;
-    const showCustomRules = urlState?.showCustomRules ?? storageState?.showCustomRules;
+    const ruleSource = urlState?.source ?? storageState?.source;
     const tags = urlState?.tags ?? storageState?.tags;
     const sorting = urlState?.sort ?? storageState?.sort;
     const page = urlState?.page ?? storageState?.page;
@@ -42,8 +43,8 @@ export function useInitializeRulesTableSavedState(): void {
 
     actions.setFilterOptions({
       filter: typeof searchTerm === 'string' ? searchTerm : DEFAULT_FILTER_OPTIONS.filter,
-      showElasticRules: showCustomRules === false,
-      showCustomRules: showCustomRules === true,
+      showElasticRules: ruleSource === RuleSource.Prebuilt,
+      showCustomRules: ruleSource === RuleSource.Custom,
       tags: Array.isArray(tags) ? tags : DEFAULT_FILTER_OPTIONS.tags,
     });
 

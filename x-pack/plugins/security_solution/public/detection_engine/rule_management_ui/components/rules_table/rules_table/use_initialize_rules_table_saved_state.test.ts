@@ -10,6 +10,7 @@ import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../../common/constants';
 
 import { useInitializeRulesTableSavedState } from './use_initialize_rules_table_saved_state';
 import type { RulesTableSavedState } from './rules_table_saved_state';
+import { RuleSource } from './rules_table_saved_state';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_SORTING_OPTIONS } from './rules_table_defaults';
 import type { RulesTableActions } from './rules_table_context';
 import { useRulesTableContext } from './rules_table_context';
@@ -22,7 +23,7 @@ jest.mock('./rules_table_context');
 describe('useInitializeRulesTableSavedState', () => {
   const urlSavedState: RulesTableSavedState = {
     searchTerm: 'test',
-    showCustomRules: true,
+    source: RuleSource.Custom,
     tags: ['test'],
     sort: {
       field: 'name',
@@ -33,7 +34,7 @@ describe('useInitializeRulesTableSavedState', () => {
   };
   const storageSavedState: RulesTableSavedState = {
     searchTerm: 'test',
-    showCustomRules: true,
+    source: RuleSource.Custom,
     tags: ['test'],
     sort: {
       field: 'name',
@@ -80,8 +81,8 @@ describe('useInitializeRulesTableSavedState', () => {
 
       expect(actions.setFilterOptions).toHaveBeenCalledWith({
         filter: urlSavedState.searchTerm,
-        showCustomRules: urlSavedState.showCustomRules,
-        showElasticRules: !urlSavedState.showCustomRules,
+        showCustomRules: urlSavedState.source === RuleSource.Custom,
+        showElasticRules: urlSavedState.source === RuleSource.Prebuilt,
         tags: urlSavedState.tags,
       });
       expect(actions.setSortingOptions).toHaveBeenCalledWith(urlSavedState.sort);
@@ -127,8 +128,11 @@ describe('useInitializeRulesTableSavedState', () => {
       expect(actions.setPerPage).not.toHaveBeenCalled();
     });
 
-    it('restores only show elastic rules filter', () => {
-      mockRulesTablePersistedState({ urlState: { showCustomRules: false }, storageState: null });
+    it('restores only show prebuilt rules filter', () => {
+      mockRulesTablePersistedState({
+        urlState: { source: RuleSource.Prebuilt },
+        storageState: null,
+      });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -142,7 +146,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only show custom rules filter', () => {
-      mockRulesTablePersistedState({ urlState: { showCustomRules: true }, storageState: null });
+      mockRulesTablePersistedState({ urlState: { source: RuleSource.Custom }, storageState: null });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -230,8 +234,8 @@ describe('useInitializeRulesTableSavedState', () => {
 
       expect(actions.setFilterOptions).toHaveBeenCalledWith({
         filter: storageSavedState.searchTerm,
-        showCustomRules: storageSavedState.showCustomRules,
-        showElasticRules: !storageSavedState.showCustomRules,
+        showCustomRules: storageSavedState.source === RuleSource.Custom,
+        showElasticRules: storageSavedState.source === RuleSource.Prebuilt,
         tags: storageSavedState.tags,
       });
       expect(actions.setSortingOptions).toHaveBeenCalledWith(storageSavedState.sort);
@@ -277,8 +281,11 @@ describe('useInitializeRulesTableSavedState', () => {
       expect(actions.setPerPage).not.toHaveBeenCalled();
     });
 
-    it('restores only show elastic rules filter', () => {
-      mockRulesTablePersistedState({ urlState: null, storageState: { showCustomRules: false } });
+    it('restores only show prebuilt rules filter', () => {
+      mockRulesTablePersistedState({
+        urlState: null,
+        storageState: { source: RuleSource.Prebuilt },
+      });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -292,7 +299,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only show custom rules filter', () => {
-      mockRulesTablePersistedState({ urlState: null, storageState: { showCustomRules: true } });
+      mockRulesTablePersistedState({ urlState: null, storageState: { source: RuleSource.Custom } });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -380,8 +387,8 @@ describe('useInitializeRulesTableSavedState', () => {
 
       expect(actions.setFilterOptions).toHaveBeenCalledWith({
         filter: urlSavedState.searchTerm,
-        showCustomRules: urlSavedState.showCustomRules,
-        showElasticRules: !urlSavedState.showCustomRules,
+        showCustomRules: urlSavedState.source === RuleSource.Custom,
+        showElasticRules: urlSavedState.source === RuleSource.Prebuilt,
         tags: urlSavedState.tags,
       });
       expect(actions.setSortingOptions).toHaveBeenCalledWith(urlSavedState.sort);

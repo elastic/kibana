@@ -19,6 +19,7 @@ import {
 import type { RulesTableState } from './rules_table_context';
 import { useRulesTableContext } from './rules_table_context';
 import type { RulesTableSavedState } from './rules_table_saved_state';
+import { RuleSource } from './rules_table_saved_state';
 import { useSyncRulesTableSavedState } from './use_sync_rules_table_saved_state';
 import { omit } from 'lodash';
 
@@ -114,7 +115,7 @@ describe('useSyncRulesTableSavedState', () => {
     };
     const expectedUrlState = {
       searchTerm: 'test',
-      showCustomRules: true,
+      source: RuleSource.Custom,
       tags: ['test'],
       sort: {
         field: 'name',
@@ -151,7 +152,7 @@ describe('useSyncRulesTableSavedState', () => {
           ...defaultState,
           filterOptions: { ...defaultState.filterOptions, showElasticRules: true },
         },
-        { showCustomRules: false }
+        { source: RuleSource.Prebuilt }
       );
     });
 
@@ -161,7 +162,7 @@ describe('useSyncRulesTableSavedState', () => {
           ...defaultState,
           filterOptions: { ...defaultState.filterOptions, showCustomRules: true },
         },
-        { showCustomRules: true }
+        { source: RuleSource.Custom }
       );
     });
 
@@ -236,7 +237,7 @@ describe('useSyncRulesTableSavedState', () => {
           ...defaultState,
           filterOptions: { ...defaultState.filterOptions, showElasticRules: true },
         },
-        { showCustomRules: false }
+        { source: RuleSource.Prebuilt }
       );
     });
 
@@ -246,7 +247,7 @@ describe('useSyncRulesTableSavedState', () => {
           ...defaultState,
           filterOptions: { ...defaultState.filterOptions, showCustomRules: true },
         },
-        { showCustomRules: true }
+        { source: RuleSource.Custom }
       );
     });
 

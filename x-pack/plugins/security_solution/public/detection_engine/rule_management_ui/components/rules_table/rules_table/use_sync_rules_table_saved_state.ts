@@ -15,6 +15,7 @@ import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import { useRulesTableContext } from './rules_table_context';
 import type { RulesTableSavedState } from './rules_table_saved_state';
+import { RuleSource } from './rules_table_saved_state';
 import {
   DEFAULT_PAGE,
   DEFAULT_RULES_PER_PAGE,
@@ -36,7 +37,9 @@ export function useSyncRulesTableSavedState(): void {
     }
 
     if (state.filterOptions.showElasticRules || state.filterOptions.showCustomRules) {
-      savedState.showCustomRules = state.filterOptions.showCustomRules;
+      savedState.source = state.filterOptions.showCustomRules
+        ? RuleSource.Custom
+        : RuleSource.Prebuilt;
     }
 
     if (state.filterOptions.tags.length > 0) {

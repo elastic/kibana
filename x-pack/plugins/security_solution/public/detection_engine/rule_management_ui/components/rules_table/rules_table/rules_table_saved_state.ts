@@ -7,9 +7,14 @@
 
 import type { SortingOptions } from '../../../../rule_management/logic/types';
 
+export enum RuleSource {
+  Prebuilt,
+  Custom,
+}
+
 export interface RulesTableSavedState {
   searchTerm?: string;
-  showCustomRules?: boolean;
+  source?: RuleSource;
   tags?: string[];
   sort?: Partial<SortingOptions>;
   page?: number;
