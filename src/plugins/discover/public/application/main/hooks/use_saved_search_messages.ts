@@ -90,6 +90,7 @@ export function sendErrorMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$,
  */
 export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchStatus) {
   const recordRawType = data.main$.getValue().recordRawType;
+  console.debug('test step: sent reset message', recordRawType, initialFetchStatus);
   data.main$.next({
     fetchStatus: initialFetchStatus,
     foundDocuments: undefined,

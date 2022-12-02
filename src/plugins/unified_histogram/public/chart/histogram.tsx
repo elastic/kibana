@@ -80,7 +80,21 @@ export function Histogram({
         | IKibanaSearchResponse<estypes.SearchResponse>
         | undefined;
       const response = json?.rawResponse;
-
+      console.debug(
+        'test step: histogram onLoad',
+        JSON.stringify(
+          {
+            isLoading,
+            dataViewId: dataView.id,
+            searchSessionId: request?.searchSessionId,
+            hits,
+            timeInterval,
+            timeRange,
+          },
+          null,
+          2
+        )
+      );
       // Lens will swallow shard failures and return `isLoading: false` because it displays
       // its own errors, but this causes us to emit onTotalHitsChange(UnifiedHistogramFetchStatus.complete, 0).
       // This is incorrect, so we check for request failures and shard failures here, and emit an error instead.

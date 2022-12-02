@@ -80,11 +80,25 @@ export function useDiscoverState({
   const initialFetchStatus: FetchStatus = useMemo(() => {
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
+    const searchOnPageLoad = uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING);
+    const hasSavedSearch = savedSearch.id !== undefined;
+    const hasRefreshInterval = timefilter.getRefreshInterval().pause === false;
+    const hasSearchSessionId = searchSessionManager.hasSearchSessionIdInURL();
     const shouldSearchOnPageLoad =
       uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
       savedSearch.id !== undefined ||
       timefilter.getRefreshInterval().pause === false ||
       searchSessionManager.hasSearchSessionIdInURL();
+    console.debug(
+      'test step: initialFetchStatus',
+      JSON.stringify({
+        searchOnPageLoad,
+        hasSavedSearch,
+        hasRefreshInterval,
+        hasSearchSessionId,
+        shouldSearchOnPageLoad,
+      })
+    );
     return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
   }, [uiSettings, savedSearch.id, searchSessionManager, timefilter]);
 

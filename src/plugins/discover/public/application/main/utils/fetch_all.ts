@@ -57,6 +57,7 @@ export function fetchAll(
   try {
     const dataView = searchSource.getField('index')!;
     if (reset) {
+      console.debug('test step: set reset message', initialFetchStatus);
       sendResetMsg(dataSubjects, initialFetchStatus);
     }
     const { sort, query } = appStateContainer.getState();
