@@ -226,7 +226,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       );
     });
 
-    // the job stopped to produce an anomaly, needs investigation
     it('ecommerce anomaly explorer screenshots', async () => {
       await ml.testExecution.logTestStep('navigate to job list');
       await ml.navigation.navigateToMl();
