@@ -23,7 +23,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "max_signals": 1,
-  "name": "My First Rule",
+  "name": "My First Alert",
   "note": " \nThis is a test alert.\n\nThis alert does not show threat activity. Elastic created this alert to help you understand how alerts work.\n\nFor normal rules, the Investigation Guide will help analysts investigate alerts.\n\nThis alert will show once every 24 hours for each host. It is safe to disable this rule.\n",
   "query": "event.kind:\"event\"\n",
   "references": [
