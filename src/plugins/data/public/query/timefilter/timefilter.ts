@@ -194,6 +194,11 @@ export class Timefilter {
     if (!newRefreshInterval.pause && newRefreshInterval.value !== 0) {
       this.autoRefreshLoop.start(newRefreshInterval.value);
     }
+    console.debug(
+      'test step: refresh interval set',
+      JSON.stringify(refreshInterval),
+      JSON.stringify(this._refreshInterval)
+    );
   };
 
   /**
