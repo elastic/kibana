@@ -90,3 +90,5 @@ export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;
 export const ENDPOINT_ERROR_CODES: Record<string, number> = {
   ES_CONNECTION_ERROR: -272,
 };
+
+export const ENDPOINT_FIELDS_SEARCH_STRATEGY = 'endpointFields';
