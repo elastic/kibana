@@ -10,22 +10,15 @@ import { fireEvent, act, render, screen, waitFor } from '@testing-library/react'
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-import { RulesList, percentileFields } from './rules_list';
-import { RuleTypeModel, Percentiles } from '../../../../types';
-import { parseDuration } from '@kbn/alerting-plugin/common';
-import { getFormattedDuration, getFormattedMilliseconds } from '../../../lib/monitoring_utils';
+import { RulesList } from './rules_list';
+import { RuleTypeModel } from '../../../../types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { IToasts } from '@kbn/core/public';
 
-import {
-  mockedRulesData,
-  ruleTypeFromApi,
-  getDisabledByLicenseRuleTypeFromApi,
-  ruleType,
-} from './test_helpers';
+import { mockedRulesData, ruleTypeFromApi, ruleType } from './test_helpers';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('../../../../common/lib/kibana');
