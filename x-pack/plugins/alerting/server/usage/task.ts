@@ -13,6 +13,7 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 
+import { get } from 'lodash';
 import { getFailedAndUnrecognizedTasksPerDay } from './lib/get_telemetry_from_task_manager';
 import { getTotalCountAggregations, getTotalCountInUse } from './lib/get_telemetry_from_kibana';
 import {
@@ -72,6 +73,23 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
     });
   } catch (e) {
     logger.debug(`Error scheduling task, received ${e.message}`);
+  }
+}
+
+const mapExistingTelemetryFieldNames: Record<string, string> = {
+  avg_event_duration: 'avg_execution_time',
+  avg_es_search_duration_ms: 'avg_es_search_duration',
+  avg_total_search_duration_ms: 'avg_total_search_duration',
+  percentile_number_of_generated_actions: 'percentile_num_generated_actions',
+  percentile_alert_counts_active: 'percentile_num_alerts',
+};
+
+function getExistingFieldMapping(field: string) {
+  const keys = Object.keys(mapExistingTelemetryFieldNames);
+  for (const existingFieldPrefix of keys) {
+    if (field.startsWith(existingFieldPrefix)) {
+      return existingFieldPrefix;
+    }
   }
 }
 
@@ -173,21 +191,24 @@ export function telemetryTaskRunner(
                     dailyFailedAndUnrecognizedTasks.countFailedAndUnrecognizedTasksByStatus,
                   count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day:
                     dailyFailedAndUnrecognizedTasks.countFailedAndUnrecognizedTasksByStatusByType,
-                  avg_execution_time_per_day: dailyExecutionCounts.avgExecutionTime,
-                  avg_execution_time_by_type_per_day: dailyExecutionCounts.avgExecutionTimeByType,
-                  avg_es_search_duration_per_day: dailyExecutionCounts.avgEsSearchDuration,
-                  avg_es_search_duration_by_type_per_day:
-                    dailyExecutionCounts.avgEsSearchDurationByType,
-                  avg_total_search_duration_per_day: dailyExecutionCounts.avgTotalSearchDuration,
-                  avg_total_search_duration_by_type_per_day:
-                    dailyExecutionCounts.avgTotalSearchDurationByType,
-                  percentile_num_generated_actions_per_day:
-                    dailyExecutionCounts.generatedActionsPercentiles,
-                  percentile_num_generated_actions_by_type_per_day:
-                    dailyExecutionCounts.generatedActionsPercentilesByType,
-                  percentile_num_alerts_per_day: dailyExecutionCounts.alertsPercentiles,
-                  percentile_num_alerts_by_type_per_day:
-                    dailyExecutionCounts.alertsPercentilesByType,
+                  ...Object.keys(dailyExecutionCounts).reduce((acc, field: string) => {
+                    const mapping = getExistingFieldMapping(field);
+                    if (mapping) {
+                      const fieldName =
+                        field.indexOf('by_type') > 0
+                          ? `${mapExistingTelemetryFieldNames[mapping]}_by_type_per_day`
+                          : `${mapExistingTelemetryFieldNames[mapping]}_per_day`;
+                      return {
+                        ...acc,
+                        [fieldName]: get(dailyExecutionCounts, `${field}`),
+                      };
+                    }
+
+                    return {
+                      ...acc,
+                      [field]: get(dailyExecutionCounts, `${field}`),
+                    };
+                  }, {}),
                 },
                 runAt: getNextMidnight(),
               };
