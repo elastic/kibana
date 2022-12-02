@@ -70,6 +70,13 @@ export const ARIA_KEYPAD_LEGEND = i18n.translate(
   }
 );
 
+export const EMPTY_COMMENTS_NOT_ALLOWED = i18n.translate(
+  'xpack.cases.caseView.commentFieldRequiredError',
+  {
+    defaultMessage: 'Empty comments are not allowed.',
+  }
+);
+
 export const REQUIRED_FIELD = i18n.translate('xpack.cases.caseView.fieldRequiredError', {
   defaultMessage: 'Required field',
 });
