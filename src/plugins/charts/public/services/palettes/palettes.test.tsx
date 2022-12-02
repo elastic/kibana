@@ -184,36 +184,6 @@ describe('palettes', () => {
         expect(color1).toEqual(color2);
       });
 
-      it('should return the Other color for __other__ key', () => {
-        const palette = palettes.default;
-
-        const color1 = palette.getCategoricalColor(
-          [
-            {
-              name: '__other__',
-              rankAtDepth: 0,
-              totalSeriesAtDepth: 5,
-            },
-          ],
-          {
-            syncColors: true,
-          }
-        );
-        const color2 = palette.getCategoricalColor(
-          [
-            {
-              name: 'Other',
-              rankAtDepth: 5,
-              totalSeriesAtDepth: 5,
-            },
-          ],
-          {
-            syncColors: true,
-          }
-        );
-        expect(color1).toEqual(color2);
-      });
-
       it('should return the same color for different positions on outer series layers', () => {
         const palette = palettes.default;
 

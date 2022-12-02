@@ -29,10 +29,6 @@ import { LegacyColorsService } from '../legacy_colors';
 import { MappedColors } from '../mapped_colors';
 import { workoutColorForValue } from './helpers';
 
-const mappedSeriesNames: Record<string, string> = {
-  __other__: 'Other',
-};
-
 function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, 'title'> {
   const colors = euiPaletteColorBlind({ rotations: 2 });
   const behindTextColors = euiPaletteColorBlindBehindText({ rotations: 2 });
@@ -48,7 +44,7 @@ function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, '
   ) {
     let outputColor: string;
     if (chartConfiguration.syncColors) {
-      const seriesName = mappedSeriesNames[series[0].name] ?? series[0].name;
+      const seriesName = series[0].name;
       const colorKey = seriesName;
       mappedColors.mapKeys([colorKey]);
       const mappedColor = mappedColors.get(colorKey);
