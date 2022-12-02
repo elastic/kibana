@@ -8,7 +8,56 @@
 import Fs from 'fs';
 import Path from 'path';
 
+export interface PropertyDefinition {
+  properties?: Record<string, PropertyDefinition>;
+  type: string;
+  $ref?: string;
+}
+
 export class JsonSchemaService {
+  /**
+   * Dictionary with the schema components
+   * @private
+   */
+  private _schemaComponents: Record<string, PropertyDefinition> = {};
+
+  /**
+   * Extracts properties definition
+   * @private
+   */
+  private extractProperties(propertyDef: PropertyDefinition): void {
+    if (propertyDef.$ref) {
+      const comp = propertyDef.$ref.split('/');
+      const refKey = comp[comp.length - 1];
+
+      if (!refKey.startsWith('Ml_Types_')) return;
+
+      const schemaComponent = this._schemaComponents[refKey];
+
+      delete propertyDef.$ref;
+
+      for (const key in schemaComponent) {
+        if (schemaComponent.hasOwnProperty(key)) {
+          // @ts-ignore
+          propertyDef[key] = schemaComponent[key] as PropertyDefinition[typeof key];
+        }
+      }
+    }
+
+    if (propertyDef.properties) {
+      for (const key in propertyDef.properties) {
+        if (propertyDef.properties.hasOwnProperty(key)) {
+          this.extractProperties(propertyDef.properties[key]);
+        }
+      }
+    }
+  }
+
+  /**
+   * Extracts resolved schema definition for requested path and method
+   * @param path
+   * @param method
+   */
   public async extractSchema(path: string, method: string) {
     const fileContent = JSON.parse(
       Fs.readFileSync(Path.resolve(__dirname, 'openapi.json'), 'utf8')
@@ -21,6 +70,10 @@ export class JsonSchemaService {
     }
 
     const bodySchema = definition.requestBody.content['application/json'].schema;
+
+    this._schemaComponents = fileContent.components.schemas;
+
+    this.extractProperties(bodySchema);
 
     return bodySchema;
   }
