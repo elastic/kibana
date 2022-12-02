@@ -59,7 +59,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
         }
       });
-      return promises;
+      return Promise.all(promises);
     });
   }
 
