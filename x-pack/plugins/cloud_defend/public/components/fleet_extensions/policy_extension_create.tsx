@@ -6,11 +6,11 @@
  */
 import React, { memo } from 'react';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
-import { AdvancedView } from './advanced_view';
+import { ConfigYamlView } from '../config_yaml_view';
 
 export const CloudDefendCreatePolicyExtension = memo<PackagePolicyCreateExtensionComponentProps>(
   ({ newPolicy, onChange }) => {
-    return <AdvancedView policy={newPolicy} onChange={onChange}/>;
+    return <ConfigYamlView policy={newPolicy} onChange={onChange}/>;
   }
 );
 

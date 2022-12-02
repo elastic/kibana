@@ -8,3 +8,4 @@
 export const PLUGIN_ID = 'cloudDefend';
 export const PLUGIN_NAME = 'cloudDefend';
 export const INTEGRATION_PACKAGE_NAME = 'cloud_defend';
+export const ALERTS_DATASET = 'cloud_defend.alerts';

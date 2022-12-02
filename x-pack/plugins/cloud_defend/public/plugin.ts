@@ -11,7 +11,7 @@ import {
   CloudDefendPluginStart,
   CloudDefendPluginStartDeps,
 } from './types';
-import { INTEGRATION_PACKAGE_NAME } from '../common';
+import { INTEGRATION_PACKAGE_NAME } from '../common/constants';
 
 const LazyEditPolicy = lazy(() => import('./components/fleet_extensions/policy_extension_edit'));
 const LazyCreatePolicy = lazy(
