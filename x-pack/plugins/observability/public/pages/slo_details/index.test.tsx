@@ -77,7 +77,8 @@ describe('SLO Details Page', () => {
     render(<SloDetailsPage />, config);
 
     expect(screen.queryByTestId('pageNotFound')).toBeFalsy();
-    expect(screen.queryByTestId('loading')).toBeTruthy();
+    expect(screen.queryByTestId('loadingTitle')).toBeTruthy();
+    expect(screen.queryByTestId('loadingDetails')).toBeTruthy();
   });
 
   it('renders the SLO details page when the feature flag is enabled', async () => {

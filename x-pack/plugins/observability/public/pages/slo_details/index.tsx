@@ -24,6 +24,7 @@ import { useFetchSloDetails } from './hooks/use_fetch_slo_details';
 import { SLO } from '../../typings';
 import { SloDetails } from './components/slo_details';
 import { SLO_DETAILS_BREADCRUMB_TEXT } from './translations';
+import { PageTitle } from './components/page_title';
 
 export function SloDetailsPage() {
   const { http } = useKibana<ObservabilityAppServices>().services;
@@ -38,20 +39,17 @@ export function SloDetailsPage() {
     return <PageNotFound />;
   }
 
-  if (loading) {
-    return <EuiLoadingSpinner data-test-subj="loading" />;
-  }
-
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <>{slo && slo.name}</>,
+        pageTitle: <PageTitle isLoading={loading} slo={slo} />,
         rightSideItems: [],
         bottomBorder: true,
       }}
       data-test-subj="sloDetailsPage"
     >
-      {slo && <SloDetails slo={slo} />}
+      {loading && <EuiLoadingSpinner data-test-subj="loadingDetails" />}
+      {!loading && <SloDetails slo={slo!} />}
     </ObservabilityPageTemplate>
   );
 }
