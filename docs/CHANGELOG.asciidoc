@@ -115,7 +115,7 @@ Adds a `Content-Security-Policy` header to all `/api/*` responses, so now any Ki
 [[fixes-v7.17.8]]
 === Bug fixes
 APM::
-Metadata API does not filter by environment {kibana-pull}144474[#144474]
+Fixes the environment filter in the metadata API {kibana-pull}144474[#144474]
 
 Discover::
 Improves the performance for getFieldsToShow {kibana-pull}144672[#144672]
