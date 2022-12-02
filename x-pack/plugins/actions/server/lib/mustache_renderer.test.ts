@@ -36,7 +36,7 @@ const variables = {
   vl: '|',
 };
 
-describe.only('mustache_renderer', () => {
+describe('mustache_renderer', () => {
   describe('renderMustacheString()', () => {
     for (const escapeVal of ['none', 'slack', 'markdown', 'json']) {
       const escape = escapeVal as Escape;
@@ -99,7 +99,6 @@ describe.only('mustache_renderer', () => {
       expect(renderMustacheString('{{amp}}', variables, 'slack')).toBe('&amp;');
       expect(renderMustacheString('{{nl}}', variables, 'slack')).toBe(variables.nl);
       expect(renderMustacheString('{{dq}}', variables, 'slack')).toBe(variables.dq);
-      expect(renderMustacheString('{{bt}}', variables, 'slack')).toBe(`'`);
       expect(renderMustacheString('{{bs}}', variables, 'slack')).toBe(variables.bs);
       expect(renderMustacheString('{{st}}', variables, 'slack')).toBe('`*`');
       expect(renderMustacheString('{{ul}}', variables, 'slack')).toBe('`_`');

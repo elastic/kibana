@@ -19,6 +19,8 @@ interface TemplateDirectives {
   format: string; // mustache or handlebars
 }
 
+type RenderFn = (text: string) => string;
+
 export function renderTemplate(
   originalTemplate: string,
   variables: Variables,
@@ -26,14 +28,41 @@ export function renderTemplate(
 ): string {
   const { template, directives } = getTemplateDirectives(originalTemplate);
   // presumably we'll default to mustache, but trying defaulting to handlebars
-  const format = directives.format;
+  const templateFormat = directives.format;
 
-  switch (format) {
+  switch (templateFormat) {
     case 'mustache':
+      const lambdas = {
+        formatDate: () =>
+          function (this: Variables, text: string, render: RenderFn) {
+            const terms = render(text.trim()).split(/\s+/g);
+            const [date, timeZone, ...formatTerms] = terms;
+            const format = formatTerms.length === 0 ? undefined : formatTerms.join(' ');
+
+            return formatDate(this, date, timeZone, format);
+          },
+        formatJson: () =>
+          function (this: Variables, text: string, render: RenderFn) {
+            return formatJson(this, JSON.parse(render(text.trim())), false);
+          },
+        formatJsonl: () =>
+          function (this: Variables, text: string, render: RenderFn) {
+            return formatJson(this, JSON.parse(render(text.trim())), true);
+          },
+        evalMath: () =>
+          function (this: Variables, text: string, render: RenderFn) {
+            return evalMath(this, render(text.trim()));
+          },
+        evalJexl: () =>
+          function (this: Variables, text: string, render: RenderFn) {
+            return evalJexl(this, render(text.trim()));
+          },
+      };
+
       const previousMustacheEscape = Mustache.escape;
       Mustache.escape = getEscape(escape);
       try {
-        return Mustache.render(template, variables);
+        return Mustache.render(template, { ...variables, ...lambdas });
       } finally {
         Mustache.escape = previousMustacheEscape;
       }
@@ -44,20 +73,22 @@ export function renderTemplate(
       handlebars.registerHelper(
         'formatDate',
         function (this: Variables, o: unknown, options: Handlebars.HelperOptions) {
-          return formatDate(this, o, options);
+          const timeZone = options?.hash?.timeZone;
+          const format = options?.hash?.format;
+          return formatDate(this, o, timeZone, format);
         }
       );
       handlebars.registerHelper('formatJson', function (this: Variables, o: unknown) {
-        return jsonize(this, o, false);
+        return formatJson(this, o, false);
       });
       handlebars.registerHelper('formatJsonl', function (this: Variables, o: unknown) {
-        return jsonize(this, o, true);
+        return formatJson(this, o, true);
       });
       handlebars.registerHelper('evalMath', function (this: Variables, o: unknown) {
-        return tinymathRunner(this, o);
+        return evalMath(this, o);
       });
       handlebars.registerHelper('evalJexl', function (this: Variables, o: unknown) {
-        return jexlRunner(this, o);
+        return evalJexl(this, o);
       });
 
       // see: https://github.com/handlebars-lang/handlebars.js/pull/1523
@@ -72,7 +103,7 @@ export function renderTemplate(
       }
 
     default:
-      throw new Error(`unknown format specified for template: ${format}`);
+      throw new Error(`unknown format specified for template: ${templateFormat}`);
   }
 }
 
@@ -123,20 +154,22 @@ function getTemplateDirectives(template: string): GetTemplateDirectives {
   return result;
 }
 
-const DefaultFormat = 'YYYY-MM-DD hh:mma';
+const DefaultDateFormat = 'YYYY-MM-DD hh:mma';
 
-function formatDate(_vars: Variables, o: unknown, options: Handlebars.HelperOptions): string {
-  const timeZone = `${options?.hash?.timeZone || 'UTC'}`;
-  const format = `${options?.hash?.format || DefaultFormat}`;
-
+function formatDate(
+  _vars: Variables,
+  o: unknown,
+  timeZone: string = 'UTC',
+  format: string = DefaultDateFormat
+): string {
   const mDate = moment(`${o}`);
   if (timeZone) {
     mDate.tz(timeZone);
   }
-  return mDate.format(format ?? DefaultFormat);
+  return mDate.format(format ?? DefaultDateFormat);
 }
 
-function jsonize(_vars: Variables, o: unknown, pretty: boolean): string {
+function formatJson(_vars: Variables, o: unknown, pretty: boolean): string {
   if (pretty) {
     return JSON.stringify(o, null, 4);
   } else {
@@ -144,7 +177,7 @@ function jsonize(_vars: Variables, o: unknown, pretty: boolean): string {
   }
 }
 
-function tinymathRunner(vars: Variables, o: unknown): string {
+function evalMath(vars: Variables, o: unknown): string {
   const expr = `${o}`;
   try {
     const result = tinymath.evaluate(expr, vars);
@@ -155,7 +188,7 @@ function tinymathRunner(vars: Variables, o: unknown): string {
 }
 
 // https://github.com/TomFrost/jexl
-function jexlRunner(vars: Variables, o: unknown): string {
+function evalJexl(vars: Variables, o: unknown): string {
   const expr = `${o}`;
   const jexlEnv = new jexl.Jexl();
   jexlEnv.addTransform('concat', (val, arg) => `${val}`.concat(`${arg}`));
