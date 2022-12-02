@@ -242,5 +242,3 @@ export function MachineLearningAlertingProvider(
     },
   };
 }
-
-
