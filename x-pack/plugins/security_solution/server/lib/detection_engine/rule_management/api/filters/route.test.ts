@@ -61,7 +61,7 @@ describe('Rule management filters route', () => {
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
-        rules_custom_installed_count: 1,
+        rules_custom_count: 1,
         rules_prebuilt_installed_count: 1,
       });
     });

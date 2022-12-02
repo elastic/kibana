@@ -14,7 +14,7 @@ import { RuleManagementFiltersResponse } from './response_schema';
 describe('Rule management filters response schema', () => {
   test('it should validate an empty response with defaults', () => {
     const payload: RuleManagementFiltersResponse = {
-      rules_custom_installed_count: 0,
+      rules_custom_count: 0,
       rules_prebuilt_installed_count: 0,
     };
     const decoded = RuleManagementFiltersResponse.decode(payload);
@@ -27,7 +27,7 @@ describe('Rule management filters response schema', () => {
 
   test('it should not validate an extra invalid field added', () => {
     const payload: RuleManagementFiltersResponse & { invalid_field: string } = {
-      rules_custom_installed_count: 0,
+      rules_custom_count: 0,
       rules_prebuilt_installed_count: 0,
       invalid_field: 'invalid',
     };
@@ -41,7 +41,7 @@ describe('Rule management filters response schema', () => {
 
   test('it should NOT validate an empty response with a negative "rules_prebuilt_installed_count" number', () => {
     const payload: RuleManagementFiltersResponse = {
-      rules_custom_installed_count: 0,
+      rules_custom_count: 0,
       rules_prebuilt_installed_count: -1,
     };
     const decoded = RuleManagementFiltersResponse.decode(payload);
@@ -54,9 +54,9 @@ describe('Rule management filters response schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should NOT validate an empty response with a negative "rules_custom_installed_count"', () => {
+  test('it should NOT validate an empty response with a negative "rules_custom_count"', () => {
     const payload: RuleManagementFiltersResponse = {
-      rules_custom_installed_count: -1,
+      rules_custom_count: -1,
       rules_prebuilt_installed_count: 0,
     };
     const decoded = RuleManagementFiltersResponse.decode(payload);
@@ -64,14 +64,14 @@ describe('Rule management filters response schema', () => {
     const message = pipe(checked, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "-1" supplied to "rules_custom_installed_count"',
+      'Invalid value "-1" supplied to "rules_custom_count"',
     ]);
     expect(message.schema).toEqual({});
   });
 
   test('it should NOT validate an empty prepackaged response if "rules_prebuilt_installed_count" is not there', () => {
     const payload: RuleManagementFiltersResponse = {
-      rules_custom_installed_count: 0,
+      rules_custom_count: 0,
       rules_prebuilt_installed_count: 0,
     };
     // @ts-expect-error

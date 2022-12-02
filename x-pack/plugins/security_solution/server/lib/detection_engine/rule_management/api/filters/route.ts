@@ -66,7 +66,7 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
           rulesClient
         );
         const responseBody: RuleManagementFiltersResponse = {
-          rules_custom_installed_count: customRulesCount,
+          rules_custom_count: customRulesCount,
           rules_prebuilt_installed_count: prebuiltRulesCount,
         };
         const [validatedBody, validationError] = validate(
