@@ -40,4 +40,13 @@ describe('replaceParamsQuery', () => {
       'SELECT * FROM processes WHERE version = 8.7.0 {not.existing} 8.7.0 8.7.0 testAgent';
     expect(result).toBe(expectedQuery);
   });
+
+  it('handle complex windows query with registry as param', () => {
+    const query = `select * FROM registry WHERE key LIKE 'HKEY_USERS\{user.id}\Software\Microsoft\IdentityCRL\Immersive\production\Token\{0CB4A94A-6E8C-477B-88C8-A3799FC97414}'`;
+    const result = replaceParamsQuery(query, {
+      user: { id: 'S-1-5-20' },
+    });
+    const expectedQuery = `select * FROM registry WHERE key LIKE 'HKEY_USERS\S-1-5-20\Software\Microsoft\IdentityCRL\Immersive\production\Token\{0CB4A94A-6E8C-477B-88C8-A3799FC97414}'`;
+    expect(result).toBe(expectedQuery);
+  });
 });
