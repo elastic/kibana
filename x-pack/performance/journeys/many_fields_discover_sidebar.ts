@@ -20,7 +20,7 @@ export const journey = new Journey({
     const availableFieldsCountSelector = subj('fieldListGroupedAvailableFields-count');
     await page.waitForSelector(availableFieldsCountSelector);
 
-    await page.waitForFunction(async function verifyCount(selector) {
+    await page.waitForFunction(function verifyCount(selector) {
       return document.querySelector(selector)?.innerHTML === '6873';
     }, availableFieldsCountSelector);
   })
@@ -28,7 +28,7 @@ export const journey = new Journey({
     const fieldName = '_all.primaries.bulk.avg_size_in_bytes';
     const selectedFieldsCountSelector = subj('fieldListGroupedSelectedFields-count');
 
-    await page.waitForFunction(async function verifyCountBefore(selector) {
+    await page.waitForFunction(function verifyCountBefore(selector) {
       return !document.querySelector(selector);
     }, selectedFieldsCountSelector);
 
@@ -37,7 +37,7 @@ export const journey = new Journey({
 
     await page.waitForSelector(selectedFieldsCountSelector);
 
-    await page.waitForFunction(async function verifyCountAfter(selector) {
+    await page.waitForFunction(function verifyCountAfter(selector) {
       return document.querySelector(selector)?.innerHTML === '1';
     }, selectedFieldsCountSelector);
   });
