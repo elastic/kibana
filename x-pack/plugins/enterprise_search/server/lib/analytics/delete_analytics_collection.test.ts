@@ -23,9 +23,6 @@ describe('delete analytics collection lib function', () => {
   const mockClient = {
     asCurrentUser: {
       delete: jest.fn(),
-      // indices: {
-      //   delete: jest.fn(),
-      // },
     },
     asInternalUser: {},
   };
