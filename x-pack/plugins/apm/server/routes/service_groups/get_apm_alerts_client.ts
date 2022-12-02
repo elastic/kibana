@@ -23,7 +23,7 @@ export async function getApmAlertsClient({
   ]);
 
   if (!apmAlertsIndices || isEmpty(apmAlertsIndices)) {
-    throw Error('No alert indices exist for "apm". Please fix it');
+    throw Error('No alert indices exist for "apm"');
   }
 
   type ApmAlertsClientSearchParams = Omit<
