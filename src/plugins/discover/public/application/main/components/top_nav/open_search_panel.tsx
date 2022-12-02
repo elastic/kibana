@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import rison from 'rison-node';
+import rison from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
