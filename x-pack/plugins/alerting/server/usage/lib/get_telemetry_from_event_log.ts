@@ -9,8 +9,6 @@ import { get, flatMap, merge } from 'lodash';
 import type {
   AggregationsKeyedPercentiles,
   AggregationsSingleBucketAggregateBase,
-  AggregationsPercentilesAggregateBase,
-  AggregationsSingleMetricAggregateBase,
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
   AggregationsBuckets,
@@ -28,7 +26,6 @@ import {
   EventLogUsageAggregationType,
   EventLogUsage,
   EventLogUsageByTypeSchema,
-  EmptyEventLogUsageByType,
   EmptyEventLogUsage,
 } from '../generated/event_log_telemetry_types';
 
