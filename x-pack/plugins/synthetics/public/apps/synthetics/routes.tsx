@@ -16,6 +16,7 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { getSettingsRouteConfig } from './components/settings/route_config';
 import { TestRunDetails } from './components/test_run_details/test_run_details';
 import { ErrorDetailsPage } from './components/error_details/error_details_page';
@@ -59,7 +60,6 @@ import { MonitorHistory } from './components/monitor_details/monitor_history/mon
 import { MonitorErrors } from './components/monitor_details/monitor_errors/monitor_errors';
 import { StepDetailPage } from './components/step_details_page/step_detail_page';
 import { useSelectedMonitor } from './components/monitor_details/hooks/use_selected_monitor';
-import { NotFound } from './components/not_found/not_found';
 
 export type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
@@ -436,7 +436,7 @@ export const PageRouter: FC = () => {
               <RouteInit title={title} path={path} />
               {is404?.() ? (
                 <SyntheticsPageTemplateComponent path={path} {...pageTemplateProps}>
-                  <NotFound />
+                  <NotFoundPrompt />
                 </SyntheticsPageTemplateComponent>
               ) : (
                 <SyntheticsPageTemplateComponent
