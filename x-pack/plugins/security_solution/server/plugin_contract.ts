@@ -38,6 +38,7 @@ import type { OsqueryPluginSetup } from '@kbn/osquery-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
+import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingPluginSetup;
@@ -57,6 +58,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   osquery: OsqueryPluginSetup;
   guidedOnboarding: GuidedOnboardingPluginSetup;
+  unifiedSearch: UnifiedSearchServerPluginSetup;
 }
 
 export interface SecuritySolutionPluginStartDependencies {
