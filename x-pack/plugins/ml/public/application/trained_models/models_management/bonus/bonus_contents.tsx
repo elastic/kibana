@@ -7,7 +7,7 @@
 
 import React, { FC, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import rison, { RisonValue } from 'rison-node';
+import rison, { RisonValue } from '@kbn/rison';
 
 import {
   // EuiButton,
