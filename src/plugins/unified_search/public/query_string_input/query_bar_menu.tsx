@@ -15,6 +15,7 @@ import {
   useGeneratedHtmlId,
   EuiButtonIconProps,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -22,6 +23,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
 import { QueryBarMenuPanels, QueryBarMenuPanelsProps } from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
+import { popoverDragAndDropCss } from './add_filter_popover.styles';
 
 export const strings = {
   getFilterSetButtonLabel: () =>
@@ -86,6 +88,7 @@ export function QueryBarMenu({
   isDisabled,
 }: QueryBarMenuProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
+  const euiTheme = useEuiTheme();
 
   useEffect(() => {
     if (openQueryBarMenu) {
@@ -187,6 +190,9 @@ export function QueryBarMenu({
         anchorPosition="downLeft"
         repositionOnScroll
         data-test-subj="queryBarMenuPopover"
+        panelProps={{
+          css: popoverDragAndDropCss(euiTheme),
+        }}
       >
         {renderComponent()}
       </EuiPopover>

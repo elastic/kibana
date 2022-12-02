@@ -6,22 +6,15 @@
  * Side Public License, v 1.
  */
 
-export interface IndexPatternRef {
-  id: string;
-  title: string;
-  name?: string;
-}
+export * from './kbn_rison';
 
-export interface FieldDetails {
-  error: string;
-  exists: number;
-  total: number;
-  buckets: Bucket[];
-}
-
-export interface Bucket {
-  display: string;
-  value: string;
-  percent: number;
-  count: number;
-}
+import { encode, encodeUnknown, decode, encodeArray, decodeArray } from './kbn_rison';
+// maintain compatibility with 'rison-node' and include a default export
+// eslint-disable-next-line import/no-default-export
+export default {
+  encode,
+  encodeUnknown,
+  decode,
+  encodeArray,
+  decodeArray,
+};

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -20,6 +20,11 @@ import {
 } from '@elastic/eui';
 import { getFilterableFields } from '../../filter_bar/filter_editor';
 import { FiltersBuilderContextType } from '../context';
+import { TruncatedLabel } from '../../filter_bar/filter_editor';
+
+const DEFAULT_COMBOBOX_WIDTH = 205;
+const COMBOBOX_PADDINGS = 100;
+const DEFAULT_FONT = '14px Inter';
 
 export const strings = {
   getFieldSelectPlaceholderLabel: () =>
@@ -38,6 +43,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
   const { disabled } = useContext(FiltersBuilderContextType);
   const fields = dataView ? getFilterableFields(dataView) : [];
   const id = useGeneratedHtmlId({ prefix: 'fieldInput' });
+  const comboBoxRef = useRef<HTMLInputElement>(null);
 
   const onFieldChange = useCallback(
     ([selectedField]: DataViewField[]) => {
@@ -68,27 +74,38 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
   };
 
   return (
-    <EuiComboBox
-      id={id}
-      options={euiOptions}
-      selectedOptions={selectedEuiOptions}
-      onChange={onComboBoxChange}
-      isDisabled={disabled}
-      placeholder={strings.getFieldSelectPlaceholderLabel()}
-      sortMatchesBy="startsWith"
-      singleSelection={{ asPlainText: true }}
-      isClearable={false}
-      compressed
-      fullWidth
-      data-test-subj="filterFieldSuggestionList"
-      renderOption={(option) => (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={null}>
-            <FieldIcon type={option.value!} fill="none" />
-          </EuiFlexItem>
-          <EuiFlexItem>{option.label}</EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-    />
+    <div ref={comboBoxRef}>
+      <EuiComboBox
+        id={id}
+        options={euiOptions}
+        selectedOptions={selectedEuiOptions}
+        onChange={onComboBoxChange}
+        isDisabled={disabled}
+        placeholder={strings.getFieldSelectPlaceholderLabel()}
+        sortMatchesBy="startsWith"
+        singleSelection={{ asPlainText: true }}
+        isClearable={false}
+        compressed
+        fullWidth
+        data-test-subj="filterFieldSuggestionList"
+        renderOption={(option, searchValue) => (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={null}>
+              <FieldIcon type={option.value!} fill="none" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <TruncatedLabel
+                defaultComboboxWidth={DEFAULT_COMBOBOX_WIDTH}
+                defaultFont={DEFAULT_FONT}
+                comboboxPaddings={COMBOBOX_PADDINGS}
+                comboBoxRef={comboBoxRef}
+                label={option.label}
+                search={searchValue}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      />
+    </div>
   );
 }
