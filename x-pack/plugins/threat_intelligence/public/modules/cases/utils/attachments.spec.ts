@@ -20,7 +20,6 @@ describe('generateAttachmentsWithoutOwner', () => {
       indicatorName: 'indicatorName',
       indicatorType: 'file',
       indicatorFeedName: 'Filebeat] AbuseCH Malwar',
-      indicatorFirstSeen: '2022-01-01T01:01:01.000Z',
     };
 
     const result = generateAttachmentsWithoutOwner(externalReferenceId, metadata);
@@ -33,7 +32,6 @@ describe('generateAttachmentsWithoutOwner', () => {
       indicatorName: 'indicatorName',
       indicatorType: 'file',
       indicatorFeedName: 'Filebeat] AbuseCH Malwar',
-      indicatorFirstSeen: '2022-01-01T01:01:01.000Z',
     };
 
     const result: CaseAttachmentsWithoutOwner = generateAttachmentsWithoutOwner(

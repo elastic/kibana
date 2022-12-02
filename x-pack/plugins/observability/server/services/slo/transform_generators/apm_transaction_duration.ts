@@ -30,7 +30,8 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
       this.buildCommonGroupBy(slo),
-      this.buildAggregations(slo.indicator)
+      this.buildAggregations(slo.indicator),
+      this.buildSettings(slo)
     );
   }
 

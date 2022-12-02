@@ -14,7 +14,7 @@ import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 
 import { pluginServices } from '../services';
-import { ControlPanelState, getDefaultControlGroupInput } from '../../common';
+import { getDefaultControlGroupInput } from '../../common';
 import {
   ControlGroupInput,
   ControlGroupOutput,
@@ -22,75 +22,29 @@ import {
   CONTROL_GROUP_TYPE,
 } from './types';
 import { ControlGroupContainer } from './embeddable/control_group_container';
-import { DataControlInput, ControlInput } from '../types';
-import { getCompatibleControlType, getNextPanelOrder } from './embeddable/control_group_helpers';
 import { controlGroupReducers } from './state/control_group_reducers';
-
-export const ControlGroupInputBuilder = {
-  addDataControlFromField: async (
-    initialInput: Partial<ControlGroupInput>,
-    newPanelInput: {
-      title?: string;
-      panelId?: string;
-      fieldName: string;
-      dataViewId: string;
-    } & Partial<ControlPanelState>
-  ) => {
-    const { defaultControlGrow, defaultControlWidth } = getDefaultControlGroupInput();
-    const controlGrow = initialInput.defaultControlGrow ?? defaultControlGrow;
-    const controlWidth = initialInput.defaultControlWidth ?? defaultControlWidth;
-
-    const { panelId, dataViewId, fieldName, title, grow, width } = newPanelInput;
-    const newPanelId = panelId || uuid.v4();
-    const controlType = await getCompatibleControlType({ dataViewId, fieldName });
-
-    initialInput.panels = {
-      ...initialInput.panels,
-      [newPanelId]: {
-        order: getNextPanelOrder(initialInput),
-        type: controlType,
-        grow: grow ?? controlGrow,
-        width: width ?? controlWidth,
-        explicitInput: { id: newPanelId, dataViewId, fieldName, title: title ?? fieldName },
-      } as ControlPanelState<DataControlInput>,
-    };
-  },
-  addTimesliderControl: (initialInput: Partial<ControlGroupInput>) => {
-    const newPanelId = uuid.v4();
-    initialInput.panels = {
-      ...initialInput.panels,
-      [newPanelId]: {
-        order: getNextPanelOrder(initialInput),
-        type: 'timeSlider',
-        grow: true,
-        width: 'large',
-        explicitInput: {
-          id: newPanelId,
-          title: 'timeslider',
-        },
-      } as ControlPanelState<ControlInput>,
-    };
-  },
-};
+import { controlGroupInputBuilder } from './control_group_input_builder';
 
 export interface ControlGroupRendererProps {
-  onEmbeddableLoad: (controlGroupContainer: ControlGroupContainer) => void;
-  getCreationOptions: (
-    builder: typeof ControlGroupInputBuilder
+  onLoadComplete?: (controlGroup: ControlGroupContainer) => void;
+  getInitialInput: (
+    initialInput: Partial<ControlGroupInput>,
+    builder: typeof controlGroupInputBuilder
   ) => Promise<Partial<ControlGroupInput>>;
 }
 
 export const ControlGroupRenderer = ({
-  onEmbeddableLoad,
-  getCreationOptions,
+  onLoadComplete,
+  getInitialInput,
 }: ControlGroupRendererProps) => {
-  const controlsRoot = useRef(null);
-  const [controlGroupContainer, setControlGroupContainer] = useState<ControlGroupContainer>();
+  const controlGroupRef = useRef(null);
+  const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
   const id = useMemo(() => uuid.v4(), []);
   /**
    * Use Lifecycles to load initial control group container
    */
   useLifecycles(
+    // onMount
     () => {
       const { embeddable } = pluginServices.getServices();
       (async () => {
@@ -99,25 +53,28 @@ export const ControlGroupRenderer = ({
           ControlGroupOutput,
           IEmbeddable<ControlGroupInput, ControlGroupOutput>
         >(CONTROL_GROUP_TYPE);
-        const container = (await factory?.create({
+        const newControlGroup = (await factory?.create({
           id,
           ...getDefaultControlGroupInput(),
-          ...(await getCreationOptions(ControlGroupInputBuilder)),
+          ...(await getInitialInput(getDefaultControlGroupInput(), controlGroupInputBuilder)),
         })) as ControlGroupContainer;
 
-        if (controlsRoot.current) {
-          container.render(controlsRoot.current);
+        if (controlGroupRef.current) {
+          newControlGroup.render(controlGroupRef.current);
         }
-        setControlGroupContainer(container);
-        onEmbeddableLoad(container);
+        setControlGroup(newControlGroup);
+        if (onLoadComplete) {
+          onLoadComplete(newControlGroup);
+        }
       })();
     },
+    // onUnmount
     () => {
-      controlGroupContainer?.destroy();
+      controlGroup?.destroy();
     }
   );
 
-  return <div ref={controlsRoot} />;
+  return <div ref={controlGroupRef} />;
 };
 
 export const useControlGroupContainerContext = () =>

@@ -24,6 +24,14 @@ const objectiveSchema = t.intersection([
   t.partial({ timeslice_target: t.number, timeslice_window: durationType }),
 ]);
 
+const settingsSchema = t.type({
+  timestamp_field: t.string,
+  sync_delay: durationType,
+  frequency: durationType,
+});
+
+const optionalSettingsSchema = t.partial({ ...settingsSchema.props });
+
 const sloSchema = t.type({
   id: t.string,
   name: t.string,
@@ -32,6 +40,7 @@ const sloSchema = t.type({
   time_window: timeWindowSchema,
   budgeting_method: budgetingMethodSchema,
   objective: objectiveSchema,
+  settings: settingsSchema,
   revision: t.number,
   created_at: dateType,
   updated_at: dateType,
@@ -43,6 +52,8 @@ export {
   budgetingMethodSchema,
   objectiveSchema,
   occurrencesBudgetingMethodSchema,
+  optionalSettingsSchema,
+  settingsSchema,
   sloSchema,
   sloWithSummarySchema,
   timeslicesBudgetingMethodSchema,

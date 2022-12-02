@@ -22,6 +22,7 @@ export type {
   ControlStyle,
   ParentIgnoreSettings,
   ControlInput,
+  DataControlInput,
 } from '../common/types';
 
 export {
@@ -32,9 +33,12 @@ export {
 } from '../common';
 
 export {
+  type AddDataControlProps,
+  type AddOptionsListControlProps,
   type ControlGroupContainer,
   ControlGroupContainerFactory,
   type ControlGroupInput,
+  controlGroupInputBuilder,
   type ControlGroupOutput,
 } from './control_group';
 
