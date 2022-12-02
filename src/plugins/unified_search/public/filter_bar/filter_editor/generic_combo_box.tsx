@@ -14,6 +14,11 @@ export interface GenericComboBoxProps<T> {
   selectedOptions: T[];
   getLabel: (value: T) => string;
   onChange: (values: T[]) => void;
+  renderOption?: (
+    option: EuiComboBoxOptionOption,
+    searchValue: string,
+    OPTION_CONTENT_CLASSNAME: string
+  ) => React.ReactNode;
   [propName: string]: any;
 }
 
