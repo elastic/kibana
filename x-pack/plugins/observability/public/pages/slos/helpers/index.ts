@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export * from './eui_draggable';
-export * from './fetch_overview_data';
-export * from './slo';
-export * from './utils';
+export { isSloFeatureEnabled } from './is_slo_feature_enabled';

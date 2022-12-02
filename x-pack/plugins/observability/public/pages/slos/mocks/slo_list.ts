@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export * from './eui_draggable';
-export * from './fetch_overview_data';
-export * from './slo';
-export * from './utils';
+import { SLOList } from '../../../typings';
+
+export const emptySloList: SLOList = {
+  results: [],
+  page: 1,
+  perPage: 25,
+  total: 0,
+};
