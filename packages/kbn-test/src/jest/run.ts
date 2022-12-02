@@ -54,7 +54,9 @@ export function runJest(configName = 'jest.config.js') {
       `unexpected flag: ${flags}
 
   If this flag is valid you might need to update the flags in "packages/kbn-test/src/jest/run.js".
-  Run 'node scripts/read_jest_cli_params.js' to get the correct values from the help output of jest
+
+  Run 'yarn jest --help | node scripts/read_jest_help.mjs' to update this scripts knowledge of what
+  flags jest supports
 
 `
     );
