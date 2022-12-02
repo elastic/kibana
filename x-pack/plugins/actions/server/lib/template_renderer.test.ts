@@ -25,10 +25,9 @@ describe('template_renderer', () => {
     // -------------------------------------------------------------------
     it('date with a time zone is successful', () => {
       const timeStamp = '2022-11-29T15:52:44Z';
-      const timeZone = 'America/New_York';
       const template = dedent`
         {{!@ format: mustache}}
-        {{#formatDate}} {{timeStamp}} ${timeZone} {{/formatDate}}
+        {{#formatDate}} {{timeStamp}} America/New_York {{/formatDate}}
       `.trim();
 
       expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual('2022-11-29 10:52am');
@@ -37,11 +36,9 @@ describe('template_renderer', () => {
     // -------------------------------------------------------------------
     it('date with a format and timezone is successful', () => {
       const timeStamp = '2022-11-29T15:52:44Z';
-      const dateFormat = 'dddd MMM Do YYYY HH:mm:ss.SSS';
-      const timeZone = 'America/New_York';
       const template = dedent`
         {{!@ format: mustache}}
-        {{#formatDate}}{{timeStamp}} ${timeZone} ${dateFormat}{{/formatDate}}
+        {{#formatDate}}{{timeStamp}} America/New_York dddd MMM Do YYYY HH:mm:ss.SSS{{/formatDate}}
     `.trim();
 
       expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual(
@@ -106,18 +103,20 @@ describe('template_renderer', () => {
         },
       };
       const template = dedent`
-  {{!@ format: mustache}}
-  {{#formatJsonl}} context {{/formatJsonl}}
+        {{!@ format: mustache}}
+        {{#formatJsonl}} context {{/formatJsonl}}
     `.trim();
 
-      expect(renderMustacheString(template, vars, 'none')).toEqual(`{
-    "a": {
-        "b": 1
-    },
-    "c": {
-        "d": 2
-    }
-}`);
+      expect(renderMustacheString(template, vars, 'none')).toMatchInlineSnapshot(`
+        "{
+            \\"a\\": {
+                \\"b\\": 1
+            },
+            \\"c\\": {
+                \\"d\\": 2
+            }
+        }"
+      `);
     });
 
     // -------------------------------------------------------------------
@@ -131,9 +130,9 @@ describe('template_renderer', () => {
       const template = dedent`
         {{!@ format: mustache}}
         {{#evalMath}} 1 + 0 {{/evalMath}}
-        {{#evalMath}} 1 + {{context.a.b}} {{/evalMath}}
+        {{#evalMath}} 1 + context.a.b {{/evalMath}}
         {{#context}}
-        {{#evalMath}} 1 + {{c.d}} {{/evalMath}}
+        {{#evalMath}} 1 + c.d {{/evalMath}}
         {{/context}}
       `.trim();
 
@@ -156,9 +155,9 @@ describe('template_renderer', () => {
       const template = dedent`
         {{!@ format: mustache}}
         {{#evalJexl}} 1 + 0 {{/evalJexl}}
-        {{#evalJexl}} 1 + {{context.a.b}} {{/evalJexl}}
+        {{#evalJexl}} 1 + context.a.b {{/evalJexl}}
         {{#context}}
-        {{#evalJexl}} 1 + {{c.d}} {{/evalJexl}}
+        {{#evalJexl}} 1 + c.d {{/evalJexl}}
         {{#evalJexl}} e.firstName|toLowerCase + " " + e.lastName|toUpperCase {{/evalJexl}}
         {{/context}}
       `.trim();
@@ -193,10 +192,9 @@ describe('template_renderer', () => {
     // -------------------------------------------------------------------
     it('date with a time zone is successful', () => {
       const timeStamp = '2022-11-29T15:52:44Z';
-      const timeZone = 'America/New_York';
       const template = dedent`
         {{!@ format: handlebars}}
-        {{formatDate timeStamp timeZone="${timeZone}"}}
+        {{formatDate timeStamp timeZone="America/New_York"}}
       `.trim();
 
       expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual('2022-11-29 10:52am');
@@ -205,10 +203,9 @@ describe('template_renderer', () => {
     // -------------------------------------------------------------------
     it('date with a format is successful', () => {
       const timeStamp = '2022-11-29T15:52:44Z';
-      const dateFormat = 'dddd MMM Do YYYY HH:mm:ss.SSS';
       const template = dedent`
         {{!@ format: handlebars}}
-        {{formatDate timeStamp format="${dateFormat}"}}
+        {{formatDate timeStamp format="dddd MMM Do YYYY HH:mm:ss.SSS"}}
       `.trim();
 
       expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual(
@@ -219,11 +216,9 @@ describe('template_renderer', () => {
     // -------------------------------------------------------------------
     it('date with a format and timezone is successful', () => {
       const timeStamp = '2022-11-29T15:52:44Z';
-      const dateFormat = 'dddd MMM Do YYYY HH:mm:ss.SSS';
-      const timeZone = 'America/New_York';
       const template = dedent`
         {{!@ format: handlebars}}
-        {{formatDate timeStamp format="${dateFormat}" timeZone="${timeZone}"}}
+        {{formatDate timeStamp format="dddd MMM Do YYYY HH:mm:ss.SSS" timeZone="America/New_York"}}
     `.trim();
 
       expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual(
@@ -292,14 +287,16 @@ describe('template_renderer', () => {
         {{formatJsonl context}}
     `.trim();
 
-      expect(renderMustacheString(template, vars, 'none')).toEqual(`{
-    "a": {
-        "b": 1
-    },
-    "c": {
-        "d": 2
-    }
-}`);
+      expect(renderMustacheString(template, vars, 'none')).toMatchInlineSnapshot(`
+        "{
+            \\"a\\": {
+                \\"b\\": 1
+            },
+            \\"c\\": {
+                \\"d\\": 2
+            }
+        }"
+      `);
     });
 
     // -------------------------------------------------------------------

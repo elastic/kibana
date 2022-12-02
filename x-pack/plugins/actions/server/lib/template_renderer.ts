@@ -20,8 +20,6 @@ interface TemplateDirectives {
   format: string; // mustache or handlebars
 }
 
-type RenderFn = (text: string) => string;
-
 export function renderTemplate(
   originalTemplate: string,
   variables: Variables,
@@ -33,68 +31,17 @@ export function renderTemplate(
 
   switch (templateFormat) {
     case 'mustache':
-      const lambdas = {
-        formatDate: () =>
-          function (this: Variables, text: string, render: RenderFn) {
-            const terms = render(text.trim()).split(/\s+/g);
-            const [date, timeZone, ...formatTerms] = terms;
-            const format = formatTerms.length === 0 ? undefined : formatTerms.join(' ');
-
-            return formatDate(this, date, timeZone, format);
-          },
-        formatJson: () =>
-          function (this: Variables, text: string, render: RenderFn) {
-            const key = text.trim();
-            const val = get(this, key);
-            return formatJson(this, val, false);
-          },
-        formatJsonl: () =>
-          function (this: Variables, text: string, render: RenderFn) {
-            const key = text.trim();
-            const val = get(this, key);
-            return formatJson(this, val, true);
-          },
-        evalMath: () =>
-          function (this: Variables, text: string, render: RenderFn) {
-            return evalMath(this, render(text.trim()));
-          },
-        evalJexl: () =>
-          function (this: Variables, text: string, render: RenderFn) {
-            return evalJexl(this, render(text.trim()));
-          },
-      };
-
       const previousMustacheEscape = Mustache.escape;
       Mustache.escape = getEscape(escape);
       try {
-        return Mustache.render(template, { ...variables, ...lambdas });
+        return Mustache.render(template, { ...variables, ...MustacheLambdas });
       } finally {
         Mustache.escape = previousMustacheEscape;
       }
 
     case 'handlebars':
       const handlebars = Handlebars.create();
-
-      handlebars.registerHelper(
-        'formatDate',
-        function (this: Variables, o: unknown, options: Handlebars.HelperOptions) {
-          const timeZone = options?.hash?.timeZone;
-          const format = options?.hash?.format;
-          return formatDate(this, o, timeZone, format);
-        }
-      );
-      handlebars.registerHelper('formatJson', function (this: Variables, o: unknown) {
-        return formatJson(this, o, false);
-      });
-      handlebars.registerHelper('formatJsonl', function (this: Variables, o: unknown) {
-        return formatJson(this, o, true);
-      });
-      handlebars.registerHelper('evalMath', function (this: Variables, o: unknown) {
-        return evalMath(this, o);
-      });
-      handlebars.registerHelper('evalJexl', function (this: Variables, o: unknown) {
-        return evalJexl(this, o);
-      });
+      registerHandlebarsHelpers(handlebars);
 
       // see: https://github.com/handlebars-lang/handlebars.js/pull/1523
       // and issues linked to it, for a better approach to customizing
@@ -110,6 +57,64 @@ export function renderTemplate(
     default:
       throw new Error(`unknown format specified for template: ${templateFormat}`);
   }
+}
+
+type RenderFn = (text: string) => string;
+
+const MustacheLambdas = {
+  formatDate: () =>
+    function (this: Variables, text: string, render: RenderFn) {
+      const terms = render(text.trim()).split(/\s+/g);
+      const [date, timeZone, ...formatTerms] = terms;
+      const format = formatTerms.length === 0 ? undefined : formatTerms.join(' ');
+
+      return formatDate(this, date, timeZone, format);
+    },
+  formatJson: () =>
+    function (this: Variables, text: string, render: RenderFn) {
+      const key = text.trim();
+      const val = get(this, key);
+      return formatJson(this, val, false);
+    },
+  formatJsonl: () =>
+    function (this: Variables, text: string, render: RenderFn) {
+      const key = text.trim();
+      const val = get(this, key);
+      return formatJson(this, val, true);
+    },
+  evalMath: () =>
+    function (this: Variables, text: string, render: RenderFn) {
+      return evalMath(this, render(text.trim()));
+    },
+  evalJexl: () =>
+    function (this: Variables, text: string, render: RenderFn) {
+      return evalJexl(this, render(text.trim()));
+    },
+};
+
+type HandlebarsEnv = ReturnType<typeof Handlebars['create']>;
+
+function registerHandlebarsHelpers(handlebars: HandlebarsEnv) {
+  handlebars.registerHelper(
+    'formatDate',
+    function (this: Variables, o: unknown, options: Handlebars.HelperOptions) {
+      const timeZone = options?.hash?.timeZone;
+      const format = options?.hash?.format;
+      return formatDate(this, o, timeZone, format);
+    }
+  );
+  handlebars.registerHelper('formatJson', function (this: Variables, o: unknown) {
+    return formatJson(this, o, false);
+  });
+  handlebars.registerHelper('formatJsonl', function (this: Variables, o: unknown) {
+    return formatJson(this, o, true);
+  });
+  handlebars.registerHelper('evalMath', function (this: Variables, o: unknown) {
+    return evalMath(this, o);
+  });
+  handlebars.registerHelper('evalJexl', function (this: Variables, o: unknown) {
+    return evalJexl(this, o);
+  });
 }
 
 interface GetTemplateDirectives {
@@ -195,6 +200,8 @@ function evalMath(vars: Variables, o: unknown): string {
 // https://github.com/TomFrost/jexl
 function evalJexl(vars: Variables, o: unknown): string {
   const expr = `${o}`;
+
+  // are these stateless?  Can we just create it once and keep reusing?
   const jexlEnv = new jexl.Jexl();
   jexlEnv.addTransform('concat', (val, arg) => `${val}`.concat(`${arg}`));
   jexlEnv.addTransform('endsWith', (val, arg) => `${val}`.endsWith(`${arg}`));
