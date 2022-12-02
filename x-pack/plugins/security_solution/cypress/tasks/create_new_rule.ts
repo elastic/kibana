@@ -241,7 +241,6 @@ export const importSavedQuery = (timelineId: string) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(timelineId)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('not.be.empty');
-  removeAlertsIndex();
 };
 
 export const fillRuleName = (ruleName: string = ruleFields.ruleName) => {
@@ -347,7 +346,9 @@ const fillCustomQuery = (rule: CustomRule | OverrideRule) => {
     cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
     cy.get(TIMELINE(rule.timeline.id)).click();
     cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
-    removeAlertsIndex();
+    if (rule.dataSource.type === 'indexPatterns') {
+      removeAlertsIndex();
+    }
   } else {
     cy.get(CUSTOM_QUERY_INPUT)
       .first()
@@ -705,20 +706,3 @@ export const checkLoadQueryDynamically = () => {
 export const uncheckLoadQueryDynamically = () => {
   cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).click({ force: true }).should('not.be.checked');
 };
-
-export const defineSection = { importSavedQuery };
-export const aboutSection = {
-  fillRuleName,
-  fillDescription,
-  fillSeverity,
-  fillRiskScore,
-  fillRuleTags,
-  expandAdvancedSettings,
-  fillReferenceUrls,
-  fillFalsePositiveExamples,
-  fillThreat,
-  fillThreatTechnique,
-  fillThreatSubtechnique,
-  fillNote,
-};
-export const scheduleSection = { fillFrom };
