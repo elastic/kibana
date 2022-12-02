@@ -34,6 +34,7 @@ export function useMonitorsSortedByStatus() {
 
     const { downConfigs } = status;
     const downMonitorMap: Record<string, string[]> = {};
+    console.warn('downConfigs', downConfigs);
     downConfigs.forEach(({ location, configId }) => {
       if (downMonitorMap[configId]) {
         downMonitorMap[configId].push(location);
@@ -51,8 +52,8 @@ export function useMonitorsSortedByStatus() {
       if (!monitor.isEnabled) {
         orderedDisabledMonitors.push(monitor);
       } else if (
-        monitor.id in downMonitorMap &&
-        downMonitorMap[monitor.id].includes(monitorLocation)
+        monitor.configId in downMonitorMap &&
+        downMonitorMap[monitor.configId].includes(monitorLocation)
       ) {
         orderedDownMonitors.push(monitor);
       } else {
