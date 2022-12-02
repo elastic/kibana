@@ -437,6 +437,7 @@ export function DiscoverSidebarComponent({
                                 showFieldStats={showFieldStats}
                                 contextualFields={columns}
                                 setCollapseByField={() => setCollapseByField(field.name)}
+                                viewMode={viewMode}
                               />
                             </li>
                           );

@@ -37,6 +37,7 @@ import { getFieldTypeName } from '../../../../utils/get_field_type_name';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { SHOW_LEGACY_FIELD_TOP_VALUES, PLUGIN_ID } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
+import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows
@@ -97,10 +98,11 @@ interface ActionButtonProps {
   alwaysShow: boolean;
   toggleDisplay: (field: DataViewField, isSelected?: boolean) => void;
   setCollapseByField?: () => void;
+  viewMode: VIEW_MODE;
 }
 
 const ActionButton: React.FC<ActionButtonProps> = memo(
-  ({ field, isSelected, alwaysShow, toggleDisplay, setCollapseByField }) => {
+  ({ field, isSelected, alwaysShow, toggleDisplay, setCollapseByField, viewMode }) => {
     const actionBtnClassName = classNames('dscSidebarItem__action', {
       ['dscSidebarItem__mobile']: alwaysShow,
     });
@@ -138,7 +140,7 @@ const ActionButton: React.FC<ActionButtonProps> = memo(
     } else {
       return (
         <EuiFlexGroup gutterSize="none">
-          {field.type === 'string' && (
+          {viewMode === VIEW_MODE.TERMS_LEVEL && field.type === 'string' && (
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 delay="long"
@@ -318,6 +320,8 @@ export interface DiscoverFieldProps {
    * sets current field to collapse by for the term explorer table
    */
   setCollapseByField?: () => void;
+
+  viewMode: VIEW_MODE;
 }
 
 function DiscoverFieldComponent({
@@ -336,6 +340,7 @@ function DiscoverFieldComponent({
   showFieldStats,
   contextualFields,
   setCollapseByField,
+  viewMode,
 }: DiscoverFieldProps) {
   const services = useDiscoverServices();
   const [infoIsOpen, setOpen] = useState(false);
@@ -408,6 +413,7 @@ function DiscoverFieldComponent({
             alwaysShow={alwaysShowActionButton}
             toggleDisplay={toggleDisplay}
             setCollapseByField={setCollapseByField}
+            viewMode={viewMode}
           />
         }
         fieldName={<FieldName field={field} />}
@@ -430,6 +436,7 @@ function DiscoverFieldComponent({
           alwaysShow={alwaysShowActionButton}
           toggleDisplay={toggleDisplay}
           setCollapseByField={setCollapseByField}
+          viewMode={viewMode}
         />
       }
       fieldName={<FieldName field={field} />}
