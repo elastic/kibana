@@ -87,6 +87,8 @@ export const extractAttachmentSORefsFromAttributes = (
     transformedFields,
     references: refsWithExternalRefId,
     didDeleteOperation,
+    // TODO: why is this a NoSO? shouldn't it be either? the places where this is called seem to indicate
+    // that either type of attachment framework type can be passed in
   } = soExtractor.extractFieldsToReferences<CommentAttributesNoSO>({
     data: attributes,
     existingReferences: references,

@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { z } from 'zod';
+import { z } from 'zod';
 import * as rt from 'io-ts';
 import { either, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
@@ -130,6 +130,14 @@ export function excess<
   );
   return r as C;
 }
+
+const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+type Literal = z.infer<typeof literalSchema>;
+type Json = Literal | { [key: string]: Json } | Json[];
+
+export const jsonSchema: z.ZodType<Json> = z.lazy(() =>
+  z.union([literalSchema, z.array(jsonSchema), z.record(jsonSchema)])
+);
 
 export const jsonScalarRt = rt.union([rt.null, rt.boolean, rt.number, rt.string]);
 

@@ -11,7 +11,7 @@ import { NumberFromString } from '../saved_object';
 import { UserSchema } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
-import { CaseConnectorRt } from '../connectors';
+import { CaseConnectorSchema } from '../connectors';
 import { CaseAssigneesSchema } from './assignee';
 
 export const AttachmentTotalsRt = rt.type({
@@ -68,7 +68,7 @@ const CaseBasicRt = rt.type({
   /**
    * The external system that the case can be synced with
    */
-  connector: CaseConnectorRt,
+  connector: CaseConnectorSchema,
   /**
    * The alert sync settings
    */

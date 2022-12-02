@@ -6,15 +6,8 @@
  */
 
 import { z } from 'zod';
-import * as rt from 'io-ts';
 
 import type { ActionType } from '@kbn/actions-plugin/common';
-/**
- * ActionResult type from the common folder is outdated.
- * The type from server is not exported properly so we
- * disable the linting for the moment
- */
-
 import type { ActionResult } from '@kbn/actions-plugin/server/types';
 import { JiraFieldsSchema } from './jira';
 import { ResilientFieldsSchema } from './resilient';
@@ -103,6 +96,9 @@ const ConnectorTypeFieldsSchema = z.discriminatedUnion('type', [
   ConnectorSwimlaneTypeFieldsSchema,
 ]);
 
+/**
+ * This type represents the connector's format when it is encoded within a user action.
+ */
 export const CaseUserActionConnectorSchema = z.discriminatedUnion('type', [
   ConnectorCasesWebhookTypeFieldsSchema.merge(z.strictObject({ name: z.string() })),
   ConnectorJiraTypeFieldsSchema.merge(z.strictObject({ name: z.string() })),
@@ -127,34 +123,15 @@ export const CaseConnectorSchema = z.discriminatedUnion('type', [
   ConnectorSwimlaneTypeFieldsSchema.merge(z.strictObject({ name: z.string(), id: z.string() })),
 ]);
 
-/**
- * This type represents the connector's format when it is encoded within a user action.
- */
-export const CaseUserActionConnectorRt = rt.union([
-  rt.intersection([ConnectorCasesWebhookTypeFieldsRt, rt.type({ name: rt.string })]),
-  rt.intersection([ConnectorJiraTypeFieldsRt, rt.type({ name: rt.string })]),
-  rt.intersection([ConnectorNoneTypeFieldsRt, rt.type({ name: rt.string })]),
-  rt.intersection([ConnectorResilientTypeFieldsRt, rt.type({ name: rt.string })]),
-  rt.intersection([ConnectorServiceNowITSMTypeFieldsRt, rt.type({ name: rt.string })]),
-  rt.intersection([ConnectorServiceNowSIRTypeFieldsRt, rt.type({ name: rt.string })]),
-  rt.intersection([ConnectorSwimlaneTypeFieldsRt, rt.type({ name: rt.string })]),
-]);
-
-export const CaseConnectorRt = rt.intersection([
-  rt.type({
-    id: rt.string,
-  }),
-  CaseUserActionConnectorRt,
-]);
-
-export type CaseUserActionConnector = rt.TypeOf<typeof CaseUserActionConnectorRt>;
-export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;
-export type ConnectorTypeFields = rt.TypeOf<typeof ConnectorTypeFieldsRt>;
-export type ConnectorCasesWebhookTypeFields = rt.TypeOf<typeof ConnectorCasesWebhookTypeFieldsRt>;
-export type ConnectorJiraTypeFields = rt.TypeOf<typeof ConnectorJiraTypeFieldsRt>;
-export type ConnectorResilientTypeFields = rt.TypeOf<typeof ConnectorResilientTypeFieldsRt>;
-export type ConnectorSwimlaneTypeFields = rt.TypeOf<typeof ConnectorSwimlaneTypeFieldsRt>;
-export type ConnectorServiceNowITSMTypeFields = rt.TypeOf<
-  typeof ConnectorServiceNowITSMTypeFieldsRt
+export type CaseUserActionConnector = z.infer<typeof CaseUserActionConnectorSchema>;
+export type CaseConnector = z.infer<typeof CaseConnectorSchema>;
+export type ConnectorTypeFields = z.infer<typeof ConnectorTypeFieldsSchema>;
+export type ConnectorJiraTypeFields = z.infer<typeof ConnectorJiraTypeFieldsSchema>;
+export type ConnectorResilientTypeFields = z.infer<typeof ConnectorResilientTypeFieldsSchema>;
+export type ConnectorSwimlaneTypeFields = z.infer<typeof ConnectorSwimlaneTypeFieldsSchema>;
+export type ConnectorServiceNowITSMTypeFields = z.infer<
+  typeof ConnectorServiceNowITSMTypeFieldsSchema
 >;
-export type ConnectorServiceNowSIRTypeFields = rt.TypeOf<typeof ConnectorServiceNowSIRTypeFieldsRt>;
+export type ConnectorServiceNowSIRTypeFields = z.infer<
+  typeof ConnectorServiceNowSIRTypeFieldsSchema
+>;

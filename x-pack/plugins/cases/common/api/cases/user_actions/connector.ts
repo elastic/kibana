@@ -5,30 +5,32 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { CaseUserActionConnectorRt, CaseConnectorRt } from '../../connectors';
+import { z } from 'zod';
+import { CaseConnectorSchema, CaseUserActionConnectorSchema } from '../../connectors';
 import type { UserActionWithAttributes } from './common';
 import { ActionTypes } from './common';
 
-export const ConnectorUserActionPayloadWithoutConnectorIdRt = rt.type({
-  connector: CaseUserActionConnectorRt,
+export const ConnectorUserActionPayloadWithoutConnectorIdSchema = z.strictObject({
+  connector: CaseUserActionConnectorSchema,
 });
 
-export const ConnectorUserActionPayloadRt = rt.type({
-  connector: CaseConnectorRt,
+export const ConnectorUserActionPayloadSchema = z.strictObject({
+  connector: CaseConnectorSchema,
 });
 
-export const ConnectorUserActionWithoutConnectorIdRt = rt.type({
-  type: rt.literal(ActionTypes.connector),
-  payload: ConnectorUserActionPayloadWithoutConnectorIdRt,
+export const ConnectorUserActionWithoutConnectorIdSchema = z.strictObject({
+  type: z.literal(ActionTypes.connector),
+  payload: ConnectorUserActionPayloadWithoutConnectorIdSchema,
 });
 
-export const ConnectorUserActionRt = rt.type({
-  type: rt.literal(ActionTypes.connector),
-  payload: ConnectorUserActionPayloadRt,
+export const ConnectorUserActionSchema = z.strictObject({
+  type: z.literal(ActionTypes.connector),
+  payload: ConnectorUserActionPayloadSchema,
 });
 
-export type ConnectorUserAction = UserActionWithAttributes<rt.TypeOf<typeof ConnectorUserActionRt>>;
+export type ConnectorUserAction = UserActionWithAttributes<
+  z.infer<typeof ConnectorUserActionSchema>
+>;
 export type ConnectorUserActionWithoutConnectorId = UserActionWithAttributes<
-  rt.TypeOf<typeof ConnectorUserActionWithoutConnectorIdRt>
+  z.infer<typeof ConnectorUserActionWithoutConnectorIdSchema>
 >;
