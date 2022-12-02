@@ -29,6 +29,10 @@ import {
   enableInfrastructureHostsView,
 } from '../common/ui_settings_keys';
 
+const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
+  defaultMessage: 'beta',
+});
+
 const technicalPreviewLabel = i18n.translate(
   'xpack.observability.uiSettings.technicalPreviewLabel',
   { defaultMessage: 'technical preview' }
@@ -223,17 +227,17 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmOperationsBreakdownDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Operations Breakdown feature, that displays aggregates for backend operations. {feedbackLink}.',
+        '{betaLabel} Enable the APM Operations Breakdown feature, that displays aggregates for backend operations. {feedbackLink}.',
       values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        betaLabel: `<em>[${betaLabel}]</em>`,
         feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-operations-breakdown' }),
       },
     }),
     schema: schema.boolean(),
-    value: false,
+    value: true,
     requiresPageReload: true,
     type: 'boolean',
-    showInLabs: true,
+    showInLabs: false,
   },
   [apmLabsButton]: {
     category: [observabilityFeatureId],
