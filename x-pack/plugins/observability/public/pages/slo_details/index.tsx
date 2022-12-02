@@ -16,11 +16,11 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
 import PageNotFound from '../404';
-import { SLO_DETAILS_PAGE_TITLE } from './translations';
 import { isSloFeatureEnabled } from '../slos/helpers';
 import { SLOS_BREADCRUMB_TEXT } from '../slos/translations';
 import { SloDetailsPathParams } from './types';
 import { useFetchSloDetails } from './hooks/use_fetch_slo_details';
+import { SLO } from '../../typings';
 
 export function SloDetails() {
   const { http } = useKibana<ObservabilityAppServices>().services;
@@ -28,35 +28,35 @@ export function SloDetails() {
   const { sloId } = useParams<SloDetailsPathParams>();
 
   const [loading, slo] = useFetchSloDetails(sloId);
+  useBreadcrumbs(getBreadcrumbs(http.basePath, slo));
 
-  useBreadcrumbs(getBreadcrumbs(http.basePath));
-
-  if (!isSloFeatureEnabled(config) || slo === undefined) {
+  const isSloNotFound = loading === false && slo === undefined;
+  if (!isSloFeatureEnabled(config) || isSloNotFound) {
     return <PageNotFound />;
   }
 
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <>{SLO_DETAILS_PAGE_TITLE}</>,
+        pageTitle: <>{slo && slo.name}</>,
         rightSideItems: [],
         bottomBorder: true,
       }}
       data-test-subj="sloDetailsPage"
     >
-      <></>
+      <pre>{JSON.stringify(slo, null, 2)}</pre>
     </ObservabilityPageTemplate>
   );
 }
 
-function getBreadcrumbs(basePath: IBasePath): EuiBreadcrumbProps[] {
+function getBreadcrumbs(basePath: IBasePath, slo: SLO | undefined): EuiBreadcrumbProps[] {
   return [
     {
       href: basePath.prepend(paths.observability.slos),
       text: SLOS_BREADCRUMB_TEXT,
     },
     {
-      text: 'Details',
+      text: slo && slo.name,
     },
   ];
 }
