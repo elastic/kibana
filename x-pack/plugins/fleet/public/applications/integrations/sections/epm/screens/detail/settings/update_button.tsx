@@ -203,6 +203,8 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
               { theme$ }
             ),
           });
+
+          navigateToNewSettingsPage();
         },
       }
     );
@@ -218,6 +220,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     dryRunData,
     notifications.toasts,
     theme$,
+    navigateToNewSettingsPage,
   ]);
 
   const updateModal = (

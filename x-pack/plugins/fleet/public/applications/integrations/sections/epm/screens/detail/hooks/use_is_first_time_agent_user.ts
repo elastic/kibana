@@ -23,7 +23,7 @@ export const useIsFirstTimeAgentUserQuery = (): UseIsFirstTimeAgentUserResponse 
   });
 
   // now get all agents that are NOT part of a fleet server policy
-  const serverPolicyIdsQuery = (agentPolicies?.data?.items || [])
+  const serverPolicyIdsQuery = (agentPolicies?.items || [])
     .filter((item) => policyHasFleetServer(item))
     .map((p) => `policy_id:${p.id}`)
     .join(' or ');

@@ -45,7 +45,7 @@ export function useGetReplacementCustomIntegrations() {
 }
 
 export function useGetCategoriesQuery(query: GetCategoriesRequest['query'] = {}) {
-  return useQuery(['categories'], () =>
+  return useQuery(['categories', query], () =>
     sendRequest<GetCategoriesResponse>({
       path: epmRouteService.getCategoriesPath(),
       method: 'get',
