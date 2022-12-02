@@ -3086,6 +3086,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-i18n-common@link:bazel-bin/packages/core/i18n/core-i18n-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-i18n-server-internal@link:bazel-bin/packages/core/i18n/core-i18n-server-internal":
   version "0.0.0"
   uid ""

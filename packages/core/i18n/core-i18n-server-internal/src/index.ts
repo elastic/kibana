@@ -9,3 +9,5 @@
 export { config } from './i18n_config';
 export type { I18nConfigType } from './i18n_config';
 export { I18nService } from './i18n_service';
+export { CoreI18nRouteHandlerContext } from './i18n_route_handler_context';
+export type { InternalI18nServiceSetup, InternalI18nServiceStart } from './types';

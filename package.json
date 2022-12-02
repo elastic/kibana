@@ -230,6 +230,7 @@
     "@kbn/core-i18n-browser": "link:bazel-bin/packages/core/i18n/core-i18n-browser",
     "@kbn/core-i18n-browser-internal": "link:bazel-bin/packages/core/i18n/core-i18n-browser-internal",
     "@kbn/core-i18n-browser-mocks": "link:bazel-bin/packages/core/i18n/core-i18n-browser-mocks",
+    "@kbn/core-i18n-common": "link:bazel-bin/packages/core/i18n/core-i18n-common",
     "@kbn/core-i18n-server": "link:bazel-bin/packages/core/i18n/core-i18n-server",
     "@kbn/core-i18n-server-internal": "link:bazel-bin/packages/core/i18n/core-i18n-server-internal",
     "@kbn/core-i18n-server-mocks": "link:bazel-bin/packages/core/i18n/core-i18n-server-mocks",

@@ -178,6 +178,8 @@
       "@kbn/core-i18n-browser-internal/*": ["packages/core/i18n/core-i18n-browser-internal/*"],
       "@kbn/core-i18n-browser-mocks": ["packages/core/i18n/core-i18n-browser-mocks"],
       "@kbn/core-i18n-browser-mocks/*": ["packages/core/i18n/core-i18n-browser-mocks/*"],
+      "@kbn/core-i18n-common": ["packages/core/i18n/core-i18n-common"],
+      "@kbn/core-i18n-common/*": ["packages/core/i18n/core-i18n-common/*"],
       "@kbn/core-i18n-server": ["packages/core/i18n/core-i18n-server"],
       "@kbn/core-i18n-server/*": ["packages/core/i18n/core-i18n-server/*"],
       "@kbn/core-i18n-server-internal": ["packages/core/i18n/core-i18n-server-internal"],

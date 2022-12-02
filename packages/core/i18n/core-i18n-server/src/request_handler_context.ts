@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter } from '@kbn/core-http-server';
-import { registerTranslationsRoute } from './translations';
+import type { ScopedTranslator } from '@kbn/core-i18n-common';
 
-export const registerRoutes = ({ router }: { router: IRouter }) => {
-  registerTranslationsRoute(router);
-};
+/**
+ * Core's `i18n` request handler context.
+ * @public
+ */
+export interface I18nRequestHandlerContext {
+  translator: ScopedTranslator;
+}

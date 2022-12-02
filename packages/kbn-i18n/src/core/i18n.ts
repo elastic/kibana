@@ -47,6 +47,16 @@ function normalizeLocale(locale: string) {
 }
 
 /**
+ * Provides a way to register multiple translations with the engine
+ * @param translationsRecord
+ */
+export function addTranslations(translationsRecord: Record<string, Translation>) {
+  Object.entries(translationsRecord).forEach(([locale, translation]) => {
+    addTranslation(translation, locale);
+  });
+}
+
+/**
  * Provides a way to register translations with the engine
  * @param newTranslation
  * @param [locale = messages.locale]
@@ -78,8 +88,8 @@ export function addTranslation(newTranslation: Translation, locale = newTranslat
 /**
  * Returns messages for the current language
  */
-export function getTranslation(): Translation {
-  return translationsForLocale[currentLocale] || { messages: {} };
+export function getTranslation(locale?: string): Translation {
+  return translationsForLocale[locale ?? currentLocale] || { messages: {} };
 }
 
 /**
@@ -156,6 +166,7 @@ export interface TranslateArguments {
   values?: Record<string, string | number | boolean | Date | null | undefined>;
   defaultMessage: string;
   description?: string;
+  locale?: string;
 }
 
 /**
@@ -165,7 +176,7 @@ export interface TranslateArguments {
  * @param [options.values] - values to pass into translation
  * @param [options.defaultMessage] - will be used unless translation was successful
  */
-export function translate(id: string, { values = {}, defaultMessage }: TranslateArguments) {
+export function translate(id: string, { values = {}, defaultMessage, locale }: TranslateArguments) {
   const shouldUsePseudoLocale = isPseudoLocale(currentLocale);
 
   if (!id || !isString(id)) {
@@ -183,7 +194,11 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
       // We should call `format` even for messages without any value references
       // to let it handle escaped curly braces `\\{` that are the part of the text itself
       // and not value reference boundaries.
-      const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format(values);
+      const formattedMessage = getMessageFormat(
+        message,
+        locale ?? getLocale(),
+        getFormats()
+      ).format(values);
 
       return shouldUsePseudoLocale
         ? translateUsingPseudoLocale(formattedMessage)

@@ -9,6 +9,7 @@
 import {
   formats,
   addTranslation,
+  addTranslations,
   getTranslation,
   setLocale,
   getLocale,
@@ -35,6 +36,7 @@ import {
 
 const i18n = {
   formats,
+  addTranslations,
   addTranslation,
   getTranslation,
   setLocale,

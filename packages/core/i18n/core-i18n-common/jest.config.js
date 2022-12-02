@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter } from '@kbn/core-http-server';
-import { registerTranslationsRoute } from './translations';
-
-export const registerRoutes = ({ router }: { router: IRouter }) => {
-  registerTranslationsRoute(router);
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/i18n/core-i18n-common'],
 };
