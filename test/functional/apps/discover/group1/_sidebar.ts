@@ -409,7 +409,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'jpg\n65.0%\ncss\n15.4%\npng\n9.8%\ngif\n6.6%\nphp\n3.2%'
         );
 
-        await filterBar.addFilter('extension', 'is', 'jpg');
+        await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'jpg' });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
