@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('unifiedHistogramChart');
       // check the table columns
       const columns = await PageObjects.discover.getColumnHeaders();
-      expect(columns).to.eql(['ip', '@timestamp', 'bytes']);
+      expect(columns).to.eql(['@timestamp', 'ip', 'bytes']);
 
       await browser.closeCurrentWindow();
       await browser.switchToWindow(dashboardWindowHandle);
