@@ -39,8 +39,6 @@ const VERSION_CONFLICT_MESSAGE = 'Task has been claimed by another Kibana servic
  * Runs tasks in batches, taking costs into account.
  */
 export class TaskPool {
-  private isMovingTasksToRunningFromQueue: boolean = false;
-  private shouldMoveTasksToRunningFromQueueAgain: boolean = false;
   private maxBufferedTasks: number = 250;
   private maxWorkers: number = 0;
   private tasksInQueue: TaskRunner[] = [];
@@ -112,39 +110,30 @@ export class TaskPool {
   }
 
   private moveTasksToRunningFromQueue() {
-    if (this.isMovingTasksToRunningFromQueue) {
-      this.shouldMoveTasksToRunningFromQueueAgain = true;
-      return;
-    }
-    this.isMovingTasksToRunningFromQueue = true;
+    // Move tasks from tasksInQueue to tasksRunning
+    const tasksToRun =
+      this.availableWorkers > 0 ? this.tasksInQueue.splice(0, this.availableWorkers) : [];
+    tasksToRun.forEach((taskRunner) => this.tasksRunning.push(taskRunner));
+
+    // Mark them as running and kick them off
     (async () => {
-      const tasksToRun =
-        this.availableWorkers > 0 ? this.tasksInQueue.splice(0, this.availableWorkers) : [];
       await Promise.all(
         tasksToRun.map(async (taskRunner) => {
-          if (taskRunner) {
-            this.tasksRunning.push(taskRunner);
-            try {
-              const hasTaskBeenMarkAsRunning = await taskRunner.markTaskAsRunning();
-              if (hasTaskBeenMarkAsRunning) {
-                this.handleMarkAsRunning(taskRunner);
-              } else {
-                this.handleFailureOfMarkAsRunning(taskRunner, {
-                  name: 'TaskPoolVersionConflictError',
-                  message: VERSION_CONFLICT_MESSAGE,
-                });
-              }
-            } catch (e) {
-              this.handleFailureOfMarkAsRunning(taskRunner, e);
+          try {
+            const hasTaskBeenMarkAsRunning = await taskRunner.markTaskAsRunning();
+            if (hasTaskBeenMarkAsRunning) {
+              this.handleMarkAsRunning(taskRunner);
+            } else {
+              this.handleFailureOfMarkAsRunning(taskRunner, {
+                name: 'TaskPoolVersionConflictError',
+                message: VERSION_CONFLICT_MESSAGE,
+              });
             }
+          } catch (e) {
+            this.handleFailureOfMarkAsRunning(taskRunner, e);
           }
         })
       );
-      this.isMovingTasksToRunningFromQueue = false;
-      if (this.shouldMoveTasksToRunningFromQueueAgain) {
-        this.shouldMoveTasksToRunningFromQueueAgain = false;
-        this.moveTasksToRunningFromQueue();
-      }
     })();
   }
 
