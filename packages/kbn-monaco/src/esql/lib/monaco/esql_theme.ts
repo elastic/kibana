@@ -7,12 +7,12 @@
  */
 
 import { euiThemeVars, darkMode } from '@kbn/ui-theme';
-import { tokenPostfix } from './esql_constants';
+import { ESQL_TOKEN_POSTFIX } from '../constants';
 import { monaco } from '../../../monaco_imports';
 
 const buildRuleGroup = (tokens: string[], color: string, isBold: boolean = false) =>
   tokens.map((i) => ({
-    token: i + tokenPostfix,
+    token: i + ESQL_TOKEN_POSTFIX,
     foreground: color,
     fontStyle: isBold ? 'bold' : '',
   }));

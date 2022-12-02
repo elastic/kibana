@@ -7,16 +7,15 @@
  */
 
 import { CharStreams, Token } from 'antlr4ts';
-import { tokenPostfix } from './esql_constants';
 import { monaco } from '../../../monaco_imports';
+import { ANTLREErrorListener } from '../../../common/error_listener';
 
 import { ESQLToken } from './esql_token';
 import { ESQLLineTokens } from './esql_line_tokens';
 import { ESQLState } from './esql_state';
 
 import { getLexer } from '../antlr_facade';
-
-import { ANTLREErrorListener } from '../../../common/error_listener';
+import { ESQL_TOKEN_POSTFIX } from '../constants';
 
 const EOF = -1;
 
@@ -59,7 +58,7 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
     } while (!done);
 
     for (const e of errorStartingPoints) {
-      myTokens.push(new ESQLToken('error' + tokenPostfix, e));
+      myTokens.push(new ESQLToken('error' + ESQL_TOKEN_POSTFIX, e));
     }
 
     myTokens.sort((a, b) => (a.startIndex > b.startIndex ? 1 : -1));

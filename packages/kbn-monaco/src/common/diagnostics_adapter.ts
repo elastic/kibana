@@ -9,7 +9,7 @@
 import { BehaviorSubject } from 'rxjs';
 
 import { monaco } from '../monaco_imports';
-import { SyntaxErrors, LangValidation, EditorError, BaseWorkerDefinition } from '../types';
+import type { SyntaxErrors, LangValidation, EditorError, BaseWorkerDefinition } from '../types';
 
 const toDiagnostics = (error: EditorError): monaco.editor.IMarkerData => {
   return {

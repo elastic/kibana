@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { ESQL_LANG_ID, ESQL_THEME_ID } from './constants';
+export { ESQL_LANG_ID, ESQL_THEME_ID } from './lib/constants';
 export { ESQLLang } from './language';
 
 export { buildESQlTheme } from './lib/monaco/esql_theme';

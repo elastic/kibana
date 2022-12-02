@@ -8,7 +8,7 @@
 
 import { monaco } from '../monaco_imports';
 
-import { ESQL_LANG_ID } from './constants';
+import { ESQL_LANG_ID } from './lib/constants';
 
 import type { CustomLangModuleType } from '../types';
 import type { ESQLWorker } from './worker/esql_worker';
