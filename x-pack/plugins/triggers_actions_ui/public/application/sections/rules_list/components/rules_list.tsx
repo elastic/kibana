@@ -36,14 +36,12 @@ import {
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
-import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
+
 import { ruleDetailsRoute as commonRuleDetailsRoute } from '@kbn/rule-data-utils';
 import {
-  ActionType,
   Rule,
   RuleTableItem,
   RuleType,
-  RuleTypeIndex,
   RuleStatus,
   Pagination,
   Percentiles,
@@ -61,7 +59,6 @@ import { RuleExecutionStatusFilter } from './rule_execution_status_filter';
 import { RuleLastRunOutcomeFilter } from './rule_last_run_outcome_filter';
 import { RulesListErrorBanner } from './rules_list_error_banner';
 import {
-  loadRuleTypes,
   disableRule,
   enableRule,
   snoozeRule,
@@ -71,7 +68,7 @@ import {
   bulkEnableRules,
   cloneRule,
 } from '../../../lib/rule_api';
-import { loadActionTypes } from '../../../lib/action_connector_api';
+
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
@@ -104,6 +101,8 @@ import {
   MULTIPLE_RULE_TITLE,
 } from '../translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
+import { useRuleTypes } from '../../../hooks/use_rule_types';
+import { useActionTypes } from '../../../hooks/use_action_types';
 
 const ENTER_KEY = 13;
 
@@ -126,12 +125,6 @@ export interface RulesListProps {
   refresh?: Date;
   rulesListKey?: string;
   visibleColumns?: RulesListVisibleColumns[];
-}
-
-interface RuleTypeState {
-  isLoading: boolean;
-  isInitialized: boolean;
-  data: RuleTypeIndex;
 }
 
 export const percentileFields = {
@@ -173,7 +166,6 @@ export const RulesList = ({
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
 
   const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
-  const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [searchText, setSearchText] = useState<string | undefined>();
@@ -221,11 +213,6 @@ export const RulesList = ({
     licenseType: string;
     ruleTypeId: string;
   } | null>(null);
-  const [ruleTypesState, setRuleTypesState] = useState<RuleTypeState>({
-    isLoading: false,
-    isInitialized: false,
-    data: new Map(),
-  });
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [rulesToDeleteFilter, setRulesToDeleteFilter] = useState<KueryNode | null | undefined>();
@@ -266,16 +253,19 @@ export const RulesList = ({
   const [isUpdatingRuleAPIKeys, setIsUpdatingRuleAPIKeys] = useState<boolean>(false);
   const [isCloningRule, setIsCloningRule] = useState<boolean>(false);
 
-  const hasAnyAuthorizedRuleType = useMemo(() => {
-    return ruleTypesState.isInitialized && ruleTypesState.data.size > 0;
-  }, [ruleTypesState]);
-
   const onError = useCallback(
     (message: string) => {
       toasts.addDanger(message);
     },
     [toasts]
   );
+
+  // const { actionTypes } = useActionTypes({ onError });
+  const ruleTypesState = useRuleTypes({ onError, filteredRuleTypes });
+
+  const hasAnyAuthorizedRuleType = useMemo(() => {
+    return ruleTypesState.isInitialized && ruleTypesState.data.size > 0;
+  }, [ruleTypesState]);
 
   const authorizedRuleTypes = useMemo(() => [...ruleTypesState.data.values()], [ruleTypesState]);
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
@@ -368,55 +358,6 @@ export const RulesList = ({
   useEffect(() => {
     refreshRules();
   }, [refresh, percentileOptions]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        setRuleTypesState({ ...ruleTypesState, isLoading: true });
-        const ruleTypes = await loadRuleTypes({ http });
-        const index: RuleTypeIndex = new Map();
-        for (const ruleType of ruleTypes) {
-          index.set(ruleType.id, ruleType);
-        }
-        let filteredIndex = index;
-        if (filteredRuleTypes && filteredRuleTypes.length > 0) {
-          filteredIndex = new Map(
-            [...index].filter(([k, v]) => {
-              return filteredRuleTypes.includes(v.id);
-            })
-          );
-        }
-        setRuleTypesState({ isLoading: false, data: filteredIndex, isInitialized: true });
-      } catch (e) {
-        toasts.addDanger({
-          title: i18n.translate(
-            'xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleTypesMessage',
-            { defaultMessage: 'Unable to load rule types' }
-          ),
-        });
-        setRuleTypesState({ ...ruleTypesState, isLoading: false });
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const result = await loadActionTypes({ http, featureId: AlertingConnectorFeatureId });
-        const sortedResult = result
-          .filter(({ id }) => actionTypeRegistry.has(id))
-          .sort((a, b) => a.name.localeCompare(b.name));
-        setActionTypes(sortedResult);
-      } catch (e) {
-        toasts.addDanger({
-          title: i18n.translate(
-            'xpack.triggersActionsUI.sections.rulesList.unableToLoadConnectorTypesMessage',
-            { defaultMessage: 'Unable to load connector types' }
-          ),
-        });
-      }
-    })();
-  }, []);
 
   useEffect(() => {
     if (onStatusFilterChange) {
@@ -1010,7 +951,13 @@ export const RulesList = ({
   );
   // if initial load, show spinner
   const getRulesList = () => {
+    console.log({
+      noData,
+      'rulesState.isLoading': rulesState.isLoading,
+      'ruleTypesState.isLoading': ruleTypesState.isLoading,
+    });
     if (noData && !rulesState.isLoading && !ruleTypesState.isLoading) {
+      console.log('authorizedToCreateAnyRules', authorizedToCreateAnyRules);
       return authorizedToCreateAnyRules ? (
         <EmptyPrompt
           showCreateRuleButton={showCreateRuleButton}
