@@ -19,9 +19,9 @@ export default ({ getService }: FtrProviderContext) => {
   const TEST_URL = '/internal/rac/alerts';
   const SPACE1 = 'space1';
   const ALERT_SUMMARY_URL = `${TEST_URL}/_alert_summary`;
-  const APM_ALERT_ID = 'NoxgpHkBqbdrfX07MqXV';
-  const APM_ALERT_ID2 = 'space1alert';
-  const APM_ALERT_INDEX = '.alerts-observability.apm.alerts';
+  const LOGS_ALERT_ID = '123456789XYZ';
+  const LOGS_ALERT_ID2 = 'space1alertLogs';
+  const LOGS_ALERT_INDEX = '.alerts-observability.logs.alerts-default';
 
   describe('Alerts - GET - _alert_summary', () => {
     before(async () => {
@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
     });
 
-    it('Alert summary for all APM alerts', async () => {
+    it('Alert summary for all LOGS alerts', async () => {
       const alertSummary = await supertestWithoutAuth
         .post(`${getSpaceUrlPrefix(SPACE1)}${ALERT_SUMMARY_URL}`)
         .auth(superUser.username, superUser.password)
@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
         .send({
           gte: '2020-12-16T15:00:00.000Z',
           lte: '2020-12-16T16:00:00.000Z',
-          index: APM_ALERT_INDEX,
+          index: LOGS_ALERT_INDEX,
           fixed_interval: '10m',
         })
         .expect(200);
@@ -49,25 +49,25 @@ export default ({ getService }: FtrProviderContext) => {
         activeAlerts: [
           { key_as_string: '1608130800000', key: 1608130800000, doc_count: 0 },
           { key_as_string: '1608131400000', key: 1608131400000, doc_count: 2 },
-          { key_as_string: '1608132000000', key: 1608132000000, doc_count: 1 },
+          { key_as_string: '1608132000000', key: 1608132000000, doc_count: 2 },
           { key_as_string: '1608132600000', key: 1608132600000, doc_count: 1 },
           { key_as_string: '1608133200000', key: 1608133200000, doc_count: 1 },
           { key_as_string: '1608133800000', key: 1608133800000, doc_count: 1 },
           { key_as_string: '1608134400000', key: 1608134400000, doc_count: 1 },
         ],
         recoveredAlerts: [
-          { key_as_string: '1608130800000', key: 1608130800000, doc_count: 0 },
-          { key_as_string: '1608131400000', key: 1608131400000, doc_count: 1 },
-          { key_as_string: '1608132000000', key: 1608132000000, doc_count: 0 },
-          { key_as_string: '1608132600000', key: 1608132600000, doc_count: 0 },
-          { key_as_string: '1608133200000', key: 1608133200000, doc_count: 0 },
-          { key_as_string: '1608133800000', key: 1608133800000, doc_count: 0 },
-          { key_as_string: '1608134400000', key: 1608134400000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:00:00.000Z', key: 1608130800000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:10:00.000Z', key: 1608131400000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:20:00.000Z', key: 1608132000000, doc_count: 1 },
+          { key_as_string: '2020-12-16T15:30:00.000Z', key: 1608132600000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:40:00.000Z', key: 1608133200000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:50:00.000Z', key: 1608133800000, doc_count: 0 },
+          { key_as_string: '2020-12-16T16:00:00.000Z', key: 1608134400000, doc_count: 0 },
         ],
       });
     });
 
-    it('Alert summary for all APM alerts with features', async () => {
+    it('Alert summary for all LOGS alerts with features', async () => {
       const alertSummary = await supertestWithoutAuth
         .post(`${getSpaceUrlPrefix(SPACE1)}${ALERT_SUMMARY_URL}`)
         .auth(superUser.username, superUser.password)
@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
         .send({
           gte: '2020-12-16T15:00:00.000Z',
           lte: '2020-12-16T16:00:00.000Z',
-          featureIds: ['apm'],
+          featureIds: ['logs'],
           fixed_interval: '10m',
         })
         .expect(200);
@@ -84,20 +84,20 @@ export default ({ getService }: FtrProviderContext) => {
         activeAlerts: [
           { key_as_string: '1608130800000', key: 1608130800000, doc_count: 0 },
           { key_as_string: '1608131400000', key: 1608131400000, doc_count: 2 },
-          { key_as_string: '1608132000000', key: 1608132000000, doc_count: 1 },
+          { key_as_string: '1608132000000', key: 1608132000000, doc_count: 2 },
           { key_as_string: '1608132600000', key: 1608132600000, doc_count: 1 },
           { key_as_string: '1608133200000', key: 1608133200000, doc_count: 1 },
           { key_as_string: '1608133800000', key: 1608133800000, doc_count: 1 },
           { key_as_string: '1608134400000', key: 1608134400000, doc_count: 1 },
         ],
         recoveredAlerts: [
-          { key_as_string: '1608130800000', key: 1608130800000, doc_count: 0 },
-          { key_as_string: '1608131400000', key: 1608131400000, doc_count: 1 },
-          { key_as_string: '1608132000000', key: 1608132000000, doc_count: 0 },
-          { key_as_string: '1608132600000', key: 1608132600000, doc_count: 0 },
-          { key_as_string: '1608133200000', key: 1608133200000, doc_count: 0 },
-          { key_as_string: '1608133800000', key: 1608133800000, doc_count: 0 },
-          { key_as_string: '1608134400000', key: 1608134400000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:00:00.000Z', key: 1608130800000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:10:00.000Z', key: 1608131400000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:20:00.000Z', key: 1608132000000, doc_count: 1 },
+          { key_as_string: '2020-12-16T15:30:00.000Z', key: 1608132600000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:40:00.000Z', key: 1608133200000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:50:00.000Z', key: 1608133800000, doc_count: 0 },
+          { key_as_string: '2020-12-16T16:00:00.000Z', key: 1608134400000, doc_count: 0 },
         ],
       });
     });
@@ -112,10 +112,10 @@ export default ({ getService }: FtrProviderContext) => {
           lte: '2020-12-16T16:00:00.000Z',
           filter: {
             terms: {
-              _id: [APM_ALERT_ID2],
+              _id: [LOGS_ALERT_ID2],
             },
           },
-          index: APM_ALERT_INDEX,
+          index: LOGS_ALERT_INDEX,
           fixed_interval: '10m',
         })
         .expect(200);
@@ -124,20 +124,20 @@ export default ({ getService }: FtrProviderContext) => {
         activeAlerts: [
           { key_as_string: '1608130800000', key: 1608130800000, doc_count: 0 },
           { key_as_string: '1608131400000', key: 1608131400000, doc_count: 1 },
-          { key_as_string: '1608132000000', key: 1608132000000, doc_count: 0 },
+          { key_as_string: '1608132000000', key: 1608132000000, doc_count: 1 },
           { key_as_string: '1608132600000', key: 1608132600000, doc_count: 0 },
           { key_as_string: '1608133200000', key: 1608133200000, doc_count: 0 },
           { key_as_string: '1608133800000', key: 1608133800000, doc_count: 0 },
           { key_as_string: '1608134400000', key: 1608134400000, doc_count: 0 },
         ],
         recoveredAlerts: [
-          { key_as_string: '1608130800000', key: 1608130800000, doc_count: 0 },
-          { key_as_string: '1608131400000', key: 1608131400000, doc_count: 1 },
-          { key_as_string: '1608132000000', key: 1608132000000, doc_count: 0 },
-          { key_as_string: '1608132600000', key: 1608132600000, doc_count: 0 },
-          { key_as_string: '1608133200000', key: 1608133200000, doc_count: 0 },
-          { key_as_string: '1608133800000', key: 1608133800000, doc_count: 0 },
-          { key_as_string: '1608134400000', key: 1608134400000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:00:00.000Z', key: 1608130800000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:10:00.000Z', key: 1608131400000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:20:00.000Z', key: 1608132000000, doc_count: 1 },
+          { key_as_string: '2020-12-16T15:30:00.000Z', key: 1608132600000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:40:00.000Z', key: 1608133200000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:50:00.000Z', key: 1608133800000, doc_count: 0 },
+          { key_as_string: '2020-12-16T16:00:00.000Z', key: 1608134400000, doc_count: 0 },
         ],
       });
     });
@@ -152,10 +152,10 @@ export default ({ getService }: FtrProviderContext) => {
           lte: '2020-12-16T16:00:00.000Z',
           filter: {
             terms: {
-              _id: [APM_ALERT_ID],
+              _id: [LOGS_ALERT_ID],
             },
           },
-          index: APM_ALERT_INDEX,
+          index: LOGS_ALERT_INDEX,
           fixed_interval: '10m',
         })
         .expect(200);
@@ -171,13 +171,13 @@ export default ({ getService }: FtrProviderContext) => {
           { key_as_string: '1608134400000', key: 1608134400000, doc_count: 1 },
         ],
         recoveredAlerts: [
-          { key_as_string: '1608130800000', key: 1608130800000, doc_count: 0 },
-          { key_as_string: '1608131400000', key: 1608131400000, doc_count: 0 },
-          { key_as_string: '1608132000000', key: 1608132000000, doc_count: 0 },
-          { key_as_string: '1608132600000', key: 1608132600000, doc_count: 0 },
-          { key_as_string: '1608133200000', key: 1608133200000, doc_count: 0 },
-          { key_as_string: '1608133800000', key: 1608133800000, doc_count: 0 },
-          { key_as_string: '1608134400000', key: 1608134400000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:00:00.000Z', key: 1608130800000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:10:00.000Z', key: 1608131400000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:20:00.000Z', key: 1608132000000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:30:00.000Z', key: 1608132600000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:40:00.000Z', key: 1608133200000, doc_count: 0 },
+          { key_as_string: '2020-12-16T15:50:00.000Z', key: 1608133800000, doc_count: 0 },
+          { key_as_string: '2020-12-16T16:00:00.000Z', key: 1608134400000, doc_count: 0 },
         ],
       });
     });

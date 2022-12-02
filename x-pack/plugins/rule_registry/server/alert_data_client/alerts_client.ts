@@ -19,6 +19,7 @@ import {
   STATUS_VALUES,
   ValidFeatureId,
   ALERT_STATUS_RECOVERED,
+  ALERT_END,
 } from '@kbn/rule-data-utils';
 
 import {
@@ -531,28 +532,6 @@ export class AlertsClient {
           )) ?? []
         ).join(',');
       }
-      const dateHistogramAgg = {
-        date_histogram: {
-          field: ALERT_TIME_RANGE,
-          fixed_interval: fixedInterval,
-          hard_bounds: {
-            min: gte,
-            max: lte,
-          },
-          extended_bounds: {
-            min: gte,
-            max: lte,
-          },
-        },
-      };
-      const timeRange = {
-        range: {
-          [ALERT_TIME_RANGE]: {
-            gt: gte,
-            lt: lte,
-          },
-        },
-      };
 
       // first search for the alert by id, then use the alert info to check if user has access to it
       const [activeResponse, recoveredResponse] = await Promise.all([
@@ -560,11 +539,34 @@ export class AlertsClient {
           index: indexToUse,
           operation: ReadOperations.Get,
           aggs: {
-            active_alerts_bucket: dateHistogramAgg,
+            active_alerts_bucket: {
+              date_histogram: {
+                field: ALERT_TIME_RANGE,
+                fixed_interval: fixedInterval,
+                hard_bounds: {
+                  min: gte,
+                  max: lte,
+                },
+                extended_bounds: {
+                  min: gte,
+                  max: lte,
+                },
+              },
+            },
           },
           query: {
             bool: {
-              filter: [timeRange, ...(filter ? [filter] : [])],
+              filter: [
+                {
+                  range: {
+                    [ALERT_TIME_RANGE]: {
+                      gt: gte,
+                      lt: lte,
+                    },
+                  },
+                },
+                ...(filter ? [filter] : []),
+              ],
             },
           },
           size: 0,
@@ -573,12 +575,28 @@ export class AlertsClient {
           index: indexToUse,
           operation: ReadOperations.Get,
           aggs: {
-            recovered_alerts_bucket: dateHistogramAgg,
+            recovered_alerts_bucket: {
+              date_histogram: {
+                field: ALERT_END,
+                fixed_interval: fixedInterval,
+                extended_bounds: {
+                  min: gte,
+                  max: lte,
+                },
+              },
+            },
           },
           query: {
             bool: {
               filter: [
-                timeRange,
+                {
+                  range: {
+                    [ALERT_END]: {
+                      gt: gte,
+                      lt: lte,
+                    },
+                  },
+                },
                 {
                   term: {
                     [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
@@ -784,7 +802,7 @@ export class AlertsClient {
           throw new Error(`This feature id ${feature} should be associated to an alert index`);
         }
         return (
-          index?.getPrimaryAlias(feature === AlertConsumers.SIEM ? this.spaceId ?? '*' : '') ?? ''
+          index?.getPrimaryAlias(feature === AlertConsumers.SIEM ? this.spaceId ?? '*' : '*') ?? ''
         );
       });
 
