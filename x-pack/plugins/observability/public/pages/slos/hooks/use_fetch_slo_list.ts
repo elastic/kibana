@@ -18,11 +18,18 @@ const EMPTY_LIST = {
   perPage: 0,
 };
 
-export const useFetchSloList = (): [boolean, SLOList] => {
-  const params = useMemo(() => ({}), []);
-  const shouldExecuteApiCall = useCallback((apiCallParams: {}) => true, []);
+interface SLOListParams {
+  name?: string;
+}
 
-  const { loading, data: sloList } = useDataFetcher<{}, SLOList>({
+export const useFetchSloList = (name?: string): [boolean, SLOList] => {
+  const params: SLOListParams = useMemo(() => ({ name }), [name]);
+  const shouldExecuteApiCall = useCallback(
+    (apiCallParams: SLOListParams) => apiCallParams.name === params.name,
+    [params]
+  );
+
+  const { loading, data: sloList } = useDataFetcher<SLOListParams, SLOList>({
     paramsForApiCall: params,
     initialDataState: EMPTY_LIST,
     executeApiCall: fetchSloList,
@@ -33,13 +40,15 @@ export const useFetchSloList = (): [boolean, SLOList] => {
 };
 
 const fetchSloList = async (
-  params: {},
+  params: SLOListParams,
   abortController: AbortController,
   http: HttpSetup
 ): Promise<SLOList> => {
   try {
     const response = await http.get<Record<string, unknown>>(`/api/observability/slos`, {
-      query: {},
+      query: {
+        ...(params.name && { name: params.name }),
+      },
       signal: abortController.signal,
     });
     if (response !== undefined) {
