@@ -31368,8 +31368,6 @@
     "xpack.timelines.clipboard.copy.successToastTitle": "フィールド{field}をクリップボードにコピーしました",
     "xpack.timelines.hoverActions.columnToggleLabel": "表の{field}列を切り替える",
     "xpack.timelines.hoverActions.nestedColumnToggleLabel": "{field}フィールドはオブジェクトであり、列として追加できるネストされたフィールドに分解されます",
-    "xpack.timelines.beatFields.errorSearchDescription": "Beatフィールドの取得でエラーが発生しました",
-    "xpack.timelines.beatFields.failSearchDescription": "Beat フィールドで検索を実行できませんでした",
     "xpack.timelines.clipboard.copied": "コピー完了",
     "xpack.timelines.clipboard.copy": "コピー",
     "xpack.timelines.clipboard.copy.to.the.clipboard": "クリップボードにコピー",

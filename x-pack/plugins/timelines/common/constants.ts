@@ -9,3 +9,6 @@ export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
 
 export const DELETED_SECURITY_SOLUTION_DATA_VIEW = 'DELETED_SECURITY_SOLUTION_DATA_VIEW';
 export const ENRICHMENT_DESTINATION_PATH = 'threat.enrichments';
+
+/** The default minimum width of a column (when a width for the column type is not specified) */
+export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px

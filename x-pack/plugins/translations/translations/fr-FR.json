@@ -31392,8 +31392,6 @@
     "xpack.timelines.clipboard.copy.successToastTitle": "Champ {field} copié dans le presse-papiers",
     "xpack.timelines.hoverActions.columnToggleLabel": "Basculer la vue {field} dans le tableau",
     "xpack.timelines.hoverActions.nestedColumnToggleLabel": "Le champ {field} est un objet, et il est composé de champs imbriqués qui peuvent être ajoutés en tant que colonnes",
-    "xpack.timelines.beatFields.errorSearchDescription": "Une erreur s'est produite lors de l'obtention des champs d'agents Beats",
-    "xpack.timelines.beatFields.failSearchDescription": "Impossible de lancer une recherche sur les champs d'agents Beats",
     "xpack.timelines.clipboard.copied": "Copié",
     "xpack.timelines.clipboard.copy": "Copier",
     "xpack.timelines.clipboard.copy.to.the.clipboard": "Copier dans le presse-papiers",

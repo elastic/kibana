@@ -11,9 +11,6 @@ import { ReactNode } from 'react';
 import { Ecs } from '../../../ecs';
 import { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 
-/** The default minimum width of a column (when a width for the column type is not specified) */
-export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px
-
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
 export const defaultColumnHeaderType: ColumnHeaderType = 'not-filtered';

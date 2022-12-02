@@ -31403,8 +31403,6 @@
     "xpack.timelines.clipboard.copy.successToastTitle": "已将字段 {field} 复制到剪贴板",
     "xpack.timelines.hoverActions.columnToggleLabel": "在表中切换 {field} 列",
     "xpack.timelines.hoverActions.nestedColumnToggleLabel": "{field} 字段是对象，并分解为可以添加为列的嵌套字段",
-    "xpack.timelines.beatFields.errorSearchDescription": "获取 Beat 字段时发生错误",
-    "xpack.timelines.beatFields.failSearchDescription": "无法对 Beat 字段执行搜索",
     "xpack.timelines.clipboard.copied": "已复制",
     "xpack.timelines.clipboard.copy": "复制",
     "xpack.timelines.clipboard.copy.to.the.clipboard": "复制到剪贴板",
