@@ -45,6 +45,7 @@ export const connectorIndex: ConnectorViewIndex = {
     configuration: { foo: { label: 'bar', value: 'barbar' } },
     description: null,
     error: null,
+    features: null,
     filtering: [
       {
         active: {
@@ -134,6 +135,7 @@ export const crawlerIndex: CrawlerViewIndex = {
     configuration: { foo: { label: 'bar', value: 'barbar' } },
     description: null,
     error: null,
+    features: null,
     filtering: [
       {
         active: {
@@ -205,7 +207,7 @@ export const crawlerIndex: CrawlerViewIndex = {
   count: 1,
   crawler: {
     id: '5',
-    index_name: 'crawler',
+    index_name: 'connector-crawler',
   },
   hidden: false,
   ingestionMethod: IngestionMethod.CRAWLER,

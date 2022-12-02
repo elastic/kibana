@@ -493,11 +493,14 @@ export class Embeddable
     this.errors = this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
 
     await this.initializeOutput();
+
     this.isInitialized = true;
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {
-    if (this.handleContainerStateChanged(containerState) || this.errors?.length) this.reload();
+    if (this.handleContainerStateChanged(containerState)) {
+      this.reload();
+    }
   }
 
   handleContainerStateChanged(containerState: LensEmbeddableInput): boolean {
@@ -680,12 +683,19 @@ export class Embeddable
 
     this.domNode.setAttribute('data-shared-item', '');
 
+    const error = this.getError();
+
     this.updateOutput({
       ...this.getOutput(),
       loading: true,
-      error: this.getError(),
+      error,
     });
-    this.renderComplete.dispatchInProgress();
+
+    if (error) {
+      this.renderComplete.dispatchError();
+    } else {
+      this.renderComplete.dispatchInProgress();
+    }
 
     const input = this.getInput();
 

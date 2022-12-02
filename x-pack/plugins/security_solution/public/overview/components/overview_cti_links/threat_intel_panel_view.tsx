@@ -8,6 +8,8 @@
 import React, { useMemo } from 'react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SecurityPageName } from '../../../../common/constants';
+import { SecuritySolutionLinkButton } from '../../../common/components/links';
 
 import * as i18n from './translations';
 import type { LinkPanelListItem } from '../link_panel';
@@ -62,6 +64,20 @@ export const ThreatIntelPanelView: React.FC<LinkPanelViewProps> = ({
             />
           ),
           [totalCount]
+        ),
+        button: useMemo(
+          () => (
+            <SecuritySolutionLinkButton
+              data-test-subj="cti-view-indicators"
+              deepLinkId={SecurityPageName.threatIntelligenceIndicators}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.overview.threatIndicatorsAction"
+                defaultMessage="View indicators"
+              />
+            </SecuritySolutionLinkButton>
+          ),
+          []
         ),
       }}
     />

@@ -103,7 +103,7 @@ export async function queryPings<F>(
       bool: {
         filter: [
           { range: { '@timestamp': { gte: from, lte: to } } },
-          ...(monitorId ? [{ term: { config_id: monitorId } }] : []),
+          ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
           ...(status ? [{ term: { 'monitor.status': status } }] : []),
         ] as QueryDslQueryContainer[],
         ...REMOVE_NON_SUMMARY_BROWSER_CHECKS,

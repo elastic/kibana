@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { isEmpty, pick, reduce, isArray } from 'lodash';
+import { isEmpty, pick, reduce, isArray, filter, uniq, map, mapKeys } from 'lodash';
+import { satisfies } from 'semver';
+import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { Shard } from '../../../common/schemas/common/utils';
 import { DEFAULT_PLATFORM } from '../../../common/constants';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
@@ -88,3 +91,35 @@ export const convertSOQueriesToPackConfig = (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     {} as Record<string, any>
   );
+
+export const getInitialPolicies = (
+  packagePolicies: PackagePolicy[] | never[],
+  policyIds: string[] = [],
+  shards?: Shard
+) => {
+  // we want to find all policies, because this is a global pack
+  if (shards?.['*']) {
+    const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
+      satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
+    );
+
+    return uniq(map(supportedPackagePolicyIds, 'policy_id'));
+  }
+
+  return policyIds;
+};
+
+export const findMatchingShards = (agentPolicies: AgentPolicy[] | undefined, shards?: Shard) => {
+  const policyShards: Shard = {};
+  if (!isEmpty(shards)) {
+    const agentPoliciesIdMap = mapKeys(agentPolicies, 'id');
+
+    map(shards, (shard, shardName) => {
+      if (agentPoliciesIdMap[shardName]) {
+        policyShards[agentPoliciesIdMap[shardName].id] = shard;
+      }
+    });
+  }
+
+  return policyShards;
+};

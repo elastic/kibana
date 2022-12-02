@@ -7,22 +7,34 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { EuiButtonIcon, EuiConfirmModal, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiLoadingSpinner,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import {
+  ProjectMonitorDisclaimer,
+  PROJECT_MONITOR_TITLE,
+} from '../../../../apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor';
 import { deleteMonitor } from '../../../state/api';
 import { kibanaService } from '../../../state/kibana_service';
 
 export const DeleteMonitor = ({
-  id,
+  configId,
   name,
   onUpdate,
   isDisabled,
+  isProjectMonitor,
 }: {
-  id: string;
+  configId: string;
   name: string;
   isDisabled?: boolean;
+  isProjectMonitor?: boolean;
   onUpdate: () => void;
 }) => {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
@@ -36,15 +48,18 @@ export const DeleteMonitor = ({
 
   const { status } = useFetcher(() => {
     if (isDeleting) {
-      return deleteMonitor({ id });
+      return deleteMonitor({ id: configId });
     }
-  }, [id, isDeleting]);
+  }, [configId, isDeleting]);
 
   const handleDelete = () => {
     showDeleteModal();
   };
 
   useEffect(() => {
+    if (!isDeleting) {
+      return;
+    }
     if (status === FETCH_STATUS.SUCCESS || status === FETCH_STATUS.FAILURE) {
       setIsDeleting(false);
     }
@@ -62,17 +77,28 @@ export const DeleteMonitor = ({
       kibanaService.toasts.addSuccess(
         {
           title: toMountPoint(
-            <p data-test-subj="uptimeDeleteMonitorSuccess">{MONITOR_DELETE_SUCCESS_LABEL}</p>
+            <p data-test-subj="uptimeDeleteMonitorSuccess">
+              {i18n.translate(
+                'xpack.synthetics.monitorManagement.monitorDeleteSuccessMessage.name',
+                {
+                  defaultMessage: 'Deleted "{name}"',
+                  values: { name },
+                }
+              )}
+            </p>
           ),
         },
         { toastLifeTimeMs: 3000 }
       );
     }
-  }, [setIsDeleting, onUpdate, status]);
+  }, [setIsDeleting, onUpdate, status, name, isDeleting]);
 
   const destroyModal = (
     <EuiConfirmModal
-      title={`${DELETE_MONITOR_LABEL} ${name}`}
+      title={i18n.translate('xpack.synthetics.monitorManagement.deleteMonitorNameLabel', {
+        defaultMessage: 'Delete "{name}" monitor?',
+        values: { name },
+      })}
       onCancel={() => setIsDeleteModalVisible(false)}
       onConfirm={onConfirmDelete}
       cancelButtonText={NO_LABEL}
@@ -80,7 +106,16 @@ export const DeleteMonitor = ({
       buttonColor="danger"
       defaultFocusedButton="confirm"
     >
-      <p>{DELETE_DESCRIPTION_LABEL}</p>
+      {isProjectMonitor && (
+        <>
+          <EuiCallOut color="warning" iconType="help" title={PROJECT_MONITOR_TITLE}>
+            <p>
+              <ProjectMonitorDisclaimer />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
     </EuiConfirmModal>
   );
 
@@ -102,14 +137,6 @@ export const DeleteMonitor = ({
   );
 };
 
-const DELETE_DESCRIPTION_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.confirmDescriptionLabel',
-  {
-    defaultMessage:
-      'This action will delete the monitor but keep any data collected. This action cannot be undone.',
-  }
-);
-
 const YES_LABEL = i18n.translate('xpack.synthetics.monitorManagement.yesLabel', {
   defaultMessage: 'Delete',
 });
@@ -122,13 +149,6 @@ const DELETE_MONITOR_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.deleteMonitorLabel',
   {
     defaultMessage: 'Delete monitor',
-  }
-);
-
-const MONITOR_DELETE_SUCCESS_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.monitorDeleteSuccessMessage',
-  {
-    defaultMessage: 'Monitor deleted successfully.',
   }
 );
 

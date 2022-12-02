@@ -44,7 +44,7 @@ export const useEndpointActionItems = (
     canAccessResponseConsole,
     canIsolateHost,
     canUnIsolateHost,
-    canReadActionsLogManagement,
+    canAccessEndpointActionsLogManagement,
   } = useUserPrivileges().endpointPrivileges;
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
@@ -141,7 +141,7 @@ export const useEndpointActionItems = (
               },
             ]
           : []),
-        ...(options?.isEndpointList && canReadActionsLogManagement
+        ...(options?.isEndpointList && canAccessEndpointActionsLogManagement
           ? [
               {
                 'data-test-subj': 'actionsLink',
@@ -253,7 +253,7 @@ export const useEndpointActionItems = (
   }, [
     allCurrentUrlParams,
     canAccessResponseConsole,
-    canReadActionsLogManagement,
+    canAccessEndpointActionsLogManagement,
     endpointMetadata,
     fleetAgentPolicies,
     getAppUrl,

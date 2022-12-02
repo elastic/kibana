@@ -27,7 +27,8 @@ import type {
 } from '@kbn/ui-actions-plugin/public';
 import type { ClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
-import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { FieldSpec, DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
 import type { EuiButtonIconProps } from '@elastic/eui';
@@ -132,6 +133,27 @@ export interface EditorFrameStart {
 export interface TableSuggestionColumn {
   columnId: string;
   operation: Operation;
+}
+
+export interface DataSourceInfo {
+  layerId: string;
+  dataView?: DataView;
+  columns: Array<{
+    id: string;
+    role: 'split' | 'metric';
+    operation: OperationDescriptor & { type: string; fields?: string[]; filter?: Query };
+  }>;
+}
+
+export interface VisualizationInfo {
+  layers: Array<{
+    layerId: string;
+    layerType: string;
+    chartType?: string;
+    icon?: IconType;
+    label?: string;
+    dimensions: Array<{ name: string; id: string; dimensionType: string }>;
+  }>;
 }
 
 /**
@@ -472,12 +494,11 @@ export interface Datasource<T = unknown, P = unknown> {
    */
   getUsedDataViews: (state: T) => string[];
 
-  getSupportedActionsForLayer?: (
-    layerId: string,
+  getDatasourceInfo: (
     state: T,
-    setState: StateSetter<T>,
-    openLayerSettings?: () => void
-  ) => LayerAction[];
+    references?: SavedObjectReference[],
+    dataViewsService?: DataViewsPublicPluginStart
+  ) => Promise<DataSourceInfo[]>;
 }
 
 export interface DatasourceFixAction<T> {
@@ -558,6 +579,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
 
 /** @internal **/
 export interface LayerAction {
+  id: string;
   displayName: string;
   description?: string;
   execute: () => void | Promise<void>;
@@ -566,6 +588,8 @@ export interface LayerAction {
   isCompatible: boolean;
   'data-test-subj'?: string;
 }
+
+export type LayerActionFromVisualization = Omit<LayerAction, 'execute'>;
 
 interface SharedDimensionProps {
   /** Visualizations can restrict operations based on their own rules.
@@ -617,6 +641,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   supportStaticValue: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector: boolean;
+  dataSectionExtra?: React.ReactNode;
   formatSelectorOptions: FormatSelectorOptions | undefined;
 };
 
@@ -772,6 +797,10 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   /** ID is passed back to visualization. For example, `x` */
   groupId: string;
   accessors: AccessorConfig[];
+  // currently used only on partition charts to display non-editable UI dimension trigger in the buckets group when multiple metrics exist
+  fakeFinalAccessor?: {
+    label: string;
+  };
   supportsMoreColumns: boolean;
   dimensionsTooMany?: number;
   /** If required, a warning will appear if accessors are empty */
@@ -1041,12 +1070,13 @@ export interface Visualization<T = unknown, P = unknown> {
    * returns a list of custom actions supported by the visualization layer.
    * Default actions like delete/clear are not included in this list and are managed by the editor frame
    * */
-  getSupportedActionsForLayer?: (
-    layerId: string,
-    state: T,
-    setState: StateSetter<T>,
-    openLayerSettings?: () => void
-  ) => LayerAction[];
+  getSupportedActionsForLayer?: (layerId: string, state: T) => LayerActionFromVisualization[];
+
+  /**
+   * Perform state mutations in response to a layer action
+   */
+  onLayerAction?: (layerId: string, actionId: string, state: T) => T;
+
   /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
 
@@ -1125,13 +1155,18 @@ export interface Visualization<T = unknown, P = unknown> {
     dropProps: GetDropPropsArgs
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
 
+  /**
+   * Allows the visualization to announce whether or not it has any settings to show
+   */
+  hasLayerSettings?: (props: VisualizationConfigProps<T>) => boolean;
+
   renderLayerSettings?: (
     domElement: Element,
     props: VisualizationLayerSettingsProps<T>
   ) => ((cleanupElement: Element) => void) | void;
 
   /**
-   * Additional editor that gets rendered inside the dimension popover.
+   * Additional editor that gets rendered inside the dimension popover in the "appearance" section.
    * This can be used to configure dimension-specific options
    */
   renderDimensionEditor?: (
@@ -1139,10 +1174,18 @@ export interface Visualization<T = unknown, P = unknown> {
     props: VisualizationDimensionEditorProps<T>
   ) => ((cleanupElement: Element) => void) | void;
   /**
-   * Additional editor that gets rendered inside the dimension popover.
+   * Additional editor that gets rendered inside the dimension popover in an additional section below "appearance".
    * This can be used to configure dimension-specific options
    */
   renderDimensionEditorAdditionalSection?: (
+    domElement: Element,
+    props: VisualizationDimensionEditorProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
+  /**
+   * Additional editor that gets rendered inside the data section.
+   * This can be used to configure dimension-specific options
+   */
+  renderDimensionEditorDataExtra?: (
     domElement: Element,
     props: VisualizationDimensionEditorProps<T>
   ) => ((cleanupElement: Element) => void) | void;
@@ -1238,6 +1281,8 @@ export interface Visualization<T = unknown, P = unknown> {
   getSuggestionFromConvertToLensContext?: (
     props: VisualizationStateFromContextChangeProps
   ) => Suggestion<T> | undefined;
+
+  getVisualizationInfo?: (state: T) => VisualizationInfo;
 }
 
 // Use same technique as TriggerContext

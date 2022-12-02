@@ -209,13 +209,10 @@ export const buildXYExpression = (
     .map((layer) => {
       return {
         ...layer,
+        ignoreGlobalFilters: layer.ignoreGlobalFilters,
         annotations: layer.annotations.map((c) => ({
           ...c,
           label: uniqueLabels[c.id],
-          ...(c.type === 'query'
-            ? // Move the ignore flag at the event level
-              { ignoreGlobalFilters: layer.ignoreGlobalFilters }
-            : {}),
         })),
       };
     });
@@ -369,6 +366,7 @@ export const buildXYExpression = (
                         ?.interval) ||
                     'auto',
                   groups: validAnnotationsLayers.map((layer) => ({
+                    ignoreGlobalFilters: layer.ignoreGlobalFilters,
                     indexPatternId: layer.indexPatternId,
                     annotations: layer.annotations.filter(isValidAnnotation),
                   })),

@@ -73,7 +73,7 @@ describe('CrawlerLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useFakeTimers('legacy'); // this should be run before every test to reset these mocks
+    jest.useFakeTimers({ legacyFakeTimers: true }); // this should be run before every test to reset these mocks
     mount();
   });
 

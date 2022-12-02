@@ -9,7 +9,7 @@ import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
-import { verifyAccessAndContext, RewriteResponseCase } from './lib';
+import { verifyAccessAndContext, RewriteResponseCase, rewriteRuleLastRun } from './lib';
 import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
@@ -37,6 +37,8 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   scheduledTaskId,
   snoozeSchedule,
   isSnoozedUntil,
+  lastRun,
+  nextRun,
   ...rest
 }) => ({
   ...rest,
@@ -63,6 +65,8 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
     params,
     connector_type_id: actionTypeId,
   })),
+  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
+  ...(nextRun ? { next_run: nextRun } : {}),
 });
 
 interface BuildGetRulesRouteParams {

@@ -14,7 +14,7 @@ get:
     '200':
       description: Indicates a successful call.
       content:
-        application/json; charset=utf-8:
+        application/json:
           schema:
             type: array
             items: 
@@ -82,7 +82,7 @@ post:
     '200':
       description: Indicates a successful call.
       content:
-         application/json; charset=utf-8:
+         application/json:
           schema:
             type: object
             properties:

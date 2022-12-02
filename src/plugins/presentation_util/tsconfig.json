@@ -5,7 +5,6 @@
     "emitDeclarationOnly": true,
     "declaration": true,
   },
-  "extraPublicDirs": ["common"],
   "include": [
     "common/**/*",
     "public/**/*",

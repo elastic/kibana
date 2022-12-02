@@ -7,6 +7,8 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { RANDOM_SAMPLER_SEED } from './constants';
+
 /**
  * Wraps the supplied aggregations in a random sampler aggregation.
  * A supplied sample probability of 1 indicates no sampling, and the aggs are returned as-is.
@@ -24,6 +26,7 @@ export function buildRandomSamplerAggregation(
       // @ts-expect-error `random_sampler` is not yet part of `AggregationsAggregationContainer`
       random_sampler: {
         probability: sampleProbability,
+        seed: RANDOM_SAMPLER_SEED,
       },
       aggs,
     },

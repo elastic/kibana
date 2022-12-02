@@ -352,6 +352,7 @@ export interface RegistryElasticsearch {
   'index_template.mappings'?: estypes.MappingTypeMapping;
   'ingest_pipeline.name'?: string;
   source_mode?: 'default' | 'synthetic';
+  index_mode?: 'time_series';
 }
 
 export interface RegistryDataStreamPrivileges {
@@ -434,6 +435,7 @@ export interface IntegrationCardItem {
   categories: string[];
   fromIntegrations?: string;
   isUnverified?: boolean;
+  isUpdateAvailable?: boolean;
   showLabels?: boolean;
 }
 
@@ -444,7 +446,7 @@ export type PackageInfo =
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
 
 // TODO - Expand this with other experimental indexing types
-export type ExperimentalIndexingFeature = 'synthetic_source';
+export type ExperimentalIndexingFeature = 'synthetic_source' | 'tsdb';
 
 export interface ExperimentalDataStreamFeature {
   data_stream: string;

@@ -9,7 +9,7 @@ import { registerTransactionDurationRuleType } from './register_transaction_dura
 import { createRuleTypeMocks } from '../../test_utils';
 
 describe('registerTransactionDurationRuleType', () => {
-  it('sends alert when value is greater than threashold', async () => {
+  it('sends alert when value is greater than threshold', async () => {
     const { services, dependencies, executor, scheduleActions } =
       createRuleTypeMocks();
 
@@ -56,14 +56,17 @@ describe('registerTransactionDurationRuleType', () => {
     await executor({ params });
     expect(scheduleActions).toHaveBeenCalledTimes(1);
     expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-      transactionType: 'request',
-      serviceName: 'opbeans-java',
+      alertDetailsUrl: expect.stringContaining(
+        'http://localhost:5601/eyr/app/observability/alerts/'
+      ),
       environment: 'Not defined',
-      threshold: 3000000,
-      triggerValue: '5,500 ms',
       interval: `5m`,
       reason:
         'Avg. latency is 5,500 ms in the last 5 mins for opbeans-java. Alert when > 3,000 ms.',
+      transactionType: 'request',
+      serviceName: 'opbeans-java',
+      threshold: 3000000,
+      triggerValue: '5,500 ms',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/opbeans-java?transactionType=request&environment=ENVIRONMENT_ALL',
     });

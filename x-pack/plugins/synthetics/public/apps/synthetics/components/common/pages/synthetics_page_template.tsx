@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
-import styled from 'styled-components';
-import { EuiPageHeaderProps, EuiPageTemplateProps, useIsWithinMaxBreakpoint } from '@elastic/eui';
+import React, { useEffect } from 'react';
+import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import { useSyntheticsDataView } from '../../../contexts';
@@ -20,12 +19,6 @@ interface Props {
   pageHeader?: EuiPageHeaderProps;
 }
 
-const mobileCenteredHeader = `
-  .euiPageHeaderContent > .euiFlexGroup > .euiFlexItem {
-    align-items: center;
-  }
-`;
-
 export const SyntheticsPageTemplateComponent: React.FC<Props & EuiPageTemplateProps> = ({
   path,
   pageHeader,
@@ -35,18 +28,8 @@ export const SyntheticsPageTemplateComponent: React.FC<Props & EuiPageTemplatePr
   const {
     services: { observability },
   } = useKibana<ClientPluginsStart>();
-  const isMobile = useIsWithinMaxBreakpoint('s');
 
   const PageTemplateComponent = observability.navigation.PageTemplate;
-  const StyledPageTemplateComponent = useMemo(() => {
-    return styled(PageTemplateComponent)<{ isMobile: boolean }>`
-      .euiPageHeaderContent > .euiFlexGroup {
-        flex-wrap: wrap;
-      }
-
-      ${(props) => (props.isMobile ? mobileCenteredHeader : '')}
-    `;
-  }, [PageTemplateComponent]);
 
   const { loading, error, hasData } = useSyntheticsDataView();
   const { inspectorAdapters } = useInspectorContext();
@@ -63,8 +46,7 @@ export const SyntheticsPageTemplateComponent: React.FC<Props & EuiPageTemplatePr
 
   return (
     <>
-      <StyledPageTemplateComponent
-        isMobile={isMobile}
+      <PageTemplateComponent
         pageHeader={pageHeader}
         data-test-subj={'synthetics-page-template'}
         isPageDataLoaded={loading === false}
@@ -72,7 +54,7 @@ export const SyntheticsPageTemplateComponent: React.FC<Props & EuiPageTemplatePr
       >
         {showLoading && <EmptyStateLoading />}
         <div style={{ visibility: showLoading ? 'hidden' : 'initial' }}>{children}</div>
-      </StyledPageTemplateComponent>
+      </PageTemplateComponent>
     </>
   );
 };

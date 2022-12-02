@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicatorData } from '../../types/models';
+import { IndicatorData } from '../models';
 import { toHighPrecision } from '../../utils/number';
 
 export function computeSLI(sliData: IndicatorData): number {

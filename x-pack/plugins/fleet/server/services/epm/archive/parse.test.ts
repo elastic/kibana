@@ -67,6 +67,11 @@ describe('parseDataStreamElasticsearchEntry', () => {
       source_mode: 'synthetic',
     });
   });
+  it('Should add index_mode', () => {
+    expect(parseDataStreamElasticsearchEntry({ index_mode: 'time_series' })).toEqual({
+      index_mode: 'time_series',
+    });
+  });
   it('Should add index_template mappings and expand dots', () => {
     expect(
       parseDataStreamElasticsearchEntry({

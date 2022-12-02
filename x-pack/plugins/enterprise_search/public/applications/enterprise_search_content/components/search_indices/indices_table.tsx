@@ -135,10 +135,24 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
     {
       actions: [
         {
-          description: 'View this index',
+          description: i18n.translate(
+            'xpack.enterpriseSearch.content.searchIndices.actions.viewIndex.title',
+            {
+              defaultMessage: 'View this index',
+            }
+          ),
           icon: 'eye',
           isPrimary: false,
-          name: (index) => `View ${index.name}`,
+          name: (index) =>
+            i18n.translate(
+              'xpack.enterpriseSearch.content.searchIndices.actions.viewIndex.caption',
+              {
+                defaultMessage: 'View index {indexName}',
+                values: {
+                  indexName: index.name,
+                },
+              }
+            ),
           onClick: (index) =>
             navigateToUrl(
               generateEncodedPath(SEARCH_INDEX_PATH, {
@@ -149,10 +163,24 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
         },
         {
           color: 'danger',
-          description: 'Delete this index',
+          description: i18n.translate(
+            'xpack.enterpriseSearch.content.searchIndices.actions.deleteIndex.title',
+            {
+              defaultMessage: 'Delete this index',
+            }
+          ),
           icon: 'trash',
           isPrimary: false,
-          name: (index) => `Delete ${index.name}`,
+          name: (index) =>
+            i18n.translate(
+              'xpack.enterpriseSearch.content.searchIndices.actions.deleteIndex.caption',
+              {
+                defaultMessage: 'Delete index {indexName}',
+                values: {
+                  indexName: index.name,
+                },
+              }
+            ),
           onClick: (index) => onDelete(index),
           type: 'icon',
         },

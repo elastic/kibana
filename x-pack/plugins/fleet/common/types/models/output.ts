@@ -25,6 +25,7 @@ export interface NewOutput {
     certificate?: string;
     key?: string;
   } | null;
+  proxy_id?: string | null;
 }
 
 export type OutputSOAttributes = NewOutput & {

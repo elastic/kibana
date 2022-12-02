@@ -17,10 +17,12 @@ import { useHtmlId } from '../../../components/use_html_id';
 
 export interface ApiKeysEmptyPromptProps {
   error?: Error;
+  readOnly?: boolean;
 }
 
 export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
   error,
+  readOnly,
   children,
 }) => {
   const accordionId = useHtmlId('apiKeysEmptyPrompt', 'accordion');
@@ -110,6 +112,30 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
               </EuiText>
             </EuiAccordion>
           </>
+        }
+      />
+    );
+  }
+
+  if (readOnly) {
+    return (
+      <KibanaPageTemplate.EmptyPrompt
+        iconType="crossInACircleFilled"
+        title={
+          <h1>
+            <FormattedMessage
+              id="xpack.security.management.apiKeysEmptyPrompt.readOnlyEmptyTitle"
+              defaultMessage="You do not have permission to create API keys"
+            />
+          </h1>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.security.management.apiKeysEmptyPrompt.readOnlyEmptyMessage"
+              defaultMessage="Please contact your administrator for more information"
+            />
+          </p>
         }
       />
     );

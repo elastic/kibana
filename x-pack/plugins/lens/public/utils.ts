@@ -284,6 +284,11 @@ export const isOperationFromTheSameGroup = (op1?: DraggingIdentifier, op2?: Drag
   );
 };
 
+export const sortDataViewRefs = (dataViewRefs: IndexPatternRef[]) =>
+  dataViewRefs.sort((a, b) => {
+    return a.title.localeCompare(b.title);
+  });
+
 export const getSearchWarningMessages = (
   adapter: RequestAdapter,
   datasource: Datasource,

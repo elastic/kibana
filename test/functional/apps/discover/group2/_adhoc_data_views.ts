@@ -14,8 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
-  const dashboardAddPanel = getService('dashboardAddPanel');
   const fieldEditor = getService('fieldEditor');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const queryBar = getService('queryBar');
@@ -51,6 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
@@ -132,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should update data view id when saving data view from hoc one', async () => {
       const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
 
-      await testSubjects.click('discoverAlertsButton');
+      await testSubjects.click('shareTopNavButton');
       await testSubjects.click('confirmModalConfirmButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 

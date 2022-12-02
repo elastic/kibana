@@ -4,8 +4,8 @@
   "description": "Contains all the key functionality of Kibana's unified search experience.Contains all the key functionality of Kibana's unified search experience.",
   "kibanaVersion": "kibana",
   "owner": {
-    "name": "Unified Search",
-    "githubTeam": "kibana-app-services"
+    "name": "Visualizations",
+    "githubTeam": "kibana-visualizations"
   },
   "server": true,
   "ui": true,

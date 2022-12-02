@@ -395,8 +395,8 @@ export const getNewTermsRule = (): NewTermsRule => ({
 
 export const getMachineLearningRule = (): MachineLearningRule => ({
   machineLearningJobs: [
-    'v3_linux_anomalous_process_all_hosts',
     'v3_linux_anomalous_network_activity',
+    'v3_linux_anomalous_process_all_hosts',
   ],
   anomalyScoreThreshold: 20,
   name: 'New ML Rule Test',

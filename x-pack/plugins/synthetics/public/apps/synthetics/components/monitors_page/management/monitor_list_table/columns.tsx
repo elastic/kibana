@@ -18,6 +18,7 @@ import {
   EncryptedSyntheticsSavedMonitor,
   Ping,
   ServiceLocations,
+  SourceType,
   SyntheticsMonitorSchedule,
 } from '../../../../../../../common/runtime_types';
 
@@ -130,12 +131,13 @@ export function getMonitorListColumns({
     {
       align: 'left' as const,
       field: ConfigKey.ENABLED as string,
+      sortable: true,
       name: i18n.translate('xpack.synthetics.management.monitorList.enabled', {
         defaultMessage: 'Enabled',
       }),
       render: (_enabled: boolean, monitor: EncryptedSyntheticsSavedMonitor) => (
         <MonitorEnabled
-          id={monitor.id}
+          configId={monitor[ConfigKey.CONFIG_ID]}
           monitor={monitor}
           reloadPage={reloadPage}
           isSwitchable={!loading}
@@ -150,10 +152,11 @@ export function getMonitorListColumns({
       render: (fields: EncryptedSyntheticsSavedMonitor) => (
         <Actions
           euiTheme={euiTheme}
-          id={fields.id}
+          configId={fields[ConfigKey.CONFIG_ID]}
           name={fields[ConfigKey.NAME]}
           canEditSynthetics={canEditSynthetics}
           reloadPage={reloadPage}
+          isProjectMonitor={fields[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT}
         />
       ),
     },

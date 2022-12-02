@@ -22,7 +22,6 @@ export default function upgradeAssistantFunctionalTests({
 
   describe('Deprecation pages', function () {
     this.tags('skipFirefox');
-    this.timeout(32000);
 
     before(async () => {
       await security.testUser.setRoles(['superuser']);
@@ -63,7 +62,7 @@ export default function upgradeAssistantFunctionalTests({
         });
 
         // Wait for the cluster settings to be reflected to the ES nodes
-        await setTimeout(30000);
+        await setTimeout(12000);
       } catch (e) {
         log.debug('[Setup error] Error updating cluster settings');
         throw e;

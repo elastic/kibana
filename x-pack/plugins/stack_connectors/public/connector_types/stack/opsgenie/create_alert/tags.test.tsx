@@ -9,6 +9,7 @@ import React from 'react';
 import { screen, render, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Tags } from './tags';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 
 describe('Tags', () => {
   const onChange = jest.fn();
@@ -16,6 +17,7 @@ describe('Tags', () => {
   const options = {
     values: [],
     onChange,
+    executionMode: ActionConnectorMode.ActionForm,
   };
 
   beforeEach(() => jest.clearAllMocks());
@@ -74,9 +76,7 @@ describe('Tags', () => {
       expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    act(() => {
-      userEvent.click(screen.getByTestId('comboBoxSearchInput'));
-    });
+    userEvent.click(screen.getByTestId('comboBoxSearchInput'));
 
     userEvent.type(screen.getByTestId('comboBoxSearchInput'), 'awesome{enter}');
 
@@ -99,9 +99,7 @@ describe('Tags', () => {
       expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    act(() => {
-      userEvent.click(screen.getByTestId('comboBoxSearchInput'));
-    });
+    userEvent.click(screen.getByTestId('comboBoxSearchInput'));
 
     await waitFor(() => {
       expect(screen.getByTestId('opsgenie-tags-rule-tags')).toBeInTheDocument();
@@ -116,9 +114,7 @@ describe('Tags', () => {
       expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    act(() => {
-      userEvent.click(screen.getByTestId('comboBoxSearchInput'));
-    });
+    userEvent.click(screen.getByTestId('comboBoxSearchInput'));
 
     await waitFor(() => {
       expect(screen.getByTestId('opsgenie-tags-rule-tags')).toBeInTheDocument();
@@ -139,5 +135,20 @@ describe('Tags', () => {
       ]
     `)
     );
+  });
+
+  it('does not contain the rule.tags option when in test mode', async () => {
+    render(<Tags {...{ ...options, executionMode: ActionConnectorMode.Test }} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+    });
+
+    userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('opsgenie-tags-rule-tags')).not.toBeInTheDocument();
+      expect(screen.queryByText('The tags of the rule.')).not.toBeInTheDocument();
+    });
   });
 });

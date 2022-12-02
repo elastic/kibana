@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+/* eslint-disable @elastic/eui/href-or-on-click */
 import React from 'react';
 
 import type { EuiStepProps } from '@elastic/eui';
@@ -14,7 +15,7 @@ import {
   EuiCode,
   EuiForm,
   EuiFormErrorText,
-  EuiLink,
+  EuiButtonEmpty,
   EuiSpacer,
   EuiText,
   EuiFormRow,
@@ -26,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { MultiRowInput } from '../../../sections/settings/components/multi_row_input';
 
-import { useLink } from '../../../hooks';
+import { useLink, useFlyoutContext } from '../../../hooks';
 
 import type { QuickStartCreateForm } from '../hooks';
 import { FleetServerHostSelect } from '../components';
@@ -51,6 +52,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
   submit,
 }) => {
   const { getHref } = useLink();
+  const flyoutContext = useFlyoutContext();
 
   if (status === 'success') {
     return (
@@ -71,12 +73,16 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
             values={{
               hostUrl: <EuiCode>{selectedFleetServerHost?.host_urls[0]}</EuiCode>,
               fleetSettingsLink: (
-                <EuiLink href={getHref('settings')}>
+                <EuiButtonEmpty
+                  href={getHref('settings')}
+                  onClick={() => flyoutContext.closeFleetServerFlyout()}
+                  flush="left"
+                >
                   <FormattedMessage
                     id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
                     defaultMessage="Fleet Settings"
                   />
-                </EuiLink>
+                </EuiButtonEmpty>
               ),
             }}
           />

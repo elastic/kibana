@@ -12,6 +12,7 @@ import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
+import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
 import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import {
   BulkActionType,
@@ -46,6 +47,7 @@ interface UseBulkActionsArgs {
     result: DryRunResult | undefined,
     action: BulkActionForConfirmation
   ) => Promise<boolean>;
+  showBulkDuplicateConfirmation: () => Promise<string | null>;
   completeBulkEditForm: (
     bulkActionEditType: BulkActionEditType
   ) => Promise<BulkActionEditPayload | null>;
@@ -56,6 +58,7 @@ export const useBulkActions = ({
   filterOptions,
   confirmDeletion,
   showBulkActionConfirmation,
+  showBulkDuplicateConfirmation,
   completeBulkEditForm,
   executeBulkActionsDryRun,
 }: UseBulkActionsArgs) => {
@@ -71,7 +74,7 @@ export const useBulkActions = ({
 
   const {
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
-    actions: { clearRulesSelection },
+    actions: { clearRulesSelection, setIsPreflightInProgress },
   } = rulesTableContext;
 
   const getBulkItemsPopoverContent = useCallback(
@@ -125,8 +128,16 @@ export const useBulkActions = ({
         startTransaction({ name: BULK_RULE_ACTIONS.DUPLICATE });
         closePopover();
 
+        const modalDuplicationConfirmationResult = await showBulkDuplicateConfirmation();
+        if (modalDuplicationConfirmationResult === null) {
+          return;
+        }
         await executeBulkAction({
           type: BulkActionType.duplicate,
+          duplicatePayload: {
+            include_exceptions:
+              modalDuplicationConfirmationResult === DuplicateOptions.withExceptions,
+          },
           ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
         });
         clearRulesSelection();
@@ -184,6 +195,8 @@ export const useBulkActions = ({
 
         closePopover();
 
+        setIsPreflightInProgress(true);
+
         const dryRunResult = await executeBulkActionsDryRun({
           type: BulkActionType.edit,
           ...(isAllSelected
@@ -191,6 +204,8 @@ export const useBulkActions = ({
             : { ids: selectedRuleIds }),
           editPayload: computeDryRunEditPayload(bulkEditActionType),
         });
+
+        setIsPreflightInProgress(false);
 
         // User has cancelled edit action or there are no custom rules to proceed
         const hasActionBeenConfirmed = await showBulkActionConfirmation(
@@ -453,14 +468,16 @@ export const useBulkActions = ({
       executeBulkAction,
       filterQuery,
       toasts,
+      showBulkDuplicateConfirmation,
       clearRulesSelection,
       confirmDeletion,
       bulkExport,
       showBulkActionConfirmation,
+      downloadExportedRules,
+      setIsPreflightInProgress,
       executeBulkActionsDryRun,
       filterOptions,
       completeBulkEditForm,
-      downloadExportedRules,
     ]
   );
 

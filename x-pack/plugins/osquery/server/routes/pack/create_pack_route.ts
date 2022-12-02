@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { has, mapKeys, set, unset, find, some } from 'lodash';
+import { has, set, unset, find, some, mapKeys } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -19,8 +19,13 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
-import { convertPackQueriesToSO, convertSOQueriesToPackConfig } from './utils';
-import { getInternalSavedObjectsClient } from '../utils';
+import {
+  convertSOQueriesToPackConfig,
+  convertPackQueriesToSO,
+  findMatchingShards,
+  getInitialPolicies,
+} from './utils';
+import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
 import type { PackSavedObjectAttributes } from '../../common/types';
 
 export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -34,6 +39,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             description: schema.maybe(schema.string()),
             enabled: schema.maybe(schema.boolean()),
             policy_ids: schema.maybe(schema.arrayOf(schema.string())),
+            shards: schema.recordOf(schema.string(), schema.number()),
             queries: schema.recordOf(
               schema.string(),
               schema.object({
@@ -75,8 +81,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { name, description, queries, enabled, policy_ids } = request.body;
-
+      const { name, description, queries, enabled, policy_ids, shards } = request.body;
       const conflictingEntries = await savedObjectsClient.find({
         type: packSavedObjectType,
         filter: `${packSavedObjectType}.attributes.name: "${name}"`,
@@ -98,17 +103,22 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         }
       )) ?? { items: [] };
 
-      const agentPolicies = policy_ids
-        ? mapKeys(await agentPolicyService?.getByIds(internalSavedObjectsClient, policy_ids), 'id')
-        : {};
+      const policiesList = getInitialPolicies(packagePolicies, policy_ids, shards);
 
-      const references = policy_ids
-        ? policy_ids.map((policyId: string) => ({
-            id: policyId,
-            name: agentPolicies[policyId].name,
-            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-          }))
-        : [];
+      const agentPolicies = await agentPolicyService?.getByIds(
+        internalSavedObjectsClient,
+        policiesList
+      );
+
+      const policyShards = findMatchingShards(agentPolicies, shards);
+
+      const agentPoliciesIdMap = mapKeys(agentPolicies, 'id');
+
+      const references = policiesList.map((id) => ({
+        id,
+        name: agentPoliciesIdMap[id]?.name,
+        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      }));
 
       const packSO = await savedObjectsClient.create<PackSavedObjectAttributes>(
         packSavedObjectType,
@@ -121,6 +131,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           created_by: currentUser,
           updated_at: moment().toISOString(),
           updated_by: currentUser,
+          shards: convertShardsToArray(shards),
         },
         {
           references,
@@ -128,9 +139,9 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         }
       );
 
-      if (enabled && policy_ids?.length) {
+      if (enabled && policiesList.length) {
         await Promise.all(
-          policy_ids.map((agentPolicyId) => {
+          policiesList.map((agentPolicyId) => {
             const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
             if (packagePolicy) {
               return packagePolicyService?.update(
@@ -144,6 +155,9 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                   }
 
                   set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
+                    shard: policyShards[packagePolicy.policy_id]
+                      ? policyShards[packagePolicy.policy_id]
+                      : 100,
                     queries: convertSOQueriesToPackConfig(queries),
                   });
 

@@ -53,7 +53,8 @@
     "macOS",
     "Linux",
     "Threat Detection",
-    "Discovery"
+    "Discovery",
+    "Investigation Guide"
   ],
   "threat": [
     {
@@ -81,5 +82,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 101
+  "version": 102
 }

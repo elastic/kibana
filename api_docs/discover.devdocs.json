@@ -984,7 +984,7 @@
                 "section": "def-common.SearchSourceSearchOptions",
                 "text": "SearchSourceSearchOptions"
               },
-              " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
+              " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean, includeFields?: boolean) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1204,6 +1204,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isTextBasedQuery",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SavedSearch.usesAdHocDataView",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "usesAdHocDataView",
             "description": [],
             "signature": [
               "boolean | undefined"

@@ -199,6 +199,7 @@ export interface ParamEditorProps<
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   paramEditorCustomProps?: ParamEditorCustomProps;
   isReferenced?: boolean;
+  dataSectionExtra?: React.ReactNode;
 }
 
 export interface FieldInputProps<C> {
@@ -443,6 +444,10 @@ interface BaseOperationDefinitionProps<
    *    more than 5 values returned or 6 if the "Other" bucket is enabled)
    */
   getMaxPossibleNumValues?: (column: C) => number;
+  /**
+   * Boolean flag whether the data section extra element passed in from the visualization is handled by the param editor of the operation or whether the datasource general logic should be used.
+   */
+  handleDataSectionExtra?: boolean;
 }
 
 interface BaseBuildColumnArgs {

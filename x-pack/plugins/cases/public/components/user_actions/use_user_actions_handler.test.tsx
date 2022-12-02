@@ -32,7 +32,7 @@ const wrapper: React.FC<string> = ({ children }) => <TestProviders>{children}</T
 
 describe('useUserActionsHandler', () => {
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     jest.spyOn(global, 'setTimeout');
   });
 

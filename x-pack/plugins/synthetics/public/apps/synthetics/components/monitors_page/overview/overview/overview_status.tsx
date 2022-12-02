@@ -86,19 +86,19 @@ export function OverviewStatus() {
       }
     } else if (status) {
       setStatusConfig({
-        up: status?.up,
-        down: status?.down || 0,
-        disabledCount: 0,
+        up: status.up,
+        down: status.down,
+        disabledCount: status.disabledCount,
       });
     }
   }, [status, statusFilter]);
 
   return (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} hasBorder>
       <EuiTitle size="xs">
         <h3>{headingText}</h3>
       </EuiTitle>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem grow={false}>
           <EuiStat

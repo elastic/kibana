@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
+import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
+
 export const getLimitProperties = (
   totalItems: number,
   maxItems: number,
@@ -19,3 +22,17 @@ export const getLimitProperties = (
 
   return { isLastLimitedPage, limitedTotalItemCount };
 };
+
+export const useLimitProperties = ({
+  total,
+  pageIndex,
+  pageSize,
+}: {
+  total?: number;
+  pageSize: number;
+  pageIndex: number;
+}) =>
+  useMemo(
+    () => getLimitProperties(total || 0, MAX_FINDINGS_TO_LOAD, pageSize, pageIndex),
+    [total, pageIndex, pageSize]
+  );

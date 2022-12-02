@@ -13,7 +13,7 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { CommonRuleParams, EsQueryRuleParams, SearchType } from '../types';
+import { CommonRuleParams, EsQueryRuleMetaData, EsQueryRuleParams, SearchType } from '../types';
 import { EsQueryRuleTypeExpression } from './expression';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { Subject } from 'rxjs';
@@ -22,6 +22,7 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { act } from 'react-dom/test-utils';
+import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { ReactWrapper } from 'enzyme';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -87,6 +88,8 @@ const searchSourceFieldsMock = {
     id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     title: 'kibana_sample_data_logs',
     fields: [],
+    getName: () => 'kibana_sample_data_logs',
+    isPersisted: () => true,
   },
 };
 
@@ -122,11 +125,15 @@ const savedQueryMock = {
 };
 
 const dataMock = dataPluginMock.createStartContract();
+const dataViewsMock = dataViewPluginMocks.createStartContract();
+const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
+
 (dataMock.search.searchSource.create as jest.Mock).mockImplementation(() =>
   Promise.resolve(searchSourceMock)
 );
-(dataMock.dataViews.getIdsWithTitle as jest.Mock).mockImplementation(() => Promise.resolve([]));
-dataMock.dataViews.getDefaultDataView = jest.fn(() => Promise.resolve(null));
+(dataViewsMock.getIds as jest.Mock) = jest.fn().mockImplementation(() => Promise.resolve([]));
+dataViewsMock.getDefaultDataView = jest.fn(() => Promise.resolve(null));
+dataViewsMock.get = jest.fn();
 (dataMock.query.savedQueries.getSavedQuery as jest.Mock).mockImplementation(() =>
   Promise.resolve(savedQueryMock)
 );
@@ -137,7 +144,8 @@ dataMock.query.savedQueries.findSavedQueries = jest.fn(() =>
 
 const Wrapper: React.FC<{
   ruleParams: EsQueryRuleParams<SearchType.searchSource> | EsQueryRuleParams<SearchType.esQuery>;
-}> = ({ ruleParams }) => {
+  metadata?: EsQueryRuleMetaData;
+}> = ({ ruleParams, metadata }) => {
   const [currentRuleParams, setCurrentRuleParams] = useState<CommonRuleParams>(ruleParams);
   const errors = {
     index: [],
@@ -170,23 +178,29 @@ const Wrapper: React.FC<{
       defaultActionGroupId=""
       actionGroups={[]}
       charts={chartsStartMock}
+      metadata={metadata}
+      onChangeMetaData={jest.fn()}
     />
   );
 };
 
 const setup = (
-  ruleParams: EsQueryRuleParams<SearchType.searchSource> | EsQueryRuleParams<SearchType.esQuery>
+  ruleParams: EsQueryRuleParams<SearchType.searchSource> | EsQueryRuleParams<SearchType.esQuery>,
+  metadata?: EsQueryRuleMetaData
 ) => {
   return mountWithIntl(
     <KibanaContextProvider
       services={{
         data: dataMock,
+        dataViews: dataViewsMock,
         uiSettings: uiSettingsMock,
         docLinks: docLinksMock,
         http: httpMock,
+        unifiedSearch: unifiedSearchMock,
+        dataViewEditor: dataViewEditorMock,
       }}
     >
-      <Wrapper ruleParams={ruleParams} />
+      <Wrapper ruleParams={ruleParams} metadata={metadata} />
     </KibanaContextProvider>
   );
 };
@@ -236,10 +250,10 @@ describe('EsQueryRuleTypeExpression', () => {
     expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeTruthy();
   });
 
-  test('should render QueryDSL view without the form type chooser if some rule params were passed', async () => {
+  test('should render QueryDSL view without the form type chooser', async () => {
     let wrapper: ReactWrapper;
     await act(async () => {
-      wrapper = setup(defaultEsQueryRuleParams);
+      wrapper = setup(defaultEsQueryRuleParams, { adHocDataViewList: [], isManagementPage: false });
       wrapper = await wrapper.update();
     });
     expect(findTestSubject(wrapper!, 'queryFormTypeChooserTitle').exists()).toBeFalsy();
@@ -247,10 +261,13 @@ describe('EsQueryRuleTypeExpression', () => {
     expect(findTestSubject(wrapper!, 'selectIndexExpression').exists()).toBeTruthy();
   });
 
-  test('should render KQL and Lucene view without the form type chooser if some rule params were passed', async () => {
+  test('should render KQL and Lucene view without the form type chooser', async () => {
     let wrapper: ReactWrapper;
     await act(async () => {
-      wrapper = setup(defaultSearchSourceRuleParams);
+      wrapper = setup(defaultSearchSourceRuleParams, {
+        adHocDataViewList: [],
+        isManagementPage: false,
+      });
       wrapper = await wrapper.update();
     });
     wrapper = await wrapper!.update();
