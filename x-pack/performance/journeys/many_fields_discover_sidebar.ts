@@ -9,20 +9,18 @@ import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 import { waitForChrome } from '../utils';
 
-// You can run it locally with:
-// node scripts/functional_tests --config /x-pack/performance/journeys/many_fields_discover.ts
-
 export const journey = new Journey({
   kbnArchives: ['test/functional/fixtures/kbn_archiver/many_fields_data_view'],
   esArchives: ['test/functional/fixtures/es_archiver/many_fields'],
 })
-  .step('Go to Discover Page', async ({ page, kbnUrl }) => {
+  .step('Go to Discover Page and wait for the sidebar', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`/app/discover`));
     await waitForChrome(page);
-    await page.waitForSelector('[data-test-subj="discoverDocTable"][data-render-complete="true"]');
+    await page.waitForSelector(subj('fieldListGroupedAvailableFields-count'));
   })
-  .step('Expand the first document', async ({ page }) => {
-    const expandButtons = page.locator(subj('docTableExpandToggleColumn'));
-    await expandButtons.first().click();
-    await page.locator('text="Expanded document"');
+  .step('Add a field to the table', async ({ page, kbnUrl }) => {
+    const fieldName = '_all.primaries.bulk.avg_size_in_bytes';
+    await page.locator(subj(`field-${fieldName}`)).hover();
+    await page.locator(subj(`fieldToggle-${fieldName}`)).click();
+    await page.waitForSelector(subj('fieldListGroupedSelectedFields-count'));
   });
