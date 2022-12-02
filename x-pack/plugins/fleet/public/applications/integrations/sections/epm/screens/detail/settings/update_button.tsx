@@ -96,9 +96,11 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     perPage: SO_SEARCH_LIMIT,
     page: 1,
     // Fetch all agent policies that include one of the eligible package policies
-    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:${packagePolicyIds
-      .map((id) => `"${id}"`)
-      .join(' or ')}`,
+    kuery: packagePolicyIds.length
+      ? `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:${packagePolicyIds
+          .map((id) => `"${id}"`)
+          .join(' or ')}`
+      : '',
   });
 
   const packagePolicyCount = useMemo(() => packagePolicyIds.length, [packagePolicyIds]);
