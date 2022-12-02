@@ -111,8 +111,10 @@ export const CreateControlButton = ({
               updateGrow={updateDefaultGrow}
               onSave={(type) => onSave(flyoutInstance, type)}
               onCancel={() => onCancel(flyoutInstance)}
-              onTypeEditorChange={(partialInput) =>
-                (inputToReturn = { ...inputToReturn, ...partialInput })
+              onTypeEditorChange={(partialInput) => {
+                console.log(partialInput);
+                inputToReturn = { ...inputToReturn, ...partialInput };
+                }
               }
             />
           </ControlsServicesProvider>,

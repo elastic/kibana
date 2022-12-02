@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import uuid from 'uuid';
-import { ControlPanelState } from '../../common';
+import { ControlPanelState, OptionsListEmbeddableInput } from '../../common';
 import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
@@ -33,9 +34,7 @@ export interface AddDataControlProps {
   width?: ControlWidth;
 }
 
-export type AddOptionsListControlProps = AddDataControlProps & {
-  selectedOptions?: string[];
-};
+export type AddOptionsListControlProps = AddDataControlProps & Partial<OptionsListEmbeddableInput>;
 
 export type AddRangeSliderControlProps = AddDataControlProps & {
   value?: RangeValue;
@@ -45,7 +44,7 @@ export const controlGroupInputBuilder = {
   addDataControlFromField: async (
     initialInput: Partial<ControlGroupInput>,
     controlProps: AddDataControlProps
-  ) => {
+  ): Promise<string> => {
     const { controlId, dataViewId, fieldName, title } = controlProps;
     const panelId = controlId ? controlId : uuid.v4();
     initialInput.panels = {
@@ -63,12 +62,13 @@ export const controlGroupInputBuilder = {
         },
       } as ControlPanelState<DataControlInput>,
     };
+    return panelId;
   },
   addOptionsListControl: (
     initialInput: Partial<ControlGroupInput>,
     controlProps: AddOptionsListControlProps
-  ) => {
-    const { controlId, dataViewId, fieldName, selectedOptions, title } = controlProps;
+  ): string => {
+    const { controlId, dataViewId, fieldName, title, ...rest } = controlProps;
     const panelId = controlId ? controlId : uuid.v4();
     initialInput.panels = {
       ...initialInput.panels,
@@ -81,17 +81,18 @@ export const controlGroupInputBuilder = {
           id: panelId,
           dataViewId,
           fieldName,
-          selectedOptions,
           title: title ?? fieldName,
+          ...rest,
         },
       } as ControlPanelState<DataControlInput>,
     };
+    return panelId;
   },
   addRangeSliderControl: (
     initialInput: Partial<ControlGroupInput>,
     controlProps: AddRangeSliderControlProps
-  ) => {
-    const { controlId, dataViewId, fieldName, title, value } = controlProps;
+  ): string => {
+    const { controlId, dataViewId, fieldName, title, ...rest } = controlProps;
     const panelId = controlId ? controlId : uuid.v4();
     initialInput.panels = {
       ...initialInput.panels,
@@ -105,12 +106,13 @@ export const controlGroupInputBuilder = {
           dataViewId,
           fieldName,
           title: title ?? fieldName,
-          value: value ? value : ['', ''],
+          ...rest,
         },
       } as ControlPanelState<DataControlInput>,
     };
+    return panelId;
   },
-  addTimeSliderControl: (initialInput: Partial<ControlGroupInput>) => {
+  addTimeSliderControl: (initialInput: Partial<ControlGroupInput>): string => {
     const panelId = uuid.v4();
     initialInput.panels = {
       ...initialInput.panels,
@@ -121,10 +123,13 @@ export const controlGroupInputBuilder = {
         width: 'large',
         explicitInput: {
           id: panelId,
-          title: 'timeslider',
+          title: i18n.translate('controls.controlGroup.timeSlider.title', {
+            defaultMessage: 'Time slider',
+          }),
         },
       } as ControlPanelState<ControlInput>,
     };
+    return panelId;
   },
 };
 
