@@ -8,6 +8,8 @@
 import React from 'react';
 
 import { useParams } from 'react-router-dom';
+import { IBasePath } from '@kbn/core-http-browser';
+import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
 import { ObservabilityAppServices } from '../../application/types';
 import { paths } from '../../config';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -27,15 +29,7 @@ export function SloDetails() {
 
   const [loading, slo] = useFetchSloDetails(sloId);
 
-  useBreadcrumbs([
-    {
-      href: http.basePath.prepend(paths.observability.slos),
-      text: SLOS_BREADCRUMB_TEXT,
-    },
-    {
-      text: 'Details',
-    },
-  ]);
+  useBreadcrumbs(getBreadcrumbs(http.basePath));
 
   if (!isSloFeatureEnabled(config) || slo === undefined) {
     return <PageNotFound />;
@@ -53,4 +47,16 @@ export function SloDetails() {
       <></>
     </ObservabilityPageTemplate>
   );
+}
+
+function getBreadcrumbs(basePath: IBasePath): EuiBreadcrumbProps[] {
+  return [
+    {
+      href: basePath.prepend(paths.observability.slos),
+      text: SLOS_BREADCRUMB_TEXT,
+    },
+    {
+      text: 'Details',
+    },
+  ];
 }
