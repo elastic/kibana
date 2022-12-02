@@ -87,6 +87,7 @@ export const HoverActions: React.FC<Props> = React.memo(
     //   [ownFocus]
     // );
 
+    // TODO to move getHoverContent to inside hover_actions_popover and check if code looks cleaner
     const getHoverContent = useCallback(
       async (closeHoverPopOver: () => void) => {
         closeExtraActions(); // Closed extra actions when opening hover actions

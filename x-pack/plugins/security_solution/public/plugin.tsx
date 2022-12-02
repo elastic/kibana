@@ -59,6 +59,9 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 import type { State } from './common/store/types';
+import { createCopyToClipboardAction } from './actions/copy_to_clipboard';
+import { createFilterInAction } from './actions/filter_in';
+import { createFilterOutAction } from './actions/filter_out';
 /**
  * The Redux store type for the Security app.
  */
@@ -210,7 +213,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
   }
 
-  public start(core: CoreStart, plugins: StartPlugins) {
+  public async start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
     licenseService.start(plugins.licensing.license$);
@@ -264,6 +267,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     // Not using await to prevent blocking start execution
     this.registerAppLinks(core, plugins);
+    this.registerUiActions(core, plugins);
 
     return {};
   }
@@ -459,5 +463,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const filteredLinks = await getFilteredLinks(core, plugins);
       updateAppLinks(filteredLinks, linksPermissions);
     });
+  }
+
+  /**
+   * Register UI Actions.
+   */
+  registerUiActions(core: CoreStart, plugins: StartPlugins) {
+    const copyAction = createCopyToClipboardAction(core.notifications);
+    const filterInAction = createFilterInAction(plugins.data.query.filterManager);
+    const filterOutAction = createFilterOutAction(plugins.data.query.filterManager);
+
+    plugins.uiActions.registerTrigger({
+      id: 'test-security-solution-trigger',
+    });
+
+    plugins.uiActions.addTriggerAction('test-security-solution-trigger', copyAction);
+    plugins.uiActions.addTriggerAction('test-security-solution-trigger', filterInAction);
+    plugins.uiActions.addTriggerAction('test-security-solution-trigger', filterOutAction);
   }
 }
