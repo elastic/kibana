@@ -131,7 +131,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const alerting = MachineLearningAlertingProvider(context, api, commonUI);
   const swimLane = SwimLaneProvider(context);
   const trainedModels = TrainedModelsProvider(context, commonUI);
-  const trainedModelsTable = TrainedModelsTableProvider(context, commonUI);
+  const trainedModelsTable = TrainedModelsTableProvider(context, commonUI, trainedModels);
   const mlNodesPanel = MlNodesPanelProvider(context);
   const notifications = NotificationsProvider(context, commonUI, tableService);
 

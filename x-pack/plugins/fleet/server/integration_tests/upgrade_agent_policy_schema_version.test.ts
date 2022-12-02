@@ -122,7 +122,8 @@ describe('upgrade agent policy schema version', () => {
     await stopServers();
   });
 
-  describe('with package installed with outdated schema version', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/142347
+  describe.skip('with package installed with outdated schema version', () => {
     let soClient: SavedObjectsClientContract;
     let esClient: ElasticsearchClient;
 
