@@ -79,10 +79,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     before(async () => {
       // Stop the sample data feed about three months after the current date to capture anomaly
       const dateStopString = new Date(Date.now() + 131400 * 60 * 1000).toISOString();
-      await ml.api.createAndRunAnomalyDetectionJob(
+      await ml.api.createAndRunAnomalyDetectionLookbackJob(
         ecommerceGeoJobConfig as Job,
         ecommerceGeoDatafeedConfig as Datafeed,
-        dateStopString
+        { end: dateStopString }
       );
       await ml.api.createAndRunAnomalyDetectionLookbackJob(
         weblogGeoJobConfig as Job,
@@ -237,8 +237,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.jobTable.filterWithSearchString(ecommerceGeoJobConfig.job_id, 1);
       await ml.jobTable.clickOpenJobInAnomalyExplorerButton(ecommerceGeoJobConfig.job_id);
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
-      await timePicker.setCommonlyUsedTime('sample_data range');
       await ml.testExecution.logTestStep('Choose time range...');
+      await timePicker.setCommonlyUsedTime('sample_data range');
 
       await ml.testExecution.logTestStep('open anomaly list actions and take screenshot');
       await ml.anomaliesTable.scrollTableIntoView();
