@@ -9,11 +9,10 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
-import uuid from 'uuid';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   ControlGroupContainer,
-  type ControlGroupInput, 
+  type ControlGroupInput,
   type controlGroupInputBuilder,
   LazyControlGroupRenderer,
 } from '@kbn/controls-plugin/public';
@@ -55,7 +54,10 @@ export class Timeslider extends Component<Props, {}> {
     this._isMounted = true;
   }
 
-  _getInitialInput = async (initialInput: Partial<ControlGroupInput>, builder: typeof controlGroupInputBuilder) => {
+  _getInitialInput = async (
+    initialInput: Partial<ControlGroupInput>,
+    builder: typeof controlGroupInputBuilder
+  ) => {
     builder.addTimesliderControl(initialInput);
     return {
       ...initialInput,
