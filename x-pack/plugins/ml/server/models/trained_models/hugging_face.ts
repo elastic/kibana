@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { BehaviorSubject } from 'rxjs';
 import type { Observable } from 'rxjs';
 import fetch, { HeaderInit } from 'node-fetch';
 import { streamFactory } from '@kbn/aiops-utils';
 import type { KibanaRequest, IScopedClusterClient } from '@kbn/core/server';
 import { queue } from 'async';
+import { HuggingFaceTrainedModel } from '../../../common/types/trained_models';
 import type { MlConfigType } from '../../../config';
 import { IMPORT_API_ACTION_NAME } from '../../../common/constants/trained_models';
+
+type TrainedModelVocabulary = estypes.MlPutTrainedModelVocabularyRequest['body'];
 
 export class HuggingFace {
   private serverUrl: string;
@@ -92,17 +97,17 @@ export class HuggingFace {
 
       const run = async () => {
         try {
-          const meta = await this.getMetaData(modelId);
-          const definitionSize: number = meta.source.total_definition_length;
-          const definitionParts: number = meta.source.total_parts;
+          const {
+            source: { total_definition_length: definitionSize, total_parts: definitionParts },
+          } = await this.getHuggingFaceModelConfig(modelId);
 
-          const config = await this.getConfig(modelId);
+          const config = await this.getModelConfig(modelId);
 
           push({
             type: IMPORT_API_ACTION_NAME.GET_CONFIG,
           });
 
-          const vocab = await this.getVocabulary(modelId);
+          const vocab = await this.getModelVocabulary(modelId);
 
           push({
             type: IMPORT_API_ACTION_NAME.GET_VOCABULARY,
@@ -123,7 +128,7 @@ export class HuggingFace {
             const content = await this.getDefinitionPart(modelId, partNo);
             const b64 = content.toString('base64');
 
-            await this.putModelPart(modelId, partNo, definitionParts, definitionSize, b64);
+            await this.putDefinitionPart(modelId, partNo, definitionParts, definitionSize, b64);
             const progress = Number(completedParts / (definitionParts - 1)) * 100;
             completedParts++;
             push({
@@ -158,7 +163,7 @@ export class HuggingFace {
     return responseWithHeaders;
   }
 
-  private async getMetaData(modelId: string) {
+  private async getHuggingFaceModelConfig(modelId: string): Promise<HuggingFaceTrainedModel> {
     const resp = await fetch(`${this.serverUrl}${modelId}`, {
       method: 'GET',
       headers: this.authHeader,
@@ -166,7 +171,7 @@ export class HuggingFace {
     return resp.json();
   }
 
-  private async getConfig(modelId: string) {
+  private async getModelConfig(modelId: string): Promise<estypes.MlTrainedModelConfig> {
     const url = `${this.serverUrl}${modelId}/config`;
     const resp = await fetch(url, {
       method: 'GET',
@@ -178,7 +183,7 @@ export class HuggingFace {
     return resp.json();
   }
 
-  private async putConfig(id: string, config: string) {
+  private async putConfig(id: string, config: estypes.MlTrainedModelConfig) {
     return this.client.asInternalUser.transport.request({
       method: 'PUT',
       path: `/_ml/trained_models/${id}`,
@@ -186,28 +191,7 @@ export class HuggingFace {
     });
   }
 
-  private async putModelPart(
-    id: string,
-    partNumber: number,
-    totalParts: number,
-    totalLength: number,
-    definition: string
-  ) {
-    return this.client.asInternalUser.transport.request(
-      {
-        method: 'PUT',
-        path: `/_ml/trained_models/${id}/definition/${partNumber}`,
-        body: {
-          definition,
-          total_definition_length: totalLength,
-          total_parts: totalParts,
-        },
-      },
-      { maxRetries: 0 }
-    );
-  }
-
-  private async getVocabulary(modelId: string) {
+  private async getModelVocabulary(modelId: string): Promise<TrainedModelVocabulary> {
     const url = `${this.serverUrl}${modelId}/vocabulary`;
 
     const resp = await fetch(url, {
@@ -221,7 +205,7 @@ export class HuggingFace {
     return resp.json();
   }
 
-  private async putVocabulary(id: string, config: string) {
+  private async putVocabulary(id: string, config: TrainedModelVocabulary) {
     return this.client.asInternalUser.transport.request({
       method: 'PUT',
       path: `/_ml/trained_models/${id}/vocabulary`,
@@ -238,5 +222,26 @@ export class HuggingFace {
       throw new Error('definition part not found');
     }
     return resp.buffer();
+  }
+
+  private async putDefinitionPart(
+    id: string,
+    partNumber: number,
+    totalParts: number,
+    totalLength: number,
+    definitionB64: string
+  ) {
+    return this.client.asInternalUser.transport.request(
+      {
+        method: 'PUT',
+        path: `/_ml/trained_models/${id}/definition/${partNumber}`,
+        body: {
+          definition: definitionB64,
+          total_definition_length: totalLength,
+          total_parts: totalParts,
+        },
+      },
+      { maxRetries: 0 }
+    );
   }
 }
