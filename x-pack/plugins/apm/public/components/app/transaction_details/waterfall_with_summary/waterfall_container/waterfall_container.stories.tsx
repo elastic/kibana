@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { apm, dedot } from '@kbn/apm-synthtrace';
-import { Meta } from '@storybook/react';
+import { Meta, Story } from '@storybook/react';
 import { noop } from 'lodash';
 import React, { ComponentProps } from 'react';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
@@ -35,7 +35,7 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example = () => {
+export const Example: Story<any> = () => {
   const serviceName = 'synth-apple';
   const instanceJava = apm
     .service({

@@ -118,6 +118,7 @@ export function SpanFlyout({
   );
 
   const { span, parentTransaction } = data;
+
   const isLoading = isPending(status);
 
   return (
