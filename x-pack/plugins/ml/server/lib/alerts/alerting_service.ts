@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import rison from 'rison-node';
+import rison from '@kbn/rison';
 import { Duration } from 'moment/moment';
 import { memoize } from 'lodash';
 import {
