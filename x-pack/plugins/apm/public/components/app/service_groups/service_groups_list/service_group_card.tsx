@@ -81,7 +81,11 @@ export function ServiceGroupsCard({
 
   return (
     <EuiFlexItem key={serviceGroup.groupName}>
-      <EuiCard layout="vertical" {...cardProps} />
+      <EuiCard
+        layout="vertical"
+        {...cardProps}
+        data-test-subj="serviceGroupCard"
+      />
     </EuiFlexItem>
   );
 }
