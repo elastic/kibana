@@ -17,9 +17,6 @@ type Variables = Record<string, unknown>;
 
 interface TemplateDirectives {
   format: string; // mustache or handlebars
-  timeZone?: string; // https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-  dateFormat?: string; // https://momentjs.com/docs/#/displaying/format/
-  expressions: string[]; // kibana expressions
 }
 
 export function renderTemplate(
@@ -42,25 +39,25 @@ export function renderTemplate(
       }
 
     case 'handlebars':
-      const timeZone = directives.timeZone;
-      const dateFormat = directives.dateFormat;
-
       const handlebars = Handlebars.create();
 
-      handlebars.registerHelper('date', function (this: Variables, o: unknown) {
-        return formatDate(o, this, timeZone, dateFormat);
+      handlebars.registerHelper(
+        'formatDate',
+        function (this: Variables, o: unknown, options: Handlebars.HelperOptions) {
+          return formatDate(this, o, options);
+        }
+      );
+      handlebars.registerHelper('formatJson', function (this: Variables, o: unknown) {
+        return jsonize(this, o, false);
       });
-      handlebars.registerHelper('json', function (this: Variables, o: unknown) {
-        return jsonize(o, this, false);
+      handlebars.registerHelper('formatJsonl', function (this: Variables, o: unknown) {
+        return jsonize(this, o, true);
       });
-      handlebars.registerHelper('jsonl', function (this: Variables, o: unknown) {
-        return jsonize(o, this, true);
+      handlebars.registerHelper('evalMath', function (this: Variables, o: unknown) {
+        return tinymathRunner(this, o);
       });
-      handlebars.registerHelper('math', function (this: Variables, o: unknown) {
-        return tinymathRunner(o, this);
-      });
-      handlebars.registerHelper('jexl', function (this: Variables, o: unknown) {
-        return jexlRunner(o, this);
+      handlebars.registerHelper('evalJexl', function (this: Variables, o: unknown) {
+        return jexlRunner(this, o);
       });
 
       // see: https://github.com/handlebars-lang/handlebars.js/pull/1523
@@ -93,13 +90,8 @@ const propertyPattern = /^\s*(\w+)\s*:\s*(.*)\s*$/;
 function getTemplateDirectives(template: string): GetTemplateDirectives {
   const lines = template.split('\n');
   const templateLines: string[] = [];
-  const directives: TemplateDirectives = {
-    format: 'mustache',
-    expressions: [],
-  };
+  const directives: TemplateDirectives = { format: 'mustache' };
 
-  // just trying this as default "for fun", but presumably we'd ship
-  // mustache as the default, like a few lines ^^^
   directives.format = 'mustache';
 
   for (const line of lines) {
@@ -120,15 +112,6 @@ function getTemplateDirectives(template: string): GetTemplateDirectives {
       case 'format':
         directives.format = val;
         break;
-      case 'timeZone':
-        directives.timeZone = val;
-        break;
-      case 'dateFormat':
-        directives.dateFormat = val;
-        break;
-      case 'expr':
-        directives.expressions.push(val);
-        break;
     }
   }
 
@@ -142,12 +125,10 @@ function getTemplateDirectives(template: string): GetTemplateDirectives {
 
 const DefaultFormat = 'YYYY-MM-DD hh:mma';
 
-function formatDate(
-  o: unknown,
-  vars: Variables,
-  timeZone: string = 'UTC',
-  format?: string
-): string {
+function formatDate(_vars: Variables, o: unknown, options: Handlebars.HelperOptions): string {
+  const timeZone = `${options?.hash?.timeZone || 'UTC'}`;
+  const format = `${options?.hash?.format || DefaultFormat}`;
+
   const mDate = moment(`${o}`);
   if (timeZone) {
     mDate.tz(timeZone);
@@ -155,7 +136,7 @@ function formatDate(
   return mDate.format(format ?? DefaultFormat);
 }
 
-function jsonize(o: unknown, vars: Variables, pretty: boolean): string {
+function jsonize(_vars: Variables, o: unknown, pretty: boolean): string {
   if (pretty) {
     return JSON.stringify(o, null, 4);
   } else {
@@ -163,7 +144,7 @@ function jsonize(o: unknown, vars: Variables, pretty: boolean): string {
   }
 }
 
-function tinymathRunner(o: unknown, vars: Variables): string {
+function tinymathRunner(vars: Variables, o: unknown): string {
   const expr = `${o}`;
   try {
     const result = tinymath.evaluate(expr, vars);
@@ -174,7 +155,7 @@ function tinymathRunner(o: unknown, vars: Variables): string {
 }
 
 // https://github.com/TomFrost/jexl
-function jexlRunner(o: unknown, vars: Variables): string {
+function jexlRunner(vars: Variables, o: unknown): string {
   const expr = `${o}`;
   const jexlEnv = new jexl.Jexl();
   jexlEnv.addTransform('concat', (val, arg) => `${val}`.concat(`${arg}`));

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import dedent from 'dedent';
+
 import { renderMustacheString } from './mustache_renderer';
 
 describe('using handlebars', () => {
   // -------------------------------------------------------------------
   it('is supported with a format comment directive', () => {
-    const template = `
-{{!@ format: handlebars}}
-{{#if x}}{{x}}{{/if}}
+    const template = dedent`
+      {{!@ format: handlebars}}
+      {{#if x}}{{x}}{{/if}}
     `.trim();
 
     expect(renderMustacheString(template, { x: 1 }, 'none')).toEqual('1');
@@ -21,9 +23,9 @@ describe('using handlebars', () => {
   // -------------------------------------------------------------------
   it('has a date helper', () => {
     const timeStamp = '2022-11-29T15:52:44Z';
-    const template = `
+    const template = dedent`
 {{!@ format: handlebars}}
-{{date timeStamp}}
+{{formatDate timeStamp}}
     `.trim();
 
     expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual('2022-11-29 03:52pm');
@@ -35,8 +37,7 @@ describe('using handlebars', () => {
     const timeZone = 'America/New_York';
     const template = `
 {{!@ format: handlebars}}
-{{!@ timeZone: ${timeZone}}}
-{{date timeStamp}}
+{{formatDate timeStamp timeZone="${timeZone}"}}
     `.trim();
 
     expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual('2022-11-29 10:52am');
@@ -46,10 +47,9 @@ describe('using handlebars', () => {
   it('date with a format is successful', () => {
     const timeStamp = '2022-11-29T15:52:44Z';
     const dateFormat = 'dddd MMM Do YYYY HH:mm:ss.SSS';
-    const template = `
-{{!@ format: handlebars}}
-{{!@ dateFormat: ${dateFormat}}}
-{{date timeStamp}}
+    const template = dedent`
+      {{!@ format: handlebars}}
+      {{formatDate timeStamp format="${dateFormat}"}}
     `.trim();
 
     expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual(
@@ -62,11 +62,9 @@ describe('using handlebars', () => {
     const timeStamp = '2022-11-29T15:52:44Z';
     const dateFormat = 'dddd MMM Do YYYY HH:mm:ss.SSS';
     const timeZone = 'America/New_York';
-    const template = `
-{{!@ format: handlebars}}
-{{!@ dateFormat: ${dateFormat}}}
-{{!@ timeZone: ${timeZone}}}
-{{date timeStamp}}
+    const template = dedent`
+      {{!@ format: handlebars}}
+      {{formatDate timeStamp format="${dateFormat}" timeZone="${timeZone}"}}
   `.trim();
 
     expect(renderMustacheString(template, { timeStamp }, 'none')).toEqual(
@@ -86,9 +84,9 @@ describe('using handlebars', () => {
         },
       },
     };
-    const template = `
-{{!@ format: handlebars}}
-{{json context}}
+    const template = dedent`
+      {{!@ format: handlebars}}
+      {{formatJson context}}
   `.trim();
 
     expect(renderMustacheString(template, vars, 'none')).toEqual('{"a":{"b":1},"c":{"d":2}}');
@@ -101,18 +99,18 @@ describe('using handlebars', () => {
         arr: [17, 42],
       },
     };
-    const template = `
-{{!@ format: handlebars}}
-{{json context.arr}}
+    const template = dedent`
+      {{!@ format: handlebars}}
+      {{formatJson context.arr}}
   `.trim();
 
     expect(renderMustacheString(template, vars, 'none')).toEqual('[17,42]');
 
     // arrays to JSON doesn't work with mustache due to legacy toString
     // support in the JS arrays
-    const template2 = `
-{{!@ format: mustache}}
-{{context.arr}}
+    const template2 = dedent`
+      {{!@ format: mustache}}
+      {{context.arr}}
       `.trim();
 
     expect(renderMustacheString(template2, vars, 'none')).toEqual('17,42');
@@ -130,9 +128,9 @@ describe('using handlebars', () => {
         },
       },
     };
-    const template = `
+    const template = dedent`
 {{!@ format: handlebars}}
-{{jsonl context}}
+{{formatJsonl context}}
   `.trim();
 
     expect(renderMustacheString(template, vars, 'none')).toEqual(`{
@@ -153,13 +151,13 @@ describe('using handlebars', () => {
         c: { d: 2 },
       },
     };
-    const template = `
-{{!@ format: handlebars}}
-{{math '1 + 0'}}
-{{math '1 + context.a.b'}}
-{{#context}}
-{{math '1 + c.d'}}
-{{/context}}
+    const template = dedent`
+      {{!@ format: handlebars}}
+      {{evalMath '1 + 0'}}
+      {{evalMath '1 + context.a.b'}}
+      {{#context}}
+      {{evalMath '1 + c.d'}}
+      {{/context}}
     `.trim();
 
     const result = renderMustacheString(template, vars, 'none');
@@ -178,14 +176,14 @@ describe('using handlebars', () => {
         },
       },
     };
-    const template = `
-{{!@ format: handlebars}}
-{{jexl '1 + 0'}}
-{{jexl '1 + context.a.b'}}
-{{#context}}
-{{jexl '1 + c.d'}}
-{{jexl 'e.firstName|toLowerCase + " " + e.lastName|toUpperCase'}}
-{{/context}}
+    const template = dedent`
+      {{!@ format: handlebars}}
+      {{evalJexl '1 + 0'}}
+      {{evalJexl '1 + context.a.b'}}
+      {{#context}}
+      {{evalJexl '1 + c.d'}}
+      {{evalJexl 'e.firstName|toLowerCase + " " + e.lastName|toUpperCase'}}
+      {{/context}}
     `.trim();
 
     const result = renderMustacheString(template, vars, 'none');
