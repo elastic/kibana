@@ -14,14 +14,21 @@ const pkgMap = require('@kbn/synthetic-package-map').readPackageMap();
 
 const setupFilesAfterEnv = [];
 if (process.env.CI) {
-  setupFilesAfterEnv.push('<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/disable_console_logs.js')
-  process.stderr.write(chalk.bgYellow.blackBright(`      WARNING      `) + `
+  setupFilesAfterEnv.push(
+    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/disable_console_logs.js'
+  );
+  if (!process.env.JEST_WORKER_ID) {
+    process.stderr.write(
+      chalk.black.bgYellow(`      WARNING      `) +
+        `
 
   console.log(), console.warn(), and console.error() output in jest tests causes a massive amount
   of noise on CI without any percevable benefit, so they have been disabled. If you want to log
   output in your test temporarily, you can modify "packages/kbn-test/src/jest/setup/disable_console_logs.js"
 
-`)
+`
+    );
+  }
 }
 
 /** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
