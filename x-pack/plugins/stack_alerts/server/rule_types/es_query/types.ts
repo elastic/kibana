@@ -12,13 +12,12 @@ import { ActionGroupId } from './constants';
 
 export type OnlyEsQueryRuleParams = Omit<EsQueryRuleParams, 'searchConfiguration'> & {
   searchType: 'esQuery';
+  timeField: string;
 };
 
-export type OnlySearchSourceRuleParams = Omit<
-  EsQueryRuleParams,
-  'esQuery' | 'index' | 'timeField'
-> & {
+export type OnlySearchSourceRuleParams = Omit<EsQueryRuleParams, 'esQuery' | 'index'> & {
   searchType: 'searchSource';
+  timeField?: string;
 };
 
 export type ExecutorOptions<P extends RuleTypeParams> = RuleExecutorOptions<

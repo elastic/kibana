@@ -16,7 +16,7 @@ import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
-import { validateExpression } from '../validation';
+import { hasExpressionValidationErrors } from '../validation';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
 import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
@@ -26,13 +26,6 @@ import { totalHitsToNumber } from '../test_query_row';
 import { useTriggerUiActionServices } from '../util';
 
 const { useXJsonMode } = XJson;
-
-const hasExpressionValidationErrors = (ruleParams: EsQueryRuleParams) => {
-  const { errors: validationErrors } = validateExpression(ruleParams);
-  return Object.keys(validationErrors).some(
-    (key) => validationErrors[key] && validationErrors[key].length
-  );
-};
 
 export const EsQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esQuery>, EsQueryRuleMetaData>

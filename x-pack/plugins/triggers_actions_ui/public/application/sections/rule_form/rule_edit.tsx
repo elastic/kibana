@@ -74,11 +74,10 @@ export const RuleEdit = ({
   const [metadata, setMetadata] = useState(initialMetadata);
   const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
 
-  const services = useKibana().services;
   const {
     http,
     notifications: { toasts },
-  } = services;
+  } = useKibana().services;
 
   const setRule = (value: Rule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
@@ -117,8 +116,7 @@ export const RuleEdit = ({
   const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = getRuleErrors(
     rule as Rule,
     ruleType,
-    config,
-    metadata
+    config
   );
 
   const checkForChangesAndCloseFlyout = () => {

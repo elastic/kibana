@@ -27,6 +27,7 @@ import { DataViewSelectPopover } from '../../components/data_view_select_popover
 import { RuleCommonExpressions } from '../rule_common_expressions';
 import { totalHitsToNumber } from '../test_query_row';
 import { useTriggerUiActionServices } from '../util';
+import { hasExpressionValidationErrors } from '../validation';
 
 const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = [
   'pinFilter',
@@ -70,7 +71,6 @@ interface SearchSourceExpressionFormProps {
   searchSource: ISearchSource;
   ruleParams: EsQueryRuleParams<SearchType.searchSource>;
   errors: IErrorObject;
-  hasValidationErrors: boolean;
   metadata?: EsQueryRuleMetaData;
   initialSavedQuery?: SavedQuery;
   setParam: (paramField: string, paramValue: unknown) => void;
@@ -94,6 +94,10 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       if (isSearchSourceParam(action)) {
         searchSource.setParent(undefined).setField(action.type, action.payload);
         setParam('searchConfiguration', searchSource.getSerializedFields());
+
+        if (action.type === 'index') {
+          setParam('timeField', searchSource.getField('index')?.timeFieldName);
+        }
       } else {
         setParam(action.type, action.payload);
       }
@@ -291,7 +295,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         onChangeWindowUnit={onChangeWindowUnit}
         onChangeSizeValue={onChangeSizeValue}
         errors={errors}
-        hasValidationErrors={props.hasValidationErrors}
+        hasValidationErrors={hasExpressionValidationErrors(props.ruleParams)}
         onTestFetch={onTestFetch}
         onCopyQuery={onCopyQuery}
         excludeHitsFromPreviousRun={ruleConfiguration.excludeHitsFromPreviousRun}

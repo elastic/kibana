@@ -31,12 +31,13 @@ export const COMMON_EXPRESSION_ERRORS = {
 
 export const SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS = {
   searchConfiguration: new Array<string>(),
+  timeField: new Array<string>(),
 };
 
 export const ONLY_ES_QUERY_EXPRESSION_ERRORS = {
   index: new Array<string>(),
-  timeField: new Array<string>(),
   esQuery: new Array<string>(),
+  timeField: new Array<string>(),
 };
 
 const ALL_EXPRESSION_ERROR_ENTRIES = {

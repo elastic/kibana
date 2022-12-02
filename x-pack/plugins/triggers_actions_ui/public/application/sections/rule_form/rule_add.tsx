@@ -91,12 +91,11 @@ const RuleAdd = ({
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
 
-  const services = useKibana().services;
   const {
     http,
     notifications: { toasts },
     application: { capabilities },
-  } = services;
+  } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
 
@@ -200,8 +199,7 @@ const RuleAdd = ({
   const { ruleBaseErrors, ruleErrors, ruleParamsErrors } = getRuleErrors(
     rule as Rule,
     ruleType,
-    config,
-    metadata
+    config
   );
 
   // Confirm before saving if user is able to add actions but hasn't added any to this rule

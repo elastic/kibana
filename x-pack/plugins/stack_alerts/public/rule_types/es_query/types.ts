@@ -9,7 +9,6 @@ import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 
 export interface Comparator {
   text: string;
@@ -32,9 +31,8 @@ export interface CommonRuleParams extends RuleTypeParams {
 }
 
 export interface EsQueryRuleMetaData {
-  adHocDataViewList?: DataView[];
+  adHocDataViewList: DataView[];
   isManagementPage?: boolean;
-  moreParamsErrors?: ValidationResult['errors'];
 }
 
 export type EsQueryRuleParams<T = SearchType> = T extends SearchType.searchSource
@@ -48,6 +46,7 @@ export interface OnlyEsQueryRuleParams {
 }
 
 export interface OnlySearchSourceRuleParams {
+  timeField?: string;
   searchType?: 'searchSource';
   searchConfiguration?: SerializedSearchSourceFields;
   savedQueryId?: string;

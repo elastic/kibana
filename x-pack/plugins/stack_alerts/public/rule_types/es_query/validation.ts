@@ -8,8 +8,7 @@
 import { defaultsDeep, isNil } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ValidationResult, builtInComparators } from '@kbn/triggers-actions-ui-plugin/public';
-import { ISearchSource } from '@kbn/data-plugin/public';
-import { EsQueryRuleParams, OnlySearchSourceRuleParams, OnlyEsQueryRuleParams } from './types';
+import { EsQueryRuleParams, SearchType } from './types';
 import { isSearchSourceRule } from './util';
 import {
   COMMON_EXPRESSION_ERRORS,
@@ -85,16 +84,13 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
   return errors;
 };
 
-export const validateSearchSourceParams = (
-  ruleParams: OnlySearchSourceRuleParams,
-  searchSource?: ISearchSource
-) => {
+const validateSearchSourceParams = (ruleParams: EsQueryRuleParams<SearchType.searchSource>) => {
   const errors: typeof SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS = defaultsDeep(
     {},
     SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS
   );
 
-  if (!ruleParams.searchConfiguration || !searchSource) {
+  if (!ruleParams.searchConfiguration) {
     errors.searchConfiguration.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredSearchConfiguration', {
         defaultMessage: 'Search source configuration is required.',
@@ -103,8 +99,7 @@ export const validateSearchSourceParams = (
     return errors;
   }
 
-  const dataView = searchSource.getField('index');
-  if (!dataView) {
+  if (!ruleParams.searchConfiguration.index) {
     errors.searchConfiguration.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewText', {
         defaultMessage: 'Data view is required.',
@@ -113,8 +108,8 @@ export const validateSearchSourceParams = (
     return errors;
   }
 
-  if (!dataView?.isTimeBased()) {
-    errors.searchConfiguration.push(
+  if (!ruleParams.timeField) {
+    errors.timeField.push(
       i18n.translate(
         'xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewTimeFieldText',
         {
@@ -128,7 +123,7 @@ export const validateSearchSourceParams = (
   return errors;
 };
 
-const validateEsQueryParams = (ruleParams: OnlyEsQueryRuleParams) => {
+const validateEsQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esQuery>) => {
   const errors: typeof ONLY_ES_QUERY_EXPRESSION_ERRORS = defaultsDeep(
     {},
     ONLY_ES_QUERY_EXPRESSION_ERRORS
@@ -194,13 +189,19 @@ export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationRes
   if (isSearchSource) {
     validationResult.errors = {
       ...validationResult.errors,
-      ...defaultsDeep({}, SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS),
+      ...validateSearchSourceParams(ruleParams),
     };
-    // skip searchConfiguration check here, since it will be checked in by updating metadata
     return validationResult;
   }
 
-  const esQueryErrors = validateEsQueryParams(ruleParams as OnlyEsQueryRuleParams);
+  const esQueryErrors = validateEsQueryParams(ruleParams as EsQueryRuleParams<SearchType.esQuery>);
   validationResult.errors = { ...validationResult.errors, ...esQueryErrors };
   return validationResult;
+};
+
+export const hasExpressionValidationErrors = (ruleParams: EsQueryRuleParams) => {
+  const { errors: validationErrors } = validateExpression(ruleParams);
+  return Object.keys(validationErrors).some(
+    (key) => validationErrors[key] && validationErrors[key].length
+  );
 };

@@ -401,8 +401,6 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
   onSave?: (metadata?: MetaData) => Promise<void>;
-  // be aware, `moreParamsErrors` prop of metadata is used to pass
-  // errors which can't be validated syncronously within `validate` function
   metadata?: MetaData;
   ruleTypeIndex?: RuleTypeIndex;
   filteredRuleTypes?: string[];

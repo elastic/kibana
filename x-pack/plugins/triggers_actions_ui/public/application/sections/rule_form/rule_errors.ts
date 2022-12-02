@@ -82,15 +82,11 @@ export function validateBaseProperties(
 export function getRuleErrors(
   rule: Rule,
   ruleTypeModel: RuleTypeModel | null,
-  config: TriggersActionsUiConfig,
-  metadata?: Record<string, unknown>
+  config: TriggersActionsUiConfig
 ) {
-  let ruleParamsErrors: IErrorObject = ruleTypeModel
+  const ruleParamsErrors: IErrorObject = ruleTypeModel
     ? ruleTypeModel.validate(rule.params).errors
     : [];
-  if (metadata && metadata.moreParamsErrors) {
-    ruleParamsErrors = { ...ruleParamsErrors, ...(metadata.moreParamsErrors as IErrorObject) };
-  }
   const ruleBaseErrors = validateBaseProperties(rule, config).errors as IErrorObject;
   const ruleErrors = {
     ...ruleParamsErrors,

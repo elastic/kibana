@@ -54,9 +54,8 @@ export function updateSearchSource(
   params: OnlySearchSourceRuleParams,
   latestTimestamp: string | undefined
 ) {
-  const index = searchSource.getField('index');
-
-  const timeFieldName = index?.timeFieldName;
+  const index = searchSource.getField('index')!;
+  const timeFieldName = params.timeField || index.timeFieldName;
   if (!timeFieldName) {
     throw new Error('Invalid data view without timeFieldName.');
   }
@@ -75,7 +74,7 @@ export function updateSearchSource(
     if (latestTimestamp && latestTimestamp > dateStart) {
       // add additional filter for documents with a timestamp greater then
       // the timestamp of the previous run, so that those documents are not counted twice
-      const field = index.fields.find((f) => f.name === timeFieldName);
+      const field = index.fields.find((f) => f.name === params.timeField);
       const addTimeRangeField = buildRangeFilter(field!, { gt: latestTimestamp }, index);
       filters.push(addTimeRangeField);
     }
