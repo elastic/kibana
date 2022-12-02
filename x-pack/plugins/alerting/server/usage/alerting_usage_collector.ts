@@ -8,13 +8,17 @@
 import { MakeSchemaFrom, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { get } from 'lodash';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { AlertingUsage } from './types';
+import { AlertingTelemetry } from './types';
 import { byTypeSchema } from './by_type_schema';
-import { EmptyEventUsage, EventUsageMapping } from './generated/event_log_telemetry_types';
+import {
+  EmptyEventLogUsage,
+  EmptyEventLogUsageByType,
+  EventLogUsageMapping,
+} from './generated/event_log_telemetry_types';
 
 export const NUM_ALERTING_RULE_TYPES = Object.keys(byTypeSchema).length;
 
-const byReasonSchema: MakeSchemaFrom<AlertingUsage>['count_rules_executions_failured_by_reason_per_day'] =
+const byReasonSchema: MakeSchemaFrom<AlertingTelemetry>['count_rules_executions_failured_by_reason_per_day'] =
   {
     // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
     DYNAMIC_KEY: { type: 'long' },
@@ -26,7 +30,7 @@ const byReasonSchema: MakeSchemaFrom<AlertingUsage>['count_rules_executions_fail
 
 export const NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES = Object.keys(byReasonSchema).length;
 
-const byReasonSchemaByType: MakeSchemaFrom<AlertingUsage>['count_rules_executions_failured_by_reason_by_type_per_day'] =
+const byReasonSchemaByType: MakeSchemaFrom<AlertingTelemetry>['count_rules_executions_failured_by_reason_by_type_per_day'] =
   {
     // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
     DYNAMIC_KEY: byTypeSchema,
@@ -36,7 +40,7 @@ const byReasonSchemaByType: MakeSchemaFrom<AlertingUsage>['count_rules_execution
     unknown: byTypeSchema,
   };
 
-const byTaskStatusSchema: MakeSchemaFrom<AlertingUsage>['count_failed_and_unrecognized_rule_tasks_by_status_per_day'] =
+const byTaskStatusSchema: MakeSchemaFrom<AlertingTelemetry>['count_failed_and_unrecognized_rule_tasks_by_status_per_day'] =
   {
     // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
     DYNAMIC_KEY: { type: 'long' },
@@ -44,7 +48,7 @@ const byTaskStatusSchema: MakeSchemaFrom<AlertingUsage>['count_failed_and_unreco
     unrecognized: { type: 'long' },
   };
 
-const byTaskStatusSchemaByType: MakeSchemaFrom<AlertingUsage>['count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day'] =
+const byTaskStatusSchemaByType: MakeSchemaFrom<AlertingTelemetry>['count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day'] =
   {
     // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
     DYNAMIC_KEY: byTypeSchema,
@@ -52,20 +56,20 @@ const byTaskStatusSchemaByType: MakeSchemaFrom<AlertingUsage>['count_failed_and_
     unrecognized: byTypeSchema,
   };
 
-const byStatusSchema: MakeSchemaFrom<AlertingUsage>['count_rules_by_execution_status'] = {
+const byStatusSchema: MakeSchemaFrom<AlertingTelemetry>['count_rules_by_execution_status'] = {
   success: { type: 'long' },
   error: { type: 'long' },
   warning: { type: 'long' },
 };
 
-const byStatusPerDaySchema: MakeSchemaFrom<AlertingUsage>['count_rules_by_execution_status_per_day'] =
+const byStatusPerDaySchema: MakeSchemaFrom<AlertingTelemetry>['count_rules_by_execution_status_per_day'] =
   {
     success: { type: 'long' },
     failure: { type: 'long' },
     unknown: { type: 'long' },
   };
 
-const byNotifyWhenSchema: MakeSchemaFrom<AlertingUsage>['count_rules_by_notify_when'] = {
+const byNotifyWhenSchema: MakeSchemaFrom<AlertingTelemetry>['count_rules_by_notify_when'] = {
   on_action_group_change: { type: 'long' },
   on_active_alert: { type: 'long' },
   on_throttle_interval: { type: 'long' },
@@ -75,7 +79,7 @@ export function createAlertingUsageCollector(
   usageCollection: UsageCollectionSetup,
   taskManager: Promise<TaskManagerStartContract>
 ) {
-  return usageCollection.makeUsageCollector<AlertingUsage>({
+  return usageCollection.makeUsageCollector<AlertingTelemetry>({
     type: 'alerts',
     isReady: async () => {
       await taskManager;
@@ -85,7 +89,7 @@ export function createAlertingUsageCollector(
       try {
         const doc = await getLatestTaskState(await taskManager);
         // get the accumulated state from the recurring task
-        const { runs, ...state } = get(doc, 'state') as AlertingUsage & { runs: number };
+        const { runs, ...state } = get(doc, 'state') as AlertingTelemetry & { runs: number };
 
         return state;
       } catch (err) {
@@ -150,7 +154,8 @@ export function createAlertingUsageCollector(
           count_rules_with_muted_alerts: 0,
           count_connector_types_by_consumers: {},
           count_rules_by_execution_status_per_day: {},
-          ...EmptyEventUsage,
+          ...EmptyEventLogUsage,
+          ...EmptyEventLogUsageByType,
         };
       }
     },
@@ -209,8 +214,8 @@ export function createAlertingUsageCollector(
       count_rules_with_muted_alerts: { type: 'long' },
       count_connector_types_by_consumers: { DYNAMIC_KEY: { DYNAMIC_KEY: { type: 'long' } } },
       count_rules_by_execution_status_per_day: byStatusPerDaySchema,
-      ...EventUsageMapping,
-    },
+      ...EventLogUsageMapping,
+    } as MakeSchemaFrom<AlertingTelemetry>,
   });
 }
 

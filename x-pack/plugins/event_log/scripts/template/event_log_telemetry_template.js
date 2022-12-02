@@ -16,43 +16,45 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { byTypeSchema } from '../by_type_schema';
 
-export interface EventUsageSchema %%SCHEMA%%
-export interface EventUsageByTypeSchema %%SCHEMA_BY_TYPE%%
+export interface EventLogUsageSchema %%SCHEMA%%
+export interface EventLogUsageByTypeSchema %%SCHEMA_BY_TYPE%%
 
-export type EventSchema = EventUsageSchema & EventUsageByTypeSchema;
+export type EventLogUsage = EventLogUsageSchema & EventLogUsageByTypeSchema;
 
-export type AvgSchema = number;
-export type AvgByTypeSchema = Record<string, number>;
-export interface PercentileSchema {
+export type AvgValueSchema = number;
+export type AvgValueByTypeSchema = Record<string, number>;
+export interface PercentileValueSchema {
   p50: number;
   p90: number;
   p99: number;
 }
-export interface PercentileByTypeSchema {
+export interface PercentileValueByTypeSchema {
   p50: Record<string, number>;
   p90: Record<string, number>;
   p99: Record<string, number>;
 }
 
-export const EmptyEventUsage = %%DEFAULT_VALS%%;
+export const EmptyEventLogUsage = %%DEFAULT_VALS%%;
 
-const byPercentileSchema: MakeSchemaFrom<PercentileSchema> = {
+export const EmptyEventLogUsageByType = %%DEFAULT_VALS_BY_TYPE%%;
+
+const byPercentileSchema: MakeSchemaFrom<PercentileValueSchema> = {
   p50: { type: 'long' },
   p90: { type: 'long' },
   p99: { type: 'long' },
 };
 
-const byPercentileSchemaByType: MakeSchemaFrom<PercentileByTypeSchema> = {
+const byPercentileSchemaByType: MakeSchemaFrom<PercentileValueByTypeSchema> = {
   p50: byTypeSchema,
   p90: byTypeSchema,
   p99: byTypeSchema,
 };
 
-export const EventUsageMapping = %%MAPPINGS%%;
+export const EventLogUsageMapping = %%MAPPINGS%%;
 
-export const EventUsageAggregations = %%AGGREGATIONS%%;
+export const EventLogUsageAggregations = %%AGGREGATIONS%%;
 
-export interface EventUsageAggregationType %%AGG_TYPE%%
+export interface EventLogUsageAggregationType %%AGG_TYPE%%
 `.trim();
 
 module.exports = {

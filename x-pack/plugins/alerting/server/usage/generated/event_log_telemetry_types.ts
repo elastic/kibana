@@ -16,138 +16,141 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { byTypeSchema } from '../by_type_schema';
 
-export interface EventUsageSchema {
-  avg_event_duration_per_day: AvgSchema;
-  avg_kibana_task_schedule_delay_per_day: AvgSchema;
-  avg_number_of_triggered_actions_per_day: AvgSchema;
-  percentile_number_of_generated_actions_per_day: PercentileSchema;
-  percentile_alert_counts_active_per_day: PercentileSchema;
-  avg_alert_counts_new_per_day: AvgSchema;
-  avg_alert_counts_recovered_per_day: AvgSchema;
-  avg_number_of_searches_per_day: AvgSchema;
-  avg_total_indexing_duration_ms_per_day: AvgSchema;
-  avg_es_search_duration_ms_per_day: AvgSchema;
-  avg_total_search_duration_ms_per_day: AvgSchema;
-  avg_execution_gap_duration_s_per_day: AvgSchema;
-  avg_rule_type_run_duration_ms_per_day: AvgSchema;
-  avg_process_alerts_duration_ms_per_day: AvgSchema;
-  avg_trigger_actions_duration_ms_per_day: AvgSchema;
-  avg_process_rule_duration_ms_per_day: AvgSchema;
-  avg_claim_to_start_duration_ms_per_day: AvgSchema;
-  avg_prepare_rule_duration_ms_per_day: AvgSchema;
-  avg_total_run_duration_ms_per_day: AvgSchema;
-  avg_total_enrichment_duration_ms_per_day: AvgSchema;
+export interface EventLogUsageSchema {
+  avg_event_duration_per_day: AvgValueSchema;
+  avg_kibana_task_schedule_delay_per_day: AvgValueSchema;
+  avg_number_of_triggered_actions_per_day: AvgValueSchema;
+  percentile_number_of_generated_actions_per_day: PercentileValueSchema;
+  percentile_alert_counts_active_per_day: PercentileValueSchema;
+  avg_alert_counts_new_per_day: AvgValueSchema;
+  avg_alert_counts_recovered_per_day: AvgValueSchema;
+  avg_number_of_searches_per_day: AvgValueSchema;
+  avg_total_indexing_duration_ms_per_day: AvgValueSchema;
+  avg_es_search_duration_ms_per_day: AvgValueSchema;
+  avg_total_search_duration_ms_per_day: AvgValueSchema;
+  avg_execution_gap_duration_s_per_day: AvgValueSchema;
+  avg_rule_type_run_duration_ms_per_day: AvgValueSchema;
+  avg_process_alerts_duration_ms_per_day: AvgValueSchema;
+  avg_trigger_actions_duration_ms_per_day: AvgValueSchema;
+  avg_process_rule_duration_ms_per_day: AvgValueSchema;
+  avg_claim_to_start_duration_ms_per_day: AvgValueSchema;
+  avg_prepare_rule_duration_ms_per_day: AvgValueSchema;
+  avg_total_run_duration_ms_per_day: AvgValueSchema;
+  avg_total_enrichment_duration_ms_per_day: AvgValueSchema;
 }
-export interface EventUsageByTypeSchema {
-  avg_event_duration_by_type_per_day: AvgByTypeSchema;
-  avg_kibana_task_schedule_delay_by_type_per_day: AvgByTypeSchema;
-  avg_number_of_triggered_actions_by_type_per_day: AvgByTypeSchema;
-  percentile_number_of_generated_actions_by_type_per_day: PercentileByTypeSchema;
-  percentile_alert_counts_active_by_type_per_day: PercentileByTypeSchema;
-  avg_alert_counts_new_by_type_per_day: AvgByTypeSchema;
-  avg_alert_counts_recovered_by_type_per_day: AvgByTypeSchema;
-  avg_number_of_searches_by_type_per_day: AvgByTypeSchema;
-  avg_total_indexing_duration_ms_by_type_per_day: AvgByTypeSchema;
-  avg_es_search_duration_ms_by_type_per_day: AvgByTypeSchema;
-  avg_total_search_duration_ms_by_type_per_day: AvgByTypeSchema;
-  avg_execution_gap_duration_s_by_type_per_day: AvgByTypeSchema;
-  avg_rule_type_run_duration_ms_by_type_per_day: AvgByTypeSchema;
-  avg_process_alerts_duration_ms_by_type_per_day: AvgByTypeSchema;
-  avg_trigger_actions_duration_ms_by_type_per_day: AvgByTypeSchema;
-  avg_process_rule_duration_ms_by_type_per_day: AvgByTypeSchema;
-  avg_claim_to_start_duration_ms_by_type_per_day: AvgByTypeSchema;
-  avg_prepare_rule_duration_ms_by_type_per_day: AvgByTypeSchema;
-  avg_total_run_duration_ms_by_type_per_day: AvgByTypeSchema;
-  avg_total_enrichment_duration_ms_by_type_per_day: AvgByTypeSchema;
+export interface EventLogUsageByTypeSchema {
+  avg_event_duration_by_type_per_day: AvgValueByTypeSchema;
+  avg_kibana_task_schedule_delay_by_type_per_day: AvgValueByTypeSchema;
+  avg_number_of_triggered_actions_by_type_per_day: AvgValueByTypeSchema;
+  percentile_number_of_generated_actions_by_type_per_day: PercentileValueByTypeSchema;
+  percentile_alert_counts_active_by_type_per_day: PercentileValueByTypeSchema;
+  avg_alert_counts_new_by_type_per_day: AvgValueByTypeSchema;
+  avg_alert_counts_recovered_by_type_per_day: AvgValueByTypeSchema;
+  avg_number_of_searches_by_type_per_day: AvgValueByTypeSchema;
+  avg_total_indexing_duration_ms_by_type_per_day: AvgValueByTypeSchema;
+  avg_es_search_duration_ms_by_type_per_day: AvgValueByTypeSchema;
+  avg_total_search_duration_ms_by_type_per_day: AvgValueByTypeSchema;
+  avg_execution_gap_duration_s_by_type_per_day: AvgValueByTypeSchema;
+  avg_rule_type_run_duration_ms_by_type_per_day: AvgValueByTypeSchema;
+  avg_process_alerts_duration_ms_by_type_per_day: AvgValueByTypeSchema;
+  avg_trigger_actions_duration_ms_by_type_per_day: AvgValueByTypeSchema;
+  avg_process_rule_duration_ms_by_type_per_day: AvgValueByTypeSchema;
+  avg_claim_to_start_duration_ms_by_type_per_day: AvgValueByTypeSchema;
+  avg_prepare_rule_duration_ms_by_type_per_day: AvgValueByTypeSchema;
+  avg_total_run_duration_ms_by_type_per_day: AvgValueByTypeSchema;
+  avg_total_enrichment_duration_ms_by_type_per_day: AvgValueByTypeSchema;
 }
 
-export type EventSchema = EventUsageSchema & EventUsageByTypeSchema;
+export type EventLogUsage = EventLogUsageSchema & EventLogUsageByTypeSchema;
 
-export type AvgSchema = number;
-export type AvgByTypeSchema = Record<string, number>;
-export interface PercentileSchema {
+export type AvgValueSchema = number;
+export type AvgValueByTypeSchema = Record<string, number>;
+export interface PercentileValueSchema {
   p50: number;
   p90: number;
   p99: number;
 }
-export interface PercentileByTypeSchema {
+export interface PercentileValueByTypeSchema {
   p50: Record<string, number>;
   p90: Record<string, number>;
   p99: Record<string, number>;
 }
 
-export const EmptyEventUsage = {
+export const EmptyEventLogUsage = {
   avg_event_duration_per_day: 0,
-  avg_event_duration_by_type_per_day: {},
   avg_kibana_task_schedule_delay_per_day: 0,
-  avg_kibana_task_schedule_delay_by_type_per_day: {},
   avg_number_of_triggered_actions_per_day: 0,
-  avg_number_of_triggered_actions_by_type_per_day: {},
   percentile_number_of_generated_actions_per_day: {
     p50: 0,
     p90: 0,
     p99: 0,
-  },
-  percentile_number_of_generated_actions_by_type_per_day: {
-    p50: {},
-    p90: {},
-    p99: {},
   },
   percentile_alert_counts_active_per_day: {
     p50: 0,
     p90: 0,
     p99: 0,
   },
+  avg_alert_counts_new_per_day: 0,
+  avg_alert_counts_recovered_per_day: 0,
+  avg_number_of_searches_per_day: 0,
+  avg_total_indexing_duration_ms_per_day: 0,
+  avg_es_search_duration_ms_per_day: 0,
+  avg_total_search_duration_ms_per_day: 0,
+  avg_execution_gap_duration_s_per_day: 0,
+  avg_rule_type_run_duration_ms_per_day: 0,
+  avg_process_alerts_duration_ms_per_day: 0,
+  avg_trigger_actions_duration_ms_per_day: 0,
+  avg_process_rule_duration_ms_per_day: 0,
+  avg_claim_to_start_duration_ms_per_day: 0,
+  avg_prepare_rule_duration_ms_per_day: 0,
+  avg_total_run_duration_ms_per_day: 0,
+  avg_total_enrichment_duration_ms_per_day: 0,
+};
+
+export const EmptyEventLogUsageByType = {
+  avg_event_duration_by_type_per_day: {},
+  avg_kibana_task_schedule_delay_by_type_per_day: {},
+  avg_number_of_triggered_actions_by_type_per_day: {},
+  percentile_number_of_generated_actions_by_type_per_day: {
+    p50: {},
+    p90: {},
+    p99: {},
+  },
   percentile_alert_counts_active_by_type_per_day: {
     p50: {},
     p90: {},
     p99: {},
   },
-  avg_alert_counts_new_per_day: 0,
   avg_alert_counts_new_by_type_per_day: {},
-  avg_alert_counts_recovered_per_day: 0,
   avg_alert_counts_recovered_by_type_per_day: {},
-  avg_number_of_searches_per_day: 0,
   avg_number_of_searches_by_type_per_day: {},
-  avg_total_indexing_duration_ms_per_day: 0,
   avg_total_indexing_duration_ms_by_type_per_day: {},
-  avg_es_search_duration_ms_per_day: 0,
   avg_es_search_duration_ms_by_type_per_day: {},
-  avg_total_search_duration_ms_per_day: 0,
   avg_total_search_duration_ms_by_type_per_day: {},
-  avg_execution_gap_duration_s_per_day: 0,
   avg_execution_gap_duration_s_by_type_per_day: {},
-  avg_rule_type_run_duration_ms_per_day: 0,
   avg_rule_type_run_duration_ms_by_type_per_day: {},
-  avg_process_alerts_duration_ms_per_day: 0,
   avg_process_alerts_duration_ms_by_type_per_day: {},
-  avg_trigger_actions_duration_ms_per_day: 0,
   avg_trigger_actions_duration_ms_by_type_per_day: {},
-  avg_process_rule_duration_ms_per_day: 0,
   avg_process_rule_duration_ms_by_type_per_day: {},
-  avg_claim_to_start_duration_ms_per_day: 0,
   avg_claim_to_start_duration_ms_by_type_per_day: {},
-  avg_prepare_rule_duration_ms_per_day: 0,
   avg_prepare_rule_duration_ms_by_type_per_day: {},
-  avg_total_run_duration_ms_per_day: 0,
   avg_total_run_duration_ms_by_type_per_day: {},
-  avg_total_enrichment_duration_ms_per_day: 0,
   avg_total_enrichment_duration_ms_by_type_per_day: {},
 };
 
-const byPercentileSchema: MakeSchemaFrom<PercentileSchema> = {
+const byPercentileSchema: MakeSchemaFrom<PercentileValueSchema> = {
   p50: { type: 'long' },
   p90: { type: 'long' },
   p99: { type: 'long' },
 };
 
-const byPercentileSchemaByType: MakeSchemaFrom<PercentileByTypeSchema> = {
+const byPercentileSchemaByType: MakeSchemaFrom<PercentileValueByTypeSchema> = {
   p50: byTypeSchema,
   p90: byTypeSchema,
   p99: byTypeSchema,
 };
 
-export const EventUsageMapping = {
+export const EventLogUsageMapping = {
   avg_event_duration_per_day: { type: 'long' },
   avg_event_duration_by_type_per_day: byTypeSchema,
   avg_kibana_task_schedule_delay_per_day: { type: 'long' },
@@ -190,7 +193,7 @@ export const EventUsageMapping = {
   avg_total_enrichment_duration_ms_by_type_per_day: byTypeSchema,
 };
 
-export const EventUsageAggregations = {
+export const EventLogUsageAggregations = {
   avg_event_duration: {
     avg: {
       field: 'event.duration',
@@ -295,7 +298,7 @@ export const EventUsageAggregations = {
   },
 };
 
-export interface EventUsageAggregationType {
+export interface EventLogUsageAggregationType {
   avg_event_duration: AggregationsSingleMetricAggregateBase;
   avg_kibana_task_schedule_delay: AggregationsSingleMetricAggregateBase;
   avg_number_of_triggered_actions: AggregationsSingleMetricAggregateBase;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { flatMap, merge } from 'lodash';
+import { get, flatMap, merge } from 'lodash';
 import type {
   AggregationsKeyedPercentiles,
   AggregationsSingleBucketAggregateBase,
@@ -16,7 +16,6 @@ import type {
   AggregationsBuckets,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import mappings from '@kbn/event-log-plugin/generated/mappings.json';
 import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import {
   NUM_ALERTING_RULE_TYPES,
@@ -25,9 +24,12 @@ import {
 import { replaceDotSymbols } from './replace_dots_with_underscores';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 import {
-  EventUsageAggregations,
-  EventUsageAggregationType,
-  EventUsageSchema,
+  EventLogUsageAggregations,
+  EventLogUsageAggregationType,
+  EventLogUsage,
+  EventLogUsageByTypeSchema,
+  EmptyEventLogUsageByType,
+  EmptyEventLogUsage,
 } from '../generated/event_log_telemetry_types';
 
 const Millis2Nanos = 1000 * 1000;
@@ -43,7 +45,10 @@ interface Opts {
   logger: Logger;
 }
 
-interface GetExecutionsPerDayCountResults extends EventUsageSchema {
+interface RuleTypeBucketResults extends EventLogUsageByTypeSchema {
+  countRuleExecutionsByType: Record<string, number>;
+}
+interface GetExecutionsPerDayCountResults extends EventLogUsage {
   hasErrors: boolean;
   errorMessage?: string;
   countTotalRuleExecutions: number;
@@ -62,114 +67,20 @@ interface GetExecutionTimeoutsPerDayCountResults {
 interface GetExecutionCountsExecutionFailures extends AggregationsSingleBucketAggregateBase {
   by_reason: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
 }
-interface GetExecutionCountsAggregationBucket extends AggregationsStringTermsBucketKeys {
-  avg_execution_time: AggregationsSingleMetricAggregateBase;
-  avg_es_search_duration: AggregationsSingleMetricAggregateBase;
-  avg_total_search_duration: AggregationsSingleMetricAggregateBase;
+interface GetExecutionCountsAggregationBucket
+  extends AggregationsStringTermsBucketKeys,
+    EventLogUsageAggregationType {
   execution_failures: GetExecutionCountsExecutionFailures;
-  percentile_scheduled_actions: AggregationsPercentilesAggregateBase;
-  percentile_alerts: AggregationsPercentilesAggregateBase;
 }
 
 interface IGetExecutionFailures extends AggregationsSingleBucketAggregateBase {
   by_reason: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
 }
 
-interface IAggResult extends EventUsageAggregationType, Record<string, AggregationsAggregate> {
+interface IAggResult extends EventLogUsageAggregationType, Record<string, AggregationsAggregate> {
   by_rule_type_id: AggregationsTermsAggregateBase<GetExecutionCountsAggregationBucket>;
   execution_failures: IGetExecutionFailures;
   by_execution_status: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
-}
-
-const numericMappingTypes = ['integer', 'long', 'float'];
-
-function parseMappingHelper(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  _mappings: any,
-  accumulatedFieldMappings: string[] = [],
-  fieldName: string = ''
-) {
-  if (_mappings.properties) {
-    Object.keys(_mappings.properties).forEach((field: string) => {
-      const numericField = parseMappingHelper(
-        _mappings.properties[field],
-        accumulatedFieldMappings,
-        fieldName.length > 0 ? `${fieldName}.${field}` : field
-      );
-      if (numericField) {
-        accumulatedFieldMappings.push(numericField);
-      }
-    });
-  } else {
-    if (_mappings.type && numericMappingTypes.includes(_mappings.type)) {
-      return fieldName;
-    } else {
-      return null;
-    }
-  }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function parseNumericMappings(_mappings: any) {
-  const numericFields: string[] = [];
-  parseMappingHelper(_mappings, numericFields);
-  return numericFields;
-}
-
-function getAggNameFromField(fieldName: string) {
-  // remove 'kibana.alert.rule.execution.metrics.' prefix if it exists
-  return fieldName.replace('kibana.alert.rule.execution.metrics.', '').replaceAll('.', '_');
-}
-
-const excludeList = [
-  'event.risk_score',
-  'event.risk_score_norm',
-  'event.sequence',
-  'event.severity',
-  'kibana.alert.rule.execution.status_order',
-];
-
-const aggTypeMapping: Record<string, string> = {
-  'kibana.alert.rule.execution.metrics.number_of_generated_actions': 'percentile',
-  'kibana.alert.rule.execution.metrics.alert_counts.active': 'percentile',
-};
-
-export function buildEventLogAggsFromMapping() {
-  const numericEventLogFields = parseNumericMappings(mappings);
-  return numericEventLogFields.reduce((acc, fieldName: string) => {
-    if (excludeList.includes(fieldName)) {
-      return acc;
-    }
-
-    const aggName = getAggNameFromField(fieldName);
-    const aggType = aggTypeMapping[fieldName];
-
-    let agg;
-    switch (aggType) {
-      case 'percentile':
-        agg = {
-          [`percentile_${aggName}`]: {
-            percentiles: {
-              field: fieldName,
-              percents: [50, 90, 99],
-            },
-          },
-        };
-        break;
-      default:
-        agg = {
-          [`avg_${aggName}`]: {
-            avg: {
-              field: fieldName,
-            },
-          },
-        };
-    }
-    return {
-      ...acc,
-      ...agg,
-    };
-  }, {});
 }
 
 export async function getExecutionsPerDayCount({
@@ -194,7 +105,7 @@ export async function getExecutionsPerDayCount({
           },
         },
       },
-      ...EventUsageAggregations,
+      ...EventLogUsageAggregations,
     };
 
     const query = {
@@ -228,6 +139,7 @@ export async function getExecutionsPerDayCount({
     const totalRuleExecutions =
       typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
 
+    console.log(JSON.stringify(results.aggregations));
     const aggregations = results.aggregations as IAggResult;
     const aggregationsByRuleTypeId: AggregationsBuckets<GetExecutionCountsAggregationBucket> =
       aggregations.by_rule_type_id.buckets as GetExecutionCountsAggregationBucket[];
@@ -390,39 +302,54 @@ export async function getExecutionTimeoutsPerDayCount({
  * }
  */
 
+const mapExistingTelemetryFieldNames: Record<string, string> = {
+  avg_event_duration_by_type_per_day: 'avgExecutionTimeByType',
+  avg_es_search_duration_ms_by_type_per_day: 'avgEsSearchDurationByType',
+  avg_total_search_duration_ms_by_type_per_day: 'avgTotalSearchDurationByType',
+  percentile_number_of_generated_actions_by_type_per_day: 'generatedActionsPercentilesByType',
+  percentile_alert_counts_active_by_type_per_day: 'alertsPercentilesByType',
+};
 export function parseRuleTypeBucket(
   buckets: GetExecutionCountsAggregationBucket[]
-): Pick<
-  GetExecutionsPerDayCountResults,
-  | 'countRuleExecutionsByType'
-  | 'avgExecutionTimeByType'
-  | 'avgEsSearchDurationByType'
-  | 'avgTotalSearchDurationByType'
-  | 'generatedActionsPercentilesByType'
-  | 'alertsPercentilesByType'
-> {
+): RuleTypeBucketResults {
   let summary = {
     countRuleExecutionsByType: {},
-    avgExecutionTimeByType: {},
-    avgEsSearchDurationByType: {},
-    avgTotalSearchDurationByType: {},
-    generatedActionsPercentilesByType: { p50: {}, p90: {}, p99: {} },
-    alertsPercentilesByType: { p50: {}, p90: {}, p99: {} },
+    ...EmptyEventLogUsage,
   };
   for (const bucket of buckets ?? []) {
     const ruleType: string = replaceDotSymbols(bucket?.key) ?? '';
     const numExecutions: number = bucket?.doc_count ?? 0;
-    const avgExecutionTimeNanos = bucket?.avg_execution_time?.value ?? 0;
-    const avgEsSearchTimeMillis = bucket?.avg_es_search_duration?.value ?? 0;
-    const avgTotalSearchTimeMillis = bucket?.avg_total_search_duration?.value ?? 0;
-    const actionPercentiles = bucket?.percentile_scheduled_actions?.values ?? {};
-    const alertPercentiles = bucket?.percentile_alerts?.values ?? {};
+
+    const metrics = Object.keys(bucket).reduce((acc, key) => {
+      if (key.startsWith('avg_') || key.startsWith('percentile_')) {
+        return {
+          ...acc,
+          [key]: get(bucket, `${key}.value`, 0) ?? 0,
+        };
+      }
+      return acc;
+    }, {});
 
     summary = {
       countRuleExecutionsByType: {
         ...summary.countRuleExecutionsByType,
         [ruleType]: numExecutions,
       },
+      ...Object.keys(metrics).reduce((acc, key) => {
+        if (mapExistingTelemetryFieldNames[key]) {
+          return {
+            ...acc,
+            ...get(summary, `${mapExistingTelemetryFieldNames[key]}`),
+            [mapExistingTelemetryFieldNames[key]]: get(metrics, `${key}`),
+          };
+        } else {
+          return {
+            ...acc,
+            ...get(summary, `${key}`),
+            [key]: get(metrics, `${key}`),
+          };
+        }
+      }, {}),
       avgExecutionTimeByType: {
         ...summary.avgExecutionTimeByType,
         [ruleType]: Math.round(avgExecutionTimeNanos / Millis2Nanos),

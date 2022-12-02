@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EventSchema } from './generated/event_log_telemetry_types';
+import { EventLogUsage } from './generated/event_log_telemetry_types';
 
-export interface AlertingLegacyUsage {
+export interface AlertingUsage {
   has_errors: boolean;
   error_messages?: string[];
   count_total: number;
@@ -72,4 +72,4 @@ export interface AlertingLegacyUsage {
   };
 }
 
-export type AlertingUsage = AlertingLegacyUsage & EventSchema;
+export type AlertingTelemetry = AlertingUsage & EventLogUsage;

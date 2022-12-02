@@ -36,6 +36,7 @@ function writeEventLogTelemetrySchema(elSchema) {
     SCHEMA: LineWriter.createLineWriter(),
     SCHEMA_BY_TYPE: LineWriter.createLineWriter(),
     DEFAULT_VALS: LineWriter.createLineWriter(),
+    DEFAULT_VALS_BY_TYPE: LineWriter.createLineWriter(),
     MAPPINGS: LineWriter.createLineWriter(),
     AGGREGATIONS: LineWriter.createLineWriter(),
     AGG_TYPE: LineWriter.createLineWriter(),
@@ -77,9 +78,9 @@ function generateSchemaLines(lineWriters, prop, mappings, fullFieldName = '') {
         const aggType = aggTypeMapping[fullFieldName];
         switch (aggType) {
           case 'percentile':
-            lineWriters.SCHEMA.addLine(`percentile_${fieldName}_per_day: PercentileSchema;`);
+            lineWriters.SCHEMA.addLine(`percentile_${fieldName}_per_day: PercentileValueSchema;`);
             lineWriters.SCHEMA_BY_TYPE.addLine(
-              `percentile_${fieldName}_by_type_per_day: PercentileByTypeSchema;`
+              `percentile_${fieldName}_by_type_per_day: PercentileValueByTypeSchema;`
             );
             lineWriters.MAPPINGS.addLine(`percentile_${fieldName}_per_day: byPercentileSchema,`);
             lineWriters.MAPPINGS.addLine(
@@ -90,7 +91,7 @@ function generateSchemaLines(lineWriters, prop, mappings, fullFieldName = '') {
     p90: 0,
     p99: 0,
   },`);
-            lineWriters.DEFAULT_VALS.addLine(
+            lineWriters.DEFAULT_VALS_BY_TYPE.addLine(
               `percentile_${fieldName}_by_type_per_day: {
     p50: {},
     p90: {},
@@ -108,14 +109,14 @@ function generateSchemaLines(lineWriters, prop, mappings, fullFieldName = '') {
             );
             break;
           default: // default to avg
-            lineWriters.SCHEMA.addLine(`avg_${fieldName}_per_day: AvgSchema;`);
+            lineWriters.SCHEMA.addLine(`avg_${fieldName}_per_day: AvgValueSchema;`);
             lineWriters.SCHEMA_BY_TYPE.addLine(
-              `avg_${fieldName}_by_type_per_day: AvgByTypeSchema;`
+              `avg_${fieldName}_by_type_per_day: AvgValueByTypeSchema;`
             );
             lineWriters.MAPPINGS.addLine(`avg_${fieldName}_per_day: { type: 'long' },`);
             lineWriters.MAPPINGS.addLine(`avg_${fieldName}_by_type_per_day: byTypeSchema,`);
             lineWriters.DEFAULT_VALS.addLine(`avg_${fieldName}_per_day: 0,`);
-            lineWriters.DEFAULT_VALS.addLine(`avg_${fieldName}_by_type_per_day: {},`);
+            lineWriters.DEFAULT_VALS_BY_TYPE.addLine(`avg_${fieldName}_by_type_per_day: {},`);
             lineWriters.AGGREGATIONS.addLine(`avg_${fieldName}: {
     avg: {
       field: '${fullFieldName}',

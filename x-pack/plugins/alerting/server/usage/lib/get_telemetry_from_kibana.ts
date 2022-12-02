@@ -19,7 +19,7 @@ import {
 } from './group_connectors_by_consumers';
 import { groupRulesByNotifyWhen } from './group_rules_by_notify_when';
 import { groupRulesByStatus } from './group_rules_by_status';
-import { AlertingUsage } from '../types';
+import { AlertingTelemetry } from '../types';
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 
@@ -30,7 +30,7 @@ interface Opts {
 }
 
 type GetTotalCountsResults = Pick<
-  AlertingUsage,
+  AlertingTelemetry,
   | 'count_total'
   | 'count_by_type'
   | 'count_rules_by_execution_status'
