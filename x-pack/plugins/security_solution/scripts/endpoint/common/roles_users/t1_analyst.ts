@@ -8,7 +8,7 @@
 import type { Role } from '@kbn/security-plugin/common';
 import { getNoResponseActionsRole } from './without_response_actions_role';
 
-export const getWithResponseActionsRole: () => Omit<Role, 'name'> = () => {
+export const getT1Analyst: () => Omit<Role, 'name'> = () => {
   const noResponseActionsRole = getNoResponseActionsRole();
   return {
     ...noResponseActionsRole,
@@ -17,12 +17,7 @@ export const getWithResponseActionsRole: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siem: [
-            ...noResponseActionsRole.kibana[0].feature.siem,
-            'host_isolation_all',
-            'process_operations_all',
-            'file_operations_all',
-          ],
+          siem: ['minimal_all'],
         },
       },
     ],
