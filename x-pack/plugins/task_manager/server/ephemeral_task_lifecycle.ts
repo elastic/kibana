@@ -149,7 +149,7 @@ export class EphemeralTaskLifecycle {
           ),
           0
         )
-      : this.pool.availableWorkers;
+      : this.pool.availableQueueSize;
 
   private emitEvent = (event: TaskLifecycleEvent) => {
     this.events$.next(event);
