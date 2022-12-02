@@ -153,7 +153,9 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
   };
 
   const crumbs = breadcrumbs
-    ?.map<React.ReactNode>((crumb) => <EuiBadge>{crumb}</EuiBadge>)
+    ?.map<React.ReactNode>((crumb) => (
+      <EuiBadge className="termsExplorerTable__titleBadge">{crumb}</EuiBadge>
+    ))
     .reduce((prev, current) => [prev, <span> and </span>, current]);
 
   return (
@@ -167,7 +169,8 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
       >
         <p>
           <span>
-            Unique values of <EuiBadge>{collapseFieldName}</EuiBadge>
+            Unique values of{' '}
+            <EuiBadge className="termsExplorerTable__titleBadge">{collapseFieldName}</EuiBadge>
           </span>
           <span>
             {crumbs ? ' where ' : ''} {crumbs}
