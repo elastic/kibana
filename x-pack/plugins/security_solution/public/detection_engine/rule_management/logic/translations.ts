@@ -14,6 +14,13 @@ export const RULE_AND_TIMELINE_FETCH_FAILURE = i18n.translate(
   }
 );
 
+export const RULE_MANAGEMENT_FILTERS_FETCH_FAILURE = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.ruleManagementFiltersFetchFailure',
+  {
+    defaultMessage: 'Failed to fetch Rule management filters',
+  }
+);
+
 export const RULE_ADD_FAILURE = i18n.translate(
   'xpack.securitySolution.containers.detectionEngine.addRuleFailDescription',
   {

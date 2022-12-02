@@ -32,7 +32,6 @@ import { useListsConfig } from '../../../../detections/containers/detection_engi
 import { redirectToDetections } from '../../../../detections/pages/detection_engine/rules/helpers';
 
 import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/use_find_rules_query';
-import { useInvalidateFetchPrebuiltRulesStatusQuery } from '../../../rule_management/api/hooks/use_fetch_prebuilt_rules_status_query';
 import { importRules } from '../../../rule_management/logic';
 import { usePrePackagedRulesInstallationStatus } from '../../../rule_management/logic/use_pre_packaged_rules_installation_status';
 import { usePrePackagedTimelinesInstallationStatus } from '../../../rule_management/logic/use_pre_packaged_timelines_installation_status';
@@ -42,17 +41,18 @@ import { RulesTableContextProvider } from '../../components/rules_table/rules_ta
 
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { RulesPageTourComponent } from '../../components/rules_table/alternative_tour/tour';
+import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
   const { navigateToApp } = useKibana().services.application;
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
-  const invalidateFetchPrebuiltRulesStatusQuery = useInvalidateFetchPrebuiltRulesStatusQuery();
+  const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
   const invalidateRules = useCallback(() => {
     invalidateFindRulesQuery();
-    invalidateFetchPrebuiltRulesStatusQuery();
-  }, [invalidateFindRulesQuery, invalidateFetchPrebuiltRulesStatusQuery]);
+    invalidateFetchRuleManagementFilters();
+  }, [invalidateFindRulesQuery, invalidateFetchRuleManagementFilters]);
 
   const [
     {

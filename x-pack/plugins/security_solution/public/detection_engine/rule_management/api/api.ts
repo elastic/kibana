@@ -11,6 +11,7 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
+import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../common/detection_engine/rule_management/api/urls';
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -33,7 +34,7 @@ import type {
   BulkActionDuplicatePayload,
 } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { BulkActionType } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-
+import type { RuleManagementFiltersResponse } from '../../../../common/detection_engine/rule_management/api/get_filters/response_schema';
 import type {
   RuleResponse,
   PreviewResponse,
@@ -399,6 +400,23 @@ export type FetchTagsResponse = string[];
  */
 export const fetchTags = async ({ signal }: { signal?: AbortSignal }): Promise<FetchTagsResponse> =>
   KibanaServices.get().http.fetch<FetchTagsResponse>(DETECTION_ENGINE_TAGS_URL, {
+    method: 'GET',
+    signal,
+  });
+
+/**
+ * Fetch rule management related filters
+ *
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const fetchRuleManagementFilters = async ({
+  signal,
+}: {
+  signal?: AbortSignal;
+}): Promise<RuleManagementFiltersResponse> =>
+  KibanaServices.get().http.fetch<RuleManagementFiltersResponse>(RULE_MANAGEMENT_FILTERS_URL, {
     method: 'GET',
     signal,
   });
