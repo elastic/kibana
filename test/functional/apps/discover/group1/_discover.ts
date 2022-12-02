@@ -249,33 +249,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe.only('refresh interval', function () {
       it('should refetch when autofresh is enabled', async () => {
         const intervalS = 5;
-        log.debug('test step: set date range start');
-        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-        log.debug('test step: set date range end');
-        log.debug('test step: navigate to discover start');
-        await PageObjects.common.navigateToApp('discover');
-        log.debug('test step: navigate to discover end');
-        log.debug('test step: wait for loading start');
-        await PageObjects.discover.waitForDocTableLoadingComplete();
-        log.debug('test step: wait for loading end');
-        log.debug(
-          `test step: original config = ${JSON.stringify(
-            await PageObjects.timePicker.getRefreshConfig()
-          )}`
-        );
-        log.debug('test step: update refresh interval start');
-        await retry.waitFor('auto refresh interval update', async () => {
-          await PageObjects.timePicker.startAutoRefresh(intervalS);
-          const config = await PageObjects.timePicker.getRefreshConfig();
-          log.debug(`test step: new config = ${JSON.stringify(config)}`);
-          return (
-            !config.isPaused && config.interval === String(intervalS) && config.units === 'Seconds'
-          );
-        });
-        log.debug('test step: update refresh interval end');
-        log.debug('test step: wait for loading start');
-        await PageObjects.discover.waitForDocTableLoadingComplete();
-        log.debug('test step: wait for loading end');
+        await PageObjects.timePicker.startAutoRefresh(intervalS);
+
         const getRequestTimestamp = async () => {
           // check inspector panel request stats for timestamp
           await inspector.open();
@@ -289,10 +264,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await inspector.close();
           return requestStatsRow[0][1];
         };
-        log.debug('test step: get request timestamp start');
+
         const requestTimestampBefore = await getRequestTimestamp();
-        log.debug('test step: get request timestamp end');
-        log.debug('test step: check request timestamp start');
         await retry.waitFor('refetch because of refresh interval', async () => {
           const requestTimestampAfter = await getRequestTimestamp();
           log.debug(
@@ -300,7 +273,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
           return Boolean(requestTimestampAfter) && requestTimestampBefore !== requestTimestampAfter;
         });
-        log.debug('test step: check request timestamp end');
       });
 
       after(async () => {
