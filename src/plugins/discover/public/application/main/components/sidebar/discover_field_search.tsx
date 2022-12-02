@@ -17,11 +17,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelect,
-  EuiSwitch,
-  EuiSwitchEvent,
   EuiForm,
   EuiFormRow,
   EuiButtonGroup,
@@ -43,7 +40,6 @@ export interface State {
   searchable: string;
   aggregatable: string;
   type: string;
-  missing: boolean;
   [index: string]: string | boolean;
 }
 
@@ -68,6 +64,11 @@ export interface Props {
    * is text base lang mode
    */
   isPlainRecord: boolean;
+
+  /**
+   * For a11y
+   */
+  fieldSearchDescriptionId?: string;
 }
 
 interface FieldTypeTableItem {
@@ -86,6 +87,7 @@ export function DiscoverFieldSearch({
   types,
   presentFieldTypes,
   isPlainRecord,
+  fieldSearchDescriptionId,
 }: Props) {
   const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
@@ -112,7 +114,6 @@ export function DiscoverFieldSearch({
     searchable: 'any',
     aggregatable: 'any',
     type: 'any',
-    missing: true,
   });
 
   const { docLinks } = useDiscoverServices();
@@ -191,7 +192,7 @@ export function DiscoverFieldSearch({
   };
 
   const isFilterActive = (name: string, filterValue: string | boolean) => {
-    return name !== 'missing' && filterValue !== 'any';
+    return filterValue !== 'any';
   };
 
   const handleValueChange = (name: string, filterValue: string | boolean) => {
@@ -212,11 +213,6 @@ export function DiscoverFieldSearch({
     const filterActive = isFilterActive(name, currentValue);
     const diff = Number(filterActive) - Number(previouslyFilterActive);
     setActiveFiltersCount(activeFiltersCount + diff);
-  };
-
-  const handleMissingChange = (e: EuiSwitchEvent) => {
-    const missingValue = e.target.checked;
-    handleValueChange('missing', missingValue);
   };
 
   const buttonContent = (
@@ -297,21 +293,6 @@ export function DiscoverFieldSearch({
     );
   };
 
-  const footer = () => {
-    return (
-      <EuiPopoverFooter paddingSize="s">
-        <EuiSwitch
-          label={i18n.translate('discover.fieldChooser.filter.hideEmptyFieldsLabel', {
-            defaultMessage: 'Hide empty fields',
-          })}
-          checked={values.missing}
-          onChange={handleMissingChange}
-          data-test-subj="missingSwitch"
-        />
-      </EuiPopoverFooter>
-    );
-  };
-
   const selectionPanel = (
     <div className="dscFieldSearch__formWrapper">
       <EuiForm data-test-subj="filterSelectionPanel">
@@ -353,10 +334,11 @@ export function DiscoverFieldSearch({
       <EuiFlexGroup responsive={false} gutterSize={'s'}>
         <EuiFlexItem>
           <EuiFieldSearch
+            aria-describedby={fieldSearchDescriptionId}
             aria-label={searchPlaceholder}
             data-test-subj="fieldFilterSearchInput"
             fullWidth
-            onChange={(event) => onChange('name', event.currentTarget.value)}
+            onChange={(event) => onChange('name', event.target.value)}
             placeholder={searchPlaceholder}
             value={value}
           />
@@ -384,7 +366,6 @@ export function DiscoverFieldSearch({
                 })}
               </EuiPopoverTitle>
               {selectionPanel}
-              {footer()}
             </EuiPopover>
             <EuiPopover
               anchorPosition="rightUp"

@@ -29,6 +29,7 @@ import {
   EuiLink,
   EuiTextArea,
 } from '@elastic/eui';
+import { formatLocation } from '../../../../../../common/utils/location_formatter';
 import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../hooks/use_monitor_name';
 import { MonitorTypeRadioGroup } from '../fields/monitor_type_radio_group';
@@ -407,10 +408,7 @@ export const FIELD: Record<string, FieldMeta> = {
         onChange: (updatedValues: ServiceLocations) => {
           setValue(
             ConfigKey.LOCATIONS,
-            updatedValues.map((location) => ({
-              id: location.id,
-              isServiceManaged: location.isServiceManaged,
-            })) as MonitorServiceLocations,
+            updatedValues.map((location) => formatLocation(location)) as MonitorServiceLocations,
             { shouldValidate: Boolean(formState.submitCount > 0) }
           );
         },
