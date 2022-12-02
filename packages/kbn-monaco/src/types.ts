@@ -14,7 +14,6 @@ export interface LangModuleType {
   ID: string;
   lexerRules?: monaco.languages.IMonarchLanguage;
   languageConfiguration?: monaco.languages.LanguageConfiguration;
-  onLanguage?: () => void;
 }
 
 export interface CompleteLangModuleType extends LangModuleType {
@@ -22,6 +21,10 @@ export interface CompleteLangModuleType extends LangModuleType {
   getSuggestionProvider: Function;
   getSyntaxErrors: Function;
   validation$: () => Observable<LangValidation>;
+}
+
+export interface CustomLangModuleType extends LangModuleType {
+  onLanguage: () => void;
 }
 
 export interface EditorError {

@@ -10,13 +10,13 @@ import { monaco } from '../monaco_imports';
 
 import { ESQL_LANG_ID } from './constants';
 
-import type { LangModuleType } from '../types';
+import type { CustomLangModuleType } from '../types';
 import type { ESQLWorker } from './worker/esql_worker';
 
 import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
 import { WorkerProxyService } from '../common/worker_proxy';
 
-export const ESQLLang: LangModuleType = {
+export const ESQLLang: CustomLangModuleType = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
     const { ESQLTokensProvider } = await import('./lib/monaco');

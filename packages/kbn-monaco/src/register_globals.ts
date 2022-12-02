@@ -13,12 +13,36 @@ import { monaco } from './monaco_imports';
 import { ESQL_THEME_ID, ESQLLang, buildESQlTheme } from './esql';
 
 import { registerLanguage, registerTheme } from './helpers';
+import { createWorkersRegistry } from './workers_registry';
 
-import jsonWorkerSrc from '!!raw-loader!../../target_workers/json.editor.worker.js';
-import xJsonWorkerSrc from '!!raw-loader!../../target_workers/xjson.editor.worker.js';
-import defaultWorkerSrc from '!!raw-loader!../../target_workers/default.editor.worker.js';
-import painlessWorkerSrc from '!!raw-loader!../../target_workers/painless.editor.worker.js';
-import esqlWorkerSrc from '!!raw-loader!../../target_workers/esql.editor.worker.js';
+export const DEFAULT_WORKER_ID = 'default';
+
+const workerRegistry = createWorkersRegistry(DEFAULT_WORKER_ID);
+
+workerRegistry.register(
+  DEFAULT_WORKER_ID,
+  async () => await import('!!raw-loader!../../target_workers/default.editor.worker.js')
+);
+
+workerRegistry.register(
+  XJsonLang.ID,
+  async () => await import('!!raw-loader!../../target_workers/xjson.editor.worker.js')
+);
+
+workerRegistry.register(
+  PainlessLang.ID,
+  async () => await import('!!raw-loader!../../target_workers/painless.editor.worker.js')
+);
+
+workerRegistry.register(
+  ESQLLang.ID,
+  async () => await import('!!raw-loader!../../target_workers/esql.editor.worker.js')
+);
+
+workerRegistry.register(
+  monaco.languages.json.jsonDefaults.languageId,
+  async () => await import('!!raw-loader!../../target_workers/json.editor.worker.js')
+);
 
 /**
  * Register languages and lexer rules
@@ -33,24 +57,9 @@ registerLanguage(ESQLLang);
  */
 registerTheme(ESQL_THEME_ID, buildESQlTheme());
 
-/**
- * Create web workers by language ID
- */
-const mapLanguageIdToWorker: { [key: string]: any } = {
-  [XJsonLang.ID]: xJsonWorkerSrc,
-  [PainlessLang.ID]: painlessWorkerSrc,
-  [ESQLLang.ID]: esqlWorkerSrc,
-  [monaco.languages.json.jsonDefaults.languageId]: jsonWorkerSrc,
-};
-
 // @ts-ignore
 window.MonacoEnvironment = {
   // needed for functional tests so that we can get value from 'editor'
   monaco,
-  getWorker: (module: string, languageId: string) => {
-    const workerSrc = mapLanguageIdToWorker[languageId] || defaultWorkerSrc;
-
-    const blob = new Blob([workerSrc], { type: 'application/javascript' });
-    return new Worker(URL.createObjectURL(blob));
-  },
+  getWorker: workerRegistry.getWorker,
 };
