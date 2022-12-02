@@ -7,7 +7,7 @@
 
 import d3 from 'd3';
 import { calculateTextWidth } from './string_utils';
-import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impact';
+import { getAnomalyScoreExplanationImpactValue } from '../../../common/util/anomaly_utils';
 import moment from 'moment';
 import { CHART_TYPE } from '../explorer/explorer_constants';
 import { ML_PAGES } from '../../../common/constants/locator';
@@ -224,17 +224,29 @@ export async function getExploreSeriesLink(mlLocator, series, timeRange) {
 }
 
 export function showMultiBucketAnomalyMarker(point) {
-  // TODO - test threshold with real use cases
-  return (
-    point.multiBucketImpact !== undefined && point.multiBucketImpact >= MULTI_BUCKET_IMPACT.MEDIUM
-  );
+  return point.isMultiBucketAnomaly === true;
 }
 
 export function showMultiBucketAnomalyTooltip(point) {
-  // TODO - test threshold with real use cases
-  return (
-    point.multiBucketImpact !== undefined && point.multiBucketImpact >= MULTI_BUCKET_IMPACT.LOW
-  );
+  return point.isMultiBucketAnomaly === true;
+}
+
+export function getMultiBucketImpactTooltipValue(point) {
+  const numFilledSquares =
+    point.multiBucketImpact !== undefined
+      ? getAnomalyScoreExplanationImpactValue(point.multiBucketImpact)
+      : 0;
+  const numHollowSquares = 5 - numFilledSquares;
+
+  let tooltip = '';
+  for (let i = 0; i < numFilledSquares; i++) {
+    tooltip += '\u25A0 '; // Unicode filled square
+  }
+  for (let i = 0; i < numHollowSquares; i++) {
+    tooltip += '\u25A1 '; // Unicode hollow square
+  }
+
+  return tooltip;
 }
 
 export function numTicks(axisWidth) {
