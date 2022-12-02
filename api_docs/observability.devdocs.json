@@ -720,7 +720,7 @@
         "signature": [
           "React.ExoticComponent<Pick<{ alert?: ",
           "TopAlert",
-          " | undefined; alerts?: Record<string, unknown>[] | undefined; isInApp?: boolean | undefined; observabilityRuleTypeRegistry: { register: (type: ",
+          "<{}> | undefined; alerts?: Record<string, unknown>[] | undefined; isInApp?: boolean | undefined; observabilityRuleTypeRegistry: { register: (type: ",
           {
             "pluginId": "observability",
             "scope": "public",
