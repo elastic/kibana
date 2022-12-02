@@ -11,10 +11,10 @@ import { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
 import uuid from 'uuid';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 import {
   ControlGroupContainer,
-  type ControlGroupInputBuilder,
+  type ControlGroupInput, 
+  type controlGroupInputBuilder,
   LazyControlGroupRenderer,
 } from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
@@ -55,17 +55,10 @@ export class Timeslider extends Component<Props, {}> {
     this._isMounted = true;
   }
 
-  _getInitialInput = async (builder: typeof ControlGroupInputBuilder) => {
-    const input = {
-      id: uuid(),
-      ...getDefaultControlGroupInput(),
-    };
-    if (!this._isMounted) {
-      return input;
-    }
-    builder.addTimesliderControl(input);
+  _getInitialInput = async (initialInput: Partial<ControlGroupInput>, builder: typeof controlGroupInputBuilder) => {
+    builder.addTimesliderControl(initialInput);
     return {
-      ...input,
+      ...initialInput,
       viewMode: ViewMode.VIEW,
       timeRange: this.props.timeRange,
     };
@@ -108,8 +101,8 @@ export class Timeslider extends Component<Props, {}> {
     return (
       <div className="mapTimeslider mapTimeslider--animation">
         <ControlGroupRenderer
-          onEmbeddableLoad={this._onLoadComplete}
-          getCreationOptions={this._getInitialInput}
+          onLoadComplete={this._onLoadComplete}
+          getInitialInput={this._getInitialInput}
         />
       </div>
     );
