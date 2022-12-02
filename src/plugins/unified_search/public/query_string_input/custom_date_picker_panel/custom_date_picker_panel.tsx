@@ -13,12 +13,21 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EuiLink, EuiFlexGrid, EuiFlexItem, ApplyTime } from '@elastic/eui';
 import { getDocumentsTimeRange } from './get_documents_time_range';
 
+/**
+ * Props of the custom panel
+ */
 export interface Props {
   data: DataPublicPluginStart;
   currentDataViewId: string;
-  applyTime?: ApplyTime;
+  applyTime?: ApplyTime; // will be injected by Eui
 }
 
+/**
+ * A panel with custom quick date picker ranges
+ * @param data
+ * @param currentDataViewId
+ * @param applyTime
+ */
 export const CustomDatePickerPanel: React.FC<Props> = ({ data, currentDataViewId, applyTime }) => {
   const applyTimeRange = useCallback(
     async (type: 'all' | 'first' | 'last') => {

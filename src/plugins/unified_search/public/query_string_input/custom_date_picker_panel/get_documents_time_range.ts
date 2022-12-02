@@ -10,6 +10,14 @@ import { lastValueFrom } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
+/**
+ * Fetches the historical time range of the data view documents
+ * @param data
+ * @param dataView
+ * @param abortSignal
+ * @param dslQuery
+ * @public
+ */
 export const getDocumentsTimeRange = async ({
   data,
   dataView,
