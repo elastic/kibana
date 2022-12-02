@@ -23,7 +23,7 @@ interface Props {
   onFilterAdded?: () => void;
 }
 
-export const StyledContent = styled.div<{ $isDetails: boolean }>`
+const StyledContent = styled.div<{ $isDetails: boolean }>`
   border-bottom: 1px solid #d3dae6;
   padding: ${({ $isDetails }) => ($isDetails ? '0 8px' : undefined)};
 `;
