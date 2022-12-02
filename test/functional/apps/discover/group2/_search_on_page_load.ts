@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe(`when it's false`, () => {
+    describe.only(`when it's false`, () => {
       beforeEach(async () => await initSearchOnPageLoad(false));
 
       it('should not fetch data from ES initially', async function () {
@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
       });
 
-      it('should fetch data when a search is saved', async function () {
+      it.only('should fetch data when a search is saved', async function () {
         await PageObjects.discover.selectIndexPattern('logstash-*');
 
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
       });
 
-      it('should reset state after opening a saved search and pressing New', async function () {
+      it.only('should reset state after opening a saved search and pressing New', async function () {
         await PageObjects.discover.loadSavedSearch(savedSearchName);
         await PageObjects.header.waitUntilLoadingHasFinished();
 

@@ -246,7 +246,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('refresh interval', function () {
+    describe.only('refresh interval', function () {
       it('should refetch when autofresh is enabled', async () => {
         const intervalS = 5;
         await PageObjects.timePicker.startAutoRefresh(intervalS);
