@@ -245,10 +245,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         .send();
       objectRemover.add(space1, cloneRuleResponse.body.id, 'rule', 'alerting');
 
-      expect(cloneRuleResponse.body).to.eql({
-        ...cloneRuleResponse.body,
-        scheduled_task_id: null,
-      });
+      expect(cloneRuleResponse.body.scheduled_task_id).to.eql(undefined);
     });
   });
 }
