@@ -16,7 +16,7 @@ export interface RuleDetailsPathParams {
 }
 
 export interface FetchRuleProps {
-  ruleId: string;
+  ruleId?: string;
   http: HttpSetup;
 }
 

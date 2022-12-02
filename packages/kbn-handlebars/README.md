@@ -69,7 +69,7 @@ The tests for `@kbn/handlebars` are integrated into the regular test suite of Ki
 node scripts/jest packages/kbn-handlebars
 ```
 
-By default each test will run both the original `handlebars` code and the modified `@kbn/handlebars` code to compare if the output of the two are identical. To isolate a test run to just one or the other, you can use the following environment variables:
+By default, each test will run both the original `handlebars` code and the modified `@kbn/handlebars` code to compare if the output of the two are identical. To isolate a test run to just one or the other, you can use the following environment variables:
 
 - `EVAL=1` - Set to only run the original `handlebars` implementation that uses `eval`.
 - `AST=1` - Set to only run the modified `@kbn/handlebars` implementation that doesn't use `eval`.
@@ -84,7 +84,7 @@ Some of the tests have been copied from the upstream `handlebars` project and mo
 
 If the script outputs a diff for a given file, it means that this file has been updated.
 
-_Note: that this will look for chanages in the `4.x` branch of the `handlebars.js` repo only. Changes in the `master` branch are ignored._
+_Note: that this will look for changes in the `4.x` branch of the `handlebars.js` repo only. Changes in the `master` branch are ignored._
 
 Once all updates have been manually merged with our versions of the files, run the following script to "lock" us into the new updates:
 
