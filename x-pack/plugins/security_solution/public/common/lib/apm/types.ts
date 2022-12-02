@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APM_USER_INTERACTIONS } from './constants';
+import type { APM_USER_INTERACTIONS } from './constants';
 
 export type ApmUserInteractionName =
   typeof APM_USER_INTERACTIONS[keyof typeof APM_USER_INTERACTIONS];

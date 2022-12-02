@@ -34,9 +34,9 @@ import { Direction, TableId } from '../../../../common/types';
 import type { ESQuery } from '../../../../common/typed_json';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { dataTableActions } from '../../store/data_table';
-import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
 import { ERROR_TIMELINE_EVENTS } from './translations';
 import type { AlertWorkflowStatus } from '../../types';
+import { getSearchTransactionName, useStartTransaction } from '../../lib/apm/use_start_transaction';
 export type InspectResponse = Inspect & { response: string[] };
 
 export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
@@ -101,7 +101,7 @@ const getInspectResponse = <T extends TimelineFactoryQueryTypes>(
     response != null ? [JSON.stringify(response.rawResponse, null, 2)] : prevResponse?.response,
 });
 
-const ID = 'timelineEventsQuery';
+const ID = 'eventsQuery';
 export const initSortDefault = [
   {
     direction: Direction.desc,
@@ -110,6 +110,32 @@ export const initSortDefault = [
     type: 'date',
   },
 ];
+
+const useApmTracking = (tableId: string) => {
+  const { startTransaction } = useStartTransaction();
+
+  const startTracking = useCallback(() => {
+    // Create the transaction, the managed flag is turned off to prevent it from being polluted by non-related automatic spans.
+    // The managed flag can be turned on to investigate high latency requests in APM.
+    // However, note that by enabling the managed flag, the transaction trace may be distorted by other requests information.
+    const transaction = startTransaction({
+      name: getSearchTransactionName(tableId),
+      type: 'http-request',
+      options: { managed: false },
+    });
+    // Create a blocking span to control the transaction time and prevent it from closing automatically with partial batch responses.
+    // The blocking span needs to be ended manually when the batched request finishes.
+    const span = transaction?.startSpan('batched search', 'http-request', { blocking: true });
+    return {
+      endTracking: (result: 'success' | 'error' | 'aborted' | 'invalid') => {
+        transaction?.addLabels({ result });
+        span?.end();
+      },
+    };
+  }, [startTransaction, tableId]);
+
+  return { startTracking };
+};
 
 const NO_CONSUMERS: AlertConsumers[] = [];
 export const useTimelineEventsHandler = ({
@@ -132,8 +158,7 @@ export const useTimelineEventsHandler = ({
   filterStatus,
 }: UseTimelineEventsProps): [boolean, TimelineArgs, TimelineEventsSearchHandler] => {
   const dispatch = useDispatch();
-  const { startTracking } = useTrackHttpRequest();
-  // const { startTracking } = useApmTracking(id);
+  const { startTracking } = useApmTracking(id);
   const refetch = useRef<Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -209,7 +234,7 @@ export const useTimelineEventsHandler = ({
         abortCtrl.current = new AbortController();
         setLoading(true);
         if (data && data.search) {
-          const { endTracking } = startTracking({ name: id });
+          const { endTracking } = startTracking();
           const abortSignal = abortCtrl.current.signal;
           searchSubscription$.current = data.search
             .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(
