@@ -14,7 +14,7 @@ import { AlertStatus } from '../../../../common/typings';
 
 export interface AlertStatusFilterProps {
   status: AlertStatus;
-  onChange: (id: string, value: string) => void;
+  onChange: (id: AlertStatus) => void;
 }
 
 export interface AlertSearchBarWithUrlSyncProps extends CommonAlertSearchBarProps {
@@ -41,10 +41,9 @@ export interface Services {
   useToasts: () => ToastsStart;
 }
 
-export interface ObservabilityAlertSearchBarProps
-  extends AlertSearchBarContainerState,
-    AlertSearchBarStateTransitions,
-    CommonAlertSearchBarProps {}
+export type ObservabilityAlertSearchBarProps = AlertSearchBarContainerState &
+  AlertSearchBarStateTransitions &
+  CommonAlertSearchBarProps;
 
 interface AlertSearchBarContainerState {
   rangeFrom: string;

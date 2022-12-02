@@ -119,10 +119,7 @@ export function ObservabilityAlertSearchBar({
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <AlertsStatusFilter
-              status={status}
-              onChange={(id) => onStatusChange(id as AlertStatus)}
-            />
+            <AlertsStatusFilter status={status} onChange={onStatusChange} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
