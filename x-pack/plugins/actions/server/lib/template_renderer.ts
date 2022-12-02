@@ -6,6 +6,7 @@
  */
 
 import jexl from 'jexl';
+import { get } from 'lodash';
 import Mustache from 'mustache';
 import moment from 'moment-timezone';
 import Handlebars from '@kbn/handlebars';
@@ -43,11 +44,15 @@ export function renderTemplate(
           },
         formatJson: () =>
           function (this: Variables, text: string, render: RenderFn) {
-            return formatJson(this, JSON.parse(render(text.trim())), false);
+            const key = text.trim();
+            const val = get(this, key);
+            return formatJson(this, val, false);
           },
         formatJsonl: () =>
           function (this: Variables, text: string, render: RenderFn) {
-            return formatJson(this, JSON.parse(render(text.trim())), true);
+            const key = text.trim();
+            const val = get(this, key);
+            return formatJson(this, val, true);
           },
         evalMath: () =>
           function (this: Variables, text: string, render: RenderFn) {

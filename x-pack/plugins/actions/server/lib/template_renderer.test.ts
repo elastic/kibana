@@ -63,14 +63,14 @@ describe('template_renderer', () => {
       };
       const template = dedent`
         {{!@ format: mustache}}
-        {{#formatJson}} {{context}} {{/formatJson}}
+        {{#formatJson}} context {{/formatJson}}
     `.trim();
 
       expect(renderMustacheString(template, vars, 'none')).toEqual('{"a":{"b":1},"c":{"d":2}}');
     });
 
     // -------------------------------------------------------------------
-    it.failing('json with arrays works', () => {
+    it('json with arrays works', () => {
       const vars = {
         context: {
           arr: [17, 42],
@@ -78,7 +78,7 @@ describe('template_renderer', () => {
       };
       const template = dedent`
         {{!@ format: mustache}}
-        {{#formatJson}}{{context.arr}}{{/formatJson}}
+        {{#formatJson}} context.arr {{/formatJson}}
     `.trim();
 
       expect(renderMustacheString(template, vars, 'none')).toEqual('[17,42]');
@@ -107,7 +107,7 @@ describe('template_renderer', () => {
       };
       const template = dedent`
   {{!@ format: mustache}}
-  {{#formatJsonl}} {{context}} {{/formatJsonl}}
+  {{#formatJsonl}} context {{/formatJsonl}}
     `.trim();
 
       expect(renderMustacheString(template, vars, 'none')).toEqual(`{
