@@ -32,6 +32,13 @@ export function MachineLearningAlertingProvider(
       });
     },
 
+    async selectAnomalyDetectionJobHealthAlertType() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('xpack.ml.anomaly_detection_jobs_health-SelectOption');
+        await testSubjects.existOrFail(`mlJobsHealthAlertingRuleForm`, { timeout: 1000 });
+      });
+    },
+
     async selectJobs(jobIds: string[]) {
       for (const jobId of jobIds) {
         await comboBox.set('mlAnomalyAlertJobSelection > comboBoxInput', jobId);
@@ -219,6 +226,14 @@ export function MachineLearningAlertingProvider(
       });
     },
 
+    async clickCancelSaveRuleButton() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('cancelSaveRuleButton');
+        await testSubjects.existOrFail('confirmModalTitleText', { timeout: 1000 });
+        await testSubjects.click('confirmModalConfirmButton');
+      });
+    },
+
     async openAddRuleVariable() {
       await retry.tryForTime(5000, async () => {
         await testSubjects.click('messageAddVariableButton');
@@ -227,3 +242,5 @@ export function MachineLearningAlertingProvider(
     },
   };
 }
+
+
