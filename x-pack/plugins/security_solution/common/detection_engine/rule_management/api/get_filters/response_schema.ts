@@ -13,5 +13,6 @@ export const RuleManagementFiltersResponse = t.exact(
   t.type({
     rules_custom_count: PositiveInteger,
     rules_prebuilt_installed_count: PositiveInteger,
+    tags: t.array(t.string),
   })
 );

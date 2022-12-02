@@ -16,6 +16,21 @@ describe('Rule management filters response schema', () => {
     const payload: RuleManagementFiltersResponse = {
       rules_custom_count: 0,
       rules_prebuilt_installed_count: 0,
+      tags: [],
+    };
+    const decoded = RuleManagementFiltersResponse.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('it should validate an non empty response with defaults', () => {
+    const payload: RuleManagementFiltersResponse = {
+      rules_custom_count: 10,
+      rules_prebuilt_installed_count: 20,
+      tags: ['a', 'b', 'c'],
     };
     const decoded = RuleManagementFiltersResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -29,6 +44,7 @@ describe('Rule management filters response schema', () => {
     const payload: RuleManagementFiltersResponse & { invalid_field: string } = {
       rules_custom_count: 0,
       rules_prebuilt_installed_count: 0,
+      tags: [],
       invalid_field: 'invalid',
     };
     const decoded = RuleManagementFiltersResponse.decode(payload);
@@ -43,6 +59,7 @@ describe('Rule management filters response schema', () => {
     const payload: RuleManagementFiltersResponse = {
       rules_custom_count: 0,
       rules_prebuilt_installed_count: -1,
+      tags: [],
     };
     const decoded = RuleManagementFiltersResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -58,6 +75,7 @@ describe('Rule management filters response schema', () => {
     const payload: RuleManagementFiltersResponse = {
       rules_custom_count: -1,
       rules_prebuilt_installed_count: 0,
+      tags: [],
     };
     const decoded = RuleManagementFiltersResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -73,6 +91,7 @@ describe('Rule management filters response schema', () => {
     const payload: RuleManagementFiltersResponse = {
       rules_custom_count: 0,
       rules_prebuilt_installed_count: 0,
+      tags: [],
     };
     // @ts-expect-error
     delete payload.rules_prebuilt_installed_count;
@@ -83,6 +102,20 @@ describe('Rule management filters response schema', () => {
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "rules_prebuilt_installed_count"',
     ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should NOT validate an empty response with wrong "tags"', () => {
+    const payload: RuleManagementFiltersResponse = {
+      rules_custom_count: 0,
+      rules_prebuilt_installed_count: 0,
+      tags: [1] as unknown as string[],
+    };
+    const decoded = RuleManagementFiltersResponse.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "1" supplied to "tags"']);
     expect(message.schema).toEqual({});
   });
 });

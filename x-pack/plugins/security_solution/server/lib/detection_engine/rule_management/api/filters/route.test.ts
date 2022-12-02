@@ -54,8 +54,13 @@ describe('Rule management filters route', () => {
   });
 
   describe('responses', () => {
-    test('1 rule installed and 1 custom rule', async () => {
+    test('1 rule installed, 1 custom rule and 3 tags', async () => {
       clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.rulesClient.aggregate.mockResolvedValue({
+        alertExecutionStatus: {},
+        ruleLastRunOutcome: {},
+        ruleTags: ['a', 'b', 'c'],
+      });
       const request = getRuleManagementFiltersRequest();
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
@@ -63,6 +68,7 @@ describe('Rule management filters route', () => {
       expect(response.body).toEqual({
         rules_custom_count: 1,
         rules_prebuilt_installed_count: 1,
+        tags: ['a', 'b', 'c'],
       });
     });
   });

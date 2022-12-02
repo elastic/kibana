@@ -47,6 +47,17 @@ async function fetchRulesCount(rulesClient: RulesClient): Promise<RulesCount> {
   };
 }
 
+async function fetchRuleTags(rulesClient: RulesClient): Promise<string[]> {
+  const res = await rulesClient.aggregate({
+    options: {
+      fields: ['tags'],
+      filter: undefined,
+    },
+  });
+
+  return res.ruleTags ?? [];
+}
+
 export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
@@ -62,12 +73,12 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
       const rulesClient = ctx.alerting.getRulesClient();
 
       try {
-        const { prebuilt: prebuiltRulesCount, custom: customRulesCount } = await fetchRulesCount(
-          rulesClient
-        );
+        const [{ prebuilt: prebuiltRulesCount, custom: customRulesCount }, tags] =
+          await Promise.all([fetchRulesCount(rulesClient), fetchRuleTags(rulesClient)]);
         const responseBody: RuleManagementFiltersResponse = {
           rules_custom_count: customRulesCount,
           rules_prebuilt_installed_count: prebuiltRulesCount,
+          tags,
         };
         const [validatedBody, validationError] = validate(
           responseBody,
