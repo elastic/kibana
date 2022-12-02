@@ -136,17 +136,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it.only('should reset state after opening a saved search and pressing New', async function () {
+        log.debug('test step: load saved search start');
         await PageObjects.discover.loadSavedSearch(savedSearchName);
+        log.debug('test step: load saved search end');
+        log.debug('test step: wait on loading start');
         await PageObjects.header.waitUntilLoadingHasFinished();
-
+        log.debug('test step: wait on loading end');
+        log.debug('test step: wait on fetch check start');
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
+        log.debug('test step: wait on fetch check end');
+        log.debug('test step: check sidebar start');
         expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
-
+        log.debug('test step: check sidebar end');
+        log.debug('test step: click new start');
         await testSubjects.click('discoverNewButton');
+        log.debug('test step: click new end');
+        log.debug('test step: wait on loading start');
         await PageObjects.header.waitUntilLoadingHasFinished();
-
+        log.debug('test step: wait on loading end');
+        log.debug('test step: wait on fetch check start');
         await retry.waitFor('number of fetches to be 0', waitForFetches(1));
+        log.debug('test step: wait on fetch check end');
+        log.debug('test step: check sidebar start');
         expect(await PageObjects.discover.doesSidebarShowFields()).to.be(false);
+        log.debug('test step: check sidebar end');
       });
     });
 

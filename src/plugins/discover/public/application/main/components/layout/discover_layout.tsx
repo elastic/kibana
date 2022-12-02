@@ -101,6 +101,7 @@ export function DiscoverLayout({
   useEffect(() => {
     if (dataState.fetchStatus === FetchStatus.LOADING) {
       fetchCounter.current++;
+      console.debug('test step: fetch started', fetchCounter.current);
     }
   }, [dataState.fetchStatus]);
 
