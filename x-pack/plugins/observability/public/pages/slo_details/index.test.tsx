@@ -14,15 +14,21 @@ import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from '.';
+import { useFetchSloDetails } from './hooks/use_fetch_slo_details';
+import { anSLO } from './mocks/slo';
+import { useParams } from 'react-router-dom';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
 }));
 
+jest.mock('./hooks/use_fetch_slo_details');
 jest.mock('../../utils/kibana_react');
 jest.mock('../../hooks/use_breadcrumbs');
 
+const useFetchSloDetailsMock = useFetchSloDetails as jest.Mock;
+const useParamsMock = useParams as jest.Mock;
 const useKibanaMock = useKibana as jest.Mock;
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -50,14 +56,36 @@ describe('SLO Details Page', () => {
   });
 
   it('renders the not found page when the feature flag is not enabled', async () => {
+    useParamsMock.mockReturnValue(anSLO.id);
+    useFetchSloDetailsMock.mockReturnValue([false, anSLO]);
     render(<SloDetailsPage />, { unsafe: { slo: { enabled: false } } });
 
     expect(screen.queryByTestId('pageNotFound')).toBeTruthy();
   });
 
+  it('renders the not found page when the SLO cannot be found', async () => {
+    useParamsMock.mockReturnValue('inexistant');
+    useFetchSloDetailsMock.mockReturnValue([false, undefined]);
+    render(<SloDetailsPage />, config);
+
+    expect(screen.queryByTestId('pageNotFound')).toBeTruthy();
+  });
+
+  it('renders the loading spiner when fetching the SLO', async () => {
+    useParamsMock.mockReturnValue(anSLO.id);
+    useFetchSloDetailsMock.mockReturnValue([true, undefined]);
+    render(<SloDetailsPage />, config);
+
+    expect(screen.queryByTestId('pageNotFound')).toBeFalsy();
+    expect(screen.queryByTestId('loading')).toBeTruthy();
+  });
+
   it('renders the SLO details page when the feature flag is enabled', async () => {
+    useParamsMock.mockReturnValue(anSLO.id);
+    useFetchSloDetailsMock.mockReturnValue([false, anSLO]);
     render(<SloDetailsPage />, config);
 
     expect(screen.queryByTestId('sloDetailsPage')).toBeTruthy();
+    expect(screen.queryByTestId('sloDetails')).toBeTruthy();
   });
 });

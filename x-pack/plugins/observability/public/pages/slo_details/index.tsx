@@ -39,7 +39,7 @@ export function SloDetailsPage() {
   }
 
   if (loading) {
-    return <EuiLoadingSpinner />;
+    return <EuiLoadingSpinner data-test-subj="loading" />;
   }
 
   return (
