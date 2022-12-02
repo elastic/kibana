@@ -76,6 +76,7 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
         showSaveQuery
         showQueryInput
         onFiltersUpdated={onFilterChange}
+        displayStyle="inPage"
       />
       <ControlsContent
         timeRange={unifiedSearchDateRange}
