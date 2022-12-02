@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { render } from '@testing-library/react';
+import { ThemeProvider } from 'styled-components';
 
 import { ResponseActionsForm } from './response_actions_form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ArrayItem } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { getMockTheme } from '../../common/lib/kibana/kibana_react.mock';
 
 const renderWithContext = (Element: React.ReactElement) => {
-  return render(<IntlProvider locale={'en'}>{Element}</IntlProvider>);
+  const mockTheme = getMockTheme({ eui: { euiColorLightestShade: '#F5F7FA' } });
+
+  return render(
+    <ThemeProvider theme={mockTheme}>
+      <IntlProvider locale={'en'}>{Element}</IntlProvider>
+    </ThemeProvider>
+  );
 };
 
 describe('ResponseActionsForm', () => {
   const Component = (props: { items: ArrayItem[] }) => {
     const { form } = useForm();
-    const saveClickRef = useRef<{ onSaveClick: () => Promise<boolean> | null }>({
-      onSaveClick: () => null,
-    });
     return (
       <Form form={form}>
-        <ResponseActionsForm
-          addItem={jest.fn()}
-          removeItem={jest.fn()}
-          saveClickRef={saveClickRef}
-          {...props}
-        />
+        <ResponseActionsForm addItem={jest.fn()} removeItem={jest.fn()} {...props} form={form} />
       </Form>
     );
   };

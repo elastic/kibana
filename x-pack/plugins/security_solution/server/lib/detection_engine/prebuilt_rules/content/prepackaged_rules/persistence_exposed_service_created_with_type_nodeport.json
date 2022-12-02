@@ -13,13 +13,29 @@
   "license": "Elastic License v2",
   "name": "Kubernetes Exposed Service Created With Type NodePort",
   "note": "",
-  "query": "kubernetes.audit.objectRef.resource:\"services\" and kubernetes.audit.verb:(\"create\" or \"update\" or \"patch\") and kubernetes.audit.requestObject.spec.type:\"NodePort\"\n",
+  "query": "event.dataset : \"kubernetes.audit_logs\" \n  and kubernetes.audit.annotations.authorization_k8s_io/decision:\"allow\" \n  and kubernetes.audit.objectRef.resource:\"services\" \n  and kubernetes.audit.verb:(\"create\" or \"update\" or \"patch\") \n  and kubernetes.audit.requestObject.spec.type:\"NodePort\"\n",
   "references": [
     "https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types",
     "https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport",
     "https://www.tigera.io/blog/new-vulnerability-exposes-kubernetes-to-man-in-the-middle-attacks-heres-how-to-mitigate/"
   ],
+  "related_integrations": [
+    {
+      "package": "kubernetes",
+      "version": "^1.4.1"
+    }
+  ],
   "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "kubernetes.audit.annotations.authorization_k8s_io/decision",
+      "type": "unknown"
+    },
     {
       "ecs": false,
       "name": "kubernetes.audit.objectRef.resource",
@@ -66,5 +82,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 100
+  "version": 200
 }

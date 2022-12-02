@@ -27,6 +27,7 @@ import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/
 import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { waitFor } from '@testing-library/react';
+import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
 
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
@@ -195,6 +196,7 @@ describe.skip('Response actions history', () => {
       ...baseMockedActionList,
     };
     jest.clearAllMocks();
+    useUserPrivilegesMock.mockImplementation(getUserPrivilegesMockDefaultValue);
   });
 
   describe('When index does not exist yet', () => {

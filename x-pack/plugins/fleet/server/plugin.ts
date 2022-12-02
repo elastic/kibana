@@ -101,7 +101,11 @@ import {
   AgentServiceImpl,
   PackageServiceImpl,
 } from './services';
-import { registerFleetUsageCollector, fetchUsage, fetchAgentsUsage } from './collectors/register';
+import {
+  registerFleetUsageCollector,
+  fetchAgentsUsage,
+  fetchFleetUsage,
+} from './collectors/register';
 import { getAuthzFromRequest, makeRouterWithFleetAuthz } from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
@@ -383,14 +387,9 @@ export class FleetPlugin
 
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);
-    const fetch = async () => fetchUsage(core, config);
-    this.fleetUsageSender = new FleetUsageSender(
-      deps.taskManager,
-      core,
-      fetch,
-      this.kibanaVersion,
-      this.isProductionMode
-    );
+    const fetch = async (abortController: AbortController) =>
+      await fetchFleetUsage(core, config, abortController);
+    this.fleetUsageSender = new FleetUsageSender(deps.taskManager, core, fetch);
     registerFleetUsageLogger(deps.taskManager, async () => fetchAgentsUsage(core, config));
 
     const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();

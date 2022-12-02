@@ -18,6 +18,8 @@ import * as retrieveHooks from '../monitor_test_result/use_retrieve_step_image';
 
 jest.mock('@kbn/observability-plugin/public');
 
+jest.setTimeout(10 * 1000);
+
 describe('JourneyStepScreenshotContainer', () => {
   let checkGroup: string;
   let timestamp: string;
@@ -108,7 +110,7 @@ describe('JourneyStepScreenshotContainer', () => {
       attempts: 1,
     });
 
-    const { getByAltText, getByText, getByRole, getAllByText, queryByAltText } = render(
+    const { getByAltText, getByText, getByRole, findAllByText, queryByAltText } = render(
       <JourneyStepScreenshotContainer
         checkGroup={checkGroup}
         stepLabels={[getShortTimeStamp(moment(timestamp))]}
@@ -116,7 +118,9 @@ describe('JourneyStepScreenshotContainer', () => {
     );
 
     await waitFor(() => getByRole('img'));
-    const caption = getAllByText('Nov 26, 2020 10:28:56 AM');
+
+    await waitFor(async () => await findAllByText('Nov 26, 2020 10:28:56 AM'));
+    const caption = await findAllByText('Nov 26, 2020 10:28:56 AM');
     fireEvent.mouseEnter(caption[0]);
 
     const altText = `A larger version of the screenshot for this journey step's thumbnail.`;

@@ -320,22 +320,19 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                   </h2>
                 </EuiTitle>
               </EuiFlyoutHeader>
-              {/* Using only the direct flyout body class because we maintain scroll in a lower sidebar component. Needs a fix on the EUI side */}
-              <div className="euiFlyoutBody">
-                <DiscoverSidebar
-                  {...props}
-                  documents={documentState.result}
-                  fieldCounts={fieldCounts.current}
-                  fieldFilter={fieldFilter}
-                  setFieldFilter={setFieldFilter}
-                  alwaysShowActionButtons={true}
-                  setFieldEditorRef={setFieldEditorRef}
-                  closeFlyout={closeFlyout}
-                  editField={editField}
-                  createNewDataView={createNewDataView}
-                  showDataViewPicker={true}
-                />
-              </div>
+              <DiscoverSidebar
+                {...props}
+                documents={documentState.result}
+                fieldCounts={fieldCounts.current}
+                fieldFilter={fieldFilter}
+                setFieldFilter={setFieldFilter}
+                alwaysShowActionButtons={true}
+                setFieldEditorRef={setFieldEditorRef}
+                closeFlyout={closeFlyout}
+                editField={editField}
+                createNewDataView={createNewDataView}
+                showDataViewPicker={true}
+              />
             </EuiFlyout>
           </EuiPortal>
         )}

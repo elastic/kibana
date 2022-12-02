@@ -112,7 +112,7 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
       } catch (error) {
         notifications.toasts.addDanger({
           title: i18n.translate('guidedOnboarding.dropdownPanel.stepHandlerError', {
-            defaultMessage: 'Unable to update the guide. Please try again later.',
+            defaultMessage: 'Unable to update the guide. Wait a moment and try again.',
           }),
           text: error.message,
         });
@@ -138,7 +138,7 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
     } catch (error) {
       notifications.toasts.addDanger({
         title: i18n.translate('guidedOnboarding.dropdownPanel.completeGuideError', {
-          defaultMessage: 'Unable to update the guide. Please try again later.',
+          defaultMessage: 'Unable to update the guide. Wait a moment and try again.',
         }),
         text: error.message,
       });
@@ -181,14 +181,16 @@ export const GuidePanel = ({ api, application, notifications }: GuidePanelProps)
 
   return (
     <>
-      <GuideButton
-        pluginState={pluginState}
-        toggleGuidePanel={toggleGuide}
-        isGuidePanelOpen={isGuideOpen}
-        navigateToLandingPage={navigateToLandingPage}
-      />
+      <div css={styles.setupButton}>
+        <GuideButton
+          pluginState={pluginState}
+          toggleGuidePanel={toggleGuide}
+          isGuidePanelOpen={isGuideOpen}
+          navigateToLandingPage={navigateToLandingPage}
+        />
+      </div>
 
-      {isGuideOpen && (
+      {isGuideOpen && guideConfig && (
         <EuiFlyout
           ownFocus
           onClose={toggleGuide}

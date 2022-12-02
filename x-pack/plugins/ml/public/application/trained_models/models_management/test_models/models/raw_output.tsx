@@ -27,10 +27,11 @@ type ResultResponses = Array<
 export const RawOutput: FC<{
   inferrer: InferrerType;
 }> = ({ inferrer }) => {
-  const inferenceError = useObservable(inferrer.getInferenceError$());
-  const runningState = useObservable(inferrer.getRunningState$());
+  const inferenceError = useObservable(inferrer.getInferenceError$(), inferrer.getInferenceError());
+  const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
   const inferenceResult = useObservable(
-    inferrer.getInferenceResult$() as Observable<InferenceResponse>
+    inferrer.getInferenceResult$() as Observable<InferenceResponse>,
+    inferrer.getInferenceResult() as InferenceResponse
   );
 
   if (
@@ -58,7 +59,7 @@ export const RawOutput: FC<{
 
   return (
     <>
-      <MLJobEditor value={rawResponse ?? ''} readOnly={true} />
+      <MLJobEditor data-test-subj={'mlTestModelRawOutput'} value={rawResponse ?? ''} readOnly />
     </>
   );
 };

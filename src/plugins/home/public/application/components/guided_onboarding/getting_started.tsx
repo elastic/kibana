@@ -109,8 +109,13 @@ export const GettingStarted = () => {
     application.navigateToApp('home');
   };
   const { euiTheme } = useEuiTheme();
-  const paddingCss = css`
+  const panelCss = css`
     padding: calc(${euiTheme.size.base}*3) calc(${euiTheme.size.base}*4);
+    // fix the misalignment of the cards
+    // delete if https://github.com/elastic/eui/pull/6424 is backported into 8.6 branch
+    .euiCard__main {
+      flex-grow: 1;
+    }
   `;
 
   const isDarkTheme = uiSettings.get<boolean>('theme:darkMode');
@@ -120,7 +125,7 @@ export const GettingStarted = () => {
     } catch (err) {
       getServices().toastNotifications.addDanger({
         title: i18n.translate('home.guidedOnboarding.gettingStarted.activateGuide.errorMessage', {
-          defaultMessage: 'Unable to start the guide. Please try again later.',
+          defaultMessage: 'Unable to start the guide. Wait a moment and try again.',
         }),
         text: err.message,
       });
@@ -134,7 +139,7 @@ export const GettingStarted = () => {
         body={
           <EuiText color="subdued">
             {i18n.translate('home.guidedOnboarding.gettingStarted.loadingIndicator', {
-              defaultMessage: 'Loading setup guide state...',
+              defaultMessage: 'Loading the guide state...',
             })}
           </EuiText>
         }
@@ -151,7 +156,7 @@ export const GettingStarted = () => {
         title={
           <h2>
             {i18n.translate('home.guidedOnboarding.gettingStarted.errorSectionTitle', {
-              defaultMessage: 'Unable to load guide state',
+              defaultMessage: 'Unable to load the guide state',
             })}
           </h2>
         }
@@ -159,7 +164,7 @@ export const GettingStarted = () => {
           <>
             <EuiText color="subdued">
               {i18n.translate('home.guidedOnboarding.gettingStarted.errorSectionDescription', {
-                defaultMessage: 'There was an error loading the guide state. Try again later.',
+                defaultMessage: `The guide couldn't be loaded. Wait a moment and try again.`,
               })}
             </EuiText>
             <EuiSpacer />
@@ -183,7 +188,7 @@ export const GettingStarted = () => {
   return (
     <KibanaPageTemplate panelled={false} grow>
       <EuiPageTemplate.Section alignment="center">
-        <EuiPanel color="plain" hasShadow css={paddingCss}>
+        <EuiPanel color="plain" hasShadow css={panelCss} data-test-subj="onboarding--landing-page">
           <EuiTitle size="l" className="eui-textCenter">
             <h1>{title}</h1>
           </EuiTitle>

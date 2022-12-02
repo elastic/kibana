@@ -127,6 +127,10 @@ async function getComponent({
             }),
           },
         },
+        getState: () => ({
+          query: { query: '', language: 'lucene' },
+          filters: [],
+        }),
       },
     },
     dataViews: dataViewPluginMocks.createStartContract(),

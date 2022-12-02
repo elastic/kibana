@@ -30,7 +30,7 @@ import {
   WrappedByAutoSizer,
   useTheme,
   Wrapper,
-  ChartWrapper,
+  BarChartWrapper,
 } from './common';
 import { DraggableLegend } from './draggable_legend';
 import type { LegendItem } from './draggable_legend_item';
@@ -209,7 +209,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
     <Wrapper>
       <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
         {isValidSeriesExist && barChart && (
-          <ChartWrapper gutterSize="none">
+          <BarChartWrapper gutterSize="none">
             <EuiFlexItem grow={true}>
               <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
                 <BarChartBase
@@ -226,7 +226,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
             <LegendFlexItem grow={false}>
               <DraggableLegend legendItems={legendItems} height={height} />
             </LegendFlexItem>
-          </ChartWrapper>
+          </BarChartWrapper>
         )}
         {!isValidSeriesExist && (
           <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />

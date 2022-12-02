@@ -24,7 +24,7 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import type { DataViewBase } from '@kbn/es-query';
-import styled, { css } from 'styled-components';
+import styled, { css, createGlobalStyle } from 'styled-components';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { hasEqlSequenceQuery, isEqlRule } from '../../../../../../common/detection_engine/utils';
 import type { Rule } from '../../../../rule_management/logic/types';
@@ -55,6 +55,15 @@ const SectionHeader = styled(EuiTitle)`
   ${() => css`
     font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
   `}
+`;
+// EuiCombox doesn't support change of z-index, or providing any class to portal
+// This fix ovveride z-index for EuiFlyout, which conflict with EuiComboBox on this flyout
+// fix x-pack/plugins/security_solution/public/detection_engine/rule_exceptions/components/add_exception_flyout/index.tsx#L429
+// TODO: should be fixed on Component level
+const EuiComboboxZIndexGlobalStyle = createGlobalStyle`
+  [data-test-subj="comboBoxOptionsList osSelectionDropdown-optionsList"] {
+    z-index: 6000 !important;
+  }
 `;
 
 interface ExceptionsFlyoutConditionsComponentProps {
@@ -233,6 +242,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
               data-test-subj="osSelectionDropdown"
             />
           </EuiFormRow>
+          <EuiComboboxZIndexGlobalStyle />
           <EuiSpacer size="l" />
         </>
       )}

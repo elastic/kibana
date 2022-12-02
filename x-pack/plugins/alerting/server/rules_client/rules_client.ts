@@ -2112,14 +2112,20 @@ export class RulesClient {
             taskIdsFailedToBeDeleted.push(status.id);
           }
         });
-        this.logger.debug(
-          `Successfully deleted schedules for underlying tasks: ${taskIdsSuccessfullyDeleted.join(
-            ', '
-          )}`
-        );
-        this.logger.error(
-          `Failure to delete schedules for underlying tasks: ${taskIdsFailedToBeDeleted.join(', ')}`
-        );
+        if (taskIdsSuccessfullyDeleted.length) {
+          this.logger.debug(
+            `Successfully deleted schedules for underlying tasks: ${taskIdsSuccessfullyDeleted.join(
+              ', '
+            )}`
+          );
+        }
+        if (taskIdsFailedToBeDeleted.length) {
+          this.logger.error(
+            `Failure to delete schedules for underlying tasks: ${taskIdsFailedToBeDeleted.join(
+              ', '
+            )}`
+          );
+        }
       } catch (error) {
         this.logger.error(
           `Failure to delete schedules for underlying tasks: ${taskIdsToDelete.join(

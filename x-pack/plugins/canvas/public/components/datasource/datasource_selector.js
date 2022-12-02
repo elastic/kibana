@@ -19,7 +19,7 @@ export const DatasourceSelector = ({ onSelect, datasources, current }) => {
     padding-bottom: 60px;
     position: relative;
 
-    button {
+    & > button {
       position: absolute;
       left: 0;
       right: 0;
