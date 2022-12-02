@@ -249,7 +249,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe.only('refresh interval', function () {
       it('should refetch when autofresh is enabled', async () => {
         const intervalS = 5;
+        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.waitForDocTableLoadingComplete();
         await PageObjects.timePicker.startAutoRefresh(intervalS);
+        await PageObjects.discover.waitForDocTableLoadingComplete();
 
         const getRequestTimestamp = async () => {
           // check inspector panel request stats for timestamp

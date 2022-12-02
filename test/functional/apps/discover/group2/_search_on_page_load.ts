@@ -35,6 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const waitForFetches = (fetchesNumber: number) => async () => {
     const nrOfFetches = await PageObjects.discover.getNrOfFetches();
+    log.debug(`nrOfFetches: ${nrOfFetches}`);
     return nrOfFetches === fetchesNumber;
   };
 
