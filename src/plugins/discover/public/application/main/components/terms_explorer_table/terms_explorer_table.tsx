@@ -7,7 +7,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Filter, Query, AggregateQuery, buildEsQuery, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -21,6 +21,8 @@ import {
   EuiBadge,
   EuiButtonIcon,
   EuiText,
+  EuiTableFooter,
+  EuiTableFooterCell,
 } from '@elastic/eui';
 import { TermsExplorerTableRow } from './terms_explorer_table_row';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -59,16 +61,8 @@ export interface TermsExplorerTableProps {
 }
 
 export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
-  const {
-    dataView,
-    columns,
-    collapseFieldName,
-    timeRange,
-    filters,
-    query,
-    breadcrumbs,
-    isTopLevel,
-  } = tableProps;
+  const { dataView, columns, collapseFieldName, timeRange, filters, query, breadcrumbs } =
+    tableProps;
 
   const services = useDiscoverServices();
   const {
@@ -81,6 +75,7 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
   } = services;
 
   const [rows, setRows] = useState<TermsExplorerResponse['rows'] | undefined>();
+  const [summaryRow, setSummaryRow] = useState<TermsExplorerResponse['summaryRow'] | undefined>();
   const [totalRows, setTotalRows] = useState<number>(0);
   const [currentFrom, setCurrentFrom] = useState<number>(0);
 
@@ -92,7 +87,7 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
     ));
   };
 
-  const pageSize = useMemo(() => (isTopLevel ? 20 : 10), [isTopLevel]);
+  const pageSize = 10;
 
   useEffect(() => {
     const timeFilter = timeRange ? timeService.createFilter(dataView, timeRange) : undefined;
@@ -125,6 +120,7 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
       );
       setRows(response.rows);
       setTotalRows(response.totalRows);
+      setSummaryRow(response.summaryRow);
     })();
   }, [
     collapseFieldName,
@@ -150,6 +146,31 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
     }
 
     return renderedRows;
+  };
+
+  const renderFooterCells = () => {
+    if (!summaryRow) return;
+    return columns.map((columnName) => {
+      const numericSummary = summaryRow[columnName];
+      const summaryContent = (() => {
+        if (numericSummary) {
+          const field = dataView.getFieldByName(columnName);
+          const fieldFormatter = field && dataView.getFormatterForField(field);
+          return fieldFormatter
+            ? fieldFormatter.getConverterFor('text')(numericSummary.result)
+            : numericSummary.result;
+        }
+        return columnName;
+      })();
+      return (
+        <EuiTableFooterCell
+          key={`summary_${columnName}`}
+          align={numericSummary ? 'left' : 'center'}
+        >
+          {summaryContent}
+        </EuiTableFooterCell>
+      );
+    });
   };
 
   const crumbs = breadcrumbs
@@ -183,7 +204,7 @@ export const TermsExplorerTable = (tableProps: TermsExplorerTableProps) => {
 
         <EuiTableBody>{renderRows()}</EuiTableBody>
 
-        {/* <EuiTableFooter>{this.renderFooterCells()}</EuiTableFooter> */}
+        <EuiTableFooter>{renderFooterCells()}</EuiTableFooter>
       </EuiTable>
       <div
         css={css`

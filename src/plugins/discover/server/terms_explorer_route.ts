@@ -15,6 +15,7 @@ import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 
 import {
+  TermsExplorerNumericColumnResult,
   TermsExplorerRequest,
   TermsExplorerResponse,
   TermsExplorerResponseColumn,
@@ -190,12 +191,29 @@ export const setupTermsExplorerRoute = ({ http }: CoreSetup) => {
             },
           },
         },
+
+        // top level aggs for the summary row...
+        // all numeric fields get a summary aggregation. Sum for now, but later each field could have a different agg type...
+        ...numericColumns.reduce((acc, fieldName) => {
+          acc[`summary_${fieldName}`] = {
+            sum: {
+              field: fieldName,
+            },
+          };
+          return acc;
+        }, {} as { [key: string]: unknown }),
       },
     };
     const columnsResult = await esClient.search(
       { index, body: columnsBody },
       { signal: abortController.signal }
     );
+
+    const summaryRow = numericColumns.reduce((acc, fieldName) => {
+      const result = get(columnsResult, `aggregations.summary_${fieldName}.value`);
+      acc[fieldName] = { result_type: 'numeric_aggregation', result };
+      return acc;
+    }, {} as { [key: string]: TermsExplorerNumericColumnResult });
 
     const responseRows = Object.values(get(columnsResult, 'aggregations.rowsAgg.buckets')).map(
       (bucketValue, rowIndex) => {
@@ -229,6 +247,6 @@ export const setupTermsExplorerRoute = ({ http }: CoreSetup) => {
       }
     );
 
-    return { rows: responseRows, totalRows };
+    return { rows: responseRows, totalRows, summaryRow };
   };
 };

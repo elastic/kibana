@@ -55,4 +55,5 @@ export interface TermsExplorerResponseRow {
 export interface TermsExplorerResponse {
   rows: TermsExplorerResponseRow[];
   totalRows: number;
+  summaryRow: { [key: string]: TermsExplorerNumericColumnResult };
 }
