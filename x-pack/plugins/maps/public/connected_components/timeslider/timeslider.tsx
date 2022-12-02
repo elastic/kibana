@@ -58,7 +58,7 @@ export class Timeslider extends Component<Props, {}> {
     initialInput: Partial<ControlGroupInput>,
     builder: typeof controlGroupInputBuilder
   ) => {
-    builder.addTimesliderControl(initialInput);
+    builder.addTimeSliderControl(initialInput);
     return {
       ...initialInput,
       viewMode: ViewMode.VIEW,
