@@ -38,23 +38,6 @@ describe('audit_logger', () => {
       logger = new AuthorizationAuditLogger(mockLogger);
     });
 
-    it('does not throw an error when the underlying audit logger is undefined', () => {
-      const authLogger = new AuthorizationAuditLogger();
-      jest.spyOn(authLogger, 'log');
-
-      expect(() => {
-        authLogger.log({
-          operation: Operations.createCase,
-          entity: {
-            owner: 'a',
-            id: '1',
-          },
-        });
-      }).not.toThrow();
-
-      expect(authLogger.log).toHaveBeenCalledTimes(1);
-    });
-
     it('logs a message with a saved object ID in the message field', () => {
       logger.log({
         operation: Operations.createCase,

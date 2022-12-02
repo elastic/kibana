@@ -166,7 +166,9 @@
           "label": "OsqueryResponseActionTypeForm",
           "description": [],
           "signature": [
-            "(props: LazyOsqueryActionParamsFormProps) => JSX.Element"
+            "(props: ",
+            "OsqueryResponseActionsParamsFormProps",
+            ") => JSX.Element"
           ],
           "path": "x-pack/plugins/osquery/public/types.ts",
           "deprecated": false,
@@ -181,7 +183,7 @@
               "label": "props",
               "description": [],
               "signature": [
-                "LazyOsqueryActionParamsFormProps"
+                "OsqueryResponseActionsParamsFormProps"
               ],
               "path": "x-pack/plugins/osquery/public/shared_components/lazy_osquery_action_params_form.tsx",
               "deprecated": false,
