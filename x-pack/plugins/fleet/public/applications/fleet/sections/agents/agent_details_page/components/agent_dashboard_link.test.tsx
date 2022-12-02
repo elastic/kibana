@@ -13,7 +13,7 @@ import { useGetPackageInfoByKeyQuery } from '../../../../../../hooks/use_request
 
 import { AgentDashboardLink } from './agent_dashboard_link';
 
-const mockedUseGetPackageInfoByKey = useGetPackageInfoByKeyQuery as jest.MockedFunction<
+const mockedUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.MockedFunction<
   typeof useGetPackageInfoByKeyQuery
 >;
 
@@ -27,7 +27,7 @@ jest.mock('../../../../../../hooks/use_request/epm');
 
 describe('AgentDashboardLink', () => {
   it('should enable the button if elastic_agent package is installed and policy has monitoring enabled', async () => {
-    mockedUseGetPackageInfoByKey.mockReturnValue({
+    mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
       isLoading: false,
       data: {
         item: {
@@ -57,7 +57,7 @@ describe('AgentDashboardLink', () => {
   });
 
   it('should not enable the button if elastic_agent package is not installed and policy has monitoring enabled', async () => {
-    mockedUseGetPackageInfoByKey.mockReturnValue({
+    mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
       isLoading: false,
       data: {
         item: {
@@ -88,7 +88,7 @@ describe('AgentDashboardLink', () => {
   });
 
   it('should not enable the button if elastic_agent package is installed and policy do not have monitoring enabled', async () => {
-    mockedUseGetPackageInfoByKey.mockReturnValue({
+    mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
       isLoading: false,
       data: {
         item: {

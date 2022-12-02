@@ -42,7 +42,7 @@ jest.mock('../../../../hooks', () => {
     sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
       data: { item: { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' } },
     }),
-    useGetPackageInfoByKey: jest.fn(),
+    useGetPackageInfoByKeyQuery: jest.fn(),
     sendCreatePackagePolicy: jest
       .fn()
       .mockResolvedValue({ data: { item: { id: 'policy-1', inputs: [] } } }),
