@@ -45,7 +45,12 @@ import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
 import { CreateTimeSliderControlButton } from '../editor/create_time_slider_control';
 import { getNextPanelOrder } from './control_group_helpers';
-import { AddDataControlProps, AddOptionsListControlProps, AddRangeSliderControlProps, controlGroupInputBuilder } from '../control_group_input_builder';
+import {
+  AddDataControlProps,
+  AddOptionsListControlProps,
+  AddRangeSliderControlProps,
+  controlGroupInputBuilder,
+} from '../control_group_input_builder';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -99,7 +104,7 @@ export class ControlGroupContainer extends Container<
 
   public async addDataControlFromField(controlProps: AddDataControlProps) {
     const input = {
-      ...this.getInput()
+      ...this.getInput(),
     };
     const panelId = await controlGroupInputBuilder.addDataControlFromField(input, controlProps);
     const panelState = input.panels[panelId];
@@ -108,7 +113,7 @@ export class ControlGroupContainer extends Container<
 
   public addOptionsListControl(controlProps: AddOptionsListControlProps) {
     const input = {
-      ...this.getInput()
+      ...this.getInput(),
     };
     const panelId = controlGroupInputBuilder.addOptionsListControl(input, controlProps);
     const panelState = input.panels[panelId];
@@ -117,7 +122,7 @@ export class ControlGroupContainer extends Container<
 
   public addRangeSliderControl(controlProps: AddRangeSliderControlProps) {
     const input = {
-      ...this.getInput()
+      ...this.getInput(),
     };
     const panelId = controlGroupInputBuilder.addRangeSliderControl(input, controlProps);
     const panelState = input.panels[panelId];
@@ -126,7 +131,7 @@ export class ControlGroupContainer extends Container<
 
   public addTimeSliderControl() {
     const input = {
-      ...this.getInput()
+      ...this.getInput(),
     };
     const panelId = controlGroupInputBuilder.addTimeSliderControl(input);
     const panelState = input.panels[panelId];
@@ -185,7 +190,9 @@ export class ControlGroupContainer extends Container<
     });
     return (
       <CreateTimeSliderControlButton
-        onCreate={() => { this.addTimeSliderControl() }}
+        onCreate={() => {
+          this.addTimeSliderControl();
+        }}
         closePopover={closePopover}
         hasTimeSliderControl={hasTimeSliderControl}
       />
