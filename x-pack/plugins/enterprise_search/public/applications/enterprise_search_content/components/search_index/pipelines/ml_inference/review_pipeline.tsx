@@ -29,7 +29,7 @@ export const ReviewPipeline: React.FC = () => {
           )}
         </h4>
       </EuiText>
-      <EuiCodeBlock language="json" isCopyable overflowHeight={300}>
+      <EuiCodeBlock language="json" isCopyable>
         {JSON.stringify(mlInferencePipeline ?? {}, null, 2)}
       </EuiCodeBlock>
       <EuiSpacer />
