@@ -79,13 +79,18 @@ const mockOptions = {
         alertId: 'TEST_ALERT_0',
         alertUuid: 'TEST_ALERT_0_UUID',
         started: '2020-01-01T12:00:00.000Z',
+        flappingHistory: [],
+        flapping: false,
       },
       TEST_ALERT_1: {
         alertId: 'TEST_ALERT_1',
         alertUuid: 'TEST_ALERT_1_UUID',
         started: '2020-01-02T12:00:00.000Z',
+        flappingHistory: [],
+        flapping: false,
       },
     },
+    trackedAlertsRecovered: {},
   },
   spaceId: '',
   rule: {

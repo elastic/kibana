@@ -31,7 +31,7 @@ export const getRuleList = (rule: CspFinding['rule']) => [
     description: (
       <>
         {rule.tags.map((tag) => (
-          <EuiBadge>{tag}</EuiBadge>
+          <EuiBadge key={tag}>{tag}</EuiBadge>
         ))}
       </>
     ),

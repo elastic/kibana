@@ -332,6 +332,7 @@ exports[`LoginPage page renders as expected 1`] = `
       </span>
       <EuiTitle
         className="loginWelcome__title"
+        data-test-subj="loginWelcomeTitle"
         size="m"
       >
         <h1>
