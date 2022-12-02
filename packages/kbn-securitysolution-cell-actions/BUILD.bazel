@@ -3,7 +3,7 @@ load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
 PKG_DIRNAME = "kbn-securitysolution-cell-actions"
-PKG_REQUIRE_NAME = "@kbn/securitysolution-cell_actions"
+PKG_REQUIRE_NAME = "@kbn/securitysolution-cell-actions"
 
 SOURCE_FILES = glob(
   [

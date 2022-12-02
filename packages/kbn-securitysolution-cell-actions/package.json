@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/securitysolution-cell_actions",
+  "name": "@kbn/securitysolution-cell-actions",
   "private": true,
   "version": "1.0.0",
   "main": "./target_node/index.js",

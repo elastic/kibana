@@ -3801,7 +3801,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-cell_actions@link:bazel-bin/packages/kbn-securitysolution-cell-actions":
+"@kbn/securitysolution-cell-actions@link:bazel-bin/packages/kbn-securitysolution-cell-actions":
   version "0.0.0"
   uid ""
 

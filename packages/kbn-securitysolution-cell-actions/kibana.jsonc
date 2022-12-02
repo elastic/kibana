@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/securitysolution-cell_actions",
+  "id": "@kbn/securitysolution-cell-actions",
   "owner": "@elastic/security-threat-hunting-explore",
   "runtimeDeps": [],
   "typeDeps": [],
