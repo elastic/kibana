@@ -11,13 +11,15 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   IEmbeddable,
+  SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 
-export interface SearchInput extends EmbeddableInput {
+interface SearchBaseInput extends EmbeddableInput {
   timeRange: TimeRange;
   timeslice?: [number, number];
   query?: Query;
@@ -29,8 +31,15 @@ export interface SearchInput extends EmbeddableInput {
   rowsPerPage?: number;
 }
 
+export type SearchByValueInput = {
+  attributes: SavedSearchAttributes;
+} & SearchBaseInput;
+
+export type SearchByReferenceInput = SavedObjectEmbeddableInput & SearchBaseInput;
+
+export type SearchInput = SearchByValueInput | SearchByReferenceInput;
+
 export interface SearchOutput extends EmbeddableOutput {
-  editUrl: string;
   indexPatterns?: DataView[];
   editable: boolean;
 }

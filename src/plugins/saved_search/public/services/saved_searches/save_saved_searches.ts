@@ -12,37 +12,13 @@ import type { SavedSearch } from './types';
 import { SAVED_SEARCH_TYPE } from './constants';
 import { toSavedSearchAttributes } from '../../../common/service/saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../../../common/content_management';
+import { checkForDuplicateTitle } from './check_for_duplicate_title';
 
 export interface SaveSavedSearchOptions {
   onTitleDuplicate?: () => void;
   isTitleDuplicateConfirmed?: boolean;
   copyOnSave?: boolean;
 }
-
-const hasDuplicatedTitle = async (
-  title: string,
-  contentManagement: ContentManagementPublicStart['client']
-): Promise<boolean | void> => {
-  if (!title) {
-    return;
-  }
-
-  const response = await contentManagement.search<
-    SavedSearchCrudTypes['SearchIn'],
-    SavedSearchCrudTypes['SearchOut']
-  >({
-    contentTypeId: SAVED_SEARCH_TYPE,
-    query: {
-      text: `"${title}"`,
-    },
-    options: {
-      searchFields: ['title'],
-      fields: ['title'],
-    },
-  });
-
-  return response.hits.some((obj) => obj.attributes.title.toLowerCase() === title.toLowerCase());
-};
 
 /** @internal **/
 export const saveSavedSearch = async (
@@ -53,14 +29,16 @@ export const saveSavedSearch = async (
 ): Promise<string | undefined> => {
   const isNew = options.copyOnSave || !savedSearch.id;
 
-  if (savedSearch.title) {
-    if (
-      isNew &&
-      !options.isTitleDuplicateConfirmed &&
-      options.onTitleDuplicate &&
-      (await hasDuplicatedTitle(savedSearch.title, contentManagement))
-    ) {
-      options.onTitleDuplicate();
+  if (isNew) {
+    try {
+      await checkForDuplicateTitle({
+        title: savedSearch.title,
+        isTitleDuplicateConfirmed: options.isTitleDuplicateConfirmed,
+        onTitleDuplicate: options.onTitleDuplicate,
+        contentManagement,
+      });
+    } catch {
+      // ignore duplicate title failure, user notified in save modal
       return;
     }
   }

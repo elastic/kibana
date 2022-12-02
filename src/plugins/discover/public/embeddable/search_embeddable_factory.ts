@@ -13,14 +13,11 @@ import {
   Container,
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-
-import type { TimeRange } from '@kbn/es-query';
-
-import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
-import { SearchInput, SearchOutput } from './types';
+import { SearchByReferenceInput, SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import { DiscoverServices } from '../build_services';
+import { getSavedSearchAttributeService } from './saved_search_attribute_service';
 
 export interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
@@ -60,30 +57,31 @@ export class SearchEmbeddableFactory
 
   public createFromSavedObject = async (
     savedObjectId: string,
-    input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
+    input: SearchInput,
     parent?: Container
   ): Promise<SavedSearchEmbeddable | ErrorEmbeddable> => {
-    const services = await this.getDiscoverServices();
-    const filterManager = services.filterManager;
-    const url = getSavedSearchUrl(savedObjectId);
-    const editUrl = services.addBasePath(`/app/discover${url}`);
-    try {
-      const savedSearch = await services.savedSearch.get(savedObjectId);
+    if (!(input as SearchByReferenceInput).savedObjectId) {
+      (input as SearchByReferenceInput).savedObjectId = savedObjectId;
+    }
+    return this.create(input, parent);
+  };
 
-      const dataView = savedSearch.searchSource.getField('index');
+  public async create(input: SearchInput, parent?: Container) {
+    const services = await this.getDiscoverServices();
+    const attributeService = getSavedSearchAttributeService(services);
+    const filterManager = services.filterManager;
+
+    try {
       const { executeTriggerActions } = await this.getStartServices();
       const { SavedSearchEmbeddable: SavedSearchEmbeddableClass } = await import(
         './saved_search_embeddable'
       );
       return new SavedSearchEmbeddableClass(
         {
-          savedSearch,
-          editUrl,
-          editPath: url,
           filterManager,
           editable: services.capabilities.discover.save as boolean,
-          indexPatterns: dataView ? [dataView] : [],
           services,
+          attributeService,
         },
         input,
         executeTriggerActions,
@@ -93,9 +91,5 @@ export class SearchEmbeddableFactory
       console.error(e); // eslint-disable-line no-console
       return new ErrorEmbeddable(e, input, parent);
     }
-  };
-
-  public async create(input: SearchInput) {
-    return new ErrorEmbeddable('Saved searches can only be created from a saved object', input);
   }
 }

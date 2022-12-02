@@ -22,10 +22,12 @@ import {
   saveSavedSearch,
   SaveSavedSearchOptions,
   getNewSavedSearch,
+  checkForDuplicateTitle,
 } from './services/saved_searches';
 import { SavedSearch, SavedSearchAttributes } from '../common/types';
 import { SavedSearchType, LATEST_VERSION } from '../common';
 import { SavedSearchesService } from './services/saved_searches/saved_searches_service';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { kibanaContext } from '../common/expressions';
 import { getKibanaContext } from './expressions/kibana_context';
 
@@ -46,6 +48,7 @@ export interface SavedSearchPublicPluginStart {
     savedSearch: SavedSearch,
     options?: SaveSavedSearchOptions
   ) => ReturnType<typeof saveSavedSearch>;
+  checkForDuplicateTitle: (props: OnSaveProps) => ReturnType<typeof checkForDuplicateTitle>;
 }
 
 /**

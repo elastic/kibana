@@ -10,10 +10,17 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { getSavedSearch, saveSavedSearch, SaveSavedSearchOptions, getNewSavedSearch } from '.';
+import {
+  getSavedSearch,
+  saveSavedSearch,
+  SaveSavedSearchOptions,
+  getNewSavedSearch,
+  checkForDuplicateTitle,
+} from '.';
 import type { SavedSearchCrudTypes } from '../../../common/content_management';
 import { SavedSearchType } from '../../../common';
 import type { SavedSearch } from '../../../common/types';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 
 interface SavedSearchesServiceDeps {
   search: DataPublicPluginStart['search'];
@@ -79,5 +86,14 @@ export class SavedSearchesService {
       contentManagement,
       savedObjectsTaggingOss?.getTaggingApi()
     );
+  };
+
+  checkForDuplicateTitle = (props: OnSaveProps) => {
+    return checkForDuplicateTitle({
+      title: props.newTitle,
+      isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
+      onTitleDuplicate: props.onTitleDuplicate,
+      contentManagement: this.deps.contentManagement,
+    });
   };
 }
