@@ -64,6 +64,7 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
       application,
       uiSettings,
       mlServices: { mlApiServices },
+      lens,
     },
   } = useMlFromLensKibanaContext();
 
@@ -78,19 +79,13 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
   const [createError, setCreateError] = useState<{ text: string; errorText: string } | null>(null);
   const quickJobCreator = useMemo(
     () =>
-      new QuickJobCreator(
-        data.dataViews,
-        uiSettings,
-        data.query.timefilter.timefilter,
-        share,
-        mlApiServices
-      ),
+      new QuickJobCreator(lens, uiSettings, data.query.timefilter.timefilter, share, mlApiServices),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data, uiSettings]
   );
 
   function createADJobInWizard() {
-    redirectToADJobWizards(embeddable, layerIndex, share);
+    redirectToADJobWizards(embeddable, layerIndex, share, lens);
   }
 
   async function createADJob() {
