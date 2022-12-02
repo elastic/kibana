@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import * as fetchers from '../../../state/api/monitor_management';
 import { FETCH_STATUS, useFetcher as originalUseFetcher } from '@kbn/observability-plugin/public';
@@ -19,11 +19,16 @@ import {
   MonitorManagementListResult,
   SourceType,
 } from '../../../../../common/runtime_types';
-import userEvent from '@testing-library/user-event';
 
 describe('<DeleteMonitor />', () => {
   const onUpdate = jest.fn();
-  const useFetcher = spyOnUseFetcher({});
+
+  let useFetcher: jest.SpyInstance;
+
+  beforeEach(() => {
+    useFetcher?.mockClear();
+    useFetcher = spyOnUseFetcher({});
+  });
 
   it('calls delete monitor on monitor deletion', () => {
     useFetcher.mockImplementation(originalUseFetcher);
@@ -40,9 +45,20 @@ describe('<DeleteMonitor />', () => {
     expect(deleteMonitor).toBeCalledWith({ id });
   });
 
-  it('calls set refresh when deletion is successful', () => {
+  it('calls set refresh when deletion is successful', async () => {
     const id = 'test-id';
     const name = 'sample monitor';
+    useFetcher
+      .mockReturnValueOnce({
+        data: {},
+        status: FETCH_STATUS.PENDING,
+        refetch: () => {},
+      })
+      .mockReturnValueOnce({
+        data: {},
+        status: FETCH_STATUS.SUCCESS,
+        refetch: () => {},
+      });
     render(
       <Actions
         configId={id}
@@ -62,9 +78,13 @@ describe('<DeleteMonitor />', () => {
       />
     );
 
-    userEvent.click(screen.getByTestId('monitorManagementDeleteMonitor'));
+    fireEvent.click(screen.getByRole('button'));
 
-    expect(onUpdate).toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    await waitFor(() => {
+      expect(onUpdate).toHaveBeenCalled();
+    });
   });
 
   it('shows loading spinner while waiting for monitor to delete', () => {
