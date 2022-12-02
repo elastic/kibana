@@ -13,7 +13,7 @@ import { Subset } from '../../typings';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
-import { SloDetails } from '.';
+import { SloDetailsPage } from '.';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -50,13 +50,13 @@ describe('SLO Details Page', () => {
   });
 
   it('renders the not found page when the feature flag is not enabled', async () => {
-    render(<SloDetails />, { unsafe: { slo: { enabled: false } } });
+    render(<SloDetailsPage />, { unsafe: { slo: { enabled: false } } });
 
     expect(screen.queryByTestId('pageNotFound')).toBeTruthy();
   });
 
-  it('renders the SLOs page when the feature flag is enabled', async () => {
-    render(<SloDetails />, config);
+  it('renders the SLO details page when the feature flag is enabled', async () => {
+    render(<SloDetailsPage />, config);
 
     expect(screen.queryByTestId('sloDetailsPage')).toBeTruthy();
   });

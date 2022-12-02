@@ -10,3 +10,10 @@ import { i18n } from '@kbn/i18n';
 export const SLO_DETAILS_PAGE_TITLE = i18n.translate('xpack.observability.sloDetailsPageTitle', {
   defaultMessage: 'SLO Details',
 });
+
+export const SLO_DETAILS_BREADCRUMB_TEXT = i18n.translate(
+  'xpack.observability.breadcrumbs.sloDetailsLinkText',
+  {
+    defaultMessage: 'Details',
+  }
+);

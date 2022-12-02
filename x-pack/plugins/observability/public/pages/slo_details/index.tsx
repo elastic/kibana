@@ -10,6 +10,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { IBasePath } from '@kbn/core-http-browser';
 import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { ObservabilityAppServices } from '../../application/types';
 import { paths } from '../../config';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -21,8 +22,10 @@ import { SLOS_BREADCRUMB_TEXT } from '../slos/translations';
 import { SloDetailsPathParams } from './types';
 import { useFetchSloDetails } from './hooks/use_fetch_slo_details';
 import { SLO } from '../../typings';
+import { SloDetails } from './components/slo_details';
+import { SLO_DETAILS_BREADCRUMB_TEXT } from './translations';
 
-export function SloDetails() {
+export function SloDetailsPage() {
   const { http } = useKibana<ObservabilityAppServices>().services;
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { sloId } = useParams<SloDetailsPathParams>();
@@ -30,9 +33,13 @@ export function SloDetails() {
   const [loading, slo] = useFetchSloDetails(sloId);
   useBreadcrumbs(getBreadcrumbs(http.basePath, slo));
 
-  const isSloNotFound = loading === false && slo === undefined;
+  const isSloNotFound = !loading && slo === undefined;
   if (!isSloFeatureEnabled(config) || isSloNotFound) {
     return <PageNotFound />;
+  }
+
+  if (loading) {
+    return <EuiLoadingSpinner />;
   }
 
   return (
@@ -44,7 +51,7 @@ export function SloDetails() {
       }}
       data-test-subj="sloDetailsPage"
     >
-      <pre>{JSON.stringify(slo, null, 2)}</pre>
+      {slo && <SloDetails slo={slo} />}
     </ObservabilityPageTemplate>
   );
 }
@@ -56,7 +63,7 @@ function getBreadcrumbs(basePath: IBasePath, slo: SLO | undefined): EuiBreadcrum
       text: SLOS_BREADCRUMB_TEXT,
     },
     {
-      text: slo && slo.name,
+      text: slo?.name ?? SLO_DETAILS_BREADCRUMB_TEXT,
     },
   ];
 }
