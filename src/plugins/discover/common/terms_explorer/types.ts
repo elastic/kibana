@@ -19,13 +19,13 @@ export interface TermsExplorerRequest {
 }
 
 export interface FieldCardinalityRequest {
-  fieldName: string;
+  fieldNames: string[];
   filters?: Array<{ bool: BoolQuery }>;
   from?: number;
-  size?: number;
 }
 
 export interface FieldCardinalityResponse {
+  field: string;
   cardinality: number;
 }
 

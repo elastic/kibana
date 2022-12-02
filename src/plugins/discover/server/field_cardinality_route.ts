@@ -32,7 +32,7 @@ export const setupFieldCardinalityRoute = ({ http }: CoreSetup) => {
         body: schema.object(
           {
             filters: schema.maybe(schema.any()),
-            fieldName: schema.string(),
+            fieldNames: schema.arrayOf(schema.string()),
           },
           { unknowns: 'allow' }
         ),
@@ -70,30 +70,43 @@ export const setupFieldCardinalityRoute = ({ http }: CoreSetup) => {
   }): Promise<FieldCardinalityResponse> => {
     const abortController = new AbortController();
     abortedEvent$.subscribe(() => abortController.abort());
-    const { filters, fieldName, from, size } = request;
+    const { filters, fieldNames, from } = request;
+
+    const aggs = fieldNames.reduce((a, fieldName) => {
+      return {
+        ...a,
+        [fieldName]: {
+          cardinality: {
+            field: fieldName,
+          },
+        },
+      };
+    }, {});
 
     /**
      * Get row values
      */
     const body: SearchRequest['body'] = {
-      size,
+      size: 0,
       from,
       query: {
         bool: {
           filter: filters,
         },
       },
-      aggs: {
-        unique_terms: {
-          cardinality: {
-            field: fieldName,
-          },
-        },
-      },
+      aggs: { ...aggs },
     };
 
     const rawEsResult = await esClient.search({ index, body }, { signal: abortController.signal });
 
-    return { cardinality: get(rawEsResult, 'aggregations.unique_terms.value') };
+    let minCardinality = { field: '', cardinality: Number.MAX_SAFE_INTEGER };
+    fieldNames.forEach((fieldName) => {
+      const cardinality = get(rawEsResult, `aggregations.${fieldName}.value`);
+      if (cardinality < minCardinality.cardinality) {
+        minCardinality = { field: fieldName, cardinality };
+      }
+    });
+
+    return minCardinality;
   };
 };

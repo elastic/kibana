@@ -40,29 +40,17 @@ export const TermsExplorerTab: React.FC<
     if (props.columns?.length === 0) return;
     (async () => {
       if (!collapseOnColumn) {
-        let fieldWithMinCardinality = {
-          field: '',
-          cardinality: Number.MAX_SAFE_INTEGER,
+        const cardinalityRequestBody: FieldCardinalityRequest = {
+          fieldNames: props.columns,
         };
-        for (const columnName of props.columns) {
-          const cardinalityRequestBody: FieldCardinalityRequest = {
-            fieldName: columnName,
-          };
-          const response = await services.http.fetch<FieldCardinalityResponse>(
-            `/api/kibana/discover/fieldCardinality/${props.dataView.getIndexPattern()}`,
-            {
-              body: JSON.stringify(cardinalityRequestBody),
-              method: 'POST',
-            }
-          );
-          if (response.cardinality < fieldWithMinCardinality.cardinality) {
-            fieldWithMinCardinality = {
-              field: columnName,
-              cardinality: response.cardinality,
-            };
+        const response = await services.http.fetch<FieldCardinalityResponse>(
+          `/api/kibana/discover/fieldCardinality/${props.dataView.getIndexPattern()}`,
+          {
+            body: JSON.stringify(cardinalityRequestBody),
+            method: 'POST',
           }
-        }
-        setCollapseOnColumn(fieldWithMinCardinality.field);
+        );
+        setCollapseOnColumn(response.field);
       }
     })();
   }, [props.columns, props.dataView, services.http, collapseOnColumn, setCollapseOnColumn]);
