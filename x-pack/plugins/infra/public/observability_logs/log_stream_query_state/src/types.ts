@@ -5,15 +5,25 @@
  * 2.0.
  */
 
-import { AggregateQuery, Query } from '@kbn/es-query';
+import { AggregateQuery, BoolQuery, DataViewBase, Query } from '@kbn/es-query';
 import { ActorRef } from 'xstate';
 
-export interface LogStreamQueryContextWithDefaultQuery {
-  defaultQuery: string;
+export type AnyQuery = Query | AggregateQuery;
+
+export interface ParsedQuery {
+  bool: BoolQuery;
+}
+
+export interface LogStreamQueryContextWithDataViews {
+  dataViews: DataViewBase[];
 }
 
 export interface LogStreamQueryContextWithQuery {
-  query: string;
+  query: AnyQuery;
+}
+
+export interface LogStreamQueryContextWithParsedQuery {
+  parsedQuery: ParsedQuery;
 }
 
 export interface LogStreamQueryContextWithValidationError {
@@ -23,15 +33,21 @@ export interface LogStreamQueryContextWithValidationError {
 export type LogStreamQueryTypestate =
   | {
       value: 'uninitialized';
-      context: LogStreamQueryContextWithDefaultQuery;
+      context: LogStreamQueryContextWithDataViews;
     }
   | {
-      value: 'hasQuery' | { hasQuery: 'valid' };
-      context: LogStreamQueryContextWithDefaultQuery & LogStreamQueryContextWithQuery;
+      value: 'hasQuery' | { hasQuery: 'validating' };
+      context: LogStreamQueryContextWithDataViews & LogStreamQueryContextWithQuery;
+    }
+  | {
+      value: { hasQuery: 'valid' };
+      context: LogStreamQueryContextWithDataViews &
+        LogStreamQueryContextWithQuery &
+        LogStreamQueryContextWithParsedQuery;
     }
   | {
       value: { hasQuery: 'invalid' };
-      context: LogStreamQueryContextWithDefaultQuery &
+      context: LogStreamQueryContextWithDataViews &
         LogStreamQueryContextWithQuery &
         LogStreamQueryContextWithValidationError;
     };
@@ -43,11 +59,23 @@ export type LogStreamQueryStateValue = LogStreamQueryTypestate['value'];
 export type LogStreamQueryEvent =
   | {
       type: 'queryFromUrlChanged';
-      query: Query | AggregateQuery;
+      query: AnyQuery;
     }
   | {
       type: 'queryFromUiChanged';
-      query: Query | AggregateQuery;
+      query: AnyQuery;
+    }
+  | {
+      type: 'dataViewsChanged';
+      dataViews: DataViewBase[];
+    }
+  | {
+      type: 'validationSucceeded';
+      parsedQuery: ParsedQuery;
+    }
+  | {
+      type: 'validationFailed';
+      error: Error;
     };
 
 export type LogStreamQueryActor = ActorRef<LogStreamQueryEvent>;
