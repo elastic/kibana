@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
 import { HostsTableColumns } from './hosts_table_columns';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
@@ -17,6 +18,7 @@ import type { SnapshotMetricType } from '../../../../../common/inventory_models/
 import type { InfraTimerangeInput } from '../../../../../common/http_api';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { useSourceContext } from '../../../../containers/metrics_source';
+import { useTableProperties } from '../hooks/use_table_properties_url_state';
 
 const HOST_METRICS: Array<{ type: SnapshotMetricType }> = [
   { type: 'rx' },
@@ -30,6 +32,7 @@ const HOST_METRICS: Array<{ type: SnapshotMetricType }> = [
 export const HostsTable = () => {
   const { sourceId } = useSourceContext();
   const { buildQuery, dateRangeTimestamp, panelFilters } = useUnifiedSearchContext();
+  const { state, dispatch } = useTableProperties();
 
   const timeRange: InfraTimerangeInput = {
     from: dateRangeTimestamp.from,
@@ -58,6 +61,34 @@ export const HostsTable = () => {
 
   const items = useHostTable(nodes);
   const noData = items.length === 0;
+
+  const addTableChangeToUrl = useCallback(
+    ({ page, sort }) => {
+      const { index: pageIndex, size: pageSize } = page;
+      const { field, direction } = sort;
+
+      const sorting = field && direction ? { field, direction } : true;
+      const pagination = pageIndex >= 0 && pageSize !== 0 ? { pageIndex, pageSize } : true;
+
+      if (!isEqual(state.sorting, sorting)) {
+        dispatch({
+          type: 'setSorting',
+          payload: { sorting },
+        });
+      }
+      if (!isEqual(state.pagination, pagination)) {
+        dispatch({
+          type: 'setPagination',
+          payload: { pagination },
+        });
+      }
+    },
+    [dispatch, state.pagination, state.sorting]
+  );
+
+  const onTableChange = ({ page = {}, sort = {} }) => {
+    addTableChangeToUrl({ page, sort });
+  };
 
   return (
     <>
@@ -88,7 +119,13 @@ export const HostsTable = () => {
           />
         </div>
       ) : (
-        <EuiInMemoryTable pagination sorting items={items} columns={HostsTableColumns} />
+        <EuiInMemoryTable
+          pagination={state.pagination}
+          sorting={typeof state.sorting === 'boolean' ? state.sorting : { sort: state.sorting }}
+          items={items}
+          columns={HostsTableColumns}
+          onTableChange={onTableChange}
+        />
       )}
     </>
   );
