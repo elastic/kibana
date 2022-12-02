@@ -51,16 +51,16 @@ export const requestEndpointFieldsSearch = async (
   beatFields: BeatFields,
   indexPatterns: DataViewsServerPluginStart
 ): Promise<IndexFieldsStrategyResponse> => {
-  const { canWriteEventFilters, canReadEndpointList } = await context.getEndpointAuthz(
-    deps.request
-  );
-
   if (
     request.indices.length > 1 ||
     (request.indices[0] !== eventsIndexPattern && request.indices[0] !== METADATA_UNITED_INDEX)
   ) {
     throw new Error(`Invalid indices request ${request.indices.join(', ')}`);
   }
+
+  const { canWriteEventFilters, canReadEndpointList } = await context.getEndpointAuthz(
+    deps.request
+  );
 
   if (
     (!canWriteEventFilters && request.indices[0] === eventsIndexPattern) ||
