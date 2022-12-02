@@ -16,7 +16,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const screenshotDirectories = ['ml_docs', 'anomaly_detection'];
 
   describe('finding anomalies', function () {
-
     after(async () => {
       await elasticChart.setNewChartUiDebugFlag(false);
       await ml.api.cleanMlIndices();
@@ -33,10 +32,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('take screenshot');
       await commonScreenshots.removeFocusFromElement();
-      await commonScreenshots.takeScreenshot(
-        'ml-create-job',
-        screenshotDirectories
-      );
+      await commonScreenshots.takeScreenshot('ml-create-job', screenshotDirectories);
     });
   });
 }
