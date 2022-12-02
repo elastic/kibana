@@ -8,9 +8,10 @@
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { chunk } from 'lodash/fp';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 
-const partitionActions = (actions: Action[], showMoreActionsFrom: number) => {
+export const partitionActions = (actions: Action[], showMoreActionsFrom: number) => {
   if (showMoreActionsFrom <= 1) return { extraActions: actions, visibleActions: [] };
   if (actions.length <= showMoreActionsFrom) return { extraActions: [], visibleActions: actions };
 
@@ -24,21 +25,15 @@ export interface PartitionedActions {
 }
 
 export const usePartitionActions = (
-  actions: Action[],
+  getActions: () => Promise<Action[]>,
   showMoreActionsFrom: number
-): PartitionedActions => {
-  return useMemo(
-    () => partitionActions(actions, showMoreActionsFrom),
-    [actions, showMoreActionsFrom]
-  );
-};
+): PartitionedActions & { loading: boolean } => {
+  const { value: allActions, loading } = useAsync(() => getActions(), []);
 
-export const useGetPartitionedActions = (
-  getActions: () => Action[],
-  showMoreActionsFrom: number
-): (() => PartitionedActions) => {
-  return useCallback(
-    () => partitionActions(getActions(), showMoreActionsFrom),
-    [getActions, showMoreActionsFrom]
-  );
+  return useMemo(() => {
+    if (loading) {
+      return { extraActions: [], visibleActions: [], loading };
+    }
+    return { ...partitionActions(allActions ?? [], showMoreActionsFrom), loading };
+  }, [loading, allActions, showMoreActionsFrom]);
 };

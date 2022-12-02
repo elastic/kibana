@@ -10,7 +10,7 @@ import React, { createContext, FC } from 'react';
 // TODO can't import plugin from package
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
-type GetActionsType = undefined | ((trigger: string, context: object) => Action[]);
+type GetActionsType = undefined | ((trigger: string, context: object) => Promise<Action[]>);
 
 const initialContext = {
   getCompatibleActions: undefined,

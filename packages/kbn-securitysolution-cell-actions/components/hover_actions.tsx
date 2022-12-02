@@ -15,11 +15,10 @@ import { HoverActionsPopover } from './hover_actions_popover';
 import { ActionItem } from './cell_action_item';
 import { CellActionConfig } from '.';
 import { ExtraActionsPopOverWithAnchor } from './extra_actions_popover';
-import { useGetPartitionedActions } from '../hooks/actions';
+import { partitionActions } from '../hooks/actions';
 import { ExtraActionsButton } from './extra_actions_button';
 import { YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
 
-// const SHOW_TOP_N_KEYBOARD_SHORTCUT = 't';
 const additionalContentCSS = css`
   padding: 2px;
 `;
@@ -31,7 +30,7 @@ const hoverContentWrapperCSS = css`
 interface Props {
   additionalContent?: React.ReactNode;
   config: CellActionConfig;
-  getActions: () => Action[];
+  getActions: () => Promise<Action[]>;
   actionContext: ActionExecutionContext;
   showTooltip: boolean;
   showMoreActionsFrom: number;
@@ -62,6 +61,7 @@ export const HoverActions: React.FC<Props> = React.memo(
       [setIsExtraActionsPopoverOpen]
     );
 
+    // const SHOW_TOP_N_KEYBOARD_SHORTCUT = 't';
     // onKeyDown SHORTCUTS
     //   {showHoverContent ? <div onKeyDown={onKeyDown}>{hoverContent}</div> : null}
     // const onKeyDown = useCallback(
@@ -87,12 +87,12 @@ export const HoverActions: React.FC<Props> = React.memo(
     //   [ownFocus]
     // );
 
-    const getPartitionedActions = useGetPartitionedActions(getActions, showMoreActionsFrom);
-
     const getHoverContent = useCallback(
-      (closeHoverPopOver: () => void) => {
+      async (closeHoverPopOver: () => void) => {
         closeExtraActions(); // Closed extra actions when opening hover actions
-        const { visibleActions, extraActions } = getPartitionedActions();
+
+        const actions = await getActions();
+        const { visibleActions, extraActions } = partitionActions(actions, showMoreActionsFrom);
         const onShowExtraActionsClick = () => {
           setIsExtraActionsPopoverOpen(true);
           closeHoverPopOver();
@@ -119,10 +119,11 @@ export const HoverActions: React.FC<Props> = React.memo(
       },
       [
         closeExtraActions,
-        getPartitionedActions,
-        showTooltip,
+        getActions,
+        showMoreActionsFrom,
         config.field,
         additionalContent,
+        showTooltip,
         actionContext,
       ]
     );
@@ -133,7 +134,8 @@ export const HoverActions: React.FC<Props> = React.memo(
           <div ref={contentRef}>{children}</div>
         </HoverActionsPopover>
         <ExtraActionsPopOverWithAnchor
-          getPartitionedActions={getPartitionedActions}
+          showMoreActionsFrom={showMoreActionsFrom}
+          getActions={getActions}
           anchorRef={contentRef}
           actionContext={actionContext}
           config={config}

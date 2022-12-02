@@ -16,8 +16,8 @@ import {
 import React from 'react';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { CellActionConfig } from '.';
-import { PartitionedActions } from '../hooks/actions';
 import { YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
+import { usePartitionActions } from '../hooks/actions';
 
 interface ActionsPopOverProps {
   anchorRef: React.RefObject<HTMLElement>;
@@ -25,59 +25,54 @@ interface ActionsPopOverProps {
   config: CellActionConfig;
   isOpen: boolean;
   closePopOver: () => void;
-  getPartitionedActions: () => PartitionedActions;
+  actions: Action[];
   button: JSX.Element;
 }
 
 export const ExtraActionsPopOver: React.FC<ActionsPopOverProps> = ({
-  getPartitionedActions,
+  actions,
   actionContext,
   config,
   isOpen,
   closePopOver,
   button,
-}) => {
-  // TODO memoize getActions call to improve performance
-  const { extraActions } = getPartitionedActions();
-  return (
-    <EuiPopover
-      button={button}
-      isOpen={isOpen}
-      closePopover={closePopOver}
-      panelPaddingSize="s"
-      anchorPosition={'downCenter'}
-      hasArrow={true}
-      repositionOnScroll
-      ownFocus
-    >
-      <ExtraActionsPopOverContent
-        actions={extraActions}
-        actionContext={actionContext}
-        closePopOver={closePopOver}
-        config={config}
-      />
-    </EuiPopover>
-  );
-};
+}) => (
+  <EuiPopover
+    button={button}
+    isOpen={isOpen}
+    closePopover={closePopOver}
+    panelPaddingSize="s"
+    anchorPosition={'downCenter'}
+    hasArrow={true}
+    repositionOnScroll
+    ownFocus
+  >
+    <ExtraActionsPopOverContent
+      actions={actions}
+      actionContext={actionContext}
+      closePopOver={closePopOver}
+      config={config}
+    />
+  </EuiPopover>
+);
 
 interface ExtraActionsPopOverWithAnchorProps
-  extends Pick<
-    ActionsPopOverProps,
-    'actionContext' | 'closePopOver' | 'config' | 'isOpen' | 'getPartitionedActions'
-  > {
+  extends Pick<ActionsPopOverProps, 'actionContext' | 'closePopOver' | 'config' | 'isOpen'> {
+  getActions: () => Promise<Action[]>;
   anchorRef: React.RefObject<HTMLElement>;
+  showMoreActionsFrom: number;
 }
 
 export const ExtraActionsPopOverWithAnchor = ({
-  getPartitionedActions,
   anchorRef,
   actionContext,
   config,
   isOpen,
   closePopOver,
+  getActions,
+  showMoreActionsFrom,
 }: ExtraActionsPopOverWithAnchorProps) => {
-  // TODO memoize getActions call to improve performance
-  const { extraActions } = getPartitionedActions();
+  const { extraActions } = usePartitionActions(getActions, showMoreActionsFrom);
   return anchorRef.current ? (
     <EuiWrappingPopover
       button={anchorRef.current}

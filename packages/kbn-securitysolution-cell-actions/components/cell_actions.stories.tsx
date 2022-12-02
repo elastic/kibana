@@ -11,9 +11,10 @@ import { ComponentStory } from '@storybook/react';
 import { CellActions, CellActionsMode, CellActionsProps } from '.';
 import { CellActionsContextProvider } from './cell_actions_context';
 
-const makeActions = (actionsName: string, icon: string) => ({
+const makeActions = (actionsName: string, icon: string, order: number = 0) => ({
   id: actionsName,
   type: actionsName,
+  order,
   getIconType: () => icon,
   getDisplayName: () => actionsName,
   getDisplayNameTooltip: () => actionsName,
@@ -34,13 +35,15 @@ export default {
     (storyFn: Function) => (
       <CellActionsContextProvider
         // call uiActions getTriggerCompatibleActions(triggerId, data)
-        getCompatibleActions={() => [
-          makeActions('Filter in', 'plusInCircle'),
-          makeActions('Filter out', 'minusInCircle'),
-          makeActions('Minimize', 'minimize'),
-          makeActions('Send email', 'email'),
-          makeActions('Pin field', 'pin'),
-        ]}
+        getCompatibleActions={() =>
+          Promise.resolve([
+            makeActions('Filter in', 'plusInCircle', 2),
+            makeActions('Filter out', 'minusInCircle', 3),
+            makeActions('Minimize', 'minimize', 1),
+            makeActions('Send email', 'email', 4),
+            makeActions('Pin field', 'pin', 5),
+          ])
+        }
       >
         <div style={{ paddingTop: '70px' }} />
         {storyFn()}

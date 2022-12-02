@@ -35,7 +35,7 @@ interface Props {
    * layout, and to adjust it's position via `top` and `left`.
    * The function will be called once the first time the hover event starts for performance optimization.
    */
-  getHoverContent: (closePopover: () => void) => JSX.Element;
+  getHoverContent: (closePopover: () => void) => Promise<JSX.Element>;
 
   /**
    * This optional callback is invoked when a close is requested via user
@@ -71,6 +71,7 @@ interface Props {
 export const HoverActionsPopover = React.memo<Props>(
   ({ closePopOverTrigger, getHoverContent, onCloseRequested, children, panelStyle }) => {
     const [showHoverContent, setShowHoverContent] = useState(false);
+    const [hoverContent, setHoverContent] = useState<JSX.Element | null>(null);
     const [, setHoverTimeout] = useState<number | undefined>(undefined);
     const popoverRef = useRef<EuiPopover>(null);
 
@@ -87,14 +88,11 @@ export const HoverActionsPopover = React.memo<Props>(
       }
     }, [onCloseRequested]);
 
-    // TODO Cache the returned value of getHoverContent() for performance optimization on successive calls.
-    const hoverContent = useMemo(
-      () => (showHoverContent ? getHoverContent(() => tryClosePopover()) : null),
-
-      [getHoverContent, showHoverContent, tryClosePopover]
-    );
-
     const onMouseEnter = useCallback(() => {
+      getHoverContent(() => tryClosePopover()).then((hoverContentParam) => {
+        setHoverContent(hoverContentParam);
+      });
+
       setHoverTimeout(
         Number(
           setTimeout(() => {
@@ -107,7 +105,7 @@ export const HoverActionsPopover = React.memo<Props>(
           }, HOVER_INTENT_DELAY)
         )
       );
-    }, [setHoverTimeout, setShowHoverContent]);
+    }, [getHoverContent, tryClosePopover]);
 
     const onMouseLeave = useCallback(() => {
       tryClosePopover();

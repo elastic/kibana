@@ -16,7 +16,7 @@ import { CellActionConfig } from '.';
 
 interface InlineActionsProps {
   config: CellActionConfig;
-  getActions: () => Action[];
+  getActions: () => Promise<Action[]>;
   actionContext: ActionExecutionContext;
   showTooltip: boolean;
   showMoreActionsFrom: number;
@@ -29,12 +29,7 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
   showMoreActionsFrom,
   config,
 }) => {
-  const allActions = useMemo(() => getActions(), [getActions]);
-  const { extraActions, visibleActions } = usePartitionActions(allActions, showMoreActionsFrom);
-  const getPartitionedActions = useCallback(
-    () => ({ extraActions, visibleActions }),
-    [extraActions, visibleActions]
-  );
+  const { extraActions, visibleActions } = usePartitionActions(getActions, showMoreActionsFrom);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopOver = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
   const closePopOver = useCallback(() => setIsPopoverOpen(false), []);
@@ -51,7 +46,7 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
       ))}
       {extraActions.length > 0 ? (
         <ExtraActionsPopOver
-          getPartitionedActions={getPartitionedActions}
+          actions={extraActions}
           anchorRef={popOverAnchorRef}
           actionContext={actionContext}
           config={config}

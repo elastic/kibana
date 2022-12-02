@@ -53,13 +53,11 @@ export const CellActions: React.FC<CellActionsProps> = ({
       console.error(
         'No CellActionsContext found. Please wrap the application with CellActionsContextProvider'
       );
-      return [];
+      return Promise.resolve([]);
     } else {
-      return orderBy(
-        ['order', 'title'],
-        ['desc', 'asc'],
-        context.getCompatibleActions(triggerId, config)
-      );
+      return context
+        .getCompatibleActions(triggerId, config)
+        .then((actions) => orderBy(['order', 'id'], ['asc', 'asc'], actions));
     }
   }, [config, triggerId, context]);
 
