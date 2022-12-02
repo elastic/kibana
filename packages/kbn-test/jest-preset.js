@@ -9,7 +9,20 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
+const chalk = require('chalk');
 const pkgMap = require('@kbn/synthetic-package-map').readPackageMap();
+
+const setupFilesAfterEnv = [];
+if (process.env.CI) {
+  setupFilesAfterEnv.push('<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/disable_console_logs.js')
+  process.stderr.write(chalk.bgYellow.blackBright(`      WARNING      `) + `
+
+  console.log(), console.warn(), and console.error() output in jest tests causes a massive amount
+  of noise on CI without any percevable benefit, so they have been disabled. If you want to log
+  output in your test temporarily, you can modify "packages/kbn-test/src/jest/setup/disable_console_logs.js"
+
+`)
+}
 
 /** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
 /** @type {JestConfig} */
@@ -91,6 +104,7 @@ module.exports = {
     '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/mocks.moment_timezone.js',
     '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/mocks.eui.js',
     '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/react_testing_library.js',
+    ...setupFilesAfterEnv,
   ],
 
   snapshotFormat: {
