@@ -40,10 +40,13 @@ const hasPartialMatch = (searchValue: string, options: ItemSelectableOption[]) =
   return options.some((option) => option.key?.includes(searchValue));
 };
 
-const toSelectableOption = (item: string): ItemSelectableOption => {
+const itemToSelectableOption = (item: {
+  key: string;
+  data: Record<string, unknown>;
+}): ItemSelectableOption => {
   return {
-    key: item,
-    label: item,
+    key: item.key,
+    label: item.key,
   } as ItemSelectableOption;
 };
 
@@ -57,7 +60,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
     {
       items: tags,
       selectedCases,
-      toSelectableOption,
+      itemToSelectableOption,
       fieldSelector: (theCase) => theCase.tags,
       onChangeItems: onChangeTags,
     }

@@ -14,7 +14,7 @@ import type { ItemSelectableOption, ItemsSelectionState } from './types';
 interface UseItemsStateProps {
   items: string[];
   selectedCases: Case[];
-  toSelectableOption: <T>(item: string) => EuiSelectableOption<T>;
+  itemToSelectableOption: <T>(item: Payload[number]) => EuiSelectableOption<T>;
   fieldSelector: (theCase: Case) => string[];
   onChangeItems: (args: ItemsSelectionState) => void;
 }
@@ -36,14 +36,17 @@ enum ICONS {
   UNCHECKED = 'empty',
 }
 
+type Payload = Array<Pick<Item, 'key' | 'data'>>;
 type Action =
-  | { type: Actions.CHECK_ITEM; payload: string[] }
-  | { type: Actions.UNCHECK_ITEM; payload: string[] };
+  | { type: Actions.CHECK_ITEM; payload: Payload }
+  | { type: Actions.UNCHECK_ITEM; payload: Payload };
 
 interface Item {
+  key: string;
   itemState: ItemState;
   dirty: boolean;
   icon: IconType;
+  data: Record<string, unknown>;
 }
 
 interface State {
@@ -108,7 +111,13 @@ const itemsReducer: React.Reducer<State, Action> = (state: State, action): State
       const selectedItems: State['items'] = {};
 
       for (const item of action.payload) {
-        selectedItems[item] = { itemState: ItemState.CHECKED, dirty: true, icon: ICONS.CHECKED };
+        selectedItems[item.key] = {
+          key: item.key,
+          itemState: ItemState.CHECKED,
+          dirty: true,
+          icon: ICONS.CHECKED,
+          data: item.data,
+        };
       }
 
       return { ...state, items: { ...state.items, ...selectedItems } };
@@ -117,10 +126,12 @@ const itemsReducer: React.Reducer<State, Action> = (state: State, action): State
       const unSelectedItems: State['items'] = {};
 
       for (const item of action.payload) {
-        unSelectedItems[item] = {
+        unSelectedItems[item.key] = {
+          key: item.key,
           itemState: ItemState.UNCHECKED,
           dirty: true,
           icon: ICONS.UNCHECKED,
+          data: item.data,
         };
       }
 
@@ -157,7 +168,7 @@ const getInitialItemsState = ({
 
     const icon = getSelectionIcon(itemState);
 
-    itemsRecord[item] = { itemState, dirty: isCheckedItem, icon };
+    itemsRecord[item] = { key: item, itemState, dirty: isCheckedItem, icon, data: {} };
   }
 
   return state;
@@ -191,12 +202,12 @@ export const getSelectedAndUnselectedItems = (
   newOptions: ItemSelectableOption[],
   items: State['items']
 ) => {
-  const selectedItems: string[] = [];
-  const unSelectedItems: string[] = [];
+  const selectedItems: Payload = [];
+  const unSelectedItems: Payload = [];
 
   for (const option of newOptions) {
     if (option.checked === 'on') {
-      selectedItems.push(option.key);
+      selectedItems.push({ key: option.key, data: option.data ?? {} });
     }
 
     /**
@@ -204,18 +215,23 @@ export const getSelectedAndUnselectedItems = (
      * we need to ensure that state access is done only by options with state.
      */
     if (!option.data?.newItem && !option.checked && items[option.key] && items[option.key].dirty) {
-      unSelectedItems.push(option.key);
+      unSelectedItems.push({ key: option.key, data: option.data ?? {} });
     }
   }
 
   return { selectedItems, unSelectedItems };
 };
 
+const getKeysFromPayload = (items: Payload): string[] => items.map((item) => item.key);
+
+const stateToPayload = (items: State['items']): Payload =>
+  Object.keys(items).map((key) => ({ key, data: items[key].data }));
+
 export const useItemsState = ({
   items,
   selectedCases,
   fieldSelector,
-  toSelectableOption,
+  itemToSelectableOption,
   onChangeItems,
 }: UseItemsStateProps) => {
   /**
@@ -234,19 +250,19 @@ export const useItemsState = ({
   const stateToOptions = useCallback((): ItemSelectableOption[] => {
     const itemsKeys = Object.keys(state.items);
 
-    return itemsKeys.map((item): EuiSelectableOption => {
-      const convertedItem = toSelectableOption(item);
+    return itemsKeys.map((key): EuiSelectableOption => {
+      const convertedItem = itemToSelectableOption({ key, data: state.items[key].data });
 
       return {
-        key: item,
-        ...(state.items[item].itemState === ItemState.CHECKED ? { checked: 'on' } : {}),
-        'data-test-subj': `cases-actions-items-edit-selectable-item-${item}`,
+        key,
+        ...(state.items[key].itemState === ItemState.CHECKED ? { checked: 'on' } : {}),
+        'data-test-subj': `cases-actions-items-edit-selectable-item-${key}`,
         ...convertedItem,
-        label: convertedItem.label ?? item,
-        data: { ...convertedItem?.data, itemIcon: state.items[item].icon },
+        label: convertedItem.label ?? key,
+        data: { ...convertedItem?.data, itemIcon: state.items[key].icon },
       };
     }) as ItemSelectableOption[];
-  }, [state.items, toSelectableOption]);
+  }, [state.items, itemToSelectableOption]);
 
   const onChange = useCallback(
     (newOptions: ItemSelectableOption[]) => {
@@ -275,27 +291,30 @@ export const useItemsState = ({
 
       dispatch({ type: Actions.CHECK_ITEM, payload: selectedItems });
       dispatch({ type: Actions.UNCHECK_ITEM, payload: unSelectedItems });
-      onChangeItems({ selectedItems, unSelectedItems });
+      onChangeItems({
+        selectedItems: getKeysFromPayload(selectedItems),
+        unSelectedItems: getKeysFromPayload(unSelectedItems),
+      });
     },
     [onChangeItems, state.items]
   );
 
   const onSelectAll = useCallback(() => {
-    dispatch({ type: Actions.CHECK_ITEM, payload: Object.keys(state.items) });
+    dispatch({ type: Actions.CHECK_ITEM, payload: stateToPayload(state.items) });
     onChangeItems({ selectedItems: Object.keys(state.items), unSelectedItems: [] });
   }, [onChangeItems, state.items]);
 
   const onSelectNone = useCallback(() => {
-    const unSelectedItems = [];
+    const unSelectedItems: Payload = [];
 
     for (const [id, item] of Object.entries(state.items)) {
       if (item.itemState === ItemState.CHECKED || item.itemState === ItemState.PARTIAL) {
-        unSelectedItems.push(id);
+        unSelectedItems.push({ key: id, data: item.data });
       }
     }
 
     dispatch({ type: Actions.UNCHECK_ITEM, payload: unSelectedItems });
-    onChangeItems({ selectedItems: [], unSelectedItems });
+    onChangeItems({ selectedItems: [], unSelectedItems: getKeysFromPayload(unSelectedItems) });
   }, [state.items, onChangeItems]);
 
   const options: ItemSelectableOption[] = useMemo(() => stateToOptions(), [stateToOptions]);

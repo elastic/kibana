@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { isEmpty, sortBy } from 'lodash';
 import {
   EuiSelectable,
   EuiFlexGroup,
@@ -13,16 +14,18 @@ import {
   EuiHorizontalRule,
   EuiTextColor,
   EuiHighlight,
-  useEuiTheme,
   EuiIcon,
 } from '@elastic/eui';
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar, getUserDisplayName } from '@kbn/user-profile-components';
+import { useIsUserTyping } from '../../../common/use_is_user_typing';
+import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import type { Case } from '../../../../common';
 import * as i18n from './translations';
 import { useItemsState } from '../use_items_state';
 import type { ItemSelectableOption, ItemsSelectionState } from '../types';
+import { useCasesContext } from '../../cases_context/use_cases_context';
 
 interface Props {
   selectedCases: Case[];
@@ -39,39 +42,62 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
   isLoading,
   onChangeAssignees,
 }) => {
+  const { owner: owners } = useCasesContext();
+  const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();
   // TODO: Include unknown users
   const userProfileIds = [...userProfiles.keys()];
 
-  const toSelectableOption = useCallback(
-    (item: string): AssigneeSelectableOption => {
-      const userProfile = userProfiles.get(item);
+  const [searchValue, setSearchValue] = useState<string>('');
+  const { data: searchResultUserProfiles, isLoading: isLoadingSuggest } = useSuggestUserProfiles({
+    name: searchValue,
+    owners,
+    onDebounce,
+  });
+
+  const itemToSelectableOption = useCallback(
+    (item: { key: string; data: Record<string, unknown> }): AssigneeSelectableOption => {
+      // TODO: Fix types
+      const userProfileFromData = item.data as unknown as UserProfileWithAvatar;
+      const userProfile = isEmpty(userProfileFromData)
+        ? userProfiles.get(item.key)
+        : userProfileFromData;
 
       if (userProfile) {
-        return {
-          key: userProfile.uid,
-          label: getUserDisplayName(userProfile.user),
-          data: userProfile,
-        } as unknown as AssigneeSelectableOption;
+        return toSelectableOption(userProfile);
+      }
+
+      const profileInSuggestedUsers = searchResultUserProfiles?.find(
+        (profile) => profile.uid === item.data.uid
+      );
+
+      if (profileInSuggestedUsers) {
+        return toSelectableOption(profileInSuggestedUsers);
       }
 
       // TODO: Put unknown label
       return {
-        key: item,
-        label: item,
+        key: item.key,
+        label: item.key,
       } as AssigneeSelectableOption;
     },
-    [userProfiles]
+    [searchResultUserProfiles, userProfiles]
   );
 
-  const { state, options, totalSelectedItems, onChange } = useItemsState({
+  const { options, onChange } = useItemsState({
     items: userProfileIds,
     selectedCases,
     fieldSelector: (theCase) => theCase.assignees.map(({ uid }) => uid),
     onChangeItems: onChangeAssignees,
-    toSelectableOption,
+    itemToSelectableOption,
   });
-  const [searchValue, setSearchValue] = useState<string>('');
-  const { euiTheme } = useEuiTheme();
+
+  const finalOptions = getDisplayOptions({
+    searchResultUserProfiles: searchResultUserProfiles ?? [],
+    options,
+    searchValue,
+  });
+
+  const isLoadingData = isLoading || isLoadingSuggest || isUserTyping;
 
   const renderOption = useCallback(
     (option: AssigneeSelectableOption, search: string) => {
@@ -125,18 +151,22 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
     [searchValue]
   );
 
-  const onSearchChange = useCallback((value) => {
-    setSearchValue(value);
-  }, []);
+  const onSearchChange = useCallback(
+    (value) => {
+      setSearchValue(value);
+      onContentChange(value);
+    },
+    [onContentChange]
+  );
 
   return (
     <EuiSelectable
-      options={options}
+      options={finalOptions}
       searchable
       searchProps={{
         placeholder: i18n.SEARCH_PLACEHOLDER,
-        isLoading,
-        isClearable: !isLoading,
+        isLoading: isLoadingData,
+        isClearable: !isLoadingData,
         onChange: onSearchChange,
         value: searchValue,
         'data-test-subj': 'cases-actions-tags-edit-selectable-search-input',
@@ -149,64 +179,15 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
       data-test-subj="cases-actions-tags-edit-selectable"
       height="full"
     >
-      {(list, search) => (
-        <>
-          {search}
-          {/* <EuiSpacer size="s" />
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceBetween"
-            responsive={false}
-            direction="row"
-            css={{ flexGrow: 0 }}
-            gutterSize="none"
-          >
-            <EuiFlexItem
-              grow={false}
-              css={{
-                borderRight: euiTheme.border.thin,
-                paddingRight: euiTheme.size.s,
-              }}
-            >
-              <EuiText size="xs" color="subdued">
-                {i18n.TOTAL_TAGS(tags.length)}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-              css={{
-                paddingLeft: euiTheme.size.s,
-              }}
-            >
-              <EuiText size="xs" color="subdued">
-                {i18n.SELECTED_TAGS(totalSelectedItems)}
-              </EuiText>
-            </EuiFlexItem> */}
-          {/* <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
-              <EuiFlexGroup
-                responsive={false}
-                direction="row"
-                alignItems="center"
-                justifyContent="flexEnd"
-                gutterSize="xs"
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty size="xs" flush="right" onClick={onSelectAll}>
-                    {i18n.SELECT_ALL}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty size="xs" flush="right" onClick={onSelectNone}>
-                    {i18n.SELECT_NONE}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem> */}
-          {/* </EuiFlexGroup> */}
-          <EuiHorizontalRule margin="m" />
-          {list}
-        </>
-      )}
+      {(list, search) => {
+        return (
+          <>
+            {search}
+            <EuiHorizontalRule margin="m" />
+            {list}
+          </>
+        );
+      }}
     </EuiSelectable>
   );
 };
@@ -214,3 +195,61 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
 EditAssigneesSelectableComponent.displayName = 'EditAssigneesSelectable';
 
 export const EditAssigneesSelectable = React.memo(EditAssigneesSelectableComponent);
+
+const getDisplayOptions = ({
+  searchResultUserProfiles,
+  options,
+  searchValue,
+}: {
+  searchResultUserProfiles: UserProfileWithAvatar[];
+  options: AssigneeSelectableOption[];
+  searchValue: string;
+}) => {
+  const searchResultsOptions =
+    searchResultUserProfiles
+      ?.filter((profile) => !options.find((option) => isMatchingOption(option, profile)))
+      ?.map((profile) => toSelectableOption(profile)) ?? [];
+
+  const [selectedOrPartialOptions, unselectedOptions] = options.reduce(
+    (acc, option) => {
+      // TODO fix type
+      if (option?.data?.itemIcon !== 'empty') {
+        acc[0].push(option);
+      } else {
+        acc[1].push(option);
+      }
+
+      return acc;
+    },
+    [[], []] as [AssigneeSelectableOption[], AssigneeSelectableOption[]]
+  );
+
+  const finalOptions = [
+    ...sortOptionsAlphabetically(selectedOrPartialOptions),
+    ...sortOptionsAlphabetically([...unselectedOptions, ...searchResultsOptions]),
+  ];
+
+  return finalOptions;
+};
+
+const sortOptionsAlphabetically = (options: AssigneeSelectableOption[]) =>
+  /**
+   * sortBy will not mutate the original array.
+   * It will return a new sorted array
+   *  */
+  sortBy(options, (option) => option.label);
+
+const toSelectableOption = (userProfile: UserProfileWithAvatar): AssigneeSelectableOption => {
+  return {
+    key: userProfile.uid,
+    label: getUserDisplayName(userProfile.user),
+    data: userProfile,
+  } as unknown as AssigneeSelectableOption;
+};
+
+const isMatchingOption = <Option extends UserProfileWithAvatar | null>(
+  option: AssigneeSelectableOption,
+  profile: UserProfileWithAvatar
+) => {
+  return option.key === profile.uid;
+};

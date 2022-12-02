@@ -32,6 +32,7 @@ import * as i18n from './translations';
 import { bringCurrentUserToFrontAndSort } from '../user_profiles/sort';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { getAllPermissionsExceptFrom } from '../../utils/permissions';
+import { useIsUserTyping } from '../../common/use_is_user_typing';
 
 interface Props {
   isLoading: boolean;
@@ -177,13 +178,11 @@ const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
   const availableOwners = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>();
-  const [isUserTyping, setIsUserTyping] = useState(false);
+  const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();
   const hasOwners = owners.length > 0;
 
   const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
     useGetCurrentUserProfile();
-
-  const onDebounce = useCallback(() => setIsUserTyping(false), []);
 
   const {
     data: userProfiles,
@@ -203,8 +202,9 @@ const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
   const onSearchComboChange = (value: string) => {
     if (!isEmpty(value)) {
       setSearchTerm(value);
-      setIsUserTyping(true);
     }
+
+    onContentChange(value);
   };
 
   const isLoading =

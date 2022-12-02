@@ -69,8 +69,8 @@ describe('EditTagsFlyout', () => {
     userEvent.click(result.getByTestId('cases-edit-tags-flyout-submit'));
 
     expect(props.onSaveTags).toHaveBeenCalledWith({
-      selectedTags: ['pepsi'],
-      unSelectedTags: ['coke'],
+      selectedItems: ['pepsi'],
+      unSelectedItems: ['coke'],
     });
   });
 
