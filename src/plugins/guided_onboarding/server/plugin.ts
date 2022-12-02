@@ -18,7 +18,7 @@ export class GuidedOnboardingPlugin
   implements Plugin<GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart>
 {
   private readonly logger: Logger;
-  private guidesConfig: GuidesConfig;
+  private readonly guidesConfig: GuidesConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
