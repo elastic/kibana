@@ -19,9 +19,7 @@ import type { FleetRequestHandlerContext } from '../types';
 
 import {
   buildPathsFromRequiredAuthz,
-  deserializeAuthzConfig,
   makeRouterWithFleetAuthz,
-  serializeAuthzConfig,
   validateSecurityRbac,
 } from './security';
 
@@ -203,82 +201,6 @@ describe('FleetAuthzRouter', () => {
           routeConfig,
         })
       ).toEqual('forbidden');
-    });
-  });
-});
-
-describe('serializeAuthzConfig', () => {
-  it('should serialize authz to tags', () => {
-    const res = serializeAuthzConfig({
-      fleetAuthz: {
-        fleet: {
-          readEnrollmentTokens: true,
-          setup: true,
-        },
-        integrations: {
-          readPackageInfo: true,
-          removePackages: true,
-        },
-        packagePrivileges: {
-          endpoint: {
-            actions: {
-              readPolicyManagement: {
-                executePackageAction: true,
-              },
-              readBlocklist: {
-                executePackageAction: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    expect(res).toEqual([
-      'fleet:authz:fleet:readEnrollmentTokens',
-      'fleet:authz:fleet:setup',
-      'fleet:authz:integrations:readPackageInfo',
-      'fleet:authz:integrations:removePackages',
-      'fleet:authz:packagePrivileges:endpoint:actions:readPolicyManagement:executePackageAction',
-      'fleet:authz:packagePrivileges:endpoint:actions:readBlocklist:executePackageAction',
-    ]);
-  });
-});
-
-describe('deserializeAuthzConfig', () => {
-  it('should deserialize tags to fleet authz', () => {
-    const res = deserializeAuthzConfig([
-      'fleet:authz:fleet:readEnrollmentTokens',
-      'fleet:authz:fleet:setup',
-      'fleet:authz:integrations:readPackageInfo',
-      'fleet:authz:integrations:removePackages',
-      'fleet:authz:packagePrivileges:endpoint:actions:readPolicyManagement:executePackageAction',
-      'fleet:authz:packagePrivileges:endpoint:actions:readBlocklist:executePackageAction',
-    ]);
-
-    expect(res).toEqual({
-      fleetAuthz: {
-        fleet: {
-          readEnrollmentTokens: true,
-          setup: true,
-        },
-        integrations: {
-          readPackageInfo: true,
-          removePackages: true,
-        },
-        packagePrivileges: {
-          endpoint: {
-            actions: {
-              readPolicyManagement: {
-                executePackageAction: true,
-              },
-              readBlocklist: {
-                executePackageAction: true,
-              },
-            },
-          },
-        },
-      },
     });
   });
 });
