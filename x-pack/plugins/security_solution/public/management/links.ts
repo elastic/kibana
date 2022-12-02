@@ -273,7 +273,13 @@ export const getManagementFilteredLinks = async (
     );
   }
 
-  const { canReadActionsLogManagement, canReadHostIsolationExceptions } = fleetAuthz
+  const {
+    canReadActionsLogManagement,
+    canReadHostIsolationExceptions,
+    canReadEndpointList,
+    canReadTrustedApplications,
+    canReadEventFilters,
+  } = fleetAuthz
     ? calculateEndpointAuthz(
         licenseService,
         fleetAuthz,
@@ -284,12 +290,24 @@ export const getManagementFilteredLinks = async (
       )
     : getEndpointAuthzInitialState();
 
+  if (!canReadEndpointList) {
+    linksToExclude.push(SecurityPageName.endpoints);
+  }
+
   if (!canReadActionsLogManagement) {
     linksToExclude.push(SecurityPageName.responseActionsHistory);
   }
 
   if (!canReadHostIsolationExceptions) {
     linksToExclude.push(SecurityPageName.hostIsolationExceptions);
+  }
+
+  if (!canReadTrustedApplications) {
+    linksToExclude.push(SecurityPageName.trustedApps);
+  }
+
+  if (!canReadEventFilters) {
+    linksToExclude.push(SecurityPageName.eventFilters);
   }
 
   return excludeLinks(linksToExclude);
