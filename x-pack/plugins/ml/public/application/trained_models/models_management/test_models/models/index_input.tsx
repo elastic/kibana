@@ -10,13 +10,21 @@ import React, { FC, useState, useMemo, useEffect, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { firstValueFrom } from 'rxjs';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { EuiSpacer, EuiSelect, EuiFormRow, EuiAccordion, EuiCodeBlock } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiSelect,
+  EuiFormRow,
+  EuiAccordion,
+  EuiCodeBlock,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../../contexts/kibana';
 import { RUNNING_STATE } from './inference_base';
 import type { InferrerType } from '.';
+import { showBonusFlyout } from '../../bonus';
 
 interface Props {
   inferrer: InferrerType;
@@ -24,9 +32,12 @@ interface Props {
 }
 
 export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) => {
+  const { services } = useMlKibana();
+
   const {
     dataViewListItems,
     fieldNames,
+    selectedDataView,
     selectedDataViewId,
     setSelectedDataViewId,
     selectedField,
@@ -36,6 +47,10 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
   const runningState = useObservable(inferrer.getRunningState$(), inferrer.getRunningState());
   const pipeline = useObservable(inferrer.getPipeline$(), inferrer.getPipeline());
   const inputComponent = useMemo(() => inferrer.getInputComponent(), [inferrer]);
+
+  const showBonus = () => {
+    showBonusFlyout(pipeline, selectedDataView, () => {}, services);
+  };
 
   return (
     <>
@@ -83,6 +98,10 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
           {JSON.stringify(pipeline, null, 2)}
         </EuiCodeBlock>
       </EuiAccordion>
+
+      <EuiButtonEmpty disabled={selectedDataView === null} onClick={() => showBonus()}>
+        Bonus
+      </EuiButtonEmpty>
     </>
   );
 };
@@ -200,6 +219,7 @@ export function useIndexInput({ inferrer }: { inferrer: InferrerType }) {
     fieldNames,
     dataViewListItems,
     reloadExamples,
+    selectedDataView,
     selectedDataViewId,
     setSelectedDataViewId,
     selectedField,

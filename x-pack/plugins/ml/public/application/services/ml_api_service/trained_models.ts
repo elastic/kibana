@@ -200,6 +200,27 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         method: 'GET',
       });
     },
+
+    reIndex(
+      sourceIndexName: string,
+      destIndexName: string,
+      pipelineDescription: string,
+      pipelineId: string,
+      processors: any
+    ) {
+      const body = JSON.stringify({
+        sourceIndexName,
+        destIndexName,
+        pipelineDescription,
+        pipelineId,
+        processors,
+      });
+      return httpService.http<{ success: boolean; dataviewId: string }>({
+        path: `${apiBasePath}/trained_models/re_index`,
+        method: 'POST',
+        body,
+      });
+    },
   };
 }
 

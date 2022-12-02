@@ -17,8 +17,6 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import './style.scss';
-
 import { useFetchStream } from '@kbn/aiops-utils';
 import { IMPORT_API_ACTION_NAME } from '../../../../../common/constants/trained_models';
 import { ModelUpload } from './types';

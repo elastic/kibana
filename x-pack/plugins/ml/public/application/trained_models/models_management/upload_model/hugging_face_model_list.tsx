@@ -25,8 +25,6 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import './style.scss';
-
 import { useMlKibana } from '../../../contexts/kibana';
 import { HuggingFaceTrainedModel } from '../../../../../common/types/trained_models';
 import { SUPPORTED_PYTORCH_TASKS } from '../../../../../common/constants/trained_models';
