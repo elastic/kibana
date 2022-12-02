@@ -17,26 +17,12 @@ import {
   UNISOLATE_HOST_ROUTE_V2,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { FtrProviderContext } from '../ftr_provider_context';
-import {
-  createUserAndRole,
-  deleteUserAndRole,
-  ROLES,
-} from '../../common/services/security_solution';
+import { ROLE } from '../services/roles_users';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('When attempting to call an endpoint api with no authz', () => {
-    before(async () => {
-      // create role/user
-      await createUserAndRole(getService, ROLES.t1_analyst);
-    });
-
-    after(async () => {
-      // delete role/user
-      await deleteUserAndRole(getService, ROLES.t1_analyst);
-    });
-
     const apiList = [
       {
         method: 'get',
@@ -90,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
         apiListItem.path
       }]`, async () => {
         await supertestWithoutAuth[apiListItem.method](apiListItem.path)
-          .auth(ROLES.t1_analyst, 'changeme')
+          .auth(ROLE.t1_analyst, 'changeme')
           .set('kbn-xsrf', 'xxx')
           .send(apiListItem.body)
           .expect(403, {
