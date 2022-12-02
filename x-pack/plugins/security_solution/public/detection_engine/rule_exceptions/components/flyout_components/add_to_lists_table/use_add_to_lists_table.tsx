@@ -47,7 +47,6 @@ export const useAddToSharedListTable = ({
   onListSelectionChange,
 }: ExceptionsAddToListsComponentProps) => {
   const [listsToDisplay, setListsToDisplay] = useState<ExceptionListRuleReferencesSchema[]>([]);
-  const [exceptionListReferences, setExceptionListReferences] = useState<RuleReferences>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const listsToFetch = useMemo(() => {
@@ -68,7 +67,7 @@ export const useAddToSharedListTable = ({
   const getReferences = useCallback(async () => {
     try {
       setIsLoading(true);
-      return await getExceptionItemsReferences(
+      return getExceptionItemsReferences(
         (!listsToFetch.length
           ? [{ namespace_type: 'single' }]
           : listsToFetch) as ExceptionListSchema[]
@@ -83,9 +82,9 @@ export const useAddToSharedListTable = ({
     if (!result) {
       return setIsLoading(false);
     }
-    setExceptionListReferences(result as RuleReferences);
     const lists: ExceptionListRuleReferencesSchema[] = [];
-    for (const [_, value] of Object.entries(result))
+
+    for (const value of Object.values(result))
       if (value.type === ExceptionListTypeEnum.DETECTION) lists.push(value);
 
     setListsToDisplay(lists);
