@@ -252,7 +252,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitForDocTableLoadingComplete();
-        await PageObjects.timePicker.startAutoRefresh(intervalS);
+        await retry.waitFor('auto refresh interval update', async () => {
+          await PageObjects.timePicker.startAutoRefresh(intervalS);
+          const config = await PageObjects.timePicker.getRefreshConfig();
+          log.debug(`config = ${JSON.stringify(config)}`);
+          return (
+            !config.isPaused && config.interval === String(intervalS) && config.units === 'Seconds'
+          );
+        });
         await PageObjects.discover.waitForDocTableLoadingComplete();
 
         const getRequestTimestamp = async () => {
