@@ -18,33 +18,19 @@ import {
   traceChildStartBeforeParent,
   traceWithErrors,
 } from './waterfall_container.stories.data';
-import type { ApmPluginContextValue } from '../../../../../context/apm_plugin/apm_plugin_context';
 import { getWaterfall } from '../../../../../../common/waterfall_helper';
+import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
 
 type Args = ComponentProps<typeof WaterfallContainer>;
-
-const apmPluginContextMock = {
-  core: {
-    http: {
-      basePath: { prepend: () => {} },
-    },
-  },
-} as unknown as ApmPluginContextValue;
 
 const stories: Meta<Args> = {
   title: 'app/TransactionDetails/waterfall',
   component: WaterfallContainer,
   decorators: [
     (StoryComponent) => (
-      <MemoryRouter
-        initialEntries={[
-          '/services/{serviceName}/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=testTransactionName',
-        ]}
-      >
-        <MockApmPluginContextWrapper value={apmPluginContextMock}>
-          <StoryComponent />
-        </MockApmPluginContextWrapper>
-      </MemoryRouter>
+      <MockApmPluginStorybook routePath="/services/{serviceName}/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=testTransactionName">
+        <StoryComponent />
+      </MockApmPluginStorybook>
     ),
   ],
 };
