@@ -16,22 +16,14 @@ import {
   EuiImage,
   EuiSwitch,
   EuiSpacer,
-  EuiForm,
-  EuiFormRow,
-  EuiRange,
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ConfigureDatasetPanel, FIELD_TYPES, FieldValue } from './configure_dataset_panel';
 import { LargeDataSetParams, useServices } from './services';
 import { useSVG } from './hooks';
 
-const MIN_DOCUMENTS = 10000;
-const MAX_DOCUMENTS = 500000;
-const STEP_DOCUMENTS = 5000;
-const MIN_FIELDS = 10;
-const MAX_FIELDS = 500;
-const STEP_FIELDS = 5;
 const INDEX_NAME = '';
 const NOTIFICATION_KEY = 'largedatasetPanel:notificationShown';
 const EXPECTED_NR_OF_DOCUMENTS_KEY = 'largedatasetPanel:expectedNrOfDocuments';
@@ -42,7 +34,7 @@ const i18nTexts = {
   }),
   generateSubtitle: i18n.translate('homePackages.largeDatasetPanel.generateSubtitle', {
     defaultMessage:
-      'Generate a large data set. Takes about 10 minutes. Turn the switch on to configure the dataset, or leave the switch off to generate a dataset with default parameters',
+      'Generate a large data set with random field types and values. Takes about 10 minutes. Turn the switch on to configure the dataset, or leave the switch off to generate a dataset with default parameters',
   }),
   installButtonText: i18n.translate('homePackages.largeDatasetPanel.button.install', {
     defaultMessage: 'Generate!',
@@ -77,10 +69,6 @@ const i18nTexts = {
       defaultMessage: 'Large dataset already generated.',
     }
   ),
-  seeItInDiscover: i18n.translate('homePackages.largeDatasetPanel.seeItInDiscover.info', {
-    defaultMessage:
-      'Once it is ready, you will be able to see the dataset in Discover, under the name: ',
-  }),
   configure: i18n.translate('homePackages.largeDatasetPanel.configureSwitch.label', {
     defaultMessage: 'Configure your dataset: ',
   }),
@@ -107,6 +95,12 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
   const [discoverUrl, setDiscoverUrl] = useState<string>('#');
   const intervalRef = useRef<ReturnType<typeof setTimeout>>();
   const { notifySuccess, notifyError, getDiscoverLocator } = useServices();
+  const [fieldValues, setFieldValues] = useState<FieldValue[]>([
+    {
+      name: '',
+      type: FIELD_TYPES[0],
+    },
+  ]);
 
   const image = imageSrc ? <EuiImage alt={'demo image'} size="l" src={imageSrc} /> : null;
 
@@ -156,9 +150,21 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
     setInstallStatus(status);
   };
 
+  const updateFieldValues = (values: FieldValue[]) => {
+    setFieldValues(values);
+  };
+
   const onInstallClick = async () => {
     try {
-      installDataset({ nrOfDocuments, nrOfFields });
+      const fieldsToSend = fieldValues
+        .filter((value) => value.name !== '')
+        .map((el) => {
+          return {
+            name: el.name,
+            type: el.type.value,
+          };
+        });
+      installDataset({ nrOfDocuments, nrOfFields, fieldValues: fieldsToSend });
       updateSessionStorage(Status.GENERATING);
     } catch {
       notifyError(i18nTexts.datasetUninstallErrorMessage);
@@ -179,46 +185,14 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
     setChecked(!checked);
   };
 
-  const onNrOfDocumentsChange = (target: EventTarget | (EventTarget & HTMLInputElement)) => {
-    const value = Number((target as HTMLInputElement).value);
+  const onNumberOfDocumentsChange = (value: number) => {
     setNrOfDocuments(value);
     sessionStorage.setItem(EXPECTED_NR_OF_DOCUMENTS_KEY, nrOfDocuments.toString(10));
   };
 
-  const onNrOfFieldsChange = (target: EventTarget | (EventTarget & HTMLInputElement)) => {
-    const value = Number((target as HTMLInputElement).value);
+  const onNumberOfFieldsChange = (value: number) => {
     setNrOfFields(value);
   };
-
-  const configureLayout = (
-    <EuiPanel>
-      <EuiForm component="form">
-        <EuiFormRow label="Desired number of documents">
-          <EuiRange
-            min={MIN_DOCUMENTS}
-            max={MAX_DOCUMENTS}
-            step={STEP_DOCUMENTS}
-            value={nrOfDocuments}
-            onChange={(e) => onNrOfDocumentsChange(e.target)}
-            showLabels
-            showValue
-          />
-        </EuiFormRow>
-        <EuiFormRow label="Desired number of fields">
-          <EuiRange
-            min={MIN_FIELDS}
-            max={MAX_FIELDS}
-            step={STEP_FIELDS}
-            value={nrOfFields}
-            onChange={(e) => onNrOfFieldsChange(e.target)}
-            showLabels
-            showValue
-          />
-        </EuiFormRow>
-      </EuiForm>
-      <EuiSpacer />
-    </EuiPanel>
-  );
 
   const installTitleText =
     installStatus === Status.GENERATING
@@ -280,7 +254,16 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
           <p>{i18nTexts.generateSubtitle}</p>
           <EuiSwitch label={i18nTexts.configure} checked={checked} onChange={onChange} />
           <EuiSpacer />
-          {checked ? configureLayout : null}
+          {checked ? (
+            <ConfigureDatasetPanel
+              fieldValues={fieldValues}
+              updateFieldValues={updateFieldValues}
+              nrOfDocuments={nrOfDocuments}
+              nrOfFields={nrOfFields}
+              onNumberOfFieldsChange={onNumberOfFieldsChange}
+              onNumberOfDocumentsChange={onNumberOfDocumentsChange}
+            />
+          ) : null}
           {checked ? <EuiSpacer /> : null}
           <EuiButton
             fill

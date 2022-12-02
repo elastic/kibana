@@ -53,6 +53,7 @@ const Context = React.createContext<Services | null>(null);
 export interface LargeDataSetParams {
   nrOfDocuments: number;
   nrOfFields: number;
+  fieldValues: Array<{ name: string; type: string }>;
 }
 
 /**

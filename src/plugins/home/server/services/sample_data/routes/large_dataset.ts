@@ -18,6 +18,7 @@ import {
   findAndDeleteDataView,
 } from '../lib';
 import { getSavedObjectsClient } from './utils';
+import { WorkerData } from '../generate_dataset';
 
 const LARGE_DATASET_INDEX_NAME = 'kibana_sample_data_large';
 const workerState = {} as Record<string, any>;
@@ -28,18 +29,38 @@ export function createLargeDatasetRoute(router: IRouter, logger: Logger, core: C
     {
       path: '/api/sample_data/large_dataset',
       validate: {
-        body: schema.object({ nrOfDocuments: schema.number(), nrOfFields: schema.number() }),
+        body: schema.object({
+          nrOfDocuments: schema.number(),
+          nrOfFields: schema.number(),
+          fieldValues: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                name: schema.string(),
+                type: schema.string(),
+              })
+            )
+          ),
+        }),
       },
     },
     async (context, req, res) => {
-      const { nrOfDocuments, nrOfFields } = req.body;
+      const { nrOfDocuments, nrOfFields, fieldValues } = req.body;
       const esClient = (await core.getStartServices())[0].elasticsearch.client;
       id = uuidv4();
+      const workerData: WorkerData = {
+        numberOfDocuments: nrOfDocuments,
+        numberOfFields: nrOfFields,
+      };
+      if (fieldValues && fieldValues.length > 0) {
+        const format: string[] = [];
+        fieldValues.forEach((el) => {
+          format.push(`${el.name}:${el.type}`);
+          workerData.numberOfFields--;
+        });
+        workerData.additionalFormat = JSON.stringify(format);
+      }
       const worker = new Worker(Path.join(__dirname, '../worker.js'), {
-        workerData: {
-          numberOfDocuments: nrOfDocuments,
-          numberOfFields: nrOfFields,
-        },
+        workerData,
       });
       workerState[id] = worker;
       try {

@@ -17,9 +17,10 @@ const FIELD_TYPES = ['bool', 'str', 'int', 'ipv4', 'ts', 'text'];
 export interface WorkerData {
   numberOfDocuments: number;
   numberOfFields: number;
+  additionalFormat?: string;
 }
 
-const { numberOfDocuments, numberOfFields } = workerData as WorkerData;
+const { numberOfDocuments, numberOfFields, additionalFormat } = workerData as WorkerData;
 const logger = createLogger(LogLevel.info);
 
 function getRandomInt(min: number, max: number) {
@@ -125,7 +126,7 @@ const generateFieldName = () => {
 
 const generateFormat = () => {
   // name, age and last_updated should be generated only once
-  const format = 'name:str,age:int,last_updated:ts,ip:ipv4'.split(',');
+  let format = 'name:str,age:int,last_updated:ts,ip:ipv4'.split(',');
   const fieldNames = new Set();
   for (let i = 0; i <= numberOfFields; i++) {
     const fieldType = generateFieldType();
@@ -136,6 +137,9 @@ const generateFormat = () => {
     }
     fieldNames.add(fieldName);
     format.push(`${fieldName}:${fieldType}`);
+  }
+  if (additionalFormat) {
+    format = format.concat(JSON.parse(additionalFormat));
   }
   return format;
 };
