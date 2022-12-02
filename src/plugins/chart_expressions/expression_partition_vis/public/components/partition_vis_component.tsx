@@ -226,18 +226,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     [props]
   );
 
-  // handles legend cell value action event data
-  // const getCellValueActionData = useCallback(
-  //   (vData: Datatable) => (series: SeriesIdentifier) => {
-  //     const data = getCellValueEventData(vData, series);
-  //     props.fireEvent({
-  //       name: 'cellValue',
-  //       data,
-  //     });
-  //   },
-  //   [props]
-  // );
-
   const toggleLegend = useCallback(() => {
     setShowLegend((value) => {
       const newValue = !value;

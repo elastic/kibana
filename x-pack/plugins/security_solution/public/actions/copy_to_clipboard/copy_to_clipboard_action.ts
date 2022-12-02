@@ -11,13 +11,15 @@ import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import copy from 'copy-to-clipboard';
 import { KibanaServices } from '../../common/lib/kibana';
-import { isInSecurityApp, isLensEmbeddable } from '../utils';
+import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../utils';
 
 export const ACTION_ID = 'copyToClipboard';
 
 function isDataColumnsValid(data?: CellValueContext['data']): boolean {
   return (
-    !!data && data.length > 0 && data.every(({ columnMeta }) => columnMeta && columnMeta.field)
+    !!data &&
+    data.length > 0 &&
+    data.every(({ columnMeta }) => columnMeta && fieldHasCellActions(columnMeta.field))
   );
 }
 

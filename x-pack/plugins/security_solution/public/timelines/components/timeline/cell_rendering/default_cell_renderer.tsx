@@ -33,10 +33,8 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   isTimeline,
   linkValues,
   rowRenderers,
-  setCellProps,
   scopeId,
   truncate,
-  closeCellPopover,
   enableActions = true,
 }) => {
   const asPlainText = useMemo(() => {
@@ -74,7 +72,6 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
           globalFilters={globalFilters}
           scopeId={scopeId}
           value={values}
-          closeCellPopover={closeCellPopover}
         />
       )}
     </>

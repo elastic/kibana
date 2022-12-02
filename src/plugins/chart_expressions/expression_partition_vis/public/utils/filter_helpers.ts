@@ -129,30 +129,3 @@ export const getFilterEventData = (
 export const getSeriesValueColumnIndex = (value: string, visData: Datatable): number => {
   return visData.columns.findIndex(({ id }) => !!visData.rows.find((r) => r[id] === value));
 };
-
-export const getCellValueEventData = (
-  visData: Datatable,
-  series: SeriesIdentifier
-): CellValueContext['data'] => {
-  return visData.columns.reduce<CellValueContext['data']>((acc, { id, meta }) => {
-    const value = series.key;
-    const row = visData.rows.findIndex((r) => r[id] === value);
-    if (row > -1) {
-      acc.push({
-        columnMeta: meta,
-        value,
-      });
-    }
-    return acc;
-  }, []);
-};
-
-// export const getCellValueEventData = (
-//   visData: Datatable,
-//   series: SeriesIdentifier
-// ): CellValueContext['data'] => {
-//   const column = visData.columns[0]; // TODO, get first column only by now
-//   const { field, type } = column.meta;
-//   const value = series.key;
-//   return { field: field!, type, value };
-// };

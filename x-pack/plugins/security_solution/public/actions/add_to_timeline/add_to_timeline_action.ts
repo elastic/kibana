@@ -15,7 +15,7 @@ import { addProvider, showTimeline } from '../../timelines/store/timeline/action
 import type { DataProvider } from '../../../common/types';
 import { TimelineId } from '../../../common/types';
 import { createDataProviders } from './data_provider';
-import { isInSecurityApp, isLensEmbeddable } from '../utils';
+import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../utils';
 
 export const ACTION_ID = 'addToTimeline';
 
@@ -26,7 +26,7 @@ function isDataColumnsFilterable(data?: CellValueContext['data']): boolean {
     data.every(
       ({ columnMeta }) =>
         columnMeta &&
-        columnMeta.field &&
+        fieldHasCellActions(columnMeta.field) &&
         columnMeta.source === 'esaggs' &&
         columnMeta.sourceParams?.indexPatternId
     )
