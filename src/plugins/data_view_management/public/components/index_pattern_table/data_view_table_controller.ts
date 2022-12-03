@@ -8,8 +8,10 @@
 
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { isEqual } from 'lodash';
 import { getIndexPatterns } from '../utils';
 import { IndexPatternTableItem } from '../types';
+import { stateSelectorFactory } from '../state_helpers';
 
 export interface DataViewTableControllerState {
   isLoadingDataViews: boolean;
@@ -28,6 +30,21 @@ export interface DataViewTableControllerConstructorArgs {
   };
 }
 
+export const dataViewTableControllerStateDefaults = {
+  isLoadingDataViews: false,
+  isLoadingHasData: true,
+  hasDataView: false,
+  hasEsData: false,
+  dataViews: [],
+};
+
+const selectIndexPattern = (state: DataViewTableControllerState) => state.dataViews;
+const selectHasDataView = (state: DataViewTableControllerState) => state.hasDataView;
+const selectHasEsData = (state: DataViewTableControllerState) => state.hasEsData;
+const selectIsLoadingIndexPatterns = (state: DataViewTableControllerState) =>
+  state.isLoadingDataViews;
+const selectIsLoadingDataState = (state: DataViewTableControllerState) => state.isLoadingHasData;
+
 export class DataViewTableController {
   constructor({
     services: { dataViews },
@@ -36,28 +53,35 @@ export class DataViewTableController {
     this.dataViews = dataViews;
     this.defaultDataView = defaultDataView;
 
-    this.state$ = this.stateInternal$.asObservable();
+    const stateSelector = stateSelectorFactory(this.state$);
+
+    this.isLoadingIndexPatterns$ = stateSelector(selectIsLoadingIndexPatterns);
+    this.indexPatterns$ = stateSelector(selectIndexPattern, isEqual);
+    this.isLoadingDataState$ = stateSelector(selectIsLoadingDataState);
+    this.hasDataView$ = stateSelector(selectHasDataView);
+    this.hasESData$ = stateSelector(selectHasEsData);
 
     this.loadDataViews();
   }
 
   private state: DataViewTableControllerState = {
-    isLoadingDataViews: false,
-    isLoadingHasData: true,
-    hasDataView: false,
-    hasEsData: false,
-    dataViews: [],
+    ...dataViewTableControllerStateDefaults,
   };
 
-  private stateInternal$ = new BehaviorSubject<DataViewTableControllerState>(this.state);
-  state$: Observable<DataViewTableControllerState>;
+  private state$ = new BehaviorSubject<DataViewTableControllerState>(this.state);
 
   private dataViews: DataViewsPublicPluginStart;
   private defaultDataView: string;
 
+  isLoadingIndexPatterns$: Observable<boolean>;
+  indexPatterns$: Observable<IndexPatternTableItem[]>;
+  isLoadingDataState$: Observable<boolean>;
+  hasDataView$: Observable<boolean>;
+  hasESData$: Observable<boolean>;
+
   private updateState = (newState: Partial<DataViewTableControllerState>) => {
     this.state = { ...this.state, ...newState };
-    this.stateInternal$.next(this.state);
+    this.state$.next(this.state);
   };
 
   private loadHasData = async () => {

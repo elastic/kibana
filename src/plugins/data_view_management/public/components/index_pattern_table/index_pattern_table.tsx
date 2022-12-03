@@ -17,9 +17,9 @@ import {
   EuiBasicTableColumn,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
@@ -34,9 +34,8 @@ import { removeDataView, RemoveDataViewProps } from '../edit_index_pattern';
 import { deleteModalMsg } from './delete_modal_msg';
 import {
   DataViewTableController,
-  DataViewTableControllerState,
+  dataViewTableControllerStateDefaults as defaults,
 } from './data_view_table_controller';
-import { useStateSelectorFactory } from '../state_helpers';
 
 const pagination = {
   initialPageSize: 10,
@@ -70,13 +69,6 @@ interface Props extends RouteComponentProps {
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
-const selectIndexPattern = (state: DataViewTableControllerState) => state.dataViews;
-const selectHasDataView = (state: DataViewTableControllerState) => state.hasDataView;
-const selectHasEsData = (state: DataViewTableControllerState) => state.hasEsData;
-const selectIsLoadingIndexPatterns = (state: DataViewTableControllerState) =>
-  state.isLoadingDataViews;
-const selectIsLoadingDataState = (state: DataViewTableControllerState) => state.isLoadingHasData;
-
 export const IndexPatternTable = ({
   history,
   canSave,
@@ -104,15 +96,17 @@ export const IndexPatternTable = ({
       })
   );
 
-  const useStateSelector = useStateSelectorFactory<DataViewTableControllerState>(
-    dataViewController.state$
+  const isLoadingIndexPatterns = useObservable(
+    dataViewController.isLoadingIndexPatterns$,
+    defaults.isLoadingDataViews
   );
-
-  const isLoadingIndexPatterns = useStateSelector<boolean>(selectIsLoadingIndexPatterns, false);
-  const indexPatterns = useStateSelector(selectIndexPattern, [], isEqual);
-  const isLoadingDataState = useStateSelector(selectIsLoadingDataState, true);
-  const hasDataView = useStateSelector(selectHasDataView, false);
-  const hasESData = useStateSelector(selectHasEsData, false);
+  const indexPatterns = useObservable(dataViewController.indexPatterns$, defaults.dataViews);
+  const isLoadingDataState = useObservable(
+    dataViewController.isLoadingDataState$,
+    defaults.isLoadingHasData
+  );
+  const hasDataView = useObservable(dataViewController.hasDataView$, defaults.hasDataView);
+  const hasESData = useObservable(dataViewController.hasESData$, defaults.hasEsData);
 
   const handleOnChange = ({ queryText, error }: { queryText: string; error: unknown }) => {
     if (!error) {

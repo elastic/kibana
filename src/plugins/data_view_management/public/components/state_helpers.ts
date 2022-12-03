@@ -7,20 +7,8 @@
  */
 
 import { map, distinctUntilChanged, Observable } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
 
-// Use an observable for react state WITH a selector function
-export const useObservableSelector = <S, R>(
-  observable: Observable<S>,
-  selector: (arg0: S) => R,
-  defaultValue: R,
-  equalityFn?: (arg0: R, arg1: R) => boolean
-): R =>
-  useObservable(observable.pipe(map(selector), distinctUntilChanged(equalityFn)), defaultValue);
-
-// Takes an observable and returns a function for creating multiple stateful values via selectors
-export const useStateSelectorFactory =
-  <S>(state: Observable<S>) =>
-  <R>(selector: (arg0: S) => R, defaultValue: R, equalityFn?: (arg0: R, arg1: R) => boolean) =>
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useObservableSelector(state, selector, defaultValue, equalityFn);
+export const stateSelectorFactory =
+  <S>(state$: Observable<S>) =>
+  <R>(selector: (state: S) => R, equalityFn?: (arg0: R, arg1: R) => boolean) =>
+    state$.pipe(map(selector), distinctUntilChanged(equalityFn));
