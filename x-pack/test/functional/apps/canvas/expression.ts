@@ -73,7 +73,6 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
     });
 
     it('does not show autocomplete before typing', async () => {
-      await monacoEditor.setCodeEditorValue(' ', 1);
       await retry.try(async () => {
         const elements = await find.allByCssSelector('.monaco-list-rows > .monaco-list-row');
         expect(elements.length).to.be(0);
