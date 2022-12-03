@@ -7,3 +7,5 @@
 
 export * from './eui_draggable';
 export * from './fetch_overview_data';
+export * from './slo';
+export * from './utils';
