@@ -39,9 +39,21 @@ export function getFetch$({
   const { timefilter } = data.query.timefilter;
   const { filterManager } = data.query;
   let fetch$ = merge(
-    refetch$,
-    filterManager.getFetches$(),
-    timefilter.getFetch$(),
+    refetch$.pipe(
+      tap(() => {
+        console.debug('test step: refetch$', main$.getValue().fetchStatus);
+      })
+    ),
+    filterManager.getFetches$().pipe(
+      tap(() => {
+        console.debug('test step: filterManager.getFetches$()', main$.getValue().fetchStatus);
+      })
+    ),
+    timefilter.getFetch$().pipe(
+      tap(() => {
+        console.debug('test step: timefilter.getFetch$()', main$.getValue().fetchStatus);
+      })
+    ),
     timefilter.getAutoRefreshFetch$().pipe(
       tap((done) => {
         setAutoRefreshDone(done);
@@ -55,16 +67,35 @@ export function getFetch$({
            */
           currentFetchStatus !== FetchStatus.LOADING && currentFetchStatus !== FetchStatus.PARTIAL
         );
+      }),
+      tap(() => {
+        console.debug('test step: timefilter.getAutoRefreshFetch$()', main$.getValue().fetchStatus);
       })
     ),
-    data.query.queryString.getUpdates$(),
-    searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
+    data.query.queryString.getUpdates$().pipe(
+      tap(() => {
+        console.debug(
+          'test step: data.query.queryString.getUpdates$()',
+          main$.getValue().fetchStatus
+        );
+      })
+    ),
+    searchSessionManager.newSearchSessionIdFromURL$.pipe(
+      filter((sessionId) => !!sessionId),
+      tap(() => {
+        console.debug(
+          'test step: searchSessionManager.newSearchSessionIdFromURL$',
+          main$.getValue().fetchStatus
+        );
+      })
+    )
   ).pipe(debounceTime(100));
 
   /**
    * Skip initial fetch when discover:searchOnPageLoad is disabled.
    */
   if (initialFetchStatus === FetchStatus.UNINITIALIZED) {
+    console.debug('test step: skip initial fetch');
     fetch$ = fetch$.pipe(skip(1));
   }
 

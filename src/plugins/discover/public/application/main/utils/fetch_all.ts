@@ -73,7 +73,7 @@ export function fetchAll(
         useNewFieldsApi,
       });
     }
-
+    console.debug('test step: set loading message', new Error().stack);
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$, { recordRawType });
     sendLoadingMsg(dataSubjects.documents$, { recordRawType, query });

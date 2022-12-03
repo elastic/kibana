@@ -182,7 +182,7 @@ export const useSavedSearch = ({
       abortController?.abort();
       abortController = new AbortController();
       const autoRefreshDone = refs.current.autoRefreshDone;
-
+      console.debug('test step: fetch$ triggered', JSON.stringify(val));
       await fetchAll(dataSubjects, searchSource, val === 'reset', {
         abortController,
         appStateContainer: stateContainer.appStateContainer,
