@@ -72,7 +72,6 @@
     "yarn": "^1.22.19"
   },
   "resolutions": {
-    "**/@tanstack/match-sorter-utils": "8.1.1",
     "**/@types/node": "16.11.41",
     "**/chokidar": "^3.5.3",
     "**/deepmerge": "^4.2.2",
