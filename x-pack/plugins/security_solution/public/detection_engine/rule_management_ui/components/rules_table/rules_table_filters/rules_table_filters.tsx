@@ -15,7 +15,6 @@ import { useStartTransaction } from '../../../../../common/lib/apm/use_start_tra
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import { TagsFilterPopover } from './tags_filter_popover';
-import { useTags } from '../../../../rule_management/logic/use_tags';
 import { RuleSearchField } from './rule_search_field';
 
 const FilterWrapper = styled(EuiFlexGroup)`
@@ -32,8 +31,8 @@ const RulesTableFiltersComponent = () => {
     state: { filterOptions },
     actions: { setFilterOptions },
   } = useRulesTableContext();
-  const { data: allTags = [] } = useTags();
   const { data: filtersData } = useRuleManagementFilters();
+  const allTags = filtersData?.tags ?? [];
   const rulesCustomCount = filtersData?.rules_custom_count;
   const rulesPrebuiltInstalledCount = filtersData?.rules_prebuilt_installed_count;
 

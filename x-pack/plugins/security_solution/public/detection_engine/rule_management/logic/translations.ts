@@ -55,10 +55,3 @@ export const TIMELINE_PREPACKAGED_SUCCESS = i18n.translate(
     defaultMessage: 'Installed pre-packaged timeline templates from elastic',
   }
 );
-
-export const TAG_FETCH_FAILURE = i18n.translate(
-  'xpack.securitySolution.containers.detectionEngine.tagFetchFailDescription',
-  {
-    defaultMessage: 'Failed to fetch Tags',
-  }
-);

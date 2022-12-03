@@ -389,21 +389,6 @@ export const exportRules = async ({
   });
 };
 
-export type FetchTagsResponse = string[];
-
-/**
- * Fetch all unique Tags used by Rules
- *
- * @param signal to cancel request
- *
- * @throws An error if response is not OK
- */
-export const fetchTags = async ({ signal }: { signal?: AbortSignal }): Promise<FetchTagsResponse> =>
-  KibanaServices.get().http.fetch<FetchTagsResponse>(DETECTION_ENGINE_TAGS_URL, {
-    method: 'GET',
-    signal,
-  });
-
 /**
  * Fetch rule management related filters
  *
