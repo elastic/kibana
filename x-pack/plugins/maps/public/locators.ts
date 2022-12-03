@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import rison from 'rison-node';
+import rison from '@kbn/rison';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { type Filter, isFilterPinned, type TimeRange, type Query } from '@kbn/es-query';
@@ -97,13 +97,7 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
     path = setStateToKbnUrl('_a', appState, { useHash }, path);
 
     if (initialLayers && initialLayers.length) {
-      const risonEncodedInitialLayers = (
-        rison as unknown as {
-          encode_array: (
-            initialLayers: (LayerDescriptor[] & SerializableRecord) | undefined
-          ) => string;
-        }
-      ).encode_array(initialLayers);
+      const risonEncodedInitialLayers = rison.encodeArray(initialLayers);
       path = `${path}&${INITIAL_LAYERS_KEY}=${encodeURIComponent(risonEncodedInitialLayers)}`;
     }
 
