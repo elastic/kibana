@@ -14,7 +14,7 @@ import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/consta
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFindRulesQuery, useUpdateRulesCache } from './use_find_rules_query';
 import { useInvalidateFetchRuleByIdQuery } from './use_fetch_rule_by_id_query';
-import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';
+import { useInvalidateFetchRulesInfoQuery } from './use_fetch_rules_info_query';
 
 export const BULK_ACTION_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_BULK_ACTION];
 
@@ -27,7 +27,7 @@ export const useBulkActionMutation = (
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
-  const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
+  const invalidateFetchRulesInfo = useInvalidateFetchRulesInfoQuery();
   const invalidateFetchPrebuiltRulesStatusQuery = useInvalidateFetchPrebuiltRulesStatusQuery();
   const updateRulesCache = useUpdateRulesCache();
 
@@ -66,12 +66,12 @@ export const useBulkActionMutation = (
         case BulkActionType.delete:
           invalidateFindRulesQuery();
           invalidateFetchRuleByIdQuery();
-          invalidateFetchRuleManagementFilters();
+          invalidateFetchRulesInfo();
           invalidateFetchPrebuiltRulesStatusQuery();
           break;
         case BulkActionType.duplicate:
           invalidateFindRulesQuery();
-          invalidateFetchRuleManagementFilters();
+          invalidateFetchRulesInfo();
           invalidateFetchPrebuiltRulesStatusQuery();
           break;
         case BulkActionType.edit:

@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useFetchRuleManagementFiltersQuery } from '../api/hooks/use_fetch_rule_management_filters_query';
+import { useFetchRulesInfoQuery } from '../api/hooks/use_fetch_rules_info_query';
 import * as i18n from './translations';
 
-export const useRuleManagementFilters = () => {
+export const useRulesInfo = () => {
   const { addError } = useAppToasts();
 
-  return useFetchRuleManagementFiltersQuery({
+  return useFetchRulesInfoQuery({
     onError: (err) => {
       addError(err, { title: i18n.RULE_MANAGEMENT_FILTERS_FETCH_FAILURE });
     },

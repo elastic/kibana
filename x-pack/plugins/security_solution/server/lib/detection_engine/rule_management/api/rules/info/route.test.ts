@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { getRuleManagementFilters } from './route';
+import { getRulesInfo } from './route';
 
 import {
   getEmptyFindResult,
   getFindResultWithSingleHit,
-  getRuleManagementFiltersRequest,
-} from '../../../routes/__mocks__/request_responses';
-import { requestContextMock, serverMock } from '../../../routes/__mocks__';
+  getRulesInfoRequest,
+} from '../../../../routes/__mocks__/request_responses';
+import { requestContextMock, serverMock } from '../../../../routes/__mocks__';
 
 describe('Rule management filters route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -25,13 +25,13 @@ describe('Rule management filters route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
 
-    getRuleManagementFilters(server.router);
+    getRulesInfo(server.router);
   });
 
   describe('status codes', () => {
     test('returns 200', async () => {
       const response = await server.inject(
-        getRuleManagementFiltersRequest(),
+        getRulesInfoRequest(),
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(200);
@@ -42,7 +42,7 @@ describe('Rule management filters route', () => {
         throw new Error('Test error');
       });
       const response = await server.inject(
-        getRuleManagementFiltersRequest(),
+        getRulesInfoRequest(),
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(500);
@@ -61,7 +61,7 @@ describe('Rule management filters route', () => {
         ruleLastRunOutcome: {},
         ruleTags: ['a', 'b', 'c'],
       });
-      const request = getRuleManagementFiltersRequest();
+      const request = getRulesInfoRequest();
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);

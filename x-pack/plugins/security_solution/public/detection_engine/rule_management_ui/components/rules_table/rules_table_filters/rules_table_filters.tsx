@@ -9,7 +9,7 @@ import { EuiFilterButton, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@ela
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { useRuleManagementFilters } from '../../../../rule_management/logic/use_rule_management_filters';
+import { useRulesInfo } from '../../../../rule_management/logic/use_rules_info';
 import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
@@ -31,10 +31,10 @@ const RulesTableFiltersComponent = () => {
     state: { filterOptions },
     actions: { setFilterOptions },
   } = useRulesTableContext();
-  const { data: filtersData } = useRuleManagementFilters();
-  const allTags = filtersData?.tags ?? [];
-  const rulesCustomCount = filtersData?.rules_custom_count;
-  const rulesPrebuiltInstalledCount = filtersData?.rules_prebuilt_installed_count;
+  const { data: rulesInfo } = useRulesInfo();
+  const allTags = rulesInfo?.tags ?? [];
+  const rulesCustomCount = rulesInfo?.rules_custom_count;
+  const rulesPrebuiltInstalledCount = rulesInfo?.rules_prebuilt_installed_count;
 
   const { showCustomRules, showElasticRules, tags: selectedTags } = filterOptions;
 

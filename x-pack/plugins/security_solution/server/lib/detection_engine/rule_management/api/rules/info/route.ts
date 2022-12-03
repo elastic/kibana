@@ -8,11 +8,11 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { RuleManagementFiltersResponse } from '../../../../../../common/detection_engine/rule_management/api/get_filters/response_schema';
-import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../../common/detection_engine/rule_management/api/urls';
-import { buildSiemResponse } from '../../../routes/utils';
-import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { findRules } from '../../logic/search/find_rules';
+import { RulesInfoResponse } from '../../../../../../../common/detection_engine/rule_management/api/rules/info/response_schema';
+import { RULES_INFO_URL } from '../../../../../../../common/detection_engine/rule_management/api/urls';
+import { buildSiemResponse } from '../../../../routes/utils';
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import { findRules } from '../../../logic/search/find_rules';
 
 interface RulesCount {
   prebuilt: number;
@@ -47,21 +47,25 @@ async function fetchRulesCount(rulesClient: RulesClient): Promise<RulesCount> {
   };
 }
 
+// This is a contrived max limit on the number of tags. In fact it can exceed this number and will be truncated to the hardcoded number.
+const EXPECTED_MAX_TAGS = 500;
+
 async function fetchRuleTags(rulesClient: RulesClient): Promise<string[]> {
   const res = await rulesClient.aggregate({
     options: {
       fields: ['tags'],
       filter: undefined,
+      maxTags: EXPECTED_MAX_TAGS,
     },
   });
 
   return res.ruleTags ?? [];
 }
 
-export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) => {
+export const getRulesInfo = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
-      path: RULE_MANAGEMENT_FILTERS_URL,
+      path: RULES_INFO_URL,
       validate: false,
       options: {
         tags: ['access:securitySolution'],
@@ -75,15 +79,12 @@ export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) =
       try {
         const [{ prebuilt: prebuiltRulesCount, custom: customRulesCount }, tags] =
           await Promise.all([fetchRulesCount(rulesClient), fetchRuleTags(rulesClient)]);
-        const responseBody: RuleManagementFiltersResponse = {
+        const responseBody: RulesInfoResponse = {
           rules_custom_count: customRulesCount,
           rules_prebuilt_installed_count: prebuiltRulesCount,
           tags,
         };
-        const [validatedBody, validationError] = validate(
-          responseBody,
-          RuleManagementFiltersResponse
-        );
+        const [validatedBody, validationError] = validate(responseBody, RulesInfoResponse);
 
         if (validationError != null) {
           return siemResponse.error({ statusCode: 500, body: validationError });

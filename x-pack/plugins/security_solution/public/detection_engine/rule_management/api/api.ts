@@ -11,14 +11,14 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../common/detection_engine/rule_management/api/urls';
+import type { RulesInfoResponse } from '../../../../common/detection_engine/rule_management/api/rules/info/response_schema';
+import { RULES_INFO_URL } from '../../../../common/detection_engine/rule_management/api/urls';
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
-  DETECTION_ENGINE_TAGS_URL,
 } from '../../../../common/constants';
 
 import {
@@ -34,7 +34,6 @@ import type {
   BulkActionDuplicatePayload,
 } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { BulkActionType } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import type { RuleManagementFiltersResponse } from '../../../../common/detection_engine/rule_management/api/get_filters/response_schema';
 import type {
   RuleResponse,
   PreviewResponse,
@@ -390,18 +389,18 @@ export const exportRules = async ({
 };
 
 /**
- * Fetch rule management related filters
+ * Fetch rules information like installed count, tags and etc
  *
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const fetchRuleManagementFilters = async ({
+export const fetchRulesInfo = async ({
   signal,
 }: {
   signal?: AbortSignal;
-}): Promise<RuleManagementFiltersResponse> =>
-  KibanaServices.get().http.fetch<RuleManagementFiltersResponse>(RULE_MANAGEMENT_FILTERS_URL, {
+}): Promise<RulesInfoResponse> =>
+  KibanaServices.get().http.fetch<RulesInfoResponse>(RULES_INFO_URL, {
     method: 'GET',
     signal,
   });

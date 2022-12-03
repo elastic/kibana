@@ -9,7 +9,7 @@ import { EuiCallOut, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
-import { useRuleManagementFilters } from '../../../../../rule_management/logic/use_rule_management_filters';
+import { useRulesInfo } from '../../../../../rule_management/logic/use_rules_info';
 import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import * as i18n from '../../../../../../detections/pages/detection_engine/rules/translations';
@@ -78,7 +78,7 @@ interface TagsFormProps {
 }
 
 const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm }: TagsFormProps) => {
-  const { data: { tags } = { tags: [] } } = useRuleManagementFilters();
+  const { data: { tags } = { tags: [] } } = useRulesInfo();
   const { form } = useForm({
     defaultValue: initialFormData,
     schema,

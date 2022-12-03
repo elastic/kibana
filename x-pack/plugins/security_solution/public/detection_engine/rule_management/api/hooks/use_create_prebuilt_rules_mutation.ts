@@ -11,7 +11,7 @@ import type { CreatePrepackagedRulesResponse } from '../api';
 import { createPrepackagedRules } from '../api';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFindRulesQuery } from './use_find_rules_query';
-import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';
+import { useInvalidateFetchRulesInfoQuery } from './use_fetch_rules_info_query';
 
 export const CREATE_PREBUILT_RULES_MUTATION_KEY = ['PUT', PREBUILT_RULES_URL];
 
@@ -20,7 +20,7 @@ export const useCreatePrebuiltRulesMutation = (
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidatePrePackagedRulesStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
-  const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
+  const invalidateFetchRulesInfo = useInvalidateFetchRulesInfoQuery();
 
   return useMutation(() => createPrepackagedRules(), {
     ...options,
@@ -30,7 +30,7 @@ export const useCreatePrebuiltRulesMutation = (
       // the number of rules might change after the installation
       invalidatePrePackagedRulesStatus();
       invalidateFindRulesQuery();
-      invalidateFetchRuleManagementFilters();
+      invalidateFetchRulesInfo();
 
       if (options?.onSettled) {
         options.onSettled(...args);

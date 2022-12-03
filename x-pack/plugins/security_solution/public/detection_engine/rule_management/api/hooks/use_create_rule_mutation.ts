@@ -14,7 +14,7 @@ import type {
 import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
 import { createRule } from '../api';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
-import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';
+import { useInvalidateFetchRulesInfoQuery } from './use_fetch_rules_info_query';
 import { useInvalidateFindRulesQuery } from './use_find_rules_query';
 
 export const CREATE_RULE_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_URL];
@@ -23,7 +23,7 @@ export const useCreateRuleMutation = (
   options?: UseMutationOptions<RuleResponse, Error, RuleCreateProps>
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
-  const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
+  const invalidateFetchRulesInfo = useInvalidateFetchRulesInfoQuery();
   const invalidateFetchPrePackagedRulesStatusQuery = useInvalidateFetchPrebuiltRulesStatusQuery();
 
   return useMutation<RuleResponse, Error, RuleCreateProps>(
@@ -34,7 +34,7 @@ export const useCreateRuleMutation = (
       onSettled: (...args) => {
         invalidateFetchPrePackagedRulesStatusQuery();
         invalidateFindRulesQuery();
-        invalidateFetchRuleManagementFilters();
+        invalidateFetchRulesInfo();
 
         if (options?.onSettled) {
           options.onSettled(...args);

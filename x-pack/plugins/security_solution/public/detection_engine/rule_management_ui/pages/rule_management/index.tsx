@@ -41,18 +41,18 @@ import { RulesTableContextProvider } from '../../components/rules_table/rules_ta
 
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { RulesPageTourComponent } from '../../components/rules_table/alternative_tour/tour';
-import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
+import { useInvalidateFetchRulesInfoQuery } from '../../../rule_management/api/hooks/use_fetch_rules_info_query';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
   const { navigateToApp } = useKibana().services.application;
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
-  const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
+  const invalidateFetchRulesInfo = useInvalidateFetchRulesInfoQuery();
   const invalidateRules = useCallback(() => {
     invalidateFindRulesQuery();
-    invalidateFetchRuleManagementFilters();
-  }, [invalidateFindRulesQuery, invalidateFetchRuleManagementFilters]);
+    invalidateFetchRulesInfo();
+  }, [invalidateFindRulesQuery, invalidateFetchRulesInfo]);
 
   const [
     {

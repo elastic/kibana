@@ -9,16 +9,16 @@ import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import { RuleManagementFiltersResponse } from './response_schema';
+import { RulesInfoResponse } from './response_schema';
 
 describe('Rule management filters response schema', () => {
   test('it should validate an empty response with defaults', () => {
-    const payload: RuleManagementFiltersResponse = {
+    const payload: RulesInfoResponse = {
       rules_custom_count: 0,
       rules_prebuilt_installed_count: 0,
       tags: [],
     };
-    const decoded = RuleManagementFiltersResponse.decode(payload);
+    const decoded = RulesInfoResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -27,12 +27,12 @@ describe('Rule management filters response schema', () => {
   });
 
   test('it should validate an non empty response with defaults', () => {
-    const payload: RuleManagementFiltersResponse = {
+    const payload: RulesInfoResponse = {
       rules_custom_count: 10,
       rules_prebuilt_installed_count: 20,
       tags: ['a', 'b', 'c'],
     };
-    const decoded = RuleManagementFiltersResponse.decode(payload);
+    const decoded = RulesInfoResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -41,13 +41,13 @@ describe('Rule management filters response schema', () => {
   });
 
   test('it should not validate an extra invalid field added', () => {
-    const payload: RuleManagementFiltersResponse & { invalid_field: string } = {
+    const payload: RulesInfoResponse & { invalid_field: string } = {
       rules_custom_count: 0,
       rules_prebuilt_installed_count: 0,
       tags: [],
       invalid_field: 'invalid',
     };
-    const decoded = RuleManagementFiltersResponse.decode(payload);
+    const decoded = RulesInfoResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -56,12 +56,12 @@ describe('Rule management filters response schema', () => {
   });
 
   test('it should NOT validate an empty response with a negative "rules_prebuilt_installed_count" number', () => {
-    const payload: RuleManagementFiltersResponse = {
+    const payload: RulesInfoResponse = {
       rules_custom_count: 0,
       rules_prebuilt_installed_count: -1,
       tags: [],
     };
-    const decoded = RuleManagementFiltersResponse.decode(payload);
+    const decoded = RulesInfoResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -72,12 +72,12 @@ describe('Rule management filters response schema', () => {
   });
 
   test('it should NOT validate an empty response with a negative "rules_custom_count"', () => {
-    const payload: RuleManagementFiltersResponse = {
+    const payload: RulesInfoResponse = {
       rules_custom_count: -1,
       rules_prebuilt_installed_count: 0,
       tags: [],
     };
-    const decoded = RuleManagementFiltersResponse.decode(payload);
+    const decoded = RulesInfoResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -88,14 +88,14 @@ describe('Rule management filters response schema', () => {
   });
 
   test('it should NOT validate an empty prepackaged response if "rules_prebuilt_installed_count" is not there', () => {
-    const payload: RuleManagementFiltersResponse = {
+    const payload: RulesInfoResponse = {
       rules_custom_count: 0,
       rules_prebuilt_installed_count: 0,
       tags: [],
     };
     // @ts-expect-error
     delete payload.rules_prebuilt_installed_count;
-    const decoded = RuleManagementFiltersResponse.decode(payload);
+    const decoded = RulesInfoResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -106,12 +106,12 @@ describe('Rule management filters response schema', () => {
   });
 
   test('it should NOT validate an empty response with wrong "tags"', () => {
-    const payload: RuleManagementFiltersResponse = {
+    const payload: RulesInfoResponse = {
       rules_custom_count: 0,
       rules_prebuilt_installed_count: 0,
       tags: [1] as unknown as string[],
     };
-    const decoded = RuleManagementFiltersResponse.decode(payload);
+    const decoded = RulesInfoResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
