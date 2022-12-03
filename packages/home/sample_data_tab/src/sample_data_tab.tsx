@@ -32,8 +32,13 @@ const sampleDataLabel = i18n.translate('homePackages.tutorials.sampleData.sample
  * The content for the Sample Data Tab in the `home` plugin.
  */
 export const SampleDataTab = () => {
-  const { logClick, installLargeDataset, checkLargeDatasetInstalled, uninstallLargeDataset } =
-    useServices();
+  const {
+    logClick,
+    installLargeDataset,
+    checkLargeDatasetInstalled,
+    uninstallLargeDataset,
+    installCustomDataset,
+  } = useServices();
   const onClick = () => {
     logClick(METRIC_CLICK_DEMO_ENV_BUTTON);
   };
@@ -49,7 +54,8 @@ export const SampleDataTab = () => {
       <DemoEnvironmentPanel demoUrl={URL_DEMO_ENV} {...{ onClick }} />
       <EuiSpacer />
       <LargeDatasetPanel
-        installDataset={installLargeDataset}
+        installCustomDataset={installCustomDataset}
+        installLargeDataset={installLargeDataset}
         checkInstalled={checkLargeDatasetInstalled}
         uninstallDataset={uninstallLargeDataset}
       />

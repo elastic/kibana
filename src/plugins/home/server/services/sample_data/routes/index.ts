@@ -14,3 +14,4 @@ export {
   createIsLargeDataSetInstalledRoute,
   deleteLargeDatasetRoute as createDeleteLargeDatasetRoute,
 } from './large_dataset';
+export { createCustomDatasetRoute } from './custom_dataset';

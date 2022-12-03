@@ -21,10 +21,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ConfigureDatasetPanel, FIELD_TYPES, FieldValue } from './configure_dataset_panel';
-import { LargeDataSetParams, useServices } from './services';
+import { LargeDataSetParams, CustomDatasetParams, useServices } from './services';
 import { useSVG } from './hooks';
 
-const INDEX_NAME = '';
+const INDEX_NAME = 'kibana_sample_dataset_large';
 const NOTIFICATION_KEY = 'largedatasetPanel:notificationShown';
 const EXPECTED_NR_OF_DOCUMENTS_KEY = 'largedatasetPanel:expectedNrOfDocuments';
 
@@ -75,7 +75,8 @@ const i18nTexts = {
 };
 
 interface Props {
-  installDataset: (params: LargeDataSetParams) => Promise<void>;
+  installLargeDataset: (params: LargeDataSetParams) => Promise<void>;
+  installCustomDataset: (params: CustomDatasetParams) => Promise<void>;
   checkInstalled: () => Promise<{ installed: boolean; count: number }>;
   uninstallDataset: () => Promise<void>;
 }
@@ -86,7 +87,12 @@ enum Status {
   DONE = 'done',
 }
 
-export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDataset }: Props) => {
+export const LargeDatasetPanel = ({
+  installLargeDataset,
+  installCustomDataset,
+  checkInstalled,
+  uninstallDataset,
+}: Props) => {
   const [imageSrc] = useSVG();
   const [checked, setChecked] = useState<boolean>(false);
   const [installStatus, setInstallStatus] = useState<Status>(Status.EMPTY);
@@ -164,7 +170,7 @@ export const LargeDatasetPanel = ({ installDataset, checkInstalled, uninstallDat
             type: el.type.value,
           };
         });
-      installDataset({ nrOfDocuments, nrOfFields, fieldValues: fieldsToSend });
+      installLargeDataset({ nrOfDocuments, nrOfFields, fieldValues: fieldsToSend });
       updateSessionStorage(Status.GENERATING);
     } catch {
       notifyError(i18nTexts.datasetUninstallErrorMessage);

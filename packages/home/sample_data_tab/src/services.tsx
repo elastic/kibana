@@ -36,6 +36,7 @@ interface Services {
   notifyError: NotifyFn;
   notifySuccess: NotifyFn;
   logClick: (metric: string) => void;
+  installCustomDataset: (params: CustomDatasetParams) => Promise<void>;
   installLargeDataset: (params: LargeDataSetParams) => Promise<void>;
   checkLargeDatasetInstalled: () => Promise<{ installed: boolean; count: number }>;
   uninstallLargeDataset: () => Promise<void>;
@@ -56,6 +57,11 @@ export interface LargeDataSetParams {
   fieldValues: Array<{ name: string; type: string }>;
 }
 
+export interface CustomDatasetParams {
+  nrOfDocuments: number;
+  fieldFormat: Array<{ name: string; type: string }>;
+}
+
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
@@ -66,6 +72,7 @@ export const SampleDataTabProvider: FC<SampleDataTabServices> = ({ children, ...
     notifySuccess,
     logClick,
     installLargeDataset,
+    installCustomDataset,
     checkLargeDatasetInstalled,
     uninstallLargeDataset,
     getDiscoverLocator,
@@ -80,6 +87,7 @@ export const SampleDataTabProvider: FC<SampleDataTabServices> = ({ children, ...
         installLargeDataset,
         checkLargeDatasetInstalled,
         uninstallLargeDataset,
+        installCustomDataset,
         getDiscoverLocator,
       }}
     >
@@ -139,12 +147,19 @@ export const SampleDataTabKibanaProvider: FC<SampleDataTabKibanaDependencies> = 
     await http.delete(`${URL_SAMPLE_DATA_API}/large_dataset`);
   };
 
+  const installCustomDataset = async (params: CustomDatasetParams) => {
+    await http.post(`${URL_SAMPLE_DATA_API}/custom_dataset`, {
+      body: JSON.stringify(params),
+    });
+  };
+
   const value: Services = {
     fetchSampleDataSets: async () => (await http.get(URL_SAMPLE_DATA_API)) as SampleDataSet[],
     notifyError: (input) => notifications.toasts.addDanger(input),
     notifySuccess: (input) => notifications.toasts.addSuccess(input),
     logClick: (eventName) => trackUiMetric('click', eventName),
     installLargeDataset,
+    installCustomDataset,
     checkLargeDatasetInstalled,
     uninstallLargeDataset,
     getDiscoverLocator,

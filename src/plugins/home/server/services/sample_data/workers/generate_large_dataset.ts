@@ -10,7 +10,7 @@ import process from 'process';
 import { sample } from 'lodash';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { faker } from '@faker-js/faker';
-import { createLogger, LogLevel } from './lib/util/create_logger';
+import { createLogger, LogLevel } from '../lib/util/create_logger';
 
 const FIELD_TYPES = ['bool', 'str', 'int', 'ipv4', 'ts', 'text'];
 

@@ -11,9 +11,6 @@ import { SavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-serve
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Readable } from 'stream';
 
-const LARGE_DATASET_INDEX = 'kibana_sample_data_large';
-const LARGE_DATASET_DATA_VIEW = 'Kibana Sample Data Large';
-
 const dataView = (indexName: string, dataViewName: string) => {
   return {
     id: uuid.v4(),
@@ -31,14 +28,16 @@ const dataView = (indexName: string, dataViewName: string) => {
 };
 
 export const createDataView = async (
+  indexName: string,
+  dataViewName: string,
   savedObjects: SavedObjectsRequestHandlerContext,
   savedObjectsClient: SavedObjectsClientContract
 ) => {
   const { getImporter } = savedObjects;
   const soImporter = getImporter(savedObjectsClient);
 
-  const dataViewToSave = [dataView(LARGE_DATASET_INDEX, LARGE_DATASET_DATA_VIEW)];
-  await findAndDeleteDataView(savedObjectsClient);
+  const dataViewToSave = [dataView(indexName, dataViewName)];
+  await findAndDeleteDataView(indexName, savedObjectsClient);
   const readStream = Readable.from(dataViewToSave);
   const { errors = [] } = await soImporter.import({
     readStream,
@@ -48,11 +47,14 @@ export const createDataView = async (
   return { errors };
 };
 
-export const findAndDeleteDataView = async (savedObjectsClient: SavedObjectsClientContract) => {
+export const findAndDeleteDataView = async (
+  indexName: string,
+  savedObjectsClient: SavedObjectsClientContract
+) => {
   const findResult = await savedObjectsClient.find({
     type: 'index-pattern',
     fields: ['attributes.title'],
-    search: LARGE_DATASET_INDEX,
+    search: indexName,
   });
   if (findResult.total > 0) {
     await savedObjectsClient.delete('index-pattern', findResult.saved_objects[0].id);

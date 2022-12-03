@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @typescript-eslint/no-var-requires*/
+// eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-extraneous-dependencies
 require('@babel/register')({
   extensions: ['.ts', '.js'],
   presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
 });
 
-require('./generate_dataset');
+require('./generate_custom_dataset');

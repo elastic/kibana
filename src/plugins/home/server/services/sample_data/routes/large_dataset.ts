@@ -18,9 +18,9 @@ import {
   findAndDeleteDataView,
 } from '../lib';
 import { getSavedObjectsClient } from './utils';
-import { WorkerData } from '../generate_dataset';
+import { WorkerData } from '../workers/generate_large_dataset';
 
-const LARGE_DATASET_INDEX_NAME = 'kibana_sample_data_large';
+const largeDatasetIndexName = 'kibana_sample_data_large';
 const workerState = {} as Record<string, any>;
 let id: string | undefined;
 
@@ -59,13 +59,13 @@ export function createLargeDatasetRoute(router: IRouter, logger: Logger, core: C
         });
         workerData.additionalFormat = JSON.stringify(format);
       }
-      const worker = new Worker(Path.join(__dirname, '../worker.js'), {
+      const worker = new Worker(Path.join(__dirname, '../workers/large_dataset_worker.js'), {
         workerData,
       });
       workerState[id] = worker;
       try {
-        await deleteIndex(esClient, LARGE_DATASET_INDEX_NAME);
-        await createIndex(esClient, LARGE_DATASET_INDEX_NAME);
+        await deleteIndex(esClient, largeDatasetIndexName);
+        await createIndex(esClient, largeDatasetIndexName);
         let delay = 0;
         let index = 0;
         worker.on('message', async (message) => {
@@ -74,7 +74,7 @@ export function createLargeDatasetRoute(router: IRouter, logger: Logger, core: C
               const { items } = message;
               logger.info('Received items from worker at index ' + index);
               setTimeout(() => {
-                bulkUpload(esClient, LARGE_DATASET_INDEX_NAME, items);
+                bulkUpload(esClient, largeDatasetIndexName, items);
               }, delay);
               // backoff, kinda
               index++;
@@ -82,7 +82,12 @@ export function createLargeDatasetRoute(router: IRouter, logger: Logger, core: C
             } else if (message.status === 'DONE') {
               const { savedObjects } = await context.core;
               const savedObjectsClient = await getSavedObjectsClient(context, ['index-pattern']);
-              const result = await createDataView(savedObjects, savedObjectsClient);
+              const result = await createDataView(
+                largeDatasetIndexName,
+                'Kibana Sample Data Large',
+                savedObjects,
+                savedObjectsClient
+              );
               if (result.errors.length > 0) {
                 logger.error('Error occurred while creating a data view');
               }
@@ -119,13 +124,13 @@ export function createIsLargeDataSetInstalledRoute(router: IRouter, core: CoreSe
     async (context, _req, res) => {
       const esClient = (await core.getStartServices())[0].elasticsearch.client;
       const indexExists = await esClient.asInternalUser.indices.exists({
-        index: LARGE_DATASET_INDEX_NAME,
+        index: largeDatasetIndexName,
       });
       let count = 0;
       if (indexExists) {
         count = (
           await esClient.asInternalUser.count({
-            index: LARGE_DATASET_INDEX_NAME,
+            index: largeDatasetIndexName,
           })
         ).count;
       }
@@ -149,8 +154,8 @@ export function deleteLargeDatasetRoute(router: IRouter, logger: Logger, core: C
       try {
         const esClient = (await core.getStartServices())[0].elasticsearch.client;
         const savedObjectsClient = await getSavedObjectsClient(context, ['index-pattern']);
-        await deleteIndex(esClient, LARGE_DATASET_INDEX_NAME);
-        await findAndDeleteDataView(savedObjectsClient);
+        await deleteIndex(esClient, largeDatasetIndexName);
+        await findAndDeleteDataView(largeDatasetIndexName, savedObjectsClient);
       } catch (e) {
         return res.customError({ statusCode: 500, body: 'An error occurred.' });
       }
