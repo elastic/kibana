@@ -26,7 +26,6 @@ export interface AttachmentMetadata {
   indicatorName: string;
   indicatorType: string;
   indicatorFeedName: string;
-  indicatorFirstSeen: string;
 }
 
 /**
@@ -111,15 +110,10 @@ export const generateAttachmentsMetadata = (indicator: Indicator): AttachmentMet
     indicator,
     RawIndicatorFieldId.Feed
   ).value;
-  const indicatorFirstSeen: string | null = getIndicatorFieldAndValue(
-    indicator,
-    RawIndicatorFieldId.FirstSeen
-  ).value;
 
   return {
     indicatorName: indicatorName || EMPTY_VALUE,
     indicatorType: indicatorType || EMPTY_VALUE,
     indicatorFeedName: indicatorFeedName || EMPTY_VALUE,
-    indicatorFirstSeen: indicatorFirstSeen || EMPTY_VALUE,
   };
 };

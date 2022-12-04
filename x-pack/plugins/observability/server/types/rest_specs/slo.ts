@@ -12,19 +12,24 @@ import {
   dateType,
   indicatorSchema,
   objectiveSchema,
+  optionalSettingsSchema,
+  settingsSchema,
   summarySchema,
   timeWindowSchema,
 } from '../schema';
 
 const createSLOParamsSchema = t.type({
-  body: t.type({
-    name: t.string,
-    description: t.string,
-    indicator: indicatorSchema,
-    time_window: timeWindowSchema,
-    budgeting_method: budgetingMethodSchema,
-    objective: objectiveSchema,
-  }),
+  body: t.intersection([
+    t.type({
+      name: t.string,
+      description: t.string,
+      indicator: indicatorSchema,
+      time_window: timeWindowSchema,
+      budgeting_method: budgetingMethodSchema,
+      objective: objectiveSchema,
+    }),
+    t.partial({ settings: optionalSettingsSchema }),
+  ]),
 });
 
 const createSLOResponseSchema = t.type({
@@ -59,6 +64,7 @@ const getSLOResponseSchema = t.type({
   time_window: timeWindowSchema,
   budgeting_method: budgetingMethodSchema,
   objective: objectiveSchema,
+  settings: settingsSchema,
   summary: summarySchema,
   revision: t.number,
   created_at: dateType,
@@ -76,6 +82,7 @@ const updateSLOParamsSchema = t.type({
     time_window: timeWindowSchema,
     budgeting_method: budgetingMethodSchema,
     objective: objectiveSchema,
+    settings: settingsSchema,
   }),
 });
 
@@ -87,6 +94,7 @@ const updateSLOResponseSchema = t.type({
   time_window: timeWindowSchema,
   budgeting_method: budgetingMethodSchema,
   objective: objectiveSchema,
+  settings: settingsSchema,
   created_at: dateType,
   updated_at: dateType,
 });
@@ -105,6 +113,7 @@ const findSLOResponseSchema = t.type({
       budgeting_method: budgetingMethodSchema,
       objective: objectiveSchema,
       summary: summarySchema,
+      settings: settingsSchema,
       revision: t.number,
       created_at: dateType,
       updated_at: dateType,

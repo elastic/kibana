@@ -65,7 +65,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Create rule button', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/146450
+    describe.skip('Create rule button', () => {
       it('Show Create Rule flyout when Create Rule button is clicked', async () => {
         await observability.alerts.common.navigateToRulesPage();
         await retry.waitFor(

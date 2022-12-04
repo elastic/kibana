@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { useParams } from 'react-router-dom';
 import { Chance } from 'chance';
 import { waitFor } from '@testing-library/react';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
-import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 
+import { Subset } from '../../../typings';
 import { render } from '../../../utils/test_helper';
 import { useKibana } from '../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
@@ -21,6 +21,8 @@ import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { AlertDetails } from './alert_details';
 import { ConfigSchema } from '../../../plugin';
 import { alert, alertWithNoData } from '../mock/alert';
+import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
+import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -28,6 +30,17 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('../../../utils/kibana_react');
+const validationMethod = (): ValidationResult => ({ errors: {} });
+const ruleType: RuleTypeModel = {
+  id: 'logs.alert.document.count',
+  iconClass: 'test',
+  description: 'Testing',
+  documentationUrl: 'https://...',
+  requiresAppContext: false,
+  validate: validationMethod,
+  ruleParamsExpression: () => <Fragment />,
+};
+const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 const useKibanaMock = useKibana as jest.Mock;
 
@@ -41,12 +54,25 @@ const mockKibana = () => {
           prepend: jest.fn(),
         },
       },
-      triggersActionsUi: triggersActionsUiMock.createStart(),
+      triggersActionsUi: {
+        ruleTypeRegistry,
+      },
     },
   });
 };
 
 jest.mock('../../../hooks/use_fetch_alert_detail');
+jest.mock('../../../hooks/use_fetch_rule', () => {
+  return {
+    useFetchRule: () => ({
+      reloadRule: jest.fn(),
+      rule: {
+        id: 'ruleId',
+        name: 'ruleName',
+      },
+    }),
+  };
+});
 jest.mock('../../../hooks/use_breadcrumbs');
 jest.mock('../../../hooks/use_get_user_cases_permissions', () => ({
   useGetUserCasesPermissions: () => ({
@@ -69,7 +95,7 @@ const params = {
   alertId: chance.guid(),
 };
 
-const config = {
+const config: Subset<ConfigSchema> = {
   unsafe: {
     alertDetails: {
       apm: { enabled: true },
@@ -78,7 +104,7 @@ const config = {
       uptime: { enabled: true },
     },
   },
-} as ConfigSchema;
+};
 
 describe('Alert details', () => {
   jest
@@ -89,6 +115,9 @@ describe('Alert details', () => {
     jest.clearAllMocks();
     useParamsMock.mockReturnValue(params);
     useBreadcrumbsMock.mockReturnValue([]);
+    ruleTypeRegistry.list.mockReturnValue([ruleType]);
+    ruleTypeRegistry.get.mockReturnValue(ruleType);
+    ruleTypeRegistry.has.mockReturnValue(true);
     mockKibana();
   });
 
