@@ -108,7 +108,13 @@ export const JobsListPage: FC<{
   }
 
   if (isPlatinumOrTrialLicense === false) {
-    return <InsufficientLicensePage basePath={coreStart.http.basePath} />;
+    return (
+      <I18nContext>
+        <KibanaThemeProvider theme$={theme$}>
+          <InsufficientLicensePage basePath={coreStart.http.basePath} />
+        </KibanaThemeProvider>
+      </I18nContext>
+    );
   }
 
   return (
