@@ -487,7 +487,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         const fromTime = 'Sep 20, 2015 @ 00:00:00.000';
         const toTime = 'Sep 20, 2015 @ 23:30:00.000';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime, true);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       });
 
       it('should update collapsed accordion label when time range is changed', async () => {
@@ -498,7 +498,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(accordionLabelText).to.include.string('per 30 minutes');
         const fromTime = 'Sep 20, 2015 @ 08:30:00.000';
         const toTime = 'Sep 20, 2015 @ 23:30:00.000';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime, true);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         accordionLabelText = await accordionLabel.getVisibleText();
         expect(accordionLabelText).to.include.string('per 10 minutes');
       });
@@ -530,7 +530,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(helperScaledLabelText).to.include.string('to 10 minutes');
           const fromTime = 'Sep 20, 2015 @ 22:30:00.000';
           const toTime = 'Sep 20, 2015 @ 23:30:00.000';
-          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime, true);
+          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
           helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
           expect(helperScaledLabelText).to.include.string('to 30 seconds');
         });
@@ -546,7 +546,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(helperScaledLabelText).to.include.string('to 10 minutes');
           const fromTime = 'Sep 20, 2015 @ 21:30:00.000';
           const toTime = 'Sep 20, 2015 @ 23:30:00.000';
-          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime, true);
+          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
           helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
           expect(helperScaledLabelText).to.include.string('to minute');
         });
