@@ -83,6 +83,7 @@ export const useBulkActionMutation = (
             invalidateFindRulesQuery();
           }
           invalidateFetchRuleByIdQuery();
+          invalidateFetchRulesInfo();
           break;
       }
 
