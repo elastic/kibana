@@ -31,6 +31,15 @@ export default function ({ getService }) {
         })
         .expect(200));
 
+    it('accepts unmapped_fields param', () =>
+      supertest
+        .get('/api/index_patterns/_fields_for_wildcard')
+        .query({
+          pattern: '*',
+          unmapped_fields: true,
+        })
+        .expect(200));
+
     it('accepts meta_fields query param in string array', () =>
       supertest
         .get('/api/index_patterns/_fields_for_wildcard')
