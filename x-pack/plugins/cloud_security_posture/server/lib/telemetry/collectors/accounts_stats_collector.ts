@@ -11,9 +11,6 @@ import { calculatePostureScore } from '../../../routes/compliance_dashboard/get_
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 import type { CspmAccountsStats } from './types';
 
-// TODO: test with multiple accounts
-// TODO: naming, naming, naming
-
 export interface Accounts {
   accounts: {
     buckets: AccountEntity[];

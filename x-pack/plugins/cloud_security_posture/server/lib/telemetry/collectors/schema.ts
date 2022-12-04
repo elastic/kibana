@@ -67,7 +67,12 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       agents_count: { type: 'long' },
       account_score: { type: 'float' },
       resource_type: {
-        byResourceType,
+        // byResourceType,
+        DYNAMIC_KEY: {
+          doc_count: { type: 'long' },
+          passed: { type: 'long' },
+          failed: { type: 'long' },
+        },
       },
     },
   },
