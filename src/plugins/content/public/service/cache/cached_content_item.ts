@@ -29,4 +29,8 @@ export class CachedContentItem<T = unknown> {
   public async getData(): Promise<ContentItem<T>> {
     return await firstValueFrom(this.data);
   }
+
+  public setData(item: ContentItem<T>): void {
+    this.data.next(item);
+  }
 }

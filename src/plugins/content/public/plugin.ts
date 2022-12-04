@@ -34,7 +34,23 @@ export class ContentPlugin implements Plugin<ContentPluginSetup, ContentPluginSt
             data: res.attributes,
           };
           return details;
-        }
+        },
+        list: async () => {
+          const [coreStart] = await core.getStartServices();
+          const soc = coreStart.savedObjects.client;
+          const res = await soc.find({
+            type: 'dashboard',
+          });
+          const details: ContentItemDetails[] = res.savedObjects.map((so) => ({
+            id: so.id,
+            fields: {
+              title: so.attributes.title,
+              description: so.attributes.description,
+            },
+            data: so.attributes,
+          }));
+          return details;
+        },
       },
     });
 

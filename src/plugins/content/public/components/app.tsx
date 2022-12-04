@@ -14,6 +14,7 @@ import { CoreStart } from '../../../../core/public';
 
 import type { ContentRegistry } from '../service/registry/content_registry';
 import type { ContentCache } from '../service/cache/content_cache';
+import {firstValueFrom} from 'rxjs';
 
 interface ContentAppDeps {
   basename: string;
@@ -36,9 +37,14 @@ export const ContentApp = ({ registry, cache }: ContentAppDeps) => {
             <div style={{width: 1000}}>
               <EuiText>
                 <EuiButton type="primary" size="s" onClick={async () => {
-                  const item = cache.get('dashboard:edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b');
-                  const data = await item.getData();
-                  console.log('data', data);
+                  // const item = cache.get('dashboard:edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b');
+                  // const data = await item.getData();
+                  // console.log('data', data);
+                  // const type = registry.getType('dashboard')!;
+                  // const list = await type.list();
+                  // console.log(type, list);
+                  const list = await firstValueFrom(cache.type('dashboard').list());
+                  console.log('list', list);
                 }}>
                   Do something...
                 </EuiButton>

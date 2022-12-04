@@ -16,4 +16,13 @@ export class ContentType<T = unknown> {
     const item = new ContentItem<T>(itemDetails);
     return item;
   }
+
+  public async list(): Promise<ContentItem<T>[]> {
+    const typeDetails = this.details;
+    if (!typeDetails.operations.list)
+      throw new Error(`Content type ${this.id} does not support list operation`);
+    const list = await typeDetails.operations.list();
+    const items = list.map((itemDetails) => new ContentItem<T>(itemDetails));
+    return items;
+  }
 }
