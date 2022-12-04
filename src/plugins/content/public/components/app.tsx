@@ -38,7 +38,7 @@ export const ContentApp = ({ registry, cache }: ContentAppDeps) => {
                 <EuiButton type="primary" size="s" onClick={async () => {
                   const item = cache.get('dashboard:edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b');
                   const data = await item.getData();
-                  console.log('data', data, JSON.stringify(data.details.data).length);
+                  console.log('data', data);
                 }}>
                   Do something...
                 </EuiButton>

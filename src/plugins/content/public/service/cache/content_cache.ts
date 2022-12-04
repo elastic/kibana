@@ -9,7 +9,7 @@ export class ContentCache {
   public get(id: string) {
     let item = this.cache.get(id);
     if (!item) {
-      item = new CachedContentItem(id, this.registry);
+      item = new CachedContentItem(id, this);
       this.cache.set(id, item);
     }
     item.refresh();

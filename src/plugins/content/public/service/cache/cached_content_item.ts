@@ -1,11 +1,11 @@
 import {firstValueFrom, ReplaySubject} from "rxjs";
 import type {ContentItem} from "../registry/content_item";
-import type {ContentRegistry} from "../registry/content_registry";
+import type {ContentCache} from "./content_cache";
 
 export class CachedContentItem<T = unknown> {
   public readonly data = new ReplaySubject<ContentItem<T>>(1);
 
-  constructor(public readonly id: string, protected readonly registry: ContentRegistry) {}
+  constructor(public readonly id: string, protected readonly cache: ContentCache) {}
 
   public get type(): string {
     return this.id.split(':')[0];
@@ -16,7 +16,7 @@ export class CachedContentItem<T = unknown> {
   }
 
   public async load(): Promise<void> {
-    const type = this.registry.getType(this.type);
+    const type = this.cache.registry.getType(this.type);
     if (!type) throw new Error(`Unknown content type: ${this.type}`);
     const item = await type.read(this.itemId) as ContentItem<T>;
     this.data.next(item);
@@ -27,6 +27,6 @@ export class CachedContentItem<T = unknown> {
   }
 
   public async getData(): Promise<ContentItem<T>> {
-    return firstValueFrom(this.data);
+    return await firstValueFrom(this.data);
   }
 }
