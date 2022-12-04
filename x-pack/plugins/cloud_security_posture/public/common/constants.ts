@@ -13,6 +13,8 @@ import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
+  CLOUDBEAT_INTEGRATION,
+  POLICY_TEMPLATE,
 } from '../../common/constants';
 
 export const statusColors = {
@@ -28,9 +30,19 @@ export const LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY = 'cloudPosture:findings:pageS
 export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
 
-export type CloudPostureIntegrations = typeof cloudPostureIntegrations;
+export type CloudPostureIntegrations = Record<POLICY_TEMPLATE, CloudPostureIntegrationProps>;
+export interface CloudPostureIntegrationProps {
+  policyTemplate: POLICY_TEMPLATE;
+  name: string;
+  shortName: string;
+  options: Array<{
+    type: CLOUDBEAT_INTEGRATION;
+    name: string;
+    benchmark: string;
+  }>;
+}
 
-export const cloudPostureIntegrations = {
+export const cloudPostureIntegrations: CloudPostureIntegrations = {
   cspm: {
     policyTemplate: 'cspm',
     name: i18n.translate('xpack.csp.cspmIntegration.integration.nameTitle', {
@@ -98,4 +110,4 @@ export const cloudPostureIntegrations = {
       },
     ],
   },
-} as const;
+};

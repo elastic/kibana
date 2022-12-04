@@ -17,31 +17,18 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { cloudPostureIntegrations } from '../../common/constants';
-import {
-  CLOUDBEAT_EKS,
-  CLOUDBEAT_VANILLA,
-  CLOUDBEAT_AWS,
-  CLOUDBEAT_GCP,
-  CLOUDBEAT_AZURE,
-} from '../../../common/constants';
-
-export type InputType =
-  | typeof CLOUDBEAT_EKS
-  | typeof CLOUDBEAT_VANILLA
-  | typeof CLOUDBEAT_AWS
-  | typeof CLOUDBEAT_GCP
-  | typeof CLOUDBEAT_AZURE;
+import { CLOUDBEAT_INTEGRATION, POLICY_TEMPLATE } from '../../../common/constants';
 
 interface Props {
-  policyTemplate: 'kspm' | 'cspm';
-  type: InputType;
-  onChange?: (type: InputType) => void;
+  policyTemplate: POLICY_TEMPLATE;
+  type: CLOUDBEAT_INTEGRATION;
+  onChange?: (type: CLOUDBEAT_INTEGRATION) => void;
   isDisabled?: boolean;
 }
 
 const kubeDeployOptions = (
-  policyTemplate: Props['policyTemplate']
-): Array<EuiComboBoxOptionOption<InputType>> =>
+  policyTemplate: POLICY_TEMPLATE
+): Array<EuiComboBoxOptionOption<CLOUDBEAT_INTEGRATION>> =>
   cloudPostureIntegrations[policyTemplate].options.map((o) => ({ value: o.type, label: o.name }));
 
 const KubernetesDeploymentFieldLabel = () => (

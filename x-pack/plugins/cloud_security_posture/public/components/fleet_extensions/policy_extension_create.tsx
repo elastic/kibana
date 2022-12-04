@@ -7,8 +7,8 @@
 import React, { memo } from 'react';
 import { EuiForm } from '@elastic/eui';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
-import { CLOUDBEAT_AWS, CLOUDBEAT_EKS } from '../../../common/constants';
-import { DeploymentTypeSelect, InputType } from './deployment_type_select';
+import { CLOUDBEAT_AWS, CLOUDBEAT_EKS, CLOUDBEAT_INTEGRATION } from '../../../common/constants';
+import { DeploymentTypeSelect } from './deployment_type_select';
 import { EksFormWrapper } from './eks_form';
 import {
   getEnabledInput,
@@ -22,7 +22,7 @@ export const CspCreatePolicyExtension = memo<PackagePolicyCreateExtensionCompone
     const selectedDeploymentType = getEnabledInputType(newPolicy.inputs);
     const selectedInput = getEnabledInput(newPolicy.inputs);
     const policyTemplate = selectedInput?.policy_template;
-    const updateDeploymentType = (inputType: InputType) =>
+    const updateDeploymentType = (inputType: CLOUDBEAT_INTEGRATION) =>
       onChange(getUpdatedDeploymentType(newPolicy, inputType));
 
     const updateEksVar = (key: string, value: string) =>

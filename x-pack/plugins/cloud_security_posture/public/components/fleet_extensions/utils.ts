@@ -5,25 +5,42 @@
  * 2.0.
  */
 import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
-import { CLOUDBEAT_AWS, CLOUDBEAT_EKS, CLOUDBEAT_VANILLA } from '../../../common/constants';
-import type { InputType } from './deployment_type_select';
+import {
+  CLOUDBEAT_AWS,
+  CLOUDBEAT_EKS,
+  CLOUDBEAT_VANILLA,
+  CLOUDBEAT_INTEGRATION,
+  SUPPORTED_POLICY_TEMPLATES,
+  POLICY_TEMPLATE,
+} from '../../../common/constants';
 
 export const isEksInput = (input: NewPackagePolicyInput) => input.type === CLOUDBEAT_EKS;
 export const inputsWithVars = [CLOUDBEAT_EKS, CLOUDBEAT_AWS];
-const defaultInputType = {
+const defaultInputType: Record<POLICY_TEMPLATE, CLOUDBEAT_INTEGRATION> = {
   kspm: CLOUDBEAT_VANILLA,
   cspm: CLOUDBEAT_AWS,
-} as any;
-export const getEnabledInputType = (inputs: NewPackagePolicy['inputs']): InputType =>
-  (getEnabledInput(inputs)?.type as InputType) ||
-  (inputs[0].policy_template && defaultInputType[inputs[0].policy_template]) ||
-  CLOUDBEAT_VANILLA;
+};
+export const getEnabledInputType = (inputs: NewPackagePolicy['inputs']): CLOUDBEAT_INTEGRATION => {
+  const enabledInput = getEnabledInput(inputs);
+
+  if (enabledInput) return enabledInput.type as CLOUDBEAT_INTEGRATION;
+
+  const policyTemplate = inputs[0].policy_template as POLICY_TEMPLATE | undefined;
+
+  if (policyTemplate && SUPPORTED_POLICY_TEMPLATES.includes(policyTemplate))
+    return defaultInputType[policyTemplate];
+
+  throw new Error('unsupported policy template');
+};
 
 export const getEnabledInput = (
   inputs: NewPackagePolicy['inputs']
 ): NewPackagePolicyInput | undefined => inputs.find((input) => input.enabled);
 
-export const getUpdatedDeploymentType = (newPolicy: NewPackagePolicy, inputType: InputType) => ({
+export const getUpdatedDeploymentType = (
+  newPolicy: NewPackagePolicy,
+  inputType: CLOUDBEAT_INTEGRATION
+) => ({
   isValid: true, // TODO: add validations
   updatedPolicy: {
     ...newPolicy,
