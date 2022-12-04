@@ -10,12 +10,17 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import { Observable } from 'rxjs';
+import { CoreTheme } from '@kbn/core-theme-browser';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { MarkdownVisRenderValue } from './markdown_fn';
 
 // @ts-ignore
 const MarkdownVisComponent = lazy(() => import('./markdown_vis_controller'));
 
-export const markdownVisRenderer: ExpressionRenderDefinition<MarkdownVisRenderValue> = {
+export const getMarkdownVisRenderer: (
+  theme$: Observable<CoreTheme>
+) => ExpressionRenderDefinition<MarkdownVisRenderValue> = (theme$) => ({
   name: 'markdown_vis',
   displayName: 'markdown visualization',
   reuseDomNode: true,
@@ -25,10 +30,12 @@ export const markdownVisRenderer: ExpressionRenderDefinition<MarkdownVisRenderVa
     });
 
     render(
-      <VisualizationContainer className="markdownVis" handlers={handlers}>
-        <MarkdownVisComponent {...visParams} renderComplete={handlers.done} />
-      </VisualizationContainer>,
+      <KibanaThemeProvider theme$={theme$}>
+        <VisualizationContainer className="markdownVis" handlers={handlers}>
+          <MarkdownVisComponent {...visParams} renderComplete={handlers.done} />
+        </VisualizationContainer>
+      </KibanaThemeProvider>,
       domNode
     );
   },
-};
+});
