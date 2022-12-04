@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { createKibanaReactContext, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { AppDependencies } from '..';
 import { SearchSessionsMgmtMain } from '../components/main';
 
@@ -28,9 +28,11 @@ export const renderApp = (
 
   render(
     <I18nContext>
-      <KibanaReactContextProvider>
-        <SearchSessionsMgmtMain {...homeDeps} timezone={uiSettings.get('dateFormat:tz')} />
-      </KibanaReactContextProvider>
+      <KibanaThemeProvider theme$={homeDeps.core.theme.theme$}>
+        <KibanaReactContextProvider>
+          <SearchSessionsMgmtMain {...homeDeps} timezone={uiSettings.get('dateFormat:tz')} />
+        </KibanaReactContextProvider>
+      </KibanaThemeProvider>
     </I18nContext>,
     elem
   );
