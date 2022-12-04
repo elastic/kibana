@@ -64,10 +64,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('when there is a custom rule', () => {
       beforeEach(async () => {
+        const rule = getSimpleRule();
+        rule.tags = ['tag-a'];
+
         await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(getSimpleRule())
+          .send(rule)
           .expect(200);
       });
 
