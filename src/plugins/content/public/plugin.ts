@@ -3,11 +3,13 @@ import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../core/
 import { ContentPluginSetup, ContentPluginStart, AppPluginStartDependencies } from './types';
 import { PLUGIN_NAME } from '../common';
 import { ContentRegistry } from './service/registry/content_registry';
-import {ContentItemDetails} from './service/registry/types';
+import { ContentCache } from './service/cache/content_cache';
+import { ContentItemDetails } from './service/registry/types';
 
 export class ContentPlugin implements Plugin<ContentPluginSetup, ContentPluginStart> {
   public setup(core: CoreSetup): ContentPluginSetup {
     const contentRegistry = new ContentRegistry();
+    const contentCache = new ContentCache(contentRegistry);
 
     contentRegistry.registerType({
       id: 'dashboard',
@@ -44,7 +46,7 @@ export class ContentPlugin implements Plugin<ContentPluginSetup, ContentPluginSt
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
-        return renderApp(coreStart, depsStart as AppPluginStartDependencies, params, contentRegistry);
+        return renderApp(coreStart, depsStart as AppPluginStartDependencies, params, contentRegistry, contentCache);
       },
     });
 
