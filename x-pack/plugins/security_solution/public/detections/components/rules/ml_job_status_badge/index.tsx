@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import withResponseActionsUser from './with_response_actions_user.json';
-import noResponseActionsUser from './without_response_actions_user.json';
-export { withResponseActionsUser, noResponseActionsUser };
+export { MlJobStatusBadge } from './ml_job_status_badge';
