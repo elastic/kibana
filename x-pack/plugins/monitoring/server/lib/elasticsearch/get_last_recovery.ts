@@ -7,9 +7,7 @@
 
 import moment from 'moment';
 import _ from 'lodash';
-// @ts-ignore
 import { createQuery } from '../create_query';
-// @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 import {
   ElasticsearchResponse,

@@ -90,10 +90,11 @@ run(
         await startEs();
         await runWarmup(journey);
         await runTest(journey);
-        await procRunner.stop('es');
       } catch (e) {
         log.error(e);
         failedJourneys.push(journey);
+      } finally {
+        await procRunner.stop('es');
       }
     }
 
