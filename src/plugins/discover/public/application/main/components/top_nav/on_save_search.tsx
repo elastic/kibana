@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useState, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { GetStateReturn } from '../../services/discover_state';
@@ -175,6 +176,10 @@ export async function onSaveSearch({
     return response;
   };
 
+  const Wrapper: FC = ({ children }) => (
+    <KibanaThemeProvider theme$={services.core.theme.theme$}>{children}</KibanaThemeProvider>
+  );
+
   const saveModal = (
     <SaveSearchObjectModal
       services={services}
@@ -187,7 +192,7 @@ export async function onSaveSearch({
       onClose={onClose ?? (() => {})}
     />
   );
-  showSaveModal(saveModal, services.core.i18n.Context);
+  showSaveModal(saveModal, services.core.i18n.Context, Wrapper);
 }
 
 const SaveSearchObjectModal: React.FC<{
