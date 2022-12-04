@@ -12,11 +12,11 @@ import { RULES_INFO_URL } from '../../../../../common/detection_engine/rule_mana
 import { fetchRulesInfo } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
-export const RULE_MANAGEMENT_FILTERS_QUERY_KEY = ['GET', RULES_INFO_URL];
+export const RULES_INFO_QUERY_KEY = ['GET', RULES_INFO_URL];
 
 export const useFetchRulesInfoQuery = (options?: UseQueryOptions<RulesInfoResponse>) => {
   return useQuery<RulesInfoResponse>(
-    RULE_MANAGEMENT_FILTERS_QUERY_KEY,
+    RULES_INFO_QUERY_KEY,
     async ({ signal }) => {
       const response = await fetchRulesInfo({ signal });
       return response;
@@ -39,7 +39,7 @@ export const useInvalidateFetchRulesInfoQuery = () => {
   const queryClient = useQueryClient();
 
   return useCallback(() => {
-    queryClient.invalidateQueries(RULE_MANAGEMENT_FILTERS_QUERY_KEY, {
+    queryClient.invalidateQueries(RULES_INFO_QUERY_KEY, {
       refetchType: 'active',
     });
   }, [queryClient]);

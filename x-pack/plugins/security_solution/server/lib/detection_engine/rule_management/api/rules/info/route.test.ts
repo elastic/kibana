@@ -14,7 +14,7 @@ import {
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock } from '../../../../routes/__mocks__';
 
-describe('Rule management filters route', () => {
+describe('Rules info route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
