@@ -20,42 +20,42 @@ import { isEksInput } from './utils';
 
 export const eksVars = [
   {
-    id: 'aws.credentials.access_key_id',
+    id: 'access_key_id',
     label: i18n.translate(
       'xpack.csp.createPackagePolicy.eksIntegrationSettingsSection.accessKeyIdFieldLabel',
       { defaultMessage: 'Access key ID' }
     ),
   },
   {
-    id: 'aws.credentials.secret_access_key',
+    id: 'secret_access_key',
     label: i18n.translate(
       'xpack.csp.createPackagePolicy.eksIntegrationSettingsSection.secretAccessKeyFieldLabel',
       { defaultMessage: 'Secret Access Key' }
     ),
   },
   {
-    id: 'aws.credentials.session_token',
+    id: 'session_token',
     label: i18n.translate(
       'xpack.csp.createPackagePolicy.eksIntegrationSettingsSection.sessionTokenFieldLabel',
       { defaultMessage: 'Session Token' }
     ),
   },
   {
-    id: 'aws.credentials.shared_credential_file',
+    id: 'shared_credential_file',
     label: i18n.translate(
       'xpack.csp.createPackagePolicy.eksIntegrationSettingsSection.sharedCredentialsFileFieldLabel',
       { defaultMessage: 'Shared Credential File' }
     ),
   },
   {
-    id: 'aws.credentials.credential_profile_name',
+    id: 'credential_profile_name',
     label: i18n.translate(
       'xpack.csp.createPackagePolicy.eksIntegrationSettingsSection.sharedCredentialFileFieldLabel',
       { defaultMessage: 'Credential Profile Name' }
     ),
   },
   {
-    id: 'aws.credentials.role_arn',
+    id: 'role_arn',
     label: i18n.translate(
       'xpack.csp.createPackagePolicy.eksIntegrationSettingsSection.roleARNFieldLabel',
       { defaultMessage: 'ARN Role' }
@@ -75,14 +75,12 @@ interface Props {
 const getEksVars = (input?: NewPackagePolicyInput): EksFormVars => {
   const vars = input?.streams?.[0]?.vars;
   return {
-    'aws.credentials.access_key_id': vars?.['aws.credentials.access_key_id']?.value || '',
-    'aws.credentials.secret_access_key': vars?.['aws.credentials.secret_access_key']?.value || '',
-    'aws.credentials.session_token': vars?.['aws.credentials.session_token']?.value || '',
-    'aws.credentials.shared_credential_file':
-      vars?.['aws.credentials.shared_credential_file']?.value || '',
-    'aws.credentials.credential_profile_name':
-      vars?.['aws.credentials.credential_profile_name']?.value || '',
-    'aws.credentials.role_arn': vars?.['aws.credentials.role_arn']?.value || '',
+    access_key_id: vars?.access_key_id?.value || '',
+    secret_access_key: vars?.secret_access_key?.value || '',
+    session_token: vars?.session_token?.value || '',
+    shared_credential_file: vars?.shared_credential_file?.value || '',
+    credential_profile_name: vars?.credential_profile_name?.value || '',
+    role_arn: vars?.role_arn?.value || '',
   };
 };
 

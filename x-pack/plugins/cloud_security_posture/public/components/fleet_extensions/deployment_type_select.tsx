@@ -17,18 +17,32 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { cloudPostureIntegrations } from '../../common/constants';
-import { CLOUDBEAT_EKS, CLOUDBEAT_VANILLA } from '../../../common/constants';
+import {
+  CLOUDBEAT_EKS,
+  CLOUDBEAT_VANILLA,
+  CLOUDBEAT_AWS,
+  CLOUDBEAT_GCP,
+  CLOUDBEAT_AZURE,
+} from '../../../common/constants';
 
-export type InputType = typeof CLOUDBEAT_EKS | typeof CLOUDBEAT_VANILLA;
+export type InputType =
+  | typeof CLOUDBEAT_EKS
+  | typeof CLOUDBEAT_VANILLA
+  | typeof CLOUDBEAT_AWS
+  | typeof CLOUDBEAT_GCP
+  | typeof CLOUDBEAT_AZURE;
 
 interface Props {
+  policyTemplate: 'kspm' | 'cspm';
   type: InputType;
   onChange?: (type: InputType) => void;
   isDisabled?: boolean;
 }
 
-const kubeDeployOptions: Array<EuiComboBoxOptionOption<InputType>> =
-  cloudPostureIntegrations.kspm.options.map((o) => ({ value: o.type, label: o.name }));
+const kubeDeployOptions = (
+  policyTemplate: Props['policyTemplate']
+): Array<EuiComboBoxOptionOption<InputType>> =>
+  cloudPostureIntegrations[policyTemplate].options.map((o) => ({ value: o.type, label: o.name }));
 
 const KubernetesDeploymentFieldLabel = () => (
   <EuiToolTip
@@ -52,13 +66,13 @@ const KubernetesDeploymentFieldLabel = () => (
   </EuiToolTip>
 );
 
-export const DeploymentTypeSelect = ({ type, isDisabled, onChange }: Props) => (
+export const DeploymentTypeSelect = ({ policyTemplate, type, isDisabled, onChange }: Props) => (
   <EuiDescribedFormGroup title={<div />}>
     <EuiFormRow label={<KubernetesDeploymentFieldLabel />}>
       <EuiComboBox
         singleSelection={{ asPlainText: true }}
-        options={kubeDeployOptions}
-        selectedOptions={kubeDeployOptions.filter((o) => o.value === type)}
+        options={kubeDeployOptions(policyTemplate)}
+        selectedOptions={kubeDeployOptions(policyTemplate).filter((o) => o.value === type)}
         isDisabled={isDisabled}
         onChange={(options) => !isDisabled && onChange?.(options[0].value!)}
       />

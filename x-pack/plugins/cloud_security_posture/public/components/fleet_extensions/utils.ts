@@ -5,13 +5,23 @@
  * 2.0.
  */
 import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
-import { CLOUDBEAT_EKS, CLOUDBEAT_VANILLA } from '../../../common/constants';
+import { CLOUDBEAT_AWS, CLOUDBEAT_EKS, CLOUDBEAT_VANILLA } from '../../../common/constants';
 import type { InputType } from './deployment_type_select';
 
 export const isEksInput = (input: NewPackagePolicyInput) => input.type === CLOUDBEAT_EKS;
-
+export const inputsWithVars = [CLOUDBEAT_EKS, CLOUDBEAT_AWS];
+const defaultInputType = {
+  kspm: CLOUDBEAT_VANILLA,
+  cspm: CLOUDBEAT_AWS,
+} as any;
 export const getEnabledInputType = (inputs: NewPackagePolicy['inputs']): InputType =>
-  (inputs.find((input) => input.enabled)?.type as InputType) || CLOUDBEAT_VANILLA;
+  (getEnabledInput(inputs)?.type as InputType) ||
+  (inputs[0].policy_template && defaultInputType[inputs[0].policy_template]) ||
+  CLOUDBEAT_VANILLA;
+
+export const getEnabledInput = (
+  inputs: NewPackagePolicy['inputs']
+): NewPackagePolicyInput | undefined => inputs.find((input) => input.enabled);
 
 export const getUpdatedDeploymentType = (newPolicy: NewPackagePolicy, inputType: InputType) => ({
   isValid: true, // TODO: add validations
@@ -33,7 +43,7 @@ export const getUpdatedEksVar = (newPolicy: NewPackagePolicy, key: string, value
   updatedPolicy: {
     ...newPolicy,
     inputs: newPolicy.inputs.map((item) =>
-      isEksInput(item) ? getUpdatedStreamVars(item, key, value) : item
+      inputsWithVars.includes(item.type) ? getUpdatedStreamVars(item, key, value) : item
     ),
   },
 });
