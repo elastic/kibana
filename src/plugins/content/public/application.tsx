@@ -6,7 +6,7 @@ import { ContentApp } from './components/app';
 
 export const renderApp = (
   { notifications, http }: CoreStart,
-  { navigation }: AppPluginStartDependencies,
+  { }: AppPluginStartDependencies,
   { appBasePath, element }: AppMountParameters
 ) => {
   ReactDOM.render(
@@ -14,7 +14,6 @@ export const renderApp = (
       basename={appBasePath}
       notifications={notifications}
       http={http}
-      navigation={navigation}
     />,
     element
   );

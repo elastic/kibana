@@ -9,6 +9,6 @@
   "description": "Content management",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation"],
+  "requiredPlugins": [],
   "optionalPlugins": []
 }

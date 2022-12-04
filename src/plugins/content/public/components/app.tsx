@@ -17,18 +17,16 @@ import {
 } from '@elastic/eui';
 
 import { CoreStart } from '../../../../core/public';
-import { NavigationPublicPluginStart } from '../../../navigation/public';
 
-import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
+import { PLUGIN_NAME } from '../../common';
 
 interface ContentAppDeps {
   basename: string;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
-  navigation: NavigationPublicPluginStart;
 }
 
-export const ContentApp = ({ basename, notifications, http, navigation }: ContentAppDeps) => {
+export const ContentApp = ({ basename, notifications, http }: ContentAppDeps) => {
   // Use React hooks to manage state.
   const [timestamp, setTimestamp] = useState<string | undefined>();
 
@@ -45,17 +43,10 @@ export const ContentApp = ({ basename, notifications, http, navigation }: Conten
     });
   };
 
-  // Render the application DOM.
-  // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
   return (
     <Router basename={basename}>
       <I18nProvider>
         <>
-          <navigation.ui.TopNavMenu
-            appName={PLUGIN_ID}
-            showSearchBar={true}
-            useDefaultBehaviors={true}
-          />
           <EuiPage restrictWidth="1000px">
             <EuiPageBody>
               <EuiPageHeader>

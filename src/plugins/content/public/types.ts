@@ -1,5 +1,3 @@
-import { NavigationPublicPluginStart } from '../../navigation/public';
-
 export interface ContentPluginSetup {
   getGreeting: () => string;
 }
@@ -7,5 +5,5 @@ export interface ContentPluginSetup {
 export interface ContentPluginStart {}
 
 export interface AppPluginStartDependencies {
-  navigation: NavigationPublicPluginStart;
+
 }

@@ -5,7 +5,7 @@ import { PLUGIN_NAME } from '../common';
 
 export class ContentPlugin implements Plugin<ContentPluginSetup, ContentPluginStart> {
   public setup(core: CoreSetup): ContentPluginSetup {
-    // Register an application into the side navigation menu
+    // Register an application into the side menu
     core.application.register({
       id: 'content',
       title: PLUGIN_NAME,
