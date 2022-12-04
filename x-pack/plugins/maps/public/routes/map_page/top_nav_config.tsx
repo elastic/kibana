@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import {
@@ -18,6 +18,7 @@ import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   getNavigateToApp,
   getMapsCapabilities,
@@ -28,6 +29,7 @@ import {
   getCoreOverlays,
   getSavedObjectsTagging,
   getPresentationUtilContext,
+  getTheme,
 } from '../../kibana_services';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { SavedMap } from './saved_map';
@@ -212,6 +214,11 @@ export function getTopNavConfig({
           }),
         };
         const PresentationUtilContext = getPresentationUtilContext();
+        const SaveModalContext: FC = ({ children }) => (
+          <KibanaThemeProvider theme$={getTheme().theme$}>
+            <PresentationUtilContext>{children}</PresentationUtilContext>
+          </KibanaThemeProvider>
+        );
 
         let saveModal;
 
@@ -245,7 +252,7 @@ export function getTopNavConfig({
           );
         }
 
-        showSaveModal(saveModal, getCoreI18n().Context, PresentationUtilContext);
+        showSaveModal(saveModal, getCoreI18n().Context, SaveModalContext);
       },
     });
 
