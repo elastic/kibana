@@ -17,6 +17,7 @@ import type { ContentCache } from '../service/cache/content_cache';
 import {firstValueFrom} from 'rxjs';
 import {ContentCard} from './items/card/card';
 import {context} from './context';
+import {ContentAvatar} from './items/avatar/avatar';
 
 interface ContentAppDeps {
   basename: string;
@@ -53,6 +54,7 @@ export const ContentApp = ({ registry, cache }: ContentAppDeps) => {
                   </EuiButton>
                 </EuiText>
 
+                <ContentAvatar id={'dashboard:edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b'} />
                 <ContentCard id={'dashboard:edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b'} />
               </div>
             </EuiPageContentBody>
