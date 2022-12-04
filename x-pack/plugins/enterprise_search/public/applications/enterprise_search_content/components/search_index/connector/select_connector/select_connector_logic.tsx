@@ -82,7 +82,7 @@ export const SelectConnectorLogic = kea<
       } else {
         actions.makeRequest({
           connectorId: values.index.connector.id,
-          nativeConnector: values.selectedNativeConnector,
+          serviceType: values.selectedNativeConnector.serviceType,
         });
       }
     },

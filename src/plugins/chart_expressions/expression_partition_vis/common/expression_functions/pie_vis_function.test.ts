@@ -53,6 +53,7 @@ describe('interpreter/functions#pieVis', () => {
       percentDecimals: 2,
       truncate: 100,
       last_level: false,
+      colorOverrides: {},
     },
     metrics: [
       {

@@ -14,7 +14,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Temporarily Scheduled Task Creation",
-  "query": "sequence by host.id, winlog.event_data.TaskName with maxspan=5m\n   [iam where event.action == \"scheduled-task-created\"]\n   [iam where event.action == \"scheduled-task-deleted\"]\n",
+  "query": "sequence by host.id, winlog.event_data.TaskName with maxspan=5m\n   [iam where event.action == \"scheduled-task-created\" and not user.name : \"*$\"]\n   [iam where event.action == \"scheduled-task-deleted\" and not user.name : \"*$\"]\n",
   "references": [
     "https://docs.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4698"
   ],
@@ -27,6 +27,11 @@
     {
       "ecs": true,
       "name": "host.id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "user.name",
       "type": "keyword"
     },
     {
@@ -86,5 +91,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }
