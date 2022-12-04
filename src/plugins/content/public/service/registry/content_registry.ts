@@ -16,4 +16,10 @@ export class ContentRegistry {
   public getType(id: string): ContentType | undefined {
     return this.types.get(id);
   }
+
+  public loadList() {
+    
+  }
+
+  // public read(id: string): 
 }

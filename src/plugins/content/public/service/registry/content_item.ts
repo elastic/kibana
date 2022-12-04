@@ -6,4 +6,8 @@ export class ContentItem<T = unknown> {
   public get id(): string {
     return this.details.id;
   }
+
+  public get title(): string {
+    return this.details.fields.title || '';
+  }
 }

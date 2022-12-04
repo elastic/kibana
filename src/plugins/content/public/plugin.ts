@@ -3,6 +3,7 @@ import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../core/
 import { ContentPluginSetup, ContentPluginStart, AppPluginStartDependencies } from './types';
 import { PLUGIN_NAME } from '../common';
 import { ContentRegistry } from './service/registry/content_registry';
+import {ContentItemDetails} from './service/registry/types';
 
 export class ContentPlugin implements Plugin<ContentPluginSetup, ContentPluginStart> {
   public setup(core: CoreSetup): ContentPluginSetup {
@@ -19,8 +20,18 @@ export class ContentPlugin implements Plugin<ContentPluginSetup, ContentPluginSt
       icon: 'dashboardApp',
       operations: {
         read: async (id: string) => {
-          const { data } = await core.http.get(`/api/content/dashboard/${id}`);
-          return data;
+          const [coreStart] = await core.getStartServices();
+          const so = coreStart.savedObjects.client;
+          const res = await so.get('dashboard', id);
+          const details: ContentItemDetails = {
+            id: res.id,
+            fields: {
+              title: res.attributes.title,
+              description: res.attributes.description,
+            },
+            data: res.attributes,
+          };
+          return details;
         }
       },
     });

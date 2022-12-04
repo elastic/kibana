@@ -33,8 +33,10 @@ export const ContentApp = ({ registry }: ContentAppDeps) => {
           <EuiPageContentBody>
             <div style={{width: 1000}}>
               <EuiText>
-                <EuiButton type="primary" size="s" onClick={() => {
-                  console.log(registry);
+                <EuiButton type="primary" size="s" onClick={async () => {
+                  const dashboards = registry.getType('dashboard')!;
+                  const item = await dashboards.read('edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b');
+                  console.log(item, item.id, item.title);
                 }}>
                   Do something...
                 </EuiButton>
