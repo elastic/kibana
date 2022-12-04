@@ -19,16 +19,20 @@ import {
 import { CoreStart } from '../../../../core/public';
 
 import { PLUGIN_NAME } from '../../common';
+import { ContentRegistry } from '../service/registry/content_registry';
 
 interface ContentAppDeps {
   basename: string;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
+  registry: ContentRegistry;
 }
 
-export const ContentApp = ({ basename, notifications, http }: ContentAppDeps) => {
+export const ContentApp = ({ basename, notifications, http, registry }: ContentAppDeps) => {
   // Use React hooks to manage state.
   const [timestamp, setTimestamp] = useState<string | undefined>();
+
+  console.log(registry);
 
   const onClickHandler = () => {
     // Use the core http service to make a response to the server API.
