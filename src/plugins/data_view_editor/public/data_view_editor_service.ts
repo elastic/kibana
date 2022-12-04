@@ -198,7 +198,7 @@ export class DataViewEditorService {
     const indexRequests = [];
     let newRollupIndexName: string | undefined | null;
 
-    this.updateState({ isLoadingSourcesInternal: true });
+    this.updateState({ loadingTimestampFields: true });
 
     if (query?.endsWith('*')) {
       const exactMatchedQuery = this.getIndicesCached({
