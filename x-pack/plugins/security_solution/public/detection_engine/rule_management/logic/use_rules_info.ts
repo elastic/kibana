@@ -13,7 +13,7 @@ export const useRulesInfo = () => {
 
   return useFetchRulesInfoQuery({
     onError: (err) => {
-      addError(err, { title: i18n.RULE_MANAGEMENT_FILTERS_FETCH_FAILURE });
+      addError(err, { title: i18n.RULES_INFO_FETCH_FAILURE });
     },
   });
 };
