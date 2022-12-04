@@ -75,12 +75,12 @@ interface Props {
 const getEksVars = (input?: NewPackagePolicyInput): EksFormVars => {
   const vars = input?.streams?.[0]?.vars;
   return {
-    access_key_id: vars?.access_key_id?.value || '',
-    secret_access_key: vars?.secret_access_key?.value || '',
-    session_token: vars?.session_token?.value || '',
-    shared_credential_file: vars?.shared_credential_file?.value || '',
-    credential_profile_name: vars?.credential_profile_name?.value || '',
-    role_arn: vars?.role_arn?.value || '',
+    access_key_id: vars?.access_key_id.value || '',
+    secret_access_key: vars?.secret_access_key.value || '',
+    session_token: vars?.session_token.value || '',
+    shared_credential_file: vars?.shared_credential_file.value || '',
+    credential_profile_name: vars?.credential_profile_name.value || '',
+    role_arn: vars?.role_arn.value || '',
   };
 };
 

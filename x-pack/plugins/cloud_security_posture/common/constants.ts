@@ -49,16 +49,8 @@ export const CLOUDBEAT_EKS = 'cloudbeat/cis_eks'; // Integration input
 export const CLOUDBEAT_AWS = 'cloudbeat/cis_aws'; // Integration input
 export const CLOUDBEAT_GCP = 'cloudbeat/cis_gcp'; // Integration input
 export const CLOUDBEAT_AZURE = 'cloudbeat/cis_azure'; // Integration input
-export type CLOUDBEAT_INTEGRATION =
-  | typeof CLOUDBEAT_VANILLA
-  | typeof CLOUDBEAT_EKS
-  | typeof CLOUDBEAT_AWS
-  | typeof CLOUDBEAT_GCP
-  | typeof CLOUDBEAT_AZURE;
 export const KSPM_POLICY_TEMPLATE = 'kspm';
 export const CSPM_POLICY_TEMPLATE = 'cspm';
-export type POLICY_TEMPLATE = typeof KSPM_POLICY_TEMPLATE | typeof CSPM_POLICY_TEMPLATE;
-
 export const SUPPORTED_POLICY_TEMPLATES = [KSPM_POLICY_TEMPLATE, CSPM_POLICY_TEMPLATE];
 export const SUPPORTED_CLOUDBEAT_INPUTS = [
   CLOUDBEAT_VANILLA,
@@ -67,3 +59,6 @@ export const SUPPORTED_CLOUDBEAT_INPUTS = [
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
 ];
+
+export type CLOUDBEAT_INTEGRATION = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
+export type POLICY_TEMPLATE = typeof SUPPORTED_POLICY_TEMPLATES[number];
