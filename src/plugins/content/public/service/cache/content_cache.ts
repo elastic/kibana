@@ -17,10 +17,11 @@ export class ContentCache {
     return type;
   }
 
-  public item(id: string): CachedContentItem {
+  public item(id: string, refreshIfNew: boolean = true): CachedContentItem {
     let item = this.cache.get(id);
     if (!item) {
       item = new CachedContentItem(id, this);
+      if (refreshIfNew) item.refresh();
       this.cache.set(id, item);
     }
     return item;
