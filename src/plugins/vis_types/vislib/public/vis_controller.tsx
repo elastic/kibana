@@ -9,10 +9,11 @@
 import $ from 'jquery';
 import React, { RefObject } from 'react';
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
 import { VisTypeVislibCoreSetup } from './plugin';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
 import { BasicVislibParams } from './types';
@@ -129,15 +130,19 @@ export const createVislibVisController = (
     ) {
       const { legendPosition } = visParams;
       this.unmountLegend = toMountPoint(
-        <VisLegend
-          ref={this.legendRef}
-          vislibVis={this.vislibVis}
-          visData={visData}
-          uiState={uiState}
-          fireEvent={fireEvent}
-          addLegend={this.showLegend(visParams)}
-          position={legendPosition}
-        />
+        <I18nProvider>
+          <KibanaThemeProvider theme$={core.theme.theme$}>
+            <VisLegend
+              ref={this.legendRef}
+              vislibVis={this.vislibVis}
+              visData={visData}
+              uiState={uiState}
+              fireEvent={fireEvent}
+              addLegend={this.showLegend(visParams)}
+              position={legendPosition}
+            />
+          </KibanaThemeProvider>
+        </I18nProvider>
       )(this.legendEl);
     }
 
