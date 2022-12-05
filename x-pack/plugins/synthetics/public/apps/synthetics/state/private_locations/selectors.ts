@@ -11,6 +11,5 @@ import { AppState } from '..';
 const getState = (appState: AppState) => appState.agentPolicies;
 export const selectAgentPolicies = createSelector(getState, (state) => state);
 
-export const selectAddingNewPrivateLocation = createSelector(getState, (state) =>
-  Boolean(state.isAddingNewPrivateLocation)
-);
+export const selectAddingNewPrivateLocation = (state: AppState) =>
+  state.agentPolicies.isAddingNewPrivateLocation ?? false;

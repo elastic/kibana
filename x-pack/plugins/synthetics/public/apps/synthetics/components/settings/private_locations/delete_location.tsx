@@ -75,7 +75,7 @@ export const DeleteLocation = ({
   );
 };
 
-const DELETE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.delete', {
+const DELETE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.deleteLocation', {
   defaultMessage: 'Delete location',
 });
 
