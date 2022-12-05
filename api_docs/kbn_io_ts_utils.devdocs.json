@@ -325,8 +325,48 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.IndexPatternType",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexPatternType",
+        "description": [],
+        "signature": [
+          "string & ",
+          "Brand",
+          "<",
+          "IndexPatternBrand",
+          ">"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/index_pattern_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.indexPatternRt",
+        "type": "Object",
+        "tags": [],
+        "label": "indexPatternRt",
+        "description": [],
+        "signature": [
+          "BrandC",
+          "<",
+          "StringC",
+          ", ",
+          "IndexPatternBrand",
+          ">"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/index_pattern_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.isoToEpochRt",

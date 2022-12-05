@@ -65,7 +65,7 @@
     "Windows",
     "Threat Detection",
     "Lateral Movement",
-    "has_guide"
+    "Investigation Guide"
   ],
   "threat": [
     {
@@ -107,5 +107,5 @@
     }
   ],
   "type": "eql",
-  "version": 101
+  "version": 102
 }
