@@ -35,7 +35,6 @@ export const DeleteMonitor = ({
   onUpdate: () => void;
 }) => {
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-  const [fetchStatus, setFetchStatus] = useState(FETCH_STATUS.PENDING);
 
   const isDeleting = useSelector((state: AppState) =>
     deleteMonitorLoadingSelector(state, configId)
