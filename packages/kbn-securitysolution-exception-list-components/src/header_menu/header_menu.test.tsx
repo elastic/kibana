@@ -13,6 +13,17 @@ import { getSecurityLinkAction } from '../mocks/security_link_component.mock';
 
 describe('HeaderMenu', () => {
   it('should render button icon with default settings', () => {
+    const wrapper = render(
+      <HeaderMenu iconType="boxesHorizontal" disableActions={false} actions={null} />
+    );
+
+    expect(wrapper).toMatchSnapshot();
+
+    expect(wrapper.getByTestId('ButtonIcon')).toBeInTheDocument();
+    expect(wrapper.queryByTestId('EmptyButton')).not.toBeInTheDocument();
+    expect(wrapper.queryByTestId('MenuPanel')).not.toBeInTheDocument();
+  });
+  it('should not render icon', () => {
     const wrapper = render(<HeaderMenu disableActions={false} actions={null} />);
 
     expect(wrapper).toMatchSnapshot();
@@ -23,7 +34,11 @@ describe('HeaderMenu', () => {
   });
   it('should render button icon disabled', () => {
     const wrapper = render(
-      <HeaderMenu disableActions={false} actions={actionsWithDisabledDelete} />
+      <HeaderMenu
+        iconType="boxesHorizontal"
+        disableActions={false}
+        actions={actionsWithDisabledDelete}
+      />
     );
 
     fireEvent.click(wrapper.getByTestId('ButtonIcon'));
@@ -103,7 +118,13 @@ describe('HeaderMenu', () => {
   it('should render custom Actions', () => {
     const customActions = getSecurityLinkAction('headerMenuTest');
     const wrapper = render(
-      <HeaderMenu disableActions={false} emptyButton actions={customActions} useCustomActions />
+      <HeaderMenu
+        iconType="boxesHorizontal"
+        disableActions={false}
+        emptyButton
+        actions={customActions}
+        useCustomActions
+      />
     );
 
     expect(wrapper).toMatchSnapshot();
@@ -117,7 +138,12 @@ describe('HeaderMenu', () => {
     const customAction = [...actions];
     customAction[0].onClick = onEdit;
     const wrapper = render(
-      <HeaderMenu dataTestSubj="headerMenu" disableActions={false} actions={actions} />
+      <HeaderMenu
+        iconType="boxesHorizontal"
+        dataTestSubj="headerMenu"
+        disableActions={false}
+        actions={actions}
+      />
     );
     const headerMenu = wrapper.getByTestId('headerMenuItems');
     const click = createEvent.click(headerMenu);
