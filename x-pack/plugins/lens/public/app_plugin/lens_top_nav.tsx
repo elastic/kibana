@@ -41,6 +41,7 @@ import {
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
+import { LensByReferenceInput } from '../embeddable';
 
 function getLensTopNavConfig(options: {
   showSaveAndReturn: boolean;
@@ -55,7 +56,7 @@ function getLensTopNavConfig(options: {
   savingToDashboardPermitted: boolean;
   contextOriginatingApp?: string;
   isSaveable: boolean;
-  initialContextAppId?: string;
+  showReplaceInDashbord: boolean;
 }): TopNavMenuData[] {
   const {
     actions,
@@ -69,7 +70,7 @@ function getLensTopNavConfig(options: {
     tooltips,
     contextOriginatingApp,
     isSaveable,
-    initialContextAppId,
+    showReplaceInDashbord,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -92,14 +93,14 @@ function getLensTopNavConfig(options: {
         defaultMessage: 'Save',
       });
 
-  if (contextOriginatingApp && initialContextAppId !== 'dashboards') {
+  if (contextOriginatingApp && !showCancel) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.goBackLabel', {
         defaultMessage: `Go back to {contextOriginatingApp}`,
         values: { contextOriginatingApp },
       }),
       run: actions.goBack,
-      className: 'lnsNavItem__goBack',
+      className: 'lnsNavItem__withDivider',
       testId: 'lnsApp_goBackToAppButton',
       description: i18n.translate('xpack.lens.app.goBackLabel', {
         defaultMessage: `Go back to {contextOriginatingApp}`,
@@ -118,6 +119,7 @@ function getLensTopNavConfig(options: {
       label: exploreDataInDiscoverLabel,
       run: () => {},
       testId: 'lnsApp_openInDiscover',
+      className: 'lnsNavItem__withDivider',
       description: exploreDataInDiscoverLabel,
       disableButton: Boolean(tooltips.showUnderlyingDataWarning()),
       tooltip: tooltips.showUnderlyingDataWarning,
@@ -156,6 +158,7 @@ function getLensTopNavConfig(options: {
       defaultMessage: 'Settings',
     }),
     run: actions.openSettings,
+    className: 'lnsNavItem__withDivider',
     testId: 'lnsApp_settingsButton',
     description: i18n.translate('xpack.lens.app.settingsAriaLabel', {
       defaultMessage: 'Open the Lens settings menu',
@@ -177,10 +180,8 @@ function getLensTopNavConfig(options: {
 
   topNavMenu.push({
     label: saveButtonLabel,
-    iconType: (initialContextAppId === 'dashboards' ? false : !showSaveAndReturn)
-      ? 'save'
-      : undefined,
-    emphasize: initialContextAppId === 'dashboards' ? false : !showSaveAndReturn,
+    iconType: (showReplaceInDashbord ? false : !showSaveAndReturn) ? 'save' : undefined,
+    emphasize: showReplaceInDashbord ? false : !showSaveAndReturn,
     run: actions.showSaveModal,
     testId: 'lnsApp_saveButton',
     description: i18n.translate('xpack.lens.app.saveButtonAriaLabel', {
@@ -205,13 +206,13 @@ function getLensTopNavConfig(options: {
     });
   }
 
-  if (initialContextAppId === 'dashboards') {
+  if (showReplaceInDashbord) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.replaceInDashboard', {
         defaultMessage: 'Replace in dashboard',
       }),
       emphasize: true,
-      iconType: 'checkInCircleFilled',
+      iconType: 'merge',
       run: actions.saveAndReturn,
       testId: 'lnsApp_replaceInDashboardButton',
       disableButton: !isSaveable,
@@ -471,9 +472,12 @@ export const LensTopNavMenu = ({
   const lensStore = useStore();
 
   const topNavConfig = useMemo(() => {
+    const showReplaceInDashbord =
+      initialContext?.originatingApp === 'dashboards' &&
+      !(initialInput as LensByReferenceInput)?.savedObjectId;
     const baseMenuEntries = getLensTopNavConfig({
       showSaveAndReturn:
-        initialContext?.originatingApp !== 'dashboards' &&
+        !showReplaceInDashbord &&
         (Boolean(
           isLinkedToOriginatingApp &&
             // Temporarily required until the 'by value' paradigm is default.
@@ -489,7 +493,7 @@ export const LensTopNavMenu = ({
       savingToDashboardPermitted,
       isSaveable,
       contextOriginatingApp,
-      initialContextAppId: initialContext?.originatingApp,
+      showReplaceInDashbord,
       tooltips: {
         showExportWarning: () => {
           if (activeData) {
@@ -549,7 +553,16 @@ export const LensTopNavMenu = ({
             });
             runSave(
               {
-                newTitle: title || '',
+                newTitle:
+                  title ||
+                  (initialContext && 'title' in initialContext && initialContext.title
+                    ? i18n.translate('xpack.lens.app.convertedLabel', {
+                        defaultMessage: '{title} (converted)',
+                        values: {
+                          title: initialContext.title,
+                        },
+                      })
+                    : ''),
                 newCopyOnSave: false,
                 isTitleDuplicateConfirmed: false,
                 returnToOrigin: true,

@@ -252,7 +252,7 @@ export function App({
     }
     if (!persistedDoc?.title && initialContext && 'title' in initialContext) {
       currentDocTitle = i18n.translate('xpack.lens.breadcrumbsEditInLensFromDashboard', {
-        defaultMessage: 'Converting "{title}"',
+        defaultMessage: 'Converting {title}',
         values: { title: initialContext.title },
       });
     }

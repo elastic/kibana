@@ -121,7 +121,12 @@ export class DashboardPanelActionsService extends FtrService {
   }
 
   async customizePanel(parent?: WebElementWrapper) {
+    this.log.debug('customizePanel');
     await this.openContextMenu(parent);
+    const isActionVisible = await this.testSubjects.exists(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
+    if (!isActionVisible) await this.clickContextMenuMoreItem();
+    const isPanelActionVisible = await this.testSubjects.exists(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
+    if (!isPanelActionVisible) await this.clickContextMenuMoreItem();
     await this.testSubjects.click(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
   }
 

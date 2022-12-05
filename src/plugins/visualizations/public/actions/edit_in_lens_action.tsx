@@ -53,7 +53,7 @@ const isVisualizeEmbeddable = (embeddable: IEmbeddable): embeddable is Visualize
 export class EditInLensAction implements Action<EditInLensContext> {
   public id = ACTION_EDIT_IN_LENS;
   public readonly type = ACTION_EDIT_IN_LENS;
-  public order = 30;
+  public order = 100;
   public showNotification = true;
   public currentAppId: string | undefined;
 
@@ -78,6 +78,7 @@ export class EditInLensAction implements Action<EditInLensContext> {
       const updatedWithMeta = {
         ...navigateToLensConfig,
         title:
+          vis.title ||
           embeddable.getOutput().title ||
           i18n.translate('visualizations.actions.editInLens.visulizationTitle', {
             defaultMessage: '{type} visualization',
@@ -114,7 +115,8 @@ export class EditInLensAction implements Action<EditInLensContext> {
       return false;
     }
     const vis = embeddable.getVis();
-    if (!vis) {
+    const contextType = embeddable.getInput().executionContext?.type
+    if (!vis || contextType !== 'dashboard') {
       return false;
     }
     const canNavigateToLens =
