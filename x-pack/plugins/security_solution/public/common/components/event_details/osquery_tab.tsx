@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiCode,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiNotificationBadge,
-} from '@elastic/eui';
+import { EuiCode, EuiEmptyPrompt, EuiNotificationBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -121,22 +115,11 @@ export const useOsqueryTab = ({
   return {
     id: EventsViewType.osqueryView,
     'data-test-subj': 'osqueryViewTab',
-    name: (
-      <EuiFlexGroup
-        direction="row"
-        alignItems={'center'}
-        justifyContent={'spaceAround'}
-        gutterSize="xs"
-      >
-        <EuiFlexItem>
-          <span>{i18n.OSQUERY_VIEW}</span>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiNotificationBadge data-test-subj="osquery-actions-notification">
-            {osqueryActionsLength}
-          </EuiNotificationBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    name: i18n.OSQUERY_VIEW,
+    append: (
+      <EuiNotificationBadge data-test-subj="osquery-actions-notification">
+        {osqueryActionsLength}
+      </EuiNotificationBadge>
     ),
     content: (
       <>
