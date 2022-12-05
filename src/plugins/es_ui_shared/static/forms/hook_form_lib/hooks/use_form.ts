@@ -245,7 +245,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
           resolve();
         }, 100);
       } else {
-        resolve();
+        setTimeout(resolve, 0);
       }
     });
   }, [fieldsToArray]);
