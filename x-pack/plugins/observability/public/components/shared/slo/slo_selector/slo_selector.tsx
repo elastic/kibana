@@ -6,6 +6,7 @@
  */
 
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 
@@ -32,8 +33,12 @@ export function SloSelector() {
 
   return (
     <EuiComboBox
-      aria-label="SLO selector"
-      placeholder="Select a SLO"
+      aria-label={i18n.translate('xpack.observability.slo.sloSelector.ariaLabel', {
+        defaultMessage: 'SLO Selector',
+      })}
+      placeholder={i18n.translate('xpack.observability.slo.sloSelector.placeholder', {
+        defaultMessage: 'Select a SLO',
+      })}
       data-test-subj="sloSelector"
       singleSelection={{ asPlainText: true }}
       options={options}
