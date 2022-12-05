@@ -45,11 +45,16 @@ import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
 import { CreateTimeSliderControlButton } from '../editor/create_time_slider_control';
 import { getNextPanelOrder } from './control_group_helpers';
-import {
+import type {
   AddDataControlProps,
   AddOptionsListControlProps,
   AddRangeSliderControlProps,
-  controlGroupInputBuilder,
+} from '../control_group_input_builder';
+import {
+  getDataControlPanelState,
+  getOptionsListPanelState,
+  getRangeSliderPanelState,
+  getTimeSliderPanelState,
 } from '../control_group_input_builder';
 
 let flyoutRef: OverlayRef | undefined;
@@ -102,39 +107,27 @@ export class ControlGroupContainer extends Container<
     flyoutRef = undefined;
   }
 
+  public getNextPanelOrder() {
+    return getNextPanelOrder(this.getInput().panels);
+  }
+
   public async addDataControlFromField(controlProps: AddDataControlProps) {
-    const input = {
-      ...this.getInput(),
-    };
-    const panelId = await controlGroupInputBuilder.addDataControlFromField(input, controlProps);
-    const panelState = input.panels[panelId];
+    const panelState = await getDataControlPanelState(this.getInput(), controlProps);
     return this.createAndSaveEmbeddable(panelState.type, panelState);
   }
 
   public addOptionsListControl(controlProps: AddOptionsListControlProps) {
-    const input = {
-      ...this.getInput(),
-    };
-    const panelId = controlGroupInputBuilder.addOptionsListControl(input, controlProps);
-    const panelState = input.panels[panelId];
+    const panelState = getOptionsListPanelState(this.getInput(), controlProps);
     return this.createAndSaveEmbeddable(panelState.type, panelState);
   }
 
   public addRangeSliderControl(controlProps: AddRangeSliderControlProps) {
-    const input = {
-      ...this.getInput(),
-    };
-    const panelId = controlGroupInputBuilder.addRangeSliderControl(input, controlProps);
-    const panelState = input.panels[panelId];
+    const panelState = getRangeSliderPanelState(this.getInput(), controlProps);
     return this.createAndSaveEmbeddable(panelState.type, panelState);
   }
 
   public addTimeSliderControl() {
-    const input = {
-      ...this.getInput(),
-    };
-    const panelId = controlGroupInputBuilder.addTimeSliderControl(input);
-    const panelState = input.panels[panelId];
+    const panelState = getTimeSliderPanelState(this.getInput());
     return this.createAndSaveEmbeddable(panelState.type, panelState);
   }
 
@@ -355,7 +348,7 @@ export class ControlGroupContainer extends Container<
   ): ControlPanelState<TEmbeddableInput> {
     const panelState = super.createNewPanelState(factory, partial);
     return {
-      order: getNextPanelOrder(this.getInput()),
+      order: this.getNextPanelOrder(),
       width: this.getInput().defaultControlWidth,
       grow: this.getInput().defaultControlGrow,
       ...panelState,
