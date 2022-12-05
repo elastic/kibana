@@ -355,7 +355,7 @@ describe('useInitializeRulesTableSavedState', () => {
     it('does not restore the page number', () => {
       mockRulesTablePersistedState({
         urlState: null,
-        // @ts-expect-error
+        // @ts-expect-error Passing an invalid value for the test
         storageState: { page: 10 },
       });
 
@@ -428,7 +428,7 @@ describe('useInitializeRulesTableSavedState', () => {
         urlState: {
           searchTerm: 'test',
           source: RuleSource.Custom,
-          // @ts-expect-error
+          // @ts-expect-error Passing an invalid value for the test
           tags: [1, 2, 3],
           field: 'name',
           order: 'asc',
@@ -458,7 +458,7 @@ describe('useInitializeRulesTableSavedState', () => {
           source: RuleSource.Custom,
           tags: ['test'],
           field: 'name',
-          // @ts-expect-error
+          // @ts-expect-error Passing an invalid value for the test
           order: 'abc',
           page: 2,
           perPage: 10,
@@ -487,7 +487,7 @@ describe('useInitializeRulesTableSavedState', () => {
           tags: ['test'],
           field: 'name',
           order: 'asc',
-          // @ts-expect-error
+          // @ts-expect-error Passing an invalid value for the test
           page: 'aaa',
           perPage: 10,
         },
@@ -515,7 +515,7 @@ describe('useInitializeRulesTableSavedState', () => {
         storageState: {
           searchTerm: 'test',
           source: RuleSource.Custom,
-          // @ts-expect-error
+          // @ts-expect-error Passing an invalid value for the test
           tags: [1, 2, 3],
           field: 'name',
           order: 'asc',
@@ -544,7 +544,7 @@ describe('useInitializeRulesTableSavedState', () => {
           source: RuleSource.Custom,
           tags: ['test'],
           field: 'name',
-          // @ts-expect-error
+          // @ts-expect-error Passing an invalid value for the test
           order: 'abc',
           perPage: 10,
         },
@@ -572,7 +572,7 @@ describe('useInitializeRulesTableSavedState', () => {
           tags: ['test'],
           field: 'name',
           order: 'asc',
-          // @ts-expect-error
+          // @ts-expect-error Passing an invalid value for the test
           perPage: 'aaa',
         },
       });
