@@ -115,7 +115,7 @@ export class EditInLensAction implements Action<EditInLensContext> {
       return false;
     }
     const vis = embeddable.getVis();
-    const contextType = embeddable.getInput().executionContext?.type
+    const contextType = embeddable.getInput().executionContext?.type;
     if (!vis || contextType !== 'dashboard') {
       return false;
     }
