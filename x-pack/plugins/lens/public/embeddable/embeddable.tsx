@@ -214,9 +214,6 @@ async function getViewUnderlyingDataArgs({
     capabilities
   );
 
-  // eslint-disable-next-line no-console
-  console.log('meta', meta);
-
   if (error || !meta) {
     return;
   }
