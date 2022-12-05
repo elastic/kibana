@@ -269,7 +269,7 @@ const spanFromTraceByIdRoute = createApmServerRoute({
       traceId: t.string,
       spanId: t.string,
     }),
-    query: t.partial({ parentTransactionId: t.string }),
+    query: t.union([t.partial({ parentTransactionId: t.string }), t.undefined]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -281,6 +281,7 @@ const spanFromTraceByIdRoute = createApmServerRoute({
     const { params } = resources;
     const { spanId, traceId } = params.path;
     const { parentTransactionId } = params.query;
+    console.log('### caue  parentTransactionId', parentTransactionId);
     const apmEventClient = await getApmEventClient(resources);
     return await getSpan({
       spanId,
