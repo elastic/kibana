@@ -26,7 +26,7 @@ import { ConnectorConfigurationForm } from './connector_configuration_form';
 import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 
 export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
-  const { error } = useValues(IndexViewLogic);
+  const { connectorError } = useValues(IndexViewLogic);
   const { configView, isEditing } = useValues(ConnectorConfigurationLogic);
   const { setIsEditing } = useActions(ConnectorConfigurationLogic);
 
@@ -68,7 +68,7 @@ export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
           )
         )}
       </EuiFlexItem>
-      {!!error && (
+      {!!connectorError && (
         <EuiFlexItem>
           <EuiCallOut
             color="danger"
@@ -79,7 +79,7 @@ export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
               }
             )}
           >
-            <EuiText size="s">{error}</EuiText>
+            <EuiText size="s">{connectorError}</EuiText>
           </EuiCallOut>
         </EuiFlexItem>
       )}

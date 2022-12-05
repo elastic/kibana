@@ -25,7 +25,7 @@ get:
                 required:
                   - status
                   - savedObject
-  operationId: get-package
+  operationId: get-package-deprecated
   security:
     - basicAuth: []
   parameters:
@@ -62,10 +62,15 @@ post:
                     - type
             required:
               - response
-  operationId: install-package
+  operationId: install-package-deprecated
   description: ''
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
+    - schema:
+        type: string
+      name: pkgkey
+      in: path
+      required: true
   requestBody:
     content:
       application/json:
@@ -102,9 +107,14 @@ delete:
                     - type
             required:
               - response
-  operationId: delete-package
+  operationId: delete-package-deprecated
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
+    - schema:
+        type: string
+      name: pkgkey
+      in: path
+      required: true
   requestBody:
     content:
       application/json:
