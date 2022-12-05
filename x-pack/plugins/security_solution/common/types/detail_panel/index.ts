@@ -8,8 +8,7 @@
 import type { FlowTargetSourceDest } from '../../search_strategy';
 import type { TimelineTabs } from '../timeline';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type EmptyObject = Record<any, never>;
+type EmptyObject = Record<string | number, never>;
 
 export type ExpandedEventType =
   | {
