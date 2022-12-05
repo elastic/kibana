@@ -361,7 +361,8 @@ describe('useInitializeRulesTableSavedState', () => {
     it('does not restore the page number', () => {
       mockRulesTablePersistedState({
         urlState: null,
-        storageState: { page: 10 } as unknown as RulesTableStorageSavedState,
+        // @ts-expect-error
+        storageState: { page: 10 },
       });
 
       renderHook(() => useInitializeRulesTableSavedState());
@@ -433,12 +434,13 @@ describe('useInitializeRulesTableSavedState', () => {
         urlState: {
           searchTerm: 'test',
           source: RuleSource.Custom,
+          // @ts-expect-error
           tags: [1, 2, 3],
           field: 'name',
           order: 'asc',
           page: 2,
           perPage: 10,
-        } as unknown as RulesTableUrlSavedState,
+        },
         storageState: null,
       });
 
@@ -462,10 +464,11 @@ describe('useInitializeRulesTableSavedState', () => {
           source: RuleSource.Custom,
           tags: ['test'],
           field: 'name',
+          // @ts-expect-error
           order: 'abc',
           page: 2,
           perPage: 10,
-        } as unknown as RulesTableUrlSavedState,
+        },
         storageState: null,
       });
 
@@ -490,9 +493,10 @@ describe('useInitializeRulesTableSavedState', () => {
           tags: ['test'],
           field: 'name',
           order: 'asc',
+          // @ts-expect-error
           page: 'aaa',
           perPage: 10,
-        } as unknown as RulesTableUrlSavedState,
+        },
         storageState: null,
       });
 
@@ -517,11 +521,12 @@ describe('useInitializeRulesTableSavedState', () => {
         storageState: {
           searchTerm: 'test',
           source: RuleSource.Custom,
+          // @ts-expect-error
           tags: [1, 2, 3],
           field: 'name',
           order: 'asc',
           perPage: 10,
-        } as unknown as RulesTableStorageSavedState,
+        },
       });
 
       renderHook(() => useInitializeRulesTableSavedState());
@@ -545,9 +550,10 @@ describe('useInitializeRulesTableSavedState', () => {
           source: RuleSource.Custom,
           tags: ['test'],
           field: 'name',
+          // @ts-expect-error
           order: 'abc',
           perPage: 10,
-        } as unknown as RulesTableStorageSavedState,
+        },
       });
 
       renderHook(() => useInitializeRulesTableSavedState());
@@ -572,8 +578,9 @@ describe('useInitializeRulesTableSavedState', () => {
           tags: ['test'],
           field: 'name',
           order: 'asc',
+          // @ts-expect-error
           perPage: 'aaa',
-        } as unknown as RulesTableStorageSavedState,
+        },
       });
 
       renderHook(() => useInitializeRulesTableSavedState());
