@@ -27,7 +27,7 @@ import { ROOT_PATH } from '../../routes';
 export interface DeleteAnalyticsCollectionActions {
   apiError: Actions<{}, DeleteAnalyticsCollectionApiLogicResponse>['apiError'];
   apiSuccess: Actions<{}, DeleteAnalyticsCollectionApiLogicResponse>['apiSuccess'];
-  deleteAnalyticsCollection(name: string): { name: string };
+  deleteAnalyticsCollection(id: string): { id: string };
   makeRequest: Actions<{}, DeleteAnalyticsCollectionApiLogicResponse>['makeRequest'];
 }
 export interface DeleteAnalyticsCollectionValues {
@@ -40,7 +40,7 @@ export const DeleteAnalyticsCollectionLogic = kea<
   MakeLogicType<DeleteAnalyticsCollectionValues, DeleteAnalyticsCollectionActions>
 >({
   actions: {
-    deleteAnalyticsCollection: (name) => ({ name }),
+    deleteAnalyticsCollection: (id) => ({ id }),
   },
   connect: {
     actions: [DeleteAnalyticsCollectionAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
@@ -58,8 +58,8 @@ export const DeleteAnalyticsCollectionLogic = kea<
       await breakpoint(1000);
       KibanaLogic.values.navigateToUrl(ROOT_PATH);
     },
-    deleteAnalyticsCollection: ({ name }) => {
-      actions.makeRequest({ name });
+    deleteAnalyticsCollection: ({ id }) => {
+      actions.makeRequest({ id });
     },
     makeRequest: () => clearFlashMessages(),
   }),
