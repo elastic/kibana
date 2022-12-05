@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { useFetchSloList } from '../hooks/use_fetch_slo_list';
+import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 
 export function SloList() {
   const [isLoading, sloList] = useFetchSloList();
