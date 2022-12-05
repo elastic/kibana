@@ -15,15 +15,14 @@ export const DatasetComboBox: React.FC<{
   datasets: string[];
 }> = ({ value, onChange, datasets }) => {
   const datasetOptions = datasets.map((dataset: string) => ({ label: dataset })) ?? [];
-  const [selectedOptions, setSelectedOptions] = useState<Array<{ label: string }>>(
-    value
-      ? [
-          {
-            label: value,
-          },
-        ]
-      : []
-  );
+  const defaultOption = 'generic';
+  const [selectedOptions, setSelectedOptions] = useState<Array<{ label: string }>>([
+    {
+      label: value ?? defaultOption,
+    },
+  ]);
+
+  if (!value) onChange(defaultOption);
 
   const onDatasetChange = (newSelectedOptions: Array<{ label: string }>) => {
     setSelectedOptions(newSelectedOptions);
