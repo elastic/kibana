@@ -32,6 +32,7 @@ import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import type { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '@kbn/embeddable-plugin/public';
 
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   setFullScreenMode,
   setHidePanelTitles,
@@ -323,7 +324,9 @@ export function DashboardTopNav({
       />
     );
     closeAllFlyouts();
-    showSaveModal(dashboardSaveModal, i18nContext);
+    showSaveModal(dashboardSaveModal, i18nContext, ({ children }) => (
+      <KibanaThemeProvider theme$={theme.theme$}>{children}</KibanaThemeProvider>
+    ));
   }, [
     saveDashboardStateToSavedObject,
     checkForDuplicateDashboardTitle,
@@ -335,6 +338,7 @@ export function DashboardTopNav({
     redirectTo,
     docTitle,
     query,
+    theme.theme$,
   ]);
 
   const runQuickSave = useCallback(async () => {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -22,6 +22,7 @@ import {
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { migrateToLatest, PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   EmbeddableFactoryRegistry,
   EmbeddableFactoryProvider,
@@ -213,7 +214,12 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getAttributeService: (type: string, options) =>
         new AttributeService(
           type,
-          showSaveModal,
+          (saveModal, I18nContext, Wrapper: FC = ({ children }) => <>{children}</>) =>
+            showSaveModal(saveModal, I18nContext, ({ children }) => (
+              <KibanaThemeProvider theme$={core.theme.theme$}>
+                <Wrapper>{children}</Wrapper>
+              </KibanaThemeProvider>
+            )),
           core.i18n.Context,
           core.notifications.toasts,
           options,
