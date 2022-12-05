@@ -91,34 +91,6 @@ export const NEW_TERMS_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ML_RUN_JOB_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.mlRunJobLabel',
-  {
-    defaultMessage: 'Run job',
-  }
-);
-
-export const ML_STOP_JOB_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.mlStopJobLabel',
-  {
-    defaultMessage: 'Stop job',
-  }
-);
-
-export const ML_JOB_STARTED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStartedDescription',
-  {
-    defaultMessage: 'Started',
-  }
-);
-
-export const ML_JOB_STOPPED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStoppedDescription',
-  {
-    defaultMessage: 'Stopped',
-  }
-);
-
 export const THRESHOLD_RESULTS_ALL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAllDescription',
   {
