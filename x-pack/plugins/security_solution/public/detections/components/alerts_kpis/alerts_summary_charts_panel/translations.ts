@@ -21,7 +21,7 @@ export const SEVERITY_LEVELS_INSPECT_TITLE = i18n.translate(
 );
 
 export const SEVERITY_LEVELS_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionResponse.alertsBySeverity.inspectModalSeverityTitle',
+  'xpack.securitySolution.detectionResponse.alertsBySeverity.chartSeverityTitle',
   {
     defaultMessage: 'Severity Levels',
   }

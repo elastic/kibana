@@ -149,18 +149,6 @@ export const useSeverityChartData: UseAlertsByStatus = ({
     }
   }, [skip, refetchQuery]);
 
-  // useQueryInspector({
-  //   deleteQuery,
-  //   inspect: {
-  //     dsl: [request],
-  //     response: [response],
-  //   },
-  //   refetch,
-  //   setQuery,
-  //   queryId,
-  //   loading: isLoading,
-  // });
-
   useInspectButton({
     deleteQuery,
     loading: isLoading,

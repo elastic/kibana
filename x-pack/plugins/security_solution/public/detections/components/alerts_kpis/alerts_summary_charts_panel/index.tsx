@@ -34,6 +34,7 @@ const PlaceHolder = ({ title }: { title: string }) => {
 interface Props {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   filters?: Filter[];
+  addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
   panelHeight?: number;
   query?: Query;
   signalIndexName: string | null;
@@ -44,6 +45,7 @@ interface Props {
 export const AlertsSummaryChartsPanel: React.FC<Props> = ({
   alignHeader,
   filters,
+  addFilter,
   panelHeight,
   query,
   runtimeMappings,
@@ -100,6 +102,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
             data={severityData}
             isLoading={isLoading}
             uniqueQueryId={uniqueQueryId}
+            addFilter={addFilter}
           />
           <PlaceHolder title={'Alert by host type'} />
         </EuiFlexGroup>

@@ -237,6 +237,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
           ) : (
             <AlertsSummaryChartsPanel
               alignHeader="flexStart"
+              addFilter={addFilter}
               filters={alertsHistogramDefaultFilters}
               query={query}
               panelHeight={ALERTS_CHARTS_PANEL_HEIGHT}

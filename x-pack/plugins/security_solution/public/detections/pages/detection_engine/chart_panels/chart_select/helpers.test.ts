@@ -55,6 +55,7 @@ describe('helpers', () => {
           alertViewSelection,
           closePopover,
           setAlertViewSelection,
+          isAlertsPageChartsEnabled: false, // remove after charts is implemented
         });
 
         expect(panels[0].id).toEqual(0);
@@ -65,6 +66,7 @@ describe('helpers', () => {
           alertViewSelection,
           closePopover,
           setAlertViewSelection,
+          isAlertsPageChartsEnabled: false, // remove after charts is implemented
         });
 
         const item = panels[0].items?.find((x) => x['data-test-subj'] === alertViewSelection);
@@ -78,6 +80,7 @@ describe('helpers', () => {
           alertViewSelection,
           closePopover,
           setAlertViewSelection,
+          isAlertsPageChartsEnabled: false, // remove after charts is implemented
         });
 
         const item = panels[0].items?.find((x) => x['data-test-subj'] === alertViewSelection);

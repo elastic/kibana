@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiBasicTable } from '@elastic/eui';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiInMemoryTable } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { isEmpty } from 'lodash/fp';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ShapeTreeNode } from '@elastic/charts';
+import type { ShapeTreeNode, ElementClickListener } from '@elastic/charts';
 import * as i18n from './translations';
 import type { ParsedAlertsData, SeverityBuckets } from './types';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
@@ -26,82 +27,92 @@ interface AlertsChartsPanelProps {
   data: ParsedAlertsData;
   isLoading: boolean;
   uniqueQueryId: string;
+  addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
 }
 
-export const SeverityLevelChart = memo<AlertsChartsPanelProps>(
-  ({ data, isLoading, uniqueQueryId }) => {
-    const [sortField, setSortField] = useState<keyof SeverityBuckets>('value');
-    const [sortDirection, setSortDirection] = useState<SortOrder>('desc');
+export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
+  data,
+  isLoading,
+  uniqueQueryId,
+  addFilter,
+}) => {
+  const fillColor: FillColor = useCallback((d: ShapeTreeNode) => {
+    return chartConfigs.find((cfg) => cfg.label === d.dataName)?.color ?? emptyDonutColor;
+  }, []);
 
-    const fillColor: FillColor = useCallback((d: ShapeTreeNode) => {
-      return chartConfigs.find((cfg) => cfg.label === d.dataName)?.color ?? emptyDonutColor;
-    }, []);
+  const columns = useMemo(() => getSeverityTableColumns(), []);
+  const items = data ?? [];
 
-    const onTableChange = useCallback(
-      ({ sort = {} }) => {
-        setSortField(sort.field);
-        setSortDirection(sort.direction);
-      },
-      [setSortDirection, setSortField]
-    );
-
-    const columns = useMemo(() => getSeverityTableColumns(), []);
-    const items = data ?? [];
-
-    const count = data
+  const count = useMemo(() => {
+    return data
       ? data.reduce(function (prev, cur) {
           return prev + cur.value;
         }, 0)
       : 0;
+  }, [data]);
 
-    const sorting = useMemo(() => {
-      return {
-        sort: {
-          field: sortField,
-          direction: sortDirection,
-        },
-      };
-    }, [sortDirection, sortField]);
+  const sorting: { sort: { field: keyof SeverityBuckets; direction: SortOrder } } = {
+    sort: {
+      field: 'value',
+      direction: 'desc',
+    },
+  };
 
-    return (
-      <EuiFlexItem>
-        <InspectButtonContainer>
-          <EuiPanel>
-            <HeaderSection
-              id={uniqueQueryId}
-              inspectTitle={i18n.SEVERITY_LEVELS_INSPECT_TITLE}
-              outerDirection="row"
-              title={i18n.SEVERITY_LEVELS_TITLE}
-              titleSize="xs"
-              hideSubtitle
-            />
-            <EuiFlexGroup data-test-subj="severtyChart" gutterSize="l">
-              <EuiFlexItem>
-                <EuiBasicTable
-                  data-test-subj="severityLevelAlertsTable"
-                  columns={columns}
-                  items={items}
-                  loading={isLoading}
-                  sorting={sorting}
-                  onChange={onTableChange}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <DonutChart
-                  data={data}
-                  fillColor={fillColor}
-                  height={DONUT_HEIGHT}
-                  label={i18n.SEVERITY_TOTAL_ALERTS}
-                  title={<ChartLabel count={count} />}
-                  totalCount={count}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </InspectButtonContainer>
-      </EuiFlexItem>
-    );
-  }
-);
+  const onElementClick: ElementClickListener = useCallback(
+    (event) => {
+      const flattened = event.flat(2);
+      const level =
+        flattened.length > 0 &&
+        'groupByRollup' in flattened[0] &&
+        flattened[0].groupByRollup != null
+          ? `${flattened[0].groupByRollup}`
+          : '';
+
+      if (addFilter != null && !isEmpty(level.trim())) {
+        addFilter({ field: 'kibana.alert.severity', value: level.toLowerCase() });
+      }
+    },
+    [addFilter]
+  );
+
+  return (
+    <EuiFlexItem>
+      <InspectButtonContainer>
+        <EuiPanel>
+          <HeaderSection
+            id={uniqueQueryId}
+            inspectTitle={i18n.SEVERITY_LEVELS_INSPECT_TITLE}
+            outerDirection="row"
+            title={i18n.SEVERITY_LEVELS_TITLE}
+            titleSize="xs"
+            hideSubtitle
+          />
+          <EuiFlexGroup data-test-subj="severtyChart" gutterSize="l">
+            <EuiFlexItem>
+              <EuiInMemoryTable
+                data-test-subj="severityLevelAlertsTable"
+                columns={columns}
+                items={items}
+                loading={isLoading}
+                sorting={sorting}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <DonutChart
+                data={data}
+                fillColor={fillColor}
+                height={DONUT_HEIGHT}
+                label={i18n.SEVERITY_TOTAL_ALERTS}
+                title={<ChartLabel count={count} />}
+                totalCount={count}
+                onElementClick={onElementClick}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </InspectButtonContainer>
+    </EuiFlexItem>
+  );
+};
 
 SeverityLevelChart.displayName = 'SeverityLevelChart';
