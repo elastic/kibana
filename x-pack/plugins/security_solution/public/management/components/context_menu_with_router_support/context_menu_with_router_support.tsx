@@ -39,6 +39,7 @@ export interface ContextMenuWithRouterSupportProps
   title?: string;
   loading?: boolean;
   hoverInfo?: React.ReactNode;
+  disabled?: boolean;
 }
 
 /**
@@ -58,6 +59,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
     title,
     loading = false,
     hoverInfo,
+    disabled,
     ...commonProps
   }) => {
     const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
@@ -84,6 +86,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
         return (
           <ContextMenuItemNavByRouter
             {...itemProps}
+            disabled={disabled}
             key={uuid.v4()}
             data-test-subj={itemProps['data-test-subj'] ?? getTestId(`item-${index}`)}
             textTruncate={Boolean(maxWidth) || itemProps.textTruncate}
@@ -97,7 +100,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
           />
         );
       });
-    }, [getTestId, handleCloseMenu, items, maxWidth, loading, hoverInfo]);
+    }, [items, loading, disabled, getTestId, maxWidth, hoverInfo, handleCloseMenu]);
 
     type AdditionalPanelProps = Partial<
       Omit<EuiContextMenuPanelProps & HTMLAttributes<HTMLDivElement>, 'style'>
