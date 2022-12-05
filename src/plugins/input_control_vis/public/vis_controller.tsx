@@ -17,6 +17,7 @@ import { Filter } from '@kbn/es-query';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
 
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';
 import { getLineageMap } from './lineage';
@@ -92,20 +93,22 @@ export const createInputControlVisController = (
 
       render(
         <I18nContext>
-          <VisualizationContainer handlers={handlers}>
-            <InputControlVis
-              updateFiltersOnChange={this.visParams?.updateFiltersOnChange}
-              controls={this.controls}
-              stageFilter={this.stageFilter}
-              submitFilters={this.submitFilters}
-              resetControls={this.updateControlsFromKbn}
-              clearControls={this.clearControls}
-              hasChanges={this.hasChanges}
-              hasValues={this.hasValues}
-              refreshControl={this.refreshControl}
-              isDarkMode={this.isDarkMode}
-            />
-          </VisualizationContainer>
+          <KibanaThemeProvider theme$={deps.core.theme.theme$}>
+            <VisualizationContainer handlers={handlers}>
+              <InputControlVis
+                updateFiltersOnChange={this.visParams?.updateFiltersOnChange}
+                controls={this.controls}
+                stageFilter={this.stageFilter}
+                submitFilters={this.submitFilters}
+                resetControls={this.updateControlsFromKbn}
+                clearControls={this.clearControls}
+                hasChanges={this.hasChanges}
+                hasValues={this.hasValues}
+                refreshControl={this.refreshControl}
+                isDarkMode={this.isDarkMode}
+              />
+            </VisualizationContainer>
+          </KibanaThemeProvider>
         </I18nContext>,
         el
       );
