@@ -15,7 +15,7 @@ do
 
   echo "Overwriting stored patch file for spec/$file.js..."
   set +e
-  diff .tmp/handlebars/spec/$file.js packages/kbn-handlebars/src/upstream/index.$file.test.ts > packages/kbn-handlebars/.patches/$file.patch
+  diff -d --strip-trailing-cr .tmp/handlebars/spec/$file.js packages/kbn-handlebars/src/upstream/index.$file.test.ts > packages/kbn-handlebars/.patches/$file.patch
   set -e
 done
 

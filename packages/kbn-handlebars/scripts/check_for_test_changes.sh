@@ -16,7 +16,7 @@ do
   echo "Checking for changes to spec/$file.js..."
 
   set +e
-  diff .tmp/handlebars/spec/$file.js packages/kbn-handlebars/src/upstream/index.$file.test.ts > .tmp/$file.patch
+  diff -d --strip-trailing-cr .tmp/handlebars/spec/$file.js packages/kbn-handlebars/src/upstream/index.$file.test.ts > .tmp/$file.patch
   error=$?
   set -e
   if [ $error -gt 1 ]
