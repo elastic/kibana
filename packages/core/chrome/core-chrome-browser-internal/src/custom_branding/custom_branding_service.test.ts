@@ -9,22 +9,20 @@ import type { App } from '@kbn/core-application-browser';
 import { BehaviorSubject } from 'rxjs';
 import { CustomBrandingService } from './custom_branding_service';
 
-
 describe('CustomBrandingService', () => {
-    let service: CustomBrandingService;
-    let mockAppService: any;
-  
-    beforeEach(() => {
-      service = new CustomBrandingService();
-      mockAppService = {
-        applications$: new BehaviorSubject<ReadonlyMap<string, App>>({}),
-      };
-    });
-  
-    describe('#getCustomBranding$()', () => {
-      it('only applies to enterprise license', () => {})
-      it('#get', () => {})
-      it('#set', () => {})
-    })
+  let service: CustomBrandingService;
+  let mockAppService: any;
+
+  beforeEach(() => {
+    service = new CustomBrandingService();
+    mockAppService = {
+      applications$: new BehaviorSubject<ReadonlyMap<string, App>>({}),
+    };
   });
-  
+
+  describe('#getCustomBranding$()', () => {
+    it('only applies to enterprise license', () => {});
+    it('#get', () => {});
+    it('#set', () => {});
+  });
+});

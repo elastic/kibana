@@ -43,7 +43,6 @@ export interface CustomBranding {
 export class CustomBrandingService {
   private licenseType: '';
 
-  
   async start(): Promise<CustomBranding> {
     return {
       get: () => {
