@@ -137,7 +137,7 @@ export const EXCEPTION_LIST_HEADER_NAME_TEXTBOX = i18n.translate(
 export const EXCEPTION_LIST_HEADER_DESCRIPTION_TEXTBOX = i18n.translate(
   'exceptionList-components.exception_list_header_description_textbox',
   {
-    defaultMessage: 'Description',
+    defaultMessage: 'Description (optional)',
   }
 );
 

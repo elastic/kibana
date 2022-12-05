@@ -7,7 +7,7 @@
 
 export interface KeyValuePair {
   label: string;
-  value: string;
+  value: string | null;
 }
 
 export type ConnectorConfiguration = Record<string, KeyValuePair | null>;
@@ -99,7 +99,7 @@ export interface FilteringConfig {
 }
 
 export enum TriggerMethod {
-  ON_DEMAND = 'on-demand',
+  ON_DEMAND = 'on_demand',
   SCHEDULED = 'scheduled',
 }
 
@@ -113,7 +113,7 @@ export interface Connector {
   configuration: ConnectorConfiguration;
   description: string | null;
   error: string | null;
-  features: Record<FeatureName, boolean | null> | null;
+  features: Partial<Record<FeatureName, boolean>> | null;
   filtering: FilteringConfig[];
   id: string;
   index_name: string;
@@ -142,7 +142,7 @@ export interface ConnectorSyncJob {
   completed_at: string | null;
   connector: {
     configuration: ConnectorConfiguration;
-    filtering: FilteringRules | null;
+    filtering: FilteringRules[] | null;
     id: string;
     index_name: string;
     language: string;
@@ -164,3 +164,10 @@ export interface ConnectorSyncJob {
 }
 
 export type ConnectorSyncJobDocument = Omit<ConnectorSyncJob, 'id'>;
+
+export interface NativeConnector {
+  configuration: ConnectorConfiguration;
+  features: Connector['features'];
+  name: string;
+  serviceType: string;
+}

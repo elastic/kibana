@@ -7,18 +7,23 @@
  */
 
 import { Root } from '@kbn/core-root-server-internal';
-import * as kbnTestServer from '../../../test_helpers/kbn_server';
+import {
+  createTestServers,
+  createRootWithCorePlugins,
+  request,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 
 describe('default route provider', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let esServer: TestElasticsearchUtils;
   let root: Root;
 
   beforeAll(async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
     });
     esServer = await startES();
-    root = kbnTestServer.createRootWithCorePlugins({
+    root = createRootWithCorePlugins({
       server: {
         basePath: '/hello',
       },
@@ -35,7 +40,7 @@ describe('default route provider', () => {
   });
 
   it('redirects to the configured default route respecting basePath', async function () {
-    const { status, header } = await kbnTestServer.request.get(root, '/');
+    const { status, header } = await request.get(root, '/');
 
     expect(status).toEqual(302);
     expect(header).toMatchObject({
@@ -52,13 +57,13 @@ describe('default route provider', () => {
     ];
 
     for (const url of invalidRoutes) {
-      await kbnTestServer.request
+      await request
         .post(root, '/api/kibana/settings/defaultRoute')
         .send({ value: url })
         .expect(400);
     }
 
-    const { status, header } = await kbnTestServer.request.get(root, '/');
+    const { status, header } = await request.get(root, '/');
     expect(status).toEqual(302);
     expect(header).toMatchObject({
       location: '/hello/app/home',
@@ -66,12 +71,12 @@ describe('default route provider', () => {
   });
 
   it('consumes valid values', async function () {
-    await kbnTestServer.request
+    await request
       .post(root, '/api/kibana/settings/defaultRoute')
       .send({ value: '/valid' })
       .expect(200);
 
-    const { status, header } = await kbnTestServer.request.get(root, '/');
+    const { status, header } = await request.get(root, '/');
     expect(status).toEqual(302);
     expect(header).toMatchObject({
       location: '/hello/valid',
