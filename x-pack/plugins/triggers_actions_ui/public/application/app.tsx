@@ -26,6 +26,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { ruleDetailsRoute } from '@kbn/rule-data-utils';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
   ActionTypeRegistryContract,
@@ -43,6 +44,7 @@ const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
   () => import('./sections/rule_details/components/rule_details_route')
 );
+const queryClient = new QueryClient();
 
 export interface TriggersAndActionsUiServices extends CoreStart {
   actions: ActionsPublicPluginSetup;
@@ -86,7 +88,9 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...deps }}>
             <Router history={deps.history}>
-              <AppWithoutRouter sectionsRegex={sectionsRegex} />
+              <QueryClientProvider client={queryClient}>
+                <AppWithoutRouter sectionsRegex={sectionsRegex} />
+              </QueryClientProvider>
             </Router>
           </KibanaContextProvider>
         </KibanaThemeProvider>
