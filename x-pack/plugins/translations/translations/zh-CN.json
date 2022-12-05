@@ -31093,7 +31093,6 @@
     "xpack.synthetics.monitorManagement.monitorAdvancedOptions.monitorNamespaceFieldLabel": "命名空间",
     "xpack.synthetics.monitorManagement.monitorAdvancedOptions.namespaceHelpLearnMoreLabel": "了解详情",
     "xpack.synthetics.monitorManagement.monitorDeleteFailureMessage": "无法删除监测。请稍后重试。",
-    "xpack.synthetics.monitorManagement.monitorDeleteLoadingMessage": "正在删除监测......",
     "xpack.synthetics.monitorManagement.monitorEditedSuccessMessage": "已成功更新监测。",
     "xpack.synthetics.monitorManagement.monitorFailureMessage": "无法保存监测。请稍后重试。",
     "xpack.synthetics.monitorManagement.monitorList.actions": "操作",
