@@ -120,7 +120,7 @@ describe('Runtime field editor', () => {
       });
 
       await act(async () => {
-        const submit = lastOnChangeCall()[0].submit();;
+        const submit = lastOnChangeCall()[0].submit();
         jest.advanceTimersByTime(0); // advance timers to allow the form to validate
         await submit;
       });
