@@ -299,7 +299,7 @@ export default ({ getService }: FtrProviderContext) => {
           status_code: 409,
         });
       });
-      
+
       it('should not update a rule if trying to add default rule exception list which attached to another using rule.id', async () => {
         const ruleWithException = await createRule(supertest, log, {
           ...getSimpleRule('rule-1'),
