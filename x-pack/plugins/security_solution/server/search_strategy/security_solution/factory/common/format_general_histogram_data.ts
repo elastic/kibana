@@ -6,17 +6,17 @@
  */
 
 import type {
-  HostsKpiHistogram,
-  HostsKpiGeneralHistogramCount,
-  HostsKpiHistogramData,
-} from '../../../../../../../common/search_strategy';
+  KpiHistogramData,
+  KpiGeneralHistogramCount,
+  KpiHistogram,
+} from '../../../../../common/search_strategy';
 
 export const formatGeneralHistogramData = (
-  data: Array<HostsKpiHistogram<HostsKpiGeneralHistogramCount>>
-): HostsKpiHistogramData[] | null =>
+  data: Array<KpiHistogram<KpiGeneralHistogramCount>>
+): KpiHistogramData[] | null =>
   data && data.length > 0
-    ? data.map<HostsKpiHistogramData>(({ key, count }) => ({
+    ? data.map<KpiHistogramData>(({ key, count }) => ({
         x: key,
-        y: count.value,
+        y: count.doc_count ?? count.value,
       }))
     : null;
