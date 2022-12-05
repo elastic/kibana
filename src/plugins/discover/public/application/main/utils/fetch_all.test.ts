@@ -36,7 +36,7 @@ jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
 }));
 
-jest.mock('./fetch_textBased', () => ({
+jest.mock('./fetch_textbased', () => ({
   fetchTextBased: jest.fn().mockResolvedValue([]),
 }));
 
