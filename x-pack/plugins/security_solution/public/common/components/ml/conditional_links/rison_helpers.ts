@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RisonValue, RisonObject } from 'rison-node';
-import { decode } from 'rison-node';
+import type { RisonValue } from '@kbn/rison';
+import { decode } from '@kbn/rison';
 import { isObject, isString } from 'lodash/fp';
 
 export const decodeRison = (value: string): RisonValue => {
@@ -17,7 +17,7 @@ export const decodeRison = (value: string): RisonValue => {
   }
 };
 
-export const isRisonObject = (value: RisonValue): value is RisonObject => {
+export const isRisonObject = (value: RisonValue): value is Record<string, RisonValue> => {
   return isObject(value);
 };
 

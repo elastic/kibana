@@ -23,14 +23,15 @@ import {
   ruleExecutionStatusToRaw,
   isRuleSnoozed,
   processAlerts,
+  setFlapping,
   lastRunFromError,
   getNextRun,
+  determineAlertsToReturn,
 } from '../lib';
 import {
   RuleExecutionStatus,
   RuleExecutionStatusErrorReasons,
   IntervalSchedule,
-  RawAlertInstance,
   RawRuleExecutionStatus,
   RawRuleMonitoring,
   RuleTaskState,
@@ -233,6 +234,7 @@ export class TaskRunner<
       params: { alertId: ruleId, spaceId },
       state: {
         alertInstances: alertRawInstances = {},
+        alertRecoveredInstances: alertRecoveredRawInstances = {},
         alertTypeState: ruleTypeState = {},
         previousStartedAt,
       },
@@ -266,11 +268,18 @@ export class TaskRunner<
       searchSourceClient,
     });
 
-    const { updatedRuleTypeState, hasReachedAlertLimit, originalAlerts } =
+    const { updatedRuleTypeState, hasReachedAlertLimit, originalAlerts, originalRecoveredAlerts } =
       await this.timer.runWithTimer(TaskRunnerTimerSpan.RuleTypeRun, async () => {
         for (const id in alertRawInstances) {
           if (alertRawInstances.hasOwnProperty(id)) {
             this.alerts[id] = new Alert<State, Context>(id, alertRawInstances[id]);
+          }
+        }
+
+        const recoveredAlerts: Record<string, Alert<State, Context>> = {};
+        for (const id in alertRecoveredRawInstances) {
+          if (alertRecoveredRawInstances.hasOwnProperty(id)) {
+            recoveredAlerts[id] = new Alert<State, Context>(id, alertRecoveredRawInstances[id]);
           }
         }
 
@@ -386,31 +395,40 @@ export class TaskRunner<
 
         return {
           originalAlerts: alertsCopy,
+          originalRecoveredAlerts: recoveredAlerts,
           updatedRuleTypeState: updatedState || undefined,
           hasReachedAlertLimit: alertFactory.hasReachedAlertLimit(),
         };
       });
 
-    const { activeAlerts, recoveredAlerts } = await this.timer.runWithTimer(
+    const { activeAlerts, recoveredAlerts, currentRecoveredAlerts } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.ProcessAlerts,
       async () => {
         const {
           newAlerts: processedAlertsNew,
           activeAlerts: processedAlertsActive,
+          currentRecoveredAlerts: processedAlertsRecoveredCurrent,
           recoveredAlerts: processedAlertsRecovered,
         } = processAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>({
           alerts: this.alerts,
           existingAlerts: originalAlerts,
+          previouslyRecoveredAlerts: originalRecoveredAlerts,
           hasReachedAlertLimit,
           alertLimit: this.maxAlerts,
+          setFlapping: true,
         });
+
+        setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+          processedAlertsActive,
+          processedAlertsRecovered
+        );
 
         logAlerts({
           logger: this.logger,
           alertingEventLogger: this.alertingEventLogger,
           newAlerts: processedAlertsNew,
           activeAlerts: processedAlertsActive,
-          recoveredAlerts: processedAlertsRecovered,
+          recoveredAlerts: processedAlertsRecoveredCurrent,
           ruleLogPrefix: ruleLabel,
           ruleRunMetricsStore,
           canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
@@ -421,6 +439,7 @@ export class TaskRunner<
           newAlerts: processedAlertsNew,
           activeAlerts: processedAlertsActive,
           recoveredAlerts: processedAlertsRecovered,
+          currentRecoveredAlerts: processedAlertsRecoveredCurrent,
         };
       }
     );
@@ -451,21 +470,22 @@ export class TaskRunner<
         );
         this.countUsageOfActionExecutionAfterRuleCancellation();
       } else {
-        await executionHandler.run({ ...activeAlerts, ...recoveredAlerts });
+        await executionHandler.run({ ...activeAlerts, ...currentRecoveredAlerts });
       }
     });
 
-    const alertsToReturn: Record<string, RawAlertInstance> = {};
-    for (const id in activeAlerts) {
-      if (activeAlerts.hasOwnProperty(id)) {
-        alertsToReturn[id] = activeAlerts[id].toRaw();
-      }
-    }
+    const { alertsToReturn, recoveredAlertsToReturn } = determineAlertsToReturn<
+      State,
+      Context,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >(activeAlerts, recoveredAlerts);
 
     return {
       metrics: ruleRunMetricsStore.getMetrics(),
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: alertsToReturn,
+      alertRecoveredInstances: recoveredAlertsToReturn,
     };
   }
 

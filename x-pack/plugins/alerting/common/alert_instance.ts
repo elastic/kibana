@@ -30,6 +30,12 @@ export type LastScheduledActions = t.TypeOf<typeof lastScheduledActionsSchema>;
 
 const metaSchema = t.partial({
   lastScheduledActions: lastScheduledActionsSchema,
+  // an array used to track changes in alert state, the order is based on the rule executions (oldest to most recent)
+  // true - alert has changed from active/recovered
+  // false - the status has remained either active or recovered
+  flappingHistory: t.array(t.boolean),
+  // flapping flag that indicates whether the alert is flapping
+  flapping: t.boolean,
 });
 export type AlertInstanceMeta = t.TypeOf<typeof metaSchema>;
 
@@ -43,5 +49,4 @@ export const rawAlertInstance = t.partial({
   state: stateSchema,
   meta: metaSchema,
 });
-
 export type RawAlertInstance = t.TypeOf<typeof rawAlertInstance>;

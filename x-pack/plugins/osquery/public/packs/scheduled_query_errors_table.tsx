@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable, EuiCodeBlock, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 import { stringify } from 'querystring';
 
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';

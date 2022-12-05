@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies the manual reading of the /etc/shadow file via the commandline using standard system utilities. Threat actors will attempt to read this file, after elevating their privileges to root, in order to gain valid credentials they can utilize to move laterally undetected and access additional resources.",
+  "description": "Identifies access to the /etc/shadow file via the commandline using standard system utilities. After elevating privileges to root, threat actors may attempt to read or dump this file in order to gain valid credentials. They may utilize these to move laterally undetected and access additional resources.",
   "from": "now-9m",
   "index": [
     "auditbeat-*",
@@ -10,8 +10,11 @@
   ],
   "language": "eql",
   "license": "Elastic License v2",
-  "name": "Shadow File Read via Command Line Utilities",
-  "query": "process where event.type == \"start\" and event.action == \"exec\" and user.name == \"root\" and\nprocess.args : \"/etc/shadow\" and\nnot process.executable: (\"/usr/bin/find\", \"/usr/bin/cmp\", \"/bin/ls\", \"/usr/sbin/restorecon\", \"/usr/bin/uniq\") and\nnot process.parent.executable: \"/bin/dracut\"\n",
+  "name": "Potential Shadow File Read via Command Line Utilities",
+  "query": "process where event.type == \"start\" and event.action == \"exec\" and user.name == \"root\" \n  and (process.args : \"/etc/shadow\" or (process.working_directory: \"/etc\" and process.args: \"shadow\"))\n  and not process.executable: \n    (\"/usr/bin/tar\", \n    \"/bin/tar\", \n    \"/usr/bin/gzip\", \n    \"/bin/gzip\", \n    \"/usr/bin/zip\", \n    \"/bin/zip\", \n    \"/usr/bin/stat\", \n    \"/bin/stat\", \n    \"/usr/bin/cmp\", \n    \"/bin/cmp\", \n    \"/usr/bin/sudo\", \n    \"/bin/sudo\", \n    \"/usr/bin/find\", \n    \"/bin/find\", \n    \"/usr/bin/ls\", \n    \"/bin/ls\", \n    \"/usr/bin/uniq\", \n    \"/bin/uniq\", \n    \"/usr/bin/unzip\", \n    \"/bin/unzip\") \n  and not process.parent.executable: \"/bin/dracut\"\n",
+  "references": [
+    "https://www.cyberciti.biz/faq/unix-linux-password-cracking-john-the-ripper/"
+  ],
   "required_fields": [
     {
       "ecs": true,
@@ -40,6 +43,11 @@
     },
     {
       "ecs": true,
+      "name": "process.working_directory",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
       "name": "user.name",
       "type": "keyword"
     }
@@ -52,7 +60,8 @@
     "Host",
     "Linux",
     "Threat Detection",
-    "Privilege Escalation"
+    "Privilege Escalation",
+    "Credential Access"
   ],
   "threat": [
     {
@@ -69,9 +78,31 @@
           "reference": "https://attack.mitre.org/techniques/T1068/"
         }
       ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0006",
+        "name": "Credential Access",
+        "reference": "https://attack.mitre.org/tactics/TA0006/"
+      },
+      "technique": [
+        {
+          "id": "T1003",
+          "name": "OS Credential Dumping",
+          "reference": "https://attack.mitre.org/techniques/T1003/",
+          "subtechnique": [
+            {
+              "id": "T1003.008",
+              "name": "/etc/passwd and /etc/shadow",
+              "reference": "https://attack.mitre.org/techniques/T1003/008/"
+            }
+          ]
+        }
+      ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 2
 }

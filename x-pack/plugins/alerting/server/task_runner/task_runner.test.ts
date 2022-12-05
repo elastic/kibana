@@ -1017,6 +1017,7 @@ describe('Task Runner', () => {
           id: 1,
           duration: MOCK_DURATION,
           start: DATE_1969,
+          flappingHistory: [false],
           actions: {
             '1': {
               date: new Date(DATE_1970),
@@ -1362,7 +1363,13 @@ describe('Task Runner', () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
     const runnerResult = await taskRunner.run();
     expect(runnerResult.state.alertInstances).toEqual(
-      generateAlertInstance({ id: 1, duration: MOCK_DURATION, start: DATE_1969 })
+      generateAlertInstance({
+        id: 1,
+        duration: MOCK_DURATION,
+        start: DATE_1969,
+        flappingHistory: [false],
+        flapping: false,
+      })
     );
 
     testAlertingEventLogCalls({
@@ -2442,6 +2449,8 @@ describe('Task Runner', () => {
                   },
                 },
               },
+              flappingHistory: [true],
+              flapping: false,
             },
             state: {
               duration: '0',
@@ -2615,6 +2624,8 @@ describe('Task Runner', () => {
                   },
                 },
               },
+              flappingHistory: [true],
+              flapping: false,
             },
             state: {
               duration: '0',
@@ -2635,6 +2646,8 @@ describe('Task Runner', () => {
                   },
                 },
               },
+              flappingHistory: [true],
+              flapping: false,
             },
             state: {
               duration: '0',
