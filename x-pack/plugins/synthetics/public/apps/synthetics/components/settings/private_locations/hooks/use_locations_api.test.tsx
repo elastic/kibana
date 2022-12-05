@@ -12,7 +12,7 @@ import { useLocationsAPI } from './use_locations_api';
 
 describe('useLocationsAPI', () => {
   it('returns expected results', () => {
-    const { result } = renderHook(() => useLocationsAPI({ isOpen: false }), {
+    const { result } = renderHook(() => useLocationsAPI(), {
       wrapper: WrappedHelper,
     });
 
@@ -38,7 +38,7 @@ describe('useLocationsAPI', () => {
     },
   });
   it('returns expected results after data', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI({ isOpen: true }), {
+    const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI(), {
       wrapper: WrappedHelper,
     });
 
@@ -65,7 +65,7 @@ describe('useLocationsAPI', () => {
   });
 
   it('adds location on submit', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI({ isOpen: true }), {
+    const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI(), {
       wrapper: WrappedHelper,
     });
 
@@ -121,7 +121,7 @@ describe('useLocationsAPI', () => {
       },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI({ isOpen: true }), {
+    const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI(), {
       wrapper: WrappedHelper,
     });
 
