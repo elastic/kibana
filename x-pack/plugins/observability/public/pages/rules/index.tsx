@@ -117,20 +117,19 @@ function RulesPage() {
       pageHeader={{
         pageTitle: <>{RULES_PAGE_TITLE}</>,
         rightSideItems: [
-          authorizedToCreateAnyRules && (
-            <EuiButton
-              iconType="plusInCircle"
-              key="create-alert"
-              data-test-subj="createRuleButton"
-              fill
-              onClick={() => setCreateRuleFlyoutVisibility(true)}
-            >
-              <FormattedMessage
-                id="xpack.observability.rules.addRuleButtonLabel"
-                defaultMessage="Create rule"
-              />
-            </EuiButton>
-          ),
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            key="create-alert"
+            data-test-subj="createRuleButton"
+            disabled={!authorizedToCreateAnyRules}
+            onClick={() => setCreateRuleFlyoutVisibility(true)}
+          >
+            <FormattedMessage
+              id="xpack.observability.rules.addRuleButtonLabel"
+              defaultMessage="Create rule"
+            />
+          </EuiButton>,
           <EuiButtonEmpty
             href={documentationLink}
             target="_blank"

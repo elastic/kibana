@@ -7109,10 +7109,10 @@
     "@types/node" "*"
     form-data "^2.3.3"
 
-"@types/node-forge@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-1.3.0.tgz#c655e951e0fb5c4b53c9f4746c2128d4f93002fd"
-  integrity sha512-yUsIEHG3d81E2c+akGjZAMdVcjbfqMzpMjvpebnTO7pEGfqxCtBzpRV52kR1RETtwJ9fHkLdEjtaM+uMKWpwFA==
+"@types/node-forge@^1.3.1":
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-1.3.1.tgz#49e44432c306970b4e900c3b214157c480af19fa"
+  integrity sha512-hvQ7Wav8I0j9amPXJtGqI/Yx70zeF62UKlAYq8JPm0nHzjKKzZvo9iR3YI2MiOghZRlOI+tQ2f6D+G6vVf4V2Q==
   dependencies:
     "@types/node" "*"
 

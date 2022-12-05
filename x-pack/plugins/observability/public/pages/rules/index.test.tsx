@@ -129,9 +129,11 @@ describe('RulesPage with all capabilities', () => {
     );
   });
 
-  it('renders create rule button', async () => {
+  it('renders a create rule button that is not disabled', async () => {
     await setup();
-    expect(wrapper.find('[data-test-subj="createRuleButton"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="createRuleButton"]').hostNodes().prop('disabled')).toBe(
+      false
+    );
   });
 });
 
@@ -179,8 +181,11 @@ describe('RulesPage with show only capability', () => {
     wrapper = mountWithIntl(<RulesPage />);
   }
 
-  it('does not render create rule button', async () => {
+  it('renders a create rule button that is disabled', async () => {
     await setup();
-    expect(wrapper.find('[data-test-subj="createRuleButton"]').exists()).toBeFalsy();
+
+    expect(wrapper.find('[data-test-subj="createRuleButton"]').hostNodes().prop('disabled')).toBe(
+      true
+    );
   });
 });

@@ -28,7 +28,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 
 import { calculateBucketSize } from './helpers';
-import { PageHeaderProps } from './types';
+import { HeaderActionsProps } from './types';
 
 import { EmptySections } from '../../../../components/app/empty_sections';
 import { observabilityFeatureId } from '../../../../../common';
@@ -147,14 +147,17 @@ export function OverviewPage() {
     <ObservabilityPageTemplate
       isPageDataLoaded={isAllRequestsComplete}
       pageHeader={{
-        children: (
-          <PageHeader
+        pageTitle: i18n.translate('xpack.observability.overview.pageTitle', {
+          defaultMessage: 'Overview',
+        }),
+        rightSideItems: [
+          <HeaderActions
             showTour={isGuidedSetupTourVisible}
             onTourDismiss={hideGuidedSetupTour}
             handleGuidedSetupClick={handleGuidedSetupClick}
             onTimeRangeRefresh={onTimeRangeRefresh}
-          />
-        ),
+          />,
+        ],
       }}
     >
       <>
@@ -262,12 +265,12 @@ export function OverviewPage() {
   );
 }
 
-function PageHeader({
+function HeaderActions({
   showTour = false,
   onTourDismiss,
   handleGuidedSetupClick,
   onTimeRangeRefresh,
-}: PageHeaderProps) {
+}: HeaderActionsProps) {
   const { relativeStart, relativeEnd, refreshInterval, refreshPaused } = useDatePickerContext();
   const { endTour: endObservabilityTour, isTourVisible: isObservabilityTourVisible } =
     useObservabilityTourContext();
@@ -276,17 +279,13 @@ function PageHeader({
 
   return (
     <EuiFlexGroup wrap gutterSize="s" justifyContent="flexEnd">
-      <EuiFlexItem grow={1}>
-        <EuiTitle>
-          <h1 className="eui-textNoWrap">{overviewPageTitle}</h1>
-        </EuiTitle>
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <DatePicker
           rangeFrom={relativeStart}
           rangeTo={relativeEnd}
           refreshInterval={refreshInterval}
           refreshPaused={refreshPaused}
+          width="auto"
           onTimeRangeRefresh={onTimeRangeRefresh}
         />
       </EuiFlexItem>
@@ -345,7 +344,3 @@ function PageHeader({
     </EuiFlexGroup>
   );
 }
-
-const overviewPageTitle = i18n.translate('xpack.observability.overview.pageTitle', {
-  defaultMessage: 'Overview',
-});

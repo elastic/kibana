@@ -632,6 +632,7 @@ export class RulesClient {
       mutedInstanceIds: [],
       executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
       monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
+      scheduledTaskId: null,
     };
 
     this.auditLogger?.log(
