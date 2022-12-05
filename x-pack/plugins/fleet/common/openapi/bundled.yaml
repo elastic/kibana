@@ -92,9 +92,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/fleet_settings_response'
       operationId: get-settings
-    post:
+    put:
       summary: Settings - Update
       tags: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fleet_server_hosts:
+                  type: array
+                  description: Protocol and path must be the same for each URL
+                  items:
+                    type: string
+                has_seen_add_data_notice:
+                  type: boolean
+                additional_yaml_config:
+                  type: string
       responses:
         '200':
           description: OK
@@ -3885,6 +3900,7 @@ components:
           type: string
           enum:
             - elasticsearch
+            - logstash
         hosts:
           type: array
           items:
@@ -3900,12 +3916,12 @@ components:
         ssl:
           type: object
           properties:
-            certificate:
-              type: string
             certificate_authorities:
               type: array
               items:
                 type: string
+            certificate:
+              type: string
             key:
               type: string
       required:

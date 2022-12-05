@@ -64,6 +64,11 @@ describe('FindSLO', () => {
               duration: '7d',
               is_rolling: true,
             },
+            settings: {
+              timestamp_field: '@timestamp',
+              sync_delay: '1m',
+              frequency: '1m',
+            },
             summary: {
               sli_value: 0.9999,
               error_budget: {
