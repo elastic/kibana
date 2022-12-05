@@ -29,7 +29,7 @@ export const useFetchRulesInfoQuery = (options?: UseQueryOptions<RulesInfoRespon
 };
 
 /**
- * We should use this hook to invalidate the prepackaged rules cache. For
+ * We should use this hook to invalidate the rule management filters cache. For
  * example, rule mutations that affect rule set size, like creation or deletion,
  * should lead to cache invalidation.
  *
