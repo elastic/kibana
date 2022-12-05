@@ -53,6 +53,7 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
       <EuiButtonIcon
         iconType={this.getIconType({ embeddable })}
         onClick={() => this.execute(context)}
+        aria-label={this.displayName}
       />
     );
   };
