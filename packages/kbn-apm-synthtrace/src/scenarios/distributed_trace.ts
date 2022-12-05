@@ -23,61 +23,61 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const transactionName = '240rpm/75% 1000ms';
       const successfulTimestamps = range.interval('1s').rate(3);
 
-      const opbeansRum = apm
-        .service({ name: 'opbeans-rum', environment: ENVIRONMENT, agentName: 'rum-js' })
+      const synthRum = apm
+        .service({ name: 'synth-rum', environment: ENVIRONMENT, agentName: 'rum-js' })
         .instance('my-instance');
-      const opbeansNode = apm
-        .service({ name: 'opbeans-node', environment: ENVIRONMENT, agentName: 'nodejs' })
+      const synthNode = apm
+        .service({ name: 'synth-node', environment: ENVIRONMENT, agentName: 'nodejs' })
         .instance('my-instance');
-      const opbeansGo = apm
-        .service({ name: 'opbeans-go', environment: ENVIRONMENT, agentName: 'go' })
+      const synthGo = apm
+        .service({ name: 'synth-go', environment: ENVIRONMENT, agentName: 'go' })
         .instance('my-instance');
 
       const traces = successfulTimestamps.generator((timestamp) => {
-        // opbeans-rum
-        return opbeansRum
+        // synth-rum
+        return synthRum
           .transaction({ transactionName })
           .duration(400)
           .timestamp(timestamp)
           .children(
-            // opbeans-rum -> opbeans-node
-            opbeansRum
+            // synth-rum -> synth-node
+            synthRum
               .span(
                 httpExitSpan({
                   spanName: 'GET /api/products/top',
-                  destinationUrl: 'http://opbeans-node:3000',
+                  destinationUrl: 'http://synth-node:3000',
                 })
               )
               .duration(300)
               .timestamp(timestamp)
 
               .children(
-                // opbeans-node
-                opbeansNode
-                  .transaction({ transactionName: 'Initial transaction in opbeans-node' })
+                // synth-node
+                synthNode
+                  .transaction({ transactionName: 'Initial transaction in synth-node' })
                   .duration(300)
                   .timestamp(timestamp)
                   .children(
-                    opbeansNode
-                      // opbeans-node -> opbeans-go
+                    synthNode
+                      // synth-node -> synth-go
                       .span(
                         httpExitSpan({
-                          spanName: 'GET opbeans-go:3000',
-                          destinationUrl: 'http://opbeans-go:3000',
+                          spanName: 'GET synth-go:3000',
+                          destinationUrl: 'http://synth-go:3000',
                         })
                       )
                       .timestamp(timestamp)
                       .duration(400)
 
                       .children(
-                        // opbeans-go
-                        opbeansGo
+                        // synth-go
+                        synthGo
 
-                          .transaction({ transactionName: 'Initial transaction in opbeans-go' })
+                          .transaction({ transactionName: 'Initial transaction in synth-go' })
                           .timestamp(timestamp)
                           .duration(200)
                           .children(
-                            opbeansGo
+                            synthGo
                               .span({ spanName: 'custom_operation', spanType: 'custom' })
                               .timestamp(timestamp)
                               .duration(100)

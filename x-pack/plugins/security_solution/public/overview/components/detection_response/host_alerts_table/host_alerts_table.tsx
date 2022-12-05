@@ -28,7 +28,7 @@ import { HostDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import * as i18n from '../translations';
-import { ITEMS_PER_PAGE, SEVERITY_COLOR } from '../utils';
+import { ITEMS_PER_PAGE, openAlertsFilter, SEVERITY_COLOR } from '../utils';
 import type { HostAlertsItem } from './use_host_alerts_items';
 import { useHostAlertsItems } from './use_host_alerts_items';
 
@@ -53,7 +53,9 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
         : undefined;
 
       openTimelineWithFilters(
-        severityFilter ? [[hostNameFilter, severityFilter]] : [[hostNameFilter]]
+        severityFilter
+          ? [[hostNameFilter, openAlertsFilter, severityFilter]]
+          : [[hostNameFilter, openAlertsFilter]]
       );
     },
     [openTimelineWithFilters]
@@ -133,7 +135,11 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.ALERTS_TEXT,
     'data-test-subj': 'hostSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { hostName }) => (
-      <EuiLink disabled={totalAlerts === 0} onClick={() => handleClick({ hostName })}>
+      <EuiLink
+        data-test-subj="hostSeverityAlertsTable-totalAlertsLink"
+        disabled={totalAlerts === 0}
+        onClick={() => handleClick({ hostName })}
+      >
         <FormattedCount count={totalAlerts} />
       </EuiLink>
     ),
@@ -144,6 +150,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     render: (count: number, { hostName }) => (
       <EuiHealth data-test-subj="hostSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
         <EuiLink
+          data-test-subj="hostSeverityAlertsTable-criticalLink"
           disabled={count === 0}
           onClick={() => handleClick({ hostName, severity: 'critical' })}
         >

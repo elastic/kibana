@@ -33,7 +33,7 @@ export const mockRule = (): Rule => {
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
     monitoring: {
-      execution: {
+      run: {
         history: [
           {
             success: true,
@@ -55,7 +55,13 @@ export const mockRule = (): Rule => {
           success_ratio: 0.66,
           p50: 200000,
           p95: 300000,
-          p99: 300000,
+          p99: 390000,
+        },
+        last_run: {
+          timestamp: '2020-08-20T19:23:38Z',
+          metrics: {
+            duration: 500,
+          },
         },
       },
     },

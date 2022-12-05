@@ -72,6 +72,8 @@ export function DiscoverLayout({
   persistDataView,
   updateAdHocDataViewId,
   adHocDataViewList,
+  savedDataViewList,
+  updateDataViewList,
 }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
@@ -233,6 +235,8 @@ export function DiscoverLayout({
         persistDataView={persistDataView}
         updateAdHocDataViewId={updateAdHocDataViewId}
         adHocDataViewList={adHocDataViewList}
+        savedDataViewList={savedDataViewList}
+        updateDataViewList={updateDataViewList}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
@@ -241,7 +245,7 @@ export function DiscoverLayout({
           history={history}
         />
         <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} className="dscPageBody__sidebar">
             <SidebarMemoized
               columns={columns}
               documents$={savedSearchData$.documents$}

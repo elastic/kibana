@@ -44,48 +44,43 @@ const GB = 1024 ** 3;
  * But the result of this calculation is in Bytes-milliseconds, as the "system.memory.total" is stored in bytes and the "faas.billed_duration" is stored in milliseconds.
  * But to calculate the overall cost AWS uses GB-second, so we need to convert the result to this unit.
  */
-export function calcComputeUsageGBSeconds({
-  billedDuration,
-  totalMemory,
+export function convertComputeUsageToGbSec({
+  computeUsageBytesMs,
+  countInvocations,
 }: {
-  billedDuration?: number | null;
-  totalMemory?: number | null;
+  computeUsageBytesMs?: number | null;
+  countInvocations?: number | null;
 }) {
-  if (!isFiniteNumber(billedDuration) || !isFiniteNumber(totalMemory)) {
+  if (
+    !isFiniteNumber(computeUsageBytesMs) ||
+    !isFiniteNumber(countInvocations)
+  ) {
     return undefined;
   }
-
-  const totalMemoryGB = totalMemory / GB;
-  const billedDurationSec = billedDuration / 1000;
-  return totalMemoryGB * billedDurationSec;
+  const computeUsageGbSec = computeUsageBytesMs / GB / 1000;
+  return computeUsageGbSec * countInvocations;
 }
 
 export function calcEstimatedCost({
   awsLambdaPriceFactor,
   architecture,
   transactionThroughput,
-  billedDuration,
-  totalMemory,
   awsLambdaRequestCostPerMillion,
+  computeUsageGbSec,
 }: {
   awsLambdaPriceFactor?: AWSLambdaPriceFactor;
   architecture?: AwsLambdaArchitecture;
   transactionThroughput: number;
-  billedDuration?: number | null;
-  totalMemory?: number | null;
   awsLambdaRequestCostPerMillion?: number;
+  computeUsageGbSec?: number;
 }) {
   try {
-    const computeUsage = calcComputeUsageGBSeconds({
-      billedDuration,
-      totalMemory,
-    });
     if (
       !awsLambdaPriceFactor ||
       !architecture ||
       !isFiniteNumber(awsLambdaRequestCostPerMillion) ||
       !isFiniteNumber(awsLambdaPriceFactor?.[architecture]) ||
-      !isFiniteNumber(computeUsage)
+      !isFiniteNumber(computeUsageGbSec)
     ) {
       return undefined;
     }
@@ -93,7 +88,7 @@ export function calcEstimatedCost({
     const priceFactor = awsLambdaPriceFactor?.[architecture];
 
     const estimatedCost =
-      computeUsage * priceFactor +
+      computeUsageGbSec * priceFactor +
       transactionThroughput * (awsLambdaRequestCostPerMillion / 1000000);
 
     // Rounds up the decimals

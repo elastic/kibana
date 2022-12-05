@@ -15,7 +15,7 @@ import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DataPublicPluginStart, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
@@ -37,6 +37,7 @@ import type {
   IndexPattern,
   IndexPatternRef,
   DatasourceLayerSettingsProps,
+  DataSourceInfo,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -65,17 +66,18 @@ import {
 
 import {
   getFiltersInLayer,
-  getTSDBRollupWarningMessages,
+  getShardFailuresWarningMessages,
   getVisualDefaultsForLayer,
   isColumnInvalid,
   cloneLayer,
 } from './utils';
 import { isDraggedDataViewField } from '../../utils';
-import { normalizeOperationDataType } from './pure_utils';
+import { hasField, normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
+  getCurrentFieldsForOperation,
   getErrorMessages,
   insertNewColumn,
   operationDefinitionMap,
@@ -89,10 +91,10 @@ import {
 } from './operations/layer_helpers';
 import { FormBasedPrivateState, FormBasedPersistedState, DataViewDragDropOperation } from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
-import { Datasource, VisualizeEditorContext } from '../../types';
+import type { Datasource, VisualizeEditorContext } from '../../types';
 import { deleteColumn, isReferenced } from './operations';
 import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
-import { DraggingIdentifier } from '../../drag_drop';
+import type { DraggingIdentifier } from '../../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
@@ -105,7 +107,7 @@ export { deleteColumn } from './operations';
 export function columnToOperation(
   column: GenericIndexPatternColumn,
   uniqueLabel?: string,
-  dataView?: IndexPattern
+  dataView?: IndexPattern | DataView
 ): OperationDescriptor {
   const { dataType, label, isBucketed, scale, operationType, timeShift, reducedTimeRange } = column;
   const fieldTypes =
@@ -617,22 +619,6 @@ export function getFormBasedDatasource({
 
     getDropProps,
     onDrop,
-    getSupportedActionsForLayer(layerId, state, _, openLayerSettings) {
-      if (!openLayerSettings) {
-        return [];
-      }
-      return [
-        {
-          displayName: i18n.translate('xpack.lens.indexPattern.layerSettingsAction', {
-            defaultMessage: 'Layer settings',
-          }),
-          execute: openLayerSettings,
-          icon: 'gear',
-          isCompatible: Boolean(state.layers[layerId]),
-          'data-test-subj': 'lnsLayerSettings',
-        },
-      ];
-    },
 
     getCustomWorkspaceRenderer: (
       state: FormBasedPrivateState,
@@ -897,8 +883,8 @@ export function getFormBasedDatasource({
         ),
       ];
     },
-    getSearchWarningMessages: (state, warning) => {
-      return [...getTSDBRollupWarningMessages(state, warning)];
+    getSearchWarningMessages: (state, warning, request, response) => {
+      return [...getShardFailuresWarningMessages(state, warning, request, response, core.theme)];
     },
     getDeprecationMessages: () => {
       const deprecatedMessages: React.ReactNode[] = [];
@@ -983,6 +969,44 @@ export function getFormBasedDatasource({
     },
     getUsedDataViews: (state) => {
       return Object.values(state.layers).map(({ indexPatternId }) => indexPatternId);
+    },
+
+    getDatasourceInfo: async (state, references, dataViewsService) => {
+      const layers = references ? injectReferences(state, references).layers : state.layers;
+      const indexPatterns: DataView[] = [];
+      for (const { indexPatternId } of Object.values(layers)) {
+        const dataView = await dataViewsService?.get(indexPatternId);
+        if (dataView) {
+          indexPatterns.push(dataView);
+        }
+      }
+      return Object.entries(layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
+        const dataView = indexPatterns?.find(
+          (indexPattern) => indexPattern.id === layer.indexPatternId
+        );
+
+        const columns = Object.entries(layer.columns).map(([colId, col]) => {
+          const fields = hasField(col) ? getCurrentFieldsForOperation(col) : undefined;
+          return {
+            id: colId,
+            role: col.isBucketed ? ('split' as const) : ('metric' as const),
+            operation: {
+              ...columnToOperation(col, undefined, dataView),
+              type: col.operationType,
+              fields,
+              filter: col.filter,
+            },
+          };
+        });
+
+        acc.push({
+          layerId: key,
+          columns,
+          dataView,
+        });
+
+        return acc;
+      }, []);
     },
   };
 

@@ -50,6 +50,7 @@ import {
 import { activeTimeline } from '../../containers/active_timeline_context';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
 import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
+import { getDisplayValue } from '../../components/timeline/data_providers/helpers';
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
 interface AddTimelineNoteParams {
@@ -850,7 +851,7 @@ const updateProviderProperties = ({
   operator: QueryOperator;
   providerId: string;
   timeline: TimelineModel;
-  value: string | number;
+  value: string | number | Array<string | number>;
 }) =>
   timeline.dataProviders.map((provider) =>
     provider.id === providerId
@@ -862,7 +863,7 @@ const updateProviderProperties = ({
             field,
             displayField: field,
             value,
-            displayValue: value,
+            displayValue: getDisplayValue(value),
             operator,
           },
         }
@@ -884,7 +885,7 @@ const updateAndProviderProperties = ({
   operator: QueryOperator;
   providerId: string;
   timeline: TimelineModel;
-  value: string | number;
+  value: string | number | Array<string | number>;
 }) =>
   timeline.dataProviders.map((provider) =>
     provider.id === providerId
@@ -900,7 +901,7 @@ const updateAndProviderProperties = ({
                     field,
                     displayField: field,
                     value,
-                    displayValue: value,
+                    displayValue: getDisplayValue(value),
                     operator,
                   },
                 }
@@ -918,7 +919,7 @@ interface UpdateTimelineProviderEditPropertiesParams {
   operator: QueryOperator;
   providerId: string;
   timelineById: TimelineById;
-  value: string | number;
+  value: string | number | Array<string | number>;
 }
 
 export const updateTimelineProviderProperties = ({

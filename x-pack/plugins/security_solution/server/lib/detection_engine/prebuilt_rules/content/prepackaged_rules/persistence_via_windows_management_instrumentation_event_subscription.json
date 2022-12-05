@@ -14,6 +14,9 @@
   "name": "Persistence via WMI Event Subscription",
   "note": "",
   "query": "process where event.type == \"start\" and\n  (process.name : \"wmic.exe\" or process.pe.original_file_name == \"wmic.exe\") and\n  process.args : \"create\" and\n  process.args : (\"ActiveScriptEventConsumer\", \"CommandLineEventConsumer\")\n",
+  "references": [
+    "https://www.elastic.co/security-labs/hunting-for-persistence-using-elastic-security-part-1"
+  ],
   "required_fields": [
     {
       "ecs": true,
@@ -73,5 +76,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 101
+  "version": 102
 }

@@ -114,6 +114,10 @@ describe('Run-length encoding operations', () => {
         expected: [3, 3, 3, 3, 3, 3, 3, 3, 3],
       },
       {
+        data: 'AQkBCAEHAQYBBQEEAQMBAgEBAQA',
+        expected: [9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+      },
+      {
         data: 'EgMHBA',
         expected: Array(18).fill(3).concat(Array(7).fill(4)),
       },

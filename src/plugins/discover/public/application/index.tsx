@@ -9,14 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { discoverRouter } from './discover_router';
 import { DiscoverServices } from '../build_services';
-import { HistoryLocationState } from '../locator';
 
-export const renderApp = (
-  element: HTMLElement,
-  services: DiscoverServices,
-  isDev: boolean,
-  historyLocationState?: HistoryLocationState
-) => {
+export const renderApp = (element: HTMLElement, services: DiscoverServices, isDev: boolean) => {
   const { history: getHistory, capabilities, chrome, data, core } = services;
 
   const history = getHistory();
@@ -32,7 +26,7 @@ export const renderApp = (
     });
   }
   const unmount = toMountPoint(
-    wrapWithTheme(discoverRouter(services, history, isDev, historyLocationState), core.theme.theme$)
+    wrapWithTheme(discoverRouter(services, history, isDev), core.theme.theme$)
   )(element);
 
   return () => {

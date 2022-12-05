@@ -12,6 +12,7 @@ export * from './package_policy';
 export * from './epm';
 export * from './enrollment_api_key';
 export * from './fleet_server_policy_config';
+export * from './fleet_proxies';
 export * from './output';
 export * from './preconfiguration';
 export * from './settings';

@@ -53,7 +53,6 @@ import {
   SelfStyledEmbeddable,
   FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import type {
@@ -87,7 +86,12 @@ import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage, TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
-import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
+import {
+  getActiveDatasourceIdFromDoc,
+  getIndexPatternsObjects,
+  getSearchWarningMessages,
+  inferTimeField,
+} from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 import { convertDataViewIntoLensIndexPattern } from '../data_views_service/loader';
 
@@ -489,11 +493,14 @@ export class Embeddable
     this.errors = this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
 
     await this.initializeOutput();
+
     this.isInitialized = true;
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {
-    if (this.handleContainerStateChanged(containerState) || this.errors?.length) this.reload();
+    if (this.handleContainerStateChanged(containerState)) {
+      this.reload();
+    }
   }
 
   handleContainerStateChanged(containerState: LensEmbeddableInput): boolean {
@@ -531,21 +538,30 @@ export class Embeddable
 
   private handleWarnings(adapters?: Partial<DefaultInspectorAdapters>) {
     const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
-    if (!activeDatasourceId || !adapters?.requests) return;
+
+    if (!activeDatasourceId || !adapters?.requests) {
+      return;
+    }
+
     const activeDatasource = this.deps.datasourceMap[activeDatasourceId];
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
-    const warnings: React.ReactNode[] = [];
-    this.deps.data.search.showWarnings(adapters.requests, (warning) => {
-      const warningMessage = activeDatasource.getSearchWarningMessages?.(
-        docDatasourceState,
-        warning
-      );
 
-      warnings.push(...(warningMessage || []));
-      if (warningMessage && warningMessage.length) return true;
-    });
-    if (warnings && this.warningDomNode) {
-      render(<Warnings warnings={warnings} />, this.warningDomNode);
+    const requestWarnings = getSearchWarningMessages(
+      adapters.requests,
+      activeDatasource,
+      docDatasourceState,
+      {
+        searchService: this.deps.data.search,
+      }
+    );
+
+    if (requestWarnings.length && this.warningDomNode) {
+      render(
+        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+          <Warnings warnings={requestWarnings} compressed />
+        </KibanaThemeProvider>,
+        this.warningDomNode
+      );
     }
   }
 
@@ -631,6 +647,25 @@ export class Embeddable
     }
   }
 
+  private getError(): Error | undefined {
+    const message =
+      typeof this.errors?.[0]?.longMessage === 'string'
+        ? this.errors[0].longMessage
+        : this.errors?.[0]?.shortMessage;
+
+    if (message != null) {
+      return new Error(message);
+    }
+
+    if (!this.expression) {
+      return new Error(
+        i18n.translate('xpack.lens.embeddable.failure', {
+          defaultMessage: "Visualization couldn't be displayed",
+        })
+      );
+    }
+  }
+
   /**
    *
    * @param {HTMLElement} domNode
@@ -648,12 +683,19 @@ export class Embeddable
 
     this.domNode.setAttribute('data-shared-item', '');
 
+    const error = this.getError();
+
     this.updateOutput({
       ...this.getOutput(),
       loading: true,
-      error: undefined,
+      error,
     });
-    this.renderComplete.dispatchInProgress();
+
+    if (error) {
+      this.renderComplete.dispatchError();
+    } else {
+      this.renderComplete.dispatchInProgress();
+    }
 
     const input = this.getInput();
 
@@ -683,7 +725,8 @@ export class Embeddable
           style={input.style}
           executionContext={this.getExecutionContext()}
           canEdit={this.getIsEditable() && input.viewMode === 'edit'}
-          onRuntimeError={() => {
+          onRuntimeError={(message) => {
+            this.updateOutput({ error: new Error(message) });
             this.logError('runtime');
           }}
           noPadding={this.visDisplayOptions?.noPadding}
@@ -692,8 +735,8 @@ export class Embeddable
           css={css({
             position: 'absolute',
             zIndex: 2,
-            right: euiThemeVars.euiSizeM,
-            bottom: euiThemeVars.euiSizeM,
+            left: 0,
+            bottom: 0,
           })}
           ref={(el) => {
             if (el) {

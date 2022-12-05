@@ -62,7 +62,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       it('should return 200 and an array for upgrading a package', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
-          .post(`/api/fleet/epm/packages/_bulk`)
+          .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
           .set('kbn-xsrf', 'xxxx')
           .send({ packages: ['multiple_versions'] })
           .expect(200);
@@ -73,7 +73,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       it('should return an error for packages that do not exist', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
-          .post(`/api/fleet/epm/packages/_bulk`)
+          .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
           .set('kbn-xsrf', 'xxxx')
           .send({ packages: ['multiple_versions', 'blahblah'] })
           .expect(200);
@@ -88,7 +88,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       it('should upgrade multiple packages', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
-          .post(`/api/fleet/epm/packages/_bulk`)
+          .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
           .set('kbn-xsrf', 'xxxx')
           .send({ packages: ['multiple_versions', 'overrides'] })
           .expect(200);
@@ -110,7 +110,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should return 200 and an array for upgrading a package', async function () {
         const { body }: { body: BulkInstallPackagesResponse } = await supertest
-          .post(`/api/fleet/epm/packages/_bulk`)
+          .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
           .set('kbn-xsrf', 'xxxx')
           .send({ packages: ['multiple_versions'] })
           .expect(200);

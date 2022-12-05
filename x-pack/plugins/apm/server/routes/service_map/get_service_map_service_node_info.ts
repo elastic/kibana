@@ -15,7 +15,7 @@ import {
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { NodeStats } from '../../../common/service_map';
 import {
   TRANSACTION_PAGE_LOAD,

@@ -21,7 +21,7 @@ import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } fro
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { sampleAttributeWithReferenceLines } from './test_data/sample_attribute_with_reference_lines';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+import { FormulaPublicApi, XYState } from '@kbn/lens-plugin/public';
 
 describe('Lens Attribute', () => {
   mockAppDataView();
@@ -108,7 +108,7 @@ describe('Lens Attribute', () => {
             to: 'now',
           },
           dataView: mockDataView,
-          name: 'ux-series-1',
+          name: 'Page load time',
           breakdown: 'percentile',
           reportDefinitions: {},
           selectedMetricField: 'transaction.duration.us',
@@ -139,7 +139,7 @@ describe('Lens Attribute', () => {
             query: 'transaction.type: page-load and processor.event: transaction',
           },
           isBucketed: false,
-          label: `${rank} percentile of page load time`,
+          label: 'Page load time',
           operationType: 'percentile',
           params: {
             percentile: Number(rank.slice(0, 2)),
@@ -431,7 +431,7 @@ describe('Lens Attribute', () => {
         isVisible: true,
         showSingleSeries: true,
         position: 'right',
-        legendSize: 'large',
+        legendSize: 'auto',
         shouldTruncate: false,
       },
       preferredSeriesType: 'line',
@@ -470,11 +470,9 @@ describe('Lens Attribute', () => {
         layerConfig: layerConfig1,
         sourceField: USER_AGENT_NAME,
         layerId: 'layer0',
-        indexPattern: mockDataView,
-        labels: layerConfig.seriesConfig.labels,
       });
 
-      expect(lnsAttr.visualization?.layers).toEqual([
+      expect((lnsAttr.visualization as XYState)?.layers).toEqual([
         {
           accessors: ['y-axis-column-layer0-0'],
           layerId: 'layer0',
@@ -501,7 +499,7 @@ describe('Lens Attribute', () => {
           'breakdown-column-layer0': {
             dataType: 'string',
             isBucketed: true,
-            label: 'Top values of Browser family',
+            label: 'Browser family',
             operationType: 'terms',
             params: {
               missingBucket: false,

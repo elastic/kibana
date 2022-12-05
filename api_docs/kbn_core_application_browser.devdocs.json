@@ -402,7 +402,7 @@
             ],
             "signature": [
               "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: ",
-              "ButtonColor",
+              "EuiButtonColor",
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-application-browser",
@@ -494,7 +494,7 @@
                   "(optional) color for the confirmation button\nso we can show to the user the right UX for him to saved his/her/their changes"
                 ],
                 "signature": [
-                  "ButtonColor",
+                  "EuiButtonColor",
                   " | undefined"
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
@@ -614,7 +614,7 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "ButtonColor",
+              "EuiButtonColor",
               " | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",

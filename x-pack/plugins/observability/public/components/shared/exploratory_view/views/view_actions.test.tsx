@@ -65,7 +65,7 @@ describe('ViewActions', () => {
 
     const btnComponent = screen.getByTestId('seriesChangesApplyButton');
 
-    expect(btnComponent.classList).toContain('euiButton-isDisabled');
+    expect(btnComponent.classList[1]).toContain('disabled');
 
     fireEvent.click(applyBtn);
 
@@ -140,7 +140,7 @@ describe('ViewActions', () => {
 
     const btnComponent = screen.getByTestId('seriesChangesApplyButton');
 
-    expect(btnComponent.classList).toContain('euiButton-isDisabled');
+    expect(btnComponent.classList[1]).toContain('disabled');
 
     fireEvent.click(applyBtn);
 

@@ -1,14 +1,13 @@
 {
   "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
-    "allowJs": true,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outDir": "./target_types",
-    "stripInternal": true,
+    "outDir": "target_types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "@kbn/ambient-common-types"
     ]
   },
   "include": [

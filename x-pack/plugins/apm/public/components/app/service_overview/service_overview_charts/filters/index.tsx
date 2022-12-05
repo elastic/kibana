@@ -4,11 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexGroupProps,
+  EuiFlexItem,
+  EuiSelect,
+} from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { Environment } from '../../../../../../common/environment_rt';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
+import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
 import { useFetcher } from '../../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { push } from '../../../../shared/links/url_helpers';
@@ -19,6 +25,7 @@ type MobileFilter =
 interface Props {
   end: string;
   environment: Environment;
+  transactionType?: string;
   kuery: string;
   start: string;
   filters: Record<MobileFilter['key'], string | undefined>;
@@ -32,11 +39,13 @@ const ALL_OPTION = {
 export function MobileFilters({
   end,
   environment,
+  transactionType,
   kuery,
   start,
   filters,
 }: Props) {
   const history = useHistory();
+  const { isSmall, isLarge } = useBreakpoints();
   const { serviceName } = useApmServiceContext();
   const { data = { mobileFilters: [] } } = useFetcher(
     (callApmApi) => {
@@ -45,12 +54,12 @@ export function MobileFilters({
         {
           params: {
             path: { serviceName },
-            query: { end, environment, kuery, start },
+            query: { end, environment, kuery, start, transactionType },
           },
         }
       );
     },
-    [end, environment, kuery, serviceName, start]
+    [end, environment, kuery, serviceName, start, transactionType]
   );
 
   function toSelectOptions(items?: string[]) {
@@ -66,12 +75,26 @@ export function MobileFilters({
     });
   }
 
+  const groupDirection: EuiFlexGroupProps['direction'] = isLarge
+    ? 'column'
+    : 'row';
+
   return (
-    <EuiFlexGroup justifyContent="flexEnd">
+    <EuiFlexGroup
+      justifyContent="flexEnd"
+      gutterSize="s"
+      responsive={false}
+      direction={groupDirection}
+    >
       {data.mobileFilters.map((filter) => {
         return (
-          <EuiFlexItem grow={false} key={filter.key}>
+          <EuiFlexItem
+            grow={false}
+            key={filter.key}
+            style={isLarge ? {} : { width: '225px' }}
+          >
             <EuiSelect
+              fullWidth={isSmall}
               prepend={filter.label}
               options={toSelectOptions(filter.options)}
               value={filters[filter.key]}

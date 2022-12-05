@@ -67,6 +67,8 @@ export const tGridDefaults: SubsetTGridModel = {
   dataViewId: null,
   deletedEventIds: [],
   expandedDetail: {},
+  selectAll: false,
+  totalCount: 0,
   filters: [],
   indexNames: [],
   isLoading: false,

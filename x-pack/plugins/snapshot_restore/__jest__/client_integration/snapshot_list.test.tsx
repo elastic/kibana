@@ -55,7 +55,7 @@ describe('<SnapshotList />', () => {
   let getSearchErrorText: SnapshotListTestBed['actions']['getSearchErrorText'];
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     const snapshot = fixtures.getSnapshot({
       repository: REPOSITORY_NAME,
       snapshot: getRandomString(),

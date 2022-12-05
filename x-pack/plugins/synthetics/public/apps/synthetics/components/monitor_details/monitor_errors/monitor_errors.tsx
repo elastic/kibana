@@ -14,48 +14,58 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { FailedTestsCount } from './failed_tests_count';
-import { useGetUrlParams } from '../../../hooks';
+import { useAbsoluteDate, useGetUrlParams } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
 import { ErrorsList } from './errors_list';
+import { MonitorFailedTests } from './failed_tests';
 
 export const MonitorErrors = () => {
   const { euiTheme } = useEuiTheme();
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
+  const time = useAbsoluteDate({ from: dateRangeStart, to: dateRangeEnd });
+
+  const monitorId = useMonitorQueryId();
+
   return (
     <>
       <SyntheticsDatePicker fullWidth={true} />
-      <EuiSpacer />
-      <EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
-          <EuiPanel>
+          <EuiPanel hasBorder>
             <EuiTitle size="xs">
               <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{OVERVIEW_LABEL}</h3>
             </EuiTitle>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <MonitorErrorsCount to={dateRangeEnd} from={dateRangeStart} />
+                {monitorId && (
+                  <MonitorErrorsCount from={time.from} to={time.to} monitorId={[monitorId]} />
+                )}
               </EuiFlexItem>
               <EuiFlexItem>
-                <FailedTestsCount to={dateRangeEnd} from={dateRangeStart} />
+                <FailedTestsCount from={time.from} to={time.to} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={3}>
-          <EuiPanel>
+          <EuiPanel hasBorder>
             <EuiTitle size="xs">
               <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{FAILED_TESTS_LABEL}</h3>
             </EuiTitle>
+            <MonitorFailedTests time={time} />
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={2}>
-          <EuiPanel>
+          <EuiPanel hasBorder>
             <EuiTitle size="xs">
               <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{ERRORS_LABEL}</h3>
             </EuiTitle>
@@ -63,7 +73,7 @@ export const MonitorErrors = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          <EuiPanel>
+          <EuiPanel hasBorder>
             <EuiTitle size="xs">
               <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>
                 {FAILED_TESTS_BY_STEPS_LABEL}

@@ -23,7 +23,7 @@ import { Tags } from './tags';
 import { Connector } from './connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import type { ActionConnector } from '../../../common/api';
+import type { ActionConnector, CasePostRequest } from '../../../common/api';
 import type { Case } from '../../containers/types';
 import type { CasesTimelineIntegration } from '../timeline_context';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
@@ -70,6 +70,7 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
   ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
   attachments?: CaseAttachmentsWithoutOwner;
+  initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
 const empty: ActionConnector[] = [];
@@ -79,6 +80,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
 
     const { owner } = useCasesContext();
+
     const availableOwners = useAvailableCasesOwners();
     const canShowCaseSolutionSelection = !owner.length && availableOwners.length;
 
@@ -181,12 +183,14 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     onSuccess,
     timelineIntegration,
     attachments,
+    initialValue,
   }) => (
     <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
       <FormContext
         afterCaseCreated={afterCaseCreated}
         onSuccess={onSuccess}
         attachments={attachments}
+        initialValue={initialValue}
       >
         <CreateCaseFormFields
           connectors={empty}

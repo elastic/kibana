@@ -10,7 +10,7 @@ import { chunk } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { Logger, SavedObjectsBulkUpdateObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { convertRuleIdsToKueryNode } from '../../lib';
-import { BulkEditError } from '../rules_client';
+import { BulkOperationError } from '../rules_client';
 import { RawRule } from '../../types';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 
@@ -21,13 +21,13 @@ type BulkEditOperation = (filter: KueryNode | null) => Promise<{
   apiKeysToInvalidate: string[];
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
-  errors: BulkEditError[];
+  errors: BulkOperationError[];
 }>;
 
 interface ReturnRetry {
   apiKeysToInvalidate: string[];
   results: Array<SavedObjectsUpdateResponse<RawRule>>;
-  errors: BulkEditError[];
+  errors: BulkOperationError[];
 }
 
 /**
@@ -52,7 +52,7 @@ export const retryIfBulkEditConflicts = async (
   retries: number = RETRY_IF_CONFLICTS_ATTEMPTS,
   accApiKeysToInvalidate: string[] = [],
   accResults: Array<SavedObjectsUpdateResponse<RawRule>> = [],
-  accErrors: BulkEditError[] = []
+  accErrors: BulkOperationError[] = []
 ): Promise<ReturnRetry> => {
   // run the operation, return if no errors or throw if not a conflict error
   try {

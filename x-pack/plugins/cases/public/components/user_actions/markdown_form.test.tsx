@@ -54,7 +54,7 @@ describe('UserActionMarkdown ', () => {
         target: { value: newValue },
       });
 
-    wrapper.find(`[data-test-subj="user-action-save-markdown"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="user-action-save-markdown"]`).first().simulate('click');
 
     await waitFor(() => {
       expect(onSaveContent).toHaveBeenCalledWith(newValue);
@@ -68,7 +68,7 @@ describe('UserActionMarkdown ', () => {
       </TestProviders>
     );
 
-    wrapper.find(`[data-test-subj="user-action-save-markdown"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="user-action-save-markdown"]`).first().simulate('click');
 
     await waitFor(() => {
       expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);

@@ -48,6 +48,7 @@ export const mockGlobalState: TableState = {
       title: 'Events',
       sessionViewConfig: null,
       selectAll: false,
+      totalCount: 0,
     },
   },
 };

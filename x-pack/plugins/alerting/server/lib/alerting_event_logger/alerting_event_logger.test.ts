@@ -66,6 +66,7 @@ const alert = {
     end: '2020-01-01T03:00:00.000Z',
     duration: '2343252346',
   },
+  flapping: false,
 };
 
 const action = {
@@ -79,7 +80,7 @@ describe('AlertingEventLogger', () => {
   let alertingEventLogger: AlertingEventLogger;
 
   beforeAll(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(new Date(mockNow));
   });
 

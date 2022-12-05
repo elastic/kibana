@@ -2,10 +2,8 @@
   "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
     "declaration": true,
-    "allowJs": true,
     "checkJs": true,
     "outDir": "target_types",
-    "stripInternal": false,
     "types": [
       "jest",
       "node"

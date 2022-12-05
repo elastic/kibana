@@ -16,12 +16,15 @@ import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server
 
 import type { RuleToImport } from '../../../../../common/detection_engine/rule_management';
 import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
-import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
+import type {
+  AlertSuppression,
+  RuleResponse,
+} from '../../../../../common/detection_engine/rule_schema';
 
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRulesActionsSavedObject } from '../../rule_actions_legacy';
 import type { RuleExecutionSummariesByRuleId } from '../../rule_monitoring';
-import type { RuleAlertType, RuleParams } from '../../rule_schema';
+import type { AlertSuppressionCamel, RuleAlertType, RuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';
 import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
@@ -355,3 +358,21 @@ export const getInvalidConnectors = async (
 
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];
 };
+
+export const convertAlertSuppressionToCamel = (
+  input: AlertSuppression | undefined
+): AlertSuppressionCamel | undefined =>
+  input
+    ? {
+        groupBy: input.group_by,
+      }
+    : undefined;
+
+export const convertAlertSuppressionToSnake = (
+  input: AlertSuppressionCamel | undefined
+): AlertSuppression | undefined =>
+  input
+    ? {
+        group_by: input.groupBy,
+      }
+    : undefined;

@@ -30,6 +30,7 @@ import {
   executionLogSortableColumns,
   ExecutionLogSortFields,
 } from '@kbn/alerting-plugin/common';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { RuleEventLogListCellRenderer, ColumnId } from './rule_event_log_list_cell_renderer';
 import { RuleEventLogPaginationStatus } from './rule_event_log_pagination_status';
 import { RuleActionErrorBadge } from './rule_action_error_badge';
@@ -173,6 +174,8 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
   } = props;
 
   const { euiTheme } = useEuiTheme();
+
+  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
   const getPaginatedRowIndex = useCallback(
     (rowIndex: number) => {
@@ -621,6 +624,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             dateFormat={dateFormat}
             ruleId={ruleId}
             spaceIds={spaceIds}
+            useExecutionStatus={isRuleUsingExecutionStatus}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

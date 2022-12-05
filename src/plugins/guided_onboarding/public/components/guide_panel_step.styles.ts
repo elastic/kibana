@@ -29,4 +29,13 @@ export const getGuidePanelStepStyles = (euiTheme: EuiThemeComputed, stepStatus: 
       color: ${euiTheme.colors.title};
     }
   `,
+  description: css`
+    p {
+      margin-left: 32px;
+      margin-block-end: 0;
+    }
+    ul {
+      padding-left: 28px;
+    }
+  `,
 });

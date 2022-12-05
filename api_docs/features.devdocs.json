@@ -353,12 +353,12 @@
                 "path": "x-pack/plugins/security/server/lib/role_utils.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/plugin.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
               },
               {
                 "plugin": "security",
@@ -1739,12 +1739,12 @@
                 "path": "x-pack/plugins/security/server/lib/role_utils.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/plugin.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
               },
               {
                 "plugin": "security",
@@ -3596,12 +3596,12 @@
                 "path": "x-pack/plugins/security/server/lib/role_utils.ts"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/plugin.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
               },
               {
                 "plugin": "security",

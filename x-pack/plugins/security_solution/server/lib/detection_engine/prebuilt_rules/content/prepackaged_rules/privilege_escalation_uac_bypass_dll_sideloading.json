@@ -15,7 +15,8 @@
   "note": "",
   "query": "file where event.type : \"change\" and process.name : \"dllhost.exe\" and\n  /* Known modules names side loaded into process running with high or system integrity level for UAC Bypass, update here for new modules */\n  file.name : (\"wow64log.dll\", \"comctl32.dll\", \"DismCore.dll\", \"OskSupport.dll\", \"duser.dll\", \"Accessibility.ni.dll\") and\n  /* has no impact on rule logic just to avoid OS install related FPs */\n  not file.path : (\"C:\\\\Windows\\\\SoftwareDistribution\\\\*\", \"C:\\\\Windows\\\\WinSxS\\\\*\")\n",
   "references": [
-    "https://github.com/hfiref0x/UACME"
+    "https://github.com/hfiref0x/UACME",
+    "https://www.elastic.co/security-labs/exploring-windows-uac-bypasses-techniques-and-detection-strategies"
   ],
   "required_fields": [
     {
@@ -76,5 +77,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 100
+  "version": 101
 }

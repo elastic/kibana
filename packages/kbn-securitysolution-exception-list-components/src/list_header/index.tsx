@@ -10,17 +10,13 @@ import React from 'react';
 import type { FC } from 'react';
 import { EuiIcon, EuiPageHeader, EuiText } from '@elastic/eui';
 import * as i18n from '../translations';
-import {
-  textWithEditContainerCss,
-  textCss,
-  descriptionContainerCss,
-  headerCss,
-} from './list_header.styles';
+import { textCss, descriptionContainerCss, backTextCss } from './list_header.styles';
 import { MenuItems } from './menu_items';
 import { TextWithEdit } from '../text_with_edit';
 import { EditModal } from './edit_modal';
 import { ListDetails, Rule } from '../types';
 import { useExceptionListHeader } from './use_list_header';
+import { textWithEditContainerCss } from '../text_with_edit/text_with_edit.styles';
 
 interface ExceptionListHeaderComponentProps {
   name: string;
@@ -29,7 +25,8 @@ interface ExceptionListHeaderComponentProps {
   isReadonly: boolean;
   linkedRules: Rule[];
   dataTestSubj?: string;
-  breadcrumbLink?: string;
+  backOptions: BackOptions;
+  canUserEditList?: boolean;
   securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   onEditListDetails: (listDetails: ListDetails) => void;
   onExportList: () => void;
@@ -37,6 +34,12 @@ interface ExceptionListHeaderComponentProps {
   onManageRules: () => void;
 }
 
+export interface BackOptions {
+  pageId: string;
+  path: string;
+  dataTestSubj?: string;
+  onNavigate: (path: string) => void;
+}
 const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
   name,
   description,
@@ -45,7 +48,8 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
   isReadonly,
   dataTestSubj,
   securityLinkAnchorComponent,
-  breadcrumbLink,
+  backOptions,
+  canUserEditList = true,
   onEditListDetails,
   onExportList,
   onDeleteList,
@@ -57,7 +61,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
     onEditListDetails,
   });
   return (
-    <div css={headerCss}>
+    <div>
       <EuiPageHeader
         bottomBorder
         paddingSize="none"
@@ -65,7 +69,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
           <TextWithEdit
             dataTestSubj={`${dataTestSubj || ''}Title`}
             text={listDetails.name || i18n.EXCEPTION_LIST_HEADER_NAME}
-            isReadonly={isReadonly}
+            isReadonly={isReadonly || !canUserEditList}
             onEdit={onEdit}
           />
         }
@@ -76,7 +80,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
             <TextWithEdit
               dataTestSubj={`${dataTestSubj || ''}Description`}
               textCss={textCss}
-              isReadonly={isReadonly}
+              isReadonly={isReadonly || !canUserEditList}
               text={listDetails.description || i18n.EXCEPTION_LIST_HEADER_DESCRIPTION}
               onEdit={onEdit}
             />
@@ -91,6 +95,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
             dataTestSubj={`${dataTestSubj || ''}RightSideMenuItems`}
             linkedRules={linkedRules}
             isReadonly={isReadonly}
+            canUserEditList={canUserEditList}
             securityLinkAnchorComponent={securityLinkAnchorComponent}
             onExportList={onExportList}
             onDeleteList={onDeleteList}
@@ -100,15 +105,18 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
         breadcrumbs={[
           {
             text: (
-              <div data-test-subj={`${dataTestSubj || ''}Breadcrumb`}>
+              <div data-test-subj={`${dataTestSubj || ''}Breadcrumb`} css={backTextCss}>
                 <EuiIcon size="s" type="arrowLeft" />
                 {i18n.EXCEPTION_LIST_HEADER_BREADCRUMB}
               </div>
             ),
             color: 'primary',
             'aria-current': false,
-            href: breadcrumbLink,
-            onClick: (e) => e.preventDefault(),
+            href: backOptions.path,
+            onClick: (e) => {
+              e.preventDefault();
+              backOptions.onNavigate(backOptions.path);
+            },
           },
         ]}
       />

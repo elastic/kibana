@@ -216,7 +216,6 @@ export const PreviewHistogram = ({
             entityType: 'events',
             filters: [],
             globalFullScreen,
-            hasAlertsCrud: false,
             id: TableId.rulePreview,
             indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
             indexPattern: selectedIndexPattern,

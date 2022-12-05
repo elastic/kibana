@@ -19,11 +19,19 @@ export const enableMonitorManagedViaApi = async (kibanaUrl: string) => {
   }
 };
 
-export const addTestMonitor = async (kibanaUrl: string, name: string) => {
-  data.name = name;
-
+export const addTestMonitor = async (
+  kibanaUrl: string,
+  name: string,
+  params: Record<string, any> = { type: 'browser' }
+) => {
+  const testData = {
+    ...(params?.type !== 'browser' ? {} : data),
+    ...(params || {}),
+    name,
+    locations: [{ id: 'us_central', isServiceManaged: true }],
+  };
   try {
-    await axios.post(kibanaUrl + '/internal/uptime/service/monitors', data, {
+    await axios.post(kibanaUrl + '/internal/uptime/service/monitors', testData, {
       auth: { username: 'elastic', password: 'changeme' },
       headers: { 'kbn-xsrf': 'true' },
     });

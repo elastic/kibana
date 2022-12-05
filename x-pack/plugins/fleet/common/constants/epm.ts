@@ -41,6 +41,7 @@ export const autoUpdatePackages = [
   FLEET_ENDPOINT_PACKAGE,
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
+  FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
 ];
 
 export const HIDDEN_API_REFERENCE_PACKAGES = [
@@ -49,7 +50,11 @@ export const HIDDEN_API_REFERENCE_PACKAGES = [
   FLEET_SYNTHETICS_PACKAGE,
 ];
 
-export const autoUpgradePoliciesPackages = [FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE];
+export const autoUpgradePoliciesPackages = [
+  FLEET_APM_PACKAGE,
+  FLEET_SYNTHETICS_PACKAGE,
+  FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
+];
 
 export const agentAssetTypes = {
   Input: 'input',

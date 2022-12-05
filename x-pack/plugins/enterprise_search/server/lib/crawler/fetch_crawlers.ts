@@ -11,8 +11,8 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { Crawler, CrawlRequest } from '../../../common/types/crawler';
 import { fetchAll } from '../fetch_all';
 
-const CRAWLER_CONFIGURATIONS_INDEX = '.ent-search-actastic-crawler2_configurations';
-const CRAWLER_CRAWL_REQUESTS_INDEX = '.ent-search-actastic-crawler2_crawl_requests';
+const CRAWLER_CONFIGURATIONS_INDEX = '.ent-search-actastic-crawler2_configurations_v2';
+const CRAWLER_CRAWL_REQUESTS_INDEX = '.ent-search-actastic-crawler2_crawl_requests_v2';
 
 export const fetchMostRecentCrawlerRequestByConfigurationId = async (
   client: IScopedClusterClient,

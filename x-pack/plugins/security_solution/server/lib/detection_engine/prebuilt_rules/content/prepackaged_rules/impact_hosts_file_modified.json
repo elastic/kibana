@@ -56,7 +56,8 @@
     "Windows",
     "macOS",
     "Threat Detection",
-    "Impact"
+    "Impact",
+    "Investigation Guide"
   ],
   "threat": [
     {
@@ -86,5 +87,5 @@
   "timeline_title": "Comprehensive File Timeline",
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 101
+  "version": 102
 }

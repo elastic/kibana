@@ -29,6 +29,7 @@
   ],
   "kbn_references": [
     { "path": "../src/core/tsconfig.json" },
+    { "path": "../src/setup_node_env/tsconfig.json" },
     { "path": "../src/plugins/telemetry_management_section/tsconfig.json" },
     { "path": "../src/plugins/advanced_settings/tsconfig.json" },
     { "path": "../src/plugins/management/tsconfig.json" },

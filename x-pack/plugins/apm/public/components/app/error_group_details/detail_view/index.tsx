@@ -43,7 +43,7 @@ import {
 import { ExceptionStacktrace } from './exception_stacktrace';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { ERROR_GROUP_ID } from '../../../../../common/elasticsearch_fieldnames';
+import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
 import { TraceSearchType } from '../../../../../common/trace_explorer';
 import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
 import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
@@ -96,7 +96,7 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
   const method = error.http?.request?.method;
   const status = error.http?.response?.status_code;
 
-  const traceExplorerLink = router.link('/traces/explorer', {
+  const traceExplorerLink = router.link('/traces/explorer/waterfall', {
     query: {
       ...query,
       showCriticalPath: false,
