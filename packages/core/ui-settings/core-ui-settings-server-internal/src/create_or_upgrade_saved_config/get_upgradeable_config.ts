@@ -24,16 +24,17 @@ export interface UpgradeableConfigAttributes extends ConfigAttributes {
  *  @param {Object} options
  *  @property {SavedObjectsClient} savedObjectsClient
  *  @property {string} version
+ *  @property {type} `config` or `config-global`
  *  @return {Promise<SavedConfig|undefined>}
  */
 export async function getUpgradeableConfig({
   savedObjectsClient,
   version,
-  type = 'config',
+  type,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   version: string;
-  type?: 'config' | 'config-global';
+  type: 'config' | 'config-global';
 }) {
   // attempt to find a config we can upgrade
   const { saved_objects: savedConfigs } =

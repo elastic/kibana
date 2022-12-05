@@ -28,25 +28,19 @@ interface Options {
   buildNum: number;
   log: Logger;
   handleWriteErrors: boolean;
-  type?: 'config' | 'config-global';
+  type: 'config' | 'config-global';
 }
 
 export async function createOrUpgradeSavedConfig(
   options: Options
 ): Promise<Record<string, any> | undefined> {
-  const {
-    savedObjectsClient,
-    version,
-    buildNum,
-    log,
-    handleWriteErrors,
-    type = 'config',
-  } = options;
+  const { savedObjectsClient, version, buildNum, log, handleWriteErrors, type } = options;
 
   // try to find an older config we can upgrade
   const upgradeableConfig = await getUpgradeableConfig({
     savedObjectsClient,
     version,
+    type,
   });
 
   let transformDefaults = {};

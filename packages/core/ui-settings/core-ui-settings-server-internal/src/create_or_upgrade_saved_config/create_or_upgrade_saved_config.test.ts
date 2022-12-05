@@ -23,7 +23,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
   const prevVersion = '4.0.0';
   const buildNum = 1337;
 
-  function setup() {
+  function setup(configType = 'config' as 'config' | 'config-global') {
     const logger = loggingSystemMock.create();
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.create.mockImplementation(
@@ -42,11 +42,16 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         buildNum,
         log: logger.get(),
         handleWriteErrors: false,
+        type: configType,
         ...options,
       });
 
       expect(mockGetUpgradeableConfig).toHaveBeenCalledTimes(1);
-      expect(mockGetUpgradeableConfig).toHaveBeenCalledWith({ savedObjectsClient, version });
+      expect(mockGetUpgradeableConfig).toHaveBeenCalledWith({
+        savedObjectsClient,
+        version,
+        type: configType,
+      });
 
       return resp;
     }
@@ -266,6 +271,37 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
       });
 
       await run({ type: 'config-global' });
+
+      expect(mockGetUpgradeableConfig).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.create).toHaveBeenCalledWith(
+        'config-global',
+        {
+          ...savedAttributes,
+          buildNum,
+        },
+        {
+          id: version,
+        }
+      );
+    });
+  });
+
+  describe('upgrade config-global', () => {
+    it('should merge upgraded attributes with current build number in new config', async () => {
+      const { run, savedObjectsClient } = setup();
+
+      const savedAttributes = {
+        buildNum: buildNum - 100,
+        defaultIndex: 'some-index',
+      };
+
+      mockGetUpgradeableConfig.mockResolvedValue({
+        id: prevVersion,
+        attributes: savedAttributes,
+      });
+
+      await run('config-global');
 
       expect(mockGetUpgradeableConfig).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);

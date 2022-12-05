@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core-ui-settings-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { UiSettingsParams } from '@kbn/core-ui-settings-common';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 
 /** @internal */
 export interface InternalUiSettingsServicePreboot {
