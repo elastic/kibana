@@ -32,7 +32,7 @@ describe('ui settings global client', () => {
     schema: schema.string(),
   };
   const settingB: UiSettingsParams = {
-    name: 'settingA',
+    name: 'settingB',
     value: 123,
     scope: 'global',
     schema: schema.number(),
