@@ -14,6 +14,7 @@ import {
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   LABEL_BORDER_SIZES,
+  LABEL_POSITIONS,
   LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
@@ -72,6 +73,11 @@ function getLayerStyle(): VectorStyleDescriptor {
             name: TRANSACTION_DURATION_COUNTRY,
             origin: FIELD_ORIGIN.JOIN,
           },
+        },
+      },
+      labelPosition: {
+        options: {
+          position: LABEL_POSITIONS.CENTER,
         },
       },
       labelZoomRange: {

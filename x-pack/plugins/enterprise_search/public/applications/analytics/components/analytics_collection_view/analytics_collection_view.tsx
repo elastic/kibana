@@ -10,14 +10,7 @@ import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
@@ -42,7 +35,7 @@ export const collectionViewBreadcrumbs = [
 export const AnalyticsCollectionView: React.FC = () => {
   const { fetchAnalyticsCollection } = useActions(FetchAnalyticsCollectionLogic);
   const { analyticsCollection, isLoading } = useValues(FetchAnalyticsCollectionLogic);
-  const { name, section } = useParams<{ name: string; section: string }>();
+  const { id, section } = useParams<{ id: string; section: string }>();
   const { navigateToUrl } = useValues(KibanaLogic);
   const collectionViewTabs = [
     {
@@ -53,7 +46,7 @@ export const AnalyticsCollectionView: React.FC = () => {
       onClick: () =>
         navigateToUrl(
           generateEncodedPath(COLLECTION_VIEW_PATH, {
-            name: analyticsCollection?.name,
+            id: analyticsCollection?.id,
             section: 'events',
           })
         ),
@@ -64,11 +57,10 @@ export const AnalyticsCollectionView: React.FC = () => {
       label: i18n.translate('xpack.enterpriseSearch.analytics.collectionsView.tabs.integrateName', {
         defaultMessage: 'Integrate',
       }),
-      prepend: <EuiIcon type="editorCodeBlock" size="l" />,
       onClick: () =>
         navigateToUrl(
           generateEncodedPath(COLLECTION_VIEW_PATH, {
-            name: analyticsCollection?.name,
+            id: analyticsCollection?.id,
             section: 'integrate',
           })
         ),
@@ -82,7 +74,7 @@ export const AnalyticsCollectionView: React.FC = () => {
       onClick: () =>
         navigateToUrl(
           generateEncodedPath(COLLECTION_VIEW_PATH, {
-            name: analyticsCollection?.name,
+            id: analyticsCollection?.id,
             section: 'settings',
           })
         ),
@@ -91,7 +83,7 @@ export const AnalyticsCollectionView: React.FC = () => {
   ];
 
   useEffect(() => {
-    fetchAnalyticsCollection(name);
+    fetchAnalyticsCollection(id);
   }, []);
 
   return (
