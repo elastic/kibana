@@ -108,7 +108,8 @@ describe('Rules info response schema', () => {
     const payload: RulesInfoResponse = {
       rules_custom_count: 0,
       rules_prebuilt_installed_count: 0,
-      tags: [1] as unknown as string[],
+      // @ts-expect-error Passing an invalid value for the test
+      tags: [1],
     };
     const decoded = RulesInfoResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
