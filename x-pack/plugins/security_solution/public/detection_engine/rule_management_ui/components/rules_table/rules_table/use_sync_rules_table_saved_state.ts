@@ -14,7 +14,10 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import { useRulesTableContext } from './rules_table_context';
-import type { RulesTableSavedState } from './rules_table_saved_state';
+import type {
+  RulesTableStorageSavedState,
+  RulesTableUrlSavedState,
+} from './rules_table_saved_state';
 import { RuleSource } from './rules_table_saved_state';
 import {
   DEFAULT_PAGE,
@@ -30,49 +33,63 @@ export function useSyncRulesTableSavedState(): void {
   const replaceUrlParams = useReplaceUrlParams();
 
   useEffect(() => {
-    const savedState: RulesTableSavedState = {};
+    const urlStateToSave: RulesTableUrlSavedState = {};
+    const storageStateToSave: RulesTableStorageSavedState = {};
 
     if (state.filterOptions.filter.length > 0) {
-      savedState.searchTerm = state.filterOptions.filter;
+      urlStateToSave.searchTerm = state.filterOptions.filter;
+      storageStateToSave.searchTerm = state.filterOptions.filter;
     }
 
     if (state.filterOptions.showElasticRules || state.filterOptions.showCustomRules) {
-      savedState.source = state.filterOptions.showCustomRules
-        ? RuleSource.Custom
-        : RuleSource.Prebuilt;
+      const source = state.filterOptions.showCustomRules ? RuleSource.Custom : RuleSource.Prebuilt;
+
+      urlStateToSave.source = source;
+      storageStateToSave.source = source;
     }
 
     if (state.filterOptions.tags.length > 0) {
-      savedState.tags = state.filterOptions.tags;
+      urlStateToSave.tags = state.filterOptions.tags;
+      storageStateToSave.tags = state.filterOptions.tags;
     }
 
     if (state.sortingOptions.field !== DEFAULT_SORTING_OPTIONS.field) {
-      savedState.sort = { field: state.sortingOptions.field };
+      urlStateToSave.field = state.sortingOptions.field;
+      storageStateToSave.field = state.sortingOptions.field;
     }
 
     if (state.sortingOptions.order !== DEFAULT_SORTING_OPTIONS.order) {
-      savedState.sort = { ...savedState.sort, order: state.sortingOptions.order };
+      urlStateToSave.direction = state.sortingOptions.order;
+      storageStateToSave.direction = state.sortingOptions.order;
     }
 
     if (state.pagination.page !== DEFAULT_PAGE) {
-      savedState.page = state.pagination.page;
+      urlStateToSave.page = state.pagination.page;
     }
 
     if (state.pagination.perPage !== DEFAULT_RULES_PER_PAGE) {
-      savedState.perPage = state.pagination.perPage;
+      urlStateToSave.perPage = state.pagination.perPage;
+      storageStateToSave.perPage = state.pagination.perPage;
     }
 
-    if (Object.keys(savedState).length === 0) {
-      replaceUrlParams([{ key: URL_PARAM_KEY.rulesTable, value: null }]);
-      sessionStorage.remove(RULES_TABLE_STATE_STORAGE_KEY);
+    const hasUrlStateToSave = Object.keys(urlStateToSave).length > 0;
+    const hasStorageStateToSave = Object.keys(storageStateToSave).length > 0;
 
+    if (!hasUrlStateToSave) {
+      replaceUrlParams([{ key: URL_PARAM_KEY.rulesTable, value: null }]);
+    }
+
+    if (!hasStorageStateToSave) {
+      sessionStorage.remove(RULES_TABLE_STATE_STORAGE_KEY);
+    }
+
+    if (!hasUrlStateToSave && !hasStorageStateToSave) {
       return;
     }
 
-    const sessionSavedState = { ...savedState };
-    delete sessionSavedState.page;
-
-    replaceUrlParams([{ key: URL_PARAM_KEY.rulesTable, value: encodeRisonUrlState(savedState) }]);
-    sessionStorage.set(RULES_TABLE_STATE_STORAGE_KEY, sessionSavedState);
+    replaceUrlParams([
+      { key: URL_PARAM_KEY.rulesTable, value: encodeRisonUrlState(urlStateToSave) },
+    ]);
+    sessionStorage.set(RULES_TABLE_STATE_STORAGE_KEY, storageStateToSave);
   }, [replaceUrlParams, sessionStorage, state]);
 }

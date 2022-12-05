@@ -9,7 +9,10 @@ import { renderHook } from '@testing-library/react-hooks';
 import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../../common/constants';
 
 import { useInitializeRulesTableSavedState } from './use_initialize_rules_table_saved_state';
-import type { RulesTableSavedState } from './rules_table_saved_state';
+import type {
+  RulesTableStorageSavedState,
+  RulesTableUrlSavedState,
+} from './rules_table_saved_state';
 import { RuleSource } from './rules_table_saved_state';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_SORTING_OPTIONS } from './rules_table_defaults';
 import type { RulesTableActions } from './rules_table_context';
@@ -21,26 +24,21 @@ jest.mock('../../../../../common/utils/global_query_string/helpers');
 jest.mock('./rules_table_context');
 
 describe('useInitializeRulesTableSavedState', () => {
-  const urlSavedState: RulesTableSavedState = {
+  const urlSavedState: RulesTableUrlSavedState = {
     searchTerm: 'test',
     source: RuleSource.Custom,
     tags: ['test'],
-    sort: {
-      field: 'name',
-      order: 'asc',
-    },
+    field: 'name',
+    direction: 'asc',
     page: 2,
     perPage: 10,
   };
-  const storageSavedState: RulesTableSavedState = {
+  const storageSavedState: RulesTableStorageSavedState = {
     searchTerm: 'test',
     source: RuleSource.Custom,
     tags: ['test'],
-    sort: {
-      field: 'name',
-      order: 'asc',
-    },
-    page: 1,
+    field: 'name',
+    direction: 'asc',
     perPage: 20,
   };
   let actions: Partial<RulesTableActions>;
@@ -85,7 +83,10 @@ describe('useInitializeRulesTableSavedState', () => {
         showElasticRules: urlSavedState.source === RuleSource.Prebuilt,
         tags: urlSavedState.tags,
       });
-      expect(actions.setSortingOptions).toHaveBeenCalledWith(urlSavedState.sort);
+      expect(actions.setSortingOptions).toHaveBeenCalledWith({
+        field: urlSavedState.field,
+        order: urlSavedState.direction,
+      });
       expect(actions.setPage).toHaveBeenCalledWith(urlSavedState.page);
       expect(actions.setPerPage).toHaveBeenCalledWith(urlSavedState.perPage);
     });
@@ -174,7 +175,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only sorting field', () => {
-      mockRulesTablePersistedState({ urlState: { sort: { field: 'name' } }, storageState: null });
+      mockRulesTablePersistedState({ urlState: { field: 'name' }, storageState: null });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -188,7 +189,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only sorting order', () => {
-      mockRulesTablePersistedState({ urlState: { sort: { order: 'asc' } }, storageState: null });
+      mockRulesTablePersistedState({ urlState: { direction: 'asc' }, storageState: null });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -238,8 +239,11 @@ describe('useInitializeRulesTableSavedState', () => {
         showElasticRules: storageSavedState.source === RuleSource.Prebuilt,
         tags: storageSavedState.tags,
       });
-      expect(actions.setSortingOptions).toHaveBeenCalledWith(storageSavedState.sort);
-      expect(actions.setPage).toHaveBeenCalledWith(storageSavedState.page);
+      expect(actions.setSortingOptions).toHaveBeenCalledWith({
+        field: storageSavedState.field,
+        order: storageSavedState.direction,
+      });
+      expect(actions.setPage).not.toHaveBeenCalled();
       expect(actions.setPerPage).toHaveBeenCalledWith(storageSavedState.perPage);
     });
 
@@ -327,7 +331,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only sorting field', () => {
-      mockRulesTablePersistedState({ urlState: null, storageState: { sort: { field: 'name' } } });
+      mockRulesTablePersistedState({ urlState: null, storageState: { field: 'name' } });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -341,7 +345,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only sorting order', () => {
-      mockRulesTablePersistedState({ urlState: null, storageState: { sort: { order: 'asc' } } });
+      mockRulesTablePersistedState({ urlState: null, storageState: { direction: 'asc' } });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -354,14 +358,14 @@ describe('useInitializeRulesTableSavedState', () => {
       expect(actions.setPerPage).not.toHaveBeenCalled();
     });
 
-    it('restores only page number', () => {
+    it('does not restore the page number', () => {
       mockRulesTablePersistedState({ urlState: null, storageState: { page: 10 } });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
       expect(actions.setFilterOptions).toHaveBeenCalledWith(DEFAULT_FILTER_OPTIONS);
       expect(actions.setSortingOptions).not.toHaveBeenCalled();
-      expect(actions.setPage).toHaveBeenCalledWith(10);
+      expect(actions.setPage).not.toHaveBeenCalled();
       expect(actions.setPerPage).not.toHaveBeenCalled();
     });
 
@@ -391,7 +395,10 @@ describe('useInitializeRulesTableSavedState', () => {
         showElasticRules: urlSavedState.source === RuleSource.Prebuilt,
         tags: urlSavedState.tags,
       });
-      expect(actions.setSortingOptions).toHaveBeenCalledWith(urlSavedState.sort);
+      expect(actions.setSortingOptions).toHaveBeenCalledWith({
+        field: urlSavedState.field,
+        order: urlSavedState.direction,
+      });
       expect(actions.setPage).toHaveBeenCalledWith(urlSavedState.page);
       expect(actions.setPerPage).toHaveBeenCalledWith(urlSavedState.perPage);
     });
@@ -401,7 +408,7 @@ describe('useInitializeRulesTableSavedState', () => {
     it('restores only the search term', () => {
       mockRulesTablePersistedState({
         urlState: { searchTerm: 'test' },
-        storageState: { sort: { field: 'name' } },
+        storageState: { field: 'name' },
       });
 
       renderHook(() => useInitializeRulesTableSavedState());
@@ -414,6 +421,169 @@ describe('useInitializeRulesTableSavedState', () => {
         ...DEFAULT_SORTING_OPTIONS,
         field: 'name',
       });
+    });
+  });
+
+  describe('when there is invalid state in the url', () => {
+    it('does not restore the filter', () => {
+      mockRulesTablePersistedState({
+        urlState: {
+          searchTerm: 'test',
+          source: RuleSource.Custom,
+          tags: [1, 2, 3],
+          field: 'name',
+          direction: 'asc',
+          page: 2,
+          perPage: 10,
+        } as unknown as RulesTableUrlSavedState,
+        storageState: null,
+      });
+
+      renderHook(() => useInitializeRulesTableSavedState());
+
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        filter: '',
+        showCustomRules: false,
+        showElasticRules: false,
+        tags: [],
+      });
+      expect(actions.setSortingOptions).toHaveBeenCalledWith({ field: 'name', order: 'asc' });
+      expect(actions.setPage).toHaveBeenCalledWith(2);
+      expect(actions.setPerPage).toHaveBeenCalledWith(10);
+    });
+
+    it('does not restore the sorting', () => {
+      mockRulesTablePersistedState({
+        urlState: {
+          searchTerm: 'test',
+          source: RuleSource.Custom,
+          tags: ['test'],
+          field: 'name',
+          direction: 'abc',
+          page: 2,
+          perPage: 10,
+        } as unknown as RulesTableUrlSavedState,
+        storageState: null,
+      });
+
+      renderHook(() => useInitializeRulesTableSavedState());
+
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        filter: 'test',
+        showCustomRules: true,
+        showElasticRules: false,
+        tags: ['test'],
+      });
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).toHaveBeenCalledWith(2);
+      expect(actions.setPerPage).toHaveBeenCalledWith(10);
+    });
+
+    it('does not restore the pagination', () => {
+      mockRulesTablePersistedState({
+        urlState: {
+          searchTerm: 'test',
+          source: RuleSource.Custom,
+          tags: ['test'],
+          field: 'name',
+          direction: 'asc',
+          page: 'aaa',
+          perPage: 10,
+        } as unknown as RulesTableUrlSavedState,
+        storageState: null,
+      });
+
+      renderHook(() => useInitializeRulesTableSavedState());
+
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        filter: 'test',
+        showCustomRules: true,
+        showElasticRules: false,
+        tags: ['test'],
+      });
+      expect(actions.setSortingOptions).toHaveBeenCalledWith({ field: 'name', order: 'asc' });
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when there is invalid state in the storage', () => {
+    it('does not restore the filter', () => {
+      mockRulesTablePersistedState({
+        urlState: null,
+        storageState: {
+          searchTerm: 'test',
+          source: RuleSource.Custom,
+          tags: [1, 2, 3],
+          field: 'name',
+          direction: 'asc',
+          perPage: 10,
+        } as unknown as RulesTableStorageSavedState,
+      });
+
+      renderHook(() => useInitializeRulesTableSavedState());
+
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        filter: '',
+        showCustomRules: false,
+        showElasticRules: false,
+        tags: [],
+      });
+      expect(actions.setSortingOptions).toHaveBeenCalledWith({ field: 'name', order: 'asc' });
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).toHaveBeenCalledWith(10);
+    });
+
+    it('does not restore the sorting', () => {
+      mockRulesTablePersistedState({
+        urlState: null,
+        storageState: {
+          searchTerm: 'test',
+          source: RuleSource.Custom,
+          tags: ['test'],
+          field: 'name',
+          direction: 'abc',
+          perPage: 10,
+        } as unknown as RulesTableStorageSavedState,
+      });
+
+      renderHook(() => useInitializeRulesTableSavedState());
+
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        filter: 'test',
+        showCustomRules: true,
+        showElasticRules: false,
+        tags: ['test'],
+      });
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).toHaveBeenCalledWith(10);
+    });
+
+    it('does not restore the pagination', () => {
+      mockRulesTablePersistedState({
+        urlState: null,
+        storageState: {
+          searchTerm: 'test',
+          source: RuleSource.Custom,
+          tags: ['test'],
+          field: 'name',
+          direction: 'asc',
+          perPage: 'aaa',
+        } as unknown as RulesTableStorageSavedState,
+      });
+
+      renderHook(() => useInitializeRulesTableSavedState());
+
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        filter: 'test',
+        showCustomRules: true,
+        showElasticRules: false,
+        tags: ['test'],
+      });
+      expect(actions.setSortingOptions).toHaveBeenCalledWith({ field: 'name', order: 'asc' });
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
     });
   });
 });

@@ -18,7 +18,10 @@ import {
 } from './rules_table_defaults';
 import type { RulesTableState } from './rules_table_context';
 import { useRulesTableContext } from './rules_table_context';
-import type { RulesTableSavedState } from './rules_table_saved_state';
+import type {
+  RulesTableStorageSavedState,
+  RulesTableUrlSavedState,
+} from './rules_table_saved_state';
 import { RuleSource } from './rules_table_saved_state';
 import { useSyncRulesTableSavedState } from './use_sync_rules_table_saved_state';
 import { omit } from 'lodash';
@@ -42,7 +45,7 @@ describe('useSyncRulesTableSavedState', () => {
   };
   const expectStateToSyncWithUrl = (
     rulesTableState: Partial<RulesTableState>,
-    expectedUrlState: RulesTableSavedState
+    expectedUrlState: RulesTableUrlSavedState
   ) => {
     (useRulesTableContext as jest.Mock).mockReturnValue({
       state: rulesTableState,
@@ -59,7 +62,7 @@ describe('useSyncRulesTableSavedState', () => {
   };
   const expectStateToSyncWithStorage = (
     rulesTableState: Partial<RulesTableState>,
-    expectedStorageState: RulesTableSavedState
+    expectedStorageState: RulesTableStorageSavedState
   ) => {
     (useRulesTableContext as jest.Mock).mockReturnValue({
       state: rulesTableState,
@@ -113,18 +116,16 @@ describe('useSyncRulesTableSavedState', () => {
         total: 100,
       },
     };
-    const expectedUrlState = {
+    const expectedUrlState: RulesTableUrlSavedState = {
       searchTerm: 'test',
       source: RuleSource.Custom,
       tags: ['test'],
-      sort: {
-        field: 'name',
-        order: 'asc',
-      },
+      field: 'name',
+      direction: 'asc',
       page: 3,
       perPage: 10,
     };
-    const expectedStorageState = omit(expectedUrlState, 'page');
+    const expectedStorageState: RulesTableStorageSavedState = omit(expectedUrlState, 'page');
 
     (useRulesTableContext as jest.Mock).mockReturnValue({
       state,
@@ -182,7 +183,7 @@ describe('useSyncRulesTableSavedState', () => {
           ...defaultState,
           sortingOptions: { ...defaultState.sortingOptions, field: 'name' },
         },
-        { sort: { field: 'name' } }
+        { field: 'name' }
       );
     });
 
@@ -192,7 +193,7 @@ describe('useSyncRulesTableSavedState', () => {
           ...defaultState,
           sortingOptions: { ...defaultState.sortingOptions, order: 'asc' },
         },
-        { sort: { order: 'asc' } }
+        { direction: 'asc' }
       );
     });
 
@@ -267,7 +268,7 @@ describe('useSyncRulesTableSavedState', () => {
           ...defaultState,
           sortingOptions: { ...defaultState.sortingOptions, field: 'name' },
         },
-        { sort: { field: 'name' } }
+        { field: 'name' }
       );
     });
 
@@ -277,7 +278,7 @@ describe('useSyncRulesTableSavedState', () => {
           ...defaultState,
           sortingOptions: { ...defaultState.sortingOptions, order: 'asc' },
         },
-        { sort: { order: 'asc' } }
+        { direction: 'asc' }
       );
     });
 

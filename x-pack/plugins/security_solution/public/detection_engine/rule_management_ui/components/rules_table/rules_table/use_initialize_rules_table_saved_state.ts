@@ -6,18 +6,48 @@
  */
 
 import { useEffect } from 'react';
+import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { useGetInitialUrlParamValue } from '../../../../../common/utils/global_query_string/helpers';
 import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import { useRulesTableContext } from './rules_table_context';
-import type { RulesTableSavedState } from './rules_table_saved_state';
-import { RuleSource } from './rules_table_saved_state';
+import type {
+  RulesTableStorageSavedState,
+  RulesTableUrlSavedState,
+} from './rules_table_saved_state';
+import {
+  RuleSource,
+  RulesTableSavedFilter,
+  RulesTableSavedSorting,
+  RulesTableStorageSavedPagination,
+  RulesTableUrlSavedPagination,
+} from './rules_table_saved_state';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_SORTING_OPTIONS } from './rules_table_defaults';
+import type { RulesSortingFields } from '../../../../rule_management/logic';
+
+function validateState(
+  urlState: RulesTableUrlSavedState | null,
+  storageState: RulesTableStorageSavedState | null
+): [RulesTableSavedFilter, RulesTableSavedSorting, RulesTableUrlSavedPagination] {
+  const [filterFromUrl] = validateNonExact(urlState, RulesTableSavedFilter);
+  const [filterFromStorage] = validateNonExact(storageState, RulesTableSavedFilter);
+  const filter = { ...filterFromStorage, ...filterFromUrl };
+
+  const [sortingFromUrl] = validateNonExact(urlState, RulesTableSavedSorting);
+  const [sortingFromStorage] = validateNonExact(storageState, RulesTableSavedSorting);
+  const sorting = { ...sortingFromStorage, ...sortingFromUrl };
+
+  const [paginationFromUrl] = validateNonExact(urlState, RulesTableUrlSavedPagination);
+  const [paginationFromStorage] = validateNonExact(storageState, RulesTableStorageSavedPagination);
+  const pagination = { perPage: paginationFromStorage?.perPage, ...paginationFromUrl };
+
+  return [filter, sorting, pagination];
+}
 
 export function useInitializeRulesTableSavedState(): void {
-  const getUrlParam = useGetInitialUrlParamValue<RulesTableSavedState>(URL_PARAM_KEY.rulesTable);
+  const getUrlParam = useGetInitialUrlParamValue<RulesTableUrlSavedState>(URL_PARAM_KEY.rulesTable);
   const { actions } = useRulesTableContext();
   const {
     services: { sessionStorage },
@@ -25,8 +55,7 @@ export function useInitializeRulesTableSavedState(): void {
 
   useEffect(() => {
     const { decodedParam: urlState } = getUrlParam();
-
-    const storageState: Partial<RulesTableSavedState> | null = sessionStorage.get(
+    const storageState: Partial<RulesTableStorageSavedState> | null = sessionStorage.get(
       RULES_TABLE_STATE_STORAGE_KEY
     );
 
@@ -34,33 +63,32 @@ export function useInitializeRulesTableSavedState(): void {
       return;
     }
 
-    const searchTerm = urlState?.searchTerm ?? storageState?.searchTerm;
-    const ruleSource = urlState?.source ?? storageState?.source;
-    const tags = urlState?.tags ?? storageState?.tags;
-    const sorting = urlState?.sort ?? storageState?.sort;
-    const page = urlState?.page ?? storageState?.page;
-    const perPage = urlState?.perPage ?? storageState?.perPage;
+    const [filter, sorting, pagination] = validateState(urlState, storageState);
 
     actions.setFilterOptions({
-      filter: typeof searchTerm === 'string' ? searchTerm : DEFAULT_FILTER_OPTIONS.filter,
-      showElasticRules: ruleSource === RuleSource.Prebuilt,
-      showCustomRules: ruleSource === RuleSource.Custom,
-      tags: Array.isArray(tags) ? tags : DEFAULT_FILTER_OPTIONS.tags,
+      filter: filter.searchTerm ?? DEFAULT_FILTER_OPTIONS.filter,
+      showElasticRules: filter.source === RuleSource.Prebuilt,
+      showCustomRules: filter.source === RuleSource.Custom,
+      tags: Array.isArray(filter.tags) ? filter.tags : DEFAULT_FILTER_OPTIONS.tags,
     });
 
-    if (sorting) {
+    if (sorting.field || sorting.direction) {
       actions.setSortingOptions({
-        field: sorting.field ?? DEFAULT_SORTING_OPTIONS.field,
-        order: sorting.order ?? DEFAULT_SORTING_OPTIONS.order,
+        field: (sorting.field as RulesSortingFields) ?? DEFAULT_SORTING_OPTIONS.field,
+        order: sorting.direction ?? DEFAULT_SORTING_OPTIONS.order,
       });
     }
 
-    if (page) {
-      actions.setPage(page);
+    if (pagination.page) {
+      actions.setPage(pagination.page);
     }
 
-    if (perPage && perPage > 0 && perPage <= RULES_TABLE_MAX_PAGE_SIZE) {
-      actions.setPerPage(perPage);
+    if (
+      pagination.perPage &&
+      pagination.perPage > 0 &&
+      pagination.perPage <= RULES_TABLE_MAX_PAGE_SIZE
+    ) {
+      actions.setPerPage(pagination.perPage);
     }
   }, [getUrlParam, actions, sessionStorage]);
 }

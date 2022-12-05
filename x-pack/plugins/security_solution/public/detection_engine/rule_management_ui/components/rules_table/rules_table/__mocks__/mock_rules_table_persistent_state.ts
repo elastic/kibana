@@ -7,14 +7,17 @@
 
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useGetInitialUrlParamValue } from '../../../../../../common/utils/global_query_string/helpers';
-import type { RulesTableSavedState } from '../rules_table_saved_state';
+import type {
+  RulesTableStorageSavedState,
+  RulesTableUrlSavedState,
+} from '../rules_table_saved_state';
 
 export function mockRulesTablePersistedState({
   urlState,
   storageState,
 }: {
-  urlState: RulesTableSavedState | null;
-  storageState: RulesTableSavedState | null;
+  urlState: RulesTableUrlSavedState | null;
+  storageState: RulesTableStorageSavedState | null;
 }): void {
   (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(
     jest.fn().mockReturnValue({ decodedParam: urlState })
