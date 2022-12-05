@@ -107,10 +107,6 @@ export class ControlGroupContainer extends Container<
     flyoutRef = undefined;
   }
 
-  public getNextPanelOrder() {
-    return getNextPanelOrder(this.getInput().panels);
-  }
-
   public async addDataControlFromField(controlProps: AddDataControlProps) {
     const panelState = await getDataControlPanelState(this.getInput(), controlProps);
     return this.createAndSaveEmbeddable(panelState.type, panelState);
@@ -348,7 +344,7 @@ export class ControlGroupContainer extends Container<
   ): ControlPanelState<TEmbeddableInput> {
     const panelState = super.createNewPanelState(factory, partial);
     return {
-      order: this.getNextPanelOrder(),
+      order: getNextPanelOrder(this.getInput().panels),
       width: this.getInput().defaultControlWidth,
       grow: this.getInput().defaultControlGrow,
       ...panelState,
