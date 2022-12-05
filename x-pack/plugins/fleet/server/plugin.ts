@@ -93,7 +93,12 @@ import {
   fetchAgentsUsage,
   fetchFleetUsage,
 } from './collectors/register';
-import { getAuthzFromRequest, makeRouterWithFleetAuthz } from './routes/security';
+import {
+  calculateRouteAuthz,
+  getAuthzFromRequest,
+  makeRouterWithFleetAuthz,
+  ROUTE_AUTHZ_REQUIREMENTS,
+} from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
@@ -337,7 +342,17 @@ export class FleetPlugin
       PLUGIN_ID,
       async (context, request) => {
         const plugin = this;
-        const esClient = (await context.core).elasticsearch.client;
+        const coreContext = await context.core;
+        const authz = await getAuthzFromRequest(request);
+        const esClient = coreContext.elasticsearch.client;
+        const routePath = request.route.path;
+        const routeAuthz = ROUTE_AUTHZ_REQUIREMENTS[routePath]
+          ? calculateRouteAuthz(authz, ROUTE_AUTHZ_REQUIREMENTS[routePath])
+          : undefined;
+        const getInternalSoClient = (): SavedObjectsClientContract =>
+          appContextService
+            .getSavedObjects()
+            .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
 
         return {
           get agentClient() {
@@ -356,17 +371,31 @@ export class FleetPlugin
               asInternalUser: service.asInternalUser,
             };
           },
-          authz: await getAuthzFromRequest(request),
+          authz,
           epm: {
             // Use a lazy getter to avoid constructing this client when not used by a request handler
             get internalSoClient() {
-              return appContextService
-                .getSavedObjects()
-                .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
+              return getInternalSoClient();
             },
           },
           get spaceId() {
             return deps.spaces.spacesService.getSpaceId(request);
+          },
+
+          async getSoClient() {
+            if (routeAuthz && routeAuthz.granted) {
+              return {
+                client: routeAuthz.grantedByFleetPrivileges
+                  ? coreContext.savedObjects.client
+                  : getInternalSoClient(),
+                limitedToPackages: routeAuthz.scopeDataToPackages,
+              };
+            }
+
+            return {
+              client: coreContext.savedObjects.client,
+              limitedToPackages: undefined,
+            };
           },
         };
       }

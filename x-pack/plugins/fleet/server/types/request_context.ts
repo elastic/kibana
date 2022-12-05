@@ -40,6 +40,23 @@ export type FleetRequestHandlerContext = CustomRequestHandlerContext<{
       readonly internalSoClient: SavedObjectsClientContract;
     };
     spaceId: string;
+
+    /**
+     * Returns the Saved Object client for the route. This could be an Internal SO client if the route
+     * was granted access via a Package Privilege instead of a Fleet (+ integration) privilege.
+     */
+    getSoClient: () => Promise<{
+      /**
+       * The SO client. Could be an internal client if Authz to the API was granted
+       * only based on Package Privileges
+       */
+      client: SavedObjectsClientContract;
+      /**
+       * If data is to be limited to the list of integration package names. This will be set when
+       * authz to the API was granted only bassed on Package Privileges.
+       */
+      limitedToPackages: undefined | string[];
+    }>;
   };
 }>;
 

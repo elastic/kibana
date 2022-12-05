@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { result } from 'lodash';
+import { pick, result } from 'lodash';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type {
   IRouter,
@@ -19,8 +19,10 @@ import type {
   IKibanaResponse,
 } from '@kbn/core/server';
 
+import { deepFreeze } from '@kbn/std';
+
 import type { FleetAuthz } from '../../common';
-import { INTEGRATIONS_PLUGIN_ID } from '../../common';
+import { INTEGRATIONS_PLUGIN_ID, PACKAGE_POLICY_API_ROUTES } from '../../common';
 import { calculateAuthz, calculatePackagePrivilegesFromKibanaPrivileges } from '../../common/authz';
 
 import { appContextService } from '../services';
@@ -162,6 +164,144 @@ export const WRITE_ENDPOINT_PACKAGE_PRIVILEGES: DeepPartialTruthy<FleetAuthz> = 
     },
   },
 });
+
+/**
+ * The authorization requirements needed for an API route. Route authorization requirements are
+ * defined either via an `all` object, where all value must be `true` in order for access to be granted,
+ * or, by an `any` object, where any value defined that is set to `true` will grant access to the API
+ */
+export const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<
+  Record<
+    string,
+    {
+      any?: FleetAuthzRequirements;
+      all?: FleetAuthzRequirements;
+    }
+  >
+>({
+  [PACKAGE_POLICY_API_ROUTES.LIST_PATTERN]: {
+    any: {
+      integrations: {
+        readIntegrationPolicies: true,
+      },
+      packagePrivileges: {
+        endpoint: {
+          actions: {
+            readPolicyManagement: {
+              executePackageAction: true,
+            },
+            readTrustedApplications: {
+              executePackageAction: true,
+            },
+            readEventFilters: {
+              executePackageAction: true,
+            },
+            readHostIsolationExceptions: {
+              executePackageAction: true,
+            },
+            readBlocklist: {
+              executePackageAction: true,
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
+export interface RouteAuthz {
+  granted: boolean;
+  grantedByFleetPrivileges: boolean;
+  scopeDataToPackages: string[] | undefined;
+}
+
+/**
+ * Calculates Authz information for a Route
+ *
+ * @param fleetAuthz
+ * @param requiredAuthz
+ */
+export const calculateRouteAuthz = (
+  fleetAuthz: FleetAuthz,
+  requiredAuthz: {
+    any?: FleetAuthzRequirements;
+    all?: FleetAuthzRequirements;
+  }
+): RouteAuthz => {
+  const response: RouteAuthz = {
+    granted: false,
+    grantedByFleetPrivileges: false,
+    scopeDataToPackages: undefined,
+  };
+  const fleetAuthzFlatten = flatten(fleetAuthz);
+
+  const isPrivilegeGranted = (flattenPrivilegeKey: string): boolean =>
+    Boolean(fleetAuthzFlatten[flattenPrivilegeKey]);
+
+  if (requiredAuthz.all) {
+    response.granted = Object.keys(flatten(requiredAuthz.all)).every(isPrivilegeGranted);
+
+    if (response.granted) {
+      if (requiredAuthz.all.fleet || requiredAuthz.all.integrations) {
+        response.grantedByFleetPrivileges = true;
+      }
+
+      return response;
+    }
+  }
+
+  if (requiredAuthz.any) {
+    response.granted = Object.keys(flatten(requiredAuthz.any)).some(isPrivilegeGranted);
+
+    if (response.granted) {
+      // Figure out if authz was granted via Fleet privileges
+      if (requiredAuthz.any.fleet || requiredAuthz.any.integrations) {
+        const fleetAnyPrivileges = pick(requiredAuthz.any, ['fleet', 'integrations']);
+
+        response.grantedByFleetPrivileges = Object.keys(flatten(fleetAnyPrivileges)).some(
+          isPrivilegeGranted
+        );
+      }
+
+      // If access was not granted via Fleet Authz, then retrieve a list of Package names for which the
+      // data should be sopped
+      if (!response.grantedByFleetPrivileges) {
+        response.scopeDataToPackages = Object.keys(requiredAuthz.any.packagePrivileges ?? {});
+      }
+
+      return response;
+    }
+  }
+
+  return response;
+};
+
+/**
+ * Utility to flatten an object's key all the way down to the last value.
+ * @param source
+ */
+function flatten(source: object): Record<string, unknown> {
+  const response: Record<string, unknown> = {};
+  const processKeys = (prefix: string, value: unknown) => {
+    if (typeof value === 'object' && value !== null) {
+      const objectKeys = Object.keys(value);
+
+      for (const key of objectKeys) {
+        processKeys(`${prefix}${prefix ? '.' : ''}${key}`, (value as Record<string, unknown>)[key]);
+      }
+    } else if (Array.isArray(value)) {
+      value.forEach((subValue, key) => {
+        processKeys(`${prefix}${prefix ? '.' : ''}${key}`, subValue);
+      });
+    } else {
+      response[prefix] = value;
+    }
+  };
+
+  processKeys('', source);
+
+  return response;
+}
 
 // exported only for testing
 export function buildPathsFromRequiredAuthz(required: FleetAuthzRequirements): string[] {

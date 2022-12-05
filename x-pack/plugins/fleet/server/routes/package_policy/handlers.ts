@@ -43,11 +43,12 @@ import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/servi
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
-export const getPackagePoliciesHandler: RequestHandler<
+export const getPackagePoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetPackagePoliciesRequestSchema.query>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
+  const { client: soClient } = await (await context.fleet).getSoClient();
+
   try {
     const { items, total, page, perPage } = await packagePolicyService.list(
       soClient,

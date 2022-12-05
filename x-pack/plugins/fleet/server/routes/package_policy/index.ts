@@ -19,8 +19,10 @@ import {
   BulkGetPackagePoliciesRequestSchema,
 } from '../../types';
 import {
+  calculateRouteAuthz,
   type FleetAuthzRouter,
   READ_ENDPOINT_PACKAGE_PRIVILEGES as packagePrivileges,
+  ROUTE_AUTHZ_REQUIREMENTS,
   validateSecurityRbac,
 } from '../security';
 
@@ -44,14 +46,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
       validate: GetPackagePoliciesRequestSchema,
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
-        validateSecurityRbac(fleetAuthz, {
-          any: {
-            integrations: {
-              readIntegrationPolicies: true,
-            },
-            ...packagePrivileges,
-          },
-        }),
+        calculateRouteAuthz(
+          fleetAuthz,
+          ROUTE_AUTHZ_REQUIREMENTS[PACKAGE_POLICY_API_ROUTES.LIST_PATTERN]
+        ).granted,
     },
     getPackagePoliciesHandler
   );
