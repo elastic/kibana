@@ -90,7 +90,6 @@ const tagModelVersion1: SavedObjectsModelVersion<
 //////////
 // Example 2
 // Just adding new optional fields
-// No migration required
 /////////
 
 type Version2Attrs = Version1Attrs & {
@@ -139,7 +138,121 @@ const tagModelVersion2: SavedObjectsModelVersion<
   },
 };
 
+//////////
+// Example 3
+// Dropping some previously mandatory field
+/////////
 
+type Version2CompatAttrs = Version2Attrs;
+
+type Version3Attrs = Omit<Version2CompatAttrs, 'description'>;
+
+const tagModelVersion3: SavedObjectsModelVersion<
+  Version2Attrs,
+  Version2CompatAttrs,
+  Version3Attrs
+> = {
+  expand: {
+    addedMappings: {}, // no new mappings
+    migration: {
+      up: (doc, ctx) => {
+        // UP to compat: no-op
+        return doc;
+      },
+      down: (doc, ctx) => {
+        // DOWN from compat: no-op
+        return doc;
+      },
+    },
+  },
+  contract: {
+    removedMappings: [], // no fields to drop here
+    migration: {
+      up: (doc, ctx) => {
+        // no-op
+        return doc;
+      },
+      down: (doc, ctx) => {
+        return {
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            description: '',
+          },
+        };
+      },
+    },
+  },
+};
+
+//////////
+// Example 4
+// Tags can now support multiple colors ('color: string' field changed to 'colors: string[]')
+/////////
+
+type Version3CompatAttrs = Version3Attrs & {
+  colors: string[];
+};
+
+type Version4Attrs = Omit<Version3CompatAttrs, 'color'>;
+
+const tagModelVersion4: SavedObjectsModelVersion<
+  Version3Attrs,
+  Version3CompatAttrs,
+  Version4Attrs
+> = {
+  expand: {
+    addedMappings: {
+      colors: {
+        type: 'text',
+      },
+    },
+    migration: {
+      up: (doc, ctx) => {
+        // UP to compat: copy color into colors
+        return {
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            colors: [doc.attributes.color],
+          },
+        };
+      },
+      down: (doc, ctx) => {
+        // DOWN from compat: remove colors
+        // yes, this can lead to data loss
+        const { colors, ...attrs } = doc.attributes;
+        return {
+          ...doc,
+          attributes: attrs,
+        };
+      },
+    },
+  },
+  contract: {
+    removedMappings: ['color'], // remove the 'color' field during contract
+    migration: {
+      up: (doc, ctx) => {
+        // UP to final: remove color
+        const { color, ...attrs } = doc.attributes;
+        return {
+          ...doc,
+          attributes: attrs,
+        };
+      },
+      down: (doc, ctx) => {
+        // DOWN to compat: create color from colors
+        return {
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            color: doc.attributes.colors[0],
+          },
+        };
+      },
+    },
+  },
+};
 
 /////// End of examples
 
@@ -176,5 +289,7 @@ export const tagType: SavedObjectsType = {
     // renaming the 'name' property to 'title'
     '1': tagModelVersion1,
     '2': tagModelVersion2,
+    '3': tagModelVersion3,
+    '4': tagModelVersion4,
   },
 };
