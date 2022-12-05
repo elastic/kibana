@@ -68,7 +68,6 @@ const defaultDataViewEditorState: DataViewEditorState = {
   rollupIndexName: undefined,
 };
 
-// todo move elsewhere
 export const stateSelectorFactory =
   <S>(state$: Observable<S>) =>
   <R>(selector: (state: S) => R, equalityFn?: (arg0: R, arg1: R) => boolean) =>
