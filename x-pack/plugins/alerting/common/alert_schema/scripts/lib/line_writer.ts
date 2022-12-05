@@ -8,33 +8,40 @@
 const INDENT_LENGTH = 2;
 const INDENT = ''.padStart(INDENT_LENGTH);
 
-module.exports = {
-  createLineWriter,
-};
+export class LineWriter {
+  private _indent: string = '';
+  private _lines: string[] = [];
 
-class LineWriter {
   constructor() {
     this._indent = '';
     this._lines = [];
   }
 
-  addLine(line) {
+  public addLine(line: string) {
     this._lines.push(`${this._indent}${line}`);
   }
 
-  indent() {
+  public addLineAndIndent(line: string) {
+    this._lines.push(`${this._indent}${line}`);
     this._indent = `${this._indent}${INDENT}`;
   }
 
-  dedent() {
+  public dedentAndAddLine(line: string) {
+    this._indent = this._indent.substr(INDENT_LENGTH);
+    this._lines.push(`${this._indent}${line}`);
+  }
+
+  public indent() {
+    this._indent = `${this._indent}${INDENT}`;
+  }
+
+  public dedent() {
     this._indent = this._indent.substr(INDENT_LENGTH);
   }
 
-  getContent() {
+  public getContent() {
     return this._lines.join('\n');
   }
 }
 
-function createLineWriter() {
-  return new LineWriter();
-}
+export const createLineWriter = () => new LineWriter();
