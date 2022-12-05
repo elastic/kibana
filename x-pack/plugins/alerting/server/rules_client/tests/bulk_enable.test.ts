@@ -21,6 +21,8 @@ import { BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server/task_sched
 import {
   disabledRule1,
   disabledRule2,
+  disabledRuleWithAction1,
+  disabledRuleWithAction2,
   enabledRule2,
   savedObjectWith409Error,
   savedObjectWith500Error,
@@ -305,7 +307,10 @@ describe('bulkEnableRules', () => {
     );
   });
 
-  test('should thow if there are actions, but do not have execute permissions', async () => {
+  test('should throw if there are actions, but do not have execute permissions', async () => {
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [disabledRuleWithAction1, disabledRuleWithAction2],
+    });
     actionsAuthorization.ensureAuthorized.mockImplementation(() => {
       throw new Error('UPS');
     });

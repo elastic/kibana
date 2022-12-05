@@ -53,16 +53,7 @@ export const defaultRule = {
     consumer: 'fakeConsumer',
     alertTypeId: 'fakeType',
     schedule: { interval: '5m' },
-    actions: [
-      {
-        group: 'default',
-        actionTypeId: '1',
-        actionRef: '1',
-        params: {
-          foo: true,
-        },
-      },
-    ],
+    actions: [] as unknown,
   },
   references: [],
   version: '1',
@@ -110,14 +101,37 @@ export const disabledRule2 = {
   },
 };
 
-export const rule2 = {
-  ...defaultRule,
-  id: 'id2',
+export const disabledRuleWithAction1 = {
+  ...disabledRule1,
   attributes: {
-    ...defaultRule.attributes,
-    enabled: true,
-    scheduledTaskId: 'id2',
-    apiKey: Buffer.from('321:abc').toString('base64'),
+    ...disabledRule1.attributes,
+    actions: [
+      {
+        group: 'default',
+        actionTypeId: '1',
+        actionRef: '1',
+        params: {
+          foo: true,
+        },
+      },
+    ],
+  },
+};
+
+export const disabledRuleWithAction2 = {
+  ...disabledRule2,
+  attributes: {
+    ...disabledRule2.attributes,
+    actions: [
+      {
+        group: 'default',
+        actionTypeId: '1',
+        actionRef: '1',
+        params: {
+          foo: true,
+        },
+      },
+    ],
   },
 };
 

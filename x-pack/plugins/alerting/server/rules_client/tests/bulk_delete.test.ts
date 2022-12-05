@@ -19,6 +19,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { loggerMock } from '@kbn/logging-mocks';
+import { enabledRule1, enabledRule2 } from './test_helpers';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -63,33 +64,9 @@ setGlobalDate();
 
 describe('bulkDelete', () => {
   let rulesClient: RulesClient;
-  const existingRule = {
-    id: 'id1',
-    type: 'alert',
-    attributes: {},
-    references: [],
-    version: '123',
-  };
-  const existingDecryptedRule1 = {
-    ...existingRule,
-    attributes: {
-      ...existingRule.attributes,
-      scheduledTaskId: 'taskId1',
-      apiKey: Buffer.from('123:abc').toString('base64'),
-    },
-  };
-  const existingDecryptedRule2 = {
-    ...existingRule,
-    id: 'id2',
-    attributes: {
-      ...existingRule.attributes,
-      scheduledTaskId: 'taskId2',
-      apiKey: Buffer.from('321:abc').toString('base64'),
-    },
-  };
 
   const mockCreatePointInTimeFinderAsInternalUser = (
-    response = { saved_objects: [existingDecryptedRule1, existingDecryptedRule2] }
+    response = { saved_objects: [enabledRule1, enabledRule2] }
   ) => {
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
       .fn()
@@ -103,6 +80,7 @@ describe('bulkDelete', () => {
 
   beforeEach(async () => {
     rulesClient = new RulesClient(rulesClientParams);
+    mockCreatePointInTimeFinderAsInternalUser();
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       ensureRuleTypeIsAuthorized() {},
     });
@@ -136,7 +114,6 @@ describe('bulkDelete', () => {
   });
 
   test('should try to delete rules, one successful and one with 500 error', async () => {
-    mockCreatePointInTimeFinderAsInternalUser();
     unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
       statuses: [
         { id: 'id1', type: 'alert', success: true },
@@ -157,11 +134,11 @@ describe('bulkDelete', () => {
 
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
-      existingDecryptedRule1,
-      existingDecryptedRule2,
+      enabledRule1,
+      enabledRule2,
     ]);
     expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledWith(['taskId1']);
+    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledWith(['id1']);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw=='] },
@@ -169,7 +146,25 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      errors: [{ message: 'UPS', rule: { id: 'id2', name: 'n/a' }, status: 500 }],
+      rules: [
+        {
+          actions: [],
+          alertTypeId: 'fakeType',
+          apiKey: 'MTIzOmFiYw==',
+          consumer: 'fakeConsumer',
+          enabled: true,
+          id: 'id1',
+          name: 'fakeName',
+          notifyWhen: undefined,
+          params: undefined,
+          schedule: {
+            interval: '5m',
+          },
+          scheduledTaskId: 'id1',
+          snoozeSchedule: [],
+        },
+      ],
+      errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 500 }],
       total: 2,
       taskIdsFailedToBeDeleted: [],
     });
@@ -226,19 +221,19 @@ describe('bulkDelete', () => {
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [existingDecryptedRule1, existingDecryptedRule2] };
+          yield { saved_objects: [enabledRule1, enabledRule2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [existingDecryptedRule2] };
+          yield { saved_objects: [enabledRule2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [existingDecryptedRule2] };
+          yield { saved_objects: [enabledRule2] };
         },
       });
 
@@ -246,7 +241,7 @@ describe('bulkDelete', () => {
 
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(3);
     expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledWith(['taskId1']);
+    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledWith(['id1']);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw=='] },
@@ -254,7 +249,25 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      errors: [{ message: 'UPS', rule: { id: 'id2', name: 'n/a' }, status: 409 }],
+      rules: [
+        {
+          actions: [],
+          alertTypeId: 'fakeType',
+          apiKey: 'MTIzOmFiYw==',
+          consumer: 'fakeConsumer',
+          enabled: true,
+          id: 'id1',
+          name: 'fakeName',
+          notifyWhen: undefined,
+          params: undefined,
+          schedule: {
+            interval: '5m',
+          },
+          scheduledTaskId: 'id1',
+          snoozeSchedule: [],
+        },
+      ],
+      errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 409 }],
       total: 2,
       taskIdsFailedToBeDeleted: [],
     });
@@ -292,19 +305,19 @@ describe('bulkDelete', () => {
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [existingDecryptedRule1, existingDecryptedRule2] };
+          yield { saved_objects: [enabledRule1, enabledRule2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [existingDecryptedRule2] };
+          yield { saved_objects: [enabledRule2] };
         },
       })
       .mockResolvedValueOnce({
         close: jest.fn(),
         find: function* asyncGenerator() {
-          yield { saved_objects: [existingDecryptedRule2] };
+          yield { saved_objects: [enabledRule2] };
         },
       });
 
@@ -312,14 +325,48 @@ describe('bulkDelete', () => {
 
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(2);
     expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledWith(['taskId1', 'taskId2']);
+    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledWith(['id1', 'id2']);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
-      { apiKeys: ['MTIzOmFiYw==', 'MzIxOmFiYw=='] },
+      { apiKeys: ['MTIzOmFiYw==', 'MTIzOmFiYw=='] },
       expect.anything(),
       expect.anything()
     );
     expect(result).toStrictEqual({
+      rules: [
+        {
+          actions: [],
+          alertTypeId: 'fakeType',
+          apiKey: 'MTIzOmFiYw==',
+          consumer: 'fakeConsumer',
+          enabled: true,
+          id: 'id1',
+          name: 'fakeName',
+          notifyWhen: undefined,
+          params: undefined,
+          schedule: {
+            interval: '5m',
+          },
+          scheduledTaskId: 'id1',
+          snoozeSchedule: [],
+        },
+        {
+          actions: [],
+          alertTypeId: 'fakeType',
+          apiKey: 'MTIzOmFiYw==',
+          consumer: 'fakeConsumer',
+          enabled: true,
+          id: 'id2',
+          name: 'fakeName',
+          notifyWhen: undefined,
+          params: undefined,
+          schedule: {
+            interval: '5m',
+          },
+          scheduledTaskId: 'id2',
+          snoozeSchedule: [],
+        },
+      ],
       errors: [],
       total: 2,
       taskIdsFailedToBeDeleted: [],
@@ -345,7 +392,6 @@ describe('bulkDelete', () => {
   });
 
   test('should throw an error if we do not get buckets', async () => {
-    mockCreatePointInTimeFinderAsInternalUser();
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       aggregations: {
         alertTypeId: {},
@@ -363,7 +409,6 @@ describe('bulkDelete', () => {
 
   describe('taskManager', () => {
     test('should return task id if deleting task failed', async () => {
-      mockCreatePointInTimeFinderAsInternalUser();
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
         statuses: [
           { id: 'id1', type: 'alert', success: true },
@@ -373,12 +418,12 @@ describe('bulkDelete', () => {
       taskManager.bulkRemoveIfExist.mockImplementation(async () => ({
         statuses: [
           {
-            id: 'taskId1',
+            id: 'id1',
             type: 'alert',
             success: true,
           },
           {
-            id: 'taskId2',
+            id: 'id2',
             type: 'alert',
             success: false,
             error: {
@@ -394,16 +439,13 @@ describe('bulkDelete', () => {
 
       expect(logger.debug).toBeCalledTimes(1);
       expect(logger.debug).toBeCalledWith(
-        'Successfully deleted schedules for underlying tasks: taskId1'
+        'Successfully deleted schedules for underlying tasks: id1'
       );
       expect(logger.error).toBeCalledTimes(1);
-      expect(logger.error).toBeCalledWith(
-        'Failure to delete schedules for underlying tasks: taskId2'
-      );
+      expect(logger.error).toBeCalledWith('Failure to delete schedules for underlying tasks: id2');
     });
 
     test('should not throw an error if taskManager throw an error', async () => {
-      mockCreatePointInTimeFinderAsInternalUser();
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
         statuses: [
           { id: 'id1', type: 'alert', success: true },
@@ -418,7 +460,7 @@ describe('bulkDelete', () => {
 
       expect(logger.error).toBeCalledTimes(1);
       expect(logger.error).toBeCalledWith(
-        'Failure to delete schedules for underlying tasks: taskId1, taskId2. TaskManager bulkRemoveIfExist failed with Error: UPS'
+        'Failure to delete schedules for underlying tasks: id1, id2. TaskManager bulkRemoveIfExist failed with Error: UPS'
       );
     });
 
@@ -433,12 +475,12 @@ describe('bulkDelete', () => {
       taskManager.bulkRemoveIfExist.mockImplementation(async () => ({
         statuses: [
           {
-            id: 'taskId1',
+            id: 'id1',
             type: 'alert',
             success: true,
           },
           {
-            id: 'taskId2',
+            id: 'id2',
             type: 'alert',
             success: true,
           },
@@ -449,7 +491,7 @@ describe('bulkDelete', () => {
 
       expect(logger.debug).toBeCalledTimes(1);
       expect(logger.debug).toBeCalledWith(
-        'Successfully deleted schedules for underlying tasks: taskId1, taskId2'
+        'Successfully deleted schedules for underlying tasks: id1, id2'
       );
       expect(logger.error).toBeCalledTimes(0);
     });
@@ -459,7 +501,6 @@ describe('bulkDelete', () => {
     jest.spyOn(auditLogger, 'log').mockImplementation();
 
     test('logs audit event when deleting rules', async () => {
-      mockCreatePointInTimeFinderAsInternalUser();
       unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
         statuses: [
           { id: 'id1', type: 'alert', success: true },
@@ -482,7 +523,6 @@ describe('bulkDelete', () => {
     });
 
     test('logs audit event when authentication failed', async () => {
-      mockCreatePointInTimeFinderAsInternalUser();
       authorization.ensureAuthorized.mockImplementation(() => {
         throw new Error('Unauthorized');
       });
@@ -499,7 +539,6 @@ describe('bulkDelete', () => {
     });
 
     test('logs audit event when getting an authorization filter failed', async () => {
-      mockCreatePointInTimeFinderAsInternalUser();
       authorization.getFindAuthorizationFilter.mockImplementation(() => {
         throw new Error('Error');
       });
@@ -516,3 +555,4 @@ describe('bulkDelete', () => {
     });
   });
 });
+
