@@ -4,6 +4,7 @@
 
 import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
 
+import { ValueFunctionExpressionContext } from "./esql_parser";
 import { ValueExpressionDefaultContext } from "./esql_parser";
 import { ComparisonContext } from "./esql_parser";
 import { NullLiteralContext } from "./esql_parser";
@@ -40,9 +41,11 @@ import { FromCommandContext } from "./esql_parser";
 import { EvalCommandContext } from "./esql_parser";
 import { StatsCommandContext } from "./esql_parser";
 import { SourceIdentifierContext } from "./esql_parser";
+import { FunctionExpressionArgumentContext } from "./esql_parser";
 import { QualifiedNameContext } from "./esql_parser";
 import { QualifiedNamesContext } from "./esql_parser";
 import { IdentifierContext } from "./esql_parser";
+import { FunctionIdentifierContext } from "./esql_parser";
 import { ConstantContext } from "./esql_parser";
 import { LimitCommandContext } from "./esql_parser";
 import { SortCommandContext } from "./esql_parser";
@@ -62,6 +65,19 @@ import { SubqueryExpressionContext } from "./esql_parser";
  * `esql_parser`.
  */
 export interface esql_parserListener extends ParseTreeListener {
+	/**
+	 * Enter a parse tree produced by the `valueFunctionExpression`
+	 * labeled alternative in `esql_parser.valueExpression`.
+	 * @param ctx the parse tree
+	 */
+	enterValueFunctionExpression?: (ctx: ValueFunctionExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by the `valueFunctionExpression`
+	 * labeled alternative in `esql_parser.valueExpression`.
+	 * @param ctx the parse tree
+	 */
+	exitValueFunctionExpression?: (ctx: ValueFunctionExpressionContext) => void;
+
 	/**
 	 * Enter a parse tree produced by the `valueExpressionDefault`
 	 * labeled alternative in `esql_parser.valueExpression`.
@@ -499,6 +515,17 @@ export interface esql_parserListener extends ParseTreeListener {
 	exitSourceIdentifier?: (ctx: SourceIdentifierContext) => void;
 
 	/**
+	 * Enter a parse tree produced by `esql_parser.functionExpressionArgument`.
+	 * @param ctx the parse tree
+	 */
+	enterFunctionExpressionArgument?: (ctx: FunctionExpressionArgumentContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.functionExpressionArgument`.
+	 * @param ctx the parse tree
+	 */
+	exitFunctionExpressionArgument?: (ctx: FunctionExpressionArgumentContext) => void;
+
+	/**
 	 * Enter a parse tree produced by `esql_parser.qualifiedName`.
 	 * @param ctx the parse tree
 	 */
@@ -530,6 +557,17 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitIdentifier?: (ctx: IdentifierContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.functionIdentifier`.
+	 * @param ctx the parse tree
+	 */
+	enterFunctionIdentifier?: (ctx: FunctionIdentifierContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.functionIdentifier`.
+	 * @param ctx the parse tree
+	 */
+	exitFunctionIdentifier?: (ctx: FunctionIdentifierContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.constant`.

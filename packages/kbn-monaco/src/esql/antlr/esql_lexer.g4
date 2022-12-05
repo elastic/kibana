@@ -30,7 +30,6 @@ WS
     ;
 
 
-
 mode EXPRESSION;
 
 PIPE : '|' -> popMode;
@@ -105,6 +104,13 @@ ASTERISK : '*';
 SLASH : '/';
 PERCENT : '%';
 
+ROUND_FUNCTION_MATH : 'round';
+AVG_FUNCTION_MATH : 'avg';
+SUM_FUNCTION_MATH : 'sum';
+MIN_FUNCTION_MATH : 'min';
+MAX_FUNCTION_MATH : 'max';
+
+
 UNQUOTED_IDENTIFIER
     : (LETTER | '_') (LETTER | DIGIT | '_')*
     ;
@@ -124,7 +130,6 @@ EXPR_MULTILINE_COMMENT
 EXPR_WS
     : WS -> channel(HIDDEN)
     ;
-
 
 
 mode SOURCE_IDENTIFIERS;

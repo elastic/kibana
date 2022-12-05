@@ -46,8 +46,9 @@ booleanExpression
     ;
 
 valueExpression
-    : operatorExpression                                                                      #valueExpressionDefault
-    | left=operatorExpression comparisonOperator right=operatorExpression                     #comparison
+    : functionIdentifier LP (functionExpressionArgument (COMMA functionExpressionArgument)*)? RP  #valueFunctionExpression
+    | operatorExpression                                                                          #valueExpressionDefault
+    | left=operatorExpression comparisonOperator right=operatorExpression                         #comparison
     ;
 
 operatorExpression
@@ -73,7 +74,8 @@ fields
     ;
 
 field
-    : booleanExpression
+    : qualifiedName ASSIGN valueExpression
+    | booleanExpression
     | qualifiedName ASSIGN booleanExpression
     ;
 
@@ -94,6 +96,11 @@ sourceIdentifier
     | SRC_QUOTED_IDENTIFIER
     ;
 
+functionExpressionArgument
+   : qualifiedName
+   | string
+   ;
+
 qualifiedName
     : identifier (DOT identifier)*
     ;
@@ -106,6 +113,15 @@ identifier
     : UNQUOTED_IDENTIFIER
     | QUOTED_IDENTIFIER
     ;
+
+functionIdentifier
+    : ROUND_FUNCTION_MATH
+    | AVG_FUNCTION_MATH
+    | SUM_FUNCTION_MATH
+    | MIN_FUNCTION_MATH
+    | MAX_FUNCTION_MATH
+    ;
+
 
 constant
     : NULL                                                                              #nullLiteral

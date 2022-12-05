@@ -62,6 +62,18 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
       euiThemeVars.euiColorPrimaryText
     ),
 
+    // math functions
+    ...buildRuleGroup(
+      [
+        'round_function_math',
+        'avg_function_math',
+        'sum_function_math',
+        'min_function_math',
+        'max_function_math',
+      ],
+      euiThemeVars.euiColorPrimaryText
+    ),
+
     // values
     ...buildRuleGroup(
       [
@@ -75,8 +87,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'src_quoted_identifier',
         'string',
       ],
-      euiThemeVars.euiTextColor,
-      true
+      euiThemeVars.euiTextColor
     ),
 
     // values #2
@@ -93,8 +104,7 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'integer_literal',
         'decimal_literal',
       ],
-      euiThemeVars.euiColorPrimaryText,
-      true
+      euiThemeVars.euiTextColor
     ),
 
     // operators
