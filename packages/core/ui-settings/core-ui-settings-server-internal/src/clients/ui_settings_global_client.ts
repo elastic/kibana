@@ -8,7 +8,7 @@
 
 import { UiSettingsClientCommon } from './ui_settings_client_common';
 import { UiSettingsServiceOptions } from '../types';
-import { SettingNotRegisteredError } from './not_registered_error';
+import { SettingNotRegisteredError } from '../ui_settings_errors';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
 
 interface UserProvidedValue<T = unknown> {

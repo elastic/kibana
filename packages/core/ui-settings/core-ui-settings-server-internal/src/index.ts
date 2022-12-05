@@ -16,3 +16,4 @@ export type {
   InternalUiSettingsServiceStart,
   UiSettingsServiceOptions,
 } from './types';
+export { CannotOverrideError, SettingNotRegisteredError } from './ui_settings_errors';
