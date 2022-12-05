@@ -10,7 +10,13 @@ import {
   INSUFFICIENT_FLEET_PERMISSIONS,
   ProjectMonitorFormatter,
 } from './project_monitor_formatter';
-import { ConfigKey, DataStream, LocationStatus } from '../../../common/runtime_types';
+import {
+  ConfigKey,
+  DataStream,
+  Locations,
+  LocationStatus,
+  PrivateLocation,
+} from '../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { times } from 'lodash';
 import { SyntheticsService } from '../synthetics_service';
@@ -21,6 +27,8 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { formatSecrets } from '../utils';
 
 import * as telemetryHooks from '../../routes/telemetry/monitor_upgrade_sender';
+import { formatLocation } from '../../../common/utils/location_formatter';
+import * as locationsUtil from '../get_all_locations';
 
 const testMonitors = [
   {
@@ -85,7 +93,7 @@ const privateLocations = times(1).map((n) => {
     agentPolicyId: `loc-${n}`,
     concurrentMonitors: 1,
   };
-});
+}) as PrivateLocation[];
 
 describe('ProjectMonitorFormatter', () => {
   const mockEsClient = {
@@ -123,7 +131,7 @@ describe('ProjectMonitorFormatter', () => {
 
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createStart().getClient();
 
-  const locations = times(3).map((n) => {
+  const publicLocations = times(3).map((n) => {
     return {
       id: `loc-${n}`,
       label: `Location ${n}`,
@@ -135,16 +143,22 @@ describe('ProjectMonitorFormatter', () => {
       isServiceManaged: true,
       status: LocationStatus.GA,
     };
-  });
+  }) as Locations;
 
   const monitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
+
+  jest.spyOn(locationsUtil, 'getAllLocations').mockImplementation(
+    async () =>
+      ({
+        publicLocations,
+        privateLocations,
+      } as any)
+  );
 
   it('should return errors', async () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      locations,
-      privateLocations,
       encryptedSavedObjectsClient,
       savedObjectsClient: soClient,
       monitors: testMonitors,
@@ -193,8 +207,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      locations,
-      privateLocations,
       encryptedSavedObjectsClient,
       savedObjectsClient: soClient,
       monitors: testMonitors,
@@ -243,8 +255,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      locations,
-      privateLocations,
       encryptedSavedObjectsClient,
       savedObjectsClient: soClient,
       monitors: testMonitors,
@@ -288,8 +298,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      locations,
-      privateLocations,
       encryptedSavedObjectsClient,
       savedObjectsClient: soClient,
       monitors: testMonitors,
@@ -334,8 +342,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      locations,
-      privateLocations,
       encryptedSavedObjectsClient,
       savedObjectsClient: soClient,
       monitors: testMonitors,
@@ -386,8 +392,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      locations,
-      privateLocations,
       encryptedSavedObjectsClient,
       savedObjectsClient: soClient,
       monitors: testMonitors,
@@ -453,7 +457,7 @@ const payloadData = [
     form_monitor_type: 'multistep',
     ignore_https_errors: false,
     journey_id: 'check if title is present 10 0',
-    locations: privateLocations,
+    locations: privateLocations.map((l) => formatLocation(l)),
     name: 'check if title is present 10 0',
     namespace: 'default_space',
     origin: 'project',
@@ -515,7 +519,7 @@ const payloadData = [
     form_monitor_type: 'multistep',
     ignore_https_errors: false,
     journey_id: 'check if title is present 10 1',
-    locations: privateLocations,
+    locations: privateLocations.map((l) => formatLocation(l)),
     name: 'check if title is present 10 1',
     namespace: 'default_space',
     origin: 'project',

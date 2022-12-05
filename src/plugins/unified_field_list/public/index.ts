@@ -76,6 +76,7 @@ export {
 
 export {
   useQuerySubscriber,
+  hasQuerySubscriberData,
   type QuerySubscriberResult,
   type QuerySubscriberParams,
 } from './hooks/use_query_subscriber';
