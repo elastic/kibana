@@ -281,7 +281,6 @@ const spanFromTraceByIdRoute = createApmServerRoute({
     const { params } = resources;
     const { spanId, traceId } = params.path;
     const { parentTransactionId } = params.query;
-    console.log('### caue  parentTransactionId', parentTransactionId);
     const apmEventClient = await getApmEventClient(resources);
     return await getSpan({
       spanId,
