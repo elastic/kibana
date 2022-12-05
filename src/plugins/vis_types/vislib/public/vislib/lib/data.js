@@ -49,7 +49,6 @@ export class Data {
     this.createColorLookupFunction = createColorLookupFunction;
     this.data = this.copyDataObj(data);
     this.type = this.getDataType();
-    this._cleanVisData();
     this.labels = this._getLabels(this.data);
     this.color = this.labels
       ? createColorLookupFunction(this.labels, uiState.get('vis.colors'))
