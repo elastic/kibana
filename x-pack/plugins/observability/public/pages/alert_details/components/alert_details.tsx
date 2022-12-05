@@ -8,10 +8,11 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
-import { EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 
 import { ALERT_RULE_TYPE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { AlertSummary } from '../../..';
 import { getTimeZone } from '../../../utils/get_time_zone';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
@@ -20,7 +21,7 @@ import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 
-import { AlertSummary, HeaderActions, PageTitle } from '.';
+import { HeaderActions, PageTitle } from '.';
 import { CenterJustifiedSpinner } from '../../rule_details/components/center_justified_spinner';
 import PageNotFound from '../../404';
 
@@ -116,10 +117,12 @@ export function AlertDetails() {
       }}
       data-test-subj="alertDetails"
     >
-      <AlertSummary alert={alert} />
-      <EuiSpacer size="l" />
-      {AlertDetailsAppSection && rule && (
+      {AlertDetailsAppSection && rule ? (
         <AlertDetailsAppSection alert={alert} rule={rule} timeZone={timeZone} />
+      ) : (
+        // TODO: the AlertSummary component will be part of AlertDetailsAppSection.
+        // As the AlertDetailsAppSection is not done for all the Apps, yet. We will show only the AlertSummary
+        <AlertSummary alert={alert} />
       )}
     </ObservabilityPageTemplate>
   );

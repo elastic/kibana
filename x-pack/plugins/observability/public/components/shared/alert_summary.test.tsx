@@ -7,17 +7,17 @@
 
 import React from 'react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
-import { render } from '../../../utils/test_helper';
+import { render } from '../../utils/test_helper';
 import { AlertSummary } from './alert_summary';
-import { asDuration } from '../../../../common/utils/formatters';
-import { alertWithTags, alertWithNoData, tags } from '../mock/alert';
+import { asDuration } from '../../../common/utils/formatters';
+import { alertWithTags, alertWithNoData, tags } from '../../pages/alert_details/mock/alert';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
 }));
 
-jest.mock('../../../utils/kibana_react');
+jest.mock('../../utils/kibana_react');
 
 describe('Alert summary', () => {
   jest
