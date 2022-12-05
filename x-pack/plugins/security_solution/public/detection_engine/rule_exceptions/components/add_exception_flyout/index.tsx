@@ -53,6 +53,7 @@ import { useAddNewExceptionItems } from './use_add_new_exceptions';
 import { enrichNewExceptionItems } from '../flyout_components/utils';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
+import { useInvalidateFetchRuleByIdQuery } from '../../../rule_management/api/hooks/use_fetch_rule_by_id_query';
 
 const SectionHeader = styled(EuiTitle)`
   ${() => css`
@@ -114,6 +115,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const { isLoading, indexPatterns } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
+  const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
   const allowLargeValueLists = useMemo((): boolean => {
     if (rules != null && rules.length === 1) {
       // We'll only block this when we know what rule we're dealing with.
@@ -360,6 +362,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         await closeAlerts(ruleStaticIds, addedItems, alertIdToClose, bulkCloseIndex);
       }
 
+      
+      invalidateFetchRuleByIdQuery();
       // Rule only would have been updated if we had to create a rule default list
       // to attach to it, all shared lists would already be referenced on the rule
       onConfirm(true, closeSingleAlert, bulkCloseAlerts);
@@ -385,6 +389,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     onConfirm,
     bulkCloseIndex,
     setErrorSubmitting,
+    invalidateFetchRuleByIdQuery
   ]);
 
   const isSubmitButtonDisabled = useMemo(
