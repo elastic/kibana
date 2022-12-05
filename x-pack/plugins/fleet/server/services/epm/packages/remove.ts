@@ -17,6 +17,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
+import { updateIndexSettings } from '../elasticsearch/index/update_settings';
+
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -164,27 +166,35 @@ async function deleteAssets(
   esClient: ElasticsearchClient
 ) {
   const logger = appContextService.getLogger();
+  // must unset default_pipelines settings in indices first, or pipelines associated with an index cannot not be deleted
   // must delete index templates first, or component templates which reference them cannot be deleted
   // must delete ingestPipelines first, or ml models referenced in them cannot be deleted.
   // separate the assets into Index Templates and other assets.
-  type Tuple = [EsAssetReference[], EsAssetReference[]];
-  const [indexTemplatesAndPipelines, otherAssets] = installedEs.reduce<Tuple>(
-    ([indexAssetTypes, otherAssetTypes], asset) => {
+  type Tuple = [EsAssetReference[], EsAssetReference[], EsAssetReference[]];
+  const [indexTemplatesAndPipelines, indexAssets, otherAssets] = installedEs.reduce<Tuple>(
+    ([indexTemplateAndPipelineTypes, indexAssetTypes, otherAssetTypes], asset) => {
       if (
         asset.type === ElasticsearchAssetType.indexTemplate ||
         asset.type === ElasticsearchAssetType.ingestPipeline
       ) {
+        indexTemplateAndPipelineTypes.push(asset);
+      } else if (asset.type === ElasticsearchAssetType.index) {
         indexAssetTypes.push(asset);
       } else {
         otherAssetTypes.push(asset);
       }
 
-      return [indexAssetTypes, otherAssetTypes];
+      return [indexTemplateAndPipelineTypes, indexAssetTypes, otherAssetTypes];
     },
-    [[], []]
+    [[], [], []]
   );
 
   try {
+    // must first unset any default pipeline associated with any existing indices
+    // by setting empty string
+    await Promise.all(
+      indexAssets.map((asset) => updateIndexSettings(esClient, asset.id, { default_pipeline: '' }))
+    );
     // must delete index templates and pipelines first
     await Promise.all(deleteESAssets(indexTemplatesAndPipelines, esClient));
     // then the other asset types

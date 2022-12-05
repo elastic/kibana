@@ -46,12 +46,11 @@ export async function deletePipeline(esClient: ElasticsearchClient, id: string):
   // '*' shouldn't ever appear here, but it still would delete all ingest pipelines
   if (id && id !== '*') {
     try {
-      // @TODO: Remove ignore 400
-      await esClient.ingest.deletePipeline({ id }, { ignore: [400] });
+      await esClient.ingest.deletePipeline({ id });
     } catch (err) {
       // Only throw if error is not a 404 error. Sometimes the pipeline is already deleted, but we have
       // duplicate references to them, see https://github.com/elastic/kibana/issues/91192
-      if (err.statusCode !== 404 || err.statusCode !== 400) {
+      if (err.statusCode !== 404) {
         throw new FleetError(`error deleting pipeline ${id}: ${err}`);
       }
     }

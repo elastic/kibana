@@ -241,8 +241,8 @@ export function buildComponentTemplates(params: {
   templateName: string;
   registryElasticsearch: RegistryElasticsearch | undefined;
   packageName: string;
-  pipelineName?: string;
   defaultSettings: IndexTemplate['template']['settings'];
+  pipelineName?: string;
 }) {
   const {
     templateName,

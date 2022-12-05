@@ -101,6 +101,7 @@ export enum KibanaSavedObjectType {
 }
 
 export enum ElasticsearchAssetType {
+  index = 'index',
   componentTemplate = 'component_template',
   ingestPipeline = 'ingest_pipeline',
   indexTemplate = 'index_template',

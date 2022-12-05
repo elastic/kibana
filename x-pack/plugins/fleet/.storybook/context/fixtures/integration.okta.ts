@@ -125,6 +125,7 @@ export const item: GetInfoResponse['item'] = {
       component_template: [],
       data_stream_ilm_policy: [],
       ilm_policy: [],
+      index: [],
       index_template: [],
       transform: [],
       ml_model: [],

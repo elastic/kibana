@@ -36,11 +36,7 @@ import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
 
 import { deleteTransforms } from './remove';
-import {
-  getAsset,
-  TRANSFORM_DEST_IDX_ALIAS_ALL_SFX,
-  TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX,
-} from './common';
+import { getAsset, TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX } from './common';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
 enum TRANSFORM_SPECS_TYPES {
@@ -76,7 +72,9 @@ const installLegacyTransformsAssets = async (
 ) => {
   await deleteTransforms(
     esClient,
-    previousInstalledTransformEsAssets.map((asset) => asset.id)
+    previousInstalledTransformEsAssets.map((asset) => asset.id),
+    // For legacy transforms, delete destination indices upon deleting transforms
+    true
   );
 
   let installedTransforms: EsAssetReference[] = [];
@@ -146,6 +144,8 @@ const processTransformAssetsPerModule = (
   const transforms: TransformInstallation[] = [];
   const aliasesRefs: string[] = [];
   const transformsToRemove: EsAssetReference[] = [];
+  const indicesToAddRefs: EsAssetReference[] = [];
+
   transformPaths.forEach((path: string) => {
     const { transformModuleId, fileName } = getTransformFolderAndFileNames(
       installablePackage,
@@ -172,9 +172,9 @@ const processTransformAssetsPerModule = (
         isFinite(content._meta?.order) && content._meta?.order >= 0 ? content._meta?.order : 0;
       const transformVersion = content._meta?.fleet_transform_version ?? '0.1.0';
       // The “all” alias for the transform destination indices will be adjusted to include the new transform destination index as well as everything it previously included
-      const allIndexAliasName = `${content.dest.index}${TRANSFORM_DEST_IDX_ALIAS_ALL_SFX}`;
+      const allIndexAliasName = `${content.dest.index}.all`;
       // The “latest” alias for the transform destination indices will point solely to the new transform destination index
-      const latestIndexAliasName = `${content.dest.index}${TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX}`;
+      const latestIndexAliasName = `${content.dest.index}.latest`;
 
       transformsSpecifications
         .get(transformModuleId)
@@ -187,7 +187,12 @@ const processTransformAssetsPerModule = (
         [latestIndexAliasName]: {},
       };
 
-      content.dest.index = `${content.dest.index}-${installNameSuffix}`;
+      const versionedIndexName = `${content.dest.index}-${installNameSuffix}`;
+      content.dest.index = versionedIndexName;
+      indicesToAddRefs.push({
+        id: versionedIndexName,
+        type: ElasticsearchAssetType.index,
+      });
       transformsSpecifications.get(transformModuleId)?.set('destinationIndex', content.dest);
       transformsSpecifications.get(transformModuleId)?.set('destinationIndexAlias', alias);
       transformsSpecifications.get(transformModuleId)?.set('transform', content);
@@ -200,6 +205,7 @@ const processTransformAssetsPerModule = (
       const installationName = getTransformAssetNameForInstallation(
         installablePackage,
         transformModuleId,
+        // transform_id is versioned by fleet_transform_version and not by package version
         `default-${transformVersion}`
       );
 
@@ -248,19 +254,22 @@ const processTransformAssetsPerModule = (
       if (isPopulatedObject(content, ['start']) && content.start === false) {
         transformsSpecifications.get(transformModuleId)?.set('start', false);
       }
-      const destinationIndexTemplate =
-        (content.destination_index_template as Record<string, unknown>) ?? {};
-      destinationIndexTemplates.push({
-        transformModuleId,
-        _meta: getESAssetMetadata({ packageName: installablePackage.name }),
-        installationName: getTransformAssetNameForInstallation(
-          installablePackage,
+
+      if (content.destination_index_template) {
+        const destinationIndexTemplate =
+          (content.destination_index_template as Record<string, unknown>) ?? {};
+        destinationIndexTemplates.push({
           transformModuleId,
-          'template'
-        ),
-        template: destinationIndexTemplate,
-      } as DestinationIndexTemplateInstallation);
-      packageAssets.set('destinationIndexTemplate', destinationIndexTemplate);
+          _meta: getESAssetMetadata({ packageName: installablePackage.name }),
+          installationName: getTransformAssetNameForInstallation(
+            installablePackage,
+            transformModuleId,
+            'template'
+          ),
+          template: destinationIndexTemplate,
+        } as DestinationIndexTemplateInstallation);
+        packageAssets.set('destinationIndexTemplate', destinationIndexTemplate);
+      }
     }
   });
 
@@ -293,6 +302,7 @@ const processTransformAssetsPerModule = (
   }));
 
   return {
+    indicesToAddRefs,
     indexTemplatesRefs,
     componentTemplatesRefs,
     transformRefs,
@@ -317,6 +327,7 @@ const installTransformsAssets = async (
   let installedTransforms: EsAssetReference[] = [];
   if (transformPaths.length > 0) {
     const {
+      indicesToAddRefs,
       indexTemplatesRefs,
       componentTemplatesRefs,
       transformRefs,
@@ -337,7 +348,7 @@ const installTransformsAssets = async (
     await Promise.all(
       aliasesRefs
         .filter((a) => a.endsWith(TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX))
-        .map((alias) => deleteIndicesWithAlias({ esClient, logger, alias }))
+        .map((alias) => deleteAliasFromIndices({ esClient, logger, alias }))
     );
 
     // delete all previous transform
@@ -352,7 +363,12 @@ const installTransformsAssets = async (
       installablePackage.name,
       esReferences,
       {
-        assetsToAdd: [...indexTemplatesRefs, ...componentTemplatesRefs, ...transformRefs],
+        assetsToAdd: [
+          ...indicesToAddRefs,
+          ...indexTemplatesRefs,
+          ...componentTemplatesRefs,
+          ...transformRefs,
+        ],
         assetsToRemove: transformsToRemove,
       }
     );
@@ -545,7 +561,7 @@ export const isTransform = (path: string) => {
   return !path.endsWith('/') && pathParts.type === ElasticsearchAssetType.transform;
 };
 
-async function deleteIndicesWithAlias({
+async function deleteAliasFromIndices({
   esClient,
   logger,
   alias,
