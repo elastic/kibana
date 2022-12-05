@@ -12,4 +12,5 @@ export type {
   GetAllTagsOptions,
   ITagsClient,
   TagWithOptionalId,
+  TagAttributesV4,
 } from './types';

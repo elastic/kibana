@@ -19,6 +19,12 @@ export interface TagAttributes {
   color: string;
 }
 
+export interface TagAttributesV4 {
+  name: string;
+  description: string;
+  colors: string[];
+}
+
 export type TagWithOptionalId = Omit<Tag, 'id'> & { id?: string };
 
 export interface GetAllTagsOptions {
@@ -29,10 +35,11 @@ export interface CreateTagOptions {
   id?: string;
   overwrite?: boolean;
   refresh?: boolean | 'wait_for';
+  modelVersion?: number;
 }
 
 export interface ITagsClient {
-  create(attributes: TagAttributes, options?: CreateTagOptions): Promise<Tag>;
+  create(attributes: TagAttributes | TagAttributesV4, options?: CreateTagOptions): Promise<Tag>;
   get(id: string): Promise<Tag>;
   getAll(options?: GetAllTagsOptions): Promise<Tag[]>;
   delete(id: string): Promise<void>;

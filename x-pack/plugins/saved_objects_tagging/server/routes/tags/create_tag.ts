@@ -10,9 +10,13 @@ import type { TagsPluginRouter } from '../../types';
 import { TagValidationError } from '../../services/tags';
 
 export const registerCreateTagRoute = (router: TagsPluginRouter) => {
+  // I should mimic the versioned router API here, but let's just duplicate the routes instead
+  // so that TS is happy.
+
+  // v3 - color
   router.post(
     {
-      path: '/api/saved_objects_tagging/tags/create',
+      path: '/api/saved_objects_tagging/v3/tags/create',
       validate: {
         body: schema.object({
           name: schema.string(),
@@ -24,7 +28,42 @@ export const registerCreateTagRoute = (router: TagsPluginRouter) => {
     router.handleLegacyErrors(async (ctx, req, res) => {
       try {
         const { tagsClient } = await ctx.tags;
-        const tag = await tagsClient.create(req.body);
+        const tag = await tagsClient.create(req.body, { modelVersion: 3 });
+        return res.ok({
+          body: {
+            tag,
+          },
+        });
+      } catch (e) {
+        if (e instanceof TagValidationError) {
+          return res.badRequest({
+            body: {
+              message: e.message,
+              attributes: e.validation,
+            },
+          });
+        }
+        throw e;
+      }
+    })
+  );
+
+  // v4 - colors
+  router.post(
+    {
+      path: '/api/saved_objects_tagging/v4/tags/create',
+      validate: {
+        body: schema.object({
+          name: schema.string(),
+          description: schema.string(),
+          colors: schema.arrayOf(schema.string()),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (ctx, req, res) => {
+      try {
+        const { tagsClient } = await ctx.tags;
+        const tag = await tagsClient.create(req.body, { modelVersion: 4 });
         return res.ok({
           body: {
             tag,
