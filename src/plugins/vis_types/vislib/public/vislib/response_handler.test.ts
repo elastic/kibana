@@ -9,37 +9,15 @@
 import { setFormatService } from '../services';
 
 jest.mock('./helpers', () => ({
-  buildHierarchicalData: jest.fn(() => ({})),
   buildPointSeriesData: jest.fn(() => ({})),
 }));
 
 // @ts-ignore
-import { vislibSeriesResponseHandler, vislibSlicesResponseHandler } from './response_handler';
-import { buildHierarchicalData, buildPointSeriesData } from './helpers';
+import { vislibSeriesResponseHandler } from './response_handler';
+import { buildPointSeriesData } from './helpers';
 import { Table } from './types';
 
 describe('response_handler', () => {
-  describe('vislibSlicesResponseHandler', () => {
-    test('should not call buildHierarchicalData when no columns', () => {
-      vislibSlicesResponseHandler({ rows: [] }, {});
-      expect(buildHierarchicalData).not.toHaveBeenCalled();
-    });
-
-    test('should call buildHierarchicalData', () => {
-      const response = {
-        rows: [{ 'col-0-1': 1 }],
-        columns: [{ id: 'col-0-1', name: 'Count' }],
-      };
-      const dimensions = { metric: { accessor: 0 } };
-      vislibSlicesResponseHandler(response, dimensions);
-
-      expect(buildHierarchicalData).toHaveBeenCalledWith(
-        { columns: [...response.columns], rows: [...response.rows] },
-        dimensions
-      );
-    });
-  });
-
   describe('vislibSeriesResponseHandler', () => {
     let resp: Table;
     let expected: any;
@@ -90,30 +68,6 @@ describe('response_handler', () => {
         { columns: [...response.columns], rows: [...response.rows] },
         dimensions
       );
-    });
-
-    test('should split columns', () => {
-      const dimensions = {
-        x: null,
-        y: [{ accessor: 1 }],
-        splitColumn: [{ accessor: 0 }],
-      };
-
-      const convertedResp = vislibSlicesResponseHandler(resp, dimensions);
-      expect(convertedResp.columns).toHaveLength(resp.rows.length);
-      expect(convertedResp.columns).toEqual(expected);
-    });
-
-    test('should split rows', () => {
-      const dimensions = {
-        x: null,
-        y: [{ accessor: 1 }],
-        splitRow: [{ accessor: 0 }],
-      };
-
-      const convertedResp = vislibSlicesResponseHandler(resp, dimensions);
-      expect(convertedResp.rows).toHaveLength(resp.rows.length);
-      expect(convertedResp.rows).toEqual(expected);
     });
   });
 });

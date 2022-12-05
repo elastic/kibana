@@ -43,7 +43,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 
 jest.mock('../../services', () => ({
   getUISettings: jest.fn(() => ({
-    get: jest.fn((token) => Boolean(token === 'visualization:visualize:legacyPieChartsLibrary')),
+    get: jest.fn(),
   })),
 }));
 
