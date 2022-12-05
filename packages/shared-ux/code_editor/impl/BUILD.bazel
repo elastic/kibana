@@ -80,6 +80,8 @@ TYPES_DEPS = [
   "//packages/kbn-i18n-react:npm_module_types",
   "//packages/kbn-i18n:npm_module_types",
   "//packages/kbn-test-jest-helpers:npm_module_types",
+  "@npm//@types/react-resize-detector",
+  "@npm//@types/react-monaco-editor",
 ]
 
 jsts_transpiler(
