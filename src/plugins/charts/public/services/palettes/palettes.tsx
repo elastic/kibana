@@ -44,8 +44,7 @@ function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, '
   ) {
     let outputColor: string;
     if (chartConfiguration.syncColors) {
-      const seriesName = series[0].name;
-      const colorKey = seriesName;
+      const colorKey = series[0].name;
       mappedColors.mapKeys([colorKey]);
       const mappedColor = mappedColors.get(colorKey);
       outputColor = chartConfiguration.behindText ? behindTextColorMap[mappedColor] : mappedColor;
