@@ -720,7 +720,7 @@
         "signature": [
           "React.ExoticComponent<Pick<{ alert?: ",
           "TopAlert",
-          " | undefined; alerts?: Record<string, unknown>[] | undefined; isInApp?: boolean | undefined; observabilityRuleTypeRegistry: { register: (type: ",
+          "<{}> | undefined; alerts?: Record<string, unknown>[] | undefined; isInApp?: boolean | undefined; observabilityRuleTypeRegistry: { register: (type: ",
           {
             "pluginId": "observability",
             "scope": "public",
@@ -4497,6 +4497,138 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.SLO",
+        "type": "Interface",
+        "tags": [],
+        "label": "SLO",
+        "description": [],
+        "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SLO.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SLO.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SLO.objective",
+            "type": "Object",
+            "tags": [],
+            "label": "objective",
+            "description": [],
+            "signature": [
+              "{ target: number; }"
+            ],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SLO.summary",
+            "type": "Object",
+            "tags": [],
+            "label": "summary",
+            "description": [],
+            "signature": [
+              "{ sliValue: number; errorBudget: { remaining: number; }; }"
+            ],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.SLOList",
+        "type": "Interface",
+        "tags": [],
+        "label": "SLOList",
+        "description": [],
+        "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SLOList.results",
+            "type": "Array",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.SLO",
+                "text": "SLO"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SLOList.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SLOList.perPage",
+            "type": "number",
+            "tags": [],
+            "label": "perPage",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SLOList.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.Stat",
         "type": "Interface",
         "tags": [],
@@ -5603,6 +5735,31 @@
           "string | null"
         ],
         "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.Subset",
+        "type": "Type",
+        "tags": [],
+        "label": "Subset",
+        "description": [
+          "\nAllow partial of nested object"
+        ],
+        "signature": [
+          "{ [attr in keyof K]?: (K[attr] extends object ? ",
+          {
+            "pluginId": "observability",
+            "scope": "public",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-public.Subset",
+            "text": "Subset"
+          },
+          "<K[attr]> : K[attr]) | undefined; }"
+        ],
+        "path": "x-pack/plugins/observability/public/typings/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7935,7 +8092,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { page: number; per_page: number; total: number; results: { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; is_estimated: boolean; }; }; settings: { timestamp_field: string; sync_delay: string; frequency: string; }; revision: number; created_at: string; updated_at: string; }[]; }, ",
+          ", { page: number; per_page: number; total: number; results: { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; is_estimated: boolean; }; }; settings: { timestamp_field: string; sync_delay: string; frequency: string; }; revision: number; created_at: string; updated_at: string; }[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7995,7 +8152,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; settings: { timestamp_field: string; sync_delay: string; frequency: string; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; is_estimated: boolean; }; }; revision: number; created_at: string; updated_at: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; settings: { timestamp_field: string; sync_delay: string; frequency: string; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; is_estimated: boolean; }; }; revision: number; created_at: string; updated_at: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8111,11 +8268,11 @@
           "TypeC",
           "<{ index: ",
           "StringC",
-          "; query_filter: ",
+          "; filter: ",
           "StringC",
-          "; numerator: ",
+          "; good: ",
           "StringC",
-          "; denominator: ",
+          "; total: ",
           "StringC",
           "; }>; }>]>; time_window: ",
           "UnionC",
@@ -8177,7 +8334,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; settings: { timestamp_field: string; sync_delay: string; frequency: string; }; created_at: string; updated_at: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; settings: { timestamp_field: string; sync_delay: string; frequency: string; }; created_at: string; updated_at: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8291,11 +8448,11 @@
           "TypeC",
           "<{ index: ",
           "StringC",
-          "; query_filter: ",
+          "; filter: ",
           "StringC",
-          "; numerator: ",
+          "; good: ",
           "StringC",
-          "; denominator: ",
+          "; total: ",
           "StringC",
           "; }>; }>]>; time_window: ",
           "UnionC",
@@ -8467,7 +8624,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { page: number; per_page: number; total: number; results: { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; is_estimated: boolean; }; }; settings: { timestamp_field: string; sync_delay: string; frequency: string; }; revision: number; created_at: string; updated_at: string; }[]; }, ",
+          ", { page: number; per_page: number; total: number; results: { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; is_estimated: boolean; }; }; settings: { timestamp_field: string; sync_delay: string; frequency: string; }; revision: number; created_at: string; updated_at: string; }[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8527,7 +8684,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; settings: { timestamp_field: string; sync_delay: string; frequency: string; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; is_estimated: boolean; }; }; revision: number; created_at: string; updated_at: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; settings: { timestamp_field: string; sync_delay: string; frequency: string; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; is_estimated: boolean; }; }; revision: number; created_at: string; updated_at: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8643,11 +8800,11 @@
           "TypeC",
           "<{ index: ",
           "StringC",
-          "; query_filter: ",
+          "; filter: ",
           "StringC",
-          "; numerator: ",
+          "; good: ",
           "StringC",
-          "; denominator: ",
+          "; total: ",
           "StringC",
           "; }>; }>]>; time_window: ",
           "UnionC",
@@ -8709,7 +8866,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; query_filter: string; numerator: string; denominator: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; settings: { timestamp_field: string; sync_delay: string; frequency: string; }; created_at: string; updated_at: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transaction_duration\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: \"sli.apm.transaction_error_rate\"; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: string; objective: { target: number; } & { timeslice_target?: number | undefined; timeslice_window?: string | undefined; }; settings: { timestamp_field: string; sync_delay: string; frequency: string; }; created_at: string; updated_at: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8823,11 +8980,11 @@
           "TypeC",
           "<{ index: ",
           "StringC",
-          "; query_filter: ",
+          "; filter: ",
           "StringC",
-          "; numerator: ",
+          "; good: ",
           "StringC",
-          "; denominator: ",
+          "; total: ",
           "StringC",
           "; }>; }>]>; time_window: ",
           "UnionC",
