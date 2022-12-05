@@ -93,7 +93,7 @@ export const getVisualization = ({
                 },
               ]
             : [],
-          filterOperations: (op: OperationMetadata) => op.isBucketed,
+          filterOperations: (op: OperationMetadata) => op.isBucketed && op.scale === 'ordinal',
           enableDimensionEditor: true,
           required: true,
           dataTestSubj: 'lnsGraph_entitiesKeyDimensionPanel',
