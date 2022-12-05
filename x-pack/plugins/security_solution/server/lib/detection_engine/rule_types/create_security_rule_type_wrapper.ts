@@ -88,6 +88,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             savedObjectsClient,
             scopedClusterClient,
             uiSettingsClient,
+            ruleMonitoringService,
           } = services;
           const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
@@ -95,6 +96,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           const ruleExecutionLogger = await ruleExecutionLoggerFactory({
             savedObjectsClient,
+            ruleMonitoringService,
             context: {
               executionId,
               ruleId: rule.id,
@@ -342,7 +344,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     secondaryTimestamp,
                     ruleExecutionLogger,
                     aggregatableTimestampField,
-                    alertTimestampOverride,
                   },
                 });
 

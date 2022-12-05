@@ -92,7 +92,7 @@ export interface RuleAggregations {
 }
 
 export interface RuleLastRun {
-  outcome: RuleLastRunOutcomes;
+  outcome: RuleLastRunOutcomes | null;
   warning?: RuleExecutionStatusErrorReasons | RuleExecutionStatusWarningReasons | null;
   outcomeMsg?: string[] | null;
   alertsCount: {

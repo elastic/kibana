@@ -35,13 +35,15 @@ import type {
   RuleExecutionContext,
   StatusChangeArgs,
 } from './client_interface';
+import { PublicRuleMonitoringService } from '@kbn/alerting-plugin/server/types';
 
 export const createClientForExecutors = (
   settings: RuleExecutionSettings,
   soClient: IRuleExecutionSavedObjectsClient,
   eventLog: IEventLogWriter,
   logger: Logger,
-  context: RuleExecutionContext
+  context: RuleExecutionContext,
+  ruleMonitoringService: PublicRuleMonitoringService
 ): IRuleExecutionLogForExecutors => {
   const baseCorrelationIds = getCorrelationIds(context);
   const baseLogSuffix = baseCorrelationIds.getLogSuffix();
@@ -162,6 +164,9 @@ export const createClientForExecutors = (
     args: NormalizedStatusChangeArgs
   ): Promise<void> => {
     const { newStatus, message, metrics } = args;
+
+    ruleMonitoringService.setLastRunOutcomeMsg("cualquiera gato");
+    debugger;
 
     await soClient.createOrUpdate(ruleId, {
       last_execution: {
