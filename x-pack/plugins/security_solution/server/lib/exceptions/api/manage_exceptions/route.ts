@@ -60,7 +60,7 @@ export const createSharedExceptionListRoute = (router: SecuritySolutionPluginRou
           listId: uuid.v4(),
           meta: undefined,
           name,
-          namespaceType: 'agnostic',
+          namespaceType: 'single',
           tags: [],
           type: 'detection',
           version: 1,
