@@ -4016,7 +4016,7 @@ export class RulesClient {
     return actions.map((action) => {
       if (action.actionRef.startsWith(preconfiguredConnectorActionRefPrefix)) {
         return {
-          ...omit(action, 'actionRef'),
+          ...action,
           id: action.actionRef.replace(preconfiguredConnectorActionRefPrefix, ''),
         };
       }
@@ -4026,10 +4026,10 @@ export class RulesClient {
         throw new Error(`Action reference "${action.actionRef}" not found in alert id: ${alertId}`);
       }
       return {
-        ...omit(action, 'actionRef'),
+        ...action,
         id: reference.id,
       };
-    }) as Rule['actions'];
+    });
   }
 
   private getAlertFromRaw<Params extends RuleTypeParams>(

@@ -83,6 +83,7 @@ const rule = {
       id: '1',
       group: 'default',
       actionTypeId: 'test',
+      actionRef: 'action_0',
       params: {
         foo: true,
         contextVal: 'My {{context.value}} goes here',
@@ -213,7 +214,7 @@ describe('Execution Handler', () => {
 
     expect(Object.values(alerts)[0].getLastScheduledActions()).toEqual({
       actions: {
-        '1': {
+        action_0: {
           date: DATE_1970,
         },
       },
@@ -779,7 +780,7 @@ describe('Execution Handler', () => {
       })
     );
     await executionHandler.run(
-      generateAlert({ id: 1, lastScheduledActions: { '1': { date: new Date(DATE_1970) } } })
+      generateAlert({ id: 1, lastScheduledActions: { action_0: { date: new Date(DATE_1970) } } })
     );
 
     clock.tick(30000);

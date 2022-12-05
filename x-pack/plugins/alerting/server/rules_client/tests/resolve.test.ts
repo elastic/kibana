@@ -94,6 +94,7 @@ describe('resolve()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionRef": "action_0",
             "group": "default",
             "id": "1",
             "params": Object {
@@ -168,6 +169,7 @@ describe('resolve()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionRef": "action_0",
             "group": "default",
             "id": "1",
             "params": Object {
@@ -327,6 +329,7 @@ describe('resolve()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionRef": "action_0",
             "group": "default",
             "id": "1",
             "params": Object {

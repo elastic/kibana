@@ -87,14 +87,14 @@ describe('isThrottled', () => {
           date: new Date(),
           group: 'default',
           actions: {
-            actionId1: { date: new Date() },
+            action_0: { date: new Date() },
           },
         },
       },
     });
     clock.tick(5000);
     alert.scheduleActions('other-group');
-    expect(alert.isThrottled({ throttle: '1m', actionId: 'actionId1' })).toEqual(false);
+    expect(alert.isThrottled({ throttle: '1m', actionRef: 'action_0' })).toEqual(false);
   });
 
   test(`shouldn't throttle a specific action when group didn't change and throttle period expired`, () => {
@@ -104,14 +104,14 @@ describe('isThrottled', () => {
           date: new Date('2020-01-01'),
           group: 'default',
           actions: {
-            actionId1: { date: new Date() },
+            action_0: { date: new Date() },
           },
         },
       },
     });
     clock.tick(30000);
     alert.scheduleActions('default');
-    expect(alert.isThrottled({ throttle: '15s', actionId: 'actionId1' })).toEqual(false);
+    expect(alert.isThrottled({ throttle: '15s', actionRef: 'action_0' })).toEqual(false);
   });
 
   test(`shouldn't throttle a specific action when group changes`, () => {
@@ -121,14 +121,14 @@ describe('isThrottled', () => {
           date: new Date(),
           group: 'default',
           actions: {
-            actionId1: { date: new Date() },
+            action_0: { date: new Date() },
           },
         },
       },
     });
     clock.tick(5000);
     alert.scheduleActions('other-group');
-    expect(alert.isThrottled({ throttle: '1m', actionId: 'actionId1' })).toEqual(false);
+    expect(alert.isThrottled({ throttle: '1m', actionRef: 'action_0' })).toEqual(false);
   });
 });
 
