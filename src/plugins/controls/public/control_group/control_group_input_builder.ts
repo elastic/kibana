@@ -148,10 +148,7 @@ export function getTimeSliderPanelState(input: Partial<ControlGroupInput>) {
   } as ControlPanelState<ControlInput>;
 }
 
-function getPanelState(
-  input: Partial<ControlGroupInput>,
-  controlProps: AddDataControlProps
-) {
+function getPanelState(input: Partial<ControlGroupInput>, controlProps: AddDataControlProps) {
   return {
     order: getNextPanelOrder(input.panels),
     grow: controlProps.grow ?? input.defaultControlGrow ?? DEFAULT_CONTROL_GROW,
