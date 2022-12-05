@@ -176,7 +176,7 @@ Object {
           </p>
           <div>
             <div
-              class="euiContextMenuPanel"
+              class="euiContextMenuPanel eui-scrollBar css-zos0rl"
               data-test-subj="MenuPanel"
               tabindex="-1"
             >
