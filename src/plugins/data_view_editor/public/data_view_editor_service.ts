@@ -7,7 +7,15 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { BehaviorSubject, Subject } from 'rxjs';
+import {
+  BehaviorSubject,
+  Subject,
+  first,
+  firstValueFrom,
+  from,
+  Observable,
+  Subscription,
+} from 'rxjs';
 
 import {
   DataViewsServicePublic,
@@ -17,30 +25,117 @@ import {
 } from '@kbn/data-views-plugin/public';
 
 import { RollupIndicesCapsResponse, MatchedIndicesSet, TimestampOption } from './types';
-import { getMatchedIndices, ensureMinimumTime, extractTimeFields } from './lib';
+import { getMatchedIndices, ensureMinimumTime, extractTimeFields, removeSpaces } from './lib';
 import { GetFieldsOptions } from './shared_imports';
 
+export const matchedIndiciesDefault = {
+  allIndices: [],
+  exactMatchedIndices: [],
+  partialMatchedIndices: [],
+  visibleIndices: [],
+};
+
+export interface DataViewEditorServiceConstructorArgs {
+  services: {
+    http: HttpSetup;
+    dataViews: DataViewsServicePublic;
+  };
+  requireTimestampField?: boolean;
+  initialValues: {
+    name?: string;
+    type?: INDEX_PATTERN_TYPE;
+    indexPattern?: string;
+  };
+}
+
 export class DataViewEditorService {
-  constructor(private http: HttpSetup, private dataViews: DataViewsServicePublic) {
+  constructor({
+    services: { http, dataViews },
+    initialValues: {
+      type: initialType = INDEX_PATTERN_TYPE.DEFAULT,
+      indexPattern: initialIndexPattern = '',
+      name: initialName = '',
+    },
+    requireTimestampField = false,
+  }: DataViewEditorServiceConstructorArgs) {
+    this.http = http;
+    this.dataViews = dataViews;
+    this.requireTimestampField = requireTimestampField;
+    this.type = initialType;
+    this.indexPattern = removeSpaces(initialIndexPattern);
+
+    // fire off a couple of requests that we know we'll need
     this.rollupCapsResponse = this.getRollupIndexCaps();
+    this.dataViewNames$ = from(this.loadDataViewNames(initialName));
+
+    // public observables
+    this.matchedIndices$ = this.matchedIndicesInternal$.asObservable();
+    this.rollupIndicesCaps$ = this.rollupIndicesCapsInternal$.asObservable();
+    this.isLoadingSources$ = this.isLoadingSourcesInternal$.asObservable();
+    this.loadingTimestampFields$ = this.loadingTimestampFieldsInternal$.asObservable();
+    this.timestampFieldOptions$ = this.timestampFieldOptionsInternal$.asObservable();
+    this.rollupIndex$ = this.rollupIndexInternal$.asObservable();
+
+    // when list of matched indices is updated always update timestamp fields
+    this.loadTimestampFieldsSub = this.matchedIndices$.subscribe(() => this.loadTimestampFields());
+
+    // alternate value with undefined so validation knows when its getting a fresh value
+    this.matchedIndicesForProviderSub = this.matchedIndices$.subscribe((matchedIndices) => {
+      this.matchedIndicesForProvider$.next(matchedIndices);
+      this.matchedIndicesForProvider$.next(undefined);
+    });
+
+    // alternate value with undefined so validation knows when its getting a fresh value
+    this.rollupIndexForProviderSub = this.rollupIndex$.subscribe((rollupIndex) => {
+      this.rollupIndexForProvider$.next(rollupIndex);
+      this.rollupIndexForProvider$.next(undefined);
+    });
   }
 
-  rollupIndicesCapabilities$ = new BehaviorSubject<RollupIndicesCapsResponse>({});
-  isLoadingSources$ = new BehaviorSubject<boolean>(false);
+  private http: HttpSetup;
+  private dataViews: DataViewsServicePublic;
+  // config
+  private requireTimestampField: boolean;
+  private type = INDEX_PATTERN_TYPE.DEFAULT;
 
-  loadingTimestampFields$ = new BehaviorSubject<boolean>(false);
-  timestampFieldOptions$ = new Subject<TimestampOption[]>();
+  // state
+  private indexPattern = '';
+  private allowHidden = false;
 
-  matchedIndices$ = new BehaviorSubject<MatchedIndicesSet>({
-    allIndices: [],
-    exactMatchedIndices: [],
-    partialMatchedIndices: [],
-    visibleIndices: [],
-  });
+  // used for data view name validation - no dupes!
+  dataViewNames$: Observable<string[]>;
+
+  private loadTimestampFieldsSub: Subscription;
+  private matchedIndicesForProviderSub: Subscription;
+  private rollupIndexForProviderSub: Subscription;
+
+  // used for validating rollup data views - must match one and only one data view
+  private rollupIndicesCapsInternal$ = new BehaviorSubject<RollupIndicesCapsResponse>({});
+  rollupIndicesCaps$: Observable<RollupIndicesCapsResponse>;
+  private isLoadingSourcesInternal$ = new BehaviorSubject<boolean>(false);
+  isLoadingSources$: Observable<boolean>;
+
+  private loadingTimestampFieldsInternal$ = new BehaviorSubject<boolean>(false);
+  loadingTimestampFields$: Observable<boolean>;
+  private timestampFieldOptionsInternal$ = new Subject<TimestampOption[]>();
+  timestampFieldOptions$: Observable<TimestampOption[]>;
+
+  // current matched rollup index
+  private rollupIndexInternal$ = new BehaviorSubject<string | undefined | null>(undefined);
+  rollupIndex$: Observable<string | undefined | null>;
+  // alernates between value and undefined so validation can treat new value as thought its a promise
+  private rollupIndexForProvider$ = new Subject<string | undefined | null>();
+
+  private matchedIndicesInternal$ = new BehaviorSubject<MatchedIndicesSet>(matchedIndiciesDefault);
+  matchedIndices$: Observable<MatchedIndicesSet>;
+
+  // alernates between value and undefined so validation can treat new value as thought its a promise
+  private matchedIndicesForProvider$ = new Subject<MatchedIndicesSet | undefined>();
 
   private rollupCapsResponse: Promise<RollupIndicesCapsResponse>;
 
   private currentLoadingTimestampFields = 0;
+  private currentLoadingMatchedIndices = 0;
 
   private getRollupIndexCaps = async () => {
     let response: RollupIndicesCapsResponse = {};
@@ -49,33 +144,35 @@ export class DataViewEditorService {
     } catch (e) {
       // Silently swallow failure responses such as expired trials
     }
-    this.rollupIndicesCapabilities$.next(response);
+    this.rollupIndicesCapsInternal$.next(response);
     return response;
   };
 
-  private getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
-
-  getIsRollupIndex = async () => {
+  private getIsRollupIndex = async () => {
     const response = await this.rollupCapsResponse;
-    return (indexName: string) => this.getRollupIndices(response).includes(indexName);
+    const indices = Object.keys(response);
+    return (indexName: string) => indices.includes(indexName);
   };
 
-  loadMatchedIndices = async (
+  private loadMatchedIndices = async (
     query: string,
     allowHidden: boolean,
-    allSources: MatchedItem[]
-  ): Promise<{
-    matchedIndicesResult: MatchedIndicesSet;
-    exactMatched: MatchedItem[];
-    partialMatched: MatchedItem[];
-  }> => {
+    allSources: MatchedItem[],
+    type: INDEX_PATTERN_TYPE
+  ): Promise<void> => {
+    const currentLoadingMatchedIndicesIdx = ++this.currentLoadingMatchedIndices;
+    const isRollupIndex = await this.getIsRollupIndex();
     const indexRequests = [];
+    let newRollupIndexName: string | undefined | null;
+
+    this.loadingTimestampFieldsInternal$.next(true);
 
     if (query?.endsWith('*')) {
       const exactMatchedQuery = this.getIndicesCached({
         pattern: query,
         showAllIndices: allowHidden,
       });
+
       indexRequests.push(exactMatchedQuery);
       // provide default value when not making a request for the partialMatchQuery
       indexRequests.push(Promise.resolve([]));
@@ -104,53 +201,73 @@ export class DataViewEditorService {
       allowHidden
     );
 
-    this.matchedIndices$.next(matchedIndicesResult);
-    return { matchedIndicesResult, exactMatched, partialMatched };
+    // verify we're looking at the current result
+    if (currentLoadingMatchedIndicesIdx === this.currentLoadingMatchedIndices) {
+      if (type === INDEX_PATTERN_TYPE.ROLLUP) {
+        const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
+        newRollupIndexName = rollupIndices.length === 1 ? rollupIndices[0].name : null;
+        this.rollupIndexInternal$.next(newRollupIndexName);
+      } else {
+        this.rollupIndexInternal$.next(null);
+      }
+
+      this.matchedIndicesInternal$.next(matchedIndicesResult);
+    }
   };
 
-  loadIndices = async (title: string, allowHidden: boolean) => {
+  setIndexPattern = (indexPattern: string) => {
+    this.indexPattern = removeSpaces(indexPattern);
+    this.loadIndices();
+  };
+
+  setAllowHidden = (allowHidden: boolean) => {
+    this.allowHidden = allowHidden;
+    this.loadIndices();
+  };
+
+  setType = (type: INDEX_PATTERN_TYPE) => {
+    this.type = type;
+    this.loadIndices();
+  };
+
+  private loadIndices = async () => {
     const allSrcs = await this.getIndicesCached({
       pattern: '*',
-      showAllIndices: allowHidden,
+      showAllIndices: this.allowHidden,
     });
+    await this.loadMatchedIndices(this.indexPattern, this.allowHidden, allSrcs, this.type);
 
-    const matchedSet = await this.loadMatchedIndices(title, allowHidden, allSrcs);
-
-    this.isLoadingSources$.next(false);
-    const matchedIndices = getMatchedIndices(
-      allSrcs,
-      matchedSet.partialMatched,
-      matchedSet.exactMatched,
-      allowHidden
-    );
-
-    this.matchedIndices$.next(matchedIndices);
-    return matchedIndices;
+    this.isLoadingSourcesInternal$.next(false);
   };
 
-  loadDataViewNames = async (dataViewName?: string) => {
-    const dataViewListItems = await this.dataViews.getIdsWithTitle(dataViewName ? true : false);
+  private loadDataViewNames = async (initialName?: string) => {
+    const dataViewListItems = await this.dataViews.getIdsWithTitle(true);
     const dataViewNames = dataViewListItems.map((item) => item.name || item.title);
-    return dataViewName ? dataViewNames.filter((v) => v !== dataViewName) : dataViewNames;
+    return initialName ? dataViewNames.filter((v) => v !== initialName) : dataViewNames;
   };
 
   private getIndicesMemory: Record<string, Promise<MatchedItem[]>> = {};
-  getIndicesCached = async (props: { pattern: string; showAllIndices?: boolean | undefined }) => {
+
+  private getIndicesCached = async (props: {
+    pattern: string;
+    showAllIndices?: boolean | undefined;
+  }) => {
     const key = JSON.stringify(props);
 
-    const getIndicesPromise = this.getIsRollupIndex().then((isRollupIndex) =>
-      this.dataViews.getIndices({ ...props, isRollupIndex })
-    );
-    this.getIndicesMemory[key] = this.getIndicesMemory[key] || getIndicesPromise;
+    this.getIndicesMemory[key] =
+      this.getIndicesMemory[key] ||
+      this.getIsRollupIndex().then((isRollupIndex) =>
+        this.dataViews.getIndices({ ...props, isRollupIndex })
+      );
 
-    getIndicesPromise.catch(() => {
+    this.getIndicesMemory[key].catch(() => {
       delete this.getIndicesMemory[key];
     });
 
-    return await getIndicesPromise;
+    return await this.getIndicesMemory[key];
   };
 
-  private timeStampOptionsMemory: Record<string, Promise<TimestampOption[]>> = {};
+  private timestampOptionsMemory: Record<string, Promise<TimestampOption[]>> = {};
   private getTimestampOptionsForWildcard = async (
     getFieldsOptions: GetFieldsOptions,
     requireTimestampField: boolean
@@ -169,47 +286,72 @@ export class DataViewEditorService {
       getFieldsOptions,
       requireTimestampField
     );
-    this.timeStampOptionsMemory[key] =
-      this.timeStampOptionsMemory[key] || getTimestampOptionsPromise;
+    this.timestampOptionsMemory[key] =
+      this.timestampOptionsMemory[key] || getTimestampOptionsPromise;
 
     getTimestampOptionsPromise.catch(() => {
-      delete this.timeStampOptionsMemory[key];
+      delete this.timestampOptionsMemory[key];
     });
 
     return await getTimestampOptionsPromise;
   };
 
-  loadTimestampFields = async (
-    index: string,
-    type: INDEX_PATTERN_TYPE,
-    requireTimestampField: boolean,
-    rollupIndex?: string
-  ) => {
-    if (this.matchedIndices$.getValue().exactMatchedIndices.length === 0) {
-      this.timestampFieldOptions$.next([]);
+  private loadTimestampFields = async () => {
+    if (this.matchedIndicesInternal$.getValue().exactMatchedIndices.length === 0) {
+      this.timestampFieldOptionsInternal$.next([]);
+      this.loadingTimestampFieldsInternal$.next(false);
       return;
     }
     const currentLoadingTimestampFieldsIdx = ++this.currentLoadingTimestampFields;
-    this.loadingTimestampFields$.next(true);
+
     const getFieldsOptions: GetFieldsOptions = {
-      pattern: index,
+      pattern: this.indexPattern,
     };
-    if (type === INDEX_PATTERN_TYPE.ROLLUP) {
+    if (this.type === INDEX_PATTERN_TYPE.ROLLUP) {
       getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;
-      getFieldsOptions.rollupIndex = rollupIndex;
+      getFieldsOptions.rollupIndex = this.rollupIndexInternal$.getValue() || '';
     }
 
     let timestampOptions: TimestampOption[] = [];
     try {
       timestampOptions = await this.getTimestampOptionsForWildcardCached(
         getFieldsOptions,
-        requireTimestampField
+        this.requireTimestampField
       );
     } finally {
       if (currentLoadingTimestampFieldsIdx === this.currentLoadingTimestampFields) {
-        this.timestampFieldOptions$.next(timestampOptions);
-        this.loadingTimestampFields$.next(false);
+        this.timestampFieldOptionsInternal$.next(timestampOptions);
+        this.loadingTimestampFieldsInternal$.next(false);
       }
     }
+  };
+
+  // provides info necessary for validation of index pattern in required async format
+  indexPatternValidationProvider = async () => {
+    const rollupIndexPromise = firstValueFrom(
+      this.rollupIndex$.pipe(first((data) => data !== undefined))
+    );
+
+    const matchedIndicesPromise = firstValueFrom(
+      this.matchedIndicesForProvider$.pipe(first((data) => data !== undefined))
+    );
+
+    // necessary to get new observable value if the field hasn't changed
+    this.loadIndices();
+
+    // Wait until we have fetched the indices.
+    // The result will then be sent to the field validator(s) (when calling await provider(););
+    const [rollupIndex, matchedIndices] = await Promise.all([
+      rollupIndexPromise,
+      matchedIndicesPromise,
+    ]);
+
+    return { rollupIndex, matchedIndices: matchedIndices || matchedIndiciesDefault };
+  };
+
+  destroy = () => {
+    this.loadTimestampFieldsSub.unsubscribe();
+    this.matchedIndicesForProviderSub.unsubscribe();
+    this.rollupIndexForProviderSub.unsubscribe();
   };
 }

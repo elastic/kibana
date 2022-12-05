@@ -15,6 +15,7 @@ import {
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   LABEL_BORDER_SIZES,
+  LABEL_POSITIONS,
   LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
@@ -118,6 +119,11 @@ export function useLayerList() {
           options: { orientation: 0 },
         },
         labelText: { type: STYLE_TYPE.STATIC, options: { value: '' } },
+        labelPosition: {
+          options: {
+            position: LABEL_POSITIONS.CENTER,
+          },
+        },
         labelZoomRange: {
           options: {
             useLayerZoomRange: true,

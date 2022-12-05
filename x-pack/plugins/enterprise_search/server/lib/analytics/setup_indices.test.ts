@@ -34,6 +34,9 @@ describe('setup analytics collection index', () => {
         event_retention_day_length: {
           type: 'long',
         },
+        eventsDatastream: {
+          type: 'keyword',
+        },
         name: {
           type: 'keyword',
         },
