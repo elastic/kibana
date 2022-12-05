@@ -16,6 +16,7 @@ import { CommentType } from '@kbn/cases-plugin/common';
 
 import type { ResponseActionBodySchema } from '../../../../common/endpoint/schema/actions';
 import {
+  KubeRequestSchema,
   NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
   EndpointActionGetFileSchema,
@@ -34,6 +35,7 @@ import {
   UNISOLATE_HOST_ROUTE,
   ENDPOINT_ACTIONS_INDEX,
   GET_FILE_ROUTE,
+  GET_KUBE_LIST_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointAction,
@@ -175,6 +177,19 @@ export function registerResponseActionRoutes(
       )
     );
   }
+
+  router.post(
+    {
+      path: GET_KUBE_LIST_ROUTE,
+      validate: KubeRequestSchema,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canGetRunningProcesses'] },
+      logger,
+      responseActionRequestHandler(endpointContext, 'kube-list')
+    )
+  );
 }
 
 const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKeys>([
