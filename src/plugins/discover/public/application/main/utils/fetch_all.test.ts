@@ -25,7 +25,7 @@ import {
 } from '../hooks/use_saved_search';
 
 import { fetchDocuments } from './fetch_documents';
-import { fetchTextBased } from './fetch_textbased';
+import { fetchTextBased } from './fetch_text_based';
 import { fetchChart } from './fetch_chart';
 import { fetchTotalHits } from './fetch_total_hits';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
@@ -36,7 +36,7 @@ jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
 }));
 
-jest.mock('./fetch_textbased', () => ({
+jest.mock('./fetch_text_based', () => ({
   fetchTextBased: jest.fn().mockResolvedValue([]),
 }));
 

@@ -34,7 +34,7 @@ import {
   SavedSearchData,
 } from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
-import { fetchTextBased } from './fetch_textbased';
+import { fetchTextBased } from './fetch_text_based';
 
 export interface FetchDeps {
   abortController: AbortController;

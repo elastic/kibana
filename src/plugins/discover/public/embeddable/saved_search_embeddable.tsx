@@ -60,7 +60,7 @@ import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
 import { getRawRecordType } from '../application/main/utils/get_raw_record_type';
-import { fetchTextBased } from '../application/main/utils/fetch_textbased';
+import { fetchTextBased } from '../application/main/utils/fetch_text_based';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
 
 export type SearchProps = Partial<DiscoverGridProps> &
