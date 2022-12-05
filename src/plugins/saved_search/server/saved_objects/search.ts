@@ -68,6 +68,7 @@ export function getSavedSearchObjectType(
           },
         },
         rowsPerPage: { type: 'integer', index: false, doc_values: false },
+        breakdownField: { type: 'text' },
       },
     },
     migrations: () => getAllMigrations(getSearchSourceMigrations()),
