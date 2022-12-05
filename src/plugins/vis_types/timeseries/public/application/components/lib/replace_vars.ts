@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { encode, RisonValue } from 'rison-node';
+import { encode } from '@kbn/rison';
 import Handlebars, { ExtendedCompileOptions, compileFnName } from '@kbn/handlebars';
 import { i18n } from '@kbn/i18n';
 import { emptyLabel } from '../../../../common/empty_label';
@@ -41,7 +41,7 @@ function createSerializationHelper(
 
 handlebars.registerHelper(
   'rison',
-  createSerializationHelper('rison', (v) => encode(v as RisonValue))
+  createSerializationHelper('rison', (v) => encode(v))
 );
 
 handlebars.registerHelper('encodeURIComponent', (component: unknown) => {
