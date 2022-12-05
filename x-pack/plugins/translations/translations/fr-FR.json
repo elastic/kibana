@@ -31088,7 +31088,6 @@
     "xpack.synthetics.monitorManagement.monitorAdvancedOptions.monitorNamespaceFieldLabel": "Espace de nom",
     "xpack.synthetics.monitorManagement.monitorAdvancedOptions.namespaceHelpLearnMoreLabel": "En savoir plus",
     "xpack.synthetics.monitorManagement.monitorDeleteFailureMessage": "Impossible de supprimer le moniteur. Réessayez plus tard.",
-    "xpack.synthetics.monitorManagement.monitorDeleteLoadingMessage": "Suppression du moniteur...",
     "xpack.synthetics.monitorManagement.monitorEditedSuccessMessage": "Moniteur mis à jour.",
     "xpack.synthetics.monitorManagement.monitorFailureMessage": "Impossible d'enregistrer le moniteur. Réessayez plus tard.",
     "xpack.synthetics.monitorManagement.monitorList.actions": "Actions",
