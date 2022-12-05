@@ -10,7 +10,11 @@ import React from 'react';
 
 import { EditPanelAction, isFilterableEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { type IEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { reactToUiComponent, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import {
+  KibanaThemeProvider,
+  reactToUiComponent,
+  toMountPoint,
+} from '@kbn/kibana-react-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
@@ -50,11 +54,14 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
   private FilterIconButton = ({ context }: { context: FiltersNotificationActionContext }) => {
     const { embeddable } = context;
     return (
-      <EuiButtonIcon
-        iconType={this.getIconType({ embeddable })}
-        onClick={() => this.execute(context)}
-        aria-label={this.displayName}
-      />
+      <KibanaThemeProvider theme$={this.settingsService.theme.theme$}>
+        <EuiButtonIcon
+          color="text"
+          iconType={this.getIconType({ embeddable })}
+          onClick={async () => await this.execute(context)}
+          aria-label={this.displayName}
+        />
+      </KibanaThemeProvider>
     );
   };
 

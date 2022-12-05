@@ -84,7 +84,6 @@ export function FiltersNotificationModal({
   });
 
   const dataViewList: DataView[] = (embeddable.getRoot() as DashboardContainer)?.getAllDataViews();
-  const viewMode = embeddable.getInput().viewMode;
 
   return (
     <>
@@ -131,32 +130,30 @@ export function FiltersNotificationModal({
         )}
       </EuiModalBody>
 
-      {viewMode !== ViewMode.VIEW && (
-        <EuiModalFooter id="filtersNotificationModal__footer">
-          <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={onClose}
-                data-test-subj="filtersNotificationModal__closeButton"
-              >
-                {dashboardFilterNotificationBadge.getCloseButtonTitle()}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="filtersNotificationModal__editButton"
-                onClick={() => {
-                  onClose();
-                  editPanelAction.execute(context);
-                }}
-                fill
-              >
-                {dashboardFilterNotificationBadge.getEditButtonTitle()}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiModalFooter>
-      )}
+      <EuiModalFooter id="filtersNotificationModal__footer">
+        <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={onClose}
+              data-test-subj="filtersNotificationModal__closeButton"
+            >
+              {dashboardFilterNotificationBadge.getCloseButtonTitle()}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="filtersNotificationModal__editButton"
+              onClick={() => {
+                onClose();
+                editPanelAction.execute(context);
+              }}
+              fill
+            >
+              {dashboardFilterNotificationBadge.getEditButtonTitle()}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiModalFooter>
     </>
   );
 }
