@@ -92,7 +92,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     SourcererScopeName.timeline
   );
 
-  const [ogDataView] = useState({ dataViewId, selectedPatterns });
+  const [originalDataView] = useState({ dataViewId, selectedPatterns });
 
   const selectedDataViewBrowserFields = useMemo(
     () =>
@@ -110,9 +110,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   // start set rule
   const handleSetRuleFromTimeline = useCallback(() => {
     if (selectedTimeline == null || selectedDataViewBrowserFields == null) return;
-    const indexPattern = selectedTimeline.indexNames.length
-      ? selectedTimeline.indexNames
-      : selectedPatterns;
+
     const newQuery = {
       query: selectedTimeline.kqlQuery.filterQuery?.kuery?.expression ?? '',
       language: selectedTimeline.kqlQuery.filterQuery?.kuery?.kind ?? 'kuery',
@@ -123,14 +121,14 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
         selectedTimeline.dataProviders != null && selectedTimeline.dataProviders.length > 0
           ? convertKueryToElasticSearchQuery(
               buildGlobalQuery(selectedTimeline.dataProviders, selectedDataViewBrowserFields),
-              { fields: [], title: indexPattern.join(',') }
+              { fields: [], title: selectedPatterns.join(',') }
             )
           : '';
 
       setLoading(false);
 
       setRuleQuery({
-        index: indexPattern,
+        index: selectedPatterns,
         queryBar: {
           filters:
             dataProvidersDsl !== ''
@@ -156,12 +154,12 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     }
 
     // reset timeline data view once complete
-    if (ogDataView.dataViewId !== dataViewId) {
+    if (originalDataView.dataViewId !== dataViewId) {
       dispatch(
         sourcererActions.setSelectedDataView({
           id: SourcererScopeName.timeline,
-          selectedDataViewId: ogDataView.dataViewId,
-          selectedPatterns: ogDataView.selectedPatterns,
+          selectedDataViewId: originalDataView.dataViewId,
+          selectedPatterns: originalDataView.selectedPatterns,
         })
       );
     }
@@ -169,8 +167,8 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     addError,
     dataViewId,
     dispatch,
-    ogDataView.dataViewId,
-    ogDataView.selectedPatterns,
+    originalDataView.dataViewId,
+    originalDataView.selectedPatterns,
     selectedDataViewBrowserFields,
     selectedPatterns,
     selectedTimeline,
@@ -182,8 +180,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     if (selectedDataViewBrowserFields != null) {
       handleSetRuleFromTimeline();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDataViewBrowserFields]);
+  }, [handleSetRuleFromTimeline, selectedDataViewBrowserFields]);
   // end set rule
 
   // start handle set rule from timeline id
@@ -215,8 +212,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     } else {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timelineIdFromUrl]);
+  }, [getTimelineById, timelineIdFromUrl]);
   // end handle set rule from timeline id
 
   return { loading, onOpenTimeline };
