@@ -133,6 +133,11 @@ const rulesBReadcrumb = {
   href: 'securitySolutionUI/rules',
 };
 
+const exceptionsBReadcrumb = {
+  text: 'Rule Exceptions',
+  href: 'securitySolutionUI/exceptions',
+};
+
 const manageBreadcrumbs = {
   text: 'Manage',
   href: 'securitySolutionUI/administration',
@@ -430,6 +435,32 @@ describe('Navigation Breadcrumbs', () => {
           {
             text: 'Endpoints',
             href: '',
+          },
+        ]);
+      });
+
+      test('should return Exceptions breadcrumbs when supplied exception Details pageName', () => {
+        const mockListName = 'new shared list';
+        const breadcrumbs = getBreadcrumbsForRoute(
+          {
+            ...getMockObject(
+              SecurityPageName.exceptions,
+              `/exceptions/details/${mockListName}`,
+              undefined
+            ),
+            state: {
+              listName: mockListName,
+            },
+          },
+          getSecuritySolutionUrl,
+          false
+        );
+        expect(breadcrumbs).toEqual([
+          securityBreadCrumb,
+          exceptionsBReadcrumb,
+          {
+            text: mockListName,
+            href: ``,
           },
         ]);
       });
@@ -770,6 +801,31 @@ describe('Navigation Breadcrumbs', () => {
           {
             text: 'Manage',
             href: '',
+          },
+        ]);
+      });
+      test('should return Exceptions breadcrumbs when supplied exception Details pageName', () => {
+        const mockListName = 'new shared list';
+        const breadcrumbs = getBreadcrumbsForRoute(
+          {
+            ...getMockObject(
+              SecurityPageName.exceptions,
+              `/exceptions/details/${mockListName}`,
+              undefined
+            ),
+            state: {
+              listName: mockListName,
+            },
+          },
+          getSecuritySolutionUrl,
+          false
+        );
+        expect(breadcrumbs).toEqual([
+          securityBreadCrumb,
+          exceptionsBReadcrumb,
+          {
+            text: mockListName,
+            href: ``,
           },
         ]);
       });

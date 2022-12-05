@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import semver from 'semver';
 import uuid from 'uuid';
 import { ConfigKey, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
@@ -148,7 +149,15 @@ export default function ({ getService }: FtrProviderContext) {
         .send(httpMonitorJson);
 
       expect(apiResponse.body.attributes).eql(
-        omit({ ...httpMonitorJson, revision: 2 }, secretKeys)
+        omit(
+          {
+            ...httpMonitorJson,
+            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
+            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            revision: 2,
+          },
+          secretKeys
+        )
       );
     });
 
@@ -355,11 +364,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(packagePolicy.package.version).eql('0.10.3');
 
-        await supertestAPI
-          .post('/api/fleet/epm/packages/synthetics/0.11.2')
-          .set('kbn-xsrf', 'true')
-          .send({ force: true });
-
         await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
         const policyResponseAfterUpgrade = await supertestAPI.get(
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
@@ -368,7 +372,7 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
-        expect(packagePolicyAfterUpgrade.package.version).eql('0.11.2');
+        expect(semver.gt(packagePolicyAfterUpgrade.package.version, '0.10.3')).eql(true);
       } finally {
         await supertestAPI
           .delete(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)

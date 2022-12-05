@@ -11,12 +11,12 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { GuideState } from '@kbn/guided-onboarding';
 
-import type { PluginState } from '../../common/types';
-import { getStepConfig } from '../services/helpers';
+import type { GuideConfig, PluginState } from '../../common';
 import { GuideButtonPopover } from './guide_button_popover';
 
 interface GuideButtonProps {
   pluginState: PluginState | undefined;
+  guideConfig: GuideConfig | undefined;
   toggleGuidePanel: () => void;
   isGuidePanelOpen: boolean;
   navigateToLandingPage: () => void;
@@ -42,12 +42,13 @@ const getStepNumber = (state: GuideState): number | undefined => {
 
 export const GuideButton = ({
   pluginState,
+  guideConfig,
   toggleGuidePanel,
   isGuidePanelOpen,
   navigateToLandingPage,
 }: GuideButtonProps) => {
-  // TODO handle loading, error state
-  // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
+  // TODO handle loading state
+  // https://github.com/elastic/kibana/issues/139799
 
   // if there is no active guide
   if (!pluginState || !pluginState.activeGuide || !pluginState.activeGuide.isActive) {
@@ -70,7 +71,7 @@ export const GuideButton = ({
           data-test-subj="guideButtonRedirect"
         >
           {i18n.translate('guidedOnboarding.guidedSetupRedirectButtonLabel', {
-            defaultMessage: 'Setup guide',
+            defaultMessage: 'Setup guides',
           })}
         </EuiButton>
       );
@@ -101,7 +102,7 @@ export const GuideButton = ({
     </EuiButton>
   );
   if (stepReadyToComplete) {
-    const stepConfig = getStepConfig(pluginState.activeGuide.guideId, stepReadyToComplete.id);
+    const stepConfig = guideConfig?.steps.find((step) => step.id === stepReadyToComplete.id);
     // check if the stepConfig has manualCompletion info
     if (stepConfig && stepConfig.manualCompletion) {
       return (

@@ -93,10 +93,16 @@ export function useAllCasesQueryParams(isModalView: boolean = false) {
 
       if (!isEqual(newUrlParams, urlParams)) {
         try {
-          history.push({
+          const newHistory = {
             ...location,
             search: stringify({ ...parsedUrlParams, ...newUrlParams }),
-          });
+          };
+
+          if (isFirstRenderRef.current) {
+            history.replace(newHistory);
+          } else {
+            history.push(newHistory);
+          }
         } catch {
           // silently fail
         }

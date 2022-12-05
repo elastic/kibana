@@ -13,6 +13,7 @@ import { formatHit } from '../../../utils/format_hit';
 import type { DataTableRecord } from '../../../types';
 
 import './row_formatter.scss';
+import { type ShouldShowFieldInTableHandler } from '../../../utils/get_should_show_field_handler';
 
 interface Props {
   defPairs: Array<readonly [string, string]>;
@@ -40,11 +41,11 @@ const TemplateComponent = ({ defPairs }: Props) => {
 export const formatRow = (
   hit: DataTableRecord,
   dataView: DataView,
-  fieldsToShow: string[],
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
   fieldFormats: FieldFormatsStart
 ) => {
-  const pairs = formatHit(hit, dataView, fieldsToShow, maxEntries, fieldFormats);
+  const pairs = formatHit(hit, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
   return <TemplateComponent defPairs={pairs} />;
 };
 

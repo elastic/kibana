@@ -15,4 +15,11 @@
       height: 100%;
     }
   }
+
+  .enterpriseSearchInferencePipelineModalFooter {
+    .euiButtonEmpty__content {
+      padding-left: $euiSizeM;
+      padding-right: $euiSizeM;
+    }
+  }
 }

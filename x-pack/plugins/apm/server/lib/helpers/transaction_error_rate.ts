@@ -10,7 +10,7 @@ import type {
   AggregationResultOf,
 } from '@kbn/es-types';
 import { isNull } from 'lodash';
-import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
+import { EVENT_OUTCOME } from '../../../common/es_fields/apm';
 import { EventOutcome } from '../../../common/event_outcome';
 
 export const getOutcomeAggregation = () => {

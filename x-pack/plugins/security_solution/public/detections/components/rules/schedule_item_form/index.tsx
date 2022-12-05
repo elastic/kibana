@@ -42,7 +42,7 @@ const timeTypeOptions = [
 
 // move optional label to the end of input
 const StyledLabelAppend = styled(EuiFlexItem)`
-  &.euiFlexItem.euiFlexItem--flexGrowZero {
+  &.euiFlexItem {
     margin-left: 31px;
   }
 `;

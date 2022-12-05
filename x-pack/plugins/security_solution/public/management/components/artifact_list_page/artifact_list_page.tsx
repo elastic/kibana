@@ -321,6 +321,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             backComponent={backButtonEmptyComponent}
             data-test-subj={getTestId('emptyState')}
             secondaryAboutInfo={secondaryPageInfo}
+            canCreateItems={allowCardCreateAction}
           />
         ) : (
           <>

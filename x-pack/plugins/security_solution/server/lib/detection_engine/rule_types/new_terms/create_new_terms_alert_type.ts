@@ -43,8 +43,7 @@ import {
 import { createEnrichEventsFunction } from '../../signals/enrichments';
 
 export const createNewTermsAlertType = (
-  createOptions: CreateRuleOptions,
-  isPreview?: boolean
+  createOptions: CreateRuleOptions
 ): SecurityAlertType<NewTermsRuleParams, {}, {}, 'default'> => {
   const { logger } = createOptions;
   return {
@@ -107,12 +106,12 @@ export const createNewTermsAlertType = (
           aggregatableTimestampField,
           exceptionFilter,
           unprocessedExceptions,
+          alertTimestampOverride,
         },
         services,
         params,
         spaceId,
         state,
-        startedAt,
       } = execOptions;
 
       // Validate the history window size compared to `from` at runtime as well as in the `validate`
@@ -194,6 +193,11 @@ export const createNewTermsAlertType = (
         }
         const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
         const includeValues = transformBucketsToValues(params.newTermsFields, bucketsForField);
+        const newTermsRuntimeMappings = getNewTermsRuntimeMappings(
+          params.newTermsFields,
+          bucketsForField
+        );
+
         // PHASE 2: Take the page of results from Phase 1 and determine if each term exists in the history window.
         // The aggregation filters out buckets for terms that exist prior to `tuple.from`, so the buckets in the
         // response correspond to each new term.
@@ -210,7 +214,7 @@ export const createNewTermsAlertType = (
           }),
           runtimeMappings: {
             ...runtimeMappings,
-            ...getNewTermsRuntimeMappings(params.newTermsFields),
+            ...newTermsRuntimeMappings,
           },
           searchAfterSortIds: undefined,
           index: inputIndex,
@@ -256,7 +260,7 @@ export const createNewTermsAlertType = (
             }),
             runtimeMappings: {
               ...runtimeMappings,
-              ...getNewTermsRuntimeMappings(params.newTermsFields),
+              ...newTermsRuntimeMappings,
             },
             searchAfterSortIds: undefined,
             index: inputIndex,
@@ -288,7 +292,6 @@ export const createNewTermsAlertType = (
               };
             });
 
-          const alertTimestampOverride = isPreview ? startedAt : undefined;
           const wrappedAlerts = wrapNewTermsAlerts({
             eventsAndTerms,
             spaceId,

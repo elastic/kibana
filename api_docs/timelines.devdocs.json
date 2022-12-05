@@ -5492,9 +5492,7 @@
             "signature": [
               "{ [x: string]: ",
               "MappingRuntimeField",
-              " | ",
-              "MappingRuntimeField",
-              "[]; }"
+              "; }"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
@@ -5700,7 +5698,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "string | number"
+              "string | number | (string | number)[]"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
@@ -5728,7 +5726,7 @@
             "label": "operator",
             "description": [],
             "signature": [
-              "\":\" | \":*\""
+              "\"includes\" | \":\" | \":*\""
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
@@ -6300,9 +6298,7 @@
             "signature": [
               "{ [x: string]: ",
               "MappingRuntimeField",
-              " | ",
-              "MappingRuntimeField",
-              "[]; }"
+              "; }"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
@@ -7329,7 +7325,7 @@
             "section": "def-common.RowRenderer",
             "text": "RowRenderer"
           },
-          "[] | undefined; setFlyoutAlert?: ((data: any) => void) | undefined; scopeId: string; truncate?: boolean | undefined; key?: string | undefined; }"
+          "[] | undefined; setFlyoutAlert?: ((data: any) => void) | undefined; scopeId: string; truncate?: boolean | undefined; key?: string | undefined; closeCellPopover?: (() => void) | undefined; enableActions?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/cells/index.ts",
         "deprecated": false,
@@ -7627,7 +7623,7 @@
           "The operator applied to a field"
         ],
         "signature": [
-          "\":\" | \":*\""
+          "\"includes\" | \":\" | \":*\""
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
@@ -7761,7 +7757,7 @@
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
           },
-          " | undefined; id?: string | undefined; timerange: ",
+          " | undefined; id?: string | undefined; timerange?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -7769,7 +7765,7 @@
             "section": "def-common.TimerangeInput",
             "text": "TimerangeInput"
           },
-          "; defaultIndex: string[]; filterQuery: string | ",
+          " | undefined; defaultIndex: string[]; filterQuery: string | ",
           "ESQuery",
           " | undefined; factoryQueryType?: ",
           "TimelineEventsQueries",

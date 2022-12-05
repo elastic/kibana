@@ -299,7 +299,7 @@ export const ResultsContentPage = euiStyled(EuiPage)`
   flex: 1 0 0%;
   flex-direction: column;
 
-  .euiFlexGroup--responsive > .euiFlexItem {
+  [class*="euiFlexGroup-responsive"] > .euiFlexItem {
     flex-basis: auto !important;
   }
 `;

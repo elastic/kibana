@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiFlexGrid,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 
@@ -37,6 +38,7 @@ import type {
   RequiredFieldArray,
   Threshold,
 } from '../../../../../common/detection_engine/rule_schema';
+import { minimumLicenseForSuppression } from '../../../../../common/detection_engine/rule_schema';
 
 import * as i18n from './translations';
 import type { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
@@ -47,6 +49,7 @@ import type {
 } from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
+import type { LicenseService } from '../../../../../common/license';
 
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
@@ -509,6 +512,51 @@ export const buildRequiredFieldsDescription = (
           ))}
         </EuiFlexGrid>
       ),
+    },
+  ];
+};
+
+export const buildAlertSuppressionDescription = (
+  label: string,
+  values: string[],
+  license: LicenseService
+): ListItems[] => {
+  if (isEmpty(values)) {
+    return [];
+  }
+  const description = (
+    <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+      {values.map((val: string) =>
+        isEmpty(val) ? null : (
+          <EuiFlexItem grow={false} key={`${label}-${val}`}>
+            <EuiBadgeWrap data-test-subj="stringArrayDescriptionBadgeItem" color="hollow">
+              {val}
+            </EuiBadgeWrap>
+          </EuiFlexItem>
+        )
+      )}
+    </EuiFlexGroup>
+  );
+
+  const title = (
+    <>
+      {label}
+      <EuiBetaBadge
+        label={i18n.ALERT_SUPPRESSION_TECHNICAL_PREVIEW}
+        style={{ verticalAlign: 'middle', marginLeft: '8px' }}
+        size="s"
+      />
+      {!license.isAtLeast(minimumLicenseForSuppression) && (
+        <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
+          <EuiIcon type={'alert'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
+        </EuiToolTip>
+      )}
+    </>
+  );
+  return [
+    {
+      title,
+      description,
     },
   ];
 };

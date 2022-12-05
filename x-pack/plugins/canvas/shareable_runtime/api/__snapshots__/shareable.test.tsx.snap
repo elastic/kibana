@@ -126,16 +126,16 @@ exports[`Canvas Shareable Workpad API Placed successfully with default propertie
         style="bottom: 0px;"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem title"
+            class="euiFlexItem title emotion-euiFlexItem-grow-1"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
                 style="flex-shrink: 0;"
               >
                 <a
@@ -150,7 +150,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with default propertie
                 </a>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
                 style="min-width: 0; cursor: default;"
               >
                 <div
@@ -166,17 +166,17 @@ exports[`Canvas Shareable Workpad API Placed successfully with default propertie
             </div>
           </div>
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                 style="margin: 0px 12px;"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <button
                     aria-label="Previous Page"
@@ -194,7 +194,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with default propertie
                   </button>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <button
                     class="euiButtonEmpty euiButtonEmpty--small css-14l66eu-empty-text"
@@ -217,7 +217,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with default propertie
                   </button>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <button
                     aria-label="Next Page"
@@ -236,10 +236,10 @@ exports[`Canvas Shareable Workpad API Placed successfully with default propertie
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup emotion-euiFlexGroup-none-center-flexEnd-column"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
                     class="euiPopover emotion-euiPopover"
@@ -400,16 +400,16 @@ exports[`Canvas Shareable Workpad API Placed successfully with height specified 
         style="bottom: 0px;"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem title"
+            class="euiFlexItem title emotion-euiFlexItem-grow-1"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
                 style="flex-shrink: 0;"
               >
                 <a
@@ -424,7 +424,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with height specified 
                 </a>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
                 style="min-width: 0; cursor: default;"
               >
                 <div
@@ -440,17 +440,17 @@ exports[`Canvas Shareable Workpad API Placed successfully with height specified 
             </div>
           </div>
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                 style="margin: 0px 12px;"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <button
                     aria-label="Previous Page"
@@ -468,7 +468,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with height specified 
                   </button>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <button
                     class="euiButtonEmpty euiButtonEmpty--small css-14l66eu-empty-text"
@@ -491,7 +491,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with height specified 
                   </button>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <button
                     aria-label="Next Page"
@@ -510,10 +510,10 @@ exports[`Canvas Shareable Workpad API Placed successfully with height specified 
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup emotion-euiFlexGroup-none-center-flexEnd-column"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
                     class="euiPopover emotion-euiPopover"
@@ -674,16 +674,16 @@ exports[`Canvas Shareable Workpad API Placed successfully with page specified 2`
         style="bottom: 0px;"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem title"
+            class="euiFlexItem title emotion-euiFlexItem-grow-1"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
                 style="flex-shrink: 0;"
               >
                 <a
@@ -698,7 +698,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with page specified 2`
                 </a>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
                 style="min-width: 0; cursor: default;"
               >
                 <div
@@ -714,17 +714,17 @@ exports[`Canvas Shareable Workpad API Placed successfully with page specified 2`
             </div>
           </div>
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                 style="margin: 0px 12px;"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <button
                     aria-label="Previous Page"
@@ -742,7 +742,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with page specified 2`
                   </button>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <button
                     class="euiButtonEmpty euiButtonEmpty--small css-14l66eu-empty-text"
@@ -765,7 +765,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with page specified 2`
                   </button>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <button
                     aria-label="Next Page"
@@ -784,10 +784,10 @@ exports[`Canvas Shareable Workpad API Placed successfully with page specified 2`
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup emotion-euiFlexGroup-none-center-flexEnd-column"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
                     class="euiPopover emotion-euiPopover"
@@ -949,16 +949,16 @@ exports[`Canvas Shareable Workpad API Placed successfully with width and height 
         style="bottom: 0px;"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem title"
+            class="euiFlexItem title emotion-euiFlexItem-grow-1"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
                 style="flex-shrink: 0;"
               >
                 <a
@@ -973,7 +973,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with width and height 
                 </a>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
                 style="min-width: 0; cursor: default;"
               >
                 <div
@@ -989,17 +989,17 @@ exports[`Canvas Shareable Workpad API Placed successfully with width and height 
             </div>
           </div>
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                 style="margin: 0px 12px;"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <button
                     aria-label="Previous Page"
@@ -1017,7 +1017,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with width and height 
                   </button>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <button
                     class="euiButtonEmpty euiButtonEmpty--small css-14l66eu-empty-text"
@@ -1040,7 +1040,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with width and height 
                   </button>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <button
                     aria-label="Next Page"
@@ -1059,10 +1059,10 @@ exports[`Canvas Shareable Workpad API Placed successfully with width and height 
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup emotion-euiFlexGroup-none-center-flexEnd-column"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
                     class="euiPopover emotion-euiPopover"
@@ -1223,16 +1223,16 @@ exports[`Canvas Shareable Workpad API Placed successfully with width specified 2
         style="bottom: 0px;"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem title"
+            class="euiFlexItem title emotion-euiFlexItem-grow-1"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
                 style="flex-shrink: 0;"
               >
                 <a
@@ -1247,7 +1247,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with width specified 2
                 </a>
               </div>
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
                 style="min-width: 0; cursor: default;"
               >
                 <div
@@ -1263,17 +1263,17 @@ exports[`Canvas Shareable Workpad API Placed successfully with width specified 2
             </div>
           </div>
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                 style="margin: 0px 12px;"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <button
                     aria-label="Previous Page"
@@ -1291,7 +1291,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with width specified 2
                   </button>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <button
                     class="euiButtonEmpty euiButtonEmpty--small css-14l66eu-empty-text"
@@ -1314,7 +1314,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with width specified 2
                   </button>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <button
                     aria-label="Next Page"
@@ -1333,10 +1333,10 @@ exports[`Canvas Shareable Workpad API Placed successfully with width specified 2
                 </div>
               </div>
               <div
-                class="euiFlexGroup euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                class="euiFlexGroup emotion-euiFlexGroup-none-center-flexEnd-column"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
                     class="euiPopover emotion-euiPopover"

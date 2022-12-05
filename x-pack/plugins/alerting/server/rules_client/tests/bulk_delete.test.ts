@@ -390,19 +390,16 @@ describe('bulkDelete', () => {
         ],
       }));
 
-      const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+      await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
+      expect(logger.debug).toBeCalledTimes(1);
       expect(logger.debug).toBeCalledWith(
         'Successfully deleted schedules for underlying tasks: taskId1'
       );
+      expect(logger.error).toBeCalledTimes(1);
       expect(logger.error).toBeCalledWith(
         'Failure to delete schedules for underlying tasks: taskId2'
       );
-      expect(result).toStrictEqual({
-        errors: [],
-        total: 2,
-        taskIdsFailedToBeDeleted: ['taskId2'],
-      });
     });
 
     test('should not throw an error if taskManager throw an error', async () => {
@@ -417,17 +414,44 @@ describe('bulkDelete', () => {
         throw new Error('UPS');
       });
 
-      const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+      await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
       expect(logger.error).toBeCalledTimes(1);
       expect(logger.error).toBeCalledWith(
         'Failure to delete schedules for underlying tasks: taskId1, taskId2. TaskManager bulkRemoveIfExist failed with Error: UPS'
       );
-      expect(result).toStrictEqual({
-        errors: [],
-        taskIdsFailedToBeDeleted: [],
-        total: 2,
+    });
+
+    test('should not call logger.error if all tasks successfully deleted', async () => {
+      mockCreatePointInTimeFinderAsInternalUser();
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: 'id1', type: 'alert', success: true },
+          { id: 'id2', type: 'alert', success: true },
+        ],
       });
+      taskManager.bulkRemoveIfExist.mockImplementation(async () => ({
+        statuses: [
+          {
+            id: 'taskId1',
+            type: 'alert',
+            success: true,
+          },
+          {
+            id: 'taskId2',
+            type: 'alert',
+            success: true,
+          },
+        ],
+      }));
+
+      await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(logger.debug).toBeCalledTimes(1);
+      expect(logger.debug).toBeCalledWith(
+        'Successfully deleted schedules for underlying tasks: taskId1, taskId2'
+      );
+      expect(logger.error).toBeCalledTimes(0);
     });
   });
 

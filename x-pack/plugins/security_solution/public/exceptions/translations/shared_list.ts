@@ -163,7 +163,7 @@ export const referenceErrorMessage = (referenceCount: number) =>
 export const EXCEPTION_LIST_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.all.exceptions.searchPlaceholder',
   {
-    defaultMessage: 'Search by name or list id',
+    defaultMessage: 'Search by name or list_id:id',
   }
 );
 
@@ -183,7 +183,7 @@ export const UPLOAD_BUTTON = i18n.translate(
 
 export const uploadSuccessMessage = (fileName: string) =>
   i18n.translate('xpack.securitySolution.lists.exceptionListImportSuccess', {
-    defaultMessage: "Exception list '{fileName}' was imported",
+    defaultMessage: 'Exception list {fileName} was imported',
     values: { fileName },
   });
 
@@ -282,14 +282,14 @@ export const EXCEPTIONS = i18n.translate(
 export const CREATE_SHARED_LIST_BUTTON = i18n.translate(
   'xpack.securitySolution.exceptions.manageExceptions.createSharedListButton',
   {
-    defaultMessage: 'create shared list',
+    defaultMessage: 'Create shared list',
   }
 );
 
 export const CREATE_BUTTON_ITEM_BUTTON = i18n.translate(
   'xpack.securitySolution.exceptions.manageExceptions.createItemButton',
   {
-    defaultMessage: 'create exception item',
+    defaultMessage: 'Create exception item',
   }
 );
 
@@ -324,7 +324,7 @@ export const CREATE_SHARED_LIST_DESCRIPTION = i18n.translate(
 export const CREATE_SHARED_LIST_DESCRIPTION_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.exceptions.createSharedExceptionListFlyoutDescriptionPlaceholder',
   {
-    defaultMessage: 'New exception list',
+    defaultMessage: 'New exception list description',
   }
 );
 
@@ -337,13 +337,24 @@ export const CREATE_BUTTON = i18n.translate(
 
 export const getSuccessText = (listName: string) =>
   i18n.translate('xpack.securitySolution.exceptions.createSharedExceptionListSuccessDescription', {
-    defaultMessage: 'list with name ${listName} was created!',
+    defaultMessage: 'List with name {listName} was created!',
     values: { listName },
   });
 
 export const SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.exceptions.createSharedExceptionListSuccessTitle',
   {
-    defaultMessage: 'created list',
+    defaultMessage: 'Created list',
+  }
+);
+
+export const SORT_BY = i18n.translate('xpack.securitySolution.exceptions.sortBy', {
+  defaultMessage: 'Sort by:',
+});
+
+export const SORT_BY_CREATE_AT = i18n.translate(
+  'xpack.securitySolution.exceptions.sortByCreateAt',
+  {
+    defaultMessage: 'Created At',
   }
 );

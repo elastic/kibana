@@ -8579,7 +8579,9 @@
             "type": "Object",
             "tags": [],
             "label": "error",
-            "description": [],
+            "description": [
+              "Error associated with this object, populated if an operation failed for this object."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -9341,7 +9343,7 @@
         "label": "AggGroupName",
         "description": [],
         "signature": [
-          "\"none\" | \"buckets\" | \"metrics\""
+          "\"none\" | \"metrics\" | \"buckets\""
         ],
         "path": "src/plugins/data/common/search/aggs/agg_groups.ts",
         "deprecated": false,
@@ -12344,10 +12346,6 @@
               "path": "x-pack/plugins/graph/public/plugin.ts"
             },
             {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
-            },
-            {
               "plugin": "stackAlerts",
               "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
             },
@@ -12457,7 +12455,15 @@
             },
             {
               "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_row/document_stats.tsx"
+            },
+            {
+              "plugin": "dataVisualizer",
               "path": "x-pack/plugins/data_visualizer/public/application/common/components/top_values/top_values.tsx"
+            },
+            {
+              "plugin": "dataVisualizer",
+              "path": "x-pack/plugins/data_visualizer/public/application/common/components/stats_table/components/field_data_expanded_row/choropleth_map.tsx"
             },
             {
               "plugin": "stackAlerts",
@@ -12917,11 +12923,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
+                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -13088,10 +13094,6 @@
                 "path": "src/plugins/data_views/common/data_views/data_view.ts"
               },
               {
-                "plugin": "dataViewEditor",
-                "path": "src/plugins/data_view_editor/public/components/data_view_editor_flyout_content.tsx"
-              },
-              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -13148,6 +13150,22 @@
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
               },
               {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+              },
+              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
@@ -13186,26 +13204,6 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
-              },
-              {
-                "plugin": "presentationUtil",
-                "path": "src/plugins/presentation_util/public/services/storybook/data_views.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
                 "plugin": "observability",
@@ -13373,6 +13371,10 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/quick_create_job.ts"
               },
               {
@@ -13433,6 +13435,14 @@
               },
               {
                 "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
+              },
+              {
+                "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
               },
               {
@@ -13474,6 +13484,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "stackAlerts",
@@ -13518,10 +13532,6 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
-              },
-              {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "transform",
@@ -13734,6 +13744,10 @@
               {
                 "plugin": "inputControlVis",
                 "path": "src/plugins/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
+              },
+              {
+                "plugin": "presentationUtil",
+                "path": "src/plugins/presentation_util/public/services/data_views/data_views.story.ts"
               },
               {
                 "plugin": "visTypeTimelion",
@@ -14764,16 +14778,16 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
               },
               " | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
               },
               ") => ",
               {
@@ -14802,16 +14816,16 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldSpec",
-                    "text": "FieldSpec"
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
                   },
                   " | ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewField",
-                    "text": "DataViewField"
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
                   }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -17981,29 +17995,29 @@
                   "ExplainResponse",
                   "<TDocument>>; }; features: ",
                   "default",
-                  "; fieldCaps: { (this: That, params: ",
+                  "; fieldCaps: { (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
-                  ">; (this: That, params: ",
+                  ">; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<",
                   "FieldCapsResponse",
-                  ", unknown>>; (this: That, params: ",
+                  ", unknown>>; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
@@ -20611,11 +20625,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
+                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -20782,10 +20796,6 @@
                 "path": "src/plugins/data_views/common/data_views/data_view.ts"
               },
               {
-                "plugin": "dataViewEditor",
-                "path": "src/plugins/data_view_editor/public/components/data_view_editor_flyout_content.tsx"
-              },
-              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -20842,6 +20852,22 @@
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
               },
               {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+              },
+              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
@@ -20880,26 +20906,6 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
-              },
-              {
-                "plugin": "presentationUtil",
-                "path": "src/plugins/presentation_util/public/services/storybook/data_views.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
                 "plugin": "observability",
@@ -21067,6 +21073,10 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/quick_create_job.ts"
               },
               {
@@ -21127,6 +21137,14 @@
               },
               {
                 "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.component.tsx"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
+              },
+              {
+                "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/public/components/es_data_view_select/es_data_view_select.tsx"
               },
               {
@@ -21168,6 +21186,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "stackAlerts",
@@ -21212,10 +21234,6 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
-              },
-              {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "transform",
@@ -21428,6 +21446,10 @@
               {
                 "plugin": "inputControlVis",
                 "path": "src/plugins/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
+              },
+              {
+                "plugin": "presentationUtil",
+                "path": "src/plugins/presentation_util/public/services/data_views/data_views.story.ts"
               },
               {
                 "plugin": "visTypeTimelion",
@@ -22458,16 +22480,16 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
               },
               " | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
               },
               ") => ",
               {
@@ -22496,16 +22518,16 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldSpec",
-                    "text": "FieldSpec"
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
                   },
                   " | ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewField",
-                    "text": "DataViewField"
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
                   }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -26992,7 +27014,9 @@
             "type": "Object",
             "tags": [],
             "label": "error",
-            "description": [],
+            "description": [
+              "Error associated with this object, populated if an operation failed for this object."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",

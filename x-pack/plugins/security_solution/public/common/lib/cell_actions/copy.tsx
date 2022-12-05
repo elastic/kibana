@@ -16,9 +16,11 @@ import { EmptyComponent, useKibanaServices } from './helpers';
 export const getCopyCellAction = ({
   data,
   pageSize,
+  closeCellPopover,
 }: {
   data?: TimelineNonEcsData[][];
   pageSize: number;
+  closeCellPopover?: () => void;
 }) =>
   data && data.length > 0
     ? function CopyButton({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) {
@@ -45,6 +47,7 @@ export const getCopyCellAction = ({
             ownFocus: false,
             showTooltip: false,
             value,
+            onClick: closeCellPopover,
           };
         }, [Component, columnId, value]);
 

@@ -11,7 +11,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,

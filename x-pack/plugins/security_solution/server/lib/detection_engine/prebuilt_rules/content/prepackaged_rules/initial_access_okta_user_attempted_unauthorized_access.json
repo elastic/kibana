@@ -13,6 +13,11 @@
   "name": "Unauthorized Access to an Okta Application",
   "note": "",
   "query": "event.dataset:okta.system and event.action:app.generic.unauth_app_access_attempt\n",
+  "references": [
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/",
+    "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy"
+  ],
   "related_integrations": [
     {
       "package": "okta",
@@ -89,5 +94,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 101
+  "version": 102
 }

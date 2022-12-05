@@ -55,7 +55,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; }"
+              "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
             "deprecated": false,
@@ -2575,6 +2575,42 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-public.useSubAction",
+        "type": "Function",
+        "tags": [],
+        "label": "useSubAction",
+        "description": [],
+        "signature": [
+          "<P, R>({ connectorId, subAction, subActionParams, disabled, }: ",
+          "UseSubActionParams",
+          "<P>) => { isLoading: boolean; response: R | undefined; error: Error | null; }"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_sub_action.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.useSubAction.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  connectorId,\n  subAction,\n  subActionParams,\n  disabled = false,\n}",
+            "description": [],
+            "signature": [
+              "UseSubActionParams",
+              "<P>"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_sub_action.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-public.useTypedKibana",
         "type": "Function",
         "tags": [],
@@ -3453,7 +3489,7 @@
             "description": [],
             "signature": [
               "BasicFields",
-              " & { tags?: string[] | undefined; kibana?: string[] | undefined; \"@timestamp\"?: string[] | undefined; \"kibana.alert.rule.rule_type_id\"?: string[] | undefined; \"kibana.alert.rule.consumer\"?: string[] | undefined; \"event.action\"?: string[] | undefined; \"kibana.alert.rule.execution.uuid\"?: string[] | undefined; \"kibana.alert\"?: string[] | undefined; \"kibana.alert.rule\"?: string[] | undefined; \"kibana.alert.rule.parameters\"?: string[] | undefined; \"kibana.alert.rule.producer\"?: string[] | undefined; \"kibana.space_ids\"?: string[] | undefined; \"kibana.alert.uuid\"?: string[] | undefined; \"kibana.alert.instance.id\"?: string[] | undefined; \"kibana.alert.start\"?: string[] | undefined; \"kibana.alert.time_range\"?: string[] | undefined; \"kibana.alert.end\"?: string[] | undefined; \"kibana.alert.duration.us\"?: string[] | undefined; \"kibana.alert.severity\"?: string[] | undefined; \"kibana.alert.status\"?: string[] | undefined; \"kibana.alert.flapping\"?: string[] | undefined; \"kibana.version\"?: string[] | undefined; \"ecs.version\"?: string[] | undefined; \"kibana.alert.risk_score\"?: string[] | undefined; \"kibana.alert.workflow_status\"?: string[] | undefined; \"kibana.alert.workflow_user\"?: string[] | undefined; \"kibana.alert.workflow_reason\"?: string[] | undefined; \"kibana.alert.system_status\"?: string[] | undefined; \"kibana.alert.action_group\"?: string[] | undefined; \"kibana.alert.reason\"?: string[] | undefined; \"kibana.alert.rule.author\"?: string[] | undefined; \"kibana.alert.rule.category\"?: string[] | undefined; \"kibana.alert.rule.uuid\"?: string[] | undefined; \"kibana.alert.rule.created_at\"?: string[] | undefined; \"kibana.alert.rule.created_by\"?: string[] | undefined; \"kibana.alert.rule.description\"?: string[] | undefined; \"kibana.alert.rule.enabled\"?: string[] | undefined; \"kibana.alert.rule.from\"?: string[] | undefined; \"kibana.alert.rule.interval\"?: string[] | undefined; \"kibana.alert.rule.license\"?: string[] | undefined; \"kibana.alert.rule.name\"?: string[] | undefined; \"kibana.alert.rule.note\"?: string[] | undefined; \"kibana.alert.rule.references\"?: string[] | undefined; \"kibana.alert.rule.rule_id\"?: string[] | undefined; \"kibana.alert.rule.rule_name_override\"?: string[] | undefined; \"kibana.alert.rule.tags\"?: string[] | undefined; \"kibana.alert.rule.to\"?: string[] | undefined; \"kibana.alert.rule.type\"?: string[] | undefined; \"kibana.alert.rule.updated_at\"?: string[] | undefined; \"kibana.alert.rule.updated_by\"?: string[] | undefined; \"kibana.alert.rule.version\"?: string[] | undefined; \"event.kind\"?: string[] | undefined; \"event.module\"?: string[] | undefined; \"kibana.alert.evaluation.threshold\"?: string[] | undefined; \"kibana.alert.evaluation.value\"?: string[] | undefined; \"kibana.alert.building_block_type\"?: string[] | undefined; \"kibana.alert.rule.exceptions_list\"?: string[] | undefined; \"kibana.alert.rule.namespace\"?: string[] | undefined; \"kibana.alert.rule.threat.framework\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.id\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.name\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.reference\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.id\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.name\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.reference\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.id\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.name\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.reference\"?: string[] | undefined; } & { [x: string]: unknown[]; }"
+              " & { tags?: string[] | undefined; kibana?: string[] | undefined; \"@timestamp\"?: string[] | undefined; \"kibana.alert.rule.rule_type_id\"?: string[] | undefined; \"kibana.alert.rule.consumer\"?: string[] | undefined; \"event.action\"?: string[] | undefined; \"kibana.alert.rule.execution.uuid\"?: string[] | undefined; \"kibana.alert\"?: string[] | undefined; \"kibana.alert.rule\"?: string[] | undefined; \"kibana.alert.rule.parameters\"?: string[] | undefined; \"kibana.alert.rule.producer\"?: string[] | undefined; \"kibana.space_ids\"?: string[] | undefined; \"kibana.alert.uuid\"?: string[] | undefined; \"kibana.alert.instance.id\"?: string[] | undefined; \"kibana.alert.start\"?: string[] | undefined; \"kibana.alert.time_range\"?: string[] | undefined; \"kibana.alert.end\"?: string[] | undefined; \"kibana.alert.duration.us\"?: string[] | undefined; \"kibana.alert.severity\"?: string[] | undefined; \"kibana.alert.status\"?: string[] | undefined; \"kibana.alert.flapping\"?: string[] | undefined; \"kibana.version\"?: string[] | undefined; \"ecs.version\"?: string[] | undefined; \"kibana.alert.risk_score\"?: string[] | undefined; \"kibana.alert.workflow_status\"?: string[] | undefined; \"kibana.alert.workflow_user\"?: string[] | undefined; \"kibana.alert.workflow_reason\"?: string[] | undefined; \"kibana.alert.system_status\"?: string[] | undefined; \"kibana.alert.action_group\"?: string[] | undefined; \"kibana.alert.reason\"?: string[] | undefined; \"kibana.alert.rule.author\"?: string[] | undefined; \"kibana.alert.rule.category\"?: string[] | undefined; \"kibana.alert.rule.uuid\"?: string[] | undefined; \"kibana.alert.rule.created_at\"?: string[] | undefined; \"kibana.alert.rule.created_by\"?: string[] | undefined; \"kibana.alert.rule.description\"?: string[] | undefined; \"kibana.alert.rule.enabled\"?: string[] | undefined; \"kibana.alert.rule.from\"?: string[] | undefined; \"kibana.alert.rule.interval\"?: string[] | undefined; \"kibana.alert.rule.license\"?: string[] | undefined; \"kibana.alert.rule.name\"?: string[] | undefined; \"kibana.alert.rule.note\"?: string[] | undefined; \"kibana.alert.rule.references\"?: string[] | undefined; \"kibana.alert.rule.rule_id\"?: string[] | undefined; \"kibana.alert.rule.rule_name_override\"?: string[] | undefined; \"kibana.alert.rule.tags\"?: string[] | undefined; \"kibana.alert.rule.to\"?: string[] | undefined; \"kibana.alert.rule.type\"?: string[] | undefined; \"kibana.alert.rule.updated_at\"?: string[] | undefined; \"kibana.alert.rule.updated_by\"?: string[] | undefined; \"kibana.alert.rule.version\"?: string[] | undefined; \"kibana.alert.suppression.terms\"?: string[] | undefined; \"kibana.alert.suppression.terms.field\"?: string[] | undefined; \"kibana.alert.suppression.terms.value\"?: string[] | undefined; \"kibana.alert.suppression.start\"?: string[] | undefined; \"kibana.alert.suppression.end\"?: string[] | undefined; \"kibana.alert.suppression.docs_count\"?: string[] | undefined; \"event.kind\"?: string[] | undefined; \"event.module\"?: string[] | undefined; \"kibana.alert.evaluation.threshold\"?: string[] | undefined; \"kibana.alert.evaluation.value\"?: string[] | undefined; \"kibana.alert.building_block_type\"?: string[] | undefined; \"kibana.alert.rule.exceptions_list\"?: string[] | undefined; \"kibana.alert.rule.namespace\"?: string[] | undefined; \"kibana.alert.rule.threat.framework\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.id\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.name\"?: string[] | undefined; \"kibana.alert.rule.threat.tactic.reference\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.id\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.name\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.reference\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.id\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.name\"?: string[] | undefined; \"kibana.alert.rule.threat.technique.subtechnique.reference\"?: string[] | undefined; } & { [x: string]: unknown[]; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -4015,7 +4051,7 @@
             "label": "throttle",
             "description": [],
             "signature": [
-              "string | null"
+              "string | null | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
@@ -4598,6 +4634,20 @@
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleAction.frequency",
+            "type": "Object",
+            "tags": [],
+            "label": "frequency",
+            "description": [],
+            "signature": [
+              "{ summary: boolean; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; throttle: string | null; } | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4683,7 +4733,7 @@
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
-              ">[]; register: (objectType: ",
+              ">[]; has: (id: string) => boolean; register: (objectType: ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -4699,7 +4749,7 @@
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
-              ">) => void; has: (id: string) => boolean; }"
+              ">) => void; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -4729,7 +4779,7 @@
                 "section": "def-public.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
-              "<unknown, unknown, any>[]; register: (objectType: ",
+              "<unknown, unknown, any>[]; has: (id: string) => boolean; register: (objectType: ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -4737,7 +4787,7 @@
                 "section": "def-public.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
-              "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
+              "<unknown, unknown, any>) => void; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -5346,6 +5396,20 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.alertDetailsAppSection",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "alertDetailsAppSection",
+            "description": [],
+            "signature": [
+              "React.FunctionComponent<any> | React.LazyExoticComponent<React.ComponentType<any>> | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5476,7 +5540,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"name\" | \"params\" | \"tags\" | \"id\" | \"monitoring\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"name\" | \"params\" | \"tags\" | \"id\" | \"monitoring\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],
@@ -6002,7 +6066,7 @@
                 "section": "def-public.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
-              "<unknown, unknown, any>[]; register: (objectType: ",
+              "<unknown, unknown, any>[]; has: (id: string) => boolean; register: (objectType: ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -6010,7 +6074,7 @@
                 "section": "def-public.ActionTypeModel",
                 "text": "ActionTypeModel"
               },
-              "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
+              "<unknown, unknown, any>) => void; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
@@ -6056,7 +6120,7 @@
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
-              ">[]; register: (objectType: ",
+              ">[]; has: (id: string) => boolean; register: (objectType: ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -6072,7 +6136,7 @@
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
-              ">) => void; has: (id: string) => boolean; }"
+              ">) => void; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
@@ -6090,9 +6154,9 @@
               "AlertsTableConfigurationRegistry",
               "; list: () => ",
               "AlertsTableConfigurationRegistry",
-              "[]; register: (objectType: ",
+              "[]; has: (id: string) => boolean; register: (objectType: ",
               "AlertsTableConfigurationRegistry",
-              ") => void; has: (id: string) => boolean; }"
+              ") => void; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
@@ -6356,7 +6420,7 @@
             "section": "def-public.ActionTypeModel",
             "text": "ActionTypeModel"
           },
-          "<ActionConnector, ActionParams, any>[]; register: (objectType: ",
+          "<ActionConnector, ActionParams, any>[]; has: (id: string) => boolean; register: (objectType: ",
           {
             "pluginId": "triggersActionsUi",
             "scope": "public",
@@ -6364,7 +6428,7 @@
             "section": "def-public.ActionTypeModel",
             "text": "ActionTypeModel"
           },
-          "<ActionConnector, ActionParams, any>) => void; has: (id: string) => boolean; }"
+          "<ActionConnector, ActionParams, any>) => void; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -6455,9 +6519,9 @@
           "AlertsTableConfigurationRegistry",
           "; list: () => ",
           "AlertsTableConfigurationRegistry",
-          "[]; register: (objectType: ",
+          "[]; has: (id: string) => boolean; register: (objectType: ",
           "AlertsTableConfigurationRegistry",
-          ") => void; has: (id: string) => boolean; }"
+          ") => void; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -6722,7 +6786,7 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          ">[]; register: (objectType: ",
+          ">[]; has: (id: string) => boolean; register: (objectType: ",
           {
             "pluginId": "triggersActionsUi",
             "scope": "public",
@@ -6738,7 +6802,7 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          ">) => void; has: (id: string) => boolean; }"
+          ">) => void; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -9074,7 +9138,7 @@
           "\nParses the string value used in `xpack.trigger_actions_ui.enableExperimental` kibana configuration,\nwhich should be a string of values delimited by a comma (`,`)\n"
         ],
         "signature": [
-          "(configValue: string[]) => Readonly<{ rulesListDatagrid: boolean; internalAlertsTable: boolean; ruleTagFilter: boolean; ruleStatusFilter: boolean; rulesDetailLogs: boolean; }>"
+          "(configValue: string[]) => Readonly<{ rulesListDatagrid: boolean; internalAlertsTable: boolean; ruleTagFilter: boolean; ruleStatusFilter: boolean; rulesDetailLogs: boolean; ruleUseExecutionStatus: boolean; }>"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
@@ -9252,7 +9316,7 @@
         "label": "ExperimentalFeatures",
         "description": [],
         "signature": [
-          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; }"
+          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
@@ -9286,7 +9350,7 @@
           "\nA list of allowed values that can be used in `xpack.trigger_actions_ui.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; }"
+          "{ readonly rulesListDatagrid: boolean; readonly internalAlertsTable: boolean; readonly ruleTagFilter: boolean; readonly ruleStatusFilter: boolean; readonly rulesDetailLogs: boolean; readonly ruleUseExecutionStatus: boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,

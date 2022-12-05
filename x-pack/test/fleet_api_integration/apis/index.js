@@ -61,5 +61,8 @@ export default function ({ loadTestFile, getService }) {
 
     // Fleet server hosts
     loadTestFile(require.resolve('./fleet_server_hosts/crud'));
+
+    // Fleet proxies
+    loadTestFile(require.resolve('./fleet_proxies/crud'));
   });
 }

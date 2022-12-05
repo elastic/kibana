@@ -19,7 +19,6 @@ import {
   TimeRange,
   isOfQueryType,
 } from '@kbn/es-query';
-import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
   DataPublicPluginStart,
@@ -80,7 +79,6 @@ import {
   DatasourceMap,
   Datasource,
   IndexPatternMap,
-  OperationDescriptor,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
@@ -106,28 +104,6 @@ export interface LensUnwrapMetaInfo {
 export interface LensUnwrapResult {
   attributes: LensSavedObjectAttributes;
   metaInfo?: LensUnwrapMetaInfo;
-}
-
-interface ChartInfo {
-  layers: ChartLayerDescriptor[];
-  visualizationType: string;
-  filters: Document['state']['filters'];
-  query: Document['state']['query'];
-}
-
-export interface ChartLayerDescriptor {
-  dataView?: DataView;
-  layerId: string;
-  layerType: string;
-  chartType?: string;
-  icon?: IconType;
-  label?: string;
-  dimensions: Array<{
-    name: string;
-    id: string;
-    role: 'split' | 'metric';
-    operation: OperationDescriptor;
-  }>;
 }
 
 interface LensBaseEmbeddableInput extends EmbeddableInput {
@@ -522,7 +498,9 @@ export class Embeddable
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {
-    if (this.handleContainerStateChanged(containerState) || this.errors?.length) this.reload();
+    if (this.handleContainerStateChanged(containerState)) {
+      this.reload();
+    }
   }
 
   handleContainerStateChanged(containerState: LensEmbeddableInput): boolean {
@@ -705,12 +683,19 @@ export class Embeddable
 
     this.domNode.setAttribute('data-shared-item', '');
 
+    const error = this.getError();
+
     this.updateOutput({
       ...this.getOutput(),
       loading: true,
-      error: this.getError(),
+      error,
     });
-    this.renderComplete.dispatchInProgress();
+
+    if (error) {
+      this.renderComplete.dispatchError();
+    } else {
+      this.renderComplete.dispatchInProgress();
+    }
 
     const input = this.getInput();
 
@@ -744,7 +729,7 @@ export class Embeddable
             this.updateOutput({ error: new Error(message) });
             this.logError('runtime');
           }}
-          noPadding={this.visDisplayOptions?.noPadding}
+          noPadding={this.visDisplayOptions.noPadding}
         />
         <div
           css={css({
@@ -1101,60 +1086,17 @@ export class Embeddable
 
   public getSelfStyledOptions() {
     return {
-      hideTitle: this.visDisplayOptions?.noPanelTitle,
+      hideTitle: this.visDisplayOptions.noPanelTitle,
     };
   }
 
-  public getChartInfo(): Readonly<ChartInfo | undefined> {
-    const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
-    if (!activeDatasourceId || !this.savedVis?.visualizationType) {
-      return undefined;
-    }
-
-    const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
-    const dataSourceInfo = this.deps.datasourceMap[activeDatasourceId].getDatasourceInfo(
-      docDatasourceState,
-      this.savedVis?.references,
-      this.indexPatterns
-    );
-    const chartInfo = this.deps.visualizationMap[
-      this.savedVis.visualizationType
-    ].getVisualizationInfo?.(this.savedVis?.state.visualization);
-
-    const layers = chartInfo?.layers.map((l) => {
-      const dataSource = dataSourceInfo.find((info) => info.layerId === l.layerId);
-      const updatedDimensions = l.dimensions.map((d) => {
-        return {
-          ...d,
-          ...dataSource?.columns.find((c) => c.id === d.id)!,
-        };
-      });
-      return {
-        ...l,
-        dataView: dataSource?.dataView,
-        dimensions: updatedDimensions,
-      };
-    });
-    return layers
-      ? {
-          layers,
-          visualizationType: this.savedVis.visualizationType,
-          filters: this.savedVis.state.filters,
-          query: this.savedVis.state.query,
-        }
-      : undefined;
-  }
-
-  private get visDisplayOptions(): VisualizationDisplayOptions | undefined {
-    if (
-      !this.savedVis?.visualizationType ||
-      !this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions
-    ) {
-      return;
+  private get visDisplayOptions(): VisualizationDisplayOptions {
+    if (!this.savedVis?.visualizationType) {
+      return {};
     }
 
     let displayOptions =
-      this.deps.visualizationMap[this.savedVis.visualizationType].getDisplayOptions!();
+      this.deps.visualizationMap[this.savedVis.visualizationType]?.getDisplayOptions?.() ?? {};
 
     if (this.input.noPadding !== undefined) {
       displayOptions = {

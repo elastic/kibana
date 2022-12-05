@@ -6,6 +6,7 @@
  */
 
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
+import { nerModel } from '../../../../__mocks__/ml_models.mock';
 
 import { HttpResponse } from '@kbn/core/public';
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
@@ -13,6 +14,7 @@ import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_
 import { ErrorResponse, HttpError, Status } from '../../../../../../../common/types/api';
 import { TrainedModelState } from '../../../../../../../common/types/pipelines';
 
+import { GetDocumentsApiLogic } from '../../../../api/documents/get_document_logic';
 import { MappingsApiLogic } from '../../../../api/mappings/mappings_logic';
 import { MLModelsApiLogic } from '../../../../api/ml_models/ml_models_logic';
 import { AttachMlInferencePipelineApiLogic } from '../../../../api/pipelines/attach_ml_inference_pipeline';
@@ -35,22 +37,8 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
       ...EMPTY_PIPELINE_CONFIGURATION,
     },
     indexName: '',
-    simulateBody: `
-[
-  {
-    "_index": "index",
-    "_id": "id",
-    "_source": {
-      "foo": "bar"
-    }
-  },
-  {
-    "_index": "index",
-    "_id": "id",
-    "_source": {
-      "foo": "baz"
-    }
-  }
+    simulateBody: `[
+
 ]`,
     step: AddInferencePipelineSteps.Configuration,
   },
@@ -61,7 +49,12 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
     pipelineName: 'Field is required.',
     sourceField: 'Field is required.',
   },
+  getDocumentApiErrorMessage: undefined,
+  getDocumentApiStatus: Status.IDLE,
+  getDocumentData: undefined,
+  getDocumentsErr: '',
   index: null,
+  isGetDocumentsLoading: false,
   isLoading: true,
   isPipelineDataValid: false,
   mappingData: undefined,
@@ -69,8 +62,9 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
   mlInferencePipeline: undefined,
   mlInferencePipelineProcessors: undefined,
   mlInferencePipelinesData: undefined,
-  mlModelsData: undefined,
+  mlModelsData: null,
   mlModelsStatus: 0,
+  showGetDocumentErrors: false,
   simulateExistingPipelineData: undefined,
   simulateExistingPipelineStatus: 0,
   simulatePipelineData: undefined,
@@ -103,6 +97,7 @@ describe('MlInferenceLogic', () => {
   const { mount: mountFetchMlInferencePipelinesApiLogic } = new LogicMounter(
     FetchMlInferencePipelinesApiLogic
   );
+  const { mount: mountGetDocumentsApiLogic } = new LogicMounter(GetDocumentsApiLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -114,6 +109,7 @@ describe('MlInferenceLogic', () => {
     mountSimulateMlInterfacePipelineApiLogic();
     mountCreateMlInferencePipelineApiLogic();
     mountAttachMlInferencePipelineApiLogic();
+    mountGetDocumentsApiLogic();
     mount();
   });
 
@@ -197,11 +193,33 @@ describe('MlInferenceLogic', () => {
         expect(MLInferenceLogic.values.createErrors).not.toHaveLength(0);
         MLInferenceLogic.actions.makeCreatePipelineRequest({
           indexName: 'test',
-          pipelineName: 'unit-test',
           modelId: 'test-model',
+          pipelineName: 'unit-test',
           sourceField: 'body',
         });
         expect(MLInferenceLogic.values.createErrors).toHaveLength(0);
+      });
+    });
+    describe('getDocumentApiSuccess', () => {
+      it('sets simulateBody text to the returned document', () => {
+        GetDocumentsApiLogic.actions.apiSuccess({
+          _id: 'test-index-123',
+          _index: 'test-index',
+          found: true,
+        });
+        expect(MLInferenceLogic.values.addInferencePipelineModal.simulateBody).toEqual(
+          JSON.stringify(
+            [
+              {
+                _id: 'test-index-123',
+                _index: 'test-index',
+                found: true,
+              },
+            ],
+            undefined,
+            2
+          )
+        );
       });
     });
   });
@@ -331,9 +349,9 @@ describe('MlInferenceLogic', () => {
           {
             destinationField: 'test-field',
             disabled: false,
-            pipelineName: 'unit-test',
-            modelType: '',
             modelId: 'test-model',
+            modelType: '',
+            pipelineName: 'unit-test',
             sourceField: 'body',
           },
         ]);
@@ -361,9 +379,9 @@ describe('MlInferenceLogic', () => {
             destinationField: 'test-field',
             disabled: true,
             disabledReason: expect.any(String),
-            pipelineName: 'unit-test',
-            modelType: '',
             modelId: 'test-model',
+            modelType: '',
+            pipelineName: 'unit-test',
             sourceField: 'body_content',
           },
         ]);
@@ -449,28 +467,10 @@ describe('MlInferenceLogic', () => {
         expect(MLInferenceLogic.values.mlInferencePipeline).toBeUndefined();
       });
       it('generates inference pipeline', () => {
-        MLModelsApiLogic.actions.apiSuccess([
-          {
-            inference_config: {
-              text_classification: {
-                classification_labels: ['one', 'two'],
-                tokenization: {
-                  bert: {},
-                },
-              },
-            },
-            input: {
-              field_names: ['text_field'],
-            },
-            model_id: 'test-model',
-            model_type: 'pytorch',
-            tags: [],
-            version: '1.0.0',
-          },
-        ]);
+        MLModelsApiLogic.actions.apiSuccess([nerModel]);
         MLInferenceLogic.actions.setInferencePipelineConfiguration({
           destinationField: '',
-          modelID: 'test-model',
+          modelID: nerModel.model_id,
           pipelineName: 'unit-test',
           sourceField: 'body',
         });
@@ -505,6 +505,46 @@ describe('MlInferenceLogic', () => {
         });
         expect(MLInferenceLogic.values.mlInferencePipeline).not.toBeUndefined();
         expect(MLInferenceLogic.values.mlInferencePipeline).toEqual(existingPipeline);
+      });
+    });
+    describe('getDocumentsErr', () => {
+      it('returns empty string when no error is present', () => {
+        GetDocumentsApiLogic.actions.apiSuccess({
+          _id: 'test-123',
+          _index: 'test',
+          found: true,
+        });
+        expect(MLInferenceLogic.values.getDocumentsErr).toEqual('');
+      });
+      it('returns extracted error message from the http response', () => {
+        GetDocumentsApiLogic.actions.apiError({
+          body: {
+            error: 'document-not-found',
+            message: 'not-found',
+            statusCode: 404,
+          },
+        } as HttpError);
+        expect(MLInferenceLogic.values.getDocumentsErr).toEqual('not-found');
+      });
+    });
+    describe('showGetDocumentErrors', () => {
+      it('returns false when no error is present', () => {
+        GetDocumentsApiLogic.actions.apiSuccess({
+          _id: 'test-123',
+          _index: 'test',
+          found: true,
+        });
+        expect(MLInferenceLogic.values.showGetDocumentErrors).toEqual(false);
+      });
+      it('returns true when an error message is present', () => {
+        GetDocumentsApiLogic.actions.apiError({
+          body: {
+            error: 'document-not-found',
+            message: 'not-found',
+            statusCode: 404,
+          },
+        } as HttpError);
+        expect(MLInferenceLogic.values.showGetDocumentErrors).toEqual(true);
       });
     });
   });
@@ -568,26 +608,13 @@ describe('MlInferenceLogic', () => {
         ...DEFAULT_VALUES.addInferencePipelineModal,
         configuration: {
           destinationField: '',
-          modelID: 'mock-model-id',
+          modelID: nerModel.model_id,
           pipelineName: 'mock-pipeline-name',
           sourceField: 'mock_text_field',
         },
         indexName: 'my-index-123',
       };
-      const mlModelsData: TrainedModelConfigResponse[] = [
-        {
-          inference_config: {
-            text_classification: {},
-          },
-          input: {
-            field_names: ['text_field'],
-          },
-          model_id: 'mock-model-id',
-          model_type: 'pytorch',
-          tags: ['test_tag'],
-          version: '1',
-        },
-      ];
+      const mlModelsData: TrainedModelConfigResponse[] = [nerModel];
       it('does nothing if mlInferencePipeline is undefined', () => {
         mount({
           ...DEFAULT_VALUES,

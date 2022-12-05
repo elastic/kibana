@@ -47,7 +47,7 @@ export class Server {
 
     return {
       addRoute: (definition) => {
-        this.log.debug(`registering route handler for [${definition.path}]`);
+        this.log.debug(`Registering route handler for [${definition.path}]`);
         this.server!.route(definition);
       },
     };

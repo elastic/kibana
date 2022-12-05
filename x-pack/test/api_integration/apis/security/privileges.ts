@@ -38,7 +38,6 @@ export default function ({ getService }: FtrProviderContext) {
         'actions_log_management_read',
         'host_isolation_all',
         'process_operations_all',
-        'file_operations_all',
       ],
       uptime: ['all', 'read', 'minimal_all', 'minimal_read'],
       securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read', 'cases_delete'],
@@ -79,13 +78,14 @@ export default function ({ getService }: FtrProviderContext) {
         'packs_all',
         'packs_read',
       ],
+      filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
+      filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
   };
 
   describe('Privileges', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/145135
-    describe.skip('GET /api/security/privileges', () => {
+    describe('GET /api/security/privileges', () => {
       it('should return a privilege map with all known privileges, without actions', async () => {
         // If you're adding a privilege to the following, that's great!
         // If you're removing a privilege, this breaks backwards compatibility
@@ -194,8 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // In this non-Basic case, results should be exactly the same as not supplying the respectLicenseLevel flag
-    // FLAKY: https://github.com/elastic/kibana/issues/145136
-    describe.skip('GET /api/security/privileges?respectLicenseLevel=false', () => {
+    describe('GET /api/security/privileges?respectLicenseLevel=false', () => {
       it('should return a privilege map with all known privileges, without actions', async () => {
         // If you're adding a privilege to the following, that's great!
         // If you're removing a privilege, this breaks backwards compatibility

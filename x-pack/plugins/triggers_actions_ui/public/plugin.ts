@@ -23,6 +23,7 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 import { TypeRegistry } from './application/type_registry';
 
@@ -212,7 +213,7 @@ export class Plugin
         title: featureTitle,
         description: featureDescription,
         icon: 'watchesApp',
-        path: '/app/management/insightsAndAlerting/triggersActions',
+        path: triggersActionsRoute,
         showOnHomePage: false,
         category: 'admin',
       });
@@ -221,7 +222,7 @@ export class Plugin
         title: connectorsFeatureTitle,
         description: connectorsFeatureDescription,
         icon: 'watchesApp',
-        path: '/app/management/insightsAndAlerting/triggersActions',
+        path: triggersActionsRoute,
         showOnHomePage: false,
         category: 'admin',
       });

@@ -40,6 +40,7 @@ import {
   RuleTypeParams,
   ActionVariable,
   RuleType as CommonRuleType,
+  RuleLastRun,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
@@ -106,6 +107,7 @@ export type {
   RuleStatusDropdownProps,
   RuleTagFilterProps,
   RuleStatusFilterProps,
+  RuleLastRun,
   RuleTagBadgeProps,
   RuleTagBadgeOptions,
   RuleEventLogListProps,
@@ -168,6 +170,18 @@ export enum ActionConnectorMode {
 }
 
 export interface BulkDeleteResponse {
+  errors: BulkOperationError[];
+  total: number;
+}
+
+export interface BulkEnableResponse {
+  rules: Rule[];
+  errors: BulkOperationError[];
+  total: number;
+}
+
+export interface BulkDisableResponse {
+  rules: Rule[];
   errors: BulkOperationError[];
   total: number;
 }
@@ -301,7 +315,7 @@ export interface RuleType<
 
 export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
 
-export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus'>;
+export type RuleUpdates = Omit<Rule, 'id' | 'executionStatus' | 'lastRun' | 'nextRun'>;
 
 export interface RuleTableItem extends Rule {
   ruleType: RuleType['name'];
@@ -350,6 +364,9 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   requiresAppContext: boolean;
   defaultActionMessage?: string;
   defaultRecoveryMessage?: string;
+  alertDetailsAppSection?:
+    | React.FunctionComponent<any>
+    | React.LazyExoticComponent<ComponentType<any>>;
 }
 
 export interface IErrorObject {

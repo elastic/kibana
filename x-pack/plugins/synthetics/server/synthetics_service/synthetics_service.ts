@@ -7,35 +7,33 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { SavedObject } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
+import { Logger, SavedObject } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
+  TaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-  TaskInstance,
 } from '@kbn/task-manager-plugin/server';
 import { Subject } from 'rxjs';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
-import { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
 import { syntheticsMonitorType } from '../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
 import { ServiceConfig } from '../../common/config';
 import { ServiceAPIClient } from './service_api_client';
-import { formatMonitorConfig, formatHeartbeatRequest } from './formatters/format_configs';
+import { formatHeartbeatRequest, formatMonitorConfig } from './formatters/format_configs';
 import {
   ConfigKey,
+  HeartbeatConfig,
   MonitorFields,
+  ServiceLocationErrors,
   ServiceLocations,
   SyntheticsMonitor,
-  ThrottlingOptions,
   SyntheticsMonitorWithId,
-  ServiceLocationErrors,
   SyntheticsMonitorWithSecrets,
-  HeartbeatConfig,
+  ThrottlingOptions,
 } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
 
@@ -54,8 +52,6 @@ export class SyntheticsService {
   private readonly config: ServiceConfig;
   private readonly esHosts: string[];
 
-  private apiKey: SyntheticsServiceApiKey | undefined;
-
   public locations: ServiceLocations;
   public throttling: ThrottlingOptions | undefined;
 
@@ -66,6 +62,8 @@ export class SyntheticsService {
   public signupUrl: string | null;
 
   public syncErrors?: ServiceLocationErrors | null = [];
+
+  public invalidApiKeyError?: boolean;
 
   constructor(server: UptimeServerSetup) {
     this.logger = server.logger;
@@ -178,7 +176,7 @@ export class SyntheticsService {
                   status: e.status,
                   stackVersion: service.server.stackVersion,
                 });
-                throw e;
+                service.logger.error(e);
               }
 
               return { state };
@@ -235,17 +233,19 @@ export class SyntheticsService {
   }
 
   async getApiKey() {
-    try {
-      this.apiKey = await getAPIKeyForSyntheticsService({ server: this.server });
-    } catch (err) {
-      this.logger.error(err);
-      throw err;
+    const { apiKey, isValid } = await getAPIKeyForSyntheticsService({ server: this.server });
+    if (!isValid) {
+      throw new Error(
+        'API key is not valid. Cannot push monitor configuration to synthetics public testing locations'
+      );
     }
 
-    return this.apiKey;
+    return apiKey;
   }
 
-  async getOutput(apiKey: SyntheticsServiceApiKey) {
+  async getOutput() {
+    const apiKey = await this.getApiKey();
+
     return {
       hosts: this.esHosts,
       api_key: `${apiKey?.id}:${apiKey?.apiKey}`,
@@ -255,21 +255,15 @@ export class SyntheticsService {
   async addConfig(config: HeartbeatConfig | HeartbeatConfig[]) {
     const monitors = this.formatConfigs(Array.isArray(config) ? config : [config]);
 
-    this.apiKey = await this.getApiKey();
-
-    if (!this.apiKey) {
-      return null;
-    }
-
-    const data = {
-      monitors,
-      output: await this.getOutput(this.apiKey),
-    };
+    const output = await this.getOutput();
 
     this.logger.debug(`1 monitor will be pushed to synthetics service.`);
 
     try {
-      this.syncErrors = await this.apiClient.post(data);
+      this.syncErrors = await this.apiClient.post({
+        monitors,
+        output,
+      });
       return this.syncErrors;
     } catch (e) {
       this.logger.error(e);
@@ -282,15 +276,10 @@ export class SyntheticsService {
       Array.isArray(monitorConfig) ? monitorConfig : [monitorConfig]
     );
 
-    this.apiKey = await this.getApiKey();
-
-    if (!this.apiKey) {
-      return null;
-    }
-
+    const output = await this.getOutput();
     const data = {
       monitors,
-      output: await this.getOutput(this.apiKey),
+      output,
       isEdit: true,
     };
 
@@ -308,31 +297,32 @@ export class SyntheticsService {
     const subject = new Subject<SyntheticsMonitorWithId[]>();
 
     subject.subscribe(async (monitorConfigs) => {
-      const monitors = this.formatConfigs(monitorConfigs);
-
-      if (monitors.length === 0) {
-        this.logger.debug('No monitor found which can be pushed to service.');
-        return null;
-      }
-
-      this.apiKey = await this.getApiKey();
-
-      if (!this.apiKey) {
-        return null;
-      }
-
-      const data = {
-        monitors,
-        output: await this.getOutput(this.apiKey),
-      };
-
-      this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
-
       try {
-        service.syncErrors = await this.apiClient.put(data);
+        const monitors = this.formatConfigs(monitorConfigs);
+
+        if (monitors.length === 0) {
+          this.logger.debug('No monitor found which can be pushed to service.');
+          return null;
+        }
+
+        const output = await this.getOutput();
+
+        this.logger.debug(`${monitors.length} monitors will be pushed to synthetics service.`);
+
+        service.syncErrors = await this.apiClient.put({
+          monitors,
+          output,
+        });
       } catch (e) {
+        sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
+          reason: 'Failed to push configs to service',
+          message: e?.message,
+          type: 'pushConfigsError',
+          code: e?.code,
+          status: e.status,
+          stackVersion: service.server.stackVersion,
+        });
         this.logger.error(e);
-        throw e;
       }
     });
 
@@ -345,19 +335,13 @@ export class SyntheticsService {
       return;
     }
 
-    this.apiKey = await this.getApiKey();
-
-    if (!this.apiKey) {
-      return null;
-    }
-
-    const data = {
-      monitors,
-      output: await this.getOutput(this.apiKey),
-    };
+    const output = await this.getOutput();
 
     try {
-      return await this.apiClient.runOnce(data);
+      return await this.apiClient.runOnce({
+        monitors,
+        output,
+      });
     } catch (e) {
       this.logger.error(e);
       throw e;
@@ -365,21 +349,13 @@ export class SyntheticsService {
   }
 
   async deleteConfigs(configs: SyntheticsMonitorWithId[]) {
-    this.apiKey = await this.getApiKey();
-
-    if (!this.apiKey) {
-      return null;
-    }
+    const output = await this.getOutput();
 
     const data = {
+      output,
       monitors: this.formatConfigs(configs),
-      output: await this.getOutput(this.apiKey),
     };
-    const result = await this.apiClient.delete(data);
-    if (this.syncErrors && this.syncErrors?.length > 0) {
-      await this.pushConfigs();
-    }
-    return result;
+    return await this.apiClient.delete(data);
   }
 
   async deleteAllConfigs() {
@@ -458,7 +434,7 @@ export class SyntheticsService {
           return formatHeartbeatRequest({
             monitor: normalizeSecrets(monitor).attributes,
             monitorId: monitor.id,
-            customHeartbeatId: attributes[ConfigKey.CUSTOM_HEARTBEAT_ID],
+            heartbeatId: attributes[ConfigKey.MONITOR_QUERY_ID],
           });
         })
       );

@@ -55,6 +55,10 @@ interface ColumnsProps {
   startMlJobs: (jobIds: string[] | undefined) => Promise<void>;
 }
 
+interface ActionColumnsProps {
+  showExceptionsDuplicateConfirmation: () => Promise<string | null>;
+}
+
 const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): TableColumn => {
   const hasMlPermissions = useHasMlPermissions();
   const hasActionsPrivileges = useHasActionsPrivileges();
@@ -209,19 +213,24 @@ const INTEGRATIONS_COLUMN: TableColumn = {
   truncateText: true,
 };
 
-const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
-  const actions = useRulesTableActions();
+const useActionsColumn = ({
+  showExceptionsDuplicateConfirmation,
+}: ActionColumnsProps): EuiTableActionsColumnType<Rule> => {
+  const actions = useRulesTableActions({ showExceptionsDuplicateConfirmation });
 
   return useMemo(() => ({ actions, width: '40px' }), [actions]);
 };
+
+export interface UseColumnsProps extends ColumnsProps, ActionColumnsProps {}
 
 export const useRulesColumns = ({
   hasCRUDPermissions,
   isLoadingJobs,
   mlJobs,
   startMlJobs,
-}: ColumnsProps): TableColumn[] => {
-  const actionsColumn = useActionsColumn();
+  showExceptionsDuplicateConfirmation,
+}: UseColumnsProps): TableColumn[] => {
+  const actionsColumn = useActionsColumn({ showExceptionsDuplicateConfirmation });
   const ruleNameColumn = useRuleNameColumn();
   const { isInMemorySorting } = useRulesTableContext().state;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
@@ -338,9 +347,10 @@ export const useMonitoringColumns = ({
   isLoadingJobs,
   mlJobs,
   startMlJobs,
-}: ColumnsProps): TableColumn[] => {
+  showExceptionsDuplicateConfirmation,
+}: UseColumnsProps): TableColumn[] => {
   const docLinks = useKibana().services.docLinks;
-  const actionsColumn = useActionsColumn();
+  const actionsColumn = useActionsColumn({ showExceptionsDuplicateConfirmation });
   const ruleNameColumn = useRuleNameColumn();
   const { isInMemorySorting } = useRulesTableContext().state;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);

@@ -10,15 +10,17 @@ import { act } from 'react-dom/test-utils';
 import React from 'react';
 
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
-import type { PluginState } from '../../common/types';
-import { guidesConfig } from '../constants/guides_config';
+import type { PluginState } from '../../common';
+import { API_BASE_PATH, testGuideConfig } from '../../common';
 import { apiService } from '../services/api';
 import type { GuidedOnboardingApi } from '../types';
 import {
+  testGuide,
   testGuideStep1ActiveState,
   testGuideStep1InProgressState,
   testGuideStep2InProgressState,
@@ -30,21 +32,32 @@ import {
 import { GuidePanel } from './guide_panel';
 
 const applicationMock = applicationServiceMock.createStartContract();
+const notificationsMock = notificationServiceMock.createStartContract();
 
+const mockGetResponse = (path: string, pluginState: PluginState) => {
+  if (path === `${API_BASE_PATH}/configs/${testGuide}`) {
+    return Promise.resolve({
+      config: testGuideConfig,
+    });
+  }
+  return Promise.resolve({ pluginState });
+};
 const setupComponentWithPluginStateMock = async (
   httpClient: jest.Mocked<HttpSetup>,
   pluginState: PluginState
 ) => {
-  httpClient.get.mockResolvedValue({
-    pluginState,
-  });
+  httpClient.get.mockImplementation((path) =>
+    mockGetResponse(path as unknown as string, pluginState)
+  );
   apiService.setup(httpClient, true);
   return await setupGuidePanelComponent(apiService);
 };
 
 const setupGuidePanelComponent = async (api: GuidedOnboardingApi) => {
   let testBed: TestBed;
-  const GuidePanelComponent = () => <GuidePanel application={applicationMock} api={api} />;
+  const GuidePanelComponent = () => (
+    <GuidePanel application={applicationMock} api={api} notifications={notificationsMock} />
+  );
   await act(async () => {
     testBed = registerTestBed(GuidePanelComponent)();
   });
@@ -228,68 +241,91 @@ describe('Guided setup', () => {
 
       expect(exists('guidePanel')).toBe(true);
       expect(exists('guideProgress')).toBe(false);
-      expect(find('guidePanelStep').length).toEqual(guidesConfig.testGuide.steps.length);
+      expect(find('guidePanelStep').length).toEqual(testGuideConfig.steps.length);
     });
 
-    test('shows the progress bar if the first step has been completed', async () => {
-      const { exists, find, component } = await setupComponentWithPluginStateMock(httpClient, {
-        status: 'in_progress',
-        isActivePeriod: true,
-        activeGuide: testGuideStep2InProgressState,
+    describe('Guide completion', () => {
+      test('shows the progress bar if the first step has been completed', async () => {
+        const { exists, find, component } = await setupComponentWithPluginStateMock(httpClient, {
+          status: 'in_progress',
+          isActivePeriod: true,
+          activeGuide: testGuideStep2InProgressState,
+        });
+        find('guideButton').simulate('click');
+        component.update();
+
+        expect(exists('guidePanel')).toBe(true);
+        expect(exists('guideProgress')).toBe(true);
       });
-      find('guideButton').simulate('click');
-      component.update();
 
-      expect(exists('guidePanel')).toBe(true);
-      expect(exists('guideProgress')).toBe(true);
-    });
+      test('shows the completed state when all steps has been completed', async () => {
+        const { exists, find, component } = await setupComponentWithPluginStateMock(httpClient, {
+          status: 'in_progress',
+          isActivePeriod: true,
+          activeGuide: { ...readyToCompleteGuideState, status: 'ready_to_complete' },
+        });
+        find('guideButton').simulate('click');
+        component.update();
 
-    test('shows the completed state when all steps has been completed', async () => {
-      const { exists, find, component } = await setupComponentWithPluginStateMock(httpClient, {
-        status: 'in_progress',
-        isActivePeriod: true,
-        activeGuide: { ...readyToCompleteGuideState, status: 'ready_to_complete' },
+        expect(find('guideTitle').text()).toContain('Well done');
+        expect(find('guideDescription').text()).toContain(
+          `You've completed the Elastic Testing example guide`
+        );
+        expect(exists('onboarding--completeGuideButton--testGuide')).toBe(true);
       });
-      find('guideButton').simulate('click');
-      component.update();
 
-      expect(find('guideTitle').text()).toContain('Well done');
-      expect(find('guideDescription').text()).toContain(
-        `You've completed the Elastic Testing example guide`
-      );
-      expect(exists('onboarding--completeGuideButton--testGuide')).toBe(true);
-    });
+      test(`doesn't show the completed state when the last step is not marked as complete`, async () => {
+        const { exists, find, component } = await setupComponentWithPluginStateMock(httpClient, {
+          status: 'in_progress',
+          isActivePeriod: true,
+          activeGuide: {
+            ...testGuideStep1ActiveState,
+            steps: [
+              {
+                ...testGuideStep1ActiveState.steps[0],
+                status: 'complete',
+              },
+              {
+                ...testGuideStep1ActiveState.steps[1],
+                status: 'complete',
+              },
+              {
+                ...testGuideStep1ActiveState.steps[2],
+                status: 'ready_to_complete',
+              },
+            ],
+          },
+        });
+        find('guideButton').simulate('click');
+        component.update();
 
-    test(`doesn't show the completed state when the last step is not marked as complete`, async () => {
-      const { exists, find, component } = await setupComponentWithPluginStateMock(httpClient, {
-        status: 'in_progress',
-        isActivePeriod: true,
-        activeGuide: {
-          ...testGuideStep1ActiveState,
-          steps: [
-            {
-              ...testGuideStep1ActiveState.steps[0],
-              status: 'complete',
-            },
-            {
-              ...testGuideStep1ActiveState.steps[1],
-              status: 'complete',
-            },
-            {
-              ...testGuideStep1ActiveState.steps[2],
-              status: 'ready_to_complete',
-            },
-          ],
-        },
+        expect(find('guideTitle').text()).not.toContain('Well done');
+        expect(find('guideDescription').text()).not.toContain(
+          `You've completed the Elastic Testing example guide`
+        );
+        expect(exists('useElasticButton')).toBe(false);
       });
-      find('guideButton').simulate('click');
-      component.update();
 
-      expect(find('guideTitle').text()).not.toContain('Well done');
-      expect(find('guideDescription').text()).not.toContain(
-        `You've completed the Elastic Testing example guide`
-      );
-      expect(exists('useElasticButton')).toBe(false);
+      test('panel works after a guide is completed', async () => {
+        const { exists, find, component } = await setupComponentWithPluginStateMock(httpClient, {
+          status: 'in_progress',
+          isActivePeriod: true,
+          activeGuide: { ...readyToCompleteGuideState, status: 'ready_to_complete' },
+        });
+        find('guideButton').simulate('click');
+        component.update();
+
+        httpClient.put.mockResolvedValueOnce({
+          pluginState: { status: 'complete', isActivePeriod: true },
+        });
+        await act(async () => {
+          find('onboarding--completeGuideButton--testGuide').simulate('click');
+        });
+        component.update();
+
+        expect(exists('guideButtonRedirect')).toBe(false);
+        expect(exists('guideButton')).toBe(false);
+      });
     });
 
     describe('Steps', () => {
@@ -396,7 +432,7 @@ describe('Guided setup', () => {
         expect(
           find('guidePanelStepDescription')
             .last()
-            .containsMatchingElement(<p>{guidesConfig.testGuide.steps[2].description}</p>)
+            .containsMatchingElement(<p>{testGuideConfig.steps[2].description}</p>)
         ).toBe(true);
       });
 
@@ -414,7 +450,7 @@ describe('Guided setup', () => {
             .first()
             .containsMatchingElement(
               <ul>
-                {guidesConfig.testGuide.steps[0].descriptionList?.map((description, i) => (
+                {testGuideConfig.steps[0].descriptionList?.map((description, i) => (
                   <li key={i}>{description}</li>
                 ))}
               </ul>
@@ -425,6 +461,12 @@ describe('Guided setup', () => {
 
     describe('Quit guide modal', () => {
       beforeEach(async () => {
+        httpClient.put.mockResolvedValueOnce({
+          pluginState: {
+            status: 'quit',
+            isActivePeriod: true,
+          },
+        });
         testBed = await setupComponentWithPluginStateMock(httpClient, {
           status: 'in_progress',
           isActivePeriod: true,
@@ -457,12 +499,6 @@ describe('Guided setup', () => {
       });
 
       test('cancels out of the quit guide confirmation modal', async () => {
-        httpClient.put.mockResolvedValueOnce({
-          pluginState: {
-            status: 'quit',
-            isActivePeriod: true,
-          },
-        });
         const { component, find, exists } = testBed;
 
         await act(async () => {

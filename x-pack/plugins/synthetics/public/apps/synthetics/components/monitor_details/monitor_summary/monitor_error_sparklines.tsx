@@ -6,8 +6,7 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useSelectedLocation } from '../hooks/use_selected_location';
@@ -15,17 +14,18 @@ import { useSelectedLocation } from '../hooks/use_selected_location';
 interface Props {
   from: string;
   to: string;
+  monitorId: string[];
 }
-export const MonitorErrorSparklines = (props: Props) => {
+export const MonitorErrorSparklines = ({ from, to, monitorId }: Props) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
 
-  const { monitorId } = useParams<{ monitorId: string }>();
-
   const { euiTheme } = useEuiTheme();
 
   const selectedLocation = useSelectedLocation();
+
+  const time = useMemo(() => ({ from, to }), [from, to]);
 
   if (!selectedLocation) {
     return null;
@@ -39,10 +39,10 @@ export const MonitorErrorSparklines = (props: Props) => {
       hideTicks={true}
       attributes={[
         {
+          time,
           seriesType: 'area',
-          time: props,
           reportDefinitions: {
-            'monitor.id': [monitorId],
+            'monitor.id': monitorId,
             'observer.geo.name': [selectedLocation?.label],
           },
           dataType: 'synthetics',
