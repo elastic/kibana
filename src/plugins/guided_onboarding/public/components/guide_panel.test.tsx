@@ -15,11 +15,12 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
-import type { PluginState } from '../../common/types';
-import { guidesConfig } from '../constants/guides_config';
+import type { PluginState } from '../../common';
+import { API_BASE_PATH, testGuideConfig } from '../../common';
 import { apiService } from '../services/api';
 import type { GuidedOnboardingApi } from '../types';
 import {
+  testGuide,
   testGuideStep1ActiveState,
   testGuideStep1InProgressState,
   testGuideStep2InProgressState,
@@ -33,13 +34,21 @@ import { GuidePanel } from './guide_panel';
 const applicationMock = applicationServiceMock.createStartContract();
 const notificationsMock = notificationServiceMock.createStartContract();
 
+const mockGetResponse = (path: string, pluginState: PluginState) => {
+  if (path === `${API_BASE_PATH}/configs/${testGuide}`) {
+    return Promise.resolve({
+      config: testGuideConfig,
+    });
+  }
+  return Promise.resolve({ pluginState });
+};
 const setupComponentWithPluginStateMock = async (
   httpClient: jest.Mocked<HttpSetup>,
   pluginState: PluginState
 ) => {
-  httpClient.get.mockResolvedValue({
-    pluginState,
-  });
+  httpClient.get.mockImplementation((path) =>
+    mockGetResponse(path as unknown as string, pluginState)
+  );
   apiService.setup(httpClient, true);
   return await setupGuidePanelComponent(apiService);
 };
@@ -232,7 +241,7 @@ describe('Guided setup', () => {
 
       expect(exists('guidePanel')).toBe(true);
       expect(exists('guideProgress')).toBe(false);
-      expect(find('guidePanelStep').length).toEqual(guidesConfig.testGuide.steps.length);
+      expect(find('guidePanelStep').length).toEqual(testGuideConfig.steps.length);
     });
 
     describe('Guide completion', () => {
@@ -423,7 +432,7 @@ describe('Guided setup', () => {
         expect(
           find('guidePanelStepDescription')
             .last()
-            .containsMatchingElement(<p>{guidesConfig.testGuide.steps[2].description}</p>)
+            .containsMatchingElement(<p>{testGuideConfig.steps[2].description}</p>)
         ).toBe(true);
       });
 
@@ -441,7 +450,7 @@ describe('Guided setup', () => {
             .first()
             .containsMatchingElement(
               <ul>
-                {guidesConfig.testGuide.steps[0].descriptionList?.map((description, i) => (
+                {testGuideConfig.steps[0].descriptionList?.map((description, i) => (
                   <li key={i}>{description}</li>
                 ))}
               </ul>
