@@ -35,28 +35,31 @@ interface Result {
 }
 async function getPackage(name: string, version: string, full: boolean = false) {
   const start = Date.now();
-  const res = await fetch(
-    `${KIBANA_URL}${base}/api/fleet/epm/packages/${name}/${version}?prerelease=true${
-      full ? '&full=true' : ''
-    }`,
-    {
-      headers: {
-        accept: '*/*',
-        'content-type': 'application/json',
-        'kbn-xsrf': 'xyz',
-        Authorization:
-          'Basic ' + Buffer.from(`${KIBANA_USERNAME}:${KIBANA_PASSWORD}`).toString('base64'),
-      },
-      method: 'GET',
-    }
-  );
-  const end = Date.now();
-
   let body;
+  let end;
+  let res;
   try {
+    res = await fetch(
+      `${KIBANA_URL}${base}/api/fleet/epm/packages/${name}/${version}?prerelease=true${
+        full ? '&full=true' : ''
+      }`,
+      {
+        headers: {
+          accept: '*/*',
+          'content-type': 'application/json',
+          'kbn-xsrf': 'xyz',
+          Authorization:
+            'Basic ' + Buffer.from(`${KIBANA_USERNAME}:${KIBANA_PASSWORD}`).toString('base64'),
+        },
+        method: 'GET',
+      }
+    );
+    end = Date.now();
+
     body = await res.json();
   } catch (e) {
-    logger.error(`Error parsing response: ${e}`);
+    logger.error(`Error reaching Kibana: ${e}`);
+    logger.info('If your kibana uses a base path, please set it with the --base /<your-base> flag');
     throw e;
   }
 
