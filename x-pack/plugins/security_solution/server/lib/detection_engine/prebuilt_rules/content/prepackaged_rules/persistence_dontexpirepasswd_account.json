@@ -52,7 +52,7 @@
     "Threat Detection",
     "Persistence",
     "Active Directory",
-    "has_guide"
+    "Investigation Guide"
   ],
   "threat": [
     {
@@ -73,5 +73,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 101
+  "version": 102
 }

@@ -52,6 +52,10 @@ export class Alert<
     this.state = (state || {}) as State;
     this.context = {} as Context;
     this.meta = meta;
+
+    if (!this.meta.flappingHistory) {
+      this.meta.flappingHistory = [];
+    }
   }
 
   getId() {
@@ -168,10 +172,35 @@ export class Alert<
     return rawAlertInstance.encode(this.toRaw());
   }
 
-  toRaw(): RawAlertInstance {
-    return {
-      state: this.state,
-      meta: this.meta,
-    };
+  toRaw(recovered: boolean = false): RawAlertInstance {
+    return recovered
+      ? {
+          // for a recovered alert, we only care to track the flappingHistory
+          // and the flapping flag
+          meta: {
+            flappingHistory: this.meta.flappingHistory,
+            flapping: this.meta.flapping,
+          },
+        }
+      : {
+          state: this.state,
+          meta: this.meta,
+        };
+  }
+
+  setFlappingHistory(fh: boolean[] = []) {
+    this.meta.flappingHistory = fh;
+  }
+
+  getFlappingHistory() {
+    return this.meta.flappingHistory;
+  }
+
+  setFlapping(f: boolean) {
+    this.meta.flapping = f;
+  }
+
+  getFlapping() {
+    return this.meta.flapping || false;
   }
 }

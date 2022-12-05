@@ -68,7 +68,7 @@ export const AnalyticsCollectionEvents: React.FC<AnalyticsCollectionEventsProps>
           field: 'labels.user_uuid',
         },
       ]}
-      query={`_index: logs-elastic_analytics.events-${collection.name}*`}
+      query={`_index: ${collection.events_datastream}`}
       filters={filters}
     />
   );
