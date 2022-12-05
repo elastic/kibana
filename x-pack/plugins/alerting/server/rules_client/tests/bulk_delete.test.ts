@@ -19,7 +19,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { loggerMock } from '@kbn/logging-mocks';
-import { enabledRule1, enabledRule2 } from './test_helpers';
+import { enabledRule1, enabledRule2, returnedRule1, returnedRule2 } from './test_helpers';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -146,24 +146,7 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      rules: [
-        {
-          actions: [],
-          alertTypeId: 'fakeType',
-          apiKey: 'MTIzOmFiYw==',
-          consumer: 'fakeConsumer',
-          enabled: true,
-          id: 'id1',
-          name: 'fakeName',
-          notifyWhen: undefined,
-          params: undefined,
-          schedule: {
-            interval: '5m',
-          },
-          scheduledTaskId: 'id1',
-          snoozeSchedule: [],
-        },
-      ],
+      rules: [returnedRule1],
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 500 }],
       total: 2,
       taskIdsFailedToBeDeleted: [],
@@ -249,24 +232,7 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      rules: [
-        {
-          actions: [],
-          alertTypeId: 'fakeType',
-          apiKey: 'MTIzOmFiYw==',
-          consumer: 'fakeConsumer',
-          enabled: true,
-          id: 'id1',
-          name: 'fakeName',
-          notifyWhen: undefined,
-          params: undefined,
-          schedule: {
-            interval: '5m',
-          },
-          scheduledTaskId: 'id1',
-          snoozeSchedule: [],
-        },
-      ],
+      rules: [returnedRule1],
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 409 }],
       total: 2,
       taskIdsFailedToBeDeleted: [],
@@ -333,40 +299,7 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      rules: [
-        {
-          actions: [],
-          alertTypeId: 'fakeType',
-          apiKey: 'MTIzOmFiYw==',
-          consumer: 'fakeConsumer',
-          enabled: true,
-          id: 'id1',
-          name: 'fakeName',
-          notifyWhen: undefined,
-          params: undefined,
-          schedule: {
-            interval: '5m',
-          },
-          scheduledTaskId: 'id1',
-          snoozeSchedule: [],
-        },
-        {
-          actions: [],
-          alertTypeId: 'fakeType',
-          apiKey: 'MTIzOmFiYw==',
-          consumer: 'fakeConsumer',
-          enabled: true,
-          id: 'id2',
-          name: 'fakeName',
-          notifyWhen: undefined,
-          params: undefined,
-          schedule: {
-            interval: '5m',
-          },
-          scheduledTaskId: 'id2',
-          snoozeSchedule: [],
-        },
-      ],
+      rules: [returnedRule1, returnedRule2],
       errors: [],
       total: 2,
       taskIdsFailedToBeDeleted: [],
@@ -555,4 +488,3 @@ describe('bulkDelete', () => {
     });
   });
 });
-

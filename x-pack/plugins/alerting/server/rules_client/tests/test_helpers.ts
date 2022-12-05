@@ -7,24 +7,6 @@
 
 import type { SavedObject } from '@kbn/core-saved-objects-common';
 
-export const successfulSavedObject1 = {
-  id: 'id1',
-  version: '1',
-  attributes: {
-    scheduledTaskId: 'id1',
-  },
-} as SavedObject;
-
-export const successfulSavedObject2 = {
-  id: 'id2',
-  version: '1',
-  attributes: {
-    scheduledTaskId: 'id2',
-  },
-} as SavedObject;
-
-export const successfulSavedObjects = [successfulSavedObject1, successfulSavedObject2];
-
 export const savedObjectWith500Error = {
   id: 'id2',
   error: {
@@ -76,7 +58,7 @@ export const enabledRule2 = {
     ...defaultRule.attributes,
     enabled: true,
     scheduledTaskId: 'id2',
-    apiKey: Buffer.from('123:abc').toString('base64'),
+    apiKey: Buffer.from('321:abc').toString('base64'),
   },
 };
 
@@ -85,7 +67,7 @@ export const disabledRule1 = {
   attributes: {
     ...defaultRule.attributes,
     enabled: false,
-    scheduledTaskId: 'id2',
+    scheduledTaskId: 'id1',
     apiKey: Buffer.from('123:abc').toString('base64'),
   },
 };
@@ -135,22 +117,46 @@ export const disabledRuleWithAction2 = {
   },
 };
 
-export const updatedRule1 = {
+export const returnedRule1 = {
   actions: [],
+  alertTypeId: 'fakeType',
+  apiKey: 'MTIzOmFiYw==',
+  consumer: 'fakeConsumer',
+  enabled: true,
   id: 'id1',
+  name: 'fakeName',
   notifyWhen: undefined,
   params: undefined,
-  schedule: undefined,
-  snoozeSchedule: [],
+  schedule: {
+    interval: '5m',
+  },
   scheduledTaskId: 'id1',
+  snoozeSchedule: [],
 };
 
-export const updatedRule2 = {
+export const returnedRule2 = {
   actions: [],
+  alertTypeId: 'fakeType',
+  apiKey: 'MzIxOmFiYw==',
+  consumer: 'fakeConsumer',
+  enabled: true,
   id: 'id2',
+  name: 'fakeName',
   notifyWhen: undefined,
   params: undefined,
-  schedule: undefined,
-  snoozeSchedule: [],
+  schedule: {
+    interval: '5m',
+  },
   scheduledTaskId: 'id2',
+  snoozeSchedule: [],
+};
+
+export const returnedDisabledRule1 = {
+  ...returnedRule1,
+  enabled: false,
+};
+
+export const returnedDisabledRule2 = {
+  ...returnedRule2,
+  enabled: false,
 };
