@@ -96,36 +96,42 @@ describe('useMonitorsSortedByStatus', () => {
               allMonitorIds: [],
               monitors: [
                 {
+                  configId: 'test-monitor-1',
                   id: 'test-monitor-1',
                   name: 'Test monitor 1',
                   location: location1,
                   isEnabled: false,
                 },
                 {
+                  configId: 'test-monitor-1',
                   id: 'test-monitor-1',
                   name: 'Test monitor 1',
                   location: location2,
                   isEnabled: true,
                 },
                 {
+                  configId: 'test-monitor-2',
                   id: 'test-monitor-2',
                   name: 'Test monitor 2',
                   location: location1,
                   isEnabled: true,
                 },
                 {
+                  configId: 'test-monitor-2',
                   id: 'test-monitor-2',
                   name: 'Test monitor 2',
                   location: location2,
                   isEnabled: true,
                 },
                 {
+                  configId: 'test-monitor-3',
                   id: 'test-monitor-3',
                   name: 'Test monitor 3',
                   location: location1,
                   isEnabled: true,
                 },
                 {
+                  configId: 'test-monitor-3',
                   id: 'test-monitor-3',
                   name: 'Test monitor 3',
                   location: location2,
@@ -151,36 +157,42 @@ describe('useMonitorsSortedByStatus', () => {
     expect(result.current).toEqual({
       monitorsSortedByStatus: [
         {
+          configId: 'test-monitor-2',
           id: 'test-monitor-2',
           name: 'Test monitor 2',
           location: location1,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-3',
           id: 'test-monitor-3',
           name: 'Test monitor 3',
           location: location1,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-1',
           id: 'test-monitor-1',
           name: 'Test monitor 1',
           location: location2,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-2',
           id: 'test-monitor-2',
           name: 'Test monitor 2',
           location: location2,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-3',
           id: 'test-monitor-3',
           name: 'Test monitor 3',
           location: location2,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-1',
           id: 'test-monitor-1',
           name: 'Test monitor 1',
           location: location1,
@@ -204,36 +216,42 @@ describe('useMonitorsSortedByStatus', () => {
     expect(result.current).toEqual({
       monitorsSortedByStatus: [
         {
+          configId: 'test-monitor-1',
           id: 'test-monitor-1',
           name: 'Test monitor 1',
           location: location2,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-2',
           id: 'test-monitor-2',
           name: 'Test monitor 2',
           location: location2,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-3',
           id: 'test-monitor-3',
           name: 'Test monitor 3',
           location: location2,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-2',
           id: 'test-monitor-2',
           name: 'Test monitor 2',
           location: location1,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-3',
           id: 'test-monitor-3',
           name: 'Test monitor 3',
           location: location1,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-1',
           id: 'test-monitor-1',
           name: 'Test monitor 1',
           location: location1,
@@ -261,18 +279,21 @@ describe('useMonitorsSortedByStatus', () => {
     expect(result.current).toEqual({
       monitorsSortedByStatus: [
         {
+          configId: 'test-monitor-1',
           id: 'test-monitor-1',
           name: 'Test monitor 1',
           location: location2,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-2',
           id: 'test-monitor-2',
           name: 'Test monitor 2',
           location: location2,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-3',
           id: 'test-monitor-3',
           name: 'Test monitor 3',
           location: location2,
@@ -300,12 +321,14 @@ describe('useMonitorsSortedByStatus', () => {
     expect(result.current).toEqual({
       monitorsSortedByStatus: [
         {
+          configId: 'test-monitor-2',
           id: 'test-monitor-2',
           name: 'Test monitor 2',
           location: location1,
           isEnabled: true,
         },
         {
+          configId: 'test-monitor-3',
           id: 'test-monitor-3',
           name: 'Test monitor 3',
           location: location1,
@@ -333,6 +356,7 @@ describe('useMonitorsSortedByStatus', () => {
     expect(result.current).toEqual({
       monitorsSortedByStatus: [
         {
+          configId: 'test-monitor-1',
           id: 'test-monitor-1',
           name: 'Test monitor 1',
           location: location1,

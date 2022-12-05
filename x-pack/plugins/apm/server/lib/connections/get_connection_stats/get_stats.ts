@@ -24,7 +24,7 @@ import {
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
   SPAN_SUBTYPE,
   SPAN_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { NodeType } from '../../../../common/connections';

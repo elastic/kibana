@@ -29,7 +29,7 @@ get:
               - page
               - perPage
               - total
-  operationId: get-enrollment-api-keys
+  operationId: get-enrollment-api-keys-deprecated
   parameters: []
   deprecated: true
 post:
@@ -49,7 +49,7 @@ post:
                 type: string
                 enum:
                   - created
-  operationId: create-enrollment-api-keys
+  operationId: create-enrollment-api-keys-deprecated
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
   deprecated: true

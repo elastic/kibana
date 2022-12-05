@@ -21,7 +21,7 @@ describe('TaskRunnerTimer', () => {
 
   describe('setDuration', () => {
     beforeAll(() => {
-      jest.useFakeTimers('modern');
+      jest.useFakeTimers();
       jest.setSystemTime(new Date('2020-03-09').getTime());
     });
 

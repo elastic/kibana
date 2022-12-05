@@ -13,6 +13,7 @@ import {
   ControlWidth,
 } from '@kbn/controls-plugin/common';
 import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
+import { SortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 import { FtrService } from '../ftr_provider_context';
@@ -23,14 +24,24 @@ const CONTROL_DISPLAY_NAMES: { [key: string]: string } = {
   [RANGE_SLIDER_CONTROL]: 'Range slider',
 };
 
+interface OptionsListAdditionalSettings {
+  defaultSortType?: SortingType;
+  ignoreTimeout?: boolean;
+  allowMultiple?: boolean;
+  hideExclude?: boolean;
+  hideExists?: boolean;
+  hideSort?: boolean;
+}
+
 export class DashboardPageControls extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
   private readonly retry = this.ctx.getService('retry');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly settings = this.ctx.getPageObject('settings');
-  private readonly testSubjects = this.ctx.getService('testSubjects');
 
   /* -----------------------------------------------------------
      General controls functions
@@ -246,6 +257,7 @@ export class DashboardPageControls extends FtrService {
     grow,
     title,
     width,
+    additionalSettings,
   }: {
     controlType: string;
     title?: string;
@@ -253,17 +265,23 @@ export class DashboardPageControls extends FtrService {
     width?: ControlWidth;
     dataViewTitle?: string;
     grow?: boolean;
+    additionalSettings?: OptionsListAdditionalSettings;
   }) {
     this.log.debug(`Creating ${controlType} control ${title ?? fieldName}`);
     await this.openCreateControlFlyout();
 
     if (dataViewTitle) await this.controlsEditorSetDataView(dataViewTitle);
-
     if (fieldName) await this.controlsEditorSetfield(fieldName, controlType);
-
     if (title) await this.controlEditorSetTitle(title);
     if (width) await this.controlEditorSetWidth(width);
     if (grow !== undefined) await this.controlEditorSetGrow(grow);
+
+    if (additionalSettings) {
+      if (controlType === OPTIONS_LIST_CONTROL) {
+        // only options lists currently have additional settings
+        await this.optionsListSetAdditionalSettings(additionalSettings);
+      }
+    }
 
     await this.controlEditorSave();
   }
@@ -312,6 +330,29 @@ export class DashboardPageControls extends FtrService {
   }
 
   // Options list functions
+  public async optionsListSetAdditionalSettings({
+    defaultSortType,
+    ignoreTimeout,
+    allowMultiple,
+    hideExclude,
+    hideExists,
+    hideSort,
+  }: OptionsListAdditionalSettings) {
+    const getSettingTestSubject = (setting: string) =>
+      `optionsListControl__${setting}AdditionalSetting`;
+
+    if (allowMultiple) await this.testSubjects.click(getSettingTestSubject('allowMultiple'));
+    if (hideExclude) await this.testSubjects.click(getSettingTestSubject('hideExclude'));
+    if (hideExists) await this.testSubjects.click(getSettingTestSubject('hideExists'));
+    if (hideSort) await this.testSubjects.click(getSettingTestSubject('hideSort'));
+    if (defaultSortType) {
+      await this.testSubjects.click(`optionsListEditor__sortOrder_${defaultSortType.direction}`);
+      await this.testSubjects.click('optionsListControl__chooseSortBy');
+      await this.testSubjects.click(`optionsListEditor__sortBy_${defaultSortType.by}`);
+    }
+    if (ignoreTimeout) await this.testSubjects.click(getSettingTestSubject('runPastTimeout'));
+  }
+
   public async optionsListGetSelectionsString(controlId: string) {
     this.log.debug(`Getting selections string for Options List: ${controlId}`);
     const controlElement = await this.getControlElementById(controlId);
@@ -365,6 +406,24 @@ export class DashboardPageControls extends FtrService {
     await this.find.clickByCssSelector('.euiFormControlLayoutClearButton');
   }
 
+  public async optionsListPopoverSetSort(sort: SortingType) {
+    this.log.debug(`select sorting type for suggestions`);
+    await this.optionsListPopoverAssertOpen();
+
+    await this.testSubjects.click('optionsListControl__sortingOptionsButton');
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('optionsListControl__sortingOptionsPopover');
+    });
+
+    await this.testSubjects.click(`optionsList__sortOrder_${sort.direction}`);
+    await this.testSubjects.click(`optionsList__sortBy_${sort.by}`);
+
+    await this.testSubjects.click('optionsListControl__sortingOptionsButton');
+    await this.retry.try(async () => {
+      await this.testSubjects.missingOrFail(`optionsListControl__sortingOptionsPopover`);
+    });
+  }
+
   public async optionsListPopoverSelectOption(availableOption: string) {
     this.log.debug(`selecting ${availableOption} from options list`);
     await this.optionsListPopoverAssertOpen();
@@ -388,6 +447,10 @@ export class DashboardPageControls extends FtrService {
         buttonGroup
       )
     ).click();
+  }
+
+  public async optionsListWaitForLoading(controlId: string) {
+    await this.testSubjects.waitForEnabled(`optionsList-control-${controlId}`);
   }
 
   /* -----------------------------------------------------------
@@ -556,5 +619,12 @@ export class DashboardPageControls extends FtrService {
   // Time slider functions
   public async gotoNextTimeSlice() {
     await this.testSubjects.click('timeSlider-nextTimeWindow');
+  }
+
+  public async closeTimeSliderPopover() {
+    const isOpen = await this.testSubjects.exists('timeSlider-popoverContents');
+    if (isOpen) {
+      await this.testSubjects.click('timeSlider-popoverToggleButton');
+    }
   }
 }

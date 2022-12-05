@@ -9,27 +9,23 @@ import { lastValueFrom } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Pagination } from '@elastic/eui';
-import { useContext } from 'react';
 import { number } from 'io-ts';
 import { CspFinding } from '../../../../../common/schemas/csp_finding';
 import { getAggregationCount, getFindingsCountAggQuery } from '../../utils/utils';
-import { FindingsEsPitContext } from '../../es_pit/findings_es_pit_context';
-import { FINDINGS_REFETCH_INTERVAL_MS } from '../../constants';
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
 import type { FindingsBaseEsQuery, Sort } from '../../types';
+import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../../common/constants';
+import { MAX_FINDINGS_TO_LOAD } from '../../../../common/constants';
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
-  from: NonNullable<NonNullable<estypes.SearchRequest['body']>['from']>;
-  size: NonNullable<NonNullable<estypes.SearchRequest['body']>['size']>;
   sort: Sort<CspFinding>;
   enabled: boolean;
 }
 
 export interface ResourceFindingsQuery {
   pageIndex: Pagination['pageIndex'];
-  pageSize: Pagination['pageSize'];
   sort: Sort<CspFinding>;
 }
 
@@ -46,14 +42,11 @@ export type ResourceFindingsResponseAggs = Record<
 const getResourceFindingsQuery = ({
   query,
   resourceId,
-  from,
-  size,
-  pitId,
   sort,
-}: UseResourceFindingsOptions & { pitId: string }): estypes.SearchRequest => ({
+}: UseResourceFindingsOptions): estypes.SearchRequest => ({
+  index: CSP_LATEST_FINDINGS_DATA_VIEW,
   body: {
-    from,
-    size,
+    size: MAX_FINDINGS_TO_LOAD,
     query: {
       ...query,
       bool: {
@@ -62,7 +55,6 @@ const getResourceFindingsQuery = ({
       },
     },
     sort: [{ [sort.field]: sort.direction }],
-    pit: { id: pitId },
     aggs: {
       ...getFindingsCountAggQuery(),
       clusterId: {
@@ -85,8 +77,7 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
     notifications: { toasts },
   } = useKibana().services;
 
-  const { pitIdRef, setPitId } = useContext(FindingsEsPitContext);
-  const params = { ...options, pitId: pitIdRef.current };
+  const params = { ...options };
 
   return useQuery(
     ['csp_resource_findings', { params }],
@@ -99,9 +90,7 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
     {
       enabled: options.enabled,
       keepPreviousData: true,
-      select: ({
-        rawResponse: { hits, pit_id: newPitId, aggregations },
-      }: ResourceFindingsResponse) => {
+      select: ({ rawResponse: { hits, aggregations } }: ResourceFindingsResponse) => {
         if (!aggregations) throw new Error('expected aggregations to exists');
 
         assertNonEmptyArray(aggregations.count.buckets);
@@ -116,16 +105,9 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
           clusterId: getFirstBucketKey(aggregations.clusterId.buckets),
           resourceSubType: getFirstBucketKey(aggregations.resourceSubType.buckets),
           resourceName: getFirstBucketKey(aggregations.resourceName.buckets),
-          newPitId: newPitId!,
         };
       },
       onError: (err: Error) => showErrorToast(toasts, err),
-      onSuccess: ({ newPitId }) => {
-        setPitId(newPitId);
-      },
-      // Refetching on an interval to ensure the PIT window stays open
-      refetchInterval: FINDINGS_REFETCH_INTERVAL_MS,
-      refetchIntervalInBackground: true,
     }
   );
 };

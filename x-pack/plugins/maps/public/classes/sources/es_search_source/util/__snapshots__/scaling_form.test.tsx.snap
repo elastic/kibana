@@ -26,7 +26,6 @@ exports[`scaling form should disable clusters option when clustering is not supp
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     labelType="label"
@@ -63,7 +62,6 @@ exports[`scaling form should disable clusters option when clustering is not supp
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     labelType="label"
@@ -104,7 +102,6 @@ exports[`scaling form should render 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     labelType="label"
@@ -134,7 +131,6 @@ exports[`scaling form should render 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     labelType="label"

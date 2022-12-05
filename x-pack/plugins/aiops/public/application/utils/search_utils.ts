@@ -204,7 +204,7 @@ export function getEsQueryFromSavedSearch({
     };
   }
 
-  // If saved search available, merge saved search with latest user query or filters
+  // If saved search available, merge saved search with the latest user query or filters
   // which might differ from extracted saved search data
   if (savedSearchData) {
     const globalFilters = filterManager?.getGlobalFilters();

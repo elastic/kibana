@@ -8,21 +8,24 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import React, { useCallback, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { Query } from '@kbn/es-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 import { observabilityAlertFeatureIds } from '../../../config';
 import { ObservabilityAppServices } from '../../../application/types';
 import { AlertsStatusFilter } from './components';
-import { ALERT_STATUS_QUERY, DEFAULT_QUERIES } from './constants';
+import { ALERT_STATUS_QUERY, DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';
 import { AlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../../utils/build_es_query';
 import { AlertStatus } from '../../../../common/typings';
 
 const getAlertStatusQuery = (status: string): Query[] => {
-  return status ? [{ query: ALERT_STATUS_QUERY[status], language: 'kuery' }] : [];
+  return ALERT_STATUS_QUERY[status]
+    ? [{ query: ALERT_STATUS_QUERY[status], language: 'kuery' }]
+    : [];
 };
 
-export function AlertSearchBar({
+export function ObservabilityAlertSearchBar({
   appName,
   rangeFrom,
   setRangeFrom,
@@ -41,6 +44,7 @@ export function AlertSearchBar({
         timefilter: { timefilter: timeFilterService },
       },
     },
+    notifications: { toasts },
     triggersActionsUi: { getAlertsSearchBar: AlertsSearchBar },
   } = useKibana<ObservabilityAppServices>().services;
 
@@ -66,20 +70,29 @@ export function AlertSearchBar({
 
   const onSearchBarParamsChange = useCallback(
     ({ dateRange, query }) => {
-      timeFilterService.setTime(dateRange);
-      setRangeFrom(dateRange.from);
-      setRangeTo(dateRange.to);
-      setKuery(query);
-      setEsQuery(
-        buildEsQuery(
+      try {
+        // First try to create es query to make sure query is valid, then save it in state
+        const esQuery = buildEsQuery(
           {
             to: rangeTo,
             from: rangeFrom,
           },
           query,
           [...getAlertStatusQuery(status), ...queries]
-        )
-      );
+        );
+        setKuery(query);
+        timeFilterService.setTime(dateRange);
+        setRangeFrom(dateRange.from);
+        setRangeTo(dateRange.to);
+        setEsQuery(esQuery);
+      } catch (error) {
+        toasts.addError(error, {
+          title: i18n.translate('xpack.observability.alerts.searchBar.invalidQueryTitle', {
+            defaultMessage: 'Invalid query string',
+          }),
+        });
+        setKuery(DEFAULT_QUERY_STRING);
+      }
     },
     [
       timeFilterService,
@@ -91,6 +104,7 @@ export function AlertSearchBar({
       rangeFrom,
       status,
       queries,
+      toasts,
     ]
   );
 

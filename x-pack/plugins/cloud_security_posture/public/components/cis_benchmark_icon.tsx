@@ -30,6 +30,6 @@ const getBenchmarkIdIconType = (props: Props): string => {
 
 export const CISBenchmarkIcon = (props: Props) => (
   <EuiToolTip content={props.name}>
-    <EuiIcon type={getBenchmarkIdIconType(props)} size="xxl" css={props.style} />
+    <EuiIcon type={getBenchmarkIdIconType(props)} size="xl" css={props.style} />
   </EuiToolTip>
 );

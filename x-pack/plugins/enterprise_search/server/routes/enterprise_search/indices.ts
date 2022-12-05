@@ -577,12 +577,17 @@ export function registerIndexRoutes({
         pipeline: { description: defaultDescription, ...pipeline },
       };
 
-      const simulateResult = await client.asCurrentUser.ingest.simulate(simulateRequest);
+      try {
+        const simulateResult = await client.asCurrentUser.ingest.simulate(simulateRequest);
 
-      return response.ok({
-        body: simulateResult,
-        headers: { 'content-type': 'application/json' },
-      });
+        return response.ok({
+          body: simulateResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (e) {
+        log.error(`Error simulating inference pipeline: ${JSON.stringify(e)}`);
+        throw e;
+      }
     })
   );
 
@@ -649,12 +654,17 @@ export function registerIndexRoutes({
         pipeline: pipelinesResponse[pipelineName],
       };
 
-      const simulateResult = await client.asCurrentUser.ingest.simulate(simulateRequest);
+      try {
+        const simulateResult = await client.asCurrentUser.ingest.simulate(simulateRequest);
 
-      return response.ok({
-        body: simulateResult,
-        headers: { 'content-type': 'application/json' },
-      });
+        return response.ok({
+          body: simulateResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (e) {
+        log.error(`Error simulating inference pipeline: ${JSON.stringify(e)}`);
+        throw e;
+      }
     })
   );
 

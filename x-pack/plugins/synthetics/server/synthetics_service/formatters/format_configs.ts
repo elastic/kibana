@@ -65,20 +65,20 @@ export const formatMonitorConfig = (configKeys: ConfigKey[], config: Partial<Mon
 export const formatHeartbeatRequest = ({
   monitor,
   monitorId,
-  customHeartbeatId,
+  heartbeatId,
   runOnce,
   testRunId,
 }: {
   monitor: SyntheticsMonitor;
   monitorId: string;
-  customHeartbeatId?: string;
+  heartbeatId: string;
   runOnce?: boolean;
   testRunId?: string;
 }): HeartbeatConfig => {
   const projectId = (monitor as BrowserFields)[ConfigKey.PROJECT_ID];
   return {
     ...monitor,
-    id: customHeartbeatId || monitorId,
+    id: heartbeatId,
     fields: {
       config_id: monitorId,
       'monitor.project.name': projectId || undefined,

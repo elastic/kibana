@@ -8,21 +8,25 @@
 
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getMigrationHash } from '@kbn/core-test-helpers-so-type-serializer';
-import { Root } from '../../../root';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+import { Root } from '@kbn/core-root-server-internal';
+import {
+  createTestServers,
+  createRootWithCorePlugins,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 
 describe('checking migration metadata changes on all registered SO types', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let esServer: TestElasticsearchUtils;
   let root: Root;
   let typeRegistry: ISavedObjectTypeRegistry;
 
   beforeAll(async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
     });
 
     esServer = await startES();
-    root = kbnTestServer.createRootWithCorePlugins({}, { oss: false });
+    root = createRootWithCorePlugins({}, { oss: false });
     await root.preboot();
     await root.setup();
     const coreStart = await root.start();
@@ -53,7 +57,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
       Object {
         "action": "7858e6d5a9f231bf23f6f2e57328eb0095b26735",
         "action_task_params": "bbd38cbfd74bf6713586fe078e3fa92db2234299",
-        "alert": "48461f3375d9ba22882ea23a318b62a5b0921a9b",
+        "alert": "eefada4a02ce05962387c0679d7b292771a931c4",
         "api_key_pending_invalidation": "9b4bc1235337da9a87ef05a1d1f4858b2a3b77c6",
         "apm-indices": "ceb0870f3a74e2ffc3a1cd3a3c73af76baca0999",
         "apm-server-schema": "2bfd2998d3873872e1366458ce553def85418f91",
@@ -80,7 +84,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "endpoint:user-artifact": "f94c250a52b30d0a2d32635f8b4c5bdabd1e25c0",
         "endpoint:user-artifact-manifest": "8c14d49a385d5d1307d956aa743ec78de0b2be88",
         "enterprise_search_telemetry": "fafcc8318528d34f721c42d1270787c52565bad5",
-        "epm-packages": "cb22b422398a785e7e0565a19c6d4d5c7af6f2fd",
+        "epm-packages": "fe3716a54188b3c71327fa060dd6780a674d3994",
         "epm-packages-assets": "9fd3d6726ac77369249e9a973902c2cd615fc771",
         "event_loop_delays_daily": "d2ed39cf669577d90921c176499908b4943fb7bd",
         "exception-list": "fe8cc004fd2742177cdb9300f4a67689463faf9c",
@@ -88,17 +92,19 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "file": "05c14a75e5e20b12ca514a1d7de231f420facf2c",
         "file-upload-usage-collection-telemetry": "8478924cf0057bd90df737155b364f98d05420a5",
         "fileShare": "3f88784b041bb8728a7f40763a08981828799a75",
-        "fleet-fleet-server-host": "f00ca963f1bee868806319789cdc33f1f53a97e2",
+        "fleet-fleet-server-host": "643d15dbf56edb96f7ca65f98409d83ac5792fb6",
         "fleet-preconfiguration-deletion-record": "7b28f200513c28ae774f1b7d7d7906954e3c6e16",
+        "fleet-proxy": "2bbcd9e6d5e30ac07b275c8d489af07a0d550df5",
         "graph-workspace": "3342f2cd561afdde8f42f5fb284bf550dee8ebb5",
         "guided-onboarding-guide-state": "561db8d481b131a2bbf46b1e534d6ce960255135",
+        "guided-onboarding-plugin-state": "a802ed58e9d0076b9632c59d7943861ba476f99c",
         "index-pattern": "48e77ca393c254e93256f11a7cdc0232dd754c08",
         "infrastructure-monitoring-log-view": "e2c78c1076bd35e57d7c5fa1b410e5c126d12327",
         "infrastructure-ui-source": "7c8dbbc0a608911f1b683a944f4a65383f6153ed",
         "ingest-agent-policies": "9170cdad95d887c036b87adf0ff38a3f12800c05",
         "ingest-download-sources": "1e69dabd6db5e320fe08c5bda8f35f29bafc6b54",
-        "ingest-outputs": "29b867bf7bfd28b1e17c84697dce5c6d078f9705",
-        "ingest-package-policies": "e8707a8c7821ea085e67c2d213e24efa56307393",
+        "ingest-outputs": "4888b16d55a452bf5fff2bb407e0361567eae63a",
+        "ingest-package-policies": "d93048bf153f9043946e8965065a88014f7ccb41",
         "ingest_manager_settings": "6f36714825cc15ea8d7cda06fde7851611a532b4",
         "inventory-view": "bc2bd1e7ec7c186159447ab228d269f22bd39056",
         "kql-telemetry": "29544cd7d3b767c5399878efae6bd724d24c03fd",
@@ -113,12 +119,12 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ml-trained-model": "e39dd10b2da827e194ddcaaf3db141ad1daf0201",
         "monitoring-telemetry": "af508cea8e22edaa909e462069390650fbbf01b7",
         "osquery-manager-usage-metric": "fbe3cbea25a96e2ca522ca436878e0162c94dcc2",
-        "osquery-pack": "afb3b46c5e23fc24ad438e9c4317ff37e4e5164a",
-        "osquery-pack-asset": "32421669c87c49dfabd4d3957f044e5eb7f7fb20",
+        "osquery-pack": "a2d675c7af4208e54a5b28d23d324d7c599a5491",
+        "osquery-pack-asset": "de8783298eb33a577bf1fa0caacd42121dcfae91",
         "osquery-saved-query": "7b213b4b7a3e59350e99c50e8df9948662ed493a",
         "query": "4640ef356321500a678869f24117b7091a911cb6",
         "sample-data-telemetry": "8b10336d9efae6f3d5593c4cc89fb4abcdf84e04",
-        "search": "e7ba25ea37cb36b622db42c9590c6d8dfc838801",
+        "search": "c48f5ab5d94545780ea98de1bff9e39f17f3606b",
         "search-session": "ba383309da68a15be3765977f7a44c84f0ec7964",
         "search-telemetry": "beb3fc25488c753f2a6dcff1845d667558712b66",
         "security-rule": "e0dfdba5d66139d0300723b2e6672993cd4a11f3",
@@ -130,7 +136,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "siem-ui-timeline-pinned-event": "e2697b38751506c7fce6e8b7207a830483dc4283",
         "space": "c4a0acce1bd4b9cce85154f2a350624a53111c59",
         "spaces-usage-stats": "922d3235bbf519e3fb3b260e27248b1df8249b79",
-        "synthetics-monitor": "30f1cd04016a37095de60554cbf7fff89aaad177",
+        "synthetics-monitor": "7c1e5a78fb3b88cc03b441d3bf3714d9967ab214",
         "synthetics-privates-locations": "dd00385f4a27ef062c3e57312eeb3799872fa4af",
         "tag": "39413f4578cc2128c9a0fda97d0acd1c8862c47a",
         "task": "ef53d0f070bd54957b8fe22fae3b1ff208913f76",

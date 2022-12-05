@@ -21,6 +21,7 @@ export const OverviewStatusType = t.intersection([
     disabledCount: t.number,
     upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
     downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
+    enabledIds: t.array(t.string),
   }),
   t.partial({
     allConfigs: t.record(t.string, OverviewStatusMetaDataCodec),

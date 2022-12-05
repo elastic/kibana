@@ -23,6 +23,7 @@ import {
   TaskInstance,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { FixtureStartDeps } from './plugin';
 import { retryIfConflicts } from './lib/retry_if_conflicts';
 
@@ -85,7 +86,7 @@ export function defineRoutes(
       const savedObjectsWithAlerts = await savedObjects.getScopedClient(req, {
         // Exclude the security and spaces wrappers to get around the safeguards those have in place to prevent
         // us from doing what we want to do - brute force replace the ApiKey
-        excludedWrappers: ['security', 'spaces'],
+        excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
         includedHiddenTypes: ['alert'],
       });
 

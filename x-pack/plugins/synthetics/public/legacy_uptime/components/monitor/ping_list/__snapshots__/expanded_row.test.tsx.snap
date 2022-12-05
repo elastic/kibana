@@ -134,10 +134,10 @@ exports[`PingListExpandedRow renders expected elements for valid props 1`] = `
 
 exports[`PingListExpandedRow renders link to docs if body is not recorded but it is present 1`] = `
 <div
-  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+  class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-stretch-column"
 >
   <div
-    class="euiFlexItem"
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
     <div
       class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary emotion-euiPanel-none-m-primary-euiCallOut"

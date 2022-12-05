@@ -44,14 +44,6 @@ export const manageLinks: LinkItem = {
   ),
   landingIcon: IconExceptionLists,
   ...commonLinkProperties,
-  links: [
-    {
-      ...getSecuritySolutionLink<SecurityPageName>('rules'),
-      sideNavDisabled: true,
-      globalSearchDisabled: true,
-      ...commonLinkProperties,
-    },
-  ],
 };
 
 export const manageCategories: LinkCategories = [

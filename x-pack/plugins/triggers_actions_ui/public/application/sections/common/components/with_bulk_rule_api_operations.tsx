@@ -56,6 +56,7 @@ import {
   LoadGlobalExecutionKPIAggregationsProps,
   bulkUnsnoozeRules,
   BulkUnsnoozeRulesProps,
+  cloneRule,
 } from '../../../lib/rule_api';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -101,6 +102,7 @@ export interface ComponentOpts {
   bulkSnoozeRules: (props: BulkSnoozeRulesProps) => Promise<BulkEditResponse>;
   unsnoozeRule: (rule: Rule, scheduleIds?: string[]) => Promise<void>;
   bulkUnsnoozeRules: (props: BulkUnsnoozeRulesProps) => Promise<BulkEditResponse>;
+  cloneRule: (ruleId: string) => Promise<Rule>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -220,6 +222,9 @@ export function withBulkRuleOperations<T>(
         }}
         bulkUnsnoozeRules={async (bulkUnsnoozeRulesProps: BulkUnsnoozeRulesProps) => {
           return await bulkUnsnoozeRules({ http, ...bulkUnsnoozeRulesProps });
+        }}
+        cloneRule={async (ruleId: string) => {
+          return await cloneRule({ http, ruleId });
         }}
       />
     );

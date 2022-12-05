@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const enum ApmMlDetectorType {
+export enum ApmMlDetectorType {
   txLatency = 'txLatency',
   txThroughput = 'txThroughput',
   txFailureRate = 'txFailureRate',

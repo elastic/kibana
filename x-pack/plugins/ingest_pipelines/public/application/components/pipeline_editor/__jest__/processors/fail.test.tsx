@@ -15,7 +15,7 @@ describe('Processor: Fail', () => {
   const { httpSetup } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

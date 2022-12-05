@@ -4,6 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export * from './list_details';
+export * from './list_details_view';
 export * from './list_exception_items';
 export * from './shared_list';

@@ -32,16 +32,18 @@ interface Props {
   allStepsLoaded?: boolean;
   asThumbnail?: boolean;
   retryFetchOnRevisit?: boolean; // Set to `true` fro "Run Once" / "Test Now" modes
+  size?: 'm';
 }
 
 export const JourneyStepScreenshotContainer = ({
-  stepLabels = [],
+  stepLabels,
   checkGroup,
   stepStatus,
   allStepsLoaded,
   initialStepNo = 1,
   retryFetchOnRevisit = false,
   asThumbnail = true,
+  size,
 }: Props) => {
   const [stepNumber, setStepNumber] = useState(initialStepNo);
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
@@ -53,7 +55,7 @@ export const JourneyStepScreenshotContainer = ({
   const { basePath } = useContext(SyntheticsSettingsContext);
 
   const imgPath = `${basePath}/internal/uptime/journey/screenshot/${checkGroup}/${stepNumber}`;
-  const stepLabel = stepLabels[stepNumber - 1] ?? '';
+  const stepLabel = stepLabels?.[stepNumber - 1] ?? '';
 
   const intersection = useIntersection(intersectionRef, {
     root: null,
@@ -139,11 +141,12 @@ export const JourneyStepScreenshotContainer = ({
           isStepFailed={stepStatus === 'failed'}
           isLoading={Boolean(loading)}
           asThumbnail={asThumbnail}
+          size={size}
         />
       ) : asThumbnail ? (
         <EmptyThumbnail isLoading={loading || !allStepsLoaded} />
       ) : (
-        <EmptyImage isLoading={loading || !allStepsLoaded} />
+        <EmptyImage isLoading={loading || !allStepsLoaded} size={size} />
       )}
     </div>
   );

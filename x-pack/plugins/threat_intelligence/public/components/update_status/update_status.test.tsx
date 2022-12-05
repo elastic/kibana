@@ -19,10 +19,10 @@ describe('<UpdateStatus />', () => {
     expect(result.asFragment()).toMatchInlineSnapshot(`
       <DocumentFragment>
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <div
               class="euiText emotion-euiText-xs-euiTextColor-subdued"
@@ -44,10 +44,10 @@ describe('<UpdateStatus />', () => {
     expect(result.asFragment()).toMatchInlineSnapshot(`
       <DocumentFragment>
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <div
               class="euiText emotion-euiText-xs-euiTextColor-subdued"

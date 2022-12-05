@@ -35,7 +35,7 @@ export async function queryMonitorStatus(
   esClient: UptimeEsClient,
   maxLocations: number,
   maxPeriod: number,
-  ids: Array<string | undefined>
+  ids: string[]
 ): Promise<Omit<OverviewStatus, 'disabledCount'>> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / maxLocations);
   const pageCount = Math.ceil(ids.length / idSize);
@@ -137,7 +137,7 @@ export async function queryMonitorStatus(
       });
     });
   }
-  return { up, down, upConfigs, downConfigs };
+  return { up, down, upConfigs, downConfigs, enabledIds: ids };
 }
 
 /**
@@ -152,9 +152,9 @@ export async function getStatus(
   syntheticsMonitorClient: SyntheticsMonitorClient,
   params: MonitorsQuery
 ) {
-  const enabledIds: Array<string | undefined> = [];
   const { query } = params;
   let monitors;
+  const enabledIds: string[] = [];
   let disabledCount = 0;
   let page = 1;
   let maxPeriod = 0;
@@ -173,6 +173,12 @@ export async function getStatus(
         sortField: 'name.keyword',
         sortOrder: 'asc',
         query,
+        fields: [
+          ConfigKey.ENABLED,
+          ConfigKey.LOCATIONS,
+          ConfigKey.MONITOR_QUERY_ID,
+          ConfigKey.SCHEDULE,
+        ],
       },
       syntheticsMonitorClient.syntheticsService,
       savedObjectsClient
@@ -182,9 +188,9 @@ export async function getStatus(
       if (monitor.attributes[ConfigKey.ENABLED] === false) {
         disabledCount += monitor.attributes[ConfigKey.LOCATIONS].length;
       } else {
-        enabledIds.push(monitor.attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitor.id);
-        maxLocations = Math.max(maxLocations, monitor.attributes.locations.length);
-        maxPeriod = Math.max(maxPeriod, periodToMs(monitor.attributes.schedule));
+        enabledIds.push(monitor.attributes[ConfigKey.MONITOR_QUERY_ID]);
+        maxLocations = Math.max(maxLocations, monitor.attributes[ConfigKey.LOCATIONS].length);
+        maxPeriod = Math.max(maxPeriod, periodToMs(monitor.attributes[ConfigKey.SCHEDULE]));
       }
     });
   } while (monitors.saved_objects.length === monitors.per_page);
@@ -197,6 +203,7 @@ export async function getStatus(
   );
 
   return {
+    enabledIds,
     disabledCount,
     up,
     down,

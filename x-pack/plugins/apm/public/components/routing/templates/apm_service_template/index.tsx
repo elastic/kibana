@@ -84,6 +84,8 @@ function TemplateWithContext({
 
   const tabs = useTabs({ selectedTab });
 
+  const { agentName } = useApmServiceContext();
+
   useBreadcrumb(
     () => ({
       title,
@@ -117,6 +119,11 @@ function TemplateWithContext({
                     end={end}
                   />
                 </EuiFlexItem>
+                {isMobileAgentName(agentName) && (
+                  <EuiFlexItem grow={false}>
+                    <TechnicalPreviewBadge />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
 
@@ -263,7 +270,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      append: <BetaBadge icon="editorBold" />,
+      append: <BetaBadge icon="beta" />,
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),

@@ -6,13 +6,19 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { UpdateByQueryResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit, UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { FileStatus } from '@kbn/files-plugin/common/types';
 
 import {
   FILE_STORAGE_DATA_INDEX_PATTERN,
   FILE_STORAGE_METADATA_INDEX_PATTERN,
-} from '../../constants/fleet_es_assets';
+} from '../../../common/constants';
+
+import {
+  getFileMetadataIndexName,
+  getIntegrationNameFromFileDataIndexName,
+} from '../../../common/services';
+
 import { ES_SEARCH_LIMIT } from '../../../common/constants';
 
 /**
@@ -34,7 +40,7 @@ export async function getFilesByStatus(
         size: ES_SEARCH_LIMIT,
         query: {
           term: {
-            'file.Status.keyword': status,
+            'file.Status': status,
           },
         },
         _source: false,
@@ -82,7 +88,7 @@ export async function fileIdsWithoutChunksByIndex(
             must: [
               {
                 terms: {
-                  'bid.keyword': Array.from(allFileIds),
+                  bid: Array.from(allFileIds),
                 },
               },
               {
@@ -102,8 +108,8 @@ export async function fileIdsWithoutChunksByIndex(
   chunks.hits.hits.forEach((hit) => {
     const fileId = hit._source?.bid;
     if (!fileId) return;
-    const integration = hit._index.split('-')[1];
-    const metadataIndex = `.fleet-${integration}-files`;
+    const integration = getIntegrationNameFromFileDataIndexName(hit._index);
+    const metadataIndex = getFileMetadataIndexName(integration);
     if (noChunkFileIdsByIndex[metadataIndex]?.delete(fileId)) {
       allFileIds.delete(fileId);
     }

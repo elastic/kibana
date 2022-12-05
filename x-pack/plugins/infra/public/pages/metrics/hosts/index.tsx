@@ -9,6 +9,9 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import { EuiLink } from '@elastic/eui';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
@@ -19,8 +22,11 @@ import { MetricsDataViewProvider } from './hooks/use_data_view';
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { UnifiedSearchProvider } from './hooks/use_unified_search';
 import { HostContainer } from './components/hosts_container';
+import { ExperimentalBadge } from './components/experimental_badge';
 
 export const HostsPage = () => {
+  const HOSTS_FEEDBACK_LINK = 'https://ela.st/feedback-host-observability';
+
   const {
     hasFailedLoadingSource,
     isLoading,
@@ -47,7 +53,27 @@ export const HostsPage = () => {
             <MetricsPageTemplate
               hasData={metricIndicesExist}
               pageHeader={{
-                pageTitle: hostsTitle,
+                alignItems: 'center',
+                pageTitle: (
+                  <div
+                    css={css`
+                      display: flex;
+                      align-items: center;
+                      gap: 0.75rem;
+                    `}
+                  >
+                    <h1>{hostsTitle}</h1>
+                    <ExperimentalBadge />
+                  </div>
+                ),
+                rightSideItems: [
+                  <EuiLink href={HOSTS_FEEDBACK_LINK} target="_blank">
+                    <FormattedMessage
+                      id="xpack.infra.hostsPage.giveFeedbackLink"
+                      defaultMessage="Give feedback"
+                    />
+                  </EuiLink>,
+                ],
               }}
               pageSectionProps={{
                 contentProps: {

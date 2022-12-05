@@ -18,7 +18,8 @@
   "references": [
     "https://research.checkpoint.com/2020/resolving-your-way-into-domain-admin-exploiting-a-17-year-old-bug-in-windows-dns-servers/",
     "https://msrc-blog.microsoft.com/2020/07/14/july-2020-security-update-cve-2020-1350-vulnerability-in-windows-domain-name-system-dns-server/",
-    "https://github.com/maxpl0it/CVE-2020-1350-DoS"
+    "https://github.com/maxpl0it/CVE-2020-1350-DoS",
+    "https://www.elastic.co/security-labs/detection-rules-for-sigred-vulnerability"
   ],
   "required_fields": [
     {
@@ -60,7 +61,7 @@
     "Network",
     "Threat Detection",
     "Lateral Movement",
-    "has_guide"
+    "Investigation Guide"
   ],
   "threat": [
     {
@@ -81,5 +82,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 101
+  "version": 102
 }

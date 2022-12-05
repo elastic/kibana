@@ -21,6 +21,7 @@ import {
   getFileKindsRegistry,
   FileKindsRegistryImpl,
 } from '../common/file_kinds_registry';
+import { registerDefaultFileKinds } from '../common/register_default_file_kinds';
 
 import { BlobStorageService } from './blob_storage_service';
 import { FileServiceFactory } from './file_service';
@@ -90,6 +91,9 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
       usageCollection,
       getFileService: () => this.fileServiceFactory?.asInternal(),
     });
+
+    // Now that everything is set up:
+    registerDefaultFileKinds();
 
     return {
       registerFileKind(fileKind) {

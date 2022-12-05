@@ -48,12 +48,12 @@ export const MetricItem = ({
   data: Array<{ x: number; y: number }>;
   averageDuration: number;
   loaded: boolean;
-  onClick: (id: string, location: string) => void;
+  onClick: (params: { id: string; configId: string; location: string }) => void;
 }) => {
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const locationName = useLocationName({ locationId: monitor.location?.id });
-  const status = useStatusByLocationOverview(monitor.id, locationName);
+  const status = useStatusByLocationOverview(monitor.configId, locationName);
   const theme = useTheme();
 
   return (
@@ -78,11 +78,15 @@ export const MetricItem = ({
         >
           <Chart>
             <Settings
-              onElementClick={() => monitor.id && locationName && onClick(monitor.id, locationName)}
+              onElementClick={() =>
+                monitor.configId &&
+                locationName &&
+                onClick({ configId: monitor.configId, id: monitor.id, location: locationName })
+              }
               baseTheme={DARK_THEME}
             />
             <Metric
-              id={`${monitor.id}-${monitor.location?.id}`}
+              id={`${monitor.configId}-${monitor.location?.id}`}
               data={[
                 [
                   {

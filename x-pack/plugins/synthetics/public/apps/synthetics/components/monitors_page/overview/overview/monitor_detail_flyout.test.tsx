@@ -50,6 +50,7 @@ describe('Monitor Detail Flyout', () => {
     const onCloseMock = jest.fn();
     const { getByLabelText } = render(
       <MonitorDetailFlyout
+        configId="test-id"
         id="test-id"
         location="US East"
         onClose={onCloseMock}
@@ -72,6 +73,7 @@ describe('Monitor Detail Flyout', () => {
 
     const { getByText } = render(
       <MonitorDetailFlyout
+        configId="test-id"
         id="test-id"
         location="US East"
         onClose={jest.fn()}
@@ -90,6 +92,7 @@ describe('Monitor Detail Flyout', () => {
 
     const { getByRole } = render(
       <MonitorDetailFlyout
+        configId="test-id"
         id="test-id"
         location="US East"
         onClose={jest.fn()}
@@ -124,6 +127,7 @@ describe('Monitor Detail Flyout', () => {
 
     const { getByRole, getByText, getAllByRole } = render(
       <MonitorDetailFlyout
+        configId="test-id"
         id="test-id"
         location="US East"
         onClose={jest.fn()}
@@ -134,7 +138,7 @@ describe('Monitor Detail Flyout', () => {
 
     expect(getByText('Every 1 minute'));
     expect(getByText('test-id'));
-    expect(getByText('Up'));
+    expect(getByText('Pending'));
     expect(
       getByRole('heading', {
         level: 2,

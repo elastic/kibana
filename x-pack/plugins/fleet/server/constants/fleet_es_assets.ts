@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getFileDataIndexName, getFileMetadataIndexName } from '../../common';
+
 import { getESAssetMetadata } from '../services/epm/elasticsearch/meta';
 
 const meta = getESAssetMetadata();
@@ -195,6 +197,6 @@ on_failure:
       value:
         - 'failed in Fleet agent final_pipeline: {{ _ingest.on_failure_message }}'`;
 
-// File storage indexes supporting endpoint Upload/download
-export const FILE_STORAGE_METADATA_INDEX_PATTERN = '.fleet-*-files';
-export const FILE_STORAGE_DATA_INDEX_PATTERN = '.fleet-*-file-data';
+// Fleet Agent indexes for storing files
+export const FILE_STORAGE_METADATA_AGENT_INDEX = getFileMetadataIndexName('agent');
+export const FILE_STORAGE_DATA_AGENT_INDEX = getFileDataIndexName('agent');
