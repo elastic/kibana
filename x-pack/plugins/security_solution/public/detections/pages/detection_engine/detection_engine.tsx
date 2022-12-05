@@ -8,27 +8,18 @@
 // No bueno, I know! Encountered when reverting RBAC work post initial BCs
 // Don't want to include large amounts of refactor in this temporary workaround
 // TODO: Refactor code - component can be broken apart
-/* eslint-disable complexity */
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiWindowEvent,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingSpinner, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
-
 import { isTab } from '@kbn/timelines-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
 import { InputsModelId } from '../../../common/store/inputs/constants';
-import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../app/types';
 import { TableId } from '../../../../common/types/timeline';
@@ -58,7 +49,6 @@ import {
   showGlobalFilters,
 } from '../../../timelines/components/timeline/helpers';
 import {
-  buildAlertStatusFilter,
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../components/alerts_table/default_config';
@@ -70,13 +60,10 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../components/callouts/missing_privileges_callout';
 import { useKibana } from '../../../common/lib/kibana';
-import {
-  AlertsTableFilterGroup,
-  FILTER_OPEN,
-} from '../../components/alerts_table/alerts_filter_group';
 import { EmptyPage } from '../../../common/components/empty_page';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
+import { DetectionPageFilterSet } from '../../components/detection_page_filters';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -130,9 +117,12 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
+  const [detectionPageFilters, setDetectionPageFilters] = useState<Filter[]>([]);
+
   const {
     indexPattern,
     runtimeMappings,
+    dataViewId,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
 
@@ -146,7 +136,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     data,
     docLinks,
   } = useKibana().services;
-  const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
 
   const { filterManager } = data.query;
 
@@ -193,25 +182,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [formatUrl, navigateToUrl]
   );
 
-  // Callback for when open/closed filter changes
-  const onFilterGroupChangedCallback = useCallback(
-    (newFilterGroup: Status) => {
-      const timelineId = TableId.alertsOnAlertsPage;
-      clearEventsLoading({ id: timelineId });
-      clearEventsDeleted({ id: timelineId });
-      setFilterGroup(newFilterGroup);
-    },
-    [clearEventsLoading, clearEventsDeleted, setFilterGroup]
-  );
-
   const alertsHistogramDefaultFilters = useMemo(
     () => [
       ...filters,
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-      ...buildAlertStatusFilter(filterGroup),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+      ...detectionPageFilters,
     ],
-    [filters, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
+    [filters, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, detectionPageFilters]
   );
 
   // AlertsTable manages global filters itself, so not including `filters`
@@ -219,8 +197,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     () => [
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+      ...detectionPageFilters,
     ],
-    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
+    [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, detectionPageFilters]
   );
 
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
@@ -272,6 +251,10 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     }),
     [docLinks]
   );
+
+  const pageFiltersUpdateHandler = useCallback((newFilters: Filter[]) => {
+    setDetectionPageFilters(newFilters);
+  }, []);
 
   if (loading) {
     return (
@@ -341,29 +324,20 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                   {i18n.BUTTON_MANAGE_RULES}
                 </SecuritySolutionLinkButton>
               </HeaderPage>
-              <EuiHorizontalRule margin="m" />
-              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <AlertsTableFilterGroup
-                    status={filterGroup}
-                    onFilterGroupChanged={onFilterGroupChangedCallback}
-                  />
-                </EuiFlexItem>
+              <DetectionPageFilterSet
+                dataViewId={dataViewId as string}
+                onFilterChange={pageFiltersUpdateHandler}
+                filters={filters}
+                query={query}
+                timeRange={{
+                  from,
+                  to,
+                  mode: 'absolute',
+                }}
+                chainingSystem="HIERARCHICAL"
+              />
 
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center" gutterSize="none">
-                    <EuiFlexItem grow={false}>
-                      {updatedAt &&
-                        timelinesUi.getLastUpdated({
-                          updatedAt: updatedAt || Date.now(),
-                          showUpdating,
-                        })}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
               <EuiSpacer size="m" />
-
               <ChartPanels
                 addFilter={addFilter}
                 alertsHistogramDefaultFilters={alertsHistogramDefaultFilters}
@@ -388,7 +362,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
               onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
               to={to}
-              filterGroup={filterGroup}
             />
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
