@@ -104,7 +104,7 @@ export const getVisualization = ({
           groupLabel: 'Metrics',
           layerId: state.layerId,
           accessors: (state.metrics ?? []).map((id) => {
-            const config = state.metricConfig.find(({ metricId }) => metricId === id);
+            const config = (state.metricConfig || []).find(({ metricId }) => metricId === id);
             const hasColoring = config?.mapValuesTo === 'color';
             const stops = config?.palette?.params?.stops;
             return hasColoring

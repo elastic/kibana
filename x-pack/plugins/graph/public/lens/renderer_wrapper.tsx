@@ -165,7 +165,7 @@ export const GraphRenderer = ({
       const endTerms = (value as MultiFieldKey).keys;
       const rowEdges: WorkspaceEdge[] = [];
       const configById: Record<string, GraphDecorationResult> = {};
-      for (const config of args.metricConfig) {
+      for (const config of args.metricConfig || []) {
         configById[config.metricId] = config;
       }
       // all ids should be mapped with any other ids in the list
