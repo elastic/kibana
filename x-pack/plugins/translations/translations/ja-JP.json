@@ -31064,7 +31064,6 @@
     "xpack.synthetics.monitorManagement.monitorAdvancedOptions.monitorNamespaceFieldLabel": "名前空間",
     "xpack.synthetics.monitorManagement.monitorAdvancedOptions.namespaceHelpLearnMoreLabel": "詳細情報",
     "xpack.synthetics.monitorManagement.monitorDeleteFailureMessage": "モニターを削除できませんでした。しばらくたってから再試行してください。",
-    "xpack.synthetics.monitorManagement.monitorDeleteLoadingMessage": "モニターを削除しています...",
     "xpack.synthetics.monitorManagement.monitorEditedSuccessMessage": "モニターは正常に更新されました。",
     "xpack.synthetics.monitorManagement.monitorFailureMessage": "モニターを保存できませんでした。しばらくたってから再試行してください。",
     "xpack.synthetics.monitorManagement.monitorList.actions": "アクション",
