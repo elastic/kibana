@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useState, useLayoutEffect } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
 
@@ -121,7 +121,7 @@ export function useAllCasesQueryParams(isModalView: boolean = false) {
     ]
   );
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (isFirstRenderRef.current) {
       persistAndUpdateQueryParams(isModalView ? DEFAULT_QUERY_PARAMS : {});
       isFirstRenderRef.current = false;
