@@ -18,28 +18,6 @@ rm -rf "${KIBANA_BUILD_LOCATION}"
 rm -rf "${KIBANA_LOAD_TESTING_DIR}"
 rm -rf "${GCS_ARTIFACTS_DIR}"
 
-# unset env vars defined in other parts of CI for automatic APM collection of
-# Kibana. We manage APM config in our FTR config and performance service, and
-# APM treats config in the ENV with a very high precedence.
-unset ELASTIC_APM_ENVIRONMENT
-unset ELASTIC_APM_TRANSACTION_SAMPLE_RATE
-unset ELASTIC_APM_SERVER_URL
-unset ELASTIC_APM_SECRET_TOKEN
-unset ELASTIC_APM_ACTIVE
-unset ELASTIC_APM_CONTEXT_PROPAGATION_ONLY
-unset ELASTIC_APM_GLOBAL_LABELS
-unset ELASTIC_APM_MAX_QUEUE_SIZE
-unset ELASTIC_APM_METRICS_INTERVAL
-unset ELASTIC_APM_CAPTURE_SPAN_STACK_TRACES
-unset ELASTIC_APM_BREAKDOWN_METRICS
-
-# `kill $esPid` doesn't work, seems that kbn-es doesn't listen to signals correctly, this does work
-trap 'killall node -q' EXIT
-
-function is_running {
-  kill -0 "$1" &>/dev/null
-}
-
 download_artifacts() {
   mkdir -p "${GCS_ARTIFACTS_DIR}"
 
@@ -96,57 +74,9 @@ download_artifacts
 echo "--- Clone kibana-load-testing repo and compile project"
 checkout_and_compile_load_runner
 
+echo "--- Run Scalability Tests"
 cd "$KIBANA_DIR"
-
-export TEST_ES_DISABLE_STARTUP=true
-ES_HOST="localhost:9200"
-export TEST_ES_URL="http://elastic:changeme@${ES_HOST}"
-# Overriding Gatling default configuration
-export ES_URL="http://${ES_HOST}"
-
-for journey in x-pack/test/scalability/apis/*; do
-  echo "--- $journey - Start ES"
-  node scripts/es snapshot&
-  export esPid=$!
-
-  # Pings the ES server every second for 2 mins until its status is green
-  curl \
-    --retry 120 \
-    --silent \
-    --retry-delay 1 \
-    --retry-connrefused \
-    -I -XGET "${TEST_ES_URL}/_cluster/health?wait_for_nodes=>=1&wait_for_status=yellow" \
-    > /dev/null
-  echo "✅ ES is ready and will run in the background"
-
-  export SCALABILITY_JOURNEY_PATH="$KIBANA_DIR/$journey"
-  echo "--- Run scalability file: $SCALABILITY_JOURNEY_PATH"
-    node scripts/functional_tests \
-      --config x-pack/test/scalability/config.ts \
-      --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-      --logToFile \
-      --debug
-
-  # remove trap, we're manually shutting down
-  trap - EXIT;
-
-  echo "--- $journey - Shutdown ES"
-  killall node
-  echo "waiting for $esPid to exit gracefully";
-
-  timeout=30 #seconds
-  dur=0
-  while is_running $esPid; do
-    sleep 1;
-    ((dur=dur+1))
-    if [ $dur -ge $timeout ]; then
-      echo "es still running after $dur seconds, killing ES and node forcefully";
-      killall -SIGKILL java
-      killall -SIGKILL node
-      sleep 5;
-    fi
-  done
-done
+node scripts/run_scalability --kibana-install-dir "$KIBANA_BUILD_LOCATION" --journey-config-path "x-pack/test/scalability/apis"
 
 echo "--- Upload test results"
 upload_test_results
