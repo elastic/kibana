@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 import moment from 'moment';
-import { flatten, isEmpty, map, omit, pick, pickBy, some } from 'lodash';
+import { filter, flatten, isEmpty, map, omit, pick, pickBy, some } from 'lodash';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { getInternalSavedObjectsClient } from '../../routes/utils';
@@ -104,7 +104,7 @@ export const createActionHandler = async (
               action_id: uuid.v4(),
               agents: selectedAgents,
             },
-            (value) => !isEmpty(value)
+            (value) => !isEmpty(value) || value === true
           )
         )
       : [
@@ -127,6 +127,9 @@ export const createActionHandler = async (
           ),
         ],
   };
+
+  // we filter out the queries that were skipped
+  osqueryAction.queries = filter(osqueryAction.queries, (query) => !query.skipped);
 
   const fleetActions = map(osqueryAction.queries, (query) => ({
     action_id: query.action_id,

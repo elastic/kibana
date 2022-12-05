@@ -93,7 +93,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     return {
       osqueryCreateAction: (params: CreateLiveQueryRequestBodySchema) =>
-        createActionHandler(osqueryContext, params),
+        // eslint-disable-next-line no-console
+        createActionHandler(osqueryContext, params).catch((error) => console.log(error)),
     };
   }
 

@@ -92,6 +92,11 @@ export type ECSMappingOrUndefined = t.TypeOf<typeof ecsMappingOrUndefined>;
 export const stringArrayOrUndefined = t.union([t.array(t.string), t.undefined]);
 export type StringArrayOrUndefined = t.TypeOf<typeof stringArrayOrUndefined>;
 
+export const skipped = t.boolean;
+export type Skipped = t.TypeOf<typeof skipped>;
+export const skippedOrUndefined = t.union([skipped, t.undefined]);
+export type SkippedOrUndefined = t.TypeOf<typeof skippedOrUndefined>;
+
 export const arrayQueries = t.array(
   t.type({
     id,
@@ -99,6 +104,7 @@ export const arrayQueries = t.array(
     ecs_mapping: ecsMappingOrUndefined,
     version: versionOrUndefined,
     platform: platformOrUndefined,
+    skipped: skippedOrUndefined,
   })
 );
 export type ArrayQueries = t.TypeOf<typeof arrayQueries>;
@@ -111,6 +117,7 @@ export const objectQueries = t.record(
     version: versionOrUndefined,
     platform: platformOrUndefined,
     saved_query_id: savedQueryIdOrUndefined,
+    skipped: skippedOrUndefined,
   })
 );
 export type ObjectQueries = t.TypeOf<typeof objectQueries>;

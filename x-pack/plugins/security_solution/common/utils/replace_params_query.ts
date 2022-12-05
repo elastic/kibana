@@ -8,20 +8,25 @@
 import { each, get } from 'lodash';
 
 export const replaceParamsQuery = (query: string, data: object) => {
-  const regex = /[^{\}]+(?=})/g;
-  const matchedBraces = query.match(regex);
+  const regex = /\{{([^}]+)\}}/g; // when there are 2 opening and 2 closing curly brackets (including brackets)
+  const matchedBrackets = query.match(regex);
   let resultQuery = query;
 
-  if (matchedBraces) {
-    each(matchedBraces, (bracesText: string) => {
-      if (resultQuery.includes(`{${bracesText}}`)) {
-        const foundFieldValue = get(data, bracesText);
+  if (matchedBrackets) {
+    each(matchedBrackets, (bracesText: string) => {
+      const field = bracesText.replace(/{{|}}/g, '').trim();
+      if (resultQuery.includes(bracesText)) {
+        const foundFieldValue = get(data, field);
         if (foundFieldValue) {
-          resultQuery = resultQuery.replace(`{${bracesText}}`, foundFieldValue);
+          resultQuery = resultQuery.replace(bracesText, foundFieldValue);
         }
       }
     });
   }
 
-  return resultQuery;
+  const skipped = regex.test(resultQuery);
+  return {
+    result: resultQuery,
+    skipped,
+  };
 };

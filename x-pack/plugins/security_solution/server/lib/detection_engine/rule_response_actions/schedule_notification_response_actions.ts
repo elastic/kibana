@@ -35,22 +35,34 @@ export const scheduleNotificationResponseActions = (
   responseActions.forEach((responseAction) => {
     if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY && osqueryCreateAction) {
       const { savedQueryId, packId, queries, ecsMapping, query, ...rest } = responseAction.params;
-      const replacedQueries = map(queries, (item) => {
-        return {
-          ...item,
-          query: replaceParamsQuery(item.query, foundAlert as object),
-        };
-      });
 
-      return osqueryCreateAction({
-        ...rest,
-        ...(query ? { query: replaceParamsQuery(query, foundAlert as object) } : {}),
-        queries: replacedQueries,
-        ecs_mapping: ecsMapping,
-        saved_query_id: savedQueryId,
-        agent_ids: agentIds,
-        alert_ids: alertIds,
-      });
+      if (packId) {
+        const replacedQueries = map(queries, (item) => {
+          const { result, skipped } = replaceParamsQuery(item.query, foundAlert as object);
+          return {
+            ...item,
+            query: result,
+            skipped,
+          };
+        });
+
+        return osqueryCreateAction({
+          ...rest,
+          queries: replacedQueries,
+          agent_ids: agentIds,
+          alert_ids: alertIds,
+        });
+      } else if (query) {
+        const { result, skipped } = replaceParamsQuery(query, foundAlert as object);
+        return osqueryCreateAction({
+          ...rest,
+          ...(query ? { query: result } : {}),
+          ecs_mapping: ecsMapping,
+          saved_query_id: savedQueryId,
+          agent_ids: skipped ? [] : agentIds,
+          alert_ids: alertIds,
+        });
+      }
     }
   });
 };
