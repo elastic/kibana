@@ -11,13 +11,13 @@ import type {
 } from '@kbn/data-plugin/server';
 import { fieldsBeat as beatFields } from '@kbn/timelines-plugin/server/utils/beat_schema/fields';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
-import { requestEventFiltersFieldsSearch } from '.';
+import { requestEndpointFieldsSearch } from '.';
 import { createMockEndpointAppContextService } from '../../endpoint/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
-import { eventsIndexPattern } from '../../../common/endpoint/constants';
+import { eventsIndexPattern, METADATA_UNITED_INDEX } from '../../../common/endpoint/constants';
 import { EndpointAuthorizationError } from '../../endpoint/errors';
 
-describe('Event filters fields', () => {
+describe('Endpoint fields', () => {
   const getFieldsForWildcardMock = jest.fn();
   const esClientSearchMock = jest.fn();
   const esClientFieldCapsMock = jest.fn();
@@ -83,14 +83,14 @@ describe('Event filters fields', () => {
     getFieldsForWildcardMock.mockRestore();
   });
   describe('with right privileges', () => {
-    it('should check index exists', async () => {
+    it('should check index exists for event filters', async () => {
       const indices = [eventsIndexPattern];
       const request = {
         indices,
         onlyCheckIfIndicesExist: true,
       };
 
-      const response = await requestEventFiltersFieldsSearch(
+      const response = await requestEndpointFieldsSearch(
         endpointAppContextService,
         request,
         deps,
@@ -101,14 +101,53 @@ describe('Event filters fields', () => {
       expect(response.indicesExist).toEqual(indices);
     });
 
-    it('should search index fields', async () => {
+    it('should check index exists for endpoints list', async () => {
+      const indices = [METADATA_UNITED_INDEX];
+      const request = {
+        indices,
+        onlyCheckIfIndicesExist: true,
+      };
+
+      const response = await requestEndpointFieldsSearch(
+        endpointAppContextService,
+        request,
+        deps,
+        beatFields,
+        IndexPatterns
+      );
+      expect(response.indexFields).toHaveLength(0);
+      expect(response.indicesExist).toEqual(indices);
+    });
+
+    it('should search index fields for event filters', async () => {
       const indices = [eventsIndexPattern];
       const request = {
         indices,
         onlyCheckIfIndicesExist: false,
       };
 
-      const response = await requestEventFiltersFieldsSearch(
+      const response = await requestEndpointFieldsSearch(
+        endpointAppContextService,
+        request,
+        deps,
+        beatFields,
+        IndexPatterns
+      );
+
+      expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
+
+      expect(response.indexFields).not.toHaveLength(0);
+      expect(response.indicesExist).toEqual(indices);
+    });
+
+    it('should search index fields for endpoints list', async () => {
+      const indices = [METADATA_UNITED_INDEX];
+      const request = {
+        indices,
+        onlyCheckIfIndicesExist: false,
+      };
+
+      const response = await requestEndpointFieldsSearch(
         endpointAppContextService,
         request,
         deps,
@@ -130,7 +169,7 @@ describe('Event filters fields', () => {
       };
 
       await expect(async () => {
-        await requestEventFiltersFieldsSearch(
+        await requestEndpointFieldsSearch(
           endpointAppContextService,
           request,
           deps,
@@ -148,7 +187,7 @@ describe('Event filters fields', () => {
       };
 
       await expect(async () => {
-        await requestEventFiltersFieldsSearch(
+        await requestEndpointFieldsSearch(
           endpointAppContextService,
           request,
           deps,
@@ -160,13 +199,10 @@ describe('Event filters fields', () => {
   });
 
   describe('without right privileges', () => {
-    beforeEach(() => {
+    it('should throw because not enough privileges for event filters', async () => {
       (endpointAppContextService.getEndpointAuthz as jest.Mock).mockResolvedValue(
         getEndpointAuthzInitialStateMock({ canReadEventFilters: true, canWriteEventFilters: false })
       );
-    });
-
-    it('should throw because not enough privileges', async () => {
       const indices = [eventsIndexPattern];
       const request = {
         indices,
@@ -174,7 +210,31 @@ describe('Event filters fields', () => {
       };
 
       await expect(async () => {
-        await requestEventFiltersFieldsSearch(
+        await requestEndpointFieldsSearch(
+          endpointAppContextService,
+          request,
+          deps,
+          beatFields,
+          IndexPatterns
+        );
+      }).rejects.toThrowError(new EndpointAuthorizationError());
+    });
+
+    it('should throw because not enough privileges for endpoints list', async () => {
+      (endpointAppContextService.getEndpointAuthz as jest.Mock).mockResolvedValue(
+        getEndpointAuthzInitialStateMock({
+          canReadEndpointList: false,
+          canWriteEndpointList: false,
+        })
+      );
+      const indices = [METADATA_UNITED_INDEX];
+      const request = {
+        indices,
+        onlyCheckIfIndicesExist: false,
+      };
+
+      await expect(async () => {
+        await requestEndpointFieldsSearch(
           endpointAppContextService,
           request,
           deps,
