@@ -67,8 +67,8 @@ export const allowedExperimentalValues = Object.freeze({
    *
    * Issue: https://github.com/elastic/kibana/issues/146777
    */
-     riskyHostsEnabled: false, // DEPRECATED
-     riskyUsersEnabled: false, // DEPRECATED
+  riskyHostsEnabled: false, // DEPRECATED
+  riskyUsersEnabled: false, // DEPRECATED
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
