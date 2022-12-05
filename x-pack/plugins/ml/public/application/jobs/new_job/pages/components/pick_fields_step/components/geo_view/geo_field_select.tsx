@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useContext, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-
-import { JobCreatorContext } from '../../../job_creator_context';
 import { Field } from '../../../../../../../../../common/types/fields';
 
 interface DropDownLabel {
@@ -23,8 +21,6 @@ interface Props {
 }
 
 export const GeoFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
-  const { jobCreatorUpdated } = useContext(JobCreatorContext);
-
   const options: EuiComboBoxOptionOption[] = useMemo(
     () =>
       fields.map(
@@ -34,7 +30,7 @@ export const GeoFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField
             field: f,
           } as DropDownLabel)
       ),
-    [fields, jobCreatorUpdated]
+    [fields]
   );
 
   const selection: EuiComboBoxOptionOption[] = useMemo(() => {

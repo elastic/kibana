@@ -6,45 +6,38 @@
  */
 
 import React, { FC, useContext, useEffect, useState } from 'react';
-import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
+import { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { GeoJobCreator } from '../../../../../common/job_creator';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { SplitCards, useAnimateSplit } from '../split_cards';
-import { MlEmbeddedMapComponent } from '../../../../../../../components/ml_embedded_map';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
-import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
-import { DetectorTitle } from '../detector_title';
+import { GeoMapExamples } from './geo_map_examples';
 
 export const GeoDetectorsSummary: FC = () => {
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const [fieldValues, setFieldValues] = useState<string[]>([]);
 
-  const { jobCreator: jc, chartLoader } = useContext(JobCreatorContext);
+  const { jobCreator: jc, chartLoader, mapLoader } = useContext(JobCreatorContext);
   const jobCreator = jc as GeoJobCreator;
   const geoField = jobCreator.geoField;
   const splitField = jobCreator.splitField;
-  const dataViewId = jobCreator.indexPatternId;
 
   const {
-    services: { maps: mapsPlugin, data, notifications },
+    services: { data, notifications },
   } = useMlKibana();
-  const animateSplit = useAnimateSplit();
 
-  // Load example field values when split field changes
+  // Load example field values for summary view
   // changes to fieldValues here will trigger the card effect
   useEffect(() => {
-    if (jobCreator.splitField !== null) {
+    if (splitField !== null) {
       chartLoader
         .loadFieldExampleValues(
-          jobCreator.splitField,
+          splitField,
           jobCreator.runtimeMappings,
           jobCreator.datafeedConfig.indices_options
         )
         .then(setFieldValues)
         .catch((error) => {
-          // @ts-ignore
           notifications.toasts.addDanger({
             title: i18n.translate('xpack.ml.newJob.geoWizard.fieldValuesFetchErrorTitle', {
               defaultMessage: 'Error fetching field example values: {error}',
@@ -55,54 +48,36 @@ export const GeoDetectorsSummary: FC = () => {
     } else {
       setFieldValues([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Update the layer list  with updated geo points upon refresh
+  // Update the layer list once the example fields have been
   useEffect(() => {
     async function getMapLayersForGeoJob() {
-      if (dataViewId !== undefined && geoField) {
-        const params: any = {
-          indexPatternId: dataViewId,
-          geoFieldName: geoField.name,
-          geoFieldType: geoField.type as unknown as ES_GEO_FIELD_TYPE,
-          filters: data.query.filterManager.getFilters() ?? [],
-          ...(fieldValues.length && splitField
-            ? { query: { query: `${splitField.name}:${fieldValues[0]}`, language: 'kuery' } }
-            : {}),
-        };
-
-        const searchLayerDescriptor = mapsPlugin
-          ? await mapsPlugin.createLayerDescriptors.createESSearchSourceLayerDescriptor(params)
-          : null;
-
-        if (searchLayerDescriptor) {
-          setLayerList([searchLayerDescriptor]);
-        }
+      if (geoField) {
+        const filters = data.query.filterManager.getFilters() ?? [];
+        const layers = await mapLoader.getMapLayersForGeoJob(
+          geoField,
+          splitField,
+          fieldValues,
+          filters
+        );
+        setLayerList(layers);
       }
     }
     getMapLayersForGeoJob();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldValues]);
 
+  if (jobCreator.geoField === null) return null;
+
   return (
-    <SplitCards
+    <GeoMapExamples
+      geoField={jobCreator.geoField}
+      splitField={jobCreator.splitField}
       fieldValues={fieldValues}
-      splitField={splitField}
-      numberOfDetectors={fieldValues.length}
-      jobType={JOB_TYPE.GEO}
-      animate={animateSplit}
-    >
-      <EuiFlexGrid columns={1}>
-        <EuiFlexItem data-test-subj={'mlGeoMap'} grow={false}>
-          <>
-            {jobCreator.geoAgg && geoField ? (
-              <DetectorTitle index={0} agg={jobCreator.geoAgg} field={geoField} />
-            ) : null}
-            <span data-test-subj="mlGeoJobWizardMap" style={{ width: '100%', height: 300 }}>
-              <MlEmbeddedMapComponent layerList={layerList} />
-            </span>
-          </>
-        </EuiFlexItem>
-      </EuiFlexGrid>
-    </SplitCards>
+      geoAgg={jobCreator.geoAgg}
+      layerList={layerList}
+    />
   );
 };

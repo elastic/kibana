@@ -7,7 +7,8 @@
 
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui'; // EuiHorizontalRule
+import { EuiSpacer } from '@elastic/eui';
+import { LayerDescriptor } from '@kbn/maps-plugin/common';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { GeoJobCreator } from '../../../../../common/job_creator';
@@ -24,10 +25,12 @@ export const GeoDetector: FC<Props> = ({ setIsValid }) => {
   const jobCreator = jc as GeoJobCreator;
 
   const [fieldValues, setFieldValues] = useState<string[]>([]);
+  const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
 
   const {
-    services: { notifications: toasts },
+    services: { data, notifications: toasts },
   } = useMlKibana();
+  const { mapLoader } = useContext(JobCreatorContext);
 
   useEffect(() => {
     let valid = false;
@@ -35,7 +38,8 @@ export const GeoDetector: FC<Props> = ({ setIsValid }) => {
       valid = true;
     }
     setIsValid(valid);
-  }, [jobCreatorUpdated]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobCreatorUpdated, jobCreator.geoField]);
 
   // Load example field values when split field changes
   // changes to fieldValues here will trigger the card effect
@@ -63,16 +67,34 @@ export const GeoDetector: FC<Props> = ({ setIsValid }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreator.splitField]);
 
+  // Update the layer list  with updated geo points upon refresh
+  useEffect(() => {
+    async function getMapLayersForGeoJob() {
+      if (jobCreator.geoField) {
+        const filters = data.query.filterManager.getFilters() ?? [];
+        const layers = await mapLoader.getMapLayersForGeoJob(
+          jobCreator.geoField,
+          jobCreator.splitField,
+          fieldValues,
+          filters
+        );
+        setLayerList(layers);
+      }
+    }
+    getMapLayersForGeoJob();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobCreator.geoField, jobCreator.splitField, fieldValues]);
+
   return (
     <>
       {jobCreator.geoField !== null && (
         <>
           <GeoMapExamples
-            dataViewId={jobCreator.indexPatternId}
             geoField={jobCreator.geoField}
             splitField={jobCreator.splitField}
             fieldValues={fieldValues}
             geoAgg={jobCreator.geoAgg}
+            layerList={layerList}
           />
           <EuiSpacer />
         </>

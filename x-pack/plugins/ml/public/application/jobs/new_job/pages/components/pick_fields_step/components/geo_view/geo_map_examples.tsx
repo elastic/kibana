@@ -5,64 +5,32 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC } from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
+import { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { SplitCards, useAnimateSplit } from '../split_cards';
 import { MlEmbeddedMapComponent } from '../../../../../../../components/ml_embedded_map';
-import { useMlKibana } from '../../../../../../../contexts/kibana';
 import { Aggregation, Field, SplitField } from '../../../../../../../../../common/types/fields';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 import { DetectorTitle } from '../detector_title';
 
 interface Props {
   dataViewId?: string;
-  geoField: Field;
+  geoField: Field | null;
   splitField: SplitField;
   fieldValues: string[];
   geoAgg: Aggregation | null;
+  layerList: LayerDescriptor[];
 }
 
 export const GeoMapExamples: FC<Props> = ({
-  dataViewId,
   geoField,
   splitField,
   fieldValues,
   geoAgg,
+  layerList,
 }) => {
-  const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
-
-  const {
-    services: { maps: mapsPlugin, data },
-  } = useMlKibana();
   const animateSplit = useAnimateSplit();
-
-  // Update the layer list  with updated geo points upon refresh
-  useEffect(() => {
-    async function getMapLayersForGeoJob() {
-      if (dataViewId !== undefined && geoField) {
-        const params: any = {
-          indexPatternId: dataViewId,
-          geoFieldName: geoField.name,
-          geoFieldType: geoField.type as unknown as ES_GEO_FIELD_TYPE,
-          filters: data.query.filterManager.getFilters() ?? [],
-          ...(fieldValues.length && splitField
-            ? { query: { query: `${splitField.name}:${fieldValues[0]}`, language: 'kuery' } }
-            : {}),
-        };
-
-        const searchLayerDescriptor = mapsPlugin
-          ? await mapsPlugin.createLayerDescriptors.createESSearchSourceLayerDescriptor(params)
-          : null;
-
-        if (searchLayerDescriptor) {
-          setLayerList([searchLayerDescriptor]);
-        }
-      }
-    }
-    getMapLayersForGeoJob();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViewId, geoField, splitField, fieldValues]);
 
   return (
     <SplitCards

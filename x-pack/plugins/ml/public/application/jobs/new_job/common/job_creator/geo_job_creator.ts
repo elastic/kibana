@@ -23,8 +23,7 @@ import { isSparseDataJob } from './util/general';
 export class GeoJobCreator extends JobCreator {
   private _geoField: Field | null = null;
   private _geoAgg: Aggregation | null = null;
-  // a multi-metric job has one optional overall partition field
-  // which is the same for all detectors.
+  // set partitionField as the default split field for geo jobs
   private _splitField: SplitField = null;
 
   protected _type: JOB_TYPE = JOB_TYPE.GEO;
@@ -72,7 +71,7 @@ export class GeoJobCreator extends JobCreator {
     }
   }
 
-  // set the split field, applying it to each detector
+  // set the split field
   public setSplitField(field: SplitField) {
     this._splitField = field;
 
