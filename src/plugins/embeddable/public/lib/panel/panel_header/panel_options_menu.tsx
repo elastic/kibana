@@ -34,6 +34,7 @@ interface State {
     actions: Action[];
   };
   isPopoverOpen: boolean;
+  showNotification: boolean;
 }
 
 export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, State> {
@@ -54,6 +55,7 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
     this.state = {
       actionContextMenuPanel: undefined,
       isPopoverOpen: false,
+      showNotification: false,
     };
   }
 
@@ -61,8 +63,21 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
     this.mounted = true;
     this.setState({ actionContextMenuPanel: undefined });
     const actionContextMenuPanel = await this.props.getActionContextMenuPanel();
+    const showNotification = actionContextMenuPanel.actions.some(
+      (action) => action.showNotification
+    );
     if (this.mounted) {
-      this.setState({ actionContextMenuPanel });
+      this.setState({ actionContextMenuPanel, showNotification });
+    }
+  }
+
+  public async componentDidUpdate() {
+    const actionContextMenuPanel = await this.props.getActionContextMenuPanel();
+    const showNotification = actionContextMenuPanel.actions.some(
+      (action) => action.showNotification
+    );
+    if (this.mounted && this.state.showNotification !== showNotification) {
+      this.setState({ showNotification });
     }
   }
 
@@ -100,15 +115,11 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
       />
     );
 
-    const showNotification = this.state.actionContextMenuPanel?.actions.some(
-      (action) => action.showNotification
-    );
-
     return (
       <EuiPopover
         className={
           'embPanel__optionsMenuPopover' +
-          (showNotification ? ' embPanel__optionsMenuPopover-notification' : '')
+          (this.state.showNotification ? ' embPanel__optionsMenuPopover-notification' : '')
         }
         button={button}
         isOpen={this.state.isPopoverOpen}

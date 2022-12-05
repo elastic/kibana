@@ -250,12 +250,7 @@ export function App({
         ? i18n.translate('xpack.lens.breadcrumbsByValue', { defaultMessage: 'Edit visualization' })
         : persistedDoc.title;
     }
-    if (
-      !persistedDoc?.title &&
-      initialContext &&
-      initialContext.originatingApp === 'dashboards' &&
-      'title' in initialContext
-    ) {
+    if (!persistedDoc?.title && initialContext && 'title' in initialContext) {
       currentDocTitle = i18n.translate('xpack.lens.breadcrumbsEditInLensFromDashboard', {
         defaultMessage: 'Converting "{title}"',
         values: { title: initialContext.title },
