@@ -1214,6 +1214,20 @@
           },
           {
             "parentPluginId": "discover",
+            "id": "def-public.SavedSearch.usesAdHocDataView",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "usesAdHocDataView",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
             "id": "def-public.SavedSearch.timeRestore",
             "type": "CompoundType",
             "tags": [],

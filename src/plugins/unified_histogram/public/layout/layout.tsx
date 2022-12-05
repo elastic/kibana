@@ -11,17 +11,41 @@ import type { PropsWithChildren, ReactElement, RefObject } from 'react';
 import React, { useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { Chart } from '../chart';
 import { Panels, PANELS_MODE } from '../panels';
 import type {
   UnifiedHistogramChartContext,
   UnifiedHistogramServices,
   UnifiedHistogramHitsContext,
+  UnifiedHistogramBreakdownContext,
+  UnifiedHistogramFetchStatus,
+  UnifiedHistogramRequestContext,
+  UnifiedHistogramChartLoadEvent,
 } from '../types';
 
 export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> {
+  /**
+   * Optional class name to add to the layout container
+   */
   className?: string;
+  /**
+   * Required services
+   */
   services: UnifiedHistogramServices;
+  /**
+   * The current data view
+   */
+  dataView: DataView;
+  /**
+   * Can be updated to `Date.now()` to force a refresh
+   */
+  lastReloadRequestTime?: number;
+  /**
+   * Context object for requests made by unified histogram components -- optional
+   */
+  request?: UnifiedHistogramRequestContext;
   /**
    * Context object for the hits count -- leave undefined to hide the hits count
    */
@@ -30,6 +54,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Context object for the chart -- leave undefined to hide the chart
    */
   chart?: UnifiedHistogramChartContext;
+  /**
+   * Context object for the breakdown -- leave undefined to hide the breakdown
+   */
+  breakdown?: UnifiedHistogramBreakdownContext;
   /**
    * Ref to the element wrapping the layout which will be used for resize calculations
    */
@@ -49,7 +77,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   /**
    * Callback to invoke when the user clicks the edit visualization button -- leave undefined to hide the button
    */
-  onEditVisualization?: () => void;
+  onEditVisualization?: (lensAttributes: TypedLensByValueInput['attributes']) => void;
   /**
    * Callback to hide or show the chart -- should set {@link UnifiedHistogramChartContext.hidden} to chartHidden
    */
@@ -58,13 +86,30 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Callback to update the time interval -- should set {@link UnifiedHistogramChartContext.timeInterval} to timeInterval
    */
   onTimeIntervalChange?: (timeInterval: string) => void;
+  /**
+   * Callback to update the breakdown field -- should set {@link UnifiedHistogramBreakdownContext.field} to breakdownField
+   */
+  onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
+  /**
+   * Callback to update the total hits -- should set {@link UnifiedHistogramHitsContext.status} to status
+   * and {@link UnifiedHistogramHitsContext.total} to result
+   */
+  onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
+  /**
+   * Called when the histogram loading status changes
+   */
+  onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
 }
 
 export const UnifiedHistogramLayout = ({
   className,
   services,
+  dataView,
+  lastReloadRequestTime,
+  request,
   hits,
   chart,
+  breakdown,
   resizeRef,
   topPanelHeight,
   appendHitsCounter,
@@ -72,6 +117,9 @@ export const UnifiedHistogramLayout = ({
   onEditVisualization,
   onChartHiddenChange,
   onTimeIntervalChange,
+  onBreakdownFieldChange,
+  onTotalHitsChange,
+  onChartLoad,
   children,
 }: UnifiedHistogramLayoutProps) => {
   const topPanelNode = useMemo(
@@ -88,7 +136,6 @@ export const UnifiedHistogramLayout = ({
   const showFixedPanels = isMobile || !chart || chart.hidden;
   const { euiTheme } = useEuiTheme();
   const defaultTopPanelHeight = euiTheme.base * 12;
-  const minTopPanelHeight = euiTheme.base * 8;
   const minMainPanelHeight = euiTheme.base * 10;
 
   const chartClassName =
@@ -119,14 +166,21 @@ export const UnifiedHistogramLayout = ({
         <Chart
           className={chartClassName}
           services={services}
+          dataView={dataView}
+          lastReloadRequestTime={lastReloadRequestTime}
+          request={request}
           hits={hits}
           chart={chart}
+          breakdown={breakdown}
           appendHitsCounter={appendHitsCounter}
           appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="l" />}
           onEditVisualization={onEditVisualization}
           onResetChartHeight={onResetChartHeight}
           onChartHiddenChange={onChartHiddenChange}
           onTimeIntervalChange={onTimeIntervalChange}
+          onBreakdownFieldChange={onBreakdownFieldChange}
+          onTotalHitsChange={onTotalHitsChange}
+          onChartLoad={onChartLoad}
         />
       </InPortal>
       <InPortal node={mainPanelNode}>{children}</InPortal>
@@ -135,7 +189,7 @@ export const UnifiedHistogramLayout = ({
         mode={panelsMode}
         resizeRef={resizeRef}
         topPanelHeight={currentTopPanelHeight}
-        minTopPanelHeight={minTopPanelHeight}
+        minTopPanelHeight={defaultTopPanelHeight}
         minMainPanelHeight={minMainPanelHeight}
         topPanel={<OutPortal node={topPanelNode} />}
         mainPanel={<OutPortal node={mainPanelNode} />}

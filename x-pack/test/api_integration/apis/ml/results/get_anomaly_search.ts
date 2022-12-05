@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.createAndRunAnomalyDetectionLookbackJob(
         ml.commonConfig.getADFqSingleMetricJobConfig(adJobId),
         ml.commonConfig.getADFqDatafeedConfig(adJobId),
-        idSpace1
+        { space: idSpace1 }
       );
       await ml.api.assertJobSpaces(adJobId, 'anomaly-detector', [idSpace1]);
     });

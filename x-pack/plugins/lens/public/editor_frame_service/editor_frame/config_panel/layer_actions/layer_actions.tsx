@@ -68,7 +68,6 @@ export const getSharedActions = ({
   getRemoveLayerAction({
     execute: onRemoveLayer,
     layerIndex,
-    activeVisualization,
     layerType,
     isOnlyLayer,
     core,

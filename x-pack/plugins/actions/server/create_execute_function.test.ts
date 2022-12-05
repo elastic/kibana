@@ -605,24 +605,27 @@ describe('bulkExecute()', () => {
       ]
     `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([{ id: '123', type: 'action' }]);
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
-      {
-        type: 'action_task_params',
-        attributes: {
-          actionId: '123',
-          params: { baz: false },
-          executionId: '123abc',
-          apiKey: Buffer.from('123:abc').toString('base64'),
-        },
-        references: [
-          {
-            id: '123',
-            name: 'actionRef',
-            type: 'action',
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+            params: { baz: false },
+            executionId: '123abc',
+            apiKey: Buffer.from('123:abc').toString('base64'),
           },
-        ],
-      },
-    ]);
+          references: [
+            {
+              id: '123',
+              name: 'actionRef',
+              type: 'action',
+            },
+          ],
+        },
+      ],
+      { refresh: false }
+    );
     expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('123', 'mock-action', {
       notifyUsage: true,
     });
@@ -691,25 +694,28 @@ describe('bulkExecute()', () => {
       ]
     `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([{ id: '123', type: 'action' }]);
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
-      {
-        type: 'action_task_params',
-        attributes: {
-          actionId: '123',
-          params: { baz: false },
-          executionId: '123abc',
-          consumer: 'test-consumer',
-          apiKey: Buffer.from('123:abc').toString('base64'),
-        },
-        references: [
-          {
-            id: '123',
-            name: 'actionRef',
-            type: 'action',
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+            params: { baz: false },
+            executionId: '123abc',
+            consumer: 'test-consumer',
+            apiKey: Buffer.from('123:abc').toString('base64'),
           },
-        ],
-      },
-    ]);
+          references: [
+            {
+              id: '123',
+              name: 'actionRef',
+              type: 'action',
+            },
+          ],
+        },
+      ],
+      { refresh: false }
+    );
     expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('123', 'mock-action', {
       notifyUsage: true,
     });
@@ -763,37 +769,40 @@ describe('bulkExecute()', () => {
         ],
       },
     ]);
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
-      {
-        type: 'action_task_params',
-        attributes: {
-          actionId: '123',
-          params: { baz: false },
-          apiKey: Buffer.from('123:abc').toString('base64'),
-          executionId: '123abc',
-          relatedSavedObjects: [
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+            params: { baz: false },
+            apiKey: Buffer.from('123:abc').toString('base64'),
+            executionId: '123abc',
+            relatedSavedObjects: [
+              {
+                id: 'related_some-type_0',
+                namespace: 'some-namespace',
+                type: 'some-type',
+                typeId: 'some-typeId',
+              },
+            ],
+          },
+          references: [
             {
-              id: 'related_some-type_0',
-              namespace: 'some-namespace',
+              id: '123',
+              name: 'actionRef',
+              type: 'action',
+            },
+            {
+              id: 'some-id',
+              name: 'related_some-type_0',
               type: 'some-type',
-              typeId: 'some-typeId',
             },
           ],
         },
-        references: [
-          {
-            id: '123',
-            name: 'actionRef',
-            type: 'action',
-          },
-          {
-            id: 'some-id',
-            name: 'related_some-type_0',
-            type: 'some-type',
-          },
-        ],
-      },
-    ]);
+      ],
+      { refresh: false }
+    );
   });
 
   test('schedules the action with all given parameters with a preconfigured action', async () => {
@@ -868,24 +877,27 @@ describe('bulkExecute()', () => {
       ]
   `);
     expect(savedObjectsClient.get).not.toHaveBeenCalled();
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
-      {
-        type: 'action_task_params',
-        attributes: {
-          actionId: '123',
-          params: { baz: false },
-          executionId: '123abc',
-          apiKey: Buffer.from('123:abc').toString('base64'),
-        },
-        references: [
-          {
-            id: source.id,
-            name: 'source',
-            type: source.type,
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+            params: { baz: false },
+            executionId: '123abc',
+            apiKey: Buffer.from('123:abc').toString('base64'),
           },
-        ],
-      },
-    ]);
+          references: [
+            {
+              id: source.id,
+              name: 'source',
+              type: source.type,
+            },
+          ],
+        },
+      ],
+      { refresh: false }
+    );
   });
 
   test('schedules the action with all given parameters with a preconfigured action and relatedSavedObjects', async () => {
@@ -968,37 +980,40 @@ describe('bulkExecute()', () => {
       ]
   `);
     expect(savedObjectsClient.get).not.toHaveBeenCalled();
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
-      {
-        type: 'action_task_params',
-        attributes: {
-          actionId: '123',
-          params: { baz: false },
-          apiKey: Buffer.from('123:abc').toString('base64'),
-          executionId: '123abc',
-          relatedSavedObjects: [
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+            params: { baz: false },
+            apiKey: Buffer.from('123:abc').toString('base64'),
+            executionId: '123abc',
+            relatedSavedObjects: [
+              {
+                id: 'related_some-type_0',
+                namespace: 'some-namespace',
+                type: 'some-type',
+                typeId: 'some-typeId',
+              },
+            ],
+          },
+          references: [
             {
-              id: 'related_some-type_0',
-              namespace: 'some-namespace',
+              id: source.id,
+              name: 'source',
+              type: source.type,
+            },
+            {
+              id: 'some-id',
+              name: 'related_some-type_0',
               type: 'some-type',
-              typeId: 'some-typeId',
             },
           ],
         },
-        references: [
-          {
-            id: source.id,
-            name: 'source',
-            type: source.type,
-          },
-          {
-            id: 'some-id',
-            name: 'related_some-type_0',
-            type: 'some-type',
-          },
-        ],
-      },
-    ]);
+      ],
+      { refresh: false }
+    );
   });
 
   test('throws when passing isESOCanEncrypt with false as a value', async () => {

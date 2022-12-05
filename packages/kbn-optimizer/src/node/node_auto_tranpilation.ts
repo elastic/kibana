@@ -37,15 +37,17 @@ import Fs from 'fs';
 import Path from 'path';
 import Crypto from 'crypto';
 
-import * as babel from '@babel/core';
+import { version as babelVersion } from '@babel/core';
+import { VERSION as peggyVersion } from '@kbn/peggy';
 import { addHook } from 'pirates';
 import { REPO_ROOT, UPSTREAM_BRANCH } from '@kbn/utils';
 import sourceMapSupport from 'source-map-support';
 import { readHashOfPackageMap } from '@kbn/synthetic-package-map';
 
-import { Cache } from './cache';
+import { TRANSFORMS } from './transforms';
+import { getBabelOptions } from './transforms/babel';
 
-const cwd = process.cwd();
+import { Cache } from './cache';
 
 const IGNORE_PATTERNS = [
   /[\/\\]kbn-pm[\/\\]dist[\/\\]/,
@@ -63,70 +65,6 @@ const IGNORE_PATTERNS = [
   /[\/\\]packages[\/\\](eslint-|kbn-)[^\/\\]+[\/\\](?!src[\/\\].*|(.+[\/\\])?(test|__tests__)[\/\\].+|.+\.test\.(js|ts|tsx)$)(.+$)/,
 ];
 
-function getBabelOptions(path: string) {
-  return babel.loadOptions({
-    cwd,
-    sourceRoot: Path.dirname(path) + Path.sep,
-    filename: path,
-    babelrc: false,
-    presets: [require.resolve('@kbn/babel-preset/node_preset')],
-    sourceMaps: 'both',
-    ast: false,
-  })!;
-}
-
-/**
- * @babel/register uses a JSON encoded copy of the config + babel.version
- * as the cache key for files, so we do something similar but we don't need
- * a unique cache key for every file as our config isn't different for
- * different files (by design). Instead we determine a unique prefix and
- * automatically prepend all paths with the prefix to create cache keys
- */
-function determineCachePrefix() {
-  const json = JSON.stringify({
-    synthPkgMapHash: readHashOfPackageMap(),
-    babelVersion: babel.version,
-    // get a config for a fake js, ts, and tsx file to make sure we
-    // capture conditional config portions based on the file extension
-    js: getBabelOptions(Path.resolve(REPO_ROOT, 'foo.js')),
-    ts: getBabelOptions(Path.resolve(REPO_ROOT, 'foo.ts')),
-    tsx: getBabelOptions(Path.resolve(REPO_ROOT, 'foo.tsx')),
-  });
-
-  const checksum = Crypto.createHash('sha256').update(json).digest('hex').slice(0, 8);
-  return `${checksum}:`;
-}
-
-function compile(cache: Cache, source: string, path: string) {
-  try {
-    const mtime = `${Fs.statSync(path).mtimeMs}`;
-    if (cache.getMtime(path) === mtime) {
-      const code = cache.getCode(path);
-      if (code) {
-        // code *should* always be defined, but if it isn't for some reason rebuild it
-        return code;
-      }
-    }
-
-    const options = getBabelOptions(path);
-    const result = babel.transform(source, options);
-
-    if (!result || !result.code || !result.map) {
-      throw new Error(`babel failed to transpile [${path}]`);
-    }
-
-    cache.update(path, {
-      mtime,
-      map: result.map,
-      code: result.code,
-    });
-
-    return result.code;
-  } catch (error) {
-    throw error;
-  }
-}
-
 let installed = false;
 
 export function registerNodeAutoTranspilation() {
@@ -135,16 +73,45 @@ export function registerNodeAutoTranspilation() {
   }
   installed = true;
 
+  const cacheLog = process.env.DEBUG_NODE_TRANSPILER_CACHE
+    ? Fs.createWriteStream(Path.resolve(REPO_ROOT, 'node_auto_transpilation_cache.log'))
+    : undefined;
+
+  const cacheDir = Path.resolve(
+    REPO_ROOT,
+    'data/node_auto_transpilation_cache_v6',
+    UPSTREAM_BRANCH
+  );
+
+  /**
+   * @babel/register uses a JSON encoded copy of the config + babel.version
+   * as the cache key for files, so we do something similar but we don't need
+   * a unique cache key for every file as our config isn't different for
+   * different files (by design). Instead we determine a unique prefix and
+   * automatically prepend all paths with the prefix to create cache keys
+   */
+
   const cache = new Cache({
+    dir: cacheDir,
+    log: cacheLog,
     pathRoot: REPO_ROOT,
-    dir: Path.resolve(REPO_ROOT, 'data/node_auto_transpilation_cache_v4', UPSTREAM_BRANCH),
-    prefix: determineCachePrefix(),
-    log: process.env.DEBUG_NODE_TRANSPILER_CACHE
-      ? Fs.createWriteStream(Path.resolve(REPO_ROOT, 'node_auto_transpilation_cache.log'), {
-          flags: 'a',
+    prefix: Crypto.createHash('sha256')
+      .update(
+        JSON.stringify({
+          synthPkgMapHash: readHashOfPackageMap(),
+          babelVersion,
+          peggyVersion,
+          // get a config for a fake js, ts, and tsx file to make sure we
+          // capture conditional config portions based on the file extension
+          js: getBabelOptions(Path.resolve(REPO_ROOT, 'foo.js')),
+          ts: getBabelOptions(Path.resolve(REPO_ROOT, 'foo.ts')),
+          tsx: getBabelOptions(Path.resolve(REPO_ROOT, 'foo.tsx')),
         })
-      : undefined,
+      )
+      .digest('hex')
+      .slice(0, 8),
   });
+  cacheLog?.write(`cache initialized\n`);
 
   sourceMapSupport.install({
     handleUncaughtExceptions: false,
@@ -152,39 +119,36 @@ export function registerNodeAutoTranspilation() {
     // @ts-expect-error bad source-map-support types
     retrieveSourceMap(path: string) {
       const map = cache.getSourceMap(path);
-
-      if (map) {
-        return {
-          url: null,
-          map,
-        };
-      } else {
-        return null;
-      }
+      return map ? { map, url: null } : null;
     },
   });
 
-  let compiling = false;
-
+  let transformInProgress = false;
   addHook(
     (code, path) => {
-      if (compiling) {
+      if (transformInProgress) {
         return code;
       }
 
-      if (IGNORE_PATTERNS.some((re) => re.test(path))) {
+      const ext = Path.extname(path);
+
+      if (ext !== '.peggy' && IGNORE_PATTERNS.some((re) => re.test(path))) {
         return code;
       }
 
       try {
-        compiling = true;
-        return compile(cache, code, path);
+        transformInProgress = true;
+        const transform = Object.hasOwn(TRANSFORMS, ext)
+          ? TRANSFORMS[ext as keyof typeof TRANSFORMS]
+          : TRANSFORMS.default;
+
+        return transform(path, code, cache);
       } finally {
-        compiling = false;
+        transformInProgress = false;
       }
     },
     {
-      exts: ['.js', '.ts', '.tsx'],
+      exts: ['.js', '.ts', '.tsx', '.peggy'],
       ignoreNodeModules: false,
     }
   );

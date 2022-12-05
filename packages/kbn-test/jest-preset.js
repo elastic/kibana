@@ -91,7 +91,10 @@ module.exports = {
     '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/mocks.moment_timezone.js',
     '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/mocks.eui.js',
     '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/react_testing_library.js',
-  ],
+    process.env.CI
+      ? '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/disable_console_logs.js'
+      : [],
+  ].flat(),
 
   snapshotFormat: {
     escapeString: true,
@@ -120,9 +123,9 @@ module.exports = {
 
   // A map from regular expressions to paths to transformers
   transform: {
-    '^.+\\.(js|tsx?)$': '<rootDir>/node_modules/@kbn/test/target_node/src/jest/babel_transform.js',
-    '^.+\\.txt?$': '<rootDir>/node_modules/@kbn/test/target_node/src/jest/raw_transform.js',
-    '^.+\\.html?$': '<rootDir>/node_modules/@kbn/test/target_node/src/jest/raw_transform.js',
+    '^.+\\.(js|tsx?)$': '<rootDir>/node_modules/@kbn/test/target_node/src/jest/transforms/babel.js',
+    '^.+\\.(txt|html)?$': '<rootDir>/node_modules/@kbn/test/target_node/src/jest/transforms/raw.js',
+    '^.+\\.peggy?$': '<rootDir>/node_modules/@kbn/test/target_node/src/jest/transforms/peggy.js',
   },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
