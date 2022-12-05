@@ -51,8 +51,8 @@ export function useMonitorsSortedByStatus() {
       if (!monitor.isEnabled) {
         orderedDisabledMonitors.push(monitor);
       } else if (
-        monitor.id in downMonitorMap &&
-        downMonitorMap[monitor.id].includes(monitorLocation)
+        monitor.configId in downMonitorMap &&
+        downMonitorMap[monitor.configId].includes(monitorLocation)
       ) {
         orderedDownMonitors.push(monitor);
       } else {

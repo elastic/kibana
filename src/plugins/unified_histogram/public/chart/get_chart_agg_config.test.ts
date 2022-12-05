@@ -14,7 +14,15 @@ describe('getChartAggConfigs', () => {
   test('is working', () => {
     const dataView = dataViewWithTimefieldMock;
     const dataMock = dataPluginMock.createStartContract();
-    const aggsConfig = getChartAggConfigs({ dataView, timeInterval: 'auto', data: dataMock });
+    const aggsConfig = getChartAggConfigs({
+      dataView,
+      timeInterval: 'auto',
+      data: dataMock,
+      timeRange: {
+        from: '2022-10-05T16:00:00.000-03:00',
+        to: '2022-10-05T18:00:00.000-03:00',
+      },
+    });
 
     expect(aggsConfig!.aggs).toMatchInlineSnapshot(`
       Array [
@@ -38,6 +46,10 @@ describe('getChartAggConfigs', () => {
             "interval": "auto",
             "min_doc_count": 1,
             "scaleMetricValues": false,
+            "timeRange": Object {
+              "from": "2022-10-05T16:00:00.000-03:00",
+              "to": "2022-10-05T18:00:00.000-03:00",
+            },
             "useNormalizedEsInterval": true,
             "used_interval": "0ms",
           },
