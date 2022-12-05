@@ -21,4 +21,4 @@ export const PLUGIN_NAME = 'AIOps';
  */
 export const AIOPS_ENABLED = true;
 
-export const CHANGE_POINT_DETECTION_ENABLED = false;
+export const CHANGE_POINT_DETECTION_ENABLED = true;

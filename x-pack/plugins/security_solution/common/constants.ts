@@ -96,7 +96,6 @@ export enum SecurityPageName {
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
   exceptions = 'exceptions',
-  sharedExceptionListDetails = 'shared-exception-list-details',
   exploreLanding = 'explore',
   hostIsolationExceptions = 'host_isolation_exceptions',
   hosts = 'hosts',
@@ -149,6 +148,7 @@ export const ALERTS_PATH = '/alerts' as const;
 export const RULES_PATH = '/rules' as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
+export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
 export const USERS_PATH = '/users' as const;
 export const KUBERNETES_PATH = '/kubernetes' as const;
@@ -448,7 +448,7 @@ export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAG
  * we will need to update these constants with the corresponding version.
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
-  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.4',
+  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.6',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =

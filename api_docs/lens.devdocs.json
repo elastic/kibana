@@ -742,22 +742,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.Embeddable.getChartInfo",
-            "type": "Function",
-            "tags": [],
-            "label": "getChartInfo",
-            "description": [],
-            "signature": [
-              "() => Readonly<ChartInfo | undefined>"
-            ],
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1130,6 +1114,81 @@
               " | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/cardinality.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.ChartInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChartInfo",
+        "description": [],
+        "path": "x-pack/plugins/lens/public/chart_info_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.ChartInfo.layers",
+            "type": "Array",
+            "tags": [],
+            "label": "layers",
+            "description": [],
+            "signature": [
+              "ChartLayerDescriptor",
+              "[]"
+            ],
+            "path": "x-pack/plugins/lens/public/chart_info_api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.ChartInfo.visualizationType",
+            "type": "string",
+            "tags": [],
+            "label": "visualizationType",
+            "description": [],
+            "path": "x-pack/plugins/lens/public/chart_info_api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.ChartInfo.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/lens/public/chart_info_api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.ChartInfo.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "{ query: string | { [key: string]: any; }; language: string; }"
+            ],
+            "path": "x-pack/plugins/lens/public/chart_info_api.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3258,6 +3317,8 @@
                 "section": "def-public.FormulaPublicApi",
                 "text": "FormulaPublicApi"
               },
+              "; chartInfo: ",
+              "ChartInfoApi",
               "; }>"
             ],
             "path": "x-pack/plugins/lens/public/plugin.ts",
@@ -3828,6 +3889,20 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.SharedPieLayerState.colorsByDimension",
+            "type": "Object",
+            "tags": [],
+            "label": "colorsByDimension",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.SharedPieLayerState.collapseFns",
             "type": "Object",
             "tags": [],
@@ -4297,7 +4372,7 @@
               "\nThe change type indicates what was changed in this table compared to the currently active table of this layer."
             ],
             "signature": [
-              "\"layers\" | \"initial\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
+              "\"layers\" | \"initial\" | \"extended\" | \"unchanged\" | \"reduced\" | \"reorder\""
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6027,6 +6102,43 @@
                 "signature": [
                   "GetDropPropsArgs",
                   "<unknown>"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.hasLayerSettings",
+            "type": "Function",
+            "tags": [],
+            "label": "hasLayerSettings",
+            "description": [
+              "\nAllows the visualization to announce whether or not it has any settings to show"
+            ],
+            "signature": [
+              "((props: ",
+              "VisualizationConfigProps",
+              "<T>) => boolean) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.hasLayerSettings.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "VisualizationConfigProps",
+                  "<T>"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -12068,6 +12180,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/lens/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-common.SharedPieLayerState.colorsByDimension",
+            "type": "Object",
+            "tags": [],
+            "label": "colorsByDimension",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
             ],
             "path": "x-pack/plugins/lens/common/types.ts",
             "deprecated": false,

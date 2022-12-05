@@ -57,6 +57,9 @@ export const DeleteMonitor = ({
   };
 
   useEffect(() => {
+    if (!isDeleting) {
+      return;
+    }
     if (status === FETCH_STATUS.SUCCESS || status === FETCH_STATUS.FAILURE) {
       setIsDeleting(false);
     }
@@ -78,7 +81,7 @@ export const DeleteMonitor = ({
               {i18n.translate(
                 'xpack.synthetics.monitorManagement.monitorDeleteSuccessMessage.name',
                 {
-                  defaultMessage: 'Monitor {name} deleted successfully.',
+                  defaultMessage: 'Deleted "{name}"',
                   values: { name },
                 }
               )}
@@ -88,7 +91,7 @@ export const DeleteMonitor = ({
         { toastLifeTimeMs: 3000 }
       );
     }
-  }, [setIsDeleting, onUpdate, status, name]);
+  }, [setIsDeleting, onUpdate, status, name, isDeleting]);
 
   const destroyModal = (
     <EuiConfirmModal

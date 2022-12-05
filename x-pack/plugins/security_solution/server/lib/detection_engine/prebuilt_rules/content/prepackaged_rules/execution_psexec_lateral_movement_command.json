@@ -58,7 +58,7 @@
     "Windows",
     "Threat Detection",
     "Execution",
-    "has_guide"
+    "Investigation Guide"
   ],
   "threat": [
     {
@@ -94,5 +94,5 @@
     }
   ],
   "type": "eql",
-  "version": 101
+  "version": 102
 }

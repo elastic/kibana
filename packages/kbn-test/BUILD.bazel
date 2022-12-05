@@ -9,6 +9,7 @@ PKG_REQUIRE_NAME = "@kbn/test"
 SOURCE_FILES = glob(
   [
     "src/failed_tests_reporter/es_config",
+    "src/jest/jest_flags.json",
     "**/*.html",
     "**/*.js",
     "**/*.ts",
@@ -100,6 +101,7 @@ TYPES_DEPS = [
   "//packages/kbn-bazel-packages:npm_module_types",
   "//packages/kbn-get-repo-files:npm_module_types",
   "//packages/kbn-ftr-screenshot-filename:npm_module_types",
+  "//packages/kbn-peggy:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//@jest/console",
   "@npm//@jest/reporters",
@@ -119,6 +121,7 @@ TYPES_DEPS = [
   "@npm//rxjs",
   "@npm//playwright",
   "@npm//xmlbuilder",
+  "@npm//@jest/transform",
   "@npm//@types/archiver",
   "@npm//@types/chance",
   "@npm//@types/dedent",
@@ -146,6 +149,10 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  additional_args = [
+    "--copy-files",
+    "--quiet"
+  ]
 )
 
 ts_config(

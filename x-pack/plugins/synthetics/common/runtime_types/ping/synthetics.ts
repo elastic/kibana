@@ -61,6 +61,7 @@ export const SyntheticsDataType = t.partial({
 
 export const JourneyStepType = t.intersection([
   t.partial({
+    config_id: t.string,
     monitor: t.partial({
       duration: t.type({
         us: t.number,

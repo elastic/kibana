@@ -59,11 +59,9 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
   const refreshValue = refresh.value ?? 0;
   const refreshPause = refresh.pause ?? true;
 
-  const blockRefresh = refreshValue === 0 || refreshPause === true;
-
   useEffect(() => {
     const refreshInterval =
-      refreshValue === 0 && refreshPause === true
+      refreshValue === 0 || refreshPause === true
         ? { pause: false, value: DEFAULT_REFRESH_INTERVAL_MS }
         : { pause: refreshPause, value: refreshValue };
     timefilter.setRefreshInterval(refreshInterval);
@@ -75,7 +73,7 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
   return (
     <PageLoader context={context}>
       <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
-        <JobsPage blockRefresh={blockRefresh} lastRefresh={lastRefresh} />
+        <JobsPage lastRefresh={lastRefresh} />
       </MlAnnotationUpdatesContext.Provider>
     </PageLoader>
   );
