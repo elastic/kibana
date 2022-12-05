@@ -7,6 +7,7 @@
  */
 
 import { Observable, Subject } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 
 /**
  * Creates observable from streaming XMLHttpRequest, where each event
@@ -63,8 +64,14 @@ export const fromStreamingXhr = (
       if (isErrorStatus()) {
         const errorMsg =
           xhr.status === 0
-            ? 'Network connection error'
-            : `Batch request failed with status ${xhr.status}`;
+            ? i18n.translate('bfetch.networkError', {
+                defaultMessage:
+                  'Error connecting to the Kibana server. Please check your network connection.',
+              })
+            : i18n.translate('bfetch.networkErrorWithStatus', {
+                defaultMessage: 'Error connecting to server, code {status}',
+                values: { status: xhr.status },
+              });
         subject.error(new Error(errorMsg));
       } else {
         subject.complete();
