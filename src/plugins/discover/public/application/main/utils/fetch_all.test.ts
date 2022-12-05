@@ -25,7 +25,7 @@ import {
 } from '../hooks/use_saved_search';
 
 import { fetchDocuments } from './fetch_documents';
-import { fetchTextBased } from './fetch_textBased';
+import { fetchTextBased } from './fetch_textbased';
 import { fetchChart } from './fetch_chart';
 import { fetchTotalHits } from './fetch_total_hits';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
