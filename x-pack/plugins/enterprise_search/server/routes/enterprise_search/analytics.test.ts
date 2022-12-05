@@ -56,7 +56,7 @@ describe('Enterprise Search Analytics API', () => {
     it('fetches a defined analytics collection name', async () => {
       const mockData: AnalyticsCollection = {
         event_retention_day_length: 30,
-        events_datastream: 'elastic_analytics-events-example',
+        events_datastream: 'logs-elastic_analytics.events-example',
         id: '1',
         name: 'my_collection',
       };
