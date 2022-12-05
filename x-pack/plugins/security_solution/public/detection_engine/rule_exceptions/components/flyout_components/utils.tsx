@@ -14,6 +14,12 @@ import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution
 
 import type { HorizontalAlignment } from '@elastic/eui';
 import {
+  HeaderMenu,
+  generateLinkedRulesMenuItems,
+} from '@kbn/securitysolution-exception-list-components';
+import { SecurityPageName } from '../../../../../common/constants';
+import { ListDetailsLinkAnchor } from '../../../../exceptions/components';
+import {
   enrichExceptionItemsWithOS,
   enrichNewExceptionItemsWithComments,
   enrichNewExceptionItemsWithName,
@@ -24,8 +30,6 @@ import {
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
-import { SecurityPageName } from '../../../../../common/constants';
-import { PopoverItems } from '../../../../common/components/popover_items';
 import type {
   ExceptionListRuleReferencesInfoSchema,
   ExceptionListRuleReferencesSchema,
@@ -187,53 +191,41 @@ export const getSharedListsTableColumns = () => [
   },
   {
     field: 'referenced_rules',
-    name: '# of rules linked to',
+    name: 'Number of rules linked to',
     sortable: false,
     'data-test-subj': 'exceptionListRulesLinkedToIdCell',
-    render: (references: ExceptionListRuleReferencesInfoSchema[]) => {
-      if (references.length === 0) return '0';
+    render: (references: ExceptionListRuleReferencesInfoSchema[]) => (
+      <HeaderMenu
+        emptyButton
+        useCustomActions
+        actions={generateLinkedRulesMenuItems({
+          dataTestSubj: 'addToSharedListsLinkedRulesMenu',
+          linkedRules: references,
+          securityLinkAnchorComponent: ListDetailsLinkAnchor,
+        })}
+        panelPaddingSize="none"
+        disableActions={false}
+        text={references.length.toString()}
+        dataTestSubj="addToSharedListsLinkedRulesMenuAction"
+      />
+    ),
+  },
+  {
+    name: 'Action',
 
-      const renderItem = (reference: ExceptionListRuleReferencesInfoSchema, i: number) => (
+    'data-test-subj': 'exceptionListRulesActionCell',
+    render: (list: ExceptionListRuleReferencesSchema) => {
+      return (
         <SecuritySolutionLinkAnchor
-          data-test-subj="referencedRuleLink"
-          deepLinkId={SecurityPageName.rules}
-          path={getRuleDetailsTabUrl(reference.id, RuleDetailTabs.alerts)}
+          data-test-subj="exceptionListActionCell-link"
+          deepLinkId={SecurityPageName.exceptions}
+          path={`/details/${list.list_id}`}
           external
         >
-          {reference.name}
+          {i18n.VIEW_LIST_DETAIL_ACTION}
         </SecuritySolutionLinkAnchor>
       );
-
-      return (
-        <PopoverItems
-          items={references}
-          popoverButtonTitle={references.length.toString()}
-          dataTestPrefix="ruleReferences"
-          renderItem={renderItem}
-        />
-      );
     },
-  },
-  // TODO: This will need to be updated once PR goes in with list details page
-  {
-    name: 'Actions',
-    actions: [
-      {
-        'data-test-subj': 'exceptionListRulesActionCell',
-        render: (list: ExceptionListRuleReferencesSchema) => {
-          return (
-            <SecuritySolutionLinkAnchor
-              data-test-subj="exceptionListActionCell-link"
-              deepLinkId={SecurityPageName.exceptions}
-              path={`/details/${list.list_id}`}
-              external
-            >
-              {i18n.VIEW_LIST_DETAIL_ACTION}
-            </SecuritySolutionLinkAnchor>
-          );
-        },
-      },
-    ],
   },
 ];
 
@@ -250,7 +242,7 @@ export const getRulesTableColumn = () => [
     truncateText: false,
   },
   {
-    name: 'Actions',
+    name: 'Action',
     'data-test-subj': 'ruleAction-view',
     render: (rule: Rule) => {
       return (
