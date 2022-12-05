@@ -163,7 +163,7 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
           </DiscoverErrorLink>
         </EuiFlexItem>
       </EuiFlexGroup>
-
+      <EuiSpacer />
       <Summary
         items={[
           <TimestampTooltip time={error.timestamp.us / 1000} />,
