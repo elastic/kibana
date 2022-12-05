@@ -19,7 +19,7 @@ import {
 import { UiSettingsService, SetupDeps } from './ui_settings_service';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
-import { uiSettingsType } from './saved_objects';
+import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
 
 const overrides = {
@@ -84,6 +84,7 @@ describe('uiSettings', () => {
       await service.setup(setupDeps);
       expect(setupDeps.savedObjects.registerType).toHaveBeenCalledTimes(2);
       expect(setupDeps.savedObjects.registerType).toHaveBeenCalledWith(uiSettingsType);
+      expect(setupDeps.savedObjects.registerType).toHaveBeenCalledWith(uiSettingsGlobalType);
     });
 
     describe('#register', () => {
