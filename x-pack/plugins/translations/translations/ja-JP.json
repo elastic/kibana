@@ -9265,7 +9265,6 @@
     "xpack.cases.caseView.comment": "コメント",
     "xpack.cases.caseView.comment.addComment": "コメントを追加",
     "xpack.cases.caseView.comment.addCommentHelpText": "新しいコメントを追加...",
-    "xpack.cases.caseView.commentFieldRequiredError": "コメントが必要です。",
     "xpack.cases.caseView.connectors": "外部インシデント管理システム",
     "xpack.cases.caseView.copyCommentLinkAria": "参照リンクをコピー",
     "xpack.cases.caseView.create": "ケースを作成",
