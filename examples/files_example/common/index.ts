@@ -7,7 +7,7 @@
  */
 
 import type { FileKind } from '@kbn/files-plugin/common';
-import type { FileImageMetadata } from '@kbn/shared-ux-file-image-types';
+import type { FileImageMetadata } from '@kbn/shared-ux-file-types';
 
 export const PLUGIN_ID = 'filesExample';
 export const PLUGIN_NAME = 'Files example';

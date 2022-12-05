@@ -16,7 +16,7 @@ import {
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { FramePublicAPI, Visualization } from '../../types';
+import { FramePublicAPI, OperationDescriptor, Visualization } from '../../types';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { cloneDeep } from 'lodash';
 import { PartitionChartsMeta } from './partition_charts_meta';
@@ -33,8 +33,10 @@ const findPrimaryGroup = (config: ReturnType<Visualization['getConfiguration']>)
 const findMetricGroup = (config: ReturnType<Visualization['getConfiguration']>) =>
   config.groups.find((group) => group.groupId === 'metric');
 
+const paletteServiceMock = chartPluginMock.createPaletteRegistry();
+
 const pieVisualization = getPieVisualization({
-  paletteService: chartPluginMock.createPaletteRegistry(),
+  paletteService: paletteServiceMock,
   kibanaTheme: themeServiceMock.createStartContract(),
 });
 
@@ -68,6 +70,8 @@ function mockFrame(): FramePublicAPI {
 
 // Just a basic bootstrap here to kickstart the tests
 describe('pie_visualization', () => {
+  beforeEach(() => jest.clearAllMocks());
+
   describe('#getErrorMessages', () => {
     describe('too many dimensions', () => {
       const state = { ...getExampleState(), shape: PieChartTypes.MOSAIC };
@@ -171,6 +175,31 @@ describe('pie_visualization', () => {
 
       expect(newState.layers[0].collapseFns).not.toHaveProperty('3');
     });
+    it('removes corresponding color by dimension if exists', () => {
+      const state = getExampleState();
+
+      const colIds = ['1', '2', '3', '4'];
+
+      state.layers[0].primaryGroups = colIds;
+
+      state.layers[0].colorsByDimension = {
+        '1': 'custom-color1',
+        '3': 'custom-color2',
+      };
+
+      const newState = pieVisualization.removeDimension({
+        layerId: LAYER_ID,
+        columnId: '3',
+        prevState: state,
+        frame: mockFrame(),
+      });
+
+      expect(newState.layers[0].colorsByDimension).toMatchInlineSnapshot(`
+        Object {
+          "1": "custom-color1",
+        }
+      `);
+    });
     it('removes custom palette if removing final slice-by dimension in multi-metric chart', () => {
       const state = getExampleState();
 
@@ -202,94 +231,213 @@ describe('pie_visualization', () => {
   });
 
   describe('#getConfiguration', () => {
-    it('assigns correct icons to accessors', () => {
+    describe('assigning icons to accessors', () => {
       const colIds = ['1', '2', '3', '4'];
-
       const frame = mockFrame();
       frame.datasourceLayers[LAYER_ID]!.getTableSpec = () =>
         colIds.map((id) => ({ columnId: id, fields: [] }));
 
-      const state = getExampleState();
-      state.layers[0].primaryGroups = colIds;
-      state.layers[0].collapseFns = {
-        '1': 'sum',
-        '3': 'max',
-      };
-      const configuration = pieVisualization.getConfiguration({
-        state,
-        frame,
-        layerId: state.layers[0].layerId,
+      frame.datasourceLayers[LAYER_ID]!.getOperationForColumnId = (colId) =>
+        ({
+          label: `Label for ${colId}`,
+        } as OperationDescriptor);
+
+      it('applies palette and collapse icons for single slice-by group', () => {
+        const state = getExampleState();
+        state.layers[0].primaryGroups = colIds;
+        state.layers[0].collapseFns = {
+          '1': 'sum',
+          '3': 'max',
+        };
+        const configuration = pieVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: state.layers[0].layerId,
+        });
+
+        // palette should be assigned to the first non-collapsed dimension
+        expect(configuration.groups[0].accessors).toMatchInlineSnapshot(`
+                  Array [
+                    Object {
+                      "columnId": "1",
+                      "triggerIcon": "aggregate",
+                    },
+                    Object {
+                      "columnId": "2",
+                      "palette": Array [
+                        "red",
+                        "black",
+                      ],
+                      "triggerIcon": "colorBy",
+                    },
+                    Object {
+                      "columnId": "3",
+                      "triggerIcon": "aggregate",
+                    },
+                    Object {
+                      "columnId": "4",
+                      "triggerIcon": undefined,
+                    },
+                  ]
+              `);
       });
 
-      // palette should be assigned to the first non-collapsed dimension
-      expect(configuration.groups[0].accessors).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "columnId": "1",
-            "triggerIcon": "aggregate",
-          },
-          Object {
-            "columnId": "2",
-            "palette": Array [
-              "red",
-              "black",
-            ],
-            "triggerIcon": "colorBy",
-          },
-          Object {
-            "columnId": "3",
-            "triggerIcon": "aggregate",
-          },
-          Object {
-            "columnId": "4",
-            "triggerIcon": undefined,
-          },
-        ]
-      `);
+      it('applies palette and collapse icons with multiple slice-by groups (mosaic)', () => {
+        const mosaicState = getExampleState();
+        mosaicState.shape = PieChartTypes.MOSAIC;
+        mosaicState.layers[0].primaryGroups = colIds.slice(0, 2);
+        mosaicState.layers[0].secondaryGroups = colIds.slice(2);
+        mosaicState.layers[0].collapseFns = {
+          '1': 'sum',
+          '3': 'max',
+        };
+        const mosaicConfiguration = pieVisualization.getConfiguration({
+          state: mosaicState,
+          frame,
+          layerId: mosaicState.layers[0].layerId,
+        });
 
-      const mosaicState = getExampleState();
-      mosaicState.shape = PieChartTypes.MOSAIC;
-      mosaicState.layers[0].primaryGroups = colIds.slice(0, 2);
-      mosaicState.layers[0].secondaryGroups = colIds.slice(2);
-      mosaicState.layers[0].collapseFns = {
-        '1': 'sum',
-        '3': 'max',
-      };
-      const mosaicConfiguration = pieVisualization.getConfiguration({
-        state: mosaicState,
-        frame,
-        layerId: mosaicState.layers[0].layerId,
-      });
-
-      expect(mosaicConfiguration.groups.map(({ accessors }) => accessors)).toMatchInlineSnapshot(`
-        Array [
+        expect(mosaicConfiguration.groups.map(({ accessors }) => accessors)).toMatchInlineSnapshot(`
           Array [
-            Object {
-              "columnId": "1",
-              "triggerIcon": "aggregate",
-            },
+            Array [
+              Object {
+                "columnId": "1",
+                "triggerIcon": "aggregate",
+              },
+              Object {
+                "columnId": "2",
+                "palette": Array [
+                  "red",
+                  "black",
+                ],
+                "triggerIcon": "colorBy",
+              },
+            ],
+            Array [
+              Object {
+                "columnId": "3",
+                "triggerIcon": "aggregate",
+              },
+              Object {
+                "columnId": "4",
+                "triggerIcon": undefined,
+              },
+            ],
+            Array [],
+          ]
+        `);
+      });
+
+      it('applies color swatch icons with multiple metrics', () => {
+        const state = getExampleState();
+        state.layers[0].allowMultipleMetrics = true;
+        state.layers[0].metrics = colIds;
+        state.layers[0].colorsByDimension = {};
+        state.layers[0].colorsByDimension[colIds[0]] = 'overridden-color';
+
+        const config = pieVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: state.layers[0].layerId,
+        });
+
+        expect(config.groups.map(({ accessors }) => accessors)).toMatchInlineSnapshot(`
+          Array [
+            Array [],
+            Array [
+              Object {
+                "color": "overridden-color",
+                "columnId": "1",
+                "triggerIcon": "color",
+              },
+              Object {
+                "color": "black",
+                "columnId": "2",
+                "triggerIcon": "color",
+              },
+              Object {
+                "color": "black",
+                "columnId": "3",
+                "triggerIcon": "color",
+              },
+              Object {
+                "color": "black",
+                "columnId": "4",
+                "triggerIcon": "color",
+              },
+            ],
+          ]
+        `);
+
+        const palette = paletteServiceMock.get('default');
+        expect((palette.getCategoricalColor as jest.Mock).mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Array [
+                Object {
+                  "name": "Label for 2",
+                  "rankAtDepth": 1,
+                  "totalSeriesAtDepth": 4,
+                },
+              ],
+            ],
+            Array [
+              Array [
+                Object {
+                  "name": "Label for 3",
+                  "rankAtDepth": 2,
+                  "totalSeriesAtDepth": 4,
+                },
+              ],
+            ],
+            Array [
+              Array [
+                Object {
+                  "name": "Label for 4",
+                  "rankAtDepth": 3,
+                  "totalSeriesAtDepth": 4,
+                },
+              ],
+            ],
+          ]
+        `);
+      });
+
+      it("applies disabled icons on multiple metrics if there's a slice-by", () => {
+        const state = getExampleState();
+        state.layers[0].allowMultipleMetrics = true;
+
+        const [first, ...rest] = colIds;
+
+        state.layers[0].primaryGroups = [first];
+        state.layers[0].metrics = rest;
+
+        const config = pieVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: state.layers[0].layerId,
+        });
+
+        expect(findMetricGroup(config)?.accessors).toMatchInlineSnapshot(`
+          Array [
             Object {
               "columnId": "2",
-              "palette": Array [
-                "red",
-                "black",
-              ],
-              "triggerIcon": "colorBy",
+              "triggerIcon": "disabled",
             },
-          ],
-          Array [
             Object {
               "columnId": "3",
-              "triggerIcon": "aggregate",
+              "triggerIcon": "disabled",
             },
             Object {
               "columnId": "4",
-              "triggerIcon": undefined,
+              "triggerIcon": "disabled",
             },
-          ],
-          Array [],
-        ]
-      `);
+          ]
+        `);
+
+        const palette = paletteServiceMock.get('default');
+        expect(palette.getCategoricalColor).not.toHaveBeenCalled();
+      });
     });
 
     it("doesn't count collapsed columns toward the dimension limits", () => {
