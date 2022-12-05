@@ -91,7 +91,10 @@ module.exports = {
     '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/mocks.moment_timezone.js',
     '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/mocks.eui.js',
     '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/react_testing_library.js',
-  ],
+    process.env.CI
+      ? '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/disable_console_logs.js'
+      : [],
+  ].flat(),
 
   snapshotFormat: {
     escapeString: true,

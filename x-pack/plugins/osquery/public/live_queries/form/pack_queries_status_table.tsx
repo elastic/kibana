@@ -23,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import { QueryDetailsFlyout } from './query_details_flyout';
 import { PackResultsHeader } from './pack_results_header';
 import { Direction } from '../../../common/search_strategy';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
@@ -43,6 +44,10 @@ const TruncateTooltipText = styled.div`
   }
 `;
 
+const StyledEuiFlexItem = styled(EuiFlexItem)`
+  cursor: pointer;
+`;
+
 const EMPTY_ARRAY: PackQueryStatusItem[] = [];
 
 // @ts-expect-error TS2769
@@ -51,13 +56,16 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
     padding: 0;
     border: 1px solid #d3dae6;
   }
+
   div.euiDataGrid__virtualized::-webkit-scrollbar {
     display: none;
   }
+
   .euiDataGrid > div {
     .euiDataGrid__scrollOverlay {
       box-shadow: none;
     }
+
     border-left: 0px;
     border-right: 0px;
   }
@@ -143,6 +151,19 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   expirationDate,
   showResultsHeader,
 }) => {
+  const [queryDetailsFlyoutOpen, setQueryDetailsFlyoutOpen] = useState<{
+    id: string;
+    query: string;
+  } | null>(null);
+
+  const handleQueryFlyoutOpen = useCallback(
+    (item) => () => {
+      setQueryDetailsFlyoutOpen(item);
+    },
+    []
+  );
+  const handleQueryFlyoutClose = useCallback(() => setQueryDetailsFlyoutOpen(null), []);
+
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
   const renderIDColumn = useCallback(
     (id: string) => (
@@ -155,18 +176,21 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     []
   );
 
-  const renderQueryColumn = useCallback((query: string, item) => {
-    const singleLine = removeMultilines(query);
-    const content = singleLine.length > 55 ? `${singleLine.substring(0, 55)}...` : singleLine;
+  const renderQueryColumn = useCallback(
+    (query: string, item) => {
+      const singleLine = removeMultilines(query);
+      const content = singleLine.length > 55 ? `${singleLine.substring(0, 55)}...` : singleLine;
 
-    return (
-      <EuiToolTip title={item.id} content={<EuiFlexItem>{query}</EuiFlexItem>}>
-        <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-          {content}
-        </EuiCodeBlock>
-      </EuiToolTip>
-    );
-  }, []);
+      return (
+        <StyledEuiFlexItem onClick={handleQueryFlyoutOpen(item)}>
+          <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
+            {content}
+          </EuiCodeBlock>
+        </StyledEuiFlexItem>
+      );
+    },
+    [handleQueryFlyoutOpen]
+  );
 
   const renderDocsColumn = useCallback(
     (item: PackQueryStatusItem) => (
@@ -269,11 +293,22 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
               />
             ),
         },
+        {
+          render: (item: { action_id: string }) => (
+            <EuiButtonIcon iconType={'expand'} onClick={handleQueryFlyoutOpen(item)} />
+          ),
+        },
       ];
 
       return resultActions.map((action) => action.render(row));
     },
-    [actionId, agentIds, renderDiscoverResultsAction, renderLensResultsAction]
+    [
+      actionId,
+      agentIds,
+      handleQueryFlyoutOpen,
+      renderDiscoverResultsAction,
+      renderLensResultsAction,
+    ]
   );
   const columns = useMemo(
     () => [
@@ -381,6 +416,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         isExpandable
       />
+      {queryDetailsFlyoutOpen ? (
+        <QueryDetailsFlyout onClose={handleQueryFlyoutClose} action={queryDetailsFlyoutOpen} />
+      ) : null}
     </>
   );
 };

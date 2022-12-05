@@ -26,8 +26,8 @@
     "Cloud",
     "AWS",
     "ML",
-    "has_guide"
+    "Investigation Guide"
   ],
   "type": "machine_learning",
-  "version": 101
+  "version": 102
 }
