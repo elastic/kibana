@@ -33,9 +33,7 @@ import { DEFAULT_DATE_FORMAT } from '../../pages/alert_details/constants';
 import { AlertSummaryProps } from '../../pages/alert_details/types';
 
 export function AlertSummary({ alert }: AlertSummaryProps) {
-  console.log('this is a test');
   const tags = alert?.fields[ALERT_RULE_TAGS];
-
   return (
     <div data-test-subj="alert-summary-container">
       <EuiFlexGroup>
