@@ -17,7 +17,6 @@ export type OnlyEsQueryRuleParams = Omit<EsQueryRuleParams, 'searchConfiguration
 
 export type OnlySearchSourceRuleParams = Omit<EsQueryRuleParams, 'esQuery' | 'index'> & {
   searchType: 'searchSource';
-  timeField?: string;
 };
 
 export type ExecutorOptions<P extends RuleTypeParams> = RuleExecutorOptions<
