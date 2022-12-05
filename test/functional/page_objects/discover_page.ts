@@ -9,6 +9,8 @@
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
+type SidebarSectionName = 'meta' | 'empty' | 'available' | 'unmapped' | 'popular' | 'selected';
+
 export class DiscoverPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -437,8 +439,61 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('discoverNoResultsTimefilter');
   }
 
+  public async getSidebarAriaDescription(): Promise<string> {
+    return await (
+      await this.testSubjects.find('fieldListGrouped__ariaDescription')
+    ).getAttribute('innerText');
+  }
+
+  public async waitUntilSidebarHasLoaded() {
+    await this.retry.waitFor('sidebar is loaded', async () => {
+      return (await this.getSidebarAriaDescription()).length > 0;
+    });
+  }
+
+  public async doesSidebarShowFields() {
+    return await this.testSubjects.exists('fieldListGroupedFieldGroups');
+  }
+
+  public getSidebarSectionSelector(
+    sectionName: SidebarSectionName,
+    asCSSSelector: boolean = false
+  ) {
+    const testSubj = `fieldListGrouped${sectionName[0].toUpperCase()}${sectionName.substring(
+      1
+    )}Fields`;
+    if (!asCSSSelector) {
+      return testSubj;
+    }
+    return `[data-test-subj="${testSubj}"]`;
+  }
+
+  public async getSidebarSectionFieldNames(sectionName: SidebarSectionName): Promise<string[]> {
+    const elements = await this.find.allByCssSelector(
+      `${this.getSidebarSectionSelector(sectionName, true)} li`
+    );
+
+    if (!elements?.length) {
+      return [];
+    }
+
+    return Promise.all(
+      elements.map(async (element) => await element.getAttribute('data-attr-field'))
+    );
+  }
+
+  public async toggleSidebarSection(sectionName: SidebarSectionName) {
+    return await this.find.clickByCssSelector(
+      `${this.getSidebarSectionSelector(sectionName, true)} .euiAccordion__iconButton`
+    );
+  }
+
   public async clickFieldListItem(field: string) {
-    return await this.testSubjects.click(`field-${field}`);
+    await this.testSubjects.click(`field-${field}`);
+
+    await this.retry.waitFor('popover is open', async () => {
+      return Boolean(await this.find.byCssSelector('[data-popover-open="true"]'));
+    });
   }
 
   public async clickFieldSort(field: string, text = 'Sort New-Old') {
@@ -455,10 +510,15 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickFieldListItemAdd(field: string) {
+    await this.waitUntilSidebarHasLoaded();
+
     // a filter check may make sense here, but it should be properly handled to make
     // it work with the _score and _source fields as well
     if (await this.isFieldSelected(field)) {
       return;
+    }
+    if (['_score', '_id', '_index'].includes(field)) {
+      await this.toggleSidebarSection('meta'); // expand Meta section
     }
     await this.clickFieldListItemToggle(field);
     const isLegacyDefault = await this.useLegacyTable();
@@ -474,16 +534,18 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async isFieldSelected(field: string) {
-    if (!(await this.testSubjects.exists('fieldList-selected'))) {
+    if (!(await this.testSubjects.exists('fieldListGroupedSelectedFields'))) {
       return false;
     }
-    const selectedList = await this.testSubjects.find('fieldList-selected');
+    const selectedList = await this.testSubjects.find('fieldListGroupedSelectedFields');
     return await this.testSubjects.descendantExists(`field-${field}`, selectedList);
   }
 
   public async clickFieldListItemRemove(field: string) {
+    await this.waitUntilSidebarHasLoaded();
+
     if (
-      !(await this.testSubjects.exists('fieldList-selected')) ||
+      !(await this.testSubjects.exists('fieldListGroupedSelectedFields')) ||
       !(await this.isFieldSelected(field))
     ) {
       return;
@@ -493,6 +555,8 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickFieldListItemVisualize(fieldName: string) {
+    await this.waitUntilSidebarHasLoaded();
+
     const field = await this.testSubjects.find(`field-${fieldName}-showDetails`);
     const isActive = await field.elementHasClass('kbnFieldButton-isActive');
 
