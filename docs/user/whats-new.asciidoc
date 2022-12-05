@@ -1,6 +1,8 @@
 [[whats-new]]
 == What's new in {minor-version}
 
+coming::[8.6.0]
+
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
@@ -11,10 +13,14 @@ Previous versions: {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8
 [discrete]
 === Flexible analysis with temporary data views
 
-Create temporary data views on the fly, allowing you to explore and visualize your data before you’re ready to share your insights with others in your organization. When you’re ready, you can save the data view for a fully collaborative experience. For more information, check <<data-views>>.
+Create temporary data views on the fly,
+allowing you to explore and visualize your data before you’re ready to share your
+insights with others in your organization. Add fields and create an {es} query alert,
+just like you would a regular {data-source}. When you’re ready, you can save the {data-source}
+for a fully collaborative experience. For more information, check <<data-views>>.
 
 [role="screenshot"]
-image::images/highlights-adhoc-data-views.gif[Temporary data views in Lens]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blta02aa660465a1a6d/638e6d162f42a15313a04f27/highlights-adhoc-data-views.gif[Temporary data views in Lens]
 
 [discrete]
 === Visualization editors
@@ -64,7 +70,7 @@ Show or hide all layers in a group with a single click.
 image::images/highlights-maps-layer-groups.png[Layer groups in map legend, width="50%"]
 
 [discrete]
-==== Invert color ramp and symbol size
+==== Color ramp and symbol size inversion
 
 Invert color ramps and symbol size to symbolize smaller values with more intense colors.
 
@@ -78,7 +84,7 @@ image::images/highlights-maps-color-ramp.png[Map showing intense colors because 
 [discrete]
 ==== Anomaly explanation
 
-Additional information is available on the anomaly table to help explain why something is
+Additional information is now available on the anomaly table to help explain why something is
 anomalous and to show that the anomaly score has significantly changed from its initial value.
 Each explanatory item has tooltips that help users better understand the anomaly.
 
