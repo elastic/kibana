@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter } from '@kbn/core-http-server';
-import { registerTranslationsRoute } from './translations';
+import type { I18nServiceSetup, I18nServiceStart } from '@kbn/core-i18n-server';
 
-export const registerRoutes = ({ router }: { router: IRouter }) => {
-  registerTranslationsRoute(router);
-};
+export type InternalI18nServiceSetup = I18nServiceSetup;
+export type InternalI18nServiceStart = I18nServiceStart;

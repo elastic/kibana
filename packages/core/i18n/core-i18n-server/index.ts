@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { I18nServiceSetup } from './src/types';
+export type { I18nServiceSetup, I18nServiceStart } from './src/contracts';
+export type { I18nRequestHandlerContext } from './src/request_handler_context';

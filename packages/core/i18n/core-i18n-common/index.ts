@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter } from '@kbn/core-http-server';
-import { registerTranslationsRoute } from './translations';
-
-export const registerRoutes = ({ router }: { router: IRouter }) => {
-  registerTranslationsRoute(router);
-};
+export type { ScopedTranslator, ScopedTranslateArgument } from './src/translator';

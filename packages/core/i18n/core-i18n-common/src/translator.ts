@@ -6,17 +6,23 @@
  * Side Public License, v 1.
  */
 
+import type { TranslateArguments } from '@kbn/i18n';
+
+export type ScopedTranslateArgument = Omit<TranslateArguments, 'locale'>;
+
 /**
+ * An instance of a translator scoped to a specific locale.
+ *
  * @public
  */
-export interface I18nServiceSetup {
+export interface ScopedTranslator {
   /**
-   * Return the locale currently in use.
+   * The locale the scoped translator is bound to.
    */
-  getLocale(): string;
+  readonly locale: string;
 
   /**
-   * Return the absolute paths to translation files currently in use.
+   * Translate message
    */
-  getTranslationFiles(): string[];
+  translate(id: string, options: ScopedTranslateArgument): string;
 }

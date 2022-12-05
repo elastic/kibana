@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { basename } from 'path';
 import { fromRoot } from '@kbn/utils';
 import { getTranslationPaths } from './get_translation_paths';
 
-export const getKibanaTranslationFiles = async (
-  locale: string,
-  pluginPaths: string[]
-): Promise<string[]> => {
+export const getKibanaTranslationFiles = async ({
+  pluginPaths,
+}: {
+  pluginPaths: string[];
+}): Promise<string[]> => {
   const translationPaths = await Promise.all([
     getTranslationPaths({
       cwd: fromRoot('.'),
@@ -26,7 +26,5 @@ export const getKibanaTranslationFiles = async (
     }),
   ]);
 
-  return ([] as string[])
-    .concat(...translationPaths)
-    .filter((translationPath) => basename(translationPath, '.json') === locale);
+  return ([] as string[]).concat(...translationPaths);
 };

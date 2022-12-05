@@ -14,11 +14,12 @@ import type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
-import type { I18nServiceSetup } from '@kbn/core-i18n-server';
+import type { InternalI18nServiceSetup, InternalI18nServiceStart } from './types';
 import { config as i18nConfigDef, I18nConfigType } from './i18n_config';
 import { getKibanaTranslationFiles } from './get_kibana_translation_files';
 import { initTranslations } from './init_translations';
 import { registerRoutes } from './routes';
+import { ScopedTranslatorImpl } from './scoped_translator';
 
 export interface PrebootDeps {
   http: InternalHttpServicePreboot;
@@ -33,6 +34,7 @@ export interface SetupDeps {
 export class I18nService {
   private readonly log: Logger;
   private readonly configService: IConfigService;
+  private defaultLocale?: string;
 
   constructor(coreContext: CoreContext) {
     this.log = coreContext.logger.get('i18n');
@@ -41,18 +43,31 @@ export class I18nService {
 
   public async preboot({ pluginPaths, http }: PrebootDeps) {
     const { locale } = await this.initTranslations(pluginPaths);
-    http.registerRoutes('', (router) => registerRoutes({ router, locale }));
+    this.defaultLocale = locale;
+    http.registerRoutes('', (router) => registerRoutes({ router }));
   }
 
-  public async setup({ pluginPaths, http }: SetupDeps): Promise<I18nServiceSetup> {
+  public async setup({ pluginPaths, http }: SetupDeps): Promise<InternalI18nServiceSetup> {
     const { locale, translationFiles } = await this.initTranslations(pluginPaths);
-
+    this.defaultLocale = locale;
     const router = http.createRouter('');
-    registerRoutes({ router, locale });
+    registerRoutes({ router });
 
     return {
       getLocale: () => locale,
+      getDefaultLocale: () => locale,
       getTranslationFiles: () => translationFiles,
+      getScopedTranslator: (l: string) => new ScopedTranslatorImpl(l),
+    };
+  }
+
+  public async start(): Promise<InternalI18nServiceStart> {
+    if (!this.defaultLocale) {
+      throw new Error('#setup must be called before #start');
+    }
+    return {
+      getLocaleForRequest: (request) => this.defaultLocale!,
+      getScopedTranslator: (l: string) => new ScopedTranslatorImpl(l),
     };
   }
 
@@ -61,14 +76,14 @@ export class I18nService {
       this.configService.atPath<I18nConfigType>(i18nConfigDef.path)
     );
 
-    const locale = i18nConfig.locale;
-    this.log.debug(`Using locale: ${locale}`);
+    const defaultLocale = i18nConfig.locale;
+    this.log.debug(`Using default locale: ${defaultLocale}`);
 
-    const translationFiles = await getKibanaTranslationFiles(locale, pluginPaths);
+    const translationFiles = await getKibanaTranslationFiles({ pluginPaths });
 
     this.log.debug(`Using translation files: [${translationFiles.join(', ')}]`);
-    await initTranslations(locale, translationFiles);
+    await initTranslations(defaultLocale, translationFiles);
 
-    return { locale, translationFiles };
+    return { locale: defaultLocale, translationFiles };
   }
 }
