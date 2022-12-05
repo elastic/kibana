@@ -30,7 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const defaultSettings = {
     'discover:enableTextBased': true,
-    defaultIndex: 'log*',
   };
 
   async function switchToTextBasedLanguage(language: string) {
