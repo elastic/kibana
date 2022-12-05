@@ -147,9 +147,9 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
 AlertBulkActionsComponent.displayName = 'AlertBulkActionsComponent';
 
 const makeMapStateToProps = () => {
-  const getTGrid = dataTableSelectors.getTableByIdSelector();
+  const getTable = dataTableSelectors.getTableByIdSelector();
   const mapStateToProps = (state: DataTableState, { id }: OwnProps) => {
-    const dataTable: DataTableModel = getTGrid(state, id);
+    const dataTable: DataTableModel = getTable(state, id);
     const { selectedEventIds, isSelectAllChecked } = dataTable;
 
     return {

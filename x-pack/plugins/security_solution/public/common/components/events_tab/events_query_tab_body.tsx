@@ -10,8 +10,6 @@ import { useDispatch } from 'react-redux';
 
 import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { EntityType } from '@kbn/timelines-plugin/common';
-
 import type { TableId } from '../../../../common/types';
 import { dataTableActions } from '../../store/data_table';
 import { RowRendererId } from '../../../../common/types/timeline';
@@ -187,7 +185,6 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         defaultCellActions={defaultCellActions}
         start={startDate}
         end={endDate}
-        entityType={'events' as EntityType}
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
@@ -197,7 +194,6 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         defaultModel={defaultModel}
         pageFilters={composedPageFilters}
         bulkActions={bulkActions}
-        hasCrudPermissions={true}
       />
     </>
   );

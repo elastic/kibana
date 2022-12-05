@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { TableId } from '../../../../common/types';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { InspectButton } from '../inspect';
 import { UpdatedFlexGroup, UpdatedFlexItem } from './styles';
@@ -20,7 +21,7 @@ const TitleText = styled.span`
 interface Props {
   tableView: ViewSelection;
   loading: boolean;
-  tableId: string;
+  tableId: TableId;
   title: string;
   onViewChange: (viewSelection: ViewSelection) => void;
   additionalFilters?: React.ReactNode;
@@ -57,7 +58,7 @@ export const RightTopMenu = ({
         {additionalFilters}
       </UpdatedFlexItem>
       {tGridEventRenderedViewEnabled &&
-        ['alerts-page', 'alerts-rules-details-page'].includes(tableId) && (
+        [TableId.alertsOnRuleDetailsPage, TableId.alertsOnAlertsPage].includes(tableId) && (
           <UpdatedFlexItem grow={false} $show={!loading}>
             <SummaryViewSelector viewSelected={tableView} onViewChange={onViewChange} />
           </UpdatedFlexItem>

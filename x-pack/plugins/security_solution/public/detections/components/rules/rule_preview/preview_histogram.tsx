@@ -194,7 +194,6 @@ export const PreviewHistogram = ({
           pageFilters={pageFilters}
           defaultModel={getAlertsPreviewDefaultModel(license)}
           end={extendedEndDate}
-          entityType={'events'}
           tableId={TableId.rulePreview}
           leadingControlColumns={getPreviewTableControlColumn(1.5)}
           renderCellValue={PreviewRenderCellValue}
@@ -207,7 +206,6 @@ export const PreviewHistogram = ({
       </FullScreenContainer>
       <DetailsPanel
         browserFields={browserFields}
-        entityType={'events'}
         isFlyoutView
         runtimeMappings={runtimeMappings}
         scopeId={TableId.rulePreview}

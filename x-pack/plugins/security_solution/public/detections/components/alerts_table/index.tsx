@@ -230,7 +230,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       defaultModel={getAlertsDefaultModel(license)}
       end={to}
       bulkActions={bulkActions}
-      entityType="events"
       hasCrudPermissions={hasIndexWrite && hasIndexMaintenance}
       tableId={tableId}
       leadingControlColumns={leadingControlColumns}

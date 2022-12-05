@@ -39,7 +39,6 @@ jest.mock('../../../common/lib/kibana', () => {
       services: {
         ...original.useKibana().services,
         cases: mockCasesContract(),
-        timelines: { getTGrid: jest.fn().mockReturnValue(() => <></>) },
       },
     }),
   };

@@ -16,6 +16,7 @@ import type { Direction, EntityType, RowRenderer } from '@kbn/timelines-plugin/c
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import type {
   ControlColumnProps,
@@ -80,7 +81,7 @@ export interface EventsViewerProps {
   defaultCellActions?: DataTableCellAction[];
   defaultModel: SubsetDataTableModel;
   end: string;
-  entityType: EntityType;
+  entityType?: EntityType;
   tableId: TableId;
   leadingControlColumns: ControlColumnProps[];
   sourcererScope: SourcererScopeName;
@@ -107,7 +108,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   defaultCellActions,
   defaultModel,
   end,
-  entityType,
+  entityType = 'events',
   tableId,
   leadingControlColumns,
   pageFilters,
@@ -118,7 +119,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   start,
   sourcererScope,
   additionalFilters,
-  hasCrudPermissions = false,
+  hasCrudPermissions = true,
   unit = defaultUnit,
   indexNames,
   bulkActions,
@@ -266,8 +267,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   );
 
   const fields = useMemo(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    () => [...columnHeaders.map((c: { id: any }) => c.id), ...(queryFields ?? [])],
+    () => [...columnHeaders.map((c: { id: string }) => c.id), ...(queryFields ?? [])],
     [columnHeaders, queryFields]
   );
 
@@ -571,6 +571,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                           {tableView === 'eventRenderedView' && (
                             <EventRenderedView
                               events={nonDeletedEvents}
+                              getRowRenderer={getRowRenderer}
                               leadingControlColumns={transformedLeadingControlColumns}
                               pagination={{
                                 pageIndex: pageInfo.activePage,
