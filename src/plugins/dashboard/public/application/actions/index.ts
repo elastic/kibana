@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  CONTEXT_MENU_TRIGGER,
-  PANEL_BADGE_TRIGGER,
-  PANEL_NOTIFICATION_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { getSavedObjectFinder } from '@kbn/saved-objects-plugin/public';
 
@@ -48,13 +44,13 @@ export const buildAllDashboardActions = async ({
   uiActions.registerAction(changeViewAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
 
-  const panelLevelFiltersNotification = new FiltersNotificationBadge();
-  uiActions.registerAction(panelLevelFiltersNotification);
-  uiActions.attachAction(PANEL_BADGE_TRIGGER, panelLevelFiltersNotification.id);
-
   const expandPanelAction = new ExpandPanelAction();
   uiActions.registerAction(expandPanelAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
+
+  const panelLevelFiltersNotification = new FiltersNotificationBadge();
+  uiActions.registerAction(panelLevelFiltersNotification);
+  uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, panelLevelFiltersNotification.id);
 
   if (share) {
     const ExportCSVPlugin = new ExportCSVAction();

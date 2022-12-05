@@ -8,13 +8,14 @@
 
 import React from 'react';
 
-import { EditPanelAction, isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
-import { type AggregateQuery } from '@kbn/es-query';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { ApplicationStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { EditPanelAction, isFilterableEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { type IEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { reactToUiComponent, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
+import { type AggregateQuery } from '@kbn/es-query';
+import { EuiButtonIcon } from '@elastic/eui';
 
 import { dashboardFilterNotificationBadge } from '../../dashboard_strings';
 import { pluginServices } from '../../services/plugin_services';
@@ -46,6 +47,22 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
     } = pluginServices.getServices());
   }
 
+  private FiltersNotification: React.FC<{ context: FiltersNotificationActionContext }> = ({
+    context,
+  }: {
+    context: FiltersNotificationActionContext;
+  }) => {
+    const { embeddable } = context;
+    return (
+      <EuiButtonIcon
+        iconType={this.getIconType({ embeddable })}
+        onClick={() => this.execute(context)}
+      />
+    );
+  };
+
+  public readonly MenuItem = reactToUiComponent(this.FiltersNotification);
+
   public getDisplayName({ embeddable }: FiltersNotificationActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
       throw new IncompatibleActionError();
@@ -65,6 +82,7 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
     if (
       isErrorEmbeddable(embeddable) ||
       !embeddable.getRoot().isContainer ||
+      embeddable.getInput()?.viewMode !== ViewMode.EDIT ||
       !isFilterableEmbeddable(embeddable)
     ) {
       return false;
