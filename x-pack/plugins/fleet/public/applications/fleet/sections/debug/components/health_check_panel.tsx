@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useRef, useCallback, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 
 import {
   EuiSpacer,
@@ -13,9 +13,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCallOut,
+  EuiHealth,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useQuery } from '@tanstack/react-query';
 
 import { sendPostHealthCheck, useGetFleetServerHosts } from '../../../hooks';
 import type { FleetServerHost } from '../../../types';
@@ -38,7 +40,6 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
     }
   }, [fleetServerHosts]);
 
-  const timeout = useRef<number | undefined>(undefined);
   const hostName = useMemo(
     () => selectedFleetServerHost?.host_urls[0] || '',
     [selectedFleetServerHost?.host_urls]
@@ -46,33 +47,14 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
 
   const [healthData, setHealthData] = useState<any>();
 
-  const pollFleetServerHealth = useCallback(async () => {
-    const res = await sendPostHealthCheck({
-      host: `${hostName}`,
-    });
-    setHealthData(res);
-  }, [hostName]);
-
+  const { data: healthCheckResponse } = useQuery(
+    ['fleetServerHealth', hostName],
+    () => sendPostHealthCheck({ host: hostName }),
+    { refetchInterval: POLLING_INTERVAL_MS }
+  );
   useEffect(() => {
-    let isAborted = false;
-
-    const poll = () => {
-      timeout.current = window.setTimeout(async () => {
-        pollFleetServerHealth();
-        if (!isAborted && hostName) {
-          poll();
-        }
-      }, POLLING_INTERVAL_MS);
-    };
-
-    poll();
-
-    if (isAborted || !hostName) clearTimeout(timeout.current);
-
-    return () => {
-      isAborted = true;
-    };
-  }, [hostName, pollFleetServerHealth]);
+    setHealthData(healthCheckResponse);
+  }, [healthCheckResponse]);
 
   const fleetServerHostsOptions = useMemo(
     () => [
@@ -86,29 +68,25 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
     [fleetServerHosts]
   );
 
-  const circleIcon = (statusValue: string) => {
+  const healthStatus = (statusValue: string) => {
     if (!statusValue) return null;
 
     let color;
     switch (statusValue) {
       case 'HEALTHY':
-        color = '#007871'; // green
+        color = 'success';
         break;
       case 'UNHEALTHY':
-        color = '#ffd200'; // yellow
+        color = 'warning';
         break;
       case 'OFFLINE':
-        color = '#bd271e'; // red
+        color = 'subdued';
         break;
       default:
-        color = '';
+        color = 'subdued';
     }
 
-    return (
-      <svg width={16} height={16} fill={color}>
-        <circle cx="10" cy="10" r="6" />
-      </svg>
-    );
+    return <EuiHealth color={color}>{statusValue}</EuiHealth>;
   };
 
   return (
@@ -127,7 +105,12 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
 
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          css={`
+            min-width: 600px;
+          `}
+        >
           <EuiSuperSelect
             fullWidth
             data-test-subj="fleetDebug.fleetServerHostsSelect"
@@ -149,16 +132,17 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
             options={fleetServerHostsOptions}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           {healthData?.data?.status && hostName === healthData?.data?.host ? (
-            <p>
-              <FormattedMessage
-                id="xpack.fleet.debug.healthCheckPanel.status"
-                defaultMessage="Status: "
-              />
-              {healthData?.data?.status}
-              {circleIcon(healthData?.data?.status)}
-            </p>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem>
+                <FormattedMessage
+                  id="xpack.fleet.debug.healthCheckPanel.status"
+                  defaultMessage="Status:"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>{healthStatus(healthData?.data?.status)}</EuiFlexItem>
+            </EuiFlexGroup>
           ) : null}
         </EuiFlexItem>
       </EuiFlexGroup>
