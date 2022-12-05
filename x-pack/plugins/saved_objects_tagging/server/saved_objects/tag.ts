@@ -254,7 +254,7 @@ const tagModelVersion4: SavedObjectsModelVersion<
   },
 };
 
-/////// End of examples
+// ///// End of examples
 
 export const tagType: SavedObjectsType = {
   name: tagSavedObjectTypeName,
