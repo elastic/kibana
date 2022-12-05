@@ -151,7 +151,6 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   public reset() {
-    this.setInputField(undefined);
     this.inputText$.next([]);
     this.inferenceResult$.next(null);
     this.inferenceError$.next(null);
@@ -159,11 +158,16 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   public setInputField(field: string | undefined) {
+    // if the field is not set, change to be the same as the model input field
     this.inputField$.next(field === undefined ? this.modelInputField : field);
   }
 
   public getInputField() {
     return this.inputField$.getValue();
+  }
+
+  public getInputField$() {
+    return this.inputField$.asObservable();
   }
 
   public setInputText(text: string[]) {
