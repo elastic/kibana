@@ -540,6 +540,8 @@
       "@kbn/repo-source-classifier/*": ["packages/kbn-repo-source-classifier/*"],
       "@kbn/repo-source-classifier-cli": ["packages/kbn-repo-source-classifier-cli"],
       "@kbn/repo-source-classifier-cli/*": ["packages/kbn-repo-source-classifier-cli/*"],
+      "@kbn/rison": ["packages/kbn-rison"],
+      "@kbn/rison/*": ["packages/kbn-rison/*"],
       "@kbn/rule-data-utils": ["packages/kbn-rule-data-utils"],
       "@kbn/rule-data-utils/*": ["packages/kbn-rule-data-utils/*"],
       "@kbn/safer-lodash-set": ["packages/kbn-safer-lodash-set"],

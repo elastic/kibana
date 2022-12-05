@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import rison, { RisonValue } from 'rison-node';
+import rison from '@kbn/rison';
 import { isStateHash, retrieveState, persistState } from '../state_hash';
 
 // should be:
@@ -22,14 +22,14 @@ export function decodeState<State>(expandedOrHashedState: string): State {
 }
 
 // should be:
-// export function encodeState<State extends RisonValue>(expandedOrHashedState: string)
-// but this leads to the chain of types mismatches up to BaseStateContainer interfaces,
-// as in state containers we don't have any restrictions on state shape
+// export function encodeState<State extends RisonValue> but this leads to the chain of
+// types mismatches up to BaseStateContainer interfaces, as in state containers we don't
+// have any restrictions on state shape
 export function encodeState<State>(state: State, useHash: boolean): string {
   if (useHash) {
     return persistState(state);
   } else {
-    return rison.encode(state as unknown as RisonValue);
+    return rison.encodeUnknown(state) ?? '';
   }
 }
 
