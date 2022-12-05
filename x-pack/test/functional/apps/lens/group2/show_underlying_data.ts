@@ -175,7 +175,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('unifiedHistogramChart');
-
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
         '( ( bytes > 4000 ) AND ( ( extension.raw: "css" ) OR ( extension.raw: "gif" ) OR ( extension.raw: "jpg" ) ) )'
