@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { partition, mapValues, pickBy } from 'lodash';
 import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
@@ -1607,6 +1608,48 @@ export function getErrorMessages(
   >;
 
   return errors.length ? errors : undefined;
+}
+
+/**
+ * Collects all errors from the columns in the layer, for display in the workspace. This includes:
+ *
+ * - All columns have complete references
+ * - All column references are valid
+ * - All prerequisites are met
+ * - If timeshift is used, terms go before date histogram
+ * - If timeshift is used, only a single date histogram can be used
+ */
+export function getWarningMessages(
+  // datatableUtilities: DatatableUtilitiesService,
+  layer: FormBasedLayer,
+  indexPattern: IndexPattern
+  // { activeData, dataViews }: FramePublicAPI,
+  // docLinks: DocLinksStart,
+  // setState: StateSetter<FormBasedPrivateState>
+): React.ReactNode[] | undefined {
+  const columns = Object.entries(layer.columns);
+  const visibleManagedReferences = columns.filter(
+    ([columnId, column]) =>
+      !isReferenced(layer, columnId) &&
+      operationDefinitionMap[column.operationType].input === 'managedReference'
+  );
+  const skippedColumns = visibleManagedReferences.flatMap(([columnId]) =>
+    getManagedColumnsFrom(columnId, layer.columns).map(([id]) => id)
+  );
+  const warnings = columns
+    .flatMap(([columnId, column]) => {
+      if (skippedColumns.includes(columnId)) {
+        return;
+      }
+      const def = operationDefinitionMap[column.operationType];
+      if (def.getWarningMessages) {
+        return def.getWarningMessages(layer, columnId, indexPattern);
+      }
+    })
+    // remove the undefined values
+    .filter((v) => v != null);
+
+  return warnings;
 }
 
 export function isReferenced(layer: FormBasedLayer, columnId: string): boolean {

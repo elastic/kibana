@@ -87,6 +87,7 @@ import {
   copyColumn,
   getColumnOrder,
   getReferenceRoot,
+  getWarningMessages,
   reorderByGroups,
 } from './operations/layer_helpers';
 import { FormBasedPrivateState, FormBasedPersistedState, DataViewDragDropOperation } from './types';
@@ -872,7 +873,16 @@ export function getFormBasedDatasource({
       return messages.length ? messages : undefined;
     },
     getWarningMessages: (state, frame, adapters, setState) => {
+      const layerWarnings = Object.values(state.layers)
+        .filter((layer) => !!frame.dataViews.indexPatterns[layer.indexPatternId])
+        .map(
+          (layer) =>
+            getWarningMessages(layer, frame.dataViews.indexPatterns[layer.indexPatternId]) ?? []
+        )
+        .flat();
+
       return [
+        ...layerWarnings,
         ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, frame) || []),
         ...getPrecisionErrorWarningMessages(
           data.datatableUtilities,

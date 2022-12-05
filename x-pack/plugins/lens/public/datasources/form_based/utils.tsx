@@ -234,6 +234,7 @@ export function getShardFailuresWarningMessages(
   return [];
 }
 
+// TODO move to terms op?
 export function getPrecisionErrorWarningMessages(
   datatableUtilities: DatatableUtilitiesService,
   state: FormBasedPrivateState,

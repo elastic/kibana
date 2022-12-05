@@ -293,6 +293,7 @@ export const percentileOperation: OperationDefinition<
       getDisallowedPreviousShiftMessage(layer, columnId),
       getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
+  getWarningMessages: (layer, columnId, indexPattern) => [<div>hey dude</div>],
   paramEditor: function PercentileParamEditor({
     paramEditorUpdater,
     currentColumn,
