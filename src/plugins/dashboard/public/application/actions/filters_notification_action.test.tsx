@@ -20,7 +20,7 @@ import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { getSampleDashboardInput } from '../test_helpers';
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardContainer } from '../embeddable/dashboard_container';
-import { FiltersNotificationBadge } from './filters_notification_badge';
+import { FiltersNotificationAction } from './filters_notification_action';
 
 const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 pluginServices.getServices().embeddable.getEmbeddableFactory = jest
@@ -73,7 +73,7 @@ const buildEmbeddable = async (input?: Partial<ContactCardEmbeddableInput>) => {
   return embeddable;
 };
 
-const action = new FiltersNotificationBadge();
+const action = new FiltersNotificationAction();
 
 test('Badge is incompatible with Error Embeddables', async () => {
   const errorEmbeddable = new ErrorEmbeddable('Wow what an awful error', { id: ' 404' });
