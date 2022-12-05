@@ -60,7 +60,7 @@ and then select the default field for filtering your data by time.
 ** If you don’t set a default time field, you can't use
 global time filters on your dashboards. This is useful if
 you have multiple time fields and want to create dashboards that combine visualizations
-based on different timestamps.z
+based on different timestamps.
 +
 ** If your index doesn’t have time-based data, choose *I don’t want to use the time filter*.
 
@@ -77,17 +77,17 @@ You can manage your data view from *Stack Management*.
 
 Want to explore your data or create a visualization without saving it as a data view?
 Select *Use without saving* in the *Create {data-source}* form in *Discover*
-or *Lens*. With a temporary {data-source}, you can
-do everything you'd do with a saved
-{data-source},
-such as adding fields and creating {es} query alerts. Your work won't be visible to others in your space.
+or *Lens*. With a temporary {data-source}, you can add fields and create an {es}
+query alert, just like you would a regular {data-source}.  Your work won't be visible to others in your space.
 
 A temporary {data-source} remains in your space until you change apps, or until you save it.
-The temporary {data-sources} you create are unavailable in *Stack Management.*
+If you try to share your temporary {data-source}, it is converted to a regular {data-source}.
+
 
 [role="screenshot"]
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte3a4f3994c44c0cc/637eb0c95834861044c21a25/ad-hoc-data-view.gif[how to create an ad-hoc data view]
 
+NOTE: Temporary {data-sources} are not available in *Stack Management.*
 
 [float]
 [[rollup-data-view]]
