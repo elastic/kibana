@@ -29,7 +29,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
     savedObjectsClient.create.mockImplementation(
       async (type, _, options = {}) =>
         ({
-          type,
+          type: configType,
           id: options.id,
           version: 'foo',
         } as any)
@@ -258,7 +258,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
 
   describe('config-global', () => {
     it('should merge upgraded attributes with current build number in new config', async () => {
-      const { run, savedObjectsClient } = setup();
+      const { run, savedObjectsClient } = setup('config-global');
 
       const savedAttributes = {
         buildNum: buildNum - 100,
@@ -270,7 +270,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         attributes: savedAttributes,
       });
 
-      await run({ type: 'config-global' });
+      await run();
 
       expect(mockGetUpgradeableConfig).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
@@ -289,7 +289,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
 
   describe('upgrade config-global', () => {
     it('should merge upgraded attributes with current build number in new config', async () => {
-      const { run, savedObjectsClient } = setup();
+      const { run, savedObjectsClient } = setup('config-global');
 
       const savedAttributes = {
         buildNum: buildNum - 100,
@@ -301,7 +301,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         attributes: savedAttributes,
       });
 
-      await run('config-global');
+      await run();
 
       expect(mockGetUpgradeableConfig).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
