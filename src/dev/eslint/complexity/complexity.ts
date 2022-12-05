@@ -64,6 +64,17 @@ export class ComplexityReportGenerator {
     this.esLint = new ESLint({
       errorOnUnmatchedPattern: false,
       overrideConfig: {
+        ignorePatterns: [
+          '**/*.mock.[tj]s',
+          '**/*.spec.[tj]s',
+          '**/*.test.[tj]s',
+          '**/*.mock.[tj]sx',
+          '**/*.spec.[tj]sx',
+          '**/*.test.[tj]sx',
+          '**/test',
+          '**/tests',
+          '**/mocks',
+        ],
         noInlineConfig: true,
         rules: {
           ...ComplexityReportGenerator.mappings.reduce(
