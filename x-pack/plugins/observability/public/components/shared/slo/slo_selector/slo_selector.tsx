@@ -5,27 +5,30 @@
  * 2.0.
  */
 
-import { EuiComboBox } from '@elastic/eui';
-import React, { useState } from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { debounce } from 'lodash';
+import React, { useEffect, useMemo, useState } from 'react';
 
-interface Option {
-  label: string;
-}
+import { useFetchSloList } from '../../../../pages/slos/hooks/use_fetch_slo_list';
 
 export function SloSelector() {
-  const options: Option[] = [
-    {
-      label: 'Titan',
-    },
-    {
-      label: 'Enceladus',
-    },
-  ];
+  const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<string>>>();
+  const [searchValue, setSearchValue] = useState<string>('');
+  const [loading, sloList] = useFetchSloList(searchValue);
 
-  const [selectedOptions, setSelected] = useState<Option[]>([options[1]]);
-  const onChange = (opts: Option[]) => {
+  useEffect(() => {
+    if (!loading && sloList !== undefined) {
+      const opts = sloList.results.map((result) => ({ value: result.id, label: result.name }));
+      setOptions(opts);
+    }
+  }, [loading, sloList]);
+
+  const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
     setSelected(opts);
   };
+
+  const onSearchChange = useMemo(() => debounce((value: string) => setSearchValue(value), 300), []);
 
   return (
     <EuiComboBox
@@ -34,7 +37,10 @@ export function SloSelector() {
       singleSelection={{ asPlainText: true }}
       options={options}
       selectedOptions={selectedOptions}
+      async
+      isLoading={loading}
       onChange={onChange}
+      onSearchChange={onSearchChange}
     />
   );
 }
