@@ -11,14 +11,3 @@ export interface HostsKpiHistogramData {
   x?: Maybe<number>;
   y?: Maybe<number>;
 }
-
-export interface HostsKpiHistogram<T> {
-  key_as_string: string;
-  key: number;
-  doc_count: number;
-  count: T;
-}
-
-export interface HostsKpiGeneralHistogramCount {
-  value: number;
-}

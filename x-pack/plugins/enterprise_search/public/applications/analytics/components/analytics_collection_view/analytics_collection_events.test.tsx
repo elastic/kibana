@@ -19,7 +19,7 @@ import { AnalyticsCollectionEvents } from './analytics_collection_events';
 describe('AnalyticsCollectionEvents', () => {
   const analyticsCollections: AnalyticsCollection = {
     event_retention_day_length: 180,
-    events_datastream: 'analytics-events-example',
+    events_datastream: 'logs-elastic_analytics.events-example',
     id: '1',
     name: 'example',
   };
@@ -29,7 +29,7 @@ describe('AnalyticsCollectionEvents', () => {
   });
 
   it('renders', () => {
-    const expectedQuery = '_index: logs-elastic_analytics.events-example*';
+    const expectedQuery = '_index: logs-elastic_analytics.events-example';
 
     const wrapper = shallow(<AnalyticsCollectionEvents collection={analyticsCollections} />);
     expect(wrapper.find(EntSearchLogStream).prop('query')).toEqual(expectedQuery);
