@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    'discover:enableSql': true,
+    'discover:enableTextBased': true,
   };
 
   describe('discover sql view', async function () {

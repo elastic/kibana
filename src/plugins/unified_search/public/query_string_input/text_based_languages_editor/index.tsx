@@ -8,7 +8,7 @@
 
 import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
 import classNames from 'classnames';
-import { EsqlLang, monaco } from '@kbn/monaco';
+import { EsqlLang, ES_QLLang, monaco } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode } from '@kbn/es-query';
 import {
@@ -70,6 +70,9 @@ const KEYCODE_ARROW_DOWN = 40;
 
 const languageId = (language: string) => {
   switch (language) {
+    case 'esql': {
+      return ES_QLLang.ID;
+    }
     case 'sql':
     default: {
       return EsqlLang.ID;
@@ -117,7 +120,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     editorHeight,
     isCodeEditorExpanded,
     Boolean(errors?.length),
-    isCodeEditorExpandedFocused
+    isCodeEditorExpandedFocused,
+    Boolean(documentationSections)
   );
   const isDark = uiSettings.get('theme:darkMode');
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -437,20 +441,24 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <LanguageDocumentationPopover
-                  language={String(language).toUpperCase()}
-                  sections={documentationSections}
-                  buttonProps={{
-                    color: 'text',
-                    'data-test-subj': 'unifiedTextLangEditor-documentation',
-                    'aria-label': i18n.translate(
-                      'unifiedSearch.query.textBasedLanguagesEditor.documentationLabel',
-                      {
-                        defaultMessage: 'Documentation',
-                      }
-                    ),
-                  }}
-                />
+                {documentationSections && (
+                  <EuiFlexItem grow={false}>
+                    <LanguageDocumentationPopover
+                      language={String(language).toUpperCase()}
+                      sections={documentationSections}
+                      buttonProps={{
+                        color: 'text',
+                        'data-test-subj': 'unifiedTextLangEditor-documentation',
+                        'aria-label': i18n.translate(
+                          'unifiedSearch.query.textBasedLanguagesEditor.documentationLabel',
+                          {
+                            defaultMessage: 'Documentation',
+                          }
+                        ),
+                      }}
+                    />
+                  </EuiFlexItem>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -541,7 +549,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     onClick={() => expandCodeEditor(true)}
                     data-test-subj="unifiedTextLangEditor-expand"
                     css={{
-                      borderRadius: 0,
+                      ...(documentationSections
+                        ? {
+                            borderRadius: 0,
+                          }
+                        : {
+                            borderTopLeftRadius: 0,
+                            borderBottomLeftRadius: 0,
+                          }),
                       backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                       border: '1px solid rgb(17 43 134 / 10%) !important',
                     }}
@@ -549,28 +564,32 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <LanguageDocumentationPopover
-                  language={String(language).toUpperCase()}
-                  sections={documentationSections}
-                  buttonProps={{
-                    display: 'empty',
-                    'data-test-subj': 'unifiedTextLangEditor-inline-documentation',
-                    'aria-label': i18n.translate(
-                      'unifiedSearch.query.textBasedLanguagesEditor.documentationLabel',
-                      {
-                        defaultMessage: 'Documentation',
-                      }
-                    ),
-                    size: 'm',
-                    css: {
-                      borderTopLeftRadius: 0,
-                      borderBottomLeftRadius: 0,
-                      backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
-                      border: '1px solid rgb(17 43 134 / 10%) !important',
-                      borderLeft: 'transparent !important',
-                    },
-                  }}
-                />
+                {documentationSections && (
+                  <EuiFlexItem grow={false}>
+                    <LanguageDocumentationPopover
+                      language={String(language).toUpperCase()}
+                      sections={documentationSections}
+                      buttonProps={{
+                        display: 'empty',
+                        'data-test-subj': 'unifiedTextLangEditor-inline-documentation',
+                        'aria-label': i18n.translate(
+                          'unifiedSearch.query.textBasedLanguagesEditor.documentationLabel',
+                          {
+                            defaultMessage: 'Documentation',
+                          }
+                        ),
+                        size: 'm',
+                        css: {
+                          borderTopLeftRadius: 0,
+                          borderBottomLeftRadius: 0,
+                          backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
+                          border: '1px solid rgb(17 43 134 / 10%) !important',
+                          borderLeft: 'transparent !important',
+                        },
+                      }}
+                    />
+                  </EuiFlexItem>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

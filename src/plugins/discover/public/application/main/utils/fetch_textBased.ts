@@ -15,14 +15,14 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import { DataTableRecord } from '../../../types';
 
-interface SQLErrorResponse {
+interface TextBasedErrorResponse {
   error: {
     message: string;
   };
   type: 'error';
 }
 
-export function fetchSql(
+export function fetchTextBased(
   query: Query | AggregateQuery,
   dataViewsService: DataViewsContract,
   data: DataPublicPluginStart,
@@ -44,7 +44,7 @@ export function fetchSql(
         let finalData: DataTableRecord[] = [];
         let error: string | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {
-          const response = resp as Datatable | SQLErrorResponse;
+          const response = resp as Datatable | TextBasedErrorResponse;
           if (response.type === 'error') {
             error = response.error.message;
           } else {

@@ -502,7 +502,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'discover:enableSql': {
+  'discover:enableTextBased': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

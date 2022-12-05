@@ -29,8 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   const defaultSettings = {
-    'discover:enableSql': true,
-    defaultIndex: 'log*',
+    'discover:enableTextBased': true,
   };
 
   async function switchToTextBasedLanguage(language: string) {

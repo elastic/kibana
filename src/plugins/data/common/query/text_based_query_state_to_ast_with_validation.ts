@@ -8,6 +8,7 @@
 import {
   isOfAggregateQueryType,
   getIndexPatternFromSQLQuery,
+  getIndexPatternFromESQLQuery,
   Query,
   AggregateQuery,
 } from '@kbn/es-query';
@@ -23,6 +24,9 @@ interface Args extends QueryState {
 const getIndexPatternFromAggregateQuery = (query: AggregateQuery) => {
   if ('sql' in query) {
     return getIndexPatternFromSQLQuery(query.sql);
+  }
+  if ('esql' in query) {
+    return getIndexPatternFromESQLQuery(query.esql);
   }
 };
 

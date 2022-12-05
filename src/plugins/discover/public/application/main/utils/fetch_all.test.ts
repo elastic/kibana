@@ -25,7 +25,7 @@ import {
 } from '../hooks/use_saved_search';
 
 import { fetchDocuments } from './fetch_documents';
-import { fetchSql } from './fetch_sql';
+import { fetchTextBased } from './fetch_textBased';
 import { fetchChart } from './fetch_chart';
 import { fetchTotalHits } from './fetch_total_hits';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
@@ -36,8 +36,8 @@ jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
 }));
 
-jest.mock('./fetch_sql', () => ({
-  fetchSql: jest.fn().mockResolvedValue([]),
+jest.mock('./fetch_textBased', () => ({
+  fetchTextBased: jest.fn().mockResolvedValue([]),
 }));
 
 jest.mock('./fetch_chart', () => ({
@@ -51,7 +51,7 @@ jest.mock('./fetch_total_hits', () => ({
 const mockFetchDocuments = fetchDocuments as unknown as jest.MockedFunction<typeof fetchDocuments>;
 const mockFetchTotalHits = fetchTotalHits as unknown as jest.MockedFunction<typeof fetchTotalHits>;
 const mockFetchChart = fetchChart as unknown as jest.MockedFunction<typeof fetchChart>;
-const mockFetchSQL = fetchSql as unknown as jest.MockedFunction<typeof fetchSql>;
+const mockfetchTextBased = fetchTextBased as unknown as jest.MockedFunction<typeof fetchTextBased>;
 
 function subjectCollector<T>(subject: Subject<T>): () => Promise<T[]> {
   const promise = firstValueFrom(
@@ -96,7 +96,7 @@ describe('test fetchAll', () => {
     searchSource = savedSearchMock.searchSource.createChild();
 
     mockFetchDocuments.mockReset().mockResolvedValue([]);
-    mockFetchSQL.mockReset().mockResolvedValue([]);
+    mockfetchTextBased.mockReset().mockResolvedValue([]);
     mockFetchTotalHits.mockReset().mockResolvedValue(42);
     mockFetchChart
       .mockReset()
@@ -239,7 +239,7 @@ describe('test fetchAll', () => {
       { _id: '2', _index: 'logs' },
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    mockFetchSQL.mockResolvedValue(documents);
+    mockfetchTextBased.mockResolvedValue(documents);
     const query = { sql: 'SELECT * from foo' };
     deps = {
       appStateContainer: {

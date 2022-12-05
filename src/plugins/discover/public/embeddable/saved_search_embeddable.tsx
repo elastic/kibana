@@ -60,7 +60,7 @@ import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
 import { getRawRecordType } from '../application/main/utils/get_raw_record_type';
-import { fetchSql } from '../application/main/utils/fetch_sql';
+import { fetchTextBased } from '../application/main/utils/fetch_textBased';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
 
 export type SearchProps = Partial<DiscoverGridProps> &
@@ -220,12 +220,12 @@ export class SavedSearchEmbeddable
 
     const query = this.savedSearch.searchSource.getField('query');
     const recordRawType = getRawRecordType(query);
-    const useSql = recordRawType === RecordRawType.PLAIN;
+    const useTextBased = recordRawType === RecordRawType.PLAIN;
 
     try {
       // Request SQL data
-      if (useSql && query) {
-        const result = await fetchSql(
+      if (useTextBased && query) {
+        const result = await fetchTextBased(
           this.savedSearch.searchSource.getField('query')!,
           this.services.dataViews,
           this.services.data,

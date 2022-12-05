@@ -34,7 +34,7 @@ import {
   SavedSearchData,
 } from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
-import { fetchSql } from './fetch_sql';
+import { fetchTextBased } from './fetch_textBased';
 
 export interface FetchDeps {
   abortController: AbortController;
@@ -89,7 +89,7 @@ export function fetchAll(
     }
     const { hideChart, sort, query } = appStateContainer.getState();
     const recordRawType = getRawRecordType(query);
-    const useSql = recordRawType === RecordRawType.PLAIN;
+    const useTextbased = recordRawType === RecordRawType.PLAIN;
 
     if (recordRawType === RecordRawType.DOCUMENT) {
       // Update the base searchSource, base for all child fetches
@@ -112,13 +112,17 @@ export function fetchAll(
 
     // Start fetching all required requests
     const documents =
-      useSql && query
-        ? fetchSql(query, services.dataViews, data, services.expressions)
+      useTextbased && query
+        ? fetchTextBased(query, services.dataViews, data, services.expressions)
         : fetchDocuments(searchSource.createCopy(), fetchDeps);
     const charts =
-      isChartVisible && !useSql ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;
+      isChartVisible && !useTextbased
+        ? fetchChart(searchSource.createCopy(), fetchDeps)
+        : undefined;
     const totalHits =
-      !isChartVisible && !useSql ? fetchTotalHits(searchSource.createCopy(), fetchDeps) : undefined;
+      !isChartVisible && !useTextbased
+        ? fetchTotalHits(searchSource.createCopy(), fetchDeps)
+        : undefined;
     /**
      * This method checks the passed in hit count and will send a PARTIAL message to main$
      * if there are results, indicating that we have finished some of the requests that have been

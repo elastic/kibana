@@ -13,6 +13,22 @@ import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { TextBasedLanguagesEditor, TextBasedLanguagesEditorProps } from '.';
+import { ReactWrapper } from 'enzyme';
+
+jest.mock('./helpers', () => {
+  const module = jest.requireActual('./helpers');
+  return {
+    ...module,
+    getDocumentationSections: () => ({
+      groups: [
+        {
+          label: 'How it works',
+          items: [],
+        },
+      ],
+    }),
+  };
+});
 
 describe('TextBasedLanguagesEditor', () => {
   const uiConfig: Record<string, any> = {};
@@ -71,13 +87,16 @@ describe('TextBasedLanguagesEditor', () => {
   });
 
   it('should render the correct buttons for the inline code editor mode', async () => {
+    let component: ReactWrapper;
+
     await act(async () => {
-      const component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
-      expect(component.find('[data-test-subj="unifiedTextLangEditor-expand"]').length).not.toBe(0);
-      expect(
-        component.find('[data-test-subj="unifiedTextLangEditor-inline-documentation"]').length
-      ).not.toBe(0);
+      component = mount(renderTextBasedLanguagesEditorComponent({ ...props }));
     });
+    component!.update();
+    expect(component!.find('[data-test-subj="unifiedTextLangEditor-expand"]').length).not.toBe(0);
+    expect(
+      component!.find('[data-test-subj="unifiedTextLangEditor-inline-documentation"]').length
+    ).not.toBe(0);
   });
 
   it('should call the expand editor function when expand button is clicked', async () => {
@@ -98,18 +117,18 @@ describe('TextBasedLanguagesEditor', () => {
       ...props,
       isCodeEditorExpanded: true,
     };
+    let component: ReactWrapper;
     await act(async () => {
-      const component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
-      expect(
-        component.find('[data-test-subj="unifiedTextLangEditor-toggleWordWrap"]').length
-      ).not.toBe(0);
-      expect(component.find('[data-test-subj="unifiedTextLangEditor-minimize"]').length).not.toBe(
-        0
-      );
-      expect(
-        component.find('[data-test-subj="unifiedTextLangEditor-documentation"]').length
-      ).not.toBe(0);
+      component = mount(renderTextBasedLanguagesEditorComponent({ ...newProps }));
     });
+    component!.update();
+    expect(
+      component!.find('[data-test-subj="unifiedTextLangEditor-toggleWordWrap"]').length
+    ).not.toBe(0);
+    expect(component!.find('[data-test-subj="unifiedTextLangEditor-minimize"]').length).not.toBe(0);
+    expect(
+      component!.find('[data-test-subj="unifiedTextLangEditor-documentation"]').length
+    ).not.toBe(0);
   });
 
   it('should call the expand editor function when minimize button is clicked', async () => {

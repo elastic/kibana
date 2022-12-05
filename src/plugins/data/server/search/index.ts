@@ -10,6 +10,7 @@ export * from './types';
 export * from './strategies/es_search';
 export * from './strategies/ese_search';
 export * from './strategies/eql_search';
+export * from './strategies/esql_search';
 export type { SearchUsage } from './collectors/search';
 export { usageProvider, searchUsageObserver } from './collectors/search';
 export * from './aggs';

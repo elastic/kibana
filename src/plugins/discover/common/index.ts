@@ -29,4 +29,4 @@ export const ROW_HEIGHT_OPTION = 'discover:rowHeightOption';
 export const SEARCH_EMBEDDABLE_TYPE = 'search';
 export const HIDE_ANNOUNCEMENTS = 'hideAnnouncements';
 export const SHOW_LEGACY_FIELD_TOP_VALUES = 'discover:showLegacyFieldTopValues';
-export const ENABLE_SQL = 'discover:enableSql';
+export const ENABLE_TEXT_BASED = 'discover:enableTextBased';

@@ -9,6 +9,7 @@
 import { XJsonLang } from './xjson';
 import { PainlessLang } from './painless';
 import { EsqlLang } from './esql';
+import { ES_QLLang } from './es_ql';
 import { monaco } from './monaco_imports';
 import { registerLanguage } from './helpers';
 
@@ -23,6 +24,7 @@ import painlessWorkerSrc from '!!raw-loader!../../target_workers/painless.editor
 registerLanguage(XJsonLang);
 registerLanguage(PainlessLang);
 registerLanguage(EsqlLang);
+registerLanguage(ES_QLLang);
 
 /**
  * Create web workers by language ID
