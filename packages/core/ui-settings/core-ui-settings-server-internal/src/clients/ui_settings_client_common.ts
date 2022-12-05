@@ -7,12 +7,11 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
-import { Logger } from '@kbn/logging';
-import { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 import { CannotOverrideError } from '../ui_settings_errors';
 import { Cache } from '../cache';
 import { UiSettingsServiceOptions } from '../types';
+import { BaseUiSettingsClient } from './base_ui_settings_client';
 
 interface ReadOptions {
   autoCreateOrUpgradeIfMissing?: boolean;
@@ -28,24 +27,19 @@ type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
 /**
  * Common logic for setting / removing keys in a {@link IUiSettingsClient} implementation
  */
-export class UiSettingsClientCommon {
+export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   private readonly type: UiSettingsServiceOptions['type'];
   private readonly id: UiSettingsServiceOptions['id'];
   private readonly buildNum: UiSettingsServiceOptions['buildNum'];
   private readonly savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
-  private readonly overrides: Record<string, any>;
   private readonly cache: Cache;
-  protected readonly log: Logger;
-  private readonly defaults: Record<string, UiSettingsParams>;
 
   constructor(options: UiSettingsServiceOptions) {
-    const { type, id, buildNum, savedObjectsClient, log, defaults = {}, overrides = {} } = options;
-    this.overrides = overrides;
+    super(options);
+    const { savedObjectsClient, type, id, buildNum } = options;
     this.type = type;
     this.id = id;
     this.buildNum = buildNum;
-    this.log = log;
-    this.defaults = defaults;
     this.savedObjectsClient = savedObjectsClient;
     this.cache = new Cache();
   }
@@ -186,13 +180,6 @@ export class UiSettingsClientCommon {
       }
 
       throw error;
-    }
-  }
-  protected validateKey(key: string, value: unknown) {
-    const definition = this.defaults[key];
-    if (value === null || definition === undefined) return;
-    if (definition.schema) {
-      definition.schema.validate(value, {}, `validation [${key}]`);
     }
   }
 
