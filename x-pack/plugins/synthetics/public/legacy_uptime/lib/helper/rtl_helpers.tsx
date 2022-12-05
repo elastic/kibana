@@ -227,7 +227,7 @@ export function WrappedHelper<ExtraCore>({
 }: RenderRouterOptions<ExtraCore> & {
   children: ReactElement;
   useRealStore?: boolean;
-  store: Store;
+  store?: Store;
 }) {
   const testState: AppState = merge({}, mockState, state);
 
