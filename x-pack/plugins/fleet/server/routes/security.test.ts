@@ -11,15 +11,16 @@ import type { AuthenticatedUser, CheckPrivilegesPayload } from '@kbn/security-pl
 import type { CheckPrivilegesResponse } from '@kbn/security-plugin/server/authorization/types';
 import type { CheckPrivilegesDynamically } from '@kbn/security-plugin/server/authorization/check_privileges_dynamically';
 
+import type { FleetAuthz } from '../../common';
+
 import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from '../services';
 import type { FleetRequestHandlerContext } from '../types';
 
 import {
   buildPathsFromRequiredAuthz,
-  deserializeAuthzConfig,
   makeRouterWithFleetAuthz,
-  serializeAuthzConfig,
+  validateSecurityRbac,
 } from './security';
 
 function getCheckPrivilegesMockedImplementation(kibanaRoles: string[]) {
@@ -204,82 +205,6 @@ describe('FleetAuthzRouter', () => {
   });
 });
 
-describe('serializeAuthzConfig', () => {
-  it('should serialize authz to tags', () => {
-    const res = serializeAuthzConfig({
-      fleetAuthz: {
-        fleet: {
-          readEnrollmentTokens: true,
-          setup: true,
-        },
-        integrations: {
-          readPackageInfo: true,
-          removePackages: true,
-        },
-        packagePrivileges: {
-          endpoint: {
-            actions: {
-              readPolicyManagement: {
-                executePackageAction: true,
-              },
-              readBlocklist: {
-                executePackageAction: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    expect(res).toEqual([
-      'fleet:authz:fleet:readEnrollmentTokens',
-      'fleet:authz:fleet:setup',
-      'fleet:authz:integrations:readPackageInfo',
-      'fleet:authz:integrations:removePackages',
-      'fleet:authz:packagePrivileges:endpoint:actions:readPolicyManagement:executePackageAction',
-      'fleet:authz:packagePrivileges:endpoint:actions:readBlocklist:executePackageAction',
-    ]);
-  });
-});
-
-describe('deserializeAuthzConfig', () => {
-  it('should deserialize tags to fleet authz', () => {
-    const res = deserializeAuthzConfig([
-      'fleet:authz:fleet:readEnrollmentTokens',
-      'fleet:authz:fleet:setup',
-      'fleet:authz:integrations:readPackageInfo',
-      'fleet:authz:integrations:removePackages',
-      'fleet:authz:packagePrivileges:endpoint:actions:readPolicyManagement:executePackageAction',
-      'fleet:authz:packagePrivileges:endpoint:actions:readBlocklist:executePackageAction',
-    ]);
-
-    expect(res).toEqual({
-      fleetAuthz: {
-        fleet: {
-          readEnrollmentTokens: true,
-          setup: true,
-        },
-        integrations: {
-          readPackageInfo: true,
-          removePackages: true,
-        },
-        packagePrivileges: {
-          endpoint: {
-            actions: {
-              readPolicyManagement: {
-                executePackageAction: true,
-              },
-              readBlocklist: {
-                executePackageAction: true,
-              },
-            },
-          },
-        },
-      },
-    });
-  });
-});
-
 describe('buildPathsFromRequiredAuthz', () => {
   it('should build paths from given authz', () => {
     const res = buildPathsFromRequiredAuthz({
@@ -313,5 +238,436 @@ describe('buildPathsFromRequiredAuthz', () => {
       'packagePrivileges.endpoint.actions.readPolicyManagement.executePackageAction',
       'packagePrivileges.endpoint.actions.readBlocklist.executePackageAction',
     ]);
+  });
+});
+
+describe('validateSecurityRbac', () => {
+  const fleetAuthz = Object.freeze({
+    fleet: {
+      all: false,
+      setup: false,
+      readEnrollmentTokens: false,
+      readAgentPolicies: false,
+    },
+    integrations: {
+      readPackageInfo: false,
+      readInstalledPackages: false,
+      installPackages: false,
+      upgradePackages: false,
+      removePackages: false,
+      uploadPackages: false,
+      readPackageSettings: false,
+      writePackageSettings: false,
+      readIntegrationPolicies: false,
+      writeIntegrationPolicies: false,
+    },
+    packagePrivileges: {
+      endpoint: {
+        actions: {
+          writeEndpointList: {
+            executePackageAction: false,
+          },
+          readEndpointList: {
+            executePackageAction: false,
+          },
+          writeTrustedApplications: {
+            executePackageAction: false,
+          },
+          readTrustedApplications: {
+            executePackageAction: false,
+          },
+          writeHostIsolationExceptions: {
+            executePackageAction: false,
+          },
+          readHostIsolationExceptions: {
+            executePackageAction: false,
+          },
+          writeBlocklist: {
+            executePackageAction: false,
+          },
+          readBlocklist: {
+            executePackageAction: false,
+          },
+          writeEventFilters: {
+            executePackageAction: false,
+          },
+          readEventFilters: {
+            executePackageAction: false,
+          },
+          writePolicyManagement: {
+            executePackageAction: false,
+          },
+          readPolicyManagement: {
+            executePackageAction: false,
+          },
+          writeActionsLogManagement: {
+            executePackageAction: false,
+          },
+          readActionsLogManagement: {
+            executePackageAction: false,
+          },
+          writeHostIsolation: {
+            executePackageAction: false,
+          },
+          writeProcessOperations: {
+            executePackageAction: false,
+          },
+          writeFileOperations: {
+            executePackageAction: false,
+          },
+        },
+      },
+    },
+  });
+
+  const getFleetAuthz = (authz: FleetAuthz = fleetAuthz) => authz;
+
+  describe('with ANY', () => {
+    it('should return TRUE if `any` are true', () => {
+      expect(
+        validateSecurityRbac(
+          getFleetAuthz({
+            ...fleetAuthz,
+            packagePrivileges: {
+              ...fleetAuthz.packagePrivileges,
+              endpoint: {
+                ...fleetAuthz.packagePrivileges.endpoint,
+                actions: {
+                  ...fleetAuthz.packagePrivileges.endpoint.actions,
+                  readPolicyManagement: {
+                    executePackageAction: true,
+                  },
+                },
+              },
+            },
+          }),
+          {
+            any: {
+              integrations: {
+                readPackageInfo: true,
+                removePackages: true,
+              },
+              packagePrivileges: {
+                endpoint: {
+                  actions: {
+                    readPolicyManagement: {
+                      executePackageAction: true,
+                    },
+                    readBlocklist: {
+                      executePackageAction: true,
+                    },
+                  },
+                },
+              },
+            },
+          }
+        )
+      ).toEqual(true);
+    });
+
+    it('should return FALSE if `any` are false', () => {
+      expect(
+        validateSecurityRbac(getFleetAuthz(), {
+          any: {
+            integrations: {
+              readPackageInfo: true,
+              removePackages: true,
+            },
+            packagePrivileges: {
+              endpoint: {
+                actions: {
+                  readPolicyManagement: {
+                    executePackageAction: true,
+                  },
+                  readBlocklist: {
+                    executePackageAction: true,
+                  },
+                },
+              },
+            },
+          },
+        })
+      ).toEqual(false);
+    });
+  });
+
+  describe('with ALL', () => {
+    it('should return TRUE if `all` are true', () => {
+      expect(
+        validateSecurityRbac(
+          getFleetAuthz({
+            ...fleetAuthz,
+            integrations: {
+              ...fleetAuthz.integrations,
+              readPackageInfo: true,
+              removePackages: true,
+            },
+            packagePrivileges: {
+              ...fleetAuthz.packagePrivileges,
+              endpoint: {
+                ...fleetAuthz.packagePrivileges.endpoint,
+                actions: {
+                  ...fleetAuthz.packagePrivileges.endpoint.actions,
+                  readPolicyManagement: {
+                    executePackageAction: true,
+                  },
+                  readBlocklist: {
+                    executePackageAction: true,
+                  },
+                },
+              },
+            },
+          }),
+          {
+            all: {
+              integrations: {
+                readPackageInfo: true,
+                removePackages: true,
+              },
+              packagePrivileges: {
+                endpoint: {
+                  actions: {
+                    readPolicyManagement: {
+                      executePackageAction: true,
+                    },
+                    readBlocklist: {
+                      executePackageAction: true,
+                    },
+                  },
+                },
+              },
+            },
+          }
+        )
+      ).toEqual(true);
+    });
+
+    it('should return FALSE if not `all` are true', () => {
+      expect(
+        validateSecurityRbac(
+          getFleetAuthz({
+            ...fleetAuthz,
+            packagePrivileges: {
+              ...fleetAuthz.packagePrivileges,
+              endpoint: {
+                ...fleetAuthz.packagePrivileges.endpoint,
+                actions: {
+                  ...fleetAuthz.packagePrivileges.endpoint.actions,
+                  readPolicyManagement: {
+                    executePackageAction: true,
+                  },
+                },
+              },
+            },
+          }),
+          {
+            all: {
+              integrations: {
+                readPackageInfo: true,
+                removePackages: true,
+              },
+              packagePrivileges: {
+                endpoint: {
+                  actions: {
+                    readPolicyManagement: {
+                      executePackageAction: true,
+                    },
+                    readBlocklist: {
+                      executePackageAction: true,
+                    },
+                  },
+                },
+              },
+            },
+          }
+        )
+      ).toEqual(false);
+    });
+  });
+
+  describe('with ALL and ANY', () => {
+    it('should return TRUE if `all` are true', () => {
+      expect(
+        validateSecurityRbac(
+          getFleetAuthz({
+            ...fleetAuthz,
+            integrations: {
+              ...fleetAuthz.integrations,
+              readPackageInfo: true,
+              removePackages: true,
+            },
+            packagePrivileges: {
+              ...fleetAuthz.packagePrivileges,
+              endpoint: {
+                ...fleetAuthz.packagePrivileges.endpoint,
+                actions: {
+                  ...fleetAuthz.packagePrivileges.endpoint.actions,
+                  readPolicyManagement: {
+                    executePackageAction: true,
+                  },
+                  readBlocklist: {
+                    executePackageAction: true,
+                  },
+                },
+              },
+            },
+          }),
+          {
+            all: {
+              integrations: {
+                readPackageInfo: true,
+                removePackages: true,
+              },
+              packagePrivileges: {
+                endpoint: {
+                  actions: {
+                    readPolicyManagement: {
+                      executePackageAction: true,
+                    },
+                    readBlocklist: {
+                      executePackageAction: true,
+                    },
+                  },
+                },
+              },
+            },
+          }
+        )
+      ).toEqual(true);
+    });
+
+    it('should return TRUE if all OR any are true', () => {
+      expect(
+        validateSecurityRbac(
+          getFleetAuthz({
+            ...fleetAuthz,
+            integrations: {
+              ...fleetAuthz.integrations,
+              readPackageInfo: true,
+              removePackages: true,
+            },
+            packagePrivileges: {
+              ...fleetAuthz.packagePrivileges,
+              endpoint: {
+                ...fleetAuthz.packagePrivileges.endpoint,
+                actions: {
+                  ...fleetAuthz.packagePrivileges.endpoint.actions,
+                  readPolicyManagement: {
+                    executePackageAction: true,
+                  },
+                },
+              },
+            },
+          }),
+          {
+            all: {
+              integrations: {
+                readPackageInfo: true,
+                removePackages: true,
+              },
+            },
+            any: {
+              packagePrivileges: {
+                endpoint: {
+                  actions: {
+                    readPolicyManagement: {
+                      executePackageAction: true,
+                    },
+                    readBlocklist: {
+                      executePackageAction: true,
+                    },
+                  },
+                },
+              },
+            },
+          }
+        )
+      ).toEqual(true);
+    });
+
+    it('should return TRUE if `all` are not true but `any` are true ', () => {
+      expect(
+        validateSecurityRbac(
+          getFleetAuthz({
+            ...fleetAuthz,
+            integrations: {
+              ...fleetAuthz.integrations,
+              readPackageInfo: true,
+            },
+            packagePrivileges: {
+              ...fleetAuthz.packagePrivileges,
+              endpoint: {
+                ...fleetAuthz.packagePrivileges.endpoint,
+                actions: {
+                  ...fleetAuthz.packagePrivileges.endpoint.actions,
+                  readPolicyManagement: {
+                    executePackageAction: true,
+                  },
+                },
+              },
+            },
+          }),
+          {
+            all: {
+              integrations: {
+                readPackageInfo: true,
+                removePackages: true,
+              },
+            },
+            any: {
+              packagePrivileges: {
+                endpoint: {
+                  actions: {
+                    readPolicyManagement: {
+                      executePackageAction: true,
+                    },
+                    readBlocklist: {
+                      executePackageAction: true,
+                    },
+                  },
+                },
+              },
+            },
+          }
+        )
+      ).toEqual(true);
+    });
+
+    it('should return TRUE if `all` are true but `any` are not true ', () => {
+      expect(
+        validateSecurityRbac(
+          getFleetAuthz({
+            ...fleetAuthz,
+            integrations: {
+              ...fleetAuthz.integrations,
+              readPackageInfo: true,
+              removePackages: true,
+            },
+          }),
+          {
+            all: {
+              integrations: {
+                readPackageInfo: true,
+                removePackages: true,
+              },
+            },
+            any: {
+              packagePrivileges: {
+                endpoint: {
+                  actions: {
+                    readPolicyManagement: {
+                      executePackageAction: true,
+                    },
+                    readBlocklist: {
+                      executePackageAction: true,
+                    },
+                  },
+                },
+              },
+            },
+          }
+        )
+      ).toEqual(true);
+    });
   });
 });

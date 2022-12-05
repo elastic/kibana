@@ -227,5 +227,25 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         statusCode: 400,
       });
     });
+
+    it('should set  scheduled_task_id to null when the rule cloned is disable', async () => {
+      const disableRuleCreated = await supertest
+        .post(`${getUrlPrefix(space1)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            enabled: false,
+          })
+        );
+      objectRemover.add(space1, disableRuleCreated.body.id, 'rule', 'alerting');
+
+      const cloneRuleResponse = await supertest
+        .post(`${getUrlPrefix(space1)}/internal/alerting/rule/${disableRuleCreated.body.id}/_clone`)
+        .set('kbn-xsrf', 'foo')
+        .send();
+      objectRemover.add(space1, cloneRuleResponse.body.id, 'rule', 'alerting');
+
+      expect(cloneRuleResponse.body.scheduled_task_id).to.eql(undefined);
+    });
   });
 }

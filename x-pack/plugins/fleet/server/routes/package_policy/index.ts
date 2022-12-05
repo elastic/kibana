@@ -20,7 +20,7 @@ import {
 } from '../../types';
 import {
   type FleetAuthzRouter,
-  readEndpointPackagePrivileges as packagePrivileges,
+  READ_ENDPOINT_PACKAGE_PRIVILEGES as packagePrivileges,
   validateSecurityRbac,
 } from '../security';
 
@@ -107,6 +107,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
       validate: CreatePackagePolicyRequestSchema,
+      fleetAuthz: {},
     },
     createPackagePolicyHandler
   );

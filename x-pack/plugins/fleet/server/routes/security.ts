@@ -16,6 +16,7 @@ import type {
   RequestHandler,
   RequestHandlerContext,
   OnPostAuthHandler,
+  IKibanaResponse,
 } from '@kbn/core/server';
 
 import type { FleetAuthz } from '../../common';
@@ -113,7 +114,7 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
 }
 
 // needed from Read routes
-export const readEndpointPackagePrivileges: DeepPartialTruthy<FleetAuthz> = Object.freeze({
+export const READ_ENDPOINT_PACKAGE_PRIVILEGES: DeepPartialTruthy<FleetAuthz> = Object.freeze({
   packagePrivileges: {
     endpoint: {
       actions: {
@@ -138,7 +139,7 @@ export const readEndpointPackagePrivileges: DeepPartialTruthy<FleetAuthz> = Obje
 });
 
 // needed from CUD routes
-export const writeEndpointPackagePrivileges: DeepPartialTruthy<FleetAuthz> = Object.freeze({
+export const WRITE_ENDPOINT_PACKAGE_PRIVILEGES: DeepPartialTruthy<FleetAuthz> = Object.freeze({
   packagePrivileges: {
     endpoint: {
       actions: {
@@ -194,19 +195,28 @@ export function validateSecurityRbac(
       return acc;
     }, []);
 
-  if (requiredAuthz.any && !requiredAuthz.all) {
-    return getBoolListFromPaths(requiredAuthz.any).some((v) => v);
-  } else if (requiredAuthz.all) {
-    return getBoolListFromPaths(requiredAuthz.all).every((v) => v);
-  } else if (requiredAuthz.any && requiredAuthz.all) {
-    // integration privileges should be all true or any of the endpoint privileges should be true
-    // e.g. epm/BULK_INSTALL_PATTERN
-    return (
+  const invalidAny =
+    !requiredAuthz.all &&
+    requiredAuthz.any &&
+    !getBoolListFromPaths(requiredAuthz.any).some((v) => v);
+  const invalidAll =
+    !requiredAuthz.any &&
+    requiredAuthz.all &&
+    !getBoolListFromPaths(requiredAuthz.all).every((v) => v);
+
+  // integration privileges should be all true or any of the endpoint privileges should be true
+  // e.g. epm/BULK_INSTALL_PATTERN
+  const invalidAnyAndAll =
+    requiredAuthz.any &&
+    !(
       getBoolListFromPaths(requiredAuthz.any).some((v) => v) ||
-      getBoolListFromPaths(requiredAuthz.all).every((v) => v)
+      (requiredAuthz.all && getBoolListFromPaths(requiredAuthz.all).every((v) => v))
     );
+
+  if (invalidAny || invalidAll || invalidAnyAndAll) {
+    return false;
   }
-  return false;
+  return true;
 }
 
 export function doesNotHaveRequiredFleetAuthz(
@@ -224,38 +234,6 @@ export function doesNotHaveRequiredFleetAuthz(
 
 interface Authz {
   [k: string]: Authz | boolean;
-}
-
-function containsRequirement(authz: Authz, requirements: DeepPartialTruthy<Authz>) {
-  if (!authz) {
-    return false;
-  }
-  for (const key of Object.keys(requirements)) {
-    if (typeof requirements[key] !== 'undefined' && typeof requirements[key] === 'boolean') {
-      if (!authz[key]) {
-        return false;
-      }
-    } else if (
-      !containsRequirement(authz[key] as Authz, requirements[key] as DeepPartialTruthy<Authz>)
-    ) {
-      return false;
-    }
-  }
-  return true;
-}
-
-export function hasRequiredFleetAuthzPrivilege(
-  authz: FleetAuthz,
-  { fleetAuthz }: { fleetAuthz?: FleetAuthzRequirements }
-): boolean {
-  if (!checkSecurityEnabled()) {
-    return false;
-  }
-  if (fleetAuthz && !containsRequirement(authz as unknown as Authz, fleetAuthz)) {
-    return false;
-  }
-
-  return true;
 }
 
 type DeepPartialTruthy<T> = {
@@ -293,93 +271,18 @@ export interface FleetAuthzRouter<
   patch: FleetAuthzRouteRegistrar<'patch', TContext>;
 }
 
-function shouldHandlePostAuthRequest(req: KibanaRequest) {
-  if (req?.route?.options?.tags) {
-    return req.route.options.tags.some((tag) => tag.match(/^fleet:authz/));
-  }
-  return false;
-}
-// Exported for test only
-export function deserializeAuthzConfig(tags: readonly string[]): FleetAuthzRouteConfig {
-  let fleetAuthz: FleetAuthzRequirements | undefined;
-  for (const tag of tags) {
-    if (!tag.match(/^fleet:authz/)) {
-      continue;
-    }
-
-    if (!fleetAuthz) {
-      fleetAuthz = {};
-    }
-
-    tag
-      .replace(/^fleet:authz:/, '')
-      .split(':')
-      .reduce((acc: any, key, idx, keys) => {
-        if (idx === keys.length - 1) {
-          acc[key] = true;
-
-          return acc;
-        }
-
-        if (!acc[key]) {
-          acc[key] = {};
-        }
-
-        return acc[key];
-      }, fleetAuthz);
-  }
-
-  return { fleetAuthz };
-}
-
-// Exported for test only
-export function serializeAuthzConfig(config: FleetAuthzRouteConfig): string[] {
-  const tags: string[] = [];
-  if (config.fleetAuthz && typeof config.fleetAuthz !== 'function') {
-    function fleetAuthzToTags(requirements: DeepPartialTruthy<Authz>, prefix: string = '') {
-      for (const key of Object.keys(requirements)) {
-        if (typeof requirements[key] === 'boolean') {
-          tags.push(`fleet:authz:${prefix}${key}`);
-        } else if (typeof requirements[key] !== 'undefined') {
-          fleetAuthzToTags(requirements[key] as DeepPartialTruthy<Authz>, `${prefix}${key}:`);
-        }
-      }
-    }
-
-    fleetAuthzToTags(config.fleetAuthz);
-  }
-
-  return tags;
-}
-
 export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerContext>(
   router: IRouter<TContext>
 ): { router: FleetAuthzRouter<TContext>; onPostAuthHandler: OnPostAuthHandler } {
-  const fleetAuthzOnPostAuthHandler: OnPostAuthHandler = async (req, res, toolkit) => {
-    if (!shouldHandlePostAuthRequest(req)) {
-      return toolkit.next();
-    }
-
+  const fleetAuthzOnPostAuthHandler: OnPostAuthHandler = async (_, res, toolkit) => {
     if (!checkSecurityEnabled()) {
-      return res.forbidden();
-    }
-
-    const fleetAuthzConfig = deserializeAuthzConfig(req.route.options.tags);
-
-    if (!fleetAuthzConfig) {
-      return toolkit.next();
-    }
-
-    const authz = await getAuthzFromRequest(req);
-
-    if (doesNotHaveRequiredFleetAuthz(authz, fleetAuthzConfig)) {
       return res.forbidden();
     }
 
     return toolkit.next();
   };
 
-  async function routerAuthzWrapper({
+  const routerAuthzWrapper = async <R extends RouteMethod>({
     context,
     request,
     response,
@@ -389,21 +292,20 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
     context: TContext;
     request: KibanaRequest;
     response: KibanaResponseFactory;
-    handler: RequestHandler<any, any, any, TContext, any, KibanaResponseFactory>;
+    handler: RequestHandler<any, any, any, TContext, R, KibanaResponseFactory>;
     hasRequiredAuthz?: FleetAuthzRouterConfigParam;
-  }) {
+  }): Promise<IKibanaResponse<any>> => {
     const requestedAuthz = await getAuthzFromRequest(request);
     if (
       hasRequiredAuthz &&
-      typeof hasRequiredAuthz === 'function' &&
-      hasRequiredAuthz(requestedAuthz)
+      ((typeof hasRequiredAuthz === 'function' && hasRequiredAuthz(requestedAuthz)) ||
+        (typeof hasRequiredAuthz !== 'function' &&
+          validateSecurityRbac(requestedAuthz, { all: hasRequiredAuthz })))
     ) {
       return handler(context, request, response);
-    } else if (hasRequiredAuthz && typeof hasRequiredAuthz !== 'function') {
-      validateSecurityRbac(requestedAuthz, { all: hasRequiredAuthz });
     }
     return response.forbidden();
-  }
+  };
 
   const fleetAuthzRouter: FleetAuthzRouter<TContext> = {
     get: ({ fleetAuthz: hasRequiredAuthz, ...options }, handler) => {

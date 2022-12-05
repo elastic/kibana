@@ -20,7 +20,7 @@ import {
 } from '../../types';
 import {
   type FleetAuthzRouter,
-  readEndpointPackagePrivileges as packagePrivileges,
+  READ_ENDPOINT_PACKAGE_PRIVILEGES as packagePrivileges,
   validateSecurityRbac,
 } from '../security';
 

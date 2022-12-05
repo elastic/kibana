@@ -88,7 +88,7 @@ import {
   doesNotHaveRequiredFleetAuthz,
   getAuthzFromRequest,
   validateSecurityRbac,
-  writeEndpointPackagePrivileges as packagePrivileges,
+  WRITE_ENDPOINT_PACKAGE_PRIVILEGES as packagePrivileges,
   type FleetAuthzRouteConfig,
 } from '../routes/security';
 
