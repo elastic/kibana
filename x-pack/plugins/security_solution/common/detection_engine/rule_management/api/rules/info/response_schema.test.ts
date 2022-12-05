@@ -6,7 +6,6 @@
  */
 
 import { left } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { RulesInfoResponse } from './response_schema';
@@ -20,7 +19,7 @@ describe('Rules info response schema', () => {
     };
     const decoded = RulesInfoResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const message = foldLeftRight(checked);
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(payload);
@@ -34,7 +33,7 @@ describe('Rules info response schema', () => {
     };
     const decoded = RulesInfoResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const message = foldLeftRight(checked);
 
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(payload);
@@ -49,7 +48,7 @@ describe('Rules info response schema', () => {
     };
     const decoded = RulesInfoResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const message = foldLeftRight(checked);
 
     expect(getPaths(left(message.errors))).toEqual(['invalid keys "invalid_field"']);
     expect(message.schema).toEqual({});
@@ -63,7 +62,7 @@ describe('Rules info response schema', () => {
     };
     const decoded = RulesInfoResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const message = foldLeftRight(checked);
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "-1" supplied to "rules_prebuilt_installed_count"',
@@ -79,7 +78,7 @@ describe('Rules info response schema', () => {
     };
     const decoded = RulesInfoResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const message = foldLeftRight(checked);
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "-1" supplied to "rules_custom_count"',
@@ -97,7 +96,7 @@ describe('Rules info response schema', () => {
     delete payload.rules_prebuilt_installed_count;
     const decoded = RulesInfoResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const message = foldLeftRight(checked);
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "rules_prebuilt_installed_count"',
@@ -113,7 +112,7 @@ describe('Rules info response schema', () => {
     };
     const decoded = RulesInfoResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
+    const message = foldLeftRight(checked);
 
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "1" supplied to "tags"']);
     expect(message.schema).toEqual({});
