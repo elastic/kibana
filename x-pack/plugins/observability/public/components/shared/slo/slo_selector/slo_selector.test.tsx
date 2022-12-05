@@ -19,20 +19,21 @@ jest.mock('../../../../hooks/slo/use_fetch_slo_list');
 const useFetchSloListMock = useFetchSloList as jest.Mock;
 
 describe('SLO Selector', () => {
+  const onSelectedSpy = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
     useFetchSloListMock.mockReturnValue([true, emptySloList]);
   });
 
   it('fetches SLOs asynchronously', async () => {
-    render(<SloSelector />);
+    render(<SloSelector onSelected={onSelectedSpy} />);
 
     expect(screen.getByTestId('sloSelector')).toBeTruthy();
     expect(useFetchSloListMock).toHaveBeenCalledWith('');
   });
 
   it('searches SLOs when typing', async () => {
-    const { getByTestId } = render(<SloSelector />);
+    const { getByTestId } = render(<SloSelector onSelected={onSelectedSpy} />);
 
     const input = getByTestId('comboBoxInput');
     await act(async () => {

@@ -10,9 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { SLO } from '../../../../typings';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 
-export function SloSelector() {
+interface Props {
+  onSelected: (slo: SLO) => void;
+}
+
+function SloSelector({ onSelected }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
@@ -20,13 +25,20 @@ export function SloSelector() {
 
   useEffect(() => {
     if (!loading && sloList !== undefined) {
-      const opts = sloList.results.map((result) => ({ value: result.id, label: result.name }));
+      const opts = sloList.results.map((slo) => ({ value: slo.id, label: slo.name }));
       setOptions(opts);
     }
   }, [loading, sloList]);
 
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
     setSelected(opts);
+    if (opts.length === 1) {
+      const sloId = opts[0].value;
+      const selectedSlo = sloList.results.find((slo) => slo.id === sloId);
+      if (selectedSlo !== undefined) {
+        onSelected(selectedSlo);
+      }
+    }
   };
 
   const onSearchChange = useMemo(() => debounce((value: string) => setSearchValue(value), 300), []);
@@ -50,3 +62,6 @@ export function SloSelector() {
     />
   );
 }
+
+export { SloSelector };
+export type { Props as SloSelectorProps };

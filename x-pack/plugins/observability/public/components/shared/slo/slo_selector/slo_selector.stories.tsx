@@ -8,6 +8,7 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
+import { SLO } from '../../../../typings';
 import { SloSelector as Component } from './slo_selector';
 
 export default {
@@ -15,7 +16,9 @@ export default {
   title: 'app/SLOs/Shared/SloSelector',
 };
 
-const Template: ComponentStory<typeof Component> = () => <Component />;
+const Template: ComponentStory<typeof Component> = () => (
+  <Component onSelected={(slo: SLO) => console.log(slo)} />
+);
 const defaultProps = {};
 
 export const Default = Template.bind({});
