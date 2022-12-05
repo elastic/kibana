@@ -28,7 +28,7 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
     indexPattern: { fields: [], title: '' },
     loading: false,
   },
-  getSecuritySolutionStore: {
+  securitySolutionStore: {
     // @ts-ignore
     dispatch: () => jest.fn(),
   },
@@ -44,4 +44,8 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
   useGlobalTime: () => ({ from: '', to: '' }),
 
   useQuery: () => ({ language: 'kuery', query: '' }),
+
+  registerQuery: () => {},
+
+  deregisterQuery: () => {},
 });
