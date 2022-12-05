@@ -341,7 +341,7 @@
 >     // TODO: This test has been added to the `4.x` branch of the handlebars.js repo along with a code-fix,
 >     // but a new version of the handlebars package containing this fix has not yet been published to npm.
 >     //
->     // Before enabling this code, a new version of handlebars needs to be released and the corrosponding
+>     // Before enabling this code, a new version of handlebars needs to be released and the corresponding
 >     // updates needs to be applied to this implementation.
 >     //
 >     // See: https://github.com/handlebars-lang/handlebars.js/commit/30dbf0478109ded8f12bb29832135d480c17e367
