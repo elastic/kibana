@@ -73,7 +73,6 @@ TYPES_DEPS = [
   "@npm//@types/react",
   "@npm//@elastic/eui",
   "//packages/kbn-monaco:npm_module_types",
-  "@npm//@types/react-monaco-editor",
   "//packages/kbn-ambient-ui-types",
   "//packages/shared-ux/code_editor/mocks:npm_module_types",
   "//packages/shared-ux/code_editor/types:npm_module_types",

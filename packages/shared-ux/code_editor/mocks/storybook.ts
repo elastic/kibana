@@ -9,7 +9,10 @@ import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 
 import type { Props as CodeEditorProps } from '@kbn/shared-ux-code-editor-types';
 
-type PropArguments = Pick<CodeEditorProps, 'languageId' | 'value'>;
+type PropArguments = Pick<
+  CodeEditorProps,
+  'languageId' | 'value' | 'aria-label' | 'allowFullScreen'
+>;
 
 export type Params = Record<keyof PropArguments, any>;
 
@@ -36,12 +39,18 @@ export class CodeEditorStorybookMock extends AbstractStorybookMock<
       },
       defaultValue: 'initial code editor value',
     },
-    // ariaLabel: {
-    //     control: {
-    //       type: 'text',
-    //     },
-    //     defaultValue: 'code editor',
-    //   },
+    'aria-label': {
+      control: {
+        type: 'text',
+      },
+      defaultValue: 'code editor',
+    },
+    allowFullScreen: {
+      control: {
+        type: 'boolean',
+      },
+      defaultValue: false,
+    },
   };
 
   serviceArguments = {};
@@ -51,6 +60,8 @@ export class CodeEditorStorybookMock extends AbstractStorybookMock<
     return {
       languageId: this.getArgumentValue('languageId', params),
       value: this.getArgumentValue('value', params),
+      'aria-label': this.getArgumentValue('aria-label', params),
+      allowFullScreen: this.getArgumentValue('allowFullScreen', params),
     };
   }
 

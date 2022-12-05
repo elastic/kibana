@@ -92,18 +92,3 @@ export interface Props {
   isCopyable?: boolean;
   allowFullScreen?: boolean;
 }
-
-// Monaco languages support
-declare module 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
-declare module 'monaco-editor/esm/vs/basic-languages/css/css';
-declare module 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
-
-// eslint-disable-next-line @kbn/eslint/module_migration
-export { cssConf, cssLanguage } from 'monaco-editor/esm/vs/basic-languages/css/css';
-export {
-  markdownConf,
-  markdownLanguage,
-  // eslint-disable-next-line @kbn/eslint/module_migration
-} from 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
-// eslint-disable-next-line @kbn/eslint/module_migration
-export { yamlConf, yamlLanguage } from 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
