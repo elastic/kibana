@@ -92,6 +92,10 @@ describe('test fetchCharts', () => {
             "interval": "auto",
             "min_doc_count": 1,
             "scaleMetricValues": false,
+            "timeRange": Object {
+              "from": "now-15m",
+              "to": "now",
+            },
             "useNormalizedEsInterval": true,
             "used_interval": "0ms",
           },
