@@ -69,7 +69,7 @@ export const fromStreamingXhr = (
                   'Error connecting to the Kibana server. Please check your network connection.',
               })
             : i18n.translate('bfetch.networkErrorWithStatus', {
-                defaultMessage: 'Error connecting to server, code {status}',
+                defaultMessage: 'Error connecting to server - code {status}',
                 values: { status: xhr.status },
               });
         subject.error(new Error(errorMsg));
