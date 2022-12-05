@@ -40,6 +40,13 @@ export const KillOrSuspendProcessRequestSchema = {
   }),
 };
 
+export const KubeRequestSchema = {
+  body: schema.object({
+    ...BaseActionRequestSchema,
+    parameters: schema.oneOf([schema.object({ resource: schema.string() })]),
+  }),
+};
+
 export const ResponseActionBodySchema = schema.oneOf([
   NoParametersRequestSchema.body,
   KillOrSuspendProcessRequestSchema.body,
