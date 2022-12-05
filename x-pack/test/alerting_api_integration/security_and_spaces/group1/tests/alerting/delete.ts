@@ -224,9 +224,17 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
             .auth(user.username, user.password);
 
           switch (scenario.id) {
-            case 'global_read at space1':
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage('delete', 'test.noop', 'alerts'),
+                statusCode: 403,
+              });
+              objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+              break;
+            case 'global_read at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',

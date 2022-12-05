@@ -9,9 +9,8 @@ import '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
 
-import { mount } from 'enzyme';
-
 import { EuiCodeBlock, EuiDescriptionListDescription } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
@@ -20,6 +19,7 @@ import { AnalyticsCollectionIntegrate } from './analytics_collection_integrate';
 describe('AnalyticsCollectionIntegrate', () => {
   const analyticsCollections: AnalyticsCollection = {
     event_retention_day_length: 180,
+    events_datastream: 'analytics-events-example',
     id: '1',
     name: 'example',
   };
@@ -29,17 +29,14 @@ describe('AnalyticsCollectionIntegrate', () => {
   });
 
   it('renders', () => {
-    const wrapper = mount(<AnalyticsCollectionIntegrate collection={analyticsCollections} />);
+    const wrapper = mountWithIntl(
+      <AnalyticsCollectionIntegrate collection={analyticsCollections} />
+    );
     expect(wrapper.find(EuiCodeBlock)).toHaveLength(2);
-    expect(wrapper.find(EuiDescriptionListDescription).get(0)).toMatchInlineSnapshot(`
-      <EuiDescriptionListDescription>
-        example
-      </EuiDescriptionListDescription>
-    `);
 
-    expect(wrapper.find(EuiDescriptionListDescription).get(1)).toMatchInlineSnapshot(`
+    expect(wrapper.find(EuiDescriptionListDescription).get(0)).toMatchInlineSnapshot(`
           <EuiDescriptionListDescription>
-            /analytics/api/collections/example
+            /analytics/api/collections/1
           </EuiDescriptionListDescription>
       `);
   });

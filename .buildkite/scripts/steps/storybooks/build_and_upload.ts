@@ -31,7 +31,6 @@ const STORYBOOKS = [
   'expression_reveal_image',
   'expression_shape',
   'expression_tagcloud',
-  'files',
   'fleet',
   'home',
   'infra',

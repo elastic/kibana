@@ -50,6 +50,11 @@ describe('<InspectorFlyoutContent />', () => {
       defaultProps,
     });
 
+    const waitForValidationResults = async () =>
+      await act(() => {
+        jest.advanceTimersByTime(550); // There is a 500ms delay to display input errors + async validation
+      });
+
     test('should set the correct flyout title', async () => {
       await act(async () => {
         testBed = await setup();
@@ -106,6 +111,8 @@ describe('<InspectorFlyoutContent />', () => {
         form: { setInputValue },
       } = testBed!;
 
+      await waitForValidationResults();
+
       await act(async () => {
         find('saveButton').simulate('click');
       });
@@ -122,11 +129,15 @@ describe('<InspectorFlyoutContent />', () => {
         setInputValue('metadataForm.descriptionInput', 'newDescription');
       });
 
+      await waitForValidationResults();
+
       component.update();
 
       await act(async () => {
         find('saveButton').simulate('click');
       });
+
+      component.update();
 
       expect(onSave).toHaveBeenCalledWith({
         id: '123',
@@ -153,6 +164,8 @@ describe('<InspectorFlyoutContent />', () => {
         setInputValue('metadataForm.nameInput', ''); // empty is not allowed
       });
 
+      await waitForValidationResults();
+
       component.update();
 
       await act(async () => {
@@ -160,11 +173,6 @@ describe('<InspectorFlyoutContent />', () => {
       });
       component.update();
       expect(onSave).not.toHaveBeenCalled();
-
-      act(() => {
-        jest.advanceTimersByTime(500); // There is a 500ms delay to display input errors
-      });
-      component.update();
 
       expect(getErrorsMessages()).toEqual(['A name is required.']);
       const errorCallout = component.find('.euiForm__errors').at(0);
@@ -213,6 +221,8 @@ describe('<InspectorFlyoutContent />', () => {
         find('tagSelector.tag-id-2').simulate('click');
       });
 
+      await waitForValidationResults();
+
       component.update();
 
       await act(async () => {
@@ -232,6 +242,8 @@ describe('<InspectorFlyoutContent />', () => {
         find('tagSelector.tag-id-3').simulate('click');
         find('tagSelector.tag-id-4').simulate('click');
       });
+
+      await waitForValidationResults();
 
       component.update();
 
