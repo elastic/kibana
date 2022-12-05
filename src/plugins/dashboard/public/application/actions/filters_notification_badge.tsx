@@ -47,11 +47,7 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
     } = pluginServices.getServices());
   }
 
-  private FiltersNotification: React.FC<{ context: FiltersNotificationActionContext }> = ({
-    context,
-  }: {
-    context: FiltersNotificationActionContext;
-  }) => {
+  private FilterIconButton = ({ context }: { context: FiltersNotificationActionContext }) => {
     const { embeddable } = context;
     return (
       <EuiButtonIcon
@@ -61,7 +57,7 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
     );
   };
 
-  public readonly MenuItem = reactToUiComponent(this.FiltersNotification);
+  public readonly MenuItem = reactToUiComponent(this.FilterIconButton);
 
   public getDisplayName({ embeddable }: FiltersNotificationActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
