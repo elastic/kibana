@@ -41,6 +41,7 @@ import {
   SnoozeSchedule,
   RulesListFilters,
   UpdateFiltersProps,
+  RulesPageContainerState,
 } from '../../../../types';
 import { RuleAdd, RuleEdit } from '../../rule_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -69,7 +70,7 @@ import { ManageLicenseModal } from './manage_license_modal';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
-import { RulesListVisibleColumns } from './rules_list_column_selector';
+import { RulesListColumns } from './rules_list_column_selector';
 import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
@@ -91,11 +92,6 @@ import {
 } from '../translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 
-interface RulesPageContainerState {
-  lastResponse: string[];
-  status: RuleStatus[];
-}
-
 export interface RulesListProps {
   filteredRuleTypes?: string[];
   showActionFilter?: boolean;
@@ -109,7 +105,8 @@ export interface RulesListProps {
   onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => RulesPageContainerState;
   refresh?: Date;
   rulesListKey?: string;
-  visibleColumns?: RulesListVisibleColumns[];
+  visibleColumns?: string[];
+  columns?: RulesListColumns[];
 }
 
 export const percentileFields = {
@@ -138,6 +135,7 @@ export const RulesList = ({
   refresh,
   rulesListKey,
   visibleColumns,
+  columns,
 }: RulesListProps) => {
   const history = useHistory();
   const {
@@ -228,7 +226,7 @@ export const RulesList = ({
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Fetch query
+  // Fetch config
   const { config } = useLoadConfigQuery();
 
   // Fetch rule types
@@ -239,6 +237,7 @@ export const RulesList = ({
     authorizedToCreateAnyRules,
   } = useLoadRuleTypesQuery({ filteredRuleTypes });
 
+  // Fetch action types
   const { actionTypes } = useLoadActionTypesQuery();
 
   const [rulesTypesFilter, hasDefaultRuleTypesFiltersOn] = useMemo(() => {
@@ -757,6 +756,7 @@ export const RulesList = ({
         rulesListKey={rulesListKey}
         config={config}
         visibleColumns={visibleColumns}
+        columns={columns}
       />
       {manageLicenseModalOpts && (
         <ManageLicenseModal

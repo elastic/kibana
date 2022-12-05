@@ -65,8 +65,8 @@ import { RulesListTableStatusCell } from './rules_list_table_status_cell';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import {
   RulesListColumns,
-  RulesListVisibleColumns,
   useRulesListColumnSelector,
+  originalRulesListVisibleColumns,
 } from './rules_list_column_selector';
 
 interface RuleTypeState {
@@ -143,7 +143,8 @@ export interface RulesListTableProps {
     onLoading: (isLoading: boolean) => void
   ) => React.ReactNode;
   renderRuleError?: (rule: RuleTableItem) => React.ReactNode;
-  visibleColumns?: RulesListVisibleColumns[];
+  visibleColumns?: string[];
+  columns?: RulesListColumns[];
 }
 
 interface ConvertRulesToTableItemsOpts {
@@ -209,6 +210,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     renderSelectAllDropdown,
     renderRuleError = EMPTY_RENDER,
     visibleColumns,
+    columns,
   } = props;
 
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
@@ -794,7 +796,34 @@ export const RulesListTable = (props: RulesListTableProps) => {
     ruleOutcomeColumnField,
   ]);
 
-  const allRuleColumns = useMemo(() => getRulesTableColumns(), [getRulesTableColumns]);
+  const columnsOverrideMap = useMemo(() => {
+    if (!columns) {
+      return {};
+    }
+    return columns.reduce<Record<string, RulesListColumns>>((result, column) => {
+      if (column.id) {
+        result[column.id] = column;
+      }
+      return result;
+    }, {});
+  }, [columns]);
+
+  const allRuleColumns = useMemo(() => {
+    const defaultColumns = getRulesTableColumns();
+
+    const columnsWithOverride = defaultColumns.map((column) => {
+      if (column.id && columnsOverrideMap[column.id]) {
+        return columnsOverrideMap[column.id];
+      }
+      return column;
+    });
+
+    const newColumns = columns?.filter((column) => {
+      return column.id && !(originalRulesListVisibleColumns as string[]).includes(column.id);
+    });
+
+    return [...columnsWithOverride, ...(newColumns || [])];
+  }, [getRulesTableColumns, columnsOverrideMap, columns]);
 
   const [rulesListColumns, ColumnSelector] = useRulesListColumnSelector({
     allRuleColumns,
