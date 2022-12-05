@@ -252,6 +252,11 @@ function parseAndVerifyArchive(
       semverPrerelease(parsed.version) || semverMajor(parsed.version) < 1 ? 'beta' : 'ga';
   }
 
+  // Ensure top-level variables are parsed as well
+  if (manifest.vars) {
+    parsed.vars = parseAndVerifyVars(manifest.vars, 'manifest.yml');
+  }
+
   return parsed;
 }
 
