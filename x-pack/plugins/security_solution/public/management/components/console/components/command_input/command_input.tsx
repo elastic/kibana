@@ -240,7 +240,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
               data-test-subj={getTestId('cmdInput-container')}
             >
               <EuiFlexGroup
-                wrap={true}
+                wrap
                 responsive={false}
                 alignItems="center"
                 gutterSize="none"
