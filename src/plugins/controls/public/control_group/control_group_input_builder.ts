@@ -87,7 +87,7 @@ export async function getDataControlPanelState(
   const { controlId, dataViewId, fieldName, title } = controlProps;
   return {
     type: await getCompatibleControlType({ dataViewId, fieldName }),
-    ...getPanelPlacementState(input, controlProps),
+    ...getPanelState(input, controlProps),
     explicitInput: {
       id: controlId ? controlId : uuid.v4(),
       dataViewId,
@@ -104,7 +104,7 @@ export function getOptionsListPanelState(
   const { controlId, dataViewId, fieldName, title, ...rest } = controlProps;
   return {
     type: OPTIONS_LIST_CONTROL,
-    ...getPanelPlacementState(input, controlProps),
+    ...getPanelState(input, controlProps),
     explicitInput: {
       id: controlId ? controlId : uuid.v4(),
       dataViewId,
@@ -122,7 +122,7 @@ export function getRangeSliderPanelState(
   const { controlId, dataViewId, fieldName, title, ...rest } = controlProps;
   return {
     type: RANGE_SLIDER_CONTROL,
-    ...getPanelPlacementState(input, controlProps),
+    ...getPanelState(input, controlProps),
     explicitInput: {
       id: controlId ? controlId : uuid.v4(),
       dataViewId,
@@ -148,7 +148,7 @@ export function getTimeSliderPanelState(input: Partial<ControlGroupInput>) {
   } as ControlPanelState<ControlInput>;
 }
 
-function getPanelPlacementState(
+function getPanelState(
   input: Partial<ControlGroupInput>,
   controlProps: AddDataControlProps
 ) {
