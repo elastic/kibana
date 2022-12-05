@@ -7,6 +7,7 @@
 
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { CellActions, CellActionsMode } from '@kbn/securitysolution-cell-actions';
 import {
   DragEffects,
   DraggableWrapper,

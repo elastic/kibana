@@ -9,11 +9,11 @@
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useCallback, useRef, useState } from 'react';
 import { css } from '@emotion/react';
-import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { HoverActionsPopover } from './hover_actions_popover';
 import { ActionItem } from './cell_action_item';
-import { CellActionConfig } from '.';
+import { CellActionExecutionContext } from '.';
 import { ExtraActionsPopOverWithAnchor } from './extra_actions_popover';
 import { partitionActions } from '../hooks/actions';
 import { ExtraActionsButton } from './extra_actions_button';
@@ -29,9 +29,8 @@ const hoverContentWrapperCSS = css`
 
 interface Props {
   additionalContent?: React.ReactNode;
-  config: CellActionConfig;
   getActions: () => Promise<Action[]>;
-  actionContext: ActionExecutionContext;
+  actionContext: CellActionExecutionContext;
   showTooltip: boolean;
   showMoreActionsFrom: number;
 }
@@ -47,7 +46,6 @@ const PANEL_STYLE = { minWidth: `24px` };
 export const HoverActions: React.FC<Props> = React.memo(
   ({
     additionalContent = null,
-    config,
     children,
     getActions,
     actionContext,
@@ -101,7 +99,7 @@ export const HoverActions: React.FC<Props> = React.memo(
         return (
           <div css={hoverContentWrapperCSS}>
             <EuiScreenReaderOnly>
-              <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(config.field)}</p>
+              <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(actionContext.field)}</p>
             </EuiScreenReaderOnly>
             {additionalContent != null && <div css={additionalContentCSS}>{additionalContent}</div>}
             {visibleActions.map((action) => (
@@ -122,7 +120,6 @@ export const HoverActions: React.FC<Props> = React.memo(
         closeExtraActions,
         getActions,
         showMoreActionsFrom,
-        config.field,
         additionalContent,
         showTooltip,
         actionContext,
@@ -139,7 +136,6 @@ export const HoverActions: React.FC<Props> = React.memo(
           getActions={getActions}
           anchorRef={contentRef}
           actionContext={actionContext}
-          config={config}
           closePopOver={closeExtraActions}
           isOpen={isExtraActionsPopoverOpen}
         />

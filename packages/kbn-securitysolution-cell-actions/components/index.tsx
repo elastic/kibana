@@ -7,17 +7,30 @@
  */
 
 import { orderBy } from 'lodash/fp';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo, useRef } from 'react';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
 import { CellActionsContext } from './cell_actions_context';
 import { HoverActions } from './hover_actions';
 import { InlineActions } from './inline_actions';
 
-// TODO Define an shared interface for all actions configuration
 export interface CellActionConfig {
   field: string;
   fieldType: string;
   value: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface CellActionExecutionContext extends CellActionConfig, ActionExecutionContext {
+  /**
+   * Ref to a DOM node where the action can add custom HTML.
+   */
+  extraContentNodeRef: React.MutableRefObject<HTMLDivElement | null>;
+
+  /**
+   * Ref to the node where the cell action are rendered.
+   */
+  nodeRef: React.MutableRefObject<HTMLDivElement | null>;
 }
 
 export enum CellActionsMode {
@@ -32,6 +45,11 @@ export interface CellActionsProps {
   mode: CellActionsMode;
   showTooltip?: boolean;
   showMoreActionsFrom?: number;
+  /**
+   * Extra data that can is sent directly to actions.
+   * Every action can require a different set of properties to render.
+   */
+  metadata?: Record<string, unknown>;
 }
 
 export const CellActions: React.FC<CellActionsProps> = ({
@@ -44,8 +62,16 @@ export const CellActions: React.FC<CellActionsProps> = ({
    * It shows 'more actions' button when the number of actions is bigger than this parameter.
    */
   showMoreActionsFrom = 3,
+  metadata,
 }) => {
   const context = useContext(CellActionsContext);
+  const extraContentNodeRef = useRef<HTMLDivElement | null>(null);
+  const nodeRef = useRef<HTMLDivElement | null>(null);
+
+  const actionContext: CellActionExecutionContext = useMemo(
+    () => ({ ...config, trigger: { id: triggerId }, extraContentNodeRef, nodeRef, metadata }),
+    [config, triggerId, metadata]
+  );
 
   const getActions = useCallback(() => {
     if (!context.getCompatibleActions) {
@@ -56,40 +82,37 @@ export const CellActions: React.FC<CellActionsProps> = ({
       return Promise.resolve([]);
     } else {
       return context
-        .getCompatibleActions(triggerId, config)
+        .getCompatibleActions(triggerId, actionContext)
         .then((actions) => orderBy(['order', 'id'], ['asc', 'asc'], actions));
     }
-  }, [config, triggerId, context]);
-
-  const actionContext = useMemo(
-    () => ({ ...config, trigger: { id: triggerId } }),
-    [config, triggerId]
-  );
+  }, [context, triggerId, actionContext]);
 
   if (mode === CellActionsMode.HOVER_POPUP) {
     return (
-      <HoverActions
-        config={config}
-        getActions={getActions}
-        actionContext={actionContext}
-        showTooltip={showTooltip}
-        showMoreActionsFrom={showMoreActionsFrom}
-      >
-        {children}
-      </HoverActions>
+      <div ref={nodeRef}>
+        <HoverActions
+          getActions={getActions}
+          actionContext={actionContext}
+          showTooltip={showTooltip}
+          showMoreActionsFrom={showMoreActionsFrom}
+        >
+          {children}
+        </HoverActions>
+        <div ref={extraContentNodeRef} />
+      </div>
     );
   } else if (mode === CellActionsMode.INLINE) {
     return (
-      <>
+      <div ref={nodeRef}>
         {children}
         <InlineActions
-          config={config}
           getActions={getActions}
           actionContext={actionContext}
           showTooltip={showTooltip}
           showMoreActionsFrom={showMoreActionsFrom}
         />
-      </>
+        <div ref={extraContentNodeRef} />
+      </div>
     );
   } else {
     return <>Not implemented</>;

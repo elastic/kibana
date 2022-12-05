@@ -17,6 +17,7 @@ import type {
   CoreStart,
   PluginInitializerContext,
   Plugin as IPlugin,
+  ScopedHistory,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -62,6 +63,7 @@ import type { State } from './common/store/types';
 import { createCopyToClipboardAction } from './actions/copy_to_clipboard';
 import { createFilterInAction } from './actions/filter_in';
 import { createFilterOutAction } from './actions/filter_out';
+import { createShowTopNAction } from './actions/show_top_n';
 /**
  * The Redux store type for the Security app.
  */
@@ -167,10 +169,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
         const { renderApp } = await this.lazyApplicationDependencies();
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
+        const store = await this.store(coreStart, startPlugins, subPlugins);
+        const services = await startServices(params);
+        this.registerUiActions(coreStart, startPlugins, store, services, params.history);
+
         return renderApp({
           ...params,
-          services: await startServices(params),
-          store: await this.store(coreStart, startPlugins, subPlugins),
+          services,
+          store,
           usageCollection: plugins.usageCollection,
           subPluginRoutes: getSubPluginRoutesByCapabilities(
             subPlugins,
@@ -267,7 +273,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     // Not using await to prevent blocking start execution
     this.registerAppLinks(core, plugins);
-    this.registerUiActions(core, plugins);
 
     return {};
   }
@@ -468,10 +473,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   /**
    * Register UI Actions.
    */
-  registerUiActions(core: CoreStart, plugins: StartPlugins) {
+  registerUiActions(
+    core: CoreStart,
+    plugins: StartPlugins,
+    store: SecurityAppStore,
+    services: StartServices,
+    history: ScopedHistory<unknown>
+  ) {
     const copyAction = createCopyToClipboardAction(core.notifications);
     const filterInAction = createFilterInAction(plugins.data.query.filterManager);
     const filterOutAction = createFilterOutAction(plugins.data.query.filterManager);
+    const showTopNAction = createShowTopNAction(store, services, history);
 
     plugins.uiActions.registerTrigger({
       id: 'test-security-solution-trigger',
@@ -480,5 +492,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     plugins.uiActions.addTriggerAction('test-security-solution-trigger', copyAction);
     plugins.uiActions.addTriggerAction('test-security-solution-trigger', filterInAction);
     plugins.uiActions.addTriggerAction('test-security-solution-trigger', filterOutAction);
+    plugins.uiActions.addTriggerAction('test-security-solution-trigger', showTopNAction);
   }
 }

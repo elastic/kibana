@@ -7,17 +7,16 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { ActionItem } from './cell_action_item';
 import { usePartitionActions } from '../hooks/actions';
 import { ExtraActionsPopOver } from './extra_actions_popover';
 import { ExtraActionsButton } from './extra_actions_button';
-import { CellActionConfig } from '.';
+import { CellActionExecutionContext } from '.';
 
 interface InlineActionsProps {
-  config: CellActionConfig;
   getActions: () => Promise<Action[]>;
-  actionContext: ActionExecutionContext;
+  actionContext: CellActionExecutionContext;
   showTooltip: boolean;
   showMoreActionsFrom: number;
 }
@@ -27,7 +26,6 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
   actionContext,
   showTooltip,
   showMoreActionsFrom,
-  config,
 }) => {
   const { extraActions, visibleActions } = usePartitionActions(getActions, showMoreActionsFrom);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -49,7 +47,6 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
           actions={extraActions}
           anchorRef={popOverAnchorRef}
           actionContext={actionContext}
-          config={config}
           button={button}
           closePopOver={closePopOver}
           isOpen={isPopoverOpen}

@@ -9,8 +9,9 @@
 import React, { useMemo } from 'react';
 
 // FIXME can't import plugin from package
-import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { EuiButtonIcon, EuiToolTip, IconType } from '@elastic/eui';
+import { CellActionExecutionContext } from '.';
 
 export const ActionItem = ({
   action,
@@ -18,7 +19,7 @@ export const ActionItem = ({
   showTooltip,
 }: {
   action: Action;
-  actionContext: ActionExecutionContext;
+  actionContext: CellActionExecutionContext;
   showTooltip: boolean;
 }) => {
   const actionProps = useMemo(
