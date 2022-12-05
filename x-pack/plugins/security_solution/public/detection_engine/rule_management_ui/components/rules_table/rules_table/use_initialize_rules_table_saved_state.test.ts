@@ -359,7 +359,10 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('does not restore the page number', () => {
-      mockRulesTablePersistedState({ urlState: null, storageState: { page: 10 } });
+      mockRulesTablePersistedState({
+        urlState: null,
+        storageState: { page: 10 } as unknown as RulesTableStorageSavedState,
+      });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
