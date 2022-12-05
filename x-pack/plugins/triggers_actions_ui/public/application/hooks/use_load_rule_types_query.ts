@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
@@ -18,6 +18,8 @@ interface UseLoadRuleTypesQueryProps {
 
 export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
   const { filteredRuleTypes } = props;
+  const [filteredIndex, setFilteredIndex] = useState<RuleTypeIndex>(() => new Map());
+
   const {
     http,
     notifications: { toasts },
@@ -35,24 +37,26 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
     );
   };
 
-  const { data = [], isLoading } = useQuery({
+  const { isLoading, isSuccess } = useQuery({
     queryKey: ['loadRuleTypes'],
     queryFn,
     onError: onErrorFn,
+    onSuccess: (data) => {
+      const index: RuleTypeIndex = new Map();
+      for (const ruleType of data) {
+        index.set(ruleType.id, ruleType);
+      }
+      let newFilteredIndex = index;
+      if (filteredRuleTypes && filteredRuleTypes.length > 0) {
+        newFilteredIndex = new Map(
+          [...index].filter(([k, v]) => {
+            return filteredRuleTypes.includes(v.id);
+          })
+        );
+      }
+      setFilteredIndex(newFilteredIndex);
+    },
   });
-
-  const index: RuleTypeIndex = new Map();
-  for (const ruleType of data) {
-    index.set(ruleType.id, ruleType);
-  }
-  let filteredIndex = index;
-  if (filteredRuleTypes && filteredRuleTypes.length > 0) {
-    filteredIndex = new Map(
-      [...index].filter(([k, v]) => {
-        return filteredRuleTypes.includes(v.id);
-      })
-    );
-  }
 
   const hasAnyAuthorizedRuleType = useMemo(() => {
     return filteredIndex.size > 0;
@@ -75,5 +79,6 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
     hasAnyAuthorizedRuleType,
     authorizedRuleTypes,
     authorizedToCreateAnyRules,
+    isSuccess,
   };
 };

@@ -121,8 +121,10 @@ const initialPercentileOptions = Object.values(Percentiles).map((percentile) => 
   key: percentile,
 }));
 
+const EMPTY_ARRAY: string[] = [];
+
 export const RulesList = ({
-  filteredRuleTypes = [],
+  filteredRuleTypes = EMPTY_ARRAY,
   showActionFilter = true,
   ruleDetailsRoute,
   showCreateRuleButton = true,
@@ -235,6 +237,7 @@ export const RulesList = ({
     hasAnyAuthorizedRuleType,
     authorizedRuleTypes,
     authorizedToCreateAnyRules,
+    isSuccess,
   } = useLoadRuleTypesQuery({ filteredRuleTypes });
 
   // Fetch action types
@@ -247,25 +250,28 @@ export const RulesList = ({
     return [filters.types, false];
   }, [filters.types, authorizedRuleTypes]);
 
-  // Fetch rules
-  const { rulesState, loadRules, noData, initialLoad } = useLoadRulesQuery({
-    filters: {
+  const computedFilter = useMemo(() => {
+    return {
       ...filters,
       types: rulesTypesFilter,
-    },
+    };
+  }, [filters, rulesTypesFilter]);
+
+  // Fetch rules
+  const { rulesState, loadRules, noData, initialLoad } = useLoadRulesQuery({
+    filters: computedFilter,
     hasDefaultRuleTypesFiltersOn,
     page,
     sort,
     onPage: setPage,
+    enabled: isSuccess,
   });
 
   // Fetch status aggregation
   const { loadRuleAggregations, rulesStatusesTotal, rulesLastRunOutcomesTotal } =
     useLoadRuleAggregationsQuery({
-      filters: {
-        ...filters,
-        types: rulesTypesFilter,
-      },
+      filters: computedFilter,
+      enabled: isSuccess,
     });
 
   // Fetch tags
@@ -316,7 +322,7 @@ export const RulesList = ({
   }, [ruleTypesState, rulesState.data, canExecuteActions, config]);
 
   useEffect(() => {
-    refreshRules();
+    // refreshRules();
   }, [refreshRules, refresh, percentileOptions]);
 
   const {

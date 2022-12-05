@@ -18,11 +18,11 @@ type UseLoadRulesQueryProps = Omit<LoadRulesProps, 'http'> & {
   onPage: (pagination: Pagination) => void;
   page: LoadRulesProps['page'];
   sort: LoadRulesProps['sort'];
+  enabled: boolean;
 };
 
 export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
-  const { filters, hasDefaultRuleTypesFiltersOn, page, sort, onPage } = props;
-
+  const { filters, hasDefaultRuleTypesFiltersOn, page, sort, onPage, enabled } = props;
   const {
     http,
     notifications: { toasts },
@@ -71,6 +71,7 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
         })
       );
     },
+    enabled,
   });
 
   const hasEmptyTypesFilter = hasDefaultRuleTypesFiltersOn ? true : isEmpty(filters.types);

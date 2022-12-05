@@ -24,10 +24,11 @@ const initializeAggregationResult = (values: readonly string[]) => {
 
 interface UseLoadRuleAggregationsQueryProps {
   filters: RulesListFilters;
+  enabled: boolean;
 }
 
 export const useLoadRuleAggregationsQuery = (props: UseLoadRuleAggregationsQueryProps) => {
-  const { filters } = props;
+  const { filters, enabled } = props;
 
   const {
     http,
@@ -77,6 +78,7 @@ export const useLoadRuleAggregationsQuery = (props: UseLoadRuleAggregationsQuery
     queryFn: internalLoadRuleAggregations,
     initialData,
     onError: onErrorFn,
+    enabled,
   });
 
   return {
