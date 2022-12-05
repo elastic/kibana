@@ -279,8 +279,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     },
   });
   const fieldsExistenceReader = useExistingFieldsReader();
-  const fieldsExistenceStatus =
-    fieldsExistenceReader.getFieldsExistenceStatus(currentIndexPatternId);
 
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
   const allFields = useMemo(() => {
@@ -326,7 +324,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     [localState]
   );
 
-  const hasFilters = Boolean(filters.length);
   const onOverrideFieldGroupDetails = useCallback(
     (groupName) => {
       if (groupName === FieldsGroupNames.AvailableFields) {
@@ -342,25 +339,20 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
                 defaultMessage:
                   'Drag and drop available fields to the workspace and create visualizations. To change the available fields, select a different data view, edit your queries, or use a different time range. Some field types cannot be visualized in Lens, including full text and geographic fields.',
               }),
-          isAffectedByGlobalFilter: hasFilters,
-        };
-      }
-      if (groupName === FieldsGroupNames.SelectedFields) {
-        return {
-          isAffectedByGlobalFilter: hasFilters,
         };
       }
     },
-    [core.uiSettings, hasFilters]
+    [core.uiSettings]
   );
 
-  const { fieldGroups } = useGroupedFields<IndexPatternField>({
+  const fieldListGroupedProps = useGroupedFields<IndexPatternField>({
     dataViewId: currentIndexPatternId,
     allFields,
     services: {
       dataViews,
     },
     fieldsExistenceReader,
+    isAffectedByGlobalFilter: Boolean(filters.length),
     onFilterField,
     onSupportedFieldFilter,
     onSelectedFieldFilter,
@@ -616,9 +608,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         </EuiFlexItem>
         <EuiFlexItem>
           <FieldListGrouped<IndexPatternField>
-            fieldGroups={fieldGroups}
-            fieldsExistenceStatus={fieldsExistenceStatus}
-            fieldsExistInIndex={!!allFields.length}
+            {...fieldListGroupedProps}
             renderFieldItem={renderFieldItem}
             screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
             data-test-subj="lnsIndexPattern"
