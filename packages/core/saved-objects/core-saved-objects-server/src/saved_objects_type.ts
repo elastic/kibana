@@ -14,6 +14,7 @@ import type { SavedObjectsTypeManagementDefinition } from './saved_objects_manag
 import type { SavedObjectsValidationMap } from './validation';
 import type { SavedObjectMigrationMap } from './migration';
 import type { SavedObjectsTypeMappingDefinition } from './mapping_definition';
+import type { SavedObjectsModelVersionMap, SavedObjectsModelVersionMapFn } from './model_version';
 
 /**
  * @public
@@ -56,14 +57,24 @@ export interface SavedObjectsType<Attributes = any> {
   mappings: SavedObjectsTypeMappingDefinition;
   /**
    * An optional map of {@link SavedObjectMigrationFn | migrations} or a function returning a map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
+   * @deprecated Will throw if registering migrations for version higher than 8.??.00
+   *             Use {@link SavedObjectsModelVersion | modelVersions} instead
    */
   migrations?: SavedObjectMigrationMap | (() => SavedObjectMigrationMap);
+  /**
+   * An optional map of {@link SavedObjectsModelVersion}
+   *
+   * @remarks After version 8.??.00, migrations are deprecated and using model versions instead
+   *          will be the only way to define mutation of data/schema for saved object types.
+   */
+  modelVersions?: SavedObjectsModelVersionMap | SavedObjectsModelVersionMapFn;
   /**
    * An optional schema that can be used to validate the attributes of the type.
    *
    * When provided, calls to {@link SavedObjectsClient.create | create} will be validated against this schema.
    *
    * See {@link SavedObjectsValidationMap} for more details.
+   * @todo: will need to be adapted for model versions too.
    */
   schemas?: SavedObjectsValidationMap | (() => SavedObjectsValidationMap);
   /**
@@ -113,6 +124,8 @@ export interface SavedObjectsType<Attributes = any> {
    * ```
    *
    * Note: migration function(s) can be optionally specified for any of these versions and will not interfere with the conversion process.
+   *
+   * @deprecated will no longer be usable after version 8.XX.0
    */
   convertToMultiNamespaceTypeVersion?: string;
   /**

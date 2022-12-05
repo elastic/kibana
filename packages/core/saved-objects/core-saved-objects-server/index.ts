@@ -88,3 +88,12 @@ export {
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
 } from './src/extensions/extensions';
+export type {
+  SavedObjectsModelVersion,
+  SavedObjectsModelVersionMap,
+  SavedObjectsModelVersionMapFn,
+  SavedObjectsModelVersionContract,
+  SavedObjectsModelVersionExpand,
+  SavedObjectModelMigration,
+  SavedObjectModelMigrationFn,
+} from './src/model_version';
