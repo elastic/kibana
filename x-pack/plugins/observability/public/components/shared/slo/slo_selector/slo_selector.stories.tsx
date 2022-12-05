@@ -13,12 +13,10 @@ import { SloSelector as Component } from './slo_selector';
 export default {
   component: Component,
   title: 'app/SLOs/Shared/SloSelector',
-  argTypes: {},
 };
 
 const Template: ComponentStory<typeof Component> = () => <Component />;
-
 const defaultProps = {};
 
-export const SloSelector = Template.bind({});
-SloSelector.args = defaultProps;
+export const Default = Template.bind({});
+Default.args = defaultProps;
