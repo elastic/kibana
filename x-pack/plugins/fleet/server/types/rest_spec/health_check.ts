@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { Maybe } from '../../../..';
+import { schema } from '@kbn/config-schema';
 
-export interface KpiHistogramData {
-  x?: Maybe<number>;
-  y?: Maybe<number>;
-}
+export const PostHealthCheckRequestSchema = {
+  body: schema.object({
+    host: schema.uri({ scheme: ['http', 'https'] }),
+  }),
+};
