@@ -15,7 +15,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { type AppLeaveHandler, AppStatus } from '@kbn/core-application-browser';
-import { CustomBranding } from '@kbn/core-chrome-browser-internal';
+import type { CustomBranding } from '@kbn/core-chrome-browser-internal';
 import type { Mounter } from '../types';
 import { AppContainer } from './app_container';
 import { CoreScopedHistory } from '../scoped_history';
