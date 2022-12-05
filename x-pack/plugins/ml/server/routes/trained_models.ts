@@ -21,7 +21,6 @@ import {
   huggingFaceImport,
   pipelineSimulateBody,
   updateDeploymentParamsSchema,
-  reindexSchema,
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
@@ -561,67 +560,5 @@ export function trainedModelsRoutes(
         return response.customError(wrapError(e));
       }
     })
-  );
-
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {post} /api/ml/trained_models/hugging_face_import Import hugging face trained model
-   * @apiName InferTrainedModelDeployment
-   * @apiDescription Import hugging face trained model.
-   */
-  router.post(
-    {
-      path: '/api/ml/trained_models/re_index',
-      validate: {
-        body: reindexSchema,
-      },
-      options: {
-        tags: ['access:ml:canTestTrainedModels'],
-      },
-    },
-    routeGuard.fullLicenseAPIGuard(
-      async ({ client, mlClient, request, response, getDataViewsService }) => {
-        const { sourceIndexName, destIndexName, pipelineDescription, pipelineId, processors } =
-          request.body;
-
-        await client.asCurrentUser.ingest.putPipeline({
-          id: pipelineId,
-          ...(pipelineDescription !== '' && pipelineDescription !== undefined
-            ? { description: pipelineDescription }
-            : {}),
-          processors,
-        });
-
-        if (sourceIndexName && destIndexName) {
-          const qq = await client.asCurrentUser.reindex({
-            source: {
-              index: sourceIndexName,
-            },
-            dest: {
-              index: destIndexName,
-              pipeline: pipelineId,
-            },
-            wait_for_completion: true,
-          });
-        }
-        const dataViewsService = await getDataViewsService();
-        const ss = await dataViewsService.createAndSave(
-          {
-            allowNoIndex: true,
-            namespaces: ['*'],
-            timeFieldName: '@timestamp',
-            title: destIndexName,
-          },
-          true
-        );
-
-        try {
-          return response.ok({ body: { success: true, dataviewId: ss.id } });
-        } catch (e) {
-          return response.customError(wrapError(e));
-        }
-      }
-    )
   );
 }

@@ -54,14 +54,6 @@ export const huggingFaceImport = schema.object({
   start: schema.boolean(),
 });
 
-export const reindexSchema = schema.object({
-  processors: schema.any(),
-  pipelineId: schema.string(),
-  pipelineDescription: schema.string(),
-  sourceIndexName: schema.string(),
-  destIndexName: schema.string(),
-});
-
 export const pipelineSimulateBody = schema.object({
   pipeline: schema.any(),
   docs: schema.arrayOf(schema.any()),
