@@ -281,7 +281,8 @@ const RunOsqueryButtonRenderer = ({
     );
     const expandedEventObject = expandDottedObject(fieldsMap);
 
-    return replaceParamsQuery(configuration.query, expandedEventObject);
+    const { result } = replaceParamsQuery(configuration.query, expandedEventObject);
+    return result;
   }, [configuration.query, data]);
 
   return (
