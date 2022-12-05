@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { apm, timerange } from '../..';
+import { apm } from '../..';
 import { Scenario } from '../cli/scenario';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { ApmFields } from '../lib/apm/apm_fields';
@@ -16,8 +16,7 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   return {
-    generate: ({ from, to }) => {
-      const range = timerange(from, to);
+    generate: ({ range }) => {
       const timestamps = range.ratePerMinute(180);
 
       const cloudFields: ApmFields = {

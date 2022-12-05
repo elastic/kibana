@@ -81,7 +81,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceC.transaction({ transactionName: 'GET /api' }).duration(1000).timestamp(timestamp)
         );
 
-      await synthtraceEsClient.index(eventsWithinTimerange.merge(eventsOutsideOfTimerange));
+      await synthtraceEsClient.index([eventsWithinTimerange, eventsOutsideOfTimerange]);
     });
 
     after(() => synthtraceEsClient.clean());

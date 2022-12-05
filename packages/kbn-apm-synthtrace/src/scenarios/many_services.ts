@@ -8,7 +8,7 @@
 
 import { flatten, random } from 'lodash';
 
-import { apm, timerange } from '../..';
+import { apm } from '../..';
 import { Scenario } from '../cli/scenario';
 import { getLogger } from '../cli/utils/get_common_services';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
@@ -32,9 +32,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   };
 
   return {
-    generate: ({ from, to }) => {
-      const range = timerange(from, to);
-
+    generate: ({ range }) => {
       const successfulTimestamps = range.ratePerMinute(180);
 
       const instances = flatten(
@@ -104,12 +102,11 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         return successfulTraceEvents;
       };
 
-      return instances
-        .flatMap((instance) => urls.map((url) => ({ instance, url })))
-        .map(({ instance, url }) =>
-          logger.perf('generating_apm_events', () => instanceSpans(instance, url))
-        )
-        .reduce((p, c) => p.merge(c));
+      return logger.perf('generating_apm_events', () =>
+        instances
+          .flatMap((instance) => urls.map((url) => ({ instance, url })))
+          .map(({ instance, url }) => instanceSpans(instance, url))
+      );
     },
   };
 };

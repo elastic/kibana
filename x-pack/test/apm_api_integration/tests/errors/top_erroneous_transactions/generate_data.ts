@@ -39,34 +39,34 @@ export async function generateData({
 
   const { firstTransaction, secondTransaction } = config;
 
-  const documents = [firstTransaction, secondTransaction].map((transaction) => {
-    return timerange(start, end)
-      .interval(interval)
-      .rate(transaction.successRate)
-      .generator((timestamp) =>
-        serviceGoProdInstance
-          .transaction({ transactionName: transaction.name })
-          .timestamp(timestamp)
-          .duration(1000)
-          .success()
-      )
-      .merge(
-        timerange(start, end)
-          .interval(interval)
-          .rate(transaction.failureRate)
-          .generator((timestamp) =>
-            serviceGoProdInstance
-              .transaction({ transactionName: transaction.name })
-              .errors(
-                serviceGoProdInstance
-                  .error({ message: 'Error 1', type: transaction.name, groupingName: 'Error test' })
-                  .timestamp(timestamp)
-              )
-              .duration(1000)
-              .timestamp(timestamp)
-              .failure()
-          )
-      );
+  const documents = [firstTransaction, secondTransaction].flatMap((transaction) => {
+    return [
+      timerange(start, end)
+        .interval(interval)
+        .rate(transaction.successRate)
+        .generator((timestamp) =>
+          serviceGoProdInstance
+            .transaction({ transactionName: transaction.name })
+            .timestamp(timestamp)
+            .duration(1000)
+            .success()
+        ),
+      timerange(start, end)
+        .interval(interval)
+        .rate(transaction.failureRate)
+        .generator((timestamp) =>
+          serviceGoProdInstance
+            .transaction({ transactionName: transaction.name })
+            .errors(
+              serviceGoProdInstance
+                .error({ message: 'Error 1', type: transaction.name, groupingName: 'Error test' })
+                .timestamp(timestamp)
+            )
+            .duration(1000)
+            .timestamp(timestamp)
+            .failure()
+        ),
+    ];
   });
 
   await synthtraceEsClient.index(documents);

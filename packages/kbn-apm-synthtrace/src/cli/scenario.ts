@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { Readable } from 'stream';
+import { Timerange } from '../lib/timerange';
+import { SynthtraceGenerator } from '../types';
 import { RunOptions } from './utils/parse_run_cli_flags';
-import { EntityIterable } from '../lib/entity_iterable';
 
-type Generate<TFields> = (range: { from: Date; to: Date }) => EntityIterable<TFields>;
+type Generate<TFields> = (options: {
+  range: Timerange;
+}) => SynthtraceGenerator<TFields> | Array<SynthtraceGenerator<TFields>> | Readable;
 export type Scenario<TFields> = (options: RunOptions) => Promise<{
   generate: Generate<TFields>;
-  mapToIndex?: (data: Record<string, any>) => string;
 }>;

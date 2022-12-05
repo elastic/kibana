@@ -9,13 +9,12 @@
 export { timerange } from './src/lib/timerange';
 export { apm } from './src/lib/apm';
 export { dedot } from './src/lib/utils/dedot';
-export { stackMonitoring } from './src/lib/stack_monitoring';
 export { observer } from './src/lib/agent_config';
-export { cleanWriteTargets } from './src/lib/utils/clean_write_targets';
 export { createLogger, LogLevel } from './src/lib/utils/create_logger';
 
+export type { SynthtraceGenerator } from './src/types';
 export type { Fields } from './src/lib/entity';
 export type { ApmFields } from './src/lib/apm/apm_fields';
-export type { ApmException, ApmSynthtraceEsClient } from './src/lib/apm';
-export type { EntityIterable } from './src/lib/entity_iterable';
-export { EntityArrayIterable } from './src/lib/entity_iterable';
+export type { ApmException } from './src/lib/apm';
+export type { Serializable } from './src/lib/serializable';
+export { ApmSynthtraceEsClient, ApmSynthtraceKibanaClient } from './src/lib/apm';

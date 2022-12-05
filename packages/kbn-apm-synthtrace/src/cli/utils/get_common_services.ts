@@ -7,7 +7,6 @@
  */
 
 import { Client, ClientOptions } from '@elastic/elasticsearch';
-import { ApmSynthtraceApmClient } from '../../lib/apm/client/apm_synthtrace_apm_client';
 import { ApmSynthtraceEsClient } from '../../lib/apm/client/apm_synthtrace_es_client';
 import { createLogger, Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
@@ -16,18 +15,8 @@ export function getLogger({ logLevel }: RunOptions) {
   return createLogger(logLevel);
 }
 
-export function getCommonServices(
-  { target, cloudId, apm, username, password, logLevel, forceLegacyIndices }: RunOptions,
-  logger?: Logger
-) {
-  if (!target && !cloudId) {
-    throw Error('target or cloudId needs to be specified');
-  }
-  const options: ClientOptions = !!target ? { node: target } : { cloud: { id: cloudId! } };
-  options.auth = {
-    username,
-    password,
-  };
+export function getCommonServices({ target, logLevel }: RunOptions, logger?: Logger) {
+  const options: ClientOptions = { node: target };
   // Useful when debugging trough mitmproxy
   /*
   options.Connection = HttpConnection;
@@ -41,16 +30,11 @@ export function getCommonServices(
 
   logger = logger ?? createLogger(logLevel);
 
-  const apmEsClient = new ApmSynthtraceEsClient(client, logger, {
-    forceLegacyIndices,
-    refreshAfterIndex: false,
-  });
-  const apmIntakeClient = apm ? new ApmSynthtraceApmClient(apm, logger) : null;
+  const apmEsClient = new ApmSynthtraceEsClient({ client, logger });
 
   return {
     logger,
     apmEsClient,
-    apmIntakeClient,
   };
 }
 

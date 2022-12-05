@@ -98,7 +98,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .timestamp(timestamp);
         });
 
-      await synthtraceClient.index(eventsWithinTimerange.merge(eventsOutsideOfTimerange));
+      await synthtraceClient.index([eventsWithinTimerange, eventsOutsideOfTimerange]);
 
       await createAndRunApmMlJobs({ es, ml, environments: ['production', 'development'] });
     });

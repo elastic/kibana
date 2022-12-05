@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-export interface Fields {
+export type Fields<TMeta extends Record<string, any> | undefined = undefined> = {
   '@timestamp'?: number;
-}
+} & (TMeta extends undefined ? {} : Partial<{ meta: TMeta }>);
 
 export class Entity<TFields extends Fields> {
   constructor(public readonly fields: TFields) {

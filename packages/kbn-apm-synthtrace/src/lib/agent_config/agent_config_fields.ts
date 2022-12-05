@@ -14,7 +14,9 @@ export type AgentConfigFields = Pick<
   | 'processor.event'
   | 'processor.name'
   | 'metricset.name'
-  | 'observer'
+  | 'observer.version'
+  | 'observer.type'
+  | 'observer.version_major'
   | 'ecs.version'
   | 'event.ingested'
 > &

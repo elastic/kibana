@@ -5,21 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-// import pLimit from 'p-limit';
-import { workerData, parentPort } from 'worker_threads';
-import { RunOptions } from './parse_run_cli_flags';
-import { getScenario } from './get_scenario';
-import { StreamToBulkOptions } from '../../lib/apm/client/apm_synthtrace_es_client';
-import { getCommonServices } from './get_common_services';
+import { parentPort, workerData } from 'worker_threads';
+import { Fields } from '../../..';
+import { timerange } from '../../lib/timerange';
 import { LogLevel } from '../../lib/utils/create_logger';
-import { StreamProcessor } from '../../lib/stream_processor';
 import { Scenario } from '../scenario';
-import { EntityIterable, Fields } from '../../..';
-import { StreamAggregator } from '../../lib/stream_aggregator';
-import { ServicMetricsAggregator } from '../../lib/apm/aggregators/service_metrics_aggregator';
+import { getCommonServices } from './get_common_services';
+import { getScenario } from './get_scenario';
+import { RunOptions } from './parse_run_cli_flags';
 
 // logging proxy to main thread, ensures we see real time logging
-const l = {
+const loggerProxy = {
   perf: <T extends any>(name: string, cb: () => T): T => {
     return cb();
   },
@@ -36,55 +32,25 @@ export interface WorkerData {
   version: string;
 }
 
-const { bucketFrom, bucketTo, runOptions, workerIndex, version } = workerData as WorkerData;
+const { bucketFrom, bucketTo, runOptions } = workerData as WorkerData;
 
-const { logger, apmEsClient, apmIntakeClient } = getCommonServices(runOptions, l);
+const { logger, apmEsClient } = getCommonServices(runOptions, loggerProxy);
 const file = runOptions.file;
 let scenario: Scenario<Fields>;
-let events: EntityIterable<Fields>;
-let streamToBulkOptions: StreamToBulkOptions;
-let streamProcessor: StreamProcessor;
+let generators: ReturnType<Awaited<ReturnType<Scenario<Fields>>>['generate']>;
 
 async function setup() {
   scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
-  const { generate, mapToIndex } = await scenario(runOptions);
+  const { generate } = await scenario(runOptions);
 
-  events = logger.perf('generate_scenario', () => generate({ from: bucketFrom, to: bucketTo }));
-  streamToBulkOptions = {
-    maxDocs: runOptions.maxDocs,
-    mapToIndex,
-    dryRun: !!runOptions.dryRun,
-  };
-  streamToBulkOptions.itemStartStopCallback = (item, done) => {
-    if (!item) return;
-    if (!done) {
-      parentPort?.postMessage({ workerIndex, firstTimestamp: item['@timestamp'] });
-    } else {
-      parentPort?.postMessage({ workerIndex, lastTimestamp: item['@timestamp'] });
-    }
-  };
-  const aggregators: StreamAggregator[] = [new ServicMetricsAggregator()];
-  // If we are sending data to apm-server we do not have to create any aggregates in the stream processor
-  streamProcessor = new StreamProcessor({
-    version,
-    processors: apmIntakeClient ? [] : StreamProcessor.apmProcessors,
-    streamAggregators: apmIntakeClient ? [] : aggregators,
-    maxSourceEvents: runOptions.maxDocs,
-    logger: l,
-    processedCallback: (processedDocuments) => {
-      parentPort!.postMessage({ workerIndex, processedDocuments });
-    },
-    name: `Worker ${workerIndex}`,
-  });
+  generators = logger.perf('generate_scenario', () =>
+    generate({ range: timerange(bucketFrom, bucketTo) })
+  );
 }
 
 async function doWork() {
   await logger.perf('index_scenario', async () => {
-    if (apmIntakeClient) {
-      await apmIntakeClient.index(events, streamToBulkOptions, streamProcessor);
-    } else {
-      await apmEsClient.index(events, streamToBulkOptions, streamProcessor);
-    }
+    await apmEsClient.index(generators);
   });
 }
 
@@ -97,7 +63,7 @@ parentPort!.on('message', async (message) => {
       await doWork();
       process.exit(0);
     } catch (error) {
-      l.info(error);
+      loggerProxy.info(error);
       process.exit(2);
     }
   }

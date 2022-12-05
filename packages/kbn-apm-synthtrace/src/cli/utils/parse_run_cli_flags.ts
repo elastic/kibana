@@ -37,7 +37,7 @@ function getParsedFile(flags: RunCliFlags) {
   throw new Error(`Could not find scenario file: "${parsedFile}"`);
 }
 
-export function parseRunCliFlags(flags: RunCliFlags) {
+export function parseRunCliFlags(flags: RunCliFlags & { target: string }) {
   const { logLevel } = flags;
   const parsedFile = getParsedFile(flags);
 
@@ -61,25 +61,7 @@ export function parseRunCliFlags(flags: RunCliFlags) {
   }
 
   return {
-    ...pick(
-      flags,
-      'maxDocs',
-      'maxDocsConfidence',
-      'target',
-      'apm',
-      'cloudId',
-      'username',
-      'password',
-      'workers',
-      'flushSizeBulk',
-      'flushSize',
-      'numShards',
-      'scenarioOpts',
-      'forceLegacyIndices',
-      'dryRun',
-      'gcpRepository',
-      'streamProcessors'
-    ),
+    ...pick(flags, 'target', 'workers', 'scenarioOpts'),
     logLevel: parsedLogLevel,
     file: parsedFile,
   };

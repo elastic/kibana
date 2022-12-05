@@ -7,7 +7,7 @@
  */
 
 import { random } from 'lodash';
-import { apm, timerange } from '../..';
+import { apm } from '../..';
 import { ApmFields } from '../lib/apm/apm_fields';
 import { Instance } from '../lib/apm/instance';
 import { Scenario } from '../cli/scenario';
@@ -24,13 +24,10 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const services = ['web', 'order-processing', 'api-backend'];
 
   return {
-    generate: ({ from, to }) => {
-      const range = timerange(from, to);
-
+    generate: ({ range }) => {
       const successfulTimestamps = range.ratePerMinute(60);
-      // `.randomize(3, 180);
 
-      const instances = services.map((service, index) =>
+      const instances = services.map((serviceName, index) =>
         apm
           .service({
             name: `${services[index % services.length]}-${
@@ -87,12 +84,11 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         return successfulTraceEvents;
       };
 
-      return instances
-        .flatMap((instance) => urls.map((url) => ({ instance, url })))
-        .map(({ instance, url }, index) =>
-          logger.perf('generating_apm_events', () => instanceSpans(instance, url, index))
-        )
-        .reduce((p, c) => p.merge(c));
+      return logger.perf('generating_apm_events', () =>
+        instances
+          .flatMap((instance) => urls.map((url) => ({ instance, url })))
+          .map(({ instance, url }, index) => instanceSpans(instance, url, index))
+      );
     },
   };
 };

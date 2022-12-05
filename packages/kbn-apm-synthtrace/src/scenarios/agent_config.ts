@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { observer, timerange } from '../..';
+import { observer } from '../..';
 import { Scenario } from '../cli/scenario';
 import { getLogger } from '../cli/utils/get_common_services';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
@@ -16,10 +16,9 @@ const scenario: Scenario<AgentConfigFields> = async (runOptions: RunOptions) => 
   const logger = getLogger(runOptions);
 
   return {
-    generate: ({ from, to }) => {
+    generate: ({ range }) => {
       const agentConfig = observer().agentConfig();
 
-      const range = timerange(from, to);
       return range
         .interval('30s')
         .rate(1)

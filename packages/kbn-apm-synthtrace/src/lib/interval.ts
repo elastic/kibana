@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { castArray } from 'lodash';
 import moment, { unitOfTime } from 'moment';
-import { random } from 'lodash';
-import { EntityIterable } from './entity_iterable';
-import { EntityGenerator } from './entity_generator';
+import { SynthtraceGenerator } from '../types';
+import { Fields } from './entity';
 import { Serializable } from './serializable';
 
 export function parseInterval(interval: string): {
@@ -25,98 +25,58 @@ export function parseInterval(interval: string): {
   };
 }
 
-export interface IntervalOptions {
+interface IntervalOptions {
   from: Date;
   to: Date;
   interval: string;
-  yieldRate?: number;
-
-  intervalUpper?: number;
-  rateUpper?: number;
+  rate?: number;
 }
 
-export class Interval implements Iterable<number> {
-  constructor(public readonly options: IntervalOptions) {
+export class Interval<TFields = Fields> {
+  private readonly intervalAmount: number;
+  private readonly intervalUnit: unitOfTime.DurationConstructor;
+
+  private readonly _rate: number;
+  constructor(private readonly options: IntervalOptions) {
     const { intervalAmount, intervalUnit } = parseInterval(options.interval);
     this.intervalAmount = intervalAmount;
     this.intervalUnit = intervalUnit;
-    this.from = this.options.from;
-    this.to = this.options.to;
+    this._rate = options.rate || 1;
   }
-  public readonly from: Date;
-  public readonly to: Date;
 
-  private readonly intervalAmount: number;
-  private readonly intervalUnit: unitOfTime.DurationConstructor;
-  generator<TField>(
-    map: (timestamp: number, index?: number) => Serializable<TField> | Array<Serializable<TField>>
-  ): EntityIterable<TField> {
-    return new EntityGenerator(this, function* (i) {
-      let index = 0;
-      for (const x of i) {
-        const data = map(x, index);
-        if (Array.isArray(data)) {
-          yield* data;
-        } else {
-          yield data;
-        }
-        index++;
+  *generator<TGeneratedFields = TFields>(
+    map: (
+      timestamp: number,
+      index: number
+    ) => Serializable<TGeneratedFields> | Array<Serializable<TGeneratedFields>>
+  ): SynthtraceGenerator<TGeneratedFields> {
+    const from = this.options.from.getTime();
+    const to = this.options.to.getTime();
+
+    let time: number = from;
+    const diff = moment.duration(this.intervalAmount, this.intervalUnit).asMilliseconds();
+
+    const timestamps: number[] = [];
+
+    const rates = new Array(this._rate);
+
+    while (time < to) {
+      timestamps.push(...rates.fill(time));
+      time += diff;
+    }
+
+    let index: number = 0;
+
+    for (const timestamp of timestamps) {
+      const events = castArray(map(timestamp, index));
+      index++;
+      for (const event of events) {
+        yield event;
       }
-    });
-  }
-  rate(rate: number): Interval {
-    return new Interval({ ...this.options, yieldRate: rate });
-  }
-
-  randomize(rateUpper: number, intervalUpper: number): Interval {
-    return new Interval({ ...this.options, intervalUpper, rateUpper });
-  }
-
-  estimatedRatePerMinute(): number {
-    const rate = this.options.rateUpper
-      ? Math.max(1, this.options.rateUpper)
-      : this.options.yieldRate ?? 1;
-
-    const interval = this.options.intervalUpper ? this.options.intervalUpper : this.intervalAmount;
-    const first = moment();
-    const last = moment(first).subtract(interval, this.intervalUnit);
-    const numberOfMinutes =
-      (Math.abs(last.toDate().getTime() - first.toDate().getTime()) / (1000 * 60)) % 60;
-    return rate / numberOfMinutes;
-  }
-
-  private yieldRateTimestamps(timestamp: number) {
-    const rate = this.options.rateUpper
-      ? random(this.options.yieldRate ?? 1, Math.max(1, this.options.rateUpper))
-      : this.options.yieldRate ?? 1;
-    return new Array<number>(rate).fill(timestamp);
-  }
-
-  private *_generate(): Iterable<number> {
-    if (this.from > this.to) {
-      let now = this.from;
-      do {
-        yield* this.yieldRateTimestamps(now.getTime());
-        const amount = this.interval();
-        now = new Date(moment(now).subtract(amount, this.intervalUnit).valueOf());
-      } while (now > this.to);
-    } else {
-      let now = this.from;
-      do {
-        yield* this.yieldRateTimestamps(now.getTime());
-        const amount = this.interval();
-        now = new Date(moment(now).add(amount, this.intervalUnit).valueOf());
-      } while (now < this.to);
     }
   }
 
-  private interval() {
-    return this.options.intervalUpper
-      ? random(this.intervalAmount, this.options.intervalUpper)
-      : this.intervalAmount;
-  }
-
-  [Symbol.iterator]() {
-    return this._generate()[Symbol.iterator]();
+  rate(rate: number): Interval {
+    return new Interval({ ...this.options, rate });
   }
 }

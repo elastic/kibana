@@ -4,34 +4,49 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import url from 'url';
 import {
-  apm,
   createLogger,
-  EntityArrayIterable,
   LogLevel,
+  ApmSynthtraceKibanaClient,
+  ApmSynthtraceEsClient,
 } from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
-import { some } from 'lodash';
 import del from 'del';
+import { some } from 'lodash';
+import { Readable } from 'stream';
 
-export function setupNodeEvents(
+export async function setupNodeEvents(
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ) {
+  const logger = createLogger(LogLevel.info);
+
+  const apmKibanaClient = new ApmSynthtraceKibanaClient({
+    logger,
+  });
+
   const client = createEsClientForTesting({
     esUrl: config.env.ES_NODE,
     requestTimeout: config.env.ES_REQUEST_TIMEOUT,
     isCloud: !!config.env.TEST_CLOUD,
   });
 
-  const synthtraceEsClient = new apm.ApmSynthtraceEsClient(
+  const esUrl = url.parse(config.env.ES_NODE);
+
+  const kibanaUrl = url
+    .format({
+      ...url.parse(config.env.KIBANA_URL),
+      auth: esUrl.auth,
+    })
+    .slice(0, -1);
+
+  const synthtraceEsClient = new ApmSynthtraceEsClient({
     client,
-    createLogger(LogLevel.info),
-    {
-      forceLegacyIndices: false,
-      refreshAfterIndex: true,
-    }
-  );
+    logger,
+    refreshAfterIndex: true,
+    version: await apmKibanaClient.fetchLatestApmPackageVersion(kibanaUrl),
+  });
 
   on('task', {
     // send logs to node process
@@ -42,7 +57,7 @@ export function setupNodeEvents(
     },
 
     'synthtrace:index': async (events: Array<Record<string, any>>) => {
-      await synthtraceEsClient.index(new EntityArrayIterable(events));
+      await synthtraceEsClient.index(Readable.from(events));
       return null;
     },
     'synthtrace:clean': async () => {

@@ -8,6 +8,8 @@
 import { defineConfig } from 'cypress';
 import { setupNodeEvents } from './setup_cypress_node_events';
 
+const baseUrl = 'http://localhost:5601';
+
 module.exports = defineConfig({
   projectId: 'omwh6f',
   fileServerFolder: './cypress',
@@ -28,8 +30,10 @@ module.exports = defineConfig({
     runMode: 1,
   },
   e2e: {
-    setupNodeEvents,
-    baseUrl: 'http://localhost:5601',
+    setupNodeEvents: (on, config) => {
+      setupNodeEvents(on, config, baseUrl);
+    },
+    baseUrl,
     supportFile: './cypress/support/e2e.ts',
     specPattern: './cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     experimentalSessionAndOrigin: false,

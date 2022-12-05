@@ -5,16 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import moment from 'moment';
-import { Worker } from 'worker_threads';
-import Path from 'path';
 import { range } from 'lodash';
-import pLimit from 'p-limit';
+import moment from 'moment';
 import { cpus } from 'os';
-import { RunOptions } from './parse_run_cli_flags';
-import { getScenario } from './get_scenario';
+import pLimit from 'p-limit';
+import Path from 'path';
+import { Worker } from 'worker_threads';
 import { ApmSynthtraceEsClient, LogLevel } from '../../..';
 import { Logger } from '../../lib/utils/create_logger';
+import { RunOptions } from './parse_run_cli_flags';
 
 export async function startHistoricalDataUpload(
   esClient: ApmSynthtraceEsClient,
@@ -24,13 +23,6 @@ export async function startHistoricalDataUpload(
   to: Date,
   version: string
 ) {
-  // if we want to generate a maximum number of documents reverse generation to descend.
-  [from, to] = runOptions.maxDocs ? [to, from] : [from, to];
-
-  const file = runOptions.file;
-  const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
-  const { generate } = await scenario(runOptions);
-
   const cores = cpus().length;
   // settle on a reasonable max concurrency arbitrarily capping at 10.
   let maxConcurrency = Math.min(10, cores - 1);
@@ -53,28 +45,17 @@ export async function startHistoricalDataUpload(
     );
   }
 
-  const events = logger.perf('generate_scenario', () => generate({ from, to }));
-  const ratePerMinute = events.estimatedRatePerMinute();
-  logger.info(
-    `Scenario is generating ${ratePerMinute.toLocaleString()} events per minute interval`
-  );
-  let rangeEnd = to;
-  if (runOptions.maxDocs) {
-    // estimate a more accurate range end for when --maxDocs is specified
-    rangeEnd = moment(from)
-      // estimatedRatePerMinute() is not exact if the generator is yielding variable documents
-      // the rate is calculated by peeking the first yielded event and its children.
-      // for real complex cases manually specifying --to is encouraged.
-      .subtract((runOptions.maxDocs / ratePerMinute) * runOptions.maxDocsConfidence, 'm')
-      .toDate();
-  }
+  const rangeEnd = to;
+
   const diff = moment(from).diff(rangeEnd);
   const d = moment.duration(Math.abs(diff), 'ms');
   logger.info(
     `Range: ${d.years()} days ${d.days()} days, ${d.hours()} hours ${d.minutes()} minutes ${d.seconds()} seconds`
   );
+
   // make sure ranges cover at least 100k documents
-  const minIntervalSpan = moment.duration(100000 / ratePerMinute, 'm');
+  const minIntervalSpan = moment.duration(60, 'm');
+
   const minNumberOfRanges = d.asMilliseconds() / minIntervalSpan.asMilliseconds();
   if (minNumberOfRanges < maxWorkers) {
     maxWorkers = Math.max(1, Math.floor(minNumberOfRanges));
@@ -91,18 +72,9 @@ export async function startHistoricalDataUpload(
 
   logger.info(`Generating data from ${from.toISOString()} to ${rangeEnd.toISOString()}`);
 
-  type WorkerMessages =
-    | { log: LogLevel; args: any[] }
-    | { workerIndex: number; processedDocuments: number }
-    | { workerIndex: number; firstTimestamp: Date }
-    | { workerIndex: number; lastTimestamp: Date };
-
-  interface WorkerTotals {
-    total: number;
-    bucketFrom: Date;
-    bucketTo: Date;
-    firstTimestamp?: Date;
-    lastTimestamp?: Date;
+  interface WorkerMessages {
+    log: LogLevel;
+    args: any[];
   }
 
   function rangeStep(interval: number) {
@@ -121,13 +93,6 @@ export async function startHistoricalDataUpload(
       bucketTo: rangeStep(interval + intervalSpan),
     }));
 
-  // precalculate interval state for each worker to report on.
-  let totalProcessed = 0;
-  const workerProcessed = range(0, maxWorkers).reduce<Record<number, WorkerTotals>>((p, c, i) => {
-    p[i] = { total: 0, bucketFrom: intervals[i].bucketFrom, bucketTo: intervals[i].bucketTo };
-    return p;
-  }, {});
-
   function runService({
     bucketFrom,
     bucketTo,
@@ -139,15 +104,6 @@ export async function startHistoricalDataUpload(
   }) {
     return new Promise((resolve, reject) => {
       logger.info(`Setting up Worker: ${workerIndex}`);
-      if (runOptions.maxDocs && totalProcessed >= runOptions.maxDocs + 10000) {
-        logger.info(
-          `Worker ${workerIndex} has no need to run since ${totalProcessed} documents were already processed `
-        );
-        return resolve(null);
-      }
-      const progressToConsole = runOptions?.maxDocs
-        ? Math.min(2000000, runOptions.maxDocs / 20)
-        : 2000000;
       const worker = new Worker(Path.join(__dirname, './worker.js'), {
         workerData: {
           runOptions,
@@ -158,36 +114,21 @@ export async function startHistoricalDataUpload(
         },
       });
       worker.on('message', (message: WorkerMessages) => {
-        if ('workerIndex' in message) {
-          if ('processedDocuments' in message) {
-            totalProcessed += message.processedDocuments;
-            workerProcessed[workerIndex].total += message.processedDocuments;
-            const check = Math.round(totalProcessed / 10000) * 10000;
-            if (check % progressToConsole === 0) {
-              logger.info(`processed: ${totalProcessed} documents`);
-            }
-          }
-          if ('firstTimestamp' in message)
-            workerProcessed[message.workerIndex].firstTimestamp = message.firstTimestamp;
-          if ('lastTimestamp' in message)
-            workerProcessed[message.workerIndex].lastTimestamp = message.lastTimestamp;
-        } else {
-          switch (message.log) {
-            case LogLevel.debug:
-              logger.debug.apply({}, message.args);
-              return;
-            case LogLevel.info:
-              logger.info.apply({}, message.args);
-              return;
-            case LogLevel.trace:
-              logger.debug.apply({}, message.args);
-              return;
-            case LogLevel.error:
-              logger.error.apply({}, message.args);
-              return;
-            default:
-              logger.info(message);
-          }
+        switch (message.log) {
+          case LogLevel.debug:
+            logger.debug.apply({}, message.args);
+            return;
+          case LogLevel.info:
+            logger.info.apply({}, message.args);
+            return;
+          case LogLevel.trace:
+            logger.debug.apply({}, message.args);
+            return;
+          case LogLevel.error:
+            logger.error.apply({}, message.args);
+            return;
+          default:
+            logger.info(message);
         }
       });
       worker.on('error', (message) => {
@@ -208,15 +149,7 @@ export async function startHistoricalDataUpload(
 
   const limiter = pLimit(Math.max(1, Math.floor(intervals.length / 2)));
   const workers = range(0, intervals.length).map((index) => () => runService(intervals[index]));
-  return Promise.all(workers.map((worker) => limiter(() => worker())))
-    .then(async () => {
-      if (!runOptions.dryRun) {
-        await esClient.refresh(runOptions.apm ? ['metrics-apm.service-*'] : []);
-      }
-    })
-    .then(() => {
-      // eslint-disable-next-line no-console
-      console.table(workerProcessed);
-      logger.info(`Finished producing ${totalProcessed} events`);
-    });
+  return Promise.all(workers.map((worker) => limiter(() => worker()))).then(async () => {
+    await esClient.refresh();
+  });
 }

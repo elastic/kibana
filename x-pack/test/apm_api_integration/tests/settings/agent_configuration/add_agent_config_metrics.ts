@@ -18,13 +18,16 @@ export async function addAgentConfigMetrics({
   end: number;
   etag?: string;
 }) {
-  const agentConfig = observer().agentConfig();
-
   const agentConfigEvents = [
     timerange(start, end)
       .interval('1m')
       .rate(1)
-      .generator((timestamp) => agentConfig.etag(etag ?? 'test-etag').timestamp(timestamp)),
+      .generator((timestamp) =>
+        observer()
+          .agentConfig()
+          .etag(etag ?? 'test-etag')
+          .timestamp(timestamp)
+      ),
   ];
 
   await synthtraceEsClient.index(agentConfigEvents);

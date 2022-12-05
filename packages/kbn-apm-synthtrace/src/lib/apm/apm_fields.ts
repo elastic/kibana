@@ -41,7 +41,9 @@ export interface Observer {
   version_major: number;
 }
 
-export type ApmFields = Fields &
+export type ApmFields = Fields<{
+  'metricset.id': string;
+}> &
   Partial<{
     'timestamp.us'?: number;
     'agent.name': string;
@@ -56,15 +58,18 @@ export type ApmFields = Fields &
     'error.exception': ApmException[];
     'error.grouping_name': string;
     'error.grouping_key': string;
-    'host.name': string;
     'host.architecture': string;
     'host.hostname': string;
+    'host.name': string;
+    'host.os.platform': string;
     'http.request.method': string;
     'http.response.status_code': number;
     'kubernetes.pod.uid': string;
     'kubernetes.pod.name': string;
     'metricset.name': string;
-    observer: Observer;
+    'observer.type': string;
+    'observer.version': string;
+    'observer.version_major': number;
     'parent.id': string;
     'processor.event': string;
     'processor.name': string;
@@ -77,11 +82,13 @@ export type ApmFields = Fields &
       values: number[];
       counts: number[];
     };
+    'transaction.result': string;
     'transaction.sampled': true;
     'service.name': string;
     'service.version': string;
     'service.environment': string;
     'service.language.name': string;
+    'service.language.version': string;
     'service.node.name': string;
     'service.runtime.name': string;
     'service.runtime.version': string;
@@ -103,18 +110,21 @@ export type ApmFields = Fields &
       trace: { id: string };
       span: { id: string };
     }>;
-    'cloud.provider': string;
-    'cloud.project.name': string;
-    'cloud.service.name': string;
+    'cloud.account.id': string;
+    'cloud.account.name': string;
     'cloud.availability_zone': string;
     'cloud.machine.type': string;
+    'cloud.project.id': string;
+    'cloud.project.name': string;
+    'cloud.provider': string;
     'cloud.region': string;
-    'host.os.platform': string;
-    'faas.id': string;
-    'faas.name': string;
+    'cloud.service.name': string;
     'faas.coldstart': boolean;
     'faas.execution': string;
-    'faas.trigger.type': string;
+    'faas.id': string;
+    'faas.name': string;
     'faas.trigger.request_id': string;
+    'faas.trigger.type': string;
+    'faas.version': string;
   }> &
   ApmApplicationMetricFields;

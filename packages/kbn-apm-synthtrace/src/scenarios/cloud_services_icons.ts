@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { apm, timerange } from '../..';
-import { ApmFields } from '../lib/apm/apm_fields';
-import { Instance } from '../lib/apm/instance';
+import { apm } from '../..';
 import { Scenario } from '../cli/scenario';
 import { getLogger } from '../cli/utils/get_common_services';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
+import { ApmFields } from '../lib/apm/apm_fields';
+import { Instance } from '../lib/apm/instance';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
@@ -22,9 +22,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const { numServices = 3 } = runOptions.scenarioOpts || {};
 
   return {
-    generate: ({ from, to }) => {
-      const range = timerange(from, to);
-
+    generate: ({ range }) => {
       const transactionName = 'Azure-AWS-Transaction';
 
       const successfulTimestamps = range.ratePerMinute(60);
@@ -184,9 +182,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         return successfulTraceEvents;
       };
 
-      return instances
-        .map((instance) => logger.perf('generating_apm_events', () => instanceSpans(instance)))
-        .reduce((p, c) => p.merge(c));
+      return logger.perf('generating_apm_events', () => instances.flatMap(instanceSpans));
     },
   };
 };

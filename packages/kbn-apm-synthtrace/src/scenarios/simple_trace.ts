@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { apm, timerange } from '../..';
+import { apm } from '../..';
 import { ApmFields } from '../lib/apm/apm_fields';
 import { Instance } from '../lib/apm/instance';
 import { Scenario } from '../cli/scenario';
@@ -22,13 +22,11 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const { numServices = 3 } = runOptions.scenarioOpts || {};
 
   return {
-    generate: ({ from, to }) => {
-      const range = timerange(from, to);
-
+    generate: ({ range }) => {
       const transactionName = '240rpm/75% 1000ms';
 
-      const successfulTimestamps = range.ratePerMinute(180);
-      const failedTimestamps = range.ratePerMinute(180);
+      const successfulTimestamps = range.interval('1m').rate(180);
+      const failedTimestamps = range.interval('1m').rate(180);
 
       const instances = [...Array(numServices).keys()].map((index) =>
         apm
@@ -88,12 +86,12 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
               .timestamp(timestamp)
           );
 
-        return successfulTraceEvents.merge(failedTraceEvents, metricsets);
+        return [successfulTraceEvents, failedTraceEvents, metricsets];
       };
 
-      return instances
-        .map((instance) => logger.perf('generating_apm_events', () => instanceSpans(instance)))
-        .reduce((p, c) => p.merge(c));
+      return logger.perf('generating_apm_events', () =>
+        instances.flatMap((instance) => instanceSpans(instance))
+      );
     },
   };
 };

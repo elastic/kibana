@@ -10,6 +10,7 @@ import { ApmError } from './apm_error';
 import { BaseSpan } from './base_span';
 import { generateShortId } from '../utils/generate_id';
 import { ApmFields } from './apm_fields';
+import { getBreakdownMetrics } from './processors/get_breakdown_metrics';
 
 export class Transaction extends BaseSpan {
   private _sampled: boolean = true;
@@ -64,11 +65,16 @@ export class Transaction extends BaseSpan {
 
     const errors = this._errors.flatMap((error) => error.serialize());
 
+    const directChildren = this.getChildren().map((child) => child.fields);
+
     const events = [transaction];
+
+    const breakdownMetrics = getBreakdownMetrics(events.concat(directChildren));
+
     if (this._sampled) {
       events.push(...spans);
     }
 
-    return events.concat(errors);
+    return events.concat(errors).concat(breakdownMetrics);
   }
 }

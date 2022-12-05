@@ -1,0 +1,54 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+import { identity } from 'lodash';
+import { Transform } from 'stream';
+import { fork } from '../../utils/stream_utils';
+import { ApmFields } from '../apm_fields';
+import { createApmMetricAggregator } from './create_apm_metric_aggregator';
+
+const filter = (event: ApmFields) =>
+  event['processor.event'] === 'metric' && event['metricset.name'] === 'span_breakdown';
+
+export function createBreakdownMetricsAggregator(flushInterval: string) {
+  const dropProcessedEventsStream = new Transform({
+    objectMode: true,
+    write(event: ApmFields, encoding, callback) {
+      if (!filter(event)) {
+        this.push(event);
+      }
+      callback();
+    },
+  });
+
+  const aggregatorStream = createApmMetricAggregator(
+    {
+      filter,
+      getAggregateKey: (event) => {
+        return event.meta!['metricset.id'];
+      },
+      flushInterval,
+      init: (event) => {
+        return {
+          ...event,
+          meta: {},
+          'span.self_time.count': 0,
+          'span.self_time.sum.us': 0,
+        };
+      },
+    },
+    (metric, event) => {
+      metric['span.self_time.count'] += event['span.self_time.count']!;
+      metric['span.self_time.sum.us'] += event['span.self_time.sum.us']!;
+    },
+    identity
+  );
+
+  const mergedStreams = fork(dropProcessedEventsStream, aggregatorStream);
+
+  return mergedStreams;
+}

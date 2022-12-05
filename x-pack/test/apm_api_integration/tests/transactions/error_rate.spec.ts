@@ -92,36 +92,36 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const { firstTransaction } = config;
 
-      const documents = timerange(start, end)
-        .ratePerMinute(firstTransaction.successRate)
-        .generator((timestamp) =>
-          serviceGoProdInstance
-            .transaction({ transactionName: firstTransaction.name })
-            .timestamp(timestamp)
-            .duration(1000)
-            .success()
-        )
-        .merge(
-          timerange(start, end)
-            .ratePerMinute(firstTransaction.failureRate)
-            .generator((timestamp) =>
-              serviceGoProdInstance
-                .transaction({ transactionName: firstTransaction.name })
-                .errors(
-                  serviceGoProdInstance
-                    .error({
-                      message: 'Error 1',
-                      type: firstTransaction.name,
-                      groupingName: 'Error test',
-                    })
-                    .timestamp(timestamp)
-                )
-                .duration(1000)
-                .timestamp(timestamp)
-                .failure()
-            )
-        );
+      const documents = [
+        timerange(start, end)
+          .ratePerMinute(firstTransaction.successRate)
+          .generator((timestamp) =>
+            serviceGoProdInstance
+              .transaction({ transactionName: firstTransaction.name })
+              .timestamp(timestamp)
+              .duration(1000)
+              .success()
+          ),
 
+        timerange(start, end)
+          .ratePerMinute(firstTransaction.failureRate)
+          .generator((timestamp) =>
+            serviceGoProdInstance
+              .transaction({ transactionName: firstTransaction.name })
+              .errors(
+                serviceGoProdInstance
+                  .error({
+                    message: 'Error 1',
+                    type: firstTransaction.name,
+                    groupingName: 'Error test',
+                  })
+                  .timestamp(timestamp)
+              )
+              .duration(1000)
+              .timestamp(timestamp)
+              .failure()
+          ),
+      ];
       await synthtraceEsClient.index(documents);
     });
 
