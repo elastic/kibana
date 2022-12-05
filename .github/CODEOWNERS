@@ -12,6 +12,7 @@
 /src/plugins/discover/ @elastic/kibana-data-discovery
 /src/plugins/saved_search/ @elastic/kibana-data-discovery
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-data-discovery
+/x-pack/test/functional/apps/discover/ @elastic/kibana-data-discovery
 /test/functional/apps/discover/ @elastic/kibana-data-discovery
 /test/functional/apps/context/ @elastic/kibana-data-discovery
 /test/api_integration/apis/unified_field_list/ @elastic/kibana-data-discovery
@@ -952,7 +953,7 @@ packages/kbn-logging-mocks @elastic/kibana-core
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-mapbox-gl @elastic/kibana-gis
-packages/kbn-monaco @elastic/kibana-app-services
+packages/kbn-monaco @elastic/kibana-global-experience
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 packages/kbn-osquery-io-ts-types @elastic/security-asset-management
@@ -965,6 +966,7 @@ packages/kbn-plugin-helpers @elastic/kibana-operations
 packages/kbn-react-field @elastic/kibana-app-services
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
+packages/kbn-rison @elastic/kibana-operations
 packages/kbn-rule-data-utils @elastic/security-detections-response @elastic/actionable-observability @elastic/response-ops
 packages/kbn-safer-lodash-set @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-solution-platform
@@ -1055,6 +1057,7 @@ packages/shared-ux/page/solution_nav @elastic/kibana-global-experience
 packages/shared-ux/prompt/no_data_views/impl @elastic/kibana-global-experience
 packages/shared-ux/prompt/no_data_views/mocks @elastic/kibana-global-experience
 packages/shared-ux/prompt/no_data_views/types @elastic/kibana-global-experience
+packages/shared-ux/prompt/not_found @elastic/kibana-global-experience
 packages/shared-ux/router/impl @elastic/kibana-global-experience
 packages/shared-ux/router/mocks @elastic/kibana-global-experience
 packages/shared-ux/router/types @elastic/kibana-global-experience

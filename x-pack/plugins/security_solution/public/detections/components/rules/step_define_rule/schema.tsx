@@ -563,7 +563,7 @@ export const schema: FormSchema<DefineStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel',
       {
-        defaultMessage: 'Suppress Alerts By',
+        defaultMessage: 'Suppress alerts by',
       }
     ),
     labelAppend: (
