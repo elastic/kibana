@@ -14,7 +14,7 @@ import type {
 
 import { requestIndexFieldSearch } from '@kbn/timelines-plugin/server/search_strategy/index_fields';
 
-import { eventsIndexPattern } from '../../../common/endpoint/constants';
+import { eventsIndexPattern, METADATA_UNITED_INDEX } from '../../../common/endpoint/constants';
 import type {
   BeatFields,
   IndexFieldsStrategyRequest,
@@ -24,11 +24,11 @@ import type { EndpointAppContextService } from '../../endpoint/endpoint_app_cont
 import { EndpointAuthorizationError } from '../../endpoint/errors';
 
 /**
- * EventFiltersFieldProvider mimics indexField provider from timeline plugin: x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts
+ * EndpointFieldProvider mimics indexField provider from timeline plugin: x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts
  * but it uses ES internalUser instead to avoid adding extra index privileges for users with event filters permissions.
  * It is used to retrieve index patterns for event filters form.
  */
-export const eventFiltersFieldsProvider = (
+export const endpointFieldsProvider = (
   context: EndpointAppContextService,
   indexPatterns: DataViewsServerPluginStart
 ): ISearchStrategy<IndexFieldsStrategyRequest<'indices'>, IndexFieldsStrategyResponse> => {
@@ -40,25 +40,34 @@ export const eventFiltersFieldsProvider = (
 
   return {
     search: (request, _, deps) =>
-      from(requestEventFiltersFieldsSearch(context, request, deps, beatFields, indexPatterns)),
+      from(requestEndpointFieldsSearch(context, request, deps, beatFields, indexPatterns)),
   };
 };
 
-export const requestEventFiltersFieldsSearch = async (
+export const requestEndpointFieldsSearch = async (
   context: EndpointAppContextService,
   request: IndexFieldsStrategyRequest<'indices'>,
   deps: SearchStrategyDependencies,
   beatFields: BeatFields,
   indexPatterns: DataViewsServerPluginStart
 ): Promise<IndexFieldsStrategyResponse> => {
-  const { canWriteEventFilters } = await context.getEndpointAuthz(deps.request);
+  if (
+    request.indices.length > 1 ||
+    (request.indices[0] !== eventsIndexPattern && request.indices[0] !== METADATA_UNITED_INDEX)
+  ) {
+    throw new Error(`Invalid indices request ${request.indices.join(', ')}`);
+  }
 
-  if (!canWriteEventFilters) {
+  const { canWriteEventFilters, canReadEndpointList } = await context.getEndpointAuthz(
+    deps.request
+  );
+
+  if (
+    (!canWriteEventFilters && request.indices[0] === eventsIndexPattern) ||
+    (!canReadEndpointList && request.indices[0] === METADATA_UNITED_INDEX)
+  ) {
     throw new EndpointAuthorizationError();
   }
 
-  if (request.indices.length > 1 || request.indices[0] !== eventsIndexPattern) {
-    throw new Error(`Invalid indices request ${request.indices.join(', ')}`);
-  }
   return requestIndexFieldSearch(request, deps, beatFields, indexPatterns, true);
 };
