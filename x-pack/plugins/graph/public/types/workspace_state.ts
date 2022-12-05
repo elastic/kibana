@@ -16,7 +16,7 @@ export interface WorkspaceNode {
   x: number;
   y: number;
   label: string;
-  icon: FontawesomeIcon;
+  icon: FontawesomeIcon | string;
   data: {
     field: string;
     term: string;
@@ -33,6 +33,7 @@ export interface WorkspaceNode {
 export type BlockListedNode = Omit<WorkspaceNode, 'numChildren' | 'kx' | 'ky' | 'id'>;
 
 export interface WorkspaceEdge {
+  id?: string;
   weight: number;
   width: number;
   label: string;
@@ -41,6 +42,8 @@ export interface WorkspaceEdge {
   isSelected?: boolean;
   topTarget: WorkspaceNode;
   topSrc: WorkspaceNode;
+  offset?: number;
+  color?: string;
 }
 
 export interface ServerResultNode {

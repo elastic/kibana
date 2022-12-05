@@ -105,7 +105,55 @@ export type {
 export type { LensEmbeddableInput, LensSavedObjectAttributes, Embeddable } from './embeddable';
 
 export { layerTypes } from '../common/layer_types';
-
+export type {
+  ToolbarPopoverProps,
+  FieldOption,
+  FieldOptionValue,
+  LabelMode,
+  Label,
+  VisLabelProps,
+} from './shared_components';
+export {
+  ToolbarPopover,
+  LegendSettingsPopover,
+  PalettePicker,
+  FieldPicker,
+  LensFieldIcon,
+  TruncatedLabel,
+  ChangeIndexPattern,
+  fieldContainsData,
+  QueryInput,
+  isQueryValid,
+  validateQuery,
+  NewBucketButton,
+  DraggableBucketContainer,
+  DragDropBuckets,
+  FieldsBucketContainer,
+  RangeInputField,
+  BucketAxisBoundsControl,
+  validateAxisDomain,
+  validateZeroInclusivityExtent,
+  hasNumericHistogramDimension,
+  getDataBounds,
+  axisExtentConfigToExpression,
+  TooltipWrapper,
+  PalettePanelContainer,
+  getContrastColor,
+  getNumericValue,
+  applyPaletteParams,
+  findMinMaxByColumnId,
+  defaultPaletteParams,
+  useDebouncedValue,
+  useDebounceWithOptions,
+  LegendActionPopover,
+  NameInput,
+  ValueLabelsSettings,
+  AxisTitleSettings,
+  DimensionEditorSection,
+  FilterQueryInput,
+  StaticHeader,
+  VisLabel,
+} from './shared_components';
 export type { LensPublicStart, LensPublicSetup } from './plugin';
 
 export const plugin = () => new LensPlugin();
