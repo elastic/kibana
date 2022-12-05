@@ -13,15 +13,15 @@ import { ApmFields, SpanParams, GeoLocation } from './apm_fields';
 import { generateLongId } from '../utils/generate_id';
 
 export interface DeviceInfo {
-  manufacturer: string; 
-  modelIdentifier: string; 
-  modelName?: string
+  manufacturer: string;
+  modelIdentifier: string;
+  modelName?: string;
 }
 
 export interface OSInfo {
-  osType: 'ios' | 'android'; 
-  osVersion: string; 
-  osFull?: string; 
+  osType: 'ios' | 'android';
+  osVersion: string;
+  osFull?: string;
   runtimeVersion?: string;
 }
 
@@ -50,15 +50,10 @@ export class MobileDevice extends Entity<ApmFields> {
 
   constructor(public readonly fields: ApmFields) {
     super(fields);
-    this.networkConnection = {type: 'unavailable'};
+    this.networkConnection = { type: 'unavailable' };
   }
 
-  deviceInfo(
-    ...options:
-      | [DeviceInfo]
-      | [string, string]
-      | [string, string, string]
-  ) {
+  deviceInfo(...options: [DeviceInfo] | [string, string] | [string, string, string]) {
     let manufacturer: string;
     let modelIdentifier: string;
     let modelName: string | undefined;
@@ -131,7 +126,7 @@ export class MobileDevice extends Entity<ApmFields> {
   }
 
   setGeoInfo(geoInfo: GeoInfo) {
-    if(geoInfo){
+    if (geoInfo) {
       this.fields['client.ip'] = geoInfo.clientIp;
       this.fields['client.geo.city_name'] = geoInfo.cityName;
       this.fields['client.geo.country_name'] = geoInfo.countryName;
@@ -220,24 +215,25 @@ export class MobileDevice extends Entity<ApmFields> {
       httpUrl = options[0].httpUrl;
     }
 
-    let spanParameters : SpanParams = {
-      spanName: spanName,
+    let spanParameters: SpanParams = {
+      spanName,
       spanType: 'external',
       spanSubtype: 'http',
       'http.request.method': httpMethod,
       'url.original': httpUrl,
     };
 
-    if(this.networkConnection){
-      spanParameters = {...spanParameters, 
+    if (this.networkConnection) {
+      spanParameters = {
+        ...spanParameters,
         'network.connection.type': this.networkConnection.type,
         'network.connection.subtype': this.networkConnection.subType,
         'network.carrier.name': this.networkConnection.carrierName,
         'network.carrier.mcc': this.networkConnection.carrierMCC,
         'network.carrier.mnc': this.networkConnection.carrierMNC,
         'network.carrier.icc': this.networkConnection.carrierICC,
-      }
-    };
+      };
+    }
 
     return this.span(spanParameters);
   }

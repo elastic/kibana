@@ -149,8 +149,8 @@ export type ApmFields = Fields &
   }> &
   ApmApplicationMetricFields;
 
-  export type SpanParams = {
-    spanName: string;
-    spanType: string;
-    spanSubtype?: string;
-  } & ApmFields;
+export type SpanParams = {
+  spanName: string;
+  spanType: string;
+  spanSubtype?: string;
+} & ApmFields;

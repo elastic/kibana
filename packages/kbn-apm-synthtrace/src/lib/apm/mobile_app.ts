@@ -21,12 +21,22 @@ export class MobileApp extends Entity<ApmFields> {
   }
 }
 
-export function mobileApp(name: string, environment: string, agentName: 'iOS' | 'android'): MobileApp;
+export function mobileApp(
+  name: string,
+  environment: string,
+  agentName: 'iOS' | 'android'
+): MobileApp;
 
-export function mobileApp(options: { name: string; environment: string; agentName: 'iOS' | 'android' }): MobileApp;
+export function mobileApp(options: {
+  name: string;
+  environment: string;
+  agentName: 'iOS' | 'android';
+}): MobileApp;
 
 export function mobileApp(
-  ...args: [{ name: string; environment: string; agentName: 'iOS' | 'android' }] | [string, string, 'iOS' | 'android']
+  ...args:
+    | [{ name: string; environment: string; agentName: 'iOS' | 'android' }]
+    | [string, string, 'iOS' | 'android']
 ) {
   const [serviceName, environment, agentName] =
     args.length === 1 ? [args[0].name, args[0].environment, args[0].agentName] : args;
