@@ -73,6 +73,17 @@ export class TagsClient implements ITagsClient {
     return results.map(savedObjectToTag);
   }
 
+  public async findByColor(color: string) {
+    const queryVersion = this.soClient.getQueryVersion(this.type);
+    const useColorField = queryVersion < 4;
+
+    const tags = this.soClient.find({
+      type: this.type,
+      filter: useColorField ? `tag.color: ${color}` : `tag.colors: ${color}`,
+    });
+    return tags;
+  }
+
   public async delete(id: string) {
     // `removeReferencesTo` security check is the same as a `delete` operation's, so we can use the scoped client here.
     // If that was to change, we would need to use the internal client instead. A FTR test is ensuring
