@@ -61,6 +61,7 @@ export const DeleteLocation = ({
         }
       >
         <EuiButtonIcon
+          data-test-subj={`deleteLocation-${id}`}
           isLoading={loading}
           iconType="trash"
           color="danger"

@@ -22,6 +22,8 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
   const monitorManagement = `${basePath}/app/synthetics/monitors`;
   const addMonitor = `${basePath}/app/synthetics/add-monitor`;
   const overview = `${basePath}/app/synthetics`;
+  const settingsPage = `${basePath}/app/synthetics/settings`;
+
   return {
     ...loginPageProvider({
       page,
@@ -51,6 +53,19 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
 
     async getAddMonitorButton() {
       return await this.findByText('Create monitor');
+    },
+
+    async navigateToSettings(doLogin = true) {
+      await page.goto(settingsPage, {
+        waitUntil: 'networkidle',
+      });
+      if (doLogin) {
+        await this.loginToKibana();
+        const invalid = await page.locator(
+          `text=Username or password is incorrect. Please try again.`
+        );
+        expect(await invalid.isVisible()).toBeFalsy();
+      }
     },
 
     async navigateToAddMonitor() {
