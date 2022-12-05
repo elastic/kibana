@@ -17,15 +17,12 @@ import {
   EuiText,
   EuiSpacer,
   EuiButtonEmpty,
-  EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
 import { mapPackageReleaseToIntegrationCardRelease } from '../../../../../../../../services/package_prerelease';
+import type { ExperimentalDataStreamFeature } from '../../../../../../../../../common/types/models/epm';
 
-import { getRegistryDataStreamAssetBaseName } from '../../../../../../../../../common/services';
-import type { ExperimentalIndexingFeature } from '../../../../../../../../../common/types/models/epm';
 import type {
   NewPackagePolicy,
   NewPackagePolicyInputStream,
@@ -39,6 +36,7 @@ import { isAdvancedVar, validationHasErrors } from '../../../services';
 import { PackagePolicyEditorDatastreamPipelines } from '../../datastream_pipelines';
 import { PackagePolicyEditorDatastreamMappings } from '../../datastream_mappings';
 
+import { ExperimentDatastreamSettings } from './experimental_datastream_settings';
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId } from './hooks';
 
@@ -119,74 +117,21 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       [advancedVars, inputStreamValidationResults?.vars]
     );
 
-    const getExperimentalFeatureValue = useCallback(
-      (feature: ExperimentalIndexingFeature, defaultToFalse = true) => {
-        return packagePolicy.package?.experimental_data_stream_features?.find(
-          ({ data_stream: dataStream, features }) =>
-            dataStream ===
-              getRegistryDataStreamAssetBaseName(packagePolicyInputStream.data_stream) &&
-            typeof features[feature] !== 'undefined'
-        )?.features ?? defaultToFalse
-          ? false
-          : undefined;
-      },
-      [
-        packagePolicy.package?.experimental_data_stream_features,
-        packagePolicyInputStream.data_stream,
-      ]
-    );
+    const setNewExperimentalDataFeatures = useCallback(
+      (newFeatures: ExperimentalDataStreamFeature[]) => {
+        if (!packagePolicy.package) {
+          return;
+        }
 
-    const isSyntheticSourceEditable =
-      packageInputStream.data_stream.elasticsearch?.source_mode !== 'default';
-
-    const syntheticSourceExperimentalValue = getExperimentalFeatureValue('synthetic_source', false);
-    const isSyntheticSourceEnabledByDefault =
-      packageInputStream.data_stream.elasticsearch?.source_mode === 'synthetic';
-
-    const newExperimentalIndexingFeature = {
-      synthetic_source:
-        typeof syntheticSourceExperimentalValue !== 'undefined'
-          ? syntheticSourceExperimentalValue
-          : isSyntheticSourceEnabledByDefault,
-      tsdb: getExperimentalFeatureValue('tsdb') ?? false,
-    };
-
-    const onIndexingSettingChange = (
-      features: Partial<Record<ExperimentalIndexingFeature, boolean>>
-    ) => {
-      if (!packagePolicy.package) {
-        return;
-      }
-
-      const newExperimentalDataStreamFeatures = [
-        ...(packagePolicy.package.experimental_data_stream_features ?? []),
-      ];
-
-      const dataStream = getRegistryDataStreamAssetBaseName(packagePolicyInputStream.data_stream);
-
-      const existingSettingRecord = newExperimentalDataStreamFeatures.find(
-        (x) => x.data_stream === dataStream
-      );
-
-      if (existingSettingRecord) {
-        existingSettingRecord.features = {
-          ...existingSettingRecord.features,
-          ...features,
-        };
-      } else {
-        newExperimentalDataStreamFeatures.push({
-          data_stream: dataStream,
-          features: { ...newExperimentalIndexingFeature, ...features },
+        updatePackagePolicy({
+          package: {
+            ...packagePolicy.package,
+            experimental_data_stream_features: newFeatures,
+          },
         });
-      }
-
-      updatePackagePolicy({
-        package: {
-          ...packagePolicy.package,
-          experimental_data_stream_features: newExperimentalDataStreamFeatures,
-        },
-      });
-    };
+      },
+      [updatePackagePolicy, packagePolicy]
+    );
 
     return (
       <>
@@ -347,82 +292,13 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       </>
                     )}
                     {/* Experimental index/datastream settings e.g. synthetic source */}
-                    <EuiFlexItem>
-                      <EuiFlexGroup direction="column" gutterSize="xs">
-                        <EuiFlexItem grow={false}>
-                          <EuiTitle size="xxxs">
-                            <h5>
-                              <FormattedMessage
-                                id="xpack.fleet.packagePolicyEditor.experimentalSettings.title"
-                                defaultMessage="Indexing settings (experimental)"
-                              />
-                            </h5>
-                          </EuiTitle>
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiText color="subdued" size="xs">
-                            <FormattedMessage
-                              id="xpack.fleet.createPackagePolicy.stepConfigure.experimentalFeaturesDescription"
-                              defaultMessage="Select data streams to configure indexing options. This is an {experimentalFeature} and may have effects on other properties."
-                              values={{
-                                experimentalFeature: (
-                                  <strong>
-                                    <FormattedMessage
-                                      id="xpack.fleet.createPackagePolicy.experimentalFeatureText"
-                                      defaultMessage="experimental feature"
-                                    />
-                                  </strong>
-                                ),
-                              }}
-                            />
-                          </EuiText>
-                        </EuiFlexItem>
-                        <EuiSpacer size="s" />
-                        <EuiFlexItem>
-                          <EuiSwitch
-                            checked={newExperimentalIndexingFeature.synthetic_source ?? false}
-                            disabled={!isSyntheticSourceEditable}
-                            label={
-                              <FormattedMessage
-                                id="xpack.fleet.createPackagePolicy.experimentalFeatures.syntheticSourceLabel"
-                                defaultMessage="Synthetic source"
-                              />
-                            }
-                            onChange={(e) => {
-                              onIndexingSettingChange({
-                                synthetic_source: e.target.checked,
-                              });
-                            }}
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiToolTip
-                            content={
-                              <FormattedMessage
-                                id="xpack.fleet.createPackagePolicy.experimentalFeatures.TSDBTooltip"
-                                defaultMessage="Enabling this feature is irreversible"
-                              />
-                            }
-                          >
-                            <EuiSwitch
-                              disabled={newExperimentalIndexingFeature.tsdb ?? false}
-                              checked={newExperimentalIndexingFeature.tsdb ?? false}
-                              label={
-                                <FormattedMessage
-                                  id="xpack.fleet.createPackagePolicy.experimentalFeatures.TSDBLabel"
-                                  defaultMessage="Time-series indexing (TSDB)"
-                                />
-                              }
-                              onChange={(e) => {
-                                onIndexingSettingChange({
-                                  tsdb: e.target.checked,
-                                });
-                              }}
-                            />
-                          </EuiToolTip>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
+                    <ExperimentDatastreamSettings
+                      registryDataStream={packageInputStream.data_stream}
+                      experimentalDataFeatures={
+                        packagePolicy.package?.experimental_data_stream_features
+                      }
+                      setNewExperimentalDataFeatures={setNewExperimentalDataFeatures}
+                    />
                   </>
                 ) : null}
               </Fragment>
