@@ -32,7 +32,7 @@ export const DeleteLocation = ({
 
   const deleteModal = (
     <EuiConfirmModal
-      title={i18n.translate('xpack.synthetics.monitorManagement.delete', {
+      title={i18n.translate('xpack.synthetics.monitorManagement.deleteLocationName', {
         defaultMessage: 'Delete "{location}"',
         values: { location: label },
       })}
