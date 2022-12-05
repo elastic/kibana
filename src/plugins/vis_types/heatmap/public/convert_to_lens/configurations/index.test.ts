@@ -90,7 +90,7 @@ describe('getConfiguration', () => {
           progression: 'fixed',
           rangeMax: 100,
           rangeMin: 0,
-          rangeType: 'number',
+          rangeType: 'percent',
           reverse: false,
           stops: [
             { color: '#F7FBFF', stop: 12.5 },
