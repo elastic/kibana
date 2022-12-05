@@ -37,29 +37,22 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllTimelines(es);
     });
 
-    it('should return expected JSON keys', async () => {
-      const { body } = await supertest
-        .get(RULE_MANAGEMENT_FILTERS_URL)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
-
-      expect(Object.keys(body)).to.eql([
-        'rules_custom_count',
-        'rules_prebuilt_installed_count',
-        'tags',
-      ]);
-    });
-
     it('should return the correct result when there are no rules', async () => {
       const { body } = await supertest
         .get(RULE_MANAGEMENT_FILTERS_URL)
         .set('kbn-xsrf', 'true')
         .send()
         .expect(200);
-      expect(body.rules_custom_count).to.eql(0);
-      expect(body.rules_prebuilt_installed_count).to.eql(0);
-      expect(body.tags).to.eql([]);
+
+      expect(body).to.eql({
+        rules_summary: {
+          custom_count: 0,
+          prebuilt_installed_count: 0,
+        },
+        aggregated_fields: {
+          tags: [],
+        },
+      });
     });
 
     describe('when there is a custom rule', () => {
@@ -80,8 +73,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
-        expect(body.rules_custom_count).to.eql(1);
-        expect(body.rules_prebuilt_installed_count).to.eql(0);
+
+        expect(body.rules_summary.custom_count).to.eql(1);
+        expect(body.rules_summary.prebuilt_installed_count).to.eql(0);
       });
 
       it('should return correct tags', async () => {
@@ -90,7 +84,8 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
-        expect(body.tags).to.eql(['tag-a']);
+
+        expect(body.aggregated_fields.tags).to.eql(['tag-a']);
       });
     });
 
@@ -105,17 +100,86 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
-        expect(body.rules_prebuilt_installed_count).to.be.greaterThan(0);
-        expect(body.rules_custom_count).to.eql(0);
+
+        expect(body.rules_summary.prebuilt_installed_count).to.eql(723);
+        expect(body.rules_summary.custom_count).to.eql(0);
       });
 
-      it('should return correct tags', async () => {
+      it('should return installed prebuilt rules tags', async () => {
         const { body } = await supertest
           .get(RULE_MANAGEMENT_FILTERS_URL)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
-        expect(body.tags.length).to.be.greaterThan(0);
+
+        expect(body.aggregated_fields.tags).to.eql([
+          'APM',
+          'AWS',
+          'Active Directory',
+          'Application',
+          'Asset Visibility',
+          'Authentication',
+          'Azure',
+          'BPFDoor',
+          'CVE-2020-1313',
+          'CVE-2020-9613',
+          'CVE-2020-9614',
+          'CVE-2020-9615',
+          'CVE_2020_9771',
+          'Cloud',
+          'Collection',
+          'Command and Control',
+          'Communication',
+          'Configuration Audit',
+          'Continuous Monitoring',
+          'Credential Access',
+          'Data Protection',
+          'Defense Evasion',
+          'Discovery',
+          'Elastic',
+          'Elastic Endgame',
+          'Endpoint Security',
+          'Example',
+          'Execution',
+          'Exfiltration',
+          'GCP',
+          'GTFOBins',
+          'Google Workspace',
+          'Guided Onboarding',
+          'Higher-Order Rules',
+          'Host',
+          'Identity',
+          'Identity and Access',
+          'Impact',
+          'Impair Defenses',
+          'Initial Access',
+          'Investigation Guide',
+          'Kubernetes',
+          'Lateral Movement',
+          'Lightning Framework',
+          'Linux',
+          'Log Auditing',
+          'ML',
+          'Microsoft 365',
+          'Monitoring',
+          'Network',
+          'Network Security',
+          'Okta',
+          'Orbit',
+          'Persistence',
+          'Post-Execution',
+          'Privilege Escalation',
+          'Resource Development',
+          'Rootkit',
+          'SecOps',
+          'Sysmon Only',
+          'Threat Detection',
+          'TripleCross',
+          'Windows',
+          'Zoom',
+          'cyberarkpas',
+          'macOS',
+        ]);
       });
     });
   });
