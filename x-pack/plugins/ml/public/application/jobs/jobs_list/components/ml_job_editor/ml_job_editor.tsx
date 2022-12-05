@@ -57,6 +57,8 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
         if (schema) {
           monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
             validate: true,
+            enableSchemaRequest: true,
+            schemaValidation: 'warning',
             schemas: [
               {
                 uri: editor.getModel()?.uri.toString() ?? '',

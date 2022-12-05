@@ -11,7 +11,10 @@ import Path from 'path';
 export interface PropertyDefinition {
   properties?: Record<string, PropertyDefinition>;
   type: string;
+  description: string;
   $ref?: string;
+  items?: PropertyDefinition;
+  anyOf?: PropertyDefinition[];
 }
 
 export class JsonSchemaService {
@@ -30,6 +33,7 @@ export class JsonSchemaService {
       const comp = propertyDef.$ref.split('/');
       const refKey = comp[comp.length - 1];
 
+      // Some ES query types can't be resolved
       if (!refKey.startsWith('Ml_Types_')) return;
 
       const schemaComponent = this._schemaComponents[refKey];
@@ -49,6 +53,16 @@ export class JsonSchemaService {
         if (propertyDef.properties.hasOwnProperty(key)) {
           this.extractProperties(propertyDef.properties[key]);
         }
+      }
+    }
+
+    if (propertyDef.items) {
+      this.extractProperties(propertyDef.items);
+    }
+
+    if (propertyDef.anyOf) {
+      for (const a of propertyDef.anyOf) {
+        this.extractProperties(a);
       }
     }
   }

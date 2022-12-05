@@ -58,6 +58,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
   const [saveable, setSaveable] = useState(false);
   const [tempCombinedJob, setTempCombinedJob] = useState<CombinedJob | null>(null);
   const [jobSchema, setJobSchema] = useState();
+  const [datafeedSchema, setDatefeedSchema] = useState();
 
   useEffect(() => {
     setJobConfigString(jobCreator.formattedJobJson);
@@ -88,6 +89,12 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
       .then((result) => {
         setJobSchema(result);
       });
+
+    // jsonSchemaApi
+    //   .getSchemaDefinition({ path: '/_ml/datafeeds/{datafeed_id}', method: 'put' })
+    //   .then((result) => {
+    //     setDatefeedSchema(result);
+    //   });
   }, []);
 
   const editJsonMode =

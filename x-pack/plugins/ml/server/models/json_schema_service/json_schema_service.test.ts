@@ -37,7 +37,256 @@ describe('JsonSchemaService', function () {
                   type: 'string',
                 },
                 {
-                  $ref: '#/components/schemas/Ml_Types_CategorizationAnalyzerDefinition',
+                  additionalProperties: false,
+                  properties: {
+                    char_filter: {
+                      description:
+                        'One or more character filters. In addition to the built-in character filters, other plugins can provide more character filters. If this property is not specified, no character filters are applied prior to categorization. If you are customizing some other aspect of the analyzer and you need to achieve the equivalent of `categorization_filters` (which are not permitted when some other aspect of the analyzer is customized), add them here as pattern replace character filters.',
+                      items: {
+                        anyOf: [
+                          {
+                            type: 'string',
+                          },
+                          {
+                            anyOf: [
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_HtmlStripCharFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_MappingCharFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_PatternReplaceCharFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_IcuNormalizationCharFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_KuromojiIterationMarkCharFilter',
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                      type: 'array',
+                    },
+                    filter: {
+                      description:
+                        'One or more token filters. In addition to the built-in token filters, other plugins can provide more token filters. If this property is not specified, no token filters are applied prior to categorization.',
+                      items: {
+                        anyOf: [
+                          {
+                            type: 'string',
+                          },
+                          {
+                            anyOf: [
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_AsciiFoldingTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_CommonGramsTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_ConditionTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_DelimitedPayloadTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_EdgeNGramTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_ElisionTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_FingerprintTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_HunspellTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_HyphenationDecompounderTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_KeepTypesTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_KeepWordsTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_KeywordMarkerTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_KStemTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_LengthTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_LimitTokenCountTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_LowercaseTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_MultiplexerTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_NGramTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_NoriPartOfSpeechTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_PatternCaptureTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_PatternReplaceTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_PorterStemTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_PredicateTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_RemoveDuplicatesTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_ReverseTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_ShingleTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_SnowballTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_StemmerOverrideTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_StemmerTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_StopTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_SynonymGraphTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_SynonymTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_TrimTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_TruncateTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_UniqueTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_UppercaseTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_WordDelimiterGraphTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_WordDelimiterTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_KuromojiStemmerTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_KuromojiReadingFormTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_KuromojiPartOfSpeechTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_IcuTokenizer',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_IcuCollationTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_IcuFoldingTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_IcuNormalizationTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_IcuTransformTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_PhoneticTokenFilter',
+                              },
+                              {
+                                $ref: '#/components/schemas/Types_Analysis_DictionaryDecompounderTokenFilter',
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                      type: 'array',
+                    },
+                    tokenizer: {
+                      anyOf: [
+                        {
+                          type: 'string',
+                        },
+                        {
+                          anyOf: [
+                            {
+                              $ref: '#/components/schemas/Types_Analysis_CharGroupTokenizer',
+                            },
+                            {
+                              $ref: '#/components/schemas/Types_Analysis_EdgeNGramTokenizer',
+                            },
+                            {
+                              $ref: '#/components/schemas/Types_Analysis_KeywordTokenizer',
+                            },
+                            {
+                              $ref: '#/components/schemas/Types_Analysis_LetterTokenizer',
+                            },
+                            {
+                              $ref: '#/components/schemas/Types_Analysis_LowercaseTokenizer',
+                            },
+                            {
+                              $ref: '#/components/schemas/Types_Analysis_NGramTokenizer',
+                            },
+                            {
+                              $ref: '#/components/schemas/Types_Analysis_NoriTokenizer',
+                            },
+                            {
+                              $ref: '#/components/schemas/Types_Analysis_PathHierarchyTokenizer',
+                            },
+                            {
+                              $ref: '#/components/schemas/Types_Analysis_StandardTokenizer',
+                            },
+                            {
+                              $ref: '#/components/schemas/Types_Analysis_UaxEmailUrlTokenizer',
+                            },
+                            {
+                              $ref: '#/components/schemas/Types_Analysis_WhitespaceTokenizer',
+                            },
+                            {
+                              $ref: '#/components/schemas/Types_Analysis_KuromojiTokenizer',
+                            },
+                            {
+                              $ref: '#/components/schemas/Types_Analysis_PatternTokenizer',
+                            },
+                            {
+                              $ref: '#/components/schemas/Types_Analysis_IcuTokenizer',
+                            },
+                          ],
+                        },
+                      ],
+                      description:
+                        'The name or definition of the tokenizer to use after character filters are applied. This property is compulsory if `categorization_analyzer` is specified as an object. Machine learning provides a tokenizer called `ml_standard` that tokenizes in a way that has been determined to produce good categorization results on a variety of log file formats for logs in English. If you want to use that tokenizer but change the character or token filters, specify "tokenizer": "ml_standard" in your `categorization_analyzer`. Additionally, the `ml_classic` tokenizer is available, which tokenizes in the same way as the non-customizable tokenizer in old versions of the product (before 6.2). `ml_classic` was the default categorization tokenizer in versions 6.2 to 7.13, so if you need categorization identical to the default for jobs created in these versions, specify "tokenizer": "ml_classic" in your `categorization_analyzer`.',
+                    },
+                  },
+                  type: 'object',
                 },
               ],
               description:
@@ -60,7 +309,113 @@ describe('JsonSchemaService', function () {
               description:
                 'Detector configuration objects specify which data fields a job analyzes. They also specify which analytical functions are used. You can specify multiple detectors for a job. If the detectors array does not contain at least one detector, no analysis can occur and an error is returned.',
               items: {
-                $ref: '#/components/schemas/Ml_Types_Detector',
+                additionalProperties: false,
+                properties: {
+                  by_field_name: {
+                    description:
+                      'The field used to split the data. In particular, this property is used for analyzing the splits with respect to their own history. It is used for finding unusual values in the context of the split.',
+                    type: 'string',
+                  },
+                  custom_rules: {
+                    description:
+                      'Custom rules enable you to customize the way detectors operate. For example, a rule may dictate conditions under which results should be skipped. Kibana refers to custom rules as job rules.',
+                    items: {
+                      additionalProperties: false,
+                      properties: {
+                        actions: {
+                          description:
+                            'The set of actions to be triggered when the rule applies. If more than one action is specified the effects of all actions are combined.',
+                          items: {
+                            enum: ['skip_result', 'skip_model_update'],
+                            type: 'string',
+                          },
+                          type: 'array',
+                        },
+                        conditions: {
+                          description:
+                            'An array of numeric conditions when the rule applies. A rule must either have a non-empty scope or at least one condition. Multiple conditions are combined together with a logical AND.',
+                          items: {
+                            additionalProperties: false,
+                            properties: {
+                              applies_to: {
+                                description:
+                                  'Specifies the result property to which the condition applies. If your detector uses `lat_long`, `metric`, `rare`, or `freq_rare` functions, you can only specify conditions that apply to time.',
+                                enum: ['actual', 'typical', 'diff_from_typical', 'time'],
+                                type: 'string',
+                              },
+                              operator: {
+                                description:
+                                  'Specifies the condition operator. The available options are greater than, greater than or equals, less than, and less than or equals.',
+                                enum: ['gt', 'gte', 'lt', 'lte'],
+                                type: 'string',
+                              },
+                              value: {
+                                description:
+                                  'The value that is compared against the `applies_to` field using the operator.',
+                                type: 'number',
+                              },
+                            },
+                            required: ['applies_to', 'operator', 'value'],
+                            type: 'object',
+                          },
+                          type: 'array',
+                        },
+                        scope: {
+                          additionalProperties: {
+                            $ref: '#/components/schemas/Ml_Types_FilterRef',
+                          },
+                          description:
+                            'A scope of series where the rule applies. A rule must either have a non-empty scope or at least one condition. By default, the scope includes all series. Scoping is allowed for any of the fields that are also specified in `by_field_name`, `over_field_name`, or `partition_field_name`.',
+                          type: 'object',
+                        },
+                      },
+                      type: 'object',
+                    },
+                    type: 'array',
+                  },
+                  detector_description: {
+                    description: 'A description of the detector.',
+                    type: 'string',
+                  },
+                  detector_index: {
+                    description:
+                      'A unique identifier for the detector. This identifier is based on the order of the detectors in the `analysis_config`, starting at zero. If you specify a value for this property, it is ignored.',
+                    type: 'number',
+                  },
+                  exclude_frequent: {
+                    description:
+                      'If set, frequent entities are excluded from influencing the anomaly results. Entities can be considered frequent over time or frequent in a population. If you are working with both over and by fields, you can set `exclude_frequent` to `all` for both fields, or to `by` or `over` for those specific fields.',
+                    enum: ['all', 'none', 'by', 'over'],
+                    type: 'string',
+                  },
+                  field_name: {
+                    description:
+                      'The field that the detector uses in the function. If you use an event rate function such as count or rare, do not specify this field. The `field_name` cannot contain double quotes or backslashes.',
+                    type: 'string',
+                  },
+                  function: {
+                    description:
+                      'The analysis function that is used. For example, `count`, `rare`, `mean`, `min`, `max`, or `sum`.',
+                    type: 'string',
+                  },
+                  over_field_name: {
+                    description:
+                      'The field used to split the data. In particular, this property is used for analyzing the splits with respect to the history of all splits. It is used for finding unusual values in the population of all splits.',
+                    type: 'string',
+                  },
+                  partition_field_name: {
+                    description:
+                      'The field used to segment the analysis. When you use this property, you have completely independent baselines for each value of this field.',
+                    type: 'string',
+                  },
+                  use_null: {
+                    description:
+                      'Defines whether a new series is used as the null series when there is no value for the by or partition fields.',
+                    type: 'boolean',
+                  },
+                },
+                required: ['function'],
+                type: 'object',
               },
               type: 'array',
             },
