@@ -12,7 +12,6 @@ import styled from 'styled-components';
 
 import { useController } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { MAX_QUERY_LENGTH } from '../../packs/queries/validations';
 import { OsquerySchemaLink } from '../../components/osquery_schema_link';
 import { OsqueryEditor } from '../../editor';
 
@@ -42,13 +41,6 @@ const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({
           defaultMessage: 'Query is a required field',
         }),
         value: true,
-      },
-      maxLength: {
-        message: i18n.translate('xpack.osquery.liveQuery.queryForm.largeQueryError', {
-          defaultMessage: 'Query is too large (max {maxLength} characters)',
-          values: { maxLength: MAX_QUERY_LENGTH },
-        }),
-        value: MAX_QUERY_LENGTH,
       },
     },
     defaultValue: '',

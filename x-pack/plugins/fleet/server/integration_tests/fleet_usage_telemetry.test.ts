@@ -179,6 +179,32 @@ describe('fleet usage telemetry', () => {
       refresh: 'wait_for',
     });
 
+    await esClient.create({
+      index: 'logs-elastic_agent-default',
+      id: 'log1',
+      body: {
+        log: {
+          level: 'error',
+        },
+        '@timestamp': new Date().toISOString(),
+        message: 'stderr panic close of closed channel',
+      },
+      refresh: 'wait_for',
+    });
+
+    await esClient.create({
+      index: 'logs-elastic_agent.fleet_server-default',
+      id: 'log2',
+      body: {
+        log: {
+          level: 'error',
+        },
+        '@timestamp': new Date().toISOString(),
+        message: 'failed to unenroll offline agents',
+      },
+      refresh: 'wait_for',
+    });
+
     const soClient = kbnServer.coreStart.savedObjects.createInternalRepository();
     await soClient.create('ingest-package-policies', {
       name: 'fleet_server-1',
@@ -255,6 +281,8 @@ describe('fleet usage telemetry', () => {
           ],
         },
         agent_policies: { count: 3, output_types: ['elasticsearch'] },
+        agent_logs_top_errors: ['stderr panic close of closed channel'],
+        fleet_server_logs_top_errors: ['failed to unenroll offline agents'],
       })
     );
   });
