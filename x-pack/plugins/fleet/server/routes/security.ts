@@ -184,7 +184,8 @@ function shouldHandlePostAuthRequest(req: KibanaRequest) {
   }
   return false;
 }
-function deserializeAuthzConfig(tags: readonly string[]): FleetAuthzRouteConfig {
+// Exported for test only
+export function deserializeAuthzConfig(tags: readonly string[]): FleetAuthzRouteConfig {
   let fleetAuthz: FleetAuthzRequirements | undefined;
   for (const tag of tags) {
     if (!tag.match(/^fleet:authz/)) {
@@ -199,7 +200,7 @@ function deserializeAuthzConfig(tags: readonly string[]): FleetAuthzRouteConfig 
       .replace(/^fleet:authz:/, '')
       .split(':')
       .reduce((acc: any, key, idx, keys) => {
-        if (idx === keys.length + 1) {
+        if (idx === keys.length - 1) {
           acc[key] = true;
 
           return acc;
@@ -215,7 +216,9 @@ function deserializeAuthzConfig(tags: readonly string[]): FleetAuthzRouteConfig 
 
   return { fleetAuthz };
 }
-function serializeAuthzConfig(config: FleetAuthzRouteConfig): string[] {
+
+// Exported for test only
+export function serializeAuthzConfig(config: FleetAuthzRouteConfig): string[] {
   const tags: string[] = [];
 
   if (config.fleetAuthz) {
@@ -224,7 +227,7 @@ function serializeAuthzConfig(config: FleetAuthzRouteConfig): string[] {
         if (typeof requirements[key] === 'boolean') {
           tags.push(`fleet:authz:${prefix}${key}`);
         } else if (typeof requirements[key] !== 'undefined') {
-          fleetAuthzToTags(requirements[key] as DeepPartialTruthy<Authz>, `${key}:`);
+          fleetAuthzToTags(requirements[key] as DeepPartialTruthy<Authz>, `${prefix}${key}:`);
         }
       }
     }

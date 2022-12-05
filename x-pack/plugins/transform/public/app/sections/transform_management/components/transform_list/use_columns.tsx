@@ -133,7 +133,7 @@ export const useColumns = (
                   values: { transformId: item.config.id },
                 })
           }
-          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowUp' : 'arrowDown'}
+          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowDown' : 'arrowRight'}
           data-test-subj="transformListRowDetailsToggle"
         />
       ),
