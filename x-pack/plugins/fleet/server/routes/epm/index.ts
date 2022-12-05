@@ -72,13 +72,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.LIST_PATTERN,
       validate: GetPackagesRequestSchema,
-      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
-        validateSecurityRbac(fleetAuthz, {
-          any: {
-            integrations: { readPackageInfo: true },
-            ...READ_ENDPOINT_PACKAGE_PRIVILEGES,
-          },
-        }),
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
     },
     getListHandler
   );
@@ -153,16 +149,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
       validate: BulkUpgradePackagesFromRegistryRequestSchema,
-      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
-        validateSecurityRbac(fleetAuthz, {
-          // `all` OR `any` should be true for this case
-          all: {
-            integrations: { installPackages: true, upgradePackages: true },
-          },
-          any: {
-            ...WRITE_ENDPOINT_PACKAGE_PRIVILEGES,
-          },
-        }),
+      fleetAuthz: {
+        integrations: { installPackages: true, upgradePackages: true },
+      },
     },
     bulkInstallPackagesFromRegistryHandler
   );

@@ -257,7 +257,7 @@ export const settingsRoutesService = {
 };
 
 export const appRoutesService = {
-  getCheckPermissionsPath: () => APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
+  getCheckPermissionsPath: (fleetServerSetup?: boolean) => APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
   getRegenerateServiceTokenPath: () => APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
   postHealthCheckPath: () => APP_API_ROUTES.HEALTH_CHECK_PATTERN,
 };
