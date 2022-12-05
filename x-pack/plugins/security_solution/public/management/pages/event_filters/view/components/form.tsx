@@ -28,7 +28,10 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
-import { eventsIndexPattern } from '../../../../../../common/endpoint/constants';
+import {
+  ENDPOINT_FIELDS_SEARCH_STRATEGY,
+  eventsIndexPattern,
+} from '../../../../../../common/endpoint/constants';
 import { useSuggestions } from '../../../../hooks/use_suggestions';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
@@ -146,7 +149,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(
       indexNames,
       undefined,
-      'eventFiltersFields'
+      ENDPOINT_FIELDS_SEARCH_STRATEGY
     );
 
     const [areConditionsValid, setAreConditionsValid] = useState(
