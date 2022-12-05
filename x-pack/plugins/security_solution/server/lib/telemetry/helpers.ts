@@ -275,10 +275,18 @@ export const setIsElasticCloudDeployment = (value: boolean) => {
 };
 
 export const tlog = (logger: Logger, message: string) => {
+  // Gets the caller file name and line # from the stack trace
+  const callerLine =
+    new Error().stack
+      ?.split('\n')[2]
+      ?.match(/at (.*)/)?.[1]
+      ?.split('/')
+      ?.slice(-1)[0]
+      ?.slice(0, -1) ?? '';
   if (isElasticCloudDeployment) {
-    logger.info(message);
+    logger.info(`[ ${callerLine} ] ${message}`);
   } else {
-    logger.debug(message);
+    logger.info(`[${callerLine}] ${message}`);
   }
 };
 
