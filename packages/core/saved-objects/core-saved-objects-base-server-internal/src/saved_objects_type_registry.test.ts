@@ -383,6 +383,22 @@ describe('SavedObjectTypeRegistry', () => {
     });
   });
 
+  describe('#isHiddenFromHttpApis', () => {
+    it('returns correct value for the type', () => {
+      registry.registerType(createType({ name: 'typeA', hiddenFromHttpApis: true }));
+      registry.registerType(createType({ name: 'typeB', hiddenFromHttpApis: false }));
+
+      expect(registry.isHiddenFromHttpApis('typeA')).toEqual(true);
+      expect(registry.isHiddenFromHttpApis('typeB')).toEqual(false);
+    });
+    it('returns true when the type is not registered', () => {
+      registry.registerType(createType({ name: 'typeA', hiddenFromHttpApis: false }));
+      registry.registerType(createType({ name: 'typeB', hiddenFromHttpApis: true }));
+
+      expect(registry.isHiddenFromHttpApis('unknownType')).toEqual(false);
+    });
+  });
+
   describe('#getIndex', () => {
     it('returns correct value for the type', () => {
       registry.registerType(createType({ name: 'typeA', indexPattern: '.custom-index' }));

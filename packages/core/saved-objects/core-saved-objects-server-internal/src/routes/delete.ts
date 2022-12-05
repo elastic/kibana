@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors } from './utils';
@@ -35,10 +36,16 @@ export const registerDeleteRoute = (
     catchAndReturnBoomErrors(async (context, req, res) => {
       const { type, id } = req.params;
       const { force } = req.query;
-      const { getClient } = (await context.core).savedObjects;
+      const { getClient, typeRegistry } = (await context.core).savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsDelete({ request: req }).catch(() => {});
+
+      // Only implement blocking behavior for visible types.
+      // Hidden types are taken care of in the repository// Assumes hiddenFromHttpApis can only be configured for visible types (hidden:false)
+      if (typeRegistry.isHiddenFromHttpApis(type)) {
+        throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type); // visible type is not exposed to the HTTP API
+      }
 
       const client = getClient();
       const result = await client.delete(type, id, { force });

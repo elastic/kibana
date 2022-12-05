@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors } from './utils';
@@ -55,6 +56,13 @@ export const registerCreateRoute = (
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsCreate({ request: req }).catch(() => {});
+      // Only implement blocking behavior for visible types.
+      // Hidden types are taken care of in the repository
+      // Assumes hiddenFromHttpApis can only be configured for visible types (hidden:false)
+      const { typeRegistry } = (await context.core).savedObjects;
+      if (typeRegistry.isHiddenFromHttpApis(type)) {
+        throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type); // visible type is not exposed to the HTTP API
+      }
 
       const options = {
         id,

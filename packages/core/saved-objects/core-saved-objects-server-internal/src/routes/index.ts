@@ -13,6 +13,7 @@ import type {
   IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
 import { registerGetRoute } from './get';
 import { registerResolveRoute } from './resolve';
@@ -49,6 +50,7 @@ export function registerRoutes({
   migratorPromise: Promise<IKibanaMigrator>;
   kibanaVersion: string;
   kibanaIndex: string;
+  typeRegistry: ISavedObjectTypeRegistry;
 }) {
   const router =
     http.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');

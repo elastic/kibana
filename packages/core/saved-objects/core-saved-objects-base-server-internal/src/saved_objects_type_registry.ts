@@ -41,6 +41,13 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
     return [...this.types.values()].filter((type) => !this.isHidden(type.name));
   }
 
+  /** {@inheritDoc ISavedObjectTypeRegistry.getVisibleToHttpApisTypes}  */
+  public getVisibleToHttpApisTypes() {
+    return this.getAllTypes().filter(
+      (type) => !this.isHidden && !this.isHiddenFromHttpApis(type.name)
+    );
+  }
+
   /** {@inheritDoc ISavedObjectTypeRegistry.getAllTypes} */
   public getAllTypes() {
     return [...this.types.values()];
@@ -75,7 +82,12 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
 
   /** {@inheritDoc ISavedObjectTypeRegistry.isHidden} */
   public isHidden(type: string) {
-    return this.types.get(type)?.hidden ?? false;
+    return this.types.get(type)?.hidden ?? false; // trouble is that with current validation, if hidden=true we need to have hiddenFromHttpApis as true too
+  }
+
+  /** {@inheritDoc ISavedObjectTypeRegistry.isHiddenFromHttpApi} */
+  public isHiddenFromHttpApis(type: string) {
+    return this.types.get(type)?.hiddenFromHttpApis ?? false; // defaults to false
   }
 
   /** {@inheritDoc ISavedObjectTypeRegistry.getType} */
@@ -89,7 +101,7 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   }
 }
 
-const validateType = ({ name, management }: SavedObjectsType) => {
+const validateType = ({ name, management, hidden, hiddenFromHttpApis }: SavedObjectsType) => {
   if (management) {
     if (management.onExport && !management.importableAndExportable) {
       throw new Error(
@@ -99,6 +111,13 @@ const validateType = ({ name, management }: SavedObjectsType) => {
     if (management.visibleInManagement !== undefined && !management.importableAndExportable) {
       throw new Error(
         `Type ${name}: 'management.importableAndExportable' must be 'true' when specifying 'management.visibleInManagement'`
+      );
+    }
+    // throw error if a type is registered as `hidden:true` and `hiddenFromHttpApis:false` (if defined)
+    // as it makes the interaction between `hidden` and `hiddenFromHttpApis` complicated
+    if (hidden && hiddenFromHttpApis !== undefined) {
+      throw new Error(
+        `Type ${name}: 'hiddenFromHttpApis' cannot be defined when specifying 'hidden: true'`
       );
     }
   }

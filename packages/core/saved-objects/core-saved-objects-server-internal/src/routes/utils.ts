@@ -19,6 +19,7 @@ import Boom from '@hapi/boom';
 import type { RequestHandlerWrapper } from '@kbn/core-http-server';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsExportResultDetails } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 
 export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
   const savedObjects = await createPromiseFromStreams([
@@ -82,3 +83,36 @@ export const catchAndReturnBoomErrors: RequestHandlerWrapper = (handler) => {
     }
   };
 };
+
+/**
+ *
+ * @param {string[]} exposedVisibleTypes all registered types with hidden:false and hiddenFromHttpApis:false|undefined
+ * @param {string[]} typesToCheck saved object types provided to the httpApi request
+ */
+export function throwOnGloballyHiddenTypes(exposedVisibleTypes: string[], typesToCheck: string[]) {
+  const denyRequestForTypes = typesToCheck.filter(
+    (type: string) => !exposedVisibleTypes.includes(type)
+  );
+  if (denyRequestForTypes.length > 0) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      `Request denied for type(s): ${denyRequestForTypes.join(', ')}`
+    );
+  }
+}
+
+export interface BulkGetItem {
+  type: string;
+  id: string;
+  fields?: string[];
+  namespaces?: string[];
+}
+
+export function removeHiddenFromBulkRequest(
+  itemsToGet: BulkGetItem[],
+  allTypesVisibleToHttpAPI: string[]
+) {
+  const filtered = itemsToGet.filter((item) => {
+    return !allTypesVisibleToHttpAPI.includes(item.type);
+  });
+  return filtered;
+}

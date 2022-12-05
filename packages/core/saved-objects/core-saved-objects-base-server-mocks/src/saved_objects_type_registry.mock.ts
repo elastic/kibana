@@ -16,6 +16,7 @@ const createRegistryMock = (): jest.Mocked<
     registerType: jest.fn(),
     getType: jest.fn(),
     getVisibleTypes: jest.fn(),
+    getUnhiddenFromHttpApisVisibleTypes: jest.fn(),
     getAllTypes: jest.fn(),
     getImportableAndExportableTypes: jest.fn(),
     isNamespaceAgnostic: jest.fn(),
@@ -23,6 +24,7 @@ const createRegistryMock = (): jest.Mocked<
     isMultiNamespace: jest.fn(),
     isShareable: jest.fn(),
     isHidden: jest.fn(),
+    isHiddenFromHttpApis: jest.fn(),
     getIndex: jest.fn(),
     isImportableAndExportable: jest.fn(),
   };
@@ -33,6 +35,7 @@ const createRegistryMock = (): jest.Mocked<
   mock.getIndex.mockReturnValue('.kibana-test');
   mock.getIndex.mockReturnValue('.kibana-test');
   mock.isHidden.mockReturnValue(false);
+  mock.isHiddenFromHttpApis.mockReturnValue(false);
   mock.isNamespaceAgnostic.mockImplementation((type: string) => type === 'global');
   mock.isSingleNamespace.mockImplementation(
     (type: string) => type !== 'global' && type !== 'shared'
@@ -40,6 +43,7 @@ const createRegistryMock = (): jest.Mocked<
   mock.isMultiNamespace.mockImplementation((type: string) => type === 'shared');
   mock.isShareable.mockImplementation((type: string) => type === 'shared');
   mock.isImportableAndExportable.mockReturnValue(true);
+  mock.getUnhiddenFromHttpApisVisibleTypes.mockReturnValue(false);
 
   return mock;
 };

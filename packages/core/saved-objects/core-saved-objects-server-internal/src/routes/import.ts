@@ -84,7 +84,7 @@ export const registerImportRoute = (
           body: e,
         });
       }
-
+      // Proposal: continue controlling importability/exportability of a type through `<type>.management.importableAndExportable</type>
       const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((t) => t.name);
 
       const includedHiddenTypes = supportedTypes.filter((supportedType) =>
