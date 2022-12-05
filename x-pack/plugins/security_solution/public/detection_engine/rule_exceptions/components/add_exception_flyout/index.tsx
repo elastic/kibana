@@ -362,7 +362,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         await closeAlerts(ruleStaticIds, addedItems, alertIdToClose, bulkCloseIndex);
       }
 
-      
       invalidateFetchRuleByIdQuery();
       // Rule only would have been updated if we had to create a rule default list
       // to attach to it, all shared lists would already be referenced on the rule
@@ -389,7 +388,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     onConfirm,
     bulkCloseIndex,
     setErrorSubmitting,
-    invalidateFetchRuleByIdQuery
+    invalidateFetchRuleByIdQuery,
   ]);
 
   const isSubmitButtonDisabled = useMemo(
