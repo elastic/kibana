@@ -55,6 +55,9 @@ import getAppDataView from './utils/observability_data_views/get_app_data_view';
 
 export interface ConfigSchema {
   unsafe: {
+    slo: {
+      enabled: boolean;
+    };
     alertDetails: {
       apm: {
         enabled: boolean;

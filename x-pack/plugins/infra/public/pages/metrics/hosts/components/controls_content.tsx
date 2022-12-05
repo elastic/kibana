@@ -59,7 +59,7 @@ export const ControlsContent: React.FC<Props> = ({
 
   return (
     <LazyControlsRenderer
-      getCreationOptions={async ({ addDataControlFromField }) => ({
+      getInitialInput={async () => ({
         id: dataViewId,
         type: CONTROL_GROUP_TYPE,
         timeRange,
@@ -72,7 +72,7 @@ export const ControlsContent: React.FC<Props> = ({
         defaultControlWidth: 'small',
         panels: controlPanel,
       })}
-      onEmbeddableLoad={(newControlGroup) => {
+      onLoadComplete={(newControlGroup) => {
         setControlGroup(newControlGroup);
         newControlGroup.onFiltersPublished$.subscribe((newFilters) => {
           setPanelFilters([...newFilters]);
