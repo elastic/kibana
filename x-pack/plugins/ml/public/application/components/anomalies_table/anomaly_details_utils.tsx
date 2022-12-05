@@ -487,7 +487,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
             'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.incompleteBucketTooltip',
             {
               defaultMessage:
-                'If the bucket contains fewer samples than expected, the score is reduced. If the bucket contains fewer samples than expected, the score is reduced.',
+                'If the bucket contains fewer samples than expected, the score is reduced.',
             }
           )}
         >

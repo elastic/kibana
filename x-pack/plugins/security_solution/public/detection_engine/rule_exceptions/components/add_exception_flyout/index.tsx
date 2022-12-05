@@ -114,7 +114,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const { isLoading, indexPatterns } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitNewExceptionItems] = useAddNewExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
-
   const allowLargeValueLists = useMemo((): boolean => {
     if (rules != null && rules.length === 1) {
       // We'll only block this when we know what rule we're dealing with.

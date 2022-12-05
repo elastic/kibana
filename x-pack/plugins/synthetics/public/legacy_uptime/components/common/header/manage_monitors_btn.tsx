@@ -20,11 +20,6 @@ export const ManageMonitorsBtn = () => {
 
   const history = useHistory();
 
-  const handleOnClick = () => {
-    setIsOpen(false);
-    history.push(MONITOR_MANAGEMENT_ROUTE + '/all');
-  };
-
   return (
     <EuiTourStep
       content={
@@ -33,7 +28,13 @@ export const ManageMonitorsBtn = () => {
             <p>{PUBLIC_BETA_DESCRIPTION}</p>
           </EuiText>
           <EuiSpacer />
-          <EuiButton color="primary" fill onClick={handleOnClick}>
+          <EuiButton
+            color="primary"
+            fill
+            href={history.createHref({
+              pathname: MONITOR_MANAGEMENT_ROUTE,
+            })}
+          >
             {MONITOR_MANAGEMENT_LABEL}
           </EuiButton>
         </>
@@ -56,7 +57,9 @@ export const ManageMonitorsBtn = () => {
         aria-label={NAVIGATE_LABEL}
         color="text"
         data-test-subj="syntheticsManagementPageLink"
-        onClick={handleOnClick}
+        href={history.createHref({
+          pathname: MONITOR_MANAGEMENT_ROUTE,
+        })}
       >
         <FormattedMessage
           id="xpack.synthetics.page_header.manageMonitors"

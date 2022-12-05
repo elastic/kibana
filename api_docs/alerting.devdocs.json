@@ -3010,7 +3010,7 @@
             "section": "def-common.SanitizedRule",
             "text": "SanitizedRule"
           },
-          "<Params>>; muteAll: ({ id }: { id: string; }) => Promise<void>; getAlertState: ({ id }: { id: string; }) => Promise<void | { alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }>; getAlertSummary: ({ id, dateStart, numberOfExecutions, }: ",
+          "<Params>>; muteAll: ({ id }: { id: string; }) => Promise<void>; getAlertState: ({ id }: { id: string; }) => Promise<void | { alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; alertRecoveredInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }>; getAlertSummary: ({ id, dateStart, numberOfExecutions, }: ",
           "GetAlertSummaryParams",
           ") => Promise<",
           {
@@ -3126,7 +3126,27 @@
           },
           "<never> | ",
           "RuleWithLegacyId",
-          "<never>)[]; total: number; taskIdsFailedToBeEnabled: string[]; }>; updateApiKey: ({ id }: { id: string; }) => Promise<void>; snooze: ({ id, snoozeSchedule, }: { id: string; snoozeSchedule: ",
+          "<never>)[]; total: number; taskIdsFailedToBeEnabled: string[]; }>; bulkDisableRules: (options: ",
+          "BulkOptions",
+          ") => Promise<{ errors: ",
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.BulkOperationError",
+            "text": "BulkOperationError"
+          },
+          "[]; rules: (",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.Rule",
+            "text": "Rule"
+          },
+          "<never> | ",
+          "RuleWithLegacyId",
+          "<never>)[]; total: number; }>; updateApiKey: ({ id }: { id: string; }) => Promise<void>; snooze: ({ id, snoozeSchedule, }: { id: string; snoozeSchedule: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -5445,7 +5465,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"ok\" | \"active\""
+              "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"active\" | \"ok\""
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -6502,7 +6522,7 @@
         "label": "AlertInstanceMeta",
         "description": [],
         "signature": [
-          "{ lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; }"
+          "{ lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
@@ -6696,7 +6716,7 @@
         "label": "RawAlertInstance",
         "description": [],
         "signature": [
-          "{ state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }"
+          "{ state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
@@ -6837,7 +6857,7 @@
         "label": "RuleExecutionStatuses",
         "description": [],
         "signature": [
-          "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"ok\" | \"active\""
+          "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"active\" | \"ok\""
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
@@ -6956,7 +6976,7 @@
         "label": "RuleTaskState",
         "description": [],
         "signature": [
-          "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }"
+          "{ alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; alertRecoveredInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule_task_instance.ts",
         "deprecated": false,
@@ -7284,7 +7304,13 @@
           "StringC",
           "; date: ",
           "Type",
-          "<Date, string, unknown>; }>]>; }>; }>"
+          "<Date, string, unknown>; }>]>; flappingHistory: ",
+          "ArrayC",
+          "<",
+          "BooleanC",
+          ">; flapping: ",
+          "BooleanC",
+          "; }>; }>"
         ],
         "path": "x-pack/plugins/alerting/common/alert_instance.ts",
         "deprecated": false,
@@ -7416,7 +7442,45 @@
           "StringC",
           "; date: ",
           "Type",
-          "<Date, string, unknown>; }>]>; }>; }>>; previousStartedAt: ",
+          "<Date, string, unknown>; }>]>; flappingHistory: ",
+          "ArrayC",
+          "<",
+          "BooleanC",
+          ">; flapping: ",
+          "BooleanC",
+          "; }>; }>>; alertRecoveredInstances: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
+          "PartialC",
+          "<{ state: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
+          "UnknownC",
+          ">; meta: ",
+          "PartialC",
+          "<{ lastScheduledActions: ",
+          "IntersectionC",
+          "<[",
+          "PartialC",
+          "<{ subgroup: ",
+          "StringC",
+          "; }>, ",
+          "TypeC",
+          "<{ group: ",
+          "StringC",
+          "; date: ",
+          "Type",
+          "<Date, string, unknown>; }>]>; flappingHistory: ",
+          "ArrayC",
+          "<",
+          "BooleanC",
+          ">; flapping: ",
+          "BooleanC",
+          "; }>; }>>; previousStartedAt: ",
           "UnionC",
           "<[",
           "NullC",

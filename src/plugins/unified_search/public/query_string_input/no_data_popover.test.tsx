@@ -75,7 +75,7 @@ describe('NoDataPopover', () => {
     };
     const instance = mount(<NoDataPopover {...props} />);
     act(() => {
-      instance.find(EuiTourStep).prop('footerAction')!.props.onClick();
+      instance.find('button[data-test-subj="noDataPopoverDismissButton"]').simulate('click');
     });
     instance.setProps({ ...props });
     expect(props.storage.set).toHaveBeenCalledWith(expect.any(String), true);

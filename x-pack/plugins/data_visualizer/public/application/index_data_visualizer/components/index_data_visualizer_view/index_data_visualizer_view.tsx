@@ -449,6 +449,11 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       language: searchQueryLanguage,
     });
   }, [data, searchQueryLanguage, searchString]);
+
+  const hasValidTimeField = useMemo(
+    () => currentDataView.timeFieldName !== undefined && currentDataView.timeFieldName !== '',
+    [currentDataView.timeFieldName]
+  );
   const helpLink = docLinks.links.ml.guide;
 
   return (
@@ -475,7 +480,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 gutterSize="s"
                 data-test-subj="dataVisualizerTimeRangeSelectorSection"
               >
-                {currentDataView.timeFieldName !== undefined && (
+                {hasValidTimeField ? (
                   <EuiFlexItem grow={false}>
                     <FullTimeRangeSelector
                       dataView={currentDataView}
@@ -484,9 +489,12 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                       timefilter={timefilter}
                     />
                   </EuiFlexItem>
-                )}
+                ) : null}
                 <EuiFlexItem grow={false}>
-                  <DatePickerWrapper />
+                  <DatePickerWrapper
+                    isAutoRefreshOnly={!hasValidTimeField}
+                    showRefresh={!hasValidTimeField}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageContentHeader>
