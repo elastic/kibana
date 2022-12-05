@@ -13,6 +13,7 @@ import { RULES_INFO_URL } from '../../../../../../../common/detection_engine/rul
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
+import { readTags } from '../../tags/read_tags/read_tags';
 
 interface RulesCount {
   prebuilt: number;
@@ -47,21 +48,6 @@ async function fetchRulesCount(rulesClient: RulesClient): Promise<RulesCount> {
   };
 }
 
-// This is a contrived max limit on the number of tags. In fact it can exceed this number and will be truncated to the hardcoded number.
-const EXPECTED_MAX_TAGS = 500;
-
-async function fetchRuleTags(rulesClient: RulesClient): Promise<string[]> {
-  const res = await rulesClient.aggregate({
-    options: {
-      fields: ['tags'],
-      filter: undefined,
-      maxTags: EXPECTED_MAX_TAGS,
-    },
-  });
-
-  return res.ruleTags ?? [];
-}
-
 export const getRulesInfo = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
@@ -78,7 +64,7 @@ export const getRulesInfo = (router: SecuritySolutionPluginRouter) => {
 
       try {
         const [{ prebuilt: prebuiltRulesCount, custom: customRulesCount }, tags] =
-          await Promise.all([fetchRulesCount(rulesClient), fetchRuleTags(rulesClient)]);
+          await Promise.all([fetchRulesCount(rulesClient), readTags({ rulesClient })]);
         const responseBody: RulesInfoResponse = {
           rules_custom_count: customRulesCount,
           rules_prebuilt_installed_count: prebuiltRulesCount,

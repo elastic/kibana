@@ -7,7 +7,6 @@
 
 import { has } from 'lodash/fp';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { findRules } from '../../../logic/search/find_rules';
 
 export interface TagType {
   id: string;
@@ -33,37 +32,22 @@ export const convertTagsToSet = (tagObjects: object[]): Set<string> => {
   return new Set(convertToTags(tagObjects));
 };
 
-// Note: This is doing an in-memory aggregation of the tags by calling each of the alerting
-// records in batches of this const setting and uses the fields to try to get the least
-// amount of data per record back. If saved objects at some point supports aggregations
-// then this should be replaced with a an aggregation call.
-// Ref: https://www.elastic.co/guide/en/kibana/master/saved-objects-api.html
+// This is a contrived max limit on the number of tags. In fact it can exceed this number and will be truncated to the hardcoded number.
+const EXPECTED_MAX_TAGS = 500;
+
 export const readTags = async ({
   rulesClient,
 }: {
   rulesClient: RulesClient;
   perPage?: number;
 }): Promise<string[]> => {
-  // Get just one record so we can get the total count
-  const firstTags = await findRules({
-    rulesClient,
-    fields: ['tags'],
-    perPage: 1,
-    page: 1,
-    sortField: 'createdAt',
-    sortOrder: 'desc',
-    filter: undefined,
+  const res = await rulesClient.aggregate({
+    options: {
+      fields: ['tags'],
+      filter: undefined,
+      maxTags: EXPECTED_MAX_TAGS,
+    },
   });
-  // Get all the rules to aggregate over all the tags of the rules
-  const rules = await findRules({
-    rulesClient,
-    fields: ['tags'],
-    perPage: firstTags.total,
-    sortField: 'createdAt',
-    sortOrder: 'desc',
-    page: 1,
-    filter: undefined,
-  });
-  const tagSet = convertTagsToSet(rules.data);
-  return Array.from(tagSet);
+
+  return res.ruleTags ?? [];
 };
