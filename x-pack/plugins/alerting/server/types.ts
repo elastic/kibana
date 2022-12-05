@@ -48,7 +48,6 @@ import {
   RuleSnooze,
   IntervalSchedule,
   RuleLastRun,
-  RuleLastRunOutcomes,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { FieldMap } from '../common/alert_schema/field_maps/types';
