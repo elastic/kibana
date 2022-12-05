@@ -16,7 +16,7 @@ import { mergeMap, reduce } from 'rxjs/operators';
 import { supportsColor } from 'chalk';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { PROJECTS } from '../typescript/projects';
 import { Project } from '../typescript/project';

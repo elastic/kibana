@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { fromRoot, REPO_ROOT } from '@kbn/utils';
+import { fromRoot, REPO_ROOT } from '@kbn/repo-info';
 import type { LoggerFactory } from '@kbn/logging';
 import { ConfigService as KbnConfigService, CliArgs, Env, RawConfigService } from '@kbn/config';
 import { getArgValues } from './read_argv';

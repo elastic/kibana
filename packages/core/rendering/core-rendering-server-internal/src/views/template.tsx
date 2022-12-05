@@ -28,6 +28,7 @@ export const Template: FunctionComponent<Props> = ({
     i18n,
     bootstrapScriptUrl,
     strictCsp,
+    monacoBundlesPath,
   },
 }) => {
   return (
@@ -43,6 +44,7 @@ export const Template: FunctionComponent<Props> = ({
         <link rel="icon" type="image/svg+xml" href={`${uiPublicUrl}/favicons/favicon.svg`} />
         <meta name="theme-color" content="#ffffff" />
         <meta name="color-scheme" content="light dark" />
+        <meta name="monacoBundlesPath" content={monacoBundlesPath} />
         {/* Inject EUI reset and global styles before all other component styles */}
         <meta name={EUI_STYLES_GLOBAL} />
         <Styles darkMode={darkMode} stylesheetPaths={stylesheetPaths} />

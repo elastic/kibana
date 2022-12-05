@@ -10,9 +10,10 @@ import Path from 'path';
 import Fs from 'fs';
 
 import { REPO_ROOT } from '../../lib/paths.mjs';
+import External from '../../lib/external_packages.js';
 
 export async function sortPackageJson() {
-  const { sortPackageJson } = await import('@kbn/sort-package-json');
+  const { sortPackageJson } = External['@kbn/sort-package-json']();
 
   const path = Path.resolve(REPO_ROOT, 'package.json');
   const json = Fs.readFileSync(path, 'utf8');

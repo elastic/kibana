@@ -17,7 +17,7 @@ import {
 import { Root } from '@kbn/core-root-server-internal';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Env } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { LogRecord } from '@kbn/logging';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';

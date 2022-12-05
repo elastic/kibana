@@ -8,7 +8,7 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { exec, Task } from '../lib';
 
 export const BuildKibanaExamplePlugins: Task = {

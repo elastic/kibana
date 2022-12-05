@@ -9,7 +9,7 @@
 import Path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { getAllJestPaths, getTestsForConfigPaths } from './configs';
 

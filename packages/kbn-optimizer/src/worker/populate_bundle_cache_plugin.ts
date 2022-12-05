@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import Path from 'path';
 import { inspect } from 'util';
 
@@ -38,20 +37,6 @@ import { BundleRefModule } from './bundle_ref_module';
  * across mulitple workers on machines with lots of cores.
  */
 const EXTRA_SCSS_WORK_UNITS = 100;
-
-const isBazelPackageCache = new Map<string, boolean>();
-function isBazelPackage(pkgJsonPath: string) {
-  const cached = isBazelPackageCache.get(pkgJsonPath);
-  if (typeof cached === 'boolean') {
-    return cached;
-  }
-
-  const path = parseFilePath(Fs.realpathSync(pkgJsonPath, 'utf-8'));
-  const match = !!path.matchDirs('bazel-out', /-fastbuild$/, 'bin', 'packages');
-  isBazelPackageCache.set(pkgJsonPath, match);
-
-  return match;
-}
 
 export class PopulateBundleCachePlugin {
   constructor(
@@ -100,18 +85,8 @@ export class PopulateBundleCachePlugin {
         for (const module of compilation.modules) {
           if (isNormalModule(module)) {
             moduleCount += 1;
-            let path = getModulePath(module);
-            let parsedPath = parseFilePath(path);
-
-            const bazelOutIndex = parsedPath.dirs.indexOf('bazel-out');
-            if (bazelOutIndex >= 0) {
-              path = Path.resolve(
-                this.workerConfig.repoRoot,
-                ...parsedPath.dirs.slice(bazelOutIndex),
-                parsedPath.filename ?? ''
-              );
-              parsedPath = parseFilePath(path);
-            }
+            const path = getModulePath(module);
+            const parsedPath = parseFilePath(path);
 
             if (!parsedPath.dirs.includes('node_modules')) {
               addReferenced(path);
@@ -134,8 +109,7 @@ export class PopulateBundleCachePlugin {
               ...parsedPath.dirs.slice(0, nmIndex + 1 + (isScoped ? 2 : 1)),
               'package.json'
             );
-
-            addReferenced(isBazelPackage(pkgJsonPath) ? path : pkgJsonPath);
+            addReferenced(pkgJsonPath);
             continue;
           }
 

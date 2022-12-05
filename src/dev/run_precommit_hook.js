@@ -10,7 +10,7 @@ import SimpleGit from 'simple-git';
 
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError, combineErrors } from '@kbn/dev-cli-errors';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';

@@ -24,8 +24,10 @@ export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapt
     return !finished;
   }
 
+  // @ts-expect-error
   protected readonly execution: Execution<Input, Output, InspectorAdapters>;
 
+  // @ts-expect-error
   constructor(execution: Execution<Input, Output, InspectorAdapters>) {
     this.execution = execution;
   }
@@ -80,5 +82,6 @@ export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapt
    * Get Inspector adapters provided to all functions of expression through
    * execution context.
    */
+  // @ts-expect-error
   inspect = (): Adapters => this.execution.inspectorAdapters;
 }

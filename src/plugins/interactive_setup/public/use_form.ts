@@ -128,6 +128,7 @@ export function useFormState<Values extends FormValues, Result>({
   const [touched, setTouched] = useState<TouchedFields<Values>>({});
   const [submitCount, setSubmitCount] = useState(0);
 
+  // @ts-expect-error
   async function validateFormFn(formValues: Values): Promise<Result>;
   async function validateFormFn(formValues: undefined): Promise<undefined>;
   async function validateFormFn(formValues: Values | undefined) {
@@ -153,6 +154,7 @@ export function useFormState<Values extends FormValues, Result>({
     const nextErrors = await validateForm(formValues);
     setTouched(mapDeep(formValues, true));
     setSubmitCount(submitCount + 1);
+    // @ts-expect-error
     if (Object.keys(nextErrors).length === 0) {
       return onSubmit(formValues);
     }

@@ -8,7 +8,7 @@
 
 import globby from 'globby';
 import Path from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { BAZEL_PACKAGE_DIRS } from '@kbn/bazel-packages';
 import { Project, ProjectOptions } from './project';
 

@@ -6,7 +6,5 @@
   "bin": {
     "synthtrace": "./bin/synthtrace"
   },
-  "main": "./target_node/index.js",
-  "private": true,
-  "types": "./target_types/index.d.ts"
+  "private": true
 }

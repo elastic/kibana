@@ -7,7 +7,7 @@
 
 import { resolve } from 'path';
 import fs from 'fs';
-import { REPO_ROOT as KIBANA_ROOT } from '@kbn/utils';
+import { REPO_ROOT as KIBANA_ROOT } from '@kbn/repo-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';

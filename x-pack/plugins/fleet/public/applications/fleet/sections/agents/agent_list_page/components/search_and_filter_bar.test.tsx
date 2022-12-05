@@ -55,6 +55,7 @@ describe('SearchAndFilterBar', () => {
     ExperimentalFeaturesService.init({
       createPackagePolicyMultiPageLayout: true,
       packageVerification: true,
+      // @ts-expect-error
       showDevtoolsRequest: false,
       diagnosticFileUploadEnabled: false,
     });

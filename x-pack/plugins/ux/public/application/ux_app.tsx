@@ -47,6 +47,7 @@ import { useKibanaServices } from '../hooks/use_kibana_services';
 
 export type BreadcrumbTitle<T = {}> =
   | string
+  // @ts-expect-error
   | ((props: RouteComponentProps<T>) => string)
   | null;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import expect from '@kbn/expect';
 import fs from 'fs';
 import path from 'path';

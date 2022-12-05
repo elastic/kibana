@@ -199,6 +199,7 @@ export class ApmSynthtraceApmClient {
   }
 
   async index<TFields>(
+    // @ts-expect-error
     events: EntityIterable<TFields> | Array<EntityIterable<TFields>>,
     options?: StreamToBulkOptions,
     streamProcessor?: StreamProcessor
@@ -220,6 +221,7 @@ export class ApmSynthtraceApmClient {
       sp.streamToDocumentAsync((e) => {
         fields = e;
         return this.map(e);
+        // @ts-expect-error
       }, dataStream);
 
     if (options?.dryRun) {
@@ -237,6 +239,7 @@ export class ApmSynthtraceApmClient {
       return;
     }
     const queueSize = 10000;
+    // @ts-expect-error
     for await (const [item, _] of sideEffectYield()) {
       if (item == null) continue;
 

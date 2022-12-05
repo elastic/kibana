@@ -1,6 +1,6 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
+load("//src/dev/bazel:index.bzl", "pkg_npm", "ts_project")
 
 PKG_DIRNAME = "kbn-import-resolver"
 PKG_REQUIRE_NAME = "@kbn/import-resolver"
@@ -49,7 +49,7 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "//packages/kbn-bazel-packages",
   "//packages/kbn-utils",
-  "//packages/kbn-synthetic-package-map",
+  "//packages/kbn-package-map",
   "@npm//resolve",
   "@npm//normalize-path",
 ]
@@ -67,18 +67,12 @@ TYPES_DEPS = [
   "//packages/kbn-bazel-packages:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
   "//packages/kbn-dev-utils:npm_module_types", # needed for testing, only required for windows dev
-  "//packages/kbn-synthetic-package-map:npm_module_types",
+  "//packages/kbn-package-map:npm_module_types",
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@types/resolve",
   "@npm//@types/normalize-path",
 ]
-
-jsts_transpiler(
-  name = "target_node",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-)
 
 ts_config(
   name = "tsconfig",
@@ -102,8 +96,8 @@ ts_project(
 
 js_library(
   name = PKG_DIRNAME,
-  srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node"],
+  srcs = NPM_MODULE_EXTRA_FILES + SRCS,
+  deps = RUNTIME_DEPS,
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -111,19 +105,8 @@ js_library(
 js_library(
   name = "npm_module_types",
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
-  visibility = ["//visibility:public"],
-)
-
-pkg_npm(
-  name = "npm_module",
-  deps = [":" + PKG_DIRNAME],
-)
-
-filegroup(
-  name = "build",
-  srcs = [":npm_module"],
   visibility = ["//visibility:public"],
 )
 

@@ -443,6 +443,7 @@ export function DashboardTopNav({
       [TopNavIds.CLONE]: runClone,
     } as { [key: string]: NavAction };
 
+    // @ts-expect-error
     if (share !== {}) {
       // TODO: Clean up this logic once share is optional
       actions[TopNavIds.SHARE] = showShare;

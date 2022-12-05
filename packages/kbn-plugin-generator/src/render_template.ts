@@ -12,7 +12,7 @@ import { promisify } from 'util';
 
 import vfs from 'vinyl-fs';
 import prettier from 'prettier';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { transformFileStream } from '@kbn/dev-utils';
 import ejs from 'ejs';
 import { Minimatch } from 'minimatch';
@@ -78,7 +78,7 @@ export async function renderTemplates({
       dot: true,
       buffer: true,
       nodir: true,
-      cwd: Path.resolve(__dirname, '../../template'),
+      cwd: Path.resolve(__dirname, '../template'),
     }),
 
     // exclude files from the template based on selected options, patterns

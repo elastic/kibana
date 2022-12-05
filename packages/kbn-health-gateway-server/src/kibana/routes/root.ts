@@ -124,6 +124,7 @@ export class RootRoute implements ServerRoute {
     try {
       return await nodeFetch(url, {
         agent: protocol === 'https:' ? this.getAgent() : undefined,
+        // @ts-expect-error
         signal: controller.signal,
         redirect: 'manual',
       });

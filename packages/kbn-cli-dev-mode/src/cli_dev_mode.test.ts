@@ -10,7 +10,7 @@ import Path from 'path';
 import * as Rx from 'rxjs';
 import { createAbsolutePathSerializer, createAnyInstanceSerializer } from '@kbn/jest-serializers';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { TestLog } from './log';
 import { CliDevMode, SomeCliArgs } from './cli_dev_mode';

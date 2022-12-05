@@ -9,7 +9,7 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import JSON5 from 'json5';
-import { kibanaPackageJson as pkg } from '@kbn/utils';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 import {
   createRootWithCorePlugins,

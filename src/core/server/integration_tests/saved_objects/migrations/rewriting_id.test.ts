@@ -9,7 +9,7 @@
 import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
-import { kibanaPackageJson as pkg } from '@kbn/utils';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import {
   createRootWithCorePlugins,
   createTestServers,

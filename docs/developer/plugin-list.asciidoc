@@ -6,7 +6,7 @@ NOTE:
 
     node scripts/build_plugin_list_docs
 
-  You can update the template within node_modules/@kbn/dev-utils/target_node/src/plugin_list/generate_plugin_list.js
+  You can update the template within packages/kbn-dev-utils/src/plugin_list/generate_plugin_list.ts
 
 ////
 

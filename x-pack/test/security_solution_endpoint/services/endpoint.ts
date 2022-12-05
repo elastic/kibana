@@ -33,7 +33,7 @@ import { HostInfo, HostMetadata } from '@kbn/security-solution-plugin/common/end
 import { EndpointDocGenerator } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import { EndpointMetadataGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/endpoint_metadata_generator';
 import { merge } from 'lodash';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import seedrandom from 'seedrandom';
 import { FtrService } from '../../functional/ftr_provider_context';
 

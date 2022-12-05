@@ -142,14 +142,40 @@ export class RepoSourceClassifier {
     }
 
     const { pkgId, rel } = pkgInfo;
+
+    if (pkgId === '@kbn/test' || pkgId === '@kbn/test-subj-selector') {
+      return 'common package';
+    }
+
     const pkgIdWords = new Set(pkgId.split(/\W+/));
     // treat any package with "mocks" or "storybook" in the ID as a test-specific package
     if (pkgIdWords.has('mocks') || pkgIdWords.has('storybook') || pkgIdWords.has('test')) {
       return 'tests or mocks';
     }
+    if (Array.from(pkgIdWords).at(-1) === 'cli') {
+      return 'tooling';
+    }
 
-    if (path.resolver.isBazelPackage(pkgId)) {
-      return 'common package';
+    const manifest = this.resolver.getPkgManifest(pkgId);
+    if (manifest) {
+      switch (manifest.type) {
+        case 'functional-tests':
+        case 'test-helper':
+          return 'tests or mocks';
+        case 'plugin-browser':
+        case 'shared-browser':
+          return 'browser package';
+        case 'plugin-server':
+        case 'shared-server':
+          return 'server package';
+        case 'shared-scss':
+          return 'static';
+        case 'shared-common':
+          return 'common package';
+        default:
+          // @ts-expect-error if there isn't an error here we are missing a case for a package type
+          throw new Error(`unexpected package type [${manifest.type}]`);
+      }
     }
 
     const [root, ...dirs] = rel.split('/');

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { toExpression } from '@kbn/interpreter';
+import { toExpression } from './to_expression';
 import { cloneDeep, set, unset } from 'lodash';
 
 describe('toExpression', () => {

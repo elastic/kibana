@@ -13,7 +13,6 @@ const Fsp = require('fs/promises');
 const { readPackageJson } = require('./parse_package_json');
 const { readPackageManifest } = require('./parse_package_manifest');
 
-const BUILD_RULE_NAME = /(^|\s)name\s*=\s*"build"/;
 const BUILD_TYPES_RULE_NAME = /(^|\s)name\s*=\s*"build_types"/;
 
 /**
@@ -93,13 +92,6 @@ class BazelPackage {
     this.manifest = manifest;
     this.pkg = pkg;
     this.buildBazelContent = buildBazelContent;
-  }
-
-  /**
-   * Returns true if the package includes a `:build` bazel rule
-   */
-  hasBuildRule() {
-    return !!(this.buildBazelContent && BUILD_RULE_NAME.test(this.buildBazelContent));
   }
 
   /**

@@ -77,6 +77,7 @@ export function InspectorContextProvider({ children }: { children: ReactNode }) 
   }, [history, inspectorAdapters]);
 
   return (
+    // @ts-expect-error
     <InspectorContext.Provider value={{ ...value, addInspectorRequest }}>
       {children}
     </InspectorContext.Provider>

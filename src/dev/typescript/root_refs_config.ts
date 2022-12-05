@@ -11,7 +11,7 @@ import Fsp from 'fs/promises';
 
 import dedent from 'dedent';
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { BazelPackage } from '@kbn/bazel-packages';
 import normalize from 'normalize-path';

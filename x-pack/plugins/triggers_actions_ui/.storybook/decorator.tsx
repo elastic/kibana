@@ -84,6 +84,7 @@ export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps>
   ExperimentalFeaturesService.init({
     experimentalFeatures: {
       rulesListDatagrid: true,
+      // @ts-expect-error
       internalAlertsTable: true,
       ruleTagFilter: true,
       ruleStatusFilter: true,

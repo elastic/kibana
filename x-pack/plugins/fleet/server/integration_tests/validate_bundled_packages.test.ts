@@ -9,7 +9,7 @@ import path from 'path';
 import fs from 'fs/promises';
 
 import JSON5 from 'json5';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import * as Registry from '../services/epm/registry';
 import { generatePackageInfoFromArchiveBuffer } from '../services/epm/archive';

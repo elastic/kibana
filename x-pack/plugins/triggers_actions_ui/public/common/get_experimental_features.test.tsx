@@ -16,6 +16,7 @@ describe('getIsExperimentalFeatureEnabled', () => {
     ExperimentalFeaturesService.init({
       experimentalFeatures: {
         rulesListDatagrid: true,
+        // @ts-expect-error
         internalAlertsTable: true,
         rulesDetailLogs: true,
         ruleTagFilter: true,

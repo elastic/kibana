@@ -8,7 +8,7 @@
 
 import { relative } from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { Suite } from '../../fake_mocha_types';

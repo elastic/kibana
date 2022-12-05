@@ -13,7 +13,7 @@ import Path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { Project } from 'ts-morph';
 
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';

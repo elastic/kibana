@@ -11,7 +11,7 @@ import Os from 'os';
 
 import Uuid from 'uuid';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import type { Config } from '../../functional_test_runner';
 import { DedicatedTaskRunner } from '../../functional_test_runner/lib';

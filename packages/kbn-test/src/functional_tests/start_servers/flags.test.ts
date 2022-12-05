@@ -10,7 +10,7 @@ import Path from 'path';
 
 import { getFlags, FlagsReader } from '@kbn/dev-cli-runner';
 import { createAnyInstanceSerializer, createAbsolutePathSerializer } from '@kbn/jest-serializers';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { EsVersion } from '../../functional_test_runner';
 import { parseFlags, FLAG_OPTIONS } from './flags';

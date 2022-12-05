@@ -14,7 +14,7 @@ import {
 
 import { BehaviorSubject } from 'rxjs';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { type PluginName, PluginType } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { Logger } from '@kbn/logging';

@@ -9,7 +9,7 @@
 import Path from 'path';
 import del from 'del';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
-import { kibanaPackageJson as pkg } from '@kbn/utils';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
   createTestServers,

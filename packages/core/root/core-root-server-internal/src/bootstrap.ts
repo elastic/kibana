@@ -34,7 +34,7 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   // and as `REPO_ROOT` is initialized on the fly when importing `dev-utils` and requires
   // the `fs` package, it causes failures. This is why we use a dynamic `require` here.
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { REPO_ROOT } = require('@kbn/utils');
+  const { REPO_ROOT } = require('@kbn/repo-info');
 
   const env = Env.createDefault(REPO_ROOT, {
     configs,

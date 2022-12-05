@@ -7,7 +7,7 @@
 
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { IndexedEndpointRuleAlerts } from '../../../security_solution_ftr/services/detections';
 

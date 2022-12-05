@@ -9,6 +9,7 @@
 import { RunOptions } from './utils/parse_run_cli_flags';
 import { EntityIterable } from '../lib/entity_iterable';
 
+// @ts-expect-error
 type Generate<TFields> = (range: { from: Date; to: Date }) => EntityIterable<TFields>;
 export type Scenario<TFields> = (options: RunOptions) => Promise<{
   generate: Generate<TFields>;

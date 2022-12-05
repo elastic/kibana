@@ -8,7 +8,10 @@
 
 import { dirname, resolve, relative } from 'path';
 import os from 'os';
+
 import loadJsonFile from 'load-json-file';
+import { discoverBazelPackages, type BazelPackage } from '@kbn/bazel-packages';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { getVersionInfo, VersionInfo } from './version_info';
 import { PlatformName, PlatformArchitecture, ALL_PLATFORMS } from './platform';
@@ -206,5 +209,20 @@ export class Config {
    */
   resolveFromTarget(...subPaths: string[]) {
     return resolve(this.repoRoot, 'target', ...subPaths);
+  }
+
+  private _prodPackages: BazelPackage[] | undefined;
+  async getProductionPackages() {
+    if (!this._prodPackages) {
+      this._prodPackages = (await discoverBazelPackages(REPO_ROOT)).filter(
+        (pkg) => !pkg.isDevOnly()
+      );
+    }
+
+    return this._prodPackages;
+  }
+
+  async getPkgIdsInNodeModules() {
+    return (await this.getProductionPackages()).map((p) => p.manifest.id);
   }
 }

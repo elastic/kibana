@@ -3,6 +3,7 @@
   "compilerOptions": {
     "declaration": true,
     "emitDeclarationOnly": true,
+    "checkJs": true,
     "outDir": "target_types",
     "types": [
       "jest",
@@ -10,6 +11,7 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "index.js",
+    "types.ts",
   ]
 }

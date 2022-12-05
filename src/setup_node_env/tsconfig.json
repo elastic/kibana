@@ -3,12 +3,13 @@
   "compilerOptions": {
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
-    "declaration": true,
+    "declaration": true
   },
   "include": [
     "harden/**/*",
     "root/**/*",
     "*.js",
+    "*.ts",
   ],
   "kbn_references": [
     { "path": "../../tsconfig.json" },

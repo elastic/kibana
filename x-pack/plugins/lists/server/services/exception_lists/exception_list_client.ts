@@ -551,6 +551,7 @@ export class ExceptionListClient {
     };
 
     if (this.enableServerExtensionPoints) {
+      // @ts-expect-error
       itemData = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreCreateItem',
         itemData,
@@ -558,6 +559,7 @@ export class ExceptionListClient {
         (data) => {
           return validateData(
             createExceptionListItemSchema,
+            // @ts-expect-error
             transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema(data)
           );
         }
@@ -619,6 +621,7 @@ export class ExceptionListClient {
     };
 
     if (this.enableServerExtensionPoints) {
+      // @ts-expect-error
       updatedItem = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreUpdateItem',
         updatedItem,
@@ -626,6 +629,7 @@ export class ExceptionListClient {
         (data) => {
           return validateData(
             updateExceptionListItemSchema,
+            // @ts-expect-error
             transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema(data)
           );
         }

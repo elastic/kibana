@@ -158,13 +158,22 @@ export async function installYarnDeps(log, opts = undefined) {
  * @param {import('./log.mjs').Log} log
  * @param {{ offline?: boolean, quiet?: boolean } | undefined} opts
  */
-export async function buildPackages(log, opts = undefined) {
-  await runBazel(log, ['build', '//packages:build', '--show_result=1'], {
-    offline: opts?.offline,
-    quiet: opts?.quiet,
-  });
+export async function buildWebpackBundles(log, opts = undefined) {
+  await runBazel(
+    log,
+    [
+      'build',
+      '//packages/kbn-ui-shared-deps-npm:shared_built_assets',
+      '//packages/kbn-ui-shared-deps-src:shared_built_assets',
+      '--show_result=1',
+    ],
+    {
+      offline: opts?.offline,
+      quiet: opts?.quiet,
+    }
+  );
 
-  log.success('packages built');
+  log.success('shared bundles built');
 }
 
 /**

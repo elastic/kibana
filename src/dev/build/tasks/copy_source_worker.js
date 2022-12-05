@@ -10,26 +10,18 @@ const { writeFileSync, readFileSync, copyFileSync, mkdirSync } = require('fs');
 const { resolve, extname, dirname } = require('path');
 
 const { optimize } = require('svgo');
-const { transformFileSync } = require('@babel/core');
+const { transformCode } = require('@kbn/babel-transform');
 
-const presets = require('@kbn/babel-preset/node_preset');
+const { ignoredPkgIds } = require('piscina').workerData;
 
-const { REPO_ROOT } = require('@kbn/utils');
+const { REPO_ROOT } = require('@kbn/repo-info');
 const BUILD_ROOT = resolve(REPO_ROOT, 'build', 'kibana');
-
-const babelOptions = {
-  presets: [[presets, { 'kibana/rootDir': REPO_ROOT }]],
-  cwd: REPO_ROOT,
-  babelrc: false,
-  sourceMaps: false,
-  ast: false,
-};
 
 const svgOptions = {
   removeComments: false,
 };
 
-module.exports = ({ source }) => {
+module.exports = async ({ source }) => {
   const absoluteSource = resolve(REPO_ROOT, source);
   const absoluteDest = resolve(BUILD_ROOT, source);
 
@@ -40,12 +32,17 @@ module.exports = ({ source }) => {
     case '.js':
     case '.ts':
     case '.tsx':
-      const output = transformFileSync(absoluteSource, babelOptions);
+      const output = transformCode(absoluteSource, undefined, {
+        disableSourceMaps: true,
+        ignoredPkgIds,
+      });
+
       if (output.code) {
         const dest = absoluteDest.substring(0, absoluteDest.lastIndexOf('.')) + '.js';
         writeFileSync(dest, output.code);
       }
       break;
+
     case '.svg':
       const input = readFileSync(absoluteSource, 'utf-8');
       const result = optimize(input, {
@@ -58,7 +55,9 @@ module.exports = ({ source }) => {
         writeFileSync(absoluteDest, output);
       }
       break;
+
     default:
       copyFileSync(absoluteSource, absoluteDest);
+      break;
   }
 };

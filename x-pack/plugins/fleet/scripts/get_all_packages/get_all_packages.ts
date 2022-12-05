@@ -6,7 +6,7 @@
  */
 
 import fetch from 'node-fetch';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { chunk } from 'lodash';
 

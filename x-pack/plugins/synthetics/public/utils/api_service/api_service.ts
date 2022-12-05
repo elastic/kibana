@@ -53,6 +53,7 @@ class ApiService {
       asResponse,
     });
 
+    // @ts-expect-error
     this.addInspectorRequest?.({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });
 
     if (decodeType) {
@@ -79,6 +80,7 @@ class ApiService {
       body: JSON.stringify(data),
     });
 
+    // @ts-expect-error
     this.addInspectorRequest?.({ data: response, status: FETCH_STATUS.SUCCESS, loading: false });
 
     if (decodeType) {

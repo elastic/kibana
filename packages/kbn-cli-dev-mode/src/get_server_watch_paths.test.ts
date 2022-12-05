@@ -9,7 +9,7 @@
 import Path from 'path';
 
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { getServerWatchPaths } from './get_server_watch_paths';
 
@@ -33,6 +33,14 @@ it('produces the right watch and ignore list', () => {
       <absolute path>/src/plugins,
       <absolute path>/test/plugin_functional/plugins,
       <absolute path>/x-pack/plugins,
+      <absolute path>/packages,
+      <absolute path>/packages/shared-ux,
+      <absolute path>/packages/analytics,
+      <absolute path>/packages/analytics/shippers,
+      <absolute path>/packages/analytics/shippers/elastic_v3,
+      <absolute path>/packages/home,
+      <absolute path>/packages/content-management,
+      <absolute path>/x-pack/packages/ml,
     ]
   `);
 

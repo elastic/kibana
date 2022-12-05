@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-require('@kbn/optimizer').registerNodeAutoTranspilation();
+require('@kbn/babel-register').install();
 
 const { aggregateLatencyMetrics } = require('./aggregate_latency_metrics');
 

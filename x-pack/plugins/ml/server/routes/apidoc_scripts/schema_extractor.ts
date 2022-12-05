@@ -6,7 +6,7 @@
  */
 
 import Path from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import * as ts from 'typescript';

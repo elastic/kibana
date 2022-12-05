@@ -19,7 +19,7 @@ import type { ChildProcess } from 'child_process';
 import { Cluster } from '@kbn/es';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';

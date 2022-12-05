@@ -48,12 +48,16 @@ const statusToErrorMessage = (
 export class SiemResponseFactory {
   constructor(private response: KibanaResponseFactory) {}
 
+  // @ts-expect-error
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>) {
     // KibanaResponse is not exported so we cannot use a return type here and that is why the linter is turned off above
+    // @ts-expect-error
     const contentType: CustomHttpResponseOptions<T>['headers'] = {
       'content-type': 'application/json',
     };
+
+    // @ts-expect-error
     const defaultedHeaders: CustomHttpResponseOptions<T>['headers'] = {
       ...contentType,
       ...(headers ?? {}),

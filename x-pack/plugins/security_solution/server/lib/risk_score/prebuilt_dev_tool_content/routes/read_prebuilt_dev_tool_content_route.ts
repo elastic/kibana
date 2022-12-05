@@ -24,10 +24,13 @@ const getReadables = (dataPath: string) => fs.promises.readFile(dataPath, { enco
 class ConsoleResponseFactory {
   constructor(private response: KibanaResponseFactory) {}
 
+  // @ts-expect-error
   error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>) {
+    // @ts-expect-error
     const contentType: CustomHttpResponseOptions<T>['headers'] = {
       'content-type': 'text/plain; charset=utf-8',
     };
+    // @ts-expect-error
     const defaultedHeaders: CustomHttpResponseOptions<T>['headers'] = {
       ...contentType,
       ...(headers ?? {}),
@@ -36,6 +39,7 @@ class ConsoleResponseFactory {
     return this.response.custom({
       headers: defaultedHeaders,
       statusCode,
+      // @ts-expect-error
       body,
     });
   }

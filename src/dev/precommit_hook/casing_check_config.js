@@ -26,6 +26,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/{Dockerfile,docker-compose.yml}',
   'x-pack/plugins/canvas/tasks/**/*',
   'x-pack/plugins/canvas/canvas_plugin_src/**/*',
+  'x-pack/plugins/canvas/server/templates/assets/*.{png,jpg,svg}',
   'x-pack/plugins/cases/docs/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   '**/.*',

@@ -56,6 +56,7 @@ const statusCount = async (context: QueryContext): Promise<Snapshot> => {
   );
 
   return (
+    // @ts-expect-error
     (res.aggregations?.counts?.value as Snapshot) ?? {
       total: 0,
       up: 0,

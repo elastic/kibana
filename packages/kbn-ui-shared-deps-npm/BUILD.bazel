@@ -1,7 +1,7 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("@npm//webpack-cli:index.bzl", webpack = "webpack_cli")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
+load("//src/dev/bazel:index.bzl", "pkg_npm", "ts_project")
 
 PKG_DIRNAME = "kbn-ui-shared-deps-npm"
 PKG_REQUIRE_NAME = "@kbn/ui-shared-deps-npm"
@@ -36,7 +36,18 @@ NPM_MODULE_EXTRA_FILES = [
   "package.json",
 ]
 
+# deps needed when importing this module from another location
 RUNTIME_DEPS = [
+  "@npm//loader-utils",
+  "@npm//val-loader",
+  "//packages/kbn-repo-info",
+  # deps in the dll need to be included in the sandbox for consumers
+  # of this DLL (ui-shared-deps-src) because webpack won't actually
+  # use the DLL version of a package until it has resolved to the same
+  # relative path as the module which is already included in the DLL manifest
+  "@npm//core-js",
+  "@npm//whatwg-fetch",
+  "@npm//symbol-observable",
   "@npm//@babel/runtime",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
@@ -45,72 +56,35 @@ RUNTIME_DEPS = [
   "@npm//@emotion/react",
   "@npm//@tanstack/react-query",
   "@npm//@tanstack/react-query-devtools",
-  "@npm//babel-loader",
-  "@npm//core-js",
-  "@npm//css-loader",
+  "@npm//classnames",
   "@npm//fflate",
+  "@npm//history",
   "@npm//jquery",
-  "@npm//loader-utils",
-  "@npm//mini-css-extract-plugin",
+  "@npm//lodash",
   "@npm//moment-timezone",
-  "@npm//moment",
-  "@npm//raw-loader",
   "@npm//react-ace",
+  "@npm//react-beautiful-dnd",
   "@npm//react-dom",
-  "@npm//react-intl",
-  "@npm//react-is",
   "@npm//react-router-dom",
   "@npm//react-router",
   "@npm//react",
   "@npm//rxjs",
   "@npm//styled-components",
-  "@npm//symbol-observable",
   "@npm//tslib",
-  "@npm//url-loader",
-  "@npm//val-loader",
-  "@npm//whatwg-fetch",
 ]
 
+# deps needed to build the webpack bundles
 WEBPACK_DEPS = [
+  "@npm//webpack",
   "@npm//clean-webpack-plugin",
+  "@npm//mini-css-extract-plugin",
+  "@npm//moment",
+  "@npm//css-loader",
 ]
 
 TYPES_DEPS = [
-  "@npm//@elastic/charts",
-  "@npm//@elastic/eui",
-  "@npm//@elastic/numeral",
-  "@npm//@emotion/cache",
-  "@npm//@emotion/react",
-  "@npm//babel-loader",
-  "@npm//core-js",
-  "@npm//css-loader",
-  "@npm//fflate",
-  "@npm//jquery",
-  "@npm//loader-utils",
-  "@npm//mini-css-extract-plugin",
-  "@npm//moment",
-  "@npm//moment-timezone",
-  "@npm//raw-loader",
-  "@npm//react",
-  "@npm//react-dom",
-  "@npm//react-intl",
-  "@npm//react-is",
-  "@npm//react-router",
-  "@npm//react-router-dom",
-  "@npm//rxjs",
-  "@npm//styled-components",
-  "@npm//symbol-observable",
-  "@npm//url-loader",
-  "@npm//val-loader",
-  "@npm//whatwg-fetch",
   "@npm//@types/node",
-]
-
-jsts_transpiler(
-  name = "target_node",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-)
+] + RUNTIME_DEPS + WEBPACK_DEPS
 
 ts_config(
   name = "tsconfig",
@@ -136,9 +110,8 @@ ts_project(
 webpack(
   name = "shared_built_assets",
   data = RUNTIME_DEPS + WEBPACK_DEPS + [
-    "//:package.json",
+    "//:.browserslistrc",
     ":srcs",
-    ":tsconfig",
     ":webpack.config.js",
   ],
   output_dir = True,
@@ -147,14 +120,23 @@ webpack(
     "$(location webpack.config.js)",
     "--output-path",
     "$(@D)",
-    "--no-stats"
+    "--stats=errors-only"
   ],
+  visibility = ["//visibility:public"],
+  env = select({
+    "//:dist": {
+      "NODE_ENV": "production",
+    },
+    "//conditions:default": {
+      "NODE_ENV": "development",
+    },
+  })
 )
 
 js_library(
   name = PKG_DIRNAME,
-  srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":shared_built_assets"],
+  srcs = NPM_MODULE_EXTRA_FILES + SRCS,
+  deps = RUNTIME_DEPS + [':shared_built_assets'],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -162,21 +144,8 @@ js_library(
 js_library(
   name = "npm_module_types",
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":shared_built_assets", ":tsc_types"],
+  deps = TYPES_DEPS + [":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
-  visibility = ["//visibility:public"],
-)
-
-pkg_npm(
-  name = "npm_module",
-  deps = [":" + PKG_DIRNAME],
-)
-
-filegroup(
-  name = "build",
-  srcs = [
-    ":npm_module",
-  ],
   visibility = ["//visibility:public"],
 )
 

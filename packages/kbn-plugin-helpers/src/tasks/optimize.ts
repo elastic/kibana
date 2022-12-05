@@ -10,7 +10,7 @@ import Fs from 'fs';
 import Path from 'path';
 import { promisify } from 'util';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { OptimizerConfig, runOptimizer, logOptimizerState } from '@kbn/optimizer';
 
 import { BuildContext } from '../build_context';

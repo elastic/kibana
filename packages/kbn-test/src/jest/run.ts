@@ -23,7 +23,7 @@ import { run } from 'jest';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { map } from 'lodash';
 import getopts from 'getopts';
 import jestFlags from './jest_flags.json';

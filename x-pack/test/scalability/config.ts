@@ -8,7 +8,7 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import fs from 'fs';
 import path from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { ScalabilityTestRunner } from './runner';

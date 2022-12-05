@@ -6,7 +6,7 @@
  */
 
 import path from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 interface CreateTestConfigOptions {

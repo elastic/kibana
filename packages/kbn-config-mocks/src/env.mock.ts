@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { Env, type RawPackageInfo, type EnvOptions } from '@kbn/config';
 
 type DeepPartial<T> = {

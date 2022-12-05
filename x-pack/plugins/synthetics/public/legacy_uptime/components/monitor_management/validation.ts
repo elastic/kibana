@@ -20,6 +20,7 @@ export const includesValidPort = /[^\:]+:[0-9]{1,5}$/g;
 
 // returns true if invalid
 function validateHeaders<T>(headers: T): boolean {
+  // @ts-expect-error
   return Object.keys(headers).some((key) => {
     if (key) {
       const whiteSpaceRegEx = /[\s]/g;

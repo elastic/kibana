@@ -9,7 +9,7 @@
 import Path from 'path';
 import del from 'del';
 import { kibanaServerTestUser } from '@kbn/test';
-import { kibanaPackageJson as pkg } from '@kbn/utils';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import {
   createTestServers,
   createRoot as createkbnTestServerRoot,

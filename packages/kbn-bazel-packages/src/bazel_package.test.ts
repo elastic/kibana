@@ -25,23 +25,6 @@ const manifest: KibanaPackageManifest = {
   typeDeps: [],
 };
 
-describe('hasBuildRule()', () => {
-  it('returns true if there is a rule with the name "build"', () => {
-    const pkg = new BazelPackage('foo', manifest, pkgJson, OWN_BAZEL_BUILD_FILE);
-    expect(pkg.hasBuildRule()).toBe(true);
-  });
-
-  it('returns false if there is no rule with name "build"', () => {
-    const pkg = new BazelPackage('foo', manifest, pkgJson, ``);
-    expect(pkg.hasBuildRule()).toBe(false);
-  });
-
-  it('returns false if there is no BUILD.bazel file', () => {
-    const pkg = new BazelPackage('foo', manifest, pkgJson);
-    expect(pkg.hasBuildRule()).toBe(false);
-  });
-});
-
 describe('hasBuildTypesRule()', () => {
   it('returns true if there is a rule with the name "build_types"', () => {
     const pkg = new BazelPackage('foo', manifest, pkgJson, OWN_BAZEL_BUILD_FILE);

@@ -9,7 +9,7 @@
 import Path from 'path';
 
 import { IMinimatch, Minimatch } from 'minimatch';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { parseTsConfig } from './ts_configfile';
 

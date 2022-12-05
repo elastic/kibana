@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { getRepoFiles } from './src/get_repo_files';
+export { getRepoFiles, type RepoPath } from './src/get_repo_files';

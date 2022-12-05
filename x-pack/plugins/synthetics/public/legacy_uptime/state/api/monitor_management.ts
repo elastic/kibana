@@ -69,6 +69,7 @@ export const fetchServiceLocations = async (): Promise<{
   throttling: ThrottlingOptions | undefined;
   locations: ServiceLocations;
 }> => {
+  // @ts-expect-error
   const { throttling, locations } = await apiService.get(
     API_URLS.SERVICE_LOCATIONS,
     undefined,

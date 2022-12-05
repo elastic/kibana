@@ -15,7 +15,7 @@ import prettier from 'prettier';
 import cpy from 'cpy';
 import del from 'del';
 import { tap, filter } from 'rxjs/operators';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { createReplaceSerializer } from '@kbn/jest-serializers';
 import { runOptimizer, OptimizerConfig, OptimizerUpdate, logOptimizerState } from '../..';
@@ -134,13 +134,13 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   expect(foo.cache.getModuleCount()).toBe(6);
   expect(foo.cache.getReferencedPaths()).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps-npm/target_node/src/public_path_module_creator.js,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/lib.ts,
       <absolute path>/packages/kbn-optimizer/src/worker/entry_point_creator.ts,
+      <absolute path>/packages/kbn-ui-shared-deps-npm/src/public_path_module_creator.js,
     ]
   `);
 
@@ -154,10 +154,9 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
 
   expect(bar.cache.getReferencedPaths()).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/node_modules/@kbn/optimizer/postcss.config.js,
       <absolute path>/node_modules/css-loader/package.json,
       <absolute path>/node_modules/style-loader/package.json,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps-npm/target_node/src/public_path_module_creator.js,
+      <absolute path>/packages/kbn-optimizer/postcss.config.js,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/index.ts,
@@ -167,6 +166,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/styles/core_app/_globals_v8dark.scss,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/core/public/styles/core_app/_globals_v8light.scss,
       <absolute path>/packages/kbn-optimizer/src/worker/entry_point_creator.ts,
+      <absolute path>/packages/kbn-ui-shared-deps-npm/src/public_path_module_creator.js,
     ]
   `);
 
@@ -177,10 +177,10 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
 
   expect(baz.cache.getReferencedPaths()).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/bazel-out/<platform>-fastbuild/bin/packages/kbn-ui-shared-deps-npm/target_node/src/public_path_module_creator.js,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/kibana.json,
       <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/x-pack/baz/public/index.ts,
       <absolute path>/packages/kbn-optimizer/src/worker/entry_point_creator.ts,
+      <absolute path>/packages/kbn-ui-shared-deps-npm/src/public_path_module_creator.js,
     ]
   `);
 });

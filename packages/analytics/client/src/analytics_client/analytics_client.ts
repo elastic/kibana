@@ -171,6 +171,7 @@ export class AnalyticsClient implements IAnalyticsClient {
     this.optInConfig$.next(optInConfigInstance);
   };
 
+  // @ts-expect-error
   public registerContextProvider = <Context>(contextProviderOpts: ContextProviderOpts<Context>) => {
     this.contextService.registerContextProvider(contextProviderOpts);
   };

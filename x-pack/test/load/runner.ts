@@ -7,7 +7,7 @@
 
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { resolve } from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import Fs from 'fs';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';

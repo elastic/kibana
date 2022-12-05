@@ -27,7 +27,7 @@
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 module.exports = (on: any, config: any) => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-extraneous-dependencies
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('@cypress/code-coverage/task')(on, config);
 
   // `on` is used to hook into various events Cypress emits

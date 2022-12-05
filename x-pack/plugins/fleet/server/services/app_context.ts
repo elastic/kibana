@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import type {
   ElasticsearchClient,
   SavedObjectsServiceStart,

@@ -14,7 +14,7 @@ import crypto from 'crypto';
 
 import execa from 'execa';
 import Axios, { AxiosRequestConfig } from 'axios';
-import { REPO_ROOT, kibanaPackageJson } from '@kbn/utils';
+import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
 import { parseConfig, Config, CiStatsMetadata } from '@kbn/ci-stats-core';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 

@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env/no_transpilation');
-require('@kbn/dev-utils/target_node/src/precommit_hook/cli');
+require('../src/setup_node_env');
+require('@kbn/dev-utils/src/precommit_hook/cli');

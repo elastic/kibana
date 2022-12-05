@@ -10,7 +10,7 @@ import Path from 'path';
 import Fs from 'fs';
 
 import execa from 'execa';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
 import extract from 'extract-zip';
 import del from 'del';

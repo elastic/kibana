@@ -15,6 +15,7 @@ const ExperimentalFeaturesServiceMock = {
     const ff: ExperimentalFeatures = {
       ...allowedExperimentalValues,
 
+      // @ts-expect-error
       responseActionGetFileEnabled: true,
     };
 

@@ -6,7 +6,7 @@
  */
 import apmAgent from 'elastic-apm-node';
 import { initApm } from '@kbn/apm-config-loader';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 if (!apmAgent.isStarted()) {
   initApm(process.argv, REPO_ROOT, false, 'test-plugin');

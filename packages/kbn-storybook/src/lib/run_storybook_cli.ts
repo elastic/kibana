@@ -12,7 +12,7 @@ import buildStandalone from '@storybook/react/standalone';
 import { Flags, run } from '@kbn/dev-cli-runner';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 // @ts-expect-error internal dep of storybook
 import interpret from 'interpret'; // eslint-disable-line import/no-extraneous-dependencies
 import * as constants from './constants';

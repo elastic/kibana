@@ -11,7 +11,7 @@ import Fsp from 'fs/promises';
 
 import dedent from 'dedent';
 
-import { REPO_ROOT, kibanaPackageJson } from '@kbn/utils';
+import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
 import { SomeDevLog } from '@kbn/some-dev-log';
 import { discoverBazelPackages } from '@kbn/bazel-packages';
 

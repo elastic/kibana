@@ -20,7 +20,7 @@ const getWorkerEntry = (language) => {
 };
 
 const getWorkerConfig = (language) => ({
-  mode: 'production',
+  mode: process.env.NODE_ENV || 'development',
   entry: getWorkerEntry(language),
   output: {
     path: path.resolve(__dirname, 'target_workers'),
@@ -33,12 +33,12 @@ const getWorkerConfig = (language) => ({
   module: {
     rules: [
       {
-        test: /\.(js|ts)$/,
-        exclude: /node_modules/,
+        test: /\.(jsx?|tsx?)$/,
         use: {
           loader: 'babel-loader',
           options: {
             babelrc: false,
+            envName: process.env.NODE_ENV || 'development',
             presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
           },
         },

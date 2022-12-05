@@ -112,7 +112,7 @@ module.exports = {
             loader: 'postcss-loader',
             options: {
               postcssOptions: {
-                config: require.resolve('@kbn/optimizer/postcss.config.js'),
+                config: require.resolve('@kbn/optimizer/postcss.config'),
               },
             },
           },

@@ -12,11 +12,10 @@ import Fsp from 'fs/promises';
 
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { REPO_ROOT } from '@kbn/utils';
-import { Jsonc } from '@kbn/bazel-packages';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { runBazel } from '@kbn/bazel-runner';
 import { asyncForEachWithLimit } from '@kbn/std';
-import { BazelPackage, discoverBazelPackages } from '@kbn/bazel-packages';
+import { Jsonc, BazelPackage, discoverBazelPackages } from '@kbn/bazel-packages';
 
 import { PROJECTS } from './projects';
 import { Project } from './project';
@@ -153,17 +152,27 @@ export async function runTypeCheckCli() {
         log.warning('Deleted all typescript caches');
       }
 
-      await runBazel(['build', '//packages:build_types', '--show_result=1'], {
-        cwd: REPO_ROOT,
-        logPrefix: '\x1b[94m[bazel]\x1b[39m',
-        onErrorExit(code: any, output: any) {
-          throw createFailError(
-            `The bazel command that was running exited with code [${code}] and output: ${output}`
-          );
-        },
-      });
-
       const bazelPackages = await discoverBazelPackages(REPO_ROOT);
+
+      await runBazel(
+        [
+          'build',
+          ...bazelPackages.flatMap((p) =>
+            p.hasBuildTypesRule() ? `//${p.normalizedRepoRelativeDir}:build_types` : []
+          ),
+          '--show_result=1',
+          '--show_progress',
+        ],
+        {
+          cwd: REPO_ROOT,
+          logPrefix: '\x1b[94m[bazel]\x1b[39m',
+          onErrorExit(code: any, output: any) {
+            throw createFailError(
+              `The bazel command that was running exited with code [${code}] and output: ${output}`
+            );
+          },
+        }
+      );
 
       // if the tsconfig.refs.json file is not self-managed then make sure it has
       // a reference to every composite project in the repo

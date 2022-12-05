@@ -89,6 +89,7 @@ export const RuleConditions = <ConditionProps extends any, ActionGroupIds extend
                   React.Children.only(children),
                   onResetConditionsFor
                     ? {
+                        // @ts-expect-error
                         actionGroup,
                         onResetConditionsFor,
                       }

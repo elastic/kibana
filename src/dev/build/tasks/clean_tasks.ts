@@ -8,7 +8,7 @@
 
 import minimatch from 'minimatch';
 import { discoverBazelPackages } from '@kbn/bazel-packages';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { deleteAll, deleteEmptyFolders, scanDelete, Task, GlobalTask } from '../lib';
 
 export const Clean: GlobalTask = {

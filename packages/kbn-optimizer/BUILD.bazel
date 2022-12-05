@@ -1,6 +1,6 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
+load("//src/dev/bazel:index.bzl", "pkg_npm", "ts_project")
 
 PKG_DIRNAME = "kbn-optimizer"
 PKG_REQUIRE_NAME = "@kbn/optimizer"
@@ -46,7 +46,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-ui-shared-deps-npm",
   "//packages/kbn-ui-shared-deps-src",
   "//packages/kbn-utils",
-  "//packages/kbn-synthetic-package-map",
+  "//packages/kbn-package-map",
   "//packages/kbn-peggy",
   "@npm//@babel/core",
   "@npm//chalk",
@@ -81,7 +81,7 @@ TYPES_DEPS = [
   "//packages/kbn-ui-shared-deps-src:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
   "//packages/kbn-tooling-log:npm_module_types",
-  "//packages/kbn-synthetic-package-map:npm_module_types",
+  "//packages/kbn-package-map:npm_module_types",
   "//packages/kbn-peggy:npm_module_types",
   "@npm//chalk",
   "@npm//clean-webpack-plugin",
@@ -107,12 +107,6 @@ TYPES_DEPS = [
   "@npm//@types/webpack-sources",
 ]
 
-jsts_transpiler(
-  name = "target_node",
-  srcs = SRCS,
-  build_pkg_name = package_name(),
-)
-
 ts_config(
   name = "tsconfig",
   src = "tsconfig.json",
@@ -135,8 +129,8 @@ ts_project(
 
 js_library(
   name = PKG_DIRNAME,
-  srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node"],
+  srcs = NPM_MODULE_EXTRA_FILES + SRCS,
+  deps = RUNTIME_DEPS,
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -144,21 +138,8 @@ js_library(
 js_library(
   name = "npm_module_types",
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
-  visibility = ["//visibility:public"],
-)
-
-pkg_npm(
-  name = "npm_module",
-  deps = [":" + PKG_DIRNAME],
-)
-
-filegroup(
-  name = "build",
-  srcs = [
-    ":npm_module",
-  ],
   visibility = ["//visibility:public"],
 )
 

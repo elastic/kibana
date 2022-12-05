@@ -25,6 +25,7 @@ export const useUrlQuery = <T extends object>(getDefaultQuery: () => T) => {
   const setUrlQuery = useCallback(
     (query: Partial<T>) =>
       push({
+        // @ts-expect-error
         search: encodeQuery({ ...getDefaultQuery(), ...urlQuery, ...query }),
       }),
     [getDefaultQuery, urlQuery, push]

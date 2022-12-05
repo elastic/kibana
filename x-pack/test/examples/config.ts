@@ -8,7 +8,7 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
 import fs from 'fs';
-import { REPO_ROOT as KIBANA_ROOT } from '@kbn/utils';
+import { REPO_ROOT as KIBANA_ROOT } from '@kbn/repo-info';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(

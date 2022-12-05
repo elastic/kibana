@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import Path from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ParameterDeclaration, ClassMemberTypes, Node } from 'ts-morph';
 import { BuildApiDecOpts } from './types';
 import { isNamedNode } from '../tsmorph_utils';

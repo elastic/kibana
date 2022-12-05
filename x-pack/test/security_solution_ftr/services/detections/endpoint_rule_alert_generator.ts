@@ -7,7 +7,7 @@
 
 import { BaseDataGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/base_data_generator';
 import endpointPrePackagedRule from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint_security.json';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { mergeWith } from 'lodash';
 import { EndpointMetadataGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/endpoint_metadata_generator';
 import { HostMetadata } from '@kbn/security-solution-plugin/common/endpoint/types';

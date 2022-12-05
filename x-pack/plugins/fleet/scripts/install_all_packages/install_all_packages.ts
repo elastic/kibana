@@ -6,7 +6,7 @@
  */
 
 import fetch from 'node-fetch';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 
 const REGISTRY_URL = 'https://epr-snapshot.elastic.co';

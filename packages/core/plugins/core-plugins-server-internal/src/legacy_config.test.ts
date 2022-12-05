@@ -8,7 +8,7 @@
 import { take } from 'rxjs/operators';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import { duration } from 'moment';
-import { fromRoot } from '@kbn/utils';
+import { fromRoot } from '@kbn/repo-info';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { createCoreContextConfigServiceMock } from './test_helpers';
 

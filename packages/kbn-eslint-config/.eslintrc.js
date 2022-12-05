@@ -258,6 +258,17 @@ module.exports = {
           'ProcRunner',
         ]
       },
+      {
+        fromPackage: '@kbn/utils',
+        toPackage: '@kbn/repo-info',
+        exportNames: [
+          'REPO_ROOT',
+          'UPSTREAM_BRANCH',
+          'kibanaPackageJson',
+          'isKibanaDistributable',
+          'fromRoot',
+        ]
+      },
     ]],
 
     '@kbn/disable/no_protected_eslint_disable': 'error',

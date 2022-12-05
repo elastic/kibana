@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { kibanaPackageJson as pkg } from '@kbn/utils';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import Command from './command';
 import serveCommand from './serve/serve';
 

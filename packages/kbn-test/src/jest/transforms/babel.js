@@ -18,6 +18,7 @@ module.exports = babelJest.default.createTransformer({
           useBuiltIns: false,
           corejs: false,
         },
+        'kibana/ignoreAllPkgImports': true,
       },
     ],
   ],

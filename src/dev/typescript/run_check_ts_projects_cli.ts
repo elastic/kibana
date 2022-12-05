@@ -12,7 +12,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { asyncMapWithLimit } from '@kbn/std';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { getRepoFiles } from '@kbn/get-repo-files';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import globby from 'globby';
 
 import { File } from '../file';
