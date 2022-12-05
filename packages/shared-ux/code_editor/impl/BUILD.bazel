@@ -55,6 +55,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-monaco",
   "//packages/kbn-i18n-react",
   "//packages/kbn-i18n",
+  "//packages/kbn-test-jest-helpers",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -73,13 +74,13 @@ TYPES_DEPS = [
   "@npm//@elastic/eui",
   "//packages/kbn-monaco:npm_module_types",
   "@npm//@types/react-monaco-editor",
-  "@npm//@types/react-resize-detector",
   "//packages/kbn-ambient-ui-types",
   "//packages/shared-ux/code_editor/mocks:npm_module_types",
   "//packages/shared-ux/code_editor/types:npm_module_types",
   "//packages/kbn-shared-ux-utility:npm_module_types",
   "//packages/kbn-i18n-react:npm_module_types",
   "//packages/kbn-i18n:npm_module_types",
+  "//packages/kbn-test-jest-helpers:npm_module_types",
 ]
 
 jsts_transpiler(
