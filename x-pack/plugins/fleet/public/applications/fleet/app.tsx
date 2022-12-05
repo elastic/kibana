@@ -247,10 +247,10 @@ export const FleetAppContext: React.FC<{
       <RedirectAppLinks application={startServices.application}>
         <startServices.i18n.Context>
           <KibanaContextProvider services={{ ...startServices }}>
-            <EuiErrorBoundary>
-              <ConfigContext.Provider value={config}>
-                <KibanaVersionContext.Provider value={kibanaVersion}>
-                  <KibanaThemeProvider theme$={theme$}>
+            <KibanaThemeProvider theme$={theme$}>
+              <EuiErrorBoundary>
+                <ConfigContext.Provider value={config}>
+                  <KibanaVersionContext.Provider value={kibanaVersion}>
                     <EuiThemeProvider darkMode={isDarkMode}>
                       <UIExtensionsContext.Provider value={extensions}>
                         <FleetStatusProvider>
@@ -265,10 +265,10 @@ export const FleetAppContext: React.FC<{
                         </FleetStatusProvider>
                       </UIExtensionsContext.Provider>
                     </EuiThemeProvider>
-                  </KibanaThemeProvider>
-                </KibanaVersionContext.Provider>
-              </ConfigContext.Provider>
-            </EuiErrorBoundary>
+                  </KibanaVersionContext.Provider>
+                </ConfigContext.Provider>
+              </EuiErrorBoundary>
+            </KibanaThemeProvider>
           </KibanaContextProvider>
         </startServices.i18n.Context>
       </RedirectAppLinks>

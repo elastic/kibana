@@ -64,8 +64,8 @@ export const renderApp = (element: HTMLElement, appDependencies: AppDependencies
   const I18nContext = appDependencies.i18n.Context;
 
   render(
-    <EuiErrorBoundary>
-      <KibanaThemeProvider theme$={appDependencies.theme.theme$}>
+    <KibanaThemeProvider theme$={appDependencies.theme.theme$}>
+      <EuiErrorBoundary>
         <KibanaContextProvider services={appDependencies}>
           <AuthorizationProvider privilegesEndpoint={`${API_BASE_PATH}privileges`}>
             <I18nContext>
@@ -73,8 +73,8 @@ export const renderApp = (element: HTMLElement, appDependencies: AppDependencies
             </I18nContext>
           </AuthorizationProvider>
         </KibanaContextProvider>
-      </KibanaThemeProvider>
-    </EuiErrorBoundary>,
+      </EuiErrorBoundary>
+    </KibanaThemeProvider>,
     element
   );
 
