@@ -45,11 +45,9 @@ discover-app {
 }
 
 .dscPageContent {
+  position: relative;
+  overflow: hidden;
   border: $euiBorderThin;
-}
-
-.dscPageContent,
-.dscPageContent__inner {
   height: 100%;
 }
 
