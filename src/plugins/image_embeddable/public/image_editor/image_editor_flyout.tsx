@@ -26,14 +26,16 @@ import {
   EuiColorPicker,
   useColorPickerState,
   EuiLoadingSpinner,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
-import { FilePicker, UploadFile } from '@kbn/files-plugin/public';
-import type { FileImageMetadata } from '@kbn/files-plugin/common';
+import { FileUpload } from '@kbn/shared-ux-file-upload';
+import { FilePicker } from '@kbn/shared-ux-file-picker';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { FileImageMetadata, imageEmbeddableFileKind } from '../imports';
 import { ImageConfig } from '../types';
-import { imageEmbeddableFileKind } from '../../common';
 import { ImageViewer } from '../image_viewer';
 import { ValidateUrlFn } from '../utils/validate_url';
 import { validateImageConfig, DraftImageConfig } from '../utils/validate_image_config';
@@ -57,6 +59,7 @@ export interface ImageEditorFlyoutProps {
 }
 
 export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
+  const { euiTheme } = useEuiTheme();
   const [fileId, setFileId] = useState<undefined | string>(() =>
     props.initialImageConfig?.src?.type === 'file' ? props.initialImageConfig.src.fileId : undefined
   );
@@ -114,15 +117,26 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
     <>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="m">
-          <h2>Configure Image</h2>
+          <h2>
+            <FormattedMessage
+              id="imageEmbeddable.imageEditor.title"
+              defaultMessage="Configure Image"
+            />
+          </h2>
         </EuiTitle>
         <EuiSpacer size={'s'} />
         <EuiTabs style={{ marginBottom: '-25px' }}>
           <EuiTab onClick={() => setSrcType('file')} isSelected={srcType === 'file'}>
-            Upload
+            <FormattedMessage
+              id="imageEmbeddable.imageEditor.uploadTabLabel"
+              defaultMessage="Upload"
+            />
           </EuiTab>
           <EuiTab onClick={() => setSrcType('url')} isSelected={srcType === 'url'}>
-            By URL
+            <FormattedMessage
+              id="imageEmbeddable.imageEditor.byURLTabLabel"
+              defaultMessage="By URL"
+            />
           </EuiTab>
         </EuiTabs>
       </EuiFlyoutHeader>
@@ -138,6 +152,10 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                   setFileId(undefined);
                   setFileImageMeta(undefined);
                 }}
+                containerCSS={css`
+                  border: ${euiTheme.border.thin};
+                  background-color: ${euiTheme.colors.lightestShade};
+                `}
               />
             ) : (
               <EuiFormRow
@@ -158,11 +176,16 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                 `}
               >
                 <>
-                  <UploadFile
+                  <FileUpload
                     kind={imageEmbeddableFileKind.id}
                     onDone={(files) => setFileId(files[0]?.id)}
                     immediate={true}
-                    initialPromptText={'Upload a new image'}
+                    initialPromptText={i18n.translate(
+                      'imageEmbeddable.imageEditor.uploadImagePromptText',
+                      {
+                        defaultMessage: 'Upload a new image',
+                      }
+                    )}
                     fullWidth={true}
                     lazyLoadFallback={
                       <div className={`lazy-load-fallback`}>
@@ -172,7 +195,10 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                   />
                   <p style={{ textAlign: 'center' }}>
                     <EuiLink onClick={() => setIsFilePickerOpen(true)}>
-                      Or select from previously uploaded images
+                      <FormattedMessage
+                        id="imageEmbeddable.imageEditor.selectImagePromptText"
+                        defaultMessage="Or select from previously uploaded images"
+                      />
                     </EuiLink>
                   </p>
                 </>
@@ -193,9 +219,23 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                 `}
                 iconType="image"
                 color="subdued"
-                title={<h3>No Image</h3>}
+                title={
+                  <p>
+                    <FormattedMessage
+                      id="imageEmbeddable.imageEditor.byURLNoImageTitle"
+                      defaultMessage="No Image"
+                    />
+                  </p>
+                }
                 titleSize={'s'}
-                body={<p>Insert a valid URL to the image in the text field below.</p>}
+                body={
+                  <p>
+                    <FormattedMessage
+                      id="imageEmbeddable.imageEditor.byURLNoImageMessage"
+                      defaultMessage="Insert a valid URL to the image in the text field below."
+                    />
+                  </p>
+                }
               />
             ) : (
               <ImageViewer
@@ -204,13 +244,27 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                 onError={() => {
                   setSrcUrlError(failedToLoadImageFromURL(srcUrl));
                 }}
+                containerCSS={css`
+                  border: ${euiTheme.border.thin};
+                  background-color: ${euiTheme.colors.lightestShade};
+                `}
               />
             )}
 
             <EuiSpacer />
             <EuiFormRow
-              label={'Insert a URL to the image'}
-              helpText="Example: https://elastic.co/my-image.png"
+              label={
+                <FormattedMessage
+                  id="imageEmbeddable.imageEditor.imageURLInputLabel"
+                  defaultMessage="Insert a URL to the image"
+                />
+              }
+              helpText={
+                <FormattedMessage
+                  id="imageEmbeddable.imageEditor.imageURLHelpText"
+                  defaultMessage="Example: https://elastic.co/my-image.png"
+                />
+              }
               fullWidth={true}
               isInvalid={!!srcUrlError}
               error={srcUrlError}
@@ -218,7 +272,9 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
               <EuiTextArea
                 fullWidth
                 compressed={true}
-                placeholder="Example: https://elastic.co/my-image.png"
+                placeholder={i18n.translate('imageEmbeddable.imageEditor.imageURLPlaceholderText', {
+                  defaultMessage: 'Example: https://elastic.co/my-image.png',
+                })}
                 value={srcUrl}
                 onChange={(e) => {
                   const url = e.target.value;
@@ -238,17 +294,47 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
         )}
         <EuiSpacer />
         <EuiFormRow
-          label={`Sizing`}
-          helpText={`How the image should be resized to fit its container.`}
+          label={
+            <FormattedMessage
+              id="imageEmbeddable.imageEditor.imageSizingLabel"
+              defaultMessage="Sizing"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="imageEmbeddable.imageEditor.imageSizingHelpText"
+              defaultMessage="How the image should be resized relative to its container."
+            />
+          }
           fullWidth
         >
           <EuiSelect
             fullWidth
             options={[
-              { value: 'contain', text: 'Fit maintaining aspect ratio' },
-              { value: 'cover', text: 'Fill maintaining aspect ratio' },
-              { value: 'fill', text: 'Stretch to fill' },
-              { value: 'none', text: "Don't resize" },
+              {
+                value: 'contain',
+                text: i18n.translate('imageEmbeddable.imageEditor.imageSizingContainOptionText', {
+                  defaultMessage: 'Fit maintaining aspect ratio',
+                }),
+              },
+              {
+                value: 'cover',
+                text: i18n.translate('imageEmbeddable.imageEditor.imageSizingCoverOptionText', {
+                  defaultMessage: 'Fill maintaining aspect ratio',
+                }),
+              },
+              {
+                value: 'fill',
+                text: i18n.translate('imageEmbeddable.imageEditor.imageSizingFillOptionText', {
+                  defaultMessage: 'Stretch to fill',
+                }),
+              },
+              {
+                value: 'none',
+                text: i18n.translate('imageEmbeddable.imageEditor.imageSizingNoneOptionText', {
+                  defaultMessage: "Don't resize",
+                }),
+              },
             ]}
             value={sizingObjectFit}
             onChange={(e) =>
@@ -259,9 +345,17 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
         <EuiSpacer />
 
         <EuiFormRow
-          label="Background color"
+          label={
+            <FormattedMessage
+              id="imageEmbeddable.imageEditor.imageBackgroundColorLabel"
+              defaultMessage="Background color"
+            />
+          }
           helpText={
-            "The background is visible if the image is transparent or if it doesn't completely fill its container."
+            <FormattedMessage
+              id="imageEmbeddable.imageEditor.imageBackgroundColorHelpText"
+              defaultMessage="The background is visible if the image is transparent or if it doesn't completely fill its container."
+            />
           }
           fullWidth
           isInvalid={isColorInvalid}
@@ -273,14 +367,29 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             color={color}
             isInvalid={isColorInvalid}
             isClearable={true}
-            placeholder={'Default'}
+            placeholder={i18n.translate(
+              'imageEmbeddable.imageEditor.imageBackgroundColorPlaceholderText',
+              {
+                defaultMessage: 'Transparent',
+              }
+            )}
           />
         </EuiFormRow>
 
         <EuiSpacer />
         <EuiFormRow
-          label={`Description`}
-          helpText={`Screen readers read this description out to their users so they know what the image means. This text is also displayed if the image can't be loaded.`}
+          label={
+            <FormattedMessage
+              id="imageEmbeddable.imageEditor.imageBackgroundDescriptionLabel"
+              defaultMessage="Description"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="imageEmbeddable.imageEditor.imageBackgroundDescriptionHelpText"
+              defaultMessage="Screen readers read this description out to their users so they know what the image means."
+            />
+          }
           fullWidth
         >
           <EuiTextArea
@@ -298,12 +407,18 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={props.onCancel} flush="left">
-              Close
+              <FormattedMessage
+                id="imageEmbeddable.imageEditor.imageBackgroundCloseButtonText"
+                defaultMessage="Close"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton onClick={onSave} fill disabled={!isDraftImageConfigValid}>
-              Save
+              <FormattedMessage
+                id="imageEmbeddable.imageEditor.imageBackgroundSaveButtonText"
+                defaultMessage="Save"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

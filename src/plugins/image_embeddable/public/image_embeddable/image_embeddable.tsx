@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';

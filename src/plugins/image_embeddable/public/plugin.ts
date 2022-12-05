@@ -10,7 +10,6 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/cor
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
-import { imageEmbeddableFileKind } from '../common';
 import { IMAGE_EMBEDDABLE_TYPE, ImageEmbeddableFactoryDefinition } from './image_embeddable';
 
 export interface SetupDependencies {
@@ -36,7 +35,6 @@ export class ImageEmbeddablePlugin
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
     const start = createStartServicesGetter(core.getStartServices);
-    plugins.files.registerFileKind(imageEmbeddableFileKind);
     plugins.embeddable.registerEmbeddableFactory(
       IMAGE_EMBEDDABLE_TYPE,
       new ImageEmbeddableFactoryDefinition({
@@ -45,6 +43,7 @@ export class ImageEmbeddablePlugin
           overlays: start().core.overlays,
           files: start().plugins.files.filesClientFactory.asUnscoped(),
           externalUrl: start().core.http.externalUrl,
+          theme: start().core.theme,
         }),
       })
     );

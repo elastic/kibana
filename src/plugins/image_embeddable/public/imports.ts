@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { FileKind } from '@kbn/shared-ux-file-types';
+import { defaultImageFileKind } from '@kbn/files-plugin/common';
+
 export type {
   FilesClient,
   FilesSetup,
@@ -13,11 +16,13 @@ export type {
   ScopedFilesClient,
 } from '@kbn/files-plugin/public';
 
-export type { FileImageMetadata } from '@kbn/files-plugin/common';
+export type { FileImageMetadata } from '@kbn/shared-ux-file-types/';
 
 export type {
   IContainer,
   EmbeddableInput,
   EmbeddableFactoryDefinition,
 } from '@kbn/embeddable-plugin/public';
-export type { ApplicationStart, OverlayStart } from '@kbn/core/public';
+export type { ApplicationStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+
+export const imageEmbeddableFileKind: FileKind = defaultImageFileKind;

@@ -73,6 +73,7 @@
 /src/plugins/ui_actions/ @elastic/kibana-global-experience
 /src/plugins/ui_actions_enhanced/ @elastic/kibana-global-experience
 /src/plugins/navigation/ @elastic/kibana-global-experience
+/src/plugins/image_embeddable/ @elastic/kibana-global-experience
 /x-pack/plugins/notifications/ @elastic/kibana-global-experience
 
 ## Examples

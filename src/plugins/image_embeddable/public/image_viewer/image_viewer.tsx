@@ -7,17 +7,24 @@
  */
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { css } from '@emotion/react';
-import { Image } from '@kbn/files-plugin/public';
+import { css, SerializedStyles } from '@emotion/react';
+import { FileImage } from '@kbn/shared-ux-file-image';
 import classNames from 'classnames';
-import { EuiButtonIcon, EuiEmptyPrompt, EuiImage, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiEmptyPrompt,
+  EuiImage,
+  useEuiTheme,
+  useResizeObserver,
+  EuiImageProps,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ImageConfig } from '../types';
 import notFound from './not_found/not_found_light.png';
 import notFound2x from './not_found/not_found_light@2x.png';
 import { validateImageConfig } from '../utils/validate_image_config';
 import { createValidateUrl } from '../utils/validate_url';
-
-// TODO: support dark theme also
 
 export interface ImageViewerContextValue {
   getImageDownloadHref: (fileId: string) => string;
@@ -42,12 +49,14 @@ export function ImageViewer({
   onClear,
   onError,
   className,
+  containerCSS,
 }: {
   imageConfig: ImageConfig;
   className?: string;
   onChange?: () => void;
   onClear?: () => void;
   onError?: () => void;
+  containerCSS?: SerializedStyles;
 }) {
   const { euiTheme } = useEuiTheme();
   const { getImageDownloadHref, validateUrl } = useImageViewerContext();
@@ -59,10 +68,6 @@ export function ImageViewer({
       ? imageConfig.src.url
       : getImageDownloadHref(imageConfig.src.fileId);
 
-  // TODO: needs fixes on <Blurhash/> side to position the same as the image
-  // const blurHash =
-  //   imageConfig.src.type === 'file' ? imageConfig.src.fileImageMeta?.blurHash : undefined;
-
   const [hasFailedToLoad, setFailedToLoad] = useState<boolean>(false);
 
   useEffect(() => {
@@ -71,25 +76,24 @@ export function ImageViewer({
 
   return (
     <div
-      style={{
-        position: 'relative',
-        backgroundColor: imageConfig.backgroundColor || euiTheme.colors.lightestShade,
-        width: '100%',
-        height: '100%',
-        borderRadius: euiTheme.border.radius.medium,
-      }}
-      css={css`
-        .visually-hidden {
-          visibility: hidden;
-        }
-      `}
+      css={[
+        css`
+          position: relative;
+          width: 100%;
+          height: 100%;
+          border-radius: ${euiTheme.border.radius.medium};
+
+          .visually-hidden {
+            visibility: hidden;
+          }
+        `,
+        containerCSS,
+      ]}
     >
       {(hasFailedToLoad || !isImageConfigValid) && <NotFound />}
       {isImageConfigValid && (
-        <Image
+        <FileImage
           src={src}
-          // TODO: to enable the blur hash loading uncomment the line, but not sure if we really need the effect
-          // until https://github.com/elastic/kibana/issues/145567
           meta={imageConfig.src.type === 'file' ? imageConfig.src.fileImageMeta : undefined}
           alt={imageConfig.altText ?? ''}
           className={classNames(className, { 'visually-hidden': hasFailedToLoad })}
@@ -100,6 +104,7 @@ export function ImageViewer({
             objectFit: imageConfig?.sizing?.objectFit ?? 'contain',
             cursor: onChange ? 'pointer' : 'initial',
             display: 'block', // needed to remove gap under the image
+            backgroundColor: imageConfig.backgroundColor,
           }}
           wrapperProps={{
             style: { display: 'block', height: '100%', width: '100%' },
@@ -130,36 +135,84 @@ export function ImageViewer({
 }
 
 function NotFound() {
+  const [resizeRef, setRef] = React.useState<HTMLDivElement | null>(null);
+  const dimensions = useResizeObserver(resizeRef);
+  let mode: 'none' | 'only-image' | 'image-and-text' = 'none';
+  if (!resizeRef) {
+    mode = 'none';
+  } else if (dimensions.height > 300 && dimensions.width > 300) {
+    mode = 'image-and-text';
+  } else {
+    mode = 'only-image';
+  }
+
   return (
-    <EuiEmptyPrompt
+    <div
+      ref={(node) => setRef(node)}
       css={`
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        max-width: none;
+        .euiPanel,
         .euiEmptyPrompt__main {
           height: 100%;
+          width: 100%;
+          max-width: none;
         }
       `}
-      color="subdued"
-      icon={
-        <EuiImage
-          className={`eui-hideFor--xs eui-hideFor--s eui-hideFor--m`}
-          srcSet={`${notFound} 1x, ${notFound2x} 2x`}
-          src={notFound}
-          alt="An outer space illustration. In the background is a large moon and two planets. In the foreground is an astronaut floating in space and the numbers '404'."
+    >
+      {mode === 'only-image' && (
+        <NotFoundImage
+          css={`
+            object-fit: contain;
+            height: 100%;
+            width: 100%;
+          `}
+          wrapperProps={{
+            css: `
+              height: 100%;
+              width: 100%;
+            `,
+          }}
         />
-      }
-      title={<h3>Image not found</h3>}
-      layout="horizontal"
-      body={
-        <p>
-          Sorry, we can&apos;t find the image you&apos;re looking for. It might have been removed or
-          renamed, or maybe it never existed.
-        </p>
-      }
-    />
+      )}
+      {mode === 'image-and-text' && (
+        <EuiEmptyPrompt
+          color="transparent"
+          icon={<NotFoundImage />}
+          title={
+            <p>
+              <FormattedMessage
+                id="imageEmbeddable.imageViewer.notFoundTitle"
+                defaultMessage="Image not found"
+              />
+            </p>
+          }
+          layout="horizontal"
+          body={
+            <p>
+              <FormattedMessage
+                id="imageEmbeddable.imageViewer.notFoundMessage"
+                defaultMessage="Sorry, we can't find the image you are looking for. It might have been
+              removed or renamed, or maybe it never existed."
+              />
+            </p>
+          }
+        />
+      )}
+    </div>
   );
 }
+
+const NotFoundImage = React.memo((props: Partial<Omit<EuiImageProps, 'url'>>) => (
+  <EuiImage
+    {...props}
+    srcSet={`${notFound} 1x, ${notFound2x} 2x`}
+    src={notFound}
+    alt={i18n.translate('imageEmbeddable.imageViewer.notFoundImageAltText', {
+      defaultMessage: `An outer space illustration. In the background is a large moon and two planets. In the foreground is an astronaut floating in space and the numbers '404'.`,
+    })}
+  />
+));

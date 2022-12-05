@@ -8,14 +8,19 @@
 
 import React from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { FilesContext } from '@kbn/files-plugin/public';
+import { FilesContext } from '@kbn/shared-ux-file-context';
 import { skip, take, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { ImageConfig } from '../types';
 import { ImageEditorFlyout } from './image_editor_flyout';
 import { ImageViewerContext } from '../image_viewer';
-import { OverlayStart, ApplicationStart, FilesClient, FileImageMetadata } from '../imports';
-import { imageEmbeddableFileKind } from '../../common';
+import {
+  OverlayStart,
+  ApplicationStart,
+  FilesClient,
+  FileImageMetadata,
+  ThemeServiceStart,
+} from '../imports';
 import { ValidateUrlFn } from '../utils/validate_url';
 
 /**
@@ -25,8 +30,10 @@ export async function configureImage(
   deps: {
     files: FilesClient<FileImageMetadata>;
     overlays: OverlayStart;
+    theme: ThemeServiceStart;
     currentAppId$: ApplicationStart['currentAppId$'];
     validateUrl: ValidateUrlFn;
+    getImageDownloadHref: (fileId: string) => string;
   },
   initialImageConfig?: ImageConfig
 ): Promise<ImageConfig> {
@@ -53,8 +60,7 @@ export async function configureImage(
         <FilesContext client={deps.files}>
           <ImageViewerContext.Provider
             value={{
-              getImageDownloadHref: (fileId: string) =>
-                deps.files.getDownloadHref({ fileKind: imageEmbeddableFileKind.id, id: fileId }),
+              getImageDownloadHref: deps.getImageDownloadHref,
               validateUrl: deps.validateUrl,
             }}
           >
@@ -65,7 +71,8 @@ export async function configureImage(
               validateUrl={deps.validateUrl}
             />
           </ImageViewerContext.Provider>
-        </FilesContext>
+        </FilesContext>,
+        { theme$: deps.theme.theme$ }
       ),
       {
         ownFocus: true,
