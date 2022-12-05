@@ -11,14 +11,9 @@ import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
 import { AnalyticsCollection } from '../../../common/types/analytics';
 
 import { ErrorCode } from '../../../common/types/error_codes';
-import { fetchIndices } from '../indices/fetch_indices';
 
 import { deleteAnalyticsCollectionById } from './delete_analytics_collection';
 import { fetchAnalyticsCollectionById } from './fetch_analytics_collection';
-
-jest.mock('../indices/fetch_indices', () => ({
-  fetchIndices: jest.fn(),
-}));
 
 jest.mock('./fetch_analytics_collection', () => ({
   fetchAnalyticsCollectionById: jest.fn(),
@@ -28,9 +23,6 @@ describe('delete analytics collection lib function', () => {
   const mockClient = {
     asCurrentUser: {
       delete: jest.fn(),
-      indices: {
-        delete: jest.fn(),
-      },
     },
     asInternalUser: {},
   };
@@ -60,17 +52,6 @@ describe('delete analytics collection lib function', () => {
     });
 
     it('should throw an exception when analytics collection does not exist', async () => {
-      const indices = [
-        {
-          name: 'elastic_analytics-events-my-collection-12.12.12',
-        },
-        {
-          name: 'elastic_analytics-events-my-collection-13.12.12',
-        },
-      ];
-      (fetchIndices as jest.Mock).mockImplementationOnce(() => {
-        return Promise.resolve(indices);
-      });
       (fetchAnalyticsCollectionById as jest.Mock).mockImplementationOnce(() =>
         Promise.resolve(undefined)
       );
@@ -80,7 +61,6 @@ describe('delete analytics collection lib function', () => {
       ).rejects.toEqual(new Error(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND));
 
       expect(mockClient.asCurrentUser.delete).not.toHaveBeenCalled();
-      expect(mockClient.asCurrentUser.indices.delete).not.toBeCalled();
     });
   });
 });
