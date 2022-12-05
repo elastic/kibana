@@ -72,7 +72,7 @@ export type SavedObjectModelMigrationFn<InputAttributes = unknown, MigratedAttri
 
 /** Just a map of model version **/
 export interface SavedObjectsModelVersionMap {
-  [modelVersion: string]: SavedObjectsModelVersion;
+  [modelVersion: string]: SavedObjectsModelVersion<any, any, any>;
 }
 
 /** Just a provider returning a model version map */

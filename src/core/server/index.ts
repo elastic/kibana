@@ -376,6 +376,13 @@ export type {
   ISavedObjectsSecurityExtension,
   ISavedObjectsSpacesExtension,
   SavedObjectsExtensions,
+  SavedObjectsModelVersion,
+  SavedObjectsModelVersionMap,
+  SavedObjectsModelVersionMapFn,
+  SavedObjectsModelVersionContract,
+  SavedObjectsModelVersionExpand,
+  SavedObjectModelMigration,
+  SavedObjectModelMigrationFn,
 } from '@kbn/core-saved-objects-server';
 export {
   ENCRYPTION_EXTENSION_ID,
