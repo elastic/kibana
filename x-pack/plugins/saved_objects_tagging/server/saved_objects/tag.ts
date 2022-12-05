@@ -87,7 +87,61 @@ const tagModelVersion1: SavedObjectsModelVersion<
   },
 };
 
-// ///// End of examples
+//////////
+// Example 2
+// Just adding new optional fields
+// No migration required
+/////////
+
+type Version2Attrs = Version1Attrs & {
+  newField?: string;
+};
+
+const tagModelVersion2: SavedObjectsModelVersion<
+  Version1Attrs,
+  Version2Attrs, // only additions -> compat schema is also final one
+  Version2Attrs
+> = {
+  expand: {
+    addedMappings: {
+      newField: {
+        type: 'text',
+      },
+    },
+    migration: {
+      up: (doc, ctx) => {
+        // UP to compat: no-op
+        return doc;
+      },
+      down: (doc, ctx) => {
+        // DOWN from compat: remove newField
+        // NOTE: yes, there is a data loss here, if something got created in v2 then edited in v1
+        const { newField, ...attrs } = doc.attributes;
+        return {
+          ...doc,
+          attrs,
+        };
+      },
+    },
+  },
+  contract: {
+    removedMappings: [], // no fields to drop here
+    migration: {
+      up: (doc, ctx) => {
+        // no-op
+        return doc;
+      },
+      down: (doc, ctx) => {
+        // no-op
+        return doc;
+      },
+    },
+  },
+};
+
+
+
+/////// End of examples
 
 export const tagType: SavedObjectsType = {
   name: tagSavedObjectTypeName,
@@ -121,6 +175,6 @@ export const tagType: SavedObjectsType = {
   modelVersions: {
     // renaming the 'name' property to 'title'
     '1': tagModelVersion1,
-    // '2': {},
+    '2': tagModelVersion2,
   },
 };
