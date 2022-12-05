@@ -37,13 +37,14 @@ export const getPaletteForHeatmap = async (params: HeatmapVisParams) => {
     true
   );
   const colorsRange: Range[] = [{ from: stop[0], to: stop[stop.length - 1], type: 'range' }];
-  const { colorSchema, invertColors, percentageMode } = params;
+  const { colorSchema, invertColors } = params;
+  // palette is type of percent, if user wants dynamic calulated ranges
   const percentageModeConfig = getPercentageModeConfig(
     {
       colorsRange,
       colorSchema,
       invertColors,
-      percentageMode,
+      percentageMode: true,
     },
     false
   );
