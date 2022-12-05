@@ -116,8 +116,6 @@ export const CloudDataMigrationApp = ({
                   }
                 />
 
-                <EuiSpacer size="s" />
-
                 <EuiListGroupItem
                   {...listItemProps}
                   label={
@@ -130,8 +128,6 @@ export const CloudDataMigrationApp = ({
                   }
                 />
 
-                <EuiSpacer size="s" />
-
                 <EuiListGroupItem
                   {...listItemProps}
                   label={
@@ -143,8 +139,6 @@ export const CloudDataMigrationApp = ({
                     </EuiText>
                   }
                 />
-
-                <EuiSpacer size="s" />
 
                 <EuiListGroupItem
                   {...listItemProps}
@@ -162,7 +156,7 @@ export const CloudDataMigrationApp = ({
               <EuiSpacer size="l" />
 
               <div>
-                <EuiButton fill={true} fullWidth={false} href={`${basePath}#/cloud_migration`}>
+                <EuiButton fill={true} target="_blank" href="https://ela.st/cloud-migration">
                   <FormattedMessage
                     id="cloudMigration.readInstructionsButtonLabel"
                     defaultMessage="Help me move"
