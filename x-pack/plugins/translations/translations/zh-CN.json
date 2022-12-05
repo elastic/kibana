@@ -9283,7 +9283,6 @@
     "xpack.cases.caseView.comment": "注释",
     "xpack.cases.caseView.comment.addComment": "添加注释",
     "xpack.cases.caseView.comment.addCommentHelpText": "添加新注释......",
-    "xpack.cases.caseView.commentFieldRequiredError": "注释必填。",
     "xpack.cases.caseView.connectors": "外部事件管理系统",
     "xpack.cases.caseView.copyCommentLinkAria": "复制引用链接",
     "xpack.cases.caseView.create": "创建案例",

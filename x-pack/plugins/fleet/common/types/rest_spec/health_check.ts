@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { Maybe } from '../../../../common';
+export interface PostHealthCheckRequest {
+  body: {
+    host: string;
+  };
+}
 
-export interface HostsKpiHistogramData {
-  x?: Maybe<number>;
-  y?: Maybe<number>;
+export interface PostHealthCheckResponse {
+  name: string;
+  host: string;
+  status: string;
 }
