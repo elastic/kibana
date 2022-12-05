@@ -10,6 +10,7 @@ import { useReplaceUrlParams } from '../../../../../common/utils/global_query_st
 import { useKibana } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
+import { useRulesTableContextMock } from './__mocks__/rules_table_context';
 import {
   DEFAULT_PAGE,
   DEFAULT_RULES_PER_PAGE,
@@ -43,13 +44,14 @@ describe('useSyncRulesTableSavedState', () => {
       total: 100,
     },
   };
+
   const expectStateToSyncWithUrl = (
     rulesTableState: Partial<RulesTableState>,
     expectedUrlState: RulesTableUrlSavedState
   ) => {
-    (useRulesTableContext as jest.Mock).mockReturnValue({
-      state: rulesTableState,
-    });
+    const rulesTableContext = useRulesTableContextMock.create();
+    rulesTableContext.state = { ...rulesTableContext.state, ...rulesTableState };
+    (useRulesTableContext as jest.Mock).mockReturnValue(rulesTableContext);
 
     renderHook(() => useSyncRulesTableSavedState());
 
@@ -60,13 +62,14 @@ describe('useSyncRulesTableSavedState', () => {
       },
     ]);
   };
+
   const expectStateToSyncWithStorage = (
     rulesTableState: Partial<RulesTableState>,
     expectedStorageState: RulesTableStorageSavedState
   ) => {
-    (useRulesTableContext as jest.Mock).mockReturnValue({
-      state: rulesTableState,
-    });
+    const rulesTableContext = useRulesTableContextMock.create();
+    rulesTableContext.state = { ...rulesTableContext.state, ...rulesTableState };
+    (useRulesTableContext as jest.Mock).mockReturnValue(rulesTableContext);
 
     renderHook(() => useSyncRulesTableSavedState());
 

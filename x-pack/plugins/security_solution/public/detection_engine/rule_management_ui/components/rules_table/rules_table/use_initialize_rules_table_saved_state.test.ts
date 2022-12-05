@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../../common/constants';
-
+import { useRulesTableContextMock } from './__mocks__/rules_table_context';
 import { useInitializeRulesTableSavedState } from './use_initialize_rules_table_saved_state';
 import type {
   RulesTableStorageSavedState,
@@ -15,7 +15,6 @@ import type {
 } from './rules_table_saved_state';
 import { RuleSource } from './rules_table_saved_state';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_SORTING_OPTIONS } from './rules_table_defaults';
-import type { RulesTableActions } from './rules_table_context';
 import { useRulesTableContext } from './rules_table_context';
 import { mockRulesTablePersistedState } from './__mocks__/mock_rules_table_persistent_state';
 
@@ -41,17 +40,12 @@ describe('useInitializeRulesTableSavedState', () => {
     order: 'asc',
     perPage: 20,
   };
-  let actions: Partial<RulesTableActions>;
+  const rulesTableContext = useRulesTableContextMock.create();
+  const actions = rulesTableContext.actions;
 
   beforeEach(() => {
-    actions = {
-      setFilterOptions: jest.fn(),
-      setSortingOptions: jest.fn(),
-      setPage: jest.fn(),
-      setPerPage: jest.fn(),
-    };
-
-    (useRulesTableContext as jest.Mock).mockReturnValue({ actions });
+    jest.clearAllMocks();
+    (useRulesTableContext as jest.Mock).mockReturnValue(rulesTableContext);
   });
 
   describe('when state is not saved', () => {
