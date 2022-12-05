@@ -22,10 +22,9 @@ export const OverviewStatusType = t.intersection([
     upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
     downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
     enabledIds: t.array(t.string),
-  }),
-  t.partial({
     allConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   }),
+  t.partial({}),
 ]);
 
 export type OverviewStatus = t.TypeOf<typeof OverviewStatusType>;
