@@ -57,7 +57,6 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           type: 'object',
         },
         frequency: {
-          type: 'nested',
           properties: {
             summary: {
               type: 'boolean',
