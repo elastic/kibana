@@ -19,7 +19,6 @@ describe('test useChartPanels', () => {
         closePopover: jest.fn(),
         onResetChartHeight: jest.fn(),
         chart: {
-          status: 'complete',
           hidden: true,
           timeInterval: 'auto',
         },
@@ -39,7 +38,6 @@ describe('test useChartPanels', () => {
         closePopover: jest.fn(),
         onResetChartHeight: jest.fn(),
         chart: {
-          status: 'complete',
           hidden: false,
           timeInterval: 'auto',
         },
@@ -59,7 +57,6 @@ describe('test useChartPanels', () => {
         onTimeIntervalChange: jest.fn(),
         closePopover: jest.fn(),
         chart: {
-          status: 'complete',
           hidden: false,
           timeInterval: 'auto',
         },
@@ -78,7 +75,6 @@ describe('test useChartPanels', () => {
         closePopover: jest.fn(),
         onResetChartHeight,
         chart: {
-          status: 'complete',
           hidden: false,
           timeInterval: 'auto',
         },
