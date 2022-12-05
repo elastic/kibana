@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiComboBox } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export const DatasetComboBox: React.FC<{
   value: any;
@@ -43,14 +44,21 @@ export const DatasetComboBox: React.FC<{
 
   return (
     <EuiComboBox
-      aria-label="Dataset combo box"
-      placeholder="Select a dataset"
+      aria-label={i18n.translate('xpack.fleet.datasetCombo.ariaLabel', {
+        defaultMessage: 'Dataset combo box',
+      })}
+      placeholder={i18n.translate('xpack.fleet.datasetCombo.placeholder', {
+        defaultMessage: 'Select a dataset',
+      })}
       singleSelection={{ asPlainText: true }}
       options={datasetOptions}
       selectedOptions={selectedOptions}
       onCreateOption={onCreateOption}
       onChange={onDatasetChange}
-      customOptionText="Add {searchValue} as a custom option"
+      customOptionText={i18n.translate('xpack.fleet.datasetCombo.customOptionText', {
+        defaultMessage: 'Add {searchValue} as a custom option',
+        values: { searchValue: '{searchValue}' },
+      })}
     />
   );
 };
