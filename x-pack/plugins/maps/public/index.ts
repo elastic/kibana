@@ -23,8 +23,6 @@ export type { PreIndexedShape } from '../common/elasticsearch_util';
 
 export { GEOJSON_FEATURE_ID_PROPERTY_NAME } from './classes/layers/vector_layer/geojson_vector_layer/assign_feature_ids';
 
-import { GeoJsonVectorLayer } from './classes/layers/vector_layer';
-
 export type {
   ITooltipProperty,
   RenderTooltipContentParams,
