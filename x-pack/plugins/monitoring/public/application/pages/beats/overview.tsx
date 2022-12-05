@@ -13,7 +13,6 @@ import { ComponentProps } from '../../route_init';
 import { BeatsTemplate } from './beats_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useCharts } from '../../hooks/use_charts';
-// @ts-ignore
 import { BeatsOverview } from '../../../components/beats/overview';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 

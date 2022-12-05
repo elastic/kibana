@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import rison from 'rison-node';
+import rison from '@kbn/rison';
 import type { Logger } from '@kbn/core/server';
 import type { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
