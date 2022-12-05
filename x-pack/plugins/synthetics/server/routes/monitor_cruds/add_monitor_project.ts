@@ -10,7 +10,6 @@ import { ProjectMonitor } from '../../../common/runtime_types';
 
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import { getAllLocations } from '../../synthetics_service/get_all_locations';
 import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor/project_monitor_formatter';
 
 const MAX_PAYLOAD_SIZE = 1048576 * 20; // 20MiB
@@ -52,18 +51,11 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     }
 
     try {
-      const { publicLocations, privateLocations } = await getAllLocations(
-        server,
-        syntheticsMonitorClient,
-        savedObjectsClient
-      );
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
       const pushMonitorFormatter = new ProjectMonitorFormatter({
         projectId: decodedProjectName,
         spaceId,
-        locations: publicLocations,
-        privateLocations,
         encryptedSavedObjectsClient,
         savedObjectsClient,
         monitors,
