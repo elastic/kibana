@@ -23,6 +23,7 @@ interface FilterEditorWrapperProps {
   timeRangeForSuggestionsOverride?: boolean;
   closePopover?: () => void;
   onFiltersUpdated?: (filters: Filter[]) => void;
+  setShouldShowConfirmModalOnClosePopover?: (show: boolean) => void;
 }
 
 export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
@@ -31,6 +32,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
   timeRangeForSuggestionsOverride,
   closePopover,
   onFiltersUpdated,
+  setShouldShowConfirmModalOnClosePopover,
 }: FilterEditorWrapperProps) {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { uiSettings, data, usageCollection, appName } = kibana.services;
@@ -70,6 +72,14 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
     onFiltersUpdated?.(updatedFilters);
   }
 
+  const onLocalFilterUpdated = (localFilter: Filter) => {
+    if (localFilter && localFilter.meta.type === 'combined' && localFilter.meta.params.length > 1) {
+      setShouldShowConfirmModalOnClosePopover?.(true);
+    } else {
+      setShouldShowConfirmModalOnClosePopover?.(false);
+    }
+  };
+
   return (
     <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
       {newFilter && (
@@ -77,6 +87,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
           filter={newFilter}
           indexPatterns={dataViews}
           onSubmit={onAdd}
+          onLocalFilterUpdated={onLocalFilterUpdated}
           onCancel={() => closePopover?.()}
           key={JSON.stringify(newFilter)}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
