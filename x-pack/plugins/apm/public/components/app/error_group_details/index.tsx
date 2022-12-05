@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { EuiText } from '@elastic/eui';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
@@ -31,7 +32,6 @@ import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { DetailView } from './detail_view';
 import { ErrorDistribution } from './distribution';
 import { TopErroneousTransactions } from './top_erroneous_transactions';
-import { EuiText } from '@elastic/eui';
 
 const Label = euiStyled.div`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
