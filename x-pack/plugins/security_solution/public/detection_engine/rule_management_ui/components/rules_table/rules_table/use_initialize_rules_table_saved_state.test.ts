@@ -29,7 +29,7 @@ describe('useInitializeRulesTableSavedState', () => {
     source: RuleSource.Custom,
     tags: ['test'],
     field: 'name',
-    direction: 'asc',
+    order: 'asc',
     page: 2,
     perPage: 10,
   };
@@ -38,7 +38,7 @@ describe('useInitializeRulesTableSavedState', () => {
     source: RuleSource.Custom,
     tags: ['test'],
     field: 'name',
-    direction: 'asc',
+    order: 'asc',
     perPage: 20,
   };
   let actions: Partial<RulesTableActions>;
@@ -85,7 +85,7 @@ describe('useInitializeRulesTableSavedState', () => {
       });
       expect(actions.setSortingOptions).toHaveBeenCalledWith({
         field: urlSavedState.field,
-        order: urlSavedState.direction,
+        order: urlSavedState.order,
       });
       expect(actions.setPage).toHaveBeenCalledWith(urlSavedState.page);
       expect(actions.setPerPage).toHaveBeenCalledWith(urlSavedState.perPage);
@@ -189,7 +189,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only sorting order', () => {
-      mockRulesTablePersistedState({ urlState: { direction: 'asc' }, storageState: null });
+      mockRulesTablePersistedState({ urlState: { order: 'asc' }, storageState: null });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -241,7 +241,7 @@ describe('useInitializeRulesTableSavedState', () => {
       });
       expect(actions.setSortingOptions).toHaveBeenCalledWith({
         field: storageSavedState.field,
-        order: storageSavedState.direction,
+        order: storageSavedState.order,
       });
       expect(actions.setPage).not.toHaveBeenCalled();
       expect(actions.setPerPage).toHaveBeenCalledWith(storageSavedState.perPage);
@@ -345,7 +345,7 @@ describe('useInitializeRulesTableSavedState', () => {
     });
 
     it('restores only sorting order', () => {
-      mockRulesTablePersistedState({ urlState: null, storageState: { direction: 'asc' } });
+      mockRulesTablePersistedState({ urlState: null, storageState: { order: 'asc' } });
 
       renderHook(() => useInitializeRulesTableSavedState());
 
@@ -400,7 +400,7 @@ describe('useInitializeRulesTableSavedState', () => {
       });
       expect(actions.setSortingOptions).toHaveBeenCalledWith({
         field: urlSavedState.field,
-        order: urlSavedState.direction,
+        order: urlSavedState.order,
       });
       expect(actions.setPage).toHaveBeenCalledWith(urlSavedState.page);
       expect(actions.setPerPage).toHaveBeenCalledWith(urlSavedState.perPage);
@@ -435,7 +435,7 @@ describe('useInitializeRulesTableSavedState', () => {
           source: RuleSource.Custom,
           tags: [1, 2, 3],
           field: 'name',
-          direction: 'asc',
+          order: 'asc',
           page: 2,
           perPage: 10,
         } as unknown as RulesTableUrlSavedState,
@@ -462,7 +462,7 @@ describe('useInitializeRulesTableSavedState', () => {
           source: RuleSource.Custom,
           tags: ['test'],
           field: 'name',
-          direction: 'abc',
+          order: 'abc',
           page: 2,
           perPage: 10,
         } as unknown as RulesTableUrlSavedState,
@@ -489,7 +489,7 @@ describe('useInitializeRulesTableSavedState', () => {
           source: RuleSource.Custom,
           tags: ['test'],
           field: 'name',
-          direction: 'asc',
+          order: 'asc',
           page: 'aaa',
           perPage: 10,
         } as unknown as RulesTableUrlSavedState,
@@ -519,7 +519,7 @@ describe('useInitializeRulesTableSavedState', () => {
           source: RuleSource.Custom,
           tags: [1, 2, 3],
           field: 'name',
-          direction: 'asc',
+          order: 'asc',
           perPage: 10,
         } as unknown as RulesTableStorageSavedState,
       });
@@ -545,7 +545,7 @@ describe('useInitializeRulesTableSavedState', () => {
           source: RuleSource.Custom,
           tags: ['test'],
           field: 'name',
-          direction: 'abc',
+          order: 'abc',
           perPage: 10,
         } as unknown as RulesTableStorageSavedState,
       });
@@ -571,7 +571,7 @@ describe('useInitializeRulesTableSavedState', () => {
           source: RuleSource.Custom,
           tags: ['test'],
           field: 'name',
-          direction: 'asc',
+          order: 'asc',
           perPage: 'aaa',
         } as unknown as RulesTableStorageSavedState,
       });

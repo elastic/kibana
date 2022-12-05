@@ -121,7 +121,7 @@ describe('useSyncRulesTableSavedState', () => {
       source: RuleSource.Custom,
       tags: ['test'],
       field: 'name',
-      direction: 'asc',
+      order: 'asc',
       page: 3,
       perPage: 10,
     };
@@ -193,7 +193,7 @@ describe('useSyncRulesTableSavedState', () => {
           ...defaultState,
           sortingOptions: { ...defaultState.sortingOptions, order: 'asc' },
         },
-        { direction: 'asc' }
+        { order: 'asc' }
       );
     });
 
@@ -278,7 +278,7 @@ describe('useSyncRulesTableSavedState', () => {
           ...defaultState,
           sortingOptions: { ...defaultState.sortingOptions, order: 'asc' },
         },
-        { direction: 'asc' }
+        { order: 'asc' }
       );
     });
 

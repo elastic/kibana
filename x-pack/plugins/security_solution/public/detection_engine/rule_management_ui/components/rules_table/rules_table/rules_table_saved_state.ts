@@ -24,7 +24,7 @@ export const RulesTableSavedFilter = t.partial({
 export type RulesTableSavedSorting = t.TypeOf<typeof RulesTableSavedSorting>;
 export const RulesTableSavedSorting = t.partial({
   field: t.string,
-  direction: SortOrder,
+  order: SortOrder,
 });
 
 export type RulesTableStorageSavedPagination = t.TypeOf<typeof RulesTableStorageSavedPagination>;

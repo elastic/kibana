@@ -59,8 +59,8 @@ export function useSyncRulesTableSavedState(): void {
     }
 
     if (state.sortingOptions.order !== DEFAULT_SORTING_OPTIONS.order) {
-      urlStateToSave.direction = state.sortingOptions.order;
-      storageStateToSave.direction = state.sortingOptions.order;
+      urlStateToSave.order = state.sortingOptions.order;
+      storageStateToSave.order = state.sortingOptions.order;
     }
 
     if (state.pagination.page !== DEFAULT_PAGE) {

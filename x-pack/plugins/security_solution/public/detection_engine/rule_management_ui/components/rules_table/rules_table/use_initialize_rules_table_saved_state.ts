@@ -72,10 +72,10 @@ export function useInitializeRulesTableSavedState(): void {
       tags: Array.isArray(filter.tags) ? filter.tags : DEFAULT_FILTER_OPTIONS.tags,
     });
 
-    if (sorting.field || sorting.direction) {
+    if (sorting.field || sorting.order) {
       actions.setSortingOptions({
         field: (sorting.field as RulesSortingFields) ?? DEFAULT_SORTING_OPTIONS.field,
-        order: sorting.direction ?? DEFAULT_SORTING_OPTIONS.order,
+        order: sorting.order ?? DEFAULT_SORTING_OPTIONS.order,
       });
     }
 
