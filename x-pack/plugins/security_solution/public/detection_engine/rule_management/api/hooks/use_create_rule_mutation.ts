@@ -13,7 +13,6 @@ import type {
 } from '../../../../../common/detection_engine/rule_schema';
 import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
 import { createRule } from '../api';
-import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFetchRulesInfoQuery } from './use_fetch_rules_info_query';
 import { useInvalidateFindRulesQuery } from './use_find_rules_query';
 
@@ -24,7 +23,6 @@ export const useCreateRuleMutation = (
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidateFetchRulesInfo = useInvalidateFetchRulesInfoQuery();
-  const invalidateFetchPrePackagedRulesStatusQuery = useInvalidateFetchPrebuiltRulesStatusQuery();
 
   return useMutation<RuleResponse, Error, RuleCreateProps>(
     (rule: RuleCreateProps) => createRule({ rule: transformOutput(rule) }),
@@ -32,7 +30,6 @@ export const useCreateRuleMutation = (
       ...options,
       mutationKey: CREATE_RULE_MUTATION_KEY,
       onSettled: (...args) => {
-        invalidateFetchPrePackagedRulesStatusQuery();
         invalidateFindRulesQuery();
         invalidateFetchRulesInfo();
 
