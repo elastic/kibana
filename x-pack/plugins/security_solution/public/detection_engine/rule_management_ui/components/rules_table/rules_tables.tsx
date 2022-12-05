@@ -65,7 +65,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
   const tableRef = useRef<EuiBasicTable>(null);
   const rulesTableContext = useRulesTableContext();
-  const { data: rulesInfo, isLoading: isRulesInfoLoading } = useRulesInfo();
+  const { data: ruleManagementFilters, isLoading: isRulesInfoLoading } = useRulesInfo();
 
   const {
     state: {
@@ -214,8 +214,8 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
   const isTableEmpty =
     !isRulesInfoLoading &&
-    rulesInfo?.rules_custom_count === 0 &&
-    rulesInfo?.rules_prebuilt_installed_count === 0;
+    ruleManagementFilters?.rules_summary.custom_count === 0 &&
+    ruleManagementFilters?.rules_summary.prebuilt_installed_count === 0;
 
   const shouldShowRulesTable = !isRulesInfoLoading && !isLoading && !isTableEmpty;
 

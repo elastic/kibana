@@ -78,7 +78,8 @@ interface TagsFormProps {
 }
 
 const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm }: TagsFormProps) => {
-  const { data: { tags } = { tags: [] } } = useRulesInfo();
+  const { data: ruleManagementFilters } = useRulesInfo();
+  const tags = ruleManagementFilters?.aggregated_fields.tags ?? [];
   const { form } = useForm({
     defaultValue: initialFormData,
     schema,

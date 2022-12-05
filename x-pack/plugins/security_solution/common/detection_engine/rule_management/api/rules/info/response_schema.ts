@@ -11,8 +11,12 @@ import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 export type RulesInfoResponse = t.TypeOf<typeof RulesInfoResponse>;
 export const RulesInfoResponse = t.exact(
   t.type({
-    rules_custom_count: PositiveInteger,
-    rules_prebuilt_installed_count: PositiveInteger,
-    tags: t.array(t.string),
+    rules_summary: t.type({
+      custom_count: PositiveInteger,
+      prebuilt_installed_count: PositiveInteger,
+    }),
+    aggregated_fields: t.type({
+      tags: t.array(t.string),
+    }),
   })
 );

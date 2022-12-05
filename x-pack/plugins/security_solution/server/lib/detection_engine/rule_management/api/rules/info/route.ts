@@ -66,9 +66,13 @@ export const getRulesInfo = (router: SecuritySolutionPluginRouter) => {
         const [{ prebuilt: prebuiltRulesCount, custom: customRulesCount }, tags] =
           await Promise.all([fetchRulesCount(rulesClient), readTags({ rulesClient })]);
         const responseBody: RulesInfoResponse = {
-          rules_custom_count: customRulesCount,
-          rules_prebuilt_installed_count: prebuiltRulesCount,
-          tags,
+          rules_summary: {
+            custom_count: customRulesCount,
+            prebuilt_installed_count: prebuiltRulesCount,
+          },
+          aggregated_fields: {
+            tags,
+          },
         };
         const [validatedBody, validationError] = validate(responseBody, RulesInfoResponse);
 

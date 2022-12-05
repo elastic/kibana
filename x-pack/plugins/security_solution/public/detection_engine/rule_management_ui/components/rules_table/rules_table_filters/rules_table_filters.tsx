@@ -31,10 +31,10 @@ const RulesTableFiltersComponent = () => {
     state: { filterOptions },
     actions: { setFilterOptions },
   } = useRulesTableContext();
-  const { data: rulesInfo } = useRulesInfo();
-  const allTags = rulesInfo?.tags ?? [];
-  const rulesCustomCount = rulesInfo?.rules_custom_count;
-  const rulesPrebuiltInstalledCount = rulesInfo?.rules_prebuilt_installed_count;
+  const { data: ruleManagementFields } = useRulesInfo();
+  const allTags = ruleManagementFields?.aggregated_fields.tags ?? [];
+  const rulesCustomCount = ruleManagementFields?.rules_summary.custom_count;
+  const rulesPrebuiltInstalledCount = ruleManagementFields?.rules_summary.prebuilt_installed_count;
 
   const { showCustomRules, showElasticRules, tags: selectedTags } = filterOptions;
 
