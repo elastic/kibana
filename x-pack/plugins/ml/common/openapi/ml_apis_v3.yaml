@@ -111,17 +111,17 @@ components:
       properties:
         anomaly-detector:
           type: object
-          description: If there are saved objects exist for nonexistent anomaly detection jobs, they are deleted.
+          description: If there are saved objects for nonexistent anomaly detection jobs, they are deleted.
           additionalProperties:
             $ref: '#/components/schemas/mlSyncResponseAnomalyDetectors'
         data-frame-analytics:
           type: object
-          description: If there are saved objects exist for nonexistent data frame analytics jobs, they are deleted.
+          description: If there are saved objects for nonexistent data frame analytics jobs, they are deleted.
           additionalProperties:
             $ref: '#/components/schemas/mlSyncResponseDataFrameAnalytics'
         trained-model:
           type: object
-          description: If there are saved objects exist for nonexistent trained models, they are deleted.
+          description: If there are saved objects for nonexistent trained models, they are deleted.
           additionalProperties:
             $ref: '#/components/schemas/mlSyncResponseTrainedModels'
     mlSyncResponseTrainedModels:
