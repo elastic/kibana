@@ -26,6 +26,5 @@ import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/bracketMatching.js';
 import 'monaco-editor/esm/vs/language/json/monaco.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution.js'; // Needed for basic javascript support
 import 'monaco-editor/esm/vs/basic-languages/xml/xml.contribution.js'; // Needed for basic xml support
-import 'monaco-editor/esm/vs/language/json/monaco.contribution.js'; // Needed for JSON support
 
 export { monaco };

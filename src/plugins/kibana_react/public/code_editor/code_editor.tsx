@@ -363,38 +363,6 @@ export const CodeEditor: React.FC<Props> = ({
         throw new Error('react-monaco-editor is using a different version of monaco');
       }
 
-      // monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-      //   validate: true,
-      //   schemas: [
-      //     {
-      //       uri: 'http://myserver/foo-schema.json', // id of the first schema
-      //       fileMatch: ['*'], // associate with our model
-      //       schema: {
-      //         type: 'object',
-      //         properties: {
-      //           p1: {
-      //             enum: ['v1', 'v2'],
-      //           },
-      //           p2: {
-      //             $ref: 'http://myserver/bar-schema.json', // reference the second schema
-      //           },
-      //         },
-      //       },
-      //     },
-      //     {
-      //       uri: 'http://myserver/bar-schema.json', // id of the first schema
-      //       schema: {
-      //         type: 'object',
-      //         properties: {
-      //           q1: {
-      //             enum: ['x1', 'x2'],
-      //           },
-      //         },
-      //       },
-      //     },
-      //   ],
-      // });
-
       remeasureFonts();
 
       _editor.current = editor;
