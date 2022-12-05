@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { storiesOf } from '@storybook/react';
-import React from 'react';
-import { LoadingSpinner } from './loading_spinner';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
-storiesOf('components/loading_spinner/LoadingSpinner', module).add('default', () => (
-  <LoadingSpinner />
-));
+const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
+
+export const fieldSupportsBreakdown = (field: DataViewField) =>
+  supportedTypes.has(field.type) && field.aggregatable && !field.scripted;
