@@ -170,6 +170,7 @@ _meta:
   });
 
   test('can install new versions and removes older version when fleet_transform_version increased', async () => {
+    // Old fleet_transform_version is 0.1.0, fleet_transform_version to be installed is 0.1.0
     const sourceData = getYamlTestData(undefined, '0.2.0');
     const expectedData = getExpectedData();
 
@@ -413,8 +414,229 @@ _meta:
     ]);
   });
 
-  test('can install new version when no older version', async () => {
-    const sourceData = getYamlTestData(true, '0.2.0');
+  test('creates index and component templates even if no manifest.yml', async () => {
+    // Old fleet_transform_version is 0.1.0, fleet_transform_version to be installed is 0.1.0
+    const sourceData = getYamlTestData(false, '0.2.0');
+    const expectedData = getExpectedData();
+
+    const previousInstallation: Installation = {
+      installed_es: [
+        {
+          id: 'metrics-endpoint.policy-0.16.0-dev.0',
+          type: ElasticsearchAssetType.ingestPipeline,
+        },
+        {
+          id: 'logs-endpoint.metadata_current-default-0.1.0',
+          type: ElasticsearchAssetType.transform,
+        },
+      ],
+    } as unknown as Installation;
+
+    const currentInstallation: Installation = {
+      installed_es: [
+        {
+          id: 'metrics-endpoint.policy-0.16.0-dev.0',
+          type: ElasticsearchAssetType.ingestPipeline,
+        },
+        {
+          id: 'logs-endpoint.metadata_current-default-0.2.0',
+          type: ElasticsearchAssetType.transform,
+        },
+        {
+          id: 'logs-endpoint.metadata_current-default-0.2.0',
+          type: ElasticsearchAssetType.transform,
+        },
+      ],
+    } as unknown as Installation;
+    (getAsset as jest.MockedFunction<typeof getAsset>)
+      .mockReturnValueOnce(Buffer.from(sourceData.FIELDS, 'utf8'))
+      .mockReturnValueOnce(Buffer.from(sourceData.TRANSFORM, 'utf8'));
+
+    (getInstallation as jest.MockedFunction<typeof getInstallation>)
+      .mockReturnValueOnce(Promise.resolve(previousInstallation))
+      .mockReturnValueOnce(Promise.resolve(currentInstallation));
+
+    (
+      getInstallationObject as jest.MockedFunction<typeof getInstallationObject>
+    ).mockReturnValueOnce(
+      Promise.resolve({
+        attributes: {
+          installed_es: previousInstallation.installed_es,
+        },
+      } as unknown as SavedObject<Installation>)
+    );
+
+    // Mock transform from old version
+    esClient.transform.getTransform.mockResponseOnce({
+      count: 1,
+      transforms: [
+        // @ts-expect-error incomplete data
+        {
+          dest: {
+            index: 'mock-old-destination-index',
+          },
+        },
+      ],
+    });
+
+    await installTransforms(
+      {
+        name: 'endpoint',
+        version: '0.16.0-dev.0',
+      } as unknown as RegistryPackage,
+      [
+        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+      ],
+      esClient,
+      savedObjectsClient,
+      loggerMock.create(),
+      previousInstallation.installed_es
+    );
+
+    // Stop and delete previously installed transforms
+    expect(esClient.transform.stopTransform.mock.calls).toEqual([
+      [
+        {
+          transform_id: 'logs-endpoint.metadata_current-default-0.1.0',
+          force: true,
+        },
+        { ignore: [404] },
+      ],
+    ]);
+    expect(esClient.transform.deleteTransform.mock.calls).toEqual([
+      [
+        {
+          transform_id: 'logs-endpoint.metadata_current-default-0.1.0',
+          force: true,
+        },
+        { ignore: [404] },
+      ],
+    ]);
+
+    // Destination index should not be deleted when transform is deleted
+    expect(esClient.transport.request.mock.calls).toEqual([]);
+
+    // Create a @package component template and an empty @custom component template
+    expect(esClient.cluster.putComponentTemplate.mock.calls).toEqual([
+      [
+        {
+          name: 'logs-endpoint.metadata_current-template@package',
+          body: {
+            template: {
+              settings: { index: { mapping: { total_fields: { limit: '10000' } } } },
+              mappings: { properties: { '@timestamp': { type: 'date' } } },
+            },
+            _meta: meta,
+          },
+          create: false,
+        },
+        { ignore: [404] },
+      ],
+      [
+        {
+          name: 'logs-endpoint.metadata_current-template@custom',
+          body: {
+            template: { settings: {} },
+            _meta: { managed_by: 'fleet', managed: true, package: { name: 'endpoint' } },
+          },
+          create: true,
+        },
+        { ignore: [404] },
+      ],
+    ]);
+
+    // Index template composed of the two component templates created
+    // with index pattern matching the destination index
+    expect(esClient.indices.putIndexTemplate.mock.calls).toEqual([
+      [
+        {
+          body: {
+            _meta: meta,
+            composed_of: [
+              'logs-endpoint.metadata_current-template@package',
+              'logs-endpoint.metadata_current-template@custom',
+            ],
+            index_patterns: ['.metrics-endpoint.metadata_united_default-0.16.0-dev.0'],
+            priority: 250,
+            template: { mappings: undefined, settings: undefined },
+          },
+          name: 'logs-endpoint.metadata_current-template',
+        },
+        { ignore: [404] },
+      ],
+    ]);
+
+    // Destination index is created before transform is created
+    expect(esClient.indices.create.mock.calls).toEqual([
+      [
+        {
+          aliases: {
+            '.metrics-endpoint.metadata_united_default.all': {},
+            '.metrics-endpoint.metadata_united_default.latest': {},
+          },
+          index: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
+        },
+        { ignore: [400] },
+      ],
+    ]);
+
+    expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM]]);
+    expect(esClient.transform.startTransform.mock.calls).toEqual([
+      [
+        {
+          transform_id: 'logs-endpoint.metadata_current-default-0.2.0',
+        },
+        { ignore: [409] },
+      ],
+    ]);
+
+    // Saved object is updated with newly created index templates, component templates, transform
+    expect(savedObjectsClient.update.mock.calls).toEqual([
+      [
+        'epm-packages',
+        'endpoint',
+        {
+          installed_es: [
+            {
+              id: 'metrics-endpoint.policy-0.16.0-dev.0',
+              type: ElasticsearchAssetType.ingestPipeline,
+            },
+            {
+              id: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
+              type: ElasticsearchAssetType.index,
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template',
+              type: ElasticsearchAssetType.indexTemplate,
+              version: '0.2.0',
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template@custom',
+              type: ElasticsearchAssetType.componentTemplate,
+              version: '0.2.0',
+            },
+            {
+              id: 'logs-endpoint.metadata_current-template@package',
+              type: ElasticsearchAssetType.componentTemplate,
+              version: '0.2.0',
+            },
+            {
+              id: 'logs-endpoint.metadata_current-default-0.2.0',
+              type: ElasticsearchAssetType.transform,
+              version: '0.2.0',
+            },
+          ],
+        },
+        {
+          refresh: false,
+        },
+      ],
+    ]);
+  });
+
+  test('can install new version when an older version does not exist', async () => {
+    const sourceData = getYamlTestData(false, '0.2.0');
     const expectedData = getExpectedData();
 
     const previousInstallation: Installation = {
@@ -429,9 +651,10 @@ _meta:
         },
       ],
     } as unknown as Installation;
-    (getAsset as jest.MockedFunction<typeof getAsset>).mockReturnValueOnce(
-      Buffer.from(sourceData.TRANSFORM, 'utf8')
-    );
+    (getAsset as jest.MockedFunction<typeof getAsset>)
+      .mockReturnValueOnce(Buffer.from(sourceData.MANIFEST, 'utf8'))
+      .mockReturnValueOnce(Buffer.from(sourceData.TRANSFORM, 'utf8'));
+
     (getInstallation as jest.MockedFunction<typeof getInstallation>)
       .mockReturnValueOnce(Promise.resolve(previousInstallation))
       .mockReturnValueOnce(Promise.resolve(currentInstallation));
@@ -449,7 +672,10 @@ _meta:
         name: 'endpoint',
         version: '0.16.0-dev.0',
       } as unknown as RegistryPackage,
-      ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml'],
+      [
+        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+      ],
       esClient,
       savedObjectsClient,
       loggerMock.create(),
@@ -457,41 +683,12 @@ _meta:
     );
 
     expect(esClient.transform.putTransform.mock.calls).toEqual([[expectedData.TRANSFORM]]);
-    expect(esClient.transform.startTransform.mock.calls).toEqual([
-      [
-        {
-          // transform_id is versioned by fleet_transform_version and not by package version
-          transform_id: 'logs-endpoint.metadata_current-default-0.2.0',
-        },
-        { ignore: [409] },
-      ],
-    ]);
-
-    expect(savedObjectsClient.update.mock.calls).toEqual([
-      [
-        'epm-packages',
-        'endpoint',
-        {
-          installed_es: [
-            {
-              id: '.metrics-endpoint.metadata_united_default-0.16.0-dev.0',
-              type: ElasticsearchAssetType.index,
-            },
-            {
-              id: 'logs-endpoint.metadata_current-default-0.2.0',
-              type: 'transform',
-              version: '0.2.0',
-            },
-          ],
-        },
-        {
-          refresh: false,
-        },
-      ],
-    ]);
+    // Does not start transform because start is set to false in manifest.yml
+    expect(esClient.transform.startTransform.mock.calls).toEqual([]);
   });
 
-  test('do not delete old transforms if version is the same', async () => {
+  test('retain old transforms and do nothing if fleet_transform_version is the same', async () => {
+    // Old fleet_transform_version is 0.1.0, fleet_transform_version to be installed is 0.1.0
     const sourceData = getYamlTestData(false, '0.1.0');
 
     const previousInstallation: Installation = {
@@ -559,7 +756,6 @@ _meta:
 
     // Transform from old version is neither stopped nor deleted
     expect(esClient.transform.stopTransform.mock.calls).toEqual([]);
-
     expect(esClient.transform.deleteTransform.mock.calls).toEqual([]);
 
     // Destination index from old version is not deleted

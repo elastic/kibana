@@ -45,7 +45,6 @@ export const AssetsFacetGroup = ({ width }: Args) => {
             component_template: [],
             data_stream_ilm_policy: [],
             ilm_policy: [],
-            index: [],
             index_template: [],
             ingest_pipeline: [],
             transform: [],

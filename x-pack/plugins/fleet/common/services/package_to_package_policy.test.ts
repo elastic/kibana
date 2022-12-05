@@ -41,7 +41,6 @@ describe('Fleet - packageToPackagePolicy', () => {
       elasticsearch: {
         ingest_pipeline: [],
         component_template: [],
-        index: [],
         index_template: [],
         transform: [],
         ilm_policy: [],

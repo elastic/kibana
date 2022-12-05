@@ -164,6 +164,29 @@ const processTransformAssetsPerModule = (
     if (fileName === TRANSFORM_SPECS_TYPES.FIELDS) {
       const validFields = processFields(content);
       const mappings = generateMappings(validFields);
+      const templateName = getTransformAssetNameForInstallation(
+        installablePackage,
+        transformModuleId,
+        'template'
+      );
+      const indexToModify = destinationIndexTemplates.findIndex(
+        (t) => t.transformModuleId === transformModuleId && t.installationName === templateName
+      );
+      const template = {
+        transformModuleId,
+        _meta: getESAssetMetadata({ packageName: installablePackage.name }),
+        installationName: getTransformAssetNameForInstallation(
+          installablePackage,
+          transformModuleId,
+          'template'
+        ),
+        template: {},
+      } as DestinationIndexTemplateInstallation;
+      if (indexToModify === -1) {
+        destinationIndexTemplates.push(template);
+      } else {
+        destinationIndexTemplates[indexToModify] = template;
+      }
       packageAssets?.set('mappings', mappings);
     }
 
@@ -247,18 +270,21 @@ const processTransformAssetsPerModule = (
     }
 
     // Create index templates for destination indices if destination_index_template OR fields are defined
-    if (
-      fileName === TRANSFORM_SPECS_TYPES.MANIFEST ||
-      isPopulatedObject(packageAssets.get('mappings'))
-    ) {
+    if (fileName === TRANSFORM_SPECS_TYPES.MANIFEST) {
       if (isPopulatedObject(content, ['start']) && content.start === false) {
         transformsSpecifications.get(transformModuleId)?.set('start', false);
       }
 
       if (content.destination_index_template) {
-        const destinationIndexTemplate =
-          (content.destination_index_template as Record<string, unknown>) ?? {};
-        destinationIndexTemplates.push({
+        const templateName = getTransformAssetNameForInstallation(
+          installablePackage,
+          transformModuleId,
+          'template'
+        );
+        const indexToModify = destinationIndexTemplates.findIndex(
+          (t) => t.transformModuleId === transformModuleId && t.installationName === templateName
+        );
+        const template = {
           transformModuleId,
           _meta: getESAssetMetadata({ packageName: installablePackage.name }),
           installationName: getTransformAssetNameForInstallation(
@@ -266,9 +292,14 @@ const processTransformAssetsPerModule = (
             transformModuleId,
             'template'
           ),
-          template: destinationIndexTemplate,
-        } as DestinationIndexTemplateInstallation);
-        packageAssets.set('destinationIndexTemplate', destinationIndexTemplate);
+          template: content.destination_index_template,
+        } as DestinationIndexTemplateInstallation;
+        if (indexToModify === -1) {
+          destinationIndexTemplates.push(template);
+        } else {
+          destinationIndexTemplates[indexToModify] = template;
+        }
+        packageAssets.set('destinationIndexTemplate', template);
       }
     }
   });
