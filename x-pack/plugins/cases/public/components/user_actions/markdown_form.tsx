@@ -82,7 +82,6 @@ const UserActionMarkdownComponent = forwardRef<
           id,
           bottomRightContent: (
             <UserActionMarkdownFooter
-              fieldName={fieldName}
               handleSaveAction={handleSaveAction}
               handleCancelAction={handleCancelAction}
             />

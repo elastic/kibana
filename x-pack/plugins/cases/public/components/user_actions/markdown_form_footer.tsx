@@ -13,17 +13,15 @@ import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib
 import * as i18n from '../case_view/translations';
 
 interface UserActionMarkdownFooterProps {
-  fieldName: string;
   handleSaveAction: () => Promise<void>;
   handleCancelAction: () => void;
 }
 
 const UserActionMarkdownFooterComponent: React.FC<UserActionMarkdownFooterProps> = ({
-  fieldName,
   handleSaveAction,
   handleCancelAction,
 }) => {
-  const [{ content }] = useFormData<{ content: string }>({ watch: [fieldName] });
+  const [{ content }] = useFormData<{ content: string }>({ watch: ['content'] });
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
