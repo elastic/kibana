@@ -64,7 +64,7 @@ import type {
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BrushTriggerEvent, ClickTriggerEvent, Warnings } from '@kbn/charts-plugin/public';
-import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import { DataViewPersistableStateService, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -162,7 +162,7 @@ export interface LensEmbeddableDeps {
 }
 
 export interface ViewUnderlyingDataArgs {
-  indexPatternId: string;
+  dataViewSpec: DataViewSpec;
   timeRange: TimeRange;
   filters: Filter[];
   query: Query | AggregateQuery | undefined;
@@ -180,11 +180,12 @@ const getExpressionFromDocument = async (
   };
 };
 
-function getViewUnderlyingDataArgs({
+async function getViewUnderlyingDataArgs({
   activeDatasource,
   activeDatasourceState,
   activeData,
   dataViews,
+  dataViewsService,
   capabilities,
   query,
   filters,
@@ -196,6 +197,7 @@ function getViewUnderlyingDataArgs({
   activeDatasourceState: unknown;
   activeData: TableInspectorAdapter | undefined;
   dataViews: DataViewBase[] | undefined;
+  dataViewsService: DataViewsContract;
   capabilities: LensEmbeddableDeps['capabilities'];
   query: ExecutionContextSearch['query'];
   filters: Filter[];
@@ -211,6 +213,9 @@ function getViewUnderlyingDataArgs({
     timeRange,
     capabilities
   );
+
+  // eslint-disable-next-line no-console
+  console.log('meta', meta);
 
   if (error || !meta) {
     return;
@@ -236,8 +241,9 @@ function getViewUnderlyingDataArgs({
     esQueryConfig
   );
 
+  const dataView = await dataViewsService.get(meta.id);
   return {
-    indexPatternId: meta.id,
+    dataViewSpec: dataView.toSpec(false),
     timeRange,
     filters: newFilters,
     query: aggregateQuery.length > 0 ? aggregateQuery[0] : newQuery,
@@ -934,11 +940,12 @@ export class Embeddable
       );
     }
 
-    const viewUnderlyingDataArgs = getViewUnderlyingDataArgs({
+    const viewUnderlyingDataArgs = await getViewUnderlyingDataArgs({
       activeDatasource: this.activeDataInfo.activeDatasource,
       activeDatasourceState: this.activeDataInfo.activeDatasourceState,
       activeData: this.activeDataInfo.activeData,
       dataViews: this.indexPatterns,
+      dataViewsService: this.deps.dataViews,
       capabilities: this.deps.capabilities,
       query: mergedSearchContext.query,
       filters: mergedSearchContext.filters || [],

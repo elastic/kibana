@@ -176,6 +176,48 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
       const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
       expect(newDataViewId).not.to.equal(prevDataViewId);
+      expect(await PageObjects.unifiedSearch.isAdHocDataView()).to.be(true);
+
+      await browser.closeCurrentWindow();
+    });
+
+    it('should navigate to discover from embeddable correctly', async () => {
+      const [lensHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(lensHandle);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await setupAdHocDataView();
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await PageObjects.lens.save(
+        'embeddable-test-with-adhoc-data-view',
+        false,
+        false,
+        false,
+        'new'
+      );
+
+      await testSubjects.click('embeddablePanelToggleMenuIcon');
+      await testSubjects.click('embeddablePanelMore-mainMenu');
+      await testSubjects.click('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
+
+      const [, discoverHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(discoverHandle);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const actualIndexPattern = await (
+        await testSubjects.find('discover-dataView-switch-link')
+      ).getVisibleText();
+      expect(actualIndexPattern).to.be('*stash*');
+
+      const actualDiscoverQueryHits = await testSubjects.getVisibleText(
+        'unifiedHistogramQueryHits'
+      );
+      expect(actualDiscoverQueryHits).to.be('14,005');
+      expect(await PageObjects.unifiedSearch.isAdHocDataView()).to.be(true);
     });
   });
 }
