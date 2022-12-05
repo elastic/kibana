@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getServiceNodes } from './';
+import { getServiceNodes } from '.';
 import {
   SearchParamsMock,
   inspectSearchParams,
@@ -45,6 +45,7 @@ describe('service node queries', () => {
         kuery: '',
         start: 0,
         end: 50000,
+        environment: ENVIRONMENT_ALL.value,
       })
     );
 
@@ -60,6 +61,7 @@ describe('service node queries', () => {
         kuery: '',
         start: 0,
         end: 50000,
+        environment: ENVIRONMENT_ALL.value,
       })
     );
 

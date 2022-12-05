@@ -10,9 +10,7 @@ import uuid from 'uuid';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, getTestAlertData, ObjectRemover, getEventLog } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { IValidatedEvent } from '../../../../../plugins/event_log/server';
-
-const NANOS_IN_MILLIS = 1000 * 1000;
+import { IValidatedEvent, nanosToMillis } from '../../../../../plugins/event_log/server';
 
 // eslint-disable-next-line import/no-default-export
 export default function eventLogTests({ getService }: FtrProviderContext) {
@@ -591,15 +589,13 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   const dateNow = Date.now();
 
   if (duration !== undefined) {
-    expect(typeof duration).to.be('number');
+    expect(typeof duration).to.be('string');
     expect(eventStart).to.be.ok();
 
     if (shouldHaveEventEnd !== false) {
       expect(eventEnd).to.be.ok();
 
-      const durationDiff = Math.abs(
-        Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
-      );
+      const durationDiff = Math.abs(nanosToMillis(duration!) - (eventEnd - eventStart));
 
       // account for rounding errors
       expect(durationDiff < 1).to.equal(true);

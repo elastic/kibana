@@ -8,14 +8,16 @@
 import path from 'path';
 
 interface PackageInfo {
-  platform: string;
-  architecture: string;
+  platform: 'linux' | 'darwin' | 'win32';
+  architecture: 'x64' | 'arm64';
   archiveFilename: string;
   archiveChecksum: string;
   binaryChecksum: string;
   binaryRelativePath: string;
-  revision: number;
+  location: 'custom' | 'common';
 }
+
+const REVISION = 1036745;
 
 enum BaseUrl {
   // see https://www.chromium.org/getting-involved/download-chromium
@@ -32,56 +34,57 @@ interface CommonPackageInfo extends PackageInfo {
   archivePath: string;
 }
 
+function isCommonPackage(p: PackageInfo): p is CommonPackageInfo {
+  return p.location === 'common';
+}
+
 export class ChromiumArchivePaths {
   public readonly packages: Array<CustomPackageInfo | CommonPackageInfo> = [
     {
       platform: 'darwin',
       architecture: 'x64',
-      archiveFilename: 'chromium-d163fd7-darwin_x64.zip',
-      archiveChecksum: '19aa88bd59e2575816425bf72786c53f',
-      binaryChecksum: 'dfcd6e007214175997663c50c8d871ea',
-      binaryRelativePath: 'headless_shell-darwin_x64/headless_shell',
-      location: 'custom',
-      revision: 856583,
+      archiveFilename: 'chrome-mac.zip',
+      archiveChecksum: 'dd4d44ad97ba2fef5dc47d7f2a39ccaa',
+      binaryChecksum: '4a7a663b2656d66ce975b00a30df3ab4',
+      binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
+      location: 'common',
+      archivePath: 'Mac',
     },
     {
       platform: 'linux',
       architecture: 'x64',
-      archiveFilename: 'chromium-70f5d88-linux_x64.zip',
-      archiveChecksum: '7b1c9c2fb613444fbdf004a3b75a58df',
-      binaryChecksum: '82e80f9727a88ba3836ce230134bd126',
+      archiveFilename: 'chromium-749e738-locales-linux_x64.zip',
+      archiveChecksum: '09ba194e6c720397728fbec3d3895b0b',
+      binaryChecksum: 'df1c957f41dcca8e33369b1d255406c2',
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
       location: 'custom',
-      revision: 901912,
     },
     {
       platform: 'linux',
       architecture: 'arm64',
-      archiveFilename: 'chromium-70f5d88-linux_arm64.zip',
-      archiveChecksum: '4a0217cfe7da86ad1e3d0e9e5895ddb5',
-      binaryChecksum: '29e943fbee6d87a217abd6cb6747058e',
+      archiveFilename: 'chromium-749e738-locales-linux_arm64.zip',
+      archiveChecksum: '1f535b1c2875d471829c6ff128a13262',
+      binaryChecksum: 'ca6b91d0ba8a65712554572dabc66968',
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
       location: 'custom',
-      revision: 901912,
     },
     {
       platform: 'win32',
       architecture: 'x64',
       archiveFilename: 'chrome-win.zip',
-      archiveChecksum: '861bb8b7b8406a6934a87d3cbbce61d9',
-      binaryChecksum: 'ffa0949471e1b9a57bc8f8633fca9c7b',
-      binaryRelativePath: 'chrome-win\\chrome.exe',
+      archiveChecksum: '42db052673414b89d8cb45657c1a6aeb',
+      binaryChecksum: '1b6eef775198ffd48fb9669ac0c818f7',
+      binaryRelativePath: path.join('chrome-win', 'chrome.exe'),
       location: 'common',
       archivePath: 'Win',
-      revision: 901912,
     },
   ];
 
   // zip files get downloaded to a .chromium directory in the kibana root
   public readonly archivesPath = path.resolve(__dirname, '../../../../../../.chromium');
 
-  public find(platform: string, architecture: string) {
-    return this.packages.find((p) => p.platform === platform && p.architecture === architecture);
+  public find(platform: string, architecture: string, packages: PackageInfo[] = this.packages) {
+    return packages.find((p) => p.platform === platform && p.architecture === architecture);
   }
 
   public resolvePath(p: PackageInfo) {
@@ -94,8 +97,8 @@ export class ChromiumArchivePaths {
   }
 
   public getDownloadUrl(p: CustomPackageInfo | CommonPackageInfo) {
-    if (p.location === 'common') {
-      return `${BaseUrl.common}/${p.archivePath}/${p.revision}/${p.archiveFilename}`;
+    if (isCommonPackage(p)) {
+      return `${BaseUrl.common}/${p.archivePath}/${REVISION}/${p.archiveFilename}`;
     }
     return BaseUrl.custom + '/' + p.archiveFilename; // revision is not used for URL if package is a custom build
   }

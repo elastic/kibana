@@ -37,7 +37,13 @@ import {
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
+import {
+  IEvent,
+  IEventLogger,
+  SAVED_OBJECT_REL_PRIMARY,
+  millisToNanos,
+  nanosToMillis,
+} from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 import { RulesClient } from '../rules_client';
 import { partiallyUpdateAlert } from '../saved_objects';
@@ -594,7 +600,7 @@ export class TaskRunner<
 
     // Copy duration into execution status if available
     if (null != event.event?.duration) {
-      executionStatus.lastDuration = Math.round(event.event?.duration / Millis2Nanos);
+      executionStatus.lastDuration = nanosToMillis(event.event?.duration);
     }
 
     // if executionStatus indicates an error, fill in fields in
@@ -695,9 +701,9 @@ function trackAlertDurations<
     const state = originalAlertIds.includes(id)
       ? originalAlerts[id].getState()
       : currentAlerts[id].getState();
-    const duration = state.start
-      ? (new Date(currentTime).valueOf() - new Date(state.start as string).valueOf()) * 1000 * 1000 // nanoseconds
-      : undefined;
+    const durationInMs =
+      new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
+    const duration = state.start ? millisToNanos(durationInMs) : undefined;
     currentAlerts[id].replaceState({
       ...state,
       ...(state.start ? { start: state.start } : {}),
@@ -708,9 +714,9 @@ function trackAlertDurations<
   // Inject end time into instance state of recovered instances
   for (const id of recoveredAlertIds) {
     const state = recoveredAlerts[id].getState();
-    const duration = state.start
-      ? (new Date(currentTime).valueOf() - new Date(state.start as string).valueOf()) * 1000 * 1000 // nanoseconds
-      : undefined;
+    const durationInMs =
+      new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
+    const duration = state.start ? millisToNanos(durationInMs) : undefined;
     recoveredAlerts[id].replaceState({
       ...state,
       ...(duration ? { duration } : {}),
@@ -835,7 +841,7 @@ function generateNewAndRecoveredInstanceEvents<
         category: [ruleType.producer],
         ...(state?.start ? { start: state.start as string } : {}),
         ...(state?.end ? { end: state.end as string } : {}),
-        ...(state?.duration !== undefined ? { duration: state.duration as number } : {}),
+        ...(state?.duration !== undefined ? { duration: state.duration as string } : {}),
       },
       kibana: {
         alerting: {

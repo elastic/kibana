@@ -55,7 +55,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
       category: [ruleType.producer],
       ...(state?.start ? { start: state.start as string } : {}),
       ...(state?.end ? { end: state.end as string } : {}),
-      ...(state?.duration !== undefined ? { duration: state.duration as number } : {}),
+      ...(state?.duration !== undefined ? { duration: state.duration as string } : {}),
     },
     kibana: {
       ...(alerting ? alerting : {}),

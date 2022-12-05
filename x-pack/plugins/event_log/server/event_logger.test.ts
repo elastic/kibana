@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { nanosToMillis } from '../common';
 import { IEvent, IEventLogger, IEventLogService } from './index';
 import { ECS_VERSION } from './types';
 import { EventLogService } from './event_log_service';
@@ -137,9 +138,9 @@ describe('EventLogger', () => {
 
     expect(timeStopValue).toBeGreaterThanOrEqual(timeStartValue);
 
-    const duration = event.event!.duration!;
+    const duration = Number(event.event!.duration!);
     expect(duration).toBeGreaterThan(0.95 * delayMS * 1000 * 1000);
-    expect(duration / (1000 * 1000)).toBeCloseTo(timeStopValue - timeStartValue);
+    expect(nanosToMillis(duration)).toBeCloseTo(timeStopValue - timeStartValue);
   });
 
   test('timing method endTiming() method works when startTiming() is not called', async () => {
