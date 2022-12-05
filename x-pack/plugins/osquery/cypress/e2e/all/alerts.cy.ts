@@ -31,6 +31,7 @@ describe('Alert Event Details', () => {
 
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'pack');
+    runKbnArchiverScript(ArchiverMethod.LOAD, 'example_pack');
     runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
   });
   beforeEach(() => {
@@ -39,6 +40,7 @@ describe('Alert Event Details', () => {
 
   after(() => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'pack');
+    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'example_pack');
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'rule');
   });
 
@@ -144,18 +146,53 @@ describe('Alert Event Details', () => {
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
     });
+    cy.intercept('PUT', '/api/detection_engine/rules').as('saveRule');
     cy.contains('Save changes').click();
+    cy.wait('@saveRule').should(({ request }) => {
+      const oneQuery = [
+        {
+          interval: 10,
+          query: 'select * from uptime;',
+          id: 'fds',
+        },
+      ];
+      expect(request.body.response_actions[0].params.queries).to.deep.equal(oneQuery);
+    });
+
     cy.contains(`${RULE_NAME} was saved`).should('exist');
     cy.getBySel('toastCloseButton').click();
     cy.contains('Edit rule settings').click();
     cy.getBySel('edit-rule-actions-tab').wait(500).click();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('testpack');
+      cy.getBySel('comboBoxInput').type('Example{downArrow}{enter}');
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('select * from uptime');
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
+    });
+    cy.contains('Save changes').click();
+    cy.wait('@saveRule').should(({ request }) => {
+      const threeQueries = [
+        {
+          interval: 3600,
+          query: 'SELECT * FROM memory_info;',
+          platform: 'linux',
+          id: 'system_memory_linux_elastic',
+        },
+        {
+          interval: 3600,
+          query: 'SELECT * FROM system_info;',
+          id: 'system_info_elastic',
+        },
+        {
+          interval: 10,
+          query: 'select opera_extensions.* from users join opera_extensions using (uid);',
+          id: 'failingQuery',
+        },
+      ];
+      expect(request.body.response_actions[0].params.queries).to.deep.equal(threeQueries);
     });
   });
 
