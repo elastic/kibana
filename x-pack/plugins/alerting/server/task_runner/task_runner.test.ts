@@ -1149,6 +1149,7 @@ describe('Task Runner', () => {
       expect(runnerResult.state.alertInstances).toEqual(
         generateAlertInstance({
           id: 1,
+          flappingHistory: [false],
           actions: {
             '1': {
               date: new Date(DATE_1970),
@@ -1278,6 +1279,7 @@ describe('Task Runner', () => {
       expect(runnerResult.state.alertInstances).toEqual(
         generateAlertInstance({
           id: 1,
+          flappingHistory: [false],
           actions: {
             '1': {
               date: new Date(DATE_1970),

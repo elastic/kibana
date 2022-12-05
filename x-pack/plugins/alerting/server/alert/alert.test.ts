@@ -316,6 +316,7 @@ describe('updateLastScheduledActions()', () => {
     expect(alert.toJSON()).toEqual({
       state: {},
       meta: {
+        flappingHistory: [],
         lastScheduledActions: {
           date: new Date().toISOString(),
           group: 'default',

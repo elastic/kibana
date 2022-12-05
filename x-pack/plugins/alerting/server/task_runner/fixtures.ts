@@ -325,7 +325,10 @@ export const generateEnqueueFunctionInput = ({
 };
 
 export const generateAlertInstance = (
-  { id, duration, start, flappingHistory, actions }: GeneratorParams = { id: 1 }
+  { id, duration, start, flappingHistory, actions }: GeneratorParams = {
+    id: 1,
+    flappingHistory: [false],
+  }
 ) => ({
   [String(id)]: {
     meta: {
