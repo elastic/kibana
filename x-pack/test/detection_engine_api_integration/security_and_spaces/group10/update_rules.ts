@@ -459,7 +459,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(409);
 
         expect(body).to.eql({
-          message: `default exception list already exists in rule(s): ${ruleWithException.id}`,
+          message: `default exception list for rule: rule-2 already exists in rule(s): ${ruleWithException.id}`,
           status_code: 409,
         });
       });
