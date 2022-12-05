@@ -165,8 +165,7 @@ export const createClientForExecutors = (
   ): Promise<void> => {
     const { newStatus, message, metrics } = args;
 
-    ruleMonitoringService.setLastRunOutcomeMsg("cualquiera gato");
-    debugger;
+    ruleMonitoringService.setLastRunOutcomeMsg("outcome message");
 
     await soClient.createOrUpdate(ruleId, {
       last_execution: {
