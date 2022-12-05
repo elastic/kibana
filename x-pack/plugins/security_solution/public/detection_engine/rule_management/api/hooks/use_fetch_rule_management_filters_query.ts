@@ -7,18 +7,20 @@
 import { useCallback } from 'react';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import type { RulesInfoResponse } from '../../../../../common/detection_engine/rule_management/api/rules/info/response_schema';
-import { RULES_INFO_URL } from '../../../../../common/detection_engine/rule_management/api/urls';
-import { fetchRulesInfo } from '../api';
+import type { RulesInfoResponse } from '../../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
+import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/detection_engine/rule_management/api/urls';
+import { fetchRuleManagementFilters } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
-export const RULES_INFO_QUERY_KEY = ['GET', RULES_INFO_URL];
+export const RULE_MANAGEMENT_FILTERS_QUERY_KEY = ['GET', RULE_MANAGEMENT_FILTERS_URL];
 
-export const useFetchRulesInfoQuery = (options?: UseQueryOptions<RulesInfoResponse>) => {
+export const useFetchRuleManagementFiltersQuery = (
+  options?: UseQueryOptions<RulesInfoResponse>
+) => {
   return useQuery<RulesInfoResponse>(
-    RULES_INFO_QUERY_KEY,
+    RULE_MANAGEMENT_FILTERS_QUERY_KEY,
     async ({ signal }) => {
-      const response = await fetchRulesInfo({ signal });
+      const response = await fetchRuleManagementFilters({ signal });
       return response;
     },
     {
@@ -35,11 +37,11 @@ export const useFetchRulesInfoQuery = (options?: UseQueryOptions<RulesInfoRespon
  *
  * @returns A rules cache invalidation callback
  */
-export const useInvalidateFetchRulesInfoQuery = () => {
+export const useInvalidateFetchRuleManagementFiltersQuery = () => {
   const queryClient = useQueryClient();
 
   return useCallback(() => {
-    queryClient.invalidateQueries(RULES_INFO_QUERY_KEY, {
+    queryClient.invalidateQueries(RULE_MANAGEMENT_FILTERS_QUERY_KEY, {
       refetchType: 'active',
     });
   }, [queryClient]);

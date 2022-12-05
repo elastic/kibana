@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { PREBUILT_RULES_URL } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
-import { RULES_INFO_URL } from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/urls';
+import { RULE_MANAGEMENT_FILTERS_URL } from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/urls';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -26,7 +26,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
-  describe('get_rules_info', () => {
+  describe('get_rule_management_filters', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest, log);
     });
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return expected JSON keys', async () => {
       const { body } = await supertest
-        .get(RULES_INFO_URL)
+        .get(RULE_MANAGEMENT_FILTERS_URL)
         .set('kbn-xsrf', 'true')
         .send()
         .expect(200);
@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return the correct result when there are no rules', async () => {
       const { body } = await supertest
-        .get(RULES_INFO_URL)
+        .get(RULE_MANAGEMENT_FILTERS_URL)
         .set('kbn-xsrf', 'true')
         .send()
         .expect(200);
@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return the correct number of custom rules', async () => {
         const { body } = await supertest
-          .get(RULES_INFO_URL)
+          .get(RULE_MANAGEMENT_FILTERS_URL)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return correct tags', async () => {
         const { body } = await supertest
-          .get(RULES_INFO_URL)
+          .get(RULE_MANAGEMENT_FILTERS_URL)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -101,7 +101,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return the correct number of installed prepacked rules after pre-packaged rules have been installed', async () => {
         const { body } = await supertest
-          .get(RULES_INFO_URL)
+          .get(RULE_MANAGEMENT_FILTERS_URL)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -111,7 +111,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should return correct tags', async () => {
         const { body } = await supertest
-          .get(RULES_INFO_URL)
+          .get(RULE_MANAGEMENT_FILTERS_URL)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);

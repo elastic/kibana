@@ -9,7 +9,7 @@ import { EuiCallOut, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
-import { useRulesInfo } from '../../../../../rule_management/logic/use_rules_info';
+import { useRuleManagementFilters } from '../../../../../rule_management/logic/use_rule_management_filters';
 import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import * as i18n from '../../../../../../detections/pages/detection_engine/rules/translations';
@@ -78,14 +78,16 @@ interface TagsFormProps {
 }
 
 const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm }: TagsFormProps) => {
-  const { data: ruleManagementFilters } = useRulesInfo();
-  const tags = ruleManagementFilters?.aggregated_fields.tags ?? [];
+  const { data: ruleManagementFilters } = useRuleManagementFilters();
   const { form } = useForm({
     defaultValue: initialFormData,
     schema,
   });
   const [{ overwrite }] = useFormData({ form, watch: ['overwrite'] });
-  const sortedTags = useMemo(() => caseInsensitiveSort(tags), [tags]);
+  const sortedTags = useMemo(
+    () => caseInsensitiveSort(ruleManagementFilters?.aggregated_fields.tags ?? []),
+    [ruleManagementFilters]
+  );
 
   const { tagsLabel, tagsHelpText, formTitle } = getFormConfig(editAction);
 

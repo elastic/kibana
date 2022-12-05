@@ -38,7 +38,7 @@ import { useBulkDuplicateExceptionsConfirmation } from './bulk_actions/use_bulk_
 import { BulkActionDuplicateExceptionsConfirmation } from './bulk_actions/bulk_duplicate_exceptions_confirmation';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
-import { useRulesInfo } from '../../../rule_management/logic/use_rules_info';
+import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -65,7 +65,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
   const tableRef = useRef<EuiBasicTable>(null);
   const rulesTableContext = useRulesTableContext();
-  const { data: ruleManagementFilters, isLoading: isRulesInfoLoading } = useRulesInfo();
+  const { data: ruleManagementFilters, isLoading: isRulesInfoLoading } = useRuleManagementFilters();
 
   const {
     state: {

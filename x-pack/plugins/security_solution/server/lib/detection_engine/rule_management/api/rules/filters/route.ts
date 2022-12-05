@@ -8,8 +8,8 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { RulesInfoResponse } from '../../../../../../../common/detection_engine/rule_management/api/rules/info/response_schema';
-import { RULES_INFO_URL } from '../../../../../../../common/detection_engine/rule_management/api/urls';
+import { RulesInfoResponse } from '../../../../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
+import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../../../common/detection_engine/rule_management/api/urls';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
@@ -48,10 +48,10 @@ async function fetchRulesCount(rulesClient: RulesClient): Promise<RulesCount> {
   };
 }
 
-export const getRulesInfo = (router: SecuritySolutionPluginRouter) => {
+export const getRuleManagementFilters = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
-      path: RULES_INFO_URL,
+      path: RULE_MANAGEMENT_FILTERS_URL,
       validate: false,
       options: {
         tags: ['access:securitySolution'],

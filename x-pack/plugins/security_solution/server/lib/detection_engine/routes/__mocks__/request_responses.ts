@@ -24,7 +24,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_CREATE,
   DETECTION_ENGINE_RULES_URL_FIND,
 } from '../../../../../common/constants';
-import { RULES_INFO_URL } from '../../../../../common/detection_engine/rule_management/api/urls';
+import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../common/detection_engine/rule_management/api/urls';
 
 import {
   PREBUILT_RULES_STATUS_URL,
@@ -194,7 +194,7 @@ export const getPrepackagedRulesStatusRequest = () =>
 export const getRulesInfoRequest = () =>
   requestMock.create({
     method: 'get',
-    path: RULES_INFO_URL,
+    path: RULE_MANAGEMENT_FILTERS_URL,
   });
 
 export interface FindHit<T = RuleAlertType> {

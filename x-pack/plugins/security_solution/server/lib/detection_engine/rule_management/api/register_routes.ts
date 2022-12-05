@@ -20,7 +20,7 @@ import { deleteRuleRoute } from './rules/delete_rule/route';
 import { exportRulesRoute } from './rules/export_rules/route';
 import { findRulesRoute } from './rules/find_rules/route';
 import { importRulesRoute } from './rules/import_rules/route';
-import { getRulesInfo } from './rules/info/route';
+import { getRuleManagementFilters } from './rules/filters/route';
 import { patchRuleRoute } from './rules/patch_rule/route';
 import { readRuleRoute } from './rules/read_rule/route';
 import { updateRuleRoute } from './rules/update_rule/route';
@@ -59,5 +59,5 @@ export const registerRuleManagementRoutes = (
   readTagsRoute(router);
 
   // Rules filters
-  getRulesInfo(router);
+  getRuleManagementFilters(router);
 };

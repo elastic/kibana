@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getRulesInfo } from './route';
+import { getRuleManagementFilters } from './route';
 
 import {
   getEmptyFindResult,
@@ -14,7 +14,7 @@ import {
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock } from '../../../../routes/__mocks__';
 
-describe('Rules info route', () => {
+describe('Rule management filters route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
@@ -25,7 +25,7 @@ describe('Rules info route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
 
-    getRulesInfo(server.router);
+    getRuleManagementFilters(server.router);
   });
 
   describe('status codes', () => {
@@ -66,9 +66,13 @@ describe('Rules info route', () => {
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
-        rules_custom_count: 1,
-        rules_prebuilt_installed_count: 1,
-        tags: ['a', 'b', 'c'],
+        rules_summary: {
+          custom_count: 1,
+          prebuilt_installed_count: 1,
+        },
+        aggregated_fields: {
+          tags: ['a', 'b', 'c'],
+        },
       });
     });
   });

@@ -9,7 +9,7 @@ import { EuiFilterButton, EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@ela
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { useRulesInfo } from '../../../../rule_management/logic/use_rules_info';
+import { useRuleManagementFilters } from '../../../../rule_management/logic/use_rule_management_filters';
 import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
@@ -31,7 +31,7 @@ const RulesTableFiltersComponent = () => {
     state: { filterOptions },
     actions: { setFilterOptions },
   } = useRulesTableContext();
-  const { data: ruleManagementFields } = useRulesInfo();
+  const { data: ruleManagementFields } = useRuleManagementFilters();
   const allTags = ruleManagementFields?.aggregated_fields.tags ?? [];
   const rulesCustomCount = ruleManagementFields?.rules_summary.custom_count;
   const rulesPrebuiltInstalledCount = ruleManagementFields?.rules_summary.prebuilt_installed_count;

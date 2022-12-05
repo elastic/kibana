@@ -13,7 +13,7 @@ import { performBulkAction } from '../api';
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
 import { useInvalidateFindRulesQuery, useUpdateRulesCache } from './use_find_rules_query';
 import { useInvalidateFetchRuleByIdQuery } from './use_fetch_rule_by_id_query';
-import { useInvalidateFetchRulesInfoQuery } from './use_fetch_rules_info_query';
+import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';
 
 export const BULK_ACTION_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_BULK_ACTION];
 
@@ -26,7 +26,7 @@ export const useBulkActionMutation = (
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
-  const invalidateFetchRulesInfo = useInvalidateFetchRulesInfoQuery();
+  const invalidateFetchRulesInfo = useInvalidateFetchRuleManagementFiltersQuery();
   const updateRulesCache = useUpdateRulesCache();
 
   return useMutation<

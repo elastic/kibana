@@ -10,7 +10,7 @@ import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts
 
 import { RulesInfoResponse } from './response_schema';
 
-describe('Rules info response schema', () => {
+describe('Rule management filters response schema', () => {
   test('it should validate an empty response with defaults', () => {
     const payload: RulesInfoResponse = {
       rules_summary: {

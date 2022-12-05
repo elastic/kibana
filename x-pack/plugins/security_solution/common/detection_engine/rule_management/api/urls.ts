@@ -7,4 +7,4 @@
 
 import { INTERNAL_DETECTION_ENGINE_URL } from '../../../constants';
 
-export const RULES_INFO_URL = `${INTERNAL_DETECTION_ENGINE_URL}/rules/_info`;
+export const RULE_MANAGEMENT_FILTERS_URL = `${INTERNAL_DETECTION_ENGINE_URL}/rules/_rule_management_filters`;
