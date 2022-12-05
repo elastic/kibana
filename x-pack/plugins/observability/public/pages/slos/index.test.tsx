@@ -14,14 +14,14 @@ import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SlosPage } from '.';
-import { useFetchSloList } from './hooks/use_fetch_slo_list';
+import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { emptySloList } from './mocks/slo_list';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
 }));
-jest.mock('./hooks/use_fetch_slo_list');
+jest.mock('../../hooks/slo/use_fetch_slo_list');
 jest.mock('../../utils/kibana_react');
 jest.mock('../../hooks/use_breadcrumbs');
 

@@ -9,7 +9,7 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { useFetchSloList } from '../../../../pages/slos/hooks/use_fetch_slo_list';
+import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 
 export function SloSelector() {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
@@ -34,6 +34,7 @@ export function SloSelector() {
     <EuiComboBox
       aria-label="SLO selector"
       placeholder="Select a SLO"
+      data-test-subj="sloSelector"
       singleSelection={{ asPlainText: true }}
       options={options}
       selectedOptions={selectedOptions}

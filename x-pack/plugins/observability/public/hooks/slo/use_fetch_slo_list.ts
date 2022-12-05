@@ -8,8 +8,8 @@
 import { useCallback, useMemo } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 
-import type { SLO, SLOList } from '../../../typings/slo';
-import { useDataFetcher } from '../../../hooks/use_data_fetcher';
+import type { SLO, SLOList } from '../../typings/slo';
+import { useDataFetcher } from '../use_data_fetcher';
 
 const EMPTY_LIST = {
   results: [],
