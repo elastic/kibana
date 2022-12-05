@@ -9,7 +9,6 @@ import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { InnerFieldItem, FieldItemProps } from './field_item';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -49,11 +48,15 @@ const mockedServices = {
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   charts: chartPluginMock.createSetupContract(),
   uiSettings: coreMock.createStart().uiSettings,
-  discover: {
-    locator: {
-      getRedirectUrl: jest.fn(() => 'discover_url'),
+  share: {
+    url: {
+      locators: {
+        get: jest.fn().mockReturnValue({
+          getRedirectUrl: jest.fn(() => 'discover_url'),
+        }),
+      },
     },
-  } as unknown as DiscoverStart,
+  },
   application: {
     capabilities: {
       discover: { save: true, saveQuery: true, show: true },
