@@ -30,7 +30,7 @@ import type {
   NewPackagePolicy,
   NewPackagePolicyInputStream,
   PackageInfo,
-  RegistryStream,
+  RegistryStreamWithDataStream,
   RegistryVarsEntry,
 } from '../../../../../../types';
 import { InlineReleaseBadge } from '../../../../../../components';
@@ -49,7 +49,7 @@ const ScrollAnchor = styled.div`
 
 interface Props {
   packagePolicy: NewPackagePolicy;
-  packageInputStream: RegistryStream & { data_stream: { dataset: string; type: string } };
+  packageInputStream: RegistryStreamWithDataStream;
   packageInfo: PackageInfo;
   packagePolicyInputStream: NewPackagePolicyInputStream;
   updatePackagePolicy: (updatedPackagePolicy: Partial<NewPackagePolicy>) => void;
@@ -119,23 +119,36 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       [advancedVars, inputStreamValidationResults?.vars]
     );
 
-    const isFeatureEnabled = useCallback(
-      (feature: ExperimentalIndexingFeature) =>
-        packagePolicy.package?.experimental_data_stream_features?.some(
+    const getExperimentalFeatureValue = useCallback(
+      (feature: ExperimentalIndexingFeature, defaultToFalse = true) => {
+        return packagePolicy.package?.experimental_data_stream_features?.find(
           ({ data_stream: dataStream, features }) =>
             dataStream ===
               getRegistryDataStreamAssetBaseName(packagePolicyInputStream.data_stream) &&
-            features[feature]
-        ) ?? false,
+            typeof features[feature] !== 'undefined'
+        )?.features ?? defaultToFalse
+          ? false
+          : undefined;
+      },
       [
         packagePolicy.package?.experimental_data_stream_features,
         packagePolicyInputStream.data_stream,
       ]
     );
 
+    const isSyntheticSourceEditable =
+      packageInputStream.data_stream.elasticsearch?.source_mode !== 'default';
+
+    const syntheticSourceExperimentalValue = getExperimentalFeatureValue('synthetic_source', false);
+    const isSyntheticSourceEnabledByDefault =
+      packageInputStream.data_stream.elasticsearch?.source_mode === 'synthetic';
+
     const newExperimentalIndexingFeature = {
-      synthetic_source: isFeatureEnabled('synthetic_source'),
-      tsdb: isFeatureEnabled('tsdb'),
+      synthetic_source:
+        typeof syntheticSourceExperimentalValue !== 'undefined'
+          ? syntheticSourceExperimentalValue
+          : isSyntheticSourceEnabledByDefault,
+      tsdb: getExperimentalFeatureValue('tsdb') ?? false,
     };
 
     const onIndexingSettingChange = (
@@ -203,11 +216,12 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       />
                     </EuiFlexItem>
                   )}
-                  {packagePolicyInputStream.release && packagePolicyInputStream.release !== 'ga' ? (
+                  {packageInputStream.data_stream.release &&
+                  packageInputStream.data_stream.release !== 'ga' ? (
                     <EuiFlexItem grow={false}>
                       <InlineReleaseBadge
                         release={mapPackageReleaseToIntegrationCardRelease(
-                          packagePolicyInputStream.release
+                          packageInputStream.data_stream.release
                         )}
                       />
                     </EuiFlexItem>
@@ -366,7 +380,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                         <EuiSpacer size="s" />
                         <EuiFlexItem>
                           <EuiSwitch
-                            checked={isFeatureEnabled('synthetic_source')}
+                            checked={newExperimentalIndexingFeature.synthetic_source ?? false}
+                            disabled={!isSyntheticSourceEditable}
                             label={
                               <FormattedMessage
                                 id="xpack.fleet.createPackagePolicy.experimentalFeatures.syntheticSourceLabel"
@@ -390,8 +405,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             }
                           >
                             <EuiSwitch
-                              disabled={isFeatureEnabled('tsdb')}
-                              checked={isFeatureEnabled('tsdb')}
+                              disabled={newExperimentalIndexingFeature.tsdb ?? false}
+                              checked={newExperimentalIndexingFeature.tsdb ?? false}
                               label={
                                 <FormattedMessage
                                   id="xpack.fleet.createPackagePolicy.experimentalFeatures.TSDBLabel"
