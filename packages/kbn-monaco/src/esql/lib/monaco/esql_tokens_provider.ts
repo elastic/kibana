@@ -61,7 +61,7 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
       myTokens.push(new ESQLToken('error' + ESQL_TOKEN_POSTFIX, e));
     }
 
-    myTokens.sort((a, b) => b.startIndex - a.startIndex);
+    myTokens.sort((a, b) => a.startIndex - b.startIndex);
 
     return new ESQLLineTokens(myTokens);
   }
