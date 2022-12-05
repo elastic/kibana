@@ -22,6 +22,8 @@ import {
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
+import { useGetDataStreams } from '../../../../../../../../hooks';
+
 import { mapPackageReleaseToIntegrationCardRelease } from '../../../../../../../../services/package_prerelease';
 
 import { getRegistryDataStreamAssetBaseName } from '../../../../../../../../../common/services';
@@ -175,6 +177,9 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       });
     };
 
+    const { data: dataStreamsData } = useGetDataStreams();
+    const datasets = dataStreamsData?.data_streams.map((dataStream) => dataStream.dataset) ?? [];
+
     return (
       <>
         <EuiFlexGrid columns={2}>
@@ -252,6 +257,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       }}
                       errors={inputStreamValidationResults?.vars![varName]}
                       forceShowErrors={forceShowErrors}
+                      packageType={packageInfo.type}
+                      datasets={datasets}
                     />
                   </EuiFlexItem>
                 );
@@ -311,6 +318,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             }}
                             errors={inputStreamValidationResults?.vars![varName]}
                             forceShowErrors={forceShowErrors}
+                            packageType={packageInfo.type}
+                            datasets={datasets}
                           />
                         </EuiFlexItem>
                       );
