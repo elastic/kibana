@@ -6,7 +6,6 @@
  */
 
 import Handlebars from '../..';
-
 import { expectTemplate } from '../__jest__/test_bench';
 
 describe('basic context', () => {
