@@ -324,8 +324,8 @@ export function getUiSettings(
         defaultMessage: 'Time filter refresh interval',
       }),
       value: `{
-  "pause": false,
-  "value": 0
+  "pause": true,
+  "value": 60000
 }`,
       type: 'json',
       description: i18n.translate('data.advancedSettings.timepicker.refreshIntervalDefaultsText', {
