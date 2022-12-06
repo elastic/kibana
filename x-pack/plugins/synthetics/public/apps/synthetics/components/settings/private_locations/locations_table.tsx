@@ -56,8 +56,8 @@ export const PrivateLocationsTable = ({
 
   const tagsList = privateLocations.reduce((acc, item) => {
     const tags = item.tags || [];
-    return [...acc, ...tags];
-  }, [] as string[]);
+    return new Set([...acc, ...tags]);
+  }, new Set<string>());
 
   const columns = [
     {
@@ -183,7 +183,7 @@ export const PrivateLocationsTable = ({
               field: 'tags',
               name: TAGS_LABEL,
               multiSelect: true,
-              options: tagsList.map((tag) => ({
+              options: [...tagsList].map((tag) => ({
                 value: tag,
                 name: tag,
                 view: tag,
