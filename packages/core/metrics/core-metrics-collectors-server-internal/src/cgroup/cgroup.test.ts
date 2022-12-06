@@ -26,86 +26,6 @@ describe('OsCgroupMetricsCollector', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('collects default cgroup data', async () => {
-    mockFs({
-      '/proc/self/cgroup': `
-123:memory:/groupname
-123:cpu:/groupname
-123:cpuacct:/groupname
-      `,
-      '/sys/fs/cgroup/cpuacct/groupname/cpuacct.usage': '111',
-      '/sys/fs/cgroup/cpu/groupname/cpu.cfs_period_us': '222',
-      '/sys/fs/cgroup/cpu/groupname/cpu.cfs_quota_us': '333',
-      '/sys/fs/cgroup/cpu/groupname/cpu.stat': `
-nr_periods 444
-nr_throttled 555
-throttled_time 666
-      `,
-    });
-
-    const collector = new OsCgroupMetricsCollector({ logger: loggerMock.create() });
-    expect(await collector.collect()).toMatchInlineSnapshot(`
-      Object {
-        "cpu": Object {
-          "cfs_period_micros": 222,
-          "cfs_quota_micros": 333,
-          "control_group": "/groupname",
-          "stat": Object {
-            "number_of_elapsed_periods": 444,
-            "number_of_times_throttled": 555,
-            "time_throttled_nanos": 666,
-          },
-        },
-        "cpuacct": Object {
-          "control_group": "/groupname",
-          "usage_nanos": 111,
-        },
-      }
-    `);
-  });
-
-  it('collects override cgroup data', async () => {
-    mockFs({
-      '/proc/self/cgroup': `
-123:memory:/groupname
-123:cpu:/groupname
-123:cpuacct:/groupname
-      `,
-      '/sys/fs/cgroup/cpuacct/xxcustomcpuacctxx/cpuacct.usage': '111',
-      '/sys/fs/cgroup/cpu/xxcustomcpuxx/cpu.cfs_period_us': '222',
-      '/sys/fs/cgroup/cpu/xxcustomcpuxx/cpu.cfs_quota_us': '333',
-      '/sys/fs/cgroup/cpu/xxcustomcpuxx/cpu.stat': `
-nr_periods 444
-nr_throttled 555
-throttled_time 666
-      `,
-    });
-
-    const collector = new OsCgroupMetricsCollector({
-      logger: loggerMock.create(),
-      cpuAcctPath: 'xxcustomcpuacctxx',
-      cpuPath: 'xxcustomcpuxx',
-    });
-    expect(await collector.collect()).toMatchInlineSnapshot(`
-      Object {
-        "cpu": Object {
-          "cfs_period_micros": 222,
-          "cfs_quota_micros": 333,
-          "control_group": "xxcustomcpuxx",
-          "stat": Object {
-            "number_of_elapsed_periods": 444,
-            "number_of_times_throttled": 555,
-            "time_throttled_nanos": 666,
-          },
-        },
-        "cpuacct": Object {
-          "control_group": "xxcustomcpuacctxx",
-          "usage_nanos": 111,
-        },
-      }
-    `);
-  });
-
   it('returns empty object and logs error on an EACCES error', async () => {
     mockFs({
       '/proc/self/cgroup': `
@@ -123,5 +43,195 @@ throttled_time 666
     expect(logger.error).toHaveBeenCalledWith(
       "cgroup metrics could not be read due to error: [Error: EACCES, permission denied '/sys/fs/cgroup/cpuacct/groupname/cpuacct.usage']"
     );
+  });
+
+  describe('cgroup v1', () => {
+    it('collects default cgroup data', async () => {
+      mockFs({
+        '/proc/self/cgroup': `
+123:memory:/groupname
+123:cpu:/groupname
+123:cpuacct:/groupname
+      `,
+        '/sys/fs/cgroup/cpuacct/groupname/cpuacct.usage': '111',
+        '/sys/fs/cgroup/cpu/groupname/cpu.cfs_period_us': '222',
+        '/sys/fs/cgroup/cpu/groupname/cpu.cfs_quota_us': '333',
+        '/sys/fs/cgroup/cpu/groupname/cpu.stat': `
+nr_periods 444
+nr_throttled 555
+throttled_time 666
+      `,
+      });
+
+      const collector = new OsCgroupMetricsCollector({ logger: loggerMock.create() });
+      expect(await collector.collect()).toMatchInlineSnapshot(`
+      Object {
+        "cpu": Object {
+          "cfs_period_micros": 222,
+          "cfs_quota_micros": 333,
+          "control_group": "/groupname",
+          "stat": Object {
+            "number_of_elapsed_periods": 444,
+            "number_of_times_throttled": 555,
+            "time_throttled_nanos": 666,
+          },
+        },
+        "cpuacct": Object {
+          "control_group": "/groupname",
+          "usage_nanos": 111,
+        },
+      }
+    `);
+    });
+
+    it('collects override cgroup data', async () => {
+      mockFs({
+        '/proc/self/cgroup': `
+123:memory:/groupname
+123:cpu:/groupname
+123:cpuacct:/groupname
+      `,
+        '/sys/fs/cgroup/cpuacct/xxcustomcpuacctxx/cpuacct.usage': '111',
+        '/sys/fs/cgroup/cpu/xxcustomcpuxx/cpu.cfs_period_us': '222',
+        '/sys/fs/cgroup/cpu/xxcustomcpuxx/cpu.cfs_quota_us': '333',
+        '/sys/fs/cgroup/cpu/xxcustomcpuxx/cpu.stat': `
+nr_periods 444
+nr_throttled 555
+throttled_time 666
+      `,
+      });
+
+      const collector = new OsCgroupMetricsCollector({
+        logger: loggerMock.create(),
+        cpuAcctPath: 'xxcustomcpuacctxx',
+        cpuPath: 'xxcustomcpuxx',
+      });
+      expect(await collector.collect()).toMatchInlineSnapshot(`
+      Object {
+        "cpu": Object {
+          "cfs_period_micros": 222,
+          "cfs_quota_micros": 333,
+          "control_group": "xxcustomcpuxx",
+          "stat": Object {
+            "number_of_elapsed_periods": 444,
+            "number_of_times_throttled": 555,
+            "time_throttled_nanos": 666,
+          },
+        },
+        "cpuacct": Object {
+          "control_group": "xxcustomcpuacctxx",
+          "usage_nanos": 111,
+        },
+      }
+    `);
+    });
+  });
+
+  describe('cgroup v2', () => {
+    it('collects default cgroup data for "root"', async () => {
+      mockFs({
+        '/proc/self/cgroup': `0::/`,
+        '/sys/fs/cgroup/cpu.max': 'max 100000', // "max" is a special no-value value
+        '/sys/fs/cgroup/cpu.stat': `usage_usec 185247
+user_usec 59279
+system_usec 125968
+nr_periods 123
+nr_throttled 1
+throttled_usec 123123`,
+      });
+
+      const collector = new OsCgroupMetricsCollector({ logger: loggerMock.create() });
+
+      expect(await collector.collect()).toMatchInlineSnapshot(`
+        Object {
+          "cpu": Object {
+            "cfs_period_micros": 100000,
+            "cfs_quota_micros": -1,
+            "control_group": "/",
+            "stat": Object {
+              "number_of_elapsed_periods": 123,
+              "number_of_times_throttled": 1,
+              "time_throttled_nanos": 123123,
+            },
+          },
+          "cpuacct": Object {
+            "control_group": "/",
+            "usage_nanos": 185247,
+          },
+        }
+       `);
+    });
+
+    it('collects default cgroup data', async () => {
+      mockFs({
+        '/proc/self/cgroup': `0::/mypath`,
+        '/sys/fs/cgroup/mypath/cpu.max': 'max 100000', // "max" is a special no-value value
+        '/sys/fs/cgroup/mypath/cpu.stat': `usage_usec 185247
+user_usec 59279
+system_usec 125968
+nr_periods 123
+nr_throttled 1
+throttled_usec 123123`,
+      });
+
+      const collector = new OsCgroupMetricsCollector({ logger: loggerMock.create() });
+
+      expect(await collector.collect()).toMatchInlineSnapshot(`
+        Object {
+          "cpu": Object {
+            "cfs_period_micros": 100000,
+            "cfs_quota_micros": -1,
+            "control_group": "/mypath",
+            "stat": Object {
+              "number_of_elapsed_periods": 123,
+              "number_of_times_throttled": 1,
+              "time_throttled_nanos": 123123,
+            },
+          },
+          "cpuacct": Object {
+            "control_group": "/mypath",
+            "usage_nanos": 185247,
+          },
+        }
+       `);
+    });
+
+    it('collects override cgroup data', async () => {
+      mockFs({
+        '/proc/self/cgroup': `0::/`,
+        '/sys/fs/cgroup/override/cpu.max': 'max 100000', // "max" is a special no-value value
+        '/sys/fs/cgroup/override/cpu.stat': `usage_usec 185247
+user_usec 59279
+system_usec 125968
+nr_periods 123
+nr_throttled 1
+throttled_usec 123123`,
+      });
+
+      const collector = new OsCgroupMetricsCollector({
+        logger: loggerMock.create(),
+        cpuPath: 'override',
+        cpuAcctPath: 'override',
+      });
+
+      expect(await collector.collect()).toMatchInlineSnapshot(`
+        Object {
+          "cpu": Object {
+            "cfs_period_micros": 100000,
+            "cfs_quota_micros": -1,
+            "control_group": "override",
+            "stat": Object {
+              "number_of_elapsed_periods": 123,
+              "number_of_times_throttled": 1,
+              "time_throttled_nanos": 123123,
+            },
+          },
+          "cpuacct": Object {
+            "control_group": "override",
+            "usage_nanos": 185247,
+          },
+        }
+       `);
+    });
   });
 });

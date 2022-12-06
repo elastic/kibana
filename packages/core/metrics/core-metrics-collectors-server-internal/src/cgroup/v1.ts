@@ -74,19 +74,17 @@ async function readCPUStat(controlGroup: string) {
       .toString()
       .split(/\n/)
       .reduce((acc, line) => {
-        const fields = line.split(/\s+/);
+        const [key, value] = line.split(/\s+/);
 
-        switch (fields[0]) {
+        switch (key) {
           case 'nr_periods':
-            acc.number_of_elapsed_periods = parseInt(fields[1], 10);
+            acc.number_of_elapsed_periods = parseInt(value, 10);
             break;
-
           case 'nr_throttled':
-            acc.number_of_times_throttled = parseInt(fields[1], 10);
+            acc.number_of_times_throttled = parseInt(value, 10);
             break;
-
           case 'throttled_time':
-            acc.time_throttled_nanos = parseInt(fields[1], 10);
+            acc.time_throttled_nanos = parseInt(value, 10);
             break;
         }
 
