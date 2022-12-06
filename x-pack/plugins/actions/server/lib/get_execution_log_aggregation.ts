@@ -29,7 +29,7 @@ const MESSAGE_FIELD = 'message';
 const VERSION_FIELD = 'kibana.version';
 const ERROR_MESSAGE_FIELD = 'error.message';
 const SCHEDULE_DELAY_FIELD = 'kibana.task.schedule_delay';
-const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
+const EXECUTION_UUID_FIELD = 'action.uuid';
 
 const Millis2Nanos = 1000 * 1000;
 
