@@ -6,6 +6,7 @@
  */
 
 export * from './data_view_permissions';
+export * from './private_locations';
 export * from './synthetics';
 export * from './alerts';
 export * from './uptime.journey';
@@ -17,5 +18,4 @@ export * from './monitor_management.journey';
 export * from './monitor_management_enablement.journey';
 export * from './monitor_details';
 export * from './locations';
-export * from './private_locations';
 export * from './detail_flyout';
