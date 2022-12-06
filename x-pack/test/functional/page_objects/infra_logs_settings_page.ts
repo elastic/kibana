@@ -8,36 +8,49 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
-export function InfraLogsSettingsPageProvider({ getService }: FtrProviderContext) {
+export function InfraLogsSettingsPageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const pageObjects = getPageObjects(['header']);
+
+  /**
+   * Page
+   */
+  async function getPage(): Promise<WebElementWrapper> {
+    return await testSubjects.find('sourceConfigurationContent');
+  }
+
+  /**
+   * Name
+   */
+  async function getNameInput(): Promise<WebElementWrapper> {
+    return await testSubjects.findDescendant('~nameInput', await this.getForm());
+  }
+
+  /**
+   * Indices
+   */
+  async function switchToIndexNamesMode() {
+    await testSubjects.click('logSettingsIndexNamesCard');
+  }
+  async function setIndexNames(indexNames: string) {
+    await testSubjects.setValue('logIndicesInput', indexNames);
+  }
+
+  const modelStateAssertions = {
+    async onLogSettingsPage() {
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await getPage();
+    },
+  };
 
   return {
-    /**
-     * Page
-     */
-    async getPage(): Promise<WebElementWrapper> {
-      return await testSubjects.find('sourceConfigurationContent');
-    },
-
-    /**
-     * Name
-     */
-    async getNameInput(): Promise<WebElementWrapper> {
-      return await testSubjects.findDescendant('~nameInput', await this.getForm());
-    },
-
-    /**
-     * Indices
-     */
-    async switchToIndexNamesMode() {
-      await testSubjects.click('logSettingsIndexNamesCard');
-    },
-    async setIndexNames(indexNames: string) {
-      await testSubjects.setValue('logIndicesInput', indexNames);
-    },
-
+    getPage,
+    getNameInput,
+    switchToIndexNamesMode,
+    setIndexNames,
+    modelStateAssertions,
     /**
      * Columns
      */
@@ -137,3 +150,12 @@ export function InfraLogsSettingsPageProvider({ getService }: FtrProviderContext
     },
   };
 }
+
+export interface LogsSettingsPageTestMachineTypestate {
+  value: 'onLogsSettingsPage';
+  context: undefined;
+}
+
+export type LogsSettingsPageTestMachineEvent =
+  | { type: 'changeIndexNamePattern' }
+  | { type: 'saveSettings' };

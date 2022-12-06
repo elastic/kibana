@@ -5,50 +5,63 @@
  * 2.0.
  */
 
-import { createTestMachine, createTestModel } from '@xstate/test';
+import { createTestModel } from '@xstate/test';
+import expect from '@kbn/expect';
+import { createMachine } from 'xstate';
+import { DATES } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import type {
+  LogStreamPageTestMachineEvent,
+  LogStreamPageTestMachineTypestate,
+} from '../../page_objects/infra_logs_page';
+import type {
+  LogsSettingsPageTestMachineEvent,
+  LogsSettingsPageTestMachineTypestate,
+} from '../../page_objects/infra_logs_settings_page';
 
 const COMMON_REQUEST_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
+type TestMachineEvent = LogStreamPageTestMachineEvent | LogsSettingsPageTestMachineEvent;
+
+type TestMachineTypestate =
+  | LogStreamPageTestMachineTypestate
+  | LogsSettingsPageTestMachineTypestate;
+
+type TestMachineContext = TestMachineTypestate['context'];
+
 const logSettingsTestMachine =
-  /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKYAu2CWAdlLACpzYCyAhgMYAWhYAdLNlQE7YDEBVAbnihVsYEqgAy6WAFU8AbQAMAXUSgADqlh58qAqpAAPRAEYAbAGYmAThs2A7AFYHxgBxPzpgDQgAniZcALEwOCqEKVsYOdnbmAEwusQC+id5omDj4RKTk1PSMTGkY2OxgVAC2FHiwWkQAkgQQeDRwAApUMFw0yE0A1li4hMQAEqUQYOzihD2KKkggGlo6enNGCBYKTOZWCqbxzg4BsVax3n4IrkEhYRFRMfFJKSCFGYPZrLkMBMzPA1ltHfQqEQwPUxgYAHLlMBtXDjAgzfQLbR4XT6VbrTbbXZuSKHY6nRAuSwBWx2UxkhQBVxxZKpdD9TLEMjvWifb70l5-dpgADq2joAGE6ECYLAuLB+GAGa8EXMkUs0YgMVsdntcUcTr4TOZLLYbEcHNtHFFko8CKgxvA5j9GW9KKzGIjNMjUStEABaLxahCe2lPDm-Jk5B1fFhsThOxYo5agVaHAnnQJMMIKWKxcwKcwuYyxAJ2P0217M+15UOFYqlCpVGpQUFNVrcyMumOGRDmBymJh2VyOAJUlzhWJes4XZNhNMZrM5vMFgO24sffKFrkwJsKt0IFwJJimFyONNblwRAIJ4weMdhUzGBT7Bxp2fpQN2xdluevf68-lCkVwNfRxUIO2uoOOYkQZlYcRpnYJ7elu1hmKYBxHuExh4qaiRAA */
-  createTestMachine({
-    schema: {
-      events: {} as
-        | { type: 'navigateToLogsUi' }
-        | { type: 'clickSettingsHeaderLink' }
-        | { type: 'changeIndexNamePattern' }
-        | { type: 'saveSettings' },
-    },
+  /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKYAu2CWAdlLACpzYCyAhgMYAWhYAdLNlQE7YDEBVAbnihVsYEqgAy6WAFU8AbQAMAXUSgADqlh58qAqpAAPRAEYAbAGYmAThtWArAoBMC4woWnHAFgA0IAJ4mAByeTJ62jnZWYaZ2AOwAvvG+aJg4+ESk5NT0jEy6kpjY7GBUALYUeLBaRACSBBB4NHAAClQwXDTIjQDWWLiExAASJRBg7OKE3YoqSCAaWjp6s0YIMZaO5p7mTo5WCoFW5na+AQjGwaHhkdFxicnofenEZKzZDATM+Q9pA7Ct7fQqEQwHVRgYAHJlMCtXBjAjTfTzbR4XT6FaBUxWJjuDZWUyBczGYwOYwnRCOTGXWwuWJ2QKOel3EApR6-F6UWjvT4EAqsjL-MAAdW0dAAwnQgTBYFxYPwwHziAjZkjFmjELFjLFQnZtrFHI5iRF9WSEBSsWFqZq6QzHIkkiACKhRvBZiyfhl2W9GIjNMjUctEABaUwmqJUqxeCwE-EKTxMt39D1ZTm5VgcbA+hYopagFaeRwm86WWxRXaHTzGMJ2ePfRPPZM5D55HkPIolcqVapQUGNFptMCZv05wyII6mJgajGxWJhWJWaeeWKFgnWWz5mybSv2GupOuZV4pptfXdPP79weqgMIA4hHXGDZ00ymaeY5fF8KeKPmGNx+0J0+eoe3K8u6xACsK2BihKwIuuovqXrmiDBHYTBxE4Vb7HYRIhv4o6RNYZhfnO+abHa8RAA */
+  createMachine<TestMachineContext, TestMachineEvent, TestMachineTypestate>({
+    predictableActionArguments: true,
     initial: 'start',
     states: {
       start: {
         on: {
           navigateToLogsUi: {
-            target: 'logStreamMissingIndicesPage',
+            target: 'onLogStreamMissingIndicesPage',
           },
         },
       },
-      logStreamMissingIndicesPage: {
+      onLogStreamMissingIndicesPage: {
         on: {
           clickSettingsHeaderLink: {
-            target: 'logSettingsPage',
+            target: 'onLogSettingsPage',
           },
         },
       },
-      logSettingsPage: {
+      onLogSettingsPage: {
         on: {
           changeIndexNamePattern: {
-            target: 'logSettingsPageWithChanges',
+            target: 'onLogSettingsPageWithChanges',
           },
         },
       },
-      logSettingsPageWithChanges: {
+      onLogSettingsPageWithChanges: {
         on: {
           saveSettings: {
-            target: 'logSettingsPage',
+            target: 'onLogSettingsPage',
           },
         },
       },
@@ -69,7 +82,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const logSettingsTestModel = createTestModel(logSettingsTestMachine, {
     logger: {
-      log: log.debug.bind(log),
+      log: log.info.bind(log),
       error: log.error.bind(log),
     },
   });
@@ -86,21 +99,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it(path.description, async () => {
         await path.test({
           events: {
-            navigateToLogsUi: async () => {
-              await pageObjects.infraLogs.navigateTo();
-            },
-            clickSettingsHeaderLink: async () => {
-              await pageObjects.infraLogs.navigateToTab('settings');
-            },
+            ...pageObjects.infraLogs.modelTransitionActions,
           },
           states: {
-            logStreamMissingIndicesPage: async () => {
-              await pageObjects.infraLogs.getMissingIndicesPage();
-            },
-            logSettingsPage: async () => {
-              await pageObjects.header.waitUntilLoadingHasFinished();
-              await pageObjects.infraLogsSettings.getPage();
-            },
+            ...pageObjects.infraLogs.modelStateAssertions,
+            ...pageObjects.infraLogsSettings.modelStateAssertions,
           },
         });
       });

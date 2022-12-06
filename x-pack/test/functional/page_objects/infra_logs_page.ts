@@ -7,8 +7,9 @@
 
 import { FlyoutOptionsUrlState } from '@kbn/infra-plugin/public/containers/logs/log_flyout';
 import { LogPositionUrlState } from '@kbn/infra-plugin/public/containers/logs/log_position';
-import querystring from 'querystring';
 import { encode } from '@kbn/rison';
+import querystring from 'querystring';
+import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export interface TabsParams {
@@ -25,60 +26,89 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common']);
 
-  return {
-    /**
-     * URL Navigation
-     */
-    async navigateTo() {
-      await pageObjects.common.navigateToApp('infraLogs');
-    },
+  /**
+   * URL Navigation
+   */
+  async function navigateTo() {
+    await pageObjects.common.navigateToApp('infraLogs');
+  }
 
-    async navigateToTab<T extends LogsUiTab>(logsUiTab: T, params?: TabsParams[T]) {
-      let qs = '';
-      if (params) {
-        const parsedParams: Record<string, string> = {};
+  async function navigateToTab<T extends LogsUiTab>(logsUiTab: T, params?: TabsParams[T]) {
+    let qs = '';
+    if (params) {
+      const parsedParams: Record<string, string> = {};
 
-        for (const key in params) {
-          if (params.hasOwnProperty(key)) {
-            const value = params[key];
-            parsedParams[key] = encode(value);
-          }
+      for (const key in params) {
+        if (params.hasOwnProperty(key)) {
+          const value = params[key];
+          parsedParams[key] = encode(value);
         }
-        qs = '?' + querystring.stringify(parsedParams);
       }
+      qs = '?' + querystring.stringify(parsedParams);
+    }
 
-      await pageObjects.common.navigateToUrlWithBrowserHistory(
-        'infraLogs',
-        `/${logsUiTab}`,
-        qs,
-        { ensureCurrentUrl: false } // Test runner struggles with `rison-node` escaped values
-      );
-    },
+    await pageObjects.common.navigateToUrlWithBrowserHistory(
+      'infraLogs',
+      `/${logsUiTab}`,
+      qs,
+      { ensureCurrentUrl: false } // Test runner struggles with `rison-node` escaped values
+    );
+  }
 
-    /**
-     * Page
-     */
-    async getPage() {
-      return await testSubjects.find('logStreamPage');
-    },
-    async getMissingIndicesPage() {
-      return await testSubjects.find('noDataPage');
-    },
+  /**
+   * Page
+   */
+  async function getPage() {
+    return await testSubjects.find('logStreamPage');
+  }
+  async function getMissingIndicesPage() {
+    return await testSubjects.find('noDataPage');
+  }
 
-    /**
-     * Header
-     */
-    async getLogSettingsHeaderLink(): Promise<WebElementWrapper> {
-      return await testSubjects.find('logSettingsHeaderLink');
-    },
+  /**
+   * Header
+   */
+  async function getLogSettingsHeaderLink(): Promise<WebElementWrapper> {
+    return await testSubjects.find('logSettingsHeaderLink');
+  }
 
-    /**
-     * Log stream
-     */
-    async getLogStream() {
-      return await testSubjects.find('logStream');
+  /**
+   * Log stream
+   */
+  async function getLogStream() {
+    return await testSubjects.find('logStream');
+  }
+
+  const modelStateAssertions = {
+    async onLogStreamMissingIndicesPage() {
+      await getMissingIndicesPage();
     },
   };
+
+  const modelTransitionActions = {
+    navigateToLogsUi: async () => navigateTo(),
+    clickSettingsHeaderLink: async () => await (await getLogSettingsHeaderLink()).click(),
+  };
+
+  return {
+    getLogSettingsHeaderLink,
+    getLogStream,
+    getMissingIndicesPage,
+    getPage,
+    modelStateAssertions,
+    modelTransitionActions,
+    navigateTo,
+    navigateToTab,
+  };
 }
+
+export interface LogStreamPageTestMachineTypestate {
+  value: 'onLogStreamMissingIndicesPage';
+  context: undefined;
+}
+
+export type LogStreamPageTestMachineEvent =
+  | { type: 'navigateToLogsUi' }
+  | { type: 'clickSettingsHeaderLink' };
 
 type LogsUiTab = 'log-categories' | 'log-rate' | 'settings' | 'stream';
