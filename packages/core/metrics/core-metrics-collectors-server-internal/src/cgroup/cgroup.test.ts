@@ -165,7 +165,7 @@ throttled_usec 123123`,
     it('collects default cgroup data', async () => {
       mockFs({
         '/proc/self/cgroup': `0::/mypath`,
-        '/sys/fs/cgroup/mypath/cpu.max': 'max 100000', // "max" is a special no-value value
+        '/sys/fs/cgroup/mypath/cpu.max': '111 100000',
         '/sys/fs/cgroup/mypath/cpu.stat': `usage_usec 185247
 user_usec 59279
 system_usec 125968
@@ -180,7 +180,7 @@ throttled_usec 123123`,
         Object {
           "cpu": Object {
             "cfs_period_micros": 100000,
-            "cfs_quota_micros": -1,
+            "cfs_quota_micros": 111,
             "control_group": "/mypath",
             "stat": Object {
               "number_of_elapsed_periods": 123,
