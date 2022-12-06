@@ -6,9 +6,7 @@
  */
 
 import { createTestModel } from '@xstate/test';
-import expect from '@kbn/expect';
 import { createMachine } from 'xstate';
-import { DATES } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type {
   LogStreamPageTestMachineEvent,
