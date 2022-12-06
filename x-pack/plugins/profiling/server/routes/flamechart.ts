@@ -13,7 +13,7 @@ import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { createBaseFlameGraph } from '../../common/flamegraph';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
-import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
+import { searchStackTraces } from './search_stacktraces';
 import { createCommonFilter } from './query';
 
 export function registerFlameChartSearchRoute({
@@ -46,16 +46,18 @@ export function registerFlameChartSearchRoute({
         });
         const totalSeconds = timeTo - timeFrom;
 
+        const t0 = Date.now();
         const { stackTraceEvents, stackTraces, executables, stackFrames, totalFrames } =
-          await getExecutablesAndStackTraces({
+          await searchStackTraces({
             logger,
-            client: createProfilingEsClient({ request, esClient }),
+            client: esClient,
             filter,
             sampleSize: targetSampleSize,
           });
+        logger.info(`querying stacktraces took ${Date.now() - t0} ms`);
 
         const flamegraph = await withProfilingSpan('create_flamegraph', async () => {
-          const t0 = Date.now();
+          const t1 = Date.now();
           const tree = createCalleeTree(
             stackTraceEvents,
             stackTraces,
@@ -63,11 +65,11 @@ export function registerFlameChartSearchRoute({
             executables,
             totalFrames
           );
-          logger.info(`creating callee tree took ${Date.now() - t0} ms`);
+          logger.info(`creating callee tree took ${Date.now() - t1} ms`);
 
-          const t1 = Date.now();
+          const t2 = Date.now();
           const fg = createBaseFlameGraph(tree, totalSeconds);
-          logger.info(`creating flamegraph took ${Date.now() - t1} ms`);
+          logger.info(`creating flamegraph took ${Date.now() - t2} ms`);
 
           return fg;
         });

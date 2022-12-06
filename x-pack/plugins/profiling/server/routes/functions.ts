@@ -12,7 +12,7 @@ import { createTopNFunctions } from '../../common/functions';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
-import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
+import { searchStackTraces } from './search_stacktraces';
 import { createCommonFilter } from './query';
 
 const querySchema = schema.object({
@@ -50,15 +50,18 @@ export function registerTopNFunctionsSearchRoute({
           kuery,
         });
 
-        const { stackFrames, stackTraceEvents, stackTraces, executables } =
-          await getExecutablesAndStackTraces({
-            client: createProfilingEsClient({ request, esClient }),
-            filter,
-            logger,
-            sampleSize: targetSampleSize,
-          });
-
         const t0 = Date.now();
+        const { stackTraceEvents, stackTraces, executables, stackFrames } = await searchStackTraces(
+          {
+            logger,
+            client: esClient,
+            filter,
+            sampleSize: targetSampleSize,
+          }
+        );
+        logger.info(`querying stacktraces took ${Date.now() - t0} ms`);
+
+        const t1 = Date.now();
         const topNFunctions = await withProfilingSpan('create_topn_functions', async () => {
           return createTopNFunctions(
             stackTraceEvents,
@@ -69,7 +72,7 @@ export function registerTopNFunctionsSearchRoute({
             endIndex
           );
         });
-        logger.info(`creating topN functions took ${Date.now() - t0} ms`);
+        logger.info(`creating topN functions took ${Date.now() - t1} ms`);
 
         logger.info('returning payload response to client');
 
