@@ -6,7 +6,7 @@
  */
 
 import { getNetworkFromInfluencers } from './get_network_from_influencers';
-import { DestinationOrSource } from '../types';
+import type { DestinationOrSource } from '../types';
 
 describe('get_network_from_influencers', () => {
   test('returns null if there are no influencers', () => {

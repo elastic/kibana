@@ -7,3 +7,4 @@
 
 export { CollapsibleIndicesList } from './collapsible_indices_list';
 export { CollapsibleDataStreamsList } from './collapsible_data_streams_list';
+export { CollapsibleFeatureStatesList } from './collapsible_feature_states';

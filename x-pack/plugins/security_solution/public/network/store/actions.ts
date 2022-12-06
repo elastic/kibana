@@ -6,7 +6,8 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { networkModel } from '.';
+import type { networkModel } from '.';
+import type { NetworkType } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/network');
 
@@ -23,3 +24,13 @@ export const setNetworkDetailsTablesActivePageToZero = actionCreator(
 export const setNetworkTablesActivePageToZero = actionCreator(
   'SET_NETWORK_TABLES_ACTIVE_PAGE_TO_ZERO'
 );
+
+export const updateNetworkAnomaliesJobIdFilter = actionCreator<{
+  jobIds: string[];
+  networkType: NetworkType;
+}>('UPDATE_NETWORK_ANOMALIES_JOB_ID_FILTER');
+
+export const updateNetworkAnomaliesInterval = actionCreator<{
+  interval: string;
+  networkType: NetworkType;
+}>('UPDATE_NETWORK_ANOMALIES_INTERVAL');

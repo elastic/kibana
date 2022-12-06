@@ -12,7 +12,8 @@ import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThreatIntelLinkPanel } from '.';
 import { ThemeProvider } from 'styled-components';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -22,6 +23,10 @@ import {
 import { mockTheme, mockProps, mockTiDataSources, mockCtiLinksResponse } from './mock';
 import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { createKibanaContextProviderMock } from '../../../common/lib/kibana/kibana_react.mock';
+
+const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 jest.mock('../../../common/lib/kibana');
 
@@ -37,11 +42,23 @@ describe('ThreatIntelLinkPanel', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
     const myState = cloneDeep(state);
-    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      myState,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
   });
 
   it('renders CtiEnabledModule when Threat Intel module is enabled', () => {
@@ -49,7 +66,9 @@ describe('ThreatIntelLinkPanel', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <ThreatIntelLinkPanel {...mockProps} />
+            <MockKibanaContextProvider>
+              <ThreatIntelLinkPanel {...mockProps} />
+            </MockKibanaContextProvider>
           </ThemeProvider>
         </I18nProvider>
       </Provider>
@@ -57,6 +76,7 @@ describe('ThreatIntelLinkPanel', () => {
 
     expect(wrapper.find('[data-test-subj="cti-enabled-module"]').length).toEqual(1);
     expect(wrapper.find('[data-test-subj="cti-enable-integrations-button"]').length).toEqual(0);
+    expect(wrapper.find('[data-test-subj="cti-view-indicators"]').length).toBeGreaterThan(0);
   });
 
   it('renders CtiDisabledModule when Threat Intel module is disabled', () => {
@@ -64,7 +84,9 @@ describe('ThreatIntelLinkPanel', () => {
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
-            <ThreatIntelLinkPanel {...mockProps} allTiDataSources={[]} />
+            <MockKibanaContextProvider>
+              <ThreatIntelLinkPanel {...mockProps} allTiDataSources={[]} />
+            </MockKibanaContextProvider>
           </ThemeProvider>
         </I18nProvider>
       </Provider>

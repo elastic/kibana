@@ -10,8 +10,16 @@ import { useKibana } from '../../lib/kibana';
 import { useMatrixHistogram, useMatrixHistogramCombined } from '.';
 import { MatrixHistogramType } from '../../../../common/search_strategy';
 import { TestProviders } from '../../mock/test_providers';
+import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
 
 jest.mock('../../lib/kibana');
+jest.mock('../../lib/apm/use_track_http_request');
+
+const mockEndTracking = jest.fn();
+const mockStartTracking = jest.fn(() => ({ endTracking: mockEndTracking }));
+(useTrackHttpRequest as jest.Mock).mockReturnValue({
+  startTracking: mockStartTracking,
+});
 
 const basicResponse = {
   isPartial: false,
@@ -42,7 +50,7 @@ describe('useMatrixHistogram', () => {
   };
 
   afterEach(() => {
-    (useKibana().services.data.search.search as jest.Mock).mockClear();
+    jest.clearAllMocks();
   });
 
   it('should update request when props has changed', async () => {
@@ -155,6 +163,58 @@ describe('useMatrixHistogram', () => {
     localProps.skip = true;
     act(() => rerender());
     expect(abortSpy).toHaveBeenCalledTimes(3);
+  });
+
+  describe('trackHttpRequest', () => {
+    it('should start tracking when request starts', () => {
+      renderHook(useMatrixHistogram, {
+        initialProps: props,
+        wrapper: TestProviders,
+      });
+
+      expect(mockStartTracking).toHaveBeenCalledWith({
+        name: `securitySolutionUI matrixHistogram ${MatrixHistogramType.events}`,
+      });
+    });
+
+    it('should end tracking success when the request succeeds', () => {
+      (useKibana().services.data.search.search as jest.Mock).mockReturnValueOnce({
+        subscribe: ({ next }: { next: Function }) => next(basicResponse),
+      });
+
+      renderHook(useMatrixHistogram, {
+        initialProps: props,
+        wrapper: TestProviders,
+      });
+
+      expect(mockEndTracking).toHaveBeenCalledWith('success');
+    });
+
+    it('should end tracking error when the partial request is invalid', () => {
+      (useKibana().services.data.search.search as jest.Mock).mockReturnValueOnce({
+        subscribe: ({ next }: { next: Function }) => next(null),
+      });
+
+      renderHook(useMatrixHistogram, {
+        initialProps: props,
+        wrapper: TestProviders,
+      });
+
+      expect(mockEndTracking).toHaveBeenCalledWith('invalid');
+    });
+
+    it('should end tracking error when the request fails', () => {
+      (useKibana().services.data.search.search as jest.Mock).mockReturnValueOnce({
+        subscribe: ({ error }: { error: Function }) => error('some error'),
+      });
+
+      renderHook(useMatrixHistogram, {
+        initialProps: props,
+        wrapper: TestProviders,
+      });
+
+      expect(mockEndTracking).toHaveBeenCalledWith('error');
+    });
   });
 });
 

@@ -39,6 +39,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     before(async () => {
       await log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);
+      await kibanaServer.savedObjects.cleanStandardList();
       try {
         config.get('esTestCluster.ccs');
         remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
@@ -67,14 +68,16 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     loadTestFile(require.resolve('./add_to_dashboard'));
     loadTestFile(require.resolve('./runtime_fields'));
     loadTestFile(require.resolve('./dashboard'));
-    loadTestFile(require.resolve('./multi_terms'));
+    loadTestFile(require.resolve('./terms'));
     loadTestFile(require.resolve('./epoch_millis'));
     loadTestFile(require.resolve('./show_underlying_data'));
     loadTestFile(require.resolve('./show_underlying_data_dashboard'));
+    loadTestFile(require.resolve('./tsdb'));
   });
 };

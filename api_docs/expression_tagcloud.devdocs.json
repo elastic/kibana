@@ -19,6 +19,7 @@
       ],
       "path": "src/plugins/chart_expressions/expression_tagcloud/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -49,6 +50,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_tagcloud/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -63,6 +65,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_tagcloud/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -77,6 +80,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_tagcloud/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -93,6 +97,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_tagcloud/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -107,6 +112,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_tagcloud/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

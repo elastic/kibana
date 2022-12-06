@@ -115,3 +115,19 @@ export const sendDeleteAgentPolicy = (body: DeleteAgentPolicyRequest['body']) =>
     body: JSON.stringify(body),
   });
 };
+
+export const sendResetOnePreconfiguredAgentPolicy = (agentPolicyId: string) => {
+  return sendRequest({
+    path: agentPolicyRouteService.getResetOnePreconfiguredAgentPolicyPath(agentPolicyId),
+    method: 'post',
+    body: JSON.stringify({}),
+  });
+};
+
+export const sendResetAllPreconfiguredAgentPolicies = () => {
+  return sendRequest({
+    path: agentPolicyRouteService.getResetAllPreconfiguredAgentPolicyPath(),
+    method: 'post',
+    body: JSON.stringify({}),
+  });
+};

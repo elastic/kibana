@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { EuiPageContent } from '@elastic/eui';
+import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';

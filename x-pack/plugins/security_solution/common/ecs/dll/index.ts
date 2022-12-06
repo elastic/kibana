@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CodeSignature } from '../file';
-import { ProcessPe } from '../process';
+import type { CodeSignature } from '../file';
+import type { ProcessPe } from '../process';
 
 export interface DllEcs {
   path?: string;

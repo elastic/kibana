@@ -5,26 +5,22 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
+import type { Datum, NodeColorAccessor, PartialTheme } from '@elastic/charts';
 import {
   Chart,
-  Datum,
   Partition,
   Settings,
   PartitionLayout,
   defaultPartitionValueFormatter,
-  NodeColorAccessor,
-  PartialTheme,
 } from '@elastic/charts';
 import styled from 'styled-components';
 import { useTheme } from './common';
 import { DraggableLegend } from './draggable_legend';
-import { LegendItem } from './draggable_legend_item';
+import type { LegendItem } from './draggable_legend_item';
 import { DonutChartEmpty } from './donutchart_empty';
-
-export const NO_LEGEND_DATA: LegendItem[] = [];
 
 const donutTheme: PartialTheme = {
   chartMargins: { top: 0, bottom: 0, left: 0, right: 0 },
@@ -48,9 +44,8 @@ export interface DonutChartProps {
   data: DonutChartData[] | null | undefined;
   fillColor: FillColor;
   height?: number;
-  label: string;
+  label: React.ReactElement | string;
   legendItems?: LegendItem[] | null | undefined;
-  link?: string | null;
   title: React.ReactElement | string | number | null;
   totalCount: number | null | undefined;
 }
@@ -75,7 +70,6 @@ export const DonutChart = ({
   height = 90,
   label,
   legendItems,
-  link,
   title,
   totalCount,
 }: DonutChartProps) => {
@@ -87,6 +81,7 @@ export const DonutChart = ({
     }),
     [euiTheme.colors.disabled]
   );
+
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -104,15 +99,15 @@ export const DonutChart = ({
         >
           <EuiFlexItem>{title}</EuiFlexItem>
           <EuiFlexItem className="eui-textTruncate">
-            {data ? (
-              <EuiText className="eui-textTruncate" size="s">
+            <EuiToolTip content={label}>
+              <EuiText
+                className="eui-textTruncate"
+                size="s"
+                style={data ? undefined : emptyLabelStyle}
+              >
                 {label}
               </EuiText>
-            ) : (
-              <EuiText className="eui-textTruncate" size="s" style={emptyLabelStyle}>
-                {label}
-              </EuiText>
-            )}
+            </EuiToolTip>
           </EuiFlexItem>
         </DonutTextWrapper>
         {data == null || totalCount == null || totalCount === 0 ? (

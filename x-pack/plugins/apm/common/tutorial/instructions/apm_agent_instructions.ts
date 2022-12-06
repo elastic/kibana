@@ -519,10 +519,12 @@ export const createDotNetAgentInstructions = (
         defaultMessage:
           'In case you don’t pass an `IConfiguration` instance to the agent (e.g. in case of non ASP.NET Core applications) \
       you can also configure the agent through environment variables. \n \
-      See [the documentation]({documentationLink}) for advanced usage.',
+      See [the documentation]({documentationLink}) for advanced usage, including the [Profiler Auto instrumentation]({profilerLink}) quick start.',
         values: {
           documentationLink:
             '{config.docs.base_url}guide/en/apm/agent/dotnet/current/configuration.html',
+          profilerLink:
+            '{config.docs.base_url}guide/en/apm/agent/dotnet/current/setup-auto-instrumentation.html#setup-auto-instrumentation',
         },
       }
     ),
@@ -591,5 +593,48 @@ export const createPhpAgentInstructions = (
         },
       }
     ),
+  },
+];
+
+export const createOpenTelemetryAgentInstructions = (
+  apmServerUrl = '',
+  secretToken = ''
+) => [
+  {
+    title: i18n.translate('xpack.apm.tutorial.otel.download.title', {
+      defaultMessage: 'Download the OpenTelemetry APM Agent or SDK',
+    }),
+    textPre: i18n.translate('xpack.apm.tutorial.otel.download.textPre', {
+      defaultMessage:
+        'See the [OpenTelemetry Instrumentation guides]({openTelemetryInstrumentationLink}) to download the OpenTelemetry Agent or SDK for your language.',
+      values: {
+        openTelemetryInstrumentationLink:
+          'https://opentelemetry.io/docs/instrumentation',
+      },
+    }),
+  },
+  {
+    title: i18n.translate('xpack.apm.tutorial.otel.configureAgent.title', {
+      defaultMessage: 'Configure OpenTelemetry in your application',
+    }),
+    textPre: i18n.translate('xpack.apm.tutorial.otel.configureAgent.textPre', {
+      defaultMessage:
+        'Specify the following OpenTelemetry settings as part of the startup of your application. Note that OpenTelemetry SDKs require some bootstrap code in addition to these configuration settings. For more details, see the [Elastic OpenTelemetry documentation]({openTelemetryDocumentationLink}) and the [OpenTelemetry community instrumentation guides]({openTelemetryInstrumentationLink}).',
+      values: {
+        openTelemetryDocumentationLink:
+          '{config.docs.base_url}guide/en/apm/guide/current/open-telemetry.html',
+        openTelemetryInstrumentationLink:
+          'https://opentelemetry.io/docs/instrumentation',
+      },
+    }),
+    customComponentName: 'TutorialConfigAgent',
+    textPost: i18n.translate('xpack.apm.tutorial.otel.configure.textPost', {
+      defaultMessage:
+        'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
+      values: {
+        documentationLink:
+          '{config.docs.base_url}guide/en/apm/guide/current/open-telemetry.html',
+      },
+    }),
   },
 ];

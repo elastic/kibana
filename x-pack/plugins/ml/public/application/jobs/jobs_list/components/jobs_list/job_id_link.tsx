@@ -59,14 +59,18 @@ export const AnomalyDetectionJobIdLink = (props: AnomalyDetectionJobIdLinkProps)
 
   if (isGroupIdLink(props)) {
     return (
-      // Set margin-left to match EuiBadge (in JobGroup) built-in left margin for consistent badge spacing in management and plugin jobs list
-      <EuiLink style={{ marginLeft: '4px' }} key={props.groupId} href={href}>
+      <EuiLink key={props.groupId} href={href}>
         <JobGroup name={props.groupId} />
       </EuiLink>
     );
   } else {
     return (
-      <EuiLink key={props.id} href={href}>
+      <EuiLink
+        key={props.id}
+        href={href}
+        css={{ overflow: 'hidden', 'text-overflow': 'ellipsis' }}
+        title={props.id}
+      >
         {props.id}
       </EuiLink>
     );

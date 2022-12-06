@@ -1,0 +1,34 @@
+title: Update case comment request properties for user comments
+description: Defines properties for case comment requests when type is user.
+type: object
+properties:
+  comment:
+    description: The new comment. It is required only when `type` is `user`.
+    type: string
+    example: A new comment.
+  id:
+    type: string
+    description: >
+      The identifier for the comment. To retrieve comment IDs, use the
+      get comments API.
+    example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
+  owner:
+    $ref: 'owners.yaml'
+  type: 
+    type: string
+    description: The type of comment.
+    enum:
+      - user
+    example: user
+  version:
+    description: >
+      The current comment version. To retrieve version values, use the get
+      comments API.
+    type: string
+    example: Wzk1LDFd
+required:
+  - comment
+  - id
+  - owner
+  - type
+  - version

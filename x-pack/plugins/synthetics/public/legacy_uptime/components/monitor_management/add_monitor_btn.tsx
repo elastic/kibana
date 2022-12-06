@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiToolTip, EuiSwitch } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useLocations } from './hooks/use_locations';
+import { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
 import { kibanaService } from '../../state/kibana_service';
 import { MONITOR_ADD_ROUTE } from '../../../../common/constants';
 import { useEnablement } from './hooks/use_enablement';
@@ -28,6 +30,8 @@ export const AddMonitorBtn = () => {
     totalMonitors,
   } = useEnablement();
   const { isEnabled, canEnable, areApiKeysEnabled } = enablement || {};
+
+  const { locations } = useLocations();
 
   useEffect(() => {
     if (isEnabling && isEnabled) {
@@ -90,7 +94,16 @@ export const AddMonitorBtn = () => {
 
   const loading = allowedLoading || enablementLoading;
 
-  const canSave: boolean = !!useKibana().services?.application?.capabilities.uptime.save;
+  const kServices = useKibana<ClientPluginsStart>().services;
+
+  const canSave: boolean = !!kServices?.application?.capabilities.uptime.save;
+
+  const canSaveIntegrations: boolean =
+    !!kServices?.fleet?.authz.integrations.writeIntegrationPolicies;
+
+  const isCloud = useKibana<ClientPluginsSetup>().services?.cloud?.isCloudEnabled;
+
+  const canSavePrivate: boolean = Boolean(isCloud) || canSaveIntegrations;
 
   return (
     <EuiFlexGroup alignItems="center">
@@ -116,11 +129,21 @@ export const AddMonitorBtn = () => {
         )}
       </EuiFlexItem>
       <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false}>
-        <EuiToolTip content={!isEnabled && !canEnable ? SYNTHETICS_DISABLED_MESSAGE : ''}>
+        <EuiToolTip
+          content={
+            !isEnabled && !canEnable
+              ? SYNTHETICS_DISABLED_MESSAGE
+              : !canSavePrivate
+              ? PRIVATE_LOCATIONS_NOT_ALLOWED_MESSAGE
+              : ''
+          }
+        >
           <EuiButton
             isLoading={loading}
             fill
-            isDisabled={!canSave || !isEnabled || !isAllowed}
+            isDisabled={
+              !canSave || !isEnabled || !isAllowed || !canSavePrivate || locations.length === 0
+            }
             iconType="plus"
             data-test-subj="syntheticsAddMonitorBtn"
             href={history.createHref({
@@ -134,6 +157,14 @@ export const AddMonitorBtn = () => {
     </EuiFlexGroup>
   );
 };
+
+const PRIVATE_LOCATIONS_NOT_ALLOWED_MESSAGE = i18n.translate(
+  'xpack.synthetics.monitorManagement.privateLocationsNotAllowedMessage',
+  {
+    defaultMessage:
+      'You do not have permission to add monitors to private locations. Contact your administrator to request access.',
+  }
+);
 
 const ADD_MONITOR_LABEL = i18n.translate('xpack.synthetics.monitorManagement.addMonitorLabel', {
   defaultMessage: 'Add monitor',

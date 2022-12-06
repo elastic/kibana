@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
 import { RuleStatusFailedCallOut } from './rule_status_failed_callout';
 
 jest.mock('../../../../common/lib/kibana');

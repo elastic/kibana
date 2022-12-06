@@ -35,7 +35,7 @@ const DropTargetDataProvidersContainer = styled.div`
     background: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.1)};
     border: 0.2rem dashed ${({ theme }) => theme.eui.euiColorSuccess};
 
-    & .euiTextColor--subdued {
+    & .timeline-drop-area-empty__text {
       color: ${({ theme }) => theme.eui.euiColorSuccess};
     }
 
@@ -86,9 +86,11 @@ const getDroppableId = (id: string): string =>
  */
 export const DataProviders = React.memo<Props>(({ timelineId }) => {
   const { browserFields } = useSourcererDataView(SourcererScopeName.timeline);
-  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-  const { isLoading } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId));
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+
+  const isLoading = useDeepEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).isLoading
+  );
   const dataProviders = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).dataProviders
   );

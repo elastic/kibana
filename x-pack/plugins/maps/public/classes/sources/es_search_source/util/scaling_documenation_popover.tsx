@@ -41,7 +41,7 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
   _renderContent() {
     return (
       <div>
-        <EuiText grow={false}>
+        <EuiText style={{ maxWidth: '36em' }}>
           <dl>
             <dt>{this.props.mvtOptionLabel} (Default)</dt>
             <dd>

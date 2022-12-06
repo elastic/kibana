@@ -34,6 +34,7 @@ export const useViewAction = () => {
   const clickHandler = useCallback((item: DataFrameAnalyticsListRow) => {
     const analysisType = getAnalysisType(item.config.analysis) as DataFrameAnalysisConfigType;
     redirectToTab(item.id, analysisType);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const action: DataFrameAnalyticsListAction = useMemo(

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { parseJsonIfString } from '../helpers/parsers';
 import { HTTPFields, ConfigKey, ContentType, contentTypesToMode } from '../types';
 import {
   Normalizer,
@@ -33,6 +34,7 @@ export const getHTTPJsonToJavascriptNormalizer = (key: ConfigKey) => {
 export const httpNormalizers: HTTPNormalizerMap = {
   [ConfigKey.METADATA]: getHTTPJsonToJavascriptNormalizer(ConfigKey.METADATA),
   [ConfigKey.URLS]: getHTTPNormalizer(ConfigKey.URLS),
+  [ConfigKey.PORT]: getHTTPNormalizer(ConfigKey.PORT),
   [ConfigKey.MAX_REDIRECTS]: getHTTPNormalizer(ConfigKey.MAX_REDIRECTS),
   [ConfigKey.USERNAME]: getHTTPNormalizer(ConfigKey.USERNAME),
   [ConfigKey.PASSWORD]: getHTTPNormalizer(ConfigKey.PASSWORD),
@@ -56,7 +58,7 @@ export const httpNormalizers: HTTPNormalizerMap = {
     const requestHeaders = fields?.[ConfigKey.REQUEST_HEADERS_CHECK]?.value;
     if (requestBody) {
       const headers = requestHeaders
-        ? JSON.parse(fields?.[ConfigKey.REQUEST_HEADERS_CHECK]?.value)
+        ? parseJsonIfString(fields?.[ConfigKey.REQUEST_HEADERS_CHECK]?.value)
         : defaultHTTPAdvancedFields[ConfigKey.REQUEST_HEADERS_CHECK];
       const requestBodyValue =
         requestBody !== null && requestBody !== undefined

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ThreatIntelLinkPanelProps } from '.';
+import type { ThreatIntelLinkPanelProps } from '.';
 import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
 import { ThreatIntelPanelView } from './threat_intel_panel_view';

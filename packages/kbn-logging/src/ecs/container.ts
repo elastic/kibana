@@ -15,13 +15,26 @@ export interface EcsContainer {
   cpu?: { usage?: number };
   disk?: Disk;
   id?: string;
-  image?: { name?: string; tag?: string[] };
-  labels?: Record<string, unknown>;
+  image?: Image;
+  labels?: Record<string, string>;
+  memory?: { usage?: number };
   name?: string;
+  network?: Network;
   runtime?: string;
 }
 
 interface Disk {
   read?: { bytes?: number };
   write?: { bytes?: number };
+}
+
+interface Image {
+  hash?: { all: string[] };
+  name?: string;
+  tag?: string[];
+}
+
+interface Network {
+  egress?: { bytes?: number };
+  ingress?: { bytes?: number };
 }

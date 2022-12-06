@@ -1,3 +1,5 @@
+TODO: consolidate with docs issue: https://github.com/elastic/observability-docs/issues/1603
+
 This document is part of the original drafts for ingest management documentation in `docs/ingest_manager` and may be outdated.
 Overall documentation of Ingest Management is now maintained in the `elastic/stack-docs` repository.
 
@@ -28,3 +30,7 @@ When a package is installed or upgraded, certain Kibana and Elasticsearch assets
 - Index templates are generated from `YAML` files contained in the package.
 - There is one index template per data stream.
 - For the generation of an index template, all `yml` files contained in the package subdirectory `data_stream/DATASET_NAME/fields/` are used.
+
+# Install format changes
+
+It is possible that the way we install ES assets change, (adding a new metadata, ...) in this case we use an `install_format_version` attributes on the package saved object and we have a constant `FLEET_INSTALL_FORMAT_VERSION` in Kibana. You can bump the `FLEET_INSTALL_FORMAT_VERSION` so all the packages not installed with that version will be reinstalled and their assets updated.

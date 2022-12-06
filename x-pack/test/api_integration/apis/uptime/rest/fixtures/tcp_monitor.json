@@ -2,6 +2,7 @@
   "type": "tcp",
   "locations": [],
   "enabled": true,
+  "config_id": "",
   "schedule": {
     "number": "3",
     "unit": "m"
@@ -14,6 +15,8 @@
     "is_zip_url_tls_enabled": false
   },
   "hosts": "example-host:40",
+  "urls": "example-host:40",
+  "url.port": null,
   "proxy_url": "",
   "proxy_use_local_resolver": false,
   "check.receive": "",
@@ -28,5 +31,9 @@
     "TLSv1.3"
   ],
   "name": "Test HTTP Monitor 04",
-  "namespace": "testnamespace"
+  "namespace": "testnamespace",
+  "origin": "ui",
+  "form_monitor_type": "tcp",
+  "id": "",
+  "hash": ""
 }

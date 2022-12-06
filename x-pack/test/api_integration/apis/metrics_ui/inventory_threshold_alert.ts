@@ -6,8 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { Logger, LogMeta } from '@kbn/core/server';
-import sinon from 'sinon';
 import { Comparator, InventoryMetricConditions } from '@kbn/infra-plugin/common/alerting/metrics';
 import {
   InventoryItemType,
@@ -17,25 +15,13 @@ import { evaluateCondition } from '@kbn/infra-plugin/server/lib/alerting/invento
 import { InfraSource } from '@kbn/infra-plugin/server/lib/sources';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
+import { createFakeLogger } from './create_fake_logger';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
   const log = getService('log');
-
-  const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) =>
-    meta ? log.debug(msg, meta) : log.debug(msg);
-
-  const logger = {
-    trace: fakeLogger,
-    debug: fakeLogger,
-    info: fakeLogger,
-    warn: fakeLogger,
-    error: fakeLogger,
-    fatal: fakeLogger,
-    log: sinon.stub(),
-    get: sinon.stub(),
-  } as Logger;
+  const logger = createFakeLogger(log);
 
   const baseCondition: InventoryMetricConditions = {
     metric: 'cpu',
@@ -116,6 +102,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 1.109,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-0', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
         });
       });
@@ -139,6 +133,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 1.0376666666666665,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-0', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
         });
       });
@@ -150,6 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
+          executionTimestamp: new Date(DATES['8.0.0'].rx.max),
           condition: {
             ...baseCondition,
             metric: 'rx',
@@ -169,7 +172,15 @@ export default function ({ getService }: FtrProviderContext) {
             shouldWarn: false,
             isNoData: false,
             isError: false,
-            currentValue: 1666.6666666666667,
+            currentValue: 79351.95,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0', network: {} },
+              container: undefined,
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
           'host-1': {
             metric: 'rx',
@@ -182,13 +193,79 @@ export default function ({ getService }: FtrProviderContext) {
             shouldWarn: false,
             isNoData: false,
             isError: false,
-            currentValue: 2000,
+            currentValue: 10,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-1', network: {} },
+              container: undefined,
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
+          },
+        });
+      });
+      it('should work with a long threshold', async () => {
+        const results = await evaluateCondition({
+          ...baseOptions,
+          executionTimestamp: new Date(DATES['8.0.0'].rx.max),
+          condition: {
+            ...baseCondition,
+            metric: 'rx',
+            threshold: [107374182400],
+            comparator: Comparator.LT,
+          },
+          esClient,
+        });
+        expect(results).to.eql({
+          'host-0': {
+            metric: 'rx',
+            timeSize: 1,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [107374182400],
+            comparator: '<',
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            isError: false,
+            currentValue: 79351.95,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0', network: {} },
+              container: undefined,
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
+          },
+          'host-1': {
+            metric: 'rx',
+            timeSize: 1,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [107374182400],
+            comparator: '<',
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            isError: false,
+            currentValue: 10,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-1', network: {} },
+              container: undefined,
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
         });
       });
       it('should work FOR LAST 5 minute', async () => {
         const options = {
           ...baseOptions,
+          executionTimestamp: new Date(DATES['8.0.0'].rx.max),
           condition: {
             ...baseCondition,
             metric: 'rx' as SnapshotMetricType,
@@ -210,7 +287,15 @@ export default function ({ getService }: FtrProviderContext) {
             shouldWarn: false,
             isNoData: false,
             isError: false,
-            currentValue: 2266.6666666666665,
+            currentValue: 125658.70833333333,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0', network: {} },
+              container: undefined,
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
           'host-1': {
             metric: 'rx',
@@ -223,7 +308,15 @@ export default function ({ getService }: FtrProviderContext) {
             shouldWarn: false,
             isNoData: false,
             isError: false,
-            currentValue: 2266.6666666666665,
+            currentValue: 11.666666666666668,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-1', network: {} },
+              container: undefined,
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
         });
       });
@@ -269,6 +362,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 833.3333333333334,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-0', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
           'host-1': {
             metric: 'custom',
@@ -289,6 +390,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 1000,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-1' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-1', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
         });
       });
@@ -330,6 +439,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 1133.3333333333333,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-0', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
           'host-1': {
             metric: 'custom',
@@ -350,6 +467,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 1133.3333333333333,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-1' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-1', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
         });
       });
@@ -382,6 +507,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 0.3,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-0', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
           'host-1': {
             metric: 'logRate',
@@ -395,6 +528,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 0.3,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-1' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-1', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
         });
       });
@@ -424,6 +565,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 0.3,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-0' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-0', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
           'host-1': {
             metric: 'logRate',
@@ -437,6 +586,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 0.3,
+            context: {
+              cloud: undefined,
+              host: { name: 'host-1' },
+              container: undefined,
+              orchestrator: undefined,
+              labels: { eventId: 'event-1', groupId: 'group-0' },
+              tags: undefined,
+            },
           },
         });
       });
@@ -470,6 +627,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 43332.833333333336,
+            context: {
+              cloud: undefined,
+              host: undefined,
+              container: [],
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
           'ed01e3a3-4787-42f6-b73e-ac9e97294e9d': {
             metric: 'rx',
@@ -483,6 +648,14 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 42783.833333333336,
+            context: {
+              cloud: undefined,
+              host: undefined,
+              container: [],
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
         });
       });
@@ -513,6 +686,21 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 50197.666666666664,
+            context: {
+              cloud: undefined,
+              host: undefined,
+              container: [
+                {
+                  id: 'container-03',
+                },
+                {
+                  id: 'container-04',
+                },
+              ],
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
           'ed01e3a3-4787-42f6-b73e-ac9e97294e9d': {
             metric: 'rx',
@@ -526,6 +714,21 @@ export default function ({ getService }: FtrProviderContext) {
             isNoData: false,
             isError: false,
             currentValue: 50622.066666666666,
+            context: {
+              cloud: undefined,
+              host: undefined,
+              container: [
+                {
+                  id: 'container-01',
+                },
+                {
+                  id: 'container-02',
+                },
+              ],
+              orchestrator: undefined,
+              labels: undefined,
+              tags: undefined,
+            },
           },
         });
       });

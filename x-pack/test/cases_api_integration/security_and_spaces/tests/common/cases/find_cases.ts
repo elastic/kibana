@@ -238,9 +238,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('returns the correct fields', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
+        // all fields that contain the UserRT definition must be included here (aka created_by, closed_by, and updated_by)
+        // see https://github.com/elastic/kibana/issues/139503
         const queryFields: Array<keyof CaseResponse | Array<keyof CaseResponse>> = [
-          'title',
-          ['title', 'description'],
+          ['title', 'created_by', 'closed_by', 'updated_by'],
+          ['title', 'description', 'created_by', 'closed_by', 'updated_by'],
         ];
 
         for (const fields of queryFields) {
@@ -279,6 +281,58 @@ export default ({ getService }: FtrProviderContext): void => {
       it('unhappy path - 400s when bad query supplied', async () => {
         await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
       });
+
+      for (const field of ['owner', 'tags', 'severity', 'status']) {
+        it(`should return a 400 when attempting to query a keyword field [${field}] when using a wildcard query`, async () => {
+          await findCases({
+            supertest,
+            query: { searchFields: [field], search: 'some search string*' },
+            expectedHttpCode: 400,
+          });
+        });
+      }
+
+      describe('search and searchField', () => {
+        beforeEach(async () => {
+          await createCase(supertest, postCaseReq);
+        });
+
+        it('should successfully find a case when using valid searchFields', async () => {
+          const cases = await findCases({
+            supertest,
+            query: { searchFields: ['title', 'description'], search: 'Issue' },
+          });
+
+          expect(cases.total).to.be(1);
+        });
+
+        it('should successfully find a case when not passing the searchFields parameter', async () => {
+          const cases = await findCases({
+            supertest,
+            query: { search: 'Issue' },
+          });
+
+          expect(cases.total).to.be(1);
+        });
+
+        it('should not find any cases when it does not use a wildcard and the string does not match', async () => {
+          const cases = await findCases({
+            supertest,
+            query: { search: 'Iss' },
+          });
+
+          expect(cases.total).to.be(0);
+        });
+
+        it('should find a case when it uses a wildcard', async () => {
+          const cases = await findCases({
+            supertest,
+            query: { search: 'Iss*' },
+          });
+
+          expect(cases.total).to.be(1);
+        });
+      });
     });
 
     describe('alerts', () => {
@@ -314,6 +368,11 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
             },
           });
+
+          // There is potential for the alert index to not be refreshed by the time the second comment is created
+          // which could attempt to update the alert status again and will encounter a conflict so this will
+          // ensure that the index is up to date before we try to update the next alert status
+          await es.indices.refresh({ index: defaultSignalsIndex });
         }
 
         const patchedCase = await createComment({

@@ -7,6 +7,7 @@
 
 import {
   EuiErrorBoundary,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -30,7 +31,7 @@ export function NewsFeed({ items }: Props) {
     // The news feed is manually added/edited, to prevent any errors caused by typos or missing fields,
     // wraps the component with EuiErrorBoundary to avoid breaking the entire page.
     <EuiErrorBoundary>
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGrid direction="row" gutterSize="s" alignItems="start">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h4>
@@ -45,7 +46,7 @@ export function NewsFeed({ items }: Props) {
             <NewsItem item={item} />
           </EuiFlexItem>
         ))}
-      </EuiFlexGroup>
+      </EuiFlexGrid>
     </EuiErrorBoundary>
   );
 }
@@ -57,22 +58,22 @@ function NewsItem({ item }: { item: INewsItem }) {
 
   return (
     <EuiPanel hasBorder={true}>
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGrid direction="row" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
             <h4>{item.title.en}</h4>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>
-              <EuiFlexGroup direction="column" gutterSize="s" alignItems="baseline">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup direction="column" gutterSize="s">
                 <EuiFlexItem>
-                  <EuiText grow={false} size="s" color="subdued">
+                  <EuiText size="s" color="subdued">
                     {limitString(item.description.en, 128)}
                   </EuiText>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem>
                   <EuiText size="s">
                     <EuiLink href={item.link_url.en} target="_blank" external>
                       {i18n.translate('xpack.observability.news.readFullStory', {
@@ -98,7 +99,7 @@ function NewsItem({ item }: { item: INewsItem }) {
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </EuiFlexGrid>
     </EuiPanel>
   );
 }

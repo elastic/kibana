@@ -14,4 +14,5 @@ export interface ApmMlJob {
   jobState?: JOB_STATE;
   datafeedId?: string;
   datafeedState?: DATAFEED_STATE;
+  bucketSpan?: string;
 }

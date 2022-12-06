@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { InfluencerInput, Anomalies, CriteriaFields } from '../types';
+import { useInstalledSecurityJobsIds } from '../hooks/use_installed_security_jobs';
+import type { InfluencerInput, Anomalies, CriteriaFields } from '../types';
 import { useAnomaliesTableData } from './use_anomalies_table_data';
 
 interface ChildrenArgs {
@@ -25,12 +26,15 @@ interface Props {
 
 export const AnomalyTableProvider = React.memo<Props>(
   ({ influencers, startDate, endDate, children, criteriaFields, skip }) => {
+    const { jobIds } = useInstalledSecurityJobsIds();
     const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
       criteriaFields,
       influencers,
       startDate,
       endDate,
       skip,
+      jobIds,
+      aggregationInterval: 'auto',
     });
     return <>{children({ isLoadingAnomaliesData, anomaliesData })}</>;
   }

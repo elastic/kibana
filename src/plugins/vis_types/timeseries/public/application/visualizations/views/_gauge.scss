@@ -3,6 +3,8 @@
  *    are being calcuated from a percentage of the base font size of 100% (14px).
  */
 
+@import './variables';
+
 .tvbVisHalfGauge,
 .tvbVisCircleGauge {
   font-size: 100%; /* 1 */

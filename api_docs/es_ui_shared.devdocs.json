@@ -23,6 +23,7 @@
         ],
         "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -37,6 +38,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "esUiShared",
@@ -50,6 +52,7 @@
                 ],
                 "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -67,6 +70,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "esUiShared",
@@ -80,6 +84,7 @@
                 ],
                 "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -105,6 +110,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "esUiShared",
@@ -124,6 +130,7 @@
                 ],
                 "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -143,6 +150,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "esUiShared",
@@ -156,6 +164,7 @@
                 ],
                 "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -173,6 +182,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -188,6 +198,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/components/cron_editor/cron_editor.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -208,6 +219,7 @@
         ],
         "path": "src/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -221,6 +233,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/url/attempt_to_uri_decode.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -239,6 +252,7 @@
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -252,6 +266,7 @@
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -278,6 +293,7 @@
         ],
         "path": "src/plugins/es_ui_shared/public/components/code_editor/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -297,6 +313,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/components/code_editor/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -317,6 +334,7 @@
         ],
         "path": "src/plugins/es_ui_shared/public/url/extract_query_params.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -330,6 +348,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/url/extract_query_params.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -348,6 +367,7 @@
         ],
         "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -361,7 +381,8 @@
               "Props<T>"
             ],
             "path": "src/plugins/es_ui_shared/public/components/json_editor/json_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -378,6 +399,7 @@
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -391,6 +413,7 @@
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/not_authorized_section.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -409,6 +432,7 @@
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/page_error.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -422,6 +446,7 @@
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/page_error.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -440,6 +465,7 @@
         ],
         "path": "src/plugins/es_ui_shared/public/components/page_loading/page_loading.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -453,6 +479,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/components/page_loading/page_loading.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -471,6 +498,7 @@
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -484,6 +512,7 @@
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -502,6 +531,7 @@
         ],
         "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -515,6 +545,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/components/section_loading/section_loading.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -531,10 +562,10 @@
         "signature": [
           "<D = any, E = any>(httpClient: ",
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-public.HttpSetup",
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpSetup",
             "text": "HttpSetup"
           },
           ", { path, method, body, query, asSystemRequest }: ",
@@ -557,6 +588,7 @@
         ],
         "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -567,15 +599,16 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-public.HttpSetup",
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -596,6 +629,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -615,6 +649,7 @@
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -629,10 +664,10 @@
         "signature": [
           "<D = any, E = Error>(httpClient: ",
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-public.HttpSetup",
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.HttpSetup",
             "text": "HttpSetup"
           },
           ", { path, method, query, body, pollIntervalMs, initialData, deserializer }: ",
@@ -655,6 +690,7 @@
         ],
         "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -665,15 +701,16 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-public.HttpSetup",
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -694,6 +731,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -712,6 +750,7 @@
         ],
         "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -725,6 +764,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/components/view_api_request_flyout/view_api_request_flyout.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -743,6 +783,7 @@
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -756,6 +797,7 @@
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -773,6 +815,7 @@
         "description": [],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -782,7 +825,8 @@
             "label": "isLoading",
             "description": [],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -796,7 +840,8 @@
               " | null"
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -815,7 +860,8 @@
               }
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -829,6 +875,7 @@
         "description": [],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -838,7 +885,8 @@
             "label": "error",
             "description": [],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -851,7 +899,8 @@
               "string[] | undefined"
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -864,7 +913,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -890,6 +940,7 @@
         ],
         "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -902,7 +953,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -915,7 +967,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -930,7 +983,8 @@
               " | undefined) => void) | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -945,7 +999,8 @@
               " | undefined) => void) | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -958,7 +1013,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -972,7 +1028,8 @@
               " | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -985,7 +1042,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -998,7 +1056,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1013,7 +1072,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1028,7 +1088,8 @@
               "string | object | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1041,7 +1102,43 @@
               "string | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.EuiCodeEditorProps.onAceEditorRef",
+            "type": "Function",
+            "tags": [],
+            "label": "onAceEditorRef",
+            "description": [],
+            "signature": [
+              "((editor: ",
+              "default",
+              " | null) => void) | undefined"
+            ],
+            "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "esUiShared",
+                "id": "def-public.EuiCodeEditorProps.onAceEditorRef.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "editor",
+                "description": [],
+                "signature": [
+                  "default",
+                  " | null"
+                ],
+                "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1065,6 +1162,7 @@
         ],
         "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -1077,7 +1175,8 @@
               "{ raw: string; format(): T; }"
             ],
             "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1091,6 +1190,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1105,7 +1205,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1119,6 +1220,7 @@
         "description": [],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -1131,7 +1233,8 @@
               "[key: string]:  string[] | undefined"
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1145,6 +1248,7 @@
         "description": [],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -1154,7 +1258,8 @@
             "label": "hasAllPrivileges",
             "description": [],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1173,7 +1278,8 @@
               }
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1187,6 +1293,7 @@
         "description": [],
         "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -1196,7 +1303,8 @@
             "label": "path",
             "description": [],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1206,10 +1314,11 @@
             "label": "method",
             "description": [],
             "signature": [
-              "\"delete\" | \"get\" | \"post\" | \"put\" | \"patch\" | \"head\""
+              "\"get\" | \"post\" | \"put\" | \"delete\" | \"patch\" | \"head\""
             ],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1220,16 +1329,17 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-public.HttpFetchQuery",
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.HttpFetchQuery",
                 "text": "HttpFetchQuery"
               },
               " | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1242,7 +1352,8 @@
               "any"
             ],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1257,7 +1368,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1281,6 +1393,7 @@
         ],
         "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -1293,7 +1406,8 @@
               "D | null"
             ],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1306,7 +1420,8 @@
               "E | null"
             ],
             "path": "src/plugins/es_ui_shared/public/request/send_request.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1337,6 +1452,7 @@
         ],
         "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -1349,7 +1465,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1362,7 +1479,8 @@
               "any"
             ],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1376,6 +1494,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "esUiShared",
@@ -1389,6 +1508,7 @@
                 ],
                 "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1416,6 +1536,7 @@
         ],
         "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -1425,7 +1546,8 @@
             "label": "isInitialRequest",
             "description": [],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1435,7 +1557,8 @@
             "label": "isLoading",
             "description": [],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1448,7 +1571,8 @@
               "E | null"
             ],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1461,7 +1585,8 @@
               "D | null | undefined"
             ],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1475,6 +1600,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1496,6 +1622,7 @@
         ],
         "path": "src/plugins/es_ui_shared/public/components/cron_editor/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1518,6 +1645,7 @@
         ],
         "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1538,7 +1666,8 @@
               "<T>"
             ],
             "path": "src/plugins/es_ui_shared/public/components/json_editor/use_json.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1559,6 +1688,7 @@
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1570,6 +1700,7 @@
         "description": [],
         "path": "src/plugins/es_ui_shared/public/indices/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -1582,7 +1713,8 @@
               "string[]"
             ],
             "path": "src/plugins/es_ui_shared/public/indices/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1596,6 +1728,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/indices/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1609,7 +1742,8 @@
                   "string | undefined"
                 ],
                 "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1625,6 +1759,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/indices/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1635,7 +1770,8 @@
                 "label": "indexName",
                 "description": [],
                 "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1651,6 +1787,7 @@
             ],
             "path": "src/plugins/es_ui_shared/public/indices/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1661,7 +1798,8 @@
                 "label": "indexName",
                 "description": [],
                 "path": "src/plugins/es_ui_shared/public/indices/validate/validate_index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -1687,9 +1825,9 @@
         "signature": [
           "({ error, response, handleCustomError, }: EsErrorHandlerParams) => ",
           {
-            "pluginId": "core",
+            "pluginId": "@kbn/core-http-server",
             "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
+            "docId": "kibKbnCoreHttpServerPluginApi",
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
@@ -1697,6 +1835,7 @@
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -1710,6 +1849,7 @@
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1728,6 +1868,7 @@
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -1741,6 +1882,7 @@
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/errors/es_error_parser.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1766,6 +1908,7 @@
         "description": [],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -1778,7 +1921,8 @@
               "[key: string]:  string[] | undefined"
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1792,6 +1936,7 @@
         "description": [],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "esUiShared",
@@ -1801,7 +1946,8 @@
             "label": "hasAllPrivileges",
             "description": [],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "esUiShared",
@@ -1820,7 +1966,8 @@
               }
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

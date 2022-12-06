@@ -6,6 +6,11 @@
  */
 
 import { DataView } from '@kbn/data-plugin/common';
+import type {
+  AggregationsExtendedStatsAggregation,
+  AggregationsPercentilesAggregation,
+  AggregationsTermsAggregation,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AGG_TYPE } from '../../../../common/constants';
 import { TileMetaFeature } from '../../../../common/descriptor_types';
 import { CountAggField } from './count_agg_field';
@@ -78,7 +83,7 @@ export class AggField extends CountAggField {
   async getLabel(): Promise<string> {
     return this._label
       ? this._label
-      : this._source.getAggLabel(
+      : await this._source.getAggLabel(
           this._aggType,
           this._esDocField ? await this._esDocField.getLabel() : ''
         );
@@ -97,17 +102,24 @@ export class AggField extends CountAggField {
     return this._getAggType() === AGG_TYPE.TERMS ? TERMS_AGG_SHARD_SIZE : 0;
   }
 
-  async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
+  async getExtendedStatsFieldMetaRequest(): Promise<Record<
+    string,
+    { extended_stats: AggregationsExtendedStatsAggregation }
+  > | null> {
     return this._esDocField ? await this._esDocField.getExtendedStatsFieldMetaRequest() : null;
   }
 
-  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null> {
+  async getPercentilesFieldMetaRequest(
+    percentiles: number[]
+  ): Promise<Record<string, { percentiles: AggregationsPercentilesAggregation }> | null> {
     return this._esDocField
       ? await this._esDocField.getPercentilesFieldMetaRequest(percentiles)
       : null;
   }
 
-  async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
+  async getCategoricalFieldMetaRequest(
+    size: number
+  ): Promise<Record<string, { terms: AggregationsTermsAggregation }> | null> {
     return this._esDocField ? await this._esDocField.getCategoricalFieldMetaRequest(size) : null;
   }
 

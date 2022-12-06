@@ -1,35 +1,19 @@
 [[managing-licenses]]
 == License Management
 
-When you install the default distribution of {kib}, you receive free features
-with no expiration date. For the full list of features, refer to
-{subscriptions}.
+By default, new installations have a Basic license that never expires. 
+For the full list of features available at the Free and Open Basic subscription level, 
+refer to {subscriptions}.
 
-If you want to try out the full set of features, you can activate a free 30-day
-trial. To view the status of your license, start a trial, or install a new
+To explore all of the available solutions and features, start a 30-day free trial.
+You can activate a trial subscription once per major product version. 
+If you need more than 30 days to complete your evaluation, 
+request an extended trial at {extendtrial}.
+
+To view the status of your license, start a trial, or install a new
 license, open the main menu, then click *Stack Management > License Management*.
 
-NOTE: You can start a trial only if your cluster has not already activated a
-trial license for the current major product version. For example, if you have
-already activated a trial for 6.0, you cannot start a new trial until
-7.0. You can, however, request an extended trial at {extendtrial}.
-
-When you activate a new license level, new features appear in *Stack Management*.
-
-[role="screenshot"]
-image::images/management-license.png[]
-
-At the end of the trial period, some features operate in a
-<<license-expiration,degraded mode>>. You can revert to Basic, extend the trial,
-or purchase a subscription.
-
-TIP: If {security-features} are enabled, unless you have a trial license,
-you must configure Transport Layer Security (TLS) in {es}.
-See {ref}/encrypting-communications.html[Encrypting communications].
-{kib} and the {ref}/start-basic.html[start basic API] provide a list of all of
-the features that will no longer be supported if you revert to a basic license.
-
-[float]
+[discrete]
 === Required permissions
 
 The `manage` cluster privilege is required to access *License Management*.
@@ -37,155 +21,23 @@ The `manage` cluster privilege is required to access *License Management*.
 To add the privilege, open the main menu, then click *Stack Management > Roles*.
 
 [discrete]
-[[update-license]]
-=== Update your license
-
-You can update your license at runtime without shutting down your {es} nodes.
-License updates take effect immediately. The license is provided as a _JSON_
-file that you install in {kib} or by using the
-{ref}/update-license.html[update license API].
-
-TIP: If you are using a basic or trial license, {security-features} are disabled
-by default. In all other licenses, {security-features} are enabled by default;
-you must secure the {stack} or disable the {security-features}.
-
-[discrete]
 [[license-expiration]]
 === License expiration
 
-Your license is time based and expires at a future date. If you're using
-{monitor-features} and your license will expire within 30 days, a license
-expiration warning is displayed prominently. Warnings are also displayed on
-startup and written to the {es} log starting 30 days from the expiration date.
-These error messages tell you when the license expires and what features will be
-disabled if you do not update the license.
+Licenses are valid for a specific time period. 
+30 days before the license expiration date, {es} starts logging expiration warnings.
+If monitoring is enabled, expiration warnings are displayed prominently in {kib}.
 
-IMPORTANT: You should update your license as soon as possible. You are
-essentially flying blind when running with an expired license. Access to the
-cluster health and stats APIs is critical for monitoring and managing an {es}
-cluster.
+If your license expires, your subscription level reverts to Basic and
+you will no longer be able to use https://www.elastic.co/subscriptions[Platinum or Enterprise features].
 
 [discrete]
-[[expiration-beats]]
-==== Beats
+[[update-license]]
+=== Update your license
 
-*  Beats will continue to poll centrally-managed configuration.
+Licenses are provided as a _JSON_ file and have an effective date and an expiration date.  
+You cannot install a new license before its effective date.
+License updates take effect immediately and do not require restarting {es}.
 
-[discrete]
-[[expiration-elasticsearch]]
-==== {es}
-
-// Upgrade API is disabled
-* The deprecation API is disabled.
-* SQL support is disabled.
-* Aggregations provided by the analytics plugin are no longer usable.
-* All searchable snapshots indices are unassigned and cannot be searched.
-
-[discrete]
-[[expiration-watcher]]
-==== {stack} {alert-features}
-
-* The PUT and GET watch APIs are disabled. The DELETE watch API continues to work.
-* Watches execute and write to the history.
-* The actions of the watches do not execute.
-
-[discrete]
-[[expiration-graph]]
-==== {stack} {graph-features}
-
-* Graph explore APIs are disabled.
-
-[discrete]
-[[expiration-ml]]
-==== {stack} {ml-features}
-
-* APIs to create {anomaly-jobs}, open jobs, send data to jobs, create {dfeeds},
-and start {dfeeds} are disabled.
-* All started {dfeeds} are stopped.
-* All open {anomaly-jobs} are closed.
-* APIs to create and start {dfanalytics-jobs} are disabled.
-* Existing {anomaly-job} and {dfanalytics-job} results continue to be available
-by using {kib} or APIs.
-
-[discrete]
-[[expiration-monitoring]]
-==== {stack} {monitor-features}
-
-* The agent stops collecting cluster and indices metrics.
-* The agent stops automatically cleaning indices older than
-`xpack.monitoring.history.duration`.
-
-[discrete]
-[[expiration-security]]
-==== {stack} {security-features}
-
-* Cluster health, cluster stats, and indices stats operations are blocked.
-* All data operations (read and write) continue to work.
-
-Once the license expires, calls to the cluster health, cluster stats, and index
-stats APIs fail with a `security_exception` and return a 403 HTTP status code.
-
-[source,sh]
------------------------------------------------------
-{
-  "error": {
-    "root_cause": [
-      {
-        "type": "security_exception",
-        "reason": "current license is non-compliant for [security]",
-        "license.expired.feature": "security"
-      }
-    ],
-    "type": "security_exception",
-    "reason": "current license is non-compliant for [security]",
-    "license.expired.feature": "security"
-  },
-  "status": 403
-}
------------------------------------------------------
-
-This message enables automatic monitoring systems to easily detect the license
-failure without immediately impacting other users.
-
-[discrete]
-[[expiration-logstash]]
-==== {ls} pipeline management
-
-* Cannot create new pipelines or edit or delete existing pipelines from the UI.
-* Cannot list or view existing pipelines from the UI.
-* Cannot run Logstash instances which are registered to listen to existing pipelines.
-//TBD: * Logstash will continue to poll centrally-managed pipelines
-
-[discrete]
-[[expiration-kibana]]
-==== {kib}
-
-* Users can still log into {kib}.
-* {kib} works for data exploration and visualization, but some features
-are disabled.
-* The license management UI is available to easily upgrade your license. See
-<<update-license>> and <<managing-licenses>>.
-
-[discrete]
-[[expiration-reporting]]
-==== {kib} {report-features}
-
-* Reporting is no longer available in {kib}.
-* Report generation URLs stop working.
-* Existing reports are no longer accessible.
-
-[discrete]
-[[expiration-rollups]]
-==== {rollups-cap}
-
-* {rollup-jobs-cap} cannot be created or started.
-* Existing {rollup-jobs} can be stopped and deleted.
-* The get rollup caps and rollup search APIs continue to function.
-
-[discrete]
-[[expiration-transforms]]
-==== {transforms-cap}
-
-* {transforms-cap} cannot be created, previewed, started, or updated.
-* Existing {transforms} can be stopped and deleted.
-* Existing {transform} results continue to be available.
+You can update your license from *Stack Management > License Management* or through the
+{ref}/update-license.html[update license API]. 

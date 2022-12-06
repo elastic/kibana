@@ -12,6 +12,7 @@ import {
   FIELD_ORIGIN,
   ICON_SOURCE,
   LABEL_BORDER_SIZES,
+  LABEL_POSITIONS,
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
   DATA_MAPPING_FUNCTION,
@@ -33,6 +34,20 @@ export type LabelBorderSizeOptions = {
 
 export type LabelBorderSizeStylePropertyDescriptor = {
   options: LabelBorderSizeOptions;
+};
+
+export type LabelPositionStylePropertyDescriptor = {
+  options: {
+    position: LABEL_POSITIONS;
+  };
+};
+
+export type LabelZoomRangeStylePropertyDescriptor = {
+  options: {
+    useLayerZoomRange: boolean;
+    minZoom: number;
+    maxZoom: number;
+  };
 };
 
 // Static/dynamic options
@@ -70,11 +85,13 @@ export type ColorDynamicOptions = {
   customColorRamp?: OrdinalColorStop[];
   useCustomColorRamp?: boolean;
   dataMappingFunction?: DATA_MAPPING_FUNCTION;
+  invert?: boolean;
 
   // category color properties
   colorCategory?: string; // TODO move color category palettes to constants and make ENUM type
   customColorPalette?: CategoryColorStop[];
   useCustomColorPalette?: boolean;
+  otherCategoryColor?: string;
 
   field?: StylePropertyField;
   fieldMetaOptions: FieldMetaOptions;
@@ -167,6 +184,7 @@ export type SizeDynamicOptions = {
   maxSize: number;
   field?: StylePropertyField;
   fieldMetaOptions: FieldMetaOptions;
+  invert?: boolean;
 };
 
 export type SizeStaticOptions = {
@@ -200,10 +218,12 @@ export type VectorStylePropertiesDescriptor = {
   [VECTOR_STYLES.ICON_SIZE]: SizeStylePropertyDescriptor;
   [VECTOR_STYLES.ICON_ORIENTATION]: OrientationStylePropertyDescriptor;
   [VECTOR_STYLES.LABEL_TEXT]: LabelStylePropertyDescriptor;
+  [VECTOR_STYLES.LABEL_ZOOM_RANGE]: LabelZoomRangeStylePropertyDescriptor;
   [VECTOR_STYLES.LABEL_COLOR]: ColorStylePropertyDescriptor;
   [VECTOR_STYLES.LABEL_SIZE]: SizeStylePropertyDescriptor;
   [VECTOR_STYLES.LABEL_BORDER_COLOR]: ColorStylePropertyDescriptor;
   [VECTOR_STYLES.LABEL_BORDER_SIZE]: LabelBorderSizeStylePropertyDescriptor;
+  [VECTOR_STYLES.LABEL_POSITION]: LabelPositionStylePropertyDescriptor;
 };
 
 export type StyleDescriptor = {
@@ -256,8 +276,14 @@ export type HeatmapStyleDescriptor = StyleDescriptor & {
   colorRampName: string;
 };
 
+export type EMSVectorTileStyleDescriptor = StyleDescriptor & {
+  color: string;
+};
+
 export type StylePropertyOptions =
   | LabelBorderSizeOptions
+  | LabelPositionStylePropertyDescriptor['options']
+  | LabelZoomRangeStylePropertyDescriptor['options']
   | SymbolizeAsOptions
   | DynamicStylePropertyOptions
   | StaticStylePropertyOptions;

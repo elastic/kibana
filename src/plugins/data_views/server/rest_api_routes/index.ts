@@ -14,6 +14,7 @@ import * as createRoutes from './create_data_view';
 import * as defaultRoutes from './default_data_view';
 import * as deleteRoutes from './delete_data_view';
 import * as getRoutes from './get_data_view';
+import * as getAllRoutes from './get_data_views';
 import * as hasRoutes from './has_user_data_view';
 import * as updateRoutes from './update_data_view';
 
@@ -38,6 +39,7 @@ const routes = [
   deleteRoutes.registerDeleteDataViewRouteLegacy,
   getRoutes.registerGetDataViewRoute,
   getRoutes.registerGetDataViewRouteLegacy,
+  getAllRoutes.registerGetDataViewsRoute,
   hasRoutes.registerHasUserDataViewRoute,
   hasRoutes.registerHasUserDataViewRouteLegacy,
   updateRoutes.registerUpdateDataViewRoute,

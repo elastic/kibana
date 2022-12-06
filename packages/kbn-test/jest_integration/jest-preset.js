@@ -8,6 +8,8 @@
 
 const preset = require('../jest-preset');
 
+/** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
+/** @type {JestConfig} */
 module.exports = {
   ...preset,
   testMatch: ['**/integration_tests**/*.test.{js,mjs,ts,tsx}'],
@@ -15,14 +17,13 @@ module.exports = {
     (pattern) => !pattern.includes('integration_tests')
   ),
   setupFilesAfterEnv: [
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/after_env.integration.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.moment_timezone.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.eui.js',
+    ...preset.setupFilesAfterEnv,
+    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/after_env.integration.js',
   ],
   reporters: [
     'default',
     [
-      '@kbn/test/target_node/jest/junit_reporter',
+      '@kbn/test/target_node/src/jest/junit_reporter',
       {
         rootDirectory: '.',
         reportName: 'Jest Integration Tests',
@@ -31,7 +32,7 @@ module.exports = {
     ...(process.env.TEST_GROUP_TYPE_INTEGRATION
       ? [
           [
-            '@kbn/test/target_node/jest/ci_stats_jest_reporter',
+            '@kbn/test/target_node/src/jest/ci_stats_jest_reporter',
             {
               testGroupType: process.env.TEST_GROUP_TYPE_INTEGRATION,
             },

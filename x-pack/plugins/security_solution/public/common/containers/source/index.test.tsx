@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { IndexField } from '../../../../common/search_strategy/index_fields';
+import type { IndexField } from '../../../../common/search_strategy/index_fields';
 import { getBrowserFields, getAllBrowserFields } from '.';
-import { IndexFieldSearch, useDataView } from './use_data_view';
+import type { IndexFieldSearch } from './use_data_view';
+import { useDataView } from './use_data_view';
 import { mockBrowserFields, mocksSource } from './mock';
 import { mockGlobalState, TestProviders } from '../../mock';
 import { act, renderHook } from '@testing-library/react-hooks';
@@ -23,6 +24,7 @@ jest.mock('react-redux', () => {
   };
 });
 jest.mock('../../lib/kibana');
+jest.mock('../../lib/apm/use_track_http_request');
 
 describe('source/index.tsx', () => {
   describe('getAllBrowserFields', () => {
@@ -101,7 +103,6 @@ describe('source/index.tsx', () => {
       expect(payload.id).toEqual('neato');
       expect(Object.keys(payload.browserFields)).toHaveLength(12);
       expect(Object.keys(payload.indexFields)).toHaveLength(mocksSource.indexFields.length);
-      expect(payload.docValueFields).toEqual([{ field: '@timestamp' }]);
     });
 
     it('should reuse the result for dataView info when cleanCache not passed', async () => {
@@ -119,23 +120,18 @@ describe('source/index.tsx', () => {
 
       await indexFieldsSearch!({ dataViewId: 'neato' });
       const {
-        payload: { browserFields, indexFields, docValueFields },
+        payload: { browserFields, indexFields },
       } = mockDispatch.mock.calls[1][0];
 
       mockDispatch.mockClear();
 
       await indexFieldsSearch!({ dataViewId: 'neato' });
       const {
-        payload: {
-          browserFields: newBrowserFields,
-          indexFields: newIndexFields,
-          docValueFields: newDocValueFields,
-        },
+        payload: { browserFields: newBrowserFields, indexFields: newIndexFields },
       } = mockDispatch.mock.calls[1][0];
 
       expect(browserFields).toBe(newBrowserFields);
       expect(indexFields).toBe(newIndexFields);
-      expect(docValueFields).toBe(newDocValueFields);
     });
 
     it('should not reuse the result for dataView info when cleanCache passed', async () => {
@@ -153,23 +149,18 @@ describe('source/index.tsx', () => {
 
       await indexFieldsSearch!({ dataViewId: 'neato' });
       const {
-        payload: { browserFields, indexFields, docValueFields },
+        payload: { browserFields, indexFields },
       } = mockDispatch.mock.calls[1][0];
 
       mockDispatch.mockClear();
 
       await indexFieldsSearch!({ dataViewId: 'neato', cleanCache: true });
       const {
-        payload: {
-          browserFields: newBrowserFields,
-          indexFields: newIndexFields,
-          docValueFields: newDocValueFields,
-        },
+        payload: { browserFields: newBrowserFields, indexFields: newIndexFields },
       } = mockDispatch.mock.calls[1][0];
 
       expect(browserFields).not.toBe(newBrowserFields);
       expect(indexFields).not.toBe(newIndexFields);
-      expect(docValueFields).not.toBe(newDocValueFields);
     });
   });
 });

@@ -235,6 +235,7 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
           `/internal/app_search/engines/${engineName}/curations/${props.curationId}`,
           { query: { skip_record_analytics: 'true' } }
         );
+
         actions.onCurationLoad(response);
       } catch (e) {
         const { navigateToUrl } = KibanaLogic.values;
@@ -263,6 +264,7 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
             }),
           }
         );
+
         actions.onCurationLoad(response);
       } catch (e) {
         flashAPIErrors(e);

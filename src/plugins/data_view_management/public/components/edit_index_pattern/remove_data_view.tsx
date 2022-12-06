@@ -27,6 +27,8 @@ export interface RemoveDataViewProps {
   id: string;
   title: string;
   namespaces?: string[] | undefined;
+  name?: string;
+  getName: () => string;
 }
 
 interface RemoveDataViewDeps {

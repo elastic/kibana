@@ -7,50 +7,65 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  DASHBOARDS_PATH,
   DETECTION_RESPONSE_PATH,
+  ENTITY_ANALYTICS_PATH,
   LANDING_PATH,
   OVERVIEW_PATH,
   SecurityPageName,
+  SERVER_APP_ID,
 } from '../../common/constants';
-import { DASHBOARDS, DETECTION_RESPONSE, GETTING_STARTED, OVERVIEW } from '../app/translations';
-import { FEATURE, LinkItem } from '../common/links/types';
+import {
+  DETECTION_RESPONSE,
+  GETTING_STARTED,
+  OVERVIEW,
+  ENTITY_ANALYTICS,
+} from '../app/translations';
+import type { LinkItem } from '../common/links/types';
+import overviewPageImg from '../common/images/overview_page.png';
+import detectionResponsePageImg from '../common/images/detection_response_page.png';
+import entityAnalyticsDashboard from '../common/images/entity_analytics_dashboard.png';
 
 export const overviewLinks: LinkItem = {
   id: SecurityPageName.overview,
   title: OVERVIEW,
+  landingImage: overviewPageImg,
+  description: i18n.translate('xpack.securitySolution.appLinks.overviewDescription', {
+    defaultMessage:
+      'Summary of your security environment activity, including alerts, events, recent items, and a news feed!',
+  }),
   path: OVERVIEW_PATH,
-  globalNavEnabled: true,
-  features: [FEATURE.general],
+  capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.overview', {
       defaultMessage: 'Overview',
     }),
   ],
-  globalNavOrder: 9000,
 };
 
 export const gettingStartedLinks: LinkItem = {
   id: SecurityPageName.landing,
   title: GETTING_STARTED,
   path: LANDING_PATH,
-  globalNavEnabled: false,
-  features: [FEATURE.general],
+  capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.getStarted', {
       defaultMessage: 'Getting started',
     }),
   ],
   skipUrlState: true,
+  hideTimeline: true,
 };
 
 export const detectionResponseLinks: LinkItem = {
   id: SecurityPageName.detectionAndResponse,
   title: DETECTION_RESPONSE,
+  landingImage: detectionResponsePageImg,
+  description: i18n.translate('xpack.securitySolution.appLinks.detectionAndResponseDescription', {
+    defaultMessage:
+      'Information about your Alerts and Cases within the Security Solution, including Hosts and Users with Alerts.',
+  }),
   path: DETECTION_RESPONSE_PATH,
-  globalNavEnabled: false,
-  experimentalKey: 'detectionResponseEnabled',
-  features: [FEATURE.general],
+  capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.detectionAndResponse', {
       defaultMessage: 'Detection & Response',
@@ -58,16 +73,16 @@ export const detectionResponseLinks: LinkItem = {
   ],
 };
 
-export const dashboardsLandingLinks: LinkItem = {
-  id: SecurityPageName.dashboardsLanding,
-  title: DASHBOARDS,
-  path: DASHBOARDS_PATH,
-  globalNavEnabled: false,
-  features: [FEATURE.general],
-  globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.dashboards', {
-      defaultMessage: 'Dashboards',
-    }),
-  ],
-  links: [overviewLinks, detectionResponseLinks],
+export const entityAnalyticsLinks: LinkItem = {
+  id: SecurityPageName.entityAnalytics,
+  title: ENTITY_ANALYTICS,
+  landingImage: entityAnalyticsDashboard,
+  description: i18n.translate('xpack.securitySolution.appLinks.entityAnalyticsDescription', {
+    defaultMessage:
+      'Entity analytics, notable anomalies, and threats to narrow down the monitoring surface area.',
+  }),
+  path: ENTITY_ANALYTICS_PATH,
+  capabilities: [`${SERVER_APP_ID}.show`],
+  isBeta: false,
+  globalSearchKeywords: [ENTITY_ANALYTICS],
 };

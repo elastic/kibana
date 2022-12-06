@@ -10,19 +10,32 @@ import type {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
-  SavedObjectsImporter,
+  ISavedObjectsImporter,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+
+import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import {
   MAX_TIME_COMPLETE_INSTALL,
   ASSETS_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
-} from '../../../../common';
-import type { InstallablePackage, InstallSource, PackageAssetReference } from '../../../../common';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import type { AssetReference, Installation, InstallType } from '../../../types';
-import { prepareToInstallTemplates } from '../elasticsearch/template/install';
+} from '../../../../common/constants';
+import { PACKAGES_SAVED_OBJECT_TYPE, FLEET_INSTALL_FORMAT_VERSION } from '../../../constants';
+import type {
+  AssetReference,
+  Installation,
+  InstallType,
+  InstallablePackage,
+  InstallSource,
+  PackageAssetReference,
+  PackageVerificationResult,
+} from '../../../types';
+import {
+  ensureFileUploadWriteIndices,
+  prepareToInstallTemplates,
+} from '../elasticsearch/template/install';
 import { removeLegacyTemplates } from '../elasticsearch/template/remove_legacy';
 import {
   prepareToInstallPipelines,
@@ -32,14 +45,14 @@ import {
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
-import { installTransform } from '../elasticsearch/transform/install';
+import { installTransforms } from '../elasticsearch/transform/install';
 import { installMlModel } from '../elasticsearch/ml_model';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
-import { packagePolicyService } from '../..';
+import { appContextService, packagePolicyService } from '../..';
 
-import { createInstallation, updateEsAssetReferences } from './install';
+import { createInstallation, updateEsAssetReferences, restartInstallation } from './install';
 import { withPackageSpan } from './utils';
 
 // this is only exported for testing
@@ -48,6 +61,8 @@ import { withPackageSpan } from './utils';
 export async function _installPackage({
   savedObjectsClient,
   savedObjectsImporter,
+  savedObjectTagAssignmentService,
+  savedObjectTagClient,
   esClient,
   logger,
   installedPkg,
@@ -56,9 +71,12 @@ export async function _installPackage({
   installType,
   installSource,
   spaceId,
+  verificationResult,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+  savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+  savedObjectTagAssignmentService: IAssignmentService;
+  savedObjectTagClient: ITagsClient;
   esClient: ElasticsearchClient;
   logger: Logger;
   installedPkg?: SavedObject<Installation>;
@@ -67,8 +85,9 @@ export async function _installPackage({
   installType: InstallType;
   installSource: InstallSource;
   spaceId: string;
+  verificationResult?: PackageVerificationResult;
 }): Promise<AssetReference[]> {
-  const { name: pkgName, version: pkgVersion } = packageInfo;
+  const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
 
   try {
     // if some installation already exists
@@ -88,11 +107,12 @@ export async function _installPackage({
       } else {
         // if no installation is running, or the installation has been running longer than MAX_TIME_COMPLETE_INSTALL
         // (it might be stuck) update the saved object and proceed
-        await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-          install_version: pkgVersion,
-          install_status: 'installing',
-          install_started_at: new Date().toISOString(),
-          install_source: installSource,
+        await restartInstallation({
+          savedObjectsClient,
+          pkgName,
+          pkgVersion,
+          installSource,
+          verificationResult,
         });
       }
     } else {
@@ -101,6 +121,7 @@ export async function _installPackage({
         packageInfo,
         installSource,
         spaceId,
+        verificationResult,
       });
     }
 
@@ -108,10 +129,14 @@ export async function _installPackage({
       installKibanaAssetsAndReferences({
         savedObjectsClient,
         savedObjectsImporter,
+        savedObjectTagAssignmentService,
+        savedObjectTagClient,
         pkgName,
+        pkgTitle,
         paths,
         installedPkg,
         logger,
+        spaceId,
       })
     );
     // Necessary to avoid async promise rejection warning
@@ -192,13 +217,22 @@ export async function _installPackage({
       logger.warn(`Error removing legacy templates: ${e.message}`);
     }
 
+    const { diagnosticFileUploadEnabled } = appContextService.getExperimentalFeatures();
+    if (diagnosticFileUploadEnabled) {
+      await ensureFileUploadWriteIndices({
+        integrationNames: [packageInfo.name],
+        esClient,
+        logger,
+      });
+    }
+
     // update current backing indices of each data stream
     await withPackageSpan('Update write indices', () =>
       updateCurrentWriteIndices(esClient, logger, installedTemplates)
     );
 
     ({ esReferences } = await withPackageSpan('Install transforms', () =>
-      installTransform(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
+      installTransforms(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
     ));
 
     // If this is an update or retrying an update, delete the previous version's pipelines
@@ -254,6 +288,7 @@ export async function _installPackage({
         install_version: pkgVersion,
         install_status: 'installed',
         package_assets: packageAssetRefs,
+        install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
       })
     );
 
@@ -273,7 +308,7 @@ export async function _installPackage({
 
     return [...installedKibanaAssetsRefs, ...esReferences];
   } catch (err) {
-    if (savedObjectsClient.errors.isConflictError(err)) {
+    if (SavedObjectsErrorHelpers.isConflictError(err)) {
       throw new ConcurrentInstallOperationError(
         `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
           pkgVersion || 'unknown'

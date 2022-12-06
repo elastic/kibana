@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { RiskScore, RiskScoreMappingOrUndefined } from '@kbn/securitysolution-io-ts-alerting-types';
 import { get } from 'lodash/fp';
-import { Meta } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { SignalSource } from '../types';
+
+import type { RiskScore, RiskScoreMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RuleMetadata } from '../../../../../common/detection_engine/rule_schema';
+import type { SignalSource } from '../types';
 
 export interface BuildRiskScoreFromMappingProps {
   eventSource: SignalSource;
   riskScore: RiskScore;
-  riskScoreMapping: RiskScoreMappingOrUndefined;
+  riskScoreMapping: RiskScoreMapping | undefined;
 }
 
 export interface BuildRiskScoreFromMappingReturn {
   riskScore: RiskScore;
-  riskScoreMeta: Meta; // TODO: Stricter types
+  riskScoreMeta: RuleMetadata; // TODO: Stricter types
 }
 
 /**

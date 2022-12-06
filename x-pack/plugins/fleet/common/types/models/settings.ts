@@ -9,12 +9,13 @@ import type { SavedObjectAttributes } from '@kbn/core/public';
 
 export interface BaseSettings {
   has_seen_add_data_notice?: boolean;
-  has_seen_fleet_migration_notice?: boolean;
-  fleet_server_hosts: string[];
+  fleet_server_hosts?: string[];
+  prerelease_integrations_enabled: boolean;
 }
 
 export interface Settings extends BaseSettings {
   id: string;
+  preconfigured_fields?: Array<'fleet_server_hosts'>;
 }
 
 export interface SettingsSOAttributes extends BaseSettings, SavedObjectAttributes {}

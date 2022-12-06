@@ -1,0 +1,234 @@
+{
+  "id": "@kbn/core-deprecations-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-deprecations-browser",
+        "id": "def-common.DeprecationsServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeprecationsServiceStart",
+        "description": [
+          "\nDeprecationsService provides methods to fetch domain deprecation details from\nthe Kibana server.\n"
+        ],
+        "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-deprecations-browser",
+            "id": "def-common.DeprecationsServiceStart.getAllDeprecations",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllDeprecations",
+            "description": [
+              "\nGrabs deprecations details for all domains."
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/core-deprecations-common",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+                "section": "def-common.DomainDeprecationDetails",
+                "text": "DomainDeprecationDetails"
+              },
+              "[]>"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-browser",
+            "id": "def-common.DeprecationsServiceStart.getDeprecations",
+            "type": "Function",
+            "tags": [],
+            "label": "getDeprecations",
+            "description": [
+              "\nGrabs deprecations for a specific domain.\n"
+            ],
+            "signature": [
+              "(domainId: string) => Promise<",
+              {
+                "pluginId": "@kbn/core-deprecations-common",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+                "section": "def-common.DomainDeprecationDetails",
+                "text": "DomainDeprecationDetails"
+              },
+              "[]>"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-deprecations-browser",
+                "id": "def-common.DeprecationsServiceStart.getDeprecations.$1",
+                "type": "string",
+                "tags": [],
+                "label": "domainId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-browser",
+            "id": "def-common.DeprecationsServiceStart.isDeprecationResolvable",
+            "type": "Function",
+            "tags": [],
+            "label": "isDeprecationResolvable",
+            "description": [
+              "\nReturns a boolean if the provided deprecation can be automatically resolvable.\n"
+            ],
+            "signature": [
+              "(details: ",
+              {
+                "pluginId": "@kbn/core-deprecations-common",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+                "section": "def-common.DomainDeprecationDetails",
+                "text": "DomainDeprecationDetails"
+              },
+              ") => boolean"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-deprecations-browser",
+                "id": "def-common.DeprecationsServiceStart.isDeprecationResolvable.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "details",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-deprecations-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+                    "section": "def-common.DomainDeprecationDetails",
+                    "text": "DomainDeprecationDetails"
+                  }
+                ],
+                "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-browser",
+            "id": "def-common.DeprecationsServiceStart.resolveDeprecation",
+            "type": "Function",
+            "tags": [],
+            "label": "resolveDeprecation",
+            "description": [
+              "\nCalls the correctiveActions.api to automatically resolve the depprecation.\n"
+            ],
+            "signature": [
+              "(details: ",
+              {
+                "pluginId": "@kbn/core-deprecations-common",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+                "section": "def-common.DomainDeprecationDetails",
+                "text": "DomainDeprecationDetails"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/core-deprecations-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
+                "section": "def-common.ResolveDeprecationResponse",
+                "text": "ResolveDeprecationResponse"
+              },
+              ">"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-deprecations-browser",
+                "id": "def-common.DeprecationsServiceStart.resolveDeprecation.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "details",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-deprecations-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+                    "section": "def-common.DomainDeprecationDetails",
+                    "text": "DomainDeprecationDetails"
+                  }
+                ],
+                "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-deprecations-browser",
+        "id": "def-common.ResolveDeprecationResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "ResolveDeprecationResponse",
+        "description": [
+          "\nResponse from correctiveActions.api call from automatically resolving the deprecation"
+        ],
+        "signature": [
+          "{ status: \"ok\"; } | { status: \"fail\"; reason: string; }"
+        ],
+        "path": "packages/core/deprecations/core-deprecations-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

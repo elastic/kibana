@@ -49,7 +49,6 @@ import {
 import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
-import { RulesClient } from './rules_client';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
@@ -63,6 +62,7 @@ import {
   RuleType,
   RuleTypeParams,
   RuleTypeState,
+  RulesClientApi,
 } from './types';
 import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
@@ -122,7 +122,9 @@ export interface PluginSetupContract {
 export interface PluginStartContract {
   listTypes: RuleTypeRegistry['list'];
 
-  getRulesClientWithRequest(request: KibanaRequest): PublicMethodsOf<RulesClient>;
+  getAllTypes: RuleTypeRegistry['getAllTypes'];
+
+  getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
 
   getAlertingAuthorizationWithRequest(
     request: KibanaRequest
@@ -346,7 +348,10 @@ export class AlertingPlugin {
         );
       },
       getConfig: () => {
-        return pick(this.config.rules, 'minimumScheduleInterval');
+        return {
+          ...pick(this.config.rules, 'minimumScheduleInterval'),
+          isUsingSecurity: this.licenseState ? !!this.licenseState.getIsSecurityEnabled() : false,
+        };
       },
     };
   }
@@ -439,6 +444,7 @@ export class AlertingPlugin {
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       maxEphemeralActionsPerRule: this.config.maxEphemeralActionsPerAlert,
       cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
+      maxAlerts: this.config.rules.run.alerts.max,
       actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       usageCounter: this.usageCounter,
     });
@@ -460,6 +466,7 @@ export class AlertingPlugin {
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
+      getAllTypes: ruleTypeRegistry!.getAllTypes.bind(this.ruleTypeRegistry!),
       getAlertingAuthorizationWithRequest,
       getRulesClientWithRequest,
       getFrameworkHealth: async () =>

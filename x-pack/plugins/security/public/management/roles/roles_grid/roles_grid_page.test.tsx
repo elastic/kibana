@@ -125,7 +125,7 @@ describe('<RolesGridPage />', () => {
     await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(PermissionDenied).length > 0;
     });
-    expect(wrapper.find(PermissionDenied)).toMatchSnapshot();
+    expect(wrapper.find(PermissionDenied).render()).toMatchSnapshot();
   });
 
   it('renders role actions as appropriate, escaping when necessary', async () => {
@@ -233,5 +233,23 @@ describe('<RolesGridPage />', () => {
         kibana: [{ base: [], spaces: [], feature: {} }],
       },
     ]);
+  });
+
+  it('hides controls when `readOnly` is enabled', async () => {
+    const wrapper = mountWithIntl(
+      <RolesGridPage
+        rolesAPIClient={apiClientMock}
+        history={history}
+        notifications={coreMock.createStart().notifications}
+        readOnly
+      />
+    );
+    const initialIconCount = wrapper.find(EuiIcon).length;
+
+    await waitForRender(wrapper, (updatedWrapper) => {
+      return updatedWrapper.find(EuiIcon).length > initialIconCount;
+    });
+
+    expect(findTestSubject(wrapper, 'createRoleButton')).toHaveLength(0);
   });
 });

@@ -39,6 +39,7 @@ import type {
   DeleteExceptionListItemByIdOptions,
   DeleteExceptionListItemOptions,
   DeleteExceptionListOptions,
+  DuplicateExceptionListOptions,
   ExportExceptionListAndItemsOptions,
   FindEndpointListItemOptions,
   FindExceptionListItemOptions,
@@ -95,6 +96,7 @@ import { findValueListExceptionListItems } from './find_value_list_exception_lis
 import { findExceptionListsItemPointInTimeFinder } from './find_exception_list_items_point_in_time_finder';
 import { findValueListExceptionListItemsPointInTimeFinder } from './find_value_list_exception_list_items_point_in_time_finder';
 import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
+import { duplicateExceptionListAndItems } from './duplicate_exception_list';
 
 /**
  * Class for use for exceptions that are with trusted applications or
@@ -307,6 +309,25 @@ export class ExceptionListClient {
       savedObjectsClient,
       tags,
       type,
+      user,
+    });
+  };
+
+  /**
+   * Create the Trusted Apps Agnostic list if it does not yet exist (`null` is returned if it does exist)
+   * @param options.listId the "list_id" of the exception list
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   * @returns The exception list schema or null if it does not exist
+   */
+  public duplicateExceptionListAndItems = async ({
+    listId,
+    namespaceType,
+  }: DuplicateExceptionListOptions): Promise<ExceptionListSchema | null> => {
+    const { savedObjectsClient, user } = this;
+    return duplicateExceptionListAndItems({
+      listId,
+      namespaceType,
+      savedObjectsClient,
       user,
     });
   };
@@ -717,6 +738,7 @@ export class ExceptionListClient {
     perPage,
     pit,
     page,
+    search,
     searchAfter,
     sortField,
     sortOrder,
@@ -750,6 +772,7 @@ export class ExceptionListClient {
       perPage,
       pit,
       savedObjectsClient,
+      search,
       searchAfter,
       sortField,
       sortOrder,
@@ -764,6 +787,7 @@ export class ExceptionListClient {
    * @param options.perPage How many per page to return
    * @param options.pit The Point in Time (pit) id if there is one, otherwise "undefined" can be sent in
    * @param options.page The page number or "undefined" if there is no page number to continue from
+   * @param options.search The simple query search parameter if there is one, otherwise "undefined" can be sent in
    * @param options.searchAfter The search_after parameter if there is one, otherwise "undefined" can be sent in
    * @param options.sortField The sort field string if there is one, otherwise "undefined" can be sent in
    * @param options.sortOder The sort order string of "asc", "desc", otherwise "undefined" if there is no preference
@@ -776,6 +800,7 @@ export class ExceptionListClient {
     perPage,
     pit,
     page,
+    search,
     searchAfter,
     sortField,
     sortOrder,
@@ -793,6 +818,7 @@ export class ExceptionListClient {
           page,
           perPage,
           pit,
+          search,
           searchAfter,
           sortField,
           sortOrder,
@@ -809,6 +835,7 @@ export class ExceptionListClient {
       perPage,
       pit,
       savedObjectsClient,
+      search,
       searchAfter,
       sortField,
       sortOrder,
@@ -898,6 +925,7 @@ export class ExceptionListClient {
    * @param options.perPage How many per page to return
    * @param options.page The page number or "undefined" if there is no page number to continue from
    * @param options.pit The Point in Time (pit) id if there is one, otherwise "undefined" can be sent in
+   * @param options.search The simple query search parameter if there is one, otherwise "undefined" can be sent in
    * @param options.searchAfter The search_after parameter if there is one, otherwise "undefined" can be sent in
    * @param options.sortField The sort field string if there is one, otherwise "undefined" can be sent in
    * @param options.sortOrder The sort order of "asc" or "desc", otherwise "undefined" can be sent in
@@ -908,6 +936,7 @@ export class ExceptionListClient {
     perPage,
     page,
     pit,
+    search,
     searchAfter,
     sortField,
     sortOrder,
@@ -922,6 +951,7 @@ export class ExceptionListClient {
       perPage,
       pit,
       savedObjectsClient,
+      search,
       searchAfter,
       sortField,
       sortOrder,
@@ -975,6 +1005,7 @@ export class ExceptionListClient {
     exceptionsToImport,
     maxExceptionsImportSize,
     overwrite,
+    generateNewListId,
   }: ImportExceptionListAndItemsOptions): Promise<ImportExceptionsResponseSchema> => {
     const { savedObjectsClient, user } = this;
 
@@ -995,6 +1026,7 @@ export class ExceptionListClient {
 
     return importExceptions({
       exceptions: parsedObjects,
+      generateNewListId,
       overwrite,
       savedObjectsClient,
       user,
@@ -1029,6 +1061,7 @@ export class ExceptionListClient {
 
     return importExceptions({
       exceptions: parsedObjects,
+      generateNewListId: false,
       overwrite,
       savedObjectsClient,
       user,

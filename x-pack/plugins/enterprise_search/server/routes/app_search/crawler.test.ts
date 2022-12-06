@@ -698,11 +698,16 @@ describe('crawler routes', () => {
     });
 
     it('validates correctly with name', () => {
-      const request = { params: { name: 'some-engine' } };
+      const request = { params: { name: 'some-engine' }, query: { 'page[current]': 4 } };
       mockRouter.shouldValidate(request);
     });
 
-    it('fails validation without name', () => {
+    it('validates correctly with page[current]', () => {
+      const request = { params: { name: 'some-engine' }, query: { 'page[size]': 100 } };
+      mockRouter.shouldValidate(request);
+    });
+
+    it('fails validation without page[size]', () => {
       const request = { params: {} };
       mockRouter.shouldThrow(request);
     });

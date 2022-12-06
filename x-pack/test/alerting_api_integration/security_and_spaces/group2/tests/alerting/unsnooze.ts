@@ -98,7 +98,7 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.snooze_end_time).to.eql(null);
+              expect(updatedAlert.snooze_schedule).to.eql(null);
               expect(updatedAlert.mute_all).to.eql(false);
               // Ensure AAD isn't broken
               await checkAAD({
@@ -155,7 +155,7 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.snooze_end_time).to.eql(null);
+              expect(updatedAlert.snooze_schedule).to.eql(null);
               expect(updatedAlert.mute_all).to.eql(false);
               // Ensure AAD isn't broken
               await checkAAD({
@@ -223,7 +223,7 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.snooze_end_time).to.eql(null);
+              expect(updatedAlert.snooze_schedule).to.eql(null);
               expect(updatedAlert.mute_all).to.eql(false);
               // Ensure AAD isn't broken
               await checkAAD({
@@ -291,7 +291,7 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.snooze_end_time).to.eql(null);
+              expect(updatedAlert.snooze_schedule).to.eql(null);
               expect(updatedAlert.mute_all).to.eql(false);
               // Ensure AAD isn't broken
               await checkAAD({

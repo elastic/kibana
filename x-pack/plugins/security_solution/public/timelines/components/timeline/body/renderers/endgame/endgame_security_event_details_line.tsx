@@ -122,6 +122,8 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   isDraggable={isDraggable}
                   queryValue={String(endgameLogonType)}
                   value={`${endgameLogonType} - ${getHumanReadableLogonType(endgameLogonType)}`}
+                  isAggregatable={true}
+                  fieldType="keyword"
                 />
               </TokensFlexItem>
             </>
@@ -142,6 +144,8 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   field="endgame.target_logon_id"
                   isDraggable={isDraggable}
                   value={endgameTargetLogonId}
+                  isAggregatable={true}
+                  fieldType="keyword"
                 />
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
@@ -185,6 +189,8 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   isDraggable={isDraggable}
                   iconType="user"
                   value={endgameSubjectUserName}
+                  isAggregatable={true}
+                  fieldType="keyword"
                 />
               </TokensFlexItem>
             </>
@@ -206,6 +212,8 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   field="endgame.subject_domain_name"
                   isDraggable={isDraggable}
                   value={endgameSubjectDomainName}
+                  isAggregatable={true}
+                  fieldType="keyword"
                 />
               </TokensFlexItem>
             </>
@@ -226,6 +234,8 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                   field="endgame.subject_logon_id"
                   isDraggable={isDraggable}
                   value={endgameSubjectLogonId}
+                  isAggregatable={true}
+                  fieldType="keyword"
                 />
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
@@ -243,6 +253,8 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                     eventId={id}
                     field="event.code"
                     value={eventCode}
+                    isAggregatable={true}
+                    fieldType="keyword"
                   />
                 </TokensFlexItem>
               ) : (
@@ -253,6 +265,8 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
                     iconType="logoWindows"
                     field="winlog.event_id"
                     value={winlogEventId}
+                    isAggregatable={true}
+                    fieldType="keyword"
                   />
                 </TokensFlexItem>
               )}

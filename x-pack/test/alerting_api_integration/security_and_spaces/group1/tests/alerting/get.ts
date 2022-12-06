@@ -81,15 +81,21 @@ const getTestUtils = (
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: response.body.execution_status,
+                ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
+                ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
                 ...(describeType === 'internal'
                   ? {
                       monitoring: response.body.monitoring,
-                      snooze_end_time: response.body.snooze_end_time,
+                      snooze_schedule: response.body.snooze_schedule,
+                      is_snoozed_until: response.body.is_snoozed_until,
                     }
                   : {}),
               });
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
+              if (response.body.next_run) {
+                expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+              }
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

@@ -6,11 +6,12 @@
  */
 
 import { appContextService } from '../../services';
-import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../common';
+import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../common/types';
 import { formatNonFatalErrors, setupFleet } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
 import type { FleetRequestHandler } from '../../types';
+import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 
 export const getFleetStatusHandler: FleetRequestHandler = async (context, request, response) => {
   try {
@@ -43,11 +44,17 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
       missing_optional_features: missingOptionalFeatures,
     };
 
+    const packageVerificationKeyId = await getGpgKeyIdOrUndefined();
+
+    if (packageVerificationKeyId) {
+      body.package_verification_key_id = packageVerificationKeyId;
+    }
+
     return response.ok({
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -62,6 +69,6 @@ export const fleetSetupHandler: FleetRequestHandler = async (context, request, r
     };
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

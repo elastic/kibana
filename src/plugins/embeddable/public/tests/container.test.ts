@@ -42,7 +42,7 @@ import { of } from './helpers';
 import { createEmbeddablePanelMock } from '../mocks';
 import { EmbeddableContainerSettings } from '../lib/containers/i_container';
 
-async function creatHelloWorldContainerAndEmbeddable(
+async function createHelloWorldContainerAndEmbeddable(
   containerInput: ContainerInput = { id: 'hello', panels: {} },
   embeddableInput = {},
   settings?: EmbeddableContainerSettings
@@ -54,6 +54,8 @@ async function creatHelloWorldContainerAndEmbeddable(
   const slowContactCardFactory = new SlowContactCardEmbeddableFactory({
     execAction: uiActions.executeTriggerActions,
   });
+  const contactCardCreateSpy = jest.spyOn(slowContactCardFactory, 'create');
+
   const helloWorldFactory = new HelloWorldEmbeddableFactoryDefinition();
 
   setup.registerEmbeddableFactory(filterableFactory.type, filterableFactory);
@@ -90,7 +92,17 @@ async function creatHelloWorldContainerAndEmbeddable(
     throw new Error('Error adding embeddable');
   }
 
-  return { container, embeddable, coreSetup, coreStart, setup, start, uiActions, testPanel };
+  return {
+    setup,
+    start,
+    coreSetup,
+    coreStart,
+    testPanel,
+    container,
+    uiActions,
+    embeddable,
+    contactCardCreateSpy,
+  };
 }
 
 describe('container initialization', () => {
@@ -116,8 +128,8 @@ describe('container initialization', () => {
     expect(embeddable.id).toBe('123');
   };
 
-  it('initializes embeddables', async (done) => {
-    const { container } = await creatHelloWorldContainerAndEmbeddable({
+  it('initializes embeddables', async () => {
+    const { container } = await createHelloWorldContainerAndEmbeddable({
       id: 'hello',
       panels,
     });
@@ -125,12 +137,21 @@ describe('container initialization', () => {
     expectEmbeddableLoaded(container, '123');
     expectEmbeddableLoaded(container, '456');
     expectEmbeddableLoaded(container, '789');
-    done();
   });
 
-  it('initializes embeddables in order', async (done) => {
+  it('initializes embeddables once and only once with multiple input updates', async () => {
+    const { container, contactCardCreateSpy } = await createHelloWorldContainerAndEmbeddable({
+      id: 'hello',
+      panels,
+    });
+    container.updateInput({ lastReloadRequestTime: 1 });
+    container.updateInput({ lastReloadRequestTime: 2 });
+    expect(contactCardCreateSpy).toHaveBeenCalledTimes(4);
+  });
+
+  it('initializes embeddables in order', async () => {
     const childIdInitializeOrder = ['456', '123', '789'];
-    const { container } = await creatHelloWorldContainerAndEmbeddable(
+    const { contactCardCreateSpy } = await createHelloWorldContainerAndEmbeddable(
       {
         id: 'hello',
         panels,
@@ -139,24 +160,19 @@ describe('container initialization', () => {
       { childIdInitializeOrder }
     );
 
-    const onPanelAddedMock = jest.spyOn(
-      container as unknown as { onPanelAdded: () => {} },
-      'onPanelAdded'
-    );
-
     await new Promise((r) => setTimeout(r, 1));
     for (const [index, orderedId] of childIdInitializeOrder.entries()) {
-      expect(onPanelAddedMock).toHaveBeenNthCalledWith(index + 1, {
-        explicitInput: { id: orderedId },
-        type: 'CONTACT_CARD_EMBEDDABLE',
-      });
+      expect(contactCardCreateSpy).toHaveBeenNthCalledWith(
+        index + 1,
+        expect.objectContaining({ id: orderedId }),
+        expect.anything() // parent passed into create method
+      );
     }
-    done();
   });
 
-  it('initializes embeddables in order with partial order arg', async (done) => {
+  it('initializes embeddables in order with partial order arg', async () => {
     const childIdInitializeOrder = ['789', 'idontexist'];
-    const { container } = await creatHelloWorldContainerAndEmbeddable(
+    const { contactCardCreateSpy } = await createHelloWorldContainerAndEmbeddable(
       {
         id: 'hello',
         panels,
@@ -166,34 +182,25 @@ describe('container initialization', () => {
     );
     const expectedInitializeOrder = ['789', '123', '456'];
 
-    const onPanelAddedMock = jest.spyOn(
-      container as unknown as { onPanelAdded: () => {} },
-      'onPanelAdded'
-    );
-
     await new Promise((r) => setTimeout(r, 1));
     for (const [index, orderedId] of expectedInitializeOrder.entries()) {
-      expect(onPanelAddedMock).toHaveBeenNthCalledWith(index + 1, {
-        explicitInput: { id: orderedId },
-        type: 'CONTACT_CARD_EMBEDDABLE',
-      });
+      expect(contactCardCreateSpy).toHaveBeenNthCalledWith(
+        index + 1,
+        expect.objectContaining({ id: orderedId }),
+        expect.anything() // parent passed into create method
+      );
     }
-    done();
   });
 
-  it('initializes embeddables in order, awaiting each', async (done) => {
+  it('initializes embeddables in order, awaiting each', async () => {
     const childIdInitializeOrder = ['456', '123', '789'];
-    const { container } = await creatHelloWorldContainerAndEmbeddable(
+    const { container, contactCardCreateSpy } = await createHelloWorldContainerAndEmbeddable(
       {
         id: 'hello',
         panels,
       },
       {},
       { childIdInitializeOrder, initializeSequentially: true }
-    );
-    const onPanelAddedMock = jest.spyOn(
-      container as unknown as { onPanelAdded: () => {} },
-      'onPanelAdded'
     );
 
     const untilEmbeddableLoadedMock = jest.spyOn(container, 'untilEmbeddableLoaded');
@@ -202,18 +209,18 @@ describe('container initialization', () => {
 
     for (const [index, orderedId] of childIdInitializeOrder.entries()) {
       await container.untilEmbeddableLoaded(orderedId);
-      expect(onPanelAddedMock).toHaveBeenNthCalledWith(index + 1, {
-        explicitInput: { id: orderedId },
-        type: 'CONTACT_CARD_EMBEDDABLE',
-      });
+      expect(contactCardCreateSpy).toHaveBeenNthCalledWith(
+        index + 1,
+        expect.objectContaining({ id: orderedId }),
+        expect.anything() // parent passed into create method
+      );
       expect(untilEmbeddableLoadedMock).toHaveBeenCalledWith(orderedId);
     }
-    done();
   });
 });
 
 test('Container.addNewEmbeddable', async () => {
-  const { container, embeddable } = await creatHelloWorldContainerAndEmbeddable(
+  const { container, embeddable } = await createHelloWorldContainerAndEmbeddable(
     { id: 'hello', panels: {} },
     {
       firstName: 'Susy',
@@ -232,8 +239,8 @@ test('Container.addNewEmbeddable', async () => {
   expect(embeddableInContainer.id).toBe(embeddable.id);
 });
 
-test('Container.removeEmbeddable removes and cleans up', async (done) => {
-  const { start, testPanel } = await creatHelloWorldContainerAndEmbeddable();
+test('Container.removeEmbeddable removes and cleans up', async () => {
+  const { start, testPanel } = await createHelloWorldContainerAndEmbeddable();
 
   const container = new HelloWorldContainer(
     {
@@ -276,19 +283,17 @@ test('Container.removeEmbeddable removes and cleans up', async (done) => {
       expect(container.getInput().panels[embeddable.id]).toBeUndefined();
       if (isErrorEmbeddable(embeddable)) {
         expect(false).toBe(true);
-        done();
       }
 
       expect(() => embeddable.updateInput({ nameTitle: 'Sir' })).toThrowError();
       expect(container.getOutput().embeddableLoaded[embeddable.id]).toBeUndefined();
-      done();
     });
 
   container.removeEmbeddable(embeddable.id);
 });
 
 test('Container.input$ is notified when child embeddable input is updated', async () => {
-  const { container, embeddable } = await creatHelloWorldContainerAndEmbeddable(
+  const { container, embeddable } = await createHelloWorldContainerAndEmbeddable(
     { id: 'hello', panels: {} },
     {
       firstName: 'Susy',
@@ -326,7 +331,7 @@ test('Container.input$ is notified when child embeddable input is updated', asyn
 });
 
 test('Container.input$', async () => {
-  const { container, embeddable } = await creatHelloWorldContainerAndEmbeddable(
+  const { container, embeddable } = await createHelloWorldContainerAndEmbeddable(
     { id: 'hello', panels: {} },
     {
       firstName: 'Susy',
@@ -351,7 +356,7 @@ test('Container.input$', async () => {
 });
 
 test('Container.getInput$ not triggered if state is the same', async () => {
-  const { container, embeddable } = await creatHelloWorldContainerAndEmbeddable(
+  const { container, embeddable } = await createHelloWorldContainerAndEmbeddable(
     { id: 'hello', panels: {} },
     {
       firstName: 'Susy',
@@ -376,7 +381,7 @@ test('Container.getInput$ not triggered if state is the same', async () => {
 });
 
 test('Container view mode change propagates to children', async () => {
-  const { container, embeddable } = await creatHelloWorldContainerAndEmbeddable(
+  const { container, embeddable } = await createHelloWorldContainerAndEmbeddable(
     { id: 'hello', panels: {}, viewMode: ViewMode.VIEW },
     {
       firstName: 'Susy',
@@ -391,9 +396,9 @@ test('Container view mode change propagates to children', async () => {
   expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
 });
 
-test(`Container updates its state when a child's input is updated`, async (done) => {
+test(`Container updates its state when a child's input is updated`, async () => {
   const { container, embeddable, start, coreStart, uiActions } =
-    await creatHelloWorldContainerAndEmbeddable(
+    await createHelloWorldContainerAndEmbeddable(
       { id: 'hello', panels: {}, viewMode: ViewMode.VIEW },
       {
         id: '123',
@@ -438,7 +443,6 @@ test(`Container updates its state when a child's input is updated`, async (done)
             childClone.getInput().nameTitle === 'Dr.'
           ) {
             cloneSubscription.unsubscribe();
-            done();
           }
         });
       }
@@ -449,7 +453,7 @@ test(`Container updates its state when a child's input is updated`, async (done)
 });
 
 test(`Derived container state passed to children`, async () => {
-  const { container, embeddable } = await creatHelloWorldContainerAndEmbeddable(
+  const { container, embeddable } = await createHelloWorldContainerAndEmbeddable(
     { id: 'hello', panels: {}, viewMode: ViewMode.VIEW },
     {
       firstName: 'Susy',
@@ -475,8 +479,8 @@ test(`Derived container state passed to children`, async () => {
   subscription.unsubscribe();
 });
 
-test(`Can subscribe to children embeddable updates`, async (done) => {
-  const { embeddable } = await creatHelloWorldContainerAndEmbeddable(
+test(`Can subscribe to children embeddable updates`, async () => {
+  const { embeddable } = await createHelloWorldContainerAndEmbeddable(
     {
       id: 'hello container',
       panels: {},
@@ -492,14 +496,13 @@ test(`Can subscribe to children embeddable updates`, async (done) => {
   const subscription = embeddable.getInput$().subscribe((input: ContactCardEmbeddableInput) => {
     if (input.nameTitle === 'Dr.') {
       subscription.unsubscribe();
-      done();
     }
   });
   embeddable.updateInput({ nameTitle: 'Dr.' });
 });
 
-test('Test nested reactions', async (done) => {
-  const { container, embeddable } = await creatHelloWorldContainerAndEmbeddable(
+test('Test nested reactions', async () => {
+  const { container, embeddable } = await createHelloWorldContainerAndEmbeddable(
     { id: 'hello', panels: {}, viewMode: ViewMode.VIEW },
     {
       firstName: 'Susy',
@@ -521,7 +524,6 @@ test('Test nested reactions', async (done) => {
     ) {
       containerSubscription.unsubscribe();
       embeddableSubscription.unsubscribe();
-      done();
     }
   });
 
@@ -535,7 +537,7 @@ test('Test nested reactions', async (done) => {
 });
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
-  const { start } = await creatHelloWorldContainerAndEmbeddable();
+  const { start } = await createHelloWorldContainerAndEmbeddable();
   const derivedFilter: MockFilter = {
     $state: { store: 'appState' },
     meta: { disabled: false, alias: 'name', negate: false },
@@ -566,8 +568,8 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
   ]);
 });
 
-test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async (done) => {
-  const { container } = await creatHelloWorldContainerAndEmbeddable({ id: 'hello', panels: {} });
+test('Explicit embeddable input mapped to undefined with no inherited value will get passed to embeddable', async () => {
+  const { container } = await createHelloWorldContainerAndEmbeddable({ id: 'hello', panels: {} });
 
   const embeddable = await container.addNewEmbeddable<
     FilterableEmbeddableInput,
@@ -589,7 +591,6 @@ test('Explicit embeddable input mapped to undefined with no inherited value will
     .subscribe(() => {
       if (embeddable.getInput().filters === undefined) {
         subscription.unsubscribe();
-        done();
       }
     });
 
@@ -597,7 +598,7 @@ test('Explicit embeddable input mapped to undefined with no inherited value will
 });
 
 test('Panel removed from input state', async () => {
-  const { container } = await creatHelloWorldContainerAndEmbeddable({
+  const { container } = await createHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {},
   });
@@ -623,7 +624,7 @@ test('Panel removed from input state', async () => {
 });
 
 test('Panel added to input state', async () => {
-  const { container, start } = await creatHelloWorldContainerAndEmbeddable({
+  const { container, start } = await createHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {},
   });
@@ -654,7 +655,7 @@ test('Panel added to input state', async () => {
   expect(container.getOutput().embeddableLoaded[embeddable2.id]).toBe(true);
 });
 
-test('Container changes made directly after adding a new embeddable are propagated', async (done) => {
+test('Container changes made directly after adding a new embeddable are propagated', async () => {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
   const { setup, doStart, uiActions } = testPlugin(coreSetup, coreStart);
@@ -698,7 +699,6 @@ test('Container changes made directly after adding a new embeddable are propagat
           const embeddable = container.getChild(embeddableId);
           if (embeddable.getInput().viewMode === ViewMode.VIEW) {
             subscription.unsubscribe();
-            done();
           }
         }
       }
@@ -712,8 +712,8 @@ test('Container changes made directly after adding a new embeddable are propagat
   container.updateInput({ viewMode: ViewMode.VIEW });
 });
 
-test('container stores ErrorEmbeddables when a factory for a child cannot be found (so the panel can be removed)', async (done) => {
-  const { container } = await creatHelloWorldContainerAndEmbeddable({
+test('container stores ErrorEmbeddables when a factory for a child cannot be found (so the panel can be removed)', async () => {
+  const { container } = await createHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {
       '123': {
@@ -728,13 +728,12 @@ test('container stores ErrorEmbeddables when a factory for a child cannot be fou
     if (container.getOutput().embeddableLoaded['123']) {
       const child = container.getChild('123');
       expect(child.type).toBe(ERROR_EMBEDDABLE_TYPE);
-      done();
     }
   });
 });
 
-test('container stores ErrorEmbeddables when a saved object cannot be found', async (done) => {
-  const { container } = await creatHelloWorldContainerAndEmbeddable({
+test('container stores ErrorEmbeddables when a saved object cannot be found', async () => {
+  const { container } = await createHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {
       '123': {
@@ -749,13 +748,12 @@ test('container stores ErrorEmbeddables when a saved object cannot be found', as
     if (container.getOutput().embeddableLoaded['123']) {
       const child = container.getChild('123');
       expect(child.type).toBe(ERROR_EMBEDDABLE_TYPE);
-      done();
     }
   });
 });
 
-test('ErrorEmbeddables get updated when parent does', async (done) => {
-  const { container } = await creatHelloWorldContainerAndEmbeddable({
+test('ErrorEmbeddables get updated when parent does', async () => {
+  const { container } = await createHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {
       '123': {
@@ -775,13 +773,12 @@ test('ErrorEmbeddables get updated when parent does', async (done) => {
       container.updateInput({ viewMode: ViewMode.VIEW });
 
       expect(embeddable.getInput().viewMode).toBe(ViewMode.VIEW);
-      done();
     }
   });
 });
 
 test('untilEmbeddableLoaded() throws an error if there is no such child panel in the container', async () => {
-  const { container } = await creatHelloWorldContainerAndEmbeddable({
+  const { container } = await createHelloWorldContainerAndEmbeddable({
     id: 'hello',
     panels: {},
   });
@@ -819,7 +816,7 @@ test('untilEmbeddableLoaded() throws an error if there is no such child panel in
   expect((error as Error).message).toMatchInlineSnapshot(`"Panel not found"`);
 });
 
-test('untilEmbeddableLoaded() resolves if child is loaded in the container', async (done) => {
+test('untilEmbeddableLoaded() resolves if child is loaded in the container', async () => {
   const { setup, doStart, coreStart, uiActions } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()
@@ -854,10 +851,9 @@ test('untilEmbeddableLoaded() resolves if child is loaded in the container', asy
   const child = await container.untilEmbeddableLoaded('123');
   expect(child).toBeDefined();
   expect(child.type).toBe(HELLO_WORLD_EMBEDDABLE);
-  done();
 });
 
-test('untilEmbeddableLoaded resolves with undefined if child is subsequently removed', async (done) => {
+test('untilEmbeddableLoaded resolves with undefined if child is subsequently removed', async () => {
   const { doStart, setup, coreStart, uiActions } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()
@@ -895,13 +891,12 @@ test('untilEmbeddableLoaded resolves with undefined if child is subsequently rem
 
   container.untilEmbeddableLoaded('123').then((embed) => {
     expect(embed).toBeUndefined();
-    done();
   });
 
   container.updateInput({ panels: {} });
 });
 
-test('adding a panel then subsequently removing it before its loaded removes the panel', async (done) => {
+test('adding a panel then subsequently removing it before its loaded removes the panel', (done) => {
   const { doStart, coreStart, uiActions, setup } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()

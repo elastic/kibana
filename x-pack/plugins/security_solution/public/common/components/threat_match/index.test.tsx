@@ -15,7 +15,7 @@ import { fields } from '@kbn/data-plugin/common/mocks';
 import { useKibana } from '../../lib/kibana';
 
 import { ThreatMatchComponent } from '.';
-import { ThreatMapEntries } from './types';
+import type { ThreatMapEntries } from './types';
 import type { DataViewBase } from '@kbn/es-query';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 
@@ -239,9 +239,9 @@ describe('ThreatMatchComponent', () => {
       </ThemeProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="entriesContainer"]').length).toEqual(4);
+    expect(wrapper.find('div[data-test-subj="entriesContainer"]').length).toEqual(2);
     wrapper.find('[data-test-subj="firstRowDeleteButton"] button').simulate('click');
-    expect(wrapper.find('[data-test-subj="entriesContainer"]').length).toEqual(2);
+    expect(wrapper.find('div[data-test-subj="entriesContainer"]').length).toEqual(1);
     wrapper.unmount();
   });
 

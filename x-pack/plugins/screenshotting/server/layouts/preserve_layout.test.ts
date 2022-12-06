@@ -35,7 +35,6 @@ it('preserve layout uses default layout selectors', () => {
       "timefilterDurationAttribute": "data-shared-timefilter-duration",
     }
   `);
-  expect(testPreserveLayout.groupCount).toBe(1);
   expect(testPreserveLayout.height).toBe(16);
   expect(testPreserveLayout.width).toBe(16);
 });

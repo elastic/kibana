@@ -18,7 +18,7 @@ import {
   EuiFlexItem,
   EuiProgress,
 } from '@elastic/eui';
-import { getOr, isEmpty } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, {
   ComponentType,
@@ -37,6 +37,8 @@ import styled, { ThemeContext } from 'styled-components';
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { Filter } from '@kbn/es-query';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   TGridCellAction,
   BulkActionsProp,
@@ -45,16 +47,14 @@ import {
   ControlColumnProps,
   RowRenderer,
   AlertStatus,
-  SortColumnTimeline,
-  TimelineId,
-  TimelineTabs,
+  SortColumnTable,
   SetEventsLoading,
   SetEventsDeleted,
 } from '../../../../common/types/timeline';
 
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 
-import { getColumnHeaders } from './column_headers/helpers';
+import { getColumnHeader, getColumnHeaders } from './column_headers/helpers';
 import {
   addBuildingBlockStyle,
   getEventIdToDataMapping,
@@ -65,12 +65,11 @@ import {
 
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import type { OnRowSelected, OnSelectAll } from '../types';
-import type { FieldBrowserOptions } from '../../../../common/types';
 import type { Refetch } from '../../../store/t_grid/inputs';
+import { Ecs } from '../../../../common/ecs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
 import { StatefulEventContext } from '../../stateful_event_context';
-import { StatefulFieldsBrowser } from '../toolbar/fields_browser';
-import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
+import { tGridActions, TGridModel, tGridSelectors, TableState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
 import * as i18n from './translations';
@@ -79,10 +78,9 @@ import { checkBoxControlColumn } from './control_columns';
 import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
 import { REMOVE_COLUMN } from './column_headers/translations';
+import { TimelinesStartPlugins } from '../../../types';
 
-const StatefulAlertStatusBulkActions = lazy(
-  () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
-);
+const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
 
 interface OwnProps {
   activePage: number;
@@ -97,6 +95,13 @@ interface OwnProps {
   filters?: Filter[];
   filterQuery?: string;
   filterStatus?: AlertStatus;
+  getRowRenderer?: ({
+    data,
+    rowRenderers,
+  }: {
+    data: Ecs;
+    rowRenderers: RowRenderer[];
+  }) => RowRenderer | null;
   id: string;
   indexNames: string[];
   isEventViewer?: boolean;
@@ -109,7 +114,7 @@ interface OwnProps {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   tableView: ViewSelection;
-  tabType: TimelineTabs;
+  tabType: string;
   totalItems: number;
   trailingControlColumns?: ControlColumnProps[];
   unit?: (total: number) => React.ReactNode;
@@ -127,11 +132,6 @@ interface OwnProps {
 
 const defaultUnit = (n: number) => i18n.ALERTS_UNIT(n);
 
-export const hasAdditionalActions = (id: TimelineId): boolean =>
-  [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage, TimelineId.active].includes(
-    id
-  );
-
 const ES_LIMIT_COUNT = 9999;
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
@@ -140,7 +140,7 @@ const EmptyHeaderCellRender: ComponentType = () => null;
 
 const gridStyle: EuiDataGridStyle = { border: 'none', fontSize: 's', header: 'underline' };
 
-const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
+const EuiEventTableContainer = styled.div<{ hideLastPage: boolean }>`
   ul.euiPagination__list {
     li.euiPagination__item:last-child {
       ${({ hideLastPage }) => `${hideLastPage ? 'display:none' : ''}`};
@@ -182,13 +182,13 @@ const transformControlColumns = ({
   onRuleChange?: () => void;
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   showCheckboxes: boolean;
-  tabType: TimelineTabs;
+  tabType: string;
   timelineId: string;
   isSelectAllChecked: boolean;
   browserFields: BrowserFields;
   onSelectPage: OnSelectAll;
   pageSize: number;
-  sort: SortColumnTimeline[];
+  sort: SortColumnTable[];
   theme: EuiTheme;
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
@@ -278,7 +278,7 @@ const transformControlColumns = ({
             setCellProps={setCellProps}
             showCheckboxes={showCheckboxes}
             tabType={tabType}
-            timelineId={timelineId}
+            tableId={timelineId}
             width={width}
             setEventsLoading={setEventsLoading}
             setEventsDeleted={setEventsDeleted}
@@ -312,6 +312,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     filterQuery,
     filters,
     filterStatus,
+    getRowRenderer,
     hasAlertsCrud,
     hasAlertsCrudPermissions,
     id,
@@ -339,11 +340,13 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     unit = defaultUnit,
   }) => {
+    const { triggersActionsUi } = useKibana<TimelinesStartPlugins>().services;
+
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
     const dispatch = useDispatch();
-    const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
-    const { queryFields, selectAll } = useDeepEqualSelector((state) =>
+    const getManageTimeline = useMemo(() => tGridSelectors.getManageDataTableById(), []);
+    const { queryFields, selectAll, defaultColumns } = useDeepEqualSelector((state) =>
       getManageTimeline(state, id)
     );
 
@@ -399,20 +402,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       }
     }, [isSelectAllChecked, onSelectPage, selectAll]);
 
-    // Clean any removed custom field that may still be present in stored columnHeaders
-    useEffect(() => {
-      if (!isEmpty(browserFields) && !isEmpty(columnHeaders)) {
-        columnHeaders.forEach(({ id: columnId }) => {
-          if (browserFields.base?.fields?.[columnId] == null) {
-            const [category] = columnId.split('.');
-            if (browserFields[category]?.fields?.[columnId] == null) {
-              dispatch(tGridActions.removeColumn({ id, columnId }));
-            }
-          }
-        });
-      }
-    }, [browserFields, columnHeaders, dispatch, id]);
-
     const onAlertStatusActionSuccess = useMemo(() => {
       if (bulkActions && bulkActions !== true) {
         return bulkActions.onAlertStatusActionSuccess;
@@ -425,6 +414,32 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       }
     }, [bulkActions]);
 
+    const additionalBulkActions = useMemo(() => {
+      if (bulkActions && bulkActions !== true && bulkActions.customBulkActions !== undefined) {
+        return bulkActions.customBulkActions.map((action) => {
+          return {
+            ...action,
+            onClick: (eventIds: string[]) => {
+              const items = data.filter((item) => {
+                return eventIds.find((event) => item._id === event);
+              });
+              action.onClick(items);
+            },
+          };
+        });
+      }
+    }, [bulkActions, data]);
+
+    const showAlertStatusActions = useMemo(() => {
+      if (!hasAlertsCrud) {
+        return false;
+      }
+      if (typeof bulkActions === 'boolean') {
+        return bulkActions;
+      }
+      return bulkActions.alertStatusActions ?? true;
+    }, [bulkActions, hasAlertsCrud]);
+
     const showBulkActions = useMemo(() => {
       if (!hasAlertsCrud) {
         return false;
@@ -436,8 +451,34 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       if (typeof bulkActions === 'boolean') {
         return bulkActions;
       }
-      return bulkActions.alertStatusActions ?? true;
+      return (bulkActions?.customBulkActions?.length || bulkActions?.alertStatusActions) ?? true;
     }, [hasAlertsCrud, selectedCount, showCheckboxes, bulkActions]);
+
+    const onResetColumns = useCallback(() => {
+      dispatch(tGridActions.updateColumns({ id, columns: defaultColumns }));
+    }, [defaultColumns, dispatch, id]);
+
+    const onToggleColumn = useCallback(
+      (columnId: string) => {
+        if (columnHeaders.some(({ id: columnHeaderId }) => columnId === columnHeaderId)) {
+          dispatch(
+            tGridActions.removeColumn({
+              columnId,
+              id,
+            })
+          );
+        } else {
+          dispatch(
+            tGridActions.upsertColumn({
+              column: getColumnHeader(columnId, defaultColumns),
+              id,
+              index: 1,
+            })
+          );
+        }
+      },
+      [columnHeaders, dispatch, id, defaultColumns]
+    );
 
     const alertToolbar = useMemo(
       () => (
@@ -447,7 +488,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           </EuiFlexItem>
           {showBulkActions && (
             <Suspense fallback={<EuiLoadingSpinner />}>
-              <StatefulAlertStatusBulkActions
+              <StatefulAlertBulkActions
+                showAlertStatusActions={showAlertStatusActions}
                 data-test-subj="bulk-actions"
                 id={id}
                 totalItems={totalSelectAllAlerts ?? totalItems}
@@ -456,6 +498,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 indexName={indexNames.join()}
                 onActionSuccess={onAlertStatusActionSuccess}
                 onActionFailure={onAlertStatusActionFailure}
+                customBulkActions={additionalBulkActions}
                 refetch={refetch}
               />
             </Suspense>
@@ -463,6 +506,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         </EuiFlexGroup>
       ),
       [
+        additionalBulkActions,
         alertCountText,
         filterQuery,
         filterStatus,
@@ -471,6 +515,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         onAlertStatusActionFailure,
         onAlertStatusActionSuccess,
         refetch,
+        showAlertStatusActions,
         showBulkActions,
         totalItems,
         totalSelectAllAlerts,
@@ -486,7 +531,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             {showBulkActions ? (
               <>
                 <Suspense fallback={<EuiLoadingSpinner />}>
-                  <StatefulAlertStatusBulkActions
+                  <StatefulAlertBulkActions
+                    showAlertStatusActions={showAlertStatusActions}
                     data-test-subj="bulk-actions"
                     id={id}
                     totalItems={totalSelectAllAlerts ?? totalItems}
@@ -495,6 +541,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                     indexName={indexNames.join()}
                     onActionSuccess={onAlertStatusActionSuccess}
                     onActionFailure={onAlertStatusActionFailure}
+                    customBulkActions={additionalBulkActions}
                     refetch={refetch}
                   />
                 </Suspense>
@@ -503,13 +550,13 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             ) : (
               <>
                 {additionalControls ?? null}
-                <StatefulFieldsBrowser
-                  data-test-subj="field-browser"
-                  browserFields={browserFields}
-                  options={fieldBrowserOptions}
-                  timelineId={id}
-                  columnHeaders={columnHeaders}
-                />
+                {triggersActionsUi.getFieldBrowser({
+                  browserFields,
+                  options: fieldBrowserOptions,
+                  columnIds: columnHeaders.map(({ id: columnId }) => columnId),
+                  onResetColumns,
+                  onToggleColumn,
+                })}
               </>
             )}
           </>
@@ -528,21 +575,26 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         showDisplaySelector: false,
       }),
       [
+        isLoading,
         alertCountText,
         showBulkActions,
+        showAlertStatusActions,
         id,
         totalSelectAllAlerts,
         totalItems,
-        fieldBrowserOptions,
         filterStatus,
         filterQuery,
         indexNames,
         onAlertStatusActionSuccess,
         onAlertStatusActionFailure,
+        onResetColumns,
+        onToggleColumn,
+        triggersActionsUi,
+        additionalBulkActions,
         refetch,
-        isLoading,
         additionalControls,
         browserFields,
+        fieldBrowserOptions,
         columnHeaders,
       ]
     );
@@ -680,6 +732,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       setEventsDeleted,
       hasAlertsCrudPermissions,
     ]);
+    const closeCellPopoverAction = dataGridRef.current?.closeCellPopover;
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
         columnHeaders.map((header) => {
@@ -690,8 +743,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               ecsData: data.map((row) => row.ecs),
               header: columnHeaders.find((h) => h.id === header.id),
               pageSize,
-              timelineId: id,
-              closeCellPopover: dataGridRef.current?.closeCellPopover,
+              scopeId: id,
+              closeCellPopover: closeCellPopoverAction,
             });
           return {
             ...header,
@@ -730,6 +783,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         dispatch,
         id,
         pageSize,
+        closeCellPopoverAction,
       ]
     );
 
@@ -779,8 +833,9 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           colIndex,
           rowRenderers,
           setCellProps,
-          timelineId: id,
+          scopeId: id,
           truncate: isDetails ? false : true,
+          closeCellPopover: closeCellPopoverAction,
         }) as React.ReactElement;
       };
       return Cell;
@@ -794,6 +849,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       renderCellValue,
       rowRenderers,
       theme,
+      closeCellPopoverAction,
     ]);
 
     const onChangeItemsPerPage = useCallback(
@@ -821,7 +877,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       <>
         <StatefulEventContext.Provider value={activeStatefulEventContext}>
           {tableView === 'gridView' && (
-            <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
+            <EuiEventTableContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
               <EuiDataGrid
                 id={'body-data-grid'}
                 data-test-subj="body-data-grid"
@@ -845,22 +901,26 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 }}
                 ref={dataGridRef}
               />
-            </EuiDataGridContainer>
+            </EuiEventTableContainer>
           )}
           {tableView === 'eventRenderedView' && (
-            <EventRenderedView
-              appId={appId}
-              alertToolbar={alertToolbar}
-              events={data}
-              leadingControlColumns={leadingTGridControlColumns ?? []}
-              onChangePage={onChangePage}
-              onChangeItemsPerPage={onChangeItemsPerPage}
-              pageIndex={activePage}
-              pageSize={pageSize}
-              pageSizeOptions={itemsPerPageOptions}
-              rowRenderers={rowRenderers}
-              totalItemCount={totalItems}
-            />
+            <EuiEventTableContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
+              <EventRenderedView
+                appId={appId}
+                alertToolbar={alertToolbar}
+                events={data}
+                getRowRenderer={getRowRenderer}
+                leadingControlColumns={leadingTGridControlColumns ?? []}
+                onChangePage={onChangePage}
+                onChangeItemsPerPage={onChangeItemsPerPage}
+                pageIndex={activePage}
+                pageSize={pageSize}
+                pageSizeOptions={itemsPerPageOptions}
+                rowRenderers={rowRenderers}
+                timelineId={id}
+                totalItemCount={totalItems}
+              />
+            </EuiEventTableContainer>
           )}
         </StatefulEventContext.Provider>
       </>
@@ -877,25 +937,20 @@ const makeMapStateToProps = () => {
   ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
   const getTGrid = tGridSelectors.getTGridByIdSelector();
-  const mapStateToProps = (
-    state: TimelineState,
-    { browserFields, id, hasAlertsCrud }: OwnProps
-  ) => {
-    const timeline: TGridModel = getTGrid(state, id);
+  const mapStateToProps = (state: TableState, { browserFields, id, hasAlertsCrud }: OwnProps) => {
+    const dataTable: TGridModel = getTGrid(state, id);
     const {
       columns,
-      excludedRowRendererIds,
       isSelectAllChecked,
       loadingEventIds,
       selectedEventIds,
       showCheckboxes,
       sort,
       isLoading,
-    } = timeline;
+    } = dataTable;
 
     return {
       columnHeaders: memoizedColumnHeaders(columns, browserFields),
-      excludedRowRendererIds,
       isSelectAllChecked,
       loadingEventIds,
       isLoading,

@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode, useMemo } from 'react';
-import {
-  EuiBasicTable,
-  EuiSpacer,
-  RIGHT_ALIGNMENT,
-  LEFT_ALIGNMENT,
-  HorizontalAlignment,
-} from '@elastic/eui';
+import React, { FC, useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { Axis, BarSeries, Chart, Settings, ScaleType } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+import { TopValues } from '../../../top_values';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { getTFPercentage } from '../../utils';
@@ -44,72 +38,23 @@ function getFormattedValue(value: number, totalCount: number): string {
 
 const BOOLEAN_DISTRIBUTION_CHART_HEIGHT = 70;
 
-export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
+export const BooleanContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
   const formattedPercentages = useMemo(() => getTFPercentage(config), [config]);
   const theme = useDataVizChartTheme();
   if (!formattedPercentages) return null;
 
-  const { trueCount, falseCount, count } = formattedPercentages;
-  const summaryTableItems = [
-    {
-      function: 'true',
-      display: (
-        <FormattedMessage
-          id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.trueCountLabel"
-          defaultMessage="true"
-        />
-      ),
-      value: getFormattedValue(trueCount, count),
-    },
-    {
-      function: 'false',
-      display: (
-        <FormattedMessage
-          id="xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.falseCountLabel"
-          defaultMessage="false"
-        />
-      ),
-      value: getFormattedValue(falseCount, count),
-    },
-  ];
-  const summaryTableColumns = [
-    {
-      field: 'function',
-      name: '',
-      render: (_: string, summaryItem: { display: ReactNode }) => summaryItem.display,
-      width: '25px',
-      align: LEFT_ALIGNMENT as HorizontalAlignment,
-    },
-    {
-      field: 'value',
-      name: '',
-      render: (v: string) => <strong>{v}</strong>,
-      align: RIGHT_ALIGNMENT as HorizontalAlignment,
-    },
-  ];
-
-  const summaryTableTitle = i18n.translate(
-    'xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.summaryTableTitle',
-    {
-      defaultMessage: 'Summary',
-    }
-  );
-
+  const { count } = formattedPercentages;
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerBooleanContent'}>
       <DocumentStatsTable config={config} />
 
-      <ExpandedRowPanel className={'dvSummaryTable__wrapper dvPanel__wrapper'}>
-        <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
-        <EuiBasicTable
-          className={'dvSummaryTable'}
-          compressed
-          items={summaryTableItems}
-          columns={summaryTableColumns}
-          tableCaption={summaryTableTitle}
-        />
-      </ExpandedRowPanel>
+      <TopValues
+        stats={config.stats}
+        fieldFormat={fieldFormat}
+        barColor="success"
+        onAddFilter={onAddFilter}
+      />
 
       <ExpandedRowPanel className={'dvPanel__wrapper dvPanel--uniform'}>
         <ExpandedRowFieldHeader>

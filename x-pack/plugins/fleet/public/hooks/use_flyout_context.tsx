@@ -27,7 +27,9 @@ export const FlyoutContextProvider: React.FunctionComponent = ({ children }) => 
     <agentFlyoutContext.Provider
       value={{
         isEnrollmentFlyoutOpen,
-        openEnrollmentFlyout: () => setIsEnrollmentFlyoutOpen(true),
+        openEnrollmentFlyout: () => {
+          setIsEnrollmentFlyoutOpen(true);
+        },
         closeEnrollmentFlyout: () => setIsEnrollmentFlyoutOpen(false),
         isFleetServerFlyoutOpen,
         openFleetServerFlyout: () => setIsFleetServerFlyoutOpen(true),

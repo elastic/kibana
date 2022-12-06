@@ -8,7 +8,8 @@
 
 export * from './index_patterns_fetcher';
 export {
-  shouldReadFieldFromDocValues,
-  mergeCapabilitiesWithFields,
   getCapabilitiesForRollupIndices,
+  mergeCapabilitiesWithFields,
+  shouldReadFieldFromDocValues,
 } from './lib';
+export type { RollupIndexCapability } from './lib';

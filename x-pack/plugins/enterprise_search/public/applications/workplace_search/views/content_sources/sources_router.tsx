@@ -28,6 +28,7 @@ import {
 import { AddSource, AddSourceList, GitHubViaApp } from './components/add_source';
 import { AddCustomSource } from './components/add_source/add_custom_source';
 import { ExternalConnectorConfig } from './components/add_source/add_external_connector';
+import { AddSourceBYOIntro } from './components/add_source/add_source_byo_intro';
 import { AddSourceChoice } from './components/add_source/add_source_choice';
 import { AddSourceIntro } from './components/add_source/add_source_intro';
 import { OrganizationSources } from './organization_sources';
@@ -80,6 +81,13 @@ export const SourcesRouter: React.FC = () => {
       </Route>
       <Route
         exact
+        path={`${getSourcesPath(getAddPath('external'), isOrganization)}/intro`}
+        data-test-subj="ConnectorBYOIntroRoute"
+      >
+        <AddSourceBYOIntro />
+      </Route>
+      <Route
+        exact
         path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/intro`}
         data-test-subj="ConnectorIntroRoute"
       >
@@ -91,6 +99,13 @@ export const SourcesRouter: React.FC = () => {
         data-test-subj="ConnectorChoiceRoute"
       >
         <AddSourceChoice />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath('external'), isOrganization)}/connector_registration`}
+        data-test-subj="ExternalConnectorConfigRoute"
+      >
+        <ExternalConnectorConfig />
       </Route>
       <Route
         exact

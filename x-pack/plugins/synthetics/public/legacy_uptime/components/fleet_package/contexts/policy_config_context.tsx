@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useRouteMatch } from 'react-router-dom';
+import { MONITOR_ADD_ROUTE } from '../../../../../common/constants';
 import { DEFAULT_NAMESPACE_STRING } from '../../../../../common/constants/monitor_defaults';
 import {
   ScheduleUnit,
+  SourceType,
   MonitorServiceLocations,
   ThrottlingOptions,
   DEFAULT_THROTTLING,
@@ -39,6 +42,7 @@ interface IPolicyConfigContext {
   defaultNamespace?: string;
   namespace?: string;
   throttling: ThrottlingOptions;
+  sourceType?: SourceType;
 }
 
 export interface IPolicyConfigContextProvider {
@@ -54,9 +58,10 @@ export interface IPolicyConfigContextProvider {
   isZipUrlSourceEnabled?: boolean;
   allowedScheduleUnits?: ScheduleUnit[];
   throttling?: ThrottlingOptions;
+  sourceType?: SourceType;
 }
 
-export const initialValue = DataStream.HTTP;
+export const initialMonitorTypeValue = DataStream.HTTP;
 
 export const defaultContext: IPolicyConfigContext = {
   setMonitorType: (_monitorType: React.SetStateAction<DataStream>) => {
@@ -79,8 +84,8 @@ export const defaultContext: IPolicyConfigContext = {
   setNamespace: (_namespace: React.SetStateAction<string>) => {
     throw new Error('setNamespace was not initialized, set it when you invoke the context');
   },
-  monitorType: initialValue, // mutable
-  defaultMonitorType: initialValue, // immutable,
+  monitorType: initialMonitorTypeValue, // mutable
+  defaultMonitorType: initialMonitorTypeValue, // immutable,
   runsOnService: false,
   defaultIsTLSEnabled: false,
   defaultIsZipUrlTLSEnabled: false,
@@ -91,6 +96,7 @@ export const defaultContext: IPolicyConfigContext = {
   allowedScheduleUnits: [ScheduleUnit.MINUTES, ScheduleUnit.SECONDS],
   defaultNamespace: DEFAULT_NAMESPACE_STRING,
   throttling: DEFAULT_THROTTLING,
+  sourceType: SourceType.UI,
 };
 
 export const PolicyConfigContext = createContext(defaultContext);
@@ -98,7 +104,7 @@ export const PolicyConfigContext = createContext(defaultContext);
 export function PolicyConfigContextProvider<ExtraFields = unknown>({
   children,
   throttling = DEFAULT_THROTTLING,
-  defaultMonitorType = initialValue,
+  defaultMonitorType = initialMonitorTypeValue,
   defaultIsTLSEnabled = false,
   defaultIsZipUrlTLSEnabled = false,
   defaultName = '',
@@ -108,6 +114,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
   runsOnService = false,
   isZipUrlSourceEnabled = true,
   allowedScheduleUnits = [ScheduleUnit.MINUTES, ScheduleUnit.SECONDS],
+  sourceType,
 }: IPolicyConfigContextProvider) {
   const [monitorType, setMonitorType] = useState<DataStream>(defaultMonitorType);
   const [name, setName] = useState<string>(defaultName);
@@ -115,6 +122,14 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
   const [isTLSEnabled, setIsTLSEnabled] = useState<boolean>(defaultIsTLSEnabled);
   const [isZipUrlTLSEnabled, setIsZipUrlTLSEnabled] = useState<boolean>(defaultIsZipUrlTLSEnabled);
   const [namespace, setNamespace] = useState<string>(defaultNamespace);
+
+  const isAddMonitorRoute = useRouteMatch(MONITOR_ADD_ROUTE);
+
+  useEffect(() => {
+    if (isAddMonitorRoute?.isExact) {
+      setMonitorType(DataStream.BROWSER);
+    }
+  }, [isAddMonitorRoute?.isExact]);
 
   const value = useMemo(() => {
     return {
@@ -140,6 +155,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
       namespace,
       setNamespace,
       throttling,
+      sourceType,
     } as IPolicyConfigContext;
   }, [
     monitorType,
@@ -158,6 +174,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
     allowedScheduleUnits,
     namespace,
     throttling,
+    sourceType,
   ]);
 
   return <PolicyConfigContext.Provider value={value} children={children} />;

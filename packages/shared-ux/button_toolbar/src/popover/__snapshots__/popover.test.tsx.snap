@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<ToolbarPopover /> is rendered 1`] = `
+<div
+  class="euiPopover emotion-euiPopover"
+  intl="[object Object]"
+>
+  <div
+    class="euiPopover__anchor css-16vtueo-render"
+  >
+    <button
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+      type="button"
+    >
+      <span
+        class="emotion-euiButtonDisplayContent"
+      >
+        <span
+          class="eui-textTruncate"
+        >
+          test
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;

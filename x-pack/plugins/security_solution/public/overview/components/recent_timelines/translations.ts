@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ERROR_RETRIEVING_USER_DETAILS = i18n.translate(
-  'xpack.securitySolution.recentTimelines.errorRetrievingUserDetailsMessage',
-  {
-    defaultMessage: 'Recent Timelines: An error occurred while retrieving user details',
-  }
-);
-
 export const FAVORITES = i18n.translate(
   'xpack.securitySolution.recentTimelines.favoritesButtonLabel',
   {

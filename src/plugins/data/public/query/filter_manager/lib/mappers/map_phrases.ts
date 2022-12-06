@@ -6,19 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Filter, isPhrasesFilter } from '@kbn/es-query';
+import { Filter, PhrasesFilter, isPhrasesFilter } from '@kbn/es-query';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
-import { FilterValueFormatter } from '../../../../../common';
-
-const getFormattedValueFn = (params: any) => {
-  return (formatter?: FilterValueFormatter) => {
-    return params
-      .map((v: any) => {
-        return formatter ? formatter.convert(v) : v;
-      })
-      .join(', ');
-  };
-};
+export function getPhrasesDisplayValue(filter: PhrasesFilter, formatter?: FieldFormat) {
+  return filter.meta.params
+    .map((v: string) => {
+      return formatter?.convert(v) ?? v;
+    })
+    .join(', ');
+}
 
 export const mapPhrases = (filter: Filter) => {
   if (!isPhrasesFilter(filter)) {
@@ -30,7 +27,7 @@ export const mapPhrases = (filter: Filter) => {
   return {
     type,
     key,
-    value: getFormattedValueFn(params),
+    value: params,
     params,
   };
 };

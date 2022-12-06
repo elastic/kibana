@@ -7,7 +7,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { Note } from '../../lib/note';
+import type { Note } from '../../lib/note';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/app');
 

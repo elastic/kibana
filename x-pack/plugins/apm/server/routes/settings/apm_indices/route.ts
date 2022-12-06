@@ -77,7 +77,7 @@ const saveApmIndicesRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<
-    import('./../../../../../../../src/core/types/saved_objects').SavedObject<{}>
+    import('./../../../../../../../src/core/types').SavedObject<{}>
   > => {
     const { params, context } = resources;
     const { body } = params;

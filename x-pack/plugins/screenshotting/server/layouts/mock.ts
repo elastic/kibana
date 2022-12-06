@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { LayoutTypes } from '../../common';
 import { createLayout, Layout } from '.';
 
 export function createMockLayout(): Layout {
   const layout = createLayout({
-    id: LayoutTypes.PRESERVE_LAYOUT,
+    id: 'preserve_layout',
     dimensions: { height: 100, width: 100 },
     zoom: 1,
   }) as Layout;

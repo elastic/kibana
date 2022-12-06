@@ -11,7 +11,7 @@ import { LIST_INDEX, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 import { getListClientMock } from './list_client.mock';
 
 describe('list_client', () => {
-  describe('Mock client sanity checks (not exhaustive tests against it)', () => {
+  describe('Mock client checks (not exhaustive tests against it)', () => {
     test('it returns the get list index as expected', () => {
       const mock = getListClientMock();
       expect(mock.getListIndex()).toEqual(LIST_INDEX);

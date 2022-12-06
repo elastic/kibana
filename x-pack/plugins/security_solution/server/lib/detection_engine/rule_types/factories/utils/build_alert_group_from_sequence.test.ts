@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
 import { ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 
@@ -16,8 +16,8 @@ import {
   objectPairIntersection,
 } from './build_alert_group_from_sequence';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
-import { getCompleteRuleMock, getQueryRuleParams } from '../../../schemas/rule_schemas.mock';
-import { QueryRuleParams } from '../../../schemas/rule_schemas';
+import { getCompleteRuleMock, getQueryRuleParams } from '../../../rule_schema/mocks';
+import type { QueryRuleParams } from '../../../rule_schema';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -58,7 +58,9 @@ describe('buildAlert', () => {
       completeRule,
       'allFields',
       SPACE_ID,
-      jest.fn()
+      jest.fn(),
+      completeRule.ruleParams.index as string[],
+      undefined
     );
     expect(alertGroup.length).toEqual(3);
     expect(alertGroup[0]).toEqual(

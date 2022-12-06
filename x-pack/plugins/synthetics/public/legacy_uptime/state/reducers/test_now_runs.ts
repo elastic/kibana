@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { createReducer, PayloadAction } from '@reduxjs/toolkit';
-import { WritableDraft } from 'immer/dist/types/types-external';
-import { IHttpFetchError } from '@kbn/core/public';
+import { createReducer, type PayloadAction } from '@reduxjs/toolkit';
+import type { WritableDraft } from 'immer/dist/types/types-external';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
-  Locations,
+  type Locations,
   ScheduleUnit,
-  ServiceLocationErrors,
-  SyntheticsMonitorSchedule,
+  type ServiceLocationErrors,
+  type SyntheticsMonitorSchedule,
 } from '../../../../common/runtime_types';
 import { clearTestNowMonitorAction, testNowMonitorAction } from '../actions';
-import { TestNowResponse } from '../api';
-import { AppState } from '..';
+import type { TestNowResponse } from '../api';
+import type { AppState } from '..';
 
 export enum TestRunStats {
   LOADING = 'loading',

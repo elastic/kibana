@@ -102,6 +102,44 @@ describe('geo_json_clean_and_validate', () => {
     });
   });
 
+  it('should reduce coordinate precision', () => {
+    const ludicrousPrecisionGeoJson = {
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [108.28125, 61.77312286453146],
+            [72.0703125, 46.31658418182218],
+            [99.49218749999999, 22.917922936146045],
+            [133.2421875, 27.059125784374068],
+            [139.5703125, 52.908902047770255],
+            [108.28125, 61.77312286453146],
+          ],
+        ],
+      },
+    };
+
+    expect(geoJsonCleanAndValidate(ludicrousPrecisionGeoJson)).toEqual({
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [108.28125, 61.773123],
+            [72.070313, 46.316584],
+            [99.492187, 22.917923],
+            [133.242188, 27.059126],
+            [139.570313, 52.908902],
+            [108.28125, 61.773123],
+          ],
+        ],
+      },
+    });
+  });
+
   it('should reverse counter-clockwise winding order', () => {
     const counterClockwiseGeoJson = {
       type: 'Feature',

@@ -11,7 +11,7 @@ import { APP_ID } from '../../../../../common/constants';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { getCaseIdsFromAlertId } from './api';
 import { CASES_FROM_ALERTS_FAILURE } from './translations';
-import { CasesFromAlertsResponse } from './types';
+import type { CasesFromAlertsResponse } from './types';
 
 interface CasesFromAlertsStatus {
   loading: boolean;

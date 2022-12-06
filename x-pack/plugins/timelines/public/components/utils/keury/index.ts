@@ -71,23 +71,27 @@ export const convertToBuildEsQuery = ({
   filters,
 }: {
   config: EsQueryConfig;
-  indexPattern: DataViewBase;
+  indexPattern: DataViewBase | undefined;
   queries: Query[];
   filters: Filter[];
-}) => {
+}): [string, undefined] | [undefined, Error] => {
   try {
-    return JSON.stringify(
-      buildEsQuery(
-        indexPattern,
-        queries,
-        filters.filter((f) => f.meta.disabled === false),
-        {
-          ...config,
-          dateFormatTZ: undefined,
-        }
-      )
-    );
-  } catch (exp) {
-    return '';
+    return [
+      JSON.stringify(
+        buildEsQuery(
+          indexPattern,
+          queries,
+          filters.filter((f) => f.meta.disabled === false),
+          {
+            nestedIgnoreUnmapped: true, // by default, prevent shard failures when unmapped `nested` fields are queried: https://github.com/elastic/kibana/issues/130340
+            ...config,
+            dateFormatTZ: undefined,
+          }
+        )
+      ),
+      undefined,
+    ];
+  } catch (error) {
+    return [undefined, error];
   }
 };

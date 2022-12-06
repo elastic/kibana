@@ -15,8 +15,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const config = getService('config');
   const log = getService('log');
   const reporting = getService('reporting');
+  const png = getService('png');
 
-  describe('dashboard reporting', () => {
+  describe('dashboard reporting: creates a map report', () => {
     // helper function to check the difference between the new image and the baseline
     const measurePngDifference = async (fileName: string) => {
       const url = await PageObjects.reporting.getReportURL(60000);
@@ -31,11 +32,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       log.debug(`session report path: ${sessionReportPath}`);
 
       expect(sessionReportPath).not.to.be(null);
-      return await reporting.checkIfPngsMatch(
+      return await png.checkIfPngsMatch(
         sessionReportPath,
         PageObjects.reporting.getBaselineReportPath(fileName, 'png', REPORTS_FOLDER),
-        config.get('screenshots.directory'),
-        log
+        config.get('screenshots.directory')
       );
     };
 
@@ -43,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await reporting.deleteAllReports();
     });
 
-    it('creates a map report using sample geo data', async function () {
+    it('PNG file matches the baseline image, using sample geo data', async function () {
       await reporting.initEcommerce();
 
       await PageObjects.common.navigateToApp('dashboard');
@@ -57,7 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await reporting.teardownEcommerce();
     });
 
-    it('creates a map report using embeddable example', async function () {
+    it('PNG file matches the baseline image, using embeddable example', async function () {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
       await PageObjects.reporting.openPngReportingPanel();

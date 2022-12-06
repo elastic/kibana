@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TreeFetcherParameters } from '../types';
+import type { TreeFetcherParameters } from '../types';
 
 import { equal } from './tree_fetcher_parameters';
 describe('TreeFetcherParameters#equal:', () => {

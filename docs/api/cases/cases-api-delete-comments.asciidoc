@@ -4,7 +4,13 @@
 <titleabbrev>Delete comments</titleabbrev>
 ++++
 
-Deletes one or all comments from a case.
+Deletes one or all comments and alerts from a case.
+
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification]. For a preview, check out <<case-apis>>.
+====
 
 === {api-request-title}
 
@@ -18,10 +24,10 @@ Deletes one or all comments from a case.
 
 === {api-prereq-title}
 
-You must have `all` privileges for the *Cases* feature in the *Management*,
-*{observability}*, or *Security* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
-`owner` of the cases you're updating.
+You must have `read` or `all` privileges and the `delete` sub-feature privilege
+for the *Cases* feature in the *Management*, *{observability}*, or *Security*
+section of the <<kibana-feature-privileges,{kib} feature privileges>>, depending
+on the `owner` of the cases you're updating.
 
 === {api-path-parms-title}
 

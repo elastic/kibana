@@ -9,11 +9,7 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { DashboardPlugin } from './plugin';
 
-export {
-  DashboardContainer,
-  DashboardContainerFactoryDefinition,
-  DASHBOARD_CONTAINER_TYPE,
-} from './application';
+export { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
@@ -23,7 +19,6 @@ export {
   cleanEmptyKeys,
 } from './locator';
 
-export type { DashboardSavedObject } from './saved_dashboards';
 export type { SavedDashboardPanel, DashboardContainerInput } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {

@@ -6,14 +6,10 @@
  */
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from '@elastic/eui';
+import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiSelectableListItem } from '@elastic/eui';
 import { RuleStatus } from '../../../../types';
 
 const statuses: RuleStatus[] = ['enabled', 'disabled', 'snoozed'];
-
-const optionStyles = {
-  textTransform: 'capitalize' as const,
-};
 
 const getOptionDataTestSubj = (status: RuleStatus) => `ruleStatusFilterOption-${status}`;
 
@@ -53,6 +49,31 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
     setIsPopoverOpen((prevIsOpen) => !prevIsOpen);
   }, [setIsPopoverOpen]);
 
+  const renderRuleStateOptions = (status: 'enabled' | 'disabled' | 'snoozed') => {
+    if (status === 'enabled') {
+      return (
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.enabledOptionText"
+          defaultMessage="Rule is enabled"
+        />
+      );
+    } else if (status === 'disabled') {
+      return (
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.disabledOptionText"
+          defaultMessage="Rule is disabled"
+        />
+      );
+    } else if (status === 'snoozed') {
+      return (
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.snoozedOptionText"
+          defaultMessage="Rule has snoozed"
+        />
+      );
+    }
+  };
+
   return (
     <EuiFilterGroup data-test-subj={dataTestSubj}>
       <EuiPopover
@@ -68,8 +89,8 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
             onClick={onClick}
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.ruleDetails.ruleStatusFilterButton"
-              defaultMessage="Status"
+              id="xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilterButton"
+              defaultMessage="Rule state"
             />
           </EuiFilterButton>
         }
@@ -77,15 +98,14 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
         <div data-test-subj={selectDataTestSubj}>
           {statuses.map((status) => {
             return (
-              <EuiFilterSelectItem
+              <EuiSelectableListItem
                 key={status}
-                style={optionStyles}
                 data-test-subj={optionDataTestSubj(status)}
                 onClick={onFilterItemClick(status)}
                 checked={selectedStatuses.includes(status) ? 'on' : undefined}
               >
-                {status}
-              </EuiFilterSelectItem>
+                {renderRuleStateOptions(status)}
+              </EuiSelectableListItem>
             );
           })}
         </div>

@@ -12,6 +12,11 @@ import { UsageStats } from './types';
 import { REDACTED_KEYWORD } from '../../../common/constants';
 import { stackManagementSchema } from './schema';
 
+/**
+ * These config keys should be redacted from any usage data, they are only used for implementation details of the config saved object.
+ */
+const CONFIG_KEYS_TO_REDACT = ['buildNum', 'isDefaultIndexMigrated'];
+
 export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClient | undefined) {
   return async function fetchUsageStats(): Promise<UsageStats | undefined> {
     const uiSettingsClient = getUiSettingsClient();
@@ -21,7 +26,7 @@ export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClien
 
     const userProvided = await uiSettingsClient.getUserProvided();
     const modifiedEntries = Object.entries(userProvided)
-      .filter(([key]) => key !== 'buildNum')
+      .filter(([key]) => !CONFIG_KEYS_TO_REDACT.includes(key))
       .reduce((obj: Record<string, unknown>, [key, { userValue }]) => {
         const sensitive = uiSettingsClient.isSensitive(key);
         obj[key] = sensitive ? REDACTED_KEYWORD : userValue;

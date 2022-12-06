@@ -8,6 +8,13 @@
 
 import { parse } from 'eslint/lib/options';
 
+let quiet = true;
+if (process.argv.includes('--no-quiet')) {
+  quiet = false;
+} else {
+  process.argv.push('--quiet');
+}
+
 const options = parse(process.argv);
 process.env.KIBANA_RESOLVER_HARD_CACHE = 'true';
 
@@ -25,3 +32,11 @@ if (!process.argv.includes('--ext')) {
 
 // common-js is required so that logic before this executes before loading eslint
 require('eslint/bin/eslint');
+
+if (quiet) {
+  process.on('exit', (code) => {
+    if (!code) {
+      console.log('✅ no eslint errors found');
+    }
+  });
+}

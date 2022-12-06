@@ -15,12 +15,17 @@ import {
   SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../mock';
-import { createStore, State } from '../../store';
-import { UpdateQueryParams, upsertQuery } from '../../store/inputs/helpers';
+import type { State } from '../../store';
+import { createStore } from '../../store';
+import type { UpdateQueryParams } from '../../store/inputs/helpers';
+import { upsertQuery } from '../../store/inputs/helpers';
 import { cloneDeep } from 'lodash';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { CASES_FEATURE_ID } from '../../../../common/constants';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { allCasesCapabilities, allCasesPermissions } from '../../../cases_test_utils';
+import { InputsModelId } from '../../store/inputs/constants';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return {
@@ -41,7 +46,7 @@ describe('VisualizationActions', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
   const newQuery: UpdateQueryParams = {
-    inputId: 'global',
+    inputId: InputsModelId.global,
     id: 'networkDnsHistogramQuery',
     inspect: {
       dsl: ['mockDsl'],
@@ -52,7 +57,13 @@ describe('VisualizationActions', () => {
     state: state.inputs,
   };
 
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
   const props = {
     lensAttributes: dnsTopDomainsLensAttributes,
     queryId: 'networkDnsHistogramQuery',
@@ -68,6 +79,9 @@ describe('VisualizationActions', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    const cases = mockCasesContract();
+    cases.helpers.getUICapabilities.mockReturnValue(allCasesPermissions());
+
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         lens: {
@@ -86,7 +100,7 @@ describe('VisualizationActions', () => {
           },
         },
         application: {
-          capabilities: { [CASES_FEATURE_ID]: { crud_cases: true, read_cases: true } },
+          capabilities: { [CASES_FEATURE_ID]: allCasesCapabilities() },
           getUrlForApp: jest.fn(),
           navigateToApp: jest.fn(),
         },
@@ -110,7 +124,13 @@ describe('VisualizationActions', () => {
     });
     const myState = cloneDeep(state);
     myState.inputs = upsertQuery(newQuery);
-    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      myState,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
   });
 
   test('Should render VisualizationActions button', () => {

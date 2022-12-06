@@ -24,7 +24,7 @@ import {
   mapAndFlattenFilters,
   getFieldDisplayValueFromFilter,
 } from '@kbn/data-plugin/public';
-import { Filter } from '@kbn/data-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { FilterLabel } from '../filter_bar';
 

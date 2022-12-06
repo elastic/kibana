@@ -10,9 +10,11 @@ import { resolve, join } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from './page_objects';
+import { getAllExternalServiceSimulatorPaths } from '../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 // .server-log is specifically not enabled
 const enabledActionTypes = [
+  '.opsgenie',
   '.email',
   '.index',
   '.pagerduty',
@@ -22,6 +24,7 @@ const enabledActionTypes = [
   '.servicenow',
   '.servicenow-sir',
   '.slack',
+  '.tines',
   '.webhook',
   'test.authorization',
   'test.failing',
@@ -50,8 +53,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     pageObjects,
     // list paths to the files that contain your plugins tests
     testFiles: [
-      resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/triggers_actions_ui'),
+      resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/uptime'),
       resolve(__dirname, './apps/ml'),
       resolve(__dirname, './apps/cases'),
@@ -60,6 +63,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('apps'),
       triggersActions: {
         pathname: '/app/management/insightsAndAlerting/triggersActions',
+      },
+      triggersActionsConnectors: {
+        pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors',
       },
     },
     esTestCluster: {
@@ -73,9 +79,18 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.hosts=https://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
+        `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'cases')}`,
+        `--plugin-path=${join(
+          __dirname,
+          '..',
+          'alerting_api_integration',
+          'common',
+          'fixtures',
+          'plugins',
+          'actions_simulators'
+        )}`,
         `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
           'internalAlertsTable',
-          'internalShareableComponentsSandbox',
           'ruleTagFilter',
           'ruleStatusFilter',
         ])}`,
@@ -104,6 +119,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             },
           },
         })}`,
+        `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
       ],
     },
     security: {
@@ -119,6 +135,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             },
           ],
         },
+        only_actions_role: {
+          kibana: [
+            {
+              feature: {
+                actions: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
         discover_alert: {
           kibana: [
             {
@@ -127,6 +153,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
                 stackAlerts: ['all'],
                 discover: ['all'],
                 advancedSettings: ['all'],
+                indexPatterns: ['all'],
               },
               spaces: ['*'],
             },

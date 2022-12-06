@@ -11,14 +11,14 @@ import { Aggregators } from '../../../../../common/alerting/metrics';
 export const createTimerange = (
   interval: number,
   aggType: Aggregators,
-  timeframe?: { end: number; start?: number }
+  timeframe?: { end: number; start?: number },
+  lastPeriodEnd?: number
 ) => {
   const to = moment(timeframe ? timeframe.end : Date.now()).valueOf();
 
   // Rate aggregations need 5 buckets worth of data
-  const minimumBuckets = aggType === Aggregators.RATE ? 5 : 1;
-
-  const calculatedFrom = to - interval * minimumBuckets;
+  const minimumBuckets = aggType === Aggregators.RATE ? 2 : 1;
+  const calculatedFrom = lastPeriodEnd ? lastPeriodEnd - interval : to - interval * minimumBuckets;
 
   // Use either the timeframe.start when the start is less then calculatedFrom
   // OR use the calculatedFrom

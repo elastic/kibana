@@ -7,10 +7,27 @@
 
 import { cloneDeep } from 'lodash/fp';
 import { Filter, EsQueryConfig, FilterStateStore } from '@kbn/es-query';
-import { DataProviderType } from '../../../common/types/timeline';
-import { mockBrowserFields, mockDataProviders, mockIndexPattern } from '../../mock';
 
-import { buildGlobalQuery, combineQueries, resolverIsShowing, showGlobalFilters } from './helpers';
+import {
+  DataProviderType,
+  EXISTS_OPERATOR,
+  IS_ONE_OF_OPERATOR,
+  IS_OPERATOR,
+} from '../../../common/types/timeline';
+import {
+  buildExistsQueryMatch,
+  buildGlobalQuery,
+  buildIsOneOfQueryMatch,
+  buildIsQueryMatch,
+  combineQueries,
+  getDefaultViewSelection,
+  isSelectableView,
+  isStringOrNumberArray,
+  isViewSelection,
+  resolverIsShowing,
+} from './helpers';
+import { mockBrowserFields, mockDataProviders, mockIndexPattern } from '../../mock';
+import { TableId } from '../../types';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
 
@@ -225,7 +242,7 @@ describe('Combined Queries', () => {
     ignoreFilterIfFieldNotInIndex: true,
     dateFormatTZ: 'America/New_York',
   };
-  test('No Data Provider & No kqlQuery & and isEventViewer is false', () => {
+  test('No Data Provider & No kqlQuery', () => {
     expect(
       combineQueries({
         config,
@@ -239,26 +256,7 @@ describe('Combined Queries', () => {
     ).toBeNull();
   });
 
-  test('No Data Provider & No kqlQuery & isEventViewer is true', () => {
-    const isEventViewer = true;
-    expect(
-      combineQueries({
-        config,
-        dataProviders: [],
-        indexPattern: mockIndexPattern,
-        browserFields: mockBrowserFields,
-        filters: [],
-        kqlQuery: { query: '', language: 'kuery' },
-        kqlMode: 'search',
-        isEventViewer,
-      })
-    ).toEqual({
-      filterQuery: '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}',
-    });
-  });
-
   test('No Data Provider & No kqlQuery & with Filters', () => {
-    const isEventViewer = true;
     expect(
       combineQueries({
         config,
@@ -293,7 +291,6 @@ describe('Combined Queries', () => {
         ],
         kqlQuery: { query: '', language: 'kuery' },
         kqlMode: 'search',
-        isEventViewer,
       })
     ).toEqual({
       filterQuery:
@@ -538,6 +535,101 @@ describe('Combined Queries', () => {
     );
   });
 
+  test('Disabled Data Provider and kqlQuery', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].enabled = false;
+    const { filterQuery } = combineQueries({
+      config,
+      dataProviders,
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: '_id:*', language: 'kuery' },
+      kqlMode: 'search',
+    })!;
+
+    const expectQueryString = JSON.stringify({
+      bool: {
+        must: [],
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  exists: {
+                    field: '_id',
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    });
+
+    expect(filterQuery).toStrictEqual(expectQueryString);
+  });
+
+  test('Both disabled & enabled data provider and kqlQuery', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
+    dataProviders[0].enabled = false;
+    const { filterQuery } = combineQueries({
+      config,
+      dataProviders,
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: '_id:*', language: 'kuery' },
+      kqlMode: 'search',
+    })!;
+
+    const expectQueryString = JSON.stringify({
+      bool: {
+        must: [],
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          [dataProviders[1].queryMatch.field]: dataProviders[1].queryMatch.value,
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+                {
+                  bool: {
+                    should: [
+                      {
+                        exists: {
+                          field: '_id',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    });
+
+    expect(filterQuery).toStrictEqual(expectQueryString);
+  });
+
   describe('resolverIsShowing', () => {
     test('it returns true when graphEventId is NOT an empty string', () => {
       expect(resolverIsShowing('a valid id')).toBe(true);
@@ -552,29 +644,385 @@ describe('Combined Queries', () => {
     });
   });
 
-  describe('showGlobalFilters', () => {
-    test('it returns false when `globalFullScreen` is true and `graphEventId` is NOT an empty string, because Resolver IS showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: 'a valid id' })).toBe(false);
+  describe('view selection', () => {
+    const validViewSelections = ['gridView', 'eventRenderedView'];
+    const invalidViewSelections = [
+      'gRiDvIeW',
+      'EvEnTrEnDeReDvIeW',
+      'anything else',
+      '',
+      1234,
+      {},
+      undefined,
+      null,
+    ];
+
+    const selectableViews: TableId[] = [
+      TableId.alertsOnAlertsPage,
+      TableId.alertsOnRuleDetailsPage,
+    ];
+
+    const exampleNonSelectableViews: string[] = [
+      TableId.hostsPageEvents,
+      TableId.usersPageEvents,
+      'foozle',
+      '',
+    ];
+
+    describe('isSelectableView', () => {
+      selectableViews.forEach((timelineId) => {
+        test(`it returns true (for selectable view) timelineId ${timelineId}`, () => {
+          expect(isSelectableView(timelineId)).toBe(true);
+        });
+      });
+
+      exampleNonSelectableViews.forEach((timelineId) => {
+        test(`it returns false (for NON-selectable view) timelineId ${timelineId}`, () => {
+          expect(isSelectableView(timelineId)).toBe(false);
+        });
+      });
     });
 
-    test('it returns true when `globalFullScreen` is true and `graphEventId` is undefined, because Resolver is NOT showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: undefined })).toBe(true);
+    describe('isViewSelection', () => {
+      validViewSelections.forEach((value) => {
+        test(`it returns true when value is valid: ${value}`, () => {
+          expect(isViewSelection(value)).toBe(true);
+        });
+      });
+
+      invalidViewSelections.forEach((value) => {
+        test(`it returns false when value is invalid: ${value}`, () => {
+          expect(isViewSelection(value)).toBe(false);
+        });
+      });
     });
 
-    test('it returns true when `globalFullScreen` is true and `graphEventId` is an empty string, because Resolver is NOT showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: '' })).toBe(true);
+    describe('getDefaultViewSelection', () => {
+      describe('NON-selectable views', () => {
+        exampleNonSelectableViews.forEach((timelineId) => {
+          describe('given valid values', () => {
+            validViewSelections.forEach((value) => {
+              test(`it ALWAYS returns 'gridView' for NON-selectable timelineId ${timelineId}, with valid value: ${value}`, () => {
+                expect(getDefaultViewSelection({ timelineId, value })).toEqual('gridView');
+              });
+            });
+          });
+
+          describe('given invalid values', () => {
+            invalidViewSelections.forEach((value) => {
+              test(`it ALWAYS returns 'gridView' for NON-selectable timelineId ${timelineId}, with invalid value: ${value}`, () => {
+                expect(getDefaultViewSelection({ timelineId, value })).toEqual('gridView');
+              });
+            });
+          });
+        });
+      });
     });
 
-    test('it returns true when `globalFullScreen` is false and `graphEventId` is NOT an empty string, because Resolver IS showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: 'a valid id' })).toBe(true);
-    });
+    describe('selectable views', () => {
+      selectableViews.forEach((timelineId) => {
+        describe('given valid values', () => {
+          validViewSelections.forEach((value) => {
+            test(`it returns ${value} for selectable timelineId ${timelineId}, with valid value: ${value}`, () => {
+              expect(getDefaultViewSelection({ timelineId, value })).toEqual(value);
+            });
+          });
+        });
 
-    test('it returns true when `globalFullScreen` is false and `graphEventId` is undefined, because Resolver is NOT showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: undefined })).toBe(true);
+        describe('given INvalid values', () => {
+          invalidViewSelections.forEach((value) => {
+            test(`it ALWAYS returns 'gridView' for selectable timelineId ${timelineId}, with invalid value: ${value}`, () => {
+              expect(getDefaultViewSelection({ timelineId, value })).toEqual('gridView');
+            });
+          });
+        });
+      });
     });
+  });
+  describe('DataProvider yields same result as kqlQuery equivolent with each operator', () => {
+    describe('IS ONE OF operator', () => {
+      test('dataprovider matches kql equivolent', () => {
+        const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+        dataProviders[0].queryMatch.operator = IS_ONE_OF_OPERATOR;
+        dataProviders[0].queryMatch.value = ['a', 'b', 'c'];
+        const { filterQuery: filterQueryWithDataProvider } = combineQueries({
+          config,
+          dataProviders,
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: '', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+        const { filterQuery: filterQueryWithKQLQuery } = combineQueries({
+          config,
+          dataProviders: [],
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: 'name: ("a" OR "b" OR "c")', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
 
-    test('it returns true when `globalFullScreen` is false and `graphEventId` is an empty string, because Resolver is NOT showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: '' })).toBe(true);
+        expect(filterQueryWithDataProvider).toEqual(filterQueryWithKQLQuery);
+      });
+      test('dataprovider with negated IS ONE OF operator matches kql equivolent', () => {
+        const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+        dataProviders[0].queryMatch.operator = IS_ONE_OF_OPERATOR;
+        dataProviders[0].queryMatch.value = ['a', 'b', 'c'];
+        dataProviders[0].excluded = true;
+        const { filterQuery: filterQueryWithDataProvider } = combineQueries({
+          config,
+          dataProviders,
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: '', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+        const { filterQuery: filterQueryWithKQLQuery } = combineQueries({
+          config,
+          dataProviders: [],
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: 'NOT name: ("a" OR "b" OR "c")', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+
+        expect(filterQueryWithDataProvider).toEqual(filterQueryWithKQLQuery);
+      });
     });
+    describe('IS operator', () => {
+      test('dataprovider matches kql equivolent', () => {
+        const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+        dataProviders[0].queryMatch.operator = IS_OPERATOR;
+        dataProviders[0].queryMatch.value = 'a';
+        const { filterQuery: filterQueryWithDataProvider } = combineQueries({
+          config,
+          dataProviders,
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: '', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+        const { filterQuery: filterQueryWithKQLQuery } = combineQueries({
+          config,
+          dataProviders: [],
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: 'name: "a"', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+
+        expect(filterQueryWithDataProvider).toEqual(filterQueryWithKQLQuery);
+      });
+      test('dataprovider with negated IS operator matches kql equivolent', () => {
+        const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+        dataProviders[0].queryMatch.operator = IS_OPERATOR;
+        dataProviders[0].queryMatch.value = 'a';
+        dataProviders[0].excluded = true;
+        const { filterQuery: filterQueryWithDataProvider } = combineQueries({
+          config,
+          dataProviders,
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: '', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+        const { filterQuery: filterQueryWithKQLQuery } = combineQueries({
+          config,
+          dataProviders: [],
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: 'NOT name: "a"', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+
+        expect(filterQueryWithDataProvider).toEqual(filterQueryWithKQLQuery);
+      });
+    });
+    describe('Exists operator', () => {
+      test('dataprovider matches kql equivolent', () => {
+        const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+        dataProviders[0].queryMatch.operator = EXISTS_OPERATOR;
+        const { filterQuery: filterQueryWithDataProvider } = combineQueries({
+          config,
+          dataProviders,
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: '', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+        const { filterQuery: filterQueryWithKQLQuery } = combineQueries({
+          config,
+          dataProviders: [],
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: 'name : *', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+
+        expect(filterQueryWithDataProvider).toEqual(filterQueryWithKQLQuery);
+      });
+      test('dataprovider with negated EXISTS operator matches kql equivolent', () => {
+        const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+        dataProviders[0].queryMatch.operator = EXISTS_OPERATOR;
+        dataProviders[0].excluded = true;
+        const { filterQuery: filterQueryWithDataProvider } = combineQueries({
+          config,
+          dataProviders,
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: '', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+        const { filterQuery: filterQueryWithKQLQuery } = combineQueries({
+          config,
+          dataProviders: [],
+          indexPattern: mockIndexPattern,
+          browserFields: mockBrowserFields,
+          filters: [],
+          kqlQuery: { query: 'NOT name : *', language: 'kuery' },
+          kqlMode: 'search',
+        })!;
+
+        expect(filterQueryWithDataProvider).toEqual(filterQueryWithKQLQuery);
+      });
+    });
+  });
+});
+
+describe('isStringOrNumberArray', () => {
+  test('it returns false when value is not an array', () => {
+    expect(isStringOrNumberArray('just a string')).toBe(false);
+  });
+
+  test('it returns false when value is an array of mixed types', () => {
+    expect(isStringOrNumberArray(['mixed', 123, 'types'])).toBe(false);
+  });
+
+  test('it returns false when value is an array of bad values', () => {
+    const badValues = [undefined, null, {}] as unknown as string[];
+    expect(isStringOrNumberArray(badValues)).toBe(false);
+  });
+
+  test('it returns true when value is an empty array', () => {
+    expect(isStringOrNumberArray([])).toBe(true);
+  });
+
+  test('it returns true when value is an array of all strings', () => {
+    expect(isStringOrNumberArray(['all', 'string', 'values'])).toBe(true);
+  });
+
+  test('it returns true when value is an array of all numbers', () => {
+    expect(isStringOrNumberArray([123, 456, 789])).toBe(true);
+  });
+});
+
+describe('buildExistsQueryMatch', () => {
+  it('correcty computes EXISTS query with no nested field', () => {
+    expect(
+      buildExistsQueryMatch({ isFieldTypeNested: false, field: 'host', browserFields: {} })
+    ).toBe(`host ${EXISTS_OPERATOR}`);
+  });
+
+  it('correcty computes EXISTS query with nested field', () => {
+    expect(
+      buildExistsQueryMatch({
+        isFieldTypeNested: true,
+        field: 'nestedField.firstAttributes',
+        browserFields: mockBrowserFields,
+      })
+    ).toBe(`nestedField: { firstAttributes: * }`);
+  });
+});
+
+describe('buildIsQueryMatch', () => {
+  it('correcty computes IS query with no nested field', () => {
+    expect(
+      buildIsQueryMatch({
+        isFieldTypeNested: false,
+        field: 'nestedField.thirdAttributes',
+        value: 100000,
+        browserFields: {},
+      })
+    ).toBe(`nestedField.thirdAttributes ${IS_OPERATOR} 100000`);
+  });
+
+  it('correcty computes IS query with nested date field', () => {
+    expect(
+      buildIsQueryMatch({
+        isFieldTypeNested: true,
+        browserFields: mockBrowserFields,
+        field: 'nestedField.thirdAttributes',
+        value: 1668521970232,
+      })
+    ).toBe(`nestedField: { thirdAttributes${IS_OPERATOR} \"1668521970232\" }`);
+  });
+
+  it('correcty computes IS query with nested string field', () => {
+    expect(
+      buildIsQueryMatch({
+        isFieldTypeNested: true,
+        browserFields: mockBrowserFields,
+        field: 'nestedField.secondAttributes',
+        value: 'text',
+      })
+    ).toBe(`nestedField: { secondAttributes${IS_OPERATOR} text }`);
+  });
+});
+
+describe('buildIsOneOfQueryMatch', () => {
+  it('correcty computes IS ONE OF query with numbers', () => {
+    expect(
+      buildIsOneOfQueryMatch({
+        field: 'kibana.alert.worflow_status',
+        value: [1, 2, 3],
+      })
+    ).toBe('kibana.alert.worflow_status : (1 OR 2 OR 3)');
+  });
+
+  it('correcty computes IS ONE OF query with strings', () => {
+    expect(
+      buildIsOneOfQueryMatch({
+        field: 'kibana.alert.worflow_status',
+        value: ['a', 'b', 'c'],
+      })
+    ).toBe(`kibana.alert.worflow_status : (\"a\" OR \"b\" OR \"c\")`);
+  });
+
+  it('correcty computes IS ONE OF query if value is an empty array', () => {
+    expect(
+      buildIsOneOfQueryMatch({
+        field: 'kibana.alert.worflow_status',
+        value: [],
+      })
+    ).toBe("kibana.alert.worflow_status : ''");
+  });
+
+  it('correcty computes IS ONE OF query if given a single string value', () => {
+    expect(
+      buildIsOneOfQueryMatch({
+        field: 'kibana.alert.worflow_status',
+        value: ['a'],
+      })
+    ).toBe(`kibana.alert.worflow_status : (\"a\")`);
+  });
+
+  it('correcty computes IS ONE OF query if given a single numeric value', () => {
+    expect(
+      buildIsOneOfQueryMatch({
+        field: 'kibana.alert.worflow_status',
+        value: [1],
+      })
+    ).toBe(`kibana.alert.worflow_status : (1)`);
   });
 });

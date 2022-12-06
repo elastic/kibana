@@ -74,6 +74,7 @@ export const CreateCalendar: FC<Props> = ({
         }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [calendarEvents]
   );
 
@@ -90,6 +91,7 @@ export const CreateCalendar: FC<Props> = ({
         setCalendarEvents([...calendarEvents]);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [calendarEvents]
   );
 
@@ -106,6 +108,7 @@ export const CreateCalendar: FC<Props> = ({
         setCalendarEvents([...calendarEvents]);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [calendarEvents]
   );
 
@@ -117,6 +120,7 @@ export const CreateCalendar: FC<Props> = ({
         setCalendarEvents([...calendarEvents]);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [calendarEvents]
   );
 
@@ -128,6 +132,7 @@ export const CreateCalendar: FC<Props> = ({
         setCalendarEvents(ce);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [calendarEvents]
   );
 

@@ -1,0 +1,89 @@
+{
+  "id": "@kbn/core-http-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-http-common",
+        "id": "def-common.IExternalUrlPolicy",
+        "type": "Interface",
+        "tags": [],
+        "label": "IExternalUrlPolicy",
+        "description": [
+          "\nA policy describing whether access to an external destination is allowed."
+        ],
+        "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-common",
+            "id": "def-common.IExternalUrlPolicy.allow",
+            "type": "boolean",
+            "tags": [],
+            "label": "allow",
+            "description": [
+              "\nIndicates if this policy allows or denies access to the described destination."
+            ],
+            "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-common",
+            "id": "def-common.IExternalUrlPolicy.host",
+            "type": "string",
+            "tags": [],
+            "label": "host",
+            "description": [
+              "\nOptional host describing the external destination.\nMay be combined with `protocol`.\n"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-common",
+            "id": "def-common.IExternalUrlPolicy.protocol",
+            "type": "string",
+            "tags": [],
+            "label": "protocol",
+            "description": [
+              "\nOptional protocol describing the external destination.\nMay be combined with `host`.\n"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

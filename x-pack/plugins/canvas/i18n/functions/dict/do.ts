@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { doFn } from '../../../canvas_plugin_src/functions/common/do';
+import type { doFn } from '../../../canvas_plugin_src/functions/common/do';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { CONTEXT } from '../../constants';

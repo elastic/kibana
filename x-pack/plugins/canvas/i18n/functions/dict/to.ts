@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { toFunctionFactory } from '../../../public/functions/to';
+import type { toFunctionFactory } from '../../../public/functions/to';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { CONTEXT } from '../../constants';

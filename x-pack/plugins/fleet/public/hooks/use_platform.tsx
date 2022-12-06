@@ -8,9 +8,9 @@
 import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-export type PLATFORM_TYPE = 'linux' | 'mac' | 'windows' | 'rpm' | 'deb';
+export type PLATFORM_TYPE = 'linux' | 'mac' | 'windows' | 'rpm' | 'deb' | 'kubernetes';
 
-export const PLATFORM_OPTIONS: Array<{
+export const REDUCED_PLATFORM_OPTIONS: Array<{
   label: string;
   id: PLATFORM_TYPE;
   'data-test-subj'?: string;
@@ -49,6 +49,17 @@ export const PLATFORM_OPTIONS: Array<{
       defaultMessage: 'DEB',
     }),
     'data-test-subj': 'platformTypeLinuxDeb',
+  },
+];
+
+export const PLATFORM_OPTIONS = [
+  ...REDUCED_PLATFORM_OPTIONS,
+  {
+    id: 'kubernetes',
+    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.kubernetes', {
+      defaultMessage: 'Kubernetes',
+    }),
+    'data-test-subj': 'platformTypeKubernetes',
   },
 ];
 

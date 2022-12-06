@@ -47,10 +47,6 @@ export interface InferenceStatsResponse {
   trained_model_stats: TrainedModelStat[];
 }
 
-export interface MlInferTrainedModelDeploymentResponse {
-  inference_results: estypes.MlInferTrainedModelDeploymentResponse[];
-}
-
 /**
  * Service with APIs calls to perform inference operations.
  * @param httpService
@@ -128,10 +124,18 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    startModelAllocation(modelId: string) {
+    startModelAllocation(
+      modelId: string,
+      queryParams?: {
+        number_of_allocations: number;
+        threads_per_allocation: number;
+        priority: 'low' | 'normal';
+      }
+    ) {
       return httpService.http<{ acknowledge: boolean }>({
         path: `${apiBasePath}/trained_models/${modelId}/deployment/_start`,
         method: 'POST',
+        query: queryParams,
       });
     },
 
@@ -145,19 +149,46 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    inferTrainedModel(modelId: string, payload: any, timeout?: string) {
+    updateModelDeployment(modelId: string, params: { number_of_allocations: number }) {
+      return httpService.http<{ acknowledge: boolean }>({
+        path: `${apiBasePath}/trained_models/${modelId}/deployment/_update`,
+        method: 'POST',
+        body: JSON.stringify(params),
+      });
+    },
+
+    inferTrainedModel(
+      modelId: string,
+      payload: estypes.MlInferTrainedModelRequest['body'],
+      timeout?: string
+    ) {
       const body = JSON.stringify(payload);
-      return httpService.http<MlInferTrainedModelDeploymentResponse>({
+      return httpService.http<estypes.MlInferTrainedModelResponse>({
         path: `${apiBasePath}/trained_models/infer/${modelId}`,
         method: 'POST',
         body,
         ...(timeout ? { query: { timeout } as HttpFetchQuery } : {}),
       });
     },
+
+    trainedModelPipelineSimulate(
+      pipeline: estypes.IngestPipeline,
+      docs: estypes.IngestSimulateDocument[]
+    ) {
+      const body = JSON.stringify({
+        pipeline,
+        docs,
+      });
+      return httpService.http<estypes.IngestSimulateResponse>({
+        path: `${apiBasePath}/trained_models/pipeline_simulate`,
+        method: 'POST',
+        body,
+      });
+    },
   };
 }
 
-type TrainedModelsApiService = ReturnType<typeof trainedModelsApiProvider>;
+export type TrainedModelsApiService = ReturnType<typeof trainedModelsApiProvider>;
 
 /**
  * Hooks for accessing {@link TrainedModelsApiService} in React components.

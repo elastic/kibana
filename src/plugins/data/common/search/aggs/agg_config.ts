@@ -14,8 +14,8 @@ import { Assign, Ensure } from '@kbn/utility-types';
 
 import { ExpressionAstExpression, ExpressionAstArgument } from '@kbn/expressions-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ISearchOptions, ISearchSource } from '../../../public';
+import { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type { ISearchOptions, ISearchSource } from '../../../public';
 
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
@@ -151,7 +151,7 @@ export class AggConfig {
         const isDeserialized = isType || isObject;
 
         if (!isDeserialized) {
-          val = aggParam.deserialize(val, this);
+          val = aggParam.deserialize(_.cloneDeep(val), this);
         }
 
         to[aggParam.name] = val;
@@ -185,7 +185,9 @@ export class AggConfig {
         return;
       }
       const resolvedBounds = this.aggConfigs.getResolvedTimeRange()!;
-      return moment.duration(moment(resolvedBounds.max).diff(resolvedBounds.min));
+      return moment.duration(
+        moment.tz(resolvedBounds.max, this.aggConfigs.timeZone).diff(resolvedBounds.min)
+      );
     }
     return parsedTimeShift;
   }
@@ -323,9 +325,7 @@ export class AggConfig {
    *
    * @public
    */
-  toSerializedFieldFormat():
-    | {}
-    | Ensure<SerializedFieldFormat<SerializableRecord>, SerializableRecord> {
+  toSerializedFieldFormat<T extends FieldFormatParams>(): SerializedFieldFormat<T> {
     return this.type ? this.type.getSerializedFormat(this) : {};
   }
 

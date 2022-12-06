@@ -19,6 +19,10 @@
     flex: 1 1 100%;
     z-index: 1;
     min-height: 0; // Absolute must for Firefox to scroll contents
+
+    &[data-error] {
+      display: none;
+    }
   }
 
   // SASSTODO: this MIGHT be fixing IE
@@ -81,7 +85,9 @@
   right: 0;
   top: 0;
   left: 0;
-  z-index: $euiZLevel1;
+  * {
+    z-index: $euiZLevel1; // apply high z-index to all children
+  }
 }
 
 // OPTIONS MENU
@@ -152,11 +158,12 @@
 }
 
 .embPanel__error {
-  text-align: center;
-  justify-content: center;
-  flex-direction: column;
-  overflow: auto;
-  padding: $euiSizeS;
+  padding: $euiSizeL;
+
+  & > * {
+    max-height: 100%;
+    overflow: auto;
+  }
 }
 
 .embPanel__label {

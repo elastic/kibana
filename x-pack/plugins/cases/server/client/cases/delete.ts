@@ -7,12 +7,13 @@
 
 import pMap from 'p-map';
 import { Boom } from '@hapi/boom';
-import { SavedObjectsFindResponse } from '@kbn/core/server';
-import { CommentAttributes } from '../../../common/api';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import type { CommentAttributes } from '../../../common/api';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
-import { CasesClientArgs } from '..';
+import type { CasesClientArgs } from '..';
 import { createCaseError } from '../../common/error';
-import { Operations, OwnerEntity } from '../../authorization';
+import type { OwnerEntity } from '../../authorization';
+import { Operations } from '../../authorization';
 
 /**
  * Deletes the specified cases and their attachments.
@@ -22,10 +23,8 @@ import { Operations, OwnerEntity } from '../../authorization';
 export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   const {
     unsecuredSavedObjectsClient,
-    caseService,
-    attachmentService,
     user,
-    userActionService,
+    services: { caseService, attachmentService, userActionService },
     logger,
     authorization,
   } = clientArgs;
@@ -53,6 +52,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
     const deleteCasesMapper = async (id: string) =>
       caseService.deleteCase({
         id,
+        refresh: false,
       });
 
     // Ensuring we don't too many concurrent deletions running.
@@ -81,6 +81,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
         attachmentService.delete({
           unsecuredSavedObjectsClient,
           attachmentId: comment.id,
+          refresh: false,
         })
       );
 

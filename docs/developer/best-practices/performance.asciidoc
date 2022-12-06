@@ -24,7 +24,7 @@ plugin bundle, therefore, reducing its size by a significant amount.
 
 [source,typescript]
 ----
-import type { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
+import type { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 export class MyPlugin implements Plugin<MyPluginSetup> {
   setup(core: CoreSetup, plugins: SetupDeps) {
     core.application.register({

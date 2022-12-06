@@ -4,18 +4,18 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "common/**/*",
     "public/**/*",
     "server/**/*",
     "config.ts",
+    "config.mock.ts",
     "common/**/*.json",
     "public/**/*.json",
     "../../../typings/index.d.ts"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../bfetch/tsconfig.json" },
     { "path": "../ui_actions/tsconfig.json" },

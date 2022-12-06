@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiFilterButton, EuiSelectable } from '@elastic/eui';
+import { EuiFilterButton, EuiSelectable, EuiFilterGroup } from '@elastic/eui';
 import { RuleTagFilter } from './rule_tag_filter';
 
 const onChangeMock = jest.fn();
@@ -25,7 +25,7 @@ describe('rule_tag_filter', () => {
     );
 
     expect(wrapper.find(EuiFilterButton).exists()).toBeTruthy();
-    expect(wrapper.find('.euiNotificationBadge').text()).toEqual('0');
+    expect(wrapper.find('.euiNotificationBadge').last().text()).toEqual('0');
   });
 
   it('can open the popover correctly', () => {
@@ -73,5 +73,19 @@ describe('rule_tag_filter', () => {
     expect(wrapper.find(EuiSelectable).props().options.length).toEqual(
       tags.length + selectedTags.length
     );
+  });
+
+  it('renders the tag filter with a EuiFilterGroup if isGrouped is false', async () => {
+    const wrapper = mountWithIntl(
+      <RuleTagFilter tags={tags} selectedTags={[]} onChange={onChangeMock} />
+    );
+
+    expect(wrapper.find(EuiFilterGroup).exists()).toBeTruthy();
+
+    wrapper.setProps({
+      isGrouped: true,
+    });
+
+    expect(wrapper.find(EuiFilterGroup).exists()).toBeFalsy();
   });
 });

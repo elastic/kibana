@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { Action } from 'redux-actions';
-import { IHttpFetchError } from '@kbn/core/public';
+import type { Action } from 'redux-actions';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { UptimeAlertTypeParams } from '../alerts/alerts';
+import type { UptimeAlertTypeParams } from '../alerts/alerts';
 
-export interface AsyncAction<Payload, SuccessPayload> {
+export interface AsyncAction<Payload, SuccessPayload, ErrorPayload = IHttpFetchError> {
   get: (payload: Payload) => Action<Payload>;
   success: (payload: SuccessPayload) => Action<SuccessPayload>;
-  fail: (payload: IHttpFetchError) => Action<IHttpFetchError>;
+  fail: (payload: ErrorPayload) => Action<ErrorPayload>;
 }
-export interface AsyncActionOptionalPayload<Payload, SuccessPayload>
-  extends AsyncAction<Payload, SuccessPayload> {
+export interface AsyncActionOptionalPayload<Payload, SuccessPayload, ErrorPayload>
+  extends AsyncAction<Payload, SuccessPayload, ErrorPayload> {
   get: (payload?: Payload) => Action<Payload>;
 }
 

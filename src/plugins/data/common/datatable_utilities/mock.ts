@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DatatableUtilitiesService } from './datatable_utilities_service';
+import { DatatableUtilitiesService } from './datatable_utilities_service';
 
 export function createDatatableUtilitiesMock(): jest.Mocked<DatatableUtilitiesService> {
   return {
@@ -14,8 +14,13 @@ export function createDatatableUtilitiesMock(): jest.Mocked<DatatableUtilitiesSe
     clearFieldFormat: jest.fn(),
     getAggConfig: jest.fn(),
     getDataView: jest.fn(),
+    getDateHistogramMeta: jest.fn(DatatableUtilitiesService.prototype.getDateHistogramMeta),
     getField: jest.fn(),
     getFieldFormat: jest.fn(),
+    getNumberHistogramInterval: jest.fn(
+      DatatableUtilitiesService.prototype.getNumberHistogramInterval
+    ),
+    hasPrecisionError: jest.fn(DatatableUtilitiesService.prototype.hasPrecisionError),
     isFilterable: jest.fn(),
     setFieldFormat: jest.fn(),
   } as unknown as jest.Mocked<DatatableUtilitiesService>;

@@ -18,11 +18,12 @@ import {
   EuiFieldNumber,
   EuiFieldText,
   EuiSuperSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { dataTypes } from '../../../../../../../common';
+import { dataTypes } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useStartServices } from '../../../../hooks';
 
@@ -33,7 +34,12 @@ import type { ValidationResults } from '../agent_policy_validation';
 
 import { policyHasFleetServer } from '../../../../services';
 
-import { useOutputOptions, DEFAULT_OUTPUT_VALUE } from './hooks';
+import {
+  useOutputOptions,
+  useDownloadSourcesOptions,
+  DEFAULT_SELECT_VALUE,
+  useFleetServerHostsOptions,
+} from './hooks';
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
@@ -57,9 +63,18 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     monitoringOutputOptions,
     isLoading: isLoadingOptions,
   } = useOutputOptions(agentPolicy);
+  const { dataDownloadSourceOptions, isLoading: isLoadingDownloadSources } =
+    useDownloadSourcesOptions(agentPolicy);
+
+  const { fleetServerHostsOptions, isLoading: isLoadingFleetServerHostsOption } =
+    useFleetServerHostsOptions(agentPolicy);
 
   // agent monitoring checkbox group can appear multiple times in the DOM, ids have to be unique to work correctly
   const monitoringCheckboxIdSuffix = Date.now();
+
+  const hasManagedPackagePolicy =
+    'package_policies' in agentPolicy &&
+    agentPolicy?.package_policies?.some((packagePolicy) => packagePolicy.is_managed);
 
   return (
     <>
@@ -102,7 +117,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
-          <h4>
+          <h4 data-test-subj="defaultNamespaceHeader">
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.namespaceFieldLabel"
               defaultMessage="Default namespace"
@@ -175,6 +190,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           options={[
             {
               id: `${dataTypes.Logs}_${monitoringCheckboxIdSuffix}`,
+              'data-test-subj': 'collectLogsCheckbox',
               label: (
                 <>
                   <FormattedMessage
@@ -197,6 +213,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             },
             {
               id: `${dataTypes.Metrics}_${monitoringCheckboxIdSuffix}`,
+              'data-test-subj': 'collectMetricsCheckbox',
               label: (
                 <>
                   <FormattedMessage
@@ -287,6 +304,45 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         title={
           <h4>
             <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.fleetServerHostsLabel"
+              defaultMessage="Fleet Server"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.fleetServerHostsDescripton"
+            defaultMessage="Select to which Fleet Server the agents in this policy will communicate."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.fleet_server_host_id && validation.fleet_server_host_id
+              ? validation.fleet_server_host_id
+              : null
+          }
+          isInvalid={Boolean(touchedFields.fleet_server_host_id && validation.fleet_server_host_id)}
+        >
+          <EuiSuperSelect
+            disabled={agentPolicy.is_managed === true}
+            valueOfSelected={agentPolicy.fleet_server_host_id || DEFAULT_SELECT_VALUE}
+            fullWidth
+            isLoading={isLoadingFleetServerHostsOption}
+            onChange={(e) => {
+              updateAgentPolicy({
+                fleet_server_host_id: e !== DEFAULT_SELECT_VALUE ? e : null,
+              });
+            }}
+            options={fleetServerHostsOptions}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
               id="xpack.fleet.agentPolicyForm.dataOutputLabel"
               defaultMessage="Output for integrations"
             />
@@ -310,12 +366,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         >
           <EuiSuperSelect
             disabled={agentPolicy.is_managed === true}
-            valueOfSelected={agentPolicy.data_output_id || DEFAULT_OUTPUT_VALUE}
+            valueOfSelected={agentPolicy.data_output_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}
             onChange={(e) => {
               updateAgentPolicy({
-                data_output_id: e !== DEFAULT_OUTPUT_VALUE ? e : null,
+                data_output_id: e !== DEFAULT_SELECT_VALUE ? e : null,
               });
             }}
             options={dataOutputOptions}
@@ -349,15 +405,55 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         >
           <EuiSuperSelect
             disabled={agentPolicy.is_managed === true}
-            valueOfSelected={agentPolicy.monitoring_output_id || DEFAULT_OUTPUT_VALUE}
+            valueOfSelected={agentPolicy.monitoring_output_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}
             onChange={(e) => {
               updateAgentPolicy({
-                monitoring_output_id: e !== DEFAULT_OUTPUT_VALUE ? e : null,
+                monitoring_output_id: e !== DEFAULT_SELECT_VALUE ? e : null,
               });
             }}
             options={monitoringOutputOptions}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.downloadSourceLabel"
+              defaultMessage="Agent Binary Download"
+              data-test-subj="agentPolicyForm.downloadSource.label"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.downloadSourceDescription"
+            defaultMessage="When an upgrade action is issued the agents will download the binary from this location."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.download_source_id && validation.download_source_id
+              ? validation.download_source_id
+              : null
+          }
+          isInvalid={Boolean(touchedFields.download_source_id && validation.download_source_id)}
+        >
+          <EuiSuperSelect
+            valueOfSelected={agentPolicy.download_source_id || DEFAULT_SELECT_VALUE}
+            fullWidth
+            isLoading={isLoadingDownloadSources}
+            onChange={(e) => {
+              updateAgentPolicy({
+                download_source_id: e !== DEFAULT_SELECT_VALUE ? e : null,
+              });
+            }}
+            options={dataDownloadSourceOptions}
+            data-test-subj="agentPolicyForm.downloadSource.select"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -383,15 +479,28 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               >
                 {(deleteAgentPolicyPrompt) => {
                   return (
-                    <EuiButton
-                      color="danger"
-                      onClick={() => deleteAgentPolicyPrompt(agentPolicy.id!, onDelete)}
+                    <EuiToolTip
+                      content={
+                        hasManagedPackagePolicy ? (
+                          <FormattedMessage
+                            id="xpack.fleet.policyForm.deletePolicyActionText.disabled"
+                            defaultMessage="Agent policy with managed package policies cannot be deleted."
+                          />
+                        ) : undefined
+                      }
                     >
-                      <FormattedMessage
-                        id="xpack.fleet.policyForm.deletePolicyActionText"
-                        defaultMessage="Delete policy"
-                      />
-                    </EuiButton>
+                      <EuiButton
+                        data-test-subj="agentPolicyForm.downloadSource.deleteBtn"
+                        color="danger"
+                        onClick={() => deleteAgentPolicyPrompt(agentPolicy.id!, onDelete)}
+                        isDisabled={hasManagedPackagePolicy}
+                      >
+                        <FormattedMessage
+                          id="xpack.fleet.policyForm.deletePolicyActionText"
+                          defaultMessage="Delete policy"
+                        />
+                      </EuiButton>
+                    </EuiToolTip>
                   );
                 }}
               </AgentPolicyDeleteProvider>

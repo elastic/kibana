@@ -13,10 +13,8 @@ describe('navTabsHosts', () => {
     const tabs = navTabsHosts({
       hasMlUserPermissions: false,
       isRiskyHostsEnabled: false,
-      isUsersEnabled: false,
     });
     expect(tabs).toHaveProperty(HostsTableType.hosts);
-    expect(tabs).toHaveProperty(HostsTableType.authentications);
     expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
     expect(tabs).not.toHaveProperty(HostsTableType.anomalies);
     expect(tabs).toHaveProperty(HostsTableType.events);
@@ -26,10 +24,8 @@ describe('navTabsHosts', () => {
     const tabs = navTabsHosts({
       hasMlUserPermissions: true,
       isRiskyHostsEnabled: false,
-      isUsersEnabled: false,
     });
     expect(tabs).toHaveProperty(HostsTableType.hosts);
-    expect(tabs).toHaveProperty(HostsTableType.authentications);
     expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
     expect(tabs).toHaveProperty(HostsTableType.anomalies);
     expect(tabs).toHaveProperty(HostsTableType.events);
@@ -39,10 +35,8 @@ describe('navTabsHosts', () => {
     const tabs = navTabsHosts({
       hasMlUserPermissions: false,
       isRiskyHostsEnabled: false,
-      isUsersEnabled: false,
     });
     expect(tabs).toHaveProperty(HostsTableType.hosts);
-    expect(tabs).toHaveProperty(HostsTableType.authentications);
     expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
     expect(tabs).not.toHaveProperty(HostsTableType.risk);
     expect(tabs).toHaveProperty(HostsTableType.events);
@@ -52,36 +46,10 @@ describe('navTabsHosts', () => {
     const tabs = navTabsHosts({
       hasMlUserPermissions: false,
       isRiskyHostsEnabled: true,
-      isUsersEnabled: false,
     });
     expect(tabs).toHaveProperty(HostsTableType.hosts);
-    expect(tabs).toHaveProperty(HostsTableType.authentications);
     expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
     expect(tabs).toHaveProperty(HostsTableType.risk);
-    expect(tabs).toHaveProperty(HostsTableType.events);
-  });
-
-  test('it should skip authentications tab if isUsersEnabled is true', () => {
-    const tabs = navTabsHosts({
-      hasMlUserPermissions: false,
-      isRiskyHostsEnabled: false,
-      isUsersEnabled: true,
-    });
-    expect(tabs).toHaveProperty(HostsTableType.hosts);
-    expect(tabs).not.toHaveProperty(HostsTableType.authentications);
-    expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
-    expect(tabs).toHaveProperty(HostsTableType.events);
-  });
-
-  test('it should display authentications tab if isUsersEnabled is false', () => {
-    const tabs = navTabsHosts({
-      hasMlUserPermissions: false,
-      isRiskyHostsEnabled: false,
-      isUsersEnabled: false,
-    });
-    expect(tabs).toHaveProperty(HostsTableType.hosts);
-    expect(tabs).toHaveProperty(HostsTableType.authentications);
-    expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
     expect(tabs).toHaveProperty(HostsTableType.events);
   });
 });

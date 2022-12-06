@@ -24,5 +24,11 @@ export const DATE_PICKER_END_DATE_POPOVER_BUTTON_TIMELINE =
 export const DATE_PICKER_START_DATE_POPOVER_BUTTON =
   'div[data-test-subj="globalDatePicker"] button[data-test-subj="superDatePickerstartDatePopoverButton"]';
 
+export const GLOBAL_FILTERS_CONTAINER = '[data-test-subj="globalDatePicker"]';
+
+export const SHOW_DATES_BUTTON = '[data-test-subj="superDatePickerShowDatesButton"]';
+
+export const DATE_PICKER_SHOW_DATE_POPOVER_BUTTON = `${GLOBAL_FILTERS_CONTAINER} ${SHOW_DATES_BUTTON}`;
+
 export const DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE =
   '[data-test-subj="timeline-date-picker-container"] [data-test-subj="superDatePickerstartDatePopoverButton"]';

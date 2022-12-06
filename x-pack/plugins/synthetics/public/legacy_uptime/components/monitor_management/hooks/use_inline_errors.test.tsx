@@ -33,7 +33,7 @@ describe('useInlineErrors', function () {
       3,
       {
         body: {
-          collapse: { field: 'config_id' },
+          collapse: { field: 'monitor.id' },
           query: {
             bool: {
               filter: [
@@ -51,7 +51,7 @@ describe('useInlineErrors', function () {
                 {
                   range: {
                     'monitor.timespan': {
-                      gte: '2022-01-01T23:55:00.000Z',
+                      gte: '2022-01-01T23:40:00.000Z',
                       lte: '2022-01-02T00:00:00.000Z',
                     },
                   },
@@ -69,7 +69,14 @@ describe('useInlineErrors', function () {
         {
           error: { monitorList: null, serviceLocations: null, enablement: null },
           enablement: null,
-          list: { monitors: [], page: 1, perPage: 10, total: null, syncErrors: null },
+          list: {
+            monitors: [],
+            page: 1,
+            perPage: 10,
+            total: null,
+            syncErrors: null,
+            absoluteTotal: 0,
+          },
           loading: { monitorList: false, serviceLocations: false, enablement: false },
           locations: [],
           syntheticsService: {

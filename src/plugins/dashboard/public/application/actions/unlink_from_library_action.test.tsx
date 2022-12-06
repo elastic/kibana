@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core/public';
-
 import {
   ViewMode,
   IContainer,
@@ -15,12 +13,7 @@ import {
   isErrorEmbeddable,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
-} from '../../services/embeddable';
-import { UnlinkFromLibraryAction } from '.';
-import { getSampleDashboardInput } from '../test_helpers';
-import { DashboardContainer } from '../embeddable/dashboard_container';
-import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
-
+} from '@kbn/embeddable-plugin/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import {
   ContactCardEmbeddable,
@@ -28,41 +21,23 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
-} from '../../services/embeddable_test_samples';
-import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
-import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 
-const { setup, doStart } = embeddablePluginMock.createInstance();
-setup.registerEmbeddableFactory(
-  CONTACT_CARD_EMBEDDABLE,
-  new ContactCardEmbeddableFactory((() => null) as any, {} as any)
-);
-const start = doStart();
+import { getSampleDashboardInput } from '../test_helpers';
+import { pluginServices } from '../../services/plugin_services';
+import { UnlinkFromLibraryAction } from './unlink_from_library_action';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable & ReferenceOrValueEmbeddable;
-let coreStart: CoreStart;
+
+const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+  .fn()
+  .mockReturnValue(mockEmbeddableFactory);
+
 beforeEach(async () => {
-  coreStart = coreMock.createStart();
-
-  const containerOptions = {
-    ExitFullScreenButton: () => null,
-    SavedObjectFinder: () => null,
-    application: {} as any,
-    embeddable: start,
-    inspector: {} as any,
-    notifications: {} as any,
-    overlays: coreStart.overlays,
-    savedObjectMetaData: {} as any,
-    uiActions: {} as any,
-    uiSettings: uiSettingsServiceMock.createStartContract(),
-    http: coreStart.http,
-    theme: coreStart.theme,
-    presentationUtil: getStubPluginServices(),
-    screenshotMode: screenshotModePluginMock.createSetupContract(),
-  };
-
-  container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
+  container = new DashboardContainer(getSampleDashboardInput());
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -86,7 +61,7 @@ beforeEach(async () => {
 });
 
 test('Unlink is incompatible with Error Embeddables', async () => {
-  const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
+  const action = new UnlinkFromLibraryAction();
   const errorEmbeddable = new ErrorEmbeddable(
     'Wow what an awful error',
     { id: ' 404' },
@@ -96,19 +71,19 @@ test('Unlink is incompatible with Error Embeddables', async () => {
 });
 
 test('Unlink is compatible when embeddable on dashboard has reference type input', async () => {
-  const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
+  const action = new UnlinkFromLibraryAction();
   embeddable.updateInput(await embeddable.getInputAsRefType());
   expect(await action.isCompatible({ embeddable })).toBe(true);
 });
 
 test('Unlink is not compatible when embeddable input is by value', async () => {
-  const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
+  const action = new UnlinkFromLibraryAction();
   embeddable.updateInput(await embeddable.getInputAsValueType());
   expect(await action.isCompatible({ embeddable })).toBe(false);
 });
 
 test('Unlink is not compatible when view mode is set to view', async () => {
-  const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
+  const action = new UnlinkFromLibraryAction();
   embeddable.updateInput(await embeddable.getInputAsRefType());
   embeddable.updateInput({ viewMode: ViewMode.VIEW });
   expect(await action.isCompatible({ embeddable })).toBe(false);
@@ -129,7 +104,7 @@ test('Unlink is not compatible when embeddable is not in a dashboard container',
     mockedByReferenceInput: { savedObjectId: 'test', id: orphanContactCard.id },
     mockedByValueInput: { firstName: 'Kibanana', id: orphanContactCard.id },
   });
-  const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
+  const action = new UnlinkFromLibraryAction();
   expect(await action.isCompatible({ embeddable: orphanContactCard })).toBe(false);
 });
 
@@ -137,7 +112,7 @@ test('Unlink replaces embeddableId and retains panel count', async () => {
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
   const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
-  const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
+  const action = new UnlinkFromLibraryAction();
   await action.execute({ embeddable });
   expect(Object.keys(container.getInput().panels).length).toEqual(originalPanelCount);
 
@@ -167,7 +142,7 @@ test('Unlink unwraps all attributes from savedObject', async () => {
   });
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));
-  const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
+  const action = new UnlinkFromLibraryAction();
   await action.execute({ embeddable });
   const newPanelId = Object.keys(container.getInput().panels).find(
     (key) => !originalPanelKeySet.has(key)

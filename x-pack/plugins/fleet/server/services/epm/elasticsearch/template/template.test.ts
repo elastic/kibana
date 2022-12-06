@@ -137,6 +137,17 @@ describe('EPM template', () => {
     expect(mappings).toMatchSnapshot(path.basename(ymlPath));
   });
 
+  it('tests loading cockroachdb_dynamic_templates.yml', () => {
+    const ymlPath = path.join(__dirname, '../../fields/tests/cockroachdb_dynamic_templates.yml');
+    const fieldsYML = readFileSync(ymlPath, 'utf-8');
+    const fields: Field[] = safeLoad(fieldsYML);
+    const processedFields = processFields(fields);
+
+    const mappings = generateMappings(processedFields);
+
+    expect(mappings).toMatchSnapshot(path.basename(ymlPath));
+  });
+
   it('tests processing long field with index false', () => {
     const longWithIndexFalseYml = `
 - name: longIndexFalse
@@ -166,7 +177,6 @@ describe('EPM template', () => {
     const keywordWithIndexFalseMapping = {
       properties: {
         keywordIndexFalse: {
-          ignore_above: 1024,
           type: 'keyword',
           doc_values: false,
         },

@@ -73,7 +73,8 @@ export async function syncGeojsonSourceData({
       registerCancelCallback.bind(null, requestToken),
       () => {
         return isRequestStillActive(dataRequestId, requestToken);
-      }
+      },
+      syncContext.inspectorAdapters
     );
     const layerFeatureCollection = assignFeatureIds(sourceFeatureCollection);
     const supportedShapes = await source.getSupportedShapeTypes();

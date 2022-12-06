@@ -9,9 +9,10 @@ import { useReducer, useCallback, useRef, useEffect } from 'react';
 
 import { useToasts } from '../common/lib/kibana';
 import { patchCase } from './api';
-import { UpdateKey, UpdateByKey } from '../../common/ui/types';
+import type { UpdateKey, UpdateByKey } from '../../common/ui/types';
 import * as i18n from './translations';
 import { createUpdateSuccessToaster } from './utils';
+import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 
 interface NewCaseState {
   isLoading: boolean;
@@ -56,7 +57,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
 export interface UseUpdateCase extends NewCaseState {
   updateCaseProperty: (updates: UpdateByKey) => void;
 }
-export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => {
+export const useUpdateCase = (): UseUpdateCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
@@ -65,17 +66,10 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
   const toasts = useToasts();
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
+  const refreshCaseViewPage = useRefreshCaseViewPage();
 
   const dispatchUpdateCaseProperty = useCallback(
-    async ({
-      fetchCaseUserActions,
-      updateKey,
-      updateValue,
-      updateCase,
-      caseData,
-      onSuccess,
-      onError,
-    }: UpdateByKey) => {
+    async ({ updateKey, updateValue, caseData, onSuccess, onError }: UpdateByKey) => {
       try {
         isCancelledRef.current = false;
         abortCtrlRef.current.abort();
@@ -83,19 +77,14 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
         dispatch({ type: 'FETCH_INIT', payload: updateKey });
 
         const response = await patchCase(
-          caseId,
+          caseData.id,
           { [updateKey]: updateValue },
           caseData.version,
           abortCtrlRef.current.signal
         );
 
         if (!isCancelledRef.current) {
-          if (fetchCaseUserActions != null) {
-            fetchCaseUserActions(caseId, response[0].connector.id);
-          }
-          if (updateCase != null) {
-            updateCase(response[0]);
-          }
+          refreshCaseViewPage();
           dispatch({ type: 'FETCH_SUCCESS' });
           toasts.addSuccess(
             createUpdateSuccessToaster(caseData, response[0], updateKey, updateValue)
@@ -121,7 +110,7 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [caseId]
+    []
   );
 
   useEffect(

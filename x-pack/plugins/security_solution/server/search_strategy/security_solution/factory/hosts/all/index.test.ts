@@ -7,7 +7,8 @@
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
-import { HostsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
+import type { HostsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
+import { RiskScoreEntity } from '../../../../../../common/search_strategy/security_solution';
 import * as buildQuery from './query.all_hosts.dsl';
 import * as buildRiskQuery from '../../risk_score/all/query.risk_score.dsl';
 import { allHosts } from '.';
@@ -28,15 +29,11 @@ class IndexNotFoundException extends Error {
   }
 }
 
-const mockDeps = (riskyHostsEnabled = true) => ({
+const mockDeps = () => ({
   ...defaultMockDeps,
   spaceId: 'test-space',
   endpointContext: {
     ...defaultMockDeps.endpointContext,
-    experimentalFeatures: {
-      ...defaultMockDeps.endpointContext.experimentalFeatures,
-      riskyHostsEnabled,
-    },
   },
 });
 
@@ -70,7 +67,11 @@ describe('allHosts search strategy', () => {
 
   describe('parse', () => {
     test('should parse data correctly', async () => {
-      const result = await allHosts.parse(mockOptions, mockSearchStrategyResponse, mockDeps(false));
+      const mockedDeps = mockDeps();
+      // @ts-expect-error incomplete type
+      mockedDeps.esClient.asCurrentUser.search.mockResponse({ hits: { hits: [] } });
+
+      const result = await allHosts.parse(mockOptions, mockSearchStrategyResponse, mockDeps());
       expect(result).toMatchObject(formattedSearchStrategyResponse);
     });
 
@@ -91,6 +92,12 @@ describe('allHosts search strategy', () => {
                 risk,
                 host: {
                   name: hostName,
+                  risk: {
+                    multipliers: [],
+                    calculated_score_norm: 9999,
+                    calculated_level: risk,
+                    rule_risks: [],
+                  },
                 },
               },
             },
@@ -122,36 +129,8 @@ describe('allHosts search strategy', () => {
       expect(buildHostsRiskQuery).toHaveBeenCalledWith({
         defaultIndex: ['ml_host_risk_score_latest_test-space'],
         filterQuery: { terms: { 'host.name': [hostName] } },
+        riskScoreEntity: RiskScoreEntity.host,
       });
-    });
-
-    test('should not enhance data when feature flag is disabled', async () => {
-      const risk = 'TEST_RISK_SCORE';
-      const hostName: string = get(
-        'aggregations.host_data.buckets[0].key',
-        mockSearchStrategyResponse.rawResponse
-      );
-      const mockedDeps = mockDeps(false);
-
-      mockedDeps.esClient.asCurrentUser.search.mockResponse({
-        hits: {
-          hits: [
-            // @ts-expect-error incomplete type
-            {
-              _source: {
-                risk,
-                host: {
-                  name: hostName,
-                },
-              },
-            },
-          ],
-        },
-      });
-
-      const result = await allHosts.parse(mockOptions, mockSearchStrategyResponse, mockedDeps);
-
-      expect(result.edges[0].node.risk).toBeUndefined();
     });
 
     test("should not enhance data when index doesn't exist", async () => {

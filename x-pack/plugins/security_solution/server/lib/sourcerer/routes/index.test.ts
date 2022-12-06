@@ -13,8 +13,8 @@ import {
 } from '../../detection_engine/routes/__mocks__';
 
 import { SOURCERER_API_URL } from '../../../../common/constants';
-import { StartServicesAccessor } from '@kbn/core/server';
-import { StartPlugins } from '../../../plugin';
+import type { StartServicesAccessor } from '@kbn/core/server';
+import type { StartPlugins } from '../../../plugin';
 
 jest.mock('./helpers', () => {
   const original = jest.requireActual('./helpers');
@@ -26,6 +26,13 @@ jest.mock('./helpers', () => {
 });
 const mockPattern = {
   id: 'security-solution',
+  fields: [
+    { name: '@timestamp', searchable: true, type: 'date', aggregatable: true },
+    { name: '@version', searchable: true, type: 'string', aggregatable: true },
+    { name: 'agent.ephemeral_id', searchable: true, type: 'string', aggregatable: true },
+    { name: 'agent.hostname', searchable: true, type: 'string', aggregatable: true },
+    { name: 'agent.id', searchable: true, type: 'string', aggregatable: true },
+  ],
   title:
     'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*,ml_host_risk_score_*,.siem-signals-default',
 };
@@ -147,7 +154,6 @@ describe('sourcerer route', () => {
 
       test('returns sourcerer formatted Data Views when SIEM Data View does NOT exist but has been created in the mean time', async () => {
         const getMock = jest.fn();
-        getMock.mockResolvedValueOnce(null);
         getMock.mockResolvedValueOnce(mockPattern);
         const getStartServicesSpecial = jest.fn().mockResolvedValue([
           null,
@@ -172,6 +178,39 @@ describe('sourcerer route', () => {
         );
         expect(response.status).toEqual(200);
         expect(response.body).toEqual(mockDataViewsTransformed);
+      });
+
+      test('passes sorted title on create and save', async () => {
+        const getMock = jest.fn();
+        getMock.mockResolvedValueOnce(null);
+        getMock.mockResolvedValueOnce(mockPattern);
+        const mockCreateAndSave = jest.fn();
+        const getStartServicesSpecial = jest.fn().mockResolvedValue([
+          null,
+          {
+            data: {
+              indexPatterns: {
+                dataViewsServiceFactory: () => ({
+                  getIdsWithTitle: () =>
+                    new Promise((rs) => rs(mockDataViews.filter((v) => v.id !== mockPattern.id))),
+                  get: getMock,
+                  createAndSave: mockCreateAndSave.mockImplementation(
+                    () => new Promise((rs) => rs(mockPattern))
+                  ),
+                  updateSavedObject: () => new Promise((rs, rj) => rj(new Error('error'))),
+                }),
+              },
+            },
+          },
+        ] as unknown) as StartServicesAccessor<StartPlugins>;
+        createSourcererDataViewRoute(server.router, getStartServicesSpecial);
+        await server.inject(
+          getSourcererRequest(['-elastic-logs-*', ...mockPatternList]),
+          requestContextMock.convertContext(context)
+        );
+        expect(mockCreateAndSave.mock.calls[0][0].title).toEqual(
+          '.siem-signals-default,apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,ml_host_risk_score_*,packetbeat-*,traces-apm*,winlogbeat-*,-elastic-logs-*'
+        );
       });
 
       test('passes override=true on create and save', async () => {
@@ -204,6 +243,49 @@ describe('sourcerer route', () => {
         );
         expect(mockCreateAndSave).toHaveBeenCalled();
         expect(mockCreateAndSave.mock.calls[0][1]).toEqual(true);
+      });
+
+      test('passes sorted title on updateSavedObject', async () => {
+        const getMock = jest.fn();
+        getMock.mockResolvedValueOnce(null);
+        getMock.mockResolvedValueOnce(mockPattern);
+        const mockCreateAndSave = jest.fn();
+        const mockUpdateSavedObject = jest.fn();
+        const getStartServicesSpecial = jest.fn().mockResolvedValue([
+          null,
+          {
+            data: {
+              indexPatterns: {
+                dataViewsServiceFactory: () => ({
+                  getIdsWithTitle: () =>
+                    new Promise((rs) =>
+                      rs([{ id: 'security-solution', title: 'winlogbeat-*,-elastic-logs-*' }])
+                    ),
+                  get: jest.fn().mockResolvedValue({
+                    id: 'security-solution',
+                    title: 'winlogbeat-*,-elastic-logs-*',
+                  }),
+                  createAndSave: mockCreateAndSave.mockImplementation(
+                    () => new Promise((rs) => rs(mockPattern))
+                  ),
+                  updateSavedObject: mockUpdateSavedObject.mockImplementation(
+                    () => new Promise((rs) => rs(mockPattern))
+                  ),
+                }),
+              },
+            },
+          },
+        ] as unknown) as StartServicesAccessor<StartPlugins>;
+        createSourcererDataViewRoute(server.router, getStartServicesSpecial);
+        await server.inject(
+          getSourcererRequest(['-elastic-logs-*', ...mockPatternList]),
+          requestContextMock.convertContext(context)
+        );
+        expect(mockUpdateSavedObject).toHaveBeenCalledWith({
+          id: 'security-solution',
+          title:
+            '.siem-signals-default,apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,ml_host_risk_score_*,packetbeat-*,traces-apm*,winlogbeat-*,-elastic-logs-*',
+        });
       });
 
       test('returns sourcerer formatted Data Views when SIEM Data View exists', async () => {

@@ -9,18 +9,21 @@ import { createSelector } from 'reselect';
 import { get } from 'lodash/fp';
 
 import { FlowTargetSourceDest } from '../../../common/search_strategy/security_solution/network';
-import { State } from '../../common/store/types';
+import type { State } from '../../common/store/types';
 import { initialNetworkState } from './reducer';
-import {
-  NetworkDetailsTableType,
+import type {
   NetworkDetailsModel,
   NetworkPageModel,
-  NetworkTableType,
-  NetworkType,
   TopCountriesQuery,
   TlsQuery,
   HttpQuery,
 } from './model';
+import { NetworkDetailsTableType, NetworkTableType, NetworkType } from './model';
+
+const selectNetwork = (
+  state: State,
+  networkType: NetworkType
+): NetworkPageModel | NetworkDetailsModel => get(networkType, state.network);
 
 const selectNetworkPage = (state: State): NetworkPageModel => state.network.page;
 
@@ -89,3 +92,15 @@ export const httpSelector = () => createSelector(selectHttpByType, (httpQueries)
 
 export const usersSelector = () =>
   createSelector(selectNetworkDetails, (network) => network.queries.users);
+
+export const networkAnomaliesJobIdFilterSelector = () =>
+  createSelector(
+    selectNetwork,
+    (network) => network.queries[NetworkTableType.anomalies].jobIdSelection
+  );
+
+export const networkAnomaliesIntervalSelector = () =>
+  createSelector(
+    selectNetwork,
+    (network) => network.queries[NetworkTableType.anomalies].intervalSelection
+  );

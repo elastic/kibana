@@ -26,8 +26,8 @@ export const RISK_SEVERITY_COLOUR: { [k in RiskSeverity]: string } = {
 const RiskBadge = styled.div<{ $severity: RiskSeverity; $hideBackgroundColor: boolean }>`
   ${({ theme, $severity, $hideBackgroundColor }) => css`
     width: fit-content;
-    padding-right: ${theme.eui.paddingSizes.s};
-    padding-left: ${theme.eui.paddingSizes.xs};
+    padding-right: ${theme.eui.euiSizeS};
+    padding-left: ${theme.eui.euiSizeXS};
 
     ${($severity === 'Critical' || $severity === 'High') &&
     !$hideBackgroundColor &&
@@ -38,7 +38,7 @@ const RiskBadge = styled.div<{ $severity: RiskSeverity; $hideBackgroundColor: bo
   `}
 `;
 const TooltipContainer = styled.div`
-  padding: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding: ${({ theme }) => theme.eui.euiSizeS};
 `;
 export const RiskScore: React.FC<{
   severity: RiskSeverity;

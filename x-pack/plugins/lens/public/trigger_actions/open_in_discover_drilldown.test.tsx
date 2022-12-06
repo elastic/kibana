@@ -7,8 +7,8 @@
 
 import React, { FormEvent } from 'react';
 import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import { DiscoverSetup } from '@kbn/discover-plugin/public';
-import { execute, isCompatible } from './open_in_discover_helpers';
+import type { ApplicationStart } from '@kbn/core/public';
+import { DiscoverAppLocator, getHref, isCompatible } from './open_in_discover_helpers';
 import { mount } from 'enzyme';
 import { Filter } from '@kbn/es-query';
 import {
@@ -16,20 +16,35 @@ import {
   CollectConfigProps,
   OpenInDiscoverDrilldown,
 } from './open_in_discover_drilldown';
+import { DataViewsService } from '@kbn/data-views-plugin/public';
 
 jest.mock('./open_in_discover_helpers', () => ({
   isCompatible: jest.fn(() => true),
-  execute: jest.fn(),
+  getHref: jest.fn(),
 }));
 
 describe('open in discover drilldown', () => {
   let drilldown: OpenInDiscoverDrilldown;
+  const originalOpen = window.open;
+
+  // Prevent the JSDOM error about missing "window.open"
+  beforeAll(() => {
+    window.open = jest.fn();
+  });
+
   beforeEach(() => {
     drilldown = new OpenInDiscoverDrilldown({
-      discover: {} as DiscoverSetup,
+      locator: () => ({} as DiscoverAppLocator),
+      dataViews: () => ({} as DataViewsService),
       hasDiscoverAccess: () => true,
+      application: () => ({} as ApplicationStart),
     });
   });
+
+  afterAll(() => {
+    window.open = originalOpen;
+  });
+
   it('provides UI to edit config', () => {
     const Component = (drilldown as unknown as { ReactCollectConfig: React.FC<CollectConfigProps> })
       .ReactCollectConfig;
@@ -44,22 +59,22 @@ describe('open in discover drilldown', () => {
     instance.find('EuiSwitch').prop('onChange')!({} as unknown as FormEvent<{}>);
     expect(setConfig).toHaveBeenCalledWith({ openInNewTab: true });
   });
-  it('calls through to isCompatible helper', () => {
+
+  it('calls through to isCompatible helper', async () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
-    drilldown.isCompatible(
+    await drilldown.isCompatible(
       { openInNewTab: true },
       { embeddable: { type: 'lens' } as IEmbeddable<EmbeddableInput>, filters }
     );
     expect(isCompatible).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });
-  it('calls through to execute helper', () => {
+
+  it('calls through to getHref helper', async () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
-    drilldown.execute(
+    await drilldown.execute(
       { openInNewTab: true },
       { embeddable: { type: 'lens' } as IEmbeddable<EmbeddableInput>, filters }
     );
-    expect(execute).toHaveBeenCalledWith(
-      expect.objectContaining({ filters, openInSameTab: false })
-    );
+    expect(getHref).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });
 });

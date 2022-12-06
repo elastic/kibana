@@ -8,7 +8,7 @@
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
 import { Filter as DataFilter } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { SavedObjectReference } from '@kbn/core/types';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter, EmbeddableInput, TimeRange as TimeRangeArg } from '../../../types';

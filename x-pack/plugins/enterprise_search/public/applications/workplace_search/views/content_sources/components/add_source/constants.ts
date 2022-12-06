@@ -258,13 +258,6 @@ export const OAUTH_BACK_BUTTON = i18n.translate(
   }
 );
 
-export const OAUTH_STEP_2 = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.oauthStep2',
-  {
-    defaultMessage: 'Provide the appropriate configuration information',
-  }
-);
-
 export const SAVE_CUSTOM_BODY1 = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.body1',
   {

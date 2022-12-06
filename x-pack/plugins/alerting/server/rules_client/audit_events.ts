@@ -23,9 +23,15 @@ export enum RuleAuditAction {
   MUTE_ALERT = 'rule_alert_mute',
   UNMUTE_ALERT = 'rule_alert_unmute',
   AGGREGATE = 'rule_aggregate',
+  BULK_EDIT = 'rule_bulk_edit',
   GET_EXECUTION_LOG = 'rule_get_execution_log',
+  GET_GLOBAL_EXECUTION_LOG = 'rule_get_global_execution_log',
+  GET_GLOBAL_EXECUTION_KPI = 'rule_get_global_execution_kpi',
+  GET_ACTION_ERROR_LOG = 'rule_get_action_error_log',
+  GET_RULE_EXECUTION_KPI = 'rule_get_execution_kpi',
   SNOOZE = 'rule_snooze',
   UNSNOOZE = 'rule_unsnooze',
+  RUN_SOON = 'rule_run_soon',
 }
 
 type VerbsTuple = [string, string, string];
@@ -35,6 +41,7 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_get: ['access', 'accessing', 'accessed'],
   rule_resolve: ['access', 'accessing', 'accessed'],
   rule_update: ['update', 'updating', 'updated'],
+  rule_bulk_edit: ['update', 'updating', 'updated'],
   rule_update_api_key: ['update API key of', 'updating API key of', 'updated API key of'],
   rule_enable: ['enable', 'enabling', 'enabled'],
   rule_disable: ['disable', 'disabling', 'disabled'],
@@ -50,8 +57,29 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
     'accessing execution log for',
     'accessed execution log for',
   ],
+  rule_get_global_execution_log: [
+    'access execution log',
+    'accessing execution log',
+    'accessed execution log',
+  ],
+  rule_get_action_error_log: [
+    'access action error log for',
+    'accessing action error log for',
+    'accessed action error log for',
+  ],
   rule_snooze: ['snooze', 'snoozing', 'snoozed'],
   rule_unsnooze: ['unsnooze', 'unsnoozing', 'unsnoozed'],
+  rule_run_soon: ['run', 'running', 'ran'],
+  rule_get_execution_kpi: [
+    'access execution KPI for',
+    'accessing execution KPI for',
+    'accessed execution KPI for',
+  ],
+  rule_get_global_execution_kpi: [
+    'access global execution KPI for',
+    'accessing global execution KPI for',
+    'accessed global execution KPI for',
+  ],
 };
 
 const eventTypes: Record<RuleAuditAction, EcsEventType> = {
@@ -59,6 +87,7 @@ const eventTypes: Record<RuleAuditAction, EcsEventType> = {
   rule_get: 'access',
   rule_resolve: 'access',
   rule_update: 'change',
+  rule_bulk_edit: 'change',
   rule_update_api_key: 'change',
   rule_enable: 'change',
   rule_disable: 'change',
@@ -70,8 +99,13 @@ const eventTypes: Record<RuleAuditAction, EcsEventType> = {
   rule_alert_unmute: 'change',
   rule_aggregate: 'access',
   rule_get_execution_log: 'access',
+  rule_get_global_execution_log: 'access',
+  rule_get_action_error_log: 'access',
   rule_snooze: 'change',
   rule_unsnooze: 'change',
+  rule_run_soon: 'access',
+  rule_get_execution_kpi: 'access',
+  rule_get_global_execution_kpi: 'access',
 };
 
 export interface RuleAuditEventParams {

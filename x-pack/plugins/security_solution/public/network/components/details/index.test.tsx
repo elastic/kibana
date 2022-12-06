@@ -7,7 +7,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { ActionCreator } from 'typescript-fsa';
+import type { ActionCreator } from 'typescript-fsa';
 
 import '../../../common/mock/match_media';
 import {
@@ -17,23 +17,37 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { networkModel } from '../../store';
 
 import { IpOverview } from '.';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
-import { NarrowDateRange } from '../../../common/components/ml/types';
-import { FlowTarget } from '../../../../common/search_strategy';
+import type { NarrowDateRange } from '../../../common/components/ml/types';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 describe('IP Overview Component', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
   });
 
   describe('rendering', () => {
@@ -41,7 +55,7 @@ describe('IP Overview Component', () => {
       anomaliesData: mockAnomalies,
       data: mockData.IpOverview,
       endDate: '2019-06-18T06:00:00.000Z',
-      flowTarget: FlowTarget.source,
+      flowTarget: FlowTargetSourceDest.source,
       loading: false,
       id: 'ipOverview',
       ip: '10.10.10.10',
@@ -51,8 +65,9 @@ describe('IP Overview Component', () => {
       startDate: '2019-06-15T06:00:00.000Z',
       type: networkModel.NetworkType.details,
       updateFlowTargetAction: jest.fn() as unknown as ActionCreator<{
-        flowTarget: FlowTarget;
+        flowTarget: FlowTargetSourceDest;
       }>,
+      indexPatterns: [],
     };
 
     test('it renders the default IP Overview', () => {

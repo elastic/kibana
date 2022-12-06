@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiLoadingSpinner, EuiFlexGroup } from '@elastic/eui';
 import { getEmptyTagValue } from '../../empty_value';
-import { Anomalies, Anomaly, NarrowDateRange } from '../types';
+import type { Anomalies, Anomaly, NarrowDateRange } from '../types';
 import { getTopSeverityJobs } from './get_top_severity';
 import { AnomalyScore } from './anomaly_score';
 

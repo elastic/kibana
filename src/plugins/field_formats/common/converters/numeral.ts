@@ -12,8 +12,9 @@ import numeral from '@elastic/numeral';
 import numeralLanguages from '@elastic/numeral/languages';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert } from '../types';
+import { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
+import { asPrettyString } from '../utils';
 
 const numeralInst = numeral();
 
@@ -31,10 +32,12 @@ export abstract class NumeralFormat extends FieldFormat {
     pattern: this.getConfig!(`format:${this.id}:defaultPattern`),
   });
 
-  protected getConvertedValue(val: number | string): string {
+  protected getConvertedValue(val: number | string | object): string {
     if (val === -Infinity) return '-∞';
     if (val === +Infinity) return '+∞';
-    if (typeof val !== 'number') {
+    if (typeof val === 'object') {
+      return JSON.stringify(val);
+    } else if (typeof val !== 'number') {
       val = parseFloat(val);
     }
 
@@ -51,6 +54,13 @@ export abstract class NumeralFormat extends FieldFormat {
 
     return formatted;
   }
+
+  htmlConvert: HtmlContextTypeConvert = (val) => {
+    if (typeof val === 'object' && !Array.isArray(val)) {
+      return asPrettyString(val);
+    }
+    return this.getConvertedValue(val);
+  };
 
   textConvert: TextContextTypeConvert = (val) => {
     return this.getConvertedValue(val);

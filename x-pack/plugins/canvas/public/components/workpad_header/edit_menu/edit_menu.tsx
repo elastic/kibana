@@ -20,8 +20,6 @@ import { crawlTree } from '../../workpad_page/integration_utils';
 // @ts-expect-error untyped local
 import { insertNodes, elementLayer, removeElements } from '../../../state/actions/elements';
 // @ts-expect-error untyped local
-import { undoHistory, redoHistory } from '../../../state/actions/history';
-// @ts-expect-error untyped local
 import { selectToplevelNodes } from '../../../state/actions/transient';
 import {
   getSelectedPage,

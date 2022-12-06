@@ -52,7 +52,9 @@ const stories: Meta<Args> = {
 
       return (
         <MemoryRouter
-          initialEntries={['/service-map?rangeFrom=now-15m&rangeTo=now']}
+          initialEntries={[
+            '/service-map?rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&offset=1d',
+          ]}
         >
           <KibanaReactContext.Provider>
             <MockUrlParamsContextProvider>
@@ -99,7 +101,7 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Backend: Story<Args> = () => {
+export const Dependency: Story<Args> = () => {
   return (
     <Popover
       environment={ENVIRONMENT_ALL.value}
@@ -109,7 +111,7 @@ export const Backend: Story<Args> = () => {
     />
   );
 };
-Backend.args = {
+Dependency.args = {
   nodeData: {
     'span.subtype': 'postgresql',
     'span.destination.service.resource': 'postgresql',
@@ -119,7 +121,7 @@ Backend.args = {
   },
 };
 
-export const BackendWithLongTitle: Story<Args> = () => {
+export const DependencyWithLongTitle: Story<Args> = () => {
   return (
     <Popover
       environment={ENVIRONMENT_ALL.value}
@@ -129,7 +131,7 @@ export const BackendWithLongTitle: Story<Args> = () => {
     />
   );
 };
-BackendWithLongTitle.args = {
+DependencyWithLongTitle.args = {
   nodeData: {
     'span.subtype': 'http',
     'span.destination.service.resource':

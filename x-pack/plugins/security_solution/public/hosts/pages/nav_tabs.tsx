@@ -8,19 +8,20 @@
 import { omit } from 'lodash/fp';
 import * as i18n from './translations';
 import { HostsTableType } from '../store/model';
-import { HostsNavTab } from './navigation/types';
+import type { HostsNavTab } from './navigation/types';
 import { HOSTS_PATH } from '../../../common/constants';
+import { TECHNICAL_PREVIEW } from '../../overview/pages/translations';
 
 const getTabsOnHostsUrl = (tabName: HostsTableType) => `${HOSTS_PATH}/${tabName}`;
 
 export const navTabsHosts = ({
   hasMlUserPermissions,
   isRiskyHostsEnabled,
-  isUsersEnabled,
+  isEnterprise,
 }: {
   hasMlUserPermissions: boolean;
   isRiskyHostsEnabled: boolean;
-  isUsersEnabled: boolean;
+  isEnterprise?: boolean;
 }): HostsNavTab => {
   const hiddenTabs = [];
   const hostsNavTabs = {
@@ -28,12 +29,6 @@ export const navTabsHosts = ({
       id: HostsTableType.hosts,
       name: i18n.NAVIGATION_ALL_HOSTS_TITLE,
       href: getTabsOnHostsUrl(HostsTableType.hosts),
-      disabled: false,
-    },
-    [HostsTableType.authentications]: {
-      id: HostsTableType.authentications,
-      name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
-      href: getTabsOnHostsUrl(HostsTableType.authentications),
       disabled: false,
     },
     [HostsTableType.uncommonProcesses]: {
@@ -54,24 +49,22 @@ export const navTabsHosts = ({
       href: getTabsOnHostsUrl(HostsTableType.events),
       disabled: false,
     },
-    [HostsTableType.alerts]: {
-      id: HostsTableType.alerts,
-      name: i18n.NAVIGATION_ALERTS_TITLE,
-      href: getTabsOnHostsUrl(HostsTableType.alerts),
-      disabled: false,
-    },
     [HostsTableType.risk]: {
       id: HostsTableType.risk,
       name: i18n.NAVIGATION_HOST_RISK_TITLE,
       href: getTabsOnHostsUrl(HostsTableType.risk),
       disabled: false,
+      isBeta: true,
+      betaOptions: {
+        text: TECHNICAL_PREVIEW,
+      },
     },
     [HostsTableType.sessions]: {
       id: HostsTableType.sessions,
       name: i18n.NAVIGATION_SESSIONS_TITLE,
       href: getTabsOnHostsUrl(HostsTableType.sessions),
       disabled: false,
-      isBeta: true,
+      isBeta: false,
     },
   };
 
@@ -83,8 +76,8 @@ export const navTabsHosts = ({
     hiddenTabs.push(HostsTableType.risk);
   }
 
-  if (isUsersEnabled) {
-    hiddenTabs.push(HostsTableType.authentications);
+  if (!isEnterprise) {
+    hiddenTabs.push(HostsTableType.sessions);
   }
 
   return omit(hiddenTabs, hostsNavTabs);

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { DeepPartial } from 'utility-types';
+import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import { BaseDataGenerator } from './base_data_generator';
-import { EffectScope, NewTrustedApp, TrustedApp } from '../types';
+import type { EffectScope, NewTrustedApp, TrustedApp } from '../types';
 
 const TRUSTED_APP_NAMES = [
   'Symantec Endpoint Security',

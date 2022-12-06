@@ -19,9 +19,7 @@ import {
 import { Observable } from 'rxjs';
 import { HttpRequestInit } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionTypeModel, RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import {

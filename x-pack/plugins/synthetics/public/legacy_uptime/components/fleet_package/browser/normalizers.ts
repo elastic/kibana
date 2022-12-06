@@ -18,6 +18,7 @@ import {
   getNormalizer,
   getJsonToJavascriptNormalizer,
 } from '../common/normalizers';
+import { tlsNormalizers } from '../tls/normalizers';
 
 import { defaultBrowserSimpleFields, defaultBrowserAdvancedFields } from '../contexts';
 
@@ -73,6 +74,7 @@ export const browserNormalizers: BrowserNormalizerMap = {
   [ConfigKey.SOURCE_ZIP_USERNAME]: getBrowserNormalizer(ConfigKey.SOURCE_ZIP_USERNAME),
   [ConfigKey.SOURCE_ZIP_PASSWORD]: getBrowserNormalizer(ConfigKey.SOURCE_ZIP_PASSWORD),
   [ConfigKey.SOURCE_ZIP_FOLDER]: getBrowserNormalizer(ConfigKey.SOURCE_ZIP_FOLDER),
+  [ConfigKey.SOURCE_PROJECT_CONTENT]: getBrowserNormalizer(ConfigKey.SOURCE_PROJECT_CONTENT),
   [ConfigKey.SOURCE_INLINE]: getBrowserJsonToJavascriptNormalizer(ConfigKey.SOURCE_INLINE),
   [ConfigKey.SOURCE_ZIP_PROXY_URL]: getBrowserNormalizer(ConfigKey.SOURCE_ZIP_PROXY_URL),
   [ConfigKey.PARAMS]: getBrowserNormalizer(ConfigKey.PARAMS),
@@ -106,5 +108,8 @@ export const browserNormalizers: BrowserNormalizerMap = {
     ConfigKey.JOURNEY_FILTERS_TAGS
   ),
   [ConfigKey.IGNORE_HTTPS_ERRORS]: getBrowserNormalizer(ConfigKey.IGNORE_HTTPS_ERRORS),
+  [ConfigKey.PLAYWRIGHT_OPTIONS]: getBrowserNormalizer(ConfigKey.PLAYWRIGHT_OPTIONS),
+  [ConfigKey.TEXT_ASSERTION]: getBrowserNormalizer(ConfigKey.TEXT_ASSERTION),
   ...commonNormalizers,
+  ...tlsNormalizers,
 };

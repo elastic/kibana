@@ -14,17 +14,19 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
  */
 export type IFieldSubType = IFieldSubTypeMultiOptional | IFieldSubTypeNestedOptional;
 
-export interface IFieldSubTypeMultiOptional {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type IFieldSubTypeMultiOptional = {
   multi?: { parent: string };
-}
+};
 
 export interface IFieldSubTypeMulti {
   multi: { parent: string };
 }
 
-export interface IFieldSubTypeNestedOptional {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type IFieldSubTypeNestedOptional = {
   nested?: { path: string };
-}
+};
 
 export interface IFieldSubTypeNested {
   nested: { path: string };
@@ -34,7 +36,8 @@ export interface IFieldSubTypeNested {
  * A base interface for an index pattern field
  * @public
  */
-export interface DataViewFieldBase {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DataViewFieldBase = {
   name: string;
   /**
    * Kibana field type
@@ -46,22 +49,27 @@ export interface DataViewFieldBase {
    */
   script?: string;
   /**
-   * Scripted field langauge
+   * Scripted field language
    * Painless is the only valid scripted field language
    */
   lang?: estypes.ScriptLanguage;
   scripted?: boolean;
-}
+  /**
+   * ES field types as strings array.
+   */
+  esTypes?: string[];
+};
 
 /**
  * A base interface for an index pattern
  * @public
  */
-export interface DataViewBase {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DataViewBase = {
   fields: DataViewFieldBase[];
   id?: string;
   title: string;
-}
+};
 
 export interface BoolQuery {
   must: estypes.QueryDslQueryContainer[];

@@ -10,15 +10,17 @@ import moment from 'moment-timezone';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
-import { NavigateToAppOptions } from '@kbn/core/public';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { NavigateToAppOptions } from '@kbn/core/public';
+import { getUICapabilities } from '../../../client/helpers/capabilities';
 import { convertToCamelCase } from '../../../api/utils';
 import {
   FEATURE_ID,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
 } from '../../../../common/constants';
-import { StartServices } from '../../../types';
+import type { CasesPermissions } from '../../../../common';
+import type { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
 
 export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);
@@ -166,7 +168,7 @@ interface Capabilities {
 }
 interface UseApplicationCapabilities {
   actions: Capabilities;
-  generalCases: Capabilities;
+  generalCases: CasesPermissions;
   visualize: Capabilities;
   dashboard: Capabilities;
 }
@@ -179,13 +181,18 @@ interface UseApplicationCapabilities {
 export const useApplicationCapabilities = (): UseApplicationCapabilities => {
   const capabilities = useKibana().services?.application?.capabilities;
   const casesCapabilities = capabilities[FEATURE_ID];
+  const permissions = getUICapabilities(casesCapabilities);
 
   return useMemo(
     () => ({
       actions: { crud: !!capabilities.actions?.save, read: !!capabilities.actions?.show },
       generalCases: {
-        crud: !!casesCapabilities?.crud_cases,
-        read: !!casesCapabilities?.read_cases,
+        all: permissions.all,
+        create: permissions.create,
+        read: permissions.read,
+        update: permissions.update,
+        delete: permissions.delete,
+        push: permissions.push,
       },
       visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
       dashboard: {
@@ -200,8 +207,12 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
       capabilities.dashboard?.show,
       capabilities.visualize?.save,
       capabilities.visualize?.show,
-      casesCapabilities?.crud_cases,
-      casesCapabilities?.read_cases,
+      permissions.all,
+      permissions.create,
+      permissions.read,
+      permissions.update,
+      permissions.delete,
+      permissions.push,
     ]
   );
 };

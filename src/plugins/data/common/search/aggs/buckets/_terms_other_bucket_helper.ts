@@ -20,6 +20,7 @@ import { AggGroupNames } from '../agg_groups';
 import { IAggConfigs } from '../agg_configs';
 import { IAggType } from '../agg_type';
 import { IAggConfig } from '../agg_config';
+import { createSamplerAgg } from '../utils/sampler';
 
 export const OTHER_BUCKET_SEPARATOR = '╰┄►';
 
@@ -128,6 +129,28 @@ const getOtherAggTerms = (requestAgg: Record<string, any>, key: string, otherAgg
     .map((filter: Record<string, any>) => filter.match_phrase[otherAgg.params.field.name]);
 };
 
+/**
+ * Helper function to handle sampling case and get the correct cursor agg from a request object
+ */
+const getCorrectAggCursorFromRequest = (
+  requestAgg: Record<string, any>,
+  aggConfigs: IAggConfigs
+) => {
+  return aggConfigs.isSamplingEnabled() ? requestAgg.sampling.aggs : requestAgg;
+};
+
+/**
+ * Helper function to handle sampling case and get the correct cursor agg from a response object
+ */
+const getCorrectAggregationsCursorFromResponse = (
+  response: estypes.SearchResponse<any>,
+  aggConfigs: IAggConfigs
+) => {
+  return aggConfigs.isSamplingEnabled()
+    ? (response.aggregations?.sampling as Record<string, estypes.AggregationsAggregate>)
+    : response.aggregations;
+};
+
 export const buildOtherBucketAgg = (
   aggConfigs: IAggConfigs,
   aggWithOtherBucket: IAggConfig,
@@ -234,7 +257,13 @@ export const buildOtherBucketAgg = (
       bool: buildQueryFromFilters(filters, indexPattern),
     };
   };
-  walkBucketTree(0, response.aggregations, bucketAggs[0].id, [], '');
+  walkBucketTree(
+    0,
+    getCorrectAggregationsCursorFromResponse(response, aggConfigs),
+    bucketAggs[0].id,
+    [],
+    ''
+  );
 
   // bail if there were no bucket results
   if (noAggBucketResults || exhaustiveBuckets) {
@@ -242,6 +271,14 @@ export const buildOtherBucketAgg = (
   }
 
   return () => {
+    if (aggConfigs.isSamplingEnabled()) {
+      return {
+        sampling: {
+          ...createSamplerAgg(aggConfigs.samplerConfig),
+          aggs: { 'other-filter': resultAgg },
+        },
+      };
+    }
     return {
       'other-filter': resultAgg,
     };
@@ -257,16 +294,27 @@ export const mergeOtherBucketAggResponse = (
   otherFilterBuilder: (requestAgg: Record<string, any>, key: string, otherAgg: IAggConfig) => Filter
 ): estypes.SearchResponse<any> => {
   const updatedResponse = cloneDeep(response);
-  each(otherResponse.aggregations['other-filter'].buckets, (bucket, key) => {
+  const aggregationsRoot = getCorrectAggregationsCursorFromResponse(otherResponse, aggsConfig);
+  const updatedAggregationsRoot = getCorrectAggregationsCursorFromResponse(
+    updatedResponse,
+    aggsConfig
+  );
+  const buckets =
+    'buckets' in aggregationsRoot!['other-filter'] ? aggregationsRoot!['other-filter'].buckets : {};
+  each(buckets, (bucket, key) => {
     if (!bucket.doc_count || key === undefined) return;
     const bucketKey = key.replace(new RegExp(`^${OTHER_BUCKET_SEPARATOR}`), '');
     const aggResultBuckets = getAggResultBuckets(
       aggsConfig,
-      updatedResponse.aggregations,
+      updatedAggregationsRoot,
       otherAgg,
       bucketKey
     );
-    const otherFilter = otherFilterBuilder(requestAgg, key, otherAgg);
+    const otherFilter = otherFilterBuilder(
+      getCorrectAggCursorFromRequest(requestAgg, aggsConfig),
+      key,
+      otherAgg
+    );
     bucket.filters = [otherFilter];
     bucket.key = '__other__';
 
@@ -290,7 +338,10 @@ export const updateMissingBucket = (
   agg: IAggConfig
 ) => {
   const updatedResponse = cloneDeep(response);
-  const aggResultBuckets = getAggConfigResultMissingBuckets(updatedResponse.aggregations, agg.id);
+  const aggResultBuckets = getAggConfigResultMissingBuckets(
+    getCorrectAggregationsCursorFromResponse(updatedResponse, aggConfigs),
+    agg.id
+  );
   aggResultBuckets.forEach((bucket) => {
     bucket.key = '__missing__';
   });
@@ -333,7 +384,8 @@ export const createOtherBucketPostFlightRequest = (
     searchSource,
     inspectorRequestAdapter,
     abortSignal,
-    searchSessionId
+    searchSessionId,
+    disableShardFailureWarning
   ) => {
     if (!resp.aggregations) return resp;
     const nestedSearchSource = searchSource.createChild();
@@ -347,6 +399,7 @@ export const createOtherBucketPostFlightRequest = (
         nestedSearchSource.fetch$({
           abortSignal,
           sessionId: searchSessionId,
+          disableShardFailureWarning,
           inspector: {
             adapter: inspectorRequestAdapter,
             title: i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {

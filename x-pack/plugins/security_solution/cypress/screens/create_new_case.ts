@@ -21,6 +21,4 @@ export const TAGS_INPUT = '[data-test-subj="caseTags"] [data-test-subj="comboBox
 
 export const TIMELINE = '[data-test-subj="timeline"]';
 
-export const TIMELINE_SEARCHBOX = '[data-test-subj="timeline-super-select-search-box"]';
-
 export const TITLE_INPUT = '[data-test-subj="caseTitle"] [data-test-subj="input"]';

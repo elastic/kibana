@@ -8,10 +8,11 @@
     "common"
   ],
   "requiredPlugins": [
-    "expressions"
+    "expressions",
+    "data"
   ],
   "owner": {
     "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "githubTeam": "kibana-visualizations"
   }
 }

@@ -11,7 +11,8 @@ import styled, { css } from 'styled-components';
 
 import { useAllCasesNavigation } from '../../common/navigation';
 import { LinkIcon } from '../link_icon';
-import { Subtitle, SubtitleProps } from '../subtitle';
+import type { SubtitleProps } from '../subtitle';
+import { Subtitle } from '../subtitle';
 import { Title } from './title';
 import * as i18n from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -30,9 +31,9 @@ const Header = styled.header.attrs({
     ${border &&
     css`
       border-bottom: ${theme.eui.euiBorderThin};
-      padding-bottom: ${theme.eui.paddingSizes.l};
+      padding-bottom: ${theme.eui.euiSizeL};
       .euiProgress {
-        top: ${theme.eui.paddingSizes.l};
+        top: ${theme.eui.euiSizeL};
       }
     `}
   `}

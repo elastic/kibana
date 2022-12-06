@@ -18,11 +18,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { isValidIPv4OrCIDR } from '../../../../../../common/endpoint/utils/is_valid_ip';
-import {
-  EffectedPolicySelect,
+import type {
   EffectedPolicySelection,
   EffectedPolicySelectProps,
 } from '../../../../components/effected_policy_select';
+import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import {
   getArtifactTagsByEffectedPolicySelection,
   getArtifactTagsWithoutPolicies,
@@ -39,7 +39,7 @@ import {
   NAME_LABEL,
   NAME_PLACEHOLDER,
 } from './translations';
-import { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
+import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { FormattedError } from '../../../../components/formatted_error';
 
 interface ExceptionIpEntry {

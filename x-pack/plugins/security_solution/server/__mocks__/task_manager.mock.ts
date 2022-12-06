@@ -7,7 +7,6 @@
 
 // See: https://github.com/elastic/kibana/issues/117255, this creates mocks to avoid memory leaks from kibana core.
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 module.exports = {
   TaskStatus,

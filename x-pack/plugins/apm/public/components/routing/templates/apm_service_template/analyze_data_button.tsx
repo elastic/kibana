@@ -12,14 +12,14 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
 import { ALL_VALUES_SELECTED } from '@kbn/observability-plugin/public';
 import {
-  isIosAgentName,
+  isMobileAgentName,
   isRumAgentName,
 } from '../../../../../common/agent_name';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
@@ -49,7 +49,7 @@ export function AnalyzeDataButton() {
   const canShowDashboard = services.application?.capabilities.dashboard.show;
 
   if (
-    (isRumAgentName(agentName) || isIosAgentName(agentName)) &&
+    (isRumAgentName(agentName) || isMobileAgentName(agentName)) &&
     rangeFrom &&
     canShowDashboard &&
     rangeTo

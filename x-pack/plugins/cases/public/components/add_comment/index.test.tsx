@@ -10,14 +10,16 @@ import { mount } from 'enzyme';
 import { waitFor, act } from '@testing-library/react';
 import { noop } from 'lodash/fp';
 
-import { TestProviders } from '../../common/mock';
+import { noCreateCasesPermissions, TestProviders } from '../../common/mock';
 
-import { CommentRequest, CommentType } from '../../../common/api';
+import { CommentType } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import { AddComment, AddCommentProps, AddCommentRefObject } from '.';
+import type { AddCommentProps, AddCommentRefObject } from '.';
+import { AddComment } from '.';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { timelineIntegrationMock } from '../__mock__/timeline';
+import type { CaseAttachmentWithoutOwner } from '../../types';
 
 jest.mock('../../containers/use_create_attachments');
 
@@ -29,7 +31,6 @@ const createAttachments = jest.fn();
 const addCommentProps: AddCommentProps = {
   id: 'newComment',
   caseId: '1234',
-  userCanCrud: true,
   onCommentSaving,
   onCommentPosted,
   showLoading: false,
@@ -42,10 +43,9 @@ const defaultResponse = {
   createAttachments,
 };
 
-const sampleData: CommentRequest = {
+const sampleData: CaseAttachmentWithoutOwner = {
   comment: 'what a cool comment',
-  type: CommentType.user,
-  owner: SECURITY_SOLUTION_OWNER,
+  type: CommentType.user as const,
 };
 
 describe('AddComment ', () => {
@@ -69,11 +69,12 @@ describe('AddComment ', () => {
     expect(wrapper.find(`[data-test-subj="add-comment"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="loading-spinner"]`).exists()).toBeFalsy();
 
-    wrapper.find(`[data-test-subj="submit-comment"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="submit-comment"]`).first().simulate('click');
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
       expect(createAttachments).toBeCalledWith({
         caseId: addCommentProps.caseId,
+        caseOwner: SECURITY_SOLUTION_OWNER,
         data: [sampleData],
         updateCase: onCommentPosted,
       });
@@ -114,14 +115,14 @@ describe('AddComment ', () => {
     ).toBeTruthy();
   });
 
-  it('should hide the component when the user does not have crud permissions', () => {
+  it('should hide the component when the user does not have create permissions', () => {
     useCreateAttachmentsMock.mockImplementation(() => ({
       ...defaultResponse,
       isLoading: true,
     }));
     const wrapper = mount(
-      <TestProviders>
-        <AddComment {...{ ...addCommentProps, userCanCrud: false }} />
+      <TestProviders permissions={noCreateCasesPermissions()}>
+        <AddComment {...{ ...addCommentProps }} />
       </TestProviders>
     );
 

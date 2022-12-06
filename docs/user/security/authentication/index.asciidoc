@@ -332,13 +332,11 @@ Anyone with access to the network {kib} is exposed to will be able to access {ki
 
 Anonymous authentication gives users access to {kib} without requiring them to provide credentials. This can be useful if you want your users to skip the login step when you embed dashboards in another application or set up a demo {kib} instance in your internal network, while still keeping other security features intact.
 
-To enable anonymous authentication in {kib}, you must decide what credentials the anonymous service account {kib} should use internally to authenticate anonymous requests.
+To enable anonymous authentication in {kib}, you must specify the credentials the anonymous service account {kib} should use internally to authenticate anonymous requests.
 
 NOTE: You can configure only one anonymous authentication provider per {kib} instance.
 
-There are three ways to specify these credentials:
-
-If you have a user who can authenticate to {es} using username and password, for instance from the Native or LDAP security realms, you can also use these credentials to impersonate the anonymous users. Here is how your `kibana.yml` might look if you use username and password credentials:
+You must have a user account that can authenticate to {es} using a username and password, for instance from the Native or LDAP security realms, so that you can use these credentials to impersonate the anonymous users. Here is how your `kibana.yml` might look:
 
 [source,yaml]
 -----------------------------------------------
@@ -349,45 +347,6 @@ xpack.security.authc.providers:
       username: "anonymous_service_account"
       password: "anonymous_service_account_password"
 -----------------------------------------------
-
-If using username and password credentials isn't desired or feasible, then you can create a dedicated <<api-keys, API key>> for the anonymous service account. In this case, your `kibana.yml` might look like this:
-
-[source,yaml]
------------------------------------------------
-xpack.security.authc.providers:
-  anonymous.anonymous1:
-    order: 0
-    credentials:
-      apiKey: "VnVhQ2ZHY0JDZGJrUW0tZTVhT3g6dWkybHAyYXhUTm1zeWFrdzl0dk5udw=="
------------------------------------------------
-
-The previous configuration snippet uses an API key string that is the result of base64-encoding of the `id` and `api_key` fields returned from the {es} API, joined by a colon. You can also specify these fields separately, and {kib} will do the concatenation and base64-encoding for you:
-
-[source,yaml]
------------------------------------------------
-xpack.security.authc.providers:
-  anonymous.anonymous1:
-    order: 0
-    credentials:
-      apiKey.id: "VuaCfGcBCdbkQm-e5aOx"
-      apiKey.key: "ui2lp2axTNmsyakw9tvNnw"
------------------------------------------------
-
-It's also possible to use {kib} anonymous access in conjunction with the {es} anonymous access.
-
-Prior to configuring {kib}, ensure that anonymous access is enabled and properly configured in {es}. See {ref}/anonymous-access.html[Enabling anonymous access] for more information.
-
-Here is how your `kibana.yml` might look like if you want to use {es} anonymous access to impersonate anonymous users in {kib}:
-
-[source,yaml]
------------------------------------------------
-xpack.security.authc.providers:
-  anonymous.anonymous1:
-    order: 0
-    credentials: "elasticsearch_anonymous_user" <1>
------------------------------------------------
-
-<1> The `elasticsearch_anonymous_user` is a special constant that indicates you want to use the {es} anonymous user.
 
 [float]
 ===== Anonymous access and other types of authentication
@@ -434,6 +393,12 @@ Be very careful when you modify HTTP authentication settings as it may indirectl
 HTTP protocol provides a simple authentication framework that can be used by a client to provide authentication information. It uses a case-insensitive token as a means to identify the authentication scheme, followed by additional information necessary for achieving authentication via that scheme.
 
 This type of authentication is usually useful for machine-to-machine interaction that requires authentication and where human intervention is not desired or just infeasible. There are a number of use cases when HTTP authentication support comes in handy for {kib} users as well.
+
+[IMPORTANT]
+============================================================================
+API keys are intended for programmatic access to {kib} and {es}. Do not use API keys to authenticate access via a web browser.
+============================================================================
+
 
 By default {kib} supports <<api-keys, `ApiKey`>> authentication scheme _and_ any scheme supported by the currently enabled authentication provider. For example, `Basic` authentication scheme is automatically supported when basic authentication provider is enabled, or `Bearer` scheme when any of the token based authentication providers is enabled (Token, SAML, OpenID Connect, PKI or Kerberos). But it's also possible to add support for any other authentication scheme in the `kibana.yml` configuration file, as follows:
 

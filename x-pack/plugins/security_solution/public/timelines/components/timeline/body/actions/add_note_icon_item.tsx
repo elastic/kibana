@@ -11,6 +11,7 @@ import { TimelineType } from '../../../../../../common/types/timeline';
 import * as i18n from '../translations';
 import { NotesButton } from '../../properties/helpers';
 import { ActionIconItem } from './action_icon_item';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 interface AddEventNoteActionProps {
   ariaLabel?: string;
@@ -24,20 +25,25 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   showNotes,
   timelineType,
   toggleShowNotes,
-}) => (
-  <ActionIconItem>
-    <NotesButton
-      ariaLabel={ariaLabel}
-      data-test-subj="add-note"
-      showNotes={showNotes}
-      timelineType={timelineType}
-      toggleShowNotes={toggleShowNotes}
-      toolTip={
-        timelineType === TimelineType.template ? i18n.NOTES_DISABLE_TOOLTIP : i18n.NOTES_TOOLTIP
-      }
-    />
-  </ActionIconItem>
-);
+}) => {
+  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+
+  return (
+    <ActionIconItem>
+      <NotesButton
+        ariaLabel={ariaLabel}
+        data-test-subj="add-note"
+        isDisabled={kibanaSecuritySolutionsPrivileges.crud === false}
+        showNotes={showNotes}
+        timelineType={timelineType}
+        toggleShowNotes={toggleShowNotes}
+        toolTip={
+          timelineType === TimelineType.template ? i18n.NOTES_DISABLE_TOOLTIP : i18n.NOTES_TOOLTIP
+        }
+      />
+    </ActionIconItem>
+  );
+};
 
 AddEventNoteActionComponent.displayName = 'AddEventNoteActionComponent';
 

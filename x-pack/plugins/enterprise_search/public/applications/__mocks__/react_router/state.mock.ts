@@ -10,15 +10,6 @@
  * Jest to accept its use within a jest.mock()
  */
 
-export const mockHistory = {
-  createHref: jest.fn(({ pathname }) => `/app/enterprise_search${pathname}`),
-  push: jest.fn(),
-  location: {
-    pathname: '/current-path',
-  },
-  listen: jest.fn(() => jest.fn()),
-} as any;
-
 export const mockLocation = {
   key: 'someKey',
   pathname: '/current-path',
@@ -26,3 +17,11 @@ export const mockLocation = {
   hash: '#hash',
   state: {},
 };
+
+export const mockHistory = {
+  createHref: jest.fn(({ pathname }) => `/app/enterprise_search${pathname}`),
+  push: jest.fn(),
+  location: mockLocation,
+  listen: jest.fn(() => jest.fn()),
+  basePath: '/app/enterprise_search',
+} as any;

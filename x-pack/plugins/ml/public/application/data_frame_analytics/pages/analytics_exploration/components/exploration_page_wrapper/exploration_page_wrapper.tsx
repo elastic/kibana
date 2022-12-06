@@ -19,6 +19,7 @@ import {
   getScatterplotMatrixLegendType,
   useResultsViewConfig,
   DataFrameAnalyticsConfig,
+  getDestinationIndex,
 } from '../../../../common';
 import { ResultsSearchQuery, ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 
@@ -32,6 +33,7 @@ import { LoadingPanel } from '../loading_panel';
 import { FeatureImportanceSummaryPanelProps } from '../total_feature_importance_summary/feature_importance_summary';
 import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
 import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
+import { IndexPatternPrompt } from '../index_pattern_prompt';
 
 function getFilters(resultsField: string) {
   return {
@@ -114,6 +116,8 @@ export const ExplorationPageWrapper: FC<Props> = ({
   };
 
   const resultsField = jobConfig?.dest.results_field ?? '';
+  const destIndex = getDestinationIndex(jobConfig);
+
   const scatterplotFieldOptions = useScatterplotFieldOptions(
     indexPattern,
     jobConfig?.analyzed_fields?.includes,
@@ -131,7 +135,12 @@ export const ExplorationPageWrapper: FC<Props> = ({
           color="danger"
           iconType="cross"
         >
-          <p>{indexPatternErrorMessage}</p>
+          <p>
+            {indexPatternErrorMessage}
+            {needsDestIndexPattern ? (
+              <IndexPatternPrompt destIndex={destIndex} color="text" />
+            ) : null}
+          </p>
         </EuiCallOut>
       </EuiPanel>
     );
@@ -152,7 +161,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
 
   return (
     <>
-      {typeof jobConfig?.description !== 'undefined' && (
+      {typeof jobConfig?.description !== 'undefined' && jobConfig?.description !== '' && (
         <>
           <EuiText>{jobConfig?.description}</EuiText>
           <EuiSpacer size="m" />
@@ -170,7 +179,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
                     indexPattern={indexPattern}
                     setSearchQuery={searchQueryUpdateHandler}
                     query={query}
-                    filters={getFilters(jobConfig.dest.results_field)}
+                    filters={getFilters(jobConfig.dest.results_field!)}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

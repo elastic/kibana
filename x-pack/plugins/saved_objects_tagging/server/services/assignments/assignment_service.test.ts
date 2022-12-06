@@ -154,21 +154,56 @@ describe('AssignmentService', () => {
         });
 
         expect(savedObjectClient.bulkUpdate).toHaveBeenCalledTimes(1);
-        expect(savedObjectClient.bulkUpdate).toHaveBeenCalledWith([
+        expect(savedObjectClient.bulkUpdate).toHaveBeenCalledWith(
+          [
+            {
+              type: 'dashboard',
+              id: 'dash-1',
+              attributes: {},
+              references: [createReference('tag', 'tag-1'), createReference('tag', 'tag-2')],
+            },
+            {
+              type: 'map',
+              id: 'map-1',
+              attributes: {},
+              references: [createReference('dashboard', 'dash-1')],
+            },
+          ],
+          { refresh: undefined }
+        );
+      });
+    });
+
+    it('calls `soClient.bulkUpdate` to update the references with refresh false', async () => {
+      savedObjectClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          createSavedObject({
+            type: 'dashboard',
+            id: 'dash-1',
+            references: [],
+          }),
+        ],
+      });
+      getUpdatableSavedObjectTypesMock.mockResolvedValue(['dashboard']);
+
+      await service.updateTagAssignments({
+        tags: ['tag-1', 'tag-2'],
+        assign: [{ type: 'dashboard', id: 'dash-1' }],
+        unassign: [],
+        refresh: false,
+      });
+
+      expect(savedObjectClient.bulkUpdate).toHaveBeenCalledWith(
+        [
           {
             type: 'dashboard',
             id: 'dash-1',
             attributes: {},
             references: [createReference('tag', 'tag-1'), createReference('tag', 'tag-2')],
           },
-          {
-            type: 'map',
-            id: 'map-1',
-            attributes: {},
-            references: [createReference('dashboard', 'dash-1')],
-          },
-        ]);
-      });
+        ],
+        { refresh: false }
+      );
     });
 
     describe('#findAssignableObjects', () => {

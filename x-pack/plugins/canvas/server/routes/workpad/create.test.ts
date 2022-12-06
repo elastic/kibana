@@ -9,7 +9,7 @@ import { AwaitedProperties } from '@kbn/utility-types';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { workpadRouteContextMock, MockWorkpadRouteContext } from '../../mocks';
 import { initializeCreateWorkpadRoute } from './create';
-import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory, RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getMockedRouterDeps } from '../test_helpers';
 
 let mockRouteContext = {
@@ -77,7 +77,7 @@ describe('POST workpad', () => {
     });
 
     mockRouteContext.canvas.workpad.create.mockImplementation(() => {
-      throw mockRouteContext.core.savedObjects.client.errors.createBadRequestError('bad request');
+      throw SavedObjectsErrorHelpers.createBadRequestError('bad request');
     });
 
     const response = await routeHandler(

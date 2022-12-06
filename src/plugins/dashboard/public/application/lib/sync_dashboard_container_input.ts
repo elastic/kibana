@@ -10,11 +10,11 @@ import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
 
-import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
-import { DashboardContainer } from '../embeddable';
-import { Query } from '../../services/data';
-import { DashboardConstants, DashboardSavedObject } from '../..';
+
+import type { DashboardContainer } from '../embeddable';
+import { DashboardConstants } from '../..';
 import {
   setControlGroupState,
   setExpandedPanelId,
@@ -22,27 +22,26 @@ import {
   setPanels,
   setQuery,
   setTimeRange,
+  setTimeslice,
 } from '../state';
 import { diffDashboardContainerInput } from './diff_dashboard_state';
-import { DashboardBuildContext, DashboardContainerInput } from '../../types';
+import type { DashboardBuildContext, DashboardContainerInput } from '../../types';
 import {
   getSearchSessionIdFromURL,
   getSessionURLObservable,
   stateToDashboardContainerInput,
 } from '.';
+import { pluginServices } from '../../services/plugin_services';
 
 type SyncDashboardContainerCommon = DashboardBuildContext & {
   dashboardContainer: DashboardContainer;
-  savedDashboard: DashboardSavedObject;
 };
 
 type ApplyStateChangesToContainerProps = SyncDashboardContainerCommon & {
   force: boolean;
 };
 
-type ApplyContainerChangesToStateProps = SyncDashboardContainerCommon & {
-  applyFilters: (query: Query, filters: Filter[]) => void;
-};
+type ApplyContainerChangesToStateProps = SyncDashboardContainerCommon;
 
 type SyncDashboardContainerProps = SyncDashboardContainerCommon & ApplyContainerChangesToStateProps;
 
@@ -91,12 +90,14 @@ export const syncDashboardContainerInput = (
 };
 
 export const applyContainerChangesToState = ({
-  query,
-  applyFilters,
   dashboardContainer,
   getLatestDashboardState,
   dispatchDashboardStateChange,
 }: ApplyContainerChangesToStateProps) => {
+  const {
+    data: { query },
+  } = pluginServices.getServices();
+
   const input = dashboardContainer.getInput();
   const latestState = getLatestDashboardState();
   if (Object.keys(latestState).length === 0) {
@@ -106,7 +107,6 @@ export const applyContainerChangesToState = ({
   if (!compareFilters(input.filters, filterManager.getFilters(), COMPARE_ALL_OPTIONS)) {
     // Add filters modifies the object passed to it, hence the clone deep.
     filterManager.addFilters(_.cloneDeep(input.filters));
-    applyFilters(latestState.query, input.filters);
   }
 
   if (!_.isEqual(input.panels, latestState.panels)) {
@@ -129,20 +129,24 @@ export const applyContainerChangesToState = ({
     dispatchDashboardStateChange(setControlGroupState(input.controlGroupInput));
   }
   dispatchDashboardStateChange(setFullScreenMode(input.isFullScreenMode));
+
+  if (!_.isEqual(input.timeslice, latestState.timeslice)) {
+    dispatchDashboardStateChange(setTimeslice(input.timeslice));
+  }
 };
 
 export const applyStateChangesToContainer = ({
   force,
-  search,
   history,
-  savedDashboard,
   dashboardContainer,
   kbnUrlStateStorage,
-  query: queryService,
   isEmbeddedExternally,
-  dashboardCapabilities,
   getLatestDashboardState,
 }: ApplyStateChangesToContainerProps) => {
+  const {
+    data: { search },
+  } = pluginServices.getServices();
+
   const latestState = getLatestDashboardState();
   if (Object.keys(latestState).length === 0) {
     return;
@@ -150,9 +154,6 @@ export const applyStateChangesToContainer = ({
   const currentDashboardStateAsInput = stateToDashboardContainerInput({
     dashboardState: latestState,
     isEmbeddedExternally,
-    dashboardCapabilities,
-    query: queryService,
-    savedDashboard,
   });
   const differences = diffDashboardContainerInput(
     dashboardContainer.getInput(),

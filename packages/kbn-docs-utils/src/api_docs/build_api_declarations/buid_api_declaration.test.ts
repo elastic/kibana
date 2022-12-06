@@ -11,7 +11,7 @@ import { Project, Node } from 'ts-morph';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { TypeKind, ApiScope, PluginOrPackage } from '../types';
-import { getKibanaPlatformPlugin } from '../tests/kibana_platform_plugin_mock';
+import { getKibanaPlatformPlugin } from '../integration_tests/kibana_platform_plugin_mock';
 import { getDeclarationNodesForPluginScope } from '../get_declaration_nodes_for_plugin';
 import { buildApiDeclarationTopNode } from './build_api_declaration';
 import { isNamedNode } from '../tsmorph_utils';
@@ -29,7 +29,10 @@ function getNodeName(node: Node): string {
 }
 
 beforeAll(() => {
-  const tsConfigFilePath = Path.resolve(__dirname, '../tests/__fixtures__/src/tsconfig.json');
+  const tsConfigFilePath = Path.resolve(
+    __dirname,
+    '../integration_tests/__fixtures__/src/tsconfig.json'
+  );
   const project = new Project({
     tsConfigFilePath,
   });

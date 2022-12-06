@@ -3,15 +3,15 @@
 exports[`ExplainPluginEnabled should explain about xpack.monitoring.enabled setting 1`] = `
 Array [
   <h2
-    class="euiTitle euiTitle--large"
+    class="euiTitle emotion-euiTitle-l"
   >
     You need to make some adjustments
   </h2>,
   <span
-    class="euiTextColor euiTextColor--subdued"
+    class="emotion-euiTextColor-subdued"
   >
     <div
-      class="euiText euiText--medium"
+      class="euiText emotion-euiText-m"
     >
       <p>
         To run monitoring please perform the following steps
@@ -19,10 +19,10 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText euiText--medium"
+    class="euiText emotion-euiText-m"
   >
     <p>
       We checked the cluster settings and found that 

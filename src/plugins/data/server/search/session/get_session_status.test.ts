@@ -6,72 +6,154 @@
  * Side Public License, v 1.
  */
 
-import { SearchStatus } from './types';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getSessionStatus } from './get_session_status';
-import { SearchSessionStatus } from '../../../common';
+import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
 import moment from 'moment';
 import { SearchSessionsConfigSchema } from '../../../config';
 
+const mockInProgressSearchResponse = {
+  body: {
+    is_partial: true,
+    is_running: true,
+  },
+};
+
+const mockErrorSearchResponse = {
+  body: {
+    is_partial: false,
+    is_running: false,
+    completion_status: 500,
+  },
+};
+
+const mockCompletedSearchResponse = {
+  body: {
+    is_partial: false,
+    is_running: false,
+    completion_status: 200,
+  },
+};
+
 describe('getSessionStatus', () => {
-  const mockConfig = {
-    notTouchedInProgressTimeout: moment.duration(1, 'm'),
-  } as unknown as SearchSessionsConfigSchema;
-  test("returns an in_progress status if there's nothing inside the session", () => {
+  beforeEach(() => {
+    deps.internalClient.asyncSearch.status.mockReset();
+  });
+
+  const mockConfig = {} as unknown as SearchSessionsConfigSchema;
+  const deps = { internalClient: elasticsearchServiceMock.createElasticsearchClient() };
+  test("returns an in_progress status if there's nothing inside the session", async () => {
     const session: any = {
       idMapping: {},
       touched: moment(),
     };
-    expect(getSessionStatus(session, mockConfig)).toBe(SearchSessionStatus.IN_PROGRESS);
+    expect(await getSessionStatus(deps, session, mockConfig)).toEqual({
+      status: SearchSessionStatus.IN_PROGRESS,
+    });
   });
 
-  test("returns an error status if there's at least one error", () => {
+  test("returns an error status if there's at least one error", async () => {
+    deps.internalClient.asyncSearch.status.mockImplementation(async ({ id }): Promise<any> => {
+      switch (id) {
+        case 'a':
+          return mockInProgressSearchResponse;
+        case 'b':
+          return mockErrorSearchResponse;
+        case 'c':
+          return mockCompletedSearchResponse;
+        default:
+          // eslint-disable-next-line no-console
+          console.error('Not mocked search id');
+          throw new Error('Not mocked search id');
+      }
+    });
     const session: any = {
       idMapping: {
-        a: { status: SearchStatus.IN_PROGRESS },
-        b: { status: SearchStatus.ERROR, error: 'Nope' },
-        c: { status: SearchStatus.COMPLETE },
+        a: {
+          id: 'a',
+        },
+        b: { id: 'b' },
+        c: { id: 'c' },
       },
     };
-    expect(getSessionStatus(session, mockConfig)).toBe(SearchSessionStatus.ERROR);
+    expect(await getSessionStatus(deps, session, mockConfig)).toEqual({
+      status: SearchSessionStatus.ERROR,
+      errors: ['Search b completed with a 500 status'],
+    });
   });
 
-  test('expires a empty session after a minute', () => {
+  test('expires a session if expired < now', async () => {
     const session: any = {
       idMapping: {},
-      touched: moment().subtract(2, 'm'),
+      expires: moment().subtract(2, 'm'),
     };
-    expect(getSessionStatus(session, mockConfig)).toBe(SearchSessionStatus.EXPIRED);
+
+    expect(await getSessionStatus(deps, session, mockConfig)).toEqual({
+      status: SearchSessionStatus.EXPIRED,
+    });
   });
 
-  test('doesnt expire a full session after a minute', () => {
+  test('doesnt expire if expire > now', async () => {
+    deps.internalClient.asyncSearch.status.mockResolvedValue(mockInProgressSearchResponse as any);
+
     const session: any = {
       idMapping: {
-        a: { status: SearchStatus.IN_PROGRESS },
+        a: { id: 'a' },
       },
-      touched: moment().subtract(2, 'm'),
+      expires: moment().add(2, 'm'),
     };
-    expect(getSessionStatus(session, mockConfig)).toBe(SearchSessionStatus.IN_PROGRESS);
+    expect(await getSessionStatus(deps, session, mockConfig)).toEqual({
+      status: SearchSessionStatus.IN_PROGRESS,
+    });
   });
 
-  test('returns a complete status if all are complete', () => {
-    const session: any = {
+  test('returns cancelled status if session was cancelled', async () => {
+    const session: Partial<SearchSessionSavedObjectAttributes> = {
       idMapping: {
-        a: { status: SearchStatus.COMPLETE },
-        b: { status: SearchStatus.COMPLETE },
-        c: { status: SearchStatus.COMPLETE },
+        a: { id: 'a', strategy: 'ese' },
       },
+      isCanceled: true,
+      expires: moment().subtract(2, 'm').toISOString(),
     };
-    expect(getSessionStatus(session, mockConfig)).toBe(SearchSessionStatus.COMPLETE);
+    expect(
+      await getSessionStatus(deps, session as SearchSessionSavedObjectAttributes, mockConfig)
+    ).toEqual({ status: SearchSessionStatus.CANCELLED });
   });
 
-  test('returns a running status if some are still running', () => {
+  test('returns a complete status if all are complete', async () => {
+    deps.internalClient.asyncSearch.status.mockResolvedValue(mockCompletedSearchResponse as any);
+
     const session: any = {
       idMapping: {
-        a: { status: SearchStatus.IN_PROGRESS },
-        b: { status: SearchStatus.COMPLETE },
-        c: { status: SearchStatus.IN_PROGRESS },
+        a: { id: 'a' },
+        b: { id: 'b' },
+        c: { id: 'c' },
       },
     };
-    expect(getSessionStatus(session, mockConfig)).toBe(SearchSessionStatus.IN_PROGRESS);
+    expect(await getSessionStatus(deps, session, mockConfig)).toEqual({
+      status: SearchSessionStatus.COMPLETE,
+    });
+  });
+
+  test('returns a running status if some are still running', async () => {
+    deps.internalClient.asyncSearch.status.mockImplementation(async ({ id }): Promise<any> => {
+      switch (id) {
+        case 'a':
+          return mockInProgressSearchResponse;
+        default:
+          return mockCompletedSearchResponse;
+      }
+    });
+
+    const session: any = {
+      idMapping: {
+        a: { id: 'a' },
+        b: { id: 'b' },
+        c: { id: 'c' },
+      },
+    };
+    expect(await getSessionStatus(deps, session, mockConfig)).toEqual({
+      status: SearchSessionStatus.IN_PROGRESS,
+    });
   });
 });

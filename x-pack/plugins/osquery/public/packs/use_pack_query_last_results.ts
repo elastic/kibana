@@ -5,27 +5,31 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import moment from 'moment-timezone';
 import { lastValueFrom } from 'rxjs';
-import { DataView, SortDirection } from '@kbn/data-plugin/common';
+import { SortDirection } from '@kbn/data-plugin/common';
 import { useKibana } from '../common/lib/kibana';
+import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 
 interface UsePackQueryLastResultsProps {
-  actionId: string;
+  actionId?: string;
   agentIds?: string[];
-  interval: number;
-  logsDataView?: DataView;
+  interval?: number;
   skip?: boolean;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const usePackQueryLastResults = ({
   actionId,
   interval,
-  logsDataView,
+  startDate,
+  endDate,
   skip = false,
 }: UsePackQueryLastResultsProps) => {
   const data = useKibana().services.data;
+  const { data: logsDataView } = useLogsDataView({ skip });
 
   return useQuery(
     ['scheduledQueryLastResults', { actionId }],
@@ -62,8 +66,10 @@ export const usePackQueryLastResults = ({
                 {
                   range: {
                     '@timestamp': {
-                      gte: moment(timestamp).subtract(interval, 'seconds').format(),
-                      lte: moment(timestamp).format(),
+                      gte: startDate
+                        ? moment(startDate).format()
+                        : moment(timestamp).subtract(interval, 'seconds').format(),
+                      lte: moment(endDate || timestamp).format(),
                     },
                   },
                 },
@@ -81,12 +87,12 @@ export const usePackQueryLastResults = ({
         aggsSearchSource.setField('aggs', {
           unique_agents: { cardinality: { field: 'agent.id' } },
         });
-        const aggsResponse = await aggsSearchSource.fetch$().toPromise();
+        const aggsResponse = await lastValueFrom(aggsSearchSource.fetch$());
 
         return {
           '@timestamp': lastResultsResponse.rawResponse?.hits?.hits[0]?.fields?.['@timestamp'],
           // @ts-expect-error update types
-          uniqueAgentsCount: aggsResponse.rawResponse.aggregations?.unique_agents?.value,
+          uniqueAgentsCount: aggsResponse?.rawResponse.aggregations?.unique_agents?.value,
           docCount: aggsResponse?.rawResponse?.hits?.total,
         };
       }
@@ -95,7 +101,7 @@ export const usePackQueryLastResults = ({
     },
     {
       keepPreviousData: true,
-      enabled: !!(!skip && actionId && interval && logsDataView),
+      enabled: !!(!skip && actionId && logsDataView),
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
     }

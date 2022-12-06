@@ -53,6 +53,7 @@ export enum LAYER_TYPE {
   HEATMAP = 'HEATMAP',
   BLENDED_VECTOR = 'BLENDED_VECTOR',
   MVT_VECTOR = 'MVT_VECTOR',
+  LAYER_GROUP = 'LAYER_GROUP',
 }
 
 export enum SOURCE_TYPES {
@@ -63,6 +64,7 @@ export enum SOURCE_TYPES {
   ES_SEARCH = 'ES_SEARCH',
   ES_PEW_PEW = 'ES_PEW_PEW',
   ES_TERM_SOURCE = 'ES_TERM_SOURCE',
+  ES_ML_ANOMALIES = 'ML_ANOMALIES',
   EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. EMS-prefix in the name is a little unfortunate :(
   WMS = 'WMS',
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
@@ -195,6 +197,7 @@ export enum LAYER_STYLE_TYPE {
   VECTOR = 'VECTOR',
   HEATMAP = 'HEATMAP',
   TILE = 'TILE',
+  EMS_VECTOR_TILE = 'EMS_VECTOR_TILE',
 }
 
 export enum COLOR_MAP_TYPE {
@@ -215,6 +218,12 @@ export enum LABEL_BORDER_SIZES {
   SMALL = 'SMALL',
   MEDIUM = 'MEDIUM',
   LARGE = 'LARGE',
+}
+
+export enum LABEL_POSITIONS {
+  BOTTOM = 'BOTTOM',
+  CENTER = 'CENTER',
+  TOP = 'TOP',
 }
 
 export const DEFAULT_ICON = 'marker';
@@ -239,10 +248,12 @@ export enum VECTOR_STYLES {
   ICON_SIZE = 'iconSize',
   ICON_ORIENTATION = 'iconOrientation',
   LABEL_TEXT = 'labelText',
+  LABEL_ZOOM_RANGE = 'labelZoomRange',
   LABEL_COLOR = 'labelColor',
   LABEL_SIZE = 'labelSize',
   LABEL_BORDER_COLOR = 'labelBorderColor',
   LABEL_BORDER_SIZE = 'labelBorderSize',
+  LABEL_POSITION = 'labelPosition',
 }
 
 export enum SCALING_TYPES {
@@ -288,6 +299,7 @@ export enum DATA_MAPPING_FUNCTION {
   INTERPOLATE = 'INTERPOLATE',
   PERCENTILES = 'PERCENTILES',
 }
+
 export const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 
 export type RawValue = string | string[] | number | boolean | undefined | null;
@@ -298,11 +310,14 @@ export const MAPS_NEW_VECTOR_LAYER_META_CREATED_BY = 'maps-new-vector-layer';
 
 export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
 
+export const NO_EMS_LOCALE = 'none';
+export const AUTOSELECT_EMS_LOCALE = 'autoselect';
 export const emsWorldLayerId = 'world_countries';
 
 export enum WIZARD_ID {
   CHOROPLETH = 'choropleth',
   GEO_FILE = 'uploadGeoFile',
+  LAYER_GROUP = 'layerGroup',
   NEW_VECTOR = 'newVectorLayer',
   OBSERVABILITY = 'observabilityLayer',
   SECURITY = 'securityLayer',

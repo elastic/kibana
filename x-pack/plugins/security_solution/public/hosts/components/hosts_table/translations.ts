@@ -40,7 +40,7 @@ export const HOST_RISK_TOOLTIP = i18n.translate(
   'xpack.securitySolution.hostsTable.hostRiskToolTip',
   {
     defaultMessage:
-      'Host risk classifcation is determined by host risk score. Hosts classified as Critical or High are indicated as risky.',
+      'Host risk classification is determined by host risk score. Hosts classified as Critical or High are indicated as risky.',
   }
 );
 

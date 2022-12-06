@@ -9,7 +9,8 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { ConfigSchema } from '../../config';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { termsAggSuggestions } from './terms_agg';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { duration } from 'moment';
@@ -21,6 +22,8 @@ const configMock = {
     valueSuggestions: { timeout: duration(4513), terminateAfter: duration(98430) },
   },
 } as unknown as ConfigSchema;
+
+const dataViewFieldMock = { name: 'field_name', type: 'string' } as DataViewField;
 
 // @ts-expect-error not full interface
 const mockResponse = {
@@ -50,7 +53,7 @@ describe('terms agg suggestions', () => {
       'fieldName',
       'query',
       [],
-      { name: 'field_name', type: 'string' }
+      dataViewFieldMock
     );
 
     const [[args]] = esClientMock.search.mock.calls;

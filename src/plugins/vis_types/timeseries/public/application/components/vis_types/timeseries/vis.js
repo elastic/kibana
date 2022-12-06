@@ -163,9 +163,11 @@ class TimeseriesVisualization extends Component {
       onFilterClick,
       syncColors,
       syncTooltips,
+      syncCursor,
       palettesService,
       fieldFormatMap,
       getConfig,
+      initialRender,
     } = this.props;
     const series = get(visData, `${model.id}.series`, []);
     const interval = getInterval(visData, model);
@@ -274,8 +276,10 @@ class TimeseriesVisualization extends Component {
             annotations={this.prepareAnnotations()}
             syncColors={syncColors}
             syncTooltips={syncTooltips}
+            syncCursor={syncCursor}
             palettesService={palettesService}
             interval={interval}
+            initialRender={initialRender}
             useLegacyTimeAxis={getConfig(LEGACY_TIME_AXIS, false)}
             isLastBucketDropped={Boolean(
               model.drop_last_bucket ||

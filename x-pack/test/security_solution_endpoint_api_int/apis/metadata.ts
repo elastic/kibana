@@ -19,6 +19,8 @@ import {
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
+import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+
 import { generateAgentDocs, generateMetadataDocs } from './metadata.fixtures';
 import {
   deleteAllDocsFromMetadataCurrentIndex,
@@ -47,38 +49,37 @@ export default function ({ getService }: FtrProviderContext) {
         const numberOfHostsInFixture = 2;
 
         before(async () => {
-          await stopTransform(getService, `${METADATA_UNITED_TRANSFORM}*`);
           await deleteAllDocsFromFleetAgents(getService);
           await deleteAllDocsFromMetadataDatastream(getService);
           await deleteAllDocsFromMetadataCurrentIndex(getService);
           await deleteAllDocsFromIndex(getService, METADATA_UNITED_INDEX);
 
-          // generate an endpoint policy and attach id to agents since
-          // metadata list api filters down to endpoint policies only
-          const policy = await indexFleetEndpointPolicy(
-            getService('kibanaServer'),
-            `Default ${uuid.v4()}`,
-            '1.1.1'
-          );
-          const policyId = policy.integrationPolicies[0].policy_id;
-          const currentTime = new Date().getTime();
+          const customIndexFn = async (): Promise<IndexedHostsAndAlertsResponse> => {
+            // generate an endpoint policy and attach id to agents since
+            // metadata list api filters down to endpoint policies only
+            const policy = await indexFleetEndpointPolicy(
+              getService('kibanaServer'),
+              `Default ${uuid.v4()}`,
+              '1.1.1'
+            );
+            const policyId = policy.integrationPolicies[0].policy_id;
+            const currentTime = new Date().getTime();
 
-          const agentDocs = generateAgentDocs(currentTime, policyId);
+            const agentDocs = generateAgentDocs(currentTime, policyId);
+            const metadataDocs = generateMetadataDocs(currentTime);
 
-          await Promise.all([
-            bulkIndex(getService, AGENTS_INDEX, agentDocs),
-            bulkIndex(getService, METADATA_DATASTREAM, generateMetadataDocs(currentTime)),
-          ]);
+            await Promise.all([
+              bulkIndex(getService, AGENTS_INDEX, agentDocs),
+              bulkIndex(getService, METADATA_DATASTREAM, metadataDocs),
+            ]);
 
-          await endpointTestResources.waitForEndpoints(
-            agentDocs.map((doc) => doc.agent.id),
-            60000
-          );
-          await startTransform(getService, METADATA_UNITED_TRANSFORM);
-          await endpointTestResources.waitForUnitedEndpoints(
-            agentDocs.map((doc) => doc.agent.id),
-            60000
-          );
+            return {
+              agents: agentDocs,
+              hosts: metadataDocs,
+            } as unknown as IndexedHostsAndAlertsResponse;
+          };
+
+          await endpointTestResources.loadEndpointData({ customIndexFn });
         });
 
         after(async () => {
@@ -254,6 +255,26 @@ export default function ({ getService }: FtrProviderContext) {
           expect(resultElasticAgentId).to.eql(targetElasticAgentId);
           expect(body.data.length).to.eql(1);
           expect(body.data[0].host_status).to.eql('healthy');
+          expect(body.page).to.eql(0);
+          expect(body.pageSize).to.eql(10);
+        });
+
+        it('metadata api should return the endpoint based on the agent hostname', async () => {
+          const targetEndpointId = 'fc0ff548-feba-41b6-8367-65e8790d0eaf';
+          const targetAgentHostname = 'Example-host-name-XYZ';
+          const { body } = await supertest
+            .get(HOST_METADATA_LIST_ROUTE)
+            .set('kbn-xsrf', 'xxx')
+            .query({
+              kuery: `united.endpoint.host.hostname:${targetAgentHostname}`,
+            })
+            .expect(200);
+          expect(body.total).to.eql(1);
+          const resultHostId: string = body.data[0].metadata.host.id;
+          const resultElasticAgentName: string = body.data[0].metadata.host.hostname;
+          expect(resultHostId).to.eql(targetEndpointId);
+          expect(resultElasticAgentName).to.eql(targetAgentHostname);
+          expect(body.data.length).to.eql(1);
           expect(body.page).to.eql(0);
           expect(body.pageSize).to.eql(10);
         });
@@ -524,6 +545,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('get metadata transforms', () => {
+      const testRegex = /endpoint\.metadata_(united|current)-default-*/;
+
       it('should respond forbidden if no fleet access', async () => {
         await getService('supertestWithoutAuth')
           .get(METADATA_TRANSFORMS_STATUS_ROUTE)
@@ -540,19 +563,22 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
-        expect(body.count).to.eql(2);
-
-        const transforms: TransformGetTransformStatsTransformStats[] = body.transforms.sort(
-          (
-            a: TransformGetTransformStatsTransformStats,
-            b: TransformGetTransformStatsTransformStats
-          ) => a.id > b.id
+        const transforms = (body.transforms as TransformGetTransformStatsTransformStats[]).filter(
+          (transform) =>
+            testRegex.test(transform.id) && transform.state === TRANSFORM_STATES.STOPPED
         );
 
-        expect(transforms[0].id).to.contain(metadataTransformPrefix);
-        expect(transforms[0].state).to.eql(TRANSFORM_STATES.STOPPED);
-        expect(transforms[1].id).to.contain(METADATA_UNITED_TRANSFORM);
-        expect(transforms[1].state).to.eql(TRANSFORM_STATES.STOPPED);
+        expect(transforms.length).to.eql(2);
+
+        const currentTransform = transforms.find((transform) =>
+          transform.id.startsWith(metadataTransformPrefix)
+        );
+        expect(currentTransform).to.be.ok();
+
+        const unitedTransform = transforms.find((transform) =>
+          transform.id.startsWith(METADATA_UNITED_TRANSFORM)
+        );
+        expect(unitedTransform).to.be.ok();
 
         await startTransform(getService, metadataTransformPrefix);
         await startTransform(getService, METADATA_UNITED_TRANSFORM);
@@ -564,19 +590,22 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
-        expect(body.count).to.eql(2);
-
-        const transforms: TransformGetTransformStatsTransformStats[] = body.transforms.sort(
-          (
-            a: TransformGetTransformStatsTransformStats,
-            b: TransformGetTransformStatsTransformStats
-          ) => a.id > b.id
+        const transforms = (body.transforms as TransformGetTransformStatsTransformStats[]).filter(
+          (transform) =>
+            testRegex.test(transform.id) && transform.state === TRANSFORM_STATES.STARTED
         );
 
-        expect(transforms[0].id).to.contain(metadataTransformPrefix);
-        expect(transforms[0].state).to.eql(TRANSFORM_STATES.STARTED);
-        expect(transforms[1].id).to.contain(METADATA_UNITED_TRANSFORM);
-        expect(transforms[1].state).to.eql(TRANSFORM_STATES.STARTED);
+        expect(transforms.length).to.eql(2);
+
+        const currentTransform = transforms.find((transform) =>
+          transform.id.startsWith(metadataTransformPrefix)
+        );
+        expect(currentTransform).to.be.ok();
+
+        const unitedTransform = transforms.find((transform) =>
+          transform.id.startsWith(METADATA_UNITED_TRANSFORM)
+        );
+        expect(unitedTransform).to.be.ok();
       });
     });
   });

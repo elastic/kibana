@@ -4,13 +4,12 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "public/**/*",
     "server/**/*",
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
     { "path": "../management/tsconfig.json" },
@@ -21,6 +20,7 @@
     { "path": "../data_view_field_editor/tsconfig.json" },
     { "path": "../data_view_editor/tsconfig.json" },
     { "path": "../unified_search/tsconfig.json" },
+    { "path": "../saved_objects_management/tsconfig.json" },
     { "path": "../../../x-pack/plugins/spaces/tsconfig.json" }
   ]
 }

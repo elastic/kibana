@@ -35,9 +35,9 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       );
       expect(getResponse.status).to.eql(200);
 
-      expect(getResponse.body.monitoring.execution.history.length).to.be(1);
-      expect(getResponse.body.monitoring.execution.history[0].success).to.be(true);
-      expect(getResponse.body.monitoring.execution.calculated_metrics.success_ratio).to.be(1);
+      expect(getResponse.body.monitoring.run.history.length).to.be(1);
+      expect(getResponse.body.monitoring.run.history[0].success).to.be(true);
+      expect(getResponse.body.monitoring.run.calculated_metrics.success_ratio).to.be(1);
     });
 
     it('should return an accurate history for multiple success', async () => {
@@ -56,11 +56,11 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       );
       expect(getResponse.status).to.eql(200);
 
-      expect(getResponse.body.monitoring.execution.history.length).to.be(3);
-      expect(getResponse.body.monitoring.execution.history[0].success).to.be(true);
-      expect(getResponse.body.monitoring.execution.history[1].success).to.be(true);
-      expect(getResponse.body.monitoring.execution.history[2].success).to.be(true);
-      expect(getResponse.body.monitoring.execution.calculated_metrics.success_ratio).to.be(1);
+      expect(getResponse.body.monitoring.run.history.length).to.be(3);
+      expect(getResponse.body.monitoring.run.history[0].success).to.be(true);
+      expect(getResponse.body.monitoring.run.history[1].success).to.be(true);
+      expect(getResponse.body.monitoring.run.history[2].success).to.be(true);
+      expect(getResponse.body.monitoring.run.calculated_metrics.success_ratio).to.be(1);
     });
 
     it('should return an accurate history for some successes and some failures', async () => {
@@ -88,13 +88,13 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       );
       expect(getResponse.status).to.eql(200);
 
-      expect(getResponse.body.monitoring.execution.history.length).to.be(5);
-      expect(getResponse.body.monitoring.execution.history[0].success).to.be(true);
-      expect(getResponse.body.monitoring.execution.history[1].success).to.be(true);
-      expect(getResponse.body.monitoring.execution.history[2].success).to.be(true);
-      expect(getResponse.body.monitoring.execution.history[3].success).to.be(false);
-      expect(getResponse.body.monitoring.execution.history[4].success).to.be(false);
-      expect(getResponse.body.monitoring.execution.calculated_metrics.success_ratio).to.be(0.6);
+      expect(getResponse.body.monitoring.run.history.length).to.be(5);
+      expect(getResponse.body.monitoring.run.history[0].success).to.be(true);
+      expect(getResponse.body.monitoring.run.history[1].success).to.be(true);
+      expect(getResponse.body.monitoring.run.history[2].success).to.be(true);
+      expect(getResponse.body.monitoring.run.history[3].success).to.be(false);
+      expect(getResponse.body.monitoring.run.history[4].success).to.be(false);
+      expect(getResponse.body.monitoring.run.calculated_metrics.success_ratio).to.be(0.6);
     });
 
     it('should populate rule objects with the calculated percentiles', async () => {
@@ -118,7 +118,7 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       );
       expect(getResponse.status).to.eql(200);
 
-      getResponse.body.monitoring.execution.history.forEach((history: any) => {
+      getResponse.body.monitoring.run.history.forEach((history: any) => {
         expect(history.duration).to.be.a('number');
       });
     });
@@ -135,13 +135,13 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${id}`
     );
     expect(getResponse.status).to.eql(200);
-    if (getResponse.body.monitoring.execution.history.length >= count) {
+    if (getResponse.body.monitoring.run.history.length >= count) {
       attempts = 0;
       return true;
     }
     // eslint-disable-next-line no-console
     console.log(
-      `found ${getResponse.body.monitoring.execution.history.length} and looking for ${count}, waiting 3s then retrying`
+      `found ${getResponse.body.monitoring.run.history.length} and looking for ${count}, waiting 3s then retrying`
     );
     await delay(3000);
     return waitForExecutionCount(count, id);

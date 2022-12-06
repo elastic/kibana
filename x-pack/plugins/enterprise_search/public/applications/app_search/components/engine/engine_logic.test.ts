@@ -41,6 +41,19 @@ describe('EngineLogic', () => {
     isMeta: false,
     invalidBoosts: false,
     schema: { test: SchemaType.Text },
+    advancedSchema: {
+      test: {
+        type: SchemaType.Text,
+        capabilities: {
+          fulltext: true,
+          filter: true,
+          facet: true,
+          sort: true,
+          snippet: true,
+          boost: true,
+        },
+      },
+    },
     apiTokens: [],
     apiKey: 'some-key',
     adaptive_relevance_suggestions_active: true,
@@ -242,7 +255,7 @@ describe('EngineLogic', () => {
     });
 
     describe('pollEmptyEngine', () => {
-      beforeEach(() => jest.useFakeTimers());
+      beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
       afterEach(() => jest.clearAllTimers());
       afterAll(() => jest.useRealTimers());
 

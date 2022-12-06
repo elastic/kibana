@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon } from '@elastic/eui';

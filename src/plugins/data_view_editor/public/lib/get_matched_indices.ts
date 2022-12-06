@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { MatchedItem } from '@kbn/data-views-plugin/public';
 import { MAX_NUMBER_OF_MATCHING_INDICES } from '../constants';
 
 function isSystemIndex(index: string): boolean {
@@ -50,7 +51,7 @@ function filterSystemIndices(indices: MatchedItem[], isIncludingSystemIndices: b
     We call this `exact` matches because ES is telling us exactly what it matches
  */
 
-import { MatchedItem, MatchedIndicesSet } from '../types';
+import { MatchedIndicesSet } from '../types';
 
 export function getMatchedIndices(
   unfilteredAllIndices: MatchedItem[],

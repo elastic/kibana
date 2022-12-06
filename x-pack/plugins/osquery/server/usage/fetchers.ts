@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import {
+import type {
   AggregationsSingleBucketAggregateBase,
   AggregationsTopHitsAggregate,
   AggregationsRateAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
-  ListResult,
-  PackagePolicy,
+  AGENTS_INDEX,
+  AGENT_ACTIONS_INDEX,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import { getRouteMetric } from '../routes/usage';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { METRICS_INDICES } from './constants';
-import { AgentInfo, BeatMetricsUsage, LiveQueryUsage } from './types';
+import type { AgentInfo, BeatMetricsUsage, LiveQueryUsage } from './types';
 
 interface PolicyLevelUsage {
   scheduled_queries?: ScheduledQueryUsageMetrics;
@@ -31,7 +32,7 @@ interface PolicyLevelUsage {
 export async function getPolicyLevelUsage(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  packagePolicyService?: PackagePolicyServiceInterface
+  packagePolicyService?: PackagePolicyClient
 ): Promise<PolicyLevelUsage> {
   if (!packagePolicyService) {
     return {};
@@ -70,7 +71,7 @@ export async function getPolicyLevelUsage(
         },
       },
     },
-    index: '.fleet-agents',
+    index: AGENTS_INDEX,
     ignore_unavailable: true,
   });
   const policied = agentResponse.aggregations?.policied;
@@ -142,7 +143,7 @@ export async function getLiveQueryUsage(
         },
       },
     },
-    index: '.fleet-actions',
+    index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
   });
   const result: LiveQueryUsage = {

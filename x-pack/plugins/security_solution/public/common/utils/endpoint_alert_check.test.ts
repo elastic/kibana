@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { Ecs } from '../../../common/ecs';
+import type { Ecs } from '../../../common/ecs';
 import { generateMockDetailItemData } from '../mock';
 import { isAlertFromEndpointAlert, isAlertFromEndpointEvent } from './endpoint_alert_check';
 

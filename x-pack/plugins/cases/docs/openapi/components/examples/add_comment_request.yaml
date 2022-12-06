@@ -1,0 +1,7 @@
+summary: Adds a comment to a case.
+value:
+  {
+    "type": "user",
+    "comment": "A new comment.",
+    "owner": "cases"
+  }

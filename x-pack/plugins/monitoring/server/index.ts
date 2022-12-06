@@ -28,6 +28,11 @@ export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
       ccs: {
         enabled: true,
       },
+      kibana: {
+        reporting: {
+          stale_status_threshold_seconds: true,
+        },
+      },
     },
     kibana: true,
   },

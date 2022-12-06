@@ -4,14 +4,13 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "isolatedModules": true,
-    "outDir": "./target_types",
-    "rootDir": "src",
+    "outDir": "target_types",
     "types": [
       "jest",
       "node"
     ],
   },
   "include": [
-    "src/**/*",
+    "**/*.ts",
   ]
 }

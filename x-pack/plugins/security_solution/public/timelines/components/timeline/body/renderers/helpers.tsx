@@ -9,7 +9,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
 
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 
 export const deleteItemIdx = (data: TimelineNonEcsData[], idx: number) => [
   ...data.slice(0, idx),
@@ -27,10 +27,17 @@ export const getValues = (field: string, data: TimelineNonEcsData[]): string[] |
   return undefined;
 };
 
-export const Details = styled.div`
+export const DETAILS_CLASS_NAME = 'details';
+
+export const Details = styled.div.attrs(() => ({
+  className: DETAILS_CLASS_NAME,
+}))`
   margin: 5px 0 5px 10px;
   & .euiBadge {
     margin: 2px 0 2px 0;
+  }
+  & .euiFlexGroup {
+    justify-content: center;
   }
 `;
 Details.displayName = 'Details';
@@ -73,13 +80,3 @@ export const showVia = (eventAction: string | null | undefined): boolean =>
     'overwrite',
     'rename',
   ].includes(`${eventAction}`.toLowerCase());
-
-export const excludeFileNameAndPath = ({
-  eventAction,
-  eventCategory,
-  eventType,
-}: {
-  eventAction: string | null | undefined;
-  eventCategory: string | null | undefined;
-  eventType: string | null | undefined;
-}) => false;

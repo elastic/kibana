@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import React, { MouseEventHandler } from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useDispatch, useSelector } from 'react-redux';
 
+// @ts-expect-error untyped local
+import { fetchAllRenderables } from '../../../state/actions/elements';
+import { getInFlight } from '../../../state/selectors/resolved_args';
 import { ToolTipShortcut } from '../../tool_tip_shortcut';
 
 const strings = {
@@ -23,30 +27,31 @@ const strings = {
     }),
 };
 
-export interface Props {
-  doRefresh: MouseEventHandler<HTMLButtonElement>;
-  inFlight: boolean;
-}
+export const RefreshControl = () => {
+  const dispatch = useDispatch();
+  const inFlight = useSelector(getInFlight);
+  const doRefresh = useCallback(() => dispatch(fetchAllRenderables()), [dispatch]);
 
-export const RefreshControl = ({ doRefresh, inFlight }: Props) => (
-  <EuiToolTip
-    position="bottom"
-    content={
-      <span>
-        {strings.getRefreshTooltip()}
-        <ToolTipShortcut namespace="EDITOR" action="REFRESH" />
-      </span>
-    }
-  >
-    <EuiButtonIcon
-      disabled={inFlight}
-      iconType="refresh"
-      aria-label={strings.getRefreshAriaLabel()}
-      onClick={doRefresh}
-      data-test-subj="canvas-refresh-control"
-    />
-  </EuiToolTip>
-);
+  return (
+    <EuiToolTip
+      position="bottom"
+      content={
+        <span>
+          {strings.getRefreshTooltip()}
+          <ToolTipShortcut namespace="EDITOR" action="REFRESH" />
+        </span>
+      }
+    >
+      <EuiButtonIcon
+        disabled={inFlight}
+        iconType="refresh"
+        aria-label={strings.getRefreshAriaLabel()}
+        onClick={doRefresh}
+        data-test-subj="canvas-refresh-control"
+      />
+    </EuiToolTip>
+  );
+};
 
 RefreshControl.propTypes = {
   doRefresh: PropTypes.func.isRequired,

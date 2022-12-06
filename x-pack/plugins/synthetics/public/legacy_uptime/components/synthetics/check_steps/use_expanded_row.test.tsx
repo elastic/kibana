@@ -255,7 +255,9 @@ const browserConsoleStep = {
     package_version: '1.0.0-beta.14',
     journey: { name: 'inline', id: 'inline' },
     payload: {
-      text: "Refused to execute inline script because it violates the following Content Security Policy directive: \"script-src 'unsafe-eval' 'self'\". Either the 'unsafe-inline' keyword, a hash ('sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE='), or a nonce ('nonce-...') is required to enable inline execution.\n",
+      text: expect.stringMatching(
+        'Refused to execute inline script because it violates the following Content Security Policy directive:'
+      ),
       type: 'error',
     },
     index: 755,

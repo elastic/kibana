@@ -12,13 +12,17 @@ import {
   buildCustomFilter,
   buildEsQuery,
   FilterStateStore,
+  TimeRange,
+  EsQueryConfig,
+  isOfQueryType,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Capabilities } from '@kbn/core/public';
 import { partition } from 'lodash';
+import { showMemoizedErrorNotification } from '../lens_ui_errors';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
-import { Datasource } from '../types';
+import { Datasource, DatasourcePublicAPI, IndexPatternMap } from '../types';
 
 /**
  * Joins a series of queries.
@@ -55,10 +59,33 @@ interface LayerMetaInfo {
   >;
 }
 
+const sortByDateFieldsFirst = (
+  datasourceAPI: DatasourcePublicAPI,
+  fields: string[],
+  indexPatterns: IndexPatternMap
+) => {
+  const dataViewId = datasourceAPI.getSourceId();
+  if (!dataViewId) return;
+
+  // for usability reasons we want to order the date fields first
+  // the fields order responds to the columns order in Discover
+  const dateFieldsFirst = fields.reduce((acc: string[], fieldName) => {
+    const field = indexPatterns[dataViewId]?.getFieldByName(fieldName);
+    if (field?.type === 'date') {
+      return [fieldName, ...acc];
+    }
+    return [...acc, fieldName];
+  }, []);
+
+  return dateFieldsFirst;
+};
+
 export function getLayerMetaInfo(
   currentDatasource: Datasource | undefined,
   datasourceState: unknown,
   activeData: TableInspectorAdapter | undefined,
+  indexPatterns: IndexPatternMap,
+  timeRange: TimeRange | undefined,
   capabilities: RecursiveReadonly<{
     navLinks: Capabilities['navLinks'];
     discover?: Capabilities['discover'];
@@ -86,21 +113,25 @@ export function getLayerMetaInfo(
       isVisible,
     };
   }
-  const [firstLayerId] = currentDatasource.getLayers(datasourceState);
-  const datasourceAPI = currentDatasource.getPublicAPI({
-    layerId: firstLayerId,
-    state: datasourceState,
-  });
-  // maybe add also datasourceId validation here?
-  if (datasourceAPI.datasourceId !== 'indexpattern') {
+  let datasourceAPI: DatasourcePublicAPI;
+
+  try {
+    const [firstLayerId] = currentDatasource.getLayers(datasourceState);
+    datasourceAPI = currentDatasource.getPublicAPI({
+      layerId: firstLayerId,
+      state: datasourceState,
+      indexPatterns,
+    });
+  } catch (error) {
+    showMemoizedErrorNotification(error);
+
     return {
       meta: undefined,
-      error: i18n.translate('xpack.lens.app.showUnderlyingDataUnsupportedDatasource', {
-        defaultMessage: 'Underlying data does not support the current datasource',
-      }),
+      error: error.message,
       isVisible,
     };
   }
+
   const tableSpec = datasourceAPI.getTableSpec();
 
   const columnsWithNoTimeShifts = tableSpec.filter(
@@ -116,12 +147,24 @@ export function getLayerMetaInfo(
     };
   }
 
+  const filtersOrError = datasourceAPI.getFilters(activeData, timeRange);
+
+  if ('error' in filtersOrError) {
+    return {
+      meta: undefined,
+      error: filtersOrError.error,
+      isVisible,
+    };
+  }
+
   const uniqueFields = [...new Set(columnsWithNoTimeShifts.map(({ fields }) => fields).flat())];
+  const dateFieldsFirst = sortByDateFieldsFirst(datasourceAPI, uniqueFields, indexPatterns);
+
   return {
     meta: {
       id: datasourceAPI.getSourceId()!,
-      columns: uniqueFields,
-      filters: datasourceAPI.getFilters(activeData),
+      columns: dateFieldsFirst ?? uniqueFields,
+      filters: filtersOrError,
     },
     error: undefined,
     isVisible,
@@ -144,7 +187,8 @@ export function combineQueryAndFilters(
   query: Query | Query[] | undefined,
   filters: Filter[],
   meta: LayerMetaInfo,
-  dataViews: DataViewBase[] | undefined
+  dataViews: DataViewBase[] | undefined,
+  esQueryConfig: EsQueryConfig
 ) {
   const queries: {
     kuery: Query[];
@@ -154,8 +198,10 @@ export function combineQueryAndFilters(
     lucene: [],
   };
 
-  const allQueries = Array.isArray(query) ? query : query ? [query] : [];
-  const nonEmptyQueries = allQueries.filter((q) => Boolean(q.query.trim()));
+  const allQueries = Array.isArray(query) ? query : query && isOfQueryType(query) ? [query] : [];
+  const nonEmptyQueries = allQueries.filter((q) =>
+    Boolean(typeof q.query === 'string' ? q.query.trim() : q.query)
+  );
 
   [queries.lucene, queries.kuery] = partition(nonEmptyQueries, (q) => q.language === 'lucene');
 
@@ -191,7 +237,12 @@ export function combineQueryAndFilters(
     newFilters.push(
       buildCustomFilter(
         meta.id!,
-        buildEsQuery(dataView, { language: filtersLanguage, query: queryExpression }, []),
+        buildEsQuery(
+          dataView,
+          { language: filtersLanguage, query: queryExpression },
+          [],
+          esQueryConfig
+        ),
         false,
         false,
         i18n.translate('xpack.lens.app.lensContext', {
@@ -215,7 +266,7 @@ export function combineQueryAndFilters(
       newFilters.push(
         buildCustomFilter(
           meta.id!,
-          buildEsQuery(dataView, disabledQuery, []),
+          buildEsQuery(dataView, disabledQuery, [], esQueryConfig),
           true,
           false,
           label,

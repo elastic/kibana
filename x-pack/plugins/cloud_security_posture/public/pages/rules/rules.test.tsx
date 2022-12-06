@@ -6,21 +6,28 @@
  */
 
 import React from 'react';
-import { LOADING_STATE_TEST_SUBJECT } from '../../components/csp_page_template';
+import Chance from 'chance';
 import { Rules } from '.';
 import { render, screen } from '@testing-library/react';
-import { QueryClient } from 'react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { TestProvider } from '../../test/test_provider';
-import { useCspIntegration } from './use_csp_integration';
+import { useCspIntegrationInfo } from './use_csp_integration';
 import { type RouteComponentProps } from 'react-router-dom';
 import type { PageUrlParams } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
-import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
+import { createReactQueryResponse } from '../../test/fixtures/react_query';
+import { coreMock } from '@kbn/core/public/mocks';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
+import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 
 jest.mock('./use_csp_integration', () => ({
-  useCspIntegration: jest.fn(),
+  useCspIntegrationInfo: jest.fn(),
 }));
-jest.mock('../../common/api/use_cis_kubernetes_integration');
+jest.mock('../../common/api/use_setup_status_api');
+jest.mock('../../common/hooks/use_subscription_status');
+jest.mock('../../common/navigation/use_navigate_to_cis_integration');
+const chance = new Chance();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,9 +37,20 @@ const queryClient = new QueryClient({
 
 const getTestComponent =
   (params: PageUrlParams): React.FC =>
-  () =>
-    (
-      <TestProvider>
+  () => {
+    const coreStart = coreMock.createStart();
+    const core = {
+      ...coreStart,
+      application: {
+        ...coreStart.application,
+        capabilities: {
+          ...coreStart.application.capabilities,
+          siem: { crud: true },
+        },
+      },
+    };
+    return (
+      <TestProvider core={core}>
         <Rules
           {...({
             match: { params },
@@ -40,79 +58,75 @@ const getTestComponent =
         />
       </TestProvider>
     );
+  };
 
 describe('<Rules />', () => {
   beforeEach(() => {
     queryClient.clear();
     jest.clearAllMocks();
-    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
-      data: { item: { status: 'installed' } },
-    }));
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed' },
+      })
+    );
+
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: true,
+      })
+    );
+
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
   });
 
   it('calls API with URL params', async () => {
     const params = { packagePolicyId: '1', policyId: '2' };
     const Component = getTestComponent(params);
-    const result = {
+    const result = createReactQueryResponse({
       status: 'loading',
-    };
+    });
 
-    (useCspIntegration as jest.Mock).mockReturnValue(result);
-
-    render(<Component />);
-
-    expect(useCspIntegration).toHaveBeenCalledWith(params);
-  });
-
-  it('displays error state when request had an error', async () => {
-    const Component = getTestComponent({ packagePolicyId: '1', policyId: '2' });
-    const request = {
-      status: 'error',
-      isError: true,
-      data: null,
-      error: new Error('some error message'),
-    };
-
-    (useCspIntegration as jest.Mock).mockReturnValue(request);
+    (useCspIntegrationInfo as jest.Mock).mockReturnValue(result);
 
     render(<Component />);
 
-    expect(await screen.findByText(request.error.message)).toBeInTheDocument();
-  });
-
-  it('displays loading state when request is pending', () => {
-    const Component = getTestComponent({ packagePolicyId: '21', policyId: '22' });
-    const request = {
-      status: 'loading',
-      isLoading: true,
-    };
-
-    (useCspIntegration as jest.Mock).mockReturnValue(request);
-
-    render(<Component />);
-
-    expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
+    expect(useCspIntegrationInfo).toHaveBeenCalledWith(params);
   });
 
   it('displays success state when result request is resolved', async () => {
     const Component = getTestComponent({ packagePolicyId: '21', policyId: '22' });
-    const request = {
+    const response = createReactQueryResponse({
       status: 'success',
-      data: {
-        name: 'CIS Kubernetes Benchmark',
-        package: {
-          title: 'my package',
+      data: [
+        {
+          name: 'CIS Kubernetes Benchmark',
+          package: {
+            title: 'my package',
+          },
+          inputs: [
+            {
+              enabled: true,
+              policy_template: 'kspm',
+              type: 'cloudbeat/cis_k8s',
+            },
+            {
+              enabled: false,
+              policy_template: 'kspm',
+              type: 'cloudbeat/cis_eks',
+            },
+          ],
         },
-      },
-    };
+        { name: 'my agent' },
+      ],
+    });
 
-    (useCspIntegration as jest.Mock).mockReturnValue(request);
+    (useCspIntegrationInfo as jest.Mock).mockReturnValue(response);
 
     render(<Component />);
 
-    expect(
-      await screen.findByText(`${request.data.package.title}, ${request.data.name}`)
-    ).toBeInTheDocument();
     expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_CONTAINER)).toBeInTheDocument();
+    expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_SHARED_VALUES)).toBeInTheDocument();
   });
 });

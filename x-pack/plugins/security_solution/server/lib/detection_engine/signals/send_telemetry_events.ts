@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { ITelemetryEventsSender } from '../../telemetry/sender';
-import { TelemetryEvent } from '../../telemetry/types';
-import { BuildRuleMessage } from './rule_messages';
-import { SignalSource, SignalSourceHit } from './types';
+import type { ITelemetryEventsSender } from '../../telemetry/sender';
+import type { TelemetryEvent } from '../../telemetry/types';
+import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
+import type { SignalSource, SignalSourceHit } from './types';
 
 interface SearchResultSource {
   _source: SignalSource;
@@ -44,11 +43,10 @@ export function enrichEndpointAlertsSignalID(
 }
 
 export function sendAlertTelemetryEvents(
-  logger: Logger,
-  eventsTelemetry: ITelemetryEventsSender | undefined,
   filteredEvents: SignalSourceHit[],
   createdEvents: SignalSource[],
-  buildRuleMessage: BuildRuleMessage
+  eventsTelemetry: ITelemetryEventsSender | undefined,
+  ruleExecutionLogger: IRuleExecutionLogForExecutors
 ) {
   if (eventsTelemetry === undefined) {
     return;
@@ -74,6 +72,6 @@ export function sendAlertTelemetryEvents(
   try {
     eventsTelemetry.queueTelemetryEvents(selectedEvents);
   } catch (exc) {
-    logger.error(buildRuleMessage(`[-] queing telemetry events failed ${exc}`));
+    ruleExecutionLogger.error(`[-] queing telemetry events failed ${exc}`);
   }
 }

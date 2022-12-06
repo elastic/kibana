@@ -10,10 +10,12 @@ import React from 'react';
 import { act, waitFor, within } from '@testing-library/react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import userEvent from '@testing-library/user-event';
-import { ArtifactFormComponentProps } from './types';
-import { ArtifactListPage, ArtifactListPageProps } from './artifact_list_page';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { trustedAppsAllHttpMocks } from '../../pages/mocks';
+import type { ArtifactFormComponentProps } from './types';
+import type { ArtifactListPageProps } from './artifact_list_page';
+import { ArtifactListPage } from './artifact_list_page';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import { trustedAppsAllHttpMocks } from '../../mocks';
 import { TrustedAppsApiClient } from '../../pages/trusted_apps/service/api_client';
 import { artifactListPageLabels } from './translations';
 
@@ -47,25 +49,6 @@ export const getFormComponentMock = (): {
     FormComponentMock,
     getLastFormComponentProps,
   };
-};
-
-interface DeferredInterface<T = void> {
-  promise: Promise<T>;
-  resolve: (data: T) => void;
-  reject: (e: Error) => void;
-}
-
-export const getDeferred = function <T = void>(): DeferredInterface<T> {
-  let resolve: DeferredInterface<T>['resolve'];
-  let reject: DeferredInterface<T>['reject'];
-
-  const promise = new Promise<T>((_resolve, _reject) => {
-    resolve = _resolve;
-    reject = _reject;
-  });
-
-  // @ts-ignore
-  return { promise, resolve, reject };
 };
 
 export const getFirstCard = async (

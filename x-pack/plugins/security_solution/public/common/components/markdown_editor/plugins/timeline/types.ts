@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ID } from './constants';
+import type { ID } from './constants';
 
 export interface TimelineConfiguration {
   id: string | null;

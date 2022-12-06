@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogViewContext } from '../../../hooks/use_log_view';
 import { LogsPageTemplate } from '../page_template';
 import { LogsPageLogsContent } from './page_logs_content';
+import { fullHeightContentStyles } from '../../../page_template.styles';
 
 const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
   defaultMessage: 'Stream',
@@ -35,29 +35,22 @@ export const StreamPageContent: React.FunctionComponent = () => {
     return <LogSourceErrorPage errors={latestLoadLogViewFailures} onRetry={load} />;
   } else {
     return (
-      <LogStreamPageWrapper className={APP_WRAPPER_CLASS}>
+      <div className={APP_WRAPPER_CLASS}>
         <LogsPageTemplate
           hasData={logViewStatus?.index !== 'missing'}
+          isDataLoading={isLoading}
           pageHeader={{
             pageTitle: streamTitle,
+          }}
+          pageSectionProps={{
+            contentProps: {
+              css: fullHeightContentStyles,
+            },
           }}
         >
           <LogsPageLogsContent />
         </LogsPageTemplate>
-      </LogStreamPageWrapper>
+      </div>
     );
   }
 };
-
-// This is added to facilitate a full height layout whereby the
-// inner container will set it's own height and be scrollable.
-// The "fullHeight" prop won't help us as it only applies to certain breakpoints.
-export const LogStreamPageWrapper = euiStyled.div`
-  .euiPage .euiPageContentBody {
-    display: flex;
-    flex-direction: column;
-    flex: 1 0 auto;
-    width: 100%;
-    height: 100%;
-  }
-`;

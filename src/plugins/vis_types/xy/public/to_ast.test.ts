@@ -23,10 +23,6 @@ jest.mock('@kbn/expressions-plugin/public', () => ({
   })),
 }));
 
-jest.mock('./to_ast_esaggs', () => ({
-  getEsaggsFn: jest.fn(),
-}));
-
 describe('xy vis toExpressionAst function', () => {
   let vis: Vis<VisParams>;
 
@@ -42,7 +38,7 @@ describe('xy vis toExpressionAst function', () => {
 
   it('should match basic snapshot', () => {
     toExpressionAst(vis, params);
-    const [, builtExpression] = (buildExpression as jest.Mock).mock.calls.pop()[0];
+    const [builtExpression] = (buildExpression as jest.Mock).mock.calls.pop()[0];
 
     expect(builtExpression).toMatchSnapshot();
   });

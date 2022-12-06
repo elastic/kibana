@@ -8,7 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { TIMELINE_EXPORT_URL } from '../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { ConfigType } from '../../../../../config';
+import type { ConfigType } from '../../../../../config';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import {
@@ -17,7 +17,7 @@ import {
 } from '../../../schemas/timelines';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { buildFrameworkRequest } from '../../../utils/common';
-import { SetupPlugins } from '../../../../../plugin';
+import type { SetupPlugins } from '../../../../../plugin';
 
 import { getExportTimelineByObjectIds } from './helpers';
 

@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiHorizontalRule,
   EuiFilePicker,
   EuiLoadingSpinner,
@@ -26,9 +26,10 @@ import { WelcomeContent } from './welcome_content';
 
 interface Props {
   onFilePickerChange(files: FileList | null): void;
+  hasPermissionToImport: boolean;
 }
 
-export const AboutPanel: FC<Props> = ({ onFilePickerChange }) => {
+export const AboutPanel: FC<Props> = ({ onFilePickerChange, hasPermissionToImport }) => {
   return (
     <EuiPageBody
       paddingSize="none"
@@ -39,7 +40,7 @@ export const AboutPanel: FC<Props> = ({ onFilePickerChange }) => {
       <EuiPageContent hasShadow={false} hasBorder>
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem grow={true}>
-            <WelcomeContent />
+            <WelcomeContent hasPermissionToImport={hasPermissionToImport} />
 
             <EuiHorizontalRule margin="l" />
 

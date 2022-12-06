@@ -34,13 +34,13 @@ describe('convertMetricToMetricsAPIMetric(metric, index)', () => {
   runTestForBasic('cardinality');
 
   runTest(
-    { aggregation: 'rate', field: 'system.network.in.bytes' },
+    { aggregation: 'rate', field: 'test.field.that.is.a.counter' },
     {
       id: 'metric_1',
       aggregations: {
         metric_1_max: {
           max: {
-            field: 'system.network.in.bytes',
+            field: 'test.field.that.is.a.counter',
           },
         },
         metric_1_deriv: {

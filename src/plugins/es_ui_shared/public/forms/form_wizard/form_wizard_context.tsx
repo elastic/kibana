@@ -17,6 +17,7 @@ export interface Props<T extends object> {
   defaultActiveStep?: number;
   defaultValue?: HookProps<T>['defaultValue'];
   onChange?: HookProps<T>['onChange'];
+  onStepChange?: (id: string) => void;
 }
 
 interface State {
@@ -48,7 +49,7 @@ const formWizardContext = createContext<Context>({} as Context);
 
 export const FormWizardProvider = WithMultiContent<Props<any>>(function FormWizardProvider<
   T extends object = { [key: string]: any }
->({ children, defaultActiveStep = 0, isEditing, onSave }: Props<T>) {
+>({ children, defaultActiveStep = 0, isEditing, onSave, onStepChange }: Props<T>) {
   const { getData, validate, validation } = useMultiContentContext<T>();
 
   const [state, setState] = useState<State>({
@@ -135,8 +136,12 @@ export const FormWizardProvider = WithMultiContent<Props<any>>(function FormWiza
 
         return nextState;
       });
+      // Trigger onStepChange
+      if (onStepChange) {
+        onStepChange(Object.values(state.steps)[getStepIndex(stepId)]?.id);
+      }
     },
-    [getStepIndex, validate, onSave, getData, lastStep]
+    [getStepIndex, validate, onSave, onStepChange, getData, lastStep, state.steps]
   );
 
   const value: Context = {

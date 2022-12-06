@@ -12,9 +12,15 @@ interface Props {
   onClickHistory: () => void;
   onClickSettings: () => void;
   onClickHelp: () => void;
+  onClickVariables: () => void;
 }
 
-export function getTopNavConfig({ onClickHistory, onClickSettings, onClickHelp }: Props) {
+export function getTopNavConfig({
+  onClickHistory,
+  onClickSettings,
+  onClickHelp,
+  onClickVariables,
+}: Props) {
   return [
     {
       id: 'history',
@@ -41,6 +47,19 @@ export function getTopNavConfig({ onClickHistory, onClickSettings, onClickHelp }
         onClickSettings();
       },
       testId: 'consoleSettingsButton',
+    },
+    {
+      id: 'variables',
+      label: i18n.translate('console.topNav.variablesTabLabel', {
+        defaultMessage: 'Variables',
+      }),
+      description: i18n.translate('console.topNav.variablesTabDescription', {
+        defaultMessage: 'Variables',
+      }),
+      onClick: () => {
+        onClickVariables();
+      },
+      testId: 'consoleVariablesButton',
     },
     {
       id: 'help',

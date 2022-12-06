@@ -64,8 +64,8 @@ export class ScalingForm extends Component<Props, State> {
 
   async loadIndexSettings() {
     try {
-      const indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
-      const { maxResultWindow } = await loadIndexSettings(indexPattern!.title);
+      const dataView = await getIndexPatternService().get(this.props.indexPatternId);
+      const { maxResultWindow } = await loadIndexSettings(dataView.getIndexPattern());
       if (this._isMounted) {
         this.setState({ maxResultWindow: maxResultWindow.toLocaleString() });
       }
@@ -228,7 +228,7 @@ export class ScalingForm extends Component<Props, State> {
         {this._renderModal()}
         <EuiTitle size="xs">
           <h5>
-            <FormattedMessage id="xpack.maps.esSearch.scaleTitle" defaultMessage="Scaling" />
+            <FormattedMessage id="xpack.maps.esSearch.scaleTitle" defaultMessage="Scaling" />{' '}
             <ScalingDocumenationPopover
               limitOptionLabel={this._getLimitOptionLabel()}
               clustersOptionLabel={this._getClustersOptionLabel()}

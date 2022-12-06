@@ -12,6 +12,8 @@ import { get } from 'lodash';
 
 import { useHistory } from 'react-router-dom';
 
+import './edit_policy.scss';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,6 +24,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiPageHeader,
+  EuiTimeline,
 } from '@elastic/eui';
 
 import { TextField, useForm, useFormData, useKibana } from '../../../shared_imports';
@@ -235,27 +238,17 @@ export const EditPolicy: React.FunctionComponent = () => {
 
         <EuiSpacer size="l" />
 
-        <div>
+        <EuiTimeline className="ilmPhases">
           <HotPhase />
 
-          <EuiSpacer />
           <WarmPhase />
 
-          <EuiSpacer />
           <ColdPhase />
 
-          {isAllowedByLicense && (
-            <>
-              <EuiSpacer />
-              <FrozenPhase />
-            </>
-          )}
+          {isAllowedByLicense && <FrozenPhase />}
 
-          {/* We can't add the <EuiSpacer /> here as it breaks the layout
-              and makes the connecting line go further that it needs to.
-              There is an issue in EUI to fix this (https://github.com/elastic/eui/issues/4492) */}
           <DeletePhase />
-        </div>
+        </EuiTimeline>
 
         <EuiHorizontalRule />
 

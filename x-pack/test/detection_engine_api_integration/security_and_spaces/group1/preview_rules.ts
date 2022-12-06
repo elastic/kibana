@@ -20,8 +20,8 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
 
-  describe('create_rules', () => {
-    describe('creating rules', () => {
+  describe('preview_rules', () => {
+    describe('previewing rules', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_PREVIEW)
             .set('kbn-xsrf', 'true')
-            .send(getSimplePreviewRule('', 3))
+            .send(getSimplePreviewRule('', 0))
             .expect(200);
           const { logs } = getSimpleRulePreviewOutput(undefined, [
             { errors: ['Invalid invocation count'], warnings: [], duration: 0 },

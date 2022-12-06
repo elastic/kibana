@@ -10,10 +10,11 @@ import { useEffect, useMemo } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { sha256 } from 'js-sha256';
 import type { Rule } from '@kbn/alerting-plugin/common';
-import { getTime, IndexPattern } from '@kbn/data-plugin/common';
-import type { Filter } from '@kbn/data-plugin/public';
+import { getTime } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import { DiscoverAppLocatorParams } from '../../locator';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAlertUtils, QueryParams, SearchThresholdAlertParams } from './view_alert_utils';
 
 type NonNullableEntry<T> = { [K in keyof T]: NonNullable<T[keyof T]> };
@@ -26,7 +27,7 @@ const isActualAlert = (queryParams: QueryParams): queryParams is NonNullableEntr
 };
 
 const buildTimeRangeFilter = (
-  dataView: IndexPattern,
+  dataView: DataView,
   fetchedAlert: Rule<SearchThresholdAlertParams>,
   timeFieldName: string
 ) => {
@@ -68,6 +69,7 @@ export function ViewAlertRoute() {
       displayRuleChangedWarn,
       displayPossibleDocsDiffInfoAlert,
       showDataViewFetchError,
+      showDataViewUpdatedWarning,
     } = getAlertUtils(toastNotifications, core, data);
 
     const navigateToResults = async () => {
@@ -76,26 +78,44 @@ export function ViewAlertRoute() {
         history.push(DISCOVER_MAIN_ROUTE);
         return;
       }
-
-      const calculatedChecksum = getCurrentChecksum(fetchedAlert.params);
-      if (openActualAlert && calculatedChecksum !== queryParams.checksum) {
-        displayRuleChangedWarn();
-      } else if (openActualAlert && calculatedChecksum === queryParams.checksum) {
-        displayPossibleDocsDiffInfoAlert();
-      }
-
       const fetchedSearchSource = await fetchSearchSource(fetchedAlert);
       if (!fetchedSearchSource) {
         history.push(DISCOVER_MAIN_ROUTE);
         return;
       }
-
       const dataView = fetchedSearchSource.getField('index');
       const timeFieldName = dataView?.timeFieldName;
+      // data view fetch error
       if (!dataView || !timeFieldName) {
         showDataViewFetchError(fetchedAlert.id);
         history.push(DISCOVER_MAIN_ROUTE);
         return;
+      }
+
+      if (dataView.isPersisted()) {
+        const dataViewSavedObject = await core.savedObjects.client.get(
+          'index-pattern',
+          dataView.id!
+        );
+
+        const alertUpdatedAt = fetchedAlert.updatedAt;
+        const dataViewUpdatedAt = dataViewSavedObject.updatedAt!;
+        // data view updated after the last update of the alert rule
+        if (
+          openActualAlert &&
+          new Date(dataViewUpdatedAt).valueOf() > new Date(alertUpdatedAt).valueOf()
+        ) {
+          showDataViewUpdatedWarning();
+        }
+      }
+
+      const calculatedChecksum = getCurrentChecksum(fetchedAlert.params);
+      // rule params changed
+      if (openActualAlert && calculatedChecksum !== queryParams.checksum) {
+        displayRuleChangedWarn();
+      } else if (openActualAlert && calculatedChecksum === queryParams.checksum) {
+        // documents might be updated or deleted
+        displayPossibleDocsDiffInfoAlert();
       }
 
       const timeRange = openActualAlert
@@ -103,7 +123,7 @@ export function ViewAlertRoute() {
         : buildTimeRangeFilter(dataView, fetchedAlert, timeFieldName);
       const state: DiscoverAppLocatorParams = {
         query: fetchedSearchSource.getField('query') || data.query.queryString.getDefaultQuery(),
-        indexPatternId: dataView.id,
+        dataViewSpec: dataView.toSpec(false),
         timeRange,
       };
 

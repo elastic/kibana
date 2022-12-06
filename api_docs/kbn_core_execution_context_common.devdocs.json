@@ -1,0 +1,51 @@
+{
+  "id": "@kbn/core-execution-context-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-execution-context-common",
+        "id": "def-common.KibanaExecutionContext",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaExecutionContext",
+        "description": [],
+        "signature": [
+          "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; child?: ",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
+          },
+          " | undefined; }"
+        ],
+        "path": "packages/core/execution-context/core-execution-context-common/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -4,30 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { httpServerMock, httpServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
-  httpServerMock,
-  httpServiceMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
-import {
-  ElasticsearchClientMock,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '@kbn/core/server/elasticsearch/client/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaRequest } from '@kbn/core/server/http/router/request';
-import {
-  benchmarksInputSchema,
+  benchmarksQueryParamsSchema,
   DEFAULT_BENCHMARKS_PER_PAGE,
 } from '../../../common/schemas/benchmark';
 import {
-  defineGetBenchmarksRoute,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   getCspPackagePolicies,
-  getAgentPolicies,
-  createBenchmarkEntry,
-  addPackagePolicyCspRules,
-} from './benchmarks';
+  getCspAgentPolicies,
+} from '../../lib/fleet_util';
+import { defineGetBenchmarksRoute, addPackagePolicyCspRules } from './benchmarks';
 
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import {
@@ -35,57 +22,17 @@ import {
   createPackagePolicyServiceMock,
 } from '@kbn/fleet-plugin/server/mocks';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import { AgentPolicy } from '@kbn/fleet-plugin/common';
+import { createCspRequestHandlerContextMock } from '../../mocks';
 
-import { CspAppService } from '../../lib/csp_app_services';
-import { CspAppContext } from '../../plugin';
-
-export const getMockCspContext = (mockEsClient: ElasticsearchClientMock): KibanaRequest => {
-  return {
-    core: {
-      elasticsearch: {
-        client: { asCurrentUser: mockEsClient },
-      },
-    },
-    fleet: { authz: { fleet: { all: false } } },
-  } as unknown as KibanaRequest;
-};
-
-function createMockAgentPolicy(props: Partial<AgentPolicy> = {}): AgentPolicy {
-  return {
-    id: 'some-uuid1',
-    namespace: 'default',
-    monitoring_enabled: [],
-    name: 'Test Policy',
-    description: '',
-    is_default: false,
-    is_preconfigured: false,
-    status: 'active',
-    is_managed: false,
-    revision: 1,
-    updated_at: '',
-    updated_by: 'elastic',
-    package_policies: [],
-    ...props,
-  };
-}
 describe('benchmarks API', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-
   beforeEach(() => {
-    logger = loggingSystemMock.createLogger();
     jest.clearAllMocks();
   });
 
   it('validate the API route path', async () => {
     const router = httpServiceMock.createRouter();
-    const cspAppContextService = new CspAppService();
 
-    const cspContext: CspAppContext = {
-      logger,
-      service: cspAppContextService,
-    };
-    defineGetBenchmarksRoute(router, cspContext);
+    defineGetBenchmarksRoute(router);
 
     const [config] = router.get.mock.calls[0];
 
@@ -94,19 +41,12 @@ describe('benchmarks API', () => {
 
   it('should accept to a user with fleet.all privilege', async () => {
     const router = httpServiceMock.createRouter();
-    const cspAppContextService = new CspAppService();
 
-    const cspContext: CspAppContext = {
-      logger,
-      service: cspAppContextService,
-    };
-    defineGetBenchmarksRoute(router, cspContext);
+    defineGetBenchmarksRoute(router);
+
     const [_, handler] = router.get.mock.calls[0];
 
-    const mockContext = {
-      fleet: { authz: { fleet: { all: true } } },
-    } as unknown as KibanaRequest;
-
+    const mockContext = createCspRequestHandlerContextMock();
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
     const [context, req, res] = [mockContext, mockRequest, mockResponse];
@@ -118,18 +58,13 @@ describe('benchmarks API', () => {
 
   it('should reject to a user without fleet.all privilege', async () => {
     const router = httpServiceMock.createRouter();
-    const cspAppContextService = new CspAppService();
 
-    const cspContext: CspAppContext = {
-      logger,
-      service: cspAppContextService,
-    };
-    defineGetBenchmarksRoute(router, cspContext);
+    defineGetBenchmarksRoute(router);
+
     const [_, handler] = router.get.mock.calls[0];
 
-    const mockContext = {
-      fleet: { authz: { fleet: { all: false } } },
-    } as unknown as KibanaRequest;
+    const mockContext = createCspRequestHandlerContextMock();
+    mockContext.fleet.authz.fleet.all = false;
 
     const mockResponse = httpServerMock.createResponseFactory();
     const mockRequest = httpServerMock.createKibanaRequest();
@@ -142,7 +77,7 @@ describe('benchmarks API', () => {
 
   describe('test input schema', () => {
     it('expect to find default values', async () => {
-      const validatedQuery = benchmarksInputSchema.validate({});
+      const validatedQuery = benchmarksQueryParamsSchema.validate({});
 
       expect(validatedQuery).toMatchObject({
         page: 1,
@@ -151,7 +86,7 @@ describe('benchmarks API', () => {
     });
 
     it('expect to find benchmark_name', async () => {
-      const validatedQuery = benchmarksInputSchema.validate({
+      const validatedQuery = benchmarksQueryParamsSchema.validate({
         benchmark_name: 'my_cis_benchmark',
       });
 
@@ -164,50 +99,50 @@ describe('benchmarks API', () => {
 
     it('should throw when page field is not a positive integer', async () => {
       expect(() => {
-        benchmarksInputSchema.validate({ page: -2 });
+        benchmarksQueryParamsSchema.validate({ page: -2 });
       }).toThrow();
     });
 
     it('should throw when per_page field is not a positive integer', async () => {
       expect(() => {
-        benchmarksInputSchema.validate({ per_page: -2 });
+        benchmarksQueryParamsSchema.validate({ per_page: -2 });
       }).toThrow();
     });
   });
 
   it('should throw when sort_field is not string', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ sort_field: true });
+      benchmarksQueryParamsSchema.validate({ sort_field: true });
     }).toThrow();
   });
 
   it('should not throw when sort_field is a string', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ sort_field: 'package_policy.name' });
+      benchmarksQueryParamsSchema.validate({ sort_field: 'package_policy.name' });
     }).not.toThrow();
   });
 
   it('should throw when sort_order is not `asc` or `desc`', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ sort_order: 'Other Direction' });
+      benchmarksQueryParamsSchema.validate({ sort_order: 'Other Direction' });
     }).toThrow();
   });
 
   it('should not throw when `asc` is input for sort_order field', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ sort_order: 'asc' });
+      benchmarksQueryParamsSchema.validate({ sort_order: 'asc' });
     }).not.toThrow();
   });
 
   it('should not throw when `desc` is input for sort_order field', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ sort_order: 'desc' });
+      benchmarksQueryParamsSchema.validate({ sort_order: 'desc' });
     }).not.toThrow();
   });
 
   it('should not throw when fields is a known string literal', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ sort_field: 'package_policy.name' });
+      benchmarksQueryParamsSchema.validate({ sort_field: 'package_policy.name' });
     }).not.toThrow();
   });
 
@@ -304,7 +239,7 @@ describe('benchmarks API', () => {
         const agentPolicyService = createMockAgentPolicyService();
         const packagePolicies = [createPackagePolicyMock(), createPackagePolicyMock()];
 
-        await getAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
+        await getCspAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
 
         expect(agentPolicyService.getByIds.mock.calls[0][1]).toHaveLength(1);
       });
@@ -317,7 +252,7 @@ describe('benchmarks API', () => {
         packagePolicy2.policy_id = 'AnotherId';
         const packagePolicies = [packagePolicy1, packagePolicy2];
 
-        await getAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
+        await getCspAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
 
         expect(agentPolicyService.getByIds.mock.calls[0][1]).toHaveLength(2);
       });
@@ -345,50 +280,6 @@ describe('benchmarks API', () => {
           all: 3,
           enabled: 2,
           disabled: 1,
-        });
-      });
-    });
-
-    describe('test createBenchmarkEntry', () => {
-      it('should build benchmark entry agent policy and package policy', async () => {
-        const packagePolicy = createPackagePolicyMock();
-        const agentPolicy = createMockAgentPolicy();
-        // @ts-expect-error
-        agentPolicy.agents = 3;
-
-        const cspRulesStatus = {
-          all: 100,
-          enabled: 52,
-          disabled: 48,
-        };
-        const enrichAgentPolicy = await createBenchmarkEntry(
-          agentPolicy,
-          packagePolicy,
-          cspRulesStatus
-        );
-
-        expect(enrichAgentPolicy).toEqual({
-          package_policy: {
-            id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
-            name: 'endpoint-1',
-            policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
-            namespace: 'default',
-            updated_at: '2020-06-25T16:03:38.159292',
-            updated_by: 'kibana',
-            created_at: '2020-06-25T16:03:38.159292',
-            created_by: 'kibana',
-            package: {
-              name: 'endpoint',
-              title: 'Elastic Endpoint',
-              version: '0.9.0',
-            },
-          },
-          agent_policy: { id: 'some-uuid1', name: 'Test Policy', agents: 3 },
-          rules: {
-            all: 100,
-            disabled: 48,
-            enabled: 52,
-          },
         });
       });
     });

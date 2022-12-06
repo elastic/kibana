@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<IconButtonGroup /> is rendered 1`] = `
+<fieldset
+  class="euiButtonGroup euiButtonGroup--medium euiButtonGroup--text"
+>
+  <legend
+    class="emotion-euiScreenReaderOnly"
+  >
+    Legend
+  </legend>
+  <div
+    class="euiButtonGroup__buttons"
+  >
+    <button
+      aria-label="Text"
+      aria-pressed="false"
+      class="euiButtonGroupButton euiButtonGroupButton-isIconOnly css-1h0umek-base-text-EuiButtonGroupButton-EuiButtonGroup"
+      data-test-subj="generated-id0"
+      id="generated-id"
+      title="Text"
+      type="button"
+    >
+      <span
+        class="euiButtonContent euiButton__content"
+      >
+        <span
+          class="euiButtonContent__icon"
+          color="inherit"
+          data-euiicon-type="visText"
+        />
+        <span
+          class="euiButton__text euiScreenReaderOnly"
+          data-text="Text"
+        >
+          Text
+        </span>
+      </span>
+    </button>
+  </div>
+</fieldset>
+`;

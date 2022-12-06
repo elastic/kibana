@@ -54,7 +54,7 @@ export function consulMetricsSpecProvider(context: TutorialContext): TutorialSch
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/consul_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/consul_metrics/screenshot.webp',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),

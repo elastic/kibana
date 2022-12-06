@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { Trigger, RowClickContext } from '@kbn/ui-actions-plugin/public';
 import { IEmbeddable } from '..';
 

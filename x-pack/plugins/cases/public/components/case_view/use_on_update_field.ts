@@ -6,24 +6,18 @@
  */
 
 import { useCallback } from 'react';
-import { CaseConnector } from '../../../common/api';
-import { CaseAttributes } from '../../../common/api/cases/case';
-import { CaseStatuses } from '../../../common/api/cases/status';
-import { Case, UpdateByKey, UpdateKey } from '../../containers/types';
+import deepEqual from 'fast-deep-equal';
+
+import type { CaseConnector } from '../../../common/api';
+import type { CaseAttributes } from '../../../common/api/cases/case';
+import type { CaseStatuses } from '../../../common/api/cases/status';
+import type { Case, UpdateByKey, UpdateKey } from '../../containers/types';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
-import { OnUpdateFields } from './types';
+import type { OnUpdateFields } from './types';
 
-export const useOnUpdateField = ({
-  caseData,
-  caseId,
-  handleUpdateField,
-}: {
-  caseData: Case;
-  caseId: string;
-  handleUpdateField: (newCase: Case, updateKey: UpdateKey) => void;
-}) => {
-  const { isLoading, updateKey: loadingKey, updateCaseProperty } = useUpdateCase({ caseId });
+export const useOnUpdateField = ({ caseData, caseId }: { caseData: Case; caseId: string }) => {
+  const { isLoading, updateKey: loadingKey, updateCaseProperty } = useUpdateCase();
 
   const onUpdateField = useCallback(
     ({ key, value, onSuccess, onError }: OnUpdateFields) => {
@@ -31,7 +25,6 @@ export const useOnUpdateField = ({
         updateCaseProperty({
           updateKey,
           updateValue,
-          updateCase: (newCase) => handleUpdateField(newCase, updateKey),
           caseData,
           onSuccess,
           onError,
@@ -77,11 +70,18 @@ export const useOnUpdateField = ({
           if (caseData.severity !== value) {
             callUpdate('severity', severityUpdate);
           }
+          break;
+        case 'assignees':
+          const assigneesUpdate = getTypedPayload<CaseAttributes['assignees']>(value);
+          if (!deepEqual(caseData.assignees, value)) {
+            callUpdate('assignees', assigneesUpdate);
+          }
+          break;
         default:
           return null;
       }
     },
-    [updateCaseProperty, handleUpdateField, caseData]
+    [updateCaseProperty, caseData]
   );
   return { onUpdateField, isLoading, loadingKey };
 };

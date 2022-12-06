@@ -8,7 +8,6 @@
 
 import * as React from 'react';
 import { createNotifications } from './create_notifications';
-// eslint-disable-next-lien
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 test('throws if no overlays service provided', () => {

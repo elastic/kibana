@@ -12,19 +12,20 @@ exports[`Authentication Host Table Component rendering it renders the host authe
 }
 
 .c1 {
-  margin-bottom: 24px;
+  margin-bottom: 0;
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
   user-select: text;
 }
 
-.c1.toggle-expand .header-section-content {
-  height: 48px;
+.c1.toggle-expand {
+  margin-bottom: 24px;
 }
 
-.c1.toggle-expand .header-section-titles {
-  margin-top: 16px;
+.c1 .no-margin {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 .c0 {
@@ -56,7 +57,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
 }
 
 <div
-  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c0"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium c0 emotion-euiPanel-grow-m-m-plain-hasBorder"
   data-test-subj="authentications-host-table-loading-false"
 >
   <header
@@ -64,83 +65,97 @@ exports[`Authentication Host Table Component rendering it renders the host authe
     data-test-subj="header-section"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-stretch-column"
+      data-test-subj="headerSectionOuterFlexGroup"
     >
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow header-section-content"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
+          data-test-subj="headerSectionInnerFlexGroup"
         >
           <div
-            class="euiFlexItem"
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive header-section-titles"
+              class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-grow-1"
+              >
+                <div
+                  class="euiFlexGroup header-section-titles emotion-euiFlexGroup-none-flexStart-stretch-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <button
+                      aria-label="Open"
+                      class="euiButtonIcon euiButtonIcon--small emotion-euiButtonIcon-empty-text-hoverStyles"
+                      data-test-subj="query-toggle-header"
+                      title="Open"
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="arrowDown"
+                      />
+                    </button>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-grow-1"
+                  >
+                    <h4
+                      class="euiTitle emotion-euiTitle-m"
+                      data-test-subj="header-section-title"
+                    >
+                      <span
+                        class="eui-textBreakNormal"
+                      >
+                        Authentications
+                      </span>
+                    </h4>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <button
-                  aria-label="Open"
-                  class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small"
-                  data-test-subj="query-toggle-header"
-                  title="Open"
+                  aria-label="Inspect"
+                  class="euiButtonIcon euiButtonIcon--xSmall inspectButtonComponent emotion-euiButtonIcon-empty-disabled-hoverStyles"
+                  data-test-subj="inspect-icon-button"
+                  disabled=""
+                  title="Inspect"
                   type="button"
                 >
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     color="inherit"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="inspect"
                   />
                 </button>
               </div>
-              <div
-                class="euiFlexItem"
-              >
-                <h4
-                  class="euiTitle euiTitle--medium"
-                  data-test-subj="header-section-title"
-                >
-                  <span
-                    class="eui-textBreakNormal"
-                  >
-                    Authentications
-                  </span>
-                </h4>
-              </div>
-            </div>
-            <div
-              class="c2 siemSubtitle"
-            >
-              <p
-                class="siemSubtitle__item siemSubtitle__item--text"
-                data-test-subj="header-panel-subtitle"
-              >
-                Showing: 0 users
-              </p>
             </div>
           </div>
-          <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+        </div>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <div
+          class="c2 siemSubtitle"
+        >
+          <p
+            class="siemSubtitle__item siemSubtitle__item--text"
+            data-test-subj="header-panel-subtitle"
           >
-            <button
-              aria-label="Inspect"
-              class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall inspectButtonComponent"
-              data-test-subj="inspect-icon-button"
-              disabled=""
-              title="Inspect"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
-                color="inherit"
-                data-euiicon-type="inspect"
-              />
-            </button>
-          </div>
+            Showing: 0 users
+          </p>
         </div>
       </div>
     </div>
@@ -154,13 +169,13 @@ exports[`Authentication Host Table Component rendering it renders the host authe
         class="euiTableHeaderMobile"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+          class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-baseline-row"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           />
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           />
         </div>
       </div>
@@ -170,7 +185,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
         tabindex="-1"
       >
         <caption
-          class="euiScreenReaderOnly euiTableCaption"
+          class="euiTableCaption emotion-euiScreenReaderOnly"
         />
         <thead>
           <tr>
@@ -193,7 +208,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
             </th>
             <th
               class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Successes_1"
+              data-test-subj="tableHeaderCell_node.successes_1"
               role="columnheader"
               scope="col"
               style="width: 8%;"
@@ -211,7 +226,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
             </th>
             <th
               class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Failures_2"
+              data-test-subj="tableHeaderCell_node.failures_2"
               role="columnheader"
               scope="col"
               style="width: 8%;"
@@ -355,21 +370,21 @@ exports[`Authentication Host Table Component rendering it renders the host authe
     </div>
   </div>
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c4"
+    class="euiFlexGroup c4 emotion-euiFlexGroup-l-flexStart-center-row"
   >
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <div
-        class="euiPopover euiPopover--anchorDownCenter"
+        class="euiPopover emotion-euiPopover"
         data-test-subj="loadingMoreSizeRowPopover"
         id="customizablePagination"
       >
         <div
-          class="euiPopover__anchor"
+          class="euiPopover__anchor css-16vtueo-render"
         >
           <button
-            class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+            class="euiButtonEmpty euiButtonEmpty--xSmall css-wvaqcf-empty-text"
             type="button"
           >
             <span
@@ -391,23 +406,23 @@ exports[`Authentication Host Table Component rendering it renders the host authe
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <nav
-        class="euiPagination"
+        class="euiPagination emotion-euiPagination-EuiPagination"
         data-test-subj="numberedPagination"
       >
         <span
           aria-atomic="true"
           aria-relevant="additions text"
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly"
           role="status"
         >
           Page 1 of 5
         </span>
         <button
           aria-label="Previous page"
-          class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
+          class="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-disabled-hoverStyles-euiPaginationArrowButton"
           data-test-subj="pagination-button-previous"
           disabled=""
           type="button"
@@ -420,7 +435,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
           />
         </button>
         <ul
-          class="euiPagination__list"
+          class="euiPagination__list emotion-euiPagination__list"
         >
           <li
             class="euiPagination__item"
@@ -428,7 +443,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
             <button
               aria-current="true"
               aria-label="Page 1 of 5"
-              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive"
+              class="euiButtonEmpty euiButtonEmpty--small euiPaginationButton css-7ubx5w-empty-disabled-euiPaginationButton-isActive"
               data-test-subj="pagination-button-0"
               disabled=""
               type="button"
@@ -449,7 +464,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
           >
             <button
               aria-label="Page 2 of 5"
-              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+              class="euiButtonEmpty euiButtonEmpty--small euiPaginationButton css-23ziaw-empty-text-euiPaginationButton"
               data-test-subj="pagination-button-1"
               type="button"
             >
@@ -469,7 +484,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
           >
             <button
               aria-label="Page 3 of 5"
-              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+              class="euiButtonEmpty euiButtonEmpty--small euiPaginationButton css-23ziaw-empty-text-euiPaginationButton"
               data-test-subj="pagination-button-2"
               type="button"
             >
@@ -489,7 +504,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
           >
             <button
               aria-label="Page 4 of 5"
-              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+              class="euiButtonEmpty euiButtonEmpty--small euiPaginationButton css-23ziaw-empty-text-euiPaginationButton"
               data-test-subj="pagination-button-3"
               type="button"
             >
@@ -509,7 +524,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
           >
             <button
               aria-label="Page 5 of 5"
-              class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+              class="euiButtonEmpty euiButtonEmpty--small euiPaginationButton css-23ziaw-empty-text-euiPaginationButton"
               data-test-subj="pagination-button-4"
               type="button"
             >
@@ -527,7 +542,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
         </ul>
         <button
           aria-label="Next page"
-          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
+          class="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-text-hoverStyles-euiPaginationArrowButton"
           data-test-subj="pagination-button-next"
           title="Next page"
           type="button"

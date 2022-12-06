@@ -6,17 +6,18 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
   intl="[object Object]"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero eui-textTruncate"
+      class="euiFlexItem eui-textTruncate emotion-euiFlexItem-growZero"
       style="max-width:200px"
     >
       <div
-        class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        data-test-subj="status"
       >
         <div
-          class="euiText euiText--small euiStat__description"
+          class="euiText euiStat__description emotion-euiText-s"
         >
           <p
             aria-hidden="true"
@@ -26,7 +27,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiTitle--xxxsmall euiStat__title"
+          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           Status: 
           <span
@@ -40,15 +41,15 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
       data-test-subj="transportAddress"
       style="max-width:200px"
     >
       <div
-        class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
       >
         <div
-          class="euiText euiText--small euiStat__description"
+          class="euiText euiStat__description emotion-euiText-s"
         >
           <p
             aria-hidden="true"
@@ -56,27 +57,27 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiTitle--xxxsmall euiStat__title"
+          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           127.0.0.1:9300
         </p>
         <p
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly"
         >
            127.0.0.1:9300
         </p>
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
       data-test-subj="documentCount"
       style="max-width:200px"
     >
       <div
-        class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
       >
         <div
-          class="euiText euiText--small euiStat__description"
+          class="euiText euiStat__description emotion-euiText-s"
         >
           <p
             aria-hidden="true"
@@ -86,12 +87,12 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiTitle--xxxsmall euiStat__title"
+          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           24.8k
         </p>
         <p
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly"
         >
           Documents 24.8k
         </p>
@@ -107,18 +108,22 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
   intl="[object Object]"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem eui-textTruncate emotion-euiFlexItem-growZero"
+      style="max-width:200px"
+    />
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
       data-test-subj="freeDiskSpace"
       style="max-width:200px"
     >
       <div
-        class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
       >
         <div
-          class="euiText euiText--small euiStat__description"
+          class="euiText euiStat__description emotion-euiText-s"
         >
           <p
             aria-hidden="true"
@@ -128,27 +133,27 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiTitle--xxxsmall euiStat__title"
+          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           173.9 GB
         </p>
         <p
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly"
         >
           Free Disk Space 173.9 GB
         </p>
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
       data-test-subj="documentCount"
       style="max-width:200px"
     >
       <div
-        class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
       >
         <div
-          class="euiText euiText--small euiStat__description"
+          class="euiText euiStat__description emotion-euiText-s"
         >
           <p
             aria-hidden="true"
@@ -158,12 +163,12 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiTitle--xxxsmall euiStat__title"
+          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           24.8k
         </p>
         <p
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly"
         >
           Documents 24.8k
         </p>
@@ -179,17 +184,18 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
   intl="[object Object]"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-center-row"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero eui-textTruncate"
+      class="euiFlexItem eui-textTruncate emotion-euiFlexItem-growZero"
       style="max-width:200px"
     >
       <div
-        class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
+        data-test-subj="status"
       >
         <div
-          class="euiText euiText--small euiStat__description"
+          class="euiText euiStat__description emotion-euiText-s"
         >
           <p
             aria-hidden="true"
@@ -199,7 +205,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiTitle--xxxsmall euiStat__title"
+          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           Status: 
           <span
@@ -213,15 +219,15 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
       data-test-subj="freeDiskSpace"
       style="max-width:200px"
     >
       <div
-        class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
       >
         <div
-          class="euiText euiText--small euiStat__description"
+          class="euiText euiStat__description emotion-euiText-s"
         >
           <p
             aria-hidden="true"
@@ -231,27 +237,27 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiTitle--xxxsmall euiStat__title"
+          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           173.9 GB
         </p>
         <p
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly"
         >
           Free Disk Space 173.9 GB
         </p>
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
       data-test-subj="documentCount"
       style="max-width:200px"
     >
       <div
-        class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        class="euiStat monSummaryStatusNoWrap__stat emotion-euiStat-left"
       >
         <div
-          class="euiText euiText--small euiStat__description"
+          class="euiText euiStat__description emotion-euiText-s"
         >
           <p
             aria-hidden="true"
@@ -261,12 +267,12 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiTitle--xxxsmall euiStat__title"
+          class="euiTitle euiStat__title emotion-euiTitle-xxxs-euiStat__title-default"
         >
           24.8k
         </p>
         <p
-          class="euiScreenReaderOnly"
+          class="emotion-euiScreenReaderOnly"
         >
           Documents 24.8k
         </p>

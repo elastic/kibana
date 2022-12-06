@@ -1,0 +1,86 @@
+---
+id: sharedUX/Components/AppLink
+slug: /shared-ux/components/redirect-app-links
+title: Redirect App Links
+description: A component for redirecting links contained within it to the appropriate Kibana solution without a page refresh.
+tags: ['shared-ux', 'component']
+date: 2022-05-04
+---
+
+## Description
+
+This component is an "area of effect" component, which produces a container that intercepts actions for specific elements within it.  In this case, the container intercepts clicks on anchor elements and redirects them to Kibana solutions without a page refresh.
+
+## Pure Component
+
+The pure component allows you create a container to intercept clicks without contextual services, (e.g. Kibana Core).  This likely does not have much utility for solutions in Kibana, but rather is useful for shared components where we want to ensure clicks are redirected correctly.
+
+```tsx
+import { RedirectAppLinksComponent as RedirectAppLinks } from '@kbn/shared-ux-links-redirect-app';
+
+<RedirectAppLinks currentAppId="appId" navigateToUrl={(url) => { ... }}>
+  <a href="/base-path/app/another-app/some-path">Go to another-app</a>
+</RedirectAppLinks>
+```
+
+## Connected Component
+
+The connected component uses a React Context to access services that provide the current app id and a function to navigate to a new url.  This is useful in that a solution can wrap their entire application in the context and use `RedirectAppLinks` in specific areas.
+
+```tsx
+import { RedirectAppLinksContainer as RedirectAppLinks, RedirectAppLinksProvider } from '@kbn/shared-ux-links-redirect-app';
+
+<RedirectAppLinksProvider currentAppId="appId" navigateToUrl={(url) => { ... }}>
+  .
+  {/* other components that don't need to redirect */}
+  .
+  <RedirectAppLinks>
+    <a href="/base-path/app/another-app/some-path">Go to another-app</a>
+  </RedirectAppLinks>
+  .
+  .
+  .
+</RedirectAppLinksProvider>
+```
+
+You can also use the Kibana provider:
+
+```tsx
+import { 
+  RedirectAppLinksContainer as RedirectAppLinks, 
+  RedirectAppLinksKibanaProvider as RedirectAppLinksProvider 
+} from '@kbn/shared-ux-links-redirect-app';
+
+<RedirectAppLinksProvider {...coreStart}>
+  .
+  {/* other components that don't need to redirect */}
+  .
+  <RedirectAppLinks>
+    <a href="/base-path/app/another-app/some-path">Go to another-app</a>
+  </RedirectAppLinks>
+  .
+  .
+</RedirectAppLinksProvider>
+```
+
+## Top-level Component
+
+This is the component is likely the most useful to solutions in Kibana.  It assumes an entire solution needs this redirect functionality, and combines the context provider with the container.  This top-level component can be used with either pure props or with Kibana services.
+
+```tsx
+import { RedirectAppLinks } from '@kbn/shared-ux-links-redirect-app';
+
+<RedirectAppLinks currentAppId="appId" navigateToUrl={(url) => { ... }}>
+  .
+  <a href="/base-path/app/another-app/some-path">Go to another-app</a>
+  .
+</RedirectAppLinks>
+
+{/* OR */}
+
+<RedirectAppLinks {...coreStart}>
+  .
+  <a href="/base-path/app/another-app/some-path">Go to another-app</a>
+  .
+</RedirectAppLinks>
+```

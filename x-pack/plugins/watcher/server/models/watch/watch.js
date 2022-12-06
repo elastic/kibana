@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { badRequest } from '@hapi/boom';
 import { WATCH_TYPES } from '../../../common/constants';
 import { JsonWatch } from './json_watch';

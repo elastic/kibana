@@ -19,7 +19,7 @@ import { LegacyRequest } from '../../types';
  */
 
 // TODO: replace LegacyRequest with current request object + plugin retrieval
-export async function verifyMonitoringAuth(req: LegacyRequest) {
+export async function verifyMonitoringAuth(req: LegacyRequest<unknown, unknown, unknown>) {
   const xpackInfo = get(req.server.plugins.monitoring, 'info');
 
   if (xpackInfo) {
@@ -42,7 +42,7 @@ export async function verifyMonitoringAuth(req: LegacyRequest) {
  */
 
 // TODO: replace LegacyRequest with current request object + plugin retrieval
-async function verifyHasPrivileges(req: LegacyRequest) {
+async function verifyHasPrivileges(req: LegacyRequest<unknown, unknown, unknown>): Promise<void> {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
   let response;

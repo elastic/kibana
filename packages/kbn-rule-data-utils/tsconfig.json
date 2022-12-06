@@ -3,16 +3,13 @@
   "compilerOptions": {
     "declaration": true,
     "emitDeclarationOnly": true,
-    "incremental": false,
-    "outDir": "./target_types",
-    "rootDir": "src",
-    "stripInternal": false,
+    "outDir": "target_types",
     "types": [
       "jest",
       "node"
     ]
   },
   "include": [
-    "src/**/*.ts"
+    "**/*.ts"
   ]
 }

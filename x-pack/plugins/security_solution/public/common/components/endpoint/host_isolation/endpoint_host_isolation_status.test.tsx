@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import {
-  EndpointHostIsolationStatus,
-  EndpointHostIsolationStatusProps,
-} from './endpoint_host_isolation_status';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../mock/endpoint';
+import type { EndpointHostIsolationStatusProps } from './endpoint_host_isolation_status';
+import { EndpointHostIsolationStatus } from './endpoint_host_isolation_status';
+import type { AppContextTestRender } from '../../../mock/endpoint';
+import { createAppRootMockRenderer } from '../../../mock/endpoint';
 
 describe('when using the EndpointHostIsolationStatus component', () => {
   let render: (
@@ -27,8 +26,7 @@ describe('when using the EndpointHostIsolationStatus component', () => {
           {...{
             'data-test-subj': 'test',
             isIsolated: false,
-            pendingUnIsolate: 0,
-            pendingIsolate: 0,
+            pendingActions: {},
             ...renderProps,
           }}
         />
@@ -46,14 +44,69 @@ describe('when using the EndpointHostIsolationStatus component', () => {
   });
 
   it.each([
-    ['Isolating', { pendingIsolate: 2 }],
-    ['Releasing', { pendingUnIsolate: 2 }],
-    ['4 actions pending', { isIsolated: true, pendingUnIsolate: 2, pendingIsolate: 2 }],
+    [
+      'Isolating',
+      {
+        pendingActions: {
+          pendingIsolate: 1,
+        },
+      },
+    ],
+    [
+      'Releasing',
+      {
+        pendingActions: {
+          pendingUnIsolate: 1,
+        },
+      },
+    ],
+    [
+      // Because they are both of the same type and there are no other types,
+      // the status should be `isolating`
+      'Isolating',
+      {
+        pendingActions: {
+          pendingIsolate: 2,
+        },
+      },
+    ],
+    [
+      // Because they are both of the same type and there are no other types,
+      // the status should be `Releasing`
+      'Releasing',
+      {
+        pendingActions: {
+          pendingUnIsolate: 2,
+        },
+      },
+    ],
+    [
+      '10 actions pending',
+      {
+        isIsolated: true,
+        pendingActions: {
+          pendingIsolate: 2,
+          pendingUnIsolate: 2,
+          pendingKillProcess: 2,
+          pendingSuspendProcess: 2,
+          pendingRunningProcesses: 2,
+        },
+      },
+    ],
+    [
+      '1 action pending',
+      {
+        isIsolated: true,
+        pendingActions: {
+          pendingKillProcess: 1,
+        },
+      },
+    ],
   ])('should show %s}', (expectedLabel, componentProps) => {
     const { getByTestId } = render(componentProps);
     expect(getByTestId('test').textContent).toBe(expectedLabel);
     // Validate that the text color is set to `subdued`
-    expect(getByTestId('test-pending').classList.contains('euiTextColor--subdued')).toBe(true);
+    expect(getByTestId('test-pending').classList.toString().includes('subdued')).toBe(true);
   });
 
   describe('and the disableIsolationUIPendingStatuses experimental feature flag is true', () => {
@@ -62,15 +115,22 @@ describe('when using the EndpointHostIsolationStatus component', () => {
     });
 
     it('should render `null` if not isolated', () => {
-      const renderResult = render({ pendingIsolate: 10, pendingUnIsolate: 20 });
+      const renderResult = render({
+        pendingActions: {
+          pendingIsolate: 10,
+          pendingUnIsolate: 20,
+        },
+      });
       expect(renderResult.container.textContent).toBe('');
     });
 
     it('should show `Isolated` when no pending actions and isolated', () => {
       const { getByTestId } = render({
         isIsolated: true,
-        pendingIsolate: 10,
-        pendingUnIsolate: 20,
+        pendingActions: {
+          pendingIsolate: 10,
+          pendingUnIsolate: 20,
+        },
       });
       expect(getByTestId('test').textContent).toBe('Isolated');
     });

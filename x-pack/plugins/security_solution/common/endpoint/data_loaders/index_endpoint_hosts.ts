@@ -5,33 +5,39 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { cloneDeep } from 'lodash';
-import { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
 import uuid from 'uuid';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { KbnClient } from '@kbn/test';
-import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Agent, CreatePackagePolicyResponse, GetPackagesResponse } from '@kbn/fleet-plugin/common';
+import type { KbnClient } from '@kbn/test';
+import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  Agent,
+  CreatePackagePolicyResponse,
+  GetPackagesResponse,
+} from '@kbn/fleet-plugin/common';
 import { EndpointDocGenerator } from '../generate_data';
-import { HostMetadata, HostPolicyResponse } from '../types';
-import {
-  deleteIndexedFleetAgents,
+import type { HostMetadata, HostPolicyResponse } from '../types';
+import type {
   DeleteIndexedFleetAgentsResponse,
   IndexedFleetAgentResponse,
-  indexFleetAgentForHost,
 } from './index_fleet_agent';
-import {
-  deleteIndexedEndpointAndFleetActions,
+import { deleteIndexedFleetAgents, indexFleetAgentForHost } from './index_fleet_agent';
+import type {
   DeleteIndexedEndpointFleetActionsResponse,
   IndexedEndpointAndFleetActionsForHostResponse,
+} from './index_endpoint_fleet_actions';
+import {
+  deleteIndexedEndpointAndFleetActions,
   indexEndpointAndFleetActionsForHost,
 } from './index_endpoint_fleet_actions';
 
-import {
-  deleteIndexedFleetEndpointPolicies,
+import type {
   DeleteIndexedFleetEndpointPoliciesResponse,
   IndexedFleetEndpointPolicyResponse,
+} from './index_fleet_endpoint_policy';
+import {
+  deleteIndexedFleetEndpointPolicies,
   indexFleetEndpointPolicy,
 } from './index_fleet_endpoint_policy';
 import { metadataCurrentIndexPattern } from '../constants';
@@ -192,14 +198,6 @@ export async function indexEndpointHostDocs({
       await indexEndpointAndFleetActionsForHost(client, hostMetadata, undefined);
     }
 
-    hostMetadata = {
-      ...hostMetadata,
-      // since the united transform uses latest metadata transform as a source
-      // there is an extra delay and fleet-agents gets populated much sooner.
-      // we manually add a delay to the time sync field so that the united transform
-      // will pick up the latest metadata doc.
-      '@timestamp': hostMetadata['@timestamp'] + 60000,
-    };
     await client
       .index({
         index: metadataIndex,

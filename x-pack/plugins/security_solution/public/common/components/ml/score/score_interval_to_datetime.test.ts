@@ -7,7 +7,8 @@
 
 import { cloneDeep } from 'lodash/fp';
 import { mockAnomalies } from '../mock';
-import { scoreIntervalToDateTime, FromTo } from './score_interval_to_datetime';
+import type { FromTo } from './score_interval_to_datetime';
+import { scoreIntervalToDateTime } from './score_interval_to_datetime';
 
 describe('score_interval_to_datetime', () => {
   let anomalies = cloneDeep(mockAnomalies);

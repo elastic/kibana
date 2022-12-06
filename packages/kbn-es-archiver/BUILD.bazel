@@ -2,18 +2,27 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-es-archiver"
+PKG_DIRNAME = "kbn-es-archiver"
 PKG_REQUIRE_NAME = "@kbn/es-archiver"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "**/*.ts",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
+    "**/*.stories.*",
     "**/__fixtures__",
     "**/__mocks__",
-    "**/__snapshots__"
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -39,17 +48,16 @@ RUNTIME_DEPS = [
   "@npm//json-stable-stringify",
   "@npm//lodash",
   "@npm//sinon",
-  "@npm//zlib",
 ]
 
 TYPES_DEPS = [
   "//packages/kbn-dev-utils:npm_module_types",
   "//packages/kbn-test:npm_module_types",
+  "//packages/kbn-tooling-log:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//aggregate-error",
   "@npm//globby",
-  "@npm//zlib",
   "@npm//@types/chance",
   "@npm//@types/jest",
   "@npm//@types/json-stable-stringify",
@@ -81,23 +89,28 @@ ts_project(
   declaration = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 
 js_library(
-  name = PKG_BASE_NAME,
+  name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
 
+js_library(
+  name = "npm_module_types",
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node", ":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
 pkg_npm(
   name = "npm_module",
-  deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
+  deps = [":" + PKG_DIRNAME],
 )
 
 filegroup(
@@ -108,19 +121,8 @@ filegroup(
   visibility = ["//visibility:public"],
 )
 
-pkg_npm_types(
-  name = "npm_module_types",
-  srcs = SRCS,
-  deps = [":tsc_types"],
-  package_name = PKG_REQUIRE_NAME,
-  tsconfig = ":tsconfig",
-  visibility = ["//visibility:public"],
-)
-
-filegroup(
+pkg_npm(
   name = "build_types",
-  srcs = [
-    ":npm_module_types",
-  ],
+  deps = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

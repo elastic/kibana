@@ -29,7 +29,6 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
           describedByIds={Array []}
           display="rowCompressed"
           error=""
-          fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           helpText="SVGs without sharp corners and intricate details work best. Modifying the settings under Advanced options may improve rendering."
@@ -51,7 +50,6 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
         <EuiFormRow
           describedByIds={Array []}
           display="rowCompressed"
-          fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label="Name"
@@ -66,15 +64,9 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
           />
         </EuiFormRow>
         <EuiSpacer />
-        <EuiAccordion
-          arrowDisplay="left"
+        <EuiAccordionClass
           buttonContent="Advanced options"
-          buttonElement="button"
-          element="div"
           id="advancedOptionsAccordion"
-          initialIsOpen={false}
-          isLoading={false}
-          isLoadingMessage={false}
           paddingSize="xs"
         >
           <EuiPanel
@@ -100,7 +92,6 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
               className="mapsCustomIconForm__cutoff"
               describedByIds={Array []}
               display="rowCompressed"
-              fullWidth={false}
               hasChildLabel={true}
               hasEmptyLabelSpace={false}
               label={
@@ -138,7 +129,6 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
               className="mapsCustomIconForm__radius"
               describedByIds={Array []}
               display="rowCompressed"
-              fullWidth={false}
               hasChildLabel={true}
               hasEmptyLabelSpace={false}
               label={
@@ -173,7 +163,7 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
               />
             </EuiFormRow>
           </EuiPanel>
-        </EuiAccordion>
+        </EuiAccordionClass>
       </EuiFlexItem>
       <EuiFlexItem
         className="mapsIconPreview__wrapper mapsCustomIconForm__preview"
@@ -208,6 +198,7 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
           color="danger"
           data-test-subj="mapsCustomIconForm-submit"
           onClick={[Function]}
+          size="m"
         >
           Delete
         </EuiButton>
@@ -216,10 +207,12 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
         grow={false}
       >
         <EuiButton
+          color="primary"
           data-test-subj="mapsCustomIconForm-submit"
           fill={true}
           isDisabled={false}
           onClick={[Function]}
+          size="m"
         >
           Save
         </EuiButton>
@@ -258,7 +251,6 @@ exports[`should render an empty custom icon modal 1`] = `
           describedByIds={Array []}
           display="rowCompressed"
           error=""
-          fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           helpText="SVGs without sharp corners and intricate details work best. Modifying the settings under Advanced options may improve rendering."
@@ -297,10 +289,12 @@ exports[`should render an empty custom icon modal 1`] = `
         grow={false}
       >
         <EuiButton
+          color="primary"
           data-test-subj="mapsCustomIconForm-submit"
           fill={true}
           isDisabled={true}
           onClick={[Function]}
+          size="m"
         >
           Save
         </EuiButton>

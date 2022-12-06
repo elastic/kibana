@@ -31,7 +31,7 @@ interface FieldCapabilitiesParams {
  *  @param  {Array}  [indices=[]]  the list of indexes to check
  *  @param  {Array}  [metaFields=[]] the list of internal fields to include
  *  @param  {Object} fieldCapsOptions
- *  @return {Promise<Array<FieldDescriptor>>}
+ *  @return {Promise<{ fields: Array<FieldDescriptor>, indices: Array<string>>}>}
  */
 export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
   const { callCluster, indices = [], fieldCapsOptions, filter, metaFields = [] } = params;
@@ -67,5 +67,8 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     )
     .map(mergeOverrides);
 
-  return sortBy(allFieldsUnsorted, 'name');
+  return {
+    fields: sortBy(allFieldsUnsorted, 'name'),
+    indices: esFieldCaps.body.indices as string[],
+  };
 }

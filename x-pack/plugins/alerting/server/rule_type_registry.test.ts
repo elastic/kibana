@@ -20,7 +20,6 @@ let mockedLicenseState: jest.Mocked<ILicenseState>;
 let ruleTypeRegistryParams: ConstructorOptions;
 
 const taskManager = taskManagerMock.createSetup();
-
 const inMemoryMetrics = inMemoryMetricsMock.create();
 
 beforeEach(() => {
@@ -609,6 +608,37 @@ describe('Create Lifecycle', () => {
       expect(context).toBeTruthy();
       expect(context!.length).toBe(1);
       expect(context![0]).toEqual({ name: 'c', description: 'x context' });
+    });
+  });
+
+  describe('getAllTypes()', () => {
+    test('should return empty when nothing is registered', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      const result = registry.getAllTypes();
+      expect(result).toEqual([]);
+    });
+
+    test('should return list of registered type ids', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register({
+        id: 'test',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'testActionGroup',
+            name: 'Test Action Group',
+          },
+        ],
+        defaultActionGroupId: 'testActionGroup',
+        doesSetRecoveryContext: false,
+        isExportable: true,
+        ruleTaskTimeout: '20m',
+        minimumLicenseRequired: 'basic',
+        executor: jest.fn(),
+        producer: 'alerts',
+      });
+      const result = registry.getAllTypes();
+      expect(result).toEqual(['test']);
     });
   });
 

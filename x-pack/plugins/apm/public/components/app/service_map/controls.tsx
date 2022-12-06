@@ -19,23 +19,23 @@ import { getAnimationOptions, getNodeHeight } from './cytoscape_options';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 
 const ControlsContainer = euiStyled('div')`
-  left: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
+  left: ${({ theme }) => theme.eui.euiSize};
   position: absolute;
-  top: ${({ theme }) => theme.eui.gutterTypes.gutterSmall};
+  top: ${({ theme }) => theme.eui.euiSizeS};
   z-index: 1; /* The element containing the cytoscape canvas has z-index = 0. */
 `;
 
 const Button = euiStyled(EuiButtonIcon)`
   display: block;
-  margin: ${({ theme }) => theme.eui.paddingSizes.xs};
+  margin: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 const ZoomInButton = euiStyled(Button)`
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const Panel = euiStyled(EuiPanel)`
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const steps = 5;

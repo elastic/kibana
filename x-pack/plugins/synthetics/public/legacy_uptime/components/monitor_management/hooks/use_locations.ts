@@ -17,13 +17,14 @@ export function useLocations() {
     loading: { serviceLocations: serviceLocationsLoading },
     locations,
     throttling,
+    locationsLoaded,
   } = useSelector(monitorManagementListSelector);
 
   useEffect(() => {
-    if (!locations.length) {
+    if (!locationsLoaded) {
       dispatch(getServiceLocations());
     }
-  }, [dispatch, locations]);
+  }, [dispatch, locations, locationsLoaded]);
 
   return {
     throttling,

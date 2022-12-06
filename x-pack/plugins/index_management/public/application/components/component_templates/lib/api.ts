@@ -10,6 +10,7 @@ import {
   ComponentTemplateListItem,
   ComponentTemplateDeserialized,
   ComponentTemplateSerialized,
+  ComponentTemplateDatastreams,
 } from '../shared_imports';
 import {
   UIM_COMPONENT_TEMPLATE_DELETE_MANY,
@@ -18,6 +19,7 @@ import {
   UIM_COMPONENT_TEMPLATE_UPDATE,
 } from '../constants';
 import { UseRequestHook, SendRequestHook } from './request';
+
 export const getApi = (
   useRequest: UseRequestHook,
   sendRequest: SendRequestHook,
@@ -27,6 +29,13 @@ export const getApi = (
   function useLoadComponentTemplates() {
     return useRequest<ComponentTemplateListItem[]>({
       path: `${apiBasePath}/component_templates`,
+      method: 'get',
+    });
+  }
+
+  function useLoadComponentTemplatesDatastream(name: string) {
+    return useRequest<ComponentTemplateDatastreams>({
+      path: `${apiBasePath}/component_templates/${encodeURIComponent(name)}/datastreams`,
       method: 'get',
     });
   }
@@ -79,11 +88,36 @@ export const getApi = (
     return result;
   }
 
+  async function getComponentTemplateDatastreams(name: string) {
+    return sendRequest<ComponentTemplateDatastreams>({
+      path: `${apiBasePath}/component_templates/${encodeURIComponent(name)}/datastreams`,
+      method: 'get',
+    });
+  }
+
+  async function postDataStreamRollover(name: string) {
+    return sendRequest<ComponentTemplateDatastreams>({
+      path: `${apiBasePath}/data_streams/${encodeURIComponent(name)}/rollover`,
+      method: 'post',
+    });
+  }
+
+  async function postDataStreamMappingsFromTemplate(name: string) {
+    return sendRequest<ComponentTemplateDatastreams>({
+      path: `${apiBasePath}/data_streams/${encodeURIComponent(name)}/mappings_from_template`,
+      method: 'post',
+    });
+  }
+
   return {
     useLoadComponentTemplates,
     deleteComponentTemplates,
     useLoadComponentTemplate,
     createComponentTemplate,
     updateComponentTemplate,
+    useLoadComponentTemplatesDatastream,
+    getComponentTemplateDatastreams,
+    postDataStreamRollover,
+    postDataStreamMappingsFromTemplate,
   };
 };

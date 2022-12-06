@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ResolverAction } from '../store/actions';
-import { SpyMiddleware, SpyMiddlewareStateActionPair } from '../types';
+import type { ResolverAction } from '../store/actions';
+import type { SpyMiddleware, SpyMiddlewareStateActionPair } from '../types';
 
 /**
  * Return a `SpyMiddleware` to be used in testing. Use `debugActions` to console.log actions and the state they produced.

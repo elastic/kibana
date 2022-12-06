@@ -14,11 +14,11 @@ import type { OpenFieldEditor } from '..';
 import * as i18n from './translations';
 
 const StyledButton = styled(EuiButton)`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.m};
+  margin-left: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
 export interface UseCreateFieldButtonProps {
-  hasFieldEditPermission: boolean;
+  isAllowed: boolean;
   loading: boolean;
   openFieldEditor: OpenFieldEditor;
 }
@@ -30,7 +30,7 @@ export type UseCreateFieldButton = (
  * Returns a memoised 'CreateFieldButton' with only an 'onClick' property.
  */
 export const useCreateFieldButton: UseCreateFieldButton = ({
-  hasFieldEditPermission,
+  isAllowed,
   loading,
   openFieldEditor,
 }) => {
@@ -52,5 +52,5 @@ export const useCreateFieldButton: UseCreateFieldButton = ({
     [loading, openFieldEditor]
   );
 
-  return hasFieldEditPermission ? createFieldButton : undefined;
+  return isAllowed ? createFieldButton : undefined;
 };

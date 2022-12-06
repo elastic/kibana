@@ -9,6 +9,19 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  opentelemetry: schema.object({
+    metrics: schema.object({
+      otlp: schema.object({
+        url: schema.maybe(schema.string()),
+        headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+        exportIntervalMillis: schema.number({ defaultValue: 10000 }),
+        logLevel: schema.string({ defaultValue: 'info' }),
+      }),
+      prometheus: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+    }),
+  }),
 });
 
 export type MonitoringCollectionConfig = ReturnType<typeof createConfig>;

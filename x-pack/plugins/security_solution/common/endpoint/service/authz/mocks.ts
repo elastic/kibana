@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EndpointAuthz } from '../../types/authz';
+import type { EndpointAuthz } from '../../types/authz';
 import { getEndpointAuthzInitialState } from './authz';
 
 export const getEndpointAuthzInitialStateMock = (
@@ -16,7 +16,7 @@ export const getEndpointAuthzInitialStateMock = (
       Object.entries(getEndpointAuthzInitialState()) as Array<[keyof EndpointAuthz, boolean]>
     ).reduce((mockPrivileges, [key, value]) => {
       // Invert the initial values (from `false` to `true`) so that everything is authorized
-      mockPrivileges[key] = !value;
+      mockPrivileges[key] = true;
 
       return mockPrivileges;
     }, {} as EndpointAuthz),

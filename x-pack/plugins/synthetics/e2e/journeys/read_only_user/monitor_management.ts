@@ -6,8 +6,8 @@
  */
 
 import { before, expect, journey, Page, step } from '@elastic/synthetics';
+import { byTestId } from '@kbn/observability-plugin/e2e/utils';
 import { monitorManagementPageProvider } from '../../page_objects/monitor_management';
-import { byTestId } from '../utils';
 
 journey(
   'Monitor Management read only user',
@@ -23,7 +23,7 @@ journey(
     });
 
     step('login to Kibana', async () => {
-      await uptime.loginToKibana('obs_read_user', 'changeme');
+      await uptime.loginToKibana('viewer', 'changeme');
     });
 
     step('Adding monitor is disabled', async () => {

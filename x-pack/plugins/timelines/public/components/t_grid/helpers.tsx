@@ -7,23 +7,34 @@
 
 import type { Filter, EsQueryConfig, Query } from '@kbn/es-query';
 import { DataViewBase, FilterStateStore } from '@kbn/es-query';
-import { isEmpty, get } from 'lodash/fp';
+import { get, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import {
-  elementOrChildrenHasFocus,
-  getFocusedAriaColindexCell,
-  getTableSkipFocus,
-  handleSkipFocus,
-  stopPropagationAndPreventDefault,
-} from '../../../common/utils/accessibility';
+import { elementOrChildrenHasFocus } from '../../../common/utils/accessibility';
 import type { BrowserFields } from '../../../common/search_strategy/index_fields';
-import { DataProviderType, EXISTS_OPERATOR } from '../../../common/types/timeline';
+import {
+  DataProviderType,
+  EXISTS_OPERATOR,
+  IS_ONE_OF_OPERATOR,
+  IS_OPERATOR,
+} from '../../../common/types/timeline';
 import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline';
+import { assertUnreachable } from '../../../common/utility_types';
 import { convertToBuildEsQuery, escapeQueryValue } from '../utils/keury';
-
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
+import { TableId } from '../../types';
+import { ViewSelection } from './event_rendered_view/selector';
 
-const isNumber = (value: string | number) => !isNaN(Number(value));
+interface CombineQueries {
+  config: EsQueryConfig;
+  dataProviders: DataProvider[];
+  indexPattern: DataViewBase;
+  browserFields: BrowserFields;
+  filters: Filter[];
+  kqlQuery: Query;
+  kqlMode: string;
+}
+
+const isNumber = (value: string | number): value is number => !isNaN(Number(value));
 
 const convertDateFieldToQuery = (field: string, value: string | number) =>
   `${field}: ${isNumber(value) ? value : new Date(value).valueOf()}`;
@@ -86,27 +97,41 @@ const checkIfFieldTypeIsNested = (field: string, browserFields: BrowserFields) =
 const buildQueryMatch = (
   dataProvider: DataProvider | DataProvidersAnd,
   browserFields: BrowserFields
-) =>
-  `${dataProvider.excluded ? 'NOT ' : ''}${
-    dataProvider.queryMatch.operator !== EXISTS_OPERATOR &&
-    dataProvider.type !== DataProviderType.template
-      ? checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
-        ? convertNestedFieldToQuery(
-            dataProvider.queryMatch.field,
-            dataProvider.queryMatch.value,
-            browserFields
-          )
-        : checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
-        ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
-        : `${dataProvider.queryMatch.field} : ${
-            isNumber(dataProvider.queryMatch.value)
-              ? dataProvider.queryMatch.value
-              : escapeQueryValue(dataProvider.queryMatch.value)
-          }`
-      : checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
-      ? convertNestedFieldToExistQuery(dataProvider.queryMatch.field, browserFields)
-      : `${dataProvider.queryMatch.field} ${EXISTS_OPERATOR}`
-  }`.trim();
+) => {
+  const {
+    excluded,
+    type,
+    queryMatch: { field, operator, value },
+  } = dataProvider;
+
+  const isFieldTypeNested = checkIfFieldTypeIsNested(field, browserFields);
+  const isExcluded = excluded ? 'NOT ' : '';
+
+  switch (operator) {
+    case IS_OPERATOR:
+      if (!isStringOrNumberArray(value)) {
+        return `${isExcluded}${
+          type !== DataProviderType.template
+            ? buildIsQueryMatch({ browserFields, field, isFieldTypeNested, value })
+            : buildExistsQueryMatch({ browserFields, field, isFieldTypeNested })
+        }`;
+      } else {
+        return `${isExcluded}${field} : ${JSON.stringify(value[0])}`;
+      }
+
+    case EXISTS_OPERATOR:
+      return `${isExcluded}${buildExistsQueryMatch({ browserFields, field, isFieldTypeNested })}`;
+
+    case IS_ONE_OF_OPERATOR:
+      if (isStringOrNumberArray(value)) {
+        return `${isExcluded}${buildIsOneOfQueryMatch({ field, value })}`;
+      } else {
+        return `${isExcluded}${field} : ${JSON.stringify(value)}`;
+      }
+    default:
+      assertUnreachable(operator);
+  }
+};
 
 export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: BrowserFields) =>
   dataProviders
@@ -133,16 +158,9 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
       return !index ? `(${queryMatch})` : `${globalQuery} or (${queryMatch})`;
     }, '');
 
-interface CombineQueries {
-  config: EsQueryConfig;
-  dataProviders: DataProvider[];
-  indexPattern: DataViewBase;
-  browserFields: BrowserFields;
-  filters: Filter[];
-  kqlQuery: Query;
-  kqlMode: string;
-  isEventViewer?: boolean;
-}
+export const isDataProviderEmpty = (dataProviders: DataProvider[]) => {
+  return isEmpty(dataProviders) || isEmpty(dataProviders.filter((d) => d.enabled === true));
+};
 
 export const combineQueries = ({
   config,
@@ -152,47 +170,49 @@ export const combineQueries = ({
   filters = [],
   kqlQuery,
   kqlMode,
-  isEventViewer,
-}: CombineQueries): { filterQuery: string } | null => {
+}: CombineQueries): { filterQuery: string | undefined; kqlError: Error | undefined } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
-  if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters) && !isEventViewer) {
+  if (isDataProviderEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters)) {
     return null;
-  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEventViewer) {
+  } else if (isDataProviderEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
+      config,
+      queries: [kuery],
+      indexPattern,
+      filters,
+    });
+
     return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
-    };
-  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
-    return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
-    };
-  } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery.query)) {
-    kuery.query = `(${kqlQuery.query})`;
-    return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
-    };
-  } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
-    kuery.query = `(${buildGlobalQuery(dataProviders, browserFields)})`;
-    return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
+      filterQuery,
+      kqlError,
     };
   }
-  const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
-  const postpend = (q: string) => `${!isEmpty(q) ? ` ${operatorKqlQuery} (${q})` : ''}`;
-  kuery.query = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
-    kqlQuery.query as string
-  )})`;
-  return {
-    filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
-  };
-};
 
-export const buildCombinedQuery = (combineQueriesParams: CombineQueries) => {
-  const combinedQuery = combineQueries(combineQueriesParams);
-  return combinedQuery?.filterQuery
-    ? {
-        filterQuery: combinedQuery.filterQuery,
-      }
-    : null;
+  const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
+
+  const postpend = (q: string) => `${!isEmpty(q) ? `(${q})` : ''}`;
+
+  const globalQuery = buildGlobalQuery(dataProviders, browserFields); // based on Data Providers
+
+  const querySuffix = postpend(kqlQuery.query as string); // based on Unified Search bar
+
+  const queryPrefix = globalQuery ? `(${globalQuery})` : '';
+
+  const queryOperator = queryPrefix && querySuffix ? operatorKqlQuery : '';
+
+  kuery.query = `(${queryPrefix} ${queryOperator} ${querySuffix})`;
+
+  const [filterQuery, kqlError] = convertToBuildEsQuery({
+    config,
+    queries: [kuery],
+    indexPattern,
+    filters,
+  });
+
+  return {
+    filterQuery,
+    kqlError,
+  };
 };
 
 export const buildTimeRangeFilter = (from: string, to: string): Filter =>
@@ -235,44 +255,10 @@ export const getCombinedFilterQuery = ({
   return combinedQueries ? combinedQueries.filterQuery : undefined;
 };
 
-/**
- * The CSS class name of a "stateful event", which appears in both
- * the `Timeline` and the `Events Viewer` widget
- */
-export const STATEFUL_EVENT_CSS_CLASS_NAME = 'event-column-view';
-
 export const resolverIsShowing = (graphEventId: string | undefined): boolean =>
   graphEventId != null && graphEventId !== '';
 
-export const showGlobalFilters = ({
-  globalFullScreen,
-  graphEventId,
-}: {
-  globalFullScreen: boolean;
-  graphEventId: string | undefined;
-}): boolean => (globalFullScreen && resolverIsShowing(graphEventId) ? false : true);
-
-/**
- * The `aria-colindex` of the Timeline actions column
- */
-export const ACTIONS_COLUMN_ARIA_COL_INDEX = '1';
-
-/**
- * Every column index offset by `2`, because, per https://www.w3.org/TR/wai-aria-practices-1.1/examples/grid/dataGrids.html
- * the `aria-colindex` attribute starts at `1`, and the "actions column" is always the first column
- */
-export const ARIA_COLUMN_INDEX_OFFSET = 2;
-
 export const EVENTS_COUNT_BUTTON_CLASS_NAME = 'local-events-count-button';
-
-/** Calculates the total number of pages in a (timeline) events view */
-export const calculateTotalPages = ({
-  itemsCount,
-  itemsPerPage,
-}: {
-  itemsCount: number;
-  itemsPerPage: number;
-}): number => (itemsCount === 0 || itemsPerPage === 0 ? 0 : Math.ceil(itemsCount / itemsPerPage));
 
 /** Returns true if the events table has focus */
 export const tableHasFocus = (containerElement: HTMLElement | null): boolean =>
@@ -280,79 +266,82 @@ export const tableHasFocus = (containerElement: HTMLElement | null): boolean =>
     containerElement?.querySelector<HTMLDivElement>(`.${EVENTS_TABLE_CLASS_NAME}`)
   );
 
-/**
- * This function has a side effect. It will skip focus "after" or "before"
- * Timeline's events table, with exceptions as noted below.
- *
- * If the currently-focused table cell has additional focusable children,
- * i.e. action buttons, draggables, or always-open popover content, the
- * browser's "natural" focus management will determine which element is
- * focused next.
- */
-export const onTimelineTabKeyPressed = ({
-  containerElement,
-  keyboardEvent,
-  onSkipFocusBeforeEventsTable,
-  onSkipFocusAfterEventsTable,
+export const isSelectableView = (timelineId: string): boolean =>
+  timelineId === TableId.alertsOnAlertsPage || timelineId === TableId.alertsOnRuleDetailsPage;
+
+export const isViewSelection = (value: unknown): value is ViewSelection =>
+  value === 'gridView' || value === 'eventRenderedView';
+
+/** always returns a valid default `ViewSelection` */
+export const getDefaultViewSelection = ({
+  timelineId,
+  value,
 }: {
-  containerElement: HTMLElement | null;
-  keyboardEvent: React.KeyboardEvent;
-  onSkipFocusBeforeEventsTable: () => void;
-  onSkipFocusAfterEventsTable: () => void;
-}) => {
-  const { shiftKey } = keyboardEvent;
+  timelineId: string;
+  value: unknown;
+}): ViewSelection => {
+  const defaultViewSelection = 'gridView';
 
-  const eventsTableSkipFocus = getTableSkipFocus({
-    containerElement,
-    getFocusedCell: getFocusedAriaColindexCell,
-    shiftKey,
-    tableHasFocus,
-    tableClassName: EVENTS_TABLE_CLASS_NAME,
-  });
-
-  if (eventsTableSkipFocus !== 'SKIP_FOCUS_NOOP') {
-    stopPropagationAndPreventDefault(keyboardEvent);
-    handleSkipFocus({
-      onSkipFocusBackwards: onSkipFocusBeforeEventsTable,
-      onSkipFocusForward: onSkipFocusAfterEventsTable,
-      skipFocus: eventsTableSkipFocus,
-    });
+  if (!isSelectableView(timelineId)) {
+    return defaultViewSelection;
+  } else {
+    return isViewSelection(value) ? value : defaultViewSelection;
   }
 };
 
-export const ACTIVE_TIMELINE_BUTTON_CLASS_NAME = 'active-timeline-button';
-export const FLYOUT_BUTTON_BAR_CLASS_NAME = 'timeline-flyout-button-bar';
-export const FLYOUT_BUTTON_CLASS_NAME = 'timeline-flyout-button';
+/** This local storage key stores the `Grid / Event rendered view` selection */
+export const ALERTS_TABLE_VIEW_SELECTION_KEY = 'securitySolution.alerts.table.view-selection';
 
-/**
- * This function focuses the active timeline button on the next tick. Focus
- * is updated on the next tick because this function is typically
- * invoked in `onClick` handlers that also dispatch Redux actions (that
- * in-turn update focus states).
- */
-export const focusActiveTimelineButton = () => {
-  setTimeout(() => {
-    document
-      .querySelector<HTMLButtonElement>(
-        `div.${FLYOUT_BUTTON_BAR_CLASS_NAME} .${ACTIVE_TIMELINE_BUTTON_CLASS_NAME}`
-      )
-      ?.focus();
-  }, 0);
+export const buildIsQueryMatch = ({
+  browserFields,
+  field,
+  isFieldTypeNested,
+  value,
+}: {
+  browserFields: BrowserFields;
+  field: string;
+  isFieldTypeNested: boolean;
+  value: string | number;
+}): string => {
+  if (isFieldTypeNested) {
+    return convertNestedFieldToQuery(field, value, browserFields);
+  } else if (checkIfFieldTypeIsDate(field, browserFields)) {
+    return convertDateFieldToQuery(field, value);
+  } else {
+    return `${field} : ${isNumber(value) ? value : escapeQueryValue(value)}`;
+  }
 };
 
-/**
- * Focuses the utility bar action contained by the provided `containerElement`
- * when a valid container is provided
- */
-export const focusUtilityBarAction = (containerElement: HTMLElement | null) => {
-  containerElement
-    ?.querySelector<HTMLButtonElement>('div.siemUtilityBar__action:last-of-type button')
-    ?.focus();
+export const buildExistsQueryMatch = ({
+  browserFields,
+  field,
+  isFieldTypeNested,
+}: {
+  browserFields: BrowserFields;
+  field: string;
+  isFieldTypeNested: boolean;
+}): string => {
+  return isFieldTypeNested
+    ? convertNestedFieldToExistQuery(field, browserFields)
+    : `${field} ${EXISTS_OPERATOR}`;
 };
 
-/**
- * Resets keyboard focus on the page
- */
-export const resetKeyboardFocus = () => {
-  document.querySelector<HTMLAnchorElement>('header.headerGlobalNav a.euiHeaderLogo')?.focus();
+export const buildIsOneOfQueryMatch = ({
+  field,
+  value,
+}: {
+  field: string;
+  value: Array<string | number>;
+}): string => {
+  const trimmedField = field.trim();
+  if (value.length) {
+    return `${trimmedField} : (${value
+      .map((item) => (isNumber(item) ? Number(item) : `${escapeQueryValue(item.trim())}`))
+      .join(' OR ')})`;
+  }
+  return `${trimmedField} : ''`;
 };
+
+export const isStringOrNumberArray = (value: unknown): value is Array<string | number> =>
+  Array.isArray(value) &&
+  (value.every((x) => typeof x === 'string') || value.every((x) => typeof x === 'number'));

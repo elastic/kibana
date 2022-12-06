@@ -11,7 +11,9 @@ import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 
-import { IAggConfig, IndexPattern, AggGroupNames } from '@kbn/data-plugin/public';
+import { IAggConfig, AggGroupNames } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+
 import type { Schema } from '@kbn/visualizations-plugin/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -46,7 +48,7 @@ export interface DefaultEditorAggParamsProps extends DefaultEditorCommonProps {
   aggIsTooLow?: boolean;
   className?: string;
   disabledParams?: string[];
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   setValidity: (isValid: boolean) => void;
   setTouched: (isTouched: boolean) => void;
   schemas: Schema[];

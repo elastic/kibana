@@ -143,8 +143,12 @@ export const decorateWithKibanaContext = <StoryFnReactReturnType extends React.R
     get$: () => new Subject(),
   };
 
+  const overlays = {
+    openFlyout: () => {},
+  };
+
   return (
-    <KibanaContextProvider services={{ data, http, uiSettings }}>
+    <KibanaContextProvider services={{ data, http, uiSettings, overlays }}>
       {wrappedStory()}
     </KibanaContextProvider>
   );

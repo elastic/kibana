@@ -5,29 +5,15 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { InputsModelId } from '../../store/inputs/constants';
 import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
 
-export const resetScroll = () => {
-  setTimeout(() => {
-    window.scrollTo(0, 0);
-
-    const kibanaBody = document.querySelector('#kibana-body');
-    if (kibanaBody != null) {
-      kibanaBody.scrollTop = 0;
-    }
-
-    const pageContainer = document.querySelector('[data-test-subj="pageContainer"]');
-    if (pageContainer != null) {
-      pageContainer.scrollTop = 0;
-    }
-  }, 0);
-};
 export interface GlobalFullScreen {
   globalFullScreen: boolean;
   setGlobalFullScreen: (fullScreen: boolean) => void;
@@ -47,13 +33,11 @@ export const useGlobalFullScreen = (): GlobalFullScreen => {
       const isDataGridFullScreen = document.querySelector('.euiDataGrid--fullScreen') !== null;
       if (fullScreen) {
         document.body.classList.add(SCROLLING_DISABLED_CLASS_NAME, 'euiDataGrid__restrictBody');
-        resetScroll();
       } else if (isDataGridFullScreen === false || fullScreen === false) {
         document.body.classList.remove(SCROLLING_DISABLED_CLASS_NAME, 'euiDataGrid__restrictBody');
-        resetScroll();
       }
 
-      dispatch(inputsActions.setFullScreen({ id: 'global', fullScreen }));
+      dispatch(inputsActions.setFullScreen({ id: InputsModelId.global, fullScreen }));
     },
     [dispatch]
   );
@@ -80,7 +64,7 @@ export const useTimelineFullScreen = (): TimelineFullScreen => {
       } else if (isDataGridFullScreen === false || fullScreen === false) {
         document.body.classList.remove('euiDataGrid__restrictBody');
       }
-      dispatch(inputsActions.setFullScreen({ id: 'timeline', fullScreen }));
+      dispatch(inputsActions.setFullScreen({ id: InputsModelId.timeline, fullScreen }));
     },
     [dispatch]
   );
@@ -92,4 +76,40 @@ export const useTimelineFullScreen = (): TimelineFullScreen => {
     [timelineFullScreen, setTimelineFullScreen]
   );
   return memoizedReturn;
+};
+
+/**
+ * Checks to see if there is a EUI Data Grid in full screen mode in the document tree
+ */
+export const useHasDataGridFullScreen = (): boolean => {
+  const [isDataGridFullScreen, setIsDataGridFullScreen] = useState(false);
+
+  useEffect(() => {
+    const observeTarget = document.body;
+    const docBodyObserver = new MutationObserver((changes) => {
+      for (const change of changes) {
+        if (change.attributeName === 'class') {
+          setIsDataGridFullScreen(observeTarget.classList.contains('euiDataGrid__restrictBody'));
+        }
+      }
+    });
+
+    docBodyObserver.observe(observeTarget, { attributes: true });
+
+    return () => docBodyObserver.disconnect();
+  }, []);
+
+  return isDataGridFullScreen;
+};
+
+/**
+ * Checks to see if any content (ex. timeline, global or data grid) is
+ * currently being displayed in full screen mode
+ */
+export const useHasFullScreenContent = (): boolean => {
+  const { globalFullScreen } = useGlobalFullScreen();
+  const { timelineFullScreen } = useTimelineFullScreen();
+  const dataGridFullScreen = useHasDataGridFullScreen();
+
+  return globalFullScreen || timelineFullScreen || dataGridFullScreen;
 };

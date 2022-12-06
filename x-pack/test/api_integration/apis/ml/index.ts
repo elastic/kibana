@@ -61,10 +61,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./job_validation'));
     loadTestFile(require.resolve('./job_audit_messages'));
     loadTestFile(require.resolve('./jobs'));
+    loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./modules'));
     loadTestFile(require.resolve('./results'));
     loadTestFile(require.resolve('./saved_objects'));
     loadTestFile(require.resolve('./system'));
     loadTestFile(require.resolve('./trained_models'));
+    loadTestFile(require.resolve('./notifications'));
   });
 }

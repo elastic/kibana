@@ -60,6 +60,53 @@ $ curl -X POST api/data_views/data-view/my-view/fields
 --------------------------------------------------
 // KIBANA
 
+Change a simple field format:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/data_views/data-view/my-view/fields
+{
+  "fields": {
+    "foo": {
+      "format": {
+        "id": "bytes"
+      }
+    }
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+Change a complex field format:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/data_views/data-view/my-view/fields
+{
+  "fields": {
+    "foo": {
+      "format": {
+                "id": "static_lookup",
+                "params": {
+                  "lookupEntries": [
+                    {
+                      "key": "1",
+                      "value": "100"
+                    },
+                    {
+                      "key": "2",
+                      "value": "200"
+                    }
+                   ],
+                   "unknownKeyValue": "5000"
+                }
+            }
+        }
+    }
+}
+--------------------------------------------------
+// KIBANA
+
 Update multiple metadata fields in one request:
 
 [source,sh]
@@ -80,6 +127,7 @@ $ curl -X POST api/data_views/data-view/my-view/fields
 // KIBANA
 
 Use `null` value to delete metadata:
+
 [source,sh]
 --------------------------------------------------
 $ curl -X POST api/data_views/data-view/my-pattern/fields
@@ -93,8 +141,8 @@ $ curl -X POST api/data_views/data-view/my-pattern/fields
 --------------------------------------------------
 // KIBANA
 
-
 The endpoint returns the updated data view object:
+
 [source,sh]
 --------------------------------------------------
 {

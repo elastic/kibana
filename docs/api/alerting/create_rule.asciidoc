@@ -1,99 +1,143 @@
 [[create-rule-api]]
-=== Create rule API
+== Create rule API
 ++++
 <titleabbrev>Create rule</titleabbrev>
 ++++
 
 Create {kib} rules.
 
-WARNING: This API supports <<token-api-authentication>> only.
-
 [[create-rule-api-request]]
-==== Request
+=== {api-request-title}
 
 `POST <kibana host>:<port>/api/alerting/rule/<id>`
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>`
 
+
+=== {api-prereq-title}
+
+You must have `all` privileges for the appropriate {kib} features, depending on
+the `consumer` and `rule_type_id` of the rules you're creating. For example, the
+*Management* > *Stack Rules* feature, *Analytics* > *Discover* and *{ml-app}*
+features, *{observability}*, and *Security* features. If the rule has `actions`,
+you must also have `read` privileges for the *Management* >
+*{connectors-feature}* feature. For more details, refer to
+<<kibana-feature-privileges>>.
+
+=== {api-description-title}
+
+[WARNING]
+====
+* This API supports only
+<<token-api-authentication,token-based authentication>>.
+* When you create a rule, it identifies which roles you have at that point in time.
+Thereafter, when the rule performs queries, it uses those security privileges.
+If a user with different privileges updates the rule, its behavior might change.
+====
+
 [[create-rule-api-path-params]]
-==== Path parameters
+=== {api-path-parms-title}
 
 `<id>`::
-  (Optional, string) Specifies a UUID v1 or v4 to use instead of a randomly generated ID.
+(Optional, string) Specifies a UUID v1 or v4 to use instead of a randomly
+generated ID.
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+(Optional, string) An identifier for the space. If `space_id` is not provided in
+the URL, the default space is used.
 
+[role="child_attributes"]
 [[create-rule-api-request-body]]
-==== Request body
-
-`name`::
-  (Required, string) A name to reference and search.
-
-`tags`::
-  (Optional, string array) A list of keywords to reference and search.
-
-`rule_type_id`::
-  (Required, string) The ID of the rule type that you want to call when the rule is scheduled to run.
-
-`schedule`::
-  (Required, object) The schedule specifying when this rule should be run, using one of the available schedule formats specified under
-+
-._Schedule Formats_.
-[%collapsible%open]
-=====
-A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.
-
-We currently support the _Interval format_ which specifies the interval in seconds, minutes, hours or days at which the rule should execute.
-Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ interval: "1d" }`.
-
-There are plans to support multiple other schedule formats in the near future.
-=====
-
-`throttle`::
-  (Optional, string) How often this rule should fire the same actions. This will prevent the rule from sending out the same notification over and over. For example, if a rule with a `schedule` of 1 minute stays in a triggered state for 90 minutes, setting a `throttle` of `10m` or `1h` will prevent it from sending 90 notifications during this period.
-
-`notify_when`::
-  (Required, string) The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`, or `onThrottleInterval`.
-
-`enabled`::
-  (Optional, boolean) Indicates if you want to run the rule on an interval basis after it is created.
-
-`consumer`::
-  (Required, string) The name of the application that owns the rule. This name has to match the Kibana Feature name, as that dictates the required RBAC privileges.
-
-`params`::
-  (Required, object) The parameters to pass to the rule type executor `params` value. This will also validate against the rule type params validator, if defined.
+=== {api-request-body-title}
 
 `actions`::
-  (Optional, object array) An array of the following action objects.
+(Optional, object array) An array of action objects.
 +
 .Properties of the action objects:
 [%collapsible%open]
 =====
-  `group`:::
-    (Required, string) Grouping actions is recommended for escalations for different types of alerts. If you don't need this, set this value to `default`.
 
-  `id`:::
-    (Required, string) The ID of the connector saved object to execute.
+`group`:::
+(Required, string) Grouping actions is recommended for escalations for different
+types of alerts. If you don't need this, set this value to `default`.
 
-  `params`:::
-    (Required, object) The map to the `params` that the <<action-types,connector type>> will receive. ` params` are handled as Mustache templates and passed a default set of context.
+`id`:::
+(Required, string) The ID of the connector saved object, which you can obtain by
+using <<get-all-connectors-api>>.
+
+`params`:::
+(Required, object) The map to the `params` that the
+<<action-types,connector type>> will receive. ` params` are handled as Mustache
+templates and passed a default set of context.
 =====
 
+`consumer`::
+(Required, string) The name of the application or feature that owns the rule.
+For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`,
+`ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
+
+`enabled`::
+(Optional, boolean) Indicates if you want to run the rule on an interval basis
+after it is created.
+
+`name`::
+(Required, string) The name of the rule. While this name does not have to be
+unique, a distinctive name can help you identify a rule.
+
+`notify_when`::
+(Required, string) Defines how often alerts generate actions. Valid values are: 
++
+--
+
+* `onActionGroupChange`: Actions run when the alert status changes.
+* `onActiveAlert`: Actions run when the alert becomes active and at each check
+interval while the rule conditions are met.
+* `onThrottleInterval`: Actions run when the alert becomes active and at the
+interval specified in the `throttle` property while the rule conditions are met.
+
+--
+
+`params`::
+(Required, object) The parameters to pass to the rule type executor `params`
+value. This will also validate against the rule type params validator, if defined.
+
+`rule_type_id`::
+(Required, string) The ID of the rule type that you want to call when the rule
+is scheduled to run. For example, `.es-query`, `.index-threshold`,
+`logs.alert.document.count`, `monitoring_alert_cluster_health`,
+`siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`. For more
+information, refer to <<rule-types>>.
+
+`schedule`::
+(Required, object) The check interval, which specifies how frequently the rule
+conditions are checked. The interval must be specified in seconds, minutes,
+hours or days. For example: `{ "interval": "10s" }`, `{ "interval": "5m" }`,
+`{ "interval": "1h" }`, or `{ "interval": "1d" }`.
+
+`tags`::
+(Optional, string array) A list of tag names that are applied to a rule.
+
+`throttle`::
+(Optional, string) Defines how often an alert generates repeated actions.
+This custom action interval must be specified in seconds, minutes, hours, or
+days. For example, `10m` or `1h`. This property is used only if `notify_when`
+is `onThrottleInterval`.
 
 [[create-rule-api-request-codes]]
-==== Response code
+===  {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
 [[create-rule-api-example]]
-==== Example
+=== {api-examples-title}
+
+Create an <<rule-type-index-threshold,index threshold rule>> that has actions
+associated with a server log connector:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/alerting/rule  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+POST api/alerting/rule
 {
   "params":{
       "aggType":"avg",
@@ -132,7 +176,7 @@ $ curl -X POST api/alerting/rule  -H 'kbn-xsrf: true' -H 'Content-Type: applicat
    ],
    "notify_when":"onActionGroupChange",
    "name":"my alert"
-}'
+}
 --------------------------------------------------
 // KIBANA
 
@@ -142,7 +186,12 @@ The API returns the following:
 --------------------------------------------------
 {
   "id": "41893910-6bca-11eb-9e0d-85d233e3ee35",
-  "notify_when": "onActionGroupChange",
+  "consumer": "alerts",
+  "tags": ["cpu"],
+  "name": "my alert",
+  "enabled": true,
+  "throttle": null,
+  "schedule": {"interval": "1m"},
   "params": {
     "aggType": "avg",
     "termSize": 6,
@@ -150,49 +199,36 @@ The API returns the following:
     "timeWindowSize": 5,
     "timeWindowUnit": "m",
     "groupBy": "top",
-    "threshold": [
-      1000
-    ],
-    "index": [
-      ".kibana"
-    ],
+    "threshold": [1000],
+    "index": [".test-index"],
     "timeField": "@timestamp",
     "aggField": "sheet.version",
     "termField": "name.keyword"
   },
-  "consumer": "alerts",
   "rule_type_id": ".index-threshold",
-  "schedule": {
-    "interval": "1m"
-  },
+  "scheduled_task_id": "425b0800-6bca-11eb-9e0d-85d233e3ee35",
+  "created_by": "elastic",
+  "updated_by": "elastic",
+  "created_at": "2022-06-08T17:20:31.632Z",
+  "updated_at": "2022-06-08T17:20:31.632Z",
+  "api_key_owner": "elastic",
+  "notify_when": "onActionGroupChange",
+  "mute_all": false,
+  "muted_alert_ids": [],
+  "execution_status": {
+    "last_execution_date": "2022-06-08T17:20:31.632Z",
+    "status": "pending"
+  }
   "actions": [
     {
-      "connector_type_id": ".server-log",
       "group": "threshold met",
+      "id": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2",
       "params": {
         "level": "info",
         "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
       },
-      "id": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
+      "connector_type_id": ".server-log"
     }
-  ],
-  "tags": [
-    "cpu"
-  ],
-  "name": "my alert",
-  "enabled": true,
-  "throttle": null,
-  "api_key_owner": "elastic",
-  "created_by": "elastic",
-  "updated_by": "elastic",
-  "mute_all": false,
-  "muted_alert_ids": [],
-  "updated_at": "2021-02-10T18:03:19.961Z",
-  "created_at": "2021-02-10T18:03:19.961Z",
-  "scheduled_task_id": "425b0800-6bca-11eb-9e0d-85d233e3ee35",
-  "execution_status": {
-    "last_execution_date": "2021-02-10T18:03:19.966Z",
-    "status": "pending"
-  }
+  ]
 }
 --------------------------------------------------

@@ -40,22 +40,22 @@ export default ({ getService }: FtrProviderContext): void => {
         features: 'mttr',
       });
 
-      expect(metrics).to.eql({ mttr: 0 });
+      expect(metrics).to.eql({ mttr: null });
 
       await deleteAllCaseItems(es);
     });
 
     describe('MTTR', () => {
-      it('responses with zero if there are no cases', async () => {
+      it('responses with null if there are no cases', async () => {
         const metrics = await getCasesMetrics({
           supertest,
           features: ['mttr'],
         });
 
-        expect(metrics).to.eql({ mttr: 0 });
+        expect(metrics).to.eql({ mttr: null });
       });
 
-      it('responses with zero if there are only open case and in-progress cases', async () => {
+      it('responses with null if there are only open case and in-progress cases', async () => {
         await createCase(supertest, getPostCaseRequest());
         const theCase = await createCase(supertest, getPostCaseRequest());
 
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
           features: ['mttr'],
         });
 
-        expect(metrics).to.eql({ mttr: 0 });
+        expect(metrics).to.eql({ mttr: null });
       });
 
       describe('closed and open cases from kbn archive', () => {

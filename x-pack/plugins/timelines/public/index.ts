@@ -36,12 +36,14 @@ export {
   clearEventsDeleted,
   initializeTGridSettings,
   setTGridSelectAll,
+  updateGraphEventId,
+  updateSessionViewConfig,
+  createTGrid,
+  updateTotalCount,
 } from './store/t_grid/actions';
 
-export { getManageTimelineById } from './store/t_grid/selectors';
-
 export { tGridReducer } from './store/t_grid/reducer';
-export type { TimelinesUIStart, TGridModelForTimeline, TimelineState } from './types';
+export type { TimelinesUIStart, TableState, TableById, SubsetTGridModel } from './types';
 export type { TGridType, SortDirection, State as TGridState, TGridModel } from './types';
 export type { OnColumnFocused } from '../common/utils/accessibility';
 
@@ -75,8 +77,15 @@ export {
 
 export { getActionsColumnWidth } from './components/t_grid/body/column_headers/helpers';
 export { DEFAULT_ACTION_BUTTON_WIDTH } from './components/t_grid/body/constants';
-export { useStatusBulkActionItems } from './hooks/use_status_bulk_action_items';
+export { useBulkActionItems } from './hooks/use_bulk_action_items';
 export { getPageRowIndex } from '../common/utils/pagination';
+export {
+  convertKueryToDslFilter,
+  convertKueryToElasticSearchQuery,
+  convertToBuildEsQuery,
+  escapeKuery,
+  escapeQueryValue,
+} from './components/utils/keury';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
@@ -85,4 +94,8 @@ export function plugin() {
 }
 
 export { StatefulEventContext } from './components/stateful_event_context';
-export { TimelineContext } from './components/t_grid/shared';
+export { TableContext } from './components/t_grid/shared';
+
+export type { AddToTimelineButtonProps } from './components/hover_actions/actions/add_to_timeline';
+
+export { combineQueries } from './components/t_grid/helpers';

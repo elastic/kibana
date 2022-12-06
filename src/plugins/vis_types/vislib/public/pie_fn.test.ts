@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Datatable } from '@kbn/expressions-plugin';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import { createPieVisFn } from './pie_fn';
 // @ts-ignore

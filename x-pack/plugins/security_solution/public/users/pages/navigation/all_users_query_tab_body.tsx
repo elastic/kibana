@@ -8,7 +8,7 @@
 import { getOr, noop } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { UsersComponentsQueryProps } from './types';
+import type { UsersComponentsQueryProps } from './types';
 
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { UsersTable } from '../../components/all_users';
@@ -32,7 +32,6 @@ export const AllUsersQueryTabBody = ({
   setQuery,
   startDate,
   type,
-  docValueFields,
   deleteQuery,
 }: UsersComponentsQueryProps) => {
   const { toggleStatus } = useQueryToggle(QUERY_ID);
@@ -70,7 +69,6 @@ export const AllUsersQueryTabBody = ({
       search({
         filterQuery,
         defaultIndex: indexNames,
-        docValueFields,
         timerange: {
           interval: '12h',
           from: startDate,
@@ -80,18 +78,7 @@ export const AllUsersQueryTabBody = ({
         sort,
       });
     }
-  }, [
-    search,
-    startDate,
-    endDate,
-    filterQuery,
-    indexNames,
-    querySkip,
-    docValueFields,
-    activePage,
-    limit,
-    sort,
-  ]);
+  }, [search, startDate, endDate, filterQuery, indexNames, querySkip, activePage, limit, sort]);
 
   return (
     <UsersTableManage

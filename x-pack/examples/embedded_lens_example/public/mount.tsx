@@ -40,5 +40,8 @@ export const mount =
     );
 
     render(reactElement, element);
-    return () => unmountComponentAtNode(element);
+    return () => {
+      unmountComponentAtNode(element);
+      plugins.data.search.session.clear();
+    };
   };

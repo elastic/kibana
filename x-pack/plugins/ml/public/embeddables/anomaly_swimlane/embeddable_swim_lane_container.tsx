@@ -11,6 +11,8 @@ import { Observable } from 'rxjs';
 
 import { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/swimlane_annotation_container';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
@@ -32,9 +34,9 @@ import {
 export interface ExplorerSwimlaneContainerProps {
   id: string;
   embeddableContext: InstanceType<IAnomalySwimlaneEmbeddable>;
-  embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>;
+  embeddableInput$: Observable<AnomalySwimlaneEmbeddableInput>;
   services: [CoreStart, MlDependencies, AnomalySwimlaneServices];
-  refresh: Observable<any>;
+  refresh: Observable<void>;
   onInputChange: (input: Partial<AnomalySwimlaneEmbeddableInput>) => void;
   onOutputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void;
   onRenderComplete: () => void;
@@ -45,7 +47,7 @@ export interface ExplorerSwimlaneContainerProps {
 export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   id,
   embeddableContext,
-  embeddableInput,
+  embeddableInput$,
   services,
   refresh,
   onInputChange,
@@ -56,7 +58,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
 }) => {
   useEmbeddableExecutionContext<AnomalySwimlaneEmbeddableInput>(
     services[0].executionContext,
-    embeddableInput,
+    embeddableInput$,
     ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
     id
   );
@@ -65,13 +67,13 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
 
   const [fromPage, setFromPage] = useState<number>(1);
 
-  const [{}, { uiActions }] = services;
+  const [{}, { uiActions, charts: chartsService }] = services;
 
   const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
 
   const [swimlaneType, swimlaneData, perPage, setPerPage, timeBuckets, isLoading, error] =
     useSwimlaneInputResolver(
-      embeddableInput,
+      embeddableInput$,
       onInputChange,
       refresh,
       services,
@@ -86,6 +88,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
       fromPage,
       interval: swimlaneData?.interval,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [perPage, fromPage, swimlaneData]);
 
   const onCellsSelection = useCallback(
@@ -100,6 +103,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
         });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [swimlaneData, perPage, fromPage, setSelectedCells]
   );
 
@@ -114,7 +118,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
         }
         color="danger"
         iconType="alert"
-        style={{ width: '100%' }}
+        css={{ width: '100%' }}
       >
         <p>{error.message}</p>
       </EuiCallOut>
@@ -123,7 +127,10 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
 
   return (
     <div
-      style={{ width: '100%', padding: '8px' }}
+      css={css`
+        width: 100%;
+        padding: 8px;
+      `}
       data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
     >
       <SwimlaneContainer
@@ -148,10 +155,11 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
           }
         }}
         isLoading={isLoading}
+        yAxisWidth={{ max: Y_AXIS_LABEL_WIDTH }}
         noDataWarning={
           <EuiEmptyPrompt
             titleSize="xxs"
-            style={{ padding: 0 }}
+            css={{ padding: 0 }}
             title={
               <h2>
                 <FormattedMessage
@@ -162,6 +170,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
             }
           />
         }
+        chartsService={chartsService}
       />
     </div>
   );

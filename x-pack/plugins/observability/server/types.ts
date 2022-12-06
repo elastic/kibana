@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { IRouter, CustomRequestHandlerContext } from '@kbn/core/server';
+import type {
+  IRouter,
+  CustomRequestHandlerContext,
+  CoreRequestHandlerContext,
+} from '@kbn/core/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
@@ -23,6 +27,7 @@ export type {
 export type ObservabilityRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
+  core: Promise<CoreRequestHandlerContext>;
 }>;
 
 /**

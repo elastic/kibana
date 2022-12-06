@@ -7,14 +7,24 @@ PKG_REQUIRE_NAME = "@kbn/shared-ux-avatar-solution"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.scss",
-    "src/**/*.mdx",
-    "src/**/*.svg",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.scss",
+    "**/*.mdx",
+    "**/*.svg",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -61,7 +71,6 @@ RUNTIME_DEPS = [
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//@elastic/eui",
-  "@npm//@storybook/addon-actions",
   "@npm//@types/classnames",
   "@npm//@types/enzyme",
   "@npm//@types/jest",
@@ -107,7 +116,6 @@ ts_project(
   declaration = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 
@@ -115,6 +123,14 @@ js_library(
   name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node", ":target_web"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
+js_library(
+  name = "npm_module_types",
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -130,17 +146,8 @@ filegroup(
   visibility = ["//visibility:public"],
 )
 
-pkg_npm_types(
-  name = "npm_module_types",
-  srcs = SRCS,
-  deps = [":tsc_types"],
-  package_name = PKG_REQUIRE_NAME,
-  tsconfig = ":tsconfig",
-  visibility = ["//visibility:public"],
-)
-
-filegroup(
+pkg_npm(
   name = "build_types",
-  srcs = [":npm_module_types"],
+  deps = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

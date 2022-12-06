@@ -10,10 +10,10 @@ import { useState, useEffect } from 'react';
 import {
   isClassificationEvaluateResponse,
   ResultsSearchQuery,
-  RocCurveItem,
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
 import { isKeywordAndTextType } from '../../../../common/fields';
+import { RocCurveItem } from '../../../../../../../common/types/data_frame_analytics';
 
 import {
   getDependentVar,
@@ -58,7 +58,7 @@ export const useRocCurve = (
       setIsLoading(true);
 
       const dependentVariable = getDependentVar(jobConfig.analysis);
-      const resultsField = jobConfig.dest.results_field;
+      const resultsField = jobConfig.dest.results_field!;
 
       const newRocCurveData: RocCurveDataRow[] = [];
 
@@ -121,6 +121,7 @@ export const useRocCurve = (
     }
 
     loadRocCurveData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify([jobConfig, searchQuery, columns])]);
 
   return {

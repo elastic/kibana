@@ -98,4 +98,14 @@ export interface IContainer<
     type: string,
     explicitInput: Partial<EEI>
   ): Promise<E | ErrorEmbeddable>;
+
+  replaceEmbeddable<
+    EEI extends EmbeddableInput = EmbeddableInput,
+    EEO extends EmbeddableOutput = EmbeddableOutput,
+    E extends Embeddable<EEI, EEO> = Embeddable<EEI, EEO>
+  >(
+    id: string,
+    newExplicitInput: Partial<EEI>,
+    newType?: string
+  ): void;
 }

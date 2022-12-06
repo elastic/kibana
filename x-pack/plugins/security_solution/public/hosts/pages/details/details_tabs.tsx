@@ -5,69 +5,38 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import React from 'react';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 
-import { UpdateDateRange } from '../../../common/components/charts/common';
-import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
-import { Anomaly } from '../../../common/components/ml/types';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { RiskDetailsTabBody } from '../../../risk_score/components/risk_details_tab_body';
 import { HostsTableType } from '../../store/model';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomaliesHostTable } from '../../../common/components/ml/tables/anomalies_host_table';
-import { EventsQueryTabBody } from '../../../common/components/events_tab/events_query_tab_body';
+import { EventsQueryTabBody } from '../../../common/components/events_tab';
 
-import { HostDetailsTabsProps } from './types';
+import type { HostDetailsTabsProps } from './types';
 import { type } from './utils';
 
 import {
-  HostsQueryTabBody,
   AuthenticationsQueryTabBody,
   UncommonProcessQueryTabBody,
-  HostAlertsQueryTabBody,
-  HostRiskTabBody,
   SessionsTabBody,
 } from '../navigation';
-import { TimelineId } from '../../../../common/types';
+import { TableId } from '../../../../common/types';
 
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
     detailName,
-    docValueFields,
     filterQuery,
     indexNames,
     indexPattern,
-    pageFilters,
-    setAbsoluteRangeDatePicker,
     hostDetailsPagePath,
+    hostDetailsFilter,
   }) => {
     const { from, to, isInitializing, deleteQuery, setQuery } = useGlobalTime();
-    const narrowDateRange = useCallback(
-      (score: Anomaly, interval: string) => {
-        const fromTo = scoreIntervalToDateTime(score, interval);
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: fromTo.from,
-          to: fromTo.to,
-        });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
-
-    const updateDateRange = useCallback<UpdateDateRange>(
-      ({ x }) => {
-        if (!x) {
-          return;
-        }
-        const [min, max] = x;
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: new Date(min).toISOString(),
-          to: new Date(max).toISOString(),
-        });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
 
     const tabProps = {
       deleteQuery,
@@ -80,17 +49,12 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       indexPattern,
       indexNames,
       hostName: detailName,
-      narrowDateRange,
-      updateDateRange,
     };
 
     return (
       <Switch>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}>
-          <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
-        </Route>
-        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.hosts})`}>
-          <HostsQueryTabBody {...tabProps} />
+          <AuthenticationsQueryTabBody {...tabProps} />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}>
           <UncommonProcessQueryTabBody {...tabProps} />
@@ -101,16 +65,17 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
 
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.events})`}>
           <EventsQueryTabBody
+            additionalFilters={hostDetailsFilter}
+            tableId={TableId.hostsPageEvents}
             {...tabProps}
-            pageFilters={pageFilters}
-            timelineId={TimelineId.hostsPageEvents}
           />
         </Route>
-        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.alerts})`}>
-          <HostAlertsQueryTabBody {...tabProps} pageFilters={pageFilters} />
-        </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.risk})`}>
-          <HostRiskTabBody {...tabProps} />
+          <RiskDetailsTabBody
+            {...tabProps}
+            riskEntity={RiskScoreEntity.host}
+            entityName={tabProps.hostName}
+          />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.sessions})`}>
           <SessionsTabBody {...tabProps} />

@@ -6,11 +6,11 @@
  */
 
 import { merge } from 'lodash';
-import { SingleCaseMetricsResponse } from '../../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../../common/api';
 import { Operations } from '../../../authorization';
 import { createCaseError } from '../../../common/error';
 import { SingleCaseAggregationHandler } from '../single_case_aggregation_handler';
-import { AggregationBuilder, SingleCaseBaseHandlerCommonOptions } from '../types';
+import type { AggregationBuilder, SingleCaseBaseHandlerCommonOptions } from '../types';
 import { IsolateHostActions } from './aggregations/isolate_host';
 
 export class Actions extends SingleCaseAggregationHandler {
@@ -24,8 +24,12 @@ export class Actions extends SingleCaseAggregationHandler {
   }
 
   public async compute(): Promise<SingleCaseMetricsResponse> {
-    const { unsecuredSavedObjectsClient, authorization, attachmentService, logger } =
-      this.options.clientArgs;
+    const {
+      unsecuredSavedObjectsClient,
+      authorization,
+      services: { attachmentService },
+      logger,
+    } = this.options.clientArgs;
     const { casesClient } = this.options;
 
     try {

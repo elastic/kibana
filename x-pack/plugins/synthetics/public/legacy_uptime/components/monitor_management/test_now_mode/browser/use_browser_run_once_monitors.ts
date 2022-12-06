@@ -86,7 +86,7 @@ export const useBrowserRunOnceMonitors = ({
   skipDetails?: boolean;
   expectSummaryDocs: number;
 }) => {
-  const { refreshTimer, lastRefresh } = useTickTick(3 * 1000, refresh);
+  const { refreshTimer, lastRefresh } = useTickTick(5 * 1000, refresh);
 
   const [checkGroupResults, setCheckGroupResults] = useState<CheckGroupResult[]>(() => {
     return new Array(expectSummaryDocs)
@@ -260,9 +260,15 @@ function mergeCheckGroups(prev: CheckGroupResult, curr: Partial<CheckGroupResult
     ? Math.max(prev?.completedSteps ?? 0, curr.completedSteps ?? 0)
     : prev?.completedSteps ?? 0;
 
+  let steps = curr.steps ?? [];
+  if (steps.length === 0 && (prev?.steps ?? []).length > 0) {
+    steps = prev.steps;
+  }
+
   return {
     ...(prev ?? {}),
     ...curr,
+    steps,
     completedSteps,
   };
 }

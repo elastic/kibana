@@ -234,7 +234,7 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
         };
       })(),
       i = [];
-    function c(e) {
+    function a(e) {
       for (var n = -1, t = 0; t < i.length; t++)
         if (i[t].identifier === e) {
           n = t;
@@ -242,15 +242,15 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
         }
       return n;
     }
-    function a(e, n) {
+    function c(e, n) {
       for (var t = {}, r = [], o = 0; o < e.length; o++) {
-        var a = e[o],
-          u = n.base ? a[0] + n.base : a[0],
+        var c = e[o],
+          u = n.base ? c[0] + n.base : c[0],
           s = t[u] || 0,
           f = \\"\\".concat(u, \\" \\").concat(s);
         t[u] = s + 1;
-        var l = c(f),
-          d = { css: a[1], media: a[2], sourceMap: a[3] };
+        var l = a(f),
+          d = { css: c[1], media: c[2], sourceMap: c[3] };
         -1 !== l
           ? (i[l].references++, i[l].updater(d))
           : i.push({ identifier: f, updater: v(d, n), references: 1 }),
@@ -273,12 +273,12 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
       )
         e.insert(n);
       else {
-        var c = o(e.insert || \\"head\\");
-        if (!c)
+        var a = o(e.insert || \\"head\\");
+        if (!a)
           throw new Error(
             \\"Couldn't find a style target. This probably means that the value for the 'insert' parameter is invalid.\\"
           );
-        c.appendChild(n);
+        a.appendChild(n);
       }
       return n;
     }
@@ -297,9 +297,9 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
       if (e.styleSheet) e.styleSheet.cssText = f(n, o);
       else {
         var i = document.createTextNode(o),
-          c = e.childNodes;
-        c[n] && e.removeChild(c[n]),
-          c.length ? e.insertBefore(i, c[n]) : e.appendChild(i);
+          a = e.childNodes;
+        a[n] && e.removeChild(a[n]),
+          a.length ? e.insertBefore(i, a[n]) : e.appendChild(i);
       }
     }
     function d(e, n, t) {
@@ -362,18 +362,18 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
           (void 0 === r &&
             (r = Boolean(window && document && document.all && !window.atob)),
           r));
-      var t = a((e = e || []), n);
+      var t = c((e = e || []), n);
       return function (e) {
         if (
           ((e = e || []),
           \\"[object Array]\\" === Object.prototype.toString.call(e))
         ) {
           for (var r = 0; r < t.length; r++) {
-            var o = c(t[r]);
+            var o = a(t[r]);
             i[o].references--;
           }
-          for (var u = a(e, n), s = 0; s < t.length; s++) {
-            var f = c(t[s]);
+          for (var u = c(e, n), s = 0; s < t.length; s++) {
+            var f = a(t[s]);
             0 === i[f].references && (i[f].updater(), i.splice(f, 1));
           }
           t = u;
@@ -393,23 +393,23 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
                 r,
                 o,
                 i = e[1] || \\"\\",
-                c = e[3];
-              if (!c) return i;
+                a = e[3];
+              if (!a) return i;
               if (n && \\"function\\" == typeof btoa) {
-                var a =
-                    ((t = c),
+                var c =
+                    ((t = a),
                     (r = btoa(unescape(encodeURIComponent(JSON.stringify(t))))),
                     (o =
                       \\"sourceMappingURL=data:application/json;charset=utf-8;base64,\\".concat(
                         r
                       )),
                     \\"/*# \\".concat(o, \\" */\\")),
-                  u = c.sources.map(function (e) {
+                  u = a.sources.map(function (e) {
                     return \\"/*# sourceURL=\\"
-                      .concat(c.sourceRoot || \\"\\")
+                      .concat(a.sourceRoot || \\"\\")
                       .concat(e, \\" */\\");
                   });
-                return [i].concat(u).concat([a]).join(\\"\\\\n\\");
+                return [i].concat(u).concat([c]).join(\\"\\\\n\\");
               }
               return [i].join(\\"\\\\n\\");
             })(n, e);
@@ -421,11 +421,11 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
           var o = {};
           if (r)
             for (var i = 0; i < this.length; i++) {
-              var c = this[i][0];
-              null != c && (o[c] = !0);
+              var a = this[i][0];
+              null != a && (o[a] = !0);
             }
-          for (var a = 0; a < e.length; a++) {
-            var u = [].concat(e[a]);
+          for (var c = 0; c < e.length; c++) {
+            var u = [].concat(e[c]);
             (r && o[u[0]]) ||
               (t &&
                 (u[2]
@@ -465,11 +465,7 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
     r(o, { insert: \\"head\\", singleton: !1 }), (e.exports = o.locals || {});
   },
   function (e, n, t) {
-    (n = t(1)(!1)).push([
-      e.i,
-      \\"p{background-color:rebeccapurple}body{width:12}\\\\n\\",
-      \\"\\",
-    ]),
+    (n = t(1)(!1)).push([e.i, \\"p{background-color:#639}body{width:12}\\", \\"\\"]),
       (e.exports = n);
   },
   function (e, n, t) {
@@ -480,11 +476,7 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
     r(o, { insert: \\"head\\", singleton: !1 }), (e.exports = o.locals || {});
   },
   function (e, n, t) {
-    (n = t(1)(!1)).push([
-      e.i,
-      \\"p{background-color:rebeccapurple}body{width:13}\\\\n\\",
-      \\"\\",
-    ]),
+    (n = t(1)(!1)).push([e.i, \\"p{background-color:#639}body{width:13}\\", \\"\\"]),
       (e.exports = n);
   },
   function (e, n, t) {
@@ -503,7 +495,7 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
     r(o, { insert: \\"head\\", singleton: !1 }), (e.exports = o.locals || {});
   },
   function (e, n, t) {
-    (n = t(1)(!1)).push([e.i, \\"body{color:green}\\\\n\\", \\"\\"]), (e.exports = n);
+    (n = t(1)(!1)).push([e.i, \\"body{color:green}\\", \\"\\"]), (e.exports = n);
   },
   function (e, n, t) {
     var r = t(0),
@@ -513,7 +505,7 @@ exports[`prepares assets for distribution: bar bundle 1`] = `
     r(o, { insert: \\"head\\", singleton: !1 }), (e.exports = o.locals || {});
   },
   function (e, n, t) {
-    (n = t(1)(!1)).push([e.i, \\"body{color:green}\\\\n\\", \\"\\"]), (e.exports = n);
+    (n = t(1)(!1)).push([e.i, \\"body{color:green}\\", \\"\\"]), (e.exports = n);
   },
   function (e, n, t) {
     \\"use strict\\";
@@ -780,7 +772,7 @@ exports[`prepares assets for distribution: metrics.json 1`] = `
     \\"group\\": \\"page load bundle size\\",
     \\"id\\": \\"foo\\",
     \\"value\\": 2457,
-    \\"limitConfigPath\\": \\"node_modules/@kbn/optimizer/limits.yml\\"
+    \\"limitConfigPath\\": \\"packages/kbn-optimizer/limits.yml\\"
   },
   {
     \\"group\\": \\"async chunks size\\",

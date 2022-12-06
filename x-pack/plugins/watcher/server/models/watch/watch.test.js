@@ -57,7 +57,7 @@ describe('Watch', () => {
     it('JsonWatch to be used when type is WATCH_TYPES.JSON', () => {
       const config = {
         id: 'id',
-        watchStatusJson: {},
+        watchStatusJson: { state: { active: true } },
         watchJson: { metadata: { xpack: { type: WATCH_TYPES.JSON } } },
       };
       expect(Watch.fromUpstreamJson(config)).toEqual(JsonWatch.fromUpstreamJson(config));
@@ -66,7 +66,7 @@ describe('Watch', () => {
     it('ThresholdWatch to be used when type is WATCH_TYPES.THRESHOLD', () => {
       const config = {
         id: 'id',
-        watchStatusJson: {},
+        watchStatusJson: { state: { active: true } },
         watchJson: { metadata: { watcherui: {}, xpack: { type: WATCH_TYPES.THRESHOLD } } },
       };
       expect(Watch.fromUpstreamJson(config)).toEqual(ThresholdWatch.fromUpstreamJson(config));
@@ -75,7 +75,7 @@ describe('Watch', () => {
     it('MonitoringWatch to be used when type is WATCH_TYPES.MONITORING', () => {
       const config = {
         id: 'id',
-        watchStatusJson: {},
+        watchStatusJson: { state: { active: true } },
         watchJson: { metadata: { xpack: { type: WATCH_TYPES.MONITORING } } },
       };
       expect(Watch.fromUpstreamJson(config)).toEqual(MonitoringWatch.fromUpstreamJson(config));

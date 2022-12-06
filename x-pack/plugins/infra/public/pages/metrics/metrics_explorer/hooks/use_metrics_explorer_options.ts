@@ -208,4 +208,5 @@ export const useMetricsExplorerOptions = () => {
   };
 };
 
-export const MetricsExplorerOptionsContainer = createContainer(useMetricsExplorerOptions);
+export const [MetricsExplorerOptionsContainer, useMetricsExplorerOptionsContainerContext] =
+  createContainer(useMetricsExplorerOptions);

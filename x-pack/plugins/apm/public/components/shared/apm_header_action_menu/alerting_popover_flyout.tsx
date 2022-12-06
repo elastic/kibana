@@ -14,8 +14,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { IBasePath } from '@kbn/core/public';
-import { AlertType } from '../../../../common/alert_types';
-import { AlertingFlyout } from '../../alerting/alerting_flyout';
+import { ApmRuleType } from '../../../../common/rules/apm_rule_types';
+import { AlertingFlyout } from '../../alerting/ui_components/alerting_flyout';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 const alertLabel = i18n.translate('xpack.apm.home.alertsMenu.alerts', {
@@ -47,7 +47,7 @@ interface Props {
   basePath: IBasePath;
   canReadAlerts: boolean;
   canSaveAlerts: boolean;
-  canReadAnomalies: boolean;
+  canReadMlJobs: boolean;
   includeTransactionDuration: boolean;
 }
 
@@ -55,11 +55,11 @@ export function AlertingPopoverAndFlyout({
   basePath,
   canSaveAlerts,
   canReadAlerts,
-  canReadAnomalies,
+  canReadMlJobs,
   includeTransactionDuration,
 }: Props) {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const [alertType, setAlertType] = useState<AlertType | null>(null);
+  const [ruleType, setRuleType] = useState<ApmRuleType | null>(null);
   const {
     plugins: { observability },
   } = useApmPluginContext();
@@ -69,6 +69,7 @@ export function AlertingPopoverAndFlyout({
       iconType="arrowDown"
       iconSide="right"
       onClick={() => setPopoverOpen((prevState) => !prevState)}
+      data-test-subj="apmAlertAndRulesHeaderLink"
     >
       {alertLabel}
     </EuiHeaderLink>
@@ -84,24 +85,27 @@ export function AlertingPopoverAndFlyout({
               {
                 name: createThresholdAlertLabel,
                 panel: CREATE_THRESHOLD_PANEL_ID,
+                'data-test-subj': 'apmAlertsMenuItemCreateThreshold',
               },
-              ...(canReadAnomalies
+              ...(canReadMlJobs
                 ? [
                     {
                       name: createAnomalyAlertAlertLabel,
                       onClick: () => {
-                        setAlertType(AlertType.Anomaly);
+                        setRuleType(ApmRuleType.Anomaly);
                         setPopoverOpen(false);
                       },
+                      'data-test-subj': 'apmAlertsMenuItemCreateAnomaly',
                     },
                   ]
                 : []),
               {
                 name: errorCountLabel,
                 onClick: () => {
-                  setAlertType(AlertType.ErrorCount);
+                  setRuleType(ApmRuleType.ErrorCount);
                   setPopoverOpen(false);
                 },
+                'data-test-subj': 'apmAlertsMenuItemErrorCount',
               },
             ]
           : []),
@@ -114,6 +118,7 @@ export function AlertingPopoverAndFlyout({
                 ),
                 href: observability.useRulesLink().href,
                 icon: 'tableOfContents',
+                'data-test-subj': 'apmAlertsMenuItemManageRules',
               },
             ]
           : []),
@@ -131,7 +136,7 @@ export function AlertingPopoverAndFlyout({
               {
                 name: transactionDurationLabel,
                 onClick: () => {
-                  setAlertType(AlertType.TransactionDuration);
+                  setRuleType(ApmRuleType.TransactionDuration);
                   setPopoverOpen(false);
                 },
               },
@@ -142,7 +147,7 @@ export function AlertingPopoverAndFlyout({
         {
           name: transactionErrorRateLabel,
           onClick: () => {
-            setAlertType(AlertType.TransactionErrorRate);
+            setRuleType(ApmRuleType.TransactionErrorRate);
             setPopoverOpen(false);
           },
         },
@@ -163,11 +168,11 @@ export function AlertingPopoverAndFlyout({
         <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>
       <AlertingFlyout
-        alertType={alertType}
-        addFlyoutVisible={!!alertType}
+        ruleType={ruleType}
+        addFlyoutVisible={!!ruleType}
         setAddFlyoutVisibility={(visible) => {
           if (!visible) {
-            setAlertType(null);
+            setRuleType(null);
           }
         }}
       />

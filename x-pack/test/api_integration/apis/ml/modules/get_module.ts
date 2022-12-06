@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { isPopulatedObject } from '@kbn/ml-plugin/common/util/object_utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
@@ -17,7 +17,6 @@ const moduleIds = [
   'apache_ecs',
   'apm_transaction',
   'auditbeat_process_docker_ecs',
-  'auditbeat_process_hosts_ecs',
   'logs_ui_analysis',
   'logs_ui_categories',
   'metricbeat_system_ecs',
@@ -28,15 +27,11 @@ const moduleIds = [
   'sample_data_ecommerce',
   'sample_data_weblogs',
   'security_auth',
-  'security_linux',
+  'security_linux_v3',
   'security_network',
-  'security_windows',
-  'siem_auditbeat',
-  'siem_auditbeat_auth',
+  'security_windows_v3',
   'siem_cloudtrail',
   'siem_packetbeat',
-  'siem_winlogbeat',
-  'siem_winlogbeat_auth',
   'uptime_heartbeat',
 ];
 

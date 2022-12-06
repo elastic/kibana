@@ -6,26 +6,30 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { getOr, isEmpty, noop } from 'lodash/fp';
+import { getOr, noop } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { isErrorResponse, isCompleteResponse } from '@kbn/data-plugin/common';
-import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
-import { inputsModel } from '../../store';
+import type { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
+import type { inputsModel } from '../../store';
 import { createFilter } from '../helpers';
 import { useKibana } from '../../lib/kibana';
-import {
-  MatrixHistogramQuery,
+import type {
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
   MatrixHistogramData,
+} from '../../../../common/search_strategy/security_solution';
+import {
+  MatrixHistogramQuery,
   MatrixHistogramTypeToAggName,
 } from '../../../../common/search_strategy/security_solution';
 import { getInspectResponse } from '../../../helpers';
-import { InspectResponse } from '../../../types';
+import type { InspectResponse } from '../../../types';
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
+import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
+import { APP_UI_ID } from '../../../../common/constants';
 
 export type Buckets = Array<{
   key: string;
@@ -46,7 +50,6 @@ export interface UseMatrixHistogramArgs {
 }
 
 export const useMatrixHistogram = ({
-  docValueFields,
   endDate,
   errorMessage,
   filterQuery,
@@ -70,6 +73,7 @@ export const useMatrixHistogram = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
+  const { startTracking } = useTrackHttpRequest();
 
   const [matrixHistogramRequest, setMatrixHistogramRequest] =
     useState<MatrixHistogramRequestOptions>({
@@ -86,7 +90,6 @@ export const useMatrixHistogram = ({
       runtimeMappings,
       threshold,
       ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
-      ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
       ...(includeMissingData != null ? { includeMissingData } : {}),
     });
   const { addError, addWarning } = useAppToasts();
@@ -102,11 +105,14 @@ export const useMatrixHistogram = ({
     buckets: [],
   });
 
-  const hostsSearch = useCallback(
+  const search = useCallback(
     (request: MatrixHistogramRequestOptions) => {
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
+        const { endTracking } = startTracking({
+          name: `${APP_UI_ID} matrixHistogram ${histogramType}`,
+        });
 
         searchSubscription$.current = data.search
           .search<MatrixHistogramRequestOptions, MatrixHistogramStrategyResponse>(request, {
@@ -130,10 +136,12 @@ export const useMatrixHistogram = ({
                   totalCount: histogramBuckets.reduce((acc, bucket) => bucket.doc_count + acc, 0),
                   buckets: histogramBuckets,
                 }));
+                endTracking('success');
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
                 addWarning(i18n.ERROR_MATRIX_HISTOGRAM);
+                endTracking('invalid');
                 searchSubscription$.current.unsubscribe();
               }
             },
@@ -142,6 +150,7 @@ export const useMatrixHistogram = ({
               addError(msg, {
                 title: errorMessage ?? i18n.FAIL_MATRIX_HISTOGRAM,
               });
+              endTracking('error');
               searchSubscription$.current.unsubscribe();
             },
           });
@@ -151,7 +160,7 @@ export const useMatrixHistogram = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, errorMessage, addError, addWarning, histogramType]
+    [data.search, histogramType, addWarning, addError, errorMessage, startTracking]
   );
 
   useEffect(() => {
@@ -169,7 +178,6 @@ export const useMatrixHistogram = ({
         stackByField,
         threshold,
         ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
-        ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
@@ -185,19 +193,18 @@ export const useMatrixHistogram = ({
     histogramType,
     threshold,
     isPtrIncluded,
-    docValueFields,
   ]);
 
   useEffect(() => {
     // We want to search if it is not skipped, stackByField ends with ip and include missing data
     if (!skip) {
-      hostsSearch(matrixHistogramRequest);
+      search(matrixHistogramRequest);
     }
     return () => {
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
-  }, [matrixHistogramRequest, hostsSearch, skip]);
+  }, [matrixHistogramRequest, search, skip]);
 
   useEffect(() => {
     if (skip) {
@@ -209,7 +216,7 @@ export const useMatrixHistogram = ({
 
   const runMatrixHistogramSearch = useCallback(
     (to: string, from: string) => {
-      hostsSearch({
+      search({
         ...matrixHistogramRequest,
         timerange: {
           interval: '12h',
@@ -218,7 +225,7 @@ export const useMatrixHistogram = ({
         },
       });
     },
-    [matrixHistogramRequest, hostsSearch]
+    [matrixHistogramRequest, search]
   );
 
   return [loading, matrixHistogramResponse, runMatrixHistogramSearch];

@@ -59,6 +59,15 @@ export const updateRuleUsage = (
         detectionRuleMetric,
       }),
     };
+  } else if (detectionRuleMetric.rule_type === 'new_terms') {
+    updatedUsage = {
+      ...usage,
+      new_terms: updateQueryUsage({
+        ruleType: detectionRuleMetric.rule_type,
+        usage,
+        detectionRuleMetric,
+      }),
+    };
   }
 
   if (detectionRuleMetric.elastic_rule) {

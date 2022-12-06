@@ -13,6 +13,8 @@ import {
   nginx as nginxRequireMetrics,
 } from '../shared/metrics/required_metrics';
 
+export { hostSnapshotMetricTypes } from './metrics';
+
 export const host: InventoryModel = {
   id: 'host',
   displayName: i18n.translate('xpack.infra.inventoryModel.host.displayName', {
@@ -31,6 +33,7 @@ export const host: InventoryModel = {
   fields: {
     id: 'host.name',
     name: 'host.name',
+    os: 'host.os.name',
     ip: 'host.ip',
   },
   metrics,

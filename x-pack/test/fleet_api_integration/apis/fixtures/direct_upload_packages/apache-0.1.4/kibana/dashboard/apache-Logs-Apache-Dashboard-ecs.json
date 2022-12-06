@@ -1,0 +1,56 @@
+{
+  "attributes": {
+    "description": "Logs Apache integration dashboard",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "optionsJSON": "{\"darkTheme\":false}",
+    "panelsJSON": "[{\"embeddableConfig\":{\"mapBounds\":{\"bottom_right\":{\"lat\":-3.864254615721396,\"lon\":205.3125},\"top_left\":{\"lat\":67.7427590666639,\"lon\":-205.6640625}},\"mapCenter\":[40.713955826286046,-0.17578125],\"mapCollar\":{\"bottom_right\":{\"lat\":-39.667755,\"lon\":180},\"top_left\":{\"lat\":90,\"lon\":-180},\"zoom\":2},\"mapZoom\":2},\"gridData\":{\"h\":12,\"i\":\"1\",\"w\":48,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"panelRefName\":\"panel_0\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":12,\"i\":\"2\",\"w\":32,\"x\":0,\"y\":20},\"panelIndex\":\"2\",\"panelRefName\":\"panel_1\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":12,\"i\":\"3\",\"w\":16,\"x\":32,\"y\":20},\"panelIndex\":\"3\",\"panelRefName\":\"panel_2\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"4\",\"w\":8,\"x\":40,\"y\":12},\"panelIndex\":\"4\",\"panelRefName\":\"panel_3\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"5\",\"w\":48,\"x\":0,\"y\":32},\"panelIndex\":\"5\",\"panelRefName\":\"panel_4\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"6\",\"w\":40,\"x\":0,\"y\":12},\"panelIndex\":\"6\",\"panelRefName\":\"panel_5\",\"version\":\"7.3.0\"},{\"embeddableConfig\":{\"columns\":[\"source.address\",\"log.level\",\"apache2.error.integration\",\"message\"],\"sort\":[\"@timestamp\",\"desc\"]},\"gridData\":{\"h\":12,\"i\":\"7\",\"w\":48,\"x\":0,\"y\":40},\"panelIndex\":\"7\",\"panelRefName\":\"panel_6\",\"version\":\"7.3.0\"}]",
+    "timeRestore": false,
+    "title": "[Logs Apache] Access and error logs ECS",
+    "version": 1
+  },
+  "id": "apache-Logs-Apache-Dashboard-ecs",
+  "migrationVersion": {
+    "dashboard": "7.3.0"
+  },
+  "references": [
+    {
+      "id": "Apache-access-unique-IPs-map-ecs",
+      "name": "panel_0",
+      "type": "visualization"
+    },
+    {
+      "id": "Apache-response-codes-of-top-URLs-ecs",
+      "name": "panel_1",
+      "type": "visualization"
+    },
+    {
+      "id": "Apache-browsers-ecs",
+      "name": "panel_2",
+      "type": "visualization"
+    },
+    {
+      "id": "Apache-operating-systems-ecs",
+      "name": "panel_3",
+      "type": "visualization"
+    },
+    {
+      "id": "Apache-error-logs-over-time-ecs",
+      "name": "panel_4",
+      "type": "visualization"
+    },
+    {
+      "id": "Apache-response-codes-over-time-ecs",
+      "name": "panel_5",
+      "type": "visualization"
+    },
+    {
+      "id": "Apache-errors-log-ecs",
+      "name": "panel_6",
+      "type": "search"
+    }
+  ],
+  "type": "dashboard"
+}

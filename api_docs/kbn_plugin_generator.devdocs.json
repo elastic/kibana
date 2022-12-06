@@ -23,6 +23,7 @@
         ],
         "path": "packages/kbn-plugin-generator/src/cli.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false

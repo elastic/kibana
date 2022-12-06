@@ -11,7 +11,7 @@ import { apiService } from '../state/api/utils';
 import { API_URLS } from '../../../common/constants';
 
 export enum UptimePage {
-  Overview = 'Overview',
+  Overview = 'GettingStarted',
   MappingError = 'MappingError',
   Monitor = 'Monitor',
   MonitorAdd = 'AddMonitor',

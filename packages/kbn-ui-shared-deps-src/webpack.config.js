@@ -57,6 +57,10 @@ module.exports = {
         ],
       },
       {
+        test: /\.peggy$/,
+        use: ['@kbn/peggy-loader'],
+      },
+      {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
@@ -102,7 +106,7 @@ module.exports = {
 
     new webpack.DllReferencePlugin({
       context: REPO_ROOT,
-      manifest: require(UiSharedDepsNpm.dllManifestPath), // eslint-disable-line
+      manifest: require(UiSharedDepsNpm.dllManifestPath), // eslint-disable-line import/no-dynamic-require
     }),
   ],
 };

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PanelState, EmbeddableInput } from '../../../services/embeddable';
-import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
+import { PanelState, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../dashboard_constants';
 import { DashboardPanelState } from '../types';
 import {
   IPanelPlacementArgs,

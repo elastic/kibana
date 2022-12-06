@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import { Network } from './network';
 import { SourceDestinationWithArrows } from './source_destination_with_arrows';
-import { SourceDestinationProps } from './types';
+import type { SourceDestinationProps } from './types';
 
 const EuiFlexItemMarginTop = styled(EuiFlexItem)`
   margin-top: 3px;

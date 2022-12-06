@@ -7,16 +7,14 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { KibanaRequest } from '@kbn/core/server';
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
-import { EndpointAppContext } from '../../types';
 import { buildStatusesKuery } from './support/agent_status';
-import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
+import type { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
 
 /**
  * 00000000-0000-0000-0000-000000000000 is initial Elastic Agent id sent by Endpoint before policy is configured
@@ -72,26 +70,6 @@ export async function kibanaRequestToMetadataListESQuery(
     from: queryBuilderOptions.page * queryBuilderOptions.pageSize,
     size: queryBuilderOptions.pageSize,
     index: metadataCurrentIndexPattern,
-  };
-}
-
-export async function getPagingProperties(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  request: KibanaRequest<any, any, any>,
-  endpointAppContext: EndpointAppContext
-) {
-  const pagingProperties: { page_size?: number; page_index?: number } = {};
-  if (request?.body?.paging_properties) {
-    for (const property of request.body.paging_properties) {
-      Object.assign(
-        pagingProperties,
-        ...Object.keys(property).map((key) => ({ [key]: property[key] }))
-      );
-    }
-  }
-  return {
-    pageSize: pagingProperties.page_size || ENDPOINT_DEFAULT_PAGE_SIZE,
-    pageIndex: pagingProperties.page_index || ENDPOINT_DEFAULT_PAGE,
   };
 }
 

@@ -63,13 +63,6 @@ export const LINE_LAYER = i18n.translate(
   }
 );
 
-export const ERROR_CONFIGURING_EMBEDDABLES_API = i18n.translate(
-  'xpack.securitySolution.components.embeddables.embeddedMap.errorConfiguringEmbeddableApiTitle',
-  {
-    defaultMessage: 'Error configuring Embeddables API',
-  }
-);
-
 export const ERROR_CREATING_EMBEDDABLE = i18n.translate(
   'xpack.securitySolution.components.embeddables.embeddedMap.errorCreatingMapEmbeddableTitle',
   {
@@ -88,13 +81,6 @@ export const ERROR_BUTTON = i18n.translate(
   'xpack.securitySolution.components.embeddables.indexPatternsMissingPrompt.errorButtonLabel',
   {
     defaultMessage: 'Configure index patterns',
-  }
-);
-
-export const FILTER_FOR_VALUE = i18n.translate(
-  'xpack.securitySolution.components.embeddables.mapToolTip.filterForValueHoverAction',
-  {
-    defaultMessage: 'Filter for value',
   }
 );
 

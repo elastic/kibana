@@ -17,7 +17,7 @@ import {
 
 import { createEpicMiddleware } from 'redux-observable';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { TimelineState, TGridEpicDependencies } from '../../types';
+import { TableState, TGridEpicDependencies } from '../../types';
 import { tGridReducer } from './reducer';
 import { getTGridByIdSelector } from './selectors';
 
@@ -27,7 +27,7 @@ export * as tGridSelectors from './selectors';
 export * from './types';
 export { tGridReducer };
 
-export type State = CombinedState<TimelineState>;
+export type State = CombinedState<TableState>;
 type ComposeType = typeof compose;
 declare global {
   interface Window {
@@ -39,7 +39,7 @@ declare global {
  * Factory for Security App's redux store.
  */
 export const createStore = (
-  state: PreloadedState<TimelineState>,
+  state: PreloadedState<TableState>,
   storage: Storage
 ): Store<State, Action> => {
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

@@ -11,10 +11,9 @@ import { Dispatch } from 'redux';
 import { isString, keyBy } from 'lodash/fp';
 
 import { stopPropagationAndPreventDefault } from '../../../common/utils/accessibility';
-import { TimelineId } from '../../../common/types';
 import type { BrowserField, BrowserFields } from '../../../common/search_strategy';
 import type { ColumnHeaderOptions } from '../../../common/types';
-import { tGridActions } from '../../store/t_grid';
+import { TableId, tGridActions } from '../../store/t_grid';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../t_grid/body/constants';
 
 /**
@@ -169,7 +168,7 @@ export const addFieldToTimelineColumns = ({
   const allColumns = getAllFieldsByName(browserFields);
   const column = allColumns[fieldId];
   const initColumnHeader =
-    timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage
+    timelineId === TableId.alertsOnAlertsPage || timelineId === TableId.alertsOnRuleDetailsPage
       ? defaultsHeader.find((c) => c.id === fieldId) ?? {}
       : {};
 

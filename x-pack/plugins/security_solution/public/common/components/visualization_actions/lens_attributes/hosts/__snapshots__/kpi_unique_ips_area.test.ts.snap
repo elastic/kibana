@@ -1,0 +1,249 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`kpiUniqueIpsAreaLensAttributes should render 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-8be0156b-d423-4a39-adf1-f54d4c9f2e69",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-ca05ecdb-0fa4-49a8-9305-b23d91012a46",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "8be0156b-d423-4a39-adf1-f54d4c9f2e69": Object {
+            "columnOrder": Array [
+              "a0cb6400-f708-46c3-ad96-24788f12dae4",
+              "d9a6eb6b-8b78-439e-98e7-a718f8ffbebe",
+            ],
+            "columns": Object {
+              "a0cb6400-f708-46c3-ad96-24788f12dae4": Object {
+                "dataType": "date",
+                "isBucketed": true,
+                "label": "@timestamp",
+                "operationType": "date_histogram",
+                "params": Object {
+                  "interval": "auto",
+                },
+                "scale": "interval",
+                "sourceField": "@timestamp",
+              },
+              "d9a6eb6b-8b78-439e-98e7-a718f8ffbebe": Object {
+                "customLabel": true,
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Src.",
+                "operationType": "unique_count",
+                "scale": "ratio",
+                "sourceField": "source.ip",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+          "ca05ecdb-0fa4-49a8-9305-b23d91012a46": Object {
+            "columnOrder": Array [
+              "f95e74e6-99dd-4b11-8faf-439b4d959df9",
+              "e7052671-fb9e-481f-8df3-7724c98cfc6f",
+            ],
+            "columns": Object {
+              "e7052671-fb9e-481f-8df3-7724c98cfc6f": Object {
+                "customLabel": true,
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Dest.",
+                "operationType": "unique_count",
+                "scale": "ratio",
+                "sourceField": "destination.ip",
+              },
+              "f95e74e6-99dd-4b11-8faf-439b4d959df9": Object {
+                "dataType": "date",
+                "isBucketed": true,
+                "label": "@timestamp",
+                "operationType": "date_histogram",
+                "params": Object {
+                  "interval": "auto",
+                },
+                "scale": "interval",
+                "sourceField": "@timestamp",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+        },
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.name",
+          "negate": false,
+          "params": Object {
+            "query": "mockHost",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.name": "mockHost",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": "",
+          "disabled": false,
+          "key": "bool",
+          "negate": false,
+          "type": "custom",
+          "value": "{\\"query\\": {\\"bool\\": {\\"filter\\": [{\\"bool\\": {\\"should\\": [{\\"exists\\": {\\"field\\": \\"host.name\\"}}],\\"minimum_should_match\\": 1}}]}}}",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "exists": Object {
+                  "field": "host.name",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "auditbeat-mytest-*",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "auditbeat-mytest-*",
+                },
+              },
+            ],
+          },
+        },
+      },
+    ],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "axisTitlesVisibilitySettings": Object {
+        "x": false,
+        "yLeft": false,
+        "yRight": true,
+      },
+      "fittingFunction": "None",
+      "gridlinesVisibilitySettings": Object {
+        "x": true,
+        "yLeft": true,
+        "yRight": true,
+      },
+      "labelsOrientation": Object {
+        "x": 0,
+        "yLeft": 0,
+        "yRight": 0,
+      },
+      "layers": Array [
+        Object {
+          "accessors": Array [
+            "d9a6eb6b-8b78-439e-98e7-a718f8ffbebe",
+          ],
+          "layerId": "8be0156b-d423-4a39-adf1-f54d4c9f2e69",
+          "layerType": "data",
+          "seriesType": "area",
+          "xAccessor": "a0cb6400-f708-46c3-ad96-24788f12dae4",
+          "yConfig": Array [
+            Object {
+              "color": "#d36186",
+              "forAccessor": "d9a6eb6b-8b78-439e-98e7-a718f8ffbebe",
+            },
+          ],
+        },
+        Object {
+          "accessors": Array [
+            "e7052671-fb9e-481f-8df3-7724c98cfc6f",
+          ],
+          "layerId": "ca05ecdb-0fa4-49a8-9305-b23d91012a46",
+          "layerType": "data",
+          "seriesType": "area",
+          "xAccessor": "f95e74e6-99dd-4b11-8faf-439b4d959df9",
+          "yConfig": Array [
+            Object {
+              "color": "#9170b8",
+              "forAccessor": "e7052671-fb9e-481f-8df3-7724c98cfc6f",
+            },
+          ],
+        },
+      ],
+      "legend": Object {
+        "isVisible": false,
+        "position": "right",
+        "showSingleSeries": false,
+      },
+      "preferredSeriesType": "area",
+      "tickLabelsVisibilitySettings": Object {
+        "x": true,
+        "yLeft": true,
+        "yRight": true,
+      },
+      "valueLabels": "hide",
+      "yLeftExtent": Object {
+        "mode": "full",
+      },
+      "yRightExtent": Object {
+        "mode": "full",
+      },
+    },
+  },
+  "title": "[Host] Unique IPs - area",
+  "type": "lens",
+  "updated_at": "2022-02-09T17:44:03.359Z",
+  "version": "WzI5MTI5OSwzXQ==",
+  "visualizationType": "lnsXY",
+}
+`;

@@ -33,9 +33,11 @@ export interface FleetConfigType {
   outputs?: PreconfiguredOutput[];
   agentIdVerificationEnabled?: boolean;
   enableExperimental?: string[];
+  packageVerification?: {
+    gpgKeyPath?: string;
+  };
   developer?: {
     disableRegistryVersionCheck?: boolean;
-    allowAgentUpgradeSourceUri?: boolean;
     bundledPackageLocation?: string;
   };
 }

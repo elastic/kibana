@@ -26,6 +26,7 @@
         ],
         "path": "src/plugins/vis_types/timeseries/common/vis_data_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypeTimeseries",
@@ -39,6 +40,7 @@
             ],
             "path": "src/plugins/vis_types/timeseries/common/vis_data_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -60,6 +62,7 @@
         ],
         "path": "src/plugins/vis_types/timeseries/common/vis_data_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypeTimeseries",
@@ -73,6 +76,7 @@
             ],
             "path": "src/plugins/vis_types/timeseries/common/vis_data_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -97,6 +101,7 @@
         ],
         "path": "src/plugins/vis_types/timeseries/common/types/vis_data.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -110,6 +115,7 @@
       "description": [],
       "path": "src/plugins/vis_types/timeseries/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "visTypeTimeseries",
@@ -129,9 +135,9 @@
             },
             ", fakeRequest: ",
             {
-              "pluginId": "core",
+              "pluginId": "@kbn/core-http-server",
               "scope": "server",
-              "docId": "kibCoreHttpPluginApi",
+              "docId": "kibKbnCoreHttpServerPluginApi",
               "section": "def-server.KibanaRequest",
               "text": "KibanaRequest"
             },
@@ -141,6 +147,7 @@
           ],
           "path": "src/plugins/vis_types/timeseries/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "visTypeTimeseries",
@@ -160,6 +167,7 @@
               ],
               "path": "src/plugins/vis_types/timeseries/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -171,9 +179,9 @@
               "description": [],
               "signature": [
                 {
-                  "pluginId": "core",
+                  "pluginId": "@kbn/core-http-server",
                   "scope": "server",
-                  "docId": "kibCoreHttpPluginApi",
+                  "docId": "kibKbnCoreHttpServerPluginApi",
                   "section": "def-server.KibanaRequest",
                   "text": "KibanaRequest"
                 },
@@ -181,6 +189,7 @@
               ],
               "path": "src/plugins/vis_types/timeseries/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -195,6 +204,7 @@
               ],
               "path": "src/plugins/vis_types/timeseries/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],

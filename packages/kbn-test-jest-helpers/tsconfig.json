@@ -3,11 +3,11 @@
   "compilerOptions": {
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outDir": "./target_types",
-    "stripInternal": true,
-    "rootDir": "src",
+    "outDir": "target_types",
     "types": ["jest", "node"]
   },
-  "include": ["src/**/*"],
-  "exclude": ["**/__fixtures__/**/*"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
 }

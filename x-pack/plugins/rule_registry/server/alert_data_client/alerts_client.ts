@@ -10,6 +10,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import {
+  AlertConsumers,
   getEsQueryConfig,
   getSafeSortIds,
   isValidFeatureId,
@@ -30,6 +31,8 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { Logger, ElasticsearchClient, EcsEventOutcome } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
   ALERT_WORKFLOW_STATUS,
@@ -40,6 +43,7 @@ import {
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { Dataset, IRuleDataService } from '../rule_data_plugin_service';
 import { getAuthzFilter, getSpacesFilter } from '../lib';
+import { fieldDescriptorToBrowserFieldMapper } from './browser_fields';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -91,12 +95,13 @@ interface GetAlertParams {
 interface SingleSearchAfterAndAudit {
   id?: string | null | undefined;
   query?: string | object | undefined;
-  aggs?: object | undefined;
+  aggs?: Record<string, any> | undefined;
   index?: string;
   _source?: string[] | undefined;
   track_total_hits?: boolean | undefined;
   size?: number | undefined;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
+  sort?: estypes.SortOptions[] | undefined;
   lastSortIds?: Array<string | number> | undefined;
 }
 
@@ -224,6 +229,7 @@ export class AlertsClient {
     size,
     index,
     operation,
+    sort,
     lastSortIds = [],
   }: SingleSearchAfterAndAudit) {
     try {
@@ -236,14 +242,14 @@ export class AlertsClient {
 
       const config = getEsQueryConfig();
 
-      let queryBody = {
+      let queryBody: estypes.SearchRequest['body'] = {
         fields: [ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER, ALERT_WORKFLOW_STATUS, SPACE_IDS],
         query: await this.buildEsQueryWithAuthz(query, id, alertSpaceId, operation, config),
         aggs,
         _source,
         track_total_hits: trackTotalHits,
         size,
-        sort: [
+        sort: sort || [
           {
             '@timestamp': {
               order: 'asc',
@@ -256,7 +262,6 @@ export class AlertsClient {
       if (lastSortIds.length > 0) {
         queryBody = {
           ...queryBody,
-          // @ts-expect-error
           search_after: lastSortIds,
         };
       }
@@ -264,7 +269,6 @@ export class AlertsClient {
       const result = await this.esClient.search<ParsedTechnicalFields>({
         index: index ?? '.alerts-*',
         ignore_unavailable: true,
-        // @ts-expect-error
         body: queryBody,
         seq_no_primary_term: true,
       });
@@ -605,6 +609,8 @@ export class AlertsClient {
     track_total_hits: trackTotalHits,
     size,
     index,
+    sort,
+    search_after: searchAfter,
   }: {
     query?: object | undefined;
     aggs?: object | undefined;
@@ -612,6 +618,8 @@ export class AlertsClient {
     track_total_hits?: boolean | undefined;
     _source?: string[] | undefined;
     size?: number | undefined;
+    sort?: estypes.SortOptions[] | undefined;
+    search_after?: Array<string | number> | undefined;
   }) {
     try {
       // first search for the alert by id, then use the alert info to check if user has access to it
@@ -623,6 +631,8 @@ export class AlertsClient {
         size,
         index,
         operation: ReadOperations.Find,
+        sort,
+        lastSortIds: searchAfter,
       });
 
       if (alertsSearchResponse == null) {
@@ -663,7 +673,9 @@ export class AlertsClient {
         if (index == null) {
           throw new Error(`This feature id ${feature} should be associated to an alert index`);
         }
-        return index?.getPrimaryAlias(this.spaceId ?? '*') ?? '';
+        return (
+          index?.getPrimaryAlias(feature === AlertConsumers.SIEM ? this.spaceId ?? '*' : '*') ?? ''
+        );
       });
 
       return toReturn;
@@ -672,5 +684,59 @@ export class AlertsClient {
       this.logger.error(errMessage);
       throw Boom.failedDependency(errMessage);
     }
+  }
+
+  public async getFeatureIdsByRegistrationContexts(
+    RegistrationContexts: string[]
+  ): Promise<string[]> {
+    try {
+      const featureIds =
+        this.ruleDataService.findFeatureIdsByRegistrationContexts(RegistrationContexts);
+      if (featureIds.length > 0) {
+        // ATTENTION FUTURE DEVELOPER when you are a super user the augmentedRuleTypes.authorizedRuleTypes will
+        // return all of the features that you can access and does not care about your featureIds
+        const augmentedRuleTypes = await this.authorization.getAugmentedRuleTypesWithAuthorization(
+          featureIds,
+          [ReadOperations.Find, ReadOperations.Get, WriteOperations.Update],
+          AlertingAuthorizationEntity.Alert
+        );
+        // As long as the user can read a minimum of one type of rule type produced by the provided feature,
+        // the user should be provided that features' alerts index.
+        // Limiting which alerts that user can read on that index will be done via the findAuthorizationFilter
+        const authorizedFeatures = new Set<string>();
+        for (const ruleType of augmentedRuleTypes.authorizedRuleTypes) {
+          authorizedFeatures.add(ruleType.producer);
+        }
+        const validAuthorizedFeatures = Array.from(authorizedFeatures).filter(
+          (feature): feature is ValidFeatureId =>
+            featureIds.includes(feature) && isValidFeatureId(feature)
+        );
+        return validAuthorizedFeatures;
+      }
+      return featureIds;
+    } catch (exc) {
+      const errMessage = `getFeatureIdsByRegistrationContexts failed to get feature ids: ${exc}`;
+      this.logger.error(errMessage);
+      throw Boom.failedDependency(errMessage);
+    }
+  }
+
+  async getBrowserFields({
+    indices,
+    metaFields,
+    allowNoIndex,
+  }: {
+    indices: string[];
+    metaFields: string[];
+    allowNoIndex: boolean;
+  }): Promise<BrowserFields> {
+    const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
+    const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+      pattern: indices,
+      metaFields,
+      fieldCapsOptions: { allow_no_indices: allowNoIndex },
+    });
+
+    return fieldDescriptorToBrowserFieldMapper(fields);
   }
 }

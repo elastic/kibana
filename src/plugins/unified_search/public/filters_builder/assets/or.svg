@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="27px" height="40px" viewBox="0 0 27 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>or</title>
+    <defs>
+        <filter x="-28.4%" y="-16.9%" width="156.8%" height="133.8%" filterUnits="objectBoundingBox" id="filter-1">
+            <feOffset dx="0" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="0.9" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.65 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-2">
+            <stop stop-color="#5CD331" offset="0%"></stop>
+            <stop stop-color="#078C04" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="or" filter="url(#filter-1)" transform="translate(4.000000, 4.000000)">
+            <g id="circle" transform="translate(1.000000, 14.000000)">
+                <path d="M0,9 C0,13.97 4.03,18 9,18 L9,18 C13.97,18 18,13.97 18,9 L18,9 C18,4.029 13.97,0 9,0 L9,0 C4.03,0 0,4.029 0,9" fill="url(#linearGradient-2)"></path>
+                <g id="or" transform="translate(4.000000, 5.000000)" fill="#FFFFFF" fill-rule="nonzero" stroke="#FFFFFF" stroke-width="0.5">
+                    <path d="M8.32844896,0 C9.21088789,0 9.93167133,0.681619492 9.99500028,1.54655963 L10,1.67155098 L10,3.32810299 C10.0002373,4.20282328 9.32574192,4.9296502 8.45344031,4.99465432 L8.33344861,4.99965397 L1.23727308,4.99965397 L2.82882959,6.51621568 C2.91929037,6.59834359 2.97087359,6.71484602 2.97087359,6.83702681 C2.97087359,6.9592076 2.91929037,7.07571003 2.82882959,7.15783794 C2.6330138,7.33595713 2.33385985,7.33595713 2.13804407,7.15783794 L0.429828959,5.5329504 C0.156296125,5.2877964 0,4.93783253 0,4.57051701 C0,4.20320149 0.156296125,3.85323761 0.429828959,3.60808362 L2.13804407,1.98319608 C2.33413487,1.80496239 2.63357206,1.80496239 2.82966287,1.98319608 C2.92012364,2.06532398 2.97170686,2.18182641 2.97170686,2.30400721 C2.97170686,2.426188 2.92012364,2.54269043 2.82966287,2.62481834 L1.2089417,4.16637831 L8.33344861,4.16637831 C8.7617523,4.16387848 9.11256136,3.8414008 9.16089135,3.42642952 L9.16672428,3.32810299 L9.16672428,1.67155098 C9.16672428,1.24158074 8.84341332,0.88743858 8.42677549,0.838275316 L8.32844896,0.833275662 L6.25025946,0.833275662 C6.03445016,0.833672946 5.85405825,0.66921065 5.83455883,0.454283726 C5.81505942,0.239356801 5.96290758,0.0451146606 6.17526465,0.0066662053 L6.25025946,0 L8.32844896,0 Z" id="Path"></path>
+                </g>
+            </g>
+            <g id="arrow">
+                <polygon id="arrow-border" fill="#FFFFFF" points="0 16.5 0 0.5 11.6000004 12.1081174 4.55353306 12.1081174 4.40241581 12.2320012"></polygon>
+                <polygon fill="#000000" points="1 2.79999995 1 13.9999998 3.969 11.1309258 4.129 10.9917767 9.165 11"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>

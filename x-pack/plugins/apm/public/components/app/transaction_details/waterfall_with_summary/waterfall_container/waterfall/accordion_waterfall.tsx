@@ -13,14 +13,18 @@ import {
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { groupBy } from 'lodash';
+import { transparentize } from 'polished';
 import { Margins } from '../../../../../shared/charts/timeline';
 import {
   IWaterfall,
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
 import { WaterfallItem } from './waterfall_item';
+import { getCriticalPath } from '../../../../../../../common/critical_path/get_critical_path';
+import { useTheme } from '../../../../../../hooks/use_theme';
 
 interface AccordionWaterfallProps {
   isOpen: boolean;
@@ -32,6 +36,7 @@ interface AccordionWaterfallProps {
   waterfall: IWaterfall;
   timelineMargins: Margins;
   onClickWaterfallItem: (item: IWaterfallSpanOrTransaction) => void;
+  showCriticalPath: boolean;
 }
 
 const ACCORDION_HEIGHT = '48px';
@@ -76,8 +81,6 @@ const StyledAccordion = euiStyled(EuiAccordion).withConfig({
 `;
 
 export function AccordionWaterfall(props: AccordionWaterfallProps) {
-  const [isOpen, setIsOpen] = useState(props.isOpen);
-
   const {
     item,
     level,
@@ -87,12 +90,38 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
     setMaxLevel,
     timelineMargins,
     onClickWaterfallItem,
+    showCriticalPath,
   } = props;
 
-  const nextLevel = level + 1;
-  setMaxLevel(nextLevel);
+  const theme = useTheme();
 
-  const children = waterfall.childrenByParentId[item.id] || [];
+  const [isOpen, setIsOpen] = useState(props.isOpen);
+  const [nextLevel] = useState(level + 1);
+
+  useEffect(() => {
+    setMaxLevel(nextLevel);
+  }, [nextLevel, setMaxLevel]);
+
+  let children = waterfall.childrenByParentId[item.id] || [];
+
+  const criticalPath = showCriticalPath
+    ? getCriticalPath(waterfall)
+    : undefined;
+
+  const criticalPathSegmentsById = groupBy(
+    criticalPath?.segments,
+    (segment) => segment.item.id
+  );
+
+  let displayedColor = item.color;
+
+  if (showCriticalPath) {
+    children = children.filter(
+      (child) => criticalPathSegmentsById[child.id]?.length
+    );
+    displayedColor = transparentize(0.5, item.color);
+  }
+
   const errorCount = waterfall.getErrorCount(item.id);
 
   // To indent the items creating the parent/child tree
@@ -129,15 +158,24 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
             <WaterfallItem
               key={item.id}
               timelineMargins={timelineMargins}
-              color={item.color}
+              color={displayedColor}
               item={item}
               hasToggle={hasToggle}
               totalDuration={duration}
               isSelected={item.id === waterfallItemId}
               errorCount={errorCount}
+              marginLeftLevel={marginLeftLevel}
               onClick={() => {
                 onClickWaterfallItem(item);
               }}
+              segments={criticalPathSegmentsById[item.id]
+                ?.filter((segment) => segment.self)
+                .map((segment) => ({
+                  color: theme.eui.euiColorAccent,
+                  left:
+                    (segment.offset - item.offset - item.skew) / item.duration,
+                  width: segment.duration / item.duration,
+                }))}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

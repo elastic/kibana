@@ -6,39 +6,38 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { ProcessorEvent } from '../../../../common/processor_event';
-import { Setup } from '../../../lib/helpers/setup_request';
-import { serviceGroupQuery } from '../../../../common/utils/service_group_query';
+import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getServicesFromErrorAndMetricDocuments({
   environment,
-  setup,
-  probability,
+  apmEventClient,
   maxNumServices,
   kuery,
   start,
   end,
   serviceGroup,
+  randomSampler,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   environment: string;
-  probability: number;
   maxNumServices: number;
   kuery: string;
   start: number;
   end: number;
   serviceGroup: ServiceGroup | null;
+  randomSampler: RandomSampler;
 }) {
-  const { apmEventClient } = setup;
-
   const response = await apmEventClient.search(
     'get_services_from_error_and_metric_documents',
     {
@@ -46,6 +45,7 @@ export async function getServicesFromErrorAndMetricDocuments({
         events: [ProcessorEvent.metric, ProcessorEvent.error],
       },
       body: {
+        track_total_hits: false,
         size: 0,
         query: {
           bool: {
@@ -59,9 +59,7 @@ export async function getServicesFromErrorAndMetricDocuments({
         },
         aggs: {
           sample: {
-            random_sampler: {
-              probability,
-            },
+            random_sampler: randomSampler,
             aggs: {
               services: {
                 terms: {

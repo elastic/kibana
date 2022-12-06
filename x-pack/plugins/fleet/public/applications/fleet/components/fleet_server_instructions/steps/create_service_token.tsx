@@ -38,7 +38,7 @@ const CommandCode = styled.div.attrs(() => {
     className: 'eui-textBreakAll',
   };
 })`
-  margin-right: ${(props) => props.theme.eui.paddingSizes.m};
+  margin-right: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 export const getGenerateServiceTokenStep = ({
@@ -116,7 +116,7 @@ const ServiceTokenStepContent: React.FunctionComponent<{
           <EuiSpacer size="m" />
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <strong>
+              <strong data-test-subject="serviceTokenSaveReminderHeader">
                 <FormattedMessage
                   id="xpack.fleet.fleetServerSetup.serviceTokenLabel"
                   defaultMessage="Service token"

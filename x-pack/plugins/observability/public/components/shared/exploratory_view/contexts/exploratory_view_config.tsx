@@ -18,33 +18,33 @@ interface ExploratoryViewContextValue {
     reportType: ReportViewType | typeof SELECT_REPORT_TYPE;
     label: string;
   }>;
-  dataViews: Record<string, string>;
   reportConfigMap: ReportConfigMap;
+  asPanel?: boolean;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme$: AppMountParameters['theme$'];
   isEditMode?: boolean;
   setIsEditMode?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const ExploratoryViewContext = createContext<ExploratoryViewContextValue>({
-  dataViews: {},
-} as ExploratoryViewContextValue);
+export const ExploratoryViewContext = createContext<ExploratoryViewContextValue>(
+  {} as ExploratoryViewContextValue
+);
 
 export function ExploratoryViewContextProvider({
   children,
   reportTypes,
   dataTypes,
-  dataViews,
   reportConfigMap,
   setHeaderActionMenu,
+  asPanel = true,
   theme$,
 }: { children: JSX.Element } & ExploratoryViewContextValue) {
   const [isEditMode, setIsEditMode] = useState(false);
 
   const value = {
+    asPanel,
     reportTypes,
     dataTypes,
-    dataViews,
     reportConfigMap,
     setHeaderActionMenu,
     theme$,

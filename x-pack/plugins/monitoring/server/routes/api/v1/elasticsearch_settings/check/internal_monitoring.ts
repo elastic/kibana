@@ -19,7 +19,7 @@ import {
 } from '../../../../../../common/http_api/elasticsearch_settings';
 import { createValidationFunction } from '../../../../../lib/create_route_validation_function';
 import { handleError } from '../../../../../lib/errors';
-import { LegacyServer, RouteDependencies } from '../../../../../types';
+import { MonitoringCore, RouteDependencies } from '../../../../../types';
 
 const queryBody = {
   size: 0,
@@ -72,7 +72,7 @@ const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, ind
   return counts;
 };
 
-export function internalMonitoringCheckRoute(server: LegacyServer, npRoute: RouteDependencies) {
+export function internalMonitoringCheckRoute(server: MonitoringCore, npRoute: RouteDependencies) {
   const validateBody = createValidationFunction(
     postElasticsearchSettingsInternalMonitoringRequestPayloadRT
   );

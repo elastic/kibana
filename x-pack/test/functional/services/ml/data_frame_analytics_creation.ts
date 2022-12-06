@@ -287,7 +287,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       const subj = 'mlDataFrameAnalyticsRuntimeMappingsEditorSwitch';
       if ((await this.getRuntimeMappingsEditorSwitchCheckedState()) !== toggle) {
         await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabled(subj);
+          await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
           await this.assertRuntimeMappingsEditorSwitchCheckState(toggle);
         });
       }
@@ -316,7 +316,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     async applyRuntimeMappings() {
       const subj = 'mlDataFrameAnalyticsRuntimeMappingsApplyButton';
       await testSubjects.existOrFail(subj);
-      await testSubjects.clickWhenNotDisabled(subj);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
       const isEnabled = await testSubjects.isEnabled(subj);
       expect(isEnabled).to.eql(
         false,
@@ -466,7 +466,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async continueToAdditionalOptionsStep() {
       await retry.tryForTime(15 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled(
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
           'mlAnalyticsCreateJobWizardConfigurationStep active > mlAnalyticsCreateJobWizardContinueButton'
         );
         await this.assertAdditionalOptionsStepActive();
@@ -475,7 +475,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async continueToDetailsStep() {
       await retry.tryForTime(15 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled(
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
           'mlAnalyticsCreateJobWizardAdvancedStep active > mlAnalyticsCreateJobWizardContinueButton'
         );
         await this.assertDetailsStepActive();
@@ -484,7 +484,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async continueToValidationStep() {
       await retry.tryForTime(15 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled(
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
           'mlAnalyticsCreateJobWizardDetailsStep active > mlAnalyticsCreateJobWizardContinueButton'
         );
         await this.assertValidationStepActive();
@@ -504,7 +504,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async continueToCreateStep() {
       await retry.tryForTime(15 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled(
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
           'mlAnalyticsCreateJobWizardValidationStepWrapper active > mlAnalyticsCreateJobWizardContinueButton'
         );
         await this.assertCreateStepActive();

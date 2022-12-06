@@ -10,7 +10,8 @@ import React, { Fragment, Component } from 'react';
 import uuid from 'uuid/v4';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiComboBoxOptionOption, EuiTitle } from '@elastic/eui';
-import { IndexPatternField, indexPatterns } from '@kbn/data-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import {
   AGG_TYPE,
@@ -42,7 +43,7 @@ interface Props {
 interface State {
   geoFieldType?: ES_GEO_FIELD_TYPE;
   metricsEditorKey: string;
-  fields: IndexPatternField[];
+  fields: DataViewField[];
   loadError?: string;
 }
 

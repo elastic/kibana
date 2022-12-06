@@ -6,25 +6,23 @@
  */
 
 import React from 'react';
-import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import {
-  Query,
-  Filter,
-  TimeRange,
-  extractTimeRange,
-  APPLY_FILTER_TRIGGER,
-} from '@kbn/data-plugin/public';
-import { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
+import type { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import type { Query, Filter, TimeRange } from '@kbn/es-query';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
 import { reactToUiComponent } from '@kbn/kibana-react-plugin/public';
-import {
+import type {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { DiscoverSetup } from '@kbn/discover-plugin/public';
-import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
+import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { execute, isCompatible, isLensEmbeddable } from './open_in_discover_helpers';
+import type { DataViewsService } from '@kbn/data-views-plugin/public';
+import { DOC_TYPE } from '../../common/constants';
+import type { DiscoverAppLocator } from './open_in_discover_helpers';
 
 interface EmbeddableQueryInput extends EmbeddableInput {
   query?: Query;
@@ -32,20 +30,23 @@ interface EmbeddableQueryInput extends EmbeddableInput {
   timeRange?: TimeRange;
 }
 
+export const getDiscoverHelpersAsync = async () => await import('../async_services');
+
 /** @internal */
 export type EmbeddableWithQueryInput = IEmbeddable<EmbeddableQueryInput>;
 
 interface UrlDrilldownDeps {
-  discover: Pick<DiscoverSetup, 'locator'>;
+  locator: () => DiscoverAppLocator | undefined;
+  dataViews: () => Pick<DataViewsService, 'get'>;
   hasDiscoverAccess: () => boolean;
+  application: () => ApplicationStart;
 }
 
 export type ActionContext = ApplyGlobalFilterActionContext;
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type Config = {
+export interface Config extends SerializableRecord {
   openInNewTab: boolean;
-};
+}
 
 export type OpenInDiscoverTrigger = typeof APPLY_FILTER_TRIGGER;
 
@@ -54,12 +55,10 @@ export interface ActionFactoryContext extends BaseActionFactoryContext {
 }
 export type CollectConfigProps = CollectConfigPropsBase<Config, ActionFactoryContext>;
 
-const OPEN_IN_DISCOVER_DRILLDOWN = 'OPEN_IN_DISCOVER_DRILLDOWN';
-
 export class OpenInDiscoverDrilldown
   implements Drilldown<Config, ActionContext, ActionFactoryContext>
 {
-  public readonly id = OPEN_IN_DISCOVER_DRILLDOWN;
+  public readonly id = 'OPEN_IN_DISCOVER_DRILLDOWN';
 
   constructor(private readonly deps: UrlDrilldownDeps) {}
 
@@ -76,11 +75,7 @@ export class OpenInDiscoverDrilldown
     return [APPLY_FILTER_TRIGGER];
   }
 
-  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({
-    config,
-    onConfig,
-    context,
-  }) => {
+  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({ config, onConfig }) => {
     return (
       <EuiFormRow hasChildLabel={false}>
         <EuiSwitch
@@ -108,8 +103,11 @@ export class OpenInDiscoverDrilldown
   };
 
   public readonly isCompatible = async (config: Config, context: ActionContext) => {
+    const { isCompatible } = await getDiscoverHelpersAsync();
+
     return isCompatible({
-      discover: this.deps.discover,
+      locator: this.deps.locator(),
+      dataViews: this.deps.dataViews(),
       hasDiscoverAccess: this.deps.hasDiscoverAccess(),
       ...context,
       embeddable: context.embeddable as IEmbeddable,
@@ -117,23 +115,35 @@ export class OpenInDiscoverDrilldown
     });
   };
 
-  public readonly isConfigurable = (context: ActionFactoryContext) => {
-    return this.deps.hasDiscoverAccess() && isLensEmbeddable(context.embeddable as IEmbeddable);
-  };
+  public readonly isConfigurable = (context: ActionFactoryContext) =>
+    this.deps.hasDiscoverAccess() && context.embeddable?.type === DOC_TYPE;
 
-  public readonly execute = async (config: Config, context: ActionContext) => {
-    const { restOfFilters: filters, timeRange: timeRange } = extractTimeRange(
-      context.filters,
-      context.timeFieldName
-    );
-    execute({
-      discover: this.deps.discover,
+  public readonly getHref = async (config: Config, context: ActionContext) => {
+    const { getHref } = await getDiscoverHelpersAsync();
+
+    return getHref({
+      locator: this.deps.locator(),
+      dataViews: this.deps.dataViews(),
       hasDiscoverAccess: this.deps.hasDiscoverAccess(),
       ...context,
       embeddable: context.embeddable as IEmbeddable,
-      openInSameTab: !config.openInNewTab,
-      filters,
-      timeRange,
     });
+  };
+
+  public readonly execute = async (config: Config, context: ActionContext) => {
+    if (config.openInNewTab) {
+      window.open(await this.getHref(config, context), '_blank');
+    } else {
+      const { getLocation } = await getDiscoverHelpersAsync();
+
+      const { app, path, state } = await getLocation({
+        locator: this.deps.locator(),
+        dataViews: this.deps.dataViews(),
+        hasDiscoverAccess: this.deps.hasDiscoverAccess(),
+        ...context,
+        embeddable: context.embeddable as IEmbeddable,
+      });
+      await this.deps.application().navigateToApp(app, { path, state });
+    }
   };
 }

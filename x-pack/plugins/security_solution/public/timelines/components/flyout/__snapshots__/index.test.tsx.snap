@@ -1,8 +1,142 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Flyout rendering it renders correctly against snapshot 1`] = `
-<Flyout
-  onAppLeave={[MockFunction]}
-  timelineId="test"
-/>
+<DocumentFragment>
+  <div
+    data-eui="EuiFocusTrap"
+  >
+    <div
+      data-test-subj="flyout-pane"
+      style="display: none;"
+    >
+      <div
+        data-eui="EuiFlyout"
+        data-test-subj="eui-flyout"
+        role="dialog"
+      >
+        <div />
+      </div>
+    </div>
+  </div>
+  .c2 {
+  display: block;
+}
+
+.c1 > span {
+  padding: 0;
+}
+
+.c3 {
+  overflow: hidden;
+  display: inline-block;
+  text-overflow: ellipsis;
+}
+
+.c0 {
+  overflow: hidden;
+}
+
+<div
+    class="timeline-flyout-button-bar"
+    data-test-subj="flyoutBottomBar"
+  >
+    <div
+      class="euiPanel euiPanel--plain euiPanel--paddingSmall emotion-euiPanel-none-s-plain"
+      data-test-subj="timeline-flyout-header-panel"
+      style="background-color: rgb(255, 255, 255); color: rgb(52, 55, 65);"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            class="euiPopover emotion-euiPopover"
+            id="timelineSettingsPopover"
+          >
+            <div
+              class="euiPopover__anchor css-16vtueo-render"
+            >
+              <button
+                aria-label="Add new timeline or template"
+                class="euiButtonIcon euiButtonIcon--medium add-timeline-button emotion-euiButtonIcon-empty-primary-hoverStyles"
+                data-test-subj="settings-plus-in-circle"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="plusInCircle"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem c0 emotion-euiFlexItem-growZero"
+        >
+          <button
+            aria-label="Open timeline Untitled timeline"
+            aria-pressed="false"
+            class="euiButtonEmpty euiButtonEmpty--small euiButtonEmpty--flushBoth c1 active-timeline-button css-9t7nyf-empty-primary"
+            data-test-subj="flyoutOverlay"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonEmpty__text"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <span
+                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    >
+                      <div
+                        class="euiHealth c2 emotion-euiHealth-s"
+                      >
+                        <div
+                          class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-center-row"
+                        >
+                          <div
+                            class="euiFlexItem emotion-euiFlexItem-growZero"
+                          >
+                            <span
+                              color="warning"
+                              data-euiicon-type="dot"
+                            />
+                          </div>
+                          <div
+                            class="euiFlexItem emotion-euiFlexItem-growZero"
+                          />
+                        </div>
+                      </div>
+                    </span>
+                  </div>
+                  <div
+                    class="euiFlexItem c3 emotion-euiFlexItem-growZero"
+                  >
+                    Untitled timeline
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div />
+                  </div>
+                </div>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
 `;

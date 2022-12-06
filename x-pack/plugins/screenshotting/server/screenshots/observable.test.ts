@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { interval, of, throwError } from 'rxjs';
+import { interval, lastValueFrom, of, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { createMockBrowserDriver } from '../browsers/mock';
 import type { ConfigType } from '../config';
@@ -26,7 +26,6 @@ describe('ScreenshotObservableHandler', () => {
     config = {
       capture: {
         timeouts: { openUrl: 30000, waitForElements: 30000, renderComplete: 30000 },
-        loadDelay: 5000,
         zoom: 13,
       },
     } as ConfigType;
@@ -47,29 +46,45 @@ describe('ScreenshotObservableHandler', () => {
     });
 
     it('catches TimeoutError and references the timeout config in a custom message', async () => {
-      const test$ = interval(1000).pipe(screenshots.waitUntil(200, 'Test Config'));
+      const test$ = interval(1000).pipe(
+        screenshots.waitUntil({
+          timeoutValue: 200,
+          label: 'Test Config',
+          configValue: 'xpack.screenshotting.testConfig',
+        })
+      );
 
-      const testPipeline = () => test$.toPromise();
+      const testPipeline = () => lastValueFrom(test$);
       await expect(testPipeline).rejects.toMatchInlineSnapshot(
-        `[Error: The "Test Config" phase took longer than 0.2 seconds.]`
+        `[Error: Screenshotting encountered a timeout error: "Test Config" took longer than 0.2 seconds. You may need to increase "xpack.screenshotting.testConfig" in kibana.yml.]`
       );
     });
 
-    it('catches other Errors and explains where they were thrown', async () => {
-      const test$ = throwError(new Error(`Test Error to Throw`)).pipe(
-        screenshots.waitUntil(200, 'Test Config')
+    it('catches other Errors', async () => {
+      const test$ = throwError(() => new Error(`Test Error to Throw`)).pipe(
+        screenshots.waitUntil({
+          timeoutValue: 200,
+          label: 'Test Config',
+          configValue: 'xpack.screenshotting.testConfig',
+        })
       );
 
-      const testPipeline = () => test$.toPromise();
+      const testPipeline = () => lastValueFrom(test$);
       await expect(testPipeline).rejects.toMatchInlineSnapshot(
         `[Error: The "Test Config" phase encountered an error: Error: Test Error to Throw]`
       );
     });
 
     it('is a pass-through if there is no Error', async () => {
-      const test$ = of('nice to see you').pipe(screenshots.waitUntil(20, 'xxxxxxxxxxx'));
+      const test$ = of('nice to see you').pipe(
+        screenshots.waitUntil({
+          timeoutValue: 20,
+          label: 'xxxxxxxxxxx',
+          configValue: 'xpack.screenshotting.testConfig',
+        })
+      );
 
-      await expect(test$.toPromise()).resolves.toBe(`nice to see you`);
+      await expect(lastValueFrom(test$)).resolves.toBe(`nice to see you`);
     });
   });
 
@@ -88,7 +103,7 @@ describe('ScreenshotObservableHandler', () => {
         })
       );
 
-      await expect(test$.toPromise()).rejects.toMatchInlineSnapshot(
+      await expect(lastValueFrom(test$)).rejects.toMatchInlineSnapshot(
         `[Error: Browser was closed unexpectedly! Check the server logs for more info.]`
       );
     });
@@ -101,7 +116,7 @@ describe('ScreenshotObservableHandler', () => {
         })
       );
 
-      await expect(test$.toPromise()).resolves.toBe(234455);
+      await expect(lastValueFrom(test$)).resolves.toBe(234455);
     });
   });
 });

@@ -33,7 +33,7 @@ import type { SpacesService } from '../plugin';
 import { Actions } from './actions';
 import { initAPIAuthorization } from './api_authorization';
 import { initAppAuthorization } from './app_authorization';
-import { checkPrivilegesWithRequestFactory } from './check_privileges';
+import { checkPrivilegesFactory } from './check_privileges';
 import type { CheckPrivilegesDynamicallyWithRequest } from './check_privileges_dynamically';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 import type { CheckSavedObjectsPrivilegesWithRequest } from './check_saved_objects_privileges';
@@ -45,7 +45,7 @@ import type { PrivilegesService } from './privileges';
 import { privilegesFactory } from './privileges';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import { ResetSessionPage } from './reset_session_page';
-import type { CheckPrivilegesWithRequest } from './types';
+import type { CheckPrivilegesWithRequest, CheckUserProfilesPrivileges } from './types';
 import { validateFeaturePrivileges } from './validate_feature_privileges';
 import { validateReservedPrivileges } from './validate_reserved_privileges';
 
@@ -74,7 +74,7 @@ interface AuthorizationServiceStartParams {
 
 export interface AuthorizationServiceSetupInternal extends AuthorizationServiceSetup {
   actions: Actions;
-  checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  checkUserProfilesPrivileges: (userProfileUids: Set<string>) => CheckUserProfilesPrivileges;
   checkPrivilegesDynamicallyWithRequest: CheckPrivilegesDynamicallyWithRequest;
   checkSavedObjectsPrivilegesWithRequest: CheckSavedObjectsPrivilegesWithRequest;
   applicationName: string;
@@ -125,7 +125,7 @@ export class AuthorizationService {
     const actions = new Actions(packageVersion);
     this.privileges = privilegesFactory(actions, features, license);
 
-    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
+    const { checkPrivilegesWithRequest, checkUserProfilesPrivileges } = checkPrivilegesFactory(
       actions,
       getClusterClient,
       this.applicationName
@@ -137,6 +137,7 @@ export class AuthorizationService {
       mode,
       privileges: this.privileges,
       checkPrivilegesWithRequest,
+      checkUserProfilesPrivileges,
       checkPrivilegesDynamicallyWithRequest: checkPrivilegesDynamicallyWithRequestFactory(
         checkPrivilegesWithRequest,
         getSpacesService

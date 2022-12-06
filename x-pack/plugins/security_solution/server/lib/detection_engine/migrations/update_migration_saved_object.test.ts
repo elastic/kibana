@@ -6,7 +6,7 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { SignalsMigrationSOUpdateAttributes } from './saved_objects_schema';
+import type { SignalsMigrationSOUpdateAttributes } from './saved_objects_schema';
 import { getSignalsMigrationSavedObjectMock } from './saved_objects_schema.mock';
 import { updateMigrationSavedObject } from './update_migration_saved_object';
 

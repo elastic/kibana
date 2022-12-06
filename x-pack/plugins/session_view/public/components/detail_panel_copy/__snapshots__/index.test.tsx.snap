@@ -6,11 +6,11 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiText euiText--small css-137zats-EuiText"
+        class="euiText emotion-EuiText"
         data-test-subj="sessionView:detail-panel-list-item"
       >
         <span
-          class="euiToolTipAnchor"
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <span>
             copy component test
@@ -21,11 +21,11 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiText euiText--small css-137zats-EuiText"
+      class="euiText emotion-EuiText"
       data-test-subj="sessionView:detail-panel-list-item"
     >
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <span>
           copy component test

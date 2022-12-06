@@ -22,11 +22,28 @@ describe('Connectors', () => {
   const initializeConnectors = jest.fn();
 
   beforeEach(() => {
+    jest.clearAllMocks();
     setMockActions({ initializeConnectors });
     setMockValues({ connectors: configuredSources });
   });
 
   it('renders', () => {
+    const wrapper = shallow(<Connectors />);
+
+    expect(wrapper.find('[data-test-subj="ConnectorRow"]')).toHaveLength(configuredSources.length);
+  });
+
+  it('hides external connectors if they are not described', () => {
+    setMockValues({
+      connectors: [
+        ...configuredSources,
+        {
+          name: 'Custom Connector Package',
+          serviceType: 'external',
+          externalConnectorServiceDescribed: false,
+        },
+      ],
+    });
     const wrapper = shallow(<Connectors />);
 
     expect(wrapper.find('[data-test-subj="ConnectorRow"]')).toHaveLength(configuredSources.length);

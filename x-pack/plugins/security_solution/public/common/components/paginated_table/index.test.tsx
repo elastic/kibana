@@ -10,7 +10,8 @@ import React from 'react';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 
-import { BasicTableProps, PaginatedTable } from '.';
+import type { BasicTableProps } from '.';
+import { PaginatedTable } from '.';
 import { getHostsColumns, mockData, rowItems, sortedHosts } from './index.mock';
 import { ThemeProvider } from 'styled-components';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
@@ -31,9 +32,7 @@ const mockTheme = getMockTheme({
     euiBreakpoints: {
       s: '450px',
     },
-    paddingSizes: {
-      m: '10px',
-    },
+    euiSizeM: '10px',
   },
 });
 
@@ -167,7 +166,7 @@ describe('Paginated Table Component', () => {
           />
         </ThemeProvider>
       );
-      wrapper.find('[data-test-subj="pagination-button-next"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="pagination-button-next"]').first().simulate('click');
       expect(updateActivePage.mock.calls.length).toEqual(0);
     });
 
@@ -207,7 +206,7 @@ describe('Paginated Table Component', () => {
           <PaginatedTable {...testProps} />
         </ThemeProvider>
       );
-      wrapper.find('[data-test-subj="pagination-button-next"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="pagination-button-next"]').first().simulate('click');
       expect(updateActivePage.mock.calls[0][0]).toEqual(1);
     });
 
@@ -217,7 +216,7 @@ describe('Paginated Table Component', () => {
           <PaginatedTable {...testProps} limit={2} />
         </ThemeProvider>
       );
-      wrapper.find('[data-test-subj="pagination-button-next"]').first().simulate('click');
+      wrapper.find('[data-test-subj="pagination-button-next"] button').first().simulate('click');
 
       wrapper.find('[data-test-subj="loadingMoreSizeRowPopover"] button').first().simulate('click');
 

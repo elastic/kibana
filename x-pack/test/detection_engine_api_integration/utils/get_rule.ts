@@ -7,7 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-import type { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response/rules_schema';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 
@@ -21,7 +21,7 @@ export const getRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   ruleId: string
-): Promise<RulesSchema> => {
+): Promise<RuleResponse> => {
   const response = await supertest
     .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
     .set('kbn-xsrf', 'true');

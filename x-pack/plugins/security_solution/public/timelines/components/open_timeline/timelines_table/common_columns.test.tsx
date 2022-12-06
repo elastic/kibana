@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIconProps } from '@elastic/eui';
+import type { EuiButtonIconProps } from '@elastic/eui';
 import { cloneDeep, omit } from 'lodash/fp';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -14,10 +14,11 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import '../../../../common/mock/match_media';
 import '../../../../common/mock/formatted_relative';
 import { getEmptyValue } from '../../../../common/components/empty_value';
-import { OpenTimelineResult } from '../types';
+import type { OpenTimelineResult } from '../types';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { NotePreviews } from '../note_previews';
-import { TimelinesTable, TimelinesTableProps } from '.';
+import type { TimelinesTableProps } from '.';
+import { TimelinesTable } from '.';
 
 import * as i18n from '../translations';
 import { getMockTimelinesTableProps } from './mocks';
@@ -378,7 +379,7 @@ describe('#getCommonColumns', () => {
 
       wrapper
         .find(`[data-test-subj="title-${mockResults[0].savedObjectId}"]`)
-        .first()
+        .last()
         .simulate('click');
 
       expect(onOpenTimeline).toHaveBeenCalledWith({

@@ -76,3 +76,198 @@
     "updated_at": "2021-10-19T13:41:04.038Z",
     "version": "WzU2NjEsMl0="
 }
+
+{
+    "attributes": {
+        "description": "",
+        "state": {
+            "datasourceStates": {
+                "indexpattern": {
+                    "layers": {
+                        "3c85b7f0-3227-43e7-88ac-9416c6311ebc": {
+                            "columns": {
+                              "951ad12c-8fae-4e81-964d-84827e387515": {
+                                "label": "order_date",
+                                "dataType": "date",
+                                "operationType": "date_histogram",
+                                "sourceField": "order_date",
+                                "isBucketed": true,
+                                "scale": "interval",
+                                "params": {
+                                  "interval": "auto",
+                                  "includeEmptyRows": true,
+                                  "dropPartials": false
+                                }
+                              },
+                              "e311d921-2525-4fb1-9716-94fe787ad623": {
+                                "label": "Count of records",
+                                "dataType": "number",
+                                "operationType": "count",
+                                "isBucketed": false,
+                                "scale": "ratio",
+                                "sourceField": "___records___",
+                                "params": {
+                                  "emptyAsNull": true
+                                }
+                              }
+                            },
+                            "columnOrder": [
+                              "951ad12c-8fae-4e81-964d-84827e387515",
+                              "e311d921-2525-4fb1-9716-94fe787ad623"
+                            ],
+                            "incompleteColumns": {}
+                          },
+                          "5321ae4b-8f8a-4300-a9bc-ec7245e2cb0f": {
+                            "columns": {
+                              "735cacfd-52af-4ff9-afa5-0e14c1b7c7fd": {
+                                "label": "Static value: 127.5",
+                                "dataType": "number",
+                                "operationType": "static_value",
+                                "isStaticValue": true,
+                                "isBucketed": false,
+                                "scale": "ratio",
+                                "params": {
+                                  "value": "127.5"
+                                },
+                                "references": []
+                              }
+                            },
+                            "columnOrder": [
+                              "735cacfd-52af-4ff9-afa5-0e14c1b7c7fd"
+                            ],
+                            "incompleteColumns": {}
+                          }
+                        }
+                    }
+                
+            },
+            "filters": [],
+            "query": {
+                "language": "kuery",
+                "query": ""
+            },
+            "visualization": {
+                "legend": {
+                  "isVisible": true,
+                  "position": "right"
+                },
+                "valueLabels": "hide",
+                "fittingFunction": "None",
+                "axisTitlesVisibilitySettings": {
+                  "x": true,
+                  "yLeft": true,
+                  "yRight": true
+                },
+                "tickLabelsVisibilitySettings": {
+                  "x": true,
+                  "yLeft": true,
+                  "yRight": true
+                },
+                "labelsOrientation": {
+                  "x": 0,
+                  "yLeft": 0,
+                  "yRight": 0
+                },
+                "gridlinesVisibilitySettings": {
+                  "x": true,
+                  "yLeft": true,
+                  "yRight": true
+                },
+                "preferredSeriesType": "bar_stacked",
+                "layers": [
+                  {
+                    "layerId": "3c85b7f0-3227-43e7-88ac-9416c6311ebc",
+                    "accessors": [
+                      "e311d921-2525-4fb1-9716-94fe787ad623"
+                    ],
+                    "position": "top",
+                    "seriesType": "bar_stacked",
+                    "showGridlines": false,
+                    "layerType": "data",
+                    "xAccessor": "951ad12c-8fae-4e81-964d-84827e387515"
+                  },
+                  {
+                    "layerId": "5321ae4b-8f8a-4300-a9bc-ec7245e2cb0f",
+                    "layerType": "referenceLine",
+                    "accessors": [
+                      "735cacfd-52af-4ff9-afa5-0e14c1b7c7fd"
+                    ],
+                    "yConfig": [
+                      {
+                        "forAccessor": "735cacfd-52af-4ff9-afa5-0e14c1b7c7fd",
+                        "axisMode": "left"
+                      }
+                    ]
+                  },
+                  {
+                    "layerId": "396c620c-1b6b-4754-a8fa-7f0e830a825c",
+                    "layerType": "annotations",
+                    "annotations": [
+                      {
+                        "label": "Event",
+                        "type": "manual",
+                        "key": {
+                          "type": "point_in_time",
+                          "timestamp": "2022-07-25T22:00:00.000Z"
+                        },
+                        "icon": "triangle",
+                        "id": "13354257-3cd4-46b5-9462-d3fbbab6a433"
+                      },
+                      {
+                        "type": "query",
+                        "id": "06539b10-c487-4aba-bf21-761c014c8d60",
+                        "label": "Event",
+                        "key": {
+                          "type": "point_in_time"
+                        },
+                        "icon": "triangle",
+                        "textVisibility": true,
+                        "textField": "customer_gender",
+                        "filter": {
+                          "type": "kibana_query",
+                          "query": "*",
+                          "language": "kuery"
+                        },
+                        "extraFields": [
+                          "category.keyword"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+        },
+        "title": "lnsXYWithReferenceLinesAndAnnotationsWithNonExistingDataView",
+        "visualizationType": "lnsXY"
+    },
+    "coreMigrationVersion": "8.0.0",
+    "id": "3454af30-30e2-11ec-8dbc-f13e30d4f8ac1",
+    "migrationVersion": {
+        "lens": "8.0.0"
+    },
+    "references": [
+        {
+            "id": "nonExistingDataView",
+            "name": "indexpattern-datasource-current-indexpattern",
+            "type": "index-pattern"
+        },
+        {
+            "id": "nonExistingDataView",
+            "name": "indexpattern-datasource-layer-3c85b7f0-3227-43e7-88ac-9416c6311ebc",
+            "type": "index-pattern"
+        },
+        {
+            "id": "nonExistingDataView",
+            "name": "indexpattern-datasource-layer-5321ae4b-8f8a-4300-a9bc-ec7245e2cb0f",
+            "type": "index-pattern"
+        },
+        {
+            "id": "nonExistingDataView",
+            "name": "xy-visualization-layer-396c620c-1b6b-4754-a8fa-7f0e830a825c",
+            "type": "index-pattern"
+        }
+    ],
+    "type": "lens",
+    "updated_at": "2021-10-19T13:41:04.038Z",
+    "version": "WzU2NjEsMl0="
+}

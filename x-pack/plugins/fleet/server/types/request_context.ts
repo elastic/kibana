@@ -16,6 +16,7 @@ import type {
 
 import type { FleetAuthz } from '../../common/authz';
 import type { AgentClient } from '../services';
+import type { PackagePolicyClient } from '../services/package_policy_service';
 
 /** @internal */
 export type FleetRequestHandlerContext = CustomRequestHandlerContext<{
@@ -26,6 +27,10 @@ export type FleetRequestHandlerContext = CustomRequestHandlerContext<{
     agentClient: {
       asCurrentUser: AgentClient;
       asInternalUser: AgentClient;
+    };
+    packagePolicyService: {
+      asCurrentUser: PackagePolicyClient;
+      asInternalUser: PackagePolicyClient;
     };
     epm: {
       /**

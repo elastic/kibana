@@ -21,7 +21,11 @@ import { EuiCode } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../hooks/use_fetcher';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
 import { OverviewTableContainer } from '../overview_table_container';
 import { getColumns } from './get_columns';
@@ -30,6 +34,7 @@ import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { fromQuery, toQuery } from '../links/url_helpers';
+import { isTimeComparison } from '../time_comparison/get_comparison_options';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -221,7 +226,10 @@ export function TransactionsTable({
                 transactionNames: JSON.stringify(
                   transactionGroups.map(({ name }) => name).sort()
                 ),
-                offset: comparisonEnabled ? offset : undefined,
+                offset:
+                  comparisonEnabled && isTimeComparison(offset)
+                    ? offset
+                    : undefined,
               },
             },
           }
@@ -237,9 +245,9 @@ export function TransactionsTable({
   const columns = getColumns({
     serviceName,
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-    transactionGroupDetailedStatisticsLoading:
-      transactionGroupDetailedStatisticsStatus === FETCH_STATUS.LOADING ||
-      transactionGroupDetailedStatisticsStatus === FETCH_STATUS.NOT_INITIATED,
+    transactionGroupDetailedStatisticsLoading: isPending(
+      transactionGroupDetailedStatisticsStatus
+    ),
     transactionGroupDetailedStatistics,
     comparisonEnabled,
     shouldShowSparkPlots,

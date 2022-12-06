@@ -9,11 +9,15 @@ import React, { CSSProperties, lazy } from 'react';
 import { Observable } from 'rxjs';
 import { CoreTheme } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import {
+  ExpressionRenderDefinition,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { withSuspense, defaultTheme$ } from '@kbn/presentation-util-plugin/public';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { MetricRendererConfig } from '../../common/types';
 
 const strings = {

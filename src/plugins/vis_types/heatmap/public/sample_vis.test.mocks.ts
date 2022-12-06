@@ -5,7 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export const sampleAreaVis = {
+
+const mockUiStateGet = jest.fn().mockReturnValue(() => {});
+export const sampleHeatmapVis = {
   type: {
     name: 'heatmap',
     title: 'Heatmap',
@@ -14,7 +16,6 @@ export const sampleAreaVis = {
     stage: 'production',
     options: {
       showTimePicker: true,
-      showQueryBar: true,
       showFilterBar: true,
       showIndexSelection: true,
       hierarchicalData: false,
@@ -60,6 +61,7 @@ export const sampleAreaVis = {
       },
     },
     editorConfig: {
+      enableDataViewChange: true,
       optionTabs: [
         {
           name: 'advanced',
@@ -1716,7 +1718,7 @@ export const sampleAreaVis = {
         {
           id: '1',
           enabled: true,
-          type: 'sum',
+          type: { name: 'sum' },
           params: {
             field: 'total_quantity',
           },
@@ -1735,7 +1737,7 @@ export const sampleAreaVis = {
         {
           id: '2',
           enabled: true,
-          type: 'date_histogram',
+          type: { name: 'date_histogram' },
           params: {
             field: 'order_date',
             timeRange: {
@@ -1758,7 +1760,7 @@ export const sampleAreaVis = {
         {
           id: '3',
           enabled: true,
-          type: 'terms',
+          type: { name: 'terms' },
           params: {
             field: 'category.keyword',
             orderBy: '1',
@@ -1788,5 +1790,10 @@ export const sampleAreaVis = {
     },
   },
   isHierarchical: () => false,
-  uiState: {},
+  uiState: {
+    vis: {
+      legendOpen: false,
+    },
+    get: mockUiStateGet,
+  },
 };

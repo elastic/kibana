@@ -50,7 +50,6 @@ const defaultNewPolicy: NewPackagePolicy = {
   namespace: 'default',
   policy_id: 'ae774160-8e49-11eb-aba5-99269d21ba6e',
   enabled: true,
-  output_id: '',
   inputs: [
     {
       type: 'synthetics/http',
@@ -637,10 +636,12 @@ describe('<SyntheticsPolicyEditExtension />', () => {
         },
       ],
     };
-    const { getByText, getByLabelText, queryByText, getByRole } = render(
+    const { getByText, getByLabelText, queryByText, getByRole, getByTestId } = render(
       <WrappedComponent policy={currentPolicy} />
     );
 
+    const zip = getByTestId('syntheticsSourceTab__zipUrl');
+    fireEvent.click(zip);
     const zipUrl = getByRole('textbox', { name: 'Zip URL' }) as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
 
@@ -1075,9 +1076,11 @@ describe('<SyntheticsPolicyEditExtension />', () => {
         },
       ],
     };
-    const { getByLabelText, queryByLabelText, getByRole } = render(
+    const { getByLabelText, queryByLabelText, getByRole, getByTestId } = render(
       <WrappedComponent policy={currentPolicy} />
     );
+    const zip = getByTestId('syntheticsSourceTab__zipUrl');
+    fireEvent.click(zip);
     const zipUrl = getByRole('textbox', { name: 'Zip URL' }) as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;

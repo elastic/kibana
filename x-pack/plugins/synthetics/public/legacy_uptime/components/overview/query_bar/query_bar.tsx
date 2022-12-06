@@ -9,9 +9,11 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem } from '@elastic/eui';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SyntaxType, useQueryBar } from './use_query_bar';
 import { KQL_PLACE_HOLDER, SIMPLE_SEARCH_PLACEHOLDER } from './translations';
 import { useGetUrlParams, useUptimeDataView } from '../../../hooks';
+import { ClientPluginsStart } from '../../../../plugin';
 
 const SYNTAX_STORAGE = 'uptime:queryBarSyntax';
 
@@ -32,7 +34,20 @@ export const isValidKuery = (query: string) => {
 
 export const QueryBar = () => {
   const { search: urlValue } = useGetUrlParams();
+  const { services } = useKibana<ClientPluginsStart>();
 
+  const {
+    appName,
+    notifications,
+    http,
+    docLinks,
+    uiSettings,
+    data,
+    dataViews,
+    unifiedSearch,
+    storage,
+    usageCollection,
+  } = services;
   const { query, setQuery, submitImmediately } = useQueryBar();
 
   const dataView = useUptimeDataView();
@@ -78,6 +93,18 @@ export const QueryBar = () => {
           query.language === SyntaxType.kuery ? KQL_PLACE_HOLDER : SIMPLE_SEARCH_PLACEHOLDER
         }
         isInvalid={isInValid()}
+        appName={appName}
+        deps={{
+          unifiedSearch,
+          notifications,
+          http,
+          docLinks,
+          uiSettings,
+          data,
+          dataViews,
+          storage,
+          usageCollection,
+        }}
       />
     </EuiFlexItem>
   );

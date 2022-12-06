@@ -29,7 +29,7 @@ import {
   PivotQuery,
 } from './request';
 import { LatestFunctionConfigUI } from '../../../common/types/transform';
-import { RuntimeField } from '@kbn/data-plugin/common';
+import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
 const simpleQuery: PivotQuery = { query_string: { query: 'airline:AAL' } };
 
@@ -311,6 +311,7 @@ describe('Transform: Common', () => {
       transformFrequency: '10m',
       transformSettingsMaxPageSearchSize: 100,
       transformSettingsDocsPerSecond: 400,
+      transformSettingsNumFailureRetries: 5,
       destinationIndex: 'the-destination-index',
       destinationIngestPipeline: 'the-destination-ingest-pipeline',
       touched: true,
@@ -334,6 +335,7 @@ describe('Transform: Common', () => {
       settings: {
         max_page_search_size: 100,
         docs_per_second: 400,
+        num_failure_retries: 5,
       },
       source: {
         index: ['the-data-view-title'],

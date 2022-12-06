@@ -17,7 +17,7 @@ jest.mock('@kbn/utils', () => ({
   kibanaPackageJson: { version: '1.0.0' },
 }));
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import {
   callEnterpriseSearchConfigAPI,
@@ -223,7 +223,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
   });
 
   it('handles timeouts', async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     // Warning
     callEnterpriseSearchConfigAPI(mockDependencies);

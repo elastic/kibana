@@ -17,14 +17,21 @@ import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elasti
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import {
+  Form,
+  useForm,
+  UseField,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CommentType } from '../../../common/api';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import { Case } from '../../containers/types';
-import { EuiMarkdownEditorRef, MarkdownEditorForm } from '../markdown_editor';
-import { Form, useForm, UseField, useFormData } from '../../common/shared_imports';
+import type { Case } from '../../containers/types';
+import type { EuiMarkdownEditorRef } from '../markdown_editor';
+import { MarkdownEditorForm } from '../markdown_editor';
 
 import * as i18n from './translations';
-import { schema, AddCommentFormSchema } from './schema';
+import type { AddCommentFormSchema } from './schema';
+import { schema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
@@ -47,7 +54,6 @@ export interface AddCommentRefObject {
 export interface AddCommentProps {
   id: string;
   caseId: string;
-  userCanCrud?: boolean;
   onCommentSaving?: () => void;
   onCommentPosted: (newCase: Case) => void;
   showLoading?: boolean;
@@ -57,20 +63,12 @@ export interface AddCommentProps {
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
     (
-      {
-        id,
-        caseId,
-        userCanCrud,
-        onCommentPosted,
-        onCommentSaving,
-        showLoading = true,
-        statusActionButton,
-      },
+      { id, caseId, onCommentPosted, onCommentSaving, showLoading = true, statusActionButton },
       ref
     ) => {
       const editorRef = useRef<EuiMarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
-      const { owner } = useCasesContext();
+      const { permissions, owner } = useCasesContext();
       const { isLoading, createAttachments } = useCreateAttachments();
 
       const { form } = useForm<AddCommentFormSchema>({
@@ -114,7 +112,8 @@ export const AddComment = React.memo(
           }
           createAttachments({
             caseId,
-            data: [{ ...data, type: CommentType.user, owner: owner[0] }],
+            caseOwner: owner[0],
+            data: [{ ...data, type: CommentType.user }],
             updateCase: onCommentPosted,
           });
           reset();
@@ -156,7 +155,7 @@ export const AddComment = React.memo(
       return (
         <span id="add-comment-permLink">
           {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
-          {userCanCrud && (
+          {permissions.create && (
             <Form form={form}>
               <UseField
                 path={fieldName}
@@ -178,7 +177,7 @@ export const AddComment = React.memo(
                           data-test-subj="submit-comment"
                           fill
                           iconType="plusInCircle"
-                          isDisabled={isLoading}
+                          isDisabled={!comment || isLoading}
                           isLoading={isLoading}
                           onClick={onSubmit}
                         >

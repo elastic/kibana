@@ -6,10 +6,11 @@
  */
 
 import * as yaml from 'js-yaml';
-import Url, { UrlObject } from 'url';
+import type { UrlObject } from 'url';
+import Url from 'url';
 
-import { ROLES } from '../../common/test';
-import { RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY } from '../../common/constants';
+import type { ROLES } from '../../common/test';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../common/constants';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
 import { hostDetailsUrl, LOGOUT_URL, userDetailsUrl } from '../urls/navigation';
 
@@ -56,7 +57,7 @@ const LOGIN_API_ENDPOINT = '/internal/security/login';
  * @param role string role/user to log in with
  * @param route string route to visit
  */
-export const getUrlWithRoute = (role: ROLES, route: string) => {
+const getUrlWithRoute = (role: ROLES, route: string) => {
   const url = Cypress.config().baseUrl;
   const kibana = new URL(String(url));
   const theUrl = `${Url.format({
@@ -99,14 +100,14 @@ export const constructUrlWithUser = (user: User, route: string) => {
   return builtUrl.href;
 };
 
-export const getCurlScriptEnvVars = () => ({
+const getCurlScriptEnvVars = () => ({
   ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
   ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
   ELASTICSEARCH_PASSWORD: Cypress.env('ELASTICSEARCH_PASSWORD'),
   KIBANA_URL: Cypress.config().baseUrl,
 });
 
-export const postRoleAndUser = (role: ROLES) => {
+const postRoleAndUser = (role: ROLES) => {
   const env = getCurlScriptEnvVars();
   const detectionsRoleScriptPath = `./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_role.sh`;
   const detectionsRoleJsonPath = `./server/lib/detection_engine/scripts/roles_users/${role}/detections_role.json`;
@@ -151,7 +152,7 @@ export const loginWithUser = (user: User) => {
   });
 };
 
-export const loginWithRole = async (role: ROLES) => {
+const loginWithRole = async (role: ROLES) => {
   postRoleAndUser(role);
   const theUrl = Url.format({
     auth: `${role}:changeme`,
@@ -286,18 +287,20 @@ export const getEnvAuth = (): User => {
 };
 
 /**
- * Saves in localStorage rules feature tour config with deactivated option
- * It prevents tour to appear during tests and cover UI elements
+ * For all the new features tours we show in the app, this method disables them
+ * by setting their configs in the local storage. It prevents the tours from appearing
+ * on the page during test runs and covering other UI elements.
  * @param window - browser's window object
  */
-const disableFeatureTourForRuleManagementPage = (window: Window) => {
+const disableNewFeaturesTours = (window: Window) => {
+  const tourStorageKeys = Object.values(NEW_FEATURES_TOUR_STORAGE_KEYS);
   const tourConfig = {
     isTourActive: false,
   };
-  window.localStorage.setItem(
-    RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY,
-    JSON.stringify(tourConfig)
-  );
+
+  tourStorageKeys.forEach((key) => {
+    window.localStorage.setItem(key, JSON.stringify(tourConfig));
+  });
 };
 
 /**
@@ -311,15 +314,21 @@ export const waitForPage = (url: string) => {
   );
 };
 
-export const visit = (url: string, onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void) => {
+export const visit = (
+  url: string,
+  onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void,
+  role?: ROLES
+) => {
   cy.visit(
-    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`,
+    `${
+      role ? getUrlWithRoute(role, url) : url
+    }?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`,
     {
       onBeforeLoad(win) {
         if (onBeforeLoadCallback) {
           onBeforeLoadCallback(win);
         }
-        disableFeatureTourForRuleManagementPage(win);
+        disableNewFeaturesTours(win);
       },
     }
   );
@@ -327,20 +336,20 @@ export const visit = (url: string, onBeforeLoadCallback?: (win: Cypress.AUTWindo
 
 export const visitWithoutDateRange = (url: string, role?: ROLES) => {
   cy.visit(role ? getUrlWithRoute(role, url) : url, {
-    onBeforeLoad: disableFeatureTourForRuleManagementPage,
+    onBeforeLoad: disableNewFeaturesTours,
   });
 };
 
 export const visitWithUser = (url: string, user: User) => {
   cy.visit(constructUrlWithUser(user, url), {
-    onBeforeLoad: disableFeatureTourForRuleManagementPage,
+    onBeforeLoad: disableNewFeaturesTours,
   });
 };
 
 export const visitTimeline = (timelineId: string, role?: ROLES) => {
   const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
   cy.visit(role ? getUrlWithRoute(role, route) : route, {
-    onBeforeLoad: disableFeatureTourForRuleManagementPage,
+    onBeforeLoad: disableNewFeaturesTours,
   });
   cy.get('[data-test-subj="headerGlobalNav"]');
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');

@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import { UrlStateContainer } from '../../utils/url_state';
-import { availableTextScales, LogViewConfiguration, TextScale } from './log_view_configuration';
+import {
+  availableTextScales,
+  useLogViewConfigurationContext,
+  TextScale,
+} from './log_view_configuration';
 
 interface LogTextviewUrlState {
   textScale?: TextScale;
@@ -16,9 +20,7 @@ interface LogTextviewUrlState {
 }
 
 export const WithLogTextviewUrlState = () => {
-  const { textScale, textWrap, setTextScale, setTextWrap } = useContext(
-    LogViewConfiguration.Context
-  );
+  const { textScale, textWrap, setTextScale, setTextWrap } = useLogViewConfigurationContext();
 
   const urlState = useMemo(() => ({ textScale, wrap: textWrap }), [textScale, textWrap]);
 

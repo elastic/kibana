@@ -7,6 +7,7 @@
  */
 
 import './visualize_editor.scss';
+import { EventEmitter } from 'events';
 import React, { RefObject, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -48,6 +49,7 @@ interface VisualizeEditorCommonProps {
   originatingPath?: string;
   visualizationIdFromUrl?: string;
   embeddableId?: string;
+  eventEmitter?: EventEmitter;
 }
 
 export const VisualizeEditorCommon = ({
@@ -66,6 +68,7 @@ export const VisualizeEditorCommon = ({
   visualizationIdFromUrl,
   embeddableId,
   visEditorRef,
+  eventEmitter,
 }: VisualizeEditorCommonProps) => {
   const { services } = useKibana<VisualizeServices>();
 
@@ -128,7 +131,6 @@ export const VisualizeEditorCommon = ({
     chartName && (chartNeedsWarning || deprecatedChartsNeedWarning)
       ? CHARTS_CONFIG_TOKENS[chartName as CHARTS_WITHOUT_SMALL_MULTIPLES]
       : undefined;
-
   const hasLegacyChartsEnabled = chartToken ? getUISettings().get(chartToken) : true;
 
   return (
@@ -149,19 +151,22 @@ export const VisualizeEditorCommon = ({
           visualizationIdFromUrl={visualizationIdFromUrl}
           embeddableId={embeddableId}
           onAppLeave={onAppLeave}
+          eventEmitter={eventEmitter}
         />
       )}
-      {visInstance?.vis?.type?.stage === 'experimental' && <ExperimentalVisInfo />}
+      {visInstance?.vis?.type?.stage === 'experimental' &&
+        !visInstance?.vis?.type?.isDeprecated && <ExperimentalVisInfo />}
       {!hasLegacyChartsEnabled && isSplitChart && chartNeedsWarning && chartToken && chartName && (
         <VizChartWarning
           chartType={chartName as CHARTS_WITHOUT_SMALL_MULTIPLES}
           chartConfigToken={chartToken}
         />
       )}
-      {hasLegacyChartsEnabled && deprecatedChartsNeedWarning && chartToken && chartName && (
+      {((hasLegacyChartsEnabled && deprecatedChartsNeedWarning && chartToken && chartName) ||
+        visInstance?.vis?.type?.isDeprecated) && (
         <VizChartWarning
           chartType={chartName as CHARTS_TO_BE_DEPRECATED}
-          chartConfigToken={chartToken}
+          chartConfigToken={chartToken ?? undefined}
           mode="new"
         />
       )}

@@ -8,7 +8,7 @@
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
 import { useAllHost, ID } from '../../containers/hosts';
-import { HostsComponentsQueryProps } from './types';
+import type { HostsComponentsQueryProps } from './types';
 import { HostsTable } from '../../components/hosts_table';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
@@ -17,7 +17,6 @@ const HostsTableManage = manageQuery(HostsTable);
 
 export const HostsQueryTabBody = ({
   deleteQuery,
-  docValueFields,
   endDate,
   filterQuery,
   indexNames,
@@ -33,7 +32,6 @@ export const HostsQueryTabBody = ({
   }, [skip, toggleStatus]);
   const [loading, { hosts, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch }] =
     useAllHost({
-      docValueFields,
       endDate,
       filterQuery,
       indexNames,

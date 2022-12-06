@@ -1,13 +1,13 @@
 [[get-started]]
 == Quick start
 
-To quickly get up and running with {kib}, set up on Cloud, then add a sample data set that you can explore and analyze.
+To quickly get up and running with {kib}, set up on Cloud, then add a sample data set that you can explore and visualize.
 
-When you've finished, you'll know how to:
+When you're done, you'll know how to:
 
 * <<explore-the-data,Explore the data with *Discover*.>>
 
-* <<view-and-analyze-the-data,Analyze the data with *Dashboard*.>>
+* <<view-and-analyze-the-data,Visualize the data with *Dashboard*.>>
 
 [float]
 === Required privileges
@@ -26,12 +26,14 @@ include::{docs-root}/shared/cloud/ess-getting-started.asciidoc[]
 
 Sample data sets come with sample visualizations, dashboards, and more to help you explore {kib} before you ingest or add your own data.
 
-. On the home page, click *Try our sample data*.
+. On the home page, click *Try sample data*.
+
+. Click *Other sample data sets*. 
 
 . On the *Sample eCommerce orders* card, click *Add data*.
 +
 [role="screenshot"]
-image::images/addData_sampleDataCards_7.15.0.png[Add data UI for the sample data sets]
+image::images/addData_sampleDataCards_8.6.0.png[Add data UI for the sample data sets]
 
 [float]
 [[explore-the-data]]
@@ -44,7 +46,7 @@ image::images/addData_sampleDataCards_7.15.0.png[Add data UI for the sample data
 . Change the <<set-time-filter, time filter>> to *Last 7 days*.
 +
 [role="screenshot"]
-image::images/tutorial-discover-2.png[Time filter menu with Last 7 days filter configured]
+image::images/timeFilter_discover_8.4.0.png[Time filter menu with Last 7 days filter configured]
 
 . To view the sales orders for women's clothing that are $60 or more, use the <<kuery-query,*KQL*>> search field:
 +
@@ -52,31 +54,31 @@ image::images/tutorial-discover-2.png[Time filter menu with Last 7 days filter c
 products.taxless_price >= 60 and category : Women's Clothing
 +
 [role="screenshot"]
-image::images/tutorial-discover-4.png[Discover tables that displays only the orders for women's clothing that are $60 or more]
+image::images/kql_discover_8.4.0.png[Discover tables that displays only the orders for women's clothing that are $60 or more]
 
 . To view only the product categories that contain sales orders, hover over the *category* field, then click *+*.
 +
 [role="screenshot"]
-image::images/tutorial-discover-3.png[Discover table that displays only the product categories that contain orders]
+image::images/availableFields_discover_8.4.0.png[Discover table that displays only the product categories that contain orders]
 
 [float]
 [[view-and-analyze-the-data]]
-== View and analyze the data
+== Visualize the data
 
-A dashboard is a collection of panels that you can use to view and analyze the data. Panels contain visualizations, interactive controls, text, and more.
+A dashboard is a collection of panels that you can use to visualize the data. Panels contain visualizations, interactive controls, text, and more.
 
 . Open the main menu, then click *Dashboard*.
 
 . Click *[eCommerce] Revenue Dashboard*.
 +
 [role="screenshot"]
-image::images/dashboard_ecommerceRevenueDashboard_7.15.0.png[The [eCommerce] Revenue Dashboard that comes with the Sample eCommerce order data set]
+image::images/dashboard_ecommerceRevenueDashboard_8.6.0.png[The [eCommerce] Revenue Dashboard that comes with the Sample eCommerce order data set]
 
 [float]
 [[create-a-visualization]]
 === Create a visualization panel
 
-Create a treemap panel that shows the top sales regions and manufacturers, then add the panel to the dashboard.
+Create a treemap visualization panel that shows the top sales regions and manufacturers, then add the panel to the dashboard.
 
 . In the toolbar, click *Edit*.
 
@@ -85,7 +87,7 @@ Create a treemap panel that shows the top sales regions and manufacturers, then 
 . In the drag-and-drop visualization editor, open the *Visualization type* dropdown, then select *Treemap*.
 +
 [role="screenshot"]
-image::getting-started/images/tutorial-visualization-dropdown.png[Chart type menu with Treemap selected]
+image::getting-started/images/visualizationTypeDropdown_lens_8.4.0.png[Chart type menu with Treemap selected]
 
 . From the *Available fields* list, drag the following fields to the workspace:
 
@@ -94,7 +96,7 @@ image::getting-started/images/tutorial-visualization-dropdown.png[Chart type men
 * *manufacturer.keyword*
 +
 [role="screenshot"]
-image::getting-started/images/tutorial-visualization-treemap.png[Treemap that displays Top values of geoip.city_name and Top values or manufacturer.keyword fields]
+image::getting-started/images/ecommerceTreemap_lens_8.4.0.png[Treemap that displays Top values of geoip.city_name and Top values or manufacturer.keyword fields]
 
 . Click *Save and return*.
 +
@@ -113,26 +115,32 @@ You can interact with the dashboard data using controls that allow you to apply 
 . Click *Apply changes*.
 +
 [role="screenshot"]
-image::images/dashboard_sampleDataFilter_7.15.0.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data from the Gnomehouse manufacturer]
+image::images/sampleDataFilter_dashboard_8.6.0.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data from the Gnomehouse manufacturer]
 
 [float]
 [[filter-and-query-the-data]]
 === Filter the data
 
-To view a subset of the data, you can apply filters to the dashboard panels. Apply a filter to view the women's clothing data generated on Wednesday from the Gnomehouse manufacturer.
+To view a subset of the data, you can apply filters to the dashboard data. Apply a filter to view the women's clothing data generated on Wednesday from the Gnomehouse manufacturer.
 
 . Click *Add filter*.
++
+[role="screenshot"]
+image::images/addFilter_dashboard_8.6.0.png[The Add filter action that applies dashboard-level filters]
 
 . From the *Field* dropdown, select *day_of_week*.
 
 . From the *Operator* dropdown, select *is*.
 
 . From the *Value* dropdown, select *Wednesday*.
-
-. Click *Save*.
 +
 [role="screenshot"]
-image::images/dashboard_sampleDataAddFilter_7.15.0.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data generated on Wednesday from the Gnomehouse manufacturer]
+image::images/addFilterOptions_dashboard_8.6.0.png[The Add filter options configured to display only the women's clothing data generated on Wednesday from the Gnomehouse manufacturer]
+
+. Click *Add filter*.
++
+[role="screenshot"]
+image::images/dashboard_sampleDataAddFilter_8.6.0.png[The [eCommerce] Revenue Dashboard that shows only the women's clothing data generated on Wednesday from the Gnomehouse manufacturer]
 
 [float]
 [[quick-start-whats-next]]
@@ -142,6 +150,6 @@ image::images/dashboard_sampleDataAddFilter_7.15.0.png[The [eCommerce] Revenue D
 
 *Explore your own data in Discover.* Ready to learn more about exploring your data in *Discover*? Go to <<discover, Discover>>.
 
-*Create a dashboard with your own data.* Ready to learn more about analyzing your data in *Dashboard*? Go to <<dashboard, Dashboard>>.
+*Create a dashboard with your own data.* Ready to learn more about visualizing your data on a *Dashboard*? Go to <<dashboard, Dashboard>>.
 
 *Try out the {ml-features}.* Ready to analyze the sample data sets and generate models for its patterns of behavior? Go to {ml-docs}/ml-getting-started.html[Getting started with {ml}].

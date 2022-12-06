@@ -27,5 +27,6 @@ export function mockAuthenticationProviderOptions(options?: { name: string }) {
     urls: {
       loggedOut: jest.fn().mockReturnValue('/mock-server-basepath/security/logged_out'),
     },
+    isElasticCloudDeployment: jest.fn().mockReturnValue(false),
   };
 }

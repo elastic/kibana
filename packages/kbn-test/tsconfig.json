@@ -3,11 +3,16 @@
   "compilerOptions": {
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outDir": "./target_types",
+    "outDir": "target_types",
     "stripInternal": true,
-    "rootDir": "src",
     "types": ["jest", "node"]
   },
-  "include": ["src/**/*", "index.d.ts"],
-  "exclude": ["**/__fixtures__/**/*"]
+  "include": [
+    "**/*.ts",
+    "**/*.js",
+  ],
+  "exclude": [
+    "types/**/*",
+    "**/__fixtures__/**/*"
+  ]
 }

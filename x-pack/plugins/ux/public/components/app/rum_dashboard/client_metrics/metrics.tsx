@@ -16,9 +16,8 @@ import {
   EuiToolTip,
   EuiIconTip,
 } from '@elastic/eui';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useClientMetricsQuery } from '../../../../hooks/use_client_metrics_query';
 import { I18LABELS } from '../translations';
-import { useUxQuery } from '../hooks/use_ux_query';
 import { formatToSec } from '../ux_metrics/key_ux_metrics';
 import { CsmSharedContext } from '../csm_shared_context';
 
@@ -49,23 +48,7 @@ function PageViewsTotalTitle({ pageViews }: { pageViews?: number }) {
 }
 
 export function Metrics() {
-  const uxQuery = useUxQuery();
-
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      if (uxQuery) {
-        return callApmApi('GET /internal/apm/ux/client-metrics', {
-          params: {
-            query: {
-              ...uxQuery,
-            },
-          },
-        });
-      }
-      return Promise.resolve(null);
-    },
-    [uxQuery]
-  );
+  const { data, loading } = useClientMetricsQuery();
 
   const { setSharedData } = useContext(CsmSharedContext);
 
@@ -79,6 +62,7 @@ export function Metrics() {
     <ClFlexGroup wrap responsive={false}>
       <EuiFlexItem style={STAT_STYLE}>
         <EuiStat
+          data-test-subj={'uxClientMetrics-totalPageLoad'}
           titleSize="l"
           title={formatTitle('ms', data?.totalPageLoadDuration?.value)}
           description={
@@ -90,11 +74,12 @@ export function Metrics() {
               />
             </>
           }
-          isLoading={status !== 'success'}
+          isLoading={!!loading}
         />
       </EuiFlexItem>
       <EuiFlexItem style={STAT_STYLE}>
         <EuiStat
+          data-test-subj={'uxClientMetrics-backend'}
           titleSize="l"
           title={formatTitle('ms', data?.backEnd?.value)}
           description={
@@ -106,11 +91,12 @@ export function Metrics() {
               />
             </>
           }
-          isLoading={status !== 'success'}
+          isLoading={!!loading}
         />
       </EuiFlexItem>
       <EuiFlexItem style={STAT_STYLE}>
         <EuiStat
+          data-test-subj={'uxClientMetrics-frontend'}
           titleSize="l"
           title={formatTitle('ms', data?.frontEnd?.value)}
           description={
@@ -122,15 +108,16 @@ export function Metrics() {
               />
             </>
           }
-          isLoading={status !== 'success'}
+          isLoading={!!loading}
         />
       </EuiFlexItem>
       <EuiFlexItem style={STAT_STYLE}>
         <EuiStat
+          data-test-subj={'uxClientMetrics-pageViews'}
           titleSize="l"
           title={<PageViewsTotalTitle pageViews={data?.pageViews?.value} />}
           description={I18LABELS.pageViews}
-          isLoading={status !== 'success'}
+          isLoading={!!loading}
         />
       </EuiFlexItem>
     </ClFlexGroup>

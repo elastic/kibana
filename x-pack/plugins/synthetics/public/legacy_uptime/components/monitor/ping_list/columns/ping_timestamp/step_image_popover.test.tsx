@@ -6,6 +6,7 @@
  */
 
 import { fireEvent, waitFor } from '@testing-library/react';
+import { screen } from '@elastic/eui/lib/test/rtl';
 import React from 'react';
 import { StepImagePopover, StepImagePopoverProps } from './step_image_popover';
 import { render } from '../../../../../lib/helper/rtl_helpers';
@@ -23,24 +24,19 @@ describe('StepImagePopover', () => {
   });
 
   it('opens displays full-size image on click, hides after close is closed', async () => {
-    const { getByAltText, getByLabelText, queryByLabelText } = render(
-      <StepImagePopover {...defaultProps} />
-    );
+    const { getByAltText } = render(<StepImagePopover {...defaultProps} />);
 
-    const closeFullScreenButton = 'Close fullscreen test caption image';
-
-    expect(queryByLabelText(closeFullScreenButton)).toBeNull();
+    expect(screen.queryByTestSubject('deactivateFullScreenButton')).toBeNull();
 
     const caption = getByAltText('test caption');
     fireEvent.click(caption);
 
     await waitFor(() => {
-      const closeButton = getByLabelText(closeFullScreenButton);
-      fireEvent.click(closeButton);
+      fireEvent.click(screen.getByTestSubject('deactivateFullScreenButton'));
     });
 
     await waitFor(() => {
-      expect(queryByLabelText(closeFullScreenButton)).toBeNull();
+      expect(screen.queryByTestSubject('deactivateFullScreenButton')).toBeNull();
     });
   });
 

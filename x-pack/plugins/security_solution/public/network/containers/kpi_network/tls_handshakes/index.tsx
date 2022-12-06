@@ -12,19 +12,19 @@ import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { inputsModel } from '../../../../common/store';
+import type { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  NetworkKpiQueries,
+import type {
   NetworkKpiTlsHandshakesRequestOptions,
   NetworkKpiTlsHandshakesStrategyResponse,
 } from '../../../../../common/search_strategy';
-import { ESTermQuery } from '../../../../../common/typed_json';
+import { NetworkKpiQueries } from '../../../../../common/search_strategy';
+import type { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../../helpers';
-import { InspectResponse } from '../../../../types';
+import type { InspectResponse } from '../../../../types';
 
 export const ID = 'networkKpiTlsHandshakesQuery';
 

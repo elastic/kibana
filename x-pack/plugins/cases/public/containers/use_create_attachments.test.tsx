@@ -9,7 +9,8 @@ import { renderHook, act } from '@testing-library/react-hooks';
 
 import { CommentType } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import { useCreateAttachments, UseCreateAttachments } from './use_create_attachments';
+import type { UseCreateAttachments } from './use_create_attachments';
+import { useCreateAttachments } from './use_create_attachments';
 import { basicCaseId } from './mock';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
@@ -26,13 +27,18 @@ describe('useCreateAttachments', () => {
   });
 
   const abortCtrl = new AbortController();
-  const samplePost = [
+  const attachmentsWithoutOwner = [
     {
       comment: 'a comment',
       type: CommentType.user as const,
-      owner: SECURITY_SOLUTION_OWNER,
     },
   ];
+
+  const attachmentsWithOwner = attachmentsWithoutOwner.map((attachment) => ({
+    ...attachment,
+    owner: SECURITY_SOLUTION_OWNER,
+  }));
+
   const updateCaseCallback = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
@@ -64,11 +70,17 @@ describe('useCreateAttachments', () => {
 
       result.current.createAttachments({
         caseId: basicCaseId,
-        data: samplePost,
+        caseOwner: SECURITY_SOLUTION_OWNER,
+        data: attachmentsWithoutOwner,
         updateCase: updateCaseCallback,
       });
+
       await waitForNextUpdate();
-      expect(spyOnBulkCreateAttachments).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal);
+      expect(spyOnBulkCreateAttachments).toBeCalledWith(
+        attachmentsWithOwner,
+        basicCaseId,
+        abortCtrl.signal
+      );
       expect(toastErrorMock).not.toHaveBeenCalled();
     });
   });
@@ -84,11 +96,17 @@ describe('useCreateAttachments', () => {
 
       result.current.createAttachments({
         caseId: basicCaseId,
-        data: samplePost,
+        caseOwner: SECURITY_SOLUTION_OWNER,
+        data: attachmentsWithoutOwner,
         updateCase: updateCaseCallback,
       });
+
       await waitForNextUpdate();
-      expect(spyOnBulkCreateAttachments).toBeCalledWith(samplePost, basicCaseId, abortCtrl.signal);
+      expect(spyOnBulkCreateAttachments).toBeCalledWith(
+        attachmentsWithOwner,
+        basicCaseId,
+        abortCtrl.signal
+      );
       expect(toastErrorMock).not.toHaveBeenCalled();
     });
   });
@@ -98,12 +116,15 @@ describe('useCreateAttachments', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseCreateAttachments>(() =>
         useCreateAttachments()
       );
+
       await waitForNextUpdate();
       result.current.createAttachments({
         caseId: basicCaseId,
-        data: samplePost,
+        caseOwner: SECURITY_SOLUTION_OWNER,
+        data: attachmentsWithoutOwner,
         updateCase: updateCaseCallback,
       });
+
       await waitForNextUpdate();
       expect(result.current).toEqual({
         isLoading: false,
@@ -118,10 +139,12 @@ describe('useCreateAttachments', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseCreateAttachments>(() =>
         useCreateAttachments()
       );
+
       await waitForNextUpdate();
       result.current.createAttachments({
         caseId: basicCaseId,
-        data: samplePost,
+        caseOwner: SECURITY_SOLUTION_OWNER,
+        data: attachmentsWithoutOwner,
         updateCase: updateCaseCallback,
       });
 
@@ -139,10 +162,12 @@ describe('useCreateAttachments', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseCreateAttachments>(() =>
         useCreateAttachments()
       );
+
       await waitForNextUpdate();
       result.current.createAttachments({
         caseId: basicCaseId,
-        data: samplePost,
+        caseOwner: SECURITY_SOLUTION_OWNER,
+        data: attachmentsWithoutOwner,
         updateCase: updateCaseCallback,
       });
 
@@ -168,11 +193,14 @@ describe('useCreateAttachments', () => {
       const { result, waitForNextUpdate } = renderHook<string, UseCreateAttachments>(() =>
         useCreateAttachments()
       );
+
       await waitForNextUpdate();
+
       async function test() {
         await result.current.createAttachments({
           caseId: basicCaseId,
-          data: samplePost,
+          caseOwner: SECURITY_SOLUTION_OWNER,
+          data: attachmentsWithoutOwner,
           updateCase: updateCaseCallback,
           throwOnError: true,
         });

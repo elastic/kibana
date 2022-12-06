@@ -6,24 +6,29 @@
  */
 import React from 'react';
 import { Redirect, Switch, Route, useLocation } from 'react-router-dom';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { NoFindingsStates } from '../../components/no_findings_states';
+import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
-import { allNavigationItems, findingsNavigation } from '../../common/navigation/constants';
-import { CspPageTemplate } from '../../components/csp_page_template';
+import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { FindingsByResourceContainer } from './latest_findings_by_resource/findings_by_resource_container';
 import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
 
 export const Findings = () => {
   const location = useLocation();
   const dataViewQuery = useLatestFindingsDataView();
+  const getSetupStatus = useCspSetupStatusApi();
 
-  if (!dataViewQuery.data) return <CspPageTemplate paddingSize="none" query={dataViewQuery} />;
+  const hasFindings = getSetupStatus.data?.status === 'indexed';
+  if (!hasFindings) return <NoFindingsStates />;
 
   return (
-    <CspPageTemplate paddingSize="none" query={dataViewQuery}>
+    <CloudPosturePage query={dataViewQuery}>
       <Switch>
         <Route
           exact
-          path={allNavigationItems.findings.path}
+          path={cloudPosturePages.findings.path}
           component={() => (
             <Redirect
               to={{
@@ -35,17 +40,21 @@ export const Findings = () => {
         />
         <Route
           path={findingsNavigation.findings_default.path}
-          render={() => <LatestFindingsContainer dataView={dataViewQuery.data} />}
+          render={() => (
+            <TrackApplicationView viewId={findingsNavigation.findings_default.id}>
+              <LatestFindingsContainer dataView={dataViewQuery.data!} />
+            </TrackApplicationView>
+          )}
         />
         <Route
           path={findingsNavigation.findings_by_resource.path}
-          render={() => <FindingsByResourceContainer dataView={dataViewQuery.data} />}
+          render={() => <FindingsByResourceContainer dataView={dataViewQuery.data!} />}
         />
         <Route
           path={'*'}
           component={() => <Redirect to={findingsNavigation.findings_default.path} />}
         />
       </Switch>
-    </CspPageTemplate>
+    </CloudPosturePage>
   );
 };

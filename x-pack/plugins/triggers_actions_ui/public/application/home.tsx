@@ -11,30 +11,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
 
 import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
-import {
-  Section,
-  routeToConnectors,
-  routeToRules,
-  routeToInternalAlerts,
-  routeToInternalShareableComponentsSandbox,
-} from './constants';
+import { Section, routeToRules, routeToInternalAlerts, routeToLogs } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
-import { hasShowActionsCapability } from './lib/capabilities';
 
 import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
 import { useKibana } from '../common/lib/kibana';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
-const ActionsConnectorsList = lazy(
-  () => import('./sections/actions_connectors_list/components/actions_connectors_list')
-);
 const RulesList = lazy(() => import('./sections/rules_list/components/rules_list'));
+const LogsList = lazy(() => import('./sections/logs_list/components/logs_list'));
 const AlertsPage = lazy(() => import('./sections/alerts_table/alerts_page'));
-const InternalShareableComponentsSandbox = lazy(
-  () => import('./internal/shareable_components_sandbox/shareable_components_sandbox')
-);
 
 export interface MatchParams {
   section: Section;
@@ -46,19 +34,9 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const {
-    chrome,
-    application: { capabilities },
-
-    setBreadcrumbs,
-    docLinks,
-  } = useKibana().services;
+  const { chrome, setBreadcrumbs, docLinks } = useKibana().services;
   const isInternalAlertsTableEnabled = getIsExperimentalFeatureEnabled('internalAlertsTable');
-  const isInternalShareableComponentsSandboxEnabled = getIsExperimentalFeatureEnabled(
-    'internalShareableComponentsSandbox'
-  );
 
-  const canShowActions = hasShowActionsCapability(capabilities);
   const tabs: Array<{
     id: Section;
     name: React.ReactNode;
@@ -71,17 +49,10 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     ),
   });
 
-  if (canShowActions) {
-    tabs.push({
-      id: 'connectors',
-      name: (
-        <FormattedMessage
-          id="xpack.triggersActionsUI.home.connectorsTabTitle"
-          defaultMessage="Connectors"
-        />
-      ),
-    });
-  }
+  tabs.push({
+    id: 'logs',
+    name: <FormattedMessage id="xpack.triggersActionsUI.home.logsTabTitle" defaultMessage="Logs" />,
+  });
 
   if (isInternalAlertsTableEnabled) {
     tabs.push({
@@ -111,10 +82,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
         bottomBorder
         pageTitle={
           <span data-test-subj="appTitle">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.home.appTitle"
-              defaultMessage="Rules and Connectors"
-            />
+            <FormattedMessage id="xpack.triggersActionsUI.home.appTitle" defaultMessage="Rules" />
           </span>
         }
         rightSideItems={[
@@ -133,7 +101,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
         description={
           <FormattedMessage
             id="xpack.triggersActionsUI.home.sectionDescription"
-            defaultMessage="Detect conditions using rules, and take actions using connectors."
+            defaultMessage="Detect conditions using rules."
           />
         }
         tabs={tabs.map((tab) => ({
@@ -150,25 +118,16 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
           <Switch>
-            {canShowActions && (
-              <Route
-                exact
-                path={routeToConnectors}
-                component={suspendedComponentWithProps(ActionsConnectorsList, 'xl')}
-              />
-            )}
+            <Route
+              exact
+              path={routeToLogs}
+              component={suspendedComponentWithProps(LogsList, 'xl')}
+            />
             <Route
               exact
               path={routeToRules}
               component={suspendedComponentWithProps(RulesList, 'xl')}
             />
-            {isInternalShareableComponentsSandboxEnabled && (
-              <Route
-                exact
-                path={routeToInternalShareableComponentsSandbox}
-                component={suspendedComponentWithProps(InternalShareableComponentsSandbox, 'xl')}
-              />
-            )}
             {isInternalAlertsTableEnabled ? (
               <Route
                 exact

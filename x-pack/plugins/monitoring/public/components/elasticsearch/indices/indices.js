@@ -16,7 +16,7 @@ import { EuiMonitoringTable } from '../../table';
 import {
   EuiLink,
   EuiPage,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageBody,
   EuiPanel,
   EuiSwitch,

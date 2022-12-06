@@ -6,7 +6,7 @@
  */
 
 import path, { join, resolve } from 'path';
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 
 import {
   TIMELINE_DRAFT_URL,
@@ -15,11 +15,16 @@ import {
   TIMELINE_URL,
   TIMELINE_PREPACKAGED_URL,
 } from '../../../../common/constants';
-import { SavedTimeline, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import type { SavedTimeline } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 import { requestMock } from '../../detection_engine/routes/__mocks__';
 
-import { patchTimelineSchema, createTimelineSchema, GetTimelineQuery } from '../schemas/timelines';
+import type {
+  patchTimelineSchema,
+  createTimelineSchema,
+  GetTimelineQuery,
+} from '../schemas/timelines';
 
 import { getReadables } from '../utils/common';
 
@@ -36,7 +41,9 @@ export const getExportTimelinesRequest = () =>
   });
 
 export const getImportTimelinesRequest = async (fileName?: string) => {
-  const dir = resolve(join(__dirname, '../../detection_engine/rules/prepackaged_timelines'));
+  const dir = resolve(
+    join(__dirname, '../../detection_engine/prebuilt_rules/content/prepackaged_timelines')
+  );
   const file = fileName ?? 'index.ndjson';
   const dataPath = path.join(dir, file);
   const readable = await getReadables(dataPath);
@@ -91,15 +98,6 @@ export const createTimelineWithoutTimelineId = {
   timelineType: TimelineType.default,
 };
 
-export const createDraftTimelineWithoutTimelineId = {
-  templateTimelineId: null,
-  timeline: inputTimeline,
-  timelineId: null,
-  version: null,
-  timelineType: TimelineType.default,
-  status: TimelineStatus.draft,
-};
-
 export const createTemplateTimelineWithoutTimelineId = {
   timeline: inputTemplateTimeline,
   timelineId: null,
@@ -110,11 +108,6 @@ export const createTemplateTimelineWithoutTimelineId = {
 
 export const createTimelineWithTimelineId = {
   ...createTimelineWithoutTimelineId,
-  timelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
-};
-
-export const createDraftTimelineWithTimelineId = {
-  ...createDraftTimelineWithoutTimelineId,
   timelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
 };
 
@@ -151,16 +144,6 @@ export const getUpdateTimelinesRequest = (mockBody: rt.TypeOf<typeof patchTimeli
     method: 'patch',
     path: TIMELINE_URL,
     body: mockBody,
-  });
-
-export const getImportTimelinesRequestEnableOverwrite = (filename?: string) =>
-  requestMock.create({
-    method: 'post',
-    path: TIMELINE_IMPORT_URL,
-    query: { overwrite: true },
-    body: {
-      file: { hapi: { filename: filename ?? 'filename.ndjson' } },
-    },
   });
 
 export const getDraftTimelinesRequest = (timelineType: TimelineType) =>
@@ -376,23 +359,6 @@ export const mockTimelines = () => ({
       createdBy: 'elastic',
       updated: 1583741175216,
       updatedBy: 'elastic',
-    },
-  ],
-});
-
-export const mockNotesSavedObjects = () => ({
-  saved_objects: [
-    {
-      id: 'eb3f3930-61dc-11ea-8a49-e77254c5b742',
-      type: 'fakeType',
-      attributes: {},
-      references: [],
-    },
-    {
-      id: '706e7510-5d52-11ea-8f07-0392944939c1',
-      type: 'fakeType',
-      attributes: {},
-      references: [],
     },
   ],
 });

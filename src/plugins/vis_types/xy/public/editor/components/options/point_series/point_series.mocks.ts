@@ -346,7 +346,6 @@ export const getVis = (bucketType: string) => {
       titleInWizard: '',
       options: {
         showTimePicker: true,
-        showQueryBar: true,
         showFilterBar: true,
         showIndexSelection: true,
         hierarchicalData: false,
@@ -440,6 +439,7 @@ export const getVis = (bucketType: string) => {
         },
       },
       editorConfig: {
+        enableDataViewChange: true,
         collections: {
           legendPositions: [
             {

@@ -663,7 +663,7 @@ describe('data modeling', () => {
     expect(usageStats).toMatchSnapshot();
   });
 
-  test('with metrics in the data', async () => {
+  test('with metrics and execution times in the data', async () => {
     const collector = getReportingUsageCollector(
       usageCollectionSetup,
       getLicenseMock(),
@@ -717,6 +717,11 @@ describe('data modeling', () => {
                             appNames: { buckets: [{ key: 'dashboard', doc_count: 1 }] },
                           },
                         ],
+                      },
+                      execution_times: {
+                        min: 12,
+                        max: 14,
+                        avg: 13.01,
                       },
                       isDeprecated: { doc_count: 0 },
                       sizes: {

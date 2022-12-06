@@ -5,6 +5,18 @@
  * 2.0.
  */
 
+export interface PhaseInstance {
+  timeoutValue: number;
+  configValue: string;
+  label: string;
+}
+
+export interface PhaseTimeouts {
+  openUrl: PhaseInstance;
+  waitForElements: PhaseInstance;
+  renderComplete: PhaseInstance;
+}
+
 export interface Screenshot {
   /**
    * Screenshot PNG image data.

@@ -7,11 +7,10 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
   <EuiHorizontalRule
     margin="xs"
   />
-  <EuiAccordion
-    arrowDisplay="left"
+  <EuiAccordionClass
     buttonContent={
       <EuiFlexGroup
-        gutterSize="none"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -25,7 +24,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           grow={false}
         >
           <Memo(StatValueComponent)
@@ -34,20 +33,15 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             isLoading={false}
             max={157258653}
           />
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
-    buttonElement="button"
-    element="div"
     id="host-stat-accordion-groupauditbeat"
-    initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
-    paddingSize="none"
   >
     <styled.div>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="auditbeatAuditd"
       >
@@ -67,19 +61,22 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-auditbeatAuditd"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={73847}
-            isGroupStat={false}
-            isLoading={false}
-            max={246351}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={73847}
+              isGroupStat={false}
+              isLoading={false}
+              max={246351}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="auditbeatFIM"
       >
@@ -99,19 +96,22 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-auditbeatFIM"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={107307}
-            isGroupStat={false}
-            isLoading={false}
-            max={246351}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={107307}
+              isGroupStat={false}
+              isLoading={false}
+              max={246351}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="auditbeatLogin"
       >
@@ -131,19 +131,22 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-auditbeatLogin"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={60015}
-            isGroupStat={false}
-            isLoading={false}
-            max={246351}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={60015}
+              isGroupStat={false}
+              isLoading={false}
+              max={246351}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="auditbeatPackage"
       >
@@ -163,19 +166,22 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-auditbeatPackage"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={2003}
-            isGroupStat={false}
-            isLoading={false}
-            max={246351}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={2003}
+              isGroupStat={false}
+              isLoading={false}
+              max={246351}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="auditbeatProcess"
       >
@@ -195,19 +201,22 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-auditbeatProcess"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={1200}
-            isGroupStat={false}
-            isLoading={false}
-            max={246351}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={1200}
+              isGroupStat={false}
+              isLoading={false}
+              max={246351}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="auditbeatUser"
       >
@@ -227,28 +236,29 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-auditbeatUser"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={1979}
-            isGroupStat={false}
-            isLoading={false}
-            max={246351}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={1979}
+              isGroupStat={false}
+              isLoading={false}
+              max={246351}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </EuiAccordion>
+  </EuiAccordionClass>
   <EuiHorizontalRule
     margin="xs"
   />
-  <EuiAccordion
-    arrowDisplay="left"
+  <EuiAccordionClass
     buttonContent={
       <EuiFlexGroup
-        gutterSize="none"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -262,7 +272,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           grow={false}
         >
           <Memo(StatValueComponent)
@@ -271,20 +281,15 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             isLoading={false}
             max={157258653}
           />
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
-    buttonElement="button"
-    element="div"
     id="host-stat-accordion-groupendgame"
-    initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
-    paddingSize="none"
   >
     <styled.div>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="endgameDns"
       >
@@ -304,19 +309,22 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-endgameDns"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={39123}
-            isGroupStat={false}
-            isLoading={false}
-            max={156714735}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={39123}
+              isGroupStat={false}
+              isLoading={false}
+              max={156714735}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="endgameFile"
       >
@@ -336,19 +344,22 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-endgameFile"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={39456}
-            isGroupStat={false}
-            isLoading={false}
-            max={156714735}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={39456}
+              isGroupStat={false}
+              isLoading={false}
+              max={156714735}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="endgameImageLoad"
       >
@@ -368,19 +379,22 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-endgameImageLoad"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={39789}
-            isGroupStat={false}
-            isLoading={false}
-            max={156714735}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={39789}
+              isGroupStat={false}
+              isLoading={false}
+              max={156714735}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="endgameNetwork"
       >
@@ -400,19 +414,22 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-endgameNetwork"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={39101112}
-            isGroupStat={false}
-            isLoading={false}
-            max={156714735}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={39101112}
+              isGroupStat={false}
+              isLoading={false}
+              max={156714735}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="endgameProcess"
       >
@@ -432,19 +449,22 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-endgameProcess"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={39131415}
-            isGroupStat={false}
-            isLoading={false}
-            max={156714735}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={39131415}
+              isGroupStat={false}
+              isLoading={false}
+              max={156714735}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="endgameRegistry"
       >
@@ -464,19 +484,22 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-endgameRegistry"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={39161718}
-            isGroupStat={false}
-            isLoading={false}
-            max={156714735}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={39161718}
+              isGroupStat={false}
+              isLoading={false}
+              max={156714735}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="endgameSecurity"
       >
@@ -496,28 +519,29 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-endgameSecurity"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={39202122}
-            isGroupStat={false}
-            isLoading={false}
-            max={156714735}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={39202122}
+              isGroupStat={false}
+              isLoading={false}
+              max={156714735}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </EuiAccordion>
+  </EuiAccordionClass>
   <EuiHorizontalRule
     margin="xs"
   />
-  <EuiAccordion
-    arrowDisplay="left"
+  <EuiAccordionClass
     buttonContent={
       <EuiFlexGroup
-        gutterSize="none"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -531,7 +555,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           grow={false}
         >
           <Memo(StatValueComponent)
@@ -540,20 +564,15 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             isLoading={false}
             max={157258653}
           />
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
-    buttonElement="button"
-    element="div"
     id="host-stat-accordion-groupfilebeat"
-    initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
-    paddingSize="none"
   >
     <styled.div>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="filebeatSystemModule"
       >
@@ -573,28 +592,29 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-filebeatSystemModule"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={568}
-            isGroupStat={false}
-            isLoading={false}
-            max={568}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={568}
+              isGroupStat={false}
+              isLoading={false}
+              max={568}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </EuiAccordion>
+  </EuiAccordionClass>
   <EuiHorizontalRule
     margin="xs"
   />
-  <EuiAccordion
-    arrowDisplay="left"
+  <EuiAccordionClass
     buttonContent={
       <EuiFlexGroup
-        gutterSize="none"
+        gutterSize="s"
         justifyContent="spaceBetween"
       >
         <EuiFlexItem
@@ -608,7 +628,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           grow={false}
         >
           <Memo(StatValueComponent)
@@ -617,20 +637,15 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             isLoading={false}
             max={157258653}
           />
-        </EuiFlexItem>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     }
     buttonContentClassName="accordion-button"
-    buttonElement="button"
-    element="div"
     id="host-stat-accordion-groupwinlogbeat"
-    initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
-    paddingSize="none"
   >
     <styled.div>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="winlogbeatSecurity"
       >
@@ -650,19 +665,22 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-winlogbeatSecurity"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={195929}
-            isGroupStat={false}
-            isLoading={false}
-            max={296999}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={195929}
+              isGroupStat={false}
+              isLoading={false}
+              max={296999}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
       <EuiFlexGroup
+        gutterSize="s"
         justifyContent="spaceBetween"
         key="winlogbeatMWSysmonOperational"
       >
@@ -682,19 +700,21 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
             </styled.div>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem
+        <Styled(EuiFlexItem)
           data-test-subj="host-stat-winlogbeatMWSysmonOperational"
           grow={false}
         >
-          <Memo(StatValueComponent)
-            count={101070}
-            isGroupStat={false}
-            isLoading={false}
-            max={296999}
-          />
-        </EuiFlexItem>
+          <styled.div>
+            <Memo(StatValueComponent)
+              count={101070}
+              isGroupStat={false}
+              isLoading={false}
+              max={296999}
+            />
+          </styled.div>
+        </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </EuiAccordion>
+  </EuiAccordionClass>
 </styled.div>
 `;

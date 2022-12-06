@@ -182,7 +182,6 @@ type TestSubject =
   | 'copyFromInput'
   | 'trimSwitch.input'
   | 'droppableList.addButton'
-  | 'droppableList.errorIcon'
   | 'droppableList.input-0'
   | 'droppableList.input-1'
   | 'droppableList.input-2';

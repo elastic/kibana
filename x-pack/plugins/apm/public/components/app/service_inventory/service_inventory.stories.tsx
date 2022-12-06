@@ -36,11 +36,11 @@ const stories: Meta<{}> = {
               default:
                 return {};
             }
-            return {};
           },
         },
         notifications: { toasts: { add: () => {}, addWarning: () => {} } },
         uiSettings: { get: () => [] },
+        dataViews: { create: async () => {} },
       } as unknown as CoreStart;
 
       const KibanaReactContext = createKibanaReactContext(coreMock);

@@ -21,16 +21,12 @@ export async function ensureFleetServerAgentPoliciesExists(
     perPage: SO_SEARCH_LIMIT,
   });
 
-  await Promise.all(
-    agentPolicies.map(async (agentPolicy) => {
-      const policyChangeActionExist = !!(await agentPolicyService.getLatestFleetPolicy(
-        esClient,
-        agentPolicy.id
-      ));
+  const outdatedAgentPolicyIds = agentPolicies
+    .filter(
+      async (agentPolicy) =>
+        !!(await agentPolicyService.getLatestFleetPolicy(esClient, agentPolicy.id))
+    )
+    .map((agentPolicy) => agentPolicy.id);
 
-      if (!policyChangeActionExist) {
-        return agentPolicyService.deployPolicy(soClient, agentPolicy.id);
-      }
-    })
-  );
+  await agentPolicyService.deployPolicies(soClient, outdatedAgentPolicyIds);
 }

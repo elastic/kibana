@@ -6,23 +6,25 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
+import type { DraggableChildrenFn } from 'react-beautiful-dnd';
+import { Droppable } from 'react-beautiful-dnd';
 
+import { useDispatch } from 'react-redux';
+import { removeColumn, upsertColumn } from '../../../../store/timeline/actions';
 import { DragEffects } from '../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { DraggableFieldBadge } from '../../../../../common/components/draggables/field_badge';
-import { BrowserFields } from '../../../../../common/containers/source';
+import type { BrowserFields } from '../../../../../common/containers/source';
 import {
   DRAG_TYPE_FIELD,
   droppableTimelineColumnsPrefix,
 } from '../../../../../common/components/drag_and_drop/helpers';
-import {
+import type {
   ColumnHeaderOptions,
   ControlColumnProps,
   HeaderActionProps,
-  TimelineId,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import { OnSelectAll } from '../../events';
+import type { OnSelectAll } from '../../events';
 import {
   EventsTh,
   EventsThead,
@@ -30,11 +32,12 @@ import {
   EventsTrHeader,
   EventsThGroupActions,
 } from '../../styles';
-import { Sort } from '../sort';
+import type { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
 
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { useFieldBrowserOptions, FieldEditorActions } from '../../../fields_browser';
+import type { FieldEditorActions } from '../../../fields_browser';
+import { useFieldBrowserOptions } from '../../../fields_browser';
 
 export interface ColumnHeadersComponentProps {
   actionsColumnWidth: number;
@@ -75,15 +78,14 @@ DraggableContainer.displayName = 'DraggableContainer';
 
 export const isFullScreen = ({
   globalFullScreen,
-  timelineId,
+  isActiveTimelines,
   timelineFullScreen,
 }: {
   globalFullScreen: boolean;
-  timelineId: string;
+  isActiveTimelines: boolean;
   timelineFullScreen: boolean;
 }) =>
-  (timelineId === TimelineId.active && timelineFullScreen) ||
-  (timelineId !== TimelineId.active && globalFullScreen);
+  (isActiveTimelines && timelineFullScreen) || (isActiveTimelines === false && globalFullScreen);
 
 /** Renders the timeline header columns */
 export const ColumnHeadersComponent = ({
@@ -102,6 +104,8 @@ export const ColumnHeadersComponent = ({
   leadingControlColumns,
   trailingControlColumns,
 }: ColumnHeadersComponentProps) => {
+  const dispatch = useDispatch();
+
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const fieldEditorActionsRef = useRef<FieldEditorActions>(null);
 
@@ -192,8 +196,9 @@ export const ColumnHeadersComponent = ({
 
   const fieldBrowserOptions = useFieldBrowserOptions({
     sourcererScope: SourcererScopeName.timeline,
-    timelineId: timelineId as TimelineId,
     editorActionsRef: fieldEditorActionsRef,
+    upsertColumn: (column, index) => dispatch(upsertColumn({ column, id: timelineId, index })),
+    removeColumn: (columnId) => dispatch(removeColumn({ columnId, id: timelineId })),
   });
 
   const LeadingHeaderActions = useMemo(() => {

@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
-
-import { GetOnePackagePolicyResponse } from '@kbn/fleet-plugin/common';
+import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../common/lib/kibana';
-import { OsqueryManagerPackagePolicy } from '../../common/types';
+import type { PackItem } from './types';
 
 interface UsePack {
-  packId: string;
+  packId?: string;
   skip?: boolean;
 }
 
 export const usePack = ({ packId, skip = false }: UsePack) => {
   const { http } = useKibana().services;
 
-  return useQuery<
-    Omit<GetOnePackagePolicyResponse, 'item'> & { item: OsqueryManagerPackagePolicy },
-    unknown,
-    OsqueryManagerPackagePolicy
-  >(['pack', { packId }], () => http.get(`/internal/osquery/packs/${packId}`), {
-    keepPreviousData: true,
-    enabled: !skip || !packId,
-  });
+  return useQuery<{ data: PackItem }, unknown, PackItem>(
+    ['pack', { packId }],
+    () => http.get(`/api/osquery/packs/${packId}`),
+    {
+      select: (response) => response?.data,
+      keepPreviousData: true,
+      enabled: !!(!skip && packId),
+    }
+  );
 };

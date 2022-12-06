@@ -7,10 +7,10 @@
  */
 
 import { Filter } from '@kbn/es-query';
+import { EmbeddableInput, IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DashboardOptions, DashboardState } from '../../types';
 import { diffDashboardState } from './diff_dashboard_state';
-import { EmbeddableInput, IEmbeddable, ViewMode } from '../../services/embeddable';
 
 const testFilter: Filter = {
   meta: {
@@ -41,6 +41,7 @@ const getDashboardState = (state?: Partial<DashboardState>): DashboardState => {
       useMargins: true,
       syncColors: false,
       syncTooltips: false,
+      syncCursor: true,
     },
     panels: {
       panel_1: {
@@ -99,6 +100,7 @@ describe('Dashboard state diff function', () => {
           useMargins: false,
           syncColors: false,
           syncTooltips: false,
+          syncCursor: true,
         },
       })
     ).toEqual(['options']);
@@ -111,6 +113,7 @@ describe('Dashboard state diff function', () => {
           useMargins: true,
           syncColors: undefined,
           syncTooltips: undefined,
+          syncCursor: true,
         } as unknown as DashboardOptions,
       })
     ).toEqual([]);

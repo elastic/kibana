@@ -8,8 +8,6 @@
 
 import { FtrService } from '../ftr_provider_context';
 import { WebElementWrapper } from './lib/web_element_wrapper';
-// @ts-ignore not supported yet
-import { scrollIntoViewIfNecessary } from './lib/web_element_wrapper/scroll_into_view_if_necessary';
 
 /**
  * wrapper around EuiComboBox interactions
@@ -35,6 +33,13 @@ export class ComboBoxService extends FtrService {
   public async set(comboBoxSelector: string, value: string): Promise<void> {
     this.log.debug(`comboBox.set, comboBoxSelector: ${comboBoxSelector}`);
     const comboBox = await this.testSubjects.find(comboBoxSelector);
+    await this.setElement(comboBox, value);
+  }
+
+  public async setForLastInput(comboBoxSelector: string, value: string): Promise<void> {
+    this.log.debug(`comboBox.set, comboBoxSelector: ${comboBoxSelector}`);
+    const comboBoxes = await this.testSubjects.findAll(comboBoxSelector);
+    const comboBox = comboBoxes[comboBoxes.length - 1];
     await this.setElement(comboBox, value);
   }
 
@@ -307,6 +312,14 @@ export class ComboBoxService extends FtrService {
   public async clearInputField(comboBoxSelector: string): Promise<void> {
     this.log.debug(`comboBox.clearInputField, comboBoxSelector:${comboBoxSelector}`);
     const comboBoxElement = await this.testSubjects.find(comboBoxSelector);
+    const input = await comboBoxElement.findByTagName('input');
+    await input.clearValueWithKeyboard();
+  }
+
+  public async clearLastInputField(comboBoxSelector: string): Promise<void> {
+    this.log.debug(`comboBox.clearInputField, comboBoxSelector:${comboBoxSelector}`);
+    const comboBoxElements = await this.testSubjects.findAll(comboBoxSelector);
+    const comboBoxElement = comboBoxElements[comboBoxElements.length - 1];
     const input = await comboBoxElement.findByTagName('input');
     await input.clearValueWithKeyboard();
   }

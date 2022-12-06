@@ -1,0 +1,24 @@
+{
+  "vocabulary": [
+    "[PAD]",
+    "[UNK]",
+    "[CLS]",
+    "[SEP]",
+    "[MASK]",
+    "Hello",
+    "world",
+    "car",
+    "bike",
+    "bee",
+    "bird",
+    "and",
+    "my",
+    "name",
+    "is",
+    "I'm",
+    "Spartacus",
+    "glad",
+    "sad",
+    "bad"
+ ]
+}

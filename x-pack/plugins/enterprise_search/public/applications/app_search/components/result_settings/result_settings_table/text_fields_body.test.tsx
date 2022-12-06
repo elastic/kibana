@@ -37,6 +37,7 @@ describe('TextFieldsBody', () => {
         snippetFallback: false,
       },
     },
+    isSnippetAllowed: () => true,
   };
 
   const actions = {
@@ -110,6 +111,15 @@ describe('TextFieldsBody', () => {
       const snippetCheckbox = getSnippetCheckbox();
       snippetCheckbox.simulate('change');
       expect(actions.toggleSnippetForField).toHaveBeenCalledWith('foo');
+    });
+
+    describe('when "isSnippetAllowed" return false', () => {
+      values.isSnippetAllowed = () => false;
+
+      it('the snippet checkbox is disabled', () => {
+        const snippetCheckbox = getSnippetCheckbox();
+        expect(snippetCheckbox.prop('disabled')).toEqual(true);
+      });
     });
   });
 

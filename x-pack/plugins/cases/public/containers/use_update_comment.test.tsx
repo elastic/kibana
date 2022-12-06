@@ -7,14 +7,17 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useUpdateComment, UseUpdateComment } from './use_update_comment';
-import { basicCase, basicCaseCommentPatch } from './mock';
+import type { UseUpdateComment } from './use_update_comment';
+import { useUpdateComment } from './use_update_comment';
+import { basicCase } from './mock';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
+jest.mock('../components/case_view/use_on_refresh_case_view_page');
 
 describe('useUpdateComment', () => {
   const abortCtrl = new AbortController();
@@ -82,8 +85,7 @@ describe('useUpdateComment', () => {
         isError: false,
         patchComment: result.current.patchComment,
       });
-      expect(fetchUserActions).toBeCalled();
-      expect(updateCase).toBeCalledWith(basicCaseCommentPatch);
+      expect(useRefreshCaseViewPage()).toBeCalled();
     });
   });
 

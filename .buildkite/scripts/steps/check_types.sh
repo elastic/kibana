@@ -7,5 +7,4 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
 echo --- Check Types
-checks-reporter-with-killswitch "Check Types" \
-  node scripts/type_check
+node scripts/type_check

@@ -5,45 +5,50 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs, EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { useHistory } from 'react-router-dom';
 import { LogStream } from '@kbn/infra-plugin/public';
+import React from 'react';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import type { ApmUrlParams } from '../../../../context/url_params_context/types';
-import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { TransactionMetadata } from '../../../shared/metadata_table/transaction_metadata';
 import { WaterfallContainer } from './waterfall_container';
 import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 interface Props {
-  transaction: Transaction;
-  urlParams: ApmUrlParams;
+  transaction?: Transaction;
+  isLoading: boolean;
   waterfall: IWaterfall;
+  detailTab?: TransactionTab;
+  serviceName?: string;
+  waterfallItemId?: string;
+  onTabClick: (tab: TransactionTab) => void;
+  showCriticalPath: boolean;
+  onShowCriticalPathChange: (showCriticalPath: boolean) => void;
 }
 
-export function TransactionTabs({ transaction, urlParams, waterfall }: Props) {
-  const history = useHistory();
+export function TransactionTabs({
+  transaction,
+  waterfall,
+  isLoading,
+  detailTab,
+  waterfallItemId,
+  serviceName,
+  onTabClick,
+  showCriticalPath,
+  onShowCriticalPathChange,
+}: Props) {
   const tabs = [timelineTab, metadataTab, logsTab];
-  const currentTab =
-    tabs.find(({ key }) => key === urlParams.detailTab) ?? timelineTab;
+  const currentTab = tabs.find(({ key }) => key === detailTab) ?? timelineTab;
   const TabContent = currentTab.component;
 
   return (
-    <React.Fragment>
+    <>
       <EuiTabs>
         {tabs.map(({ key, label }) => {
           return (
             <EuiTab
               onClick={() => {
-                history.replace({
-                  ...history.location,
-                  search: fromQuery({
-                    ...toQuery(history.location.search),
-                    detailTab: key,
-                  }),
-                });
+                onTabClick(key);
               }}
               isSelected={currentTab.key === key}
               key={key}
@@ -55,18 +60,30 @@ export function TransactionTabs({ transaction, urlParams, waterfall }: Props) {
       </EuiTabs>
 
       <EuiSpacer />
-
-      <TabContent
-        urlParams={urlParams}
-        waterfall={waterfall}
-        transaction={transaction}
-      />
-    </React.Fragment>
+      {isLoading || !transaction ? (
+        <EuiLoadingContent lines={3} data-test-sub="loading-content" />
+      ) : (
+        <TabContent
+          waterfallItemId={waterfallItemId}
+          serviceName={serviceName}
+          waterfall={waterfall}
+          transaction={transaction}
+          showCriticalPath={showCriticalPath}
+          onShowCriticalPathChange={onShowCriticalPathChange}
+        />
+      )}
+    </>
   );
 }
 
+export enum TransactionTab {
+  timeline = 'timeline',
+  metadata = 'metadata',
+  logs = 'logs',
+}
+
 const timelineTab = {
-  key: 'timeline',
+  key: TransactionTab.timeline,
   label: i18n.translate('xpack.apm.propertiesTable.tabs.timelineLabel', {
     defaultMessage: 'Timeline',
   }),
@@ -74,7 +91,7 @@ const timelineTab = {
 };
 
 const metadataTab = {
-  key: 'metadata',
+  key: TransactionTab.metadata,
   label: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
     defaultMessage: 'Metadata',
   }),
@@ -82,7 +99,7 @@ const metadataTab = {
 };
 
 const logsTab = {
-  key: 'logs',
+  key: TransactionTab.logs,
   label: i18n.translate('xpack.apm.propertiesTable.tabs.logsLabel', {
     defaultMessage: 'Logs',
   }),
@@ -90,13 +107,27 @@ const logsTab = {
 };
 
 function TimelineTabContent({
-  urlParams,
   waterfall,
+  waterfallItemId,
+  serviceName,
+  showCriticalPath,
+  onShowCriticalPathChange,
 }: {
-  urlParams: ApmUrlParams;
+  waterfallItemId?: string;
+  serviceName?: string;
   waterfall: IWaterfall;
+  showCriticalPath: boolean;
+  onShowCriticalPathChange: (showCriticalPath: boolean) => void;
 }) {
-  return <WaterfallContainer urlParams={urlParams} waterfall={waterfall} />;
+  return (
+    <WaterfallContainer
+      waterfallItemId={waterfallItemId}
+      serviceName={serviceName}
+      waterfall={waterfall}
+      showCriticalPath={showCriticalPath}
+      onShowCriticalPathChange={onShowCriticalPathChange}
+    />
+  );
 }
 
 function MetadataTabContent({ transaction }: { transaction: Transaction }) {
@@ -111,9 +142,10 @@ function LogsTabContent({ transaction }: { transaction: Transaction }) {
   const framePaddingMs = 1000 * 60 * 60 * 24; // 24 hours
   return (
     <LogStream
+      logView={{ type: 'log-view-reference', logViewId: 'default' }}
       startTimestamp={startTimestamp - framePaddingMs}
       endTimestamp={endTimestamp + framePaddingMs}
-      query={`trace.id:"${transaction.trace.id}" OR "${transaction.trace.id}"`}
+      query={`trace.id:"${transaction.trace.id}" OR (not trace.id:* AND "${transaction.trace.id}")`}
       height={640}
       columns={[
         { type: 'timestamp' },
@@ -128,6 +160,7 @@ function LogsTabContent({ transaction }: { transaction: Transaction }) {
         },
         { type: 'message' },
       ]}
+      showFlyoutAction
     />
   );
 }

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { Ecs } from '../../../../../common/ecs';
+import type { Ecs } from '../../../../../common/ecs';
 import { ActionIconItem } from '../../../../timelines/components/timeline/body/actions/action_icon_item';
 
 import {
@@ -17,7 +17,7 @@ import {
 import { useInvestigateInTimeline } from './use_investigate_in_timeline';
 
 interface InvestigateInTimelineActionProps {
-  ecsRowData?: Ecs | Ecs[] | null;
+  ecsRowData?: Ecs | null;
   ariaLabel?: string;
   buttonType?: 'text' | 'icon';
   onInvestigateInTimelineAlertClick?: () => void;

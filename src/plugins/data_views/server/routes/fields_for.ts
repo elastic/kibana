@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import {
   IRouter,
-  StartServicesAccessor,
   RequestHandler,
   RouteValidatorFullConfig,
+  StartServicesAccessor,
 } from '@kbn/core/server';
-import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
 import { IndexPatternsFetcher } from '../fetcher';
+import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
 
 const parseMetaFields = (metaFields: string | string[]) => {
   let parsedFields: string[] = [];
@@ -28,7 +29,7 @@ const parseMetaFields = (metaFields: string | string[]) => {
 
 const path = '/api/index_patterns/_fields_for_wildcard';
 
-type IBody = { index_filter?: any } | undefined;
+type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
 interface IQuery {
   pattern: string;
   meta_fields: string[];
@@ -72,7 +73,7 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
   }
 
   try {
-    const fields = await indexPatterns.getFieldsForWildcard({
+    const { fields, indices } = await indexPatterns.getFieldsForWildcard({
       pattern,
       metaFields: parsedFields,
       type,
@@ -84,7 +85,7 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
     });
 
     return response.ok({
-      body: { fields },
+      body: { fields, indices },
       headers: {
         'content-type': 'application/json',
       },
@@ -117,5 +118,6 @@ export const registerFieldForWildcard = (
   >
 ) => {
   router.put({ path, validate }, handler);
+  router.post({ path, validate }, handler);
   router.get({ path, validate }, handler);
 };

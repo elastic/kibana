@@ -6,8 +6,8 @@
  */
 
 import { CASE_SAVED_OBJECT } from '../../../../../common/constants';
-import { CasesMetricsResponse } from '../../../../../common/api';
-import { AggregationBuilder, AggregationResponse } from '../../types';
+import type { CasesMetricsResponse } from '../../../../../common/api';
+import type { AggregationBuilder, AggregationResponse } from '../../types';
 
 export class AverageDuration implements AggregationBuilder<CasesMetricsResponse> {
   build() {
@@ -23,7 +23,7 @@ export class AverageDuration implements AggregationBuilder<CasesMetricsResponse>
   formatResponse(aggregations: AggregationResponse) {
     const aggs = aggregations as MTTRAggregate;
 
-    const mttr = aggs?.mttr?.value ?? 0;
+    const mttr = aggs?.mttr?.value ?? null;
 
     return { mttr };
   }

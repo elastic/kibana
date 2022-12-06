@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visChart',
     'timePicker',
   ]);
-  const xyChartSelector = 'visTypeXyChart';
+  const xyChartSelector = 'xyVisChart';
 
   describe('line charts - split series', function () {
     const initLineChart = async function () {
@@ -114,11 +114,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show correct data, ordered by Term', async function () {
       const expectedChartData = [
-        ['png', '1,373'],
-        ['php', '445'],
-        ['jpg', '9,109'],
-        ['gif', '918'],
-        ['css', '2,159'],
+        ['png', '1,373', '_all'],
+        ['php', '445', '_all'],
+        ['jpg', '9,109', '_all'],
+        ['gif', '918', '_all'],
+        ['css', '2,159', '_all'],
       ];
 
       await inspector.open();

@@ -1,7 +1,7 @@
 - name: find docker image
   find:
     paths: /packages/
-    patterns: kibana-*-docker-image.tar.gz
+    patterns: kibana-[0-9]*-docker-image.tar.gz
   register: kibana_docker
 
 - name: load image
@@ -24,3 +24,4 @@
       ELASTICSEARCH_HOSTS: http://192.168.56.1:9200
       ELASTICSEARCH_USERNAME: '{{ elasticsearch_username }}'
       ELASTICSEARCH_PASSWORD: '{{ elasticsearch_password }}'
+      XPACK_REPORTING_CAPTURE_BROWSER_CHROMIUM_DISABLESANDBOX: 'true'

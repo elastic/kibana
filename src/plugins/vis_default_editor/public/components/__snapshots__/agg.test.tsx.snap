@@ -1,9 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DefaultEditorAgg component should init with the default set of props 1`] = `
-<EuiAccordion
+<EuiAccordionClass
   aria-label="Toggle metric editor"
-  arrowDisplay="left"
   buttonClassName="eui-textTruncate"
   buttonContent={
     <React.Fragment>
@@ -12,10 +11,8 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
     </React.Fragment>
   }
   buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
-  buttonElement="button"
   className="visEditorSidebar__section visEditorSidebar__collapsible visEditorSidebar__collapsible--marginBottom"
   data-test-subj="visEditorAggAccordion1"
-  element="div"
   extraAction={
     <React.Fragment>
       <EuiToolTip
@@ -36,10 +33,7 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
   }
   id="visEditorAggAccordion1"
   initialIsOpen={true}
-  isLoading={false}
-  isLoadingMessage={false}
   onToggle={[Function]}
-  paddingSize="none"
 >
   <EuiSpacer
     size="m"
@@ -78,5 +72,5 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
       }
     }
   />
-</EuiAccordion>
+</EuiAccordionClass>
 `;

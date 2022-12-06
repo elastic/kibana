@@ -15,10 +15,11 @@ import {
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
   GetK8sManifestRequestSchema,
+  BulkGetAgentPoliciesRequestSchema,
 } from '../../types';
 import type { FleetAuthzRouter } from '../security';
 
-import { K8S_API_ROUTES } from '../../../common';
+import { K8S_API_ROUTES } from '../../../common/constants';
 
 import {
   getAgentPoliciesHandler,
@@ -31,6 +32,7 @@ import {
   downloadFullAgentPolicy,
   downloadK8sManifest,
   getK8sManifest,
+  bulkGetAgentPoliciesHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -44,6 +46,18 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     getAgentPoliciesHandler
+  );
+
+  // Bulk GET
+  router.post(
+    {
+      path: AGENT_POLICY_API_ROUTES.BULK_GET_PATTERN,
+      validate: BulkGetAgentPoliciesRequestSchema,
+      fleetAuthz: {
+        fleet: { readAgentPolicies: true },
+      },
+    },
+    bulkGetAgentPoliciesHandler
   );
 
   // Get one

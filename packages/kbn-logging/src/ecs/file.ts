@@ -9,14 +9,12 @@
 import { EcsCodeSignature } from './code_signature';
 import { EcsElf } from './elf';
 import { EcsHash } from './hash';
-import { EcsPe } from './pe';
 import { EcsX509 } from './x509';
 
 interface NestedFields {
   code_signature?: EcsCodeSignature;
   elf?: EcsElf;
   hash?: EcsHash;
-  pe?: EcsPe;
   x509?: EcsX509;
 }
 

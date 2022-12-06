@@ -78,7 +78,7 @@ export async function renderTemplates({
       dot: true,
       buffer: true,
       nodir: true,
-      cwd: Path.resolve(__dirname, '../template'),
+      cwd: Path.resolve(__dirname, '../../template'),
     }),
 
     // exclude files from the template based on selected options, patterns

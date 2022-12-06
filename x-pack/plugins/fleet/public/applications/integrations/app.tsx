@@ -14,13 +14,18 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { Chat } from '@kbn/cloud-plugin/public';
+import { Chat } from '@kbn/cloud-chat-plugin/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
-import { ConfigContext, FleetStatusProvider, KibanaVersionContext } from '../../hooks';
+import {
+  ConfigContext,
+  FleetStatusProvider,
+  KibanaVersionContext,
+  useFleetStatus,
+} from '../../hooks';
 
 import { FleetServerFlyout } from '../fleet/components';
 
@@ -110,6 +115,7 @@ export const IntegrationsAppContext: React.FC<{
 
 export const AppRoutes = memo(() => {
   const flyoutContext = useFlyoutContext();
+  const fleetStatus = useFleetStatus();
 
   return (
     <>
@@ -142,7 +148,11 @@ export const AppRoutes = memo(() => {
       {flyoutContext.isEnrollmentFlyoutOpen && (
         <EuiPortal>
           <AgentEnrollmentFlyout
-            defaultMode="standalone"
+            defaultMode={
+              fleetStatus.isReady && fleetStatus.missingRequirements?.includes('fleet_server')
+                ? 'managed'
+                : 'standalone'
+            }
             isIntegrationFlow={true}
             onClose={() => flyoutContext.closeEnrollmentFlyout()}
           />

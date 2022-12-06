@@ -10,13 +10,14 @@ import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { networkActions, networkModel, networkSelectors } from '../../store';
-import {
+import type {
   Direction,
   SortField,
   NetworkDnsEdges,
   NetworkDnsFields,
 } from '../../../../common/search_strategy';
-import { Criteria, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
+import type { Criteria, ItemsPerRow } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 import { getNetworkDnsColumns } from './columns';

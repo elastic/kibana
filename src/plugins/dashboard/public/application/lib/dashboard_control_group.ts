@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
+import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
-import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged, skip } from 'rxjs/operators';
 
 import {
   ControlGroupInput,
-  controlGroupInputToRawControlGroupAttributes,
   getDefaultControlGroupInput,
   persistableControlGroupInputIsEqual,
-  rawControlGroupAttributesToControlGroupInput,
+  controlGroupInputToRawControlGroupAttributes,
 } from '@kbn/controls-plugin/common';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 
 import { DashboardContainer } from '..';
 import { DashboardState } from '../../types';
-import { DashboardContainerInput, DashboardSavedObject } from '../..';
+import { DashboardContainerInput } from '../..';
 
 interface DiffChecks {
   [key: string]: (a?: unknown, b?: unknown) => boolean;
@@ -140,10 +140,22 @@ export const syncDashboardControlGroup = async ({
       .pipe(
         distinctUntilChanged(({ filters: filtersA }, { filters: filtersB }) =>
           compareAllFilters(filtersA, filtersB)
+        ),
+        skip(1) // skip first filter output because it will have been applied in initialize
+      )
+      .subscribe(() => dashboardContainer.updateInput({ lastReloadRequestTime: Date.now() }))
+  );
+
+  subscriptions.add(
+    controlGroup
+      .getOutput$()
+      .pipe(
+        distinctUntilChanged(({ timeslice: timesliceA }, { timeslice: timesliceB }) =>
+          _.isEqual(timesliceA, timesliceB)
         )
       )
-      .subscribe(() => {
-        dashboardContainer.updateInput({ lastReloadRequestTime: Date.now() });
+      .subscribe(({ timeslice }) => {
+        dashboardContainer.updateInput({ timeslice });
       })
   );
 
@@ -155,53 +167,22 @@ export const syncDashboardControlGroup = async ({
   };
 };
 
-export const serializeControlGroupToDashboardSavedObject = (
-  dashboardSavedObject: DashboardSavedObject,
-  dashboardState: DashboardState
+export const serializeControlGroupInput = (
+  controlGroupInput: DashboardState['controlGroupInput']
 ) => {
   // only save to saved object if control group is not default
   if (
-    persistableControlGroupInputIsEqual(
-      dashboardState.controlGroupInput,
-      getDefaultControlGroupInput()
-    )
+    !controlGroupInput ||
+    persistableControlGroupInputIsEqual(controlGroupInput, getDefaultControlGroupInput())
   ) {
-    dashboardSavedObject.controlGroupInput = undefined;
-    return;
+    return undefined;
   }
-  if (dashboardState.controlGroupInput) {
-    dashboardSavedObject.controlGroupInput = controlGroupInputToRawControlGroupAttributes(
-      dashboardState.controlGroupInput
-    );
-  }
-};
-
-export const deserializeControlGroupFromDashboardSavedObject = (
-  dashboardSavedObject: DashboardSavedObject
-): Omit<ControlGroupInput, 'id'> | undefined => {
-  if (!dashboardSavedObject.controlGroupInput) return;
-  return rawControlGroupAttributesToControlGroupInput(dashboardSavedObject.controlGroupInput);
+  return controlGroupInputToRawControlGroupAttributes(controlGroupInput);
 };
 
 export const combineDashboardFiltersWithControlGroupFilters = (
   dashboardFilters: Filter[],
   controlGroup: ControlGroupContainer
-) => {
-  const dashboardFiltersByKey = dashboardFilters.reduce(
-    (acc: { [key: string]: Filter }, current) => {
-      const key = current.meta.key;
-      if (key) acc[key] = current;
-      return acc;
-    },
-    {}
-  );
-  const controlGroupFiltersByKey = controlGroup
-    .getOutput()
-    .filters?.reduce((acc: { [key: string]: Filter }, current) => {
-      const key = current.meta.key;
-      if (key) acc[key] = current;
-      return acc;
-    }, {});
-  const finalFilters = { ...dashboardFiltersByKey, ...(controlGroupFiltersByKey ?? {}) };
-  return Object.values(finalFilters);
+): Filter[] => {
+  return [...dashboardFilters, ...(controlGroup.getOutput().filters ?? [])];
 };

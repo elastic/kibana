@@ -59,6 +59,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       (update: MlAnomalyDetectionAlertParams[T]) => {
         setRuleParams(param, update);
       },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -83,6 +84,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         toastLifeTimeMs: 5000,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobsAndGroupIds]);
 
   const availableResultTypes = useMemo(() => {
@@ -98,6 +100,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       if (jobsAndGroupIds.length === 0) return;
       fetchJobsConfig();
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobsAndGroupIds]
   );
 
@@ -130,6 +133,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       lookbackInterval,
       topNBuckets,
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleParams.lookbackInterval, ruleParams.topNBuckets, jobConfigs]);
 
   const resultParams = useMemo(() => {
@@ -164,6 +168,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       <JobSelectorControl
         jobsAndGroupIds={jobsAndGroupIds}
         adJobsApiService={adJobsApiService}
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         onChange={useCallback(onAlertParamChange('jobSelection'), [])}
         errors={Array.isArray(errors.jobSelection) ? errors.jobSelection : []}
       />
@@ -179,15 +184,18 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       <ResultTypeSelector
         value={ruleParams.resultType}
         availableOption={availableResultTypes}
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         onChange={useCallback(onAlertParamChange('resultType'), [])}
       />
       <SeverityControl
         value={ruleParams.severity}
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         onChange={useCallback(onAlertParamChange('severity'), [])}
       />
       <EuiSpacer size="m" />
       <InterimResultsControl
         value={ruleParams.includeInterim}
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         onChange={useCallback(onAlertParamChange('includeInterim'), [])}
       />
       <EuiSpacer size="m" />
@@ -198,6 +206,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
           Object.keys(update).forEach((k) => {
             setRuleParams(k, update[k as keyof MlAnomalyDetectionAlertAdvancedSettings]);
           });
+          // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [])}
       />
 

@@ -3,5 +3,10 @@
 }
 
 .canvasArg__addPopover {
+  @include euiScrollBar;
+
   width: 250px;
+  max-height: 500px;
+
+  overflow-y: auto;
 }

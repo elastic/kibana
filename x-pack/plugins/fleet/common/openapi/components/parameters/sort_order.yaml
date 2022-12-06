@@ -1,0 +1,6 @@
+name: sortOrder
+in: query
+required: false
+schema:
+  type: string
+  enum: [asc, desc]

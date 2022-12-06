@@ -198,6 +198,11 @@ export interface ApiDeclaration {
    * Is this API deprecated or not?
    */
   deprecated?: boolean;
+
+  /**
+   * Are we interested in tracking adoption of this API?
+   */
+  trackAdoption?: boolean;
 }
 
 /**
@@ -234,7 +239,7 @@ export interface ReferencedDeprecationsByPlugin {
   [key: string]: Array<{ deprecatedApi: ApiDeclaration; ref: ApiReference }>;
 }
 
-// A mapping of plugin owner to it's plugin deprecation list.
+// A mapping of plugin owner to its plugin deprecation list.
 export interface ReferencedDeprecationsByTeam {
   // Key is the plugin owner.
   [key: string]: ReferencedDeprecationsByPlugin;
@@ -243,6 +248,23 @@ export interface ReferencedDeprecationsByTeam {
 export interface UnreferencedDeprecationsByPlugin {
   // Key is the plugin id.
   [key: string]: ApiDeclaration[];
+}
+
+export interface AdoptionTrackedAPIStats {
+  /**
+   * Minimal identifiers for the tracked API.
+   */
+  trackedApi: { id: string; label: string };
+  /**
+   * List of plugins where the API is used. For stats that is more than enough.
+   */
+  references: string[];
+}
+
+// A mapping of plugin id to a list of every deprecated API it uses, and where it's referenced.
+export interface AdoptionTrackedAPIsByPlugin {
+  // Key is the plugin id.
+  [key: string]: AdoptionTrackedAPIStats[];
 }
 
 // A mapping of deprecated API id to the places that are still referencing it.
@@ -258,6 +280,15 @@ export interface ApiStats {
   missingExports: number;
   deprecatedAPIsReferencedCount: number;
   unreferencedDeprecatedApisCount: number;
+  adoptionTrackedAPIs: AdoptionTrackedAPIStats[];
+  /**
+   * Total number of APIs that the plugin wants to track the adoption for.
+   */
+  adoptionTrackedAPIsCount: number;
+  /**
+   * Number of adoption-tracked APIs that are still not referenced.
+   */
+  adoptionTrackedAPIsUnreferencedCount: number;
 }
 
 export type PluginMetaInfo = ApiStats & {

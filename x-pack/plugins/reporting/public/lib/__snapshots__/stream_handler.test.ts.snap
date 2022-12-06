@@ -84,6 +84,9 @@ Array [
       />,
     },
   },
+  Object {
+    "toastLifeTimeMs": 86400000,
+  },
 ]
 `;
 
@@ -184,44 +187,52 @@ Array [
       />,
     },
   },
+  Object {
+    "toastLifeTimeMs": 86400000,
+  },
 ]
 `;
 
 exports[`stream handler showNotifications show success 1`] = `
-Object {
-  "color": "success",
-  "data-test-subj": "completeReportSuccess",
-  "text": MountPoint {
-    "reactNode": <React.Fragment>
-      <p>
-        <ReportLink
+Array [
+  Object {
+    "color": "success",
+    "data-test-subj": "completeReportSuccess",
+    "text": MountPoint {
+      "reactNode": <React.Fragment>
+        <p>
+          <ReportLink
+            getUrl={[Function]}
+          />
+        </p>
+        <DownloadButton
           getUrl={[Function]}
+          job={
+            Object {
+              "id": "yas1",
+              "jobtype": "yas",
+              "status": "completed",
+              "title": "Yas",
+            }
+          }
         />
-      </p>
-      <DownloadButton
-        getUrl={[Function]}
-        job={
+      </React.Fragment>,
+    },
+    "title": MountPoint {
+      "reactNode": <FormattedMessage
+        defaultMessage="{reportType} created for '{reportObjectTitle}'"
+        id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
+        values={
           Object {
-            "id": "yas1",
-            "jobtype": "yas",
-            "status": "completed",
-            "title": "Yas",
+            "reportObjectTitle": "Yas",
+            "reportType": "yas",
           }
         }
-      />
-    </React.Fragment>,
+      />,
+    },
   },
-  "title": MountPoint {
-    "reactNode": <FormattedMessage
-      defaultMessage="{reportType} created for '{reportObjectTitle}'"
-      id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
-      values={
-        Object {
-          "reportObjectTitle": "Yas",
-          "reportType": "yas",
-        }
-      }
-    />,
+  Object {
+    "toastLifeTimeMs": 86400000,
   },
-}
+]
 `;

@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import {
-  IndexActionTypeId,
-  JiraActionTypeId,
-  PagerDutyActionTypeId,
-  ServerLogActionTypeId,
-  ServiceNowITSMActionTypeId as ServiceNowActionTypeId,
-  SlackActionTypeId,
-  TeamsActionTypeId,
-  WebhookActionTypeId,
-  EmailActionTypeId,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '@kbn/actions-plugin/server/builtin_action_types';
+import type {
+  IndexConnectorTypeId,
+  JiraConnectorTypeId,
+  PagerDutyConnectorTypeId,
+  ServerLogConnectorTypeId,
+  ServiceNowITSMConnectorTypeId as ServiceNowConnectorTypeId,
+  SlackConnectorTypeId,
+  TeamsConnectorTypeId,
+  WebhookConnectorTypeId,
+  EmailConnectorTypeId,
+} from '@kbn/stack-connectors-plugin/server/connector_types';
 
 export type ActionTypeId =
-  | typeof SlackActionTypeId
-  | typeof PagerDutyActionTypeId
-  | typeof ServerLogActionTypeId
-  | typeof IndexActionTypeId
-  | typeof TeamsActionTypeId
-  | typeof ServiceNowActionTypeId
-  | typeof JiraActionTypeId
-  | typeof WebhookActionTypeId
-  | typeof EmailActionTypeId;
+  | typeof SlackConnectorTypeId
+  | typeof PagerDutyConnectorTypeId
+  | typeof ServerLogConnectorTypeId
+  | typeof IndexConnectorTypeId
+  | typeof TeamsConnectorTypeId
+  | typeof ServiceNowConnectorTypeId
+  | typeof JiraConnectorTypeId
+  | typeof WebhookConnectorTypeId
+  | typeof EmailConnectorTypeId;

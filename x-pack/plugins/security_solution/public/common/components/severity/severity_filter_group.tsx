@@ -6,17 +6,18 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 
+import type { FilterChecked } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
   EuiPopover,
-  FilterChecked,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { RiskSeverity } from '../../../../common/search_strategy';
-import { SeverityCount } from './types';
+import type { RiskSeverity } from '../../../../common/search_strategy';
+import { SEVERITY_UI_SORT_ORDER } from '../../../../common/search_strategy';
+import type { SeverityCount } from './types';
 import { RiskScore } from './common';
 
 interface SeverityItems {
@@ -46,10 +47,10 @@ export const SeverityFilterGroup: React.FC<{
 
   const items: SeverityItems[] = useMemo(() => {
     const checked: FilterChecked = 'on';
-    return (Object.keys(severityCount) as RiskSeverity[]).map((k) => ({
-      risk: k,
-      count: severityCount[k],
-      checked: selectedSeverities.includes(k) ? checked : undefined,
+    return SEVERITY_UI_SORT_ORDER.map((severity) => ({
+      risk: severity,
+      count: severityCount[severity],
+      checked: selectedSeverities.includes(severity) ? checked : undefined,
     }));
   }, [severityCount, selectedSeverities]);
 

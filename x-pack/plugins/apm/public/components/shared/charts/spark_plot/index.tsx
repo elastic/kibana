@@ -50,7 +50,7 @@ export function SparkPlot({
   valueLabel: React.ReactNode;
   compact?: boolean;
   comparisonSeries?: Coordinate[];
-  comparisonSeriesColor: string;
+  comparisonSeriesColor?: string;
 }) {
   return (
     <EuiFlexGroup
@@ -90,7 +90,7 @@ function SparkPlotItem({
   series?: Coordinate[] | null;
   compact?: boolean;
   comparisonSeries?: Coordinate[];
-  comparisonSeriesColor: string;
+  comparisonSeriesColor?: string;
 }) {
   const theme = useTheme();
   const defaultChartTheme = useChartTheme();
@@ -112,8 +112,6 @@ function SparkPlotItem({
     height: theme.eui.euiSizeL,
     width: compact ? unit * 4 : unit * 5,
   };
-
-  const Sparkline = hasComparisonSeries ? LineSeries : AreaSeries;
 
   if (isLoading) {
     return (
@@ -138,7 +136,7 @@ function SparkPlotItem({
           showLegend={false}
           tooltip="none"
         />
-        <Sparkline
+        <LineSeries
           id="Sparkline"
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}

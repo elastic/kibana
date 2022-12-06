@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Dispatch, MiddlewareAPI } from 'redux';
+import type { Dispatch, MiddlewareAPI } from 'redux';
 import { isEqual } from 'lodash';
-import { ResolverPaginatedEvents } from '../../../../common/endpoint/types';
+import type { ResolverPaginatedEvents } from '../../../../common/endpoint/types';
 
-import { ResolverState, DataAccessLayer, PanelViewAndParameters } from '../../types';
+import type { ResolverState, DataAccessLayer, PanelViewAndParameters } from '../../types';
 import * as selectors from '../selectors';
-import { ResolverAction } from '../actions';
+import type { ResolverAction } from '../actions';
 
 export function RelatedEventsFetcher(
   dataAccessLayer: DataAccessLayer,
@@ -30,7 +30,9 @@ export function RelatedEventsFetcher(
     const indices = selectors.eventIndices(state);
 
     const oldParams = last;
-    const timeRangeFilters = selectors.timeRangeFilters(state);
+    const detectedBounds = selectors.detectedBounds(state);
+    const timeRangeFilters =
+      detectedBounds !== undefined ? undefined : selectors.timeRangeFilters(state);
     // Update this each time before fetching data (or even if we don't fetch data) so that subsequent actions that call this (concurrently) will have up to date info.
     last = newParams;
 

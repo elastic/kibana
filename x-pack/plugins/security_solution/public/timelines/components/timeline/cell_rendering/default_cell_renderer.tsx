@@ -10,8 +10,7 @@ import React, { useMemo } from 'react';
 import { useGetMappedNonEcsValue } from '../body/data_driven_columns';
 import { columnRenderers } from '../body/renderers';
 import { getColumnRenderer } from '../body/renderers/get_column_renderer';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { CellValueElementProps } from '.';
+import type { CellValueElementProps } from '.';
 import { getLinkColumnDefinition } from '../../../../common/lib/cell_actions/helpers';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../../../common/lib/cell_actions/constants';
 import {
@@ -24,7 +23,6 @@ const hasCellActions = (columnId?: string) => {
 };
 
 export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
-  browserFields,
   data,
   ecsData,
   eventId,
@@ -36,17 +34,14 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   linkValues,
   rowRenderers,
   setCellProps,
-  timelineId,
+  scopeId,
   truncate,
+  closeCellPopover,
+  enableActions = true,
 }) => {
-  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
-
   const asPlainText = useMemo(() => {
-    return (
-      getLinkColumnDefinition(header.id, header.type, undefined, usersEnabled) !== undefined &&
-      !isTimeline
-    );
-  }, [header.id, header.type, isTimeline, usersEnabled]);
+    return getLinkColumnDefinition(header.id, header.type, undefined) !== undefined && !isTimeline;
+  }, [header.id, header.type, isTimeline]);
 
   const values = useGetMappedNonEcsValue({
     data,
@@ -68,18 +63,18 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
           isDraggable,
           linkValues,
           rowRenderers,
-          timelineId,
+          scopeId,
           truncate,
           values,
         })}
       </StyledContent>
-      {isDetails && browserFields && hasCellActions(header.id) && (
+      {enableActions && isDetails && hasCellActions(header.id) && (
         <ExpandedCellValueActions
-          browserFields={browserFields}
-          field={header.id}
+          field={header}
           globalFilters={globalFilters}
-          timelineId={timelineId}
+          scopeId={scopeId}
           value={values}
+          closeCellPopover={closeCellPopover}
         />
       )}
     </>

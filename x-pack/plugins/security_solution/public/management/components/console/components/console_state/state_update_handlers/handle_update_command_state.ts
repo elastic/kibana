@@ -37,7 +37,9 @@ export const handleUpdateCommandState: ConsoleStoreReducer<UpdateCommandStateAct
 
     switch (type) {
       case 'updateCommandStoreState':
-        updatedCommandState.state.store = value as CommandExecutionState['store'];
+        updatedCommandState.state.store = (
+          value as (prevState: CommandExecutionState['store']) => CommandExecutionState['store']
+        )(updatedCommandState.state.store);
         break;
       case 'updateCommandStatusState':
         // If the status was not changed, then there is nothing to be done here, so

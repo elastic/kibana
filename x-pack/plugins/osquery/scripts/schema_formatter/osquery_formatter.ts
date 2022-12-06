@@ -9,7 +9,7 @@ import { find, map, partialRight, pick } from 'lodash';
 import { promises as fs } from 'fs';
 import path from 'path';
 
-import { run } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
 
 const OSQUERY_COLUMN_SCHEMA_FIELDS = ['name', 'description', 'platforms', 'columns'];
 const ELASTIC_OSQUERY_HOSTFS_TABLES = ['users', 'groups', 'processes'];

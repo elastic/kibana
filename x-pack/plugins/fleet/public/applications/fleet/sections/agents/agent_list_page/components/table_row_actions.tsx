@@ -13,6 +13,7 @@ import type { Agent, AgentPolicy } from '../../../../types';
 import { useAuthz, useLink, useKibanaVersion } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import { isAgentUpgradeable } from '../../../../services';
+import { ExperimentalFeaturesService } from '../../../../services';
 
 export const TableRowActions: React.FunctionComponent<{
   agent: Agent;
@@ -20,13 +21,24 @@ export const TableRowActions: React.FunctionComponent<{
   onReassignClick: () => void;
   onUnenrollClick: () => void;
   onUpgradeClick: () => void;
-}> = ({ agent, agentPolicy, onReassignClick, onUnenrollClick, onUpgradeClick }) => {
+  onAddRemoveTagsClick: (button: HTMLElement) => void;
+  onRequestDiagnosticsClick: () => void;
+}> = ({
+  agent,
+  agentPolicy,
+  onReassignClick,
+  onUnenrollClick,
+  onUpgradeClick,
+  onAddRemoveTagsClick,
+  onRequestDiagnosticsClick,
+}) => {
   const { getHref } = useLink();
   const hasFleetAllPrivileges = useAuthz().fleet.all;
 
   const isUnenrolling = agent.status === 'unenrolling';
   const kibanaVersion = useKibanaVersion();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
   const menuItems = [
     <EuiContextMenuItem
       icon="inspect"
@@ -39,6 +51,19 @@ export const TableRowActions: React.FunctionComponent<{
 
   if (agentPolicy?.is_managed === false) {
     menuItems.push(
+      <EuiContextMenuItem
+        icon="tag"
+        onClick={(event) => {
+          onAddRemoveTagsClick((event.target as Element).closest('button')!);
+        }}
+        disabled={!agent.active}
+        key="addRemoveTags"
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.addRemoveTagsActionText"
+          defaultMessage="Add / remove tags"
+        />
+      </EuiContextMenuItem>,
       <EuiContextMenuItem
         icon="pencil"
         onClick={() => {
@@ -84,6 +109,23 @@ export const TableRowActions: React.FunctionComponent<{
         />
       </EuiContextMenuItem>
     );
+
+    if (diagnosticFileUploadEnabled) {
+      menuItems.push(
+        <EuiContextMenuItem
+          icon="download"
+          disabled={!hasFleetAllPrivileges}
+          onClick={() => {
+            onRequestDiagnosticsClick();
+          }}
+        >
+          <FormattedMessage
+            id="xpack.fleet.agentList.diagnosticsOneButton"
+            defaultMessage="Request diagnostics .zip"
+          />
+        </EuiContextMenuItem>
+      );
+    }
   }
   return (
     <ContextMenuActions

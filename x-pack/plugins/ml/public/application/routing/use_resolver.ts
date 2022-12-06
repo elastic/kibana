@@ -108,6 +108,7 @@ export const useResolver = (
         await redirectToJobsManagementPage();
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { context, results };

@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createFleetContextRendererMock, generateFleetPackageInfo } from '../mocks';
 import { EndpointPackageCustomExtension } from './endpoint_package_custom_extension';
 import { useEndpointPrivileges as _useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
-import { exceptionsListAllHttpMocks } from '../../../../mocks/exceptions_list_http_mocks';
+import { exceptionsListAllHttpMocks } from '../../../../../mocks/exceptions_list_http_mocks';
 import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
@@ -59,8 +59,13 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
 
   it('should NOT show artifact cards if no endpoint management authz', async () => {
     useEndpointPrivilegesMock.mockReturnValue({
-      ...getEndpointPrivilegesInitialStateMock(),
-      canAccessEndpointManagement: false,
+      ...getEndpointPrivilegesInitialStateMock({
+        canReadBlocklist: false,
+        canReadEventFilters: false,
+        canReadHostIsolationExceptions: false,
+        canReadTrustedApplications: false,
+        canIsolateHost: false,
+      }),
     });
     render();
 
@@ -68,7 +73,7 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
       artifactCards.forEach((artifactCard) => {
         expect(renderResult.queryByTestId(artifactCard)).toBeNull();
       });
-      expect(renderResult.queryByTestId('noIngestPermissions')).toBeTruthy();
+      expect(renderResult.queryByTestId('noPrivilegesPage')).toBeTruthy();
     });
   });
 
@@ -88,8 +93,7 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
 
   it('should NOT show Host Isolation Exceptions if user has no authz and no entries exist', async () => {
     useEndpointPrivilegesMock.mockReturnValue({
-      ...getEndpointPrivilegesInitialStateMock(),
-      canIsolateHost: false,
+      ...getEndpointPrivilegesInitialStateMock({ canReadHostIsolationExceptions: false }),
     });
     render();
 

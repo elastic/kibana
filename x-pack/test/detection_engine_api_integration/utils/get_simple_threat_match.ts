@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ThreatMatchCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 /**
  * This is a typical simple indicator match/threat match for testing that is easy for most basic testing
@@ -15,7 +15,7 @@ import { ThreatMatchCreateSchema } from '@kbn/security-solution-plugin/common/de
 export const getSimpleThreatMatch = (
   ruleId = 'rule-1',
   enabled = false
-): ThreatMatchCreateSchema => ({
+): ThreatMatchRuleCreateProps => ({
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   severity: 'high',

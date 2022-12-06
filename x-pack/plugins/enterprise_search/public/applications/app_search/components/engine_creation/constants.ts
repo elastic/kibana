@@ -19,7 +19,7 @@ export const ENGINE_CREATION_TITLE = i18n.translate(
 export const ENGINE_CREATION_FORM_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engineCreation.form.title',
   {
-    defaultMessage: 'Name your engine',
+    defaultMessage: 'Configure your search engine',
   }
 );
 

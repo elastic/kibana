@@ -38,6 +38,19 @@ put:
   operationId: update-agent
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+              user_provided_metadata:
+                type: object  
+              tags:
+                type: array
+                items:
+                  type: string  
 delete:
   summary: Agent - Delete
   tags: []

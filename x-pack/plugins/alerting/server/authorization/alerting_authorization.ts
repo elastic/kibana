@@ -31,8 +31,11 @@ export enum ReadOperations {
   GetRuleState = 'getRuleState',
   GetAlertSummary = 'getAlertSummary',
   GetExecutionLog = 'getExecutionLog',
+  GetActionErrorLog = 'getActionErrorLog',
   Find = 'find',
   GetAuthorizedAlertsIndices = 'getAuthorizedAlertsIndices',
+  RunSoon = 'runSoon',
+  GetRuleExecutionKPI = 'getRuleExecutionKPI',
 }
 
 export enum WriteOperations {
@@ -47,6 +50,10 @@ export enum WriteOperations {
   MuteAlert = 'muteAlert',
   UnmuteAlert = 'unmuteAlert',
   Snooze = 'snooze',
+  BulkEdit = 'bulkEdit',
+  BulkDelete = 'bulkDelete',
+  BulkEnable = 'bulkEnable',
+  BulkDisable = 'bulkDisable',
   Unsnooze = 'unsnooze',
 }
 

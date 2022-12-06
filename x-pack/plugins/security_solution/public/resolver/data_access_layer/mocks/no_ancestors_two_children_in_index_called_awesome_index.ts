@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   ResolverRelatedEvents,
   ResolverEntityIndex,
   SafeResolverEvent,
@@ -14,7 +14,7 @@ import {
 } from '../../../../common/endpoint/types';
 import { mockEndpointEvent } from '../../mocks/endpoint_event';
 import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';
-import { DataAccessLayer, TimeRange } from '../../types';
+import type { DataAccessLayer, TimeRange } from '../../types';
 
 interface Metadata {
   /**
@@ -64,7 +64,7 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
         indexPatterns,
       }: {
         entityID: string;
-        timeRange: TimeRange;
+        timeRange?: TimeRange;
         indexPatterns: string[];
       }): Promise<ResolverRelatedEvents> {
         return Promise.resolve({
@@ -90,7 +90,7 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
         entityID: string;
         category: string;
         after?: string;
-        timeRange: TimeRange;
+        timeRange?: TimeRange;
         indexPatterns: string[];
       }): Promise<{
         events: SafeResolverEvent[];
@@ -121,7 +121,7 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
         eventTimestamp: string;
         eventID?: string | number;
         winlogRecordID: string;
-        timeRange: TimeRange;
+        timeRange?: TimeRange;
         indexPatterns: string[];
       }): Promise<SafeResolverEvent | null> {
         return mockEndpointEvent({

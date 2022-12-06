@@ -6,8 +6,12 @@
  */
 
 import { journey, step, expect, before } from '@elastic/synthetics';
-import { callKibana } from '@kbn/apm-plugin/scripts/create_apm_users_and_roles/helpers/call_kibana';
-import { byTestId, waitForLoadingToFinish } from './utils';
+import {
+  byTestId,
+  TIMEOUT_60_SEC,
+  waitForLoadingToFinish,
+} from '@kbn/observability-plugin/e2e/utils';
+import { callKibana } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/helpers/call_kibana';
 import { loginPageProvider } from '../page_objects/login';
 
 journey('DataViewPermissions', async ({ page, params }) => {
@@ -17,7 +21,7 @@ journey('DataViewPermissions', async ({ page, params }) => {
     try {
       await callKibana({
         elasticsearch: { username: 'elastic', password: 'changeme' },
-        kibana: { hostname: params.kibanaUrl, roleSuffix: '' },
+        kibana: { hostname: params.kibanaUrl },
         options: {
           method: 'DELETE',
           url: '/api/saved_objects/index-pattern/synthetics_static_index_pattern_id_heartbeat_?force=false',
@@ -38,16 +42,16 @@ journey('DataViewPermissions', async ({ page, params }) => {
     await page.goto(`${baseUrl}?${queryParams}`, {
       waitUntil: 'networkidle',
     });
-    await login.loginToKibana('obs_read_user', 'changeme');
+    await login.loginToKibana('viewer', 'changeme');
   });
 
   step('Click explore data button', async () => {
     await page.click(byTestId('uptimeExploreDataButton'));
     await waitForLoadingToFinish({ page });
-    await page.waitForSelector(`text=${permissionError}`);
-    expect(await page.$(`text=${permissionError}`)).toBeTruthy();
+  });
+
+  step('it renders for viewer user as well', async () => {
+    await page.waitForSelector(`text=browser`, TIMEOUT_60_SEC);
+    expect(await page.$(`text=Monitor duration`)).toBeTruthy();
   });
 });
-
-const permissionError =
-  "Unable to create Data View. You don't have the required permission, please contact your admin.";

@@ -8,13 +8,13 @@
 // SASSTODO: Too risky to change to BEM naming
 .visualization {
   display: flex;
-  flex-direction: column;
   width: 100%;
   height: 100%;
   overflow: auto;
   position: relative;
   padding: $euiSizeS;
   flex: 1 1 100%;
+  flex-direction: column;
 }
 
 .visChart {

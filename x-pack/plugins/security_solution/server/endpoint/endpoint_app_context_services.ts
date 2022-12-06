@@ -5,45 +5,50 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from '@kbn/core/server';
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
-import {
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
+import type {
   CasesClient,
   PluginStartContract as CasesPluginStartContract,
 } from '@kbn/cases-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import {
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
   AgentService,
   FleetStartContract,
   AgentPolicyServiceInterface,
-  PackagePolicyServiceInterface,
 } from '@kbn/fleet-plugin/server';
-import { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
-import type { ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
+import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
+import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
   getPackagePolicyDeleteCallback,
+  getPackagePolicyPostCreateCallback,
 } from '../fleet_integration/fleet_integration';
-import { ManifestManager } from './services/artifacts';
-import { ConfigType } from '../config';
-import { IRequestContextFactory } from '../request_context_factory';
-import { LicenseService } from '../../common/license';
-import { ExperimentalFeatures } from '../../common/experimental_features';
-import { EndpointMetadataService } from './services/metadata';
+import type { ManifestManager } from './services/artifacts';
+import type { ConfigType } from '../config';
+import type { IRequestContextFactory } from '../request_context_factory';
+import type { LicenseService } from '../../common/license';
+import type { EndpointMetadataService } from './services/metadata';
 import {
   EndpointAppContentServicesNotSetUpError,
   EndpointAppContentServicesNotStartedError,
 } from './errors';
-import {
+import type {
   EndpointFleetServicesFactoryInterface,
   EndpointInternalFleetServicesInterface,
   EndpointScopedFleetServicesInterface,
 } from './services/fleet/endpoint_fleet_services_factory';
 import { registerListsPluginEndpointExtensionPoints } from '../lists_integration';
-import { EndpointAuthz } from '../../common/endpoint/types/authz';
-import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
-import { FeatureUsageService } from './services/feature_usage/service';
+import type { EndpointAuthz } from '../../common/endpoint/types/authz';
+import {
+  calculateEndpointAuthz,
+  calculatePermissionsFromPrivileges,
+  defaultEndpointPermissions,
+} from '../../common/endpoint/service/authz';
+import type { FeatureUsageService } from './services/feature_usage/service';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
+import { doesArtifactHaveData } from './services';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -69,6 +74,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   exceptionListsClient: ExceptionListClient | undefined;
   cases: CasesPluginStartContract | undefined;
   featureUsageService: FeatureUsageService;
+  experimentalFeatures: ExperimentalFeatures;
 };
 
 /**
@@ -123,6 +129,11 @@ export class EndpointAppContextService {
       );
 
       registerIngestCallback(
+        'packagePolicyPostCreate',
+        getPackagePolicyPostCreateCallback(logger, exceptionListsClient)
+      );
+
+      registerIngestCallback(
         'packagePolicyUpdate',
         getPackagePolicyUpdateCallback(
           logger,
@@ -147,10 +158,6 @@ export class EndpointAppContextService {
 
   public stop() {}
 
-  public getExperimentalFeatures(): Readonly<ExperimentalFeatures> | undefined {
-    return this.startDependencies?.config.experimentalFeatures;
-  }
-
   private getFleetAuthzService(): FleetStartContract['authz'] {
     if (!this.startDependencies?.fleetAuthzService) {
       throw new EndpointAppContentServicesNotStartedError();
@@ -161,9 +168,35 @@ export class EndpointAppContextService {
 
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
     const fleetAuthz = await this.getFleetAuthzService().fromRequest(request);
-    const userRoles = this.startDependencies?.security.authc.getCurrentUser(request)?.roles ?? [];
+    const userRoles = this.security?.authc.getCurrentUser(request)?.roles ?? [];
+    const { endpointRbacEnabled, endpointRbacV1Enabled } = this.experimentalFeatures;
+    const isPlatinumPlus = this.getLicenseService().isPlatinumPlus();
+    const listClient = this.getExceptionListsClient();
 
-    return calculateEndpointAuthz(this.getLicenseService(), fleetAuthz, userRoles);
+    let endpointPermissions = defaultEndpointPermissions();
+    if (this.security) {
+      const checkPrivileges = this.security.authz.checkPrivilegesDynamicallyWithRequest(request);
+      const { privileges } = await checkPrivileges({
+        kibana: [
+          this.security.authz.actions.ui.get('siem', 'crud'),
+          this.security.authz.actions.ui.get('siem', 'show'),
+        ],
+      });
+      endpointPermissions = calculatePermissionsFromPrivileges(privileges.kibana);
+    }
+
+    const hasExceptionsListItems = !isPlatinumPlus
+      ? await doesArtifactHaveData(listClient, ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID)
+      : true;
+
+    return calculateEndpointAuthz(
+      this.getLicenseService(),
+      fleetAuthz,
+      userRoles,
+      endpointRbacEnabled || endpointRbacV1Enabled,
+      endpointPermissions,
+      hasExceptionsListItems
+    );
   }
 
   public getEndpointMetadataService(): EndpointMetadataService {
@@ -195,14 +228,6 @@ export class EndpointAppContextService {
   }
 
   /** @deprecated use `getScopedFleetServices()` instead */
-  public getPackagePolicyService(): PackagePolicyServiceInterface {
-    if (!this.startDependencies?.packagePolicyService) {
-      throw new EndpointAppContentServicesNotStartedError();
-    }
-    return this.startDependencies?.packagePolicyService;
-  }
-
-  /** @deprecated use `getScopedFleetServices()` instead */
   public getAgentPolicyService(): AgentPolicyServiceInterface | undefined {
     return this.startDependencies?.agentPolicyService;
   }
@@ -225,17 +250,26 @@ export class EndpointAppContextService {
     return this.startDependencies.cases.getCasesClientWithRequest(req);
   }
 
-  public getExceptionListsClient(): ExceptionListClient {
-    if (!this.startDependencies?.exceptionListsClient) {
-      throw new EndpointAppContentServicesNotStartedError();
-    }
-    return this.startDependencies.exceptionListsClient;
-  }
-
   public getFeatureUsageService(): FeatureUsageService {
     if (this.startDependencies == null) {
       throw new EndpointAppContentServicesNotStartedError();
     }
     return this.startDependencies.featureUsageService;
+  }
+
+  public get experimentalFeatures(): ExperimentalFeatures {
+    if (this.startDependencies == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.experimentalFeatures;
+  }
+
+  public getExceptionListsClient(): ExceptionListClient {
+    if (!this.startDependencies?.exceptionListsClient) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.exceptionListsClient;
   }
 }

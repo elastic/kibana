@@ -13,36 +13,45 @@ import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useFlyoutContext } from '../../../hooks';
+import { useFleetStatus, useFlyoutContext } from '../../../hooks';
 
 export function getConfirmFleetServerConnectionStep({
   disabled,
-  isFleetServerReady,
+  hasRecentlyEnrolledFleetServers,
 }: {
   disabled: boolean;
-  isFleetServerReady: boolean;
+  hasRecentlyEnrolledFleetServers: boolean;
 }): EuiStepProps {
   return {
-    title: isFleetServerReady
+    title: hasRecentlyEnrolledFleetServers
       ? i18n.translate('xpack.fleet.fleetServerFlyout.confirmConnectionSuccessTitle', {
           defaultMessage: 'Fleet Server connected',
         })
       : i18n.translate('xpack.fleet.fleetServerFlyout.confirmConnectionTitle', {
           defaultMessage: 'Confirm connection',
         }),
-    status: isFleetServerReady ? 'complete' : 'disabled',
+    status: hasRecentlyEnrolledFleetServers ? 'complete' : 'disabled',
     children: !disabled && (
-      <ConfirmFleetServerConnectionStepContent isFleetServerReady={isFleetServerReady} />
+      <ConfirmFleetServerConnectionStepContent
+        hasRecentlyEnrolledFleetServers={hasRecentlyEnrolledFleetServers}
+      />
     ),
   };
 }
 
 const ConfirmFleetServerConnectionStepContent: React.FunctionComponent<{
-  isFleetServerReady: boolean;
-}> = ({ isFleetServerReady }) => {
+  hasRecentlyEnrolledFleetServers: boolean;
+}> = ({ hasRecentlyEnrolledFleetServers }) => {
   const flyoutContext = useFlyoutContext();
+  const fleetStatus = useFleetStatus();
 
-  return isFleetServerReady ? (
+  const handleContinueClick = () => {
+    fleetStatus.forceDisplayInstructions = false;
+    flyoutContext.closeFleetServerFlyout();
+    flyoutContext.openEnrollmentFlyout();
+  };
+
+  return hasRecentlyEnrolledFleetServers ? (
     <>
       <EuiText>
         <FormattedMessage
@@ -53,7 +62,11 @@ const ConfirmFleetServerConnectionStepContent: React.FunctionComponent<{
 
       <EuiSpacer size="m" />
 
-      <EuiButton color="primary" onClick={flyoutContext.openEnrollmentFlyout}>
+      <EuiButton
+        color="primary"
+        onClick={handleContinueClick}
+        data-test-subj="fleetServerFlyoutContinueEnrollingButton"
+      >
         <FormattedMessage
           id="xpack.fleet.fleetServerFlyout.continueEnrollingButton"
           defaultMessage="Continue enrolling Elastic Agent"

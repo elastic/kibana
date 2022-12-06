@@ -9,7 +9,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
-export const EmptyPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
+export const EmptyPrompt = ({
+  onCTAClicked,
+  showCreateRuleButton = true,
+}: {
+  onCTAClicked: () => void;
+  showCreateRuleButton: boolean;
+}) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="createFirstRuleEmptyPrompt"
@@ -30,17 +36,19 @@ export const EmptyPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
       </p>
     }
     actions={
-      <EuiButton
-        data-test-subj="createFirstRuleButton"
-        key="create-action"
-        fill
-        onClick={onCTAClicked}
-      >
-        <FormattedMessage
-          id="xpack.triggersActionsUI.components.emptyPrompt.emptyButton"
-          defaultMessage="Create rule"
-        />
-      </EuiButton>
+      showCreateRuleButton && (
+        <EuiButton
+          data-test-subj="createFirstRuleButton"
+          key="create-action"
+          fill
+          onClick={onCTAClicked}
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.components.emptyPrompt.emptyButton"
+            defaultMessage="Create rule"
+          />
+        </EuiButton>
+      )
     }
   />
 );

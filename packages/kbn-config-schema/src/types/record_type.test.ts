@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '..';
+import { schema } from '../..';
 
 test('handles object as input', () => {
   const type = schema.recordOf(schema.string(), schema.string());

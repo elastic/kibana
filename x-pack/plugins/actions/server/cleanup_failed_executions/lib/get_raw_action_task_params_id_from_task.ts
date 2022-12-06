@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResult, SavedObjectsSerializer } from '@kbn/core/server';
+import { SavedObjectsFindResult, ISavedObjectsSerializer } from '@kbn/core/server';
 import { TaskInstance } from '@kbn/task-manager-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { spaceIdToNamespace } from '../../lib';
@@ -13,7 +13,7 @@ import { spaceIdToNamespace } from '../../lib';
 interface GetRawActionTaskParamsIdFromTaskOpts {
   task: SavedObjectsFindResult<TaskInstance>;
   spaces?: SpacesPluginStart;
-  savedObjectsSerializer: SavedObjectsSerializer;
+  savedObjectsSerializer: ISavedObjectsSerializer;
 }
 
 export function getRawActionTaskParamsIdFromTask({

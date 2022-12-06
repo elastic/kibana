@@ -95,13 +95,7 @@ export class Join extends Component<Props, State> {
     });
   };
 
-  _onRightSourceChange = ({
-    indexPatternId,
-    indexPatternTitle,
-  }: {
-    indexPatternId: string;
-    indexPatternTitle: string;
-  }) => {
+  _onRightSourceChange = (indexPatternId: string) => {
     this.setState({
       rightFields: [],
       loadError: undefined,
@@ -113,7 +107,6 @@ export class Join extends Component<Props, State> {
       right: {
         ...restOfRight,
         indexPatternId,
-        indexPatternTitle,
         type: SOURCE_TYPES.ES_TERM_SOURCE,
       } as ESTermSourceDescriptor,
     });
@@ -183,9 +176,7 @@ export class Join extends Component<Props, State> {
     const { join, onRemove, leftFields, leftSourceName } = this.props;
     const { rightFields, indexPattern } = this.state;
     const right = _.get(join, 'right', {}) as ESTermSourceDescriptor;
-    const rightSourceName = right.indexPatternTitle
-      ? right.indexPatternTitle
-      : right.indexPatternId;
+    const rightSourceName = indexPattern ? indexPattern.getName() : right.indexPatternId;
     const isJoinConfigComplete = join.leftField && right.indexPatternId && right.term;
 
     let metricsExpression;

@@ -19,6 +19,7 @@ import { FieldTextSelect } from './field_text_select';
 import { ComboBoxSelect } from './combo_box_select';
 
 import type { IndexPatternValue, FetchedIndexPattern } from '../../../../../common/types';
+import { getDataViewNotFoundError } from '../../../../../common/errors';
 import { USE_KIBANA_INDEXES_KEY } from '../../../../../common/constants';
 
 export interface IndexPatternSelectProps {
@@ -29,6 +30,7 @@ export interface IndexPatternSelectProps {
   fetchedIndex:
     | (FetchedIndexPattern & {
         defaultIndex?: DataView | null;
+        missedIndex?: string;
       })
     | null;
 }
@@ -56,6 +58,8 @@ const getIndexPatternHelpText = (useKibanaIndices: boolean) => (
 const indexPatternLabel = i18n.translate('visTypeTimeseries.indexPatternSelect.label', {
   defaultMessage: 'Data view',
 });
+
+const isFetchedIndexValid = (f: IndexPatternSelectProps['fetchedIndex']) => f && !f.missedIndex;
 
 export const IndexPatternSelect = ({
   indexPatternName,
@@ -110,6 +114,10 @@ export const IndexPatternSelect = ({
       id={htmlId('indexPattern')}
       label={indexPatternLabel}
       helpText={fetchedIndex.defaultIndex && getIndexPatternHelpText(useKibanaIndices)}
+      isInvalid={!isFetchedIndexValid(fetchedIndex)}
+      error={
+        fetchedIndex.missedIndex ? getDataViewNotFoundError(fetchedIndex.missedIndex) : undefined
+      }
       labelAppend={
         !useKibanaIndices && fetchedIndex.indexPatternString && !fetchedIndex.indexPattern ? (
           <EuiLink onClick={navigateToCreateIndexPatternPage}>
@@ -129,7 +137,7 @@ export const IndexPatternSelect = ({
         allowSwitchMode={allowIndexSwitchingMode}
         onIndexChange={onIndexChange}
         onModeChange={onModeChange}
-        placeholder={fetchedIndex.defaultIndex?.title ?? ''}
+        placeholder={fetchedIndex.defaultIndex?.getName() ?? ''}
         data-test-subj="metricsIndexPatternInput"
       />
     </EuiFormRow>

@@ -42,5 +42,6 @@ describe('security list telemetry task test', () => {
     expect(mockTelemetryReceiver.fetchEndpointList).toHaveBeenCalledWith(
       ENDPOINT_EVENT_FILTERS_LIST_ID
     );
+    expect(mockTelemetryReceiver.fetchValueListMetaData).toHaveBeenCalled();
   });
 });

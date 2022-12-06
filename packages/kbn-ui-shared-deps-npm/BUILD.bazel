@@ -3,15 +3,25 @@ load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("@npm//webpack-cli:index.bzl", webpack = "webpack_cli")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-ui-shared-deps-npm"
+PKG_DIRNAME = "kbn-ui-shared-deps-npm"
 PKG_REQUIRE_NAME = "@kbn/ui-shared-deps-npm"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*",
+    "**/*.js",
   ],
   exclude = [
-    "**/*.md",
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -24,7 +34,6 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
-  "README.md"
 ]
 
 RUNTIME_DEPS = [
@@ -32,7 +41,10 @@ RUNTIME_DEPS = [
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
   "@npm//@elastic/numeral",
+  "@npm//@emotion/cache",
   "@npm//@emotion/react",
+  "@npm//@tanstack/react-query",
+  "@npm//@tanstack/react-query-devtools",
   "@npm//babel-loader",
   "@npm//core-js",
   "@npm//css-loader",
@@ -50,8 +62,6 @@ RUNTIME_DEPS = [
   "@npm//react-router-dom",
   "@npm//react-router",
   "@npm//react",
-  "@npm//regenerator-runtime",
-  "@npm//rison-node",
   "@npm//rxjs",
   "@npm//styled-components",
   "@npm//symbol-observable",
@@ -69,6 +79,7 @@ TYPES_DEPS = [
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
   "@npm//@elastic/numeral",
+  "@npm//@emotion/cache",
   "@npm//@emotion/react",
   "@npm//babel-loader",
   "@npm//core-js",
@@ -86,8 +97,6 @@ TYPES_DEPS = [
   "@npm//react-is",
   "@npm//react-router",
   "@npm//react-router-dom",
-  "@npm//regenerator-runtime",
-  "@npm//rison-node",
   "@npm//rxjs",
   "@npm//styled-components",
   "@npm//symbol-observable",
@@ -121,7 +130,6 @@ ts_project(
   declaration = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 
@@ -139,23 +147,29 @@ webpack(
     "$(location webpack.config.js)",
     "--output-path",
     "$(@D)",
-    "--display=minimal"
+    "--no-stats"
   ],
 )
 
 js_library(
-  name = PKG_BASE_NAME,
+  name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node", ":shared_built_assets"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
 
+js_library(
+  name = "npm_module_types",
+  srcs = NPM_MODULE_EXTRA_FILES,
+  deps = RUNTIME_DEPS + [":target_node", ":shared_built_assets", ":tsc_types"],
+  package_name = PKG_REQUIRE_NAME,
+  visibility = ["//visibility:public"],
+)
+
 pkg_npm(
   name = "npm_module",
-  deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
+  deps = [":" + PKG_DIRNAME],
 )
 
 filegroup(
@@ -166,19 +180,8 @@ filegroup(
   visibility = ["//visibility:public"],
 )
 
-pkg_npm_types(
-  name = "npm_module_types",
-  srcs = SRCS,
-  deps = [":tsc_types"],
-  package_name = PKG_REQUIRE_NAME,
-  tsconfig = ":tsconfig",
-  visibility = ["//visibility:public"],
-)
-
-filegroup(
+pkg_npm(
   name = "build_types",
-  srcs = [
-    ":npm_module_types",
-  ],
+  deps = [":npm_module_types"],
   visibility = ["//visibility:public"],
 )

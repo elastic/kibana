@@ -39,7 +39,7 @@ export async function setupSpacesAndUsers(getService: FtrProviderContext['getSer
 
 export async function tearDown(getService: FtrProviderContext['getService']) {
   const securityService = getService('security');
-  const esArchiver = getService('esArchiver');
+  const spacesService = getService('spaces');
 
   for (const user of Users) {
     await securityService.user.delete(user.username);
@@ -52,5 +52,7 @@ export async function tearDown(getService: FtrProviderContext['getService']) {
     }
   }
 
-  await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+  for (const space of Spaces) {
+    await spacesService.delete(space.id);
+  }
 }

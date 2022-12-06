@@ -8,15 +8,15 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import {
+import type {
   HostsKpiQueries,
   HostsKpiHostsStrategyResponse,
   HostsKpiHostsRequestOptions,
 } from '../../../../../../../common/search_strategy/security_solution/hosts';
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../../types';
+import type { SecuritySolutionFactory } from '../../../types';
 import { buildHostsKpiHostsQuery } from './query.hosts_kpi_hosts.dsl';
-import { formatGeneralHistogramData } from '../common';
+import { formatGeneralHistogramData } from '../../../common/format_general_histogram_data';
 
 export const hostsKpiHosts: SecuritySolutionFactory<HostsKpiQueries.kpiHosts> = {
   buildDsl: (options: HostsKpiHostsRequestOptions) => buildHostsKpiHostsQuery(options),

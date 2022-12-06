@@ -13,10 +13,10 @@ import { DISABLE_BFETCH_COMPRESSION, removeLeadingSlash } from '../common';
 import { createStreamingBatchedFunction, StreamingBatchedFunctionParams } from './batching';
 import { BatchedFunc } from './batching/types';
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BfetchPublicSetupDependencies {}
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BfetchPublicStartDependencies {}
 
 export interface BfetchPublicContract {

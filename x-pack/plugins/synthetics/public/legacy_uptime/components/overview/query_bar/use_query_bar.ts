@@ -8,14 +8,9 @@
 import React, { useCallback, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useDispatch } from 'react-redux';
-import { Query } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  useGetUrlParams,
-  useUptimeDataView,
-  generateUpdatedKueryString,
-  useUrlParams,
-} from '../../../hooks';
+import { useGetUrlParams, useGenerateUpdatedKueryString, useUrlParams } from '../../../hooks';
 import { setEsKueryString } from '../../../state/actions';
 import { UptimePluginServices } from '../../../../plugin';
 
@@ -70,12 +65,9 @@ export const useQueryBar = (): UseQueryBarUtils => {
         }
   );
 
-  const dataView = useUptimeDataView();
-
   const [, updateUrlParams] = useUrlParams();
 
-  const [esFilters, error] = generateUpdatedKueryString(
-    dataView,
+  const [esFilters, error] = useGenerateUpdatedKueryString(
     query.language === SyntaxType.kuery ? (query.query as string) : undefined,
     paramFilters,
     excludedFilters

@@ -10,15 +10,17 @@ import React, { useState, Fragment, ReactNode } from 'react';
 import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON, EuiText, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { FailedImportConflict } from '../../../lib/resolve_import_errors';
 import { getDefaultTitle } from '../../../lib';
 
 export interface OverwriteModalProps {
   conflict: FailedImportConflict;
   onFinish: (overwrite: boolean, destinationId?: string) => void;
+  allowedTypes: SavedObjectManagementTypeInfo[];
 }
 
-export const OverwriteModal = ({ conflict, onFinish }: OverwriteModalProps) => {
+export const OverwriteModal = ({ conflict, onFinish, allowedTypes }: OverwriteModalProps) => {
   const { obj, error } = conflict;
   let initialDestinationId: string | undefined;
   let selectControl: ReactNode = null;
@@ -46,7 +48,7 @@ export const OverwriteModal = ({ conflict, onFinish }: OverwriteModalProps) => {
             <Fragment>
               <strong>{header}</strong>
               <EuiText size="s" color="subdued">
-                <p className="euiTextColor--subdued">
+                <p>
                   {idText}
                   <br />
                   {lastUpdatedText}
@@ -78,6 +80,8 @@ export const OverwriteModal = ({ conflict, onFinish }: OverwriteModalProps) => {
 
   const { type, meta } = obj;
   const title = meta.title || getDefaultTitle(obj);
+  const typeMeta = allowedTypes.find((t) => t.name === type);
+  const typeDisplayName = typeMeta?.displayName ?? type;
   const bodyText =
     error.type === 'conflict'
       ? i18n.translate('savedObjectsManagement.objectsTable.overwriteModal.body.conflict', {
@@ -91,11 +95,12 @@ export const OverwriteModal = ({ conflict, onFinish }: OverwriteModalProps) => {
             values: { title },
           }
         );
+
   return (
     <EuiConfirmModal
       title={i18n.translate('savedObjectsManagement.objectsTable.overwriteModal.title', {
         defaultMessage: 'Overwrite {type}?',
-        values: { type },
+        values: { type: typeDisplayName },
       })}
       cancelButtonText={i18n.translate(
         'savedObjectsManagement.objectsTable.overwriteModal.cancelButtonText',

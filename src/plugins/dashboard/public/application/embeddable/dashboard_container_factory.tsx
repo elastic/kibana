@@ -7,30 +7,30 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-
 import { identity, pickBy } from 'lodash';
+
 import {
   ControlGroupContainer,
   ControlGroupInput,
   ControlGroupOutput,
   CONTROL_GROUP_TYPE,
 } from '@kbn/controls-plugin/public';
-import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
-import { DashboardContainerInput } from '../..';
-import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
-import type { DashboardContainer, DashboardContainerServices } from './dashboard_container';
 import {
   Container,
   ErrorEmbeddable,
   ContainerOutput,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
-} from '../../services/embeddable';
-import {
-  createExtract,
-  createInject,
-} from '../../../common/embeddable/dashboard_container_persistable_state';
+  isErrorEmbeddable,
+} from '@kbn/embeddable-plugin/public';
+
+import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+
+import { DashboardContainerInput } from '../..';
+import { createExtract, createInject } from '../../../common';
+import type { DashboardContainer } from './dashboard_container';
+import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -47,10 +47,7 @@ export class DashboardContainerFactoryDefinition
   public inject: EmbeddablePersistableStateService['inject'];
   public extract: EmbeddablePersistableStateService['extract'];
 
-  constructor(
-    private readonly getStartServices: () => Promise<DashboardContainerServices>,
-    private readonly persistableStateService: EmbeddablePersistableStateService
-  ) {
+  constructor(private readonly persistableStateService: EmbeddablePersistableStateService) {
     this.inject = createInject(this.persistableStateService);
     this.extract = createExtract(this.persistableStateService);
   }
@@ -73,16 +70,19 @@ export class DashboardContainerFactoryDefinition
       isFullScreenMode: false,
       useMargins: true,
       syncColors: true,
+      syncCursor: true,
       syncTooltips: true,
     };
   }
 
-  public create = async (
-    initialInput: DashboardContainerInput,
-    parent?: Container
-  ): Promise<DashboardContainer | ErrorEmbeddable> => {
-    const services = await this.getStartServices();
-    const controlsGroupFactory = services.embeddable.getEmbeddableFactory<
+  private buildControlGroup = async (
+    initialInput: DashboardContainerInput
+  ): Promise<ControlGroupContainer | ErrorEmbeddable | undefined> => {
+    const { pluginServices } = await import('../../services/plugin_services');
+    const {
+      embeddable: { getEmbeddableFactory },
+    } = pluginServices.getServices();
+    const controlsGroupFactory = getEmbeddableFactory<
       ControlGroupInput,
       ControlGroupOutput,
       ControlGroupContainer
@@ -97,10 +97,24 @@ export class DashboardContainerFactoryDefinition
       filters,
       query,
     });
-    const { DashboardContainer: DashboardContainerEmbeddable } = await import(
-      './dashboard_container'
-    );
+    if (controlGroup && !isErrorEmbeddable(controlGroup)) {
+      await controlGroup.untilInitialized();
+    }
+    return controlGroup;
+  };
 
-    return new DashboardContainerEmbeddable(initialInput, services, parent, controlGroup);
+  public create = async (
+    initialInput: DashboardContainerInput,
+    parent?: Container
+  ): Promise<DashboardContainer | ErrorEmbeddable> => {
+    const controlGroupPromise = this.buildControlGroup(initialInput);
+    const dashboardContainerPromise = import('./dashboard_container');
+
+    const [controlGroup, { DashboardContainer: DashboardContainerEmbeddable }] = await Promise.all([
+      controlGroupPromise,
+      dashboardContainerPromise,
+    ]);
+
+    return Promise.resolve(new DashboardContainerEmbeddable(initialInput, parent, controlGroup));
   };
 }

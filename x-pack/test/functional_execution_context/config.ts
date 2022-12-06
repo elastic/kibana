@@ -6,7 +6,7 @@
  */
 import Path from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
 import { logFilePath } from './test_utils';
 
 const alertTestPlugin = Path.resolve(__dirname, './fixtures/plugins/alerts');
@@ -42,23 +42,32 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
 
+        `--xpack.alerting.rules.minimumScheduleInterval.value="1s"`,
+
         '--server.requestId.allowFromAnyIp=true',
         '--logging.appenders.file.type=file',
         `--logging.appenders.file.fileName=${logFilePath}`,
         '--logging.appenders.file.layout.type=json',
 
-        '--logging.loggers[0].name=elasticsearch.query',
-        '--logging.loggers[0].level=all',
-        `--logging.loggers[0].appenders=${JSON.stringify(['file'])}`,
+        `--logging.loggers=${JSON.stringify([
+          ...getKibanaCliLoggers(functionalConfig.get('kbnTestServer.serverArgs')),
 
-        '--logging.loggers[1].name=execution_context',
-        '--logging.loggers[1].level=debug',
-        `--logging.loggers[1].appenders=${JSON.stringify(['file'])}`,
-
-        '--logging.loggers[2].name=http.server.response',
-        '--logging.loggers[2].level=all',
-        `--logging.loggers[2].appenders=${JSON.stringify(['file'])}`,
-        `--xpack.alerting.rules.minimumScheduleInterval.value="1s"`,
+          {
+            name: 'elasticsearch.query',
+            level: 'all',
+            appenders: ['file'],
+          },
+          {
+            name: 'execution_context',
+            level: 'debug',
+            appenders: ['file'],
+          },
+          {
+            name: 'http.server.response',
+            level: 'all',
+            appenders: ['file'],
+          },
+        ])}`,
       ],
     },
   };

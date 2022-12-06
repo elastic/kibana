@@ -25,7 +25,7 @@ export const ExternalConnectorDocumentation: React.FC<ExternalConnectorDocumenta
       <p>
         <FormattedMessage
           id="xpack.enterpriseSearch.workplaceSearch.contentSource.addExternalConnector.documentation.heading"
-          defaultMessage="The {name} connector is fully customizable, and will be self-managed on the infrastructure of your choice."
+          defaultMessage="The {name} is fully customizable, and will be self-managed on the infrastructure of your choice."
           values={{
             name,
           }}
@@ -46,22 +46,6 @@ export const ExternalConnectorDocumentation: React.FC<ExternalConnectorDocumenta
             ),
           }}
         />
-      </p>
-      <p>
-        <EuiLink target="_blank" href={'https://discuss.elastic.co/c/enterprise-search/84'}>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.workplaceSearch.contentSource.addExternalConnector.documentation.discussLinkLabel"
-            defaultMessage="Questions? Discuss here."
-          />
-        </EuiLink>
-      </p>
-      <p>
-        <EuiLink target="_blank" href={'https://www.elastic.co/kibana/feedback'}>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.workplaceSearch.contentSource.addExternalConnector.documentation.feedbackLinkLabel"
-            defaultMessage="We're always looking to improve. Share your feedback  "
-          />
-        </EuiLink>
       </p>
     </EuiText>
   );

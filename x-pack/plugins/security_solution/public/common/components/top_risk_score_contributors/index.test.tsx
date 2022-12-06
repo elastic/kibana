@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TopRiskScoreContributors } from '.';
 import { TestProviders } from '../../mock';
-import { RuleRisk } from '../../../../common/search_strategy';
+import type { RuleRisk } from '../../../../common/search_strategy';
 
 jest.mock('../../containers/query_toggle');
 jest.mock('../../../risk_score/containers');

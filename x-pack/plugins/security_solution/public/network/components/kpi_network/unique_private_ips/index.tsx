@@ -8,12 +8,12 @@
 import React, { useEffect, useState } from 'react';
 import { euiPaletteColorBlind } from '@elastic/eui';
 
-import { StatItems } from '../../../../common/components/stat_items';
+import type { StatItems } from '../../../../common/components/stat_items';
 import {
   useNetworkKpiUniquePrivateIps,
   ID,
 } from '../../../containers/kpi_network/unique_private_ips';
-import { NetworkKpiProps } from '../types';
+import type { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 import { kpiUniquePrivateIpsSourceMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_source_metric';
 import { kpiUniquePrivateIpsDestinationMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_destination_metric';
@@ -21,6 +21,9 @@ import { kpiUniquePrivateIpsAreaLensAttributes } from '../../../../common/compon
 import { kpiUniquePrivateIpsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_bar';
 import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis2 = euiVisColorPalette[2];
@@ -62,21 +65,29 @@ const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
   from,
   indexNames,
   to,
-  narrowDateRange,
+  updateDateRange,
   setQuery,
   skip,
 }) => {
   const { toggleStatus } = useQueryToggle(ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
+
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiUniquePrivateIps({
     filterQuery,
     endDate: to,
     indexNames,
     startDate: from,
-    skip: querySkip,
+    skip: querySkip || isChartEmbeddablesEnabled,
+  });
+
+  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+    inputId: InputsModelId.global,
+    queryId: id,
   });
 
   return (
@@ -88,10 +99,11 @@ const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
       fieldsMapping={fieldsMapping}
       from={from}
       to={to}
-      narrowDateRange={narrowDateRange}
-      refetch={refetch}
+      updateDateRange={updateDateRange}
+      refetch={isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}
+      searchSessionId={isChartEmbeddablesEnabled ? searchSessionId : undefined}
     />
   );
 };

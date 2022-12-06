@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -21,15 +20,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { debounce, omit } from 'lodash';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
   ForLastExpression,
   IErrorObject,
   RuleTypeParamsExpressionProps,
   ThresholdExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import { debounce, omit } from 'lodash';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Comparator,
   FilterQuery,
@@ -41,13 +41,13 @@ import {
   SnapshotCustomMetricInputRT,
 } from '../../../../common/http_api/snapshot_api';
 import { findInventoryModel } from '../../../../common/inventory_models';
-import { ec2MetricTypes } from '../../../../common/inventory_models/aws_ec2/toolbar_items';
-import { rdsMetricTypes } from '../../../../common/inventory_models/aws_rds/toolbar_items';
-import { s3MetricTypes } from '../../../../common/inventory_models/aws_s3/toolbar_items';
-import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
-import { containerMetricTypes } from '../../../../common/inventory_models/container/toolbar_items';
-import { hostMetricTypes } from '../../../../common/inventory_models/host/toolbar_items';
-import { podMetricTypes } from '../../../../common/inventory_models/pod/toolbar_items';
+import { awsEC2SnapshotMetricTypes } from '../../../../common/inventory_models/aws_ec2';
+import { awsRDSSnapshotMetricTypes } from '../../../../common/inventory_models/aws_rds';
+import { awsS3SnapshotMetricTypes } from '../../../../common/inventory_models/aws_s3';
+import { awsSQSSnapshotMetricTypes } from '../../../../common/inventory_models/aws_sqs';
+import { containerSnapshotMetricTypes } from '../../../../common/inventory_models/container';
+import { hostSnapshotMetricTypes } from '../../../../common/inventory_models/host';
+import { podSnapshotMetricTypes } from '../../../../common/inventory_models/pod';
 import {
   InventoryItemType,
   SnapshotMetricType,
@@ -86,7 +86,7 @@ type Props = Omit<
     },
     AlertContextMeta
   >,
-  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch' | 'onChangeMetaData'
 >;
 
 export const defaultExpression = {
@@ -545,30 +545,29 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const ofFields = useMemo(() => {
-    let myMetrics = hostMetricTypes;
+    let myMetrics: SnapshotMetricType[] = hostSnapshotMetricTypes;
 
     switch (props.nodeType) {
       case 'awsEC2':
-        myMetrics = ec2MetricTypes;
+        myMetrics = awsEC2SnapshotMetricTypes;
         break;
       case 'awsRDS':
-        myMetrics = rdsMetricTypes;
+        myMetrics = awsRDSSnapshotMetricTypes;
         break;
       case 'awsS3':
-        myMetrics = s3MetricTypes;
+        myMetrics = awsS3SnapshotMetricTypes;
         break;
       case 'awsSQS':
-        myMetrics = sqsMetricTypes;
+        myMetrics = awsSQSSnapshotMetricTypes;
         break;
       case 'host':
-        myMetrics = hostMetricTypes;
-
+        myMetrics = hostSnapshotMetricTypes;
         break;
       case 'pod':
-        myMetrics = podMetricTypes;
+        myMetrics = podSnapshotMetricTypes;
         break;
       case 'container':
-        myMetrics = containerMetricTypes;
+        myMetrics = containerSnapshotMetricTypes;
         break;
     }
     return myMetrics.map(toMetricOpt);

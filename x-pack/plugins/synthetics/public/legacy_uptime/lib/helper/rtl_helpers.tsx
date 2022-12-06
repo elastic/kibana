@@ -18,7 +18,7 @@ import { merge } from 'lodash';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { configure } from '@testing-library/dom';
@@ -27,6 +27,8 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { Store } from 'redux';
 import { mockState } from '../__mocks__/uptime_store.mock';
 import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
@@ -137,6 +139,7 @@ export const mockCore: () => Partial<CoreStart> = () => {
       },
       ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
     },
+    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   };
 
   return core;
@@ -219,12 +222,17 @@ export function WrappedHelper<ExtraCore>({
   url,
   useRealStore,
   path,
+  store,
   history = createMemoryHistory(),
-}: RenderRouterOptions<ExtraCore> & { children: ReactElement; useRealStore?: boolean }) {
+}: RenderRouterOptions<ExtraCore> & {
+  children: ReactElement;
+  useRealStore?: boolean;
+  store?: Store;
+}) {
   const testState: AppState = merge({}, mockState, state);
 
   return (
-    <MountWithReduxProvider state={testState} useRealStore={useRealStore}>
+    <MountWithReduxProvider state={testState} useRealStore={useRealStore} store={store}>
       <MockRouter path={path} history={history} kibanaProps={kibanaProps} core={core}>
         {children}
       </MockRouter>
@@ -244,8 +252,9 @@ export function render<ExtraCore>(
     url,
     path,
     useRealStore,
-  }: RenderRouterOptions<ExtraCore> & { useRealStore?: boolean } = {}
-) {
+    store,
+  }: RenderRouterOptions<ExtraCore> & { useRealStore?: boolean; store?: Store } = {}
+): any {
   if (url) {
     history = getHistoryFromUrl(url);
   }
@@ -260,6 +269,7 @@ export function render<ExtraCore>(
         state={state}
         path={path}
         useRealStore={useRealStore}
+        store={store}
       >
         {ui}
       </WrappedHelper>,

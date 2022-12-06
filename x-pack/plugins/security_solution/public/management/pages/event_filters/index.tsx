@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { NotFoundPage } from '../../../app/404';
 import { MANAGEMENT_ROUTING_EVENT_FILTERS_PATH } from '../../common/constants';
-import { EventFiltersListPage } from './view/event_filters_list_page';
+import { EventFiltersList } from './view/event_filters_list';
 
 export const EventFiltersContainer = () => {
   return (
     <Switch>
-      <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} exact component={EventFiltersListPage} />
+      <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} exact component={EventFiltersList} />
       <Route path="*" component={NotFoundPage} />
     </Switch>
   );

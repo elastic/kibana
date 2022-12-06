@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { EuiFormRow } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { uniq } from 'lodash';
 import React from 'react';
@@ -14,46 +13,40 @@ import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 
-interface Props extends PhraseSuggestorProps {
+export interface PhrasesSuggestorProps extends PhraseSuggestorProps {
   values?: string[];
   onChange: (values: string[]) => void;
   onParamsUpdate: (value: string) => void;
   intl: InjectedIntl;
   fullWidth?: boolean;
+  compressed?: boolean;
 }
 
-class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
+class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesSuggestorProps> {
   public render() {
     const { suggestions } = this.state;
-    const { values, intl, onChange, fullWidth, onParamsUpdate } = this.props;
+    const { values, intl, onChange, fullWidth, onParamsUpdate, compressed } = this.props;
     const options = values ? uniq([...values, ...suggestions]) : suggestions;
     return (
-      <EuiFormRow
+      <StringComboBox
         fullWidth={fullWidth}
-        label={intl.formatMessage({
-          id: 'unifiedSearch.filter.filterEditor.valuesSelectLabel',
-          defaultMessage: 'Values',
+        compressed={compressed}
+        placeholder={intl.formatMessage({
+          id: 'unifiedSearch.filter.filterEditor.valuesSelectPlaceholder',
+          defaultMessage: 'Select values',
         })}
-      >
-        <StringComboBox
-          fullWidth={fullWidth}
-          placeholder={intl.formatMessage({
-            id: 'unifiedSearch.filter.filterEditor.valuesSelectPlaceholder',
-            defaultMessage: 'Select values',
-          })}
-          delimiter=","
-          options={options}
-          getLabel={(option) => option}
-          selectedOptions={values || []}
-          onSearchChange={this.onSearchChange}
-          onCreateOption={(option: string) => {
-            onParamsUpdate(option.trim());
-          }}
-          onChange={onChange}
-          isClearable={false}
-          data-test-subj="filterParamsComboBox phrasesParamsComboxBox"
-        />
-      </EuiFormRow>
+        delimiter=","
+        options={options}
+        getLabel={(option) => option}
+        selectedOptions={values || []}
+        onSearchChange={this.onSearchChange}
+        onCreateOption={(option: string) => {
+          onParamsUpdate(option.trim());
+        }}
+        onChange={onChange}
+        isClearable={false}
+        data-test-subj="filterParamsComboBox phrasesParamsComboxBox"
+      />
     );
   }
 }

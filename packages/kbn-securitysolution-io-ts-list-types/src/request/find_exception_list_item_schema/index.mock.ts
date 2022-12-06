@@ -16,6 +16,7 @@ export const getFindExceptionListItemSchemaMock = (): FindExceptionListItemSchem
   namespace_type: NAMESPACE_TYPE,
   page: '1',
   per_page: '25',
+  search: undefined,
   sort_field: undefined,
   sort_order: undefined,
 });
@@ -26,6 +27,7 @@ export const getFindExceptionListItemSchemaMultipleMock = (): FindExceptionListI
   namespace_type: 'single,single,agnostic',
   page: '1',
   per_page: '25',
+  search: undefined,
   sort_field: undefined,
   sort_order: undefined,
 });
@@ -37,6 +39,7 @@ export const getFindExceptionListItemSchemaDecodedMock =
     namespace_type: [NAMESPACE_TYPE],
     page: 1,
     per_page: 25,
+    search: undefined,
     sort_field: undefined,
     sort_order: undefined,
   });
@@ -48,6 +51,7 @@ export const getFindExceptionListItemSchemaDecodedMultipleMock =
     namespace_type: ['single', 'single', 'agnostic'],
     page: 1,
     per_page: 25,
+    search: undefined,
     sort_field: undefined,
     sort_order: undefined,
   });

@@ -40,6 +40,9 @@ export const createDeserializer =
         bestCompression: hot?.actions?.forcemerge?.index_codec === 'best_compression',
         readonlyEnabled: Boolean(hot?.actions?.readonly),
         shrink: { isUsingShardSize: Boolean(hot?.actions.shrink?.max_primary_shard_size) },
+        downsample: {
+          enabled: Boolean(hot?.actions?.downsample),
+        },
       },
       warm: {
         enabled: Boolean(warm),
@@ -49,12 +52,18 @@ export const createDeserializer =
         readonlyEnabled: Boolean(warm?.actions?.readonly),
         minAgeToMilliSeconds: -1,
         shrink: { isUsingShardSize: Boolean(warm?.actions.shrink?.max_primary_shard_size) },
+        downsample: {
+          enabled: Boolean(warm?.actions?.downsample),
+        },
       },
       cold: {
         enabled: Boolean(cold),
         dataTierAllocationType: determineDataTierAllocationType(cold?.actions),
         readonlyEnabled: Boolean(cold?.actions?.readonly),
         minAgeToMilliSeconds: -1,
+        downsample: {
+          enabled: Boolean(cold?.actions?.downsample),
+        },
       },
       frozen: {
         enabled: Boolean(frozen),
@@ -105,6 +114,14 @@ export const createDeserializer =
           draft._meta.hot.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
         }
 
+        if (draft.phases.hot?.actions.downsample?.fixed_interval) {
+          const downsampleInterval = splitSizeAndUnits(
+            draft.phases.hot.actions.downsample.fixed_interval
+          );
+          draft._meta.hot.downsample.fixedIntervalUnits = downsampleInterval.units;
+          draft._meta.hot.downsample.fixedIntervalSize = downsampleInterval.size;
+        }
+
         if (draft.phases.warm) {
           if (draft.phases.warm.actions?.allocate?.require) {
             Object.entries(draft.phases.warm.actions.allocate.require).forEach((entry) => {
@@ -125,6 +142,14 @@ export const createDeserializer =
             draft.phases.warm.actions.shrink.max_primary_shard_size = primaryShardSize.size;
             draft._meta.warm.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
           }
+
+          if (draft.phases.warm?.actions.downsample?.fixed_interval) {
+            const downsampleInterval = splitSizeAndUnits(
+              draft.phases.warm.actions.downsample.fixed_interval
+            );
+            draft._meta.warm.downsample.fixedIntervalUnits = downsampleInterval.units;
+            draft._meta.warm.downsample.fixedIntervalSize = downsampleInterval.size;
+          }
         }
 
         if (draft.phases.cold) {
@@ -138,6 +163,14 @@ export const createDeserializer =
             const minAge = splitSizeAndUnits(draft.phases.cold.min_age);
             draft.phases.cold.min_age = minAge.size;
             draft._meta.cold.minAgeUnit = minAge.units;
+          }
+
+          if (draft.phases.cold?.actions.downsample?.fixed_interval) {
+            const downsampleInterval = splitSizeAndUnits(
+              draft.phases.cold.actions.downsample.fixed_interval
+            );
+            draft._meta.cold.downsample.fixedIntervalUnits = downsampleInterval.units;
+            draft._meta.cold.downsample.fixedIntervalSize = downsampleInterval.size;
           }
         }
 

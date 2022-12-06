@@ -1,0 +1,63 @@
+{
+  "id": "@kbn/core-theme-browser-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-theme-browser-internal",
+        "id": "def-common.CoreContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "CoreContextProvider",
+        "description": [
+          "\nutility component exposing all the context providers required by core when integrating with react"
+        ],
+        "signature": [
+          "({ i18n, theme, children, globalStyles, }: React.PropsWithChildren<CoreContextProviderProps>) => JSX.Element"
+        ],
+        "path": "packages/core/theme/core-theme-browser-internal/src/core_context_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-theme-browser-internal",
+            "id": "def-common.CoreContextProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  i18n,\n  theme,\n  children,\n  globalStyles = false,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<CoreContextProviderProps>"
+            ],
+            "path": "packages/core/theme/core-theme-browser-internal/src/core_context_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

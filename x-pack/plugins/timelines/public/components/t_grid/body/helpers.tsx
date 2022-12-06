@@ -18,7 +18,7 @@ import type {
 } from '../../../../common/search_strategy';
 import type {
   ColumnHeaderOptions,
-  SortColumnTimeline,
+  SortColumnTable,
   SortDirection,
 } from '../../../../common/types/timeline';
 
@@ -93,12 +93,19 @@ export const mapSortingColumns = ({
     id: string;
     direction: 'asc' | 'desc';
   }>;
-}): SortColumnTimeline[] =>
-  columns.map(({ id, direction }) => ({
-    columnId: id,
-    columnType: columnHeaders.find((ch) => ch.id === id)?.type ?? 'text',
-    sortDirection: direction,
-  }));
+}): SortColumnTable[] =>
+  columns.map(({ id, direction }) => {
+    const columnHeader = columnHeaders.find((ch) => ch.id === id);
+    const columnType = columnHeader?.type ?? '';
+    const esTypes = columnHeader?.esTypes ?? [];
+
+    return {
+      columnId: id,
+      columnType,
+      esTypes,
+      sortDirection: direction,
+    };
+  });
 
 export const allowSorting = ({
   browserField,

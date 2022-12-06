@@ -19,7 +19,8 @@ import {
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { TimeHistoryContract, TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { TimeHistoryContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 import { wrapWithTheme, toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -91,6 +92,7 @@ export const DatePickerWrapper: FC = () => {
         });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]
   );
 
@@ -103,9 +105,11 @@ export const DatePickerWrapper: FC = () => {
         });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [globalState?.refreshInterval]
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const setRefreshInterval = useCallback(
     debounce((refreshIntervalUpdate: RefreshInterval) => {
       setGlobalState('refreshInterval', refreshIntervalUpdate, true);
@@ -122,17 +126,11 @@ export const DatePickerWrapper: FC = () => {
     timefilter.isTimeRangeSelectorEnabled()
   );
 
-  const refreshInterval = useMemo((): RefreshInterval => {
-    const resultInterval = globalState?.refreshInterval ?? timeFilterRefreshInterval;
-
-    /**
-     * Enforce pause when it's set to false with 0 refresh interval.
-     */
-    const pause = resultInterval.pause || (!resultInterval.pause && resultInterval.value <= 0);
-    const value = resultInterval.value;
-
-    return { value, pause };
-  }, [JSON.stringify(globalState?.refreshInterval), timeFilterRefreshInterval]);
+  const refreshInterval = useMemo(
+    (): RefreshInterval => globalState?.refreshInterval ?? timeFilterRefreshInterval,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(globalState?.refreshInterval), timeFilterRefreshInterval]
+  );
 
   useEffect(
     function warnAboutShortRefreshInterval() {
@@ -176,8 +174,11 @@ export const DatePickerWrapper: FC = () => {
         { toastLifeTimeMs: 30000 }
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify(refreshInterval),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify(globalState?.refreshInterval),
       setRefreshInterval,
     ]
@@ -220,6 +221,7 @@ export const DatePickerWrapper: FC = () => {
     return function cleanup() {
       subscriptions.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const updateTimeFilter = useCallback(
@@ -231,6 +233,7 @@ export const DatePickerWrapper: FC = () => {
         ...(start === 'now' || end === 'now' ? { ts: Date.now() } : {}),
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [setGlobalState]
   );
 
@@ -241,6 +244,9 @@ export const DatePickerWrapper: FC = () => {
     isPaused: boolean;
     refreshInterval: number;
   }) {
+    if (pause === false && value <= 0) {
+      setRefreshInterval({ pause, value: 5000 });
+    }
     setRefreshInterval({ pause, value });
   }
 

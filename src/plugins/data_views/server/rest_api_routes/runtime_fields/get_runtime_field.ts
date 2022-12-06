@@ -9,7 +9,7 @@
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewsService } from '../../../common';
+import { DataViewsService } from '../../../common/data_views';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
 import type {

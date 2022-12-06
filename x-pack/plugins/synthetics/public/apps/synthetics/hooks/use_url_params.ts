@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { useCallback, useEffect } from 'react';
-import { stringify } from 'query-string';
+import { useCallback } from 'react';
+import { parse, stringify } from 'query-string';
 import { useLocation, useHistory } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 import { SyntheticsUrlParams, getSupportedUrlParams } from '../utils/url_params';
 
-// TODO: Create the following imports for new Synthetics App
-import { selectedFiltersSelector } from '../../../legacy_uptime/state/selectors';
-import { setSelectedFilters } from '../../../legacy_uptime/state/actions/selected_filters';
-import { getFiltersFromMap } from '../../../legacy_uptime/hooks/use_selected_filters';
-import { getParsedParams } from '../../../legacy_uptime/lib/helper/parse_search';
+function getParsedParams(search: string) {
+  return search ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false }) : {};
+}
 
 export type GetUrlParams = () => SyntheticsUrlParams;
-export type UpdateUrlParams = (updatedParams: {
-  [key: string]: string | number | boolean | undefined;
-}) => void;
+export type UpdateUrlParams = (
+  updatedParams: {
+    [key: string]: string | number | boolean | undefined;
+  } | null,
+  replaceState?: boolean
+) => void;
 
 export type SyntheticsUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
 
@@ -30,64 +30,48 @@ export const useGetUrlParams: GetUrlParams = () => {
   return getSupportedUrlParams(getParsedParams(search));
 };
 
-const getMapFromFilters = (value: any): Map<string, any> | undefined => {
-  try {
-    return new Map(JSON.parse(value));
-  } catch {
-    return undefined;
-  }
-};
-
 export const useUrlParams: SyntheticsUrlParamsHook = () => {
   const { pathname, search } = useLocation();
   const history = useHistory();
-  const dispatch = useDispatch();
-  const selectedFilters = useSelector(selectedFiltersSelector);
-  const { filters } = useGetUrlParams();
-
-  useEffect(() => {
-    if (selectedFilters === null) {
-      const filterMap = getMapFromFilters(filters);
-      if (filterMap) {
-        dispatch(setSelectedFilters(getFiltersFromMap(filterMap)));
-      }
-    }
-  }, [dispatch, filters, selectedFilters]);
 
   const updateUrlParams: UpdateUrlParams = useCallback(
-    (updatedParams) => {
+    (updatedParams, replaceState = false) => {
       const currentParams = getParsedParams(search);
       const mergedParams = {
         ...currentParams,
         ...updatedParams,
       };
 
-      const updatedSearch = stringify(
-        // drop any parameters that have no value
-        Object.keys(mergedParams).reduce((params, key) => {
-          const value = mergedParams[key];
-          if (value === undefined || value === '') {
-            return params;
-          }
-          return {
-            ...params,
-            [key]: value,
-          };
-        }, {})
-      );
+      const updatedSearch = updatedParams
+        ? stringify(
+            // drop any parameters that have no value
+            Object.keys(mergedParams).reduce((params, key) => {
+              const value = mergedParams[key];
+              if (value === undefined || value === '') {
+                return params;
+              }
+
+              return {
+                ...params,
+                [key]: value,
+              };
+            }, {})
+          )
+        : null;
 
       // only update the URL if the search has actually changed
       if (search !== updatedSearch) {
-        history.push({ pathname, search: updatedSearch });
-      }
-      const filterMap = getMapFromFilters(mergedParams.filters);
-      if (!filterMap) {
-        dispatch(setSelectedFilters(null));
-      } else {
-        dispatch(setSelectedFilters(getFiltersFromMap(filterMap)));
+        if (replaceState) {
+          history.replace({
+            pathname,
+            search: updatedSearch || undefined,
+          });
+        } else {
+          history.push({ pathname, search: updatedSearch || undefined });
+        }
       }
     },
-    [dispatch, history, pathname, search]
+    [history, pathname, search]
   );
 
   return [useGetUrlParams, updateUrlParams];

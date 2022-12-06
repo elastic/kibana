@@ -8,22 +8,18 @@
 import React from 'react';
 import { screen, cleanup, act, fireEvent, getByTestId } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {
-  TrustedAppEntryTypes,
-  OperatingSystem,
-  ConditionEntryField,
-} from '@kbn/securitysolution-utils';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
+import { OperatingSystem, ConditionEntryField } from '@kbn/securitysolution-utils';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
 import { TrustedAppsForm } from './form';
-import {
+import type {
   ArtifactFormComponentOnChangeCallbackProps,
   ArtifactFormComponentProps,
 } from '../../../../components/artifact_list_page';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { INPUT_ERRORS } from '../translations';
 import { licenseService } from '../../../../../common/hooks/use_license';
 import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
@@ -264,8 +260,9 @@ describe('Trusted apps form', () => {
       expect(formProps.onChange).toHaveBeenCalledWith(expected);
     });
 
-    it('should correctly change OS', () => {
+    it('should correctly change OS', async () => {
       userEvent.click(getOsField());
+      await waitForEuiPopoverOpen();
       userEvent.click(screen.getByRole('option', { name: 'Linux' }));
       const expected = createOnChangeArgs({
         item: createItem({ os_types: [OperatingSystem.LINUX] }),

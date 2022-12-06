@@ -8,24 +8,14 @@
 
 import React from 'react';
 import { QueryLanguageSwitcher, QueryLanguageSwitcherProps } from './language_switcher';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiButtonIcon, EuiIcon, EuiPopover } from '@elastic/eui';
 const startMock = coreMock.createStart();
 
 describe('LanguageSwitcher', () => {
-  function wrapInContext(testProps: QueryLanguageSwitcherProps) {
-    const services = {
-      uiSettings: startMock.uiSettings,
-      docLinks: startMock.docLinks,
-    };
-
-    return (
-      <KibanaContextProvider services={services}>
-        <QueryLanguageSwitcher {...testProps} />
-      </KibanaContextProvider>
-    );
+  function wrapInContext(testProps: Omit<QueryLanguageSwitcherProps, 'deps'>) {
+    return <QueryLanguageSwitcher {...testProps} deps={{ docLinks: startMock.docLinks }} />;
   }
 
   it('should select the lucene context menu if language is lucene', () => {

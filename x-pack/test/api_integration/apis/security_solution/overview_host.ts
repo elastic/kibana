@@ -59,7 +59,6 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            docValueFields: [],
             inspect: false,
           },
           strategy: 'securitySolutionSearchStrategy',

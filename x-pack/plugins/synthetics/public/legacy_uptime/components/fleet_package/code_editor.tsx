@@ -22,11 +22,19 @@ interface Props {
   ariaLabel: string;
   id: string;
   languageId: MonacoEditorLangId;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
   value: string;
+  readOnly?: boolean;
 }
 
-export const CodeEditor = ({ ariaLabel, id, languageId, onChange, value }: Props) => {
+export const CodeEditor = ({
+  ariaLabel,
+  id,
+  languageId,
+  onChange,
+  value,
+  readOnly = false,
+}: Props) => {
   return (
     <CodeEditorContainer borderRadius="none" hasShadow={false} hasBorder={true}>
       <MonacoCodeContainer
@@ -42,6 +50,7 @@ export const CodeEditor = ({ ariaLabel, id, languageId, onChange, value }: Props
           onChange={onChange}
           options={{
             renderValidationDecorations: value ? 'on' : 'off',
+            readOnly,
           }}
           isCopyable={true}
           allowFullScreen={true}

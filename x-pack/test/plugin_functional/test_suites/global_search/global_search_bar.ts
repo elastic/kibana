@@ -11,20 +11,19 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('GlobalSearchBar', function () {
     const { common, navigationalSearch } = getPageObjects(['common', 'navigationalSearch']);
-    const esArchiver = getService('esArchiver');
     const browser = getService('browser');
+    const kibanaServer = getService('kibanaServer');
 
     before(async () => {
-      await esArchiver.load(
-        'x-pack/test/plugin_functional/es_archives/global_search/search_syntax'
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/global_search/search_syntax'
       );
       await common.navigateToApp('home');
     });
 
     after(async () => {
-      await esArchiver.unload(
-        'x-pack/test/plugin_functional/es_archives/global_search/search_syntax'
-      );
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     afterEach(async () => {

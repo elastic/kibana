@@ -255,7 +255,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       ) : null}
 
       <EuiFlyout
-        onClose={onClose}
+        onClose={() => onClose()}
         data-test-subj="dataStreamDetailPanel"
         aria-labelledby="dataStreamDetailPanelTitle"
         size="m"

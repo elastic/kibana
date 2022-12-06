@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const djangoVariables = {
+  apmServiceName: 'SERVICE_NAME',
+  secretToken: 'SECRET_TOKEN',
+  apmServerUrl: 'SERVER_URL',
+  apmEnvironment: 'ENVIRONMENT',
+};
+
 export const django = `# ${i18n.translate(
   'xpack.apm.tutorial.djangoClient.configure.commands.addAgentComment',
   {
@@ -14,50 +21,50 @@ export const django = `# ${i18n.translate(
   }
 )}
 INSTALLED_APPS = (
-'elasticapm.contrib.django',
-# ...
+  'elasticapm.contrib.django',
+  # ...
 )
 
 ELASTIC_APM = {
-# ${i18n.translate(
-  'xpack.apm.tutorial.djangoClient.configure.commands.setRequiredServiceNameComment',
-  {
-    defaultMessage: 'Set the required service name. Allowed characters:',
-  }
-)}
-# ${i18n.translate(
-  'xpack.apm.tutorial.djangoClient.configure.commands.allowedCharactersComment',
-  {
-    defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
-  }
-)}
-'SERVICE_NAME': '',
+  # ${i18n.translate(
+    'xpack.apm.tutorial.djangoClient.configure.commands.setRequiredServiceNameComment',
+    {
+      defaultMessage: 'Set the required service name. Allowed characters:',
+    }
+  )}
+  # ${i18n.translate(
+    'xpack.apm.tutorial.djangoClient.configure.commands.allowedCharactersComment',
+    {
+      defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
+    }
+  )}
+  #'${djangoVariables.apmServiceName}': '{{{apmServiceName}}}',
 
-# ${i18n.translate(
-  'xpack.apm.tutorial.djangoClient.configure.commands.useIfApmServerRequiresTokenComment',
-  {
-    defaultMessage: 'Use if APM Server requires a secret token',
-  }
-)}
-'SECRET_TOKEN': '{{{secretToken}}}',
+  # ${i18n.translate(
+    'xpack.apm.tutorial.djangoClient.configure.commands.useIfApmServerRequiresTokenComment',
+    {
+      defaultMessage: 'Use if APM Server requires a secret token',
+    }
+  )}
+  '${djangoVariables.secretToken}': '{{{secretToken}}}',
 
-# ${i18n.translate(
-  'xpack.apm.tutorial.djangoClient.configure.commands.setCustomApmServerUrlComment',
-  {
-    defaultMessage:
-      'Set the custom APM Server URL (default: {defaultApmServerUrl})',
-    values: { defaultApmServerUrl: 'http://localhost:8200' },
-  }
-)}
-'SERVER_URL': '{{{apmServerUrl}}}',
+  # ${i18n.translate(
+    'xpack.apm.tutorial.djangoClient.configure.commands.setCustomApmServerUrlComment',
+    {
+      defaultMessage:
+        'Set the custom APM Server URL (default: {defaultApmServerUrl})',
+      values: { defaultApmServerUrl: 'http://localhost:8200' },
+    }
+  )}
+  '${djangoVariables.apmServerUrl}': '{{{apmServerUrl}}}',
 
-# ${i18n.translate(
-  'xpack.apm.tutorial.djangoClient.configure.commands.setServiceEnvironmentComment',
-  {
-    defaultMessage: 'Set the service environment',
-  }
-)}
-'ENVIRONMENT': 'production',
+  # ${i18n.translate(
+    'xpack.apm.tutorial.djangoClient.configure.commands.setServiceEnvironmentComment',
+    {
+      defaultMessage: 'Set the service environment',
+    }
+  )}
+  '${djangoVariables.apmEnvironment}': '{{{apmEnvironment}}}',
 }
 
 # ${i18n.translate(
@@ -67,6 +74,6 @@ ELASTIC_APM = {
   }
 )}
 MIDDLEWARE = (
-'elasticapm.contrib.django.middleware.TracingMiddleware',
-#...
+  'elasticapm.contrib.django.middleware.TracingMiddleware',
+  #...
 )`;

@@ -5,51 +5,28 @@
  * 2.0.
  */
 
-import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { wrapErrorAndRejectPromise } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
-import { FtrProviderContext } from '../ftr_provider_context';
 import {
-  createUserAndRole,
-  deleteUserAndRole,
-  ROLES,
-} from '../../common/services/security_solution';
+  AGENT_POLICY_SUMMARY_ROUTE,
+  GET_PROCESSES_ROUTE,
+  ISOLATE_HOST_ROUTE,
+  ISOLATE_HOST_ROUTE_V2,
+  KILL_PROCESS_ROUTE,
+  SUSPEND_PROCESS_ROUTE,
+  UNISOLATE_HOST_ROUTE,
+  UNISOLATE_HOST_ROUTE_V2,
+} from '@kbn/security-solution-plugin/common/endpoint/constants';
+import { FtrProviderContext } from '../ftr_provider_context';
+import { ROLE } from '../services/roles_users';
 
 export default function ({ getService }: FtrProviderContext) {
-  const endpointTestResources = getService('endpointTestResources');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('When attempting to call an endpoint api with no authz', () => {
-    let loadedData: IndexedHostsAndAlertsResponse;
-
-    before(async () => {
-      // create role/user
-      await createUserAndRole(getService, ROLES.t1_analyst);
-      loadedData = await endpointTestResources.loadEndpointData();
-    });
-
-    after(async () => {
-      if (loadedData) {
-        await endpointTestResources.unloadEndpointData(loadedData);
-      }
-
-      // delete role/user
-      await deleteUserAndRole(getService, ROLES.t1_analyst);
-    });
-
     const apiList = [
       {
         method: 'get',
-        path: '/api/endpoint/metadata',
-        body: undefined,
-      },
-      {
-        method: 'get',
-        path: '/api/endpoint/action_status?agent_ids=1',
-        body: undefined,
-      },
-      {
-        method: 'get',
-        path: '/api/endpoint/policy/summaries?package_name=endpoint',
+        path: `${AGENT_POLICY_SUMMARY_ROUTE}?package_name=endpoint`,
         body: undefined,
       },
       {
@@ -58,19 +35,39 @@ export default function ({ getService }: FtrProviderContext) {
         body: undefined,
       },
       {
-        method: 'get',
-        path: '/api/endpoint/policy_response?agentId=1',
-        body: undefined,
-      },
-      {
         method: 'post',
-        path: '/api/endpoint/isolate',
+        path: ISOLATE_HOST_ROUTE,
         body: { endpoint_ids: ['one'] },
       },
       {
         method: 'post',
-        path: '/api/endpoint/unisolate',
+        path: UNISOLATE_HOST_ROUTE,
         body: { endpoint_ids: ['one'] },
+      },
+      {
+        method: 'post',
+        path: ISOLATE_HOST_ROUTE_V2,
+        body: { endpoint_ids: ['one'] },
+      },
+      {
+        method: 'post',
+        path: UNISOLATE_HOST_ROUTE_V2,
+        body: { endpoint_ids: ['one'] },
+      },
+      {
+        method: 'post',
+        path: GET_PROCESSES_ROUTE,
+        body: { endpoint_ids: ['one'] },
+      },
+      {
+        method: 'post',
+        path: KILL_PROCESS_ROUTE,
+        body: { endpoint_ids: ['one'], parameters: { entity_id: 'abc123' } },
+      },
+      {
+        method: 'post',
+        path: SUSPEND_PROCESS_ROUTE,
+        body: { endpoint_ids: ['one'], parameters: { entity_id: 'abc123' } },
       },
     ];
 
@@ -79,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
         apiListItem.path
       }]`, async () => {
         await supertestWithoutAuth[apiListItem.method](apiListItem.path)
-          .auth(ROLES.t1_analyst, 'changeme')
+          .auth(ROLE.t1_analyst, 'changeme')
           .set('kbn-xsrf', 'xxx')
           .send(apiListItem.body)
           .expect(403, {

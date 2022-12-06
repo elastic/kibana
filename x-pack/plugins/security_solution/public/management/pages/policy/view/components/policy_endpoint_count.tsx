@@ -6,7 +6,8 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiLink, EuiLinkAnchorProps, EuiText } from '@elastic/eui';
+import type { EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
 import { useAppUrl } from '../../../../../common/lib/kibana';
@@ -15,10 +16,11 @@ import { getEndpointListPath, getPoliciesPath } from '../../../../common/routing
 import { APP_UI_ID } from '../../../../../../common/constants';
 
 /**
+ * Returns a link component that navigates to the endpoint list page filtered by a specific policy
+ *
  * @param policyId
  * @param nonLinkCondition: boolean where the returned component is just text and not a link
  *
- * Returns a link component that navigates to the endpoint list page filtered by a specific policy
  */
 export const PolicyEndpointCount = memo<
   Omit<EuiLinkAnchorProps, 'href'> & {

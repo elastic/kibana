@@ -27,7 +27,7 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
 import { PackageInstallProvider } from '../integrations/hooks';
 
-import { useAuthz, useFlyoutContext } from './hooks';
+import { useAuthz, useFleetStatus, useFlyoutContext } from './hooks';
 
 import {
   ConfigContext,
@@ -58,6 +58,7 @@ import { MissingESRequirementsPage } from './sections/agents/agent_requirements_
 import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
 import { SettingsApp } from './sections/settings';
+import { DebugPage } from './sections/debug';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
@@ -145,6 +146,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   const [initializationError, setInitializationError] = useState<Error | null>(null);
 
   const isAddIntegrationsPath = !!useRouteMatch(FLEET_ROUTING_PATHS.add_integration_to_policy);
+  const isDebugPath = !!useRouteMatch(FLEET_ROUTING_PATHS.debug);
 
   useEffect(() => {
     (async () => {
@@ -191,6 +193,10 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
         {isPermissionsLoading ? <Loading /> : <PermissionsError error={permissionsError!} />}
       </ErrorLayout>
     );
+  }
+  // Debug page moved outside of initialization to allow debugging when setup failed
+  if (isDebugPath) {
+    return <DebugPage setupError={initializationError} isInitialized={isInitialized} />;
   }
 
   if (!isInitialized || initializationError) {
@@ -303,6 +309,7 @@ const FleetTopNav = memo(
 export const AppRoutes = memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
     const flyoutContext = useFlyoutContext();
+    const fleetStatus = useFleetStatus();
 
     return (
       <>
@@ -356,7 +363,11 @@ export const AppRoutes = memo(
         {flyoutContext.isEnrollmentFlyoutOpen && (
           <EuiPortal>
             <AgentEnrollmentFlyout
-              defaultMode="standalone"
+              defaultMode={
+                fleetStatus.isReady && !fleetStatus.missingRequirements?.includes('fleet_server')
+                  ? 'managed'
+                  : 'standalone'
+              }
               isIntegrationFlow={true}
               onClose={() => flyoutContext.closeEnrollmentFlyout()}
             />

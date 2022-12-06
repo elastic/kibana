@@ -146,7 +146,12 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     availableSources: [
       () => [selectors.sourceData],
       (sourceData: CombinedDataItem[]) =>
-        sortByName(sourceData.filter(({ configured }) => !configured)),
+        sortByName(
+          sourceData.filter(
+            ({ configured, serviceType, externalConnectorServiceDescribed }) =>
+              !configured && (serviceType !== 'external' || externalConnectorServiceDescribed)
+          )
+        ),
     ],
     configuredSources: [
       () => [selectors.sourceData],

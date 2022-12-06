@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { take, filter } from 'rxjs/operators';
 
 import { i18n } from '@kbn/i18n';
 import type {
@@ -37,13 +37,25 @@ import type {
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
-import type { FleetConfigType, FleetAuthz, ExperimentalFeatures } from '../common';
-import { INTEGRATIONS_PLUGIN_ID, parseExperimentalConfigValue } from '../common';
+import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+
+import type { FleetConfigType } from '../common/types';
+import type { FleetAuthz } from '../common';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+
+import { INTEGRATIONS_PLUGIN_ID } from '../common';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 import {
   PLUGIN_ID,
@@ -53,21 +65,11 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+  FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
 } from './constants';
 import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
-import {
-  registerEPMRoutes,
-  registerPackagePolicyRoutes,
-  registerDataStreamRoutes,
-  registerAgentPolicyRoutes,
-  registerSetupRoutes,
-  registerAgentAPIRoutes,
-  registerEnrollmentApiKeyRoutes,
-  registerOutputRoutes,
-  registerSettingsRoutes,
-  registerAppRoutes,
-  registerPreconfigurationRoutes,
-} from './routes';
+import { registerRoutes } from './routes';
 
 import type { ExternalCallback, FleetRequestHandlerContext } from './types';
 import type {
@@ -76,6 +78,7 @@ import type {
   AgentPolicyServiceInterface,
   PackageService,
 } from './services';
+import { FleetUsageSender } from './services';
 import {
   appContextService,
   licenseService,
@@ -85,12 +88,21 @@ import {
   AgentServiceImpl,
   PackageServiceImpl,
 } from './services';
-import { registerFleetUsageCollector } from './collectors/register';
+import {
+  registerFleetUsageCollector,
+  fetchAgentsUsage,
+  fetchFleetUsage,
+} from './collectors/register';
 import { getAuthzFromRequest, makeRouterWithFleetAuthz } from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
 import { setupFleet } from './services/setup';
+import { BulkActionsResolver } from './services/agents';
+import type { PackagePolicyService } from './services/package_policy_service';
+import { PackagePolicyServiceImpl } from './services/package_policy';
+import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
+import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -100,6 +112,7 @@ export interface FleetSetupDeps {
   usageCollection?: UsageCollectionSetup;
   spaces: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface FleetStartDeps {
@@ -108,6 +121,8 @@ export interface FleetStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security: SecurityPluginStart;
   telemetry?: TelemetryPluginStart;
+  savedObjectsTagging: SavedObjectTaggingStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface FleetAppContext {
@@ -121,6 +136,7 @@ export interface FleetAppContext {
   configInitialValue: FleetConfigType;
   experimentalFeatures: ExperimentalFeatures;
   savedObjects: SavedObjectsServiceStart;
+  savedObjectsTagging?: SavedObjectTaggingStart;
   isProductionMode: PluginInitializerContext['env']['mode']['prod'];
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   kibanaBranch: PluginInitializerContext['env']['packageInfo']['branch'];
@@ -128,6 +144,7 @@ export interface FleetAppContext {
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
   telemetryEventsSender: TelemetryEventsSender;
+  bulkActionsResolver: BulkActionsResolver;
 }
 
 export type FleetSetupContract = void;
@@ -139,6 +156,8 @@ const allSavedObjectTypes = [
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+  FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
 ];
 
 /**
@@ -191,9 +210,13 @@ export class FleetPlugin
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
+  private bulkActionsResolver?: BulkActionsResolver;
+  private fleetUsageSender?: FleetUsageSender;
+  private checkDeletedFilesTask?: CheckDeletedFilesTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
+  private packagePolicyService?: PackagePolicyService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -284,18 +307,11 @@ export class FleetPlugin
         category: DEFAULT_APP_CATEGORIES.management,
         app: [INTEGRATIONS_PLUGIN_ID],
         catalogue: ['fleet'],
-        privilegesTooltip: i18n.translate(
-          'xpack.fleet.serverPlugin.integrationsPrivilegesTooltip',
-          {
-            defaultMessage: 'All Spaces is required for All Integrations access.',
-          }
-        ),
         privileges: {
           all: {
             api: [`${INTEGRATIONS_PLUGIN_ID}-read`, `${INTEGRATIONS_PLUGIN_ID}-all`],
             app: [INTEGRATIONS_PLUGIN_ID],
             catalogue: ['fleet'],
-            requireAllSpaces: true,
             savedObject: {
               all: allSavedObjectTypes,
               read: [],
@@ -313,6 +329,7 @@ export class FleetPlugin
             ui: ['read'],
           },
         },
+        subFeatures: [],
       });
     }
 
@@ -331,13 +348,21 @@ export class FleetPlugin
               asInternalUser: agentService.asInternalUser,
             };
           },
+          get packagePolicyService() {
+            const service = plugin.setupPackagePolicyService();
+
+            return {
+              asCurrentUser: service.asScoped(request),
+              asInternalUser: service.asInternalUser,
+            };
+          },
           authz: await getAuthzFromRequest(request),
           epm: {
             // Use a lazy getter to avoid constructing this client when not used by a request handler
             get internalSoClient() {
               return appContextService
                 .getSavedObjects()
-                .getScopedClient(request, { excludedWrappers: ['security'] });
+                .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
             },
           },
           get spaceId() {
@@ -349,6 +374,10 @@ export class FleetPlugin
 
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);
+    const fetch = async (abortController: AbortController) =>
+      await fetchFleetUsage(core, config, abortController);
+    this.fleetUsageSender = new FleetUsageSender(deps.taskManager, core, fetch);
+    registerFleetUsageLogger(deps.taskManager, async () => fetchAgentsUsage(core, config));
 
     const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();
     // Allow read-only users access to endpoints necessary for Integrations UI
@@ -359,28 +388,15 @@ export class FleetPlugin
       makeRouterWithFleetAuthz(router);
 
     core.http.registerOnPostAuth(fleetAuthzOnPostAuthHandler);
-
-    // Always register app routes for permissions checking
-    registerAppRoutes(fleetAuthzRouter);
-
-    // The upload package route is only authorized for the superuser
-    registerEPMRoutes(fleetAuthzRouter);
-
-    registerSetupRoutes(fleetAuthzRouter, config);
-    registerAgentPolicyRoutes(fleetAuthzRouter);
-    registerPackagePolicyRoutes(fleetAuthzRouter);
-    registerOutputRoutes(fleetAuthzRouter);
-    registerSettingsRoutes(fleetAuthzRouter);
-    registerDataStreamRoutes(fleetAuthzRouter);
-    registerPreconfigurationRoutes(fleetAuthzRouter);
-
-    // Conditional config routes
-    if (config.agents.enabled) {
-      registerAgentAPIRoutes(fleetAuthzRouter, config);
-      registerEnrollmentApiKeyRoutes(fleetAuthzRouter);
-    }
+    registerRoutes(fleetAuthzRouter, config);
 
     this.telemetryEventsSender.setup(deps.telemetry);
+    this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
+    this.checkDeletedFilesTask = new CheckDeletedFilesTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+    });
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
@@ -397,6 +413,7 @@ export class FleetPlugin
         this.configInitialValue.enableExperimental || []
       ),
       savedObjects: core.savedObjects,
+      savedObjectsTagging: plugins.savedObjectsTagging,
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,
       kibanaBranch: this.kibanaBranch,
@@ -404,10 +421,15 @@ export class FleetPlugin
       cloud: this.cloud,
       logger: this.logger,
       telemetryEventsSender: this.telemetryEventsSender,
+      bulkActionsResolver: this.bulkActionsResolver!,
     });
     licenseService.start(plugins.licensing.license$);
 
     this.telemetryEventsSender.start(plugins.telemetry, core);
+    this.bulkActionsResolver?.start(plugins.taskManager);
+    this.fleetUsageSender?.start(plugins.taskManager);
+    this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager });
+    startFleetUsageLogger(plugins.taskManager);
 
     const logger = appContextService.getLogger();
 
@@ -420,7 +442,18 @@ export class FleetPlugin
           summary: 'Fleet is setting up',
         });
 
-        await plugins.licensing.license$.pipe(take(1)).toPromise();
+        // We need to wait for the licence feature to be available,
+        // to have our internal saved object client with encrypted saved object working properly
+        await plugins.licensing.license$
+          .pipe(
+            filter(
+              (licence) =>
+                licence.getFeature('security').isEnabled &&
+                licence.getFeature('security').isAvailable
+            ),
+            take(1)
+          )
+          .toPromise();
 
         await setupFleet(
           new SavedObjectsClient(core.savedObjects.createInternalRepository()),
@@ -490,6 +523,14 @@ export class FleetPlugin
     return this.agentService;
   }
 
+  private setupPackagePolicyService(): PackagePolicyService {
+    if (this.packagePolicyService) {
+      return this.packagePolicyService;
+    }
+    this.packagePolicyService = new PackagePolicyServiceImpl();
+    return this.packagePolicyService;
+  }
+
   private setupPackageService(
     internalEsClient: ElasticsearchClient,
     internalSoClient: SavedObjectsClientContract
@@ -503,7 +544,7 @@ export class FleetPlugin
       internalSoClient,
       this.getLogger()
     );
-    return this.packageService;
+    return this.packageService!;
   }
 
   private getLogger(): Logger {

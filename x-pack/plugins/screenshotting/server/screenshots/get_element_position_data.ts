@@ -47,40 +47,40 @@ export const getElementPositionAndAttributes = async (
   );
 
   const { screenshot: screenshotSelector } = layout.selectors; // data-shared-items-container
+  const screenshotAttributes = { title: 'data-title', description: 'data-description' };
+
   let elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
   try {
-    elementsPositionAndAttributes = await browser.evaluate(
+    elementsPositionAndAttributes = await browser.evaluate<
+      [typeof screenshotSelector, typeof screenshotAttributes],
+      ElementsPositionAndAttribute[] | null
+    >(
       {
         fn: (selector, attributes) => {
           const elements = Array.from(document.querySelectorAll<Element>(selector));
           const results: ElementsPositionAndAttribute[] = [];
-
           for (const element of elements) {
             const boundingClientRect = element.getBoundingClientRect() as DOMRect;
             results.push({
               position: {
                 boundingClientRect: {
-                  // modern browsers support x/y, but older ones don't
-                  top: boundingClientRect.y || boundingClientRect.top,
-                  left: boundingClientRect.x || boundingClientRect.left,
+                  top: boundingClientRect.y,
+                  left: boundingClientRect.x,
                   width: boundingClientRect.width,
                   height: boundingClientRect.height,
                 },
-                scroll: {
-                  x: window.scrollX,
-                  y: window.scrollY,
-                },
+                scroll: { x: window.scrollX, y: window.scrollY },
               },
-              attributes: Object.keys(attributes).reduce((result: AttributesMap, key) => {
-                const attribute = attributes[key];
+              attributes: Object.keys(attributes).reduce<AttributesMap>((result, key) => {
+                const attribute = attributes[key as keyof typeof attributes];
                 result[key] = element.getAttribute(attribute);
                 return result;
-              }, {} as AttributesMap),
+              }, {}),
             });
           }
           return results;
         },
-        args: [screenshotSelector, { title: 'data-title', description: 'data-description' }],
+        args: [screenshotSelector, screenshotAttributes],
       },
       { context: CONTEXT_ELEMENTATTRIBUTES },
       kbnLogger

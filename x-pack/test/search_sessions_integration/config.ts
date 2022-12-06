@@ -32,7 +32,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
-      serverArgs: [...xpackFunctionalConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
+        '--data.search.sessions.management.refreshInterval=10s', // enable automatic refresh for sessions management screen
+      ],
     },
     services,
   };

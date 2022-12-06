@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { FormattedError } from './formatted_error';
 import React from 'react';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import { FormattedError } from './formatted_error';
 
 describe('When using the `FormattedError` component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -29,8 +30,8 @@ describe('When using the `FormattedError` component', () => {
     expect(renderResult.getByTestId('test').textContent).toEqual('foo');
   });
 
-  it('should display status code, message and API response body for HttpFetchError', () => {
-    const httpError = new Error('api foo') as HttpFetchError;
+  it('should display status code, message and API response body for IHttpFetchError', () => {
+    const httpError = new Error('api foo') as IHttpFetchError;
     Object.assign(httpError, {
       name: 'foo',
       req: {} as Request,

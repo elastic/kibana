@@ -12,7 +12,8 @@ import { mockSelectedTimeline } from './mocks';
 import * as i18n from '../translations';
 import { downloadBlob } from '../../../../common/utils/download_blob';
 
-import { ReactWrapper, mount } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 import { useParams } from 'react-router-dom';
 

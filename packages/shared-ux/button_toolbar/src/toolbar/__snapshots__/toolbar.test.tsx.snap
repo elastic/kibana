@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Toolbar /> is rendered 1`] = `
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <button
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+      type="button"
+    >
+      <span
+        class="emotion-euiButtonDisplayContent"
+      >
+        <span
+          class="eui-textTruncate"
+        >
+          Create chart
+        </span>
+      </span>
+    </button>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-wrap-xs-flexStart-center-row"
+    />
+  </div>
+</div>
+`;

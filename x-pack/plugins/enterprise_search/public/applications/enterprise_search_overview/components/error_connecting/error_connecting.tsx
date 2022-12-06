@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { ErrorStatePrompt } from '../../../shared/error_state';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';

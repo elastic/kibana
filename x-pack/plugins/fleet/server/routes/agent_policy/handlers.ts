@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RequestHandler, ResponseHeaders } from '@kbn/core/server';
+import type { RequestHandler, ResponseHeaders, ElasticsearchClient } from '@kbn/core/server';
 import pMap from 'p-map';
 import { safeDump } from 'js-yaml';
 
@@ -24,6 +24,8 @@ import type {
   GetFullAgentPolicyRequestSchema,
   GetK8sManifestRequestSchema,
   FleetRequestHandler,
+  BulkGetAgentPoliciesRequestSchema,
+  AgentPolicy,
 } from '../../types';
 
 import type {
@@ -37,9 +39,27 @@ import type {
   GetFullAgentPolicyResponse,
   GetFullAgentConfigMapResponse,
   GetFullAgentManifestResponse,
-} from '../../../common';
-import { defaultIngestErrorHandler } from '../../errors';
+  BulkGetAgentPoliciesResponse,
+} from '../../../common/types';
+import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
+
+async function populateAssignedAgentsCount(
+  esClient: ElasticsearchClient,
+  agentPolicies: AgentPolicy[]
+) {
+  await pMap(
+    agentPolicies,
+    (agentPolicy: GetAgentPoliciesResponseItem) =>
+      getAgentsByKuery(esClient, {
+        showInactive: false,
+        perPage: 0,
+        page: 1,
+        kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
+      }).then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
+    { concurrency: 10 }
+  );
+}
 
 export const getAgentPoliciesHandler: FleetRequestHandler<
   undefined,
@@ -55,6 +75,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
       withPackagePolicies,
       ...restOfQuery,
     });
+
     const body: GetAgentPoliciesResponse = {
       items,
       total,
@@ -62,21 +83,46 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
       perPage,
     };
 
-    await pMap(
-      items,
-      (agentPolicy: GetAgentPoliciesResponseItem) =>
-        getAgentsByKuery(esClient, {
-          showInactive: false,
-          perPage: 0,
-          page: 1,
-          kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
-        }).then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
-      { concurrency: 10 }
-    );
+    await populateAssignedAgentsCount(esClient, items);
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof BulkGetAgentPoliciesRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.epm.internalSoClient;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const { full: withPackagePolicies = false, ignoreMissing = false, ids } = request.body;
+  try {
+    const items = await agentPolicyService.getByIDs(soClient, ids, {
+      withPackagePolicies,
+      ignoreMissing,
+    });
+    const body: BulkGetAgentPoliciesResponse = {
+      items,
+    };
+
+    await populateAssignedAgentsCount(esClient, items);
+
+    return response.ok({ body });
+  } catch (error) {
+    if (error instanceof AgentPolicyNotFoundError) {
+      return response.notFound({
+        body: {
+          message: error.message,
+        },
+      });
+    }
+
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -101,7 +147,7 @@ export const getOneAgentPolicyHandler: RequestHandler<
       });
     }
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -137,20 +183,22 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
-export const updateAgentPolicyHandler: RequestHandler<
+export const updateAgentPolicyHandler: FleetRequestHandler<
   TypeOf<typeof UpdateAgentPolicyRequestSchema.params>,
   unknown,
   TypeOf<typeof UpdateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
+  const fleetContext = await context.fleet;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   const { force, ...data } = request.body;
+  const spaceId = fleetContext.spaceId;
   try {
     const agentPolicy = await agentPolicyService.update(
       soClient,
@@ -160,6 +208,7 @@ export const updateAgentPolicyHandler: RequestHandler<
       {
         force,
         user: user || undefined,
+        spaceId,
       }
     );
     const body: UpdateAgentPolicyResponse = { item: agentPolicy };
@@ -167,7 +216,7 @@ export const updateAgentPolicyHandler: RequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -196,7 +245,7 @@ export const copyAgentPolicyHandler: RequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -218,7 +267,7 @@ export const deleteAgentPoliciesHandler: RequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -250,7 +299,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
         });
       }
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   } else {
     try {
@@ -273,7 +322,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
         });
       }
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   }
 };
@@ -312,7 +361,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         });
       }
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   } else {
     try {
@@ -336,7 +385,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         });
       }
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   }
 };
@@ -363,7 +412,7 @@ export const getK8sManifest: FleetRequestHandler<
       });
     }
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -392,6 +441,6 @@ export const downloadK8sManifest: FleetRequestHandler<
       });
     }
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

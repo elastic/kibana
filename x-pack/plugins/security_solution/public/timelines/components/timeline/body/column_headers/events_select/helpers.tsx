@@ -86,7 +86,7 @@ export const getEventsSelectOptions = (): EventsSelectOption[] => [
     dropdownDisplay: (
       <PinActionItem>
         <PinIconContainer>
-          <Pin allowUnpinning={true} pinned={true} />
+          <Pin allowUnpinning={true} isAlert={false} pinned={true} />
         </PinIconContainer>
         <DropdownDisplay text={i18n.PIN_SELECTED} />
       </PinActionItem>
@@ -99,7 +99,7 @@ export const getEventsSelectOptions = (): EventsSelectOption[] => [
     dropdownDisplay: (
       <PinActionItem>
         <PinIconContainer>
-          <Pin allowUnpinning={true} pinned={false} />
+          <Pin allowUnpinning={true} isAlert={false} pinned={false} />
         </PinIconContainer>
         <DropdownDisplay text={i18n.UNPIN_SELECTED} />
       </PinActionItem>

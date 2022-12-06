@@ -37,10 +37,15 @@ export class ShareMenuManager {
        * @param options
        */
       toggleShareContextMenu: (options: ShowShareMenuOptions) => {
-        const menuItems = shareRegistry.getShareMenuItems({ ...options, onClose: this.onClose });
+        const onClose = () => {
+          this.onClose();
+          options.onClose?.();
+        };
+        const menuItems = shareRegistry.getShareMenuItems({ ...options, onClose });
         const anonymousAccess = anonymousAccessServiceProvider?.();
         this.toggleShareContextMenu({
           ...options,
+          onClose,
           menuItems,
           urlService,
           anonymousAccess,
@@ -69,14 +74,17 @@ export class ShareMenuManager {
     showPublicUrlSwitch,
     urlService,
     anonymousAccess,
+    snapshotShareWarning,
+    onClose,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
     urlService: BrowserUrlService;
     anonymousAccess: AnonymousAccessServiceContract | undefined;
     theme: ThemeServiceStart;
+    onClose: () => void;
   }) {
     if (this.isOpen) {
-      this.onClose();
+      onClose();
       return;
     }
 
@@ -90,7 +98,7 @@ export class ShareMenuManager {
             id="sharePopover"
             button={anchorElement}
             isOpen={true}
-            closePopover={this.onClose}
+            closePopover={onClose}
             panelPaddingSize="none"
             anchorPosition="downLeft"
           >
@@ -102,11 +110,12 @@ export class ShareMenuManager {
               shareMenuItems={menuItems}
               sharingData={sharingData}
               shareableUrl={shareableUrl}
-              onClose={this.onClose}
+              onClose={onClose}
               embedUrlParamExtensions={embedUrlParamExtensions}
               anonymousAccess={anonymousAccess}
               showPublicUrlSwitch={showPublicUrlSwitch}
               urlService={urlService}
+              snapshotShareWarning={snapshotShareWarning}
             />
           </EuiWrappingPopover>
         </KibanaThemeProvider>

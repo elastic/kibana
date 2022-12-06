@@ -7,19 +7,21 @@
  */
 
 import { History } from 'history';
+
 import { createQueryParamObservable } from '@kbn/kibana-utils-plugin/public';
-import { DashboardAppLocatorParams, DashboardConstants } from '../..';
-import { DashboardState } from '../../types';
-import { getDashboardTitle } from '../../dashboard_strings';
-import { DashboardSavedObject } from '../../saved_dashboards';
-import { getQueryParams } from '../../services/kibana_utils';
+import type { Query } from '@kbn/es-query';
 import {
-  DataPublicPluginStart,
   noSearchSessionStorageCapabilityMessage,
   SearchSessionInfoProvider,
-} from '../../services/data';
-import { stateToRawDashboardState } from './convert_dashboard_state';
+} from '@kbn/data-plugin/public';
+import { getQueryParams } from '@kbn/kibana-utils-plugin/public';
+
+import type { DashboardState } from '../../types';
 import { DASHBOARD_APP_LOCATOR } from '../../locator';
+import { getDashboardTitle } from '../../dashboard_strings';
+import { pluginServices } from '../../services/plugin_services';
+import { DashboardAppLocatorParams, DashboardConstants } from '../..';
+import { stateToRawDashboardState } from './convert_dashboard_state';
 
 export const getSearchSessionIdFromURL = (history: History): string | undefined =>
   getQueryParams(history.location)[DashboardConstants.SEARCH_SESSION_ID] as string | undefined;
@@ -28,8 +30,6 @@ export const getSessionURLObservable = (history: History) =>
   createQueryParamObservable<string>(history, DashboardConstants.SEARCH_SESSION_ID);
 
 export function createSessionRestorationDataProvider(deps: {
-  kibanaVersion: string;
-  data: DataPublicPluginStart;
   getAppState: () => DashboardState;
   getDashboardTitle: () => string;
   getDashboardId: () => string;
@@ -51,29 +51,22 @@ export function enableDashboardSearchSessions({
   canStoreSearchSession,
   initialDashboardState,
   getLatestDashboardState,
-  savedDashboard,
-  kibanaVersion,
-  data,
 }: {
-  kibanaVersion: string;
-  data: DataPublicPluginStart;
   canStoreSearchSession: boolean;
-  savedDashboard: DashboardSavedObject;
   initialDashboardState: DashboardState;
   getLatestDashboardState: () => DashboardState;
 }) {
+  const { data } = pluginServices.getServices();
   const dashboardTitle = getDashboardTitle(
     initialDashboardState.title,
     initialDashboardState.viewMode,
-    !savedDashboard.id
+    !getLatestDashboardState().savedObjectId
   );
 
   data.search.session.enableStorage(
     createSessionRestorationDataProvider({
-      data,
-      kibanaVersion,
       getDashboardTitle: () => dashboardTitle,
-      getDashboardId: () => savedDashboard?.id || '',
+      getDashboardId: () => getLatestDashboardState().savedObjectId ?? '',
       getAppState: getLatestDashboardState,
     }),
     {
@@ -93,27 +86,25 @@ export function enableDashboardSearchSessions({
  * as it was.
  */
 function getLocatorParams({
-  data,
   getAppState,
-  kibanaVersion,
   getDashboardId,
   shouldRestoreSearchSession,
 }: {
-  kibanaVersion: string;
-  data: DataPublicPluginStart;
   getAppState: () => DashboardState;
   getDashboardId: () => string;
   shouldRestoreSearchSession: boolean;
 }): DashboardAppLocatorParams {
-  const appState = stateToRawDashboardState({ state: getAppState(), version: kibanaVersion });
+  const { data } = pluginServices.getServices();
+
+  const appState = stateToRawDashboardState({ state: getAppState() });
   const { filterManager, queryString } = data.query;
   const { timefilter } = data.query.timefilter;
 
   return {
     timeRange: shouldRestoreSearchSession ? timefilter.getAbsoluteTime() : timefilter.getTime(),
     searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
-    panels: getDashboardId() ? undefined : appState.panels,
-    query: queryString.formatQuery(appState.query),
+    panels: getDashboardId() ? undefined : (appState.panels as DashboardAppLocatorParams['panels']),
+    query: queryString.formatQuery(appState.query) as Query,
     filters: filterManager.getFilters(),
     savedQuery: appState.savedQuery,
     dashboardId: getDashboardId(),

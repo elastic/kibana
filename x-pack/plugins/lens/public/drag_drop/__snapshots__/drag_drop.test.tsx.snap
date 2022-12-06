@@ -44,7 +44,7 @@ exports[`DragDrop renders if nothing is being dragged 1`] = `
   <button
     aria-describedby="lnsDragDrop-keyboardInstructions"
     aria-label="hello"
-    class="euiScreenReaderOnly--showOnFocus lnsDragDrop__keyboardHandler"
+    class="lnsDragDrop__keyboardHandler emotion-euiScreenReaderOnly"
     data-test-subj="lnsDragDrop-keyboardHandler"
   />
   <button

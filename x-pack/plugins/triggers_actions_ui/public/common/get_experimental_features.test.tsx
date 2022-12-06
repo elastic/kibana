@@ -20,7 +20,7 @@ describe('getIsExperimentalFeatureEnabled', () => {
         rulesDetailLogs: true,
         ruleTagFilter: true,
         ruleStatusFilter: true,
-        internalShareableComponentsSandbox: true,
+        ruleUseExecutionStatus: false,
       },
     });
 
@@ -36,10 +36,6 @@ describe('getIsExperimentalFeatureEnabled', () => {
 
     expect(result).toEqual(true);
 
-    result = getIsExperimentalFeatureEnabled('internalShareableComponentsSandbox');
-
-    expect(result).toEqual(true);
-
     result = getIsExperimentalFeatureEnabled('ruleTagFilter');
 
     expect(result).toEqual(true);
@@ -47,6 +43,10 @@ describe('getIsExperimentalFeatureEnabled', () => {
     result = getIsExperimentalFeatureEnabled('ruleStatusFilter');
 
     expect(result).toEqual(true);
+
+    result = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
+
+    expect(result).toEqual(false);
 
     expect(() => getIsExperimentalFeatureEnabled('doesNotExist' as any)).toThrowError(
       `Invalid enable value doesNotExist. Allowed values are: ${allowedExperimentalValueKeys.join(

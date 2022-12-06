@@ -12,7 +12,7 @@ import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_TYPE,
   SPAN_SUBTYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import {
   Connection,
   ConnectionNode,
@@ -115,7 +115,7 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
       ? anomalies.serviceAnomalies.find(
           (item) => item.serviceName === serviceName
         )
-      : null;
+      : undefined;
 
     if (matchedServiceNodes.length) {
       return {
@@ -158,9 +158,16 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
       const sourceData = getConnectionNode(connection.source);
       const targetData = getConnectionNode(connection.destination);
 
+      const label =
+        sourceData[SERVICE_NAME] +
+        ' to ' +
+        (targetData[SERVICE_NAME] ||
+          targetData[SPAN_DESTINATION_SERVICE_RESOURCE]);
+
       return {
         source: sourceData.id,
         target: targetData.id,
+        label,
         id: getConnectionId({ source: sourceData, destination: targetData }),
         sourceData,
         targetData,

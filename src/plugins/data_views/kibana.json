@@ -6,7 +6,7 @@
   "requiredPlugins": ["fieldFormats", "expressions"],
   "optionalPlugins": ["usageCollection"],
   "extraPublicDirs": ["common"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact"],
+  "requiredBundles": ["kibanaUtils"],
   "owner": {
     "name": "App Services",
     "githubTeam": "kibana-app-services"

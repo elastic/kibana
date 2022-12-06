@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mount, ReactWrapper, shallow } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import React from 'react';
 import * as redux from 'react-redux';
 import { waitFor } from '@testing-library/react';
@@ -199,7 +200,7 @@ describe('EmbeddedMapComponent', () => {
 
     expect(wrapper.find('[data-test-subj="siemEmbeddable"]').first().exists()).toEqual(false);
 
-    const container = wrapper.find('[data-test-subj="false-toggle-network-map"]').at(0);
+    const container = wrapper.find('[data-test-subj="false-toggle-network-map"]').last();
     container.simulate('click');
 
     await waitFor(() => {
@@ -217,7 +218,7 @@ describe('EmbeddedMapComponent', () => {
     );
 
     expect(wrapper.find('[data-test-subj="siemEmbeddable"]').first().exists()).toEqual(true);
-    const container = wrapper.find('[data-test-subj="true-toggle-network-map"]').at(0);
+    const container = wrapper.find('[data-test-subj="true-toggle-network-map"]').last();
     container.simulate('click');
 
     await waitFor(() => {

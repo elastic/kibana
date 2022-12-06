@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useContext } from 'react';
-import { TimelineContext } from '@kbn/timelines-plugin/public';
+import React, { useContext } from 'react';
+import { TimelineContext } from '../../../../timelines/components/timeline';
 import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
-import { EnrichedFieldInfo } from '../types';
-import { ColumnHeaderOptions } from '../../../../../common/types/timeline';
+import type { EnrichedFieldInfo } from '../types';
+import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
+import { useTopNPopOver } from '../../hover_actions/utils';
 
 interface Props extends EnrichedFieldInfo {
   contextId: string;
@@ -34,7 +35,7 @@ export const ActionCell: React.FC<Props> = React.memo(
     linkValue,
     onFilterAdded,
     setIsPopoverVisible,
-    timelineId,
+    scopeId,
     toggleColumn,
     values,
     hideAddToTimeline,
@@ -51,38 +52,29 @@ export const ActionCell: React.FC<Props> = React.memo(
       values,
     });
 
-    const [showTopN, setShowTopN] = useState<boolean>(false);
+    const { closeTopN, toggleTopN, isShowingTopN } = useTopNPopOver(setIsPopoverVisible);
+    const { aggregatable, type } = fieldFromBrowserField || { aggregatable: false, type: '' };
     const { timelineId: timelineIdFind } = useContext(TimelineContext);
-    const [hoverActionsOwnFocus] = useState<boolean>(false);
-    const toggleTopN = useCallback(() => {
-      setShowTopN((prevShowTopN) => {
-        const newShowTopN = !prevShowTopN;
-        if (setIsPopoverVisible) setIsPopoverVisible(newShowTopN);
-        return newShowTopN;
-      });
-    }, [setIsPopoverVisible]);
-
-    const closeTopN = useCallback(() => {
-      setShowTopN(false);
-    }, []);
 
     return (
       <HoverActions
         applyWidthAndPadding={applyWidthAndPadding}
         closeTopN={closeTopN}
         dataType={data.type}
-        dataProvider={actionCellConfig?.dataProvider}
+        dataProvider={actionCellConfig?.dataProviders}
         enableOverflowButton={true}
         field={data.field}
+        isAggregatable={aggregatable}
+        fieldType={type}
         hideAddToTimeline={hideAddToTimeline}
         isObjectArray={data.isObjectArray}
         onFilterAdded={onFilterAdded}
-        ownFocus={hoverActionsOwnFocus}
-        showTopN={showTopN}
-        timelineId={timelineId ?? timelineIdFind}
+        ownFocus={false}
+        showTopN={isShowingTopN}
+        scopeId={scopeId ?? timelineIdFind}
         toggleColumn={toggleColumn}
         toggleTopN={toggleTopN}
-        values={actionCellConfig?.stringValues}
+        values={actionCellConfig?.values}
       />
     );
   }

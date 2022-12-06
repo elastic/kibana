@@ -81,8 +81,15 @@ docker run --name logstash \
   --hostname=logstash \
   --publish=9600:9600 \
   --volume="$(pwd)/x-pack/plugins/monitoring/dev_docs/reference/logstash.yml:/usr/share/logstash/config/logstash.yml:ro" \
-  docker.elastic.co/logstash/logstash:master-SNAPSHOT \
-  -e 'input { java_generator { eps => 1 } } output { file { path => "/dev/null" } }'
+  --volume="$(pwd)/x-pack/plugins/monitoring/dev_docs/reference/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro" \
+  docker.elastic.co/logstash/logstash:master-SNAPSHOT
+```
+
+Note that you can add these arguments to populate cgroup/cfs data for logstash as well. This will require a cgroup v1 docker host until [logstash#14534](https://github.com/elastic/logstash/issues/14534) is resolved:
+
+```
+  --cpu-period=100000 \
+  --cpu-quota=150000 \
 ```
 
 # Complete docker setup

@@ -39,7 +39,7 @@ export function InputHighlightRules() {
     start: mergeTokens(
       [
         { token: 'warning', regex: '#!.*$' },
-        { token: 'comment', regex: /^#.*$/ },
+        { include: 'comments' },
         { token: 'paren.lparen', regex: '{', next: 'json', push: true },
       ],
       addEOL(['method'], /([a-zA-Z]+)/, 'start', 'method_sep'),
@@ -61,21 +61,26 @@ export function InputHighlightRules() {
         'start',
         'url'
       ),
+      addEOL(['whitespace', 'variable.template'], /(\s+)(\${\w+})/, 'start', 'url'),
       addEOL(['whitespace', 'url.protocol_host'], /(\s+)(https?:\/\/[^?\/,]+)/, 'start', 'url'),
       addEOL(['whitespace', 'url.slash'], /(\s+)(\/)/, 'start', 'url'),
       addEOL(['whitespace'], /(\s+)/, 'start', 'url')
     ),
     url: mergeTokens(
+      addEOL(['variable.template'], /(\${\w+})/, 'start'),
       addEOL(['url.part'], /(_sql)/, 'start-sql', 'url-sql'),
       addEOL(['url.part'], /([^?\/,\s]+)/, 'start'),
       addEOL(['url.comma'], /(,)/, 'start'),
       addEOL(['url.slash'], /(\/)/, 'start'),
-      addEOL(['url.questionmark'], /(\?)/, 'start', 'urlParams')
+      addEOL(['url.questionmark'], /(\?)/, 'start', 'urlParams'),
+      addEOL(['whitespace', 'comment.punctuation', 'comment.line'], /(\s+)(\/\/)(.*$)/, 'start')
     ),
     urlParams: mergeTokens(
+      addEOL(['url.param', 'url.equal', 'variable.template'], /([^&=]+)(=)(\${\w+})/, 'start'),
       addEOL(['url.param', 'url.equal', 'url.value'], /([^&=]+)(=)([^&]*)/, 'start'),
       addEOL(['url.param'], /([^&=]+)/, 'start'),
-      addEOL(['url.amp'], /(&)/, 'start')
+      addEOL(['url.amp'], /(&)/, 'start'),
+      addEOL(['whitespace', 'comment.punctuation', 'comment.line'], /(\s+)(\/\/)(.*$)/, 'start')
     ),
     'url-sql': mergeTokens(
       addEOL(['url.part'], /([^?\/,\s]+)/, 'start-sql'),
@@ -88,9 +93,48 @@ export function InputHighlightRules() {
       addEOL(['url.param'], /([^&=]+)/, 'start-sql'),
       addEOL(['url.amp'], /(&)/, 'start-sql')
     ),
+    /**
+     * Each key in this.$rules considered to be a state in state machine. Regular expressions define the tokens for the current state, as well as the transitions into another state.
+     * See for more details https://cloud9-sdk.readme.io/docs/highlighting-rules#section-defining-states
+     * *
+     * Define a state for comments, these comment rules then can be included in other states. E.g. in 'start' and 'json' states by including { include: 'comments' }
+     * This will avoid duplicating the same rules in other states
+     */
+    comments: [
+      {
+        // Capture a line comment, indicated by #
+        token: ['comment.punctuation', 'comment.line'],
+        regex: /(#)(.*$)/,
+      },
+      {
+        // Begin capturing a block comment, indicated by /*
+        token: 'comment.punctuation',
+        regex: /\/\*/,
+        push: [
+          {
+            // Finish capturing a block comment, indicated by */
+            token: 'comment.punctuation',
+            regex: /\*\//,
+            next: 'pop',
+          },
+          {
+            defaultToken: 'comment.block',
+          },
+        ],
+      },
+      {
+        // Capture a line comment, indicated by //
+        token: ['comment.punctuation', 'comment.line'],
+        regex: /(\/\/)(.*$)/,
+      },
+    ],
   };
 
   addXJsonToRules(this);
+  // Add comment rules to json rule set
+  this.$rules.json.unshift({ include: 'comments' });
+
+  this.$rules.json.unshift({ token: 'variable.template', regex: /("\${\w+}")/ });
 
   if (this.constructor === InputHighlightRules) {
     this.normalizeRules();

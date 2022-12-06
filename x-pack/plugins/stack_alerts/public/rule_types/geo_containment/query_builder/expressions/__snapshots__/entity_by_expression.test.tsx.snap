@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render entity by expression with aggregatable field options for entity 1`] = `
+<div
+  class="euiPopover emotion-euiPopover"
+  id="popoverForExpression"
+>
+  <div
+    class="euiPopover__anchor css-zih94u-render"
+  >
+    <button
+      class="euiExpression emotion-euiExpression-isClickable-success-columns"
+      data-test-subj="selectIndexExpression"
+    >
+      <span
+        class="euiExpression__description emotion-euiExpression__description-success-isUppercase-columns"
+        style="flex-basis: 20%;"
+      >
+        by
+      </span>
+       
+      <span
+        class="euiExpression__value emotion-euiExpression__value-columns"
+      >
+        FlightNum
+      </span>
+    </button>
+  </div>
+</div>
+`;

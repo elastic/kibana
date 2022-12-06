@@ -7,21 +7,40 @@
 
 import { EuiPanel, EuiComboBox } from '@elastic/eui';
 import styled from 'styled-components';
+import type { LegacyRef } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { PANEL_HEIGHT, MOBILE_PANEL_HEIGHT } from './config';
 import { useStackByFields } from './hooks';
 import * as i18n from './translations';
 
-export const KpiPanel = styled(EuiPanel)<{ height?: number; $toggleStatus: boolean }>`
+const DEFAULT_WIDTH = 400;
+
+export const KpiPanel = styled(EuiPanel)<{
+  height?: number;
+  $overflowY?:
+    | 'auto'
+    | 'clip'
+    | 'hidden'
+    | 'hidden visible'
+    | 'inherit'
+    | 'initial'
+    | 'revert'
+    | 'revert-layer'
+    | 'scroll'
+    | 'unset'
+    | 'visible';
+  $toggleStatus: boolean;
+}>`
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: ${({ $overflowY }) => $overflowY ?? 'hidden'};
   @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
-    ${({ $toggleStatus }) =>
+    ${({ height, $toggleStatus }) =>
       $toggleStatus &&
       `
-    height: ${PANEL_HEIGHT}px;
+      height: ${height != null ? height : PANEL_HEIGHT}px;
   `}
   }
   ${({ $toggleStatus }) =>
@@ -31,46 +50,73 @@ export const KpiPanel = styled(EuiPanel)<{ height?: number; $toggleStatus: boole
   `}
 `;
 interface StackedBySelectProps {
+  'aria-label'?: string;
+  'data-test-subj'?: string;
+  isDisabled?: boolean;
+  prepend?: string;
   selected: string;
+  inputRef?: (inputRef: HTMLInputElement | null) => void;
   onSelect: (selected: string) => void;
+  width?: number;
 }
 
-export const StackByComboBoxWrapper = styled.div`
-  width: 400px;
+export const StackByComboBoxWrapper = styled.div<{ width: number }>`
+  max-width: 400px;
+  width: ${({ width }) => width}px;
 `;
 
-export const StackByComboBox: React.FC<StackedBySelectProps> = ({ selected, onSelect }) => {
-  const onChange = useCallback(
-    (options) => {
-      if (options && options.length > 0) {
-        onSelect(options[0].value);
-      } else {
-        onSelect('');
-      }
-    },
-    [onSelect]
-  );
-  const selectedOptions = useMemo(() => {
-    return [{ label: selected, value: selected }];
-  }, [selected]);
-  const stackOptions = useStackByFields();
-  const singleSelection = useMemo(() => {
-    return { asPlainText: true };
-  }, []);
-  return (
-    <StackByComboBoxWrapper>
-      <EuiComboBox
-        aria-label={i18n.STACK_BY_ARIA_LABEL}
-        placeholder={i18n.STACK_BY_PLACEHOLDER}
-        prepend={i18n.STACK_BY_LABEL}
-        singleSelection={singleSelection}
-        isClearable={false}
-        sortMatchesBy="startsWith"
-        options={stackOptions}
-        selectedOptions={selectedOptions}
-        compressed
-        onChange={onChange}
-      />
-    </StackByComboBoxWrapper>
-  );
-};
+export const StackByComboBox = React.forwardRef(
+  (
+    {
+      'aria-label': ariaLabel = i18n.STACK_BY_ARIA_LABEL,
+      'data-test-subj': dataTestSubj,
+      isDisabled = false,
+      onSelect,
+      prepend = i18n.STACK_BY_LABEL,
+      selected,
+      inputRef,
+      width = DEFAULT_WIDTH,
+    }: StackedBySelectProps,
+    ref
+  ) => {
+    const onChange = useCallback(
+      (options) => {
+        if (options && options.length > 0) {
+          onSelect(options[0].value);
+        } else {
+          onSelect('');
+        }
+      },
+      [onSelect]
+    );
+    const selectedOptions = useMemo(() => {
+      return [{ label: selected, value: selected }];
+    }, [selected]);
+    const stackOptions = useStackByFields();
+    const singleSelection = useMemo(() => {
+      return { asPlainText: true };
+    }, []);
+    return (
+      <StackByComboBoxWrapper width={width}>
+        <EuiComboBox
+          data-test-subj={dataTestSubj}
+          aria-label={ariaLabel}
+          inputRef={inputRef}
+          isDisabled={isDisabled}
+          placeholder={i18n.STACK_BY_PLACEHOLDER}
+          prepend={prepend}
+          ref={ref as LegacyRef<EuiComboBox<string | number | string[] | undefined>> | undefined}
+          singleSelection={singleSelection}
+          isClearable={false}
+          sortMatchesBy="startsWith"
+          options={stackOptions}
+          selectedOptions={selectedOptions}
+          compressed
+          onChange={onChange}
+        />
+      </StackByComboBoxWrapper>
+    );
+  }
+);
+
+StackByComboBox.displayName = 'StackByComboBox';

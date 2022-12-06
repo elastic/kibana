@@ -82,6 +82,7 @@ describe('useCreateAnalyticsForm', () => {
     expect(jobConfig?.dest?.index).toBe('the-destination-index');
     expect(jobConfig?.source?.index).toBe('the-source-index');
     expect(jobConfig?.analyzed_fields?.includes).toStrictEqual([]);
+    // @ts-ignore property 'excludes' does not exist
     expect(typeof jobConfig?.analyzed_fields?.excludes).toBe('undefined');
 
     // test the conversion of comma-separated Kibana index patterns to ES array based index patterns

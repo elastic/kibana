@@ -40,6 +40,11 @@ export interface ExpressionFunctionDefinition<
   name: Name;
 
   /**
+   * The flag to mark the function as deprecated.
+   */
+  deprecated?: boolean;
+
+  /**
    * if set to true function will be disabled (but its migrate function will still be available)
    */
   disabled?: boolean;

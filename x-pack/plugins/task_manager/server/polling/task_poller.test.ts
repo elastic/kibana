@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { Subject, of, BehaviorSubject } from 'rxjs';
 import { Option, none, some } from 'fp-ts/lib/Option';
 import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
@@ -15,7 +14,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { asOk, asErr } from '../lib/result_type';
 
 describe('TaskPoller', () => {
-  beforeEach(() => jest.useFakeTimers());
+  beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
 
   test(
     'intializes the poller with the provided interval',

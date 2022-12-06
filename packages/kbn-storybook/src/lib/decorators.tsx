@@ -19,13 +19,18 @@ import 'core_styles';
  */
 const EuiProviderDecorator: DecoratorFn = (storyFn, { globals }) => {
   const colorMode = globals.euiTheme === 'v8.dark' ? 'dark' : 'light';
-  const emotionCache = createCache({
-    key: 'eui-styles',
-    container: document.querySelector(`meta[name="eui-styles-global"]`) as HTMLElement,
+  const globalCache = createCache({
+    key: 'eui',
+    container: document.querySelector(`meta[name="eui-global"]`) as HTMLElement,
   });
+  const emotionCache = createCache({
+    key: 'css',
+    container: document.querySelector(`meta[name="emotion"]`) as HTMLElement,
+  });
+  emotionCache.compat = true;
 
   return (
-    <EuiProvider colorMode={colorMode} cache={emotionCache}>
+    <EuiProvider colorMode={colorMode} cache={{ default: emotionCache, global: globalCache }}>
       {storyFn()}
     </EuiProvider>
   );

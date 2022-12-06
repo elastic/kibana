@@ -250,7 +250,7 @@ describe('with_bulk_rule_api_operations', () => {
     expect(ruleApi.loadRuleTypes).toHaveBeenCalledWith({ http });
   });
 
-  it('loadExecutionLogAggregations calls the loadExecutionLogAggregations api', () => {
+  it('loadExecutionLogAggregations calls the loadExecutionLogAggregations API', () => {
     const { http } = useKibanaMock().services;
 
     const sortTimestamp = {
@@ -279,6 +279,39 @@ describe('with_bulk_rule_api_operations', () => {
 
     expect(ruleApi.loadExecutionLogAggregations).toHaveBeenCalledTimes(1);
     expect(ruleApi.loadExecutionLogAggregations).toHaveBeenCalledWith({
+      ...callProps,
+      http,
+    });
+  });
+
+  it('loadActionErrorLog calls the loadActionErrorLog API', () => {
+    const { http } = useKibanaMock().services;
+    const callProps = {
+      id: 'test-id',
+      dateStart: '2022-03-23T16:17:53.482Z',
+      dateEnd: '2022-03-23T16:17:53.482Z',
+      filter: ['message: "test"'],
+      perPage: 10,
+      page: 0,
+      sort: [
+        {
+          timestamp: {
+            order: 'asc' as const,
+          },
+        },
+      ],
+    };
+
+    const ComponentToExtend = ({ loadActionErrorLog }: ComponentOpts) => {
+      return <button onClick={() => loadActionErrorLog(callProps)}>{'call api'}</button>;
+    };
+
+    const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
+    const component = mount(<ExtendedComponent />);
+    component.find('button').simulate('click');
+
+    expect(ruleApi.loadActionErrorLog).toHaveBeenCalledTimes(1);
+    expect(ruleApi.loadActionErrorLog).toHaveBeenCalledWith({
       ...callProps,
       http,
     });

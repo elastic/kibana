@@ -27,7 +27,7 @@ jest.mock('./use_api');
 
 import { useAppDependencies } from '../__mocks__/app_dependencies';
 import { MlSharedContext } from '../__mocks__/shared_context';
-import { RuntimeField } from '@kbn/data-plugin/common';
+import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
 const query: SimpleQuery = {
   query_string: {

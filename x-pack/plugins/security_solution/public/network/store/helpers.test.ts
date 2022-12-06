@@ -14,7 +14,8 @@ import {
   NetworkUsersFields,
 } from '../../../common/search_strategy';
 import { DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
-import { NetworkModel, NetworkTableType, NetworkDetailsTableType, NetworkType } from './model';
+import type { NetworkModel } from './model';
+import { NetworkTableType, NetworkDetailsTableType, NetworkType } from './model';
 import { setNetworkQueriesActivePageToZero } from './helpers';
 
 export const mockNetworkState: NetworkModel = {
@@ -78,6 +79,10 @@ export const mockNetworkState: NetworkModel = {
         activePage: 0,
         limit: DEFAULT_TABLE_LIMIT,
       },
+      [NetworkDetailsTableType.anomalies]: {
+        jobIdSelection: [],
+        intervalSelection: 'auto',
+      },
     },
   },
   details: {
@@ -135,6 +140,10 @@ export const mockNetworkState: NetworkModel = {
         limit: DEFAULT_TABLE_LIMIT,
         sort: { direction: Direction.desc },
       },
+      [NetworkDetailsTableType.anomalies]: {
+        jobIdSelection: [],
+        intervalSelection: 'auto',
+      },
     },
     flowTarget: FlowTarget.source,
   },
@@ -153,6 +162,10 @@ describe('Network redux store', () => {
           activePage: 0,
           limit: 10,
           sort: { field: 'bytes_out', direction: 'desc' },
+        },
+        [NetworkDetailsTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
         },
         [NetworkTableType.dns]: {
           activePage: 0,
@@ -225,6 +238,10 @@ describe('Network redux store', () => {
             direction: 'desc',
             field: 'bytes_out',
           },
+        },
+        [NetworkDetailsTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
         },
         [NetworkDetailsTableType.http]: {
           activePage: 0,

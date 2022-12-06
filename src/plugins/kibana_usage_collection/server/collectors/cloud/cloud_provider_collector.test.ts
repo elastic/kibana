@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { cloudDetailsMock, detectCloudServiceMock } from './cloud_provider_collector.test.mocks';
+import { Subject } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   Collector,
@@ -14,14 +14,17 @@ import {
   createCollectorFetchContextMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
 
+import { cloudDetailsMock, detectCloudServiceMock } from './cloud_provider_collector.test.mocks';
 import { registerCloudProviderUsageCollector } from './cloud_provider_collector';
 
 describe('registerCloudProviderUsageCollector', () => {
   let collector: Collector<unknown>;
   const logger = loggingSystemMock.createLogger();
   const mockedFetchContext = createCollectorFetchContextMock();
+  let pluginStop$: Subject<void>;
 
   beforeEach(() => {
+    pluginStop$ = new Subject<void>();
     cloudDetailsMock.mockClear();
     detectCloudServiceMock.mockClear();
     const usageCollectionMock = createUsageCollectionSetupMock();
@@ -29,7 +32,12 @@ describe('registerCloudProviderUsageCollector', () => {
       collector = new Collector(logger, config);
       return createUsageCollectionSetupMock().makeUsageCollector(config);
     });
-    registerCloudProviderUsageCollector(usageCollectionMock);
+    registerCloudProviderUsageCollector(usageCollectionMock, pluginStop$);
+  });
+
+  afterEach(() => {
+    pluginStop$.next();
+    pluginStop$.complete();
   });
 
   test('registered collector is set', () => {

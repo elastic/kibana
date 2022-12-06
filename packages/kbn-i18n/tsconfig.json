@@ -3,15 +3,15 @@
   "compilerOptions": {
     "declaration": true,
     "emitDeclarationOnly": true,
-    "outDir": "./target_types",
+    "outDir": "target_types",
     "types": [
       "jest",
       "node"
     ]
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "**/*.ts",
+    "**/*.tsx",
     "types/intl_format_cache.d.ts",
     "types/intl_relativeformat.d.ts"
   ],

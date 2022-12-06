@@ -67,6 +67,16 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     notifications_enabled: 0,
     notifications_disabled: 0,
   },
+  new_terms: {
+    enabled: 0,
+    disabled: 0,
+    alerts: 0,
+    cases: 0,
+    legacy_notifications_enabled: 0,
+    legacy_notifications_disabled: 0,
+    notifications_enabled: 0,
+    notifications_disabled: 0,
+  },
   elastic_total: {
     enabled: 0,
     disabled: 0,
@@ -134,6 +144,7 @@ export const getInitialSingleEventMetric = (): SingleEventMetric => ({
   succeeded: 0,
   index_duration: getInitialMaxAvgMin(),
   search_duration: getInitialMaxAvgMin(),
+  enrichment_duration: getInitialMaxAvgMin(),
   gap_duration: getInitialMaxAvgMin(),
   gap_count: 0,
 });

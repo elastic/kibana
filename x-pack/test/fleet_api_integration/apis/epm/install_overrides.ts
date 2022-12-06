@@ -26,6 +26,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs packages that include settings and mappings overrides', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests
@@ -39,7 +40,11 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      const templateName = body.items[0].id;
+      const templateName = body.items.filter((item: any) => item.type === 'index_template')?.[0].id;
+
+      if (!templateName) {
+        throw new Error('index template not found in package assets');
+      }
 
       const { body: indexTemplateResponse } = await es.transport.request<any>(
         {
@@ -118,6 +123,7 @@ export default function (providerContext: FtrProviderContext) {
         },
         { meta: true }
       ));
+
       // omit routings
       delete body.template.settings.index.routing;
 
@@ -126,6 +132,7 @@ export default function (providerContext: FtrProviderContext) {
           settings: {
             index: {
               codec: 'best_compression',
+              default_pipeline: 'logs-overrides.test-0.1.0',
               lifecycle: {
                 name: 'overridden by user',
               },

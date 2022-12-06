@@ -11,11 +11,7 @@ import { copyToSpaceTestSuiteFactory } from '../../common/suites/copy_to_space';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function copyToSpaceSpacesAndSecuritySuite({ getService }: FtrProviderContext) {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-  const es = getService('es');
-
+export default function copyToSpaceSpacesAndSecuritySuite(context: FtrProviderContext) {
   const {
     copyToSpaceTest,
     expectNoConflictsWithoutReferencesResult,
@@ -27,7 +23,7 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: FtrPro
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
     expectRouteForbiddenResponse,
     createMultiNamespaceTestCases,
-  } = copyToSpaceTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
+  } = copyToSpaceTestSuiteFactory(context);
 
   describe('copy to spaces', () => {
     [

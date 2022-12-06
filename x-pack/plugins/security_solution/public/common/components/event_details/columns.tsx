@@ -10,12 +10,12 @@ import { get } from 'lodash';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import styled from 'styled-components';
-import { BrowserFields } from '../../containers/source';
-import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
+import type { BrowserFields } from '../../containers/source';
+import type { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 import * as i18n from './translations';
-import { EventFieldsData } from './types';
-import { ColumnHeaderOptions } from '../../../../common/types';
-import { BrowserField } from '../../../../common/search_strategy';
+import type { EventFieldsData } from './types';
+import type { ColumnHeaderOptions } from '../../../../common/types';
+import type { BrowserField } from '../../../../common/search_strategy';
 import { FieldValueCell } from './table/field_value_cell';
 import { FieldNameCell } from './table/field_name_cell';
 import { ActionCell } from './table/action_cell';
@@ -44,7 +44,7 @@ export const getColumns = ({
   eventId,
   onUpdateColumns,
   contextId,
-  timelineId,
+  scopeId,
   toggleColumn,
   getLinkValue,
   isDraggable,
@@ -55,7 +55,7 @@ export const getColumns = ({
   eventId: string;
   onUpdateColumns: OnUpdateColumns;
   contextId: string;
-  timelineId: string;
+  scopeId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   getLinkValue: (field: string) => string | null;
   isDraggable?: boolean;
@@ -90,7 +90,7 @@ export const getColumns = ({
                 fieldFromBrowserField={fieldFromBrowserField}
                 getLinkValue={getLinkValue}
                 toggleColumn={toggleColumn}
-                timelineId={timelineId}
+                scopeId={scopeId}
                 values={values}
               />
             );

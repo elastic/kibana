@@ -18,7 +18,11 @@ import { AggregatedTransactionsBadge } from '../../shared/aggregated_transaction
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/links/url_helpers';
 import { TransactionDetailsTabs } from './transaction_details_tabs';
-import { isServerlessAgent } from '../../../../common/agent_name';
+import {
+  isMobileAgentName,
+  isServerlessAgent,
+} from '../../../../common/agent_name';
+import { MobileTransactionCharts } from '../../shared/charts/transaction_charts/mobile_transaction_charts';
 
 export function TransactionDetails() {
   const { path, query } = useApmParams(
@@ -34,7 +38,7 @@ export function TransactionDetails() {
   } = query;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const apmRouter = useApmRouter();
-  const { transactionType, fallbackToTransactions, runtimeName } =
+  const { transactionType, fallbackToTransactions, runtimeName, agentName } =
     useApmServiceContext();
 
   const history = useHistory();
@@ -44,15 +48,19 @@ export function TransactionDetails() {
     replace(history, { query: { transactionType } });
   }
 
-  useBreadcrumb({
-    title: transactionName,
-    href: apmRouter.link('/services/{serviceName}/transactions/view', {
-      path,
-      query,
+  useBreadcrumb(
+    () => ({
+      title: transactionName,
+      href: apmRouter.link('/services/{serviceName}/transactions/view', {
+        path,
+        query,
+      }),
     }),
-  });
+    [apmRouter, path, query, transactionName]
+  );
 
   const isServerless = isServerlessAgent(runtimeName);
+  const isMobileAgent = isMobileAgentName(agentName);
 
   return (
     <>
@@ -66,16 +74,25 @@ export function TransactionDetails() {
       <EuiSpacer size="m" />
 
       <ChartPointerEventContextProvider>
-        <TransactionCharts
-          kuery={query.kuery}
-          environment={query.environment}
-          start={start}
-          end={end}
-          transactionName={transactionName}
-          isServerlessContext={isServerless}
-          comparisonEnabled={comparisonEnabled}
-          offset={offset}
-        />
+        {isMobileAgent ? (
+          <MobileTransactionCharts
+            kuery={query.kuery}
+            environment={query.environment}
+            start={start}
+            end={end}
+          />
+        ) : (
+          <TransactionCharts
+            kuery={query.kuery}
+            environment={query.environment}
+            start={start}
+            end={end}
+            transactionName={transactionName}
+            isServerlessContext={isServerless}
+            comparisonEnabled={comparisonEnabled}
+            offset={offset}
+          />
+        )}
       </ChartPointerEventContextProvider>
 
       <EuiSpacer size="m" />

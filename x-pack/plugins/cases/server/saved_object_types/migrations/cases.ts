@@ -8,10 +8,12 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { cloneDeep, unset } from 'lodash';
-import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
-import { addOwnerToSO, SanitizedCaseOwner } from '.';
-import { ESConnectorFields } from '../../services';
-import { CaseAttributes, CaseSeverity, ConnectorTypes } from '../../../common/api';
+import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
+import type { SanitizedCaseOwner } from '.';
+import { addOwnerToSO } from '.';
+import type { ESConnectorFields } from '../../services';
+import type { CaseAttributes } from '../../../common/api';
+import { CaseSeverity, ConnectorTypes } from '../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
@@ -122,6 +124,13 @@ export const addSeverity = (
   return { ...doc, attributes: { ...doc.attributes, severity }, references: doc.references ?? [] };
 };
 
+export const addAssignees = (
+  doc: SavedObjectUnsanitizedDoc<CaseAttributes>
+): SavedObjectSanitizedDoc<CaseAttributes> => {
+  const assignees = doc.attributes.assignees ?? [];
+  return { ...doc, attributes: { ...doc.attributes, assignees }, references: doc.references ?? [] };
+};
+
 export const caseMigrations = {
   '7.10.0': (
     doc: SavedObjectUnsanitizedDoc<UnsanitizedCaseConnector>
@@ -184,4 +193,5 @@ export const caseMigrations = {
   '7.15.0': caseConnectorIdMigration,
   '8.1.0': removeCaseType,
   '8.3.0': pipeMigrations(addDuration, addSeverity),
+  '8.5.0': addAssignees,
 };

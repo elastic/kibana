@@ -53,6 +53,7 @@ export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({ sourceData }) 
 
   const {
     serviceType,
+    baseServiceType,
     configuration: { documentationUrl, githubRepository },
     name,
     categories = [],
@@ -60,7 +61,11 @@ export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({ sourceData }) 
 
   return (
     <>
-      <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />
+      <AddSourceHeader
+        name={name}
+        serviceType={baseServiceType ?? serviceType}
+        categories={categories}
+      />
       <EuiSpacer size="xxl" />
       <EuiFlexGroup
         justifyContent="flexStart"

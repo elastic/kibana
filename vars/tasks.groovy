@@ -8,7 +8,6 @@ def check() {
     kibanaPipeline.scriptTask('Check Telemetry Schema', 'test/scripts/checks/telemetry.sh'),
     kibanaPipeline.scriptTask('Check TypeScript Projects', 'test/scripts/checks/ts_projects.sh'),
     kibanaPipeline.scriptTask('Check Jest Configs', 'test/scripts/checks/jest_configs.sh'),
-    kibanaPipeline.scriptTask('Check Doc API Changes', 'test/scripts/checks/doc_api_changes.sh'),
     kibanaPipeline.scriptTask('Check @kbn/pm Distributable', 'test/scripts/checks/kbn_pm_dist.sh'),
     kibanaPipeline.scriptTask('Check Plugin List Docs', 'test/scripts/checks/plugin_list_docs.sh'),
     kibanaPipeline.scriptTask('Check Types and Public API Docs', 'test/scripts/checks/type_check_plugin_public_api_docs.sh'),
@@ -158,13 +157,21 @@ def functionalXpack(Map params = [:]) {
     }
 
     whenChanged([
-      'x-pack/plugins/uptime/',
+      'x-pack/plugins/synthetics/',
     ]) {
       if (githubPr.isPr()) {
         task(kibanaPipeline.functionalTestProcess('xpack-UptimePlaywright', './test/scripts/jenkins_uptime_playwright.sh'))
       }
     }
-    
+
+    whenChanged([
+      'x-pack/plugins/ux/',
+    ]) {
+      if (githubPr.isPr()) {
+        task(kibanaPipeline.functionalTestProcess('xpack-uxPluginSynthetics', './test/scripts/jenkins_ux_synthetics.sh'))
+      }
+    }
+
     whenChanged([
       'x-pack/plugins/fleet/',
     ]) {

@@ -13,9 +13,14 @@ import {
   EuiTitle,
   EuiTextColor,
 } from '@elastic/eui';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
+
+import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../helpers';
+
+const storage = new Storage(localStorage);
 
 export type ViewSelection = 'gridView' | 'eventRenderedView';
 
@@ -51,6 +56,8 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
   const onChangeSelectable = useCallback(
     (opts: EuiSelectableOption[]) => {
       const selected = opts.filter((i) => i.checked === 'on');
+      storage.set(ALERTS_TABLE_VIEW_SELECTION_KEY, selected[0]?.key ?? 'gridView');
+
       if (selected.length > 0) {
         onViewChange((selected[0]?.key ?? 'gridView') as ViewSelection);
       }

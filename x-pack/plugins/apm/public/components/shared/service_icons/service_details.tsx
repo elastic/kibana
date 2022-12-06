@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiDescriptionList } from '@elastic/eui';
-import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
+import { EuiDescriptionList, EuiDescriptionListProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';

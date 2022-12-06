@@ -10,12 +10,17 @@ import React, { useState, useRef, useEffect, FC } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 
-import { EmbeddableChildPanel, ViewMode } from '../../../services/embeddable';
-import { useLabs } from '../../../services/presentation_util';
+import {
+  EmbeddableChildPanel,
+  EmbeddablePhaseEvent,
+  ViewMode,
+} from '@kbn/embeddable-plugin/public';
+
 import { DashboardPanelState } from '../types';
 import { DashboardContainer } from '..';
+import { pluginServices } from '../../../services/plugin_services';
 
-type PanelProps = Pick<EmbeddableChildPanel, 'container' | 'PanelComponent'>;
+type PanelProps = Pick<EmbeddableChildPanel, 'container'>;
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
 interface Props extends PanelProps, DivProps {
@@ -27,6 +32,7 @@ interface Props extends PanelProps, DivProps {
   expandedPanelId?: string;
   key: string;
   isRenderable?: boolean;
+  onPanelStatusChange?: (info: EmbeddablePhaseEvent) => void;
 }
 
 const Item = React.forwardRef<HTMLDivElement, Props>(
@@ -37,8 +43,8 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       focusedPanelId,
       id,
       index,
-      PanelComponent,
       type,
+      onPanelStatusChange,
       isRenderable = true,
       // The props below are passed from ReactGridLayoutn and need to be merged with their counterparts.
       // https://github.com/react-grid-layout/react-grid-layout/issues/1241#issuecomment-658306889
@@ -49,6 +55,10 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
     },
     ref
   ) => {
+    const {
+      embeddable: { EmbeddablePanel: PanelComponent },
+    } = pluginServices.getServices();
+
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
     const classes = classNames({
@@ -73,6 +83,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
               key={type}
               embeddableId={id}
               index={index}
+              onPanelStatusChange={onPanelStatusChange}
               {...{ container, PanelComponent }}
             />
             {children}
@@ -120,9 +131,12 @@ export const ObservedItem: FC<Props> = (props: Props) => {
 };
 
 export const DashboardGridItem: FC<Props> = (props: Props) => {
-  const { isProjectEnabled } = useLabs();
+  const {
+    settings: { isProjectEnabledInLabs },
+  } = pluginServices.getServices();
+
   const isPrintMode = props.container.getInput().viewMode === ViewMode.PRINT;
-  const isEnabled = !isPrintMode && isProjectEnabled('labs:dashboard:deferBelowFold');
+  const isEnabled = !isPrintMode && isProjectEnabledInLabs('labs:dashboard:deferBelowFold');
 
   return isEnabled ? <ObservedItem {...props} /> : <Item {...props} />;
 };

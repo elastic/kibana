@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<ToolbarButton /> is rendered 1`] = `
+<button
+  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+  intl="[object Object]"
+  type="button"
+>
+  <span
+    class="emotion-euiButtonDisplayContent"
+  >
+    <span
+      color="inherit"
+      data-euiicon-type="folderOpen"
+    />
+    <span
+      class="eui-textTruncate"
+    >
+      Add from library
+    </span>
+  </span>
+</button>
+`;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NetworkKpiTlsHandshakesRequestOptions } from '../../../../../../../common/search_strategy/security_solution/network';
+import type { NetworkKpiTlsHandshakesRequestOptions } from '../../../../../../../common/search_strategy/security_solution/network';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 import { getIpFilter } from '../common';
 

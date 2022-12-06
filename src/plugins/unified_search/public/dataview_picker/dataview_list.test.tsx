@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { EuiSelectable } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { ShallowWrapper } from 'enzyme';
@@ -22,6 +22,7 @@ function getDataViewPickerOptions(instance: ShallowWrapper) {
 }
 
 function selectDataViewPickerOption(instance: ShallowWrapper, selectedLabel: string) {
+  const event = {} as MouseEvent;
   const options: Array<{ label: string; checked?: 'on' | 'off' }> = getDataViewPickerOptions(
     instance
   ).map((option: { label: string }) =>
@@ -29,7 +30,7 @@ function selectDataViewPickerOption(instance: ShallowWrapper, selectedLabel: str
       ? { ...option, checked: 'on' }
       : { ...option, checked: undefined }
   );
-  return getDataViewPickerList(instance).prop('onChange')!(options);
+  return getDataViewPickerList(instance).prop('onChange')!(options, event);
 }
 
 describe('DataView list component', () => {
@@ -50,6 +51,7 @@ describe('DataView list component', () => {
       currentDataViewId: 'dataview-1',
       onChangeDataView: changeDataViewSpy,
       dataViewsList: list,
+      isTextBasedLangSelected: false,
     };
   });
   it('should trigger the onChangeDataView if a new dataview is selected', async () => {
@@ -67,5 +69,11 @@ describe('DataView list component', () => {
       'dataview-1',
       'dataview-2',
     ]);
+  });
+
+  it('should render a warning icon if a text based language is selected', () => {
+    const component = shallow(<DataViewsList {...props} isTextBasedLangSelected />);
+
+    expect(getDataViewPickerOptions(component)!.map((option: any) => option.append)).not.toBeNull();
   });
 });

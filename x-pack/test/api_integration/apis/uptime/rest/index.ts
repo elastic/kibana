@@ -8,7 +8,7 @@
 import {
   settingsObjectId,
   settingsObjectType,
-} from '@kbn/synthetics-plugin/server/lib/saved_objects/uptime_settings';
+} from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/uptime_settings';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
@@ -70,14 +70,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./monitor_duration'));
       loadTestFile(require.resolve('./index_status'));
       loadTestFile(require.resolve('./monitor_states_real_data'));
-    });
-
-    describe('uptime CRUD routes', () => {
-      loadTestFile(require.resolve('./get_monitor'));
-      loadTestFile(require.resolve('./add_monitor'));
-      loadTestFile(require.resolve('./edit_monitor'));
-      loadTestFile(require.resolve('./delete_monitor'));
-      loadTestFile(require.resolve('./synthetics_enablement'));
+      loadTestFile(require.resolve('./uptime_zip_url_deprecation.ts'));
     });
   });
 }

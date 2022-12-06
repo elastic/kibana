@@ -17,6 +17,10 @@ export const strings = {
     i18n.translate('expressionPartitionVis.reusable.function.args.metricHelpText', {
       defaultMessage: 'Metric dimensions config',
     }),
+  getMetricToLabelHelp: () =>
+    i18n.translate('expressionPartitionVis.metricToLabel.help', {
+      defaultMessage: 'JSON key-value pairs of column ID to label',
+    }),
   getBucketsArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.bucketsHelpText', {
       defaultMessage: 'Buckets dimensions config',
@@ -123,9 +127,10 @@ export const strings = {
 export const errors = {
   moreThanNBucketsAreNotSupportedError: (maxLength: number) =>
     i18n.translate('expressionPartitionVis.reusable.function.errors.moreThenNumberBuckets', {
-      defaultMessage: 'More than {maxLength} buckets are not supported',
+      defaultMessage: 'More than {maxLength} buckets are not supported.',
       values: { maxLength },
     }),
+
   splitRowAndSplitColumnAreSpecifiedError: () =>
     i18n.translate('expressionPartitionVis.reusable.function.errors.splitRowAndColumnSpecified', {
       defaultMessage:

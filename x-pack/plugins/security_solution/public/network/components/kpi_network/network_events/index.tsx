@@ -8,13 +8,16 @@
 import React, { useEffect, useState } from 'react';
 import { euiPaletteColorBlind } from '@elastic/eui';
 
-import { StatItems } from '../../../../common/components/stat_items';
+import type { StatItems } from '../../../../common/components/stat_items';
 import { ID, useNetworkKpiNetworkEvents } from '../../../containers/kpi_network/network_events';
-import { NetworkKpiProps } from '../types';
+import type { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 import { kpiNetworkEventsLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_network_events';
 import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis1 = euiVisColorPalette[1];
@@ -39,21 +42,29 @@ const NetworkKpiNetworkEventsComponent: React.FC<NetworkKpiProps> = ({
   from,
   indexNames,
   to,
-  narrowDateRange,
+  updateDateRange,
   setQuery,
   skip,
 }) => {
   const { toggleStatus } = useQueryToggle(ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
+
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiNetworkEvents({
     filterQuery,
     endDate: to,
     indexNames,
     startDate: from,
-    skip: querySkip,
+    skip: querySkip || isChartEmbeddablesEnabled,
+  });
+
+  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+    inputId: InputsModelId.global,
+    queryId: id,
   });
 
   return (
@@ -65,10 +76,11 @@ const NetworkKpiNetworkEventsComponent: React.FC<NetworkKpiProps> = ({
       fieldsMapping={fieldsMapping}
       from={from}
       to={to}
-      narrowDateRange={narrowDateRange}
-      refetch={refetch}
+      updateDateRange={updateDateRange}
+      refetch={isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}
+      searchSessionId={isChartEmbeddablesEnabled ? searchSessionId : undefined}
     />
   );
 };

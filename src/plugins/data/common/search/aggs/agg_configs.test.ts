@@ -7,16 +7,26 @@
  */
 
 import { keyBy } from 'lodash';
+import { ExpressionAstExpression, buildExpression } from '@kbn/expressions-plugin/common';
 import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
-import { IndexPattern } from '../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { stubIndexPattern } from '../../stubs';
 import { IEsSearchResponse } from '..';
 
+// Mute moment.tz warnings about not finding a mock timezone
+jest.mock('../utils', () => {
+  const original = jest.requireActual('../utils');
+  return {
+    ...original,
+    getUserTimeZone: jest.fn(() => 'US/Pacific'),
+  };
+});
+
 describe('AggConfigs', () => {
-  const indexPattern: IndexPattern = stubIndexPattern;
+  const indexPattern: DataView = stubIndexPattern;
   let typesRegistry: AggTypesRegistryStart;
 
   beforeEach(() => {
@@ -33,7 +43,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(ac.aggs).toHaveLength(1);
     });
 
@@ -58,7 +68,7 @@ describe('AggConfigs', () => {
       ];
 
       const spy = jest.spyOn(AggConfig, 'ensureIds');
-      new AggConfigs(indexPattern, configStates, { typesRegistry });
+      new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(spy).toHaveBeenCalledTimes(1);
       expect(spy.mock.calls[0]).toEqual([configStates]);
       spy.mockRestore();
@@ -80,7 +90,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(ac.aggs).toHaveLength(2);
 
       ac.createAggConfig(
@@ -103,7 +113,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(ac.aggs).toHaveLength(1);
 
       ac.createAggConfig({
@@ -124,7 +134,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(ac.aggs).toHaveLength(1);
 
       ac.createAggConfig(
@@ -148,7 +158,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(() =>
         ac.createAggConfig({
           enabled: true,
@@ -173,7 +183,7 @@ describe('AggConfigs', () => {
         { type: 'percentiles', enabled: true, params: {}, schema: 'metric' },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const sorted = ac.getRequestAggs();
       const aggs = keyBy(ac.aggs, (agg) => agg.type.name);
 
@@ -196,7 +206,7 @@ describe('AggConfigs', () => {
         { type: 'count', enabled: true, params: {}, schema: 'metric' },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const sorted = ac.getResponseAggs();
       const aggs = keyBy(ac.aggs, (agg) => agg.type.name);
 
@@ -213,7 +223,7 @@ describe('AggConfigs', () => {
         { type: 'percentiles', enabled: true, params: { percents: [1, 2, 3] }, schema: 'metric' },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const sorted = ac.getResponseAggs();
       const aggs = keyBy(ac.aggs, (agg) => agg.type.name);
 
@@ -234,7 +244,7 @@ describe('AggConfigs', () => {
         { id: '101', type: 'count', enabled: true, params: {}, schema: 'metric' },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(ac.getResponseAggById('1')?.type.name).toEqual('terms');
       expect(ac.getResponseAggById('10')?.type.name).toEqual('date_histogram');
       expect(ac.getResponseAggById('101')?.type.name).toEqual('count');
@@ -253,7 +263,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(ac.getResponseAggById('1')?.type.name).toEqual('terms');
       expect(ac.getResponseAggById('10')?.type.name).toEqual('date_histogram');
       expect(ac.getResponseAggById('101.1')?.type.name).toEqual('percentiles');
@@ -265,7 +275,7 @@ describe('AggConfigs', () => {
   describe('#toDsl', () => {
     it('uses the sorted aggs', () => {
       const configStates = [{ enabled: true, type: 'avg', params: { field: 'bytes' } }];
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const spy = jest.spyOn(AggConfigs.prototype, 'getRequestAggs');
       ac.toDsl();
       expect(spy).toHaveBeenCalledTimes(1);
@@ -279,7 +289,7 @@ describe('AggConfigs', () => {
         { enabled: true, type: 'count', params: {} },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
 
       const aggInfos = ac.aggs.map((aggConfig) => {
         const football = {};
@@ -322,7 +332,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const dsl = ac.toDsl();
       const histo = ac.byName('date_histogram')[0];
       const count = ac.byName('count')[0];
@@ -347,7 +357,7 @@ describe('AggConfigs', () => {
         { enabled: true, type: 'max', schema: 'metric', params: { field: 'bytes' } },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const dsl = ac.toDsl();
       const histo = ac.byName('date_histogram')[0];
       const metrics = ac.bySchemaName('metrics');
@@ -379,7 +389,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       ac.timeFields = ['@timestamp'];
       ac.timeRange = {
         from: '2021-05-05T00:00:00.000Z',
@@ -442,7 +452,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       ac.timeFields = ['timestamp'];
       ac.timeRange = {
         from: '2021-05-05T00:00:00.000Z',
@@ -469,7 +479,12 @@ describe('AggConfigs', () => {
         { enabled: true, type: 'max', schema: 'metric', params: { field: 'bytes' } },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, hierarchical: true });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry, hierarchical: true },
+        jest.fn()
+      );
       const topLevelDsl = ac.toDsl();
       const buckets = ac.bySchemaName('buckets');
       const metrics = ac.bySchemaName('metrics');
@@ -539,7 +554,12 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, hierarchical: true });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry, hierarchical: true },
+        jest.fn()
+      );
       const topLevelDsl = ac.toDsl()['2'];
 
       expect(Object.keys(topLevelDsl.aggs)).toContain('1');
@@ -551,6 +571,82 @@ describe('AggConfigs', () => {
         'buckets_path',
         '1-bucket>_count'
       );
+    });
+
+    it('prepends a sampling agg whenever sampling is enabled', () => {
+      const configStates = [
+        {
+          enabled: true,
+          id: '1',
+          type: 'avg_bucket',
+          schema: 'metric',
+          params: {
+            customBucket: {
+              id: '1-bucket',
+              type: 'date_histogram',
+              schema: 'bucketAgg',
+              params: {
+                field: '@timestamp',
+                interval: '10s',
+              },
+            },
+            customMetric: {
+              id: '1-metric',
+              type: 'count',
+              schema: 'metricAgg',
+              params: {},
+            },
+          },
+        },
+        {
+          enabled: true,
+          id: '2',
+          type: 'terms',
+          schema: 'bucket',
+          params: {
+            field: 'clientip',
+          },
+        },
+        {
+          enabled: true,
+          id: '3',
+          type: 'terms',
+          schema: 'bucket',
+          params: {
+            field: 'machine.os.raw',
+          },
+        },
+      ];
+
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry, hierarchical: true, probability: 0.5 },
+        jest.fn()
+      );
+      const topLevelDsl = ac.toDsl();
+
+      expect(Object.keys(topLevelDsl)).toContain('sampling');
+      expect(Object.keys(topLevelDsl.sampling)).toEqual(['random_sampler', 'aggs']);
+      expect(Object.keys(topLevelDsl.sampling.aggs)).toContain('2');
+      expect(Object.keys(topLevelDsl.sampling.aggs['2'].aggs)).toEqual(['1', '3', '1-bucket']);
+    });
+
+    it('should not prepend a sampling agg when no nested agg is avaialble', () => {
+      const ac = new AggConfigs(
+        indexPattern,
+        [
+          {
+            enabled: true,
+            type: 'count',
+            schema: 'metric',
+          },
+        ],
+        { typesRegistry, probability: 0.5 },
+        jest.fn()
+      );
+      const topLevelDsl = ac.toDsl();
+      expect(Object.keys(topLevelDsl)).not.toContain('sampling');
     });
   });
 
@@ -586,7 +682,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       ac.timeFields = ['@timestamp'];
       ac.timeRange = {
         from: '2021-05-05T00:00:00.000Z',
@@ -728,7 +824,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       ac.timeFields = ['@timestamp'];
       ac.timeRange = {
         from: '2021-05-05T00:00:00.000Z',
@@ -785,6 +881,132 @@ describe('AggConfigs', () => {
           },
         },
       });
+    });
+  });
+
+  describe('#toExpressionAst', () => {
+    function toString(ast: ExpressionAstExpression) {
+      return buildExpression(ast).toString();
+    }
+
+    it('should generate the `index` argument', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
+
+      expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(
+        `"esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=false partialRows=false"`
+      );
+    });
+
+    it('should generate the `metricsAtAllLevels` if hierarchical', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, hierarchical: true }, jest.fn());
+
+      expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(
+        `"esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=true partialRows=false"`
+      );
+    });
+
+    it('should generate the `partialRows` argument', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, partialRows: true }, jest.fn());
+
+      expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(
+        `"esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=false partialRows=true"`
+      );
+    });
+
+    it('should generate the `aggs` argument', () => {
+      const configStates = [
+        {
+          enabled: true,
+          type: 'date_histogram',
+          schema: 'segment',
+          params: { field: '@timestamp', interval: '10s' },
+        },
+        { enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+        { enabled: true, type: 'sum', schema: 'metric', params: { field: 'bytes' } },
+        { enabled: true, type: 'min', schema: 'metric', params: { field: 'bytes' } },
+        { enabled: true, type: 'max', schema: 'metric', params: { field: 'bytes' } },
+      ];
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
+
+      expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(`
+        "esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=false partialRows=false 
+          aggs={aggDateHistogram field=\\"@timestamp\\" useNormalizedEsInterval=true extendToTimeRange=false scaleMetricValues=false interval=\\"10s\\" drop_partials=false min_doc_count=1 extended_bounds={extendedBounds} id=\\"1\\" enabled=true schema=\\"segment\\"}
+          aggs={aggAvg field=\\"bytes\\" id=\\"2\\" enabled=true schema=\\"metric\\"}
+          aggs={aggSum field=\\"bytes\\" emptyAsNull=false id=\\"3\\" enabled=true schema=\\"metric\\"}
+          aggs={aggMin field=\\"bytes\\" id=\\"4\\" enabled=true schema=\\"metric\\"}
+          aggs={aggMax field=\\"bytes\\" id=\\"5\\" enabled=true schema=\\"metric\\"}"
+      `);
+    });
+  });
+
+  describe('isSamplingEnabled', () => {
+    it('should return false if probability is 1', () => {
+      const ac = new AggConfigs(
+        indexPattern,
+        [{ enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } }],
+        { typesRegistry, probability: 1 },
+        jest.fn()
+      );
+
+      expect(ac.isSamplingEnabled()).toBeFalsy();
+    });
+
+    it('should return true if probability is less than 1', () => {
+      const ac = new AggConfigs(
+        indexPattern,
+        [{ enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } }],
+        { typesRegistry, probability: 0.1 },
+        jest.fn()
+      );
+
+      expect(ac.isSamplingEnabled()).toBeTruthy();
+    });
+
+    it('should return false when all aggs have hasNoDsl flag enabled', () => {
+      const ac = new AggConfigs(
+        indexPattern,
+        [
+          {
+            enabled: true,
+            type: 'count',
+            schema: 'metric',
+          },
+        ],
+        { typesRegistry, probability: 1 },
+        jest.fn()
+      );
+
+      expect(ac.isSamplingEnabled()).toBeFalsy();
+    });
+
+    it('should return false when no nested aggs are avaialble', () => {
+      const ac = new AggConfigs(
+        indexPattern,
+        [{ enabled: false, type: 'avg', schema: 'metric', params: { field: 'bytes' } }],
+        { typesRegistry, probability: 1 },
+        jest.fn()
+      );
+
+      expect(ac.isSamplingEnabled()).toBeFalsy();
+    });
+
+    it('should return true if at least one nested agg is available and probability < 1', () => {
+      const ac = new AggConfigs(
+        indexPattern,
+        [
+          {
+            enabled: true,
+            type: 'count',
+            schema: 'metric',
+          },
+          { enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+        ],
+        { typesRegistry, probability: 0.1 },
+        jest.fn()
+      );
+
+      expect(ac.isSamplingEnabled()).toBeTruthy();
     });
   });
 });

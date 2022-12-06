@@ -1,0 +1,84 @@
+{
+  "id": "@kbn/core-doc-links-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-doc-links-browser",
+        "id": "def-common.DocLinksStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "DocLinksStart",
+        "description": [],
+        "path": "packages/core/doc-links/core-doc-links-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-doc-links-browser",
+            "id": "def-common.DocLinksStart.DOC_LINK_VERSION",
+            "type": "string",
+            "tags": [],
+            "label": "DOC_LINK_VERSION",
+            "description": [],
+            "path": "packages/core/doc-links/core-doc-links-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-doc-links-browser",
+            "id": "def-common.DocLinksStart.ELASTIC_WEBSITE_URL",
+            "type": "string",
+            "tags": [],
+            "label": "ELASTIC_WEBSITE_URL",
+            "description": [],
+            "path": "packages/core/doc-links/core-doc-links-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-doc-links-browser",
+            "id": "def-common.DocLinksStart.links",
+            "type": "Object",
+            "tags": [],
+            "label": "links",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/doc-links",
+                "scope": "common",
+                "docId": "kibKbnDocLinksPluginApi",
+                "section": "def-common.DocLinks",
+                "text": "DocLinks"
+              }
+            ],
+            "path": "packages/core/doc-links/core-doc-links-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -28,27 +28,31 @@ import {
   useSensors,
   LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
+
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
-import { ControlGroupInput } from '../types';
+
+import { ControlGroupReduxState } from '../types';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
 
 export const ControlGroup = () => {
   // Redux embeddable container Context
   const reduxContainerContext = useReduxContainerContext<
-    ControlGroupInput,
+    ControlGroupReduxState,
     typeof controlGroupReducers
   >();
   const {
-    useEmbeddableSelector,
-    useEmbeddableDispatch,
     actions: { setControlOrders },
+    useEmbeddableSelector: select,
+    useEmbeddableDispatch,
   } = reduxContainerContext;
   const dispatch = useEmbeddableDispatch();
 
   // current state
-  const { panels, viewMode, controlStyle } = useEmbeddableSelector((state) => state);
+  const panels = select((state) => state.explicitInput.panels);
+  const viewMode = select((state) => state.explicitInput.viewMode);
+  const controlStyle = select((state) => state.explicitInput.controlStyle);
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -91,7 +95,7 @@ export const ControlGroup = () => {
     return null;
   }
 
-  let panelBg: 'subdued' | 'plain' | 'success' = 'subdued';
+  let panelBg: 'transparent' | 'plain' | 'success' = 'transparent';
   if (emptyState) panelBg = 'plain';
   if (draggingId) panelBg = 'success';
 
@@ -115,7 +119,6 @@ export const ControlGroup = () => {
             responsive={false}
             alignItems="center"
             data-test-subj="controls-group"
-            data-shared-items-count={idsInOrder.length}
           >
             <EuiFlexItem>
               <DndContext
@@ -144,6 +147,7 @@ export const ControlGroup = () => {
                             isEditable={isEditable}
                             dragInfo={{ index, draggingIndex }}
                             embeddableId={controlId}
+                            embeddableType={panels[controlId].type}
                             key={controlId}
                           />
                         )

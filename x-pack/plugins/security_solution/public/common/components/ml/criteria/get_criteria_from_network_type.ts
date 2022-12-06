@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CriteriaFields } from '../types';
+import type { CriteriaFields } from '../types';
 import { NetworkType } from '../../../../network/store/model';
 import { FlowTarget } from '../../../../../common/search_strategy';
 

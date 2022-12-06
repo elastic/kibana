@@ -9,15 +9,13 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { cloneDeep } from 'lodash';
 import { htmlIdGenerator, EuiRadio } from '@elastic/eui';
-import {
-  ImmutableArray,
-  ProtectionModes,
-  UIPolicyConfig,
-} from '../../../../../../../common/endpoint/types';
-import { MacPolicyProtection, LinuxPolicyProtection, PolicyProtection } from '../../../types';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
+import type { ImmutableArray, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
+import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import type { MacPolicyProtection, LinuxPolicyProtection, PolicyProtection } from '../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { policyConfig } from '../../../store/policy_details/selectors';
-import { AppAction } from '../../../../../../common/store/actions';
+import type { AppAction } from '../../../../../../common/store/actions';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 
 export const ProtectionRadio = React.memo(
@@ -37,6 +35,7 @@ export const ProtectionRadio = React.memo(
     const radioButtonId = useMemo(() => htmlIdGenerator()(), []);
     const selected = policyDetailsConfig && policyDetailsConfig.windows[protection].mode;
     const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
 
     const handleRadioChange = useCallback(() => {
       if (policyDetailsConfig) {
@@ -90,7 +89,7 @@ export const ProtectionRadio = React.memo(
         id={radioButtonId}
         checked={selected === protectionMode}
         onChange={handleRadioChange}
-        disabled={selected === ProtectionModes.off}
+        disabled={!canWritePolicyManagement || selected === ProtectionModes.off}
       />
     );
   }

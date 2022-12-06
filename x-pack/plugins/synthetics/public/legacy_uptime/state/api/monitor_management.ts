@@ -37,7 +37,9 @@ export const setMonitor = async ({
   if (id) {
     return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
   } else {
-    return await apiService.post(API_URLS.SYNTHETICS_MONITORS, monitor);
+    return await apiService.post(API_URLS.SYNTHETICS_MONITORS, monitor, undefined, {
+      preserve_namespace: true,
+    });
   }
 };
 
@@ -112,10 +114,16 @@ export const fetchDisableSynthetics = async (): Promise<void> => {
   return await apiService.delete(API_URLS.SYNTHETICS_ENABLEMENT);
 };
 
-export const fetchEnableSynthetics = async (): Promise<void> => {
+export const fetchEnableSynthetics = async (): Promise<MonitorManagementEnablementResult> => {
   return await apiService.post(API_URLS.SYNTHETICS_ENABLEMENT);
 };
 
 export const fetchServiceAllowed = async (): Promise<SyntheticsServiceAllowed> => {
   return await apiService.get(API_URLS.SERVICE_ALLOWED);
+};
+
+export const fetchServiceAPIKey = async (): Promise<{
+  apiKey: { encoded: string };
+}> => {
+  return await apiService.get(API_URLS.SYNTHETICS_APIKEY);
 };

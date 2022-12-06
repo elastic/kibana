@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '..';
+import { schema } from '../..';
 
 test('returns value is string and defined', () => {
   expect(schema.string().validate('test')).toBe('test');

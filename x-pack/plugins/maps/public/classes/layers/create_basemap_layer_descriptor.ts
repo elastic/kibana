@@ -9,11 +9,11 @@ import _ from 'lodash';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 import { getKibanaTileMap } from '../../util';
 import { getEMSSettings } from '../../kibana_services';
-// @ts-expect-error
 import { KibanaTilemapSource } from '../sources/kibana_tilemap_source';
 import { RasterTileLayer } from './raster_tile_layer/raster_tile_layer';
 import { EmsVectorTileLayer } from './ems_vector_tile_layer/ems_vector_tile_layer';
 import { EMSTMSSource } from '../sources/ems_tms_source';
+import { AUTOSELECT_EMS_LOCALE } from '../../../common/constants';
 
 export function createBasemapLayerDescriptor(): LayerDescriptor | null {
   const tilemapSourceFromKibana = getKibanaTileMap();
@@ -27,6 +27,7 @@ export function createBasemapLayerDescriptor(): LayerDescriptor | null {
   const isEmsEnabled = getEMSSettings()!.isEMSEnabled();
   if (isEmsEnabled) {
     const layerDescriptor = EmsVectorTileLayer.createDescriptor({
+      locale: AUTOSELECT_EMS_LOCALE,
       sourceDescriptor: EMSTMSSource.createDescriptor({ isAutoSelect: true }),
     });
     return layerDescriptor;

@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`layeredXyVis it should throw error if markSizeRatio is lower then 1 or greater then 100 1`] = `"Mark size ratio must be greater or equal to 1 and less or equal to 100"`;
+
+exports[`layeredXyVis it should throw error if markSizeRatio is lower then 1 or greater then 100 2`] = `"Mark size ratio must be greater or equal to 1 and less or equal to 100"`;
+
+exports[`layeredXyVis it should throw error if markSizeRatio is specified if no markSizeAccessor is present 1`] = `"Mark size ratio can be applied only with \`markSizeAccessor\`"`;

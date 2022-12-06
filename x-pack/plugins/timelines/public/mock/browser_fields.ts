@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DocValueFields } from '../../common/search_strategy';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { BrowserFields } from '../../common/search_strategy/index_fields';
 
 const DEFAULT_INDEX_PATTERN = [
@@ -811,20 +810,25 @@ export const mockBrowserFields: BrowserFields = {
           },
         },
       },
+      'nestedField.thirdAttributes': {
+        aggregatable: false,
+        category: 'nestedField',
+        description: '',
+        example: '',
+        format: '',
+        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+        name: 'nestedField.thirdAttributes',
+        searchable: true,
+        type: 'date',
+        subType: {
+          nested: {
+            path: 'nestedField',
+          },
+        },
+      },
     },
   },
 };
-
-export const mockDocValueFields: DocValueFields[] = [
-  {
-    field: '@timestamp',
-    format: 'date_time',
-  },
-  {
-    field: 'event.end',
-    format: 'date_time',
-  },
-];
 
 export const mockRuntimeMappings: MappingRuntimeFields = {
   '@a.runtime.field': {

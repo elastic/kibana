@@ -50,6 +50,9 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep('should display the enabled "Overview" tab');
             await ml.navigation.assertOverviewTabEnabled(true);
 
+            await ml.testExecution.logTestStep('should display the enabled "Notifications" tab');
+            await ml.navigation.assertNotificationsTabEnabled(true);
+
             await ml.testExecution.logTestStep(
               'should display the enabled "Anomaly Detection" section correctly'
             );
@@ -226,7 +229,9 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep('should display enabled AD job row action buttons');
             await ml.jobTable.assertJobActionsMenuButtonEnabled(adJobId, true);
             await ml.jobTable.assertJobActionStartDatafeedButtonEnabled(adJobId, true);
+            await ml.jobTable.assertJobActionResetJobButtonEnabled(adJobId, true);
             await ml.jobTable.assertJobActionCloneJobButtonEnabled(adJobId, true);
+            await ml.jobTable.assertJobActionViewDatafeedCountsButtonEnabled(adJobId, true);
             await ml.jobTable.assertJobActionEditJobButtonEnabled(adJobId, true);
             await ml.jobTable.assertJobActionDeleteJobButtonEnabled(adJobId, true);
 
@@ -535,15 +540,22 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.navigateToStackManagementJobsListPage();
 
             await ml.testExecution.logTestStep('should display the AD job in the list');
-            await ml.jobTable.filterWithSearchString(adJobId, 1, 'stackMgmtJobList');
+            await ml.stackManagementJobs.filterTableWithSearchString(
+              'anomaly-detector',
+              adJobId,
+              1
+            );
 
             await ml.testExecution.logTestStep(
               'should load the analytics jobs list page in stack management'
             );
             await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
-
             await ml.testExecution.logTestStep('should display the DFA job in the list');
-            await ml.dataFrameAnalyticsTable.filterWithSearchString(dfaJobId, 1);
+            await ml.stackManagementJobs.filterTableWithSearchString(
+              'data-frame-analytics',
+              dfaJobId,
+              1
+            );
           });
         });
       }

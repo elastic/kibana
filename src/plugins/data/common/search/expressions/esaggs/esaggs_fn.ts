@@ -13,7 +13,7 @@ import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-p
 import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
 
 import { IndexPatternExpressionType } from '@kbn/data-views-plugin/common/expressions';
-import { IndexPatternsContract } from '../../..';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 
 import { AggsStart, AggExpressionType, aggCountFnName } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
@@ -32,6 +32,8 @@ interface Arguments {
   metricsAtAllLevels?: boolean;
   partialRows?: boolean;
   timeFields?: string[];
+  probability?: number;
+  samplerSeed?: number;
 }
 
 export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -44,7 +46,7 @@ export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<
 /** @internal */
 export interface EsaggsStartDependencies {
   aggs: AggsStart;
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
   searchSource: ISearchStartSearchSource;
   getNow?: () => Date;
 }
@@ -94,8 +96,23 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
         defaultMessage: 'Provide time fields to get the resolved time ranges for the query',
       }),
     },
+    probability: {
+      types: ['number'],
+      default: 1,
+      help: i18n.translate('data.search.functions.esaggs.probability.help', {
+        defaultMessage:
+          'The probability that a document will be included in the aggregated data. Uses random sampler.',
+      }),
+    },
+    samplerSeed: {
+      types: ['number'],
+      help: i18n.translate('data.search.functions.esaggs.samplerSeed.help', {
+        defaultMessage:
+          'The seed to generate the random sampling of documents. Uses random sampler.',
+      }),
+    },
   },
 });
 
-/** @internal */
 export { handleRequest as handleEsaggsRequest };
+export type { RequestHandlerParams } from './request_handler';

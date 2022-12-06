@@ -1,0 +1,154 @@
+{
+  "id": "@kbn/core-analytics-browser-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-analytics-browser-internal",
+        "id": "def-common.AnalyticsService",
+        "type": "Class",
+        "tags": [],
+        "label": "AnalyticsService",
+        "description": [],
+        "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-analytics-browser-internal",
+            "id": "def-common.AnalyticsService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-analytics-browser-internal",
+                "id": "def-common.AnalyticsService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  "CoreContext"
+                ],
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-browser-internal",
+            "id": "def-common.AnalyticsService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "({ injectedMetadata }: ",
+              "AnalyticsServiceSetupDeps",
+              ") => ",
+              {
+                "pluginId": "@kbn/core-analytics-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+                "section": "def-common.AnalyticsServiceSetup",
+                "text": "AnalyticsServiceSetup"
+              }
+            ],
+            "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-analytics-browser-internal",
+                "id": "def-common.AnalyticsService.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ injectedMetadata }",
+                "description": [],
+                "signature": [
+                  "AnalyticsServiceSetupDeps"
+                ],
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-browser-internal",
+            "id": "def-common.AnalyticsService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-analytics-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+                "section": "def-common.AnalyticsServiceStart",
+                "text": "AnalyticsServiceStart"
+              }
+            ],
+            "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-browser-internal",
+            "id": "def-common.AnalyticsService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

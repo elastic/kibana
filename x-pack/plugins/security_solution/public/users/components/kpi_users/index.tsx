@@ -6,75 +6,39 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiLink } from '@elastic/eui';
-
-import { UsersKpiProps } from './types';
-
-import { HostsKpiAuthentications } from '../../../hosts/components/kpi_hosts/authentications';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import type { UsersKpiProps } from './types';
+import { UsersKpiAuthentications } from './authentications';
 import { TotalUsersKpi } from './total_users';
-import { useUserRiskScore } from '../../../risk_score/containers';
-import { CallOutSwitcher } from '../../../common/components/callouts';
-import * as i18n from './translations';
-import { RISKY_USERS_DOC_LINK } from '../constants';
 
 export const UsersKpiComponent = React.memo<UsersKpiProps>(
-  ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => {
-    const [_, { isModuleEnabled }] = useUserRiskScore({});
+  ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => (
+    <EuiFlexGroup wrap>
+      <EuiFlexItem grow={1}>
+        <TotalUsersKpi
+          filterQuery={filterQuery}
+          from={from}
+          indexNames={indexNames}
+          to={to}
+          updateDateRange={updateDateRange}
+          setQuery={setQuery}
+          skip={skip}
+        />
+      </EuiFlexItem>
 
-    return (
-      <>
-        {isModuleEnabled === false && (
-          <>
-            <CallOutSwitcher
-              namespace="users"
-              condition
-              message={{
-                type: 'primary',
-                id: 'userRiskModule',
-                title: i18n.ENABLE_USER_RISK_TEXT,
-
-                description: (
-                  <>
-                    {i18n.LEARN_MORE}{' '}
-                    <EuiLink href={RISKY_USERS_DOC_LINK} target="_blank">
-                      {i18n.USER_RISK_DATA}
-                    </EuiLink>
-                    <EuiSpacer />
-                  </>
-                ),
-              }}
-            />
-            <EuiSpacer size="l" />
-          </>
-        )}
-        <EuiFlexGroup wrap>
-          <EuiFlexItem grow={1}>
-            <TotalUsersKpi
-              filterQuery={filterQuery}
-              from={from}
-              indexNames={indexNames}
-              to={to}
-              narrowDateRange={narrowDateRange}
-              setQuery={setQuery}
-              skip={skip}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={2}>
-            <HostsKpiAuthentications
-              filterQuery={filterQuery}
-              from={from}
-              indexNames={indexNames}
-              to={to}
-              narrowDateRange={narrowDateRange}
-              setQuery={setQuery}
-              skip={skip}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
-  }
+      <EuiFlexItem grow={2}>
+        <UsersKpiAuthentications
+          filterQuery={filterQuery}
+          from={from}
+          indexNames={indexNames}
+          to={to}
+          updateDateRange={updateDateRange}
+          setQuery={setQuery}
+          skip={skip}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  )
 );
 
 UsersKpiComponent.displayName = 'UsersKpiComponent';

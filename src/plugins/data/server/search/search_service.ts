@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, from, Observable, throwError } from 'rxjs';
+import { concatMap, firstValueFrom, from, Observable, of, throwError } from 'rxjs';
 import { pick } from 'lodash';
 import moment from 'moment';
 import {
@@ -19,7 +19,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from '@kbn/core/server';
-import { map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
@@ -30,6 +30,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
   DataRequestHandlerContext,
   IScopedSearchClient,
@@ -41,7 +42,6 @@ import type {
 
 import { AggsService } from './aggs';
 
-import { IndexPatternsServiceStart } from '../data_views';
 import { registerSearchRoute, registerSessionRoutes } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
 import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
@@ -85,7 +85,7 @@ import {
   eqlRawResponse,
   SQL_SEARCH_STRATEGY,
 } from '../../common/search';
-import { getEsaggs, getEsdsl, getEql } from './expressions';
+import { getEsaggs, getEsdsl, getEssql, getEql } from './expressions';
 import {
   getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
@@ -116,7 +116,7 @@ export interface SearchServiceSetupDependencies {
 /** @internal */
 export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
-  indexPatterns: IndexPatternsServiceStart;
+  indexPatterns: DataViewsServerPluginStart;
   taskManager?: TaskManagerStartContract;
 }
 
@@ -156,13 +156,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     registerSearchRoute(router);
     registerSessionRoutes(router, this.logger);
 
-    if (taskManager) {
-      this.sessionService.setup(core, { taskManager, security });
-    } else {
-      // this should never happen in real world, but
-      // taskManager and security are optional deps because they are in x-pack
-      this.logger.debug('Skipping sessionService setup because taskManager is not available');
-    }
+    this.sessionService.setup(core, { security });
 
     core.http.registerRouteHandlerContext<DataRequestHandlerContext, 'search'>(
       'search',
@@ -184,6 +178,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       ENHANCED_ES_SEARCH_STRATEGY,
       enhancedEsSearchStrategyProvider(
         this.initializerContext.config.legacy.globalConfig$,
+        this.initializerContext.config.get().search,
         this.logger,
         usage
       )
@@ -195,13 +190,20 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     // for example use case
     this.searchAsInternalUser = enhancedEsSearchStrategyProvider(
       this.initializerContext.config.legacy.globalConfig$,
+      this.initializerContext.config.get().search,
       this.logger,
       usage,
       true
     );
 
-    this.registerSearchStrategy(EQL_SEARCH_STRATEGY, eqlSearchStrategyProvider(this.logger));
-    this.registerSearchStrategy(SQL_SEARCH_STRATEGY, sqlSearchStrategyProvider(this.logger));
+    this.registerSearchStrategy(
+      EQL_SEARCH_STRATEGY,
+      eqlSearchStrategyProvider(this.initializerContext.config.get().search, this.logger)
+    );
+    this.registerSearchStrategy(
+      SQL_SEARCH_STRATEGY,
+      sqlSearchStrategyProvider(this.initializerContext.config.get().search, this.logger)
+    );
 
     registerBsearchRoute(
       bfetch,
@@ -221,6 +223,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));
     expressions.registerFunction(getEsdsl({ getStartServices: core.getStartServices }));
+    expressions.registerFunction(getEssql({ getStartServices: core.getStartServices }));
     expressions.registerFunction(getEql({ getStartServices: core.getStartServices }));
     expressions.registerFunction(cidrFunction);
     expressions.registerFunction(dateRangeFunction);
@@ -247,7 +250,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerType(esRawResponse);
     expressions.registerType(eqlRawResponse);
 
-    const aggs = this.aggsService.setup({ registerFunction: expressions.registerFunction });
+    const aggs = this.aggsService.setup({
+      registerFunction: expressions.registerFunction,
+    });
 
     firstValueFrom(this.initializerContext.config.create<ConfigSchema>()).then((value) => {
       if (value.search.aggs.shardDelay.enabled) {
@@ -270,17 +275,17 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   ): ISearchStart {
     const { elasticsearch, savedObjects, uiSettings } = core;
 
-    if (taskManager) {
-      this.sessionService.start(core, { taskManager });
-    }
+    this.sessionService.start(core, {});
+
+    const aggs = this.aggsService.start({
+      fieldFormats,
+      uiSettings,
+      indexPatterns,
+    });
 
     this.asScoped = this.asScopedProvider(core);
     return {
-      aggs: this.aggsService.start({
-        fieldFormats,
-        uiSettings,
-        indexPatterns,
-      }),
+      aggs,
       searchAsInternalUser: this.searchAsInternalUser,
       getSearchStrategy: this.getSearchStrategy,
       asScoped: this.asScoped,
@@ -288,11 +293,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         asScoped: async (request: KibanaRequest) => {
           const esClient = elasticsearch.client.asScoped(request);
           const savedObjectsClient = savedObjects.getScopedClient(request);
-          const scopedIndexPatterns = await indexPatterns.indexPatternsServiceFactory(
+          const scopedIndexPatterns = await indexPatterns.dataViewsServiceFactory(
             savedObjectsClient,
             esClient.asCurrentUser
           );
           const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
+          const aggsStart = await aggs.asScopedToClient(savedObjectsClient, esClient.asCurrentUser);
 
           // cache ui settings, only including items which are explicitly needed by SearchSource
           const uiSettingsCache = pick(
@@ -301,6 +307,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           );
 
           const searchSourceDependencies: SearchSourceDependencies = {
+            aggs: aggsStart,
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: this.asScoped(request).search,
             onResponse: (req, res) => res,
@@ -377,22 +384,55 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       };
 
       const searchRequest$ = from(getSearchRequest());
+      let isInternalSearchStored = false; // used to prevent tracking current search more than once
       const search$ = searchRequest$.pipe(
-        switchMap((searchRequest) => strategy.search(searchRequest, options, deps)),
-        withLatestFrom(searchRequest$),
-        tap(([response, requestWithId]) => {
-          if (!options.sessionId || !response.id || (options.isRestore && requestWithId.id)) return;
-          // intentionally swallow tracking error, as it shouldn't fail the search
-          deps.searchSessionsClient.trackId(request, response.id, options).catch((trackErr) => {
-            this.logger.error(trackErr);
-          });
-        }),
-        map(([response, requestWithId]) => {
-          return {
-            ...response,
-            isRestored: !!requestWithId.id,
-          };
-        })
+        switchMap((searchRequest) =>
+          strategy.search(searchRequest, options, deps).pipe(
+            concatMap((response) => {
+              response = {
+                ...response,
+                isRestored: !!searchRequest.id,
+              };
+
+              if (
+                options.sessionId && // if within search session
+                options.isStored && // and search session was saved (saved object exists)
+                response.id && // and async search has started
+                !(options.isRestore && searchRequest.id) // and not restoring already tracked search
+              ) {
+                // then track this search inside the search-session saved object
+
+                // check if search was already tracked and extended, don't track again in this case
+                if (options.isSearchStored || isInternalSearchStored) {
+                  return of({
+                    ...response,
+                    isStored: true,
+                  });
+                } else {
+                  return from(
+                    deps.searchSessionsClient.trackId(request, response.id, options)
+                  ).pipe(
+                    tap(() => {
+                      isInternalSearchStored = true;
+                    }),
+                    map(() => ({
+                      ...response,
+                      isStored: true,
+                    })),
+                    catchError((e) => {
+                      this.logger.error(
+                        `Error while trying to track search id: ${e?.message}. This might lead to untracked long-running search.`
+                      );
+                      return of(response);
+                    })
+                  );
+                }
+              } else {
+                return of(response);
+              }
+            })
+          )
+        )
       );
 
       return search$;
@@ -514,6 +554,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         extendSession: this.extendSession.bind(this, deps),
         cancelSession: this.cancelSession.bind(this, deps),
         deleteSession: this.deleteSession.bind(this, deps),
+        getSessionStatus: searchSessionsClient.status,
       };
     };
   };

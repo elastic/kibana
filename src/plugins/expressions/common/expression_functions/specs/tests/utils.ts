@@ -7,9 +7,9 @@
  */
 
 import { mapValues } from 'lodash';
-import { AnyExpressionFunctionDefinition } from '../../types';
-import { ExecutionContext } from '../../../execution/types';
-import { Datatable } from '../../../expression_types';
+import type { AnyExpressionFunctionDefinition } from '../../types';
+import type { ExecutionContext } from '../../../execution/types';
+import type { Datatable } from '../../../expression_types';
 
 /**
  * Takes a function spec and passes in default args,
@@ -24,7 +24,9 @@ export const functionWrapper = <
   return (
     context?: Parameters<ExpressionFunctionDefinition['fn']>[0] | null,
     args: Parameters<ExpressionFunctionDefinition['fn']>[1] = {},
-    handlers: ExecutionContext = {} as ExecutionContext
+    handlers: ExecutionContext = {
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext
   ) => spec.fn(context, { ...defaultArgs, ...args }, handlers);
 };
 

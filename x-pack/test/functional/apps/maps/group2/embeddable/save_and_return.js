@@ -8,7 +8,14 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'maps', 'visualize']);
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'header',
+    'maps',
+    'timePicker',
+    'visualize',
+  ]);
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
@@ -75,6 +82,14 @@ export default function ({ getPageObjects, getService }) {
       });
 
       describe('save and return', () => {
+        it('should use dashboard instead of time stored in map state', async () => {
+          // join example map's time is "last 17 minutes"
+          // ensure map has dashboard time
+          const timeConfig = await PageObjects.timePicker.getTimeConfig();
+          expect(timeConfig.start).to.equal('Sep 20, 2015 @ 00:00:00.000');
+          expect(timeConfig.end).to.equal('Sep 20, 2015 @ 01:00:00.000');
+        });
+
         it('should return to dashboard', async () => {
           await PageObjects.maps.clickSaveAndReturnButton();
           await PageObjects.dashboard.waitForRenderComplete();

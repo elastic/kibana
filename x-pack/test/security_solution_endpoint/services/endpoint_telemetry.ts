@@ -7,8 +7,7 @@
 
 import fs from 'fs';
 import Path from 'path';
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
-import { KIBANA_ROOT } from '@kbn/test';
+import { REPO_ROOT as KIBANA_ROOT } from '@kbn/utils';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const TELEMETRY_API_ROOT = '/api/stats?extended=true';

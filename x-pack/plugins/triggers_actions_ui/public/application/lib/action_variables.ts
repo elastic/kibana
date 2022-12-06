@@ -41,6 +41,7 @@ export enum AlertProvidedActionVariables {
   ruleSpaceId = 'rule.spaceId',
   ruleTags = 'rule.tags',
   ruleType = 'rule.type',
+  ruleUrl = 'rule.url',
   date = 'date',
   alertId = 'alert.id',
   alertActionGroup = 'alert.actionGroup',
@@ -102,6 +103,14 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
     name: AlertProvidedActionVariables.ruleType,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleTypeLabel', {
       defaultMessage: 'The type of rule.',
+    }),
+  });
+
+  result.push({
+    name: AlertProvidedActionVariables.ruleUrl,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleUrlLabel', {
+      defaultMessage:
+        'The URL to the Stack Management rule page that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
     }),
   });
 

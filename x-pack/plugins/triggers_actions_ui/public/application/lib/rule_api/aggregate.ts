@@ -5,36 +5,16 @@
  * 2.0.
  */
 import { HttpSetup } from '@kbn/core/public';
-import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
-import { RuleAggregations, RuleStatus } from '../../../types';
+import { AsApiContract } from '@kbn/actions-plugin/common';
+import { RuleAggregations } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { mapFiltersToKql } from './map_filters_to_kql';
-
-export interface RuleTagsAggregations {
-  ruleTags: string[];
-}
-
-const rewriteBodyRes: RewriteRequestCase<RuleAggregations> = ({
-  rule_execution_status: ruleExecutionStatus,
-  rule_enabled_status: ruleEnabledStatus,
-  rule_muted_status: ruleMutedStatus,
-  rule_snoozed_status: ruleSnoozedStatus,
-  rule_tags: ruleTags,
-  ...rest
-}: any) => ({
-  ...rest,
-  ruleExecutionStatus,
-  ruleEnabledStatus,
-  ruleMutedStatus,
-  ruleSnoozedStatus,
-  ruleTags,
-});
-
-const rewriteTagsBodyRes: RewriteRequestCase<RuleTagsAggregations> = ({
-  rule_tags: ruleTags,
-}: any) => ({
-  ruleTags,
-});
+import {
+  LoadRuleAggregationsProps,
+  rewriteBodyRes,
+  rewriteTagsBodyRes,
+  RuleTagsAggregations,
+} from './aggregate_helpers';
 
 // TODO: https://github.com/elastic/kibana/issues/131682
 export async function loadRuleTags({ http }: { http: HttpSetup }): Promise<RuleTagsAggregations> {
@@ -52,15 +32,7 @@ export async function loadRuleAggregations({
   ruleExecutionStatusesFilter,
   ruleStatusesFilter,
   tagsFilter,
-}: {
-  http: HttpSetup;
-  searchText?: string;
-  typesFilter?: string[];
-  actionTypesFilter?: string[];
-  ruleExecutionStatusesFilter?: string[];
-  ruleStatusesFilter?: RuleStatus[];
-  tagsFilter?: string[];
-}): Promise<RuleAggregations> {
+}: LoadRuleAggregationsProps): Promise<RuleAggregations> {
   const filters = mapFiltersToKql({
     typesFilter,
     actionTypesFilter,

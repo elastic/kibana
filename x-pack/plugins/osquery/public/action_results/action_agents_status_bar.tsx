@@ -10,7 +10,7 @@ import { EuiColorPaletteDisplay } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { AGENT_STATUSES, getColorForAgentStatus } from './services/agent_status';
-import { ActionAgentStatus } from './types';
+import type { ActionAgentStatus } from './types';
 
 const StyledEuiColorPaletteDisplay = styled(EuiColorPaletteDisplay)`
   &.osquery-action-agent-status-bar {

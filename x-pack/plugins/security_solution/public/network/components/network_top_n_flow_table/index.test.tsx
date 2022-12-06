@@ -19,11 +19,13 @@ import {
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { networkModel } from '../../store';
 import { NetworkTopNFlowTable } from '.';
 import { mockData } from './mock';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to');
@@ -33,7 +35,13 @@ describe('NetworkTopNFlow Table Component', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
   const mount = useMountAppended();
   const defaultProps = {
     data: mockData.edges,
@@ -50,7 +58,13 @@ describe('NetworkTopNFlow Table Component', () => {
   };
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
   });
 
   describe('rendering', () => {

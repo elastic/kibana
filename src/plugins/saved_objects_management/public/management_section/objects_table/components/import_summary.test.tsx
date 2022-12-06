@@ -13,9 +13,6 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { ImportSummary, ImportSummaryProps } from './import_summary';
 import { FailedImport } from '../../../lib';
 
-// @ts-expect-error
-import { findTestSubject } from '@elastic/eui/lib/test';
-
 describe('ImportSummary', () => {
   let basePath: ReturnType<typeof httpServiceMock.createBasePath>;
 

@@ -17,7 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin';
+import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { exporters } from '@kbn/data-plugin/public';

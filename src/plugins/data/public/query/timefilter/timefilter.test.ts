@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-jest.useFakeTimers();
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 import sinon from 'sinon';
 import moment from 'moment';
+import { TimeRange } from '@kbn/es-query';
 import { AutoRefreshDoneFn, Timefilter } from './timefilter';
 import { Subscription } from 'rxjs';
-import { TimeRange, RefreshInterval } from '../../../common';
+import { RefreshInterval } from '../../../common';
 import { createNowProviderMock } from '../../now_provider/mocks';
 
 import { timefilterServiceMock } from './timefilter_service.mock';

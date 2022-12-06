@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest, Test } from 'supertest';
+import { fromKueryExpression } from '@kbn/es-query';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -51,6 +52,8 @@ const findTestUtils = (
       expect(response.body.per_page).to.be.greaterThan(0);
       expect(response.body.total).to.be.greaterThan(0);
       const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
+      const activeSnoozes = match.active_snoozes;
+      const hasActiveSnoozes = !!(activeSnoozes || []).filter((obj: any) => obj).length;
       expect(match).to.eql({
         id: createdAlert.id,
         name: 'abc',
@@ -72,8 +75,14 @@ const findTestUtils = (
         created_at: match.created_at,
         updated_at: match.updated_at,
         execution_status: match.execution_status,
+        ...(match.next_run ? { next_run: match.next_run } : {}),
+        ...(match.last_run ? { last_run: match.last_run } : {}),
         ...(describeType === 'internal'
-          ? { monitoring: match.monitoring, snooze_end_time: match.snooze_end_time }
+          ? {
+              monitoring: match.monitoring,
+              snooze_schedule: match.snooze_schedule,
+              ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+            }
           : {}),
       });
       expect(Date.parse(match.created_at)).to.be.greaterThan(0);
@@ -135,13 +144,13 @@ const findTestUtils = (
         const response = await supertest.get(
           `${getUrlPrefix(Spaces.space1.id)}/${
             describeType === 'public' ? 'api' : 'internal'
-          }/alerting/rules/_find?filter=alert.attributes.monitoring.execution.calculated_metrics.success_ratio>50`
+          }/alerting/rules/_find?filter=alert.attributes.monitoring.run.calculated_metrics.success_ratio>50`
         );
 
         expect(response.status).to.eql(describeType === 'internal' ? 200 : 400);
         if (describeType === 'public') {
           expect(response.body.message).to.eql(
-            'Error find rules: Filter is not supported on this field alert.attributes.monitoring.execution.calculated_metrics.success_ratio'
+            'Error find rules: Filter is not supported on this field alert.attributes.monitoring.run.calculated_metrics.success_ratio'
           );
         }
       });
@@ -152,13 +161,13 @@ const findTestUtils = (
         const response = await supertest.get(
           `${getUrlPrefix(Spaces.space1.id)}/${
             describeType === 'public' ? 'api' : 'internal'
-          }/alerting/rules/_find?sort_field=monitoring.execution.calculated_metrics.success_ratio`
+          }/alerting/rules/_find?sort_field=monitoring.run.calculated_metrics.success_ratio`
         );
 
         expect(response.status).to.eql(describeType === 'internal' ? 200 : 400);
         if (describeType === 'public') {
           expect(response.body.message).to.eql(
-            'Error find rules: Sort is not supported on this field monitoring.execution.calculated_metrics.success_ratio'
+            'Error find rules: Sort is not supported on this field monitoring.run.calculated_metrics.success_ratio'
           );
         }
       });
@@ -169,13 +178,13 @@ const findTestUtils = (
         const response = await supertest.get(
           `${getUrlPrefix(Spaces.space1.id)}/${
             describeType === 'public' ? 'api' : 'internal'
-          }/alerting/rules/_find?search_fields=monitoring.execution.calculated_metrics.success_ratio&search=50`
+          }/alerting/rules/_find?search_fields=monitoring.run.calculated_metrics.success_ratio&search=50`
         );
 
         expect(response.status).to.eql(describeType === 'internal' ? 200 : 400);
         if (describeType === 'public') {
           expect(response.body.message).to.eql(
-            'Error find rules: Search field monitoring.execution.calculated_metrics.success_ratio not supported'
+            'Error find rules: Search field monitoring.run.calculated_metrics.success_ratio not supported'
           );
         }
       });
@@ -185,6 +194,20 @@ const findTestUtils = (
           `${getUrlPrefix(Spaces.space1.id)}/${
             describeType === 'public' ? 'api' : 'internal'
           }/alerting/rules/_find?filter=alert.attributes.params.strValue:"my b"`
+        );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.total).to.equal(1);
+        expect(response.body.data[0].params.strValue).to.eql('my b');
+      });
+
+      it('should filter on kueryNode parameters', async () => {
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/${
+            describeType === 'public' ? 'api' : 'internal'
+          }/alerting/rules/_find?filter=${JSON.stringify(
+            fromKueryExpression('alert.attributes.params.strValue:"my b"')
+          )}`
         );
 
         expect(response.status).to.eql(200);
@@ -304,6 +327,8 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           createdAt: match.createdAt,
           updatedAt: match.updatedAt,
           executionStatus: match.executionStatus,
+          ...(match.nextRun ? { nextRun: match.nextRun } : {}),
+          ...(match.lastRun ? { lastRun: match.lastRun } : {}),
         });
         expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
         expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);

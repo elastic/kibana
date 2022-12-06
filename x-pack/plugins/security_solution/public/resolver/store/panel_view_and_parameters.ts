@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { decode } from 'rison-node';
+import { decode } from '@kbn/rison';
 import { isPanelViewAndParameters } from '../models/location_search';
-import { PanelViewAndParameters } from '../types';
+import type { PanelViewAndParameters } from '../types';
 import { parameterName } from './parameter_name';
 
 /**

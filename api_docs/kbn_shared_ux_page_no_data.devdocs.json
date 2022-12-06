@@ -1,0 +1,260 @@
+{
+  "id": "@kbn/shared-ux-page-no-data",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data",
+        "id": "def-common.NoDataPage",
+        "type": "Function",
+        "tags": [],
+        "label": "NoDataPage",
+        "description": [],
+        "signature": [
+          "({ solution, logo, action, docsLink, pageTitle, className, }: ",
+          "NoDataPageProps",
+          ") => JSX.Element"
+        ],
+        "path": "packages/shared-ux/page/no_data/impl/src/no_data_page.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-no-data",
+            "id": "def-common.NoDataPage.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  solution,\n  logo,\n  action,\n  docsLink,\n  pageTitle,\n  className,\n}",
+            "description": [],
+            "signature": [
+              "NoDataPageProps"
+            ],
+            "path": "packages/shared-ux/page/no_data/impl/src/no_data_page.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data",
+        "id": "def-common.NoDataPageKibanaProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "NoDataPageKibanaProvider",
+        "description": [
+          "\nKibana-specific Provider that maps dependencies to services."
+        ],
+        "signature": [
+          "({ children, ...dependencies }: React.PropsWithChildren<",
+          "NoDataCardKibanaDependencies",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/page/no_data/impl/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-no-data",
+            "id": "def-common.NoDataPageKibanaProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...dependencies\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "NoDataCardKibanaDependencies",
+              ">"
+            ],
+            "path": "packages/shared-ux/page/no_data/impl/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data",
+        "id": "def-common.NoDataPageProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "NoDataPageProvider",
+        "description": [
+          "\nA Context Provider that provides services to the component and its dependencies."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<",
+          "NoDataCardServices",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/shared-ux/page/no_data/impl/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-no-data",
+            "id": "def-common.NoDataPageProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ children, ...services }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "NoDataCardServices",
+              ">"
+            ],
+            "path": "packages/shared-ux/page/no_data/impl/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data",
+        "id": "def-common.NoDataPageProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "NoDataPageProps",
+        "description": [],
+        "signature": [
+          "NoDataPageProps",
+          " extends ",
+          "CommonProps",
+          ",",
+          "ActionCardProps"
+        ],
+        "path": "packages/shared-ux/page/no_data/types/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-no-data",
+            "id": "def-common.NoDataPageProps.solution",
+            "type": "string",
+            "tags": [],
+            "label": "solution",
+            "description": [
+              "\nSingle name for the current solution, used to auto-generate the title, logo, description, and button label"
+            ],
+            "path": "packages/shared-ux/page/no_data/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-no-data",
+            "id": "def-common.NoDataPageProps.docsLink",
+            "type": "string",
+            "tags": [],
+            "label": "docsLink",
+            "description": [
+              "\nRequired to set the docs link for the whole solution"
+            ],
+            "path": "packages/shared-ux/page/no_data/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-no-data",
+            "id": "def-common.NoDataPageProps.logo",
+            "type": "string",
+            "tags": [],
+            "label": "logo",
+            "description": [
+              "\nOptionally replace the auto-generated logo"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/shared-ux/page/no_data/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-no-data",
+            "id": "def-common.NoDataPageProps.pageTitle",
+            "type": "string",
+            "tags": [],
+            "label": "pageTitle",
+            "description": [
+              "\nOptionally replace the auto-generated page title (h1)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/shared-ux/page/no_data/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data",
+        "id": "def-common.NoDataPageKibanaDependencies",
+        "type": "Type",
+        "tags": [],
+        "label": "NoDataPageKibanaDependencies",
+        "description": [
+          "\nAn interface containing a collection of Kibana plugins and services required to\nrender this component."
+        ],
+        "signature": [
+          "KibanaDependencies",
+          " & ",
+          "RedirectAppLinksKibanaDependencies"
+        ],
+        "path": "packages/shared-ux/page/no_data/types/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data",
+        "id": "def-common.NoDataPageServices",
+        "type": "Type",
+        "tags": [],
+        "label": "NoDataPageServices",
+        "description": [
+          "\nA list of services that are consumed by this component."
+        ],
+        "signature": [
+          "Services",
+          " & ",
+          "RedirectAppLinksServices"
+        ],
+        "path": "packages/shared-ux/page/no_data/types/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

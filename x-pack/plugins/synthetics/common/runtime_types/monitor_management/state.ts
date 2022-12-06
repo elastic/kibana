@@ -12,18 +12,35 @@ export const FetchMonitorManagementListQueryArgsCodec = t.partial({
   perPage: t.number,
   sortField: t.string,
   sortOrder: t.union([t.literal('desc'), t.literal('asc')]),
-  search: t.string,
+  query: t.string,
   searchFields: t.array(t.string),
+  tags: t.array(t.string),
+  locations: t.array(t.string),
+  monitorType: t.array(t.string),
 });
 
 export type FetchMonitorManagementListQueryArgs = t.TypeOf<
   typeof FetchMonitorManagementListQueryArgsCodec
 >;
 
+export const FetchMonitorOverviewQueryArgsCodec = t.partial({
+  query: t.string,
+  searchFields: t.array(t.string),
+  tags: t.array(t.string),
+  locations: t.array(t.string),
+  monitorType: t.array(t.string),
+  sortField: t.string,
+  sortOrder: t.string,
+});
+
+export type FetchMonitorOverviewQueryArgs = t.TypeOf<typeof FetchMonitorOverviewQueryArgsCodec>;
+
 export const MonitorManagementEnablementResultCodec = t.type({
   isEnabled: t.boolean,
   canEnable: t.boolean,
+  canManageApiKeys: t.boolean,
   areApiKeysEnabled: t.boolean,
+  isValidApiKey: t.boolean,
 });
 
 export type MonitorManagementEnablementResult = t.TypeOf<

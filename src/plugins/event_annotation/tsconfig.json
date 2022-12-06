@@ -4,19 +4,21 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "common/**/*",
     "public/**/*",
     "server/**/*"
   ],
-  "references": [
+  "kbn_references": [
     {
       "path": "../../core/tsconfig.json"
     },
     {
       "path": "../expressions/tsconfig.json"
-    }
+    },
+    {
+      "path": "../data/tsconfig.json"
+    },
   ]
 }

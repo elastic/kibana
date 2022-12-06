@@ -49,6 +49,14 @@ export interface Sidebar {
   groupFiltersByOption?: FilterField;
 }
 
+export interface Flyouts {
+  keyboardShortcutsDoc: KeyboardShortcutsDocState;
+}
+
+export interface KeyboardShortcutsDocState {
+  isVisible: boolean;
+}
+
 export interface CanvasWorkpad {
   '@created': string;
   '@timestamp': string;

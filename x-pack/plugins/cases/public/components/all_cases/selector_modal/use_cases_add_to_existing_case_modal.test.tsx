@@ -10,15 +10,18 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import AllCasesSelectorModal from '.';
-import { Case, CaseStatuses, StatusAll } from '../../../../common';
-import { AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
+import type { Case } from '../../../../common';
+import { CaseStatuses, StatusAll } from '../../../../common';
+import type { AppMockRenderer } from '../../../common/mock';
+import { allCasesPermissions, createAppMockRenderer } from '../../../common/mock';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { alertComment } from '../../../containers/mock';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
-import { SupportedCaseAttachment } from '../../../types';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
+import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 
 jest.mock('../../../common/use_cases_toast');
 jest.mock('../../../containers/use_create_attachments');
@@ -35,18 +38,19 @@ const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
 
 // test component to test the hook integration
 const TestComponent: React.FC = () => {
-  const hook = useCasesAddToExistingCaseModal({
-    attachments: [alertComment as SupportedCaseAttachment],
-  });
+  const hook = useCasesAddToExistingCaseModal();
 
   const onClick = () => {
-    hook.open();
+    hook.open({ attachments: [alertComment] });
   };
 
   return <button type="button" data-test-subj="open-modal" onClick={onClick} />;
 };
 
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
+
+const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
 
 describe('use cases add to existing case modal hook', () => {
   useCreateAttachmentsMock.mockReturnValue({
@@ -59,13 +63,15 @@ describe('use cases add to existing case modal hook', () => {
     return (
       <CasesContext.Provider
         value={{
+          externalReferenceAttachmentTypeRegistry,
+          persistableStateAttachmentTypeRegistry,
           owner: ['test'],
-          userCanCrud: true,
+          permissions: allCasesPermissions(),
           appId: 'test',
           appTitle: 'jest',
           basePath: '/jest',
           dispatch,
-          features: { alerts: { sync: true, enabled: true }, metrics: [] },
+          features: { alerts: { sync: true, enabled: true, isExperimental: false }, metrics: [] },
           releasePhase: 'ga',
         }}
       >
@@ -77,6 +83,7 @@ describe('use cases add to existing case modal hook', () => {
   const defaultParams = () => {
     return { onRowClick: jest.fn() };
   };
+
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     dispatch.mockReset();
@@ -160,7 +167,7 @@ describe('use cases add to existing case modal hook', () => {
     expect(mockedToastSuccess).toHaveBeenCalled();
   });
 
-  it('should not call createAttachments nor show toast success when  a case is not selected', async () => {
+  it('should not call createAttachments nor show toast success when a case is not selected', async () => {
     const mockBulkCreateAttachments = jest.fn();
     useCreateAttachmentsMock.mockReturnValueOnce({
       createAttachments: mockBulkCreateAttachments,
@@ -172,11 +179,11 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick();
       return null;
     });
 
     const result = appMockRender.render(<TestComponent />);
+
     userEvent.click(result.getByTestId('open-modal'));
     // give a small delay for the reducer to run
 

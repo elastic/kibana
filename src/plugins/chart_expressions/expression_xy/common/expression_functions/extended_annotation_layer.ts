@@ -6,31 +6,29 @@
  * Side Public License, v 1.
  */
 
-import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { LayerTypes, EXTENDED_ANNOTATION_LAYER } from '../constants';
-import { ExtendedAnnotationLayerConfigResult, ExtendedAnnotationLayerArgs } from '../types';
+import { ExtendedAnnotationLayerFn } from '../types';
 import { strings } from '../i18n';
 
-export function extendedAnnotationLayerFunction(): ExpressionFunctionDefinition<
-  typeof EXTENDED_ANNOTATION_LAYER,
-  Datatable,
-  ExtendedAnnotationLayerArgs,
-  ExtendedAnnotationLayerConfigResult
-> {
+export function extendedAnnotationLayerFunction(): ExtendedAnnotationLayerFn {
   return {
     name: EXTENDED_ANNOTATION_LAYER,
     aliases: [],
     type: EXTENDED_ANNOTATION_LAYER,
-    inputTypes: ['datatable'],
+    inputTypes: ['null'],
     help: strings.getAnnotationLayerFnHelp(),
     args: {
-      hide: {
+      simpleView: {
         types: ['boolean'],
         default: false,
-        help: strings.getAnnotationLayerHideHelp(),
+        help: strings.getAnnotationLayerSimpleViewHelp(),
       },
       annotations: {
-        types: ['manual_point_event_annotation', 'manual_range_event_annotation'],
+        types: [
+          'manual_point_event_annotation',
+          'manual_range_event_annotation',
+          'query_point_event_annotation',
+        ],
         help: strings.getAnnotationLayerAnnotationsHelp(),
         multi: true,
       },

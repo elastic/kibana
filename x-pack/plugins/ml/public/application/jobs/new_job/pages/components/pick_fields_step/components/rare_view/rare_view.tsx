@@ -32,6 +32,7 @@ export const RareView: FC<Props> = ({ isActive, setCanProceed }) => {
     if (typeof setCanProceed === 'function') {
       setCanProceed(rareFieldValid && settingsValid);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rareFieldValid, settingsValid]);
 
   return isActive === false ? (

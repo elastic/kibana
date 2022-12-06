@@ -9,12 +9,13 @@ import React, { FC, useEffect, useState } from 'react';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Query, Filter } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { ShardSizeFilter } from './shard_size_select';
+import { css } from '@emotion/react';
+import { isDefined } from '../../../common/util/is_defined';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DataVisualizerFieldTypeFilter } from './field_type_filter';
-import { JobFieldType } from '../../../../../common/types';
+import { SupportedFieldType } from '../../../../../common/types';
 import { SearchQueryLanguage } from '../../types/combined_query';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import './_index.scss';
@@ -28,7 +29,7 @@ interface Props {
   samplerShardSize: number;
   setSamplerShardSize(s: number): void;
   overallStats: OverallStats;
-  indexedFieldTypes: JobFieldType[];
+  indexedFieldTypes: SupportedFieldType[];
   setVisibleFieldTypes(q: string[]): void;
   visibleFieldTypes: string[];
   setVisibleFieldNames(q: string[]): void;
@@ -87,8 +88,8 @@ export const SearchPanel: FC<Props> = ({
   }, [searchQueryLanguage, searchString, queryManager.filterManager]);
 
   const searchHandler = ({ query, filters }: { query?: Query; filters?: Filter[] }) => {
-    const mergedQuery = query ?? searchInput;
-    const mergedFilters = filters ?? queryManager.filterManager.getFilters();
+    const mergedQuery = isDefined(query) ? query : searchInput;
+    const mergedFilters = isDefined(filters) ? filters : queryManager.filterManager.getFilters();
     try {
       if (mergedFilters) {
         queryManager.filterManager.setFilters(mergedFilters);
@@ -135,7 +136,6 @@ export const SearchPanel: FC<Props> = ({
           onQuerySubmit={(params: { dateRange: TimeRange; query?: Query | undefined }) =>
             searchHandler({ query: params.query })
           }
-          // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
           onFiltersUpdated={(filters: Filter[]) => searchHandler({ filters })}
           indexPatterns={[dataView]}
           placeholder={i18n.translate('xpack.dataVisualizer.searchPanel.queryBarPlaceholderText', {
@@ -147,12 +147,15 @@ export const SearchPanel: FC<Props> = ({
         />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={2} className={'dvSearchPanel__controls'}>
-        <ShardSizeFilter
-          samplerShardSize={samplerShardSize}
-          setSamplerShardSize={setSamplerShardSize}
-        />
-
+      <EuiFlexItem
+        grow={2}
+        className={'dvSearchPanel__controls'}
+        css={css`
+          margin-left: 0px !important;
+          padding-left: 0px !important;
+          padding-right: 0px !important;
+        `}
+      >
         <DataVisualizerFieldNamesFilter
           overallStats={overallStats}
           setVisibleFieldNames={setVisibleFieldNames}

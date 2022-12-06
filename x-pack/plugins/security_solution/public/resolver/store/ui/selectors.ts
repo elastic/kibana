@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 
 import { createSelector } from 'reselect';
-import { PanelViewAndParameters, ResolverUIState } from '../../types';
+import type { PanelViewAndParameters, ResolverUIState } from '../../types';
 import { panelViewAndParameters as panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID } from '../panel_view_and_parameters';
 import { parameterName } from '../parameter_name';
 
@@ -74,31 +74,3 @@ export const relativeHref: (
     };
   }
 );
-
-/**
- * Returns a map of ecs category name to urls for use in panel navigation.
- * @deprecated use `useLinkProps`
- */
-export const relatedEventsRelativeHrefs: (state: ResolverUIState) => (
-  categories: Record<string, number> | undefined,
-  nodeID: string
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-) => Map<string, string | undefined> = createSelector(relativeHref, (relativeHref) => {
-  return (categories: Record<string, number> | undefined, nodeID: string) => {
-    const hrefsByCategory = new Map<string, string | undefined>();
-    if (categories !== undefined) {
-      Object.keys(categories).map((category) => {
-        const categoryPanelParams: PanelViewAndParameters = {
-          panelView: 'nodeEventsInCategory',
-          panelParameters: {
-            nodeID,
-            eventCategory: category,
-          },
-        };
-        hrefsByCategory.set(category, relativeHref(categoryPanelParams));
-        return category;
-      });
-    }
-    return hrefsByCategory;
-  };
-});

@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectReference, SavedObjectsFindResult } from '@kbn/core/server';
+import type { SavedObject, SavedObjectReference, SavedObjectsFindResult } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { ESConnectorFields } from '.';
+import type { ESConnectorFields } from '.';
 import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../common/constants';
-import {
+import type {
   CaseAttributes,
   CaseConnector,
   CaseExternalServiceBasic,
   CaseFullExternalService,
-  CaseSeverity,
-  CaseStatuses,
-  ConnectorTypes,
-  NONE_CONNECTOR_ID,
 } from '../../common/api';
+import { CaseSeverity, CaseStatuses, ConnectorTypes, NONE_CONNECTOR_ID } from '../../common/api';
 import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './cases/types';
+import type { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './cases/types';
 import { getNoneCaseConnector } from '../common/utils';
 
 /**
@@ -126,14 +123,17 @@ export const basicCaseFields: CaseAttributes = {
     syncAlerts: true,
   },
   owner: SECURITY_SOLUTION_OWNER,
+  assignees: [],
 };
 
 export const createCaseSavedObjectResponse = ({
   connector,
   externalService,
+  overrides,
 }: {
   connector?: ESCaseConnectorWithId;
   externalService?: CaseFullExternalService;
+  overrides?: Partial<CaseAttributes>;
 } = {}): SavedObject<ESCaseAttributes> => {
   const references: SavedObjectReference[] = createSavedObjectReferences({
     connector,
@@ -168,6 +168,7 @@ export const createCaseSavedObjectResponse = ({
     id: '1',
     attributes: {
       ...basicCaseFields,
+      ...overrides,
       // if connector is null we'll default this to an incomplete jira value because the service
       // should switch it to a none connector when the id can't be found in the references array
       connector: formattedConnector,

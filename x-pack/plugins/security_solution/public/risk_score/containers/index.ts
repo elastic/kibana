@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { HostsRiskScore } from '../../../common/search_strategy/security_solution/risk_score';
+import type {
+  HostRiskScore,
+  UserRiskScore,
+} from '../../../common/search_strategy/security_solution/risk_score';
 
 export * from './all';
 export * from './kpi';
 
-export const enum UserRiskScoreQueryId {
+export enum UserRiskScoreQueryId {
   USERS_BY_RISK = 'UsersByRisk',
   USER_DETAILS_RISK_SCORE = 'UserDetailsRiskScore',
 }
 
-export const enum HostRiskScoreQueryId {
+export enum HostRiskScoreQueryId {
   DEFAULT = 'HostRiskScore',
   HOST_DETAILS_RISK_SCORE = 'HostDetailsRiskScore',
   OVERVIEW_RISKY_HOSTS = 'OverviewRiskyHosts',
@@ -24,6 +27,12 @@ export const enum HostRiskScoreQueryId {
 
 export interface HostRisk {
   loading: boolean;
-  isModuleEnabled?: boolean;
-  result?: HostsRiskScore[];
+  isModuleEnabled: boolean;
+  result?: HostRiskScore[];
+}
+
+export interface UserRisk {
+  loading: boolean;
+  isModuleEnabled: boolean;
+  result?: UserRiskScore[];
 }

@@ -55,7 +55,7 @@ export function iisMetricsSpecProvider(context: TutorialContext): TutorialSchema
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/iis_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/iis_metrics/screenshot.webp',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),

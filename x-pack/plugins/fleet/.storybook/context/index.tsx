@@ -8,16 +8,18 @@
 import React, { useEffect, useMemo, useCallback } from 'react';
 
 import { EMPTY } from 'rxjs';
-import type { StoryContext } from '@storybook/react';
+import type { DecoratorFn } from '@storybook/react';
 import { createBrowserHistory } from 'history';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { ScopedHistory } from '@kbn/core/public';
+import { CoreScopedHistory } from '@kbn/core/public';
 import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/storybook';
+import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 
 import { IntegrationsAppContext } from '../../public/applications/integrations/app';
 import type { FleetConfigType, FleetStartServices } from '../../public/plugin';
+import { ExperimentalFeaturesService } from '../../public/services';
 
 // TODO: These are contract leaks, and should be on the context, rather than a setter.
 import { setHttpClient } from '../../public/hooks/use_request';
@@ -40,16 +42,17 @@ import { getExecutionContext } from './execution_context';
 // mock later, (or, ideally, Fleet starts to use a service abstraction).
 //
 // Expect this to grow as components that are given Stories need access to mocked services.
-export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
+export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>[1] }> = ({
   storyContext,
   children: storyChildren,
 }) => {
   const basepath = '';
   const browserHistory = createBrowserHistory();
-  const history = new ScopedHistory(browserHistory, basepath);
+  const history = new CoreScopedHistory(browserHistory, basepath);
 
   const isCloudEnabled = storyContext?.args.isCloudEnabled;
-
+  // @ts-ignore {} no assignable to parameter
+  ExperimentalFeaturesService.init({});
   const startServices: FleetStartServices = useMemo(
     () => ({
       ...stubbedStartServices,
@@ -70,6 +73,7 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
       },
       customIntegrations: {
         ContextProvider: getStorybookContextProvider(),
+        languageClientsUiComponents: {},
       },
       docLinks: getDocLinks(),
       http: getHttp(),
@@ -107,6 +111,7 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
           writeIntegrationPolicies: true,
         },
       },
+      guidedOnboarding: guidedOnboardingMock.createStart(),
     }),
     [isCloudEnabled]
   );

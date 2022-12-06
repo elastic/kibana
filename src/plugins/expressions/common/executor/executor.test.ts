@@ -111,7 +111,7 @@ describe('Executor', () => {
 
       test('Execution inherits context from Executor', () => {
         const foo = {};
-        const executor = new Executor({ context: { foo }, functions: {}, types: {} });
+        const executor = new Executor(undefined, { context: { foo }, functions: {}, types: {} });
         const execution = executor.createExecution('foo bar="baz"');
 
         expect(execution.context).toHaveProperty('foo', foo);

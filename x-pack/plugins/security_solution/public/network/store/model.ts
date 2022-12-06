@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   Direction,
   FlowTarget,
   NetworkDnsFields,
@@ -29,6 +29,7 @@ export enum NetworkTableType {
   topNFlowDestination = 'topNFlowDestination',
   topNFlowSource = 'topNFlowSource',
   tls = 'tls',
+  anomalies = 'anomalies',
 }
 
 export type TopNTableType =
@@ -45,8 +46,6 @@ export type TopCountriesTableType =
 
 export type TopTlsTableType = NetworkDetailsTableType.tls | NetworkTableType.tls;
 
-export type HttpTableType = NetworkDetailsTableType.http | NetworkTableType.http;
-
 export enum NetworkDetailsTableType {
   http = 'http',
   tls = 'tls',
@@ -55,9 +54,8 @@ export enum NetworkDetailsTableType {
   topNFlowDestination = 'topNFlowDestination',
   topNFlowSource = 'topNFlowSource',
   users = 'users',
+  anomalies = 'anomalies',
 }
-
-export type AllNetworkTables = NetworkTableType | NetworkDetailsTableType;
 
 export interface BasicQueryPaginated {
   activePage: number;
@@ -109,6 +107,7 @@ export interface NetworkQueries {
   [NetworkTableType.topNFlowSource]: TopNFlowQuery;
   [NetworkTableType.tls]: TlsQuery;
   [NetworkTableType.alerts]: BasicQueryPaginated;
+  [NetworkTableType.anomalies]: NetworkAnomaliesQuery;
 }
 
 export interface NetworkPageModel {
@@ -119,6 +118,11 @@ export interface NetworkUsersQuery extends BasicQueryPaginated {
   sort: SortField<NetworkUsersFields>;
 }
 
+export interface NetworkAnomaliesQuery {
+  jobIdSelection: string[];
+  intervalSelection: string;
+}
+
 export interface NetworkDetailsQueries {
   [NetworkDetailsTableType.http]: HttpQuery;
   [NetworkDetailsTableType.tls]: TlsQuery;
@@ -127,6 +131,7 @@ export interface NetworkDetailsQueries {
   [NetworkDetailsTableType.topNFlowDestination]: TopNFlowQuery;
   [NetworkDetailsTableType.topNFlowSource]: TopNFlowQuery;
   [NetworkDetailsTableType.users]: NetworkUsersQuery;
+  [NetworkDetailsTableType.anomalies]: NetworkAnomaliesQuery;
 }
 
 export interface NetworkDetailsModel {

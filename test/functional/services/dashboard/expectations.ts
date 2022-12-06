@@ -191,7 +191,7 @@ export class DashboardExpectService extends FtrService {
 
   async metricValuesExist(values: string[]) {
     this.log.debug(`DashboardExpect.metricValuesExist(${values})`);
-    await this.textWithinCssElementExists(values, '.mtrVis__value');
+    await this.textWithinCssElementExists(values, '.legacyMtrVis__value');
   }
 
   async tsvbMetricValuesExist(values: string[]) {
@@ -281,11 +281,20 @@ export class DashboardExpectService extends FtrService {
     });
   }
 
+  // legacy controls visualization
   async inputControlItemCount(expectedCount: number) {
     this.log.debug(`DashboardExpect.inputControlItemCount(${expectedCount})`);
     await this.retry.try(async () => {
       const inputControlItems = await this.testSubjects.findAll('inputControlItem');
       expect(inputControlItems.length).to.be(expectedCount);
+    });
+  }
+
+  async controlCount(expectedCount: number) {
+    this.log.debug(`DashboardExpect.controlCount(${expectedCount})`);
+    await this.retry.try(async () => {
+      const controls = await this.testSubjects.findAll('control-frame');
+      expect(controls.length).to.be(expectedCount);
     });
   }
 

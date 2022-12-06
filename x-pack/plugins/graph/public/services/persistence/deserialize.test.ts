@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '../../types';
+import { GraphWorkspaceSavedObject, Workspace } from '../../types';
 import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState, mapFields } from './deserialize';
 import { createWorkspace } from '../workspace/graph_client_workspace';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 
 describe('deserialize', () => {
   let savedWorkspace: GraphWorkspaceSavedObject;
@@ -214,8 +214,8 @@ describe('deserialize', () => {
     it('should migrate legacy index pattern ref', () => {
       const workspacePayload = { ...savedWorkspace, legacyIndexPatternRef: 'Testpattern' };
       const success = migrateLegacyIndexPatternRef(workspacePayload, [
-        { id: '678', attributes: { title: 'Testpattern' } } as IndexPatternSavedObject,
-        { id: '123', attributes: { title: 'otherpattern' } } as IndexPatternSavedObject,
+        { id: '678', title: 'Testpattern' } as DataViewListItem,
+        { id: '123', title: 'otherpattern' } as DataViewListItem,
       ]);
       expect(success).toEqual({ success: true });
       expect(workspacePayload.legacyIndexPatternRef).toBeUndefined();
@@ -225,7 +225,7 @@ describe('deserialize', () => {
     it('should return false if migration fails', () => {
       const workspacePayload = { ...savedWorkspace, legacyIndexPatternRef: 'Testpattern' };
       const success = migrateLegacyIndexPatternRef(workspacePayload, [
-        { id: '123', attributes: { title: 'otherpattern' } } as IndexPatternSavedObject,
+        { id: '123', title: 'otherpattern' } as DataViewListItem,
       ]);
       expect(success).toEqual({ success: false, missingIndexPattern: 'Testpattern' });
     });

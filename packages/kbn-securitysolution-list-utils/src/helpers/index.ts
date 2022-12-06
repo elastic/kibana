@@ -14,7 +14,6 @@ import {
   EntriesArray,
   Entry,
   EntryNested,
-  ExceptionListItemSchema,
   ExceptionListType,
   ListSchema,
   NamespaceType,
@@ -27,6 +26,8 @@ import {
   entry,
   exceptionListItemSchema,
   nestedEntryItem,
+  CreateRuleExceptionListItemSchema,
+  createRuleExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   DataViewBase,
@@ -36,13 +37,17 @@ import {
 } from '@kbn/es-query';
 
 import {
-  EXCEPTION_OPERATORS,
+  ALL_OPERATORS,
   EXCEPTION_OPERATORS_SANS_LISTS,
   doesNotExistOperator,
   existsOperator,
   isNotOperator,
   isOneOfOperator,
   isOperator,
+  DETECTION_ENGINE_EXCEPTION_OPERATORS,
+  isNotOneOfOperator,
+  isInListOperator,
+  isNotInListOperator,
 } from '../autocomplete_operators';
 
 import {
@@ -51,6 +56,7 @@ import {
   EmptyEntry,
   EmptyNestedEntry,
   ExceptionsBuilderExceptionItem,
+  ExceptionsBuilderReturnExceptionItem,
   FormattedBuilderEntry,
   OperatorOption,
 } from '../types';
@@ -61,59 +67,60 @@ export const isEntryNested = (item: BuilderEntry): item is EntryNested => {
 
 export const filterExceptionItems = (
   exceptions: ExceptionsBuilderExceptionItem[]
-): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
-  return exceptions.reduce<Array<ExceptionListItemSchema | CreateExceptionListItemSchema>>(
-    (acc, exception) => {
-      const entries = exception.entries.reduce<BuilderEntry[]>((nestedAcc, singleEntry) => {
-        const strippedSingleEntry = removeIdFromItem(singleEntry);
+): ExceptionsBuilderReturnExceptionItem[] => {
+  return exceptions.reduce<ExceptionsBuilderReturnExceptionItem[]>((acc, exception) => {
+    const entries = exception.entries.reduce<BuilderEntry[]>((nestedAcc, singleEntry) => {
+      const strippedSingleEntry = removeIdFromItem(singleEntry);
+      if (entriesNested.is(strippedSingleEntry)) {
+        const nestedEntriesArray = strippedSingleEntry.entries.filter((singleNestedEntry) => {
+          const noIdSingleNestedEntry = removeIdFromItem(singleNestedEntry);
+          const [validatedNestedEntry] = validate(noIdSingleNestedEntry, nestedEntryItem);
+          return validatedNestedEntry != null;
+        });
+        const noIdNestedEntries = nestedEntriesArray.map((singleNestedEntry) =>
+          removeIdFromItem(singleNestedEntry)
+        );
 
-        if (entriesNested.is(strippedSingleEntry)) {
-          const nestedEntriesArray = strippedSingleEntry.entries.filter((singleNestedEntry) => {
-            const noIdSingleNestedEntry = removeIdFromItem(singleNestedEntry);
-            const [validatedNestedEntry] = validate(noIdSingleNestedEntry, nestedEntryItem);
-            return validatedNestedEntry != null;
-          });
-          const noIdNestedEntries = nestedEntriesArray.map((singleNestedEntry) =>
-            removeIdFromItem(singleNestedEntry)
-          );
+        const [validatedNestedEntry] = validate(
+          { ...strippedSingleEntry, entries: noIdNestedEntries },
+          entriesNested
+        );
 
-          const [validatedNestedEntry] = validate(
-            { ...strippedSingleEntry, entries: noIdNestedEntries },
-            entriesNested
-          );
-
-          if (validatedNestedEntry != null) {
-            return [...nestedAcc, { ...singleEntry, entries: nestedEntriesArray }];
-          }
-          return nestedAcc;
-        } else {
-          const [validatedEntry] = validate(strippedSingleEntry, entry);
-
-          if (validatedEntry != null) {
-            return [...nestedAcc, singleEntry];
-          }
-          return nestedAcc;
+        if (validatedNestedEntry != null) {
+          return [...nestedAcc, { ...singleEntry, entries: nestedEntriesArray }];
         }
-      }, []);
-
-      if (entries.length === 0) {
-        return acc;
-      }
-
-      const item = { ...exception, entries };
-
-      if (exceptionListItemSchema.is(item)) {
-        return [...acc, item];
-      } else if (createExceptionListItemSchema.is(item)) {
-        const { meta, ...rest } = item;
-        const itemSansMetaId: CreateExceptionListItemSchema = { ...rest, meta: undefined };
-        return [...acc, itemSansMetaId];
+        return nestedAcc;
       } else {
-        return acc;
+        const [validatedEntry] = validate(strippedSingleEntry, entry);
+        if (validatedEntry != null) {
+          return [...nestedAcc, singleEntry];
+        }
+        return nestedAcc;
       }
-    },
-    []
-  );
+    }, []);
+
+    if (entries.length === 0) {
+      return acc;
+    }
+
+    const item = { ...exception, entries };
+
+    if (exceptionListItemSchema.is(item)) {
+      return [...acc, item];
+    } else if (
+      createExceptionListItemSchema.is(item) ||
+      createRuleExceptionListItemSchema.is(item)
+    ) {
+      const { meta, ...rest } = item;
+      const itemSansMetaId: CreateExceptionListItemSchema | CreateRuleExceptionListItemSchema = {
+        ...rest,
+        meta: undefined,
+      };
+      return [...acc, itemSansMetaId];
+    } else {
+      return acc;
+    }
+  }, []);
 };
 
 export const addIdToEntries = (entries: EntriesArray): EntriesArray => {
@@ -132,15 +139,15 @@ export const addIdToEntries = (entries: EntriesArray): EntriesArray => {
 export const getNewExceptionItem = ({
   listId,
   namespaceType,
-  ruleName,
+  name,
 }: {
-  listId: string;
-  namespaceType: NamespaceType;
-  ruleName: string;
+  listId: string | undefined;
+  namespaceType: NamespaceType | undefined;
+  name: string;
 }): CreateExceptionListItemBuilderSchema => {
   return {
     comments: [],
-    description: `${ruleName} - exception list item`,
+    description: `Exception list item`,
     entries: addIdToEntries([
       {
         field: '',
@@ -154,7 +161,7 @@ export const getNewExceptionItem = ({
     meta: {
       temporaryUuid: uuid.v4(),
     },
-    name: `${ruleName} - exception list item`,
+    name,
     namespace_type: namespaceType,
     tags: [],
     type: 'simple',
@@ -192,7 +199,7 @@ export const getExceptionOperatorSelect = (item: BuilderEntry): OperatorOption =
     return isOperator;
   } else {
     const operatorType = getOperatorType(item);
-    const foundOperator = EXCEPTION_OPERATORS.find((operatorOption) => {
+    const foundOperator = ALL_OPERATORS.find((operatorOption) => {
       return item.operator === operatorOption.operator && operatorType === operatorOption.type;
     });
 
@@ -667,6 +674,10 @@ export const getEntryOnOperatorChange = (
   }
 };
 
+const fieldSupportsMatches = (field: DataViewFieldBase) => {
+  return field.type === 'string';
+};
+
 /**
  * Determines which operators to make available
  *
@@ -687,12 +698,34 @@ export const getOperatorOptions = (
     return isBoolean ? [isOperator] : [isOperator, isOneOfOperator];
   } else if (item.nested != null && listType === 'detection') {
     return isBoolean ? [isOperator, existsOperator] : [isOperator, isOneOfOperator, existsOperator];
+  } else if (isBoolean) {
+    return [isOperator, isNotOperator, existsOperator, doesNotExistOperator];
+  } else if (!includeValueListOperators) {
+    return fieldSupportsMatches(item.field)
+      ? EXCEPTION_OPERATORS_SANS_LISTS
+      : [
+          isOperator,
+          isNotOperator,
+          isOneOfOperator,
+          isNotOneOfOperator,
+          existsOperator,
+          doesNotExistOperator,
+        ];
   } else {
-    return isBoolean
-      ? [isOperator, isNotOperator, existsOperator, doesNotExistOperator]
-      : includeValueListOperators
-      ? EXCEPTION_OPERATORS
-      : EXCEPTION_OPERATORS_SANS_LISTS;
+    return listType === 'detection'
+      ? fieldSupportsMatches(item.field)
+        ? DETECTION_ENGINE_EXCEPTION_OPERATORS
+        : [
+            isOperator,
+            isNotOperator,
+            isOneOfOperator,
+            isNotOneOfOperator,
+            existsOperator,
+            doesNotExistOperator,
+            isInListOperator,
+            isNotInListOperator,
+          ]
+      : ALL_OPERATORS;
   }
 };
 
@@ -739,13 +772,15 @@ export const getCorrespondingKeywordField = ({
  * @param parent nested entries hold copy of their parent for use in various logic
  * @param parentIndex corresponds to the entry index, this might seem obvious, but
  * was added to ensure that nested items could be identified with their parent entry
+ * @param allowCustomFieldOptions determines if field must be found to match in indexPattern or not
  */
 export const getFormattedBuilderEntry = (
   indexPattern: DataViewBase,
   item: BuilderEntry,
   itemIndex: number,
   parent: EntryNested | undefined,
-  parentIndex: number | undefined
+  parentIndex: number | undefined,
+  allowCustomFieldOptions: boolean
 ): FormattedBuilderEntry => {
   const { fields } = indexPattern;
   const field = parent != null ? `${parent.field}.${item.field}` : item.field;
@@ -770,10 +805,14 @@ export const getFormattedBuilderEntry = (
       value: getEntryValue(item),
     };
   } else {
+    const fieldToUse = allowCustomFieldOptions
+      ? foundField ?? { name: item.field, type: 'keyword' }
+      : foundField;
+
     return {
       correspondingKeywordField,
       entryIndex: itemIndex,
-      field: foundField,
+      field: fieldToUse,
       id: item.id != null ? item.id : `${itemIndex}`,
       nested: undefined,
       operator: getExceptionOperatorSelect(item),
@@ -789,8 +828,7 @@ export const getFormattedBuilderEntry = (
  *
  * @param patterns DataViewBase containing available fields on rule index
  * @param entries exception item entries
- * @param addNested boolean noting whether or not UI is currently
- * set to add a nested field
+ * @param allowCustomFieldOptions determines if field must be found to match in indexPattern or not
  * @param parent nested entries hold copy of their parent for use in various logic
  * @param parentIndex corresponds to the entry index, this might seem obvious, but
  * was added to ensure that nested items could be identified with their parent entry
@@ -798,6 +836,7 @@ export const getFormattedBuilderEntry = (
 export const getFormattedBuilderEntries = (
   indexPattern: DataViewBase,
   entries: BuilderEntry[],
+  allowCustomFieldOptions: boolean,
   parent?: EntryNested,
   parentIndex?: number
 ): FormattedBuilderEntry[] => {
@@ -809,7 +848,8 @@ export const getFormattedBuilderEntries = (
         item,
         index,
         parent,
-        parentIndex
+        parentIndex,
+        allowCustomFieldOptions
       );
       return [...acc, newItemEntry];
     } else {
@@ -839,7 +879,13 @@ export const getFormattedBuilderEntries = (
       }
 
       if (isEntryNested(item)) {
-        const nestedItems = getFormattedBuilderEntries(indexPattern, item.entries, item, index);
+        const nestedItems = getFormattedBuilderEntries(
+          indexPattern,
+          item.entries,
+          allowCustomFieldOptions,
+          item,
+          index
+        );
 
         return [...acc, parentEntry, ...nestedItems];
       }

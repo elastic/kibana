@@ -10,23 +10,25 @@ import {
   Sort,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
+  ERROR_LOG_LEVEL,
+  PARENT_ID,
+  SPAN_DURATION,
   TRACE_ID,
   TRANSACTION_DURATION,
-  SPAN_DURATION,
-  PARENT_ID,
-  ERROR_LOG_LEVEL,
-} from '../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../lib/helpers/setup_request';
+} from '../../../common/es_fields/apm';
+import { getLinkedChildrenCountBySpanId } from '../span_links/get_linked_children';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { APMConfig } from '../..';
 
 export async function getTraceItems(
   traceId: string,
-  setup: Setup,
+  config: APMConfig,
+  apmEventClient: APMEventClient,
   start: number,
   end: number
 ) {
-  const { apmEventClient, config } = setup;
   const maxTraceItems = config.ui.maxTraceItems;
   const excludedLogLevels = ['debug', 'info', 'warning'];
 
@@ -35,6 +37,7 @@ export async function getTraceItems(
       events: [ProcessorEvent.error],
     },
     body: {
+      track_total_hits: false,
       size: maxTraceItems,
       query: {
         bool: {
@@ -53,6 +56,7 @@ export async function getTraceItems(
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     body: {
+      track_total_hits: maxTraceItems + 1,
       size: maxTraceItems,
       query: {
         bool: {
@@ -70,16 +74,24 @@ export async function getTraceItems(
         { [TRANSACTION_DURATION]: { order: 'desc' as const } },
         { [SPAN_DURATION]: { order: 'desc' as const } },
       ] as Sort,
-      track_total_hits: true,
     },
   });
 
-  const errorResponse = await errorResponsePromise;
-  const traceResponse = await traceResponsePromise;
+  const [errorResponse, traceResponse, linkedChildrenOfSpanCountBySpanId] =
+    await Promise.all([
+      errorResponsePromise,
+      traceResponsePromise,
+      getLinkedChildrenCountBySpanId({ traceId, apmEventClient, start, end }),
+    ]);
 
   const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
   const traceDocs = traceResponse.hits.hits.map((hit) => hit._source);
   const errorDocs = errorResponse.hits.hits.map((hit) => hit._source);
 
-  return { exceedsMax, traceDocs, errorDocs };
+  return {
+    exceedsMax,
+    traceDocs,
+    errorDocs,
+    linkedChildrenOfSpanCountBySpanId,
+  };
 }

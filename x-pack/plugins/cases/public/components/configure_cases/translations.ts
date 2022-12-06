@@ -110,23 +110,12 @@ export const FIELD_MAPPING_THIRD_COL = i18n.translate(
   }
 );
 
-export const FIELD_MAPPING_EDIT_APPEND = i18n.translate(
-  'xpack.cases.configureCases.fieldMappingEditAppend',
-  {
-    defaultMessage: 'Append',
-  }
-);
-
 export const CANCEL = i18n.translate('xpack.cases.configureCases.cancelButton', {
   defaultMessage: 'Cancel',
 });
 
 export const SAVE = i18n.translate('xpack.cases.configureCases.saveButton', {
   defaultMessage: 'Save',
-});
-
-export const SAVE_CLOSE = i18n.translate('xpack.cases.configureCases.saveAndCloseButton', {
-  defaultMessage: 'Save & close',
 });
 
 export const WARNING_NO_CONNECTOR_TITLE = i18n.translate(
@@ -138,16 +127,6 @@ export const WARNING_NO_CONNECTOR_TITLE = i18n.translate(
 
 export const COMMENT = i18n.translate('xpack.cases.configureCases.commentMapping', {
   defaultMessage: 'Comments',
-});
-export const REQUIRED_MAPPINGS = (connectorName: string, fields: string): string =>
-  i18n.translate('xpack.cases.configureCases.requiredMappings', {
-    values: { connectorName, fields },
-    defaultMessage:
-      'At least one Case field needs to be mapped to the following required { connectorName } fields: { fields }',
-  });
-
-export const UPDATE_FIELD_MAPPINGS = i18n.translate('xpack.cases.configureCases.updateConnector', {
-  defaultMessage: 'Update field mappings',
 });
 
 export const UPDATE_SELECTED_CONNECTOR = (connectorName: string): string =>
@@ -173,3 +152,11 @@ export const DEPRECATED_TOOLTIP_CONTENT = i18n.translate(
 export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate('xpack.cases.configureCases.headerTitle', {
   defaultMessage: 'Configure cases',
 });
+
+export const CASES_WEBHOOK_MAPPINGS = i18n.translate(
+  'xpack.cases.configureCases.casesWebhookMappings',
+  {
+    defaultMessage:
+      'Webhook - Case Management field mappings are configured in the connector settings in the third-party REST API JSON.',
+  }
+);

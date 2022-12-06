@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiSteps } from '@elastic/eui';
 import React from 'react';
+import { EuiLoadingContent, EuiSteps } from '@elastic/eui';
 
 import { useAdvancedForm } from './hooks';
+import { useLatestFleetServers } from './hooks/use_latest_fleet_servers';
 
 import {
   getAddFleetServerHostStep,
@@ -18,8 +19,13 @@ import {
   getConfirmFleetServerConnectionStep,
 } from './steps';
 
-export const AdvancedTab: React.FunctionComponent = () => {
+interface AdvancedTabProps {
+  selectedPolicyId?: string;
+}
+
+export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selectedPolicyId }) => {
   const {
+    isSelectFleetServerPolicyLoading,
     eligibleFleetServerPolicies,
     refreshEligibleFleetServerPolicies,
     fleetServerPolicyId,
@@ -33,9 +39,11 @@ export const AdvancedTab: React.FunctionComponent = () => {
     setDeploymentMode,
   } = useAdvancedForm();
 
+  const { hasRecentlyEnrolledFleetServers } = useLatestFleetServers();
+
   const steps = [
     getSelectAgentPolicyStep({
-      policyId: fleetServerPolicyId,
+      policyId: fleetServerPolicyId || selectedPolicyId,
       setPolicyId: setFleetServerPolicyId,
       eligibleFleetServerPolicies,
       refreshEligibleFleetServerPolicies,
@@ -43,25 +51,35 @@ export const AdvancedTab: React.FunctionComponent = () => {
     getSetDeploymentModeStep({
       deploymentMode,
       setDeploymentMode,
-      disabled: !Boolean(fleetServerPolicyId),
+      disabled: !Boolean(fleetServerPolicyId || selectedPolicyId),
     }),
-    getAddFleetServerHostStep({ fleetServerHostForm, disabled: !Boolean(fleetServerPolicyId) }),
+    getAddFleetServerHostStep({
+      fleetServerHostForm,
+      disabled: !Boolean(fleetServerPolicyId || selectedPolicyId),
+    }),
     getGenerateServiceTokenStep({
       serviceToken,
       generateServiceToken,
       isLoadingServiceToken,
-      disabled: !Boolean(fleetServerHostForm.isFleetServerHostSubmitted),
+      disabled: Boolean(!fleetServerHostForm.fleetServerHost),
     }),
     getInstallFleetServerStep({
       isFleetServerReady,
       serviceToken,
-      fleetServerHost: fleetServerHostForm.fleetServerHost,
-      fleetServerPolicyId,
+      fleetServerHost: fleetServerHostForm.fleetServerHost?.host_urls[0],
+      fleetServerPolicyId: fleetServerPolicyId || selectedPolicyId,
       deploymentMode,
       disabled: !Boolean(serviceToken),
     }),
-    getConfirmFleetServerConnectionStep({ isFleetServerReady, disabled: !Boolean(serviceToken) }),
+    getConfirmFleetServerConnectionStep({
+      hasRecentlyEnrolledFleetServers,
+      disabled: !Boolean(serviceToken),
+    }),
   ];
 
-  return <EuiSteps steps={steps} className="eui-textLeft" />;
+  return isSelectFleetServerPolicyLoading ? (
+    <EuiLoadingContent />
+  ) : (
+    <EuiSteps steps={steps} className="eui-textLeft" />
+  );
 };

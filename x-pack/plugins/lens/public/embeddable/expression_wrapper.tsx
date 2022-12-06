@@ -16,7 +16,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ExecutionContextSearch } from '@kbn/data-plugin/public';
-import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin';
+import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
 import { ErrorMessage } from '../editor_frame_service/types';
@@ -39,13 +39,15 @@ export interface ExpressionWrapperProps {
   renderMode?: RenderMode;
   syncColors?: boolean;
   syncTooltips?: boolean;
+  syncCursor?: boolean;
   hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
   style?: React.CSSProperties;
   className?: string;
   canEdit: boolean;
-  onRuntimeError: () => void;
+  onRuntimeError: (message?: string) => void;
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
+  noPadding?: boolean;
 }
 
 interface VisualizationErrorProps {
@@ -112,6 +114,7 @@ export function ExpressionWrapper({
   renderMode,
   syncColors,
   syncTooltips,
+  syncCursor,
   hasCompatibleActions,
   style,
   className,
@@ -120,6 +123,7 @@ export function ExpressionWrapper({
   onRuntimeError,
   executionContext,
   lensInspector,
+  noPadding,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -129,7 +133,7 @@ export function ExpressionWrapper({
         <div className={classNames('lnsExpressionRenderer', className)} style={style}>
           <ExpressionRendererComponent
             className="lnsExpressionRenderer__component"
-            padding="s"
+            padding={noPadding ? undefined : 's'}
             variables={variables}
             expression={expression}
             interactive={interactive}
@@ -141,9 +145,12 @@ export function ExpressionWrapper({
             renderMode={renderMode}
             syncColors={syncColors}
             syncTooltips={syncTooltips}
+            syncCursor={syncCursor}
             executionContext={executionContext}
             renderError={(errorMessage, error) => {
-              onRuntimeError();
+              const messages = getOriginalRequestErrorMessages(error);
+              onRuntimeError(messages[0] ?? errorMessage);
+
               return (
                 <div data-test-subj="expression-renderer-error">
                   <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
@@ -151,7 +158,7 @@ export function ExpressionWrapper({
                       <EuiIcon type="alert" color="danger" />
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      {(getOriginalRequestErrorMessages(error) || [errorMessage]).map((message) => (
+                      {messages.map((message) => (
                         <EuiText size="s">{message}</EuiText>
                       ))}
                     </EuiFlexItem>

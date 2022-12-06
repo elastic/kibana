@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '..';
+import { schema } from '../..';
 
 test('returns string value when passed string', () => {
   const type = schema.nullable(schema.string());

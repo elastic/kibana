@@ -34,3 +34,32 @@ export function unenrollAgent() {
     }
   );
 }
+
+export function cleanupDownloadSources() {
+  cy.request('/api/fleet/agent_download_sources').then((response: any) => {
+    response.body.items
+      .filter((ds: any) => !ds.is_default)
+      .forEach((ds: any) => {
+        cy.request({
+          method: 'DELETE',
+          url: `/api/fleet/agent_download_sources/${ds.id}`,
+          headers: { 'kbn-xsrf': 'kibana' },
+        });
+      });
+  });
+}
+
+export function deleteFleetServerDocs(ignoreUnavailable: boolean = false) {
+  cy.task('deleteDocsByQuery', {
+    index: '.fleet-servers',
+    query: { match_all: {} },
+    ignoreUnavailable,
+  });
+}
+export function deleteAgentDocs(ignoreUnavailable: boolean = false) {
+  cy.task('deleteDocsByQuery', {
+    index: '.fleet-agents',
+    query: { match_all: {} },
+    ignoreUnavailable,
+  });
+}

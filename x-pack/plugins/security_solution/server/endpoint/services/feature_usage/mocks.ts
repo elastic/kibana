@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FeatureUsageService } from './service';
-import { PolicyData } from '../../../../common/endpoint/types';
+import type { FeatureUsageService } from './service';
+import type { PolicyData } from '../../../../common/endpoint/types';
 
 export function createFeatureUsageServiceMock() {
   return {

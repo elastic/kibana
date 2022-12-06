@@ -2,7 +2,7 @@
 id: kibDevPerformance
 slug: /kibana-dev-docs/key-concepts/performance
 title: Performance
-summary: Performance tips for Kibana development.
+description: Performance tips for Kibana development.
 date: 2021-12-03
 tags: ['kibana', 'onboarding', 'dev', 'performance']
 ---
@@ -33,7 +33,7 @@ some heavy-weight libraries that will also be removed from the initial
 plugin bundle, therefore, reducing its size by a significant amount.
 
 ```ts
-import type { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
+import type { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 export class MyPlugin implements Plugin<MyPluginSetup> {
   setup(core: CoreSetup, plugins: SetupDeps) {
     core.application.register({

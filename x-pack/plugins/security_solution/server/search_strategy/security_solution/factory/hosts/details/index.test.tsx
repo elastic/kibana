@@ -12,9 +12,13 @@ import {
   mockSearchStrategyResponse,
   formattedSearchStrategyResponse,
 } from './__mocks__';
-import { IScopedClusterClient, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { EndpointAppContext } from '../../../../../endpoint/types';
-import { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
+import type {
+  IScopedClusterClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import type { EndpointAppContext } from '../../../../../endpoint/types';
+import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
 
 const mockDeps = {

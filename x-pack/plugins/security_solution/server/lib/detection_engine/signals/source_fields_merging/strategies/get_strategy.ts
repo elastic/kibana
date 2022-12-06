@@ -7,7 +7,7 @@
 
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import type { ConfigType } from '../../../../../config';
-import { MergeStrategyFunction } from '../types';
+import type { MergeStrategyFunction } from '../types';
 import { mergeAllFieldsWithSource } from './merge_all_fields_with_source';
 import { mergeMissingFieldsWithSource } from './merge_missing_fields_with_source';
 import { mergeNoFields } from './merge_no_fields';

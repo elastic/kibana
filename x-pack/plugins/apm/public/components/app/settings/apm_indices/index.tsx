@@ -209,15 +209,13 @@ export function ApmIndices() {
                 color="primary"
                 iconType="spacesApp"
                 title={
-                  <EuiText size="s">
-                    <FormattedMessage
-                      id="xpack.apm.settings.apmIndices.spaceDescription"
-                      defaultMessage="The index settings apply to the {spaceName} space."
-                      values={{
-                        spaceName: <strong>{space?.name}</strong>,
-                      }}
-                    />
-                  </EuiText>
+                  <FormattedMessage
+                    id="xpack.apm.settings.apmIndices.spaceDescription"
+                    defaultMessage="The index settings apply to the {spaceName} space."
+                    values={{
+                      spaceName: <strong>{space?.name}</strong>,
+                    }}
+                  />
                 }
               />
             </EuiFlexItem>

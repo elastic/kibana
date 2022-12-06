@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GeoEcs } from '../geo';
+import type { GeoEcs } from '../geo';
 
 export interface DestinationEcs {
   bytes?: number[];

@@ -8,10 +8,11 @@
 import Boom from '@hapi/boom';
 import pMap from 'p-map';
 
-import { SavedObject } from '@kbn/core/public';
-import { Actions, ActionTypes, CommentAttributes } from '../../../common/api';
+import type { SavedObject } from '@kbn/core/server';
+import type { CommentAttributes } from '../../../common/api';
+import { Actions, ActionTypes } from '../../../common/api';
 import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
-import { CasesClientArgs } from '../types';
+import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 
@@ -51,9 +52,7 @@ export async function deleteAll(
   const {
     user,
     unsecuredSavedObjectsClient,
-    caseService,
-    attachmentService,
-    userActionService,
+    services: { caseService, attachmentService, userActionService },
     logger,
     authorization,
   } = clientArgs;
@@ -79,6 +78,7 @@ export async function deleteAll(
       attachmentService.delete({
         unsecuredSavedObjectsClient,
         attachmentId: comment.id,
+        refresh: false,
       });
 
     // Ensuring we don't too many concurrent deletions running.
@@ -117,8 +117,7 @@ export async function deleteComment(
   const {
     user,
     unsecuredSavedObjectsClient,
-    attachmentService,
-    userActionService,
+    services: { attachmentService, userActionService },
     logger,
     authorization,
   } = clientArgs;
@@ -149,6 +148,7 @@ export async function deleteComment(
     await attachmentService.delete({
       unsecuredSavedObjectsClient,
       attachmentId: attachmentID,
+      refresh: false,
     });
 
     await userActionService.createUserAction({

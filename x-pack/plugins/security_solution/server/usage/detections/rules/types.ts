@@ -22,6 +22,7 @@ export interface RulesTypeUsage {
   eql: FeatureTypeUsage;
   machine_learning: FeatureTypeUsage;
   threat_match: FeatureTypeUsage;
+  new_terms: FeatureTypeUsage;
   elastic_total: FeatureTypeUsage;
   custom_total: FeatureTypeUsage;
 }
@@ -84,6 +85,7 @@ export interface SingleEventMetric {
   succeeded: number;
   index_duration: MaxAvgMin;
   search_duration: MaxAvgMin;
+  enrichment_duration: MaxAvgMin;
   gap_duration: MaxAvgMin;
   gap_count: number;
 }

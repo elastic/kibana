@@ -6,108 +6,151 @@
  */
 
 /*
-This module implements two forward http proxies, http on 8080 and https on 8443,
-which can be used with the config xpack.actions.proxyUrl to emulate customers
-using forward proxies with Kibana actions.  You can use either the http or https
-versions, both can forward proxy http and https traffic: 
-  
-    xpack.actions.proxyUrl: http://localhost:8080
-      OR
-    xpack.actions.proxyUrl: https://localhost:8443
+Starts http and https proxies to use to test actions within Kibana or with curl.
 
-When using the https-based version, you may need to set the following option
-as well:
+Assumes you have elasticsearch running on https://elastic:changeme@localhost:9200,
+otherwise expect 500 responses from those requests.  All other requests should
+work as expected.
 
-    xpack.actions.rejectUnauthorized: false
+# start 4 proxies:
 
-If the server you are connecting to via the proxy is https and has self-signed
-certificates, you'll also need to set
+node x-pack/plugins/actions/server/manual_tests/forward_proxy.js http-8080-open http-8081-auth https-8443-open https-8444-auth
 
-    xpack.actions.proxyRejectUnauthorizedCertificates: false
+# issue some requests through the proxies
+
+curl -k --no-alpn -o /dev/null --proxy-insecure -x  http://127.0.0.1:8080                                 http://www.example.com; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x  http://127.0.0.1:8080                                https://www.example.com; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x https://127.0.0.1:8443                                 http://www.example.com; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x https://127.0.0.1:8443                                https://www.example.com; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x  http://127.0.0.1:8080                                https://elastic:changeme@localhost:9200; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x https://127.0.0.1:8443                                https://elastic:changeme@localhost:9200; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x  http://127.0.0.1:8081 --proxy-user elastic:changeme   http://www.example.com; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x  http://127.0.0.1:8081 --proxy-user elastic:changeme  https://www.example.com; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x https://127.0.0.1:8444 --proxy-user elastic:changeme   http://www.example.com; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x https://127.0.0.1:8444 --proxy-user elastic:changeme  https://www.example.com; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x  http://127.0.0.1:8081 --proxy-user elastic:changeme  https://elastic:changeme@localhost:9200; \
+curl -k --no-alpn -o /dev/null --proxy-insecure -x https://127.0.0.1:8444 --proxy-user elastic:changeme  https://elastic:changeme@localhost:9200; \
+echo done - you should run all the lines above as one command
+
 */
 
-const HTTP_PORT = 8080;
-const HTTPS_PORT = 8443;
-
-// starts http and https proxies to use to test actions within Kibana
-
 const fs = require('fs');
-const net = require('net');
-const url = require('url');
+const path = require('path');
 const http = require('http');
 const https = require('https');
-const httpProxy = require('http-proxy');
+const proxySetup = require('proxy');
 
-const httpsOptions = {
-  key: fs.readFileSync('packages/kbn-dev-utils/certs/kibana.key', 'utf8'),
-  cert: fs.readFileSync('packages/kbn-dev-utils/certs/kibana.crt', 'utf8'),
+const PROGRAM = path.basename(__filename).replace(/.js$/, '');
+const CertDir = path.resolve(__dirname, '../../../../../packages/kbn-dev-utils/certs');
+
+const Auth = 'elastic:changeme';
+const AuthB64 = Buffer.from(Auth).toString('base64');
+
+const HttpsOptions = {
+  key: fs.readFileSync(path.join(CertDir, 'kibana.key'), 'utf8'),
+  cert: fs.readFileSync(path.join(CertDir, 'kibana.crt'), 'utf8'),
 };
 
-const proxy = httpProxy.createServer();
-
-createServer('http', HTTP_PORT);
-createServer('https', HTTPS_PORT);
-
-function createServer(protocol, port) {
-  let httpServer;
-
-  if (protocol === 'http') {
-    httpServer = http.createServer();
-  } else {
-    httpServer = https.createServer(httpsOptions);
+async function main() {
+  const args = process.argv.slice(2);
+  if (args.length === 0) {
+    help();
+    process.exit(1);
   }
 
-  httpServer.on('request', httpRequest);
-  httpServer.on('connect', httpsRequest);
-  httpServer.listen(port);
-  log(`proxy server started: ${protocol}:/localhost:${port}`);
-
-  // handle http requests
-  function httpRequest(req, res) {
-    log(`${protocol} server: request for: ${req.url}`);
-    const parsedUrl = url.parse(req.url);
-    if (parsedUrl.hostname == null) {
-      res.writeHead(200, { 'Content-Type': 'text/plain' });
-      res.end('this is a proxy server');
-      return;
-    }
-    const target = parsedUrl.protocol + '//' + parsedUrl.hostname;
-    proxy.web(req, res, { target: target, secure: false });
-  }
-
-  // handle https requests
-  // see: https://nodejs.org/dist/latest-v14.x/docs/api/http.html#http_event_connect
-  function httpsRequest(req, socket, head) {
-    log(`${protocol} proxy server: request for target: https://${req.url}`);
-    const serverUrl = url.parse('https://' + req.url);
-    const serverSocket = net.connect(serverUrl.port, serverUrl.hostname, () => {
-      socket.write('HTTP/1.1 200 Connection Established\r\nProxy-agent: Node-Proxy\r\n\r\n');
-      serverSocket.write(head);
-      serverSocket.pipe(socket);
-      socket.pipe(serverSocket);
-    });
-    socket.on('error', (err) => {
-      log(`error on socket to proxy: ${err}`);
-      socket.destroy();
-      serverSocket.destroy();
-    });
-    serverSocket.on('error', (err) => {
-      log(`error on socket to target: ${err}`);
-      socket.destroy();
-      serverSocket.destroy();
-    });
+  const specs = args.map(argToSpec);
+  for (const spec of specs) {
+    const { protocol, port, auth } = spec;
+    createServer(protocol, port, auth);
   }
 }
 
+/** @type { (protocol: string, port: number, auth: boolean) => Promise<http.Server | httpServer> } */
+async function createServer(protocol, port, auth) {
+  let proxyServer;
+
+  if (protocol === 'http') {
+    proxyServer = http.createServer();
+  } else {
+    proxyServer = https.createServer(HttpsOptions);
+  }
+
+  proxySetup(proxyServer);
+
+  let authLabel = '';
+  if (auth) {
+    authLabel = `${Auth}@`;
+    proxyServer.authenticate = (req, callback) => {
+      const auth = req.headers['proxy-authorization'];
+      callback(null, auth === `Basic ${AuthB64}`);
+    };
+  }
+
+  const serverLabel = `${protocol}://${authLabel}localhost:${port}`;
+  proxyServer.listen(port, 'localhost', () => {
+    console.log(`proxy server started on ${serverLabel}`);
+  });
+}
+
+/* convert 'proto-port-auth' into object with shape shown below */
+/** @type { (arg: string) => void | { protocol: string, port: number, auth: boolean } } */
+function argToSpec(arg) {
+  const parts = arg.split('-');
+  if (parts.length < 2) {
+    return logError(`invalid spec: ${arg}`);
+  }
+
+  const [protocol, portString, authString] = parts;
+
+  if (!protocol) return logError(`empty protocol in '${arg}'`);
+  if (protocol !== 'http' && protocol !== 'https')
+    return logError(`invalid protocol in '${arg}': '${protocol}'`);
+
+  if (!portString) return logError(`empty port in '${arg}'`);
+  const port = Number.parseInt(portString, 10);
+  if (isNaN(port)) return logError(`invalid port in '${arg}': ${portString}`);
+
+  let auth;
+  if (!authString) {
+    auth = false;
+  } else {
+    if (authString !== 'auth' && authString !== 'open')
+      return logError(`invalid auth in '${arg}': '${authString}'`);
+    auth = authString === 'auth';
+  }
+
+  return { protocol, port, auth };
+}
+
+/** @type { (message: string) => void } */
 function log(message) {
   console.log(`${new Date().toISOString()} - ${message}`);
 }
 
-/*
-Test with:
+/** @type { (message: string) => void } */
+function logError(message) {
+  log(message);
+  process.exit(1);
+}
 
-curl -v -k --proxy-insecure -x  http://127.0.0.1:8080  http://www.google.com
-curl -v -k --proxy-insecure -x  http://127.0.0.1:8080 https://www.google.com
-curl -v -k --proxy-insecure -x https://127.0.0.1:8443  http://www.google.com
-curl -v -k --proxy-insecure -x https://127.0.0.1:8443 https://www.google.com
-*/
+main();
+
+function help() {
+  console.log(`${PROGRAM} - create http proxies to test connectors with`);
+  console.log(`usage:`);
+  console.log(`  ${PROGRAM} spec spec spec ...`);
+  console.log(``);
+  console.log(`options:`);
+  console.log(`  - none yet`);
+  console.log(``);
+  console.log(`parameters:`);
+  console.log(`  spec: spec is a 3-part token, separated by '-' chars`);
+  console.log(`    [proto]-[port]-[auth]`);
+  console.log(`      proto - 'http' or 'https'`);
+  console.log(`      port  - port to open the proxy on`);
+  console.log(`      auth  - 'auth' or 'open' (auth expects user/pass elastic:change)`);
+  console.log(``);
+  console.log(`example:`);
+  console.log(`  ${PROGRAM} {options} http-8080-open https-8443-open`);
+  console.log(`  `);
+}

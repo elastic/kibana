@@ -64,10 +64,12 @@ export function mapHitSource(
     attributes,
     id,
     references,
+    updatedAt,
   }: {
     attributes: SavedObjectAttributes;
     id: string;
     references: SavedObjectReference[];
+    updatedAt?: string;
   }
 ) {
   const newAttributes: {
@@ -76,6 +78,7 @@ export function mapHitSource(
     url: string;
     savedObjectType?: string;
     editUrl?: string;
+    updatedAt?: string;
     type?: BaseVisType;
     icon?: BaseVisType['icon'];
     image?: BaseVisType['image'];
@@ -85,6 +88,7 @@ export function mapHitSource(
     id,
     references,
     url: urlFor(id),
+    updatedAt,
     ...attributes,
   };
 
@@ -154,7 +158,8 @@ export async function findListItems(
   visTypes: Pick<TypesStart, 'get' | 'getAliases'>,
   search: string,
   size: number,
-  references?: SavedObjectsFindOptionsReference[]
+  references?: SavedObjectsFindOptionsReference[],
+  referencesToExclude?: SavedObjectsFindOptionsReference[]
 ) {
   const visAliases = visTypes.getAliases();
   const extensions = visAliases
@@ -176,6 +181,7 @@ export async function findListItems(
     page: 1,
     defaultSearchOperator: 'AND' as 'AND',
     hasReference: references,
+    hasNoReference: referencesToExclude,
   };
 
   const { total, savedObjects } = await savedObjectsClient.find<SavedObjectAttributes>(
@@ -295,9 +301,6 @@ export async function getSavedVisualization(
   }
 
   savedObject.visState = await updateOldState(savedObject.visState);
-  if (savedObject.searchSourceFields?.index) {
-    await services.dataViews.get(savedObject.searchSourceFields.index as any);
-  }
 
   return savedObject;
 }
@@ -369,10 +372,8 @@ export async function saveVisualization(
 
   try {
     await checkForDuplicateTitle(
-      {
-        ...savedObject,
-        copyOnSave,
-      } as any,
+      savedObject,
+      copyOnSave,
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
       services as any
@@ -400,3 +401,6 @@ export async function saveVisualization(
     return Promise.reject(err);
   }
 }
+
+export const shouldShowMissedDataViewError = (error: Error): error is SavedObjectNotFound =>
+  error instanceof SavedObjectNotFound && error.savedObjectType === 'data view';

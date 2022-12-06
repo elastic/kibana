@@ -2,43 +2,7 @@
   "id": "expressionHeatmap",
   "client": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "expressionHeatmap",
-        "id": "def-public.HeatmapIcon",
-        "type": "Function",
-        "tags": [],
-        "label": "HeatmapIcon",
-        "description": [],
-        "signature": [
-          "({ title, titleId, ...props }: Omit<",
-          "EuiIconProps",
-          ", \"type\">) => JSX.Element"
-        ],
-        "path": "src/plugins/chart_expressions/expression_heatmap/public/components/heatmap_icon.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "expressionHeatmap",
-            "id": "def-public.HeatmapIcon.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ title, titleId, ...props }",
-            "description": [],
-            "signature": [
-              "Omit<",
-              "EuiIconProps",
-              ", \"type\">"
-            ],
-            "path": "src/plugins/chart_expressions/expression_heatmap/public/components/heatmap_icon.tsx",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],
@@ -64,10 +28,17 @@
         "description": [],
         "signature": [
           "() => ",
-          "HeatmapExpressionFunctionDefinition"
+          {
+            "pluginId": "expressionHeatmap",
+            "scope": "common",
+            "docId": "kibExpressionHeatmapPluginApi",
+            "section": "def-common.HeatmapExpressionFunctionDefinition",
+            "text": "HeatmapExpressionFunctionDefinition"
+          }
         ],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -83,6 +54,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionHeatmap",
@@ -95,7 +67,8 @@
               "\"brush\""
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -116,7 +89,8 @@
               "; column: number; range: number[]; timeFieldName?: string | undefined; }"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -130,6 +104,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionHeatmap",
@@ -142,7 +117,8 @@
               "\"filter\""
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -163,7 +139,8 @@
               ", \"rows\" | \"columns\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -177,6 +154,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionHeatmap",
@@ -189,7 +167,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -202,7 +181,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -215,7 +195,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -228,7 +209,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -238,7 +220,13 @@
             "label": "palette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<",
               {
                 "pluginId": "charts",
@@ -250,7 +238,8 @@
               "> | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -271,7 +260,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -292,7 +282,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -313,7 +304,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -334,7 +326,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -355,7 +348,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -369,7 +363,8 @@
               " & { type: \"heatmap_legend\"; }"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -383,7 +378,8 @@
               " & { type: \"heatmap_grid\"; }"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -396,7 +392,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -410,6 +407,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionHeatmap",
@@ -428,7 +426,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -447,7 +446,44 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionHeatmap",
+            "id": "def-common.HeatmapExpressionProps.syncTooltips",
+            "type": "boolean",
+            "tags": [],
+            "label": "syncTooltips",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionHeatmap",
+            "id": "def-common.HeatmapExpressionProps.syncCursor",
+            "type": "boolean",
+            "tags": [],
+            "label": "syncCursor",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionHeatmap",
+            "id": "def-common.HeatmapExpressionProps.canNavigateToLens",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "canNavigateToLens",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -467,6 +503,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -485,13 +522,13 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
+          "<{}, ",
           {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
           },
           "> | undefined) => ",
           {
@@ -504,6 +541,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -521,20 +559,99 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
+              "<{}, ",
               {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.SerializableRecord",
+                "text": "SerializableRecord"
               },
               "> | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionHeatmap",
+        "id": "def-common.HeatmapExpressionFunctionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "HeatmapExpressionFunctionDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"heatmap\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          {
+            "pluginId": "expressionHeatmap",
+            "scope": "common",
+            "docId": "kibExpressionHeatmapPluginApi",
+            "section": "def-common.HeatmapArguments",
+            "text": "HeatmapArguments"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueRender",
+            "text": "ExpressionValueRender"
+          },
+          "<",
+          {
+            "pluginId": "expressionHeatmap",
+            "scope": "common",
+            "docId": "kibExpressionHeatmapPluginApi",
+            "section": "def-common.HeatmapExpressionProps",
+            "text": "HeatmapExpressionProps"
+          },
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -550,6 +667,63 @@
         ],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionHeatmap",
+        "id": "def-common.HeatmapGridExpressionFunctionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "HeatmapGridExpressionFunctionDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"heatmap_grid\", null, ",
+          "HeatmapGridConfig",
+          ", ",
+          {
+            "pluginId": "expressionHeatmap",
+            "scope": "common",
+            "docId": "kibExpressionHeatmapPluginApi",
+            "section": "def-common.HeatmapGridConfigResult",
+            "text": "HeatmapGridConfigResult"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -565,6 +739,63 @@
         ],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionHeatmap",
+        "id": "def-common.HeatmapLegendExpressionFunctionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "HeatmapLegendExpressionFunctionDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"heatmap_legend\", null, ",
+          "HeatmapLegendConfig",
+          ", ",
+          {
+            "pluginId": "expressionHeatmap",
+            "scope": "common",
+            "docId": "kibExpressionHeatmapPluginApi",
+            "section": "def-common.HeatmapLegendConfigResult",
+            "text": "HeatmapLegendConfigResult"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "server",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-server.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -592,6 +823,16 @@
           },
           "; chartsThemeService: ",
           "Theme",
+          "; chartsActiveCursorService: ",
+          "ActiveCursor",
+          "; datatableUtilities: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataPluginApi",
+            "section": "def-common.DatatableUtilitiesService",
+            "text": "DatatableUtilitiesService"
+          },
           "; onClickValue: (data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
@@ -609,7 +850,13 @@
             "text": "Datatable"
           },
           "; column: number; range: number[]; timeFieldName?: string | undefined; }) => void; paletteService: ",
-          "PaletteRegistry",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteRegistry",
+            "text": "PaletteRegistry"
+          },
           "; uiState: ",
           {
             "pluginId": "visualizations",
@@ -618,10 +865,11 @@
             "section": "def-public.PersistedState",
             "text": "PersistedState"
           },
-          "; interactive: boolean; }"
+          "; interactive: boolean; syncTooltips: boolean; syncCursor: boolean; renderComplete: () => void; }"
         ],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -636,6 +884,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -650,6 +899,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -663,6 +913,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionHeatmap",
@@ -675,7 +926,8 @@
               "\"heatmap_grid\""
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -688,7 +940,8 @@
               "never[]"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -701,7 +954,8 @@
               "\"heatmap_grid\""
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -711,7 +965,8 @@
             "label": "help",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -724,7 +979,8 @@
               "\"null\"[]"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -735,6 +991,7 @@
             "description": [],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "expressionHeatmap",
@@ -747,6 +1004,7 @@
                 ],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -759,17 +1017,22 @@
                       "\"number\"[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
                     "id": "def-common.heatmapGridConfig.args.strokeWidth.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -782,7 +1045,8 @@
                       "false"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -795,6 +1059,7 @@
                 "description": [],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -807,17 +1072,22 @@
                       "\"string\"[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
                     "id": "def-common.heatmapGridConfig.args.strokeColor.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -830,7 +1100,8 @@
                       "false"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -845,6 +1116,7 @@
                 ],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -857,17 +1129,22 @@
                       "\"boolean\"[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
                     "id": "def-common.heatmapGridConfig.args.isCellLabelVisible.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -882,6 +1159,7 @@
                 ],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -894,17 +1172,22 @@
                       "\"boolean\"[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
                     "id": "def-common.heatmapGridConfig.args.isYAxisLabelVisible.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -917,6 +1200,7 @@
                 "description": [],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -929,17 +1213,22 @@
                       "\"boolean\"[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
                     "id": "def-common.heatmapGridConfig.args.isYAxisTitleVisible.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -952,6 +1241,7 @@
                 "description": [],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -964,17 +1254,22 @@
                       "\"string\"[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
                     "id": "def-common.heatmapGridConfig.args.yTitle.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -987,7 +1282,8 @@
                       "false"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -1002,6 +1298,7 @@
                 ],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -1014,17 +1311,22 @@
                       "\"boolean\"[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
                     "id": "def-common.heatmapGridConfig.args.isXAxisLabelVisible.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -1037,6 +1339,7 @@
                 "description": [],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -1049,17 +1352,22 @@
                       "\"boolean\"[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
                     "id": "def-common.heatmapGridConfig.args.isXAxisTitleVisible.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -1072,6 +1380,7 @@
                 "description": [],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -1084,17 +1393,22 @@
                       "\"string\"[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
                     "id": "def-common.heatmapGridConfig.args.xTitle.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -1107,7 +1421,8 @@
                       "false"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -1127,6 +1442,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "expressionHeatmap",
@@ -1140,6 +1456,7 @@
                 ],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1154,6 +1471,7 @@
                 ],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1171,6 +1489,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionHeatmap",
@@ -1183,7 +1502,8 @@
               "\"heatmap_legend\""
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -1196,7 +1516,8 @@
               "never[]"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -1209,7 +1530,8 @@
               "\"heatmap_legend\""
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -1219,7 +1541,8 @@
             "label": "help",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -1232,7 +1555,8 @@
               "\"null\"[]"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionHeatmap",
@@ -1243,6 +1567,7 @@
             "description": [],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "expressionHeatmap",
@@ -1253,6 +1578,7 @@
                 "description": [],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -1265,17 +1591,22 @@
                       "\"boolean\"[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
                     "id": "def-common.heatmapLegendConfig.args.isVisible.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -1288,6 +1619,7 @@
                 "description": [],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -1300,7 +1632,8 @@
                       "\"string\"[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -1313,7 +1646,8 @@
                       "\"right\""
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -1326,17 +1660,22 @@
                       "(\"top\" | \"bottom\" | \"left\" | \"right\")[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
                     "id": "def-common.heatmapLegendConfig.args.position.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -1349,7 +1688,8 @@
                       "true"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -1362,6 +1702,7 @@
                 "description": [],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -1374,17 +1715,22 @@
                       "\"number\"[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
                     "id": "def-common.heatmapLegendConfig.args.maxLines.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -1397,6 +1743,7 @@
                 "description": [],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -1409,7 +1756,8 @@
                       "\"boolean\"[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -1422,17 +1770,22 @@
                       "true"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
                     "id": "def-common.heatmapLegendConfig.args.shouldTruncate.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -1445,6 +1798,7 @@
                 "description": [],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "expressionHeatmap",
@@ -1454,20 +1808,80 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "\"number\"[]"
+                      "\"string\"[]"
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapLegendConfig.args.legendSize.default",
+                    "type": "Enum",
+                    "tags": [],
+                    "label": "default",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "visualizations",
+                        "scope": "common",
+                        "docId": "kibVisualizationsPluginApi",
+                        "section": "def-common.LegendSize",
+                        "text": "LegendSize"
+                      }
+                    ],
+                    "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
                     "id": "def-common.heatmapLegendConfig.args.legendSize.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapLegendConfig.args.legendSize.options",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "options",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "visualizations",
+                        "scope": "common",
+                        "docId": "kibVisualizationsPluginApi",
+                        "section": "def-common.LegendSize",
+                        "text": "LegendSize"
+                      },
+                      "[]"
+                    ],
+                    "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapLegendConfig.args.legendSize.strict",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "strict",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
+                    "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -1485,10 +1899,19 @@
               "HeatmapLegendConfig",
               ") => { isVisible: boolean; position: ",
               "Position",
-              "; maxLines?: number | undefined; shouldTruncate?: boolean | undefined; legendSize?: number | undefined; type: \"heatmap_legend\"; }"
+              "; maxLines?: number | undefined; shouldTruncate?: boolean | undefined; legendSize?: ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.LegendSize",
+                "text": "LegendSize"
+              },
+              " | undefined; type: \"heatmap_legend\"; }"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "expressionHeatmap",
@@ -1502,6 +1925,7 @@
                 ],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1516,6 +1940,7 @@
                 ],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],

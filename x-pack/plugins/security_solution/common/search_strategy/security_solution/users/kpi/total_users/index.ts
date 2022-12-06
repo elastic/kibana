@@ -6,9 +6,8 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { Inspect, Maybe } from '../../../../common';
-import { RequestBasicOptions } from '../../..';
-import { KpiHistogramData } from '../common';
+import type { Inspect, KpiHistogramData, Maybe } from '../../../../common';
+import type { RequestBasicOptions } from '../../..';
 
 export type TotalUsersKpiRequestOptions = RequestBasicOptions;
 

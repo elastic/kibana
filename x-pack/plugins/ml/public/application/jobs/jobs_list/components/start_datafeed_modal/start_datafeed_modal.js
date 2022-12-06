@@ -143,7 +143,7 @@ export class StartDatafeedModal extends Component {
       modal = (
         <EuiModal
           onClose={this.closeModal}
-          style={{ width: '850px' }}
+          style={{ minWidth: '850px' }}
           maxWidth={false}
           data-test-subj="mlStartDatafeedModal"
         >

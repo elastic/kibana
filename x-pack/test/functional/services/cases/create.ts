@@ -8,13 +8,26 @@
 import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import uuid from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import type { CasesCommon } from './common';
 
-export function CasesCreateViewServiceProvider({ getService, getPageObject }: FtrProviderContext) {
+export interface CreateCaseParams {
+  title?: string;
+  description?: string;
+  tag?: string;
+  severity?: CaseSeverity;
+  owner?: string;
+  assignees?: [];
+}
+
+export function CasesCreateViewServiceProvider(
+  { getService, getPageObject }: FtrProviderContext,
+  casesCommon: CasesCommon
+) {
   const common = getPageObject('common');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const comboBox = getService('comboBox');
-  const config = getService('config');
+  const retry = getService('retry');
 
   return {
     /**
@@ -35,41 +48,79 @@ export function CasesCreateViewServiceProvider({ getService, getPageObject }: Ft
      * and leaves the navigation in the case view page
      *
      * Doesn't do navigation. Only works if you are already inside a cases app page.
-     * Does not work with the cases flyout.
      */
-    async createCaseFromCreateCasePage({
+    async createCase({
       title = 'test-' + uuid.v4(),
       description = 'desc' + uuid.v4(),
       tag = 'tagme',
       severity = CaseSeverity.LOW,
-    }: {
-      title: string;
-      description: string;
-      tag: string;
-      severity: CaseSeverity;
-    }) {
-      // case name
+      owner,
+    }: CreateCaseParams) {
+      await this.setTitle(title);
+      await this.setDescription(description);
+      await this.setTags(tag);
+
+      if (severity !== CaseSeverity.LOW) {
+        await this.setSeverity(severity);
+      }
+
+      if (owner) {
+        await this.setSolution(owner);
+      }
+
+      await this.submitCase();
+    },
+
+    async setTitle(title: string) {
       await testSubjects.setValue('input', title);
+    },
 
-      // case tag
-      await comboBox.setCustom('comboBoxInput', tag);
-
-      // case description
+    async setDescription(description: string) {
       const descriptionArea = await find.byCssSelector('textarea.euiMarkdownEditorTextArea');
       await descriptionArea.focus();
       await descriptionArea.type(description);
+    },
+
+    async setTags(tag: string) {
+      await comboBox.setCustom('caseTags', tag);
+    },
+
+    async setSolution(owner: string) {
+      await testSubjects.click(`${owner}RadioButton`);
+    },
+
+    async setSeverity(severity: CaseSeverity) {
       await common.clickAndValidate(
         'case-severity-selection',
         `case-severity-selection-${severity}`
       );
-      await testSubjects.click(`case-severity-selection-${severity}`);
+    },
 
-      // save
+    async submitCase() {
       await testSubjects.click('create-case-submit');
+    },
 
-      await testSubjects.existOrFail('case-view-title', {
-        timeout: config.get('timeouts.waitFor'),
+    async assertCreateCaseFlyoutVisible(expectVisible = true) {
+      await retry.tryForTime(5000, async () => {
+        if (expectVisible) {
+          await testSubjects.existOrFail('create-case-flyout');
+        } else {
+          await testSubjects.missingOrFail('create-case-flyout');
+        }
       });
+    },
+
+    async creteCaseFromFlyout(params: CreateCaseParams) {
+      await this.assertCreateCaseFlyoutVisible(true);
+      await this.createCase(params);
+      await this.assertCreateCaseFlyoutVisible(false);
+    },
+
+    async createCaseFromModal(params: CreateCaseParams) {
+      await casesCommon.assertCaseModalVisible(true);
+      await testSubjects.click('cases-table-add-case-filter-bar');
+      await casesCommon.assertCaseModalVisible(false);
+      await this.creteCaseFromFlyout(params);
     },
   };
 }

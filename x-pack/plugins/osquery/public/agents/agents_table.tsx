@@ -7,7 +7,7 @@
 
 import { find } from 'lodash/fp';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiComboBox, EuiHealth, EuiHighlight, EuiSpacer } from '@elastic/eui';
+import { EuiComboBox, EuiHealth, EuiFormRow, EuiHighlight, EuiSpacer } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 
 import useDebounce from 'react-use/lib/useDebounce';
@@ -29,23 +29,19 @@ import {
   AGENT_SELECTION_LABEL,
 } from './translations';
 
-import {
-  AGENT_GROUP_KEY,
-  SelectedGroups,
-  AgentOptionValue,
-  GroupOption,
-  AgentSelection,
-} from './types';
+import type { SelectedGroups, AgentOptionValue, GroupOption, AgentSelection } from './types';
+import { AGENT_GROUP_KEY } from './types';
 
 interface AgentsTableProps {
   agentSelection: AgentSelection;
   onChange: (payload: AgentSelection) => void;
+  error?: string;
 }
 
 const perPage = 10;
 const DEBOUNCE_DELAY = 300; // ms
 
-const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange }) => {
+const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange, error }) => {
   // search related
   const [searchValue, setSearchValue] = useState<string>('');
   const [modifyingSearch, setModifyingSearch] = useState<boolean>(false);
@@ -93,7 +89,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
         selectedGroups: SelectedGroups;
       } = generateAgentSelection(selection);
       if (newAgentSelection.allAgentsSelected) {
-        setNumAgentsSelected(agentGroupsData?.totalCount ?? 0);
+        setNumAgentsSelected(agentGroupsData?.total ?? 0);
       } else {
         const checkAgent = generateAgentCheck(selectedGroups);
         setNumAgentsSelected(
@@ -140,11 +136,11 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
         }
       }
 
-      if (agentSelection.policiesSelected.length) {
+      if (agentSelection.policiesSelected?.length) {
         handleSelectedOptions(agentSelection.policiesSelected, AGENT_POLICY_LABEL);
       }
 
-      if (agentSelection.agents.length) {
+      if (agentSelection.agents?.length) {
         handleSelectedOptions(agentSelection.agents, AGENT_SELECTION_LABEL);
       }
     }
@@ -154,7 +150,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     if (agentsFetched && groupsFetched && agentGroupsData) {
       const grouper = new AgentGrouper();
       // update the groups when groups or agents have changed
-      grouper.setTotalAgents(agentGroupsData?.totalCount);
+      grouper.setTotalAgents(agentGroupsData?.total);
       grouper.updateGroup(AGENT_GROUP_KEY.Platform, agentGroupsData?.groups.platforms);
       grouper.updateGroup(AGENT_GROUP_KEY.Policy, agentGroupsData?.groups.policies);
       // @ts-expect-error update types
@@ -190,18 +186,20 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   return (
     <div>
-      <EuiComboBox
-        data-test-subj="agentSelection"
-        placeholder={SELECT_AGENT_LABEL}
-        isLoading={modifyingSearch || groupsLoading || agentsLoading}
-        options={options}
-        isClearable={true}
-        fullWidth={true}
-        onSearchChange={onSearchChange}
-        selectedOptions={selectedOptions}
-        onChange={onSelection}
-        renderOption={renderOption}
-      />
+      <EuiFormRow label={AGENT_SELECTION_LABEL} fullWidth isInvalid={!!error} error={error}>
+        <EuiComboBox
+          data-test-subj="agentSelection"
+          placeholder={SELECT_AGENT_LABEL}
+          isLoading={modifyingSearch || groupsLoading || agentsLoading}
+          options={options}
+          isClearable={true}
+          fullWidth={true}
+          onSearchChange={onSearchChange}
+          selectedOptions={selectedOptions}
+          onChange={onSelection}
+          renderOption={renderOption}
+        />
+      </EuiFormRow>
       <EuiSpacer size="xs" />
       {numAgentsSelected > 0 ? <span>{generateSelectedAgentsMessage(numAgentsSelected)}</span> : ''}
     </div>
@@ -210,4 +208,4 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
 AgentsTableComponent.displayName = 'AgentsTable';
 
-export const AgentsTable = React.memo(AgentsTableComponent);
+export const AgentsTable = React.memo(AgentsTableComponent, deepEqual);

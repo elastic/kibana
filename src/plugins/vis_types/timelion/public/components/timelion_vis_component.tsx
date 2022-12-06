@@ -24,7 +24,7 @@ import { RangeFilterParams } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 
-import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { AreaSeriesComponent, BarSeriesComponent } from './series';
 
 import {
@@ -59,6 +59,7 @@ interface TimelionVisComponentProps {
   renderComplete: IInterpreterRenderHandlers['done'];
   ariaLabel?: string;
   syncTooltips?: boolean;
+  syncCursor?: boolean;
 }
 
 const DefaultYAxis = () => (
@@ -104,6 +105,7 @@ export const TimelionVisComponent = ({
   onBrushEvent,
   ariaLabel,
   syncTooltips,
+  syncCursor,
 }: TimelionVisComponentProps) => {
   const kibana = useKibana<TimelionVisDependencies>();
   const chartRef = useRef<Chart>(null);
@@ -203,7 +205,7 @@ export const TimelionVisComponent = ({
           showLegendExtra={true}
           legendPosition={legend.legendPosition}
           onRenderChange={onRenderChange}
-          onPointerUpdate={handleCursorUpdate}
+          onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
           externalPointerEvents={{
             tooltip: { visible: syncTooltips, placement: Placement.Right },
           }}

@@ -19,6 +19,7 @@
         "description": [],
         "path": "packages/kbn-config/src/env.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config",
@@ -33,7 +34,8 @@
               "{ readonly version: string; readonly branch: string; readonly buildNum: number; readonly buildSha: string; readonly dist: boolean; }"
             ],
             "path": "packages/kbn-config/src/env.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/config",
@@ -48,7 +50,8 @@
               "{ readonly name: \"production\" | \"development\"; readonly dev: boolean; readonly prod: boolean; }"
             ],
             "path": "packages/kbn-config/src/env.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -67,6 +70,7 @@
         ],
         "path": "packages/kbn-config/src/config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config",
@@ -80,6 +84,7 @@
             ],
             "path": "packages/kbn-config/src/config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -94,6 +99,7 @@
             ],
             "path": "packages/kbn-config/src/config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -114,6 +120,7 @@
         ],
         "path": "packages/kbn-config/src/config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config",
@@ -129,6 +136,7 @@
             ],
             "path": "packages/kbn-config/src/config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -148,6 +156,7 @@
         ],
         "path": "packages/kbn-config/src/deprecation/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config",
@@ -160,7 +169,8 @@
               "string[]"
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/config",
@@ -173,7 +183,8 @@
               "string[]"
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -189,6 +200,7 @@
         ],
         "path": "packages/kbn-config/src/deprecation/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config",
@@ -201,7 +213,8 @@
               "{ path: string; value: any; }[] | undefined"
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/config",
@@ -214,7 +227,8 @@
               "{ path: string; }[] | undefined"
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -230,6 +244,7 @@
         ],
         "path": "packages/kbn-config/src/deprecation/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config",
@@ -241,7 +256,8 @@
               "The current Kibana version, e.g `7.16.1`, `8.0.0`"
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/config",
@@ -253,7 +269,30 @@
               "The current Kibana branch, e.g `7.x`, `7.16`, `master`"
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-server.ConfigDeprecationContext.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [
+              "Allow direct access to the doc links from the deprecation handler"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/doc-links",
+                "scope": "common",
+                "docId": "kibKbnDocLinksPluginApi",
+                "section": "def-common.DocLinks",
+                "text": "DocLinks"
+              }
+            ],
+            "path": "packages/kbn-config/src/deprecation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -269,6 +308,7 @@
         ],
         "path": "packages/kbn-config/src/deprecation/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config",
@@ -293,6 +333,7 @@
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config",
@@ -306,6 +347,7 @@
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -320,6 +362,7 @@
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -334,6 +377,7 @@
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -362,6 +406,7 @@
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config",
@@ -375,6 +420,7 @@
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -389,6 +435,7 @@
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -403,6 +450,7 @@
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -431,6 +479,7 @@
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config",
@@ -444,6 +493,7 @@
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -458,6 +508,7 @@
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -472,6 +523,7 @@
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -500,6 +552,7 @@
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config",
@@ -513,6 +566,7 @@
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -527,6 +581,7 @@
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -541,6 +596,7 @@
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -569,6 +625,7 @@
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config",
@@ -582,6 +639,7 @@
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -596,6 +654,7 @@
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -624,6 +683,7 @@
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/config",
@@ -637,6 +697,7 @@
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -651,10 +712,133 @@
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/config",
+        "id": "def-server.DeprecatedConfigDetails",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeprecatedConfigDetails",
+        "description": [
+          "\nDeprecated Config Details\n"
+        ],
+        "path": "packages/kbn-config/src/deprecation/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-server.DeprecatedConfigDetails.configPath",
+            "type": "string",
+            "tags": [],
+            "label": "configPath",
+            "description": [
+              "The path of the deprecated config setting"
+            ],
+            "path": "packages/kbn-config/src/deprecation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-server.DeprecatedConfigDetails.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "The title to be displayed for the deprecation."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-config/src/deprecation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-server.DeprecatedConfigDetails.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [
+              "The message to be displayed for the deprecation."
+            ],
+            "path": "packages/kbn-config/src/deprecation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-server.DeprecatedConfigDetails.level",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "level",
+            "description": [
+              "\nlevels:\n- warning: will not break deployment upon upgrade\n- critical: needs to be addressed before upgrade."
+            ],
+            "signature": [
+              "\"warning\" | \"critical\""
+            ],
+            "path": "packages/kbn-config/src/deprecation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-server.DeprecatedConfigDetails.silent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "silent",
+            "description": [
+              "(optional) set to `true` to prevent the config service from logging the deprecation message."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-config/src/deprecation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-server.DeprecatedConfigDetails.documentationUrl",
+            "type": "string",
+            "tags": [],
+            "label": "documentationUrl",
+            "description": [
+              "(optional) link to the documentation for more details on the deprecation."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-config/src/deprecation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-server.DeprecatedConfigDetails.correctiveActions",
+            "type": "Object",
+            "tags": [],
+            "label": "correctiveActions",
+            "description": [
+              "corrective action needed to fix this deprecation."
+            ],
+            "signature": [
+              "{ manualSteps: string[]; }"
+            ],
+            "path": "packages/kbn-config/src/deprecation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -668,6 +852,7 @@
         "description": [],
         "path": "packages/kbn-config/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config",
@@ -680,7 +865,8 @@
               "\"production\" | \"development\""
             ],
             "path": "packages/kbn-config/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/config",
@@ -690,7 +876,8 @@
             "label": "dev",
             "description": [],
             "path": "packages/kbn-config/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/config",
@@ -700,7 +887,8 @@
             "label": "prod",
             "description": [],
             "path": "packages/kbn-config/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -714,6 +902,7 @@
         "description": [],
         "path": "packages/kbn-config/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config",
@@ -723,7 +912,8 @@
             "label": "version",
             "description": [],
             "path": "packages/kbn-config/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/config",
@@ -733,7 +923,8 @@
             "label": "branch",
             "description": [],
             "path": "packages/kbn-config/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/config",
@@ -743,7 +934,8 @@
             "label": "buildNum",
             "description": [],
             "path": "packages/kbn-config/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/config",
@@ -753,7 +945,8 @@
             "label": "buildSha",
             "description": [],
             "path": "packages/kbn-config/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/config",
@@ -763,7 +956,8 @@
             "label": "dist",
             "description": [],
             "path": "packages/kbn-config/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -782,11 +976,18 @@
         ],
         "signature": [
           "(details: ",
-          "DeprecatedConfigDetails",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.DeprecatedConfigDetails",
+            "text": "DeprecatedConfigDetails"
+          },
           ") => void"
         ],
         "path": "packages/kbn-config/src/deprecation/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -797,10 +998,17 @@
             "label": "details",
             "description": [],
             "signature": [
-              "DeprecatedConfigDetails"
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.DeprecatedConfigDetails",
+                "text": "DeprecatedConfigDetails"
+              }
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -842,6 +1050,7 @@
         ],
         "path": "packages/kbn-config/src/deprecation/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -857,7 +1066,8 @@
               "{ readonly [x: string]: any; }"
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/config",
@@ -867,7 +1077,8 @@
             "label": "fromPath",
             "description": [],
             "path": "packages/kbn-config/src/deprecation/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/config",
@@ -878,11 +1089,18 @@
             "description": [],
             "signature": [
               "(details: ",
-              "DeprecatedConfigDetails",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.DeprecatedConfigDetails",
+                "text": "DeprecatedConfigDetails"
+              },
               ") => void"
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -893,10 +1111,17 @@
                 "label": "details",
                 "description": [],
                 "signature": [
-                  "DeprecatedConfigDetails"
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "server",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-server.DeprecatedConfigDetails",
+                    "text": "DeprecatedConfigDetails"
+                  }
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -917,7 +1142,8 @@
               }
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -952,6 +1178,7 @@
         ],
         "path": "packages/kbn-config/src/deprecation/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -971,7 +1198,8 @@
               }
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -988,6 +1216,7 @@
         ],
         "path": "packages/kbn-config/src/config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1002,6 +1231,7 @@
         ],
         "path": "packages/kbn-config/src/raw/raw_config_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1015,7 +1245,8 @@
               "{ [x: string]: any; }"
             ],
             "path": "packages/kbn-config/src/raw/raw_config_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1034,6 +1265,7 @@
         ],
         "path": "packages/kbn-config/src/raw/raw_config_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

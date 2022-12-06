@@ -97,19 +97,6 @@ export const mlCategory: Field = {
   aggregatable: false,
 };
 
-export interface FieldAggCardinality {
-  field: string;
-  percent?: any;
-}
-
-export interface ScriptAggCardinality {
-  script: any;
-}
-
-export interface AggCardinality {
-  cardinality: FieldAggCardinality | ScriptAggCardinality;
-}
-
 export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
 
 export type RuntimeMappings = estypes.MappingRuntimeFields;

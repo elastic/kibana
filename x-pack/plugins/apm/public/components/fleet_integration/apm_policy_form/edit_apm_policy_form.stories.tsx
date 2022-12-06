@@ -81,7 +81,6 @@ const policy = {
   namespace: 'default',
   enabled: true,
   policy_id: 'policy-elastic-agent-on-cloud',
-  output_id: '',
   package: {
     name: 'apm',
     version: '8.3.0',
@@ -215,6 +214,10 @@ const policy = {
           value: '',
         },
         expvar_enabled: {
+          type: 'bool',
+          value: false,
+        },
+        pprof_enabled: {
           type: 'bool',
           value: false,
         },

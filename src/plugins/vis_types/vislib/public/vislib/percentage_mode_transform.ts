@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
-import numeral from '@elastic/numeral';
 import { getFormatService } from '../services';
 
 export function getValueForPercentageMode(value: string | number, percentageFormatPattern: string) {

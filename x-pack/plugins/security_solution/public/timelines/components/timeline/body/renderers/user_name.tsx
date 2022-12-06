@@ -6,27 +6,26 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
 import { StatefulEventContext } from '@kbn/timelines-plugin/public';
-import {
-  TimelineId,
-  TimelineTabs,
-  TimelineExpandedDetailType,
-} from '../../../../../../common/types/timeline';
+import { getScopedActions } from '../../../../../helpers';
+import type { TimelineExpandedDetailType } from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
-import { timelineActions } from '../../../../store/timeline';
 
 interface Props {
   contextId: string;
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isDraggable: boolean;
   isButton?: boolean;
   onClick?: () => void;
@@ -39,6 +38,8 @@ const UserNameComponent: React.FC<Props> = ({
   Component,
   contextId,
   eventId,
+  fieldType,
+  isAggregatable,
   isDraggable,
   isButton,
   onClick,
@@ -65,14 +66,16 @@ const UserNameComponent: React.FC<Props> = ({
             userName,
           },
         };
-
-        dispatch(
-          timelineActions.toggleDetailPanel({
-            ...updatedExpandedDetail,
-            timelineId: timelineID,
-            tabType,
-          })
-        );
+        const scopedActions = getScopedActions(timelineID);
+        if (scopedActions) {
+          dispatch(
+            scopedActions.toggleDetailPanel({
+              ...updatedExpandedDetail,
+              id: timelineID,
+              tabType: tabType as TimelineTabs,
+            })
+          );
+        }
 
         if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
           activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
@@ -104,6 +107,8 @@ const UserNameComponent: React.FC<Props> = ({
       <DefaultDraggable
         field={fieldName}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         isDraggable={isDraggable}
         tooltipContent={fieldName}
         value={userName}

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { neq } from '../../../canvas_plugin_src/functions/common/neq';
+import type { neq } from '../../../canvas_plugin_src/functions/common/neq';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { CONTEXT } from '../../constants';

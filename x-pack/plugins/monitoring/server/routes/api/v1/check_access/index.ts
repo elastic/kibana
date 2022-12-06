@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { checkAccessRoute } from './check_access';
+import { MonitoringCore } from '../../../../types';
+import { checkAccessRoute } from './check_access';
+
+export function registerV1CheckAccessRoutes(server: MonitoringCore) {
+  checkAccessRoute(server);
+}

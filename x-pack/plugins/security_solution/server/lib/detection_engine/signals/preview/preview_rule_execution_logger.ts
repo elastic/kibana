@@ -5,34 +5,37 @@
  * 2.0.
  */
 
-import {
-  RuleExecutionLogForExecutorsFactory,
+import type {
+  IRuleExecutionLogService,
   RuleExecutionContext,
   StatusChangeArgs,
-} from '../../rule_execution_log';
+} from '../../rule_monitoring';
 
 export interface IPreviewRuleExecutionLogger {
-  factory: RuleExecutionLogForExecutorsFactory;
+  factory: IRuleExecutionLogService['createClientForExecutors'];
 }
 
 export const createPreviewRuleExecutionLogger = (
   loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs>
-) => {
-  const factory: RuleExecutionLogForExecutorsFactory = (
-    savedObjectsClient,
-    eventLogService,
-    logger,
-    context
-  ) => {
-    return {
-      context,
+): IPreviewRuleExecutionLogger => {
+  return {
+    factory: ({ context }) => {
+      const spyLogger = {
+        context,
 
-      logStatusChange(args: StatusChangeArgs): Promise<void> {
-        loggedStatusChanges.push({ ...context, ...args });
-        return Promise.resolve();
-      },
-    };
+        trace: () => {},
+        debug: () => {},
+        info: () => {},
+        warn: () => {},
+        error: () => {},
+
+        logStatusChange: (args: StatusChangeArgs): Promise<void> => {
+          loggedStatusChanges.push({ ...context, ...args });
+          return Promise.resolve();
+        },
+      };
+
+      return Promise.resolve(spyLogger);
+    },
   };
-
-  return { factory };
 };

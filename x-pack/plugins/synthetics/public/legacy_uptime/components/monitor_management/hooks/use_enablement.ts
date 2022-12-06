@@ -33,9 +33,11 @@ export function useEnablement() {
   return {
     enablement: {
       areApiKeysEnabled: enablement?.areApiKeysEnabled,
+      canManageApiKeys: enablement?.canManageApiKeys,
       canEnable: enablement?.canEnable,
       isEnabled: enablement?.isEnabled,
     },
+    invalidApiKeyError: enablement ? !Boolean(enablement?.isValidApiKey) : false,
     error,
     loading,
     totalMonitors: total,

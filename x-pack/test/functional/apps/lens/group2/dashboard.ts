@@ -16,7 +16,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'lens',
     'discover',
-    'unifiedSearch',
   ]);
 
   const find = getService('find');
@@ -59,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.clickByButtonText('Artistpreviouslyknownaslens');
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
+      await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '19,986');
     });
 
     it('should be able to add filters/timerange by clicking in XYChart', async () => {
@@ -164,7 +163,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickCreateNewLink();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -183,23 +181,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.hasChartSwitchWarning('line')).to.eql(false);
 
       await PageObjects.lens.switchToVisualization('line');
-      await PageObjects.lens.configureDimension(
-        {
-          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'date_histogram',
-          field: '@timestamp',
-        },
-        1
-      );
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
 
-      await PageObjects.lens.configureDimension(
-        {
-          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'median',
-          field: 'bytes',
-        },
-        1
-      );
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'median',
+        field: 'bytes',
+      });
       await PageObjects.lens.saveAndReturn();
 
       await panelActions.openContextMenu();

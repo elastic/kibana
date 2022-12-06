@@ -6,8 +6,9 @@
  */
 
 import { useContext } from 'react';
-import { DeepReadonly } from 'utility-types';
-import { UserPrivilegesContext, UserPrivilegesState } from './user_privileges_context';
+import type { DeepReadonly } from 'utility-types';
+import type { UserPrivilegesState } from './user_privileges_context';
+import { UserPrivilegesContext } from './user_privileges_context';
 
 export const useUserPrivileges = (): DeepReadonly<UserPrivilegesState> =>
   useContext(UserPrivilegesContext);

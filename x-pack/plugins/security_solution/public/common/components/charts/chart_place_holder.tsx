@@ -8,7 +8,8 @@
 import React from 'react';
 import { EuiFlexItem, EuiText, EuiFlexGroup } from '@elastic/eui';
 import styled from 'styled-components';
-import { ChartSeriesData, checkIfAllValuesAreZero } from './common';
+import type { ChartSeriesData } from './common';
+import { checkIfAllValuesAreZero } from './common';
 import * as i18n from './translation';
 
 const FlexGroup = styled(EuiFlexGroup)<{ height?: string | null; width?: string | null }>`

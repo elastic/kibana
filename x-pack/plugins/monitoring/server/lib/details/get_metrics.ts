@@ -6,12 +6,13 @@
  */
 
 import moment from 'moment';
-import { checkParam } from '../error_missing_required';
-import { getSeries } from './get_series';
-import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
-import { getTimezone } from '../get_timezone';
-import { LegacyRequest } from '../../types';
 import { INDEX_PATTERN_TYPES } from '../../../common/constants';
+import { TimeRange } from '../../../common/http_api/shared';
+import { LegacyRequest } from '../../types';
+import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
+import { checkParam } from '../error_missing_required';
+import { getTimezone } from '../get_timezone';
+import { getSeries } from './get_series';
 
 export interface NamedMetricDescriptor {
   keys: string | string[];
@@ -22,9 +23,15 @@ export type SimpleMetricDescriptor = string;
 
 export type MetricDescriptor = SimpleMetricDescriptor | NamedMetricDescriptor;
 
+export function isNamedMetricDescriptor(
+  metricDescriptor: MetricDescriptor
+): metricDescriptor is NamedMetricDescriptor {
+  return (metricDescriptor as NamedMetricDescriptor).name !== undefined;
+}
+
 // TODO: Switch to an options object argument here
 export async function getMetrics(
-  req: LegacyRequest,
+  req: LegacyRequest<unknown, unknown, { timeRange: TimeRange }>,
   moduleType: INDEX_PATTERN_TYPES,
   metricSet: MetricDescriptor[] = [],
   filters: Array<Record<string, any>> = [],

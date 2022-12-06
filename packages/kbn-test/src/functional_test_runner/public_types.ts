@@ -8,7 +8,13 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 
-import type { Config, Lifecycle, DockerServersService, EsVersion } from './lib';
+import type {
+  Config,
+  Lifecycle,
+  DockerServersService,
+  EsVersion,
+  DedicatedTaskRunner,
+} from './lib';
 import type { Test, Suite } from './fake_mocha_types';
 
 export { Lifecycle, Config };
@@ -56,7 +62,15 @@ export interface GenericFtrProviderContext<
    * Determine if a service is avaliable
    * @param serviceName
    */
-  hasService(serviceName: 'config' | 'log' | 'lifecycle' | 'dockerServers' | 'esVersion'): true;
+  hasService(
+    serviceName:
+      | 'config'
+      | 'log'
+      | 'lifecycle'
+      | 'dockerServers'
+      | 'esVersion'
+      | 'dedicatedTaskRunner'
+  ): true;
   hasService<K extends keyof ServiceMap>(serviceName: K): serviceName is K;
   hasService(serviceName: string): serviceName is Extract<keyof ServiceMap, string>;
 
@@ -70,6 +84,7 @@ export interface GenericFtrProviderContext<
   getService(serviceName: 'lifecycle'): Lifecycle;
   getService(serviceName: 'dockerServers'): DockerServersService;
   getService(serviceName: 'esVersion'): EsVersion;
+  getService(serviceName: 'dedicatedTaskRunner'): DedicatedTaskRunner;
   getService<T extends keyof ServiceMap>(serviceName: T): ServiceMap[T];
 
   /**
@@ -90,6 +105,11 @@ export interface GenericFtrProviderContext<
    * @param path
    */
   loadTestFile(path: string): void;
+
+  /**
+   * Did the user request that baselines get updated?
+   */
+  updateBaselines: boolean;
 }
 
 export class GenericFtrService<ProviderContext extends GenericFtrProviderContext<any, any>> {
@@ -101,5 +121,7 @@ export interface FtrConfigProviderContext {
   esVersion: EsVersion;
   readConfigFile(path: string): Promise<Config>;
 }
+
+export type FtrConfigProvider = <T>(ctx: FtrConfigProviderContext) => T | Promise<T>;
 
 export type { Test, Suite };

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { act, waitFor } from '@testing-library/react';
 import { mount, ReactWrapper } from 'enzyme';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
@@ -68,13 +68,15 @@ describe('Background Search Session Management Table', () => {
               id: 'wtywp9u2802hahgp-flps',
               url: '/app/great-app-url/#48',
               appId: 'canvas',
-              status: SearchSessionStatus.IN_PROGRESS,
               created: '2020-12-02T00:19:32Z',
               expires: '2020-12-07T00:19:32Z',
               idMapping: {},
             },
           },
         ],
+        statuses: {
+          'wtywp9u2802hahgp-flps': { status: SearchSessionStatus.EXPIRED },
+        },
       };
     };
 
@@ -150,7 +152,7 @@ describe('Background Search Session Management Table', () => {
   // FLAKY: https://github.com/elastic/kibana/issues/88928
   describe.skip('fetching sessions data', () => {
     test('re-fetches data', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers({ legacyFakeTimers: true });
       sessionsClient.find = jest.fn();
       mockConfig = {
         ...mockConfig,

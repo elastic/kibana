@@ -12,6 +12,8 @@ export interface ExternalConfig {
   showCgroupMetricsElasticsearch: boolean;
   showCgroupMetricsLogstash: boolean;
   renderReactApp: boolean;
+  staleStatusThresholdSeconds: number;
+  isCcsEnabled: boolean;
 }
 
 export const ExternalConfigContext = createContext({} as ExternalConfig);

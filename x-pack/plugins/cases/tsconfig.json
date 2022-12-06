@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "common/**/*",
@@ -12,7 +11,7 @@
     "server/**/*",
     "../../../typings/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
 
     // optionalPlugins from ./kibana.json
@@ -24,6 +23,8 @@
     { "path": "../actions/tsconfig.json" },
     { "path": "../rule_registry/tsconfig.json" },
     { "path": "../triggers_actions_ui/tsconfig.json"},
+    { "path": "../stack_connectors/tsconfig.json"},
+    { "path": "../notifications/tsconfig.json" },
     { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },

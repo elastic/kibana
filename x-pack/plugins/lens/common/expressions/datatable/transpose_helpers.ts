@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin';
+import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { DatatableArgs } from './datatable';
 import type { ColumnConfig, ColumnConfigArg } from './datatable_column';
@@ -14,7 +14,7 @@ const TRANSPOSE_SEPARATOR = '---';
 
 const TRANSPOSE_VISUAL_SEPARATOR = '›';
 
-export function getTransposeId(value: string, columnId: string) {
+function getTransposeId(value: string, columnId: string) {
   return `${value}${TRANSPOSE_SEPARATOR}${columnId}`;
 }
 
@@ -36,6 +36,7 @@ export function getOriginalId(id: string) {
  *
  * If the table is tranposed by multiple columns, this process is repeated on top of the previous transformation.
  *
+ * @internal
  * @param args Arguments for the table visualization
  * @param firstTable datatable object containing the actual data
  * @param formatters Formatters for all columns to transpose columns by actual display values

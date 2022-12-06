@@ -19,7 +19,7 @@ import { ScreenshotLink } from './screenshot_link';
 import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';
 
 const Label = euiStyled.div`
-  margin-bottom: ${(props) => props.theme.eui.paddingSizes.xs};
+  margin-bottom: ${(props) => props.theme.eui.euiSizeXS};
   font-size: ${({ theme }) => theme.eui.euiFontSizeS};
   color: ${({ theme }) => theme.eui.euiColorDarkShade};
 `;

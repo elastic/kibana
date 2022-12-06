@@ -1,0 +1,9 @@
+summary: Updates a comment of a case.
+value:
+  {
+    "id": "8af6ac20-74f6-11ea-b83a-553aecdb28b6",
+    "version": "Wzk1LDFd",
+    "type": "user",
+    "comment": "An updated comment.",
+    "owner": "cases"
+  }

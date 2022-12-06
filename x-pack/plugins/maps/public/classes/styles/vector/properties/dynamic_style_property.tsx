@@ -39,6 +39,8 @@ import { InnerJoin } from '../../../joins/inner_join';
 import { IVectorStyle } from '../vector_style';
 import { getComputedFieldName } from '../style_util';
 
+export const OTHER_CATEGORY_KEY = '__other_bucket__';
+
 export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;
   getField(): IField | null;
@@ -386,12 +388,20 @@ export class DynamicStyleProperty<T>
       return [];
     }
 
-    return fieldMeta.buckets.map((bucket) => {
+    const categories = fieldMeta.buckets.map((bucket) => {
       return {
         key: bucket.key,
         count: bucket.doc_count,
       };
     });
+
+    if (fieldMeta.sum_other_doc_count > 0) {
+      categories.push({
+        key: OTHER_CATEGORY_KEY,
+        count: fieldMeta.sum_other_doc_count,
+      });
+    }
+    return categories;
   }
 
   formatField(value: RawValue): string | number {

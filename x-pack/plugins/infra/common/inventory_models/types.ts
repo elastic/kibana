@@ -31,7 +31,7 @@ export const InventoryFormatterTypeRT = rt.keyof({
   bytes: null,
   number: null,
   percent: null,
-  highPercision: null,
+  highPrecision: null,
 });
 export type InventoryFormatterType = rt.TypeOf<typeof InventoryFormatterTypeRT>;
 export type InventoryItemType = rt.TypeOf<typeof ItemTypeRT>;
@@ -64,6 +64,9 @@ export const InventoryMetricRT = rt.keyof({
   containerDiskIOBytes: null,
   containerMemory: null,
   containerNetworkTraffic: null,
+  containerK8sOverview: null,
+  containerK8sCpuUsage: null,
+  containerK8sMemoryUsage: null,
   nginxHits: null,
   nginxRequestRate: null,
   nginxActiveConnections: null,
@@ -288,6 +291,21 @@ export const ESTopMetricsAggRT = rt.type({
   }),
 });
 
+export const ESMaxPeriodFilterExistsAggRT = rt.type({
+  filter: rt.type({
+    exists: rt.type({
+      field: rt.string,
+    }),
+  }),
+  aggs: rt.type({
+    period: rt.type({
+      max: rt.type({
+        field: rt.string,
+      }),
+    }),
+  }),
+});
+
 export interface SnapshotTermsWithAggregation {
   terms: { field: string };
   aggregations: MetricsUIAggregation;
@@ -312,6 +330,7 @@ export const ESAggregationRT = rt.union([
   ESTermsWithAggregationRT,
   ESCaridnalityAggRT,
   ESTopMetricsAggRT,
+  ESMaxPeriodFilterExistsAggRT,
 ]);
 
 export const MetricsUIAggregationRT = rt.record(rt.string, ESAggregationRT);
@@ -320,8 +339,11 @@ export type MetricsUIAggregation = rt.TypeOf<typeof MetricsUIAggregationRT>;
 export const SnapshotMetricTypeKeys = {
   count: null,
   cpu: null,
+  cpuCores: null,
+  diskLatency: null,
   load: null,
   memory: null,
+  memoryTotal: null,
   tx: null,
   rx: null,
   logRate: null,
@@ -363,6 +385,7 @@ export interface InventoryModel {
   fields: {
     id: string;
     name: string;
+    os?: string;
     ip?: string;
   };
   crosslinkSupport: {

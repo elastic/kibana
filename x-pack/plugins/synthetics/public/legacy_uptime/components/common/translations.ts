@@ -15,6 +15,10 @@ export const TAGS_LABEL = i18n.translate('xpack.synthetics.monitorList.table.tag
   defaultMessage: 'Tags',
 });
 
+export const PROJECT_LABEL = i18n.translate('xpack.synthetics.monitorList.table.project.name', {
+  defaultMessage: 'Project ID',
+});
+
 export const STATUS_UP_LABEL = i18n.translate('xpack.synthetics.monitorList.statusColumn.upLabel', {
   defaultMessage: 'Up',
 });

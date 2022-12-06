@@ -5,29 +5,36 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
-import { LogFilterState, WithLogFilterUrlState } from '../../../containers/logs/log_filter';
-import { LogFlyout } from '../../../containers/logs/log_flyout';
-import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_highlights';
-import { LogPositionState, WithLogPositionUrlState } from '../../../containers/logs/log_position';
+import React from 'react';
+import {
+  LogFilterStateProvider,
+  useLogFilterStateContext,
+  WithLogFilterUrlState,
+} from '../../../containers/logs/log_filter';
+import { LogEntryFlyoutProvider } from '../../../containers/logs/log_flyout';
+import { LogHighlightsStateProvider } from '../../../containers/logs/log_highlights/log_highlights';
+import {
+  LogPositionStateProvider,
+  useLogPositionStateContext,
+} from '../../../containers/logs/log_position';
 import { LogStreamProvider, useLogStreamContext } from '../../../containers/logs/log_stream';
-import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
-import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
+import { LogViewConfigurationProvider } from '../../../containers/logs/log_view_configuration';
+import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { useLogViewContext } from '../../../hooks/use_log_view';
 
-const LogFilterStateProvider: React.FC = ({ children }) => {
+const LogFilterState: React.FC = ({ children }) => {
   const { derivedDataView } = useLogViewContext();
 
   return (
-    <LogFilterState.Provider indexPattern={derivedDataView}>
+    <LogFilterStateProvider dataView={derivedDataView}>
       <WithLogFilterUrlState />
       {children}
-    </LogFilterState.Provider>
+    </LogFilterStateProvider>
   );
 };
 
-const ViewLogInContextProvider: React.FC = ({ children }) => {
-  const { startTimestamp, endTimestamp } = useContext(LogPositionState.Context);
+const ViewLogInContext: React.FC = ({ children }) => {
+  const { startTimestamp, endTimestamp } = useLogPositionStateContext();
   const { logViewId } = useLogViewContext();
 
   if (!startTimestamp || !endTimestamp) {
@@ -35,31 +42,23 @@ const ViewLogInContextProvider: React.FC = ({ children }) => {
   }
 
   return (
-    <ViewLogInContext.Provider
+    <ViewLogInContextProvider
       startTimestamp={startTimestamp}
       endTimestamp={endTimestamp}
       sourceId={logViewId}
     >
       {children}
-    </ViewLogInContext.Provider>
+    </ViewLogInContextProvider>
   );
 };
 
 const LogEntriesStateProvider: React.FC = ({ children }) => {
   const { logViewId } = useLogViewContext();
-  const { startTimestamp, endTimestamp, targetPosition, isInitialized } = useContext(
-    LogPositionState.Context
-  );
-  const { filterQuery } = useContext(LogFilterState.Context);
+  const { startTimestamp, endTimestamp, targetPosition } = useLogPositionStateContext();
+  const { filterQuery } = useLogFilterStateContext();
 
   // Don't render anything if the date range is incorrect.
   if (!startTimestamp || !endTimestamp) {
-    return null;
-  }
-
-  // Don't initialize the entries until the position has been fully intialized.
-  // See `<WithLogPositionUrlState />`
-  if (!isInitialized) {
     return null;
   }
 
@@ -76,10 +75,10 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
   );
 };
 
-const LogHighlightsStateProvider: React.FC = ({ children }) => {
+const LogHighlightsState: React.FC = ({ children }) => {
   const { logViewId, logView } = useLogViewContext();
   const { topCursor, bottomCursor, entries } = useLogStreamContext();
-  const { filterQuery } = useContext(LogFilterState.Context);
+  const { filterQuery } = useLogFilterStateContext();
 
   const highlightsProps = {
     sourceId: logViewId,
@@ -90,7 +89,7 @@ const LogHighlightsStateProvider: React.FC = ({ children }) => {
     size: entries.length,
     filterQuery: filterQuery?.serializedQuery ?? null,
   };
-  return <LogHighlightsState.Provider {...highlightsProps}>{children}</LogHighlightsState.Provider>;
+  return <LogHighlightsStateProvider {...highlightsProps}>{children}</LogHighlightsStateProvider>;
 };
 
 export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
@@ -102,19 +101,18 @@ export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
   }
 
   return (
-    <LogViewConfiguration.Provider>
-      <LogFlyout.Provider>
-        <LogPositionState.Provider>
-          <WithLogPositionUrlState />
-          <ViewLogInContextProvider>
-            <LogFilterStateProvider>
+    <LogViewConfigurationProvider>
+      <LogEntryFlyoutProvider>
+        <LogPositionStateProvider>
+          <ViewLogInContext>
+            <LogFilterState>
               <LogEntriesStateProvider>
-                <LogHighlightsStateProvider>{children}</LogHighlightsStateProvider>
+                <LogHighlightsState>{children}</LogHighlightsState>
               </LogEntriesStateProvider>
-            </LogFilterStateProvider>
-          </ViewLogInContextProvider>
-        </LogPositionState.Provider>
-      </LogFlyout.Provider>
-    </LogViewConfiguration.Provider>
+            </LogFilterState>
+          </ViewLogInContext>
+        </LogPositionStateProvider>
+      </LogEntryFlyoutProvider>
+    </LogViewConfigurationProvider>
   );
 };

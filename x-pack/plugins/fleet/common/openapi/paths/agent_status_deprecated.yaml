@@ -34,7 +34,7 @@ get:
               - other
               - total
               - updating
-  operationId: get-agent-status
+  operationId: get-agent-status-deprecated
   parameters:
     - schema:
         type: string

@@ -7,10 +7,10 @@
 
 import React, { useMemo } from 'react';
 
-import { BrowserFields } from '../../../../common/search_strategy/index_fields';
+import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import { SummaryView } from './summary_view';
 
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
 import { getSummaryRows } from './get_alert_summary_rows';
 
@@ -19,14 +19,14 @@ const AlertSummaryViewComponent: React.FC<{
   data: TimelineEventsDetailsItem[];
   eventId: string;
   isDraggable?: boolean;
-  timelineId: string;
+  scopeId: string;
   title: string;
   goToTable: () => void;
   isReadOnly?: boolean;
-}> = ({ browserFields, data, eventId, isDraggable, timelineId, title, goToTable, isReadOnly }) => {
+}> = ({ browserFields, data, eventId, isDraggable, scopeId, title, goToTable, isReadOnly }) => {
   const summaryRows = useMemo(
-    () => getSummaryRows({ browserFields, data, eventId, isDraggable, timelineId, isReadOnly }),
-    [browserFields, data, eventId, isDraggable, timelineId, isReadOnly]
+    () => getSummaryRows({ browserFields, data, eventId, isDraggable, scopeId, isReadOnly }),
+    [browserFields, data, eventId, isDraggable, scopeId, isReadOnly]
   );
 
   return (

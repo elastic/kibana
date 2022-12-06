@@ -16,7 +16,6 @@ import {
   PartitionVisParams,
   LabelsParams,
 } from '@kbn/expression-partition-vis-plugin/common';
-import { getEsaggsFn } from './to_ast_esaggs';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });
@@ -71,7 +70,7 @@ export const toExpressionAst: VisToExpressionAst<PartitionVisParams> = async (vi
     emptySizeRatio: vis.params.emptySizeRatio,
     palette: preparePalette(vis.params.palette),
     labels: prepareLabels(vis.params.labels),
-    metric: schemas.metric.map(prepareDimension),
+    metrics: prepareDimension(schemas.metric[schemas.metric.length - 1]),
     buckets: schemas.segment?.map(prepareDimension),
     splitColumn: schemas.split_column?.map(prepareDimension),
     splitRow: schemas.split_row?.map(prepareDimension),
@@ -83,7 +82,7 @@ export const toExpressionAst: VisToExpressionAst<PartitionVisParams> = async (vi
     args
   );
 
-  const ast = buildExpression([getEsaggsFn(vis), visTypePie]);
+  const ast = buildExpression([visTypePie]);
 
   return ast.toAst();
 };

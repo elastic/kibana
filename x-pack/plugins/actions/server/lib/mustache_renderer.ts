@@ -6,10 +6,21 @@
  */
 
 import Mustache from 'mustache';
-import { isString, isPlainObject, cloneDeepWith } from 'lodash';
+import { isString, isPlainObject, cloneDeepWith, merge } from 'lodash';
 
 export type Escape = 'markdown' | 'slack' | 'json' | 'none';
 type Variables = Record<string, unknown>;
+
+// return a rendered mustache template with no escape given the specified variables and escape
+// Individual variable values should be stringified already
+export function renderMustacheStringNoEscape(string: string, variables: Variables): string {
+  try {
+    return Mustache.render(`${string}`, variables);
+  } catch (err) {
+    // log error; the mustache code does not currently leak variables
+    return `error rendering mustache template "${string}": ${err.message}`;
+  }
+}
 
 // return a rendered mustache template given the specified variables and escape
 export function renderMustacheString(string: string, variables: Variables, escape: Escape): string {
@@ -46,8 +57,34 @@ export function renderMustacheObject<Params>(params: Params, variables: Variable
 // return variables cloned, with a toString() added to objects
 function augmentObjectVariables(variables: Variables): Variables {
   const result = JSON.parse(JSON.stringify(variables));
+  // convert variables with '.' in the name to objects
+  convertDotVariables(result);
   addToStringDeep(result);
   return result;
+}
+
+function convertDotVariables(variables: Variables) {
+  Object.keys(variables).forEach((key) => {
+    if (key.includes('.')) {
+      const obj = buildObject(key, variables[key]);
+      variables = merge(variables, obj);
+    }
+    if (typeof variables[key] === 'object' && variables[key] != null) {
+      convertDotVariables(variables[key] as Variables);
+    }
+  });
+}
+
+function buildObject(key: string, value: unknown) {
+  const newObject: Variables = {};
+  let tempObject = newObject;
+  const splits = key.split('.');
+  const length = splits.length - 1;
+  splits.forEach((k, index) => {
+    tempObject[k] = index === length ? value : ({} as unknown);
+    tempObject = tempObject[k] as Variables;
+  });
+  return newObject;
 }
 
 function addToStringDeep(object: unknown): void {
@@ -123,6 +160,7 @@ function escapeMarkdown(value: unknown): string {
 
   return `${value}`
     .replace(/\\/g, '\\\\')
+    .replace(/\|/g, '\\|')
     .replace(/`/g, '\\`')
     .replace(/\*/g, '\\*')
     .replace(/_/g, '\\_')

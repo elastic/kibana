@@ -56,7 +56,7 @@ export function suricataLogsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/suricata_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/suricata_logs/screenshot.webp',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),

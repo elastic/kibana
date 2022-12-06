@@ -27,10 +27,11 @@
     "features",
     "inspector",
     "ruleRegistry",
-    "timelines",
     "triggersActionsUi",
     "inspector",
-    "unifiedSearch"
+    "unifiedSearch",
+    "security",
+    "guidedOnboarding"
   ],
   "ui": true,
   "server": true,
@@ -41,7 +42,9 @@
     "embeddable",
     "kibanaReact",
     "kibanaUtils",
-    "lens"
+    "lens",
+    "usageCollection",
+    "visualizations"
   ],
   "extraPublicDirs": [
     "common"

@@ -10,13 +10,13 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 
 import { useUiSetting } from '../../lib/kibana';
+import type { ChartSeriesData } from './common';
 import {
   checkIfAllValuesAreZero,
   defaultChartHeight,
   getChartHeight,
   getChartWidth,
   WrappedByAutoSizer,
-  ChartSeriesData,
   useTheme,
 } from './common';
 

@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UserAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/authentications';
+import type { UserAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/authentications';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 import { authenticationsFields } from '../helpers';
 
@@ -50,7 +50,7 @@ export const buildQuery = ({
             order: [
               { 'successes.doc_count': 'desc' as const },
               { 'failures.doc_count': 'desc' as const },
-            ] as estypes.AggregationsTermsAggregationOrder,
+            ] as estypes.AggregationsAggregateOrder,
           },
           aggs: {
             failures: {

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash';
 
 import { initialSourcererState, SourcererScopeName } from '../../store/sourcerer/model';
@@ -20,11 +21,14 @@ import {
   TestProviders,
 } from '../../mock';
 import { createStore } from '../../store';
-import { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
+import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
 import { waitFor } from '@testing-library/dom';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 import { TimelineId, TimelineType } from '../../../../common/types';
+import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
+import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 const mockDispatch = jest.fn();
 
@@ -52,32 +56,34 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-const mockOptions = [
-  { label: 'apm-*-transaction*', value: 'apm-*-transaction*' },
-  { label: 'auditbeat-*', value: 'auditbeat-*' },
-  { label: 'endgame-*', value: 'endgame-*' },
-  { label: 'filebeat-*', value: 'filebeat-*' },
-  { label: 'logs-*', value: 'logs-*' },
-  { label: 'packetbeat-*', value: 'packetbeat-*' },
-  { label: 'traces-apm*', value: 'traces-apm*' },
-  { label: 'winlogbeat-*', value: 'winlogbeat-*' },
-];
+const mockUpdateUrlParam = jest.fn();
+jest.mock('../../utils/global_query_string', () => {
+  const original = jest.requireActual('../../utils/global_query_string');
+
+  return {
+    ...original,
+    useUpdateUrlParam: () => mockUpdateUrlParam,
+  };
+});
+
+const mockOptions = DEFAULT_INDEX_PATTERN.map((index) => ({ label: index, value: index }));
 
 const defaultProps = {
   scope: sourcererModel.SourcererScopeName.default,
 };
 
 const checkOptionsAndSelections = (wrapper: ReactWrapper, patterns: string[]) => ({
-  availableOptionCount: wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).length,
+  availableOptionCount:
+    wrapper.find('List').length > 0 ? wrapper.find('List').prop('itemCount') : 0,
   optionsSelected: patterns.every((pattern) =>
     wrapper.find(`[data-test-subj="sourcerer-combo-box"] span[title="${pattern}"]`).first().exists()
   ),
 });
 
 const { id, patternList, title } = mockGlobalState.sourcerer.defaultDataView;
-const patternListNoSignals = patternList
-  .filter((p) => p !== mockGlobalState.sourcerer.signalIndexName)
-  .sort();
+const patternListNoSignals = sortWithExcludesAtEnd(
+  patternList.filter((p) => p !== mockGlobalState.sourcerer.signalIndexName)
+);
 let store: ReturnType<typeof createStore>;
 const sourcererDataView = {
   indicesExist: true,
@@ -88,11 +94,16 @@ describe('Sourcerer component', () => {
   const { storage } = createSecuritySolutionStorageMock();
   const pollForSignalIndexMock = jest.fn();
   beforeEach(() => {
-    store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    jest.clearAllMocks();
+    store = createStore(
+      mockGlobalState,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
     (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
     (useSignalHelpers as jest.Mock).mockReturnValue({ signalIndexNeedsInit: false });
-
-    jest.clearAllMocks();
   });
 
   afterAll(() => {
@@ -134,10 +145,7 @@ describe('Sourcerer component', () => {
       </TestProviders>
     );
     expect(wrapper.find('[data-test-subj="sourcerer-tooltip"]').prop('content')).toEqual(
-      mockOptions
-        .map((p) => p.label)
-        .sort()
-        .join(', ')
+      sortWithExcludesAtEnd(mockOptions.map((p) => p.label)).join(', ')
     );
   });
 
@@ -205,6 +213,7 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
       kibanaObservable,
       storage
     );
@@ -255,6 +264,7 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
       kibanaObservable,
       storage
     );
@@ -306,7 +316,13 @@ describe('Sourcerer component', () => {
       },
     };
 
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      state2,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
     const wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer {...defaultProps} />
@@ -351,7 +367,13 @@ describe('Sourcerer component', () => {
       },
     };
 
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      state2,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
     const wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
@@ -391,6 +413,7 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
       kibanaObservable,
       storage
     );
@@ -410,7 +433,7 @@ describe('Sourcerer component', () => {
       availableOptionCount: title.split(',').length - 4,
       optionsSelected: true,
     });
-    wrapper.find(`[data-test-subj="sourcerer-save"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="sourcerer-save"]`).first().simulate('click');
     expect(wrapper.find(`[data-test-subj="sourcerer-popover"]`).first().prop('isOpen')).toBeFalsy();
 
     expect(mockDispatch).toHaveBeenCalledWith(
@@ -421,6 +444,51 @@ describe('Sourcerer component', () => {
       })
     );
   });
+
+  it('onSave updates the URL param', () => {
+    store = createStore(
+      {
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          kibanaDataViews: [
+            mockGlobalState.sourcerer.defaultDataView,
+            {
+              ...mockGlobalState.sourcerer.defaultDataView,
+              id: '1234',
+              title: 'filebeat-*',
+              patternList: ['filebeat-*'],
+            },
+          ],
+          sourcererScopes: {
+            ...mockGlobalState.sourcerer.sourcererScopes,
+            [SourcererScopeName.default]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+              selectedDataViewId: id,
+              selectedPatterns: patternListNoSignals.slice(0, 2),
+            },
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
+
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer {...defaultProps} />
+      </TestProviders>
+    );
+    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="sourcerer-save"]`).first().simulate('click');
+
+    expect(mockUpdateUrlParam).toHaveBeenCalledTimes(1);
+  });
+
   it('resets to default index pattern', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
@@ -472,6 +540,7 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
       kibanaObservable,
       storage
     );
@@ -516,7 +585,13 @@ describe('Sourcerer component', () => {
       },
     };
 
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      state2,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
     const wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
@@ -560,7 +635,13 @@ describe('Sourcerer component', () => {
       },
     };
 
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      state2,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
     const wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer {...defaultProps} />
@@ -639,7 +720,13 @@ describe('Sourcerer component', () => {
 describe('sourcerer on alerts page or rules details page', () => {
   let wrapper: ReactWrapper;
   const { storage } = createSecuritySolutionStorageMock();
-  store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  store = createStore(
+    mockGlobalState,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
   const testProps = {
     scope: sourcererModel.SourcererScopeName.detections,
   };
@@ -708,7 +795,13 @@ describe('sourcerer on alerts page or rules details page', () => {
 describe('timeline sourcerer', () => {
   let wrapper: ReactWrapper;
   const { storage } = createSecuritySolutionStorageMock();
-  store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  store = createStore(
+    mockGlobalState,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
   const testProps = {
     scope: sourcererModel.SourcererScopeName.timeline,
   };
@@ -798,7 +891,13 @@ describe('timeline sourcerer', () => {
       },
     };
 
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      state2,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
 
     wrapper = mount(
       <TestProviders store={store}>
@@ -842,7 +941,13 @@ describe('Sourcerer integration tests', () => {
 
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });
@@ -860,7 +965,7 @@ describe('Sourcerer integration tests', () => {
       availableOptionCount: 0,
       optionsSelected: true,
     });
-    wrapper.find(`[data-test-subj="sourcerer-save"]`).first().simulate('click');
+    wrapper.find(`button[data-test-subj="sourcerer-save"]`).first().simulate('click');
 
     expect(mockDispatch).toHaveBeenCalledWith(
       sourcererActions.setSelectedDataView({
@@ -887,7 +992,13 @@ describe('No data', () => {
       ...sourcererDataView,
       indicesExist: false,
     });
-    store = createStore(mockNoIndicesState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      mockNoIndicesState,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });
@@ -962,7 +1073,13 @@ describe('Update available', () => {
       ...sourcererDataView,
       activePatterns: ['myFakebeat-*'],
     });
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      state2,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
 
     wrapper = mount(
       <TestProviders store={store}>
@@ -1091,7 +1208,13 @@ describe('Update available for timeline template', () => {
       ...sourcererDataView,
       activePatterns: ['myFakebeat-*'],
     });
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      state2,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
 
     wrapper = mount(
       <TestProviders store={store}>
@@ -1176,7 +1299,13 @@ describe('Missing index patterns', () => {
     });
     const state3 = cloneDeep(state2);
     state3.timeline.timelineById[TimelineId.active].timelineType = TimelineType.default;
-    store = createStore(state3, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      state3,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
 
     wrapper = mount(
       <TestProviders store={store}>
@@ -1212,7 +1341,13 @@ describe('Missing index patterns', () => {
       ...sourcererDataView,
       activePatterns: ['myFakebeat-*'],
     });
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      state2,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
 
     wrapper = mount(
       <TestProviders store={store}>

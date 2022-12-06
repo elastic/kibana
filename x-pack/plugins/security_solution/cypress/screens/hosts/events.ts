@@ -27,5 +27,5 @@ export const INSPECT_QUERY =
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
-export const EVENTS_VIEWER_PAGINATION =
-  '[data-test-subj="events-viewer-panel"] .euiDataGrid__pagination';
+export const EVENT_VIEWER_CHECKBOX =
+  '[data-test-subj="dataGridHeaderCell-checkbox-control-column"]';

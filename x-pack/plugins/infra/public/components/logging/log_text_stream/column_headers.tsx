@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
+import React from 'react';
 import { transparentize } from 'polished';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -17,7 +17,7 @@ import {
   LogEntryColumnWidths,
 } from './log_entry_column';
 import { ASSUMED_SCROLLBAR_WIDTH } from './vertical_scroll_panel';
-import { LogPositionState } from '../../../containers/logs/log_position';
+import { useLogPositionStateContext } from '../../../containers/logs/log_position';
 import { localizedDate } from '../../../../common/formatters/datetime';
 import {
   LogColumnRenderConfiguration,
@@ -30,7 +30,7 @@ export const LogColumnHeaders: React.FunctionComponent<{
   columnConfigurations: LogColumnRenderConfiguration[];
   columnWidths: LogEntryColumnWidths;
 }> = ({ columnConfigurations, columnWidths }) => {
-  const { firstVisiblePosition } = useContext(LogPositionState.Context);
+  const { firstVisiblePosition } = useLogPositionStateContext();
   return (
     <LogColumnHeadersWrapper>
       {columnConfigurations.map((columnConfiguration) => {

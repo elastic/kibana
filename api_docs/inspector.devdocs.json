@@ -19,10 +19,10 @@
           },
           " implements ",
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
+            "pluginId": "@kbn/core-plugins-browser",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsBrowserPluginApi",
+            "section": "def-common.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -45,6 +45,7 @@
         ],
         "path": "src/plugins/inspector/public/plugin.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "inspector",
@@ -58,7 +59,8 @@
               " | undefined"
             ],
             "path": "src/plugins/inspector/public/plugin.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -72,6 +74,7 @@
             ],
             "path": "src/plugins/inspector/public/plugin.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -82,16 +85,17 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
+                    "pluginId": "@kbn/core-plugins-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCorePluginsBrowserPluginApi",
+                    "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<object>"
                 ],
                 "path": "src/plugins/inspector/public/plugin.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -107,10 +111,10 @@
             "signature": [
               "(core: ",
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>) => { registerView: (view: ",
@@ -127,6 +131,7 @@
             ],
             "path": "src/plugins/inspector/public/plugin.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -137,16 +142,17 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
                 ],
                 "path": "src/plugins/inspector/public/plugin.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -162,10 +168,10 @@
             "signature": [
               "(core: ",
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
               ", startDeps: ",
@@ -196,16 +202,17 @@
               },
               " | undefined) => ",
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.OverlayRef",
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.OverlayRef",
                 "text": "OverlayRef"
               },
               "; }"
             ],
             "path": "src/plugins/inspector/public/plugin.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -216,15 +223,16 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-common.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
                 "path": "src/plugins/inspector/public/plugin.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -239,6 +247,7 @@
                 ],
                 "path": "src/plugins/inspector/public/plugin.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -256,6 +265,7 @@
             ],
             "path": "src/plugins/inspector/public/plugin.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -285,6 +295,7 @@
         ],
         "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "inspector",
@@ -298,6 +309,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -326,6 +338,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -341,6 +354,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -357,6 +371,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -373,6 +388,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -392,6 +408,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -407,6 +424,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -420,6 +438,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -445,6 +464,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -462,6 +482,7 @@
         ],
         "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "inspector",
@@ -475,6 +496,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -494,6 +516,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -508,6 +531,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -532,6 +556,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -545,6 +570,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -577,6 +603,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -596,6 +623,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -623,6 +651,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -642,6 +671,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -656,6 +686,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -675,6 +706,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -688,6 +720,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -707,6 +740,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -720,6 +754,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -742,6 +777,7 @@
         ],
         "path": "src/plugins/inspector/common/adapters/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "inspector",
@@ -761,7 +797,8 @@
               " | undefined"
             ],
             "path": "src/plugins/inspector/common/adapters/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -774,7 +811,8 @@
               "[key: string]:  any"
             ],
             "path": "src/plugins/inspector/common/adapters/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -793,6 +831,7 @@
         ],
         "path": "src/plugins/inspector/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "inspector",
@@ -805,7 +844,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/inspector/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -818,7 +858,8 @@
               "unknown"
             ],
             "path": "src/plugins/inspector/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -836,6 +877,7 @@
         ],
         "path": "src/plugins/inspector/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "inspector",
@@ -880,7 +922,8 @@
               ">>"
             ],
             "path": "src/plugins/inspector/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -893,7 +936,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/inspector/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -906,7 +950,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/inspector/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -928,6 +973,7 @@
             ],
             "path": "src/plugins/inspector/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -947,6 +993,7 @@
                 ],
                 "path": "src/plugins/inspector/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -960,7 +1007,8 @@
             "label": "title",
             "description": [],
             "path": "src/plugins/inspector/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -986,6 +1034,7 @@
         ],
         "path": "src/plugins/inspector/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "inspector",
@@ -1000,7 +1049,8 @@
               "TAdapters"
             ],
             "path": "src/plugins/inspector/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -1012,7 +1062,8 @@
               "\nThe title that the inspector is currently using e.g. a visualization name."
             ],
             "path": "src/plugins/inspector/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -1027,7 +1078,8 @@
               "unknown"
             ],
             "path": "src/plugins/inspector/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1052,6 +1104,7 @@
         ],
         "path": "src/plugins/inspector/common/adapters/request/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "inspector",
@@ -1061,7 +1114,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -1071,7 +1125,8 @@
             "label": "name",
             "description": [],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -1084,7 +1139,8 @@
               "object | undefined"
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -1098,7 +1154,8 @@
               " | undefined"
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -1108,7 +1165,8 @@
             "label": "startTime",
             "description": [],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -1128,7 +1186,8 @@
               " | undefined"
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -1147,7 +1206,8 @@
               }
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -1160,7 +1220,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1174,6 +1235,7 @@
         "description": [],
         "path": "src/plugins/inspector/common/adapters/request/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "inspector",
@@ -1183,7 +1245,8 @@
             "label": "label",
             "description": [],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -1196,7 +1259,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -1209,7 +1273,8 @@
               "any"
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1223,6 +1288,7 @@
         "description": [],
         "path": "src/plugins/inspector/common/adapters/request/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "inspector",
@@ -1242,7 +1308,8 @@
               }
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1260,6 +1327,7 @@
         ],
         "path": "src/plugins/inspector/common/adapters/request/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1273,15 +1341,16 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.OverlayRef",
+            "pluginId": "@kbn/core-mount-utils-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+            "section": "def-common.OverlayRef",
             "text": "OverlayRef"
           }
         ],
         "path": "src/plugins/inspector/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1295,6 +1364,7 @@
       "description": [],
       "path": "src/plugins/inspector/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "inspector",
@@ -1316,6 +1386,7 @@
           ],
           "path": "src/plugins/inspector/public/plugin.tsx",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -1335,7 +1406,8 @@
                 }
               ],
               "path": "src/plugins/inspector/public/view_registry.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         },
@@ -1352,7 +1424,8 @@
             "; }"
           ],
           "path": "src/plugins/inspector/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -1367,6 +1440,7 @@
       "description": [],
       "path": "src/plugins/inspector/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "inspector",
@@ -1390,6 +1464,7 @@
           ],
           "path": "src/plugins/inspector/public/plugin.tsx",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "inspector",
@@ -1412,6 +1487,7 @@
               ],
               "path": "src/plugins/inspector/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": false
             }
           ],
@@ -1450,15 +1526,16 @@
             },
             " | undefined) => ",
             {
-              "pluginId": "core",
-              "scope": "public",
-              "docId": "kibCorePluginApi",
-              "section": "def-public.OverlayRef",
+              "pluginId": "@kbn/core-mount-utils-browser",
+              "scope": "common",
+              "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+              "section": "def-common.OverlayRef",
               "text": "OverlayRef"
             }
           ],
           "path": "src/plugins/inspector/public/plugin.tsx",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "inspector",
@@ -1480,6 +1557,7 @@
               ],
               "path": "src/plugins/inspector/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -1503,6 +1581,7 @@
               ],
               "path": "src/plugins/inspector/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": false
             }
           ],
@@ -1548,6 +1627,7 @@
         ],
         "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "inspector",
@@ -1561,6 +1641,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1589,6 +1670,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -1604,6 +1686,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1620,6 +1703,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1636,6 +1720,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1655,6 +1740,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1670,6 +1756,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -1683,6 +1770,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1708,6 +1796,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1725,6 +1814,7 @@
         ],
         "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "inspector",
@@ -1738,6 +1828,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -1757,6 +1848,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1771,6 +1863,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1795,6 +1888,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -1808,6 +1902,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1840,6 +1935,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -1859,6 +1955,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1886,6 +1983,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -1905,6 +2003,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1919,6 +2018,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1938,6 +2038,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -1951,6 +2052,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1970,6 +2072,7 @@
             ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "inspector",
@@ -1983,6 +2086,7 @@
                 ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2005,6 +2109,7 @@
         ],
         "path": "src/plugins/inspector/common/adapters/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "inspector",
@@ -2024,7 +2129,8 @@
               " | undefined"
             ],
             "path": "src/plugins/inspector/common/adapters/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -2037,7 +2143,8 @@
               "[key: string]:  any"
             ],
             "path": "src/plugins/inspector/common/adapters/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2062,6 +2169,7 @@
         ],
         "path": "src/plugins/inspector/common/adapters/request/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "inspector",
@@ -2071,7 +2179,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -2081,7 +2190,8 @@
             "label": "name",
             "description": [],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -2094,7 +2204,8 @@
               "object | undefined"
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -2108,7 +2219,8 @@
               " | undefined"
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -2118,7 +2230,8 @@
             "label": "startTime",
             "description": [],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -2138,7 +2251,8 @@
               " | undefined"
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -2157,7 +2271,8 @@
               }
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -2170,7 +2285,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2184,6 +2300,7 @@
         "description": [],
         "path": "src/plugins/inspector/common/adapters/request/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "inspector",
@@ -2193,7 +2310,8 @@
             "label": "label",
             "description": [],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -2206,7 +2324,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "inspector",
@@ -2219,7 +2338,8 @@
               "any"
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2233,6 +2353,7 @@
         "description": [],
         "path": "src/plugins/inspector/common/adapters/request/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "inspector",
@@ -2252,7 +2373,8 @@
               }
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2270,6 +2392,7 @@
         ],
         "path": "src/plugins/inspector/common/adapters/request/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

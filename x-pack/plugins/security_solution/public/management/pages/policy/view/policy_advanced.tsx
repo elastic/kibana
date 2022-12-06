@@ -21,6 +21,7 @@ import {
 import { cloneDeep } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { policyConfig } from '../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import { AdvancedPolicySchema } from '../models/advanced_policy_schema';
@@ -95,7 +96,7 @@ const warningMessage = i18n.translate(
   }
 );
 
-export const AdvancedPolicyForms = React.memo(() => {
+export const AdvancedPolicyForms = React.memo(({ isPlatinumPlus }: { isPlatinumPlus: boolean }) => {
   return (
     <>
       <EuiCallOut title={calloutTitle} color="warning" iconType="alert">
@@ -113,14 +114,17 @@ export const AdvancedPolicyForms = React.memo(() => {
       <EuiPanel data-test-subj="advancedPolicyPanel" paddingSize="s">
         {AdvancedPolicySchema.map((advancedField, index) => {
           const configPath = advancedField.key.split('.');
+          const failsPlatinumLicenseCheck = !isPlatinumPlus && advancedField.license === 'platinum';
           return (
-            <PolicyAdvanced
-              key={index}
-              configPath={configPath}
-              firstSupportedVersion={advancedField.first_supported_version}
-              lastSupportedVersion={advancedField.last_supported_version}
-              documentation={advancedField.documentation}
-            />
+            !failsPlatinumLicenseCheck && (
+              <PolicyAdvanced
+                key={index}
+                configPath={configPath}
+                firstSupportedVersion={advancedField.first_supported_version}
+                lastSupportedVersion={advancedField.last_supported_version}
+                documentation={advancedField.documentation}
+              />
+            )
           );
         })}
       </EuiPanel>
@@ -142,6 +146,7 @@ const PolicyAdvanced = React.memo(
     lastSupportedVersion?: string;
     documentation: string;
   }) => {
+    const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
     const dispatch = useDispatch();
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
     const onChange = useCallback(
@@ -193,6 +198,7 @@ const PolicyAdvanced = React.memo(
             fullWidth
             value={value as string}
             onChange={onChange}
+            disabled={!canWritePolicyManagement}
           />
         </EuiFormRow>
       </>

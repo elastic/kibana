@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewFieldBase } from '../..';
+import { DataViewFieldBase } from '../../..';
 
 /**
  * Base index pattern fields for testing
@@ -40,6 +40,12 @@ export const fields: DataViewFieldBase[] = [
   {
     name: 'machine.os.raw',
     type: 'string',
+    scripted: false,
+  },
+  {
+    name: 'machine.os.keyword',
+    type: 'string',
+    esTypes: ['keyword'],
     scripted: false,
   },
   {

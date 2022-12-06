@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Switch, Redirect } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 import { USERS_PATH } from '../../../common/constants';
 import { UsersTableType } from '../store/model';
 import { Users } from './users';
@@ -33,7 +34,7 @@ export const UsersContainer = React.memo(() => {
           />
         )}
       />
-      <Route
+      <Route // Redirect to the first tab when tabName is not present.
         path={usersDetailsPagePath}
         render={({
           match: {
@@ -43,13 +44,30 @@ export const UsersContainer = React.memo(() => {
         }) => (
           <Redirect
             to={{
-              pathname: `${USERS_PATH}/${detailName}/${UsersTableType.authentications}`,
+              pathname: `${USERS_PATH}/name/${detailName}/${UsersTableType.authentications}`,
               search,
             }}
           />
         )}
       />
-      <Route
+
+      <Route // Compatibility redirect for the old user detail path.
+        path={`${USERS_PATH}/:detailName/:tabName?`}
+        render={({
+          match: {
+            params: { detailName, tabName = UsersTableType.authentications },
+          },
+          location: { search = '' },
+        }) => (
+          <Redirect
+            to={{
+              pathname: `${USERS_PATH}/name/${detailName}/${tabName}`,
+              search,
+            }}
+          />
+        )}
+      />
+      <Route // Redirect to the first tab when tabName is not present.
         path={USERS_PATH}
         render={({ location: { search = '' } }) => (
           <Redirect to={{ pathname: `${USERS_PATH}/${UsersTableType.allUsers}`, search }} />

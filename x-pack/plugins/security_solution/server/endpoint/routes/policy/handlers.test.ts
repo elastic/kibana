@@ -13,7 +13,7 @@ import {
 } from '../../mocks';
 import { createMockAgentClient, createMockAgentService } from '@kbn/fleet-plugin/server/mocks';
 import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
-import { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -21,18 +21,17 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
+import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import {
   createMockConfig,
   requestContextMock,
 } from '../../../lib/detection_engine/routes/__mocks__';
-import { Agent } from '@kbn/fleet-plugin/common/types/models';
-import { AgentClient, AgentService } from '@kbn/fleet-plugin/server/services';
+import type { Agent } from '@kbn/fleet-plugin/common/types/models';
+import type { AgentClient, AgentService } from '@kbn/fleet-plugin/server/services';
 import { get } from 'lodash';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ScopedClusterClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;
@@ -56,7 +55,7 @@ describe('test policy response handler', () => {
       const response = createSearchResponse(new EndpointDocGenerator().generatePolicyResponse());
       const hostPolicyResponseHandler = getHostPolicyResponseHandler();
 
-      mockScopedClient.asCurrentUser.search.mockResponseOnce(response);
+      mockScopedClient.asInternalUser.search.mockResponseOnce(response);
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { agentId: 'id' },
       });
@@ -79,7 +78,7 @@ describe('test policy response handler', () => {
     it('should return not found when there is no response policy for host', async () => {
       const hostPolicyResponseHandler = getHostPolicyResponseHandler();
 
-      mockScopedClient.asCurrentUser.search.mockResponseOnce(createSearchResponse());
+      mockScopedClient.asInternalUser.search.mockResponseOnce(createSearchResponse());
 
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { agentId: 'id' },

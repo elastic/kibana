@@ -120,17 +120,15 @@ describe('Initializing the store', () => {
       datasource1State,
       [],
       undefined,
-      {
-        isFullEditor: true,
-      }
+      [],
+      {}
     );
     expect(datasourceMap.testDatasource2.initialize).toHaveBeenCalledWith(
       datasource2State,
       [],
       undefined,
-      {
-        isFullEditor: true,
-      }
+      [],
+      {}
     );
     expect(datasourceMap.testDatasource3.initialize).not.toHaveBeenCalled();
     expect(store.getState()).toMatchSnapshot();

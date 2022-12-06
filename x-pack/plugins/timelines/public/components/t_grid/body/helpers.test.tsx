@@ -91,6 +91,7 @@ describe('helpers', () => {
         initialWidth: 176,
         category: 'kibana',
         type: 'date',
+        esTypes: ['date'],
         aggregatable: true,
         actions: {
           showSortAsc: {
@@ -122,12 +123,22 @@ describe('helpers', () => {
 
     test('it returns the expected results when each column has a corresponding entry in `columnHeaders`', () => {
       expect(mapSortingColumns({ columns, columnHeaders })).toEqual([
-        { columnId: 'kibana.rac.alert.status', columnType: 'string', sortDirection: 'asc' },
-        { columnId: 'kibana.rac.alert.start', columnType: 'date', sortDirection: 'desc' },
+        {
+          columnId: 'kibana.rac.alert.status',
+          columnType: 'string',
+          esTypes: [],
+          sortDirection: 'asc',
+        },
+        {
+          columnId: 'kibana.rac.alert.start',
+          columnType: 'date',
+          esTypes: ['date'],
+          sortDirection: 'desc',
+        },
       ]);
     });
 
-    test('it defaults to a `columnType` of `text` when a column does NOT has a corresponding entry in `columnHeaders`', () => {
+    test('it defaults to a `columnType` of empty string when a column does NOT have a corresponding entry in `columnHeaders`', () => {
       const withUnknownColumn: Array<{
         id: string;
         direction: 'asc' | 'desc';
@@ -147,11 +158,22 @@ describe('helpers', () => {
       ];
 
       expect(mapSortingColumns({ columns: withUnknownColumn, columnHeaders })).toEqual([
-        { columnId: 'kibana.rac.alert.status', columnType: 'string', sortDirection: 'asc' },
-        { columnId: 'kibana.rac.alert.start', columnType: 'date', sortDirection: 'desc' },
+        {
+          columnId: 'kibana.rac.alert.status',
+          columnType: 'string',
+          esTypes: [],
+          sortDirection: 'asc',
+        },
+        {
+          columnId: 'kibana.rac.alert.start',
+          columnType: 'date',
+          esTypes: ['date'],
+          sortDirection: 'desc',
+        },
         {
           columnId: 'unknown',
-          columnType: 'text', // <-- mapped to the default
+          columnType: '', // <-- mapped to the default
+          esTypes: [], // <-- mapped to the default
           sortDirection: 'asc',
         },
       ]);

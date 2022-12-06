@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import {
+import { type Subject, ReplaySubject } from 'rxjs';
+import type {
   PluginInitializerContext,
   Plugin,
   CoreSetup,
@@ -15,19 +16,19 @@ import {
   IContextProvider,
 } from '@kbn/core/server';
 
-import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import {
+import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
   PluginStart as DataPluginStart,
   PluginSetup as DataPluginSetup,
 } from '@kbn/data-plugin/server';
 
-import { RuleRegistryPluginConfig } from './config';
-import { IRuleDataService, RuleDataService } from './rule_data_plugin_service';
+import type { RuleRegistryPluginConfig } from './config';
+import { type IRuleDataService, RuleDataService } from './rule_data_plugin_service';
 import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
-import { AlertsClient } from './alert_data_client/alerts_client';
-import { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
+import type { AlertsClient } from './alert_data_client/alerts_client';
+import type { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
 import { defineRoutes } from './routes';
 import { ruleRegistrySearchStrategyProvider, RULE_SEARCH_STRATEGY_NAME } from './search_strategy';
 
@@ -66,6 +67,7 @@ export class RuleRegistryPlugin
   private readonly alertsClientFactory: AlertsClientFactory;
   private ruleDataService: IRuleDataService | null;
   private security: SecurityPluginSetup | undefined;
+  private pluginStop$: Subject<void>;
 
   constructor(initContext: PluginInitializerContext) {
     this.config = initContext.config.get<RuleRegistryPluginConfig>();
@@ -73,6 +75,7 @@ export class RuleRegistryPlugin
     this.kibanaVersion = initContext.env.packageInfo.version;
     this.ruleDataService = null;
     this.alertsClientFactory = new AlertsClientFactory();
+    this.pluginStop$ = new ReplaySubject(1);
   }
 
   public setup(
@@ -100,6 +103,7 @@ export class RuleRegistryPlugin
         const deps = await startDependencies;
         return deps.core.elasticsearch.client.asInternalUser;
       },
+      pluginStop$: this.pluginStop$,
     });
 
     this.ruleDataService.initializeService();
@@ -171,5 +175,8 @@ export class RuleRegistryPlugin
     };
   };
 
-  public stop() {}
+  public stop() {
+    this.pluginStop$.next();
+    this.pluginStop$.complete();
+  }
 }

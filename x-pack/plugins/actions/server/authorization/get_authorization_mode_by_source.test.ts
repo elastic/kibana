@@ -7,6 +7,7 @@
 
 import {
   getAuthorizationModeBySource,
+  getBulkAuthorizationModeBySource,
   AuthorizationMode,
 } from './get_authorization_mode_by_source';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -92,6 +93,90 @@ describe(`#getAuthorizationModeBySource`, () => {
         })
       )
     ).toEqual(AuthorizationMode.RBAC);
+  });
+});
+
+describe(`#getBulkAuthorizationModeBySource`, () => {
+  test('should return RBAC if no source is provided', async () => {
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
+    expect(await getBulkAuthorizationModeBySource(unsecuredSavedObjectsClient)).toEqual({
+      [AuthorizationMode.RBAC]: 1,
+      [AuthorizationMode.Legacy]: 0,
+    });
+  });
+
+  test('should return RBAC if source is not an alert', async () => {
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
+    expect(
+      await getBulkAuthorizationModeBySource(unsecuredSavedObjectsClient, [
+        asSavedObjectExecutionSource({
+          type: 'action',
+          id: uuid.v4(),
+        }),
+      ])
+    ).toEqual({ [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 });
+  });
+
+  test('should return RBAC if source alert is not marked as legacy', async () => {
+    const id = uuid.v4();
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [mockAlert({ id })] });
+    expect(
+      await getBulkAuthorizationModeBySource(unsecuredSavedObjectsClient, [
+        asSavedObjectExecutionSource({
+          type: 'alert',
+          id,
+        }),
+      ])
+    ).toEqual({ [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 });
+  });
+
+  test('should return Legacy if source alert is marked as legacy', async () => {
+    const id = uuid.v4();
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        mockAlert({ id, attributes: { meta: { versionApiKeyLastmodified: 'pre-7.10.0' } } }),
+      ],
+    });
+    expect(
+      await getBulkAuthorizationModeBySource(unsecuredSavedObjectsClient, [
+        asSavedObjectExecutionSource({
+          type: 'alert',
+          id,
+        }),
+      ])
+    ).toEqual({ [AuthorizationMode.RBAC]: 0, [AuthorizationMode.Legacy]: 1 });
+  });
+
+  test('should return RBAC if source alert is marked as modern', async () => {
+    const id = uuid.v4();
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        mockAlert({ id, attributes: { meta: { versionApiKeyLastmodified: '7.10.0' } } }),
+      ],
+    });
+    expect(
+      await getBulkAuthorizationModeBySource(unsecuredSavedObjectsClient, [
+        asSavedObjectExecutionSource({
+          type: 'alert',
+          id,
+        }),
+      ])
+    ).toEqual({ [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 });
+  });
+
+  test('should return RBAC if source alert doesnt have a last modified version', async () => {
+    const id = uuid.v4();
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [mockAlert({ id, attributes: { meta: {} } })],
+    });
+    expect(
+      await getBulkAuthorizationModeBySource(unsecuredSavedObjectsClient, [
+        asSavedObjectExecutionSource({
+          type: 'alert',
+          id,
+        }),
+      ])
+    ).toEqual({ [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 });
   });
 });
 

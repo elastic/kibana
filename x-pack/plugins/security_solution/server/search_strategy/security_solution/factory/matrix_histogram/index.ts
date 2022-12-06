@@ -8,16 +8,18 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import {
+import type {
   FactoryQueryTypes,
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
-  MatrixHistogramQuery,
-  MatrixHistogramType,
   MatrixHistogramDataConfig,
 } from '../../../../../common/search_strategy/security_solution';
+import {
+  MatrixHistogramQuery,
+  MatrixHistogramType,
+} from '../../../../../common/search_strategy/security_solution';
 import { inspectStringifyObject } from '../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../types';
+import type { SecuritySolutionFactory } from '../types';
 import { getGenericData } from './helpers';
 import { alertsMatrixHistogramConfig } from './alerts';
 import { anomaliesMatrixHistogramConfig } from './anomalies';
@@ -36,42 +38,6 @@ const matrixHistogramConfig: MatrixHistogramDataConfig = {
 };
 
 export const matrixHistogram: SecuritySolutionFactory<typeof MatrixHistogramQuery> = {
-  buildDsl: (options: MatrixHistogramRequestOptions) => {
-    const myConfig = getOr(null, options.histogramType, matrixHistogramConfig);
-    if (myConfig == null) {
-      throw new Error(`This histogram type ${options.histogramType} is unknown to the server side`);
-    }
-    return myConfig.buildDsl(options);
-  },
-  parse: async (
-    options: MatrixHistogramRequestOptions,
-    response: IEsSearchResponse<unknown>
-  ): Promise<MatrixHistogramStrategyResponse> => {
-    const myConfig = getOr(null, options.histogramType, matrixHistogramConfig);
-    if (myConfig == null) {
-      throw new Error(`This histogram type ${options.histogramType} is unknown to the server side`);
-    }
-    const totalCount = response.rawResponse.hits.total || 0;
-    const matrixHistogramData = getOr([], myConfig.aggName, response.rawResponse);
-    const inspect = {
-      dsl: [inspectStringifyObject(myConfig.buildDsl(options))],
-    };
-    const dataParser = myConfig.parser ?? getGenericData;
-
-    return {
-      ...response,
-      inspect,
-      matrixHistogramData: dataParser<typeof options.histogramType>(
-        matrixHistogramData,
-        myConfig.parseKey
-      ),
-      // @ts-expect-error code doesn't handle TotalHits
-      totalCount,
-    };
-  },
-};
-
-export const matrixHistogramEntities: SecuritySolutionFactory<typeof MatrixHistogramQuery> = {
   buildDsl: (options: MatrixHistogramRequestOptions) => {
     const myConfig = getOr(null, options.histogramType, matrixHistogramConfig);
     if (myConfig == null) {

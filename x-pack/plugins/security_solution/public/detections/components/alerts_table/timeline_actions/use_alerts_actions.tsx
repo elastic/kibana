@@ -8,16 +8,16 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { useStatusBulkActionItems } from '@kbn/timelines-plugin/public';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { timelineActions } from '../../../../timelines/store/timeline';
+import { useBulkActionItems } from '@kbn/timelines-plugin/public';
+import { getScopedActions } from '../../../../helpers';
+import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
-import { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
+import type { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 interface Props {
   alertStatus?: Status;
   closePopover: () => void;
   eventId: string;
-  timelineId: string;
+  scopeId: string;
   indexName: string;
   refetch?: () => void;
 }
@@ -26,7 +26,7 @@ export const useAlertsActions = ({
   alertStatus,
   closePopover,
   eventId,
-  timelineId,
+  scopeId,
   indexName,
   refetch,
 }: Props) => {
@@ -40,21 +40,26 @@ export const useAlertsActions = ({
     }
   }, [closePopover, refetch]);
 
+  const scopedActions = getScopedActions(scopeId);
   const setEventsLoading = useCallback(
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
-      dispatch(timelineActions.setEventsLoading({ id: timelineId, eventIds, isLoading }));
+      if (scopedActions) {
+        dispatch(scopedActions.setEventsLoading({ id: scopeId, eventIds, isLoading }));
+      }
     },
-    [dispatch, timelineId]
+    [dispatch, scopeId, scopedActions]
   );
 
   const setEventsDeleted = useCallback(
     ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
-      dispatch(timelineActions.setEventsDeleted({ id: timelineId, eventIds, isDeleted }));
+      if (scopedActions) {
+        dispatch(scopedActions.setEventsDeleted({ id: scopeId, eventIds, isDeleted }));
+      }
     },
-    [dispatch, timelineId]
+    [dispatch, scopeId, scopedActions]
   );
 
-  const actionItems = useStatusBulkActionItems({
+  const actionItems = useBulkActionItems({
     eventIds: [eventId],
     currentStatus: alertStatus,
     indexName,
@@ -62,7 +67,6 @@ export const useAlertsActions = ({
     setEventsDeleted,
     onUpdateSuccess: onStatusUpdate,
     onUpdateFailure: onStatusUpdate,
-    timelineId,
   });
 
   return {

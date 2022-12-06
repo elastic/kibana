@@ -8,7 +8,7 @@
 import { argv } from 'yargs';
 import pLimit from 'p-limit';
 import pRetry from 'p-retry';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { uniq, without, merge, flatten } from 'lodash';
 import * as histogram from 'hdr-histogram-js';
 import {
@@ -18,12 +18,12 @@ import {
   TRANSACTION_TYPE,
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
-  POD_NAME,
+  KUBERNETES_POD_NAME,
   CONTAINER_ID,
   SERVICE_VERSION,
   TRANSACTION_RESULT,
   PROCESSOR_EVENT,
-} from '../../common/elasticsearch_fieldnames';
+} from '../../common/es_fields/apm';
 import { createOrUpdateIndex } from '../shared/create_or_update_index';
 import { parseIndexUrl } from '../shared/parse_index_url';
 import { ESClient, getEsClient } from '../shared/get_es_client';
@@ -91,7 +91,7 @@ export async function aggregateLatencyMetrics() {
     SERVICE_ENVIRONMENT,
     AGENT_NAME,
     HOST_NAME,
-    POD_NAME,
+    KUBERNETES_POD_NAME,
     CONTAINER_ID,
     TRANSACTION_NAME,
     TRANSACTION_RESULT,

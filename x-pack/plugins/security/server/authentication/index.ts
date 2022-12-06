@@ -21,6 +21,7 @@ export {
   SAMLAuthenticationProvider,
   OIDCAuthenticationProvider,
   AnonymousAuthenticationProvider,
+  HTTPAuthenticationProvider,
 } from './providers';
 export {
   BasicHTTPAuthorizationHeaderCredentials,

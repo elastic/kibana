@@ -5,44 +5,62 @@
  * 2.0.
  */
 
-import type { MetricsMap } from './metrics_to_api_options';
-import { metricsToApiOptions } from './metrics_to_api_options';
+import type { MetricsExplorerOptions } from '../../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import {
+  createMetricByFieldLookup,
+  MetricsQueryOptions,
+  metricsToApiOptions,
+} from './metrics_to_api_options';
 
 describe('metricsToApiOptions', () => {
   type TestNodeTypeMetricsField = 'test.node.type.field1' | 'test.node.type.field2';
 
-  const testMetricsMapField1First: MetricsMap<TestNodeTypeMetricsField> = {
-    'test.node.type.field1': {
-      aggregation: 'max',
-      field: 'test.node.type.field1',
+  const testMetricsMapField1First: MetricsQueryOptions<TestNodeTypeMetricsField> = {
+    sourceFilter: {
+      term: {
+        'event.module': 'test',
+      },
     },
-    'test.node.type.field2': {
-      aggregation: 'avg',
-      field: 'test.node.type.field2',
+    groupByField: 'test.node.type.groupingField',
+    metricsMap: {
+      'test.node.type.field1': {
+        aggregation: 'max',
+        field: 'test.node.type.field1',
+      },
+      'test.node.type.field2': {
+        aggregation: 'avg',
+        field: 'test.node.type.field2',
+      },
     },
   };
 
-  const testMetricsMapField1Second: MetricsMap<TestNodeTypeMetricsField> = {
-    'test.node.type.field2': {
-      aggregation: 'avg',
-      field: 'test.node.type.field2',
+  const testMetricsMapField1Second: MetricsQueryOptions<TestNodeTypeMetricsField> = {
+    sourceFilter: {
+      term: {
+        'event.module': 'test',
+      },
     },
-    'test.node.type.field1': {
-      aggregation: 'max',
-      field: 'test.node.type.field1',
+    groupByField: 'test.node.type.groupingField',
+    metricsMap: {
+      'test.node.type.field2': {
+        aggregation: 'avg',
+        field: 'test.node.type.field2',
+      },
+      'test.node.type.field1': {
+        aggregation: 'max',
+        field: 'test.node.type.field1',
+      },
     },
   };
 
   const fields = ['test.node.type.field1', 'test.node.type.field2'];
 
   it('should join the grouping field with the metrics in the APIs expected format', () => {
-    const { options } = metricsToApiOptions(
-      testMetricsMapField1First,
-      'test.node.type.groupingField'
-    );
+    const { options } = metricsToApiOptions(testMetricsMapField1First);
     expect(options).toEqual({
       aggregation: 'avg',
       groupBy: 'test.node.type.groupingField',
+      filterQuery: JSON.stringify({ bool: { filter: [{ term: { 'event.module': 'test' } }] } }),
       metrics: [
         {
           field: 'test.node.type.field1',
@@ -53,28 +71,21 @@ describe('metricsToApiOptions', () => {
           aggregation: 'avg',
         },
       ],
-    });
+    } as MetricsExplorerOptions);
   });
 
   it('should provide a mapping object that allows consumer to ignore metric definition order', () => {
-    const field1First = metricsToApiOptions(
-      testMetricsMapField1First,
-      'test.node.type.groupingField'
-    );
+    const metricByFieldFirst = createMetricByFieldLookup(testMetricsMapField1First.metricsMap);
 
-    assertListContentIsEqual(Object.keys(field1First.metricByField), fields);
-    expect(field1First.metricByField).toEqual({
+    assertListContentIsEqual(Object.keys(metricByFieldFirst), fields);
+    expect(metricByFieldFirst).toEqual({
       'test.node.type.field1': 'metric_0',
       'test.node.type.field2': 'metric_1',
     });
 
-    const field1Second = metricsToApiOptions(
-      testMetricsMapField1Second,
-      'test.node.type.groupingField'
-    );
+    const metricByFieldSecond = createMetricByFieldLookup(testMetricsMapField1Second.metricsMap);
 
-    assertListContentIsEqual(Object.keys(field1Second.metricByField), fields);
-    expect(field1Second.metricByField).toEqual({
+    expect(metricByFieldSecond).toEqual({
       'test.node.type.field1': 'metric_1',
       'test.node.type.field2': 'metric_0',
     });

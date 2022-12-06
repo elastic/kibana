@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { isString, isEmpty } from 'lodash/fp';
-import React, { SyntheticEvent, useCallback, useMemo } from 'react';
+import type { SyntheticEvent } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { DefaultDraggable } from '../../../../../common/components/draggables';
@@ -44,6 +38,8 @@ interface RenderRuleNameProps {
   contextId: string;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isDraggable: boolean;
   isButton?: boolean;
   onClick?: () => void;
@@ -59,6 +55,8 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   contextId,
   eventId,
   fieldName,
+  fieldType,
+  isAggregatable,
   isDraggable,
   isButton,
   onClick,
@@ -148,6 +146,8 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
     return isDraggable ? (
       <DefaultDraggable
         field={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         id={id}
         isDraggable={isDraggable}
         tooltipContent={value}
@@ -162,6 +162,8 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
     return isDraggable ? (
       <DefaultDraggable
         field={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         id={id}
         isDraggable={isDraggable}
         tooltipContent={value}
@@ -188,6 +190,8 @@ export const renderEventModule = ({
   contextId,
   eventId,
   fieldName,
+  fieldType,
+  isAggregatable,
   isDraggable,
   linkValue,
   truncate,
@@ -196,6 +200,8 @@ export const renderEventModule = ({
   contextId: string;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isDraggable: boolean;
   linkValue: string | null | undefined;
   truncate?: boolean;
@@ -219,6 +225,8 @@ export const renderEventModule = ({
           <DefaultDraggable
             field={fieldName}
             id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${moduleName}`}
+            fieldType={fieldType}
+            isAggregatable={isAggregatable}
             isDraggable={isDraggable}
             tooltipContent={value}
             value={value}
@@ -286,6 +294,8 @@ export const renderUrl = ({
   Component,
   eventId,
   fieldName,
+  fieldType,
+  isAggregatable,
   isDraggable,
   truncate,
   title,
@@ -296,6 +306,8 @@ export const renderUrl = ({
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isDraggable: boolean;
   truncate?: boolean;
   title?: string;
@@ -321,6 +333,8 @@ export const renderUrl = ({
     isDraggable ? (
       <DefaultDraggable
         field={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${urlName}`}
         isDraggable={isDraggable}
         tooltipContent={value}

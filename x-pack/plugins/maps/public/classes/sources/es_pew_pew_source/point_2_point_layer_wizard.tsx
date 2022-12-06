@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import { GeoJsonVectorLayer } from '../../layers/vector_layer';
-// @ts-ignore
 import { ESPewPewSource, sourceTitle } from './es_pew_pew_source';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import {
@@ -24,7 +23,11 @@ import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import { LayerWizard, RenderWizardArguments } from '../../layers';
-import { ColorDynamicOptions, SizeDynamicOptions } from '../../../../common/descriptor_types';
+import {
+  ColorDynamicOptions,
+  ESPewPewSourceDescriptor,
+  SizeDynamicOptions,
+} from '../../../../common/descriptor_types';
 import { Point2PointLayerIcon } from '../../layers/wizards/icons/point_2_point_layer_icon';
 
 export const point2PointLayerWizardConfig: LayerWizard = {
@@ -36,7 +39,7 @@ export const point2PointLayerWizardConfig: LayerWizard = {
   }),
   icon: Point2PointLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: unknown) => {
+    const onSourceConfigChange = (sourceConfig: Partial<ESPewPewSourceDescriptor>) => {
       if (!sourceConfig) {
         previewLayers([]);
         return;

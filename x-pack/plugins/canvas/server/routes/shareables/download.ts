@@ -6,6 +6,7 @@
  */
 
 import { readFileSync } from 'fs';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { SHAREABLE_RUNTIME_FILE } from '../../../shareable_runtime/constants';
 import { RouteInitializerDeps } from '..';
 import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../../common/lib/constants';

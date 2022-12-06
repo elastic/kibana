@@ -9,17 +9,21 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { i18n } from '@kbn/i18n';
 import { groupBy, omit, pick, isEqual } from 'lodash';
 
+import apm from 'elastic-apm-node';
+
 import type {
   NewPackagePolicy,
   AgentPolicy,
   Installation,
   Output,
+  DownloadSource,
   PreconfiguredAgentPolicy,
   PreconfiguredPackage,
-  PreconfigurationError,
   PackagePolicy,
-} from '../../common';
-import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common';
+  PackageInfo,
+} from '../../common/types';
+import type { PreconfigurationError } from '../../common/constants';
+import { PRECONFIGURATION_LATEST_KEYWORD } from '../../common/constants';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../constants';
 
 import { escapeSearchQueryPhrase } from './saved_object';
@@ -45,6 +49,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   policies: PreconfiguredAgentPolicy[] = [],
   packages: PreconfiguredPackage[] = [],
   defaultOutput: Output,
+  defaultDownloadSource: DownloadSource,
   spaceId: string
 ): Promise<PreconfigurationResult> {
   const logger = appContextService.getLogger();
@@ -154,12 +159,17 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           preconfiguredAgentPolicy,
           policy
         );
+
+        const newFields: Partial<AgentPolicy> = {
+          download_source_id: defaultDownloadSource.id,
+          ...fields,
+        };
         if (hasChanged) {
           const updatedPolicy = await agentPolicyService.update(
             soClient,
             esClient,
             String(preconfiguredAgentPolicy.id),
-            fields,
+            newFields,
             {
               force: true,
             }
@@ -246,6 +256,10 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         );
       });
 
+      apm.startTransaction(
+        'fleet.preconfiguration.addPackagePolicies.improved.prReview.50',
+        'fleet'
+      );
       await addPreconfiguredPolicyPackages(
         soClient,
         esClient,
@@ -254,6 +268,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         defaultOutput,
         true
       );
+      apm.endTransaction('fleet.preconfiguration.addPackagePolicies.improved.prReview.50');
 
       // Add the is_managed flag after configuring package policies to avoid errors
       if (shouldAddIsManagedFlag) {
@@ -320,13 +335,23 @@ async function addPreconfiguredPolicyPackages(
   defaultOutput: Output,
   bumpAgentPolicyRevison = false
 ) {
+  // Cache package info objects so we don't waste lookup time on the latest package
+  // every time we call `getPackageInfo`
+  const packageInfoMap = new Map<string, PackageInfo>();
+
   // Add packages synchronously to avoid overwriting
   for (const { installedPackage, id, name, description, inputs } of installedPackagePolicies) {
-    const packageInfo = await getPackageInfo({
-      savedObjectsClient: soClient,
-      pkgName: installedPackage.name,
-      pkgVersion: installedPackage.version,
-    });
+    let packageInfo: PackageInfo;
+
+    if (packageInfoMap.has(installedPackage.name)) {
+      packageInfo = packageInfoMap.get(installedPackage.name)!;
+    } else {
+      packageInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: installedPackage.name,
+        pkgVersion: installedPackage.version,
+      });
+    }
 
     await addPackageToAgentPolicy(
       soClient,
@@ -334,6 +359,7 @@ async function addPreconfiguredPolicyPackages(
       installedPackage,
       agentPolicy,
       defaultOutput,
+      packageInfo,
       name,
       id,
       description,

@@ -15,6 +15,9 @@ import {
   putTrainedModelQuerySchema,
   inferTrainedModelQuery,
   inferTrainedModelBody,
+  threadingParamsSchema,
+  pipelineSimulateBody,
+  updateDeploymentParamsSchema,
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
@@ -301,6 +304,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       path: '/api/ml/trained_models/{modelId}/deployment/_start',
       validate: {
         params: modelIdSchema,
+        query: threadingParamsSchema,
       },
       options: {
         tags: ['access:ml:canStartStopTrainedModels'],
@@ -311,6 +315,41 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const { modelId } = request.params;
         const body = await mlClient.startTrainedModelDeployment({
           model_id: modelId,
+          ...(request.query ? request.query : {}),
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /api/ml/trained_models/:modelId/deployment/_update Update trained model deployment
+   * @apiName UpdateTrainedModelDeployment
+   * @apiDescription Updates trained model deployment.
+   */
+  router.post(
+    {
+      path: '/api/ml/trained_models/{modelId}/deployment/_update',
+      validate: {
+        params: modelIdSchema,
+        body: updateDeploymentParamsSchema,
+      },
+      options: {
+        tags: ['access:ml:canStartStopTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      try {
+        const { modelId } = request.params;
+        const body = await mlClient.updateTrainedModelDeployment({
+          model_id: modelId,
+          ...request.body,
         });
         return response.ok({
           body,
@@ -358,6 +397,39 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
   /**
    * @apiGroup TrainedModels
    *
+   * @api {post} /api/ml/trained_models/pipeline_simulate Simulates an ingest pipeline
+   * @apiName SimulateIngestPipeline
+   * @apiDescription Simulates an ingest pipeline.
+   */
+  router.post(
+    {
+      path: '/api/ml/trained_models/pipeline_simulate',
+      validate: {
+        body: pipelineSimulateBody,
+      },
+      options: {
+        tags: ['access:ml:canTestTrainedModels'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const { pipeline, docs } = request.body;
+        const body = await client.asInternalUser.ingest.simulate({
+          pipeline,
+          docs,
+        });
+        return response.ok({
+          body,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup TrainedModels
+   *
    * @api {post} /api/ml/trained_models/infer/:modelId Evaluates a trained model
    * @apiName InferTrainedModelDeployment
    * @apiDescription Evaluates a trained model.
@@ -371,13 +443,13 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         body: inferTrainedModelBody,
       },
       options: {
-        tags: ['access:ml:canStartStopTrainedModels'],
+        tags: ['access:ml:canTestTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
-        const body = await mlClient.inferTrainedModelDeployment({
+        const body = await mlClient.inferTrainedModel({
           model_id: modelId,
           body: {
             docs: request.body.docs,

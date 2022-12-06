@@ -13,6 +13,7 @@ import {
   KibanaResponseFactory,
   IKibanaResponse,
   Logger,
+  SavedObject,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { InvalidatePendingApiKey } from '@kbn/alerting-plugin/server/types';
@@ -22,6 +23,7 @@ import {
   TaskInstance,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { FixtureStartDeps } from './plugin';
 import { retryIfConflicts } from './lib/retry_if_conflicts';
 
@@ -31,6 +33,26 @@ export function defineRoutes(
   { logger }: { logger: Logger }
 ) {
   const router = core.http.createRouter();
+  router.get(
+    {
+      path: '/api/alerts_fixture/registered_rule_types',
+      validate: {},
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const [_, { alerting }] = await core.getStartServices();
+        return res.ok({
+          body: alerting.getAllTypes(),
+        });
+      } catch (err) {
+        return res.badRequest({ body: err });
+      }
+    }
+  );
   router.put(
     {
       path: '/api/alerts_fixture/{id}/replace_api_key',
@@ -64,7 +86,7 @@ export function defineRoutes(
       const savedObjectsWithAlerts = await savedObjects.getScopedClient(req, {
         // Exclude the security and spaces wrappers to get around the safeguards those have in place to prevent
         // us from doing what we want to do - brute force replace the ApiKey
-        excludedWrappers: ['security', 'spaces'],
+        excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
         includedHiddenTypes: ['alert'],
       });
 
@@ -332,7 +354,7 @@ export function defineRoutes(
 
   router.post(
     {
-      path: `/api/alerting_actions_telemetry/run_now`,
+      path: `/api/alerting_actions_telemetry/run_soon`,
       validate: {
         body: schema.object({
           taskId: schema.string({
@@ -358,9 +380,72 @@ export function defineRoutes(
       const { taskId } = req.body;
       try {
         const taskManager = await taskManagerStart;
-        return res.ok({ body: await taskManager.runNow(taskId) });
+        return res.ok({ body: await taskManager.runSoon(taskId) });
       } catch (err) {
         return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/api/alerts_fixture/rule/{id}/_get_api_key',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const { id } = req.params;
+      const [, { encryptedSavedObjects, spaces }] = await core.getStartServices();
+
+      const spaceId = spaces ? spaces.spacesService.getSpaceId(req) : 'default';
+
+      let namespace: string | undefined;
+      if (spaces && spaceId) {
+        namespace = spaces.spacesService.spaceIdToNamespace(spaceId);
+      }
+
+      try {
+        const {
+          attributes: { apiKey, apiKeyOwner },
+        }: SavedObject<RawRule> = await encryptedSavedObjects
+          .getClient({
+            includedHiddenTypes: ['alert'],
+          })
+          .getDecryptedAsInternalUser('alert', id, {
+            namespace,
+          });
+
+        return res.ok({ body: { apiKey, apiKeyOwner } });
+      } catch (err) {
+        return res.badRequest({ body: err });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/api/alerts_fixture/registered_connector_types',
+      validate: {},
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const [_, { actions }] = await core.getStartServices();
+        return res.ok({
+          body: actions.getAllTypes(),
+        });
+      } catch (e) {
+        return res.badRequest({ body: e });
       }
     }
   );

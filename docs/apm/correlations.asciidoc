@@ -21,7 +21,7 @@ NOTE: Queries within the {apm-app} are also applied to the correlations.
 ==== Find high transaction latency correlations
 
 The correlations on the *Latency correlations* tab help you discover which
-attributes are contributing to increased transaction latency. 
+attributes are contributing to increased transaction latency.
 
 [role="screenshot"]
 image::apm/images/correlations-hover.png[Latency correlations]
@@ -74,7 +74,7 @@ The table is sorted by scores, which are mapped to high, medium, or low impact
 levels. Attributes with high impact levels are more likely to contribute to
 failed transactions. By default, the attribute with the highest score is added
 to the chart. To see a different attribute in the chart, select its row in the
-table. 
+table.
 
 For example, in the screenshot below, there are attributes such as a specific
 node and pod name that have medium impact on the failed transactions.

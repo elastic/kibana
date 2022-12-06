@@ -19,6 +19,7 @@
         "description": [],
         "path": "packages/kbn-import-resolver/src/import_resolver.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
@@ -39,6 +40,7 @@
             ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/import-resolver",
@@ -52,6 +54,7 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -69,6 +72,7 @@
             ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/import-resolver",
@@ -82,6 +86,7 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -96,6 +101,7 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -110,6 +116,7 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -127,6 +134,7 @@
             ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/import-resolver",
@@ -140,6 +148,7 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -157,6 +166,7 @@
             ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/import-resolver",
@@ -170,6 +180,7 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -187,6 +198,7 @@
             ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/import-resolver",
@@ -200,6 +212,7 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -217,6 +230,7 @@
             ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/import-resolver",
@@ -230,6 +244,7 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -257,6 +272,7 @@
             ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/import-resolver",
@@ -270,6 +286,7 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -284,6 +301,7 @@
                 ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -306,6 +324,7 @@
         ],
         "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
@@ -319,6 +338,7 @@
             ],
             "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -337,6 +357,7 @@
         ],
         "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
@@ -350,6 +371,7 @@
             ],
             "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -376,6 +398,7 @@
         ],
         "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
@@ -389,6 +412,7 @@
             ],
             "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -409,6 +433,7 @@
             ],
             "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -423,6 +448,7 @@
             ],
             "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -442,6 +468,7 @@
         ],
         "path": "packages/kbn-import-resolver/src/resolve_result.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
@@ -454,7 +481,8 @@
               "\"built-in\""
             ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -470,6 +498,7 @@
         ],
         "path": "packages/kbn-import-resolver/src/resolve_result.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
@@ -482,7 +511,8 @@
               "\"file\""
             ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/import-resolver",
@@ -492,7 +522,8 @@
             "label": "absolute",
             "description": [],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/import-resolver",
@@ -505,7 +536,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/import-resolver",
@@ -518,7 +550,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/import-resolver",
@@ -531,7 +564,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -547,6 +581,7 @@
         ],
         "path": "packages/kbn-import-resolver/src/resolve_result.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
@@ -559,7 +594,8 @@
               "\"ignore\""
             ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -575,6 +611,7 @@
         ],
         "path": "packages/kbn-import-resolver/src/resolve_result.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
@@ -587,7 +624,8 @@
               "\"optional-and-missing\""
             ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -603,6 +641,7 @@
         ],
         "path": "packages/kbn-import-resolver/src/resolve_result.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/import-resolver",
@@ -615,7 +654,8 @@
               "\"@types\""
             ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/import-resolver",
@@ -625,7 +665,8 @@
             "label": "module",
             "description": [],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -645,6 +686,7 @@
         ],
         "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -699,6 +741,7 @@
         ],
         "path": "packages/kbn-import-resolver/src/resolve_result.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

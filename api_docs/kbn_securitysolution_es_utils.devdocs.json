@@ -29,6 +29,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/bad_request_error/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       }
@@ -48,6 +49,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/create_boostrap_index/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -61,6 +63,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/create_boostrap_index/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -75,6 +78,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/create_boostrap_index/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -93,6 +97,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/decode_version/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -106,6 +111,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/decode_version/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -126,6 +132,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -139,6 +146,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -153,6 +161,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -167,6 +176,57 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_all_index/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-es-utils",
+        "id": "def-server.deleteIndexTemplate",
+        "type": "Function",
+        "tags": [],
+        "label": "deleteIndexTemplate",
+        "description": [],
+        "signature": [
+          "(esClient: ",
+          "ElasticsearchClient",
+          ", name: string) => Promise<unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-es-utils/src/delete_index_template/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-server.deleteIndexTemplate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "ElasticsearchClient"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/delete_index_template/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-server.deleteIndexTemplate.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/delete_index_template/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -187,6 +247,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/delete_policy/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -200,6 +261,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_policy/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -214,6 +276,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_policy/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -234,6 +297,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/delete_template/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -247,6 +311,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_template/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -261,6 +326,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/delete_template/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -281,6 +347,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/encode_hit_version/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -294,6 +361,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/encode_hit_version/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -316,6 +384,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/get_bootstrap_index_exists/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -331,6 +400,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/get_bootstrap_index_exists/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -347,6 +417,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/get_bootstrap_index_exists/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -369,6 +440,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/get_index_aliases/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -379,6 +451,7 @@
             "description": [],
             "path": "packages/kbn-securitysolution-es-utils/src/get_index_aliases/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -388,7 +461,61 @@
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  "{ eql: ",
+                  "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
+                  "GetRequest",
+                  " | ",
+                  "GetRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "GetResponse",
+                  "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+                  "GetRequest",
+                  " | ",
+                  "GetRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "GetResponse",
+                  "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+                  "GetRequest",
+                  " | ",
+                  "GetRequest",
+                  ", options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "GetResponse",
+                  "<TDocument>>; }; delete: { (this: That, params: ",
+                  "DeleteRequest",
+                  " | ",
+                  "DeleteRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "WriteResponseBase",
+                  ">; (this: That, params: ",
+                  "DeleteRequest",
+                  " | ",
+                  "DeleteRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "WriteResponseBase",
+                  ", unknown>>; (this: That, params: ",
+                  "DeleteRequest",
+                  " | ",
+                  "DeleteRequest",
+                  ", options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "WriteResponseBase",
+                  ">; }; cluster: ",
+                  "default",
+                  "; eql: ",
                   "default",
                   "; search: { <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
@@ -452,7 +579,7 @@
                   "default",
                   "; security: ",
                   "default",
-                  "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+                  "; index: { <TDocument = unknown>(this: That, params: ",
                   "IndexRequest",
                   "<TDocument> | ",
                   "IndexRequest",
@@ -478,59 +605,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; delete: { (this: That, params: ",
-                  "DeleteRequest",
-                  " | ",
-                  "DeleteRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
-                  ">; (this: That, params: ",
-                  "DeleteRequest",
-                  " | ",
-                  "DeleteRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "WriteResponseBase",
-                  ", unknown>>; (this: That, params: ",
-                  "DeleteRequest",
-                  " | ",
-                  "DeleteRequest",
-                  ", options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
-                  ">; }; get: { <TDocument = unknown>(this: That, params: ",
-                  "GetRequest",
-                  " | ",
-                  "GetRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "GetResponse",
-                  "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-                  "GetRequest",
-                  " | ",
-                  "GetRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "GetResponse",
-                  "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-                  "GetRequest",
-                  " | ",
-                  "GetRequest",
-                  ", options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "GetResponse",
-                  "<TDocument>>; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+                  ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
                   "UpdateRequest",
                   "<TDocument, TPartialDocument> | ",
                   "UpdateRequest",
@@ -556,39 +631,11 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "UpdateResponse",
-                  "<TDocumentR>>; }; closePointInTime: { (this: That, params: ",
-                  "ClosePointInTimeRequest",
-                  " | ",
-                  "ClosePointInTimeRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "ClosePointInTimeResponse",
-                  ">; (this: That, params: ",
-                  "ClosePointInTimeRequest",
-                  " | ",
-                  "ClosePointInTimeRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "ClosePointInTimeResponse",
-                  ", unknown>>; (this: That, params: ",
-                  "ClosePointInTimeRequest",
-                  " | ",
-                  "ClosePointInTimeRequest",
-                  ", options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "ClosePointInTimeResponse",
-                  ">; }; helpers: ",
+                  "<TDocumentR>>; }; asyncSearch: ",
                   "default",
-                  "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
-                  "; Internal: ",
-                  "default",
-                  "; asyncSearch: ",
+                  "; helpers: ",
                   "default",
                   "; autoscaling: ",
                   "default",
@@ -648,9 +695,33 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "ClearScrollResponse",
-                  ">; }; cluster: ",
-                  "default",
-                  "; count: { (this: That, params?: ",
+                  ">; }; closePointInTime: { (this: That, params: ",
+                  "ClosePointInTimeRequest",
+                  " | ",
+                  "ClosePointInTimeRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "ClosePointInTimeResponse",
+                  ">; (this: That, params: ",
+                  "ClosePointInTimeRequest",
+                  " | ",
+                  "ClosePointInTimeRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "ClosePointInTimeResponse",
+                  ", unknown>>; (this: That, params: ",
+                  "ClosePointInTimeRequest",
+                  " | ",
+                  "ClosePointInTimeRequest",
+                  ", options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "ClosePointInTimeResponse",
+                  ">; }; count: { (this: That, params?: ",
                   "CountRequest",
                   " | ",
                   "CountRequest",
@@ -826,29 +897,29 @@
                   "ExplainResponse",
                   "<TDocument>>; }; features: ",
                   "default",
-                  "; fieldCaps: { (this: That, params: ",
+                  "; fieldCaps: { (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
-                  ">; (this: That, params: ",
+                  ">; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<",
                   "FieldCapsResponse",
-                  ", unknown>>; (this: That, params: ",
+                  ", unknown>>; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
@@ -1575,7 +1646,8 @@
                   "; }"
                 ],
                 "path": "packages/kbn-securitysolution-es-utils/src/get_index_aliases/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -1585,7 +1657,8 @@
                 "label": "alias",
                 "description": [],
                 "path": "packages/kbn-securitysolution-es-utils/src/get_index_aliases/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -1611,6 +1684,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/get_index_count/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -1621,6 +1695,7 @@
             "description": [],
             "path": "packages/kbn-securitysolution-es-utils/src/get_index_count/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -1630,7 +1705,61 @@
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  "{ eql: ",
+                  "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
+                  "GetRequest",
+                  " | ",
+                  "GetRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "GetResponse",
+                  "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+                  "GetRequest",
+                  " | ",
+                  "GetRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "GetResponse",
+                  "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+                  "GetRequest",
+                  " | ",
+                  "GetRequest",
+                  ", options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "GetResponse",
+                  "<TDocument>>; }; delete: { (this: That, params: ",
+                  "DeleteRequest",
+                  " | ",
+                  "DeleteRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "WriteResponseBase",
+                  ">; (this: That, params: ",
+                  "DeleteRequest",
+                  " | ",
+                  "DeleteRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "WriteResponseBase",
+                  ", unknown>>; (this: That, params: ",
+                  "DeleteRequest",
+                  " | ",
+                  "DeleteRequest",
+                  ", options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "WriteResponseBase",
+                  ">; }; cluster: ",
+                  "default",
+                  "; eql: ",
                   "default",
                   "; search: { <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
@@ -1694,7 +1823,7 @@
                   "default",
                   "; security: ",
                   "default",
-                  "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+                  "; index: { <TDocument = unknown>(this: That, params: ",
                   "IndexRequest",
                   "<TDocument> | ",
                   "IndexRequest",
@@ -1720,59 +1849,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; delete: { (this: That, params: ",
-                  "DeleteRequest",
-                  " | ",
-                  "DeleteRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
-                  ">; (this: That, params: ",
-                  "DeleteRequest",
-                  " | ",
-                  "DeleteRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "WriteResponseBase",
-                  ", unknown>>; (this: That, params: ",
-                  "DeleteRequest",
-                  " | ",
-                  "DeleteRequest",
-                  ", options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
-                  ">; }; get: { <TDocument = unknown>(this: That, params: ",
-                  "GetRequest",
-                  " | ",
-                  "GetRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "GetResponse",
-                  "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-                  "GetRequest",
-                  " | ",
-                  "GetRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "GetResponse",
-                  "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-                  "GetRequest",
-                  " | ",
-                  "GetRequest",
-                  ", options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "GetResponse",
-                  "<TDocument>>; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+                  ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
                   "UpdateRequest",
                   "<TDocument, TPartialDocument> | ",
                   "UpdateRequest",
@@ -1798,39 +1875,11 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "UpdateResponse",
-                  "<TDocumentR>>; }; closePointInTime: { (this: That, params: ",
-                  "ClosePointInTimeRequest",
-                  " | ",
-                  "ClosePointInTimeRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "ClosePointInTimeResponse",
-                  ">; (this: That, params: ",
-                  "ClosePointInTimeRequest",
-                  " | ",
-                  "ClosePointInTimeRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "ClosePointInTimeResponse",
-                  ", unknown>>; (this: That, params: ",
-                  "ClosePointInTimeRequest",
-                  " | ",
-                  "ClosePointInTimeRequest",
-                  ", options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "ClosePointInTimeResponse",
-                  ">; }; helpers: ",
+                  "<TDocumentR>>; }; asyncSearch: ",
                   "default",
-                  "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
-                  "; Internal: ",
-                  "default",
-                  "; asyncSearch: ",
+                  "; helpers: ",
                   "default",
                   "; autoscaling: ",
                   "default",
@@ -1890,9 +1939,33 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "ClearScrollResponse",
-                  ">; }; cluster: ",
-                  "default",
-                  "; count: { (this: That, params?: ",
+                  ">; }; closePointInTime: { (this: That, params: ",
+                  "ClosePointInTimeRequest",
+                  " | ",
+                  "ClosePointInTimeRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "ClosePointInTimeResponse",
+                  ">; (this: That, params: ",
+                  "ClosePointInTimeRequest",
+                  " | ",
+                  "ClosePointInTimeRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "ClosePointInTimeResponse",
+                  ", unknown>>; (this: That, params: ",
+                  "ClosePointInTimeRequest",
+                  " | ",
+                  "ClosePointInTimeRequest",
+                  ", options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "ClosePointInTimeResponse",
+                  ">; }; count: { (this: That, params?: ",
                   "CountRequest",
                   " | ",
                   "CountRequest",
@@ -2068,29 +2141,29 @@
                   "ExplainResponse",
                   "<TDocument>>; }; features: ",
                   "default",
-                  "; fieldCaps: { (this: That, params: ",
+                  "; fieldCaps: { (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
-                  ">; (this: That, params: ",
+                  ">; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
                   "<",
                   "FieldCapsResponse",
-                  ", unknown>>; (this: That, params: ",
+                  ", unknown>>; (this: That, params?: ",
                   "FieldCapsRequest",
                   " | ",
                   "FieldCapsRequest",
-                  ", options?: ",
+                  " | undefined, options?: ",
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "FieldCapsResponse",
@@ -2817,7 +2890,8 @@
                   "; }"
                 ],
                 "path": "packages/kbn-securitysolution-es-utils/src/get_index_count/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -2827,7 +2901,8 @@
                 "label": "index",
                 "description": [],
                 "path": "packages/kbn-securitysolution-es-utils/src/get_index_count/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -2851,6 +2926,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/get_index_exists/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -2864,6 +2940,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/get_index_exists/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2878,6 +2955,57 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/get_index_exists/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-es-utils",
+        "id": "def-server.getIndexTemplateExists",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexTemplateExists",
+        "description": [],
+        "signature": [
+          "(esClient: ",
+          "ElasticsearchClient",
+          ", template: string) => Promise<boolean>"
+        ],
+        "path": "packages/kbn-securitysolution-es-utils/src/get_index_template_exists/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-server.getIndexTemplateExists.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "ElasticsearchClient"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/get_index_template_exists/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-server.getIndexTemplateExists.$2",
+            "type": "string",
+            "tags": [],
+            "label": "template",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/get_index_template_exists/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2898,6 +3026,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/get_policy_exists/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -2911,6 +3040,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/get_policy_exists/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2925,6 +3055,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/get_policy_exists/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2945,6 +3076,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/get_template_exists/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -2958,6 +3090,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/get_template_exists/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2972,6 +3105,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/get_template_exists/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2992,6 +3126,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/read_index/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -3005,6 +3140,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/read_index/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -3019,6 +3155,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/read_index/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3039,6 +3176,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/read_privileges/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -3052,6 +3190,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/read_privileges/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -3066,6 +3205,72 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/read_privileges/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-es-utils",
+        "id": "def-server.setIndexTemplate",
+        "type": "Function",
+        "tags": [],
+        "label": "setIndexTemplate",
+        "description": [],
+        "signature": [
+          "(esClient: ",
+          "ElasticsearchClient",
+          ", name: string, body: Record<string, unknown>) => Promise<unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-es-utils/src/set_index_template/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-server.setIndexTemplate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "ElasticsearchClient"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/set_index_template/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-server.setIndexTemplate.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/set_index_template/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-es-utils",
+            "id": "def-server.setIndexTemplate.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "Record<string, unknown>"
+            ],
+            "path": "packages/kbn-securitysolution-es-utils/src/set_index_template/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3086,6 +3291,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/set_policy/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -3099,6 +3305,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/set_policy/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -3113,6 +3320,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/set_policy/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -3127,6 +3335,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/set_policy/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3147,6 +3356,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/set_template/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -3160,6 +3370,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/set_template/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -3174,6 +3385,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/set_template/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -3188,6 +3400,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/set_template/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3215,6 +3428,7 @@
         ],
         "path": "packages/kbn-securitysolution-es-utils/src/transform_error/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -3230,6 +3444,7 @@
             ],
             "path": "packages/kbn-securitysolution-es-utils/src/transform_error/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3247,6 +3462,7 @@
         "description": [],
         "path": "packages/kbn-securitysolution-es-utils/src/transform_error/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -3256,7 +3472,8 @@
             "label": "message",
             "description": [],
             "path": "packages/kbn-securitysolution-es-utils/src/transform_error/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-es-utils",
@@ -3266,7 +3483,8 @@
             "label": "statusCode",
             "description": [],
             "path": "packages/kbn-securitysolution-es-utils/src/transform_error/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

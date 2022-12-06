@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'error']);
   const appsMenu = getService('appsMenu');
@@ -17,13 +17,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('spaces', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     after(async () => {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('space with no features disabled', () => {

@@ -1,0 +1,23 @@
+{
+  "id": "threatIntelligence",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "ui": true,
+  "server": true,
+  "owner": {
+    "name": "Protections Experience Team",
+    "githubTeam": "protections-experience"
+  },
+  "description": "Elastic threat intelligence helps you see if you are open to or have been subject to current or historical known threats",
+  "requiredPlugins": [
+    "cases",
+    "data",
+    "dataViews",
+    "kibanaUtils",
+    "navigation",
+    "kibanaReact",
+    "triggersActionsUi",
+    "inspector"
+  ],
+  "requiredBundles": ["data", "kibanaUtils", "kibanaReact"]
+}

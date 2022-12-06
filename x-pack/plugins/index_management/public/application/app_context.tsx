@@ -31,6 +31,7 @@ export interface AppDependencies {
     fatalErrors: FatalErrorsStart;
     getUrlForApp: ApplicationStart['getUrlForApp'];
     executionContext: ExecutionContextStart;
+    application: ApplicationStart;
   };
   plugins: {
     usageCollection: UsageCollectionSetup;

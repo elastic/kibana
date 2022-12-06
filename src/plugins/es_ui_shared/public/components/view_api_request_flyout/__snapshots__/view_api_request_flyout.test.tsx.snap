@@ -12,27 +12,27 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
     type="button"
   />
   <div
-    class="euiFlyoutHeader"
+    class="euiFlyoutHeader emotion-euiFlyoutHeader"
   >
     <h2
-      class="euiTitle euiTitle--medium"
+      class="euiTitle emotion-euiTitle-m"
       data-test-subj="apiRequestFlyoutTitle"
     >
       Test title
     </h2>
   </div>
   <div
-    class="euiFlyoutBody"
+    class="euiFlyoutBody emotion-euiFlyoutBody"
   >
     <div
-      class="euiFlyoutBody__overflow"
+      class="euiFlyoutBody__overflow css-18yrfj9-noBanner"
       tabindex="0"
     >
       <div
         class="euiFlyoutBody__overflowContent"
       >
         <div
-          class="euiText euiText--medium"
+          class="euiText emotion-euiText-m"
         >
           <p
             data-test-subj="apiRequestFlyoutDescription"
@@ -41,19 +41,19 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
           </p>
         </div>
         <div
-          class="euiSpacer euiSpacer--l"
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
         />
         <div
-          class="euiSpacer euiSpacer--s"
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
         />
         <div
           class="eui-textRight"
         >
           <span
-            class="euiToolTipAnchor"
+            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
           >
             <button
-              class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+              class="euiButtonEmpty euiButtonEmpty--xSmall euiButtonEmpty--flushRight css-9t7nyf-empty-primary"
               data-test-subj="apiRequestFlyoutCopyClipboardButton"
               type="button"
             >
@@ -75,7 +75,7 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
           </span>
         </div>
         <div
-          class="euiSpacer euiSpacer--s"
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
         />
         <div>
           <pre>
@@ -91,10 +91,10 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
     </div>
   </div>
   <div
-    class="euiFlyoutFooter"
+    class="euiFlyoutFooter emotion-euiFlyoutFooter"
   >
     <button
-      class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+      class="euiButtonEmpty euiButtonEmpty--flushLeft css-9t7nyf-empty-primary"
       data-test-subj="apiRequestFlyoutClose"
       type="button"
     >

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SortColumnTimeline } from '../../../../../../common/types/timeline';
+import type { SortColumnTimeline } from '../../../../../../common/types/timeline';
 
 /** Specifies which column the timeline is sorted on */
 export type Sort = SortColumnTimeline;

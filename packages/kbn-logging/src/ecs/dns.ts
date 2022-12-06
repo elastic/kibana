@@ -13,7 +13,7 @@
  */
 export interface EcsDns {
   answers?: Answer[];
-  header_flags?: string[];
+  header_flags?: HeaderFlags[];
   id?: number;
   op_code?: string;
   question?: Question;
@@ -21,6 +21,8 @@ export interface EcsDns {
   response_code?: string;
   type?: string;
 }
+
+type HeaderFlags = 'AA' | 'TC' | 'RD' | 'RA' | 'AD' | 'CD' | 'DO';
 
 interface Answer {
   data: string;

@@ -41,6 +41,7 @@ describe('useExpViewTimeRange', function () {
           total: 0,
           monitors: [],
           syncErrors: null,
+          absoluteTotal: 0,
         },
         locations: [],
         enablement: null,

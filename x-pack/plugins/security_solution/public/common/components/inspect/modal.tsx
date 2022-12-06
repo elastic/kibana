@@ -19,18 +19,15 @@ import {
   EuiTabbedContent,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { useMemo, Fragment, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useMemo, Fragment } from 'react';
 import styled from 'styled-components';
 
 import { useLocation } from 'react-router-dom';
+import type { InputsModelId } from '../../store/inputs/constants';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
-import {
-  EXCLUDE_ELASTIC_CLOUD_INDEX,
-  getScopeFromPath,
-  useSourcererDataView,
-} from '../../containers/sourcerer';
-import { InputsModelId } from '../../store/inputs/constants';
+import { getScopeFromPath, useSourcererDataView } from '../../containers/sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const DescriptionListStyled = styled(EuiDescriptionList)`
@@ -47,11 +44,11 @@ const DescriptionListStyled = styled(EuiDescriptionList)`
 
 DescriptionListStyled.displayName = 'DescriptionListStyled';
 
-interface ModalInspectProps {
+export interface ModalInspectProps {
   additionalRequests?: string[] | null;
   additionalResponses?: string[] | null;
   closeModal: () => void;
-  inputId?: InputsModelId;
+  inputId?: InputsModelId.global | InputsModelId.timeline;
   request: string;
   response: string;
   title: string | React.ReactElement | React.ReactNode;
@@ -73,6 +70,8 @@ interface Response {
 }
 
 const MyEuiModal = styled(EuiModal)`
+  width: min(768px, calc(100vw - 16px));
+  min-height: 41vh;
   .euiModal__flex {
     width: 60vw;
   }
@@ -131,13 +130,11 @@ export const ModalInspectQuery = ({
   const inspectResponses: Response[] = parseInspectStrings(responses);
 
   const isSourcererPattern = useMemo(
-    () => (inspectRequests[0]?.index ?? []).every((pattern) => selectedPatterns.includes(pattern)),
+    () =>
+      (inspectRequests[0]?.index ?? []).every((pattern) =>
+        selectedPatterns.includes(pattern.trim())
+      ),
     [inspectRequests, selectedPatterns]
-  );
-
-  const isLogsExclude = useMemo(
-    () => (inspectRequests[0]?.index ?? []).includes(EXCLUDE_ELASTIC_CLOUD_INDEX),
-    [inspectRequests]
   );
 
   const statistics: Array<{
@@ -159,13 +156,6 @@ export const ModalInspectQuery = ({
             <p>
               <small>
                 <i data-test-subj="not-sourcerer-msg">{i18n.INSPECT_PATTERN_DIFFERENT}</i>
-              </small>
-            </p>
-          )}
-          {isLogsExclude && (
-            <p>
-              <small>
-                <i data-test-subj="exclude-logs-msg">{i18n.LOGS_EXCLUDE_MESSAGE}</i>
               </small>
             </p>
           )}

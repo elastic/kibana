@@ -40,6 +40,9 @@ const generateAlertingConfig = (): AlertingConfig => ({
       actions: {
         max: 1000,
       },
+      alerts: {
+        max: 1000,
+      },
     },
   },
 });
@@ -114,6 +117,7 @@ describe('Alerting Plugin', () => {
       const setupContract = await plugin.setup(setupMocks, mockPlugins);
 
       expect(setupContract.getConfig()).toEqual({
+        isUsingSecurity: false,
         minimumScheduleInterval: { value: '1m', enforce: false },
       });
     });

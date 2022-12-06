@@ -8,7 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText, EuiSpacer } from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-beautiful-dnd';
+import type { DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
+import { Draggable, Droppable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
@@ -20,12 +21,13 @@ import { timelineActions } from '../../../store/timeline';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
 import { AddDataProviderPopover } from './add_data_provider_popover';
-import { BrowserFields } from '../../../../common/containers/source';
+import type { BrowserFields } from '../../../../common/containers/source';
 import {
   getTimelineProviderDraggableId,
   getTimelineProviderDroppableId,
 } from '../../../../common/components/drag_and_drop/helpers';
-import { DataProvider, DataProviderType, DataProvidersAnd, IS_OPERATOR } from './data_provider';
+import type { DataProvider, DataProvidersAnd } from './data_provider';
+import { DataProviderType, IS_OPERATOR } from './data_provider';
 import { EMPTY_GROUP, flattenIntoAndGroups } from './helpers';
 import { ProviderItemBadge } from './provider_item_badge';
 
@@ -107,9 +109,6 @@ TimelineEuiFormHelpText.displayName = 'TimelineEuiFormHelpText';
 const ParensContainer = styled(EuiFlexItem)`
   align-self: center;
 `;
-
-const getDataProviderValue = (dataProvider: DataProvidersAnd) =>
-  dataProvider.queryMatch.displayValue ?? dataProvider.queryMatch.value;
 
 /**
  * Renders an interactive card representation of the data providers. It also
@@ -262,6 +261,10 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       [onKeyDown]
     );
 
+    const displayValue = String(
+      dataProvider.queryMatch.displayValue ?? dataProvider.queryMatch.value
+    );
+
     const DraggableContent = useCallback(
       (provided, snapshot) => (
         <div
@@ -300,7 +303,8 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
                 toggleEnabledProvider={handleToggleEnabledProvider}
                 toggleExcludedProvider={handleToggleExcludedProvider}
                 toggleTypeProvider={handleToggleTypeProvider}
-                val={getDataProviderValue(dataProvider)}
+                displayValue={displayValue}
+                val={dataProvider.queryMatch.value}
                 type={dataProvider.type}
                 wrapperRef={keyboardHandlerRef}
               />
@@ -321,6 +325,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       [
         browserFields,
         dataProvider,
+        displayValue,
         group,
         handleDataProviderEdited,
         handleDeleteProvider,

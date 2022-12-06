@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export { getEndpointAuthzInitialState, calculateEndpointAuthz } from './authz';
-export { getEndpointAuthzInitialStateMock } from './mocks';
+export {
+  getEndpointAuthzInitialState,
+  calculateEndpointAuthz,
+  calculatePermissionsFromPrivileges,
+  calculatePermissionsFromCapabilities,
+  defaultEndpointPermissions,
+} from './authz';

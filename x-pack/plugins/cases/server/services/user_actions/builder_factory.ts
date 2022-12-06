@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UserActionTypes } from '../../../common/api';
+import type { UserActionTypes } from '../../../common/api';
 import { CreateCaseUserActionBuilder } from './builders/create_case';
 import { TitleUserActionBuilder } from './builders/title';
 import { CommentUserActionBuilder } from './builders/comment';
@@ -16,10 +16,14 @@ import { StatusUserActionBuilder } from './builders/status';
 import { TagsUserActionBuilder } from './builders/tags';
 import { SettingsUserActionBuilder } from './builders/settings';
 import { DeleteCaseUserActionBuilder } from './builders/delete_case';
-import { UserActionBuilder } from './abstract_builder';
+import type { UserActionBuilder } from './abstract_builder';
 import { SeverityUserActionBuilder } from './builders/severity';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { BuilderDeps } from './types';
+import { AssigneesUserActionBuilder } from './builders/assignees';
 
 const builderMap = {
+  assignees: AssigneesUserActionBuilder,
   title: TitleUserActionBuilder,
   create_case: CreateCaseUserActionBuilder,
   connector: ConnectorUserActionBuilder,
@@ -34,7 +38,15 @@ const builderMap = {
 };
 
 export class BuilderFactory {
+  private readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+
+  constructor(deps: BuilderDeps) {
+    this.persistableStateAttachmentTypeRegistry = deps.persistableStateAttachmentTypeRegistry;
+  }
+
   getBuilder<T extends UserActionTypes>(type: T): UserActionBuilder | undefined {
-    return new builderMap[type]();
+    return new builderMap[type]({
+      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+    });
   }
 }

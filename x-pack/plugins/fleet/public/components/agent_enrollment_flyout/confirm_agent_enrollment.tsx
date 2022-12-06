@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import { EuiCallOut, EuiButton, EuiText, EuiLink } from '@elastic/eui';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import {
+  EuiCallOut,
+  EuiButton,
+  EuiText,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -17,6 +24,12 @@ interface Props {
   troubleshootLink: string;
   onClickViewAgents?: () => void;
   agentCount: number;
+  showLoading?: boolean;
+}
+
+interface UsePollingAgentCountOptions {
+  noLowerTimeLimit?: boolean;
+  pollImmediately?: boolean;
 }
 
 const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
@@ -27,25 +40,40 @@ const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
  * @param policyId
  * @returns agentIds
  */
-export const usePollingAgentCount = (policyId: string) => {
+export const usePollingAgentCount = (policyId: string, opts?: UsePollingAgentCountOptions) => {
   const [agentIds, setAgentIds] = useState<string[]>([]);
-
+  const [didPollInitially, setDidPollInitially] = useState(false);
   const timeout = useRef<number | undefined>(undefined);
+
+  const lowerTimeLimitKuery = opts?.noLowerTimeLimit
+    ? ''
+    : `and ${AGENTS_PREFIX}.enrolled_at >= now-10m`;
+  const kuery = `${AGENTS_PREFIX}.policy_id:"${policyId}" and not (_exists_:"${AGENTS_PREFIX}.unenrolled_at") ${lowerTimeLimitKuery}`;
+
+  const getNewAgentIds = useCallback(async () => {
+    const request = await sendGetAgents({
+      kuery,
+      showInactive: false,
+    });
+
+    const newAgentIds = request.data?.items.map((i) => i.id) ?? agentIds;
+    if (newAgentIds.some((id) => !agentIds.includes(id))) {
+      setAgentIds(newAgentIds);
+    }
+  }, [agentIds, kuery]);
+
+  // optionally poll once on first render
+  if (!didPollInitially && opts?.pollImmediately) {
+    getNewAgentIds();
+    setDidPollInitially(true);
+  }
 
   useEffect(() => {
     let isAborted = false;
 
     const poll = () => {
       timeout.current = window.setTimeout(async () => {
-        const request = await sendGetAgents({
-          kuery: `${AGENTS_PREFIX}.policy_id:"${policyId}" and ${AGENTS_PREFIX}.enrolled_at >= now-10m`,
-          showInactive: false,
-        });
-
-        const newAgentIds = request.data?.items.map((i) => i.id) ?? agentIds;
-        if (newAgentIds.some((id) => !agentIds.includes(id))) {
-          setAgentIds(newAgentIds);
-        }
+        getNewAgentIds();
         if (!isAborted) {
           poll();
         }
@@ -59,7 +87,7 @@ export const usePollingAgentCount = (policyId: string) => {
     return () => {
       isAborted = true;
     };
-  }, [agentIds, policyId]);
+  }, [agentIds, policyId, kuery, getNewAgentIds]);
   return agentIds;
 };
 
@@ -68,9 +96,19 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   troubleshootLink,
   onClickViewAgents,
   agentCount,
+  showLoading = false,
 }) => {
   const { getHref } = useLink();
   const { application } = useStartServices();
+  const showViewAgents = !!onClickViewAgents;
+  const TroubleshootLink = () => (
+    <EuiLink target="_blank" external href={troubleshootLink}>
+      <FormattedMessage
+        id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
+        defaultMessage="troubleshooting guide"
+      />
+    </EuiLink>
+  );
 
   const onButtonClick = () => {
     if (onClickViewAgents) onClickViewAgents();
@@ -78,7 +116,7 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
     application.navigateToUrl(href);
   };
 
-  if (!policyId || agentCount === 0) {
+  if (!policyId || (agentCount === 0 && !showLoading)) {
     return (
       <EuiText>
         <FormattedMessage
@@ -86,17 +124,38 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
           id="xpack.fleet.enrollmentInstructions.troubleshootingText"
           defaultMessage="If you are having trouble connecting, see our {link}."
           values={{
-            link: (
-              <EuiLink target="_blank" external href={troubleshootLink}>
-                <FormattedMessage
-                  id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
-                  defaultMessage="troubleshooting guide"
-                />
-              </EuiLink>
-            ),
+            link: <TroubleshootLink />,
           }}
         />
       </EuiText>
+    );
+  }
+
+  if (showLoading && !agentCount) {
+    return (
+      <>
+        <EuiCallOut
+          size="m"
+          color="primary"
+          iconType={EuiLoadingSpinner}
+          title={
+            <FormattedMessage
+              id="xpack.fleet.agentEnrollment.loading.listening"
+              defaultMessage="Listening for agent..."
+            />
+          }
+        />
+        <EuiSpacer size="m" />
+        <EuiText>
+          <FormattedMessage
+            id="xpack.fleet.agentEnrollment.loading.instructions"
+            defaultMessage="After the agent starts up, the Elastic Stack listens for the agent and confirms the enrollment in Fleet. If you're having trouble connecting, check out the {link}."
+            values={{
+              link: <TroubleshootLink />,
+            }}
+          />
+        </EuiText>
+      </>
     );
   }
 
@@ -113,15 +172,17 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
       color="success"
       iconType="check"
     >
-      <EuiButton
-        onClick={onButtonClick}
-        color="success"
-        data-test-subj="ConfirmAgentEnrollmentButton"
-      >
-        {i18n.translate('xpack.fleet.agentEnrollment.confirmation.button', {
-          defaultMessage: 'View enrolled agents',
-        })}
-      </EuiButton>
+      {showViewAgents && (
+        <EuiButton
+          onClick={onButtonClick}
+          color="success"
+          data-test-subj="ConfirmAgentEnrollmentButton"
+        >
+          {i18n.translate('xpack.fleet.agentEnrollment.confirmation.button', {
+            defaultMessage: 'View enrolled agents',
+          })}
+        </EuiButton>
+      )}
     </EuiCallOut>
   );
 };

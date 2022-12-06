@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/shared-ux-card-no-data-types",
+  "owner": "@elastic/kibana-global-experience",
+  "runtimeDeps": [],
+  "typeDeps": []
+}

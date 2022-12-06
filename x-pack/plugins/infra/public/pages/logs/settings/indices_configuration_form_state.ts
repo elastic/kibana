@@ -19,6 +19,7 @@ import {
   FormValidationError,
   validateIndexPattern,
   validateStringNotEmpty,
+  validateStringNoSpaces,
 } from './validation_errors';
 
 export type LogIndicesFormState = LogIndexNameReference | LogDataViewReference | undefined;
@@ -35,7 +36,10 @@ export const useLogIndicesFormElement = (initialValue: LogIndicesFormState) => {
         if (logIndices == null) {
           return validateStringNotEmpty('log data view', '');
         } else if (logIndexNameReferenceRT.is(logIndices)) {
-          return validateStringNotEmpty('log indices', logIndices.indexName);
+          return [
+            ...validateStringNotEmpty('log indices', logIndices.indexName),
+            ...validateStringNoSpaces('log indices', logIndices.indexName),
+          ];
         } else {
           const emptyStringErrors = validateStringNotEmpty('log data view', logIndices.dataViewId);
 

@@ -197,6 +197,7 @@ describe('use_field_value_autocomplete', () => {
         },
         query: '',
         signal,
+        useTimeRange: false,
       });
     });
   });
@@ -296,6 +297,7 @@ describe('use_field_value_autocomplete', () => {
         indexPattern: stubIndexPatternWithFields,
         query: '',
         signal,
+        useTimeRange: false,
       });
       expect(result.current).toEqual(expectedResult);
     });

@@ -7,6 +7,10 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import moment from 'moment';
+
+import type { DataViewBase } from '@kbn/es-query';
+import { fields } from '@kbn/data-plugin/common/mocks';
 
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { TestProviders } from '../../../../common/mock';
@@ -18,7 +22,20 @@ import { ALL_VALUES_ZEROS_TITLE } from '../../../../common/components/charts/tra
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/use_global_time');
 jest.mock('./use_preview_histogram');
-jest.mock('../../../../common/components/url_state/normalize_time_range');
+jest.mock('../../../../common/utils/normalize_time_range');
+
+const getMockIndexPattern = (): DataViewBase => ({
+  fields,
+  id: '1234',
+  title: 'logstash-*',
+});
+
+const getLastMonthTimeframe = () => ({
+  timeframeStart: moment().subtract(1, 'month'),
+  timeframeEnd: moment(),
+  interval: '5m',
+  lookback: '1m',
+});
 
 describe('PreviewHistogram', () => {
   const mockSetQuery = jest.fn();
@@ -53,11 +70,11 @@ describe('PreviewHistogram', () => {
         <TestProviders>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}
-            timeFrame="M"
+            timeframeOptions={getLastMonthTimeframe()}
             previewId={'test-preview-id'}
             spaceId={'default'}
             ruleType={'query'}
-            index={['']}
+            indexPattern={getMockIndexPattern()}
           />
         </TestProviders>
       );
@@ -84,11 +101,68 @@ describe('PreviewHistogram', () => {
         <TestProviders>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}
-            timeFrame="M"
+            timeframeOptions={getLastMonthTimeframe()}
             previewId={'test-preview-id'}
             spaceId={'default'}
             ruleType={'query'}
-            index={['']}
+            indexPattern={getMockIndexPattern()}
+          />
+        </TestProviders>
+      );
+
+      expect(await wrapper.findByTestId('preview-histogram-loading')).toBeTruthy();
+    });
+  });
+
+  describe('when advanced options passed', () => {
+    test('it uses timeframeStart and timeframeEnd to specify the time range of the preview', async () => {
+      const format = 'YYYY-MM-DD HH:mm:ss';
+      const start = '2015-03-12 05:17:10';
+      const end = '2020-03-12 05:17:10';
+
+      const usePreviewHistogramMock = usePreviewHistogram as jest.Mock;
+      usePreviewHistogramMock.mockReturnValue([
+        true,
+        {
+          inspect: { dsl: [], response: [] },
+          totalCount: 1,
+          refetch: jest.fn(),
+          data: [],
+          buckets: [],
+        },
+      ]);
+
+      usePreviewHistogramMock.mockImplementation(
+        ({ startDate, endDate }: { startDate: string; endDate: string }) => {
+          expect(startDate).toEqual('2015-03-12T09:17:10.000Z');
+          expect(endDate).toEqual('2020-03-12T09:17:10.000Z');
+          return [
+            true,
+            {
+              inspect: { dsl: [], response: [] },
+              totalCount: 1,
+              refetch: jest.fn(),
+              data: [],
+              buckets: [],
+            },
+          ];
+        }
+      );
+
+      const wrapper = render(
+        <TestProviders>
+          <PreviewHistogram
+            addNoiseWarning={jest.fn()}
+            previewId={'test-preview-id'}
+            spaceId={'default'}
+            ruleType={'query'}
+            indexPattern={getMockIndexPattern()}
+            timeframeOptions={{
+              timeframeStart: moment(start, format),
+              timeframeEnd: moment(end, format),
+              interval: '5m',
+              lookback: '1m',
+            }}
           />
         </TestProviders>
       );

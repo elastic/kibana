@@ -14,9 +14,10 @@ interface Props {
   fields: CommonFields;
   onChange: ({ value, configKey }: { value: boolean; configKey: ConfigKey }) => void;
   onBlur?: () => void;
+  readOnly?: boolean;
 }
 
-export function Enabled({ fields, onChange, onBlur }: Props) {
+export function Enabled({ fields, onChange, onBlur, readOnly }: Props) {
   return (
     <>
       <EuiFormRow
@@ -43,6 +44,7 @@ export function Enabled({ fields, onChange, onBlur }: Props) {
             })
           }
           onBlur={() => onBlur?.()}
+          disabled={readOnly}
         />
       </EuiFormRow>
     </>

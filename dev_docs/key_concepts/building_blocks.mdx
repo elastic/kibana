@@ -2,7 +2,7 @@
 id: kibBuildingBlocks
 slug: /kibana-dev-docs/key-concepts/building-blocks
 title: Building blocks
-summary: Consider these building blocks when developing your plugin.
+description: Consider these building blocks when developing your plugin.
 date: 2021-02-24
 tags: ['kibana', 'onboarding', 'dev', 'architecture']
 ---
@@ -52,7 +52,7 @@ The Dashboard Embeddable is one of the highest-level UI components you can add t
 
 Check out the Lens Embeddable if you wish to show users visualizations based on Elasticsearch data without worrying about query building and chart rendering. It's built on top of the <DocLink id="kibBuildingBlocks" section="expressions" text="Expression language" />, and integrates with <DocLink id="kibBuildingBlocks" section="index-patterns" text="Index Patterns" /> and <DocLink id="kibBuildingBlocks" section="ui-actions--triggers" text="UI Actions" />. Using the same configuration, it's also possible to link to a prefilled Lens editor, allowing the user to drill deeper and explore their data.
 
-**Github labels**: `Team:VisEditors`, `Feature:Lens`
+**Github labels**: `Team:Visualizations`, `Feature:Lens`
 
 ### Map Embeddable
 
@@ -142,7 +142,7 @@ application could register a UI Action called "View in Maps" to appear any time 
 
 ## Embeddables
 
-Embeddables help you integrate your application with the Dashboard application. Register your custom UI Widget as an Embeddable and users will
+<DocLink id="kibDevDocsEmbeddables" text="Embeddables" /> help you integrate your application with the Dashboard application. Register your custom UI Widget as an Embeddable and users will
 be able to add it as a panel on a Dashboard. With a little extra work, it can also be exposed in Canvas workpads.
 
 **Github labels**: `Team:AppServices`, `Feature:Embeddables`

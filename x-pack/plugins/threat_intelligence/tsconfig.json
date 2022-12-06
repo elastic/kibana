@@ -1,0 +1,26 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "scripts/**/*",
+    "public/**/*.json",
+    "server/**/*.json",
+    "../../../typings/**/*"
+  ],
+  "kbn_references": [
+    { "path": "../cases/tsconfig.json" },
+    { "path": "../timelines/tsconfig.json" },
+    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../src/plugins/data/tsconfig.json" },
+    { "path": "../../../src/plugins/unified_search/tsconfig.json" },
+    { "path": "../triggers_actions_ui/tsconfig.json" }
+  ]
+}

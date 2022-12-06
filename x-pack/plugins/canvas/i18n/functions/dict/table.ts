@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { table } from '../../../canvas_plugin_src/functions/common/table';
+import type { table } from '../../../canvas_plugin_src/functions/common/table';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_FALSE } from '../../constants';

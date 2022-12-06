@@ -8,12 +8,14 @@
 import moment from 'moment';
 import React from 'react';
 
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 
 import { SecurityPageName } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock';
-import { RuleAlertsTable, RuleAlertsTableProps } from './rule_alerts_table';
-import { RuleAlertsItem, UseRuleAlertsItems } from './use_rule_alerts_items';
+import type { RuleAlertsTableProps } from './rule_alerts_table';
+import { RuleAlertsTable } from './rule_alerts_table';
+import type { RuleAlertsItem, UseRuleAlertsItems } from './use_rule_alerts_items';
+import { openAlertsFilter } from '../utils';
 
 const mockGetAppUrl = jest.fn();
 jest.mock('../../../../common/lib/kibana/hooks', () => {
@@ -22,6 +24,15 @@ jest.mock('../../../../common/lib/kibana/hooks', () => {
     ...original,
     useNavigation: () => ({
       getAppUrl: mockGetAppUrl,
+    }),
+  };
+});
+
+const mockOpenTimelineWithFilters = jest.fn();
+jest.mock('../hooks/use_navigate_to_timeline', () => {
+  return {
+    useNavigateToTimeline: () => ({
+      openTimelineWithFilters: mockOpenTimelineWithFilters,
     }),
   };
 });
@@ -43,10 +54,11 @@ jest.mock('./use_rule_alerts_items', () => ({
 const defaultProps: RuleAlertsTableProps = {
   signalIndexName: '',
 };
+const ruleName = 'ruleName';
 const items: RuleAlertsItem[] = [
   {
     id: 'ruleId',
-    name: 'ruleName',
+    name: ruleName,
     last_alert_at: moment().subtract(1, 'day').format(),
     alert_count: 10,
     severity: 'high',
@@ -91,7 +103,7 @@ describe('RuleAlertsTable', () => {
       </TestProviders>
     );
 
-    expect(result.getByText('Updated now')).toBeInTheDocument();
+    expect(result.getByText(/Updated/)).toBeInTheDocument();
   });
 
   it('should render the table columns', () => {
@@ -142,5 +154,26 @@ describe('RuleAlertsTable', () => {
     });
 
     expect(result.getByTestId('severityRuleAlertsTable-name')).toHaveAttribute('href', linkUrl);
+  });
+
+  it('should open timeline with filters when total alerts is clicked', () => {
+    mockUseRuleAlertsItemsReturn({ items });
+    const { getByTestId } = render(
+      <TestProviders>
+        <RuleAlertsTable {...defaultProps} />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('severityRuleAlertsTable-alertCountLink'));
+
+    expect(mockOpenTimelineWithFilters).toHaveBeenCalledWith([
+      [
+        {
+          field: 'kibana.alert.rule.name',
+          value: ruleName,
+        },
+        openAlertsFilter,
+      ],
+    ]);
   });
 });

@@ -35,6 +35,7 @@ export const areaVisTypeDefinition = {
   description: i18n.translate('visTypeXy.area.areaDescription', {
     defaultMessage: 'Emphasize the data between an axis and a line.',
   }),
+  fetchDatatable: true,
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
   updateVisTypeOnParamsChange: getVisTypeFromParams,
@@ -127,6 +128,7 @@ export const areaVisTypeDefinition = {
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionTabs,
     schemas: [
       {
@@ -135,7 +137,13 @@ export const areaVisTypeDefinition = {
         title: i18n.translate('visTypeXy.area.metricsTitle', {
           defaultMessage: 'Y-axis',
         }),
-        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric', '!single_percentile'],
+        aggFilter: [
+          '!geo_centroid',
+          '!geo_bounds',
+          '!filtered_metric',
+          '!single_percentile',
+          '!single_percentile_rank',
+        ],
         min: 1,
         defaults: [{ schema: 'metric', type: 'count' }],
       },

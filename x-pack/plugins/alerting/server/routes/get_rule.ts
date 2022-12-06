@@ -9,7 +9,7 @@ import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
-import { verifyAccessAndContext, RewriteResponseCase } from './lib';
+import { verifyAccessAndContext, RewriteResponseCase, rewriteRuleLastRun } from './lib';
 import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
@@ -35,7 +35,10 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   executionStatus,
   actions,
   scheduledTaskId,
-  snoozeEndTime,
+  snoozeSchedule,
+  isSnoozedUntil,
+  lastRun,
+  nextRun,
   ...rest
 }) => ({
   ...rest,
@@ -46,10 +49,10 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   updated_at: updatedAt,
   api_key_owner: apiKeyOwner,
   notify_when: notifyWhen,
-  mute_all: muteAll,
   muted_alert_ids: mutedInstanceIds,
-  // Remove this object spread boolean check after snoozeEndTime is added to the public API
-  ...(snoozeEndTime !== undefined ? { snooze_end_time: snoozeEndTime } : {}),
+  mute_all: muteAll,
+  ...(isSnoozedUntil !== undefined ? { is_snoozed_until: isSnoozedUntil } : {}),
+  snooze_schedule: snoozeSchedule,
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus && {
     ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),
@@ -62,6 +65,8 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
     params,
     connector_type_id: actionTypeId,
   })),
+  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
+  ...(nextRun ? { next_run: nextRun } : {}),
 });
 
 interface BuildGetRulesRouteParams {
@@ -87,7 +92,11 @@ const buildGetRuleRoute = ({
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
-        const rule = await rulesClient.get({ id, excludeFromPublicApi });
+        const rule = await rulesClient.get({
+          id,
+          excludeFromPublicApi,
+          includeSnoozeData: true,
+        });
         return res.ok({
           body: rewriteBodyRes(rule),
         });

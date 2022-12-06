@@ -14,8 +14,9 @@ import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { InputsModelId } from '../../common/store/inputs/constants';
 import { SecurityPageName } from '../../app/types';
-import { UpdateDateRange } from '../../common/components/charts/common';
+import type { UpdateDateRange } from '../../common/components/charts/common';
 import { EmbeddedMap } from '../components/embeddables/embedded_map';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
@@ -29,7 +30,7 @@ import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { LastEventIndexKey } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../common/lib/keury';
+import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import { inputsSelectors } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -37,21 +38,21 @@ import { Display } from '../../hosts/pages/display';
 import { networkModel } from '../store';
 import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigation';
 import * as i18n from './translations';
-import { NetworkComponentProps } from './types';
+import type { NetworkComponentProps } from './types';
 import { NetworkRouteType } from './navigation/types';
 import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
   showGlobalFilters,
 } from '../../timelines/components/timeline/helpers';
-import { timelineSelectors } from '../../timelines/store/timeline';
-import { TimelineId } from '../../../common/types/timeline';
-import { timelineDefaults } from '../../timelines/store/timeline/defaults';
+import { TableId } from '../../../common/types/timeline';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
-import { filterNetworkExternalAlertData } from '../../common/components/visualization_actions/utils';
+import { sourceOrDestinationIpExistsFilter } from '../../common/components/visualization_actions/utils';
 import { LandingPageComponent } from '../../common/components/landing_page';
+import { dataTableSelectors } from '../../common/store/data_table';
+import { tableDefaults } from '../../common/store/data_table/defaults';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -67,10 +68,9 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
   ({ hasMlUserPermissions, capabilitiesFetched }) => {
     const dispatch = useDispatch();
     const containerElement = useRef<HTMLDivElement | null>(null);
-    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+    const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
     const graphEventId = useShallowEqualSelector(
-      (state) =>
-        (getTimeline(state, TimelineId.networkPageExternalAlerts) ?? timelineDefaults).graphEventId
+      (state) => (getTable(state, TableId.networkPageEvents) ?? tableDefaults).graphEventId
     );
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
@@ -78,7 +78,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     );
     const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
     const query = useDeepEqualSelector(getGlobalQuerySelector);
-    const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+    const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
     const { to, from, setQuery, isInitializing } = useGlobalTime();
     const { globalFullScreen } = useGlobalFullScreen();
@@ -88,15 +88,13 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const canUseMaps = kibana.services.application.capabilities.maps.show;
 
     const tabsFilters = useMemo(() => {
-      if (tabName === NetworkRouteType.alerts) {
-        return filters.length > 0
-          ? [...filters, ...filterNetworkExternalAlertData]
-          : filterNetworkExternalAlertData;
+      if (tabName === NetworkRouteType.events) {
+        return [...globalFilters, ...sourceOrDestinationIpExistsFilter];
       }
-      return filters;
-    }, [tabName, filters]);
+      return globalFilters;
+    }, [tabName, globalFilters]);
 
-    const narrowDateRange = useCallback<UpdateDateRange>(
+    const updateDateRange = useCallback<UpdateDateRange>(
       ({ x }) => {
         if (!x) {
           return;
@@ -104,7 +102,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
         const [min, max] = x;
         dispatch(
           setAbsoluteRangeDatePicker({
-            id: 'global',
+            id: InputsModelId.global,
             from: new Date(min).toISOString(),
             to: new Date(max).toISOString(),
           })
@@ -113,7 +111,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       [dispatch]
     );
 
-    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+    const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {
       containerElement.current
@@ -143,8 +141,9 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       config: getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
       queries: [query],
-      filters,
+      filters: globalFilters,
     });
+
     const [tabsFilterQuery] = convertToBuildEsQuery({
       config: getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
@@ -160,7 +159,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
           <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
             <EuiWindowEvent event="resize" handler={noop} />
             <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-              <SiemSearchBar indexPattern={indexPattern} id="global" />
+              <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
             </FiltersGlobal>
 
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -168,7 +167,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 <HeaderPage
                   subtitle={
                     <LastEventTime
-                      docValueFields={docValueFields}
                       indexKey={LastEventIndexKey.network}
                       indexNames={selectedPatterns}
                     />
@@ -186,7 +184,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     >
                       <EmbeddedMap
                         query={query}
-                        filters={filters}
+                        filters={globalFilters}
                         startDate={from}
                         endDate={to}
                         setQuery={setQuery}
@@ -200,7 +198,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   filterQuery={filterQuery}
                   from={from}
                   indexNames={selectedPatterns}
-                  narrowDateRange={narrowDateRange}
+                  updateDateRange={updateDateRange}
                   setQuery={setQuery}
                   skip={isInitializing || filterQuery === undefined}
                   to={to}
@@ -216,14 +214,12 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   </Display>
 
                   <NetworkRoutes
-                    docValueFields={docValueFields}
                     filterQuery={tabsFilterQuery}
                     from={from}
                     isInitializing={isInitializing}
                     indexPattern={indexPattern}
                     indexNames={selectedPatterns}
                     setQuery={setQuery}
-                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     type={networkModel.NetworkType.page}
                     to={to}
                   />

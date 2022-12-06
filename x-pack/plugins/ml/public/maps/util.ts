@@ -8,18 +8,25 @@
 import { FeatureCollection, Feature, Geometry } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { htmlIdGenerator } from '@elastic/eui';
-import { FIELD_ORIGIN, STYLE_TYPE } from '@kbn/maps-plugin/common';
+import { FIELD_ORIGIN, STYLE_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
+import {
+  ESSearchSourceDescriptor,
+  VectorStyleDescriptor,
+} from '@kbn/maps-plugin/common/descriptor_types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
-import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/es-types';
 import { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
-import { LAYER_TYPE } from '@kbn/maps-plugin/common';
+import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '@kbn/maps-plugin/common';
 import { SEVERITY_COLOR_RAMP } from '../../common';
 import { formatHumanReadableDateTimeSeconds } from '../../common/util/date_utils';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import { MLAnomalyDoc } from '../../common/types/anomalies';
 import { SEARCH_QUERY_LANGUAGE } from '../../common/constants/search';
+import { tabColor } from '../../common/util/group_color_utils';
 import { getIndexPattern } from '../application/explorer/reducers/explorer_reducer/get_index_pattern';
 import { AnomalySource } from './anomaly_source';
+import { SourceIndexGeoFields } from '../application/explorer/explorer_utils';
 
 export const ML_ANOMALY_LAYERS = {
   TYPICAL: 'typical',
@@ -103,6 +110,51 @@ export function getInitialAnomaliesLayers(jobId: string) {
           ML_ANOMALY_LAYERS[layer as keyof typeof ML_ANOMALY_LAYERS] === ML_ANOMALY_LAYERS.TYPICAL
             ? TYPICAL_STYLE
             : ACTUAL_STYLE,
+      });
+    }
+  }
+  return initialLayers;
+}
+
+export function getInitialSourceIndexFieldLayers(sourceIndexWithGeoFields: SourceIndexGeoFields) {
+  const initialLayers = [] as unknown as LayerDescriptor[] & SerializableRecord;
+  for (const index in sourceIndexWithGeoFields) {
+    if (sourceIndexWithGeoFields.hasOwnProperty(index)) {
+      const { dataViewId, geoFields } = sourceIndexWithGeoFields[index];
+
+      geoFields.forEach((geoField) => {
+        const color = tabColor(geoField);
+
+        initialLayers.push({
+          id: htmlIdGenerator()(),
+          type: LAYER_TYPE.GEOJSON_VECTOR,
+          style: {
+            type: 'VECTOR',
+            properties: {
+              fillColor: {
+                type: 'STATIC',
+                options: {
+                  color,
+                },
+              },
+              lineColor: {
+                type: 'STATIC',
+                options: {
+                  color,
+                },
+              },
+            },
+          } as unknown as VectorStyleDescriptor,
+          sourceDescriptor: {
+            id: htmlIdGenerator()(),
+            type: SOURCE_TYPES.ES_SEARCH,
+            tooltipProperties: [geoField],
+            label: index,
+            indexPatternId: dataViewId,
+            geoField,
+            scalingType: SCALING_TYPES.MVT,
+          } as unknown as ESSearchSourceDescriptor,
+        });
       });
     }
   }

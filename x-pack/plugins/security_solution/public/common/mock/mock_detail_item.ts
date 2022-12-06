@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineEventsDetailsItem } from '../../../common/search_strategy';
+import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
 
 export const mockDetailItemDataId = 'Y-6TfmcB0WOhS6qyMv3s';
 
@@ -144,109 +144,6 @@ export const rawEventData = {
   _index: '.ds-logs-endpoint.events.network-default-2021.09.28-000001',
   _id: 'TUWyf3wBFCFU0qRJTauW',
   _score: 1,
-  _source: {
-    agent: {
-      id: '2ac9e9b3-f6d5-4ce6-915d-8f1f8f413624',
-      type: 'endpoint',
-      version: '8.0.0-SNAPSHOT',
-    },
-    process: {
-      Ext: {
-        ancestry: [
-          'MmFjOWU5YjMtZjZkNS00Y2U2LTkxNWQtOGYxZjhmNDEzNjI0LTIyMzY0LTEzMjc4NjA2NTAyLjA=',
-          'MmFjOWU5YjMtZjZkNS00Y2U2LTkxNWQtOGYxZjhmNDEzNjI0LTEtMTMyNzA3Njg2OTIuMA==',
-        ],
-      },
-      name: 'filebeat',
-      pid: 22535,
-      entity_id: 'MmFjOWU5YjMtZjZkNS00Y2U2LTkxNWQtOGYxZjhmNDEzNjI0LTIyNTM1LTEzMjc4NjA2NTI4LjA=',
-      executable:
-        '/opt/Elastic/Agent/data/elastic-agent-058c40/install/filebeat-8.0.0-SNAPSHOT-linux-x86_64/filebeat',
-    },
-    destination: {
-      address: '127.0.0.1',
-      port: 9200,
-      ip: '127.0.0.1',
-    },
-    source: {
-      address: '127.0.0.1',
-      port: 54146,
-      ip: '127.0.0.1',
-    },
-    message: 'Endpoint network event',
-    network: {
-      transport: 'tcp',
-      type: 'ipv4',
-    },
-    '@timestamp': '2021-10-14T16:45:58.0310772Z',
-    ecs: {
-      version: '1.11.0',
-    },
-    data_stream: {
-      namespace: 'default',
-      type: 'logs',
-      dataset: 'endpoint.events.network',
-    },
-    elastic: {
-      agent: {
-        id: '12345',
-      },
-    },
-    host: {
-      hostname: 'test-linux-1',
-      os: {
-        Ext: {
-          variant: 'Debian',
-        },
-        kernel: '4.19.0-17-cloud-amd64 #1 SMP Debian 4.19.194-2 (2021-06-21)',
-        name: 'Linux',
-        family: 'debian',
-        type: 'linux',
-        version: '10',
-        platform: 'debian',
-        full: 'Debian 10',
-      },
-      ip: ['127.0.0.1', '::1', '10.1.2.3', '2001:0DB8:AC10:FE01::'],
-      name: 'test-linux-1',
-      id: '76ea303129f249aa7382338e4263eac1',
-      mac: ['aa:bb:cc:dd:ee:ff'],
-      architecture: 'x86_64',
-    },
-    event: {
-      agent_id_status: 'verified',
-      sequence: 44872,
-      ingested: '2021-10-14T16:46:04Z',
-      created: '2021-10-14T16:45:58.0310772Z',
-      kind: 'event',
-      module: 'endpoint',
-      action: 'connection_attempted',
-      id: 'MKPXftjGeHiQzUNj++++nn6R',
-      category: ['network'],
-      type: ['start'],
-      dataset: 'endpoint.events.network',
-      outcome: 'unknown',
-    },
-    user: {
-      Ext: {
-        real: {
-          name: 'root',
-          id: 0,
-        },
-      },
-      name: 'root',
-      id: 0,
-    },
-    group: {
-      Ext: {
-        real: {
-          name: 'root',
-          id: 0,
-        },
-      },
-      name: 'root',
-      id: 0,
-    },
-  },
   fields: {
     'host.os.full.text': ['Debian 10'],
     'event.category': ['network'],

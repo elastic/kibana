@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { PaginatedContentProps, PaginatedContent } from './paginated_content';
+import type { FC } from 'react';
+import React from 'react';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { PaginatedContentProps } from './paginated_content';
+import { PaginatedContent } from './paginated_content';
 import { act, fireEvent } from '@testing-library/react';
 
 describe('when using PaginatedContent', () => {

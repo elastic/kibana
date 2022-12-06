@@ -15,16 +15,6 @@ describe('buildEcsObjects', () => {
       _index: '.test-index',
       _id: 'test-id',
       _score: 0,
-      _source: {
-        '@timestamp': 123456,
-        host: {
-          architecture: 'windows98',
-          hostname: 'test-name',
-          id: 'some-id',
-          ip: [],
-          name: 'test-name',
-        },
-      },
       fields: {
         '@timestamp': [123456],
         'host.architecture': ['windows98'],
@@ -120,6 +110,76 @@ describe('buildEcsObjects', () => {
               atomic: ['matched_atomic_2'],
               field: ['matched_field_2'],
               type: [],
+            },
+          },
+          {
+            feed: {
+              name: [],
+            },
+            indicator: {
+              provider: [],
+              reference: [],
+            },
+            matched: {
+              atomic: ['MacBook-Pro-de-Gloria.local'],
+              field: ['host.name'],
+              type: ['indicator_match_rule'],
+            },
+          },
+          {
+            feed: {
+              name: [],
+            },
+            indicator: {
+              provider: [],
+              reference: [],
+            },
+            matched: {
+              atomic: ['MacBook-Pro-de-Gloria.local'],
+              field: ['host.hostname'],
+              type: ['indicator_match_rule'],
+            },
+          },
+          {
+            feed: {
+              name: [],
+            },
+            indicator: {
+              provider: [],
+              reference: [],
+            },
+            matched: {
+              atomic: ['x86_64'],
+              field: ['host.architecture'],
+              type: ['indicator_match_rule'],
+            },
+          },
+          {
+            feed: {
+              name: [],
+            },
+            indicator: {
+              provider: [],
+              reference: [],
+            },
+            matched: {
+              atomic: ['MacBook-Pro-de-Gloria.local'],
+              field: ['host.name'],
+              type: ['indicator_match_rule'],
+            },
+          },
+          {
+            feed: {
+              name: [],
+            },
+            indicator: {
+              provider: [],
+              reference: [],
+            },
+            matched: {
+              atomic: ['MacBook-Pro-de-Gloria.local'],
+              field: ['host.hostname'],
+              type: ['indicator_match_rule'],
             },
           },
         ],

@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('shows kibana panel', async () => {
-        expect(await overview.getKbnStatus()).to.be('Healthy');
+        expect(await overview.getKbnStatus()).to.be('Stale');
         expect(await overview.getKbnRequests()).to.be('174');
         expect(await overview.getKbnMaxResponseTime()).to.be('2203 ms');
         expect(await overview.getKbnInstances()).to.be('Instances: 1');

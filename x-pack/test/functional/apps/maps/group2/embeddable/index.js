@@ -7,6 +7,7 @@
 
 export default function ({ loadTestFile }) {
   describe('embeddable', function () {
+    loadTestFile(require.resolve('./canvas'));
     loadTestFile(require.resolve('./add_to_dashboard'));
     loadTestFile(require.resolve('./save_and_return'));
     loadTestFile(require.resolve('./dashboard'));

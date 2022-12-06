@@ -7,29 +7,33 @@
 
 import React, { useCallback, useMemo } from 'react';
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiButton,
   EuiEmptyPrompt,
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import { CaseStatuses } from '@kbn/cases-plugin/common';
+import type { CaseStatuses } from '@kbn/cases-plugin/common';
 
 import { SecurityPageName } from '../../../../app/types';
 import { FormattedDate } from '../../../../common/components/formatted_date';
+import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
+import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { CaseDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
+import type { NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
+import { useNavigation } from '../../../../common/lib/kibana';
 import * as i18n from '../translations';
-import { LastUpdatedAt } from '../util';
 import { StatusBadge } from './status_badge';
-import { CaseItem, useCaseItems } from './use_case_items';
+import type { CaseItem } from './use_case_items';
+import { useCaseItems } from './use_case_items';
 
 type GetTableColumns = (params: {
   getAppUrl: GetAppUrl;
@@ -97,22 +101,24 @@ const getTableColumns: GetTableColumns = () => [
   {
     field: 'id',
     name: i18n.CASES_TABLE_COLUMN_NAME,
-    truncateText: true,
-    textOnly: true,
     'data-test-subj': 'recentlyCreatedCaseName',
-
-    render: (id: string, { name }) => <CaseDetailsLink detailName={id}>{name}</CaseDetailsLink>,
+    render: (id: string, { name }) => (
+      <EuiToolTip
+        title={i18n.OPEN_CASE_DETAIL_TOOLTIP}
+        content={name}
+        anchorClassName="eui-textTruncate"
+      >
+        <CaseDetailsLink detailName={id}>{name}</CaseDetailsLink>
+      </EuiToolTip>
+    ),
   },
   {
-    field: 'note',
-    name: i18n.CASES_TABLE_COLUMN_NOTE,
+    field: 'totalAlerts',
+    name: i18n.ALERTS_TEXT,
     truncateText: true,
     textOnly: true,
-    render: (note: string) => (
-      <EuiText data-test-subj="recentlyCreatedCaseNote" size="s">
-        {note}
-      </EuiText>
-    ),
+    'data-test-subj': 'recentlyCreatedCaseAlert',
+    render: (totalAlerts: number) => <FormattedCount count={totalAlerts} />,
   },
   {
     field: 'createdAt',

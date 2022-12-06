@@ -8,9 +8,9 @@
 import path, { join, resolve } from 'path';
 import { Readable } from 'stream';
 
-import { ImportTimelineResultSchema } from '../../../../../../common/types/timeline';
+import type { ImportTimelineResultSchema } from '../../../../../../common/types/timeline';
 
-import { FrameworkRequest } from '../../../../framework';
+import type { FrameworkRequest } from '../../../../framework';
 
 import { importTimelines } from '../../timelines/import_timelines';
 
@@ -25,7 +25,10 @@ export const installPrepackagedTimelines = async (
 ): Promise<ImportTimelineResultSchema | Error> => {
   let readStream;
   const dir = resolve(
-    join(__dirname, filePath ?? '../../../../detection_engine/rules/prepackaged_timelines')
+    join(
+      __dirname,
+      filePath ?? '../../../../detection_engine/prebuilt_rules/content/prepackaged_timelines'
+    )
   );
   const file = fileName ?? 'index.ndjson';
   const dataPath = path.join(dir, file);

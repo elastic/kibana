@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../common/constants';
-import { userActionsMigrations } from './migrations';
+import type { UserActionsMigrationsDeps } from './migrations/user_actions';
+import { createUserActionsMigrations } from './migrations/user_actions';
 
-export const caseUserActionSavedObjectType: SavedObjectsType = {
+export const createCaseUserActionSavedObjectType = (
+  migrationDeps: UserActionsMigrationsDeps
+): SavedObjectsType => ({
   name: CASE_USER_ACTION_SAVED_OBJECT,
   hidden: true,
   namespaceType: 'multiple-isolated',
@@ -31,6 +34,9 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
             type: 'keyword',
           },
           full_name: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },
@@ -55,9 +61,9 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
       },
     },
   },
-  migrations: userActionsMigrations,
+  migrations: () => createUserActionsMigrations(migrationDeps),
   management: {
     importableAndExportable: true,
     visibleInManagement: false,
   },
-};
+});

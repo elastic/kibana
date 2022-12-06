@@ -126,11 +126,14 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
       // Add annotation marker
       mergedAnnotations.forEach((d) => {
         const annotationWidth = Math.max(
-          d.end ? xScale(Math.min(d.end, domain.max)) - Math.max(xScale(d.start), startingXPos) : 0,
+          d.end
+            ? (xScale(Math.min(d.end, domain.max)) as number) -
+                Math.max(xScale(d.start) as number, startingXPos)
+            : 0,
           ANNOTATION_MIN_WIDTH
         );
 
-        const xPos = d.start >= domain.min ? xScale(d.start) : startingXPos;
+        const xPos = d.start >= domain.min ? (xScale(d.start) as number) : startingXPos;
         svg
           .append('rect')
           .classed('mlAnnotationRect', true)
@@ -216,6 +219,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
           .on('mouseout', () => tooltipService.hide());
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartWidth, domain, annotationsData, tooltipService]);
 
   return <div ref={canvasRef} />;

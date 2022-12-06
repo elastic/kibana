@@ -19,6 +19,9 @@ describe('muteRule', () => {
       Array [
         Array [
           "/internal/alerting/rule/1%2F/_unsnooze",
+          Object {
+            "body": "{}",
+          },
         ],
       ]
     `);

@@ -18,6 +18,7 @@ import { toExpressionAst } from '../to_ast';
 import { getGaugeOptions } from '../editor/components';
 import { GaugeVisParams } from '../types';
 import { SplitTooltip } from './split_tooltip';
+import { convertGaugeToLens } from '../convert_to_lens';
 
 export const getGaugeVisTypeDefinition = (
   props: GaugeTypeProps
@@ -29,6 +30,7 @@ export const getGaugeVisTypeDefinition = (
     defaultMessage: 'Show the status of a metric.',
   }),
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
+  fetchDatatable: true,
   toExpressionAst,
   visConfig: {
     defaults: {
@@ -77,6 +79,7 @@ export const getGaugeVisTypeDefinition = (
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: getGaugeOptions(props),
     schemas: [
       {
@@ -97,6 +100,7 @@ export const getGaugeVisTypeDefinition = (
           '!geo_bounds',
           '!filtered_metric',
           '!single_percentile',
+          '!single_percentile_rank',
         ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },
@@ -127,4 +131,10 @@ export const getGaugeVisTypeDefinition = (
     ],
   },
   requiresSearch: true,
+  navigateToLens: async (vis, timefilter) => (vis ? convertGaugeToLens(vis, timefilter) : null),
+  getExpressionVariables: async (vis, timeFilter) => {
+    return {
+      canNavigateToLens: Boolean(vis?.params ? await convertGaugeToLens(vis, timeFilter) : null),
+    };
+  },
 });

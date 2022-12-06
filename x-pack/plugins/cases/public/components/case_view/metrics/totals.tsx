@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
+import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
 import {
   ASSOCIATED_HOSTS_METRIC,
   ASSOCIATED_USERS_METRIC,
@@ -16,10 +16,9 @@ import {
   TOTAL_ALERTS_METRIC,
   TOTAL_CONNECTORS_METRIC,
 } from './translations';
-import { CaseViewMetricsProps } from './types';
 
-export const CaseViewMetricItems: React.FC<Pick<CaseViewMetricsProps, 'metrics' | 'features'>> =
-  React.memo(({ metrics, features }) => {
+export const CaseViewMetricItems = React.memo(
+  ({ metrics, features }: { metrics: SingleCaseMetrics; features: SingleCaseMetricsFeature[] }) => {
     const metricItems = useGetTitleValueMetricItems(metrics, features);
 
     return (
@@ -34,7 +33,8 @@ export const CaseViewMetricItems: React.FC<Pick<CaseViewMetricsProps, 'metrics' 
         ))}
       </>
     );
-  });
+  }
+);
 CaseViewMetricItems.displayName = 'CaseViewMetricItems';
 
 const MetricValue = euiStyled(EuiFlexItem)`

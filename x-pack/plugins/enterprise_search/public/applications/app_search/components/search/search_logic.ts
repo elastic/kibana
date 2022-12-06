@@ -7,22 +7,23 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import type { SearchResult } from '@elastic/search-ui';
+
 import { flashAPIErrors } from '../../../shared/flash_messages';
 
 import { HttpLogic } from '../../../shared/http';
+import { formatResult } from '../../utils/results';
 import { EngineLogic } from '../engine';
-
-import { Result } from '../result/types';
 
 interface SearchValues {
   searchDataLoading: boolean;
   searchQuery: string;
-  searchResults: Result[];
+  searchResults: SearchResult[];
 }
 
 interface SearchActions {
   search(query: string): { query: string };
-  onSearch({ results }: { results: Result[] }): { results: Result[] };
+  onSearch({ results }: { results: SearchResult[] }): { results: SearchResult[] };
 }
 
 export const SearchLogic = kea<MakeLogicType<SearchValues, SearchActions>>({
@@ -49,7 +50,7 @@ export const SearchLogic = kea<MakeLogicType<SearchValues, SearchActions>>({
     searchResults: [
       [],
       {
-        onSearch: (_, { results }) => results,
+        onSearch: (_, { results }) => results.map((res) => formatResult(res) as SearchResult),
       },
     ],
   }),
@@ -61,7 +62,7 @@ export const SearchLogic = kea<MakeLogicType<SearchValues, SearchActions>>({
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.post<{ results: Result[] }>(
+        const response = await http.post<{ results: SearchResult[] }>(
           `/internal/app_search/engines/${engineName}/search`,
           { query: { query } }
         );

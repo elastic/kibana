@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   CasesTelemetrySchema,
   TypeLong,
   CountSchema,
   StatusSchema,
   LatestDatesSchema,
   TypeString,
+  SolutionTelemetrySchema,
+  AssigneesSchema,
 } from './types';
 
 const long: TypeLong = { type: 'long' };
@@ -22,6 +24,17 @@ const countSchema: CountSchema = {
   monthly: long,
   weekly: long,
   daily: long,
+};
+
+const assigneesSchema: AssigneesSchema = {
+  total: long,
+  totalWithZero: long,
+  totalWithAtLeastOne: long,
+};
+
+const solutionTelemetry: SolutionTelemetrySchema = {
+  ...countSchema,
+  assignees: assigneesSchema,
 };
 
 const statusSchema: StatusSchema = {
@@ -40,6 +53,7 @@ export const casesSchema: CasesTelemetrySchema = {
   cases: {
     all: {
       ...countSchema,
+      assignees: assigneesSchema,
       status: statusSchema,
       syncAlertsOn: long,
       syncAlertsOff: long,
@@ -50,9 +64,9 @@ export const casesSchema: CasesTelemetrySchema = {
       totalWithConnectors: long,
       latestDates: latestDatesSchema,
     },
-    sec: countSchema,
-    obs: countSchema,
-    main: countSchema,
+    sec: solutionTelemetry,
+    obs: solutionTelemetry,
+    main: solutionTelemetry,
   },
   userActions: { all: { ...countSchema, maxOnACase: long } },
   comments: { all: { ...countSchema, maxOnACase: long } },

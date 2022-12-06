@@ -69,12 +69,13 @@ import { getAppTitle } from '../common/i18n_getters';
 import { MapsXPackConfig, MapsConfigType } from '../config';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent_action';
+import { synchronizeMovementAction } from './trigger_actions/synchronize_movement_action';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
 import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { setIsCloudEnabled, setMapAppConfig, setStartServices } from './kibana_services';
-import { MapInspectorView } from './inspector/map_inspector_view';
+import { MapInspectorView, VectorTileInspectorView } from './inspector';
 
 import { setupLensChoroplethChart } from './lens';
 
@@ -89,7 +90,7 @@ export interface MapsPluginSetupDependencies {
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
   usageCollection?: UsageCollectionSetup;
-  screenshotMode: ScreenshotModePluginSetup;
+  screenshotMode?: ScreenshotModePluginSetup;
 }
 
 export interface MapsPluginStartDependencies {
@@ -112,6 +113,7 @@ export interface MapsPluginStartDependencies {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
+  screenshotMode?: ScreenshotModePluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -151,7 +153,7 @@ export class MapsPlugin
 
       // Override this when we know we are taking a screenshot (i.e. no user interaction)
       // to avoid a blank-canvas issue when rendering maps on a PDF
-      preserveDrawingBuffer: plugins.screenshotMode.isScreenshotMode()
+      preserveDrawingBuffer: plugins.screenshotMode?.isScreenshotMode()
         ? true
         : config.preserveDrawingBuffer,
     });
@@ -172,6 +174,7 @@ export class MapsPlugin
       })
     );
 
+    plugins.inspector.registerView(VectorTileInspectorView);
     plugins.inspector.registerView(MapInspectorView);
     if (plugins.home) {
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
@@ -187,10 +190,11 @@ export class MapsPlugin
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.kibana,
       async mount(params: AppMountParameters) {
+        const [coreStart, { savedObjectsTagging }] = await core.getStartServices();
         const UsageTracker =
           plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
         const { renderApp } = await lazyLoadMapModules();
-        return renderApp(params, UsageTracker);
+        return renderApp(params, { coreStart, AppUsageTracker: UsageTracker, savedObjectsTagging });
       },
     });
 
@@ -220,6 +224,7 @@ export class MapsPlugin
       plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
     }
     plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, filterByMapExtentAction);
+    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, synchronizeMovementAction);
 
     if (!core.application.capabilities.maps.save) {
       plugins.visualizations.unRegisterAlias(APP_ID);

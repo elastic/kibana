@@ -11,8 +11,16 @@ import { Trigger } from '@kbn/ui-actions-plugin/public';
 export const VISUALIZE_EDITOR_TRIGGER = 'VISUALIZE_EDITOR_TRIGGER';
 export const visualizeEditorTrigger: Trigger = {
   id: VISUALIZE_EDITOR_TRIGGER,
-  title: 'Convert legacy visualizations to Lens',
-  description: 'Triggered when user navigates from a legacy visualization to Lens.',
+  title: 'Convert TSVB to Lens',
+  description: 'Triggered when user navigates from a TSVB to Lens.',
+};
+
+export const AGG_BASED_VISUALIZATION_TRIGGER = 'AGG_BASED_VISUALIZATION_TRIGGER';
+export const aggBasedVisualizationTrigger: Trigger = {
+  id: AGG_BASED_VISUALIZATION_TRIGGER,
+  title: 'Convert legacy agg based visualizations to Lens',
+  description: 'Triggered when user navigates from a agg based visualization to Lens.',
 };
 
 export const ACTION_CONVERT_TO_LENS = 'ACTION_CONVERT_TO_LENS';
+export const ACTION_CONVERT_AGG_BASED_TO_LENS = 'ACTION_CONVERT_AGG_BASED_TO_LENS';

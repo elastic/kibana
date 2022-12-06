@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { UsersQueries } from '../../../../../../../common/search_strategy/security_solution/users';
 
-import { UserDetailsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/details';
+import type { UserDetailsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/details';
 
 export const mockOptions: UserDetailsRequestOptions = {
   defaultIndex: ['test_indices*'],

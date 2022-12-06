@@ -150,15 +150,18 @@ export function jobAuditMessagesProvider(
       });
     }
 
-    const body = await asInternalUser.search<JobMessage>({
-      index: ML_NOTIFICATION_INDEX_PATTERN,
-      ignore_unavailable: true,
-      size: SIZE,
-      body: {
-        sort: [{ timestamp: { order: 'desc' } }, { job_id: { order: 'asc' } }],
-        query,
+    const body = await asInternalUser.search<JobMessage>(
+      {
+        index: ML_NOTIFICATION_INDEX_PATTERN,
+        ignore_unavailable: true,
+        size: SIZE,
+        body: {
+          sort: [{ timestamp: { order: 'desc' } }, { job_id: { order: 'asc' } }],
+          query,
+        },
       },
-    });
+      { maxRetries: 0 }
+    );
 
     let messages: JobMessage[] = [];
     const notificationIndices: string[] = [];
@@ -222,36 +225,38 @@ export function jobAuditMessagesProvider(
       },
     };
 
-    const body = await asInternalUser.search({
-      index: ML_NOTIFICATION_INDEX_PATTERN,
-      ignore_unavailable: true,
-      size: 0,
-      body: {
-        query,
-        aggs: {
-          levelsPerJob: {
-            terms: {
-              field: 'job_id',
-              size: levelsPerJobAggSize,
-            },
-            aggs: {
-              levels: {
-                terms: {
-                  field: 'level',
-                },
-                aggs: {
-                  latestMessage: {
-                    terms: {
-                      field: 'message.raw',
-                      size: 1,
-                      order: {
-                        latestMessage: 'desc',
+    const body = await asInternalUser.search(
+      {
+        index: ML_NOTIFICATION_INDEX_PATTERN,
+        ignore_unavailable: true,
+        size: 0,
+        body: {
+          query,
+          aggs: {
+            levelsPerJob: {
+              terms: {
+                field: 'job_id',
+                size: levelsPerJobAggSize,
+              },
+              aggs: {
+                levels: {
+                  terms: {
+                    field: 'level',
+                  },
+                  aggs: {
+                    latestMessage: {
+                      terms: {
+                        field: 'message.raw',
+                        size: 1,
+                        order: {
+                          latestMessage: 'desc',
+                        },
                       },
-                    },
-                    aggs: {
-                      latestMessage: {
-                        max: {
-                          field: 'timestamp',
+                      aggs: {
+                        latestMessage: {
+                          max: {
+                            field: 'timestamp',
+                          },
                         },
                       },
                     },
@@ -262,7 +267,8 @@ export function jobAuditMessagesProvider(
           },
         },
       },
-    });
+      { maxRetries: 0 }
+    );
 
     interface LevelsPerJob {
       key: string;
@@ -389,25 +395,31 @@ export function jobAuditMessagesProvider(
     };
 
     const promises: Array<Promise<unknown>> = [
-      asInternalUser.updateByQuery({
-        index: notificationIndices.join(','),
-        ignore_unavailable: true,
-        refresh: false,
-        conflicts: 'proceed',
-        body: {
-          query,
-          script: {
-            source: 'ctx._source.cleared = true',
-            lang: 'painless',
+      asInternalUser.updateByQuery(
+        {
+          index: notificationIndices.join(','),
+          ignore_unavailable: true,
+          refresh: false,
+          conflicts: 'proceed',
+          body: {
+            query,
+            script: {
+              source: 'ctx._source.cleared = true',
+              lang: 'painless',
+            },
           },
         },
-      }),
+        { maxRetries: 0 }
+      ),
       ...notificationIndices.map((index) =>
-        asInternalUser.index({
-          index,
-          body: newClearedMessage,
-          refresh: 'wait_for',
-        })
+        asInternalUser.index(
+          {
+            index,
+            body: newClearedMessage,
+            refresh: 'wait_for',
+          },
+          { maxRetries: 0 }
+        )
       ),
     ];
 
@@ -428,46 +440,49 @@ export function jobAuditMessagesProvider(
     jobIds: string[],
     earliestMs?: number
   ): Promise<JobsErrorsResponse> {
-    const body = await asInternalUser.search({
-      index: ML_NOTIFICATION_INDEX_PATTERN,
-      ignore_unavailable: true,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              ...(earliestMs ? [{ range: { timestamp: { gte: earliestMs } } }] : []),
-              { terms: { job_id: jobIds } },
-              {
-                term: { level: { value: MESSAGE_LEVEL.ERROR } },
-              },
-            ],
-          },
-        },
-        aggs: {
-          by_job: {
-            terms: {
-              field: 'job_id',
-              size: jobIds.length,
+    const body = await asInternalUser.search(
+      {
+        index: ML_NOTIFICATION_INDEX_PATTERN,
+        ignore_unavailable: true,
+        size: 0,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                ...(earliestMs ? [{ range: { timestamp: { gte: earliestMs } } }] : []),
+                { terms: { job_id: jobIds } },
+                {
+                  term: { level: { value: MESSAGE_LEVEL.ERROR } },
+                },
+              ],
             },
-            aggs: {
-              latest_errors: {
-                top_hits: {
-                  size: 10,
-                  sort: [
-                    {
-                      timestamp: {
-                        order: 'desc',
+          },
+          aggs: {
+            by_job: {
+              terms: {
+                field: 'job_id',
+                size: jobIds.length,
+              },
+              aggs: {
+                latest_errors: {
+                  top_hits: {
+                    size: 10,
+                    sort: [
+                      {
+                        timestamp: {
+                          order: 'desc',
+                        },
                       },
-                    },
-                  ],
+                    ],
+                  },
                 },
               },
             },
           },
         },
       },
-    });
+      { maxRetries: 0 }
+    );
 
     const errors = body.aggregations!.by_job as estypes.AggregationsTermsAggregateBase<{
       key: string;

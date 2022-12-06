@@ -6,9 +6,10 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { UserRiskScoreColumns } from '.';
+import type { UserRiskScoreColumns } from '.';
 import { getUserRiskScoreColumns } from './columns';
 import { TestProviders } from '../../../common/mock';
+import { RiskScoreFields } from '../../../../common/search_strategy';
 
 describe('getUserRiskScoreColumns', () => {
   const defaultProps = {
@@ -19,8 +20,8 @@ describe('getUserRiskScoreColumns', () => {
     const columns = getUserRiskScoreColumns(defaultProps);
 
     expect(columns[0].field).toBe('user.name');
-    expect(columns[1].field).toBe('risk_stats.risk_score');
-    expect(columns[2].field).toBe('risk');
+    expect(columns[1].field).toBe(RiskScoreFields.userRiskScore);
+    expect(columns[2].field).toBe(RiskScoreFields.userRisk);
 
     columns.forEach((column) => {
       expect(column).toHaveProperty('name');
@@ -40,7 +41,7 @@ describe('getUserRiskScoreColumns', () => {
     expect(queryByTestId('users-link-anchor')).toHaveTextContent(username);
   });
 
-  test('should render user score truncated', () => {
+  test('should render user score rounded', () => {
     const columns: UserRiskScoreColumns = getUserRiskScoreColumns(defaultProps);
 
     const riskScore = 10.11111111;
@@ -49,6 +50,6 @@ describe('getUserRiskScoreColumns', () => {
 
     const { queryByTestId } = render(<TestProviders>{renderedColumn}</TestProviders>);
 
-    expect(queryByTestId('risk-score-truncate')).toHaveTextContent('10.11');
+    expect(queryByTestId('risk-score-truncate')).toHaveTextContent('10');
   });
 });

@@ -7,9 +7,11 @@
  */
 
 import type { Subject, Subscription } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { filter } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import type { EventContext } from '../events';
 import type { ContextProviderName, ContextProviderOpts } from './types';
+import { schemaToIoTs, validateSchema } from '../schema/validation';
 
 export class ContextService {
   private readonly contextProvidersRegistry = new Map<ContextProviderName, Partial<EventContext>>();
@@ -17,24 +19,42 @@ export class ContextService {
 
   constructor(
     private readonly context$: Subject<Partial<EventContext>>,
-    private readonly isDevMode: boolean
+    private readonly isDevMode: boolean,
+    private readonly logger: Logger
   ) {}
 
   /**
    * Registers a context provider, and subscribes to any updates from it.
    * @param contextProviderOpts The options to register the context provider {@link ContextProviderOpts}
    */
-  public registerContextProvider<Context>({ name, context$ }: ContextProviderOpts<Context>) {
+  public registerContextProvider<Context>({
+    name,
+    context$,
+    schema,
+  }: ContextProviderOpts<Context>) {
     if (this.contextProvidersSubscriptions.has(name)) {
       throw new Error(`Context provider with name '${name}' already registered`);
     }
 
+    // Declare the validator only in dev-mode
+    const validator = this.isDevMode ? schemaToIoTs(schema) : undefined;
+
     const subscription = context$
       .pipe(
-        tap((ctx) => {
-          if (this.isDevMode) {
-            // TODO: In the future we may need to validate the input of the context based on the schema (only if isDev)
+        filter((context) => {
+          if (validator) {
+            try {
+              validateSchema(
+                `Context Provider '${name}'`,
+                validator,
+                context as Record<string, unknown>
+              );
+            } catch (validationError) {
+              this.logger.error(validationError);
+              return false;
+            }
           }
+          return true;
         })
       )
       .subscribe((context) => {
