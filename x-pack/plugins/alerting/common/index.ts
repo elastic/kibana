@@ -22,7 +22,8 @@ export * from './rule_notify_when_type';
 export * from './parse_duration';
 export * from './execution_log_types';
 export * from './rule_snooze_type';
-export * from './alert_schema';
+
+export { AlertSchema, EcsSchema, type Alert, type Ecs } from './alert_schema';
 
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;
