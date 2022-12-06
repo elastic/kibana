@@ -23,7 +23,7 @@ if ! ts-node --version; then
 fi
 
 cd '.buildkite'
-retry 5 15 npm ci
+retry 5 15 npm ci -omit=dev
 cd ..
 
 echo '--- Agent Debug/SSH Info'
