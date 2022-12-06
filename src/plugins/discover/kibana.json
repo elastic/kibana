@@ -29,7 +29,8 @@
     "usageCollection",
     "spaces",
     "triggersActionsUi",
-    "savedObjectsTaggingOss"
+    "savedObjectsTaggingOss",
+    "lens"
   ],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch", "savedSearch"],
   "extraPublicDirs": ["common"],

@@ -17,11 +17,11 @@ describe('IndicatorValueActions', () => {
 
   it('should return null if field and value are invalid', () => {
     const field: string = 'invalid';
-    const kqlBarIntegration = {
+    const context = {
       kqlBarIntegration: true,
     };
     const component = render(
-      <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
+      <IndicatorsFlyoutContext.Provider value={context}>
         <IndicatorValueActions indicator={indicator} field={field} />
       </IndicatorsFlyoutContext.Provider>
     );
@@ -30,12 +30,12 @@ describe('IndicatorValueActions', () => {
 
   it('should only render add to timeline and copy to clipboard', () => {
     const field: string = 'threat.indicator.name';
-    const kqlBarIntegration = {
+    const context = {
       kqlBarIntegration: true,
     };
     const component = render(
       <TestProvidersComponent>
-        <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
+        <IndicatorsFlyoutContext.Provider value={context}>
           <IndicatorValueActions indicator={indicator} field={field} />
         </IndicatorsFlyoutContext.Provider>
       </TestProvidersComponent>
@@ -45,12 +45,12 @@ describe('IndicatorValueActions', () => {
 
   it('should render filter in/out and dropdown for add to timeline and copy to clipboard', () => {
     const field: string = 'threat.indicator.name';
-    const kqlBarIntegration = {
+    const context = {
       kqlBarIntegration: false,
     };
     const component = render(
       <TestProvidersComponent>
-        <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
+        <IndicatorsFlyoutContext.Provider value={context}>
           <IndicatorValueActions indicator={indicator} field={field} />
         </IndicatorsFlyoutContext.Provider>
       </TestProvidersComponent>
