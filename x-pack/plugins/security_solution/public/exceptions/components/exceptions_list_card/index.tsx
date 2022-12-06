@@ -67,6 +67,7 @@ const ExceptionPanel = styled(EuiPanel)`
 `;
 const ListHeaderContainer = styled(EuiFlexGroup)`
   padding: ${euiThemeVars.euiSizeS};
+  text-align: initial;
 `;
 export const ExceptionsListCard = memo<ExceptionsListCardProps>(
   ({ exceptionsList, handleDelete, handleExport, readOnly }) => {
