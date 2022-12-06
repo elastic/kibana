@@ -10,11 +10,11 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { render } from '../../../utils/test_helper';
-import { LongTimeWindow } from './long_time_window';
+import { LongWindowDuration } from './long_window_duration';
 
-describe('LongTimeWindow', () => {
+describe('LongWindowDuration', () => {
   it('shows error when duration is greater than 1440minutes', () => {
-    render(<LongTimeWindow />);
+    render(<LongWindowDuration onChange={() => {}} />);
 
     userEvent.selectOptions(screen.getByTestId('unit'), 'm');
     userEvent.type(screen.getByTestId('value'), '1441', { delay: 0 });
@@ -23,7 +23,7 @@ describe('LongTimeWindow', () => {
   });
 
   it('shows error when duration is greater than 24 hours', () => {
-    render(<LongTimeWindow />);
+    render(<LongWindowDuration onChange={() => {}} />);
 
     userEvent.selectOptions(screen.getByTestId('unit'), 'h');
     userEvent.type(screen.getByTestId('value'), '24', { delay: 0 });

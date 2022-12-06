@@ -13,9 +13,10 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Duration, DurationUnit } from '@kbn/observability-plugin/public/typings';
+
 import React, { ChangeEvent, useEffect, useState } from 'react';
 
-type DurationUnit = 'm' | 'h';
 type DurationUnitOption = { value: DurationUnit; text: string };
 
 const durationUnitOptions: DurationUnitOption[] = [
@@ -26,10 +27,16 @@ const durationUnitOptions: DurationUnitOption[] = [
 const MAX_DURATION_IN_MINUTES = 1440;
 const MAX_DURATION_IN_HOURS = 24;
 
-export function LongTimeWindow() {
-  const selectId = useGeneratedHtmlId({ prefix: 'durationUnitSelect' });
-  const [durationValue, setDurationValue] = useState<number>(1);
-  const [durationUnit, setDurationUnit] = useState<DurationUnit>(durationUnitOptions[0].value);
+interface Props {
+  initialDuration?: Duration;
+  onChange: (duration: Duration) => void;
+}
+
+export function LongWindowDuration({ initialDuration, onChange }: Props) {
+  const [durationValue, setDurationValue] = useState<number>(initialDuration?.value ?? 1);
+  const [durationUnit, setDurationUnit] = useState<DurationUnit>(
+    initialDuration?.unit ?? durationUnitOptions[0].value
+  );
   const [error, setError] = useState<string | undefined>(undefined);
 
   const onDurationValueChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -50,9 +57,11 @@ export function LongTimeWindow() {
       setError(errorText);
     } else {
       setError(undefined);
+      onChange({ value: durationValue, unit: durationUnit });
     }
   }, [durationValue, durationUnit]);
 
+  const selectId = useGeneratedHtmlId({ prefix: 'durationUnitSelect' });
   return (
     <EuiFormRow label={rowLabel} fullWidth isInvalid={!!error} error={error}>
       <EuiFlexGroup direction="row">
