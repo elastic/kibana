@@ -50,7 +50,7 @@ describe('SLOs Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockKibana();
-    useFetchSloListMock.mockReturnValue([false, emptySloList]);
+    useFetchSloListMock.mockReturnValue({ loading: false, sloList: emptySloList });
   });
 
   it('renders the not found page when the feature flag is not enabled', async () => {

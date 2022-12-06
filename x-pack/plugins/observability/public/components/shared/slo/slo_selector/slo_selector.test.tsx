@@ -22,7 +22,7 @@ describe('SLO Selector', () => {
   const onSelectedSpy = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
-    useFetchSloListMock.mockReturnValue([true, emptySloList]);
+    useFetchSloListMock.mockReturnValue({ loading: true, sloList: emptySloList });
   });
 
   it('fetches SLOs asynchronously', async () => {
