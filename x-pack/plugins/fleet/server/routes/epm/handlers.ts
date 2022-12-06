@@ -66,7 +66,7 @@ const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
 export const getCategoriesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetCategoriesRequestSchema.query>
-> = async (_context, request, response) => {
+> = async (context, request, response) => {
   try {
     const res = await getCategories({
       ...request.query,
