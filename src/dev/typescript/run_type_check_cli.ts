@@ -15,6 +15,7 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { asyncForEachWithLimit } from '@kbn/std';
 import { Jsonc } from '@kbn/bazel-packages';
+import { readPackageMap } from '@kbn/package-map';
 
 import { PROJECTS } from './projects';
 import { Project } from './project';
@@ -24,11 +25,15 @@ import {
   ROOT_REFS_CONFIG_PATH,
 } from './root_refs_config';
 
-function isValidRefs(refs: unknown): refs is Array<{ path: string }> {
+type KbnRef = string | { path: string };
+
+function isValidKbnRefs(refs: unknown): refs is KbnRef[] {
   return (
     Array.isArray(refs) &&
     refs.every(
-      (r) => typeof r === 'object' && r !== null && 'path' in r && typeof r.path === 'string'
+      (r) =>
+        typeof r === 'string' ||
+        (typeof r === 'object' && r !== null && 'path' in r && typeof r.path === 'string')
     )
   );
 }
@@ -51,6 +56,7 @@ function toTypeCheckConfigPath(path: string) {
 
 function createTypeCheckConfigs(projects: Project[]) {
   const created = new Set<string>();
+  const pkgMap = readPackageMap();
 
   // write tsconfig.type_check.json files for each project that is not the root
   const queue = new Set(projects.map((p) => p.tsConfigPath));
@@ -61,7 +67,7 @@ function createTypeCheckConfigs(projects: Project[]) {
     const dir = Path.dirname(path);
     const typeCheckConfigPath = Path.resolve(dir, 'tsconfig.type_check.json');
     const refs = parsed.kbn_references ?? [];
-    if (!isValidRefs(refs)) {
+    if (!isValidKbnRefs(refs)) {
       throw new Error(`expected valid TS refs in ${path}`);
     }
 
@@ -75,20 +81,33 @@ function createTypeCheckConfigs(projects: Project[]) {
         paths: undefined,
       },
       kbn_references: undefined,
-      references: refs.map((ref) => ({
-        path: toTypeCheckConfigPath(ref.path),
-      })),
+      references: refs.map((ref) => {
+        if (typeof ref !== 'string') {
+          // add the referenced config file to the queue if it's not already in it
+          queue.add(Path.resolve(dir, ref.path));
+          return { path: toTypeCheckConfigPath(ref.path) };
+        }
+
+        const relPkgDir = pkgMap.get(ref);
+        if (!relPkgDir) {
+          throw createFailError(
+            `tsconfig in ${dir} includes "kbn_reference" for [${ref}] but that is not a know package`
+          );
+        }
+
+        const pkgDir = Path.resolve(REPO_ROOT, relPkgDir);
+        // add the referenced config file to the queue if it's not already in it
+        queue.add(Path.resolve(pkgDir, 'tsconfig.json'));
+        return {
+          path: Path.relative(dir, Path.resolve(pkgDir, 'tsconfig.type_check.json')),
+        };
+      }),
     };
 
     Fs.writeFileSync(typeCheckConfigPath, JSON.stringify(typeCheckConfig, null, 2));
     Fs.utimesSync(typeCheckConfigPath, tsconfigStat.atime, tsconfigStat.mtime);
 
     created.add(typeCheckConfigPath);
-
-    // add all the referenced config files to the queue if they're not already in it
-    for (const ref of refs) {
-      queue.add(Path.resolve(dir, ref.path));
-    }
   }
 
   return created;
