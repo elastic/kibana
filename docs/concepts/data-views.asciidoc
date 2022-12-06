@@ -81,7 +81,6 @@ or *Lens*. With a temporary {data-source}, you can add fields and create an {es}
 query alert, just like you would a regular {data-source}.  Your work won't be visible to others in your space.
 
 A temporary {data-source} remains in your space until you change apps, or until you save it.
-If you try to share your temporary {data-source}, it is converted to a regular {data-source}.
 
 
 [role="screenshot"]
