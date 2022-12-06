@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams, UiSettingsScope } from '@kbn/core-ui-settings-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { IUiSettingsClient } from './ui_settings_client';
 
 /** @public */
 export interface UiSettingsServiceSetup {
   /**
-   * Sets settings with default values for the uiSettings.
+   * Sets settings with default values for the uiSettings in the appropriate scope
    * @param settings
    *
+   * @param scope
    * @example
    * ```ts
    * setup(core: CoreSetup){
@@ -25,30 +26,12 @@ export interface UiSettingsServiceSetup {
    *    value: true,
    *    description: 'add some awesomeness',
    *   },
+   *   scope: 'config',
    *  }]);
    * }
    * ```
    */
-  register(settings: Record<string, UiSettingsParams>): void;
-
-  /**
-   * Sets settings with default values for global uiSettings.
-   * @param settings
-   *
-   * @example
-   * ```ts
-   * setup(core: CoreSetup){
-   *  core.uiSettings.registerGlobal([{
-   *   bar: {
-   *    name: i18n.translate('my bar settings'),
-   *    value: true,
-   *    description: 'this setting will be available in every namespace',
-   *   },
-   *  }]);
-   * }
-   * ```
-   */
-  registerGlobal(settings: Record<string, UiSettingsParams>): void;
+  register(settings: Record<string, UiSettingsParams>, scope: UiSettingsScope): void;
 }
 
 /** @public */
@@ -67,21 +50,8 @@ export interface UiSettingsServiceStart {
    * }
    * ```
    */
-  asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
-
-  /**
-   * Creates a {@link IUiSettingsClient} with provided *global* saved objects client.
-   *
-   * This should only be used in the specific case where the client needs to be accessed
-   * from outside of the scope of a {@link RequestHandler}.
-   *
-   * @example
-   * ```ts
-   * start(core: CoreStart) {
-   *  const soClient = core.savedObjects.getScopedClient(arbitraryRequest);
-   *  const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
-   * }
-   * ```
-   */
-  asScopedToGlobalClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
+  asScopedToClient(
+    savedObjectsClient: SavedObjectsClientContract,
+    scope: UiSettingsScope
+  ): IUiSettingsClient;
 }

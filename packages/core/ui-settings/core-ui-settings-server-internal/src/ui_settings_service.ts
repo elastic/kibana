@@ -14,7 +14,7 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
-import type { UiSettingsParams, Scope } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams, UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { UiSettingsConfigType, uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
 import { UiSettingsClient, UiSettingsClientFactory, UiSettingsGlobalClient } from './clients';
 import type {
@@ -56,7 +56,7 @@ export class UiSettingsService
     const { overrides } = await firstValueFrom(this.config$);
     this.overrides = overrides;
 
-    this.register(getCoreSettings({ isDist: this.isDist }));
+    this.register(getCoreSettings({ isDist: this.isDist }), 'namespace');
 
     return {
       createDefaultsClient: () =>
@@ -80,7 +80,6 @@ export class UiSettingsService
 
     return {
       register: this.register,
-      registerGlobal: this.registerGlobal,
     };
   }
 
@@ -89,23 +88,23 @@ export class UiSettingsService
     this.validatesOverrides();
 
     return {
-      asScopedToClient: this.getScopedClientFactory('namespace'),
-      asScopedToGlobalClient: this.getScopedClientFactory('global'),
+      asScopedToClient: this.getScopedClientFactory(),
     };
   }
 
   public async stop() {}
 
-  private getScopedClientFactory(
-    scope: Scope
-  ): (savedObjectsClient: SavedObjectsClientContract) => UiSettingsClient | UiSettingsGlobalClient {
+  private getScopedClientFactory(): (
+    savedObjectsClient: SavedObjectsClientContract,
+    scope: UiSettingsScope
+  ) => UiSettingsClient | UiSettingsGlobalClient {
     const { version, buildNum } = this.coreContext.env.packageInfo;
-    const isNamespaceScope = () => {
-      return scope === 'namespace';
-    };
-    return (savedObjectsClient: SavedObjectsClientContract) =>
-      UiSettingsClientFactory.create({
-        type: isNamespaceScope() ? 'config' : 'config-global',
+    return (savedObjectsClient: SavedObjectsClientContract, scope: UiSettingsScope) => {
+      const isNamespaceScope = () => {
+        return scope === 'namespace';
+      };
+      const options = {
+        type: (isNamespaceScope() ? 'config' : 'config-global') as 'config' | 'config-global',
         id: version,
         buildNum,
         savedObjectsClient,
@@ -114,24 +113,25 @@ export class UiSettingsService
           : mapToObject(this.uiSettingsGlobalDefaults),
         overrides: isNamespaceScope() ? this.overrides : {},
         log: this.log,
-      });
+      };
+      return UiSettingsClientFactory.create(options);
+    };
   }
 
-  private register = (settings: Record<string, UiSettingsParams> = {}) => {
+  private register = (settings: Record<string, UiSettingsParams> = {}, scope: UiSettingsScope) => {
     Object.entries(settings).forEach(([key, value]) => {
-      if (this.uiSettingsDefaults.has(key)) {
-        throw new Error(`uiSettings for the key [${key}] has been already registered`);
+      if (scope === 'namespace') {
+        if (this.uiSettingsDefaults.has(key)) {
+          throw new Error(`uiSettings for the key [${key}] has been already registered`);
+        }
+        this.uiSettingsDefaults.set(key, value);
       }
-      this.uiSettingsDefaults.set(key, value);
-    });
-  };
-
-  private registerGlobal = (settings: Record<string, UiSettingsParams>) => {
-    Object.entries(settings).forEach(([key, value]) => {
-      if (this.uiSettingsGlobalDefaults.has(key)) {
-        throw new Error(`Global uiSettings for the key [${key}] has been already registered`);
+      if (scope === 'global') {
+        if (this.uiSettingsGlobalDefaults.has(key)) {
+          throw new Error(`Global uiSettings for the key [${key}] has been already registered`);
+        }
+        this.uiSettingsGlobalDefaults.set(key, value);
       }
-      this.uiSettingsGlobalDefaults.set(key, value);
     });
   };
 
