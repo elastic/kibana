@@ -33,32 +33,47 @@ export const getHostsColumns = (
       sortable: true,
       render: (hostName) => {
         if (hostName != null && hostName.length > 0) {
-          const id = escapeDataProviderId(`hosts-table-hostName-${hostName[0]}`);
           return (
-            <DraggableWrapper
-              key={id}
-              dataProvider={{
-                and: [],
-                enabled: true,
-                excluded: false,
-                id,
-                name: hostName[0],
-                kqlQuery: '',
-                queryMatch: { field: 'host.name', value: hostName[0], operator: IS_OPERATOR },
+            <CellActions
+              mode={CellActionsMode.HOVER_POPOVER}
+              showMoreActionsFrom={5}
+              showTooltip
+              triggerId={SECURITY_SOLUTION_ACTION_TRIGGER}
+              config={{
+                field: 'host.name',
+                value: hostName[0],
+                fieldType: 'keyword',
+                metadata: { scopeId: undefined },
               }}
-              isAggregatable={true}
-              fieldType={'keyword'}
-              render={(dataProvider, _, snapshot) =>
-                snapshot.isDragging ? (
-                  <DragEffects>
-                    <Provider dataProvider={dataProvider} />
-                  </DragEffects>
-                ) : (
-                  <HostDetailsLink hostName={hostName[0]} />
-                )
-              }
-            />
+            >
+              <HostDetailsLink hostName={hostName[0]} />
+            </CellActions>
           );
+
+          // <DraggableWrapper
+          //   key={id}
+          //   dataProvider={{
+          //     and: [],
+          //     enabled: true,
+          //     excluded: false,
+          //     id,
+          //     name: hostName[0],
+          //     kqlQuery: '',
+          //     queryMatch: { field: 'host.name', value: hostName[0], operator: IS_OPERATOR },
+          //   }}
+          //   isAggregatable={true}
+          //   fieldType={'keyword'}
+          //   render={(dataProvider, _, snapshot) =>
+          //     snapshot.isDragging ? (
+          //       <DragEffects>
+          //         <Provider dataProvider={dataProvider} />
+          //       </DragEffects>
+          //     ) : (
+          // <HostDetailsLink hostName={hostName[0]} />
+          //     )
+          //   }
+          // />
+          // );
         }
         return getEmptyTagValue();
       },
