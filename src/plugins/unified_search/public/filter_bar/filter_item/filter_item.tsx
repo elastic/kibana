@@ -310,7 +310,7 @@ export function FilterItem(props: FilterItemProps) {
       label.message = props.intl.formatMessage(
         {
           id: 'unifiedSearch.filter.filterBar.labelWarningInfo',
-          defaultMessage: 'Fields {fieldName} does not exist in current view',
+          defaultMessage: 'Field {fieldName} does not exist in current view',
         },
         {
           fieldName: filter.meta.key,
