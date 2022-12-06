@@ -46,13 +46,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: AGENT_POLICY_API_ROUTES.LIST_PATTERN,
       validate: GetAgentPoliciesRequestSchema,
-      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
-        validateSecurityRbac(fleetAuthz, {
-          any: {
-            fleet: { readAgentPolicies: true },
-            ...packagePrivileges,
-          },
-        }),
+      fleetAuthz: {
+        fleet: { readAgentPolicies: true },
+      },
     },
     getAgentPoliciesHandler
   );
@@ -62,13 +58,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: AGENT_POLICY_API_ROUTES.BULK_GET_PATTERN,
       validate: BulkGetAgentPoliciesRequestSchema,
-      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
-        validateSecurityRbac(fleetAuthz, {
-          any: {
-            fleet: { readAgentPolicies: true },
-            ...packagePrivileges,
-          },
-        }),
+      fleetAuthz: {
+        fleet: { readAgentPolicies: true },
+      },
     },
     bulkGetAgentPoliciesHandler
   );

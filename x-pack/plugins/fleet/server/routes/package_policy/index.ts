@@ -43,15 +43,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
       validate: GetPackagePoliciesRequestSchema,
-      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
-        validateSecurityRbac(fleetAuthz, {
-          any: {
-            integrations: {
-              readIntegrationPolicies: true,
-            },
-            ...packagePrivileges,
-          },
-        }),
+      fleetAuthz: {
+        integrations: { readIntegrationPolicies: true },
+      },
     },
     getPackagePoliciesHandler
   );
@@ -60,15 +54,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN,
       validate: BulkGetPackagePoliciesRequestSchema,
-      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
-        validateSecurityRbac(fleetAuthz, {
-          any: {
-            integrations: {
-              readIntegrationPolicies: true,
-            },
-            ...packagePrivileges,
-          },
-        }),
+      fleetAuthz: {
+        integrations: { readIntegrationPolicies: true },
+      },
     },
     bulkGetPackagePoliciesHandler
   );
@@ -78,15 +66,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.INFO_PATTERN,
       validate: GetOnePackagePolicyRequestSchema,
-      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
-        validateSecurityRbac(fleetAuthz, {
-          any: {
-            integrations: {
-              readIntegrationPolicies: true,
-            },
-            ...packagePrivileges,
-          },
-        }),
+      fleetAuthz: {
+        integrations: { readIntegrationPolicies: true },
+      },
     },
     getOnePackagePolicyHandler
   );
@@ -117,13 +99,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN,
       validate: UpdatePackagePolicyRequestSchema,
-      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
-        validateSecurityRbac(fleetAuthz, {
-          any: {
-            integrations: { writeIntegrationPolicies: true },
-            ...packagePrivileges,
-          },
-        }),
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
     },
     updatePackagePolicyHandler
   );
@@ -133,13 +111,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN,
       validate: DeletePackagePoliciesRequestSchema,
-      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
-        validateSecurityRbac(fleetAuthz, {
-          any: {
-            integrations: { writeIntegrationPolicies: true },
-            ...packagePrivileges,
-          },
-        }),
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
     },
     deletePackagePolicyHandler
   );
@@ -148,13 +122,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.INFO_PATTERN,
       validate: DeleteOnePackagePolicyRequestSchema,
-      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
-        validateSecurityRbac(fleetAuthz, {
-          any: {
-            integrations: { writeIntegrationPolicies: true },
-            ...packagePrivileges,
-          },
-        }),
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
     },
     deleteOnePackagePolicyHandler
   );
