@@ -16,7 +16,6 @@ export const useStyles = () => {
     const { size } = euiTheme;
     const yamlEditor: CSSObject = {
       height: '300px',
-      marginBottom: size.l,
     };
 
     return { yamlEditor };

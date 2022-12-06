@@ -5,12 +5,15 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
+import { EuiSwitch, EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { CodeEditor, YamlLang } from '@kbn/kibana-react-plugin/public';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { monaco } from '@kbn/monaco';
-import { ALERTS_DATASET } from '../../../common/constants';
+import { INPUT_DRIFT_PREVENTION } from '../../../common/constants';
 import { useStyles } from './styles';
 import { useConfigModel } from './hooks/use_config_model';
+import { getInputFromPolicy } from '../../common/utils';
+import * as i18n from './translations';
 
 const { editor } = monaco;
 
@@ -29,16 +32,13 @@ interface ConfigError {
   message: string;
 }
 
-function getStreamByDataset(policy: NewPackagePolicy, name: string) {
-  return policy.inputs[0].streams.find((stream) => stream.data_stream.dataset === name);
-}
-
 export const ConfigYamlView = ({ policy, onChange }: ConfigYamlViewwDeps) => {
   const styles = useStyles();
   const [errors, setErrors] = useState<ConfigError[]>([]);
-  const stream = getStreamByDataset(policy, ALERTS_DATASET);
-  const configuration = stream?.vars?.configuration?.value || '';
+  const input = getInputFromPolicy(policy, INPUT_DRIFT_PREVENTION);
+  const configuration = input?.vars?.configuration?.value || '';
   const currentModel = useConfigModel(configuration);
+  const driftPreventionEnabled = !!input?.enabled;
 
   useEffect(() => {
     const listener = editor.onDidChangeMarkers(([resource]) => {
@@ -63,27 +63,61 @@ export const ConfigYamlView = ({ policy, onChange }: ConfigYamlViewwDeps) => {
 
   const onYamlChange = useCallback(
     (value) => {
-      if (stream?.vars) {
-        stream.vars.configuration.value = value;
+      if (input?.vars) {
+        input.vars.configuration.value = value;
         onChange({ isValid: errors.length === 0, updatedPolicy: policy });
       }
     },
-    [errors.length, onChange, policy, stream?.vars]
+    [errors.length, input, onChange, policy]
+  );
+
+  const onToggleEnabled = useCallback(
+    (e) => {
+      if (input) {
+        input.enabled = e.target.checked;
+        onChange({ isValid: errors.length === 0, updatedPolicy: policy });
+      }
+    },
+    [errors.length, input, onChange, policy]
   );
 
   return (
-    <>
-      <div css={styles.yamlEditor}>
-        <CodeEditor
-          languageId={YamlLang}
-          options={{
-            wordWrap: 'off',
-            model: currentModel,
-          }}
-          onChange={onYamlChange}
-          value={configuration}
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <EuiSwitch
+          label={i18n.enableDriftPrevention}
+          checked={driftPreventionEnabled}
+          onChange={onToggleEnabled}
         />
-      </div>
-    </>
+        <EuiSpacer size="s" />
+        <EuiText color="subdued" size="s">
+          {i18n.enableDriftPreventionHelp}
+        </EuiText>
+      </EuiFlexItem>
+      {driftPreventionEnabled && (
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>{i18n.driftPreventionYaml}</h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText color="subdued" size="s">
+            {i18n.driftPreventionYamlHelp}
+          </EuiText>
+          <EuiSpacer size="s" />
+          <div css={styles.yamlEditor}>
+            <CodeEditor
+              languageId={YamlLang}
+              options={{
+                wordWrap: 'off',
+                model: currentModel,
+              }}
+              onChange={onYamlChange}
+              value={configuration}
+            />
+          </div>
+          <EuiSpacer size="s" />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 };

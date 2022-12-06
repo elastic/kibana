@@ -37,6 +37,7 @@ export const useConfigModel = (configuration: string) => {
           schema: {
             type: 'object',
             required: ['selectors', 'responses'],
+            additionalProperties: false,
             properties: {
               selectors: {
                 type: 'array',
@@ -52,7 +53,20 @@ export const useConfigModel = (configuration: string) => {
             $defs: {
               selector: {
                 type: 'object',
-                required: ['name', 'activity'],
+                required: ['name'],
+                additionalProperties: false,
+                oneOf: [
+                  { required: ['activity'] },
+                  { required: ['containerImageName'] },
+                  { required: ['containerImageTag'] },
+                  { required: ['filePath'] },
+                  { required: ['orchestratorClusterId'] },
+                  { required: ['orchestratorClusterName'] },
+                  { required: ['orchestratorNamespace'] },
+                  { required: ['orchestratorResourceLabel'] },
+                  { required: ['orchestratorResourceName'] },
+                  { required: ['orchestratorType'] },
+                ],
                 properties: {
                   name: {
                     type: 'string',
@@ -112,6 +126,7 @@ export const useConfigModel = (configuration: string) => {
               response: {
                 type: 'object',
                 required: ['match', 'actions'],
+                additionalProperties: false,
                 properties: {
                   match: { type: 'array', minItems: 1, items: { enum: selectorNames } },
                   exclude: { type: 'array', items: { enum: selectorNames } },
