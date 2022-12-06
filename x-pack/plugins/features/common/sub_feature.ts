@@ -29,6 +29,11 @@ export interface SubFeatureConfig {
 
   /** Collection of privilege groups */
   privilegeGroups: readonly SubFeaturePrivilegeGroupConfig[];
+
+  /**
+   * a description?
+   */
+  description?: string;
 }
 
 /**

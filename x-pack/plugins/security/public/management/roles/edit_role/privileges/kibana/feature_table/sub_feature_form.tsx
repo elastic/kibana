@@ -70,6 +70,7 @@ export const SubFeatureForm = (props: Props) => {
       <EuiFlexItem>
         <EuiText size="s">
           {props.subFeature.name} {getTooltip()}
+          {props.subFeature.description}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
