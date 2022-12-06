@@ -273,12 +273,12 @@ export class SearchSource {
     const activeIndexPattern: string[] = filters?.reduce<string[]>((acc, f) => {
       if (f.meta.key === '_index' && f.meta.disabled === false) {
         if (f.meta.negate === false) {
-          return _.concat(acc, f.meta.params.query ?? f.meta.params);
+          return _.concat(acc, (f.meta.params as any).query ?? f.meta.params);
         } else {
           if (Array.isArray(f.meta.params)) {
             return _.difference(acc, f.meta.params);
           } else {
-            return _.difference(acc, [f.meta.params.query]);
+            return _.difference(acc, [(f.meta.params as any).query]);
           }
         }
       } else {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getFilterField, cleanFilter, Filter } from '../filters';
+import { getFilterField, Filter } from '../filters';
 import { DataViewBase } from './types';
 import { getDataViewFieldSubtypeNested } from '../utils';
 
@@ -32,14 +32,12 @@ export const handleNestedFilter = (
     return filter;
   }
 
-  const query = cleanFilter(filter);
-
   return {
     meta: filter.meta,
     query: {
       nested: {
         path: subTypeNested.nested.path,
-        query: query.query || query,
+        query: filter.query,
         ...(typeof config.ignoreUnmapped === 'boolean' && {
           ignore_unmapped: config.ignoreUnmapped,
         }),

@@ -6,16 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
-import { Filter, isExistsFilter, FILTERS } from '@kbn/es-query';
+import { type ExistsFilter, type Filter, FILTERS, isExistsFilter } from '@kbn/es-query';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 export const mapExists = (filter: Filter) => {
   if (isExistsFilter(filter)) {
     return {
       type: FILTERS.EXISTS,
       value: FILTERS.EXISTS,
-      key: get(filter, 'query.exists.field'),
+      key: filter.meta.params.field,
+      params: filter.meta.params,
     };
   }
   throw filter;
 };
+
+export function getExistsDisplayValue(filter: ExistsFilter, formatter?: FieldFormat) {
+  const value = filter.meta.params.field ?? filter.meta.value;
+  return formatter?.convert(value) ?? `${value}` ?? '';
+}

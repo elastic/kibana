@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RangeFilter, FilterStateStore } from '..';
+import { type RangeFilter, FILTERS, FilterStateStore } from '..';
 
 export const rangeFilter: RangeFilter = {
   meta: {
@@ -14,7 +14,7 @@ export const rangeFilter: RangeFilter = {
     negate: false,
     disabled: false,
     alias: null,
-    type: 'range',
+    type: FILTERS.RANGE,
     key: 'bytes',
     value: '0 to 10',
     params: {

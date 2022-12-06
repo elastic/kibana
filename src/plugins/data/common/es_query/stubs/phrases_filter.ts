@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { FilterStateStore, PhrasesFilter } from '@kbn/es-query';
+import { FILTERS, FilterStateStore, type PhrasesFilter } from '@kbn/es-query';
 
 export const phrasesFilter: PhrasesFilter = {
   meta: {
     index: 'logstash-*',
-    type: 'phrases',
+    type: FILTERS.PHRASES,
     key: 'machine.os.raw',
     value: 'win xp, osx',
     params: ['win xp', 'osx'],

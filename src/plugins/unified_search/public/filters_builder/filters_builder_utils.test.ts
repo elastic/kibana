@@ -182,7 +182,7 @@ describe('filters_builder_utils', () => {
     beforeAll(() => {
       filter = filters[0];
       filtersWithOrRelationships = filters[1];
-      groupOfFilters = filters[1].meta.params;
+      groupOfFilters = filters[1].meta.params as any;
     });
 
     test('should return correct ConditionalOperationType', () => {

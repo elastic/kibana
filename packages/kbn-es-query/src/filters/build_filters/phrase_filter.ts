@@ -8,13 +8,15 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get, has, isPlainObject } from 'lodash';
 import type { Filter, FilterMeta } from './types';
-import type { DataViewFieldBase, DataViewBase } from '../../es_query';
+import { FILTERS } from './types';
+import type { DataViewBase, DataViewFieldBase } from '../../es_query';
 import { getConvertedValueForField } from './get_converted_value_for_field';
 import { hasRangeKeys } from './range_filter';
 
 export type PhraseFilterValue = string | number | boolean;
 
 export type PhraseFilterMeta = FilterMeta & {
+  type: typeof FILTERS.PHRASE;
   params?: {
     query: PhraseFilterValue; // The unformatted value
   };
@@ -46,6 +48,7 @@ export type ScriptedPhraseFilter = Filter & {
  * @public
  */
 export const isPhraseFilter = (filter: Filter): filter is PhraseFilter => {
+  if (filter.meta.type) return filter.meta.type === FILTERS.PHRASE;
   const isMatchPhraseQuery = has(filter, 'query.match_phrase');
   const matchQueryPart: estypes.QueryDslMultiMatchQuery[] = get(filter, 'query.match', []);
   const isDeprecatedMatchPhraseQuery =
@@ -104,7 +107,7 @@ export const buildPhraseFilter = (
 
   if (field.scripted) {
     return {
-      meta: { index: indexPattern.id, field: field.name } as PhraseFilterMeta,
+      meta: { type: FILTERS.PHRASE, index: indexPattern.id, field: field.name },
       query: { script: getPhraseScript(field, value) },
     };
   } else {

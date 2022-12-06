@@ -7,11 +7,13 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Filter, FilterMeta, FILTERS } from './types';
+import { Filter, FilterMeta } from './types';
 import { getPhraseScript, PhraseFilterValue } from './phrase_filter';
 import type { DataViewFieldBase, DataViewBase } from '../../es_query';
+import { FILTERS } from './types';
 
 export type PhrasesFilterMeta = FilterMeta & {
+  type: typeof FILTERS.PHRASES;
   params: PhraseFilterValue[]; // The unformatted values
   field?: string;
 };

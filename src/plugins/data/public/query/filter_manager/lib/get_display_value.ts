@@ -16,7 +16,9 @@ import {
   isScriptedPhraseFilter,
   isScriptedRangeFilter,
   getFilterField,
+  isExistsFilter,
 } from '@kbn/es-query';
+import { getExistsDisplayValue } from './mappers/map_exists';
 import { getPhraseDisplayValue } from './mappers/map_phrase';
 import { getPhrasesDisplayValue } from './mappers/map_phrases';
 import { getRangeDisplayValue } from './mappers/map_range';
@@ -55,7 +57,9 @@ export function getDisplayValueFromFilter(filter: Filter, indexPatterns: DataVie
   const fieldName = getFilterField(filter);
   const valueFormatter = getValueFormatter(indexPattern, fieldName);
 
-  if (isPhraseFilter(filter) || isScriptedPhraseFilter(filter)) {
+  if (isExistsFilter(filter)) {
+    return getExistsDisplayValue(filter, valueFormatter);
+  } else if (isPhraseFilter(filter) || isScriptedPhraseFilter(filter)) {
     return getPhraseDisplayValue(filter, valueFormatter);
   } else if (isPhrasesFilter(filter)) {
     return getPhrasesDisplayValue(filter, valueFormatter);

@@ -9,14 +9,15 @@
 import { getPhraseDisplayValue, mapPhrase } from './map_phrase';
 import type { PhraseFilter, Filter } from '@kbn/es-query';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { FILTERS } from '@kbn/es-query';
 
 describe('filter manager utilities', () => {
   describe('mapPhrase()', () => {
     test('should return the key for matching filters', async () => {
       const filter = {
-        meta: { index: 'logstash-*' },
+        meta: { index: 'logstash-*', type: FILTERS.PHRASE },
         query: { match: { _type: { query: 'apache', type: 'phrase' } } },
-      } as PhraseFilter;
+      };
 
       const result = mapPhrase(filter);
 

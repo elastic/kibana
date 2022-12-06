@@ -6,38 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { isUndefined } from 'lodash';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { migrateFilter } from './migrate_filter';
 import { filterMatchesIndex } from './filter_matches_index';
-import { Filter, cleanFilter, isFilterDisabled } from '../filters';
+import { Filter, isFilterDisabled, isExistsFilter, cleanFilter, toExistsEsQuery } from '../filters';
 import { BoolQuery, DataViewBase } from './types';
 import { handleNestedFilter } from './handle_nested_filter';
-import { handleCombinedFilter } from './handle_combined_filter';
-
-/**
- * Create a filter that can be reversed for filters with negate set
- * @param {boolean} reverse This will reverse the filter. If true then
- *                          anything where negate is set will come
- *                          through otherwise it will filter out
- * @returns {function}
- */
-const filterNegate = (reverse: boolean) => (filter: Filter) => {
-  if (isUndefined(filter.meta) || isUndefined(filter.meta.negate)) {
-    return !reverse;
-  }
-
-  return filter.meta && filter.meta.negate === reverse;
-};
-
-/**
- * Translate a filter into a query to support es 5+
- * @param  {Object} filter - The filter to translate
- * @return {Object} the query version of that filter
- */
-const translateToQuery = (filter: Partial<Filter>): estypes.QueryDslQueryContainer => {
-  return filter.query || filter;
-};
 
 /**
  * Options for building query for filters
@@ -65,38 +39,28 @@ export interface EsQueryFiltersConfig {
  * @public
  */
 export const buildQueryFromFilters = (
-  inputFilters: Filter[] = [],
-  inputDataViews: DataViewBase | DataViewBase[] | undefined,
-  options: EsQueryFiltersConfig = {
-    ignoreFilterIfFieldNotInIndex: false,
-  }
+  allFilters: Filter[] = [],
+  dataView: DataViewBase | DataViewBase[] | undefined,
+  config: EsQueryFiltersConfig = {}
 ): BoolQuery => {
-  const { ignoreFilterIfFieldNotInIndex = false, nestedIgnoreUnmapped } = options;
-  const filters = inputFilters.filter((filter) => filter && !isFilterDisabled(filter));
-  const indexPatterns = Array.isArray(inputDataViews) ? inputDataViews : [inputDataViews];
+  const { ignoreFilterIfFieldNotInIndex = false, nestedIgnoreUnmapped } = config;
+  const filters = allFilters.filter((filter) => !isFilterDisabled(filter));
 
-  const findIndexPattern = (id: string | undefined) => {
-    return indexPatterns.find((index) => index?.id === id) || indexPatterns[0];
-  };
-
-  const filtersToESQueries = (negate: boolean) => {
+  const filtersToESQueries = (negate: boolean): QueryDslQueryContainer[] => {
     return filters
-      .filter((f) => !!f)
-      .filter(filterNegate(negate))
+      .filter((filter) => !!filter.meta?.negate === negate)
       .filter((filter) => {
-        const indexPattern = findIndexPattern(filter.meta?.index);
+        const indexPattern = findIndexPattern(filter, dataView, filter.meta.index);
         return !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern);
       })
       .map((filter) => {
-        const indexPattern = findIndexPattern(filter.meta?.index);
+        const indexPattern = findIndexPattern(filter, dataView, filter.meta.index);
         const migratedFilter = migrateFilter(filter, indexPattern);
         return handleNestedFilter(migratedFilter, indexPattern, {
           ignoreUnmapped: nestedIgnoreUnmapped,
         });
       })
-      .map((filter) => handleCombinedFilter(filter, inputDataViews, options))
-      .map(cleanFilter)
-      .map(translateToQuery);
+      .map((filter) => filterToEsQuery(filter));
   };
 
   return {
@@ -106,3 +70,16 @@ export const buildQueryFromFilters = (
     must_not: filtersToESQueries(true),
   };
 };
+
+export function filterToEsQuery(filter: Filter): QueryDslQueryContainer {
+  if (isExistsFilter(filter)) {
+    return toExistsEsQuery(filter);
+  } else {
+    return filter.query ?? cleanFilter(filter);
+  }
+}
+
+function findIndexPattern(filter: Filter, dataView?: DataViewBase | DataViewBase[], id?: string) {
+  const dataViews = Array.isArray(dataView) ? dataView : dataView != null ? [dataView] : [];
+  return dataViews.find((index) => index?.id === id) || dataViews[0];
+}

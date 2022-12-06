@@ -6,16 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { ExistsFilter, FilterStateStore } from '..';
+import { type ExistsFilter, FILTERS, FilterStateStore } from '..';
 
 export const existsFilter: ExistsFilter = {
   meta: {
     index: 'logstash-*',
     negate: false,
     disabled: false,
-    type: 'exists',
+    type: FILTERS.EXISTS,
     key: 'machine.os',
     alias: null,
+    params: {
+      field: 'machine.os',
+    },
   },
   $state: {
     store: FilterStateStore.APP_STATE,

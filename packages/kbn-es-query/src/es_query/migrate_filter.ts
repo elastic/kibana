@@ -7,8 +7,15 @@
  */
 
 import { get, omit, pick } from 'lodash';
-import { getConvertedValueForField } from '../filters';
-import { Filter } from '../filters';
+import {
+  Filter,
+  FILTERS,
+  getConvertedValueForField,
+  isExistsFilter,
+  isPhraseFilter,
+  isPhrasesFilter,
+  isRangeFilter,
+} from '../filters';
 import { DataViewBase } from './types';
 
 /** @internal */
@@ -104,6 +111,17 @@ export function migrateFilter(filter: Filter, indexPattern?: DataViewBase) {
     // @ts-ignore
     delete filter[key];
   });
+
+  // Add `type` property if it doesn't already exist
+  if (isExistsFilter(filter)) {
+    filter.meta.type = FILTERS.EXISTS;
+  } else if (isPhraseFilter(filter)) {
+    filter.meta.type = FILTERS.PHRASE;
+  } else if (isPhrasesFilter(filter)) {
+    filter.meta.type = FILTERS.PHRASES;
+  } else if (isRangeFilter(filter)) {
+    filter.meta.type = FILTERS.RANGE;
+  }
 
   return filter;
 }

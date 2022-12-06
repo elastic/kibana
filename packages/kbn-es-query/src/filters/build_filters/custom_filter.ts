@@ -12,6 +12,10 @@ import { Filter, FilterMeta, FILTERS, FilterStateStore } from './types';
 /** @public */
 export type CustomFilter = Filter;
 
+export function isCustomFilter(filter: Filter): filter is CustomFilter {
+  return filter.meta.type === FILTERS.CUSTOM;
+}
+
 /**
  *
  * @param indexPatternString

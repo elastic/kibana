@@ -15,7 +15,7 @@ import { AggConfigs, AggTypesRegistryStart } from '../..';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { RequestAdapter, RequestResponder } from '@kbn/inspector-plugin/common';
 import { switchMap } from 'rxjs/operators';
-import { Filter } from '@kbn/es-query';
+import { type Filter, FILTERS } from '@kbn/es-query';
 import { stubIndexPattern } from '../../stubs';
 import { SearchSourceSearchOptions } from './types';
 import { ISearchGeneric } from '../types';
@@ -134,7 +134,7 @@ describe('SearchSource', () => {
             params: {
               query: 'auditbeat-*',
             },
-            type: 'phrase',
+            type: FILTERS.PHRASE,
           },
         },
         {
@@ -155,7 +155,7 @@ describe('SearchSource', () => {
             disabled: false,
             negate: false,
             params: ['auditbeat-*'],
-            type: 'phrase',
+            type: FILTERS.PHRASE,
           },
         },
       ];
@@ -177,7 +177,7 @@ describe('SearchSource', () => {
             disabled: false,
             negate: true,
             params: { query: 'auditbeat-*' },
-            type: 'phrase',
+            type: FILTERS.PHRASE,
           },
         },
       ];
@@ -203,7 +203,7 @@ describe('SearchSource', () => {
             disabled: true,
             negate: true,
             params: { query: 'auditbeat-*' },
-            type: 'phrase',
+            type: FILTERS.PHRASE,
           },
         },
       ];

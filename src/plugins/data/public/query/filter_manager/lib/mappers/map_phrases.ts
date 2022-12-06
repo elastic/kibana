@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Filter, PhrasesFilter, isPhrasesFilter } from '@kbn/es-query';
+import type { Filter, PhraseFilterValue, PhrasesFilter } from '@kbn/es-query';
+import { isPhrasesFilter } from '@kbn/es-query';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 export function getPhrasesDisplayValue(filter: PhrasesFilter, formatter?: FieldFormat) {
   return filter.meta.params
-    .map((v: string) => {
+    .map((v: PhraseFilterValue) => {
       return formatter?.convert(v) ?? v;
     })
     .join(', ');

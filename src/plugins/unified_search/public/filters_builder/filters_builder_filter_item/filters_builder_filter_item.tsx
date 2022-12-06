@@ -23,6 +23,7 @@ import { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { cx, css } from '@emotion/css';
 
+import type { Serializable } from '@kbn/utility-types';
 import add from '../assets/add.svg';
 import or from '../assets/or.svg';
 
@@ -117,7 +118,7 @@ export function FilterItem({
   );
 
   const onHandleParamsChange = useCallback(
-    (selectedParams: string) => {
+    (selectedParams: Serializable) => {
       dispatch({
         type: 'updateFilter',
         payload: { path, field, operator, params: selectedParams },
@@ -130,7 +131,7 @@ export function FilterItem({
     (value: Filter['meta']['params']) => {
       dispatch({
         type: 'updateFilter',
-        payload: { path, params: [value, ...(params || [])] },
+        payload: { path, params: [value, ...((params as any) || [])] },
       });
     },
     [dispatch, path, params]
@@ -177,7 +178,7 @@ export function FilterItem({
         <FilterGroup
           path={path}
           conditionType={conditionalOperationType}
-          filters={Array.isArray(filter) ? filter : filter.meta?.params}
+          filters={Array.isArray(filter) ? filter : (filter.meta?.params as any)}
           reverseBackground={!reverseBackground}
           renderedLevel={renderedLevel + 1}
         />

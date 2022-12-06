@@ -41,7 +41,7 @@ function getExistingFilter(
     if (!filter) return;
 
     if (fieldName === '_exists_' && isExistsFilter(filter)) {
-      return filter.query.exists!.field === value;
+      return filter.query?.exists?.field === value;
     }
 
     if (isPhraseFilter(filter)) {

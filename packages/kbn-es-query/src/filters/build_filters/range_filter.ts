@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { map, reduce, mapValues, has, get, keys, pickBy } from 'lodash';
+import { get, has, keys, map, mapValues, pickBy, reduce } from 'lodash';
 import type { Filter, FilterMeta } from './types';
+import { FILTERS } from './types';
 import type { DataViewBase, DataViewFieldBase } from '../../es_query';
 
 const OPERANDS_IN_RANGE = 2;
@@ -53,6 +54,7 @@ export const hasRangeKeys = (params: RangeFilterParams) =>
   );
 
 export type RangeFilterMeta = FilterMeta & {
+  type: typeof FILTERS.RANGE;
   params: RangeFilterParams;
   field?: string;
   formattedValue?: string;
@@ -90,7 +92,10 @@ export type RangeFilter = Filter & {
  *
  * @public
  */
-export const isRangeFilter = (filter?: Filter): filter is RangeFilter => has(filter, 'query.range');
+export const isRangeFilter = (filter?: Filter): filter is RangeFilter => {
+  if (filter?.meta.type) return filter?.meta.type === FILTERS.RANGE;
+  return has(filter, 'query.range');
+};
 
 /**
  *
@@ -153,6 +158,7 @@ export const buildRangeFilter = (
   }, 0);
 
   const meta: RangeFilterMeta = {
+    type: FILTERS.RANGE,
     index: indexPattern?.id,
     params: {},
     field: field.name,

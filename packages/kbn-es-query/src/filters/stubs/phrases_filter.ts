@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { FilterStateStore, PhrasesFilter } from '..';
+import { type PhrasesFilter, FILTERS, FilterStateStore } from '..';
 
 export const phrasesFilter: PhrasesFilter = {
   meta: {
     index: 'logstash-*',
-    type: 'phrases',
+    type: FILTERS.PHRASES,
     key: 'machine.os.raw',
     value: 'win xp, osx',
     params: ['win xp', 'osx'],

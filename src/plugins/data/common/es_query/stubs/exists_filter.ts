@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { ExistsFilter, FilterStateStore } from '@kbn/es-query';
+import { type ExistsFilter, FILTERS, FilterStateStore } from '@kbn/es-query';
 
 export const existsFilter: ExistsFilter = {
   meta: {
     index: 'logstash-*',
     negate: false,
     disabled: false,
-    type: 'exists',
-    key: 'machine.os',
+    type: FILTERS.EXISTS,
+    params: {
+      field: 'machine.os',
+    },
     alias: null,
   },
   $state: {

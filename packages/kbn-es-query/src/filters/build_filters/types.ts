@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Serializable } from '@kbn/utility-types';
 import { ExistsFilter } from './exists_filter';
 import { PhrasesFilter } from './phrases_filter';
 import { PhraseFilter } from './phrase_filter';
@@ -62,9 +63,9 @@ export type FilterMeta = {
   // index and type are optional only because when you create a new filter, there are no defaults
   index?: string;
   isMultiIndex?: boolean;
-  type?: string;
+  type?: FILTERS;
   key?: string;
-  params?: any;
+  params?: Serializable;
   value?: string;
 };
 

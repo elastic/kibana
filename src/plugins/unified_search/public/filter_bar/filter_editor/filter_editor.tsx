@@ -23,11 +23,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import {
-  Filter,
-  FieldFilter,
+  type Filter,
+  type FieldFilter,
   buildFilter,
   buildCustomFilter,
-  cleanFilter,
+  filterToEsQuery,
   getFilterParams,
 } from '@kbn/es-query';
 import { get } from 'lodash';
@@ -88,14 +88,15 @@ const updateButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.upda
 class FilterEditorUI extends Component<FilterEditorProps, State> {
   constructor(props: FilterEditorProps) {
     super(props);
+    const selectedIndexPattern = this.getIndexPatternFromFilter();
     this.state = {
-      selectedIndexPattern: this.getIndexPatternFromFilter(),
+      selectedIndexPattern,
       selectedField: this.getFieldFromFilter(),
       selectedOperator: this.getSelectedOperator(),
       params: getFilterParams(props.filter),
       useCustomLabel: props.filter.meta.alias !== null,
       customLabel: props.filter.meta.alias || '',
-      queryDsl: JSON.stringify(cleanFilter(props.filter), null, 2),
+      queryDsl: JSON.stringify(filterToEsQuery(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
     };
   }

@@ -18,19 +18,20 @@ export type {
 } from './src/es_query';
 
 export type {
+  AggregateQuery,
   CustomFilter,
   ExistsFilter,
   FieldFilter,
   Filter,
-  FilterItem,
   FilterCompareOptions,
+  FilterItem,
   FilterMeta,
   LatLon,
   MatchAllFilter,
   PhraseFilter,
+  PhraseFilterValue,
   PhrasesFilter,
   Query,
-  AggregateQuery,
   QueryStringFilter,
   RangeFilter,
   RangeFilterMeta,
@@ -52,12 +53,13 @@ export {
   buildEsQuery,
   buildQueryFromFilters,
   decorateQuery,
-  luceneStringToDsl,
-  migrateFilter,
-  isOfQueryType,
-  isOfAggregateQueryType,
+  filterToEsQuery,
   getAggregateQueryMode,
   getIndexPatternFromSQLQuery,
+  isOfAggregateQueryType,
+  isOfQueryType,
+  luceneStringToDsl,
+  migrateFilter,
 } from './src/es_query';
 
 export {
@@ -92,6 +94,7 @@ export {
   isFilters,
   isMatchAllFilter,
   isCombinedFilter,
+  isCustomFilter,
   isPhraseFilter,
   isPhrasesFilter,
   isQueryStringFilter,

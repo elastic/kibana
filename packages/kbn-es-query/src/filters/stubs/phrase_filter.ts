@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { PhraseFilter, FilterStateStore } from '..';
+import { type PhraseFilter, FILTERS, FilterStateStore } from '..';
 
 export const phraseFilter: PhraseFilter = {
   meta: {
     negate: false,
     index: 'logstash-*',
-    type: 'phrase',
+    type: FILTERS.PHRASE,
     key: 'machine.os',
     value: 'ios',
     disabled: false,

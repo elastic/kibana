@@ -11,7 +11,7 @@ import { AggConfigs, CreateAggConfigParams } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
-import { Filter, ExistsFilter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 
 describe('AggConfig Filters', () => {
   describe('terms', () => {
@@ -85,23 +85,6 @@ describe('AggConfig Filters', () => {
       expect(filterTrue.query).toHaveProperty('match_phrase');
       expect(filterTrue.query?.match_phrase).toHaveProperty('field');
       expect(filterTrue.query?.match_phrase?.field).toBeTruthy();
-    });
-
-    test('should generate correct __missing__ filter', () => {
-      const aggConfigs = getAggConfigs([
-        { type: BUCKET_TYPES.TERMS, schema: 'segment', params: { field: 'field' } },
-      ]);
-      const filter = createFilterTerms(
-        aggConfigs.aggs[0] as IBucketAggConfig,
-        '__missing__',
-        {}
-      ) as ExistsFilter;
-
-      expect(filter.query).toHaveProperty('exists');
-      expect(filter.query.exists).toHaveProperty('field', 'field');
-      expect(filter).toHaveProperty('meta');
-      expect(filter.meta).toHaveProperty('index', '1234');
-      expect(filter.meta).toHaveProperty('negate', true);
     });
 
     test('should generate correct __other__ filter', () => {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FilterStateStore, PhraseFilter } from '@kbn/es-query';
+import { FILTERS, FilterStateStore, type PhraseFilter } from '@kbn/es-query';
 import {
   stubIndexPattern,
   phraseFilter,
@@ -95,7 +95,7 @@ describe('getFieldDisplayValueFromFilter', () => {
       meta: {
         negate: false,
         index: 'logstash-*',
-        type: 'phrase',
+        type: FILTERS.PHRASE,
         key: 'bytes',
         value: '1024',
         disabled: false,

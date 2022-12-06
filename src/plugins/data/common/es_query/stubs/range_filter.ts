@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FilterStateStore, RangeFilter } from '@kbn/es-query';
+import { FILTERS, FilterStateStore, type RangeFilter } from '@kbn/es-query';
 
 export const rangeFilter: RangeFilter = {
   meta: {
@@ -14,7 +14,7 @@ export const rangeFilter: RangeFilter = {
     negate: false,
     disabled: false,
     alias: null,
-    type: 'range',
+    type: FILTERS.RANGE,
     key: 'bytes',
     value: '0 to 10',
     params: {

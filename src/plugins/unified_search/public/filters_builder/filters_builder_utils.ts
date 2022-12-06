@@ -21,7 +21,7 @@ const PATH_SEPARATOR = '.';
  */
 export const getPathInArray = (path: string) => path.split(PATH_SEPARATOR).map((i) => +i);
 
-const getGroupedFilters = (filter: FilterItem) =>
+const getGroupedFilters = (filter: FilterItem): any =>
   Array.isArray(filter) ? filter : filter?.meta?.params;
 
 const doForFilterByPath = <T>(
@@ -296,7 +296,7 @@ function updateOperator(filter: Filter, operator?: Operator) {
       ...filter.meta,
       negate: operator?.negate,
       type: operator?.type,
-      params: { ...filter.meta.params, query: undefined },
+      params: { ...(filter.meta.params as any), query: undefined },
       value: undefined,
     },
     query: { match_phrase: { field: filter.meta.key } },
@@ -328,7 +328,7 @@ function updateWithIsOperator(
       ...filter.meta,
       negate: operator?.negate,
       type: operator?.type,
-      params: { ...filter.meta.params, query: params },
+      params: { ...(filter.meta.params as any), query: params },
     },
     query: { match_phrase: { ...filter!.query?.match_phrase, [filter.meta.key!]: params } },
   };

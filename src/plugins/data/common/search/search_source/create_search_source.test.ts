@@ -9,7 +9,7 @@
 import { createSearchSource as createSearchSourceFactory } from './create_search_source';
 import { SearchSourceDependencies } from './search_source';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import { type Filter, FILTERS } from '@kbn/es-query';
 
 describe('createSearchSource', () => {
   const indexPatternMock: DataView = {} as DataView;
@@ -55,7 +55,7 @@ describe('createSearchSource', () => {
             alias: null,
             negate: false,
             disabled: false,
-            type: 'phrase',
+            type: FILTERS.PHRASE,
             key: 'category.keyword',
             params: {
               query: "Men's Clothing",

@@ -35,7 +35,7 @@ export interface CombinedFilter extends Filter {
  * @public
  */
 export function isCombinedFilter(filter: Filter): filter is CombinedFilter {
-  return filter?.meta?.type === FILTERS.COMBINED;
+  return filter.meta.type === FILTERS.COMBINED;
 }
 
 /**
