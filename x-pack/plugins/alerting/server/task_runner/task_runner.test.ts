@@ -1018,11 +1018,6 @@ describe('Task Runner', () => {
           duration: MOCK_DURATION,
           start: DATE_1969,
           flappingHistory: [false],
-          actions: {
-            '1': {
-              date: new Date(DATE_1970),
-            },
-          },
         })
       );
 
@@ -1150,11 +1145,6 @@ describe('Task Runner', () => {
         generateAlertInstance({
           id: 1,
           flappingHistory: [false],
-          actions: {
-            '1': {
-              date: new Date(DATE_1970),
-            },
-          },
         })
       );
 
@@ -1280,11 +1270,6 @@ describe('Task Runner', () => {
         generateAlertInstance({
           id: 1,
           flappingHistory: [false],
-          actions: {
-            '1': {
-              date: new Date(DATE_1970),
-            },
-          },
         })
       );
 
@@ -2439,17 +2424,6 @@ describe('Task Runner', () => {
               lastScheduledActions: {
                 date: new Date(DATE_1970),
                 group: 'default',
-                actions: {
-                  '1': {
-                    date: new Date(DATE_1970),
-                  },
-                  '2': {
-                    date: new Date(DATE_1970),
-                  },
-                  '3': {
-                    date: new Date(DATE_1970),
-                  },
-                },
               },
               flappingHistory: [true],
               flapping: false,
@@ -2614,17 +2588,6 @@ describe('Task Runner', () => {
               lastScheduledActions: {
                 date: new Date(DATE_1970),
                 group: 'default',
-                actions: {
-                  '1': {
-                    date: new Date(DATE_1970),
-                  },
-                  '4': {
-                    date: new Date(DATE_1970),
-                  },
-                  '5': {
-                    date: new Date(DATE_1970),
-                  },
-                },
               },
               flappingHistory: [true],
               flapping: false,
@@ -2639,14 +2602,6 @@ describe('Task Runner', () => {
               lastScheduledActions: {
                 date: new Date(DATE_1970),
                 group: 'default',
-                actions: {
-                  '4': {
-                    date: new Date(DATE_1970),
-                  },
-                  '5': {
-                    date: new Date(DATE_1970),
-                  },
-                },
               },
               flappingHistory: [true],
               flapping: false,

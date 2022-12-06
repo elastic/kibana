@@ -212,11 +212,7 @@ describe('Execution Handler', () => {
     await executionHandler.run(alerts);
 
     expect(Object.values(alerts)[0].getLastScheduledActions()).toEqual({
-      actions: {
-        '1': {
-          date: DATE_1970,
-        },
-      },
+      actions: {},
       date: DATE_1970,
       group: 'default',
     });
@@ -779,7 +775,7 @@ describe('Execution Handler', () => {
       })
     );
     await executionHandler.run(
-      generateAlert({ id: 1, lastScheduledActions: { '1': { date: new Date(DATE_1970) } } })
+      generateAlert({ id: 1, lastScheduledActions: { 'test:1h': { date: new Date(DATE_1970) } } })
     );
 
     clock.tick(30000);

@@ -227,7 +227,15 @@ export class ExecutionHandler<
         if (this.isRecoveredAlert(actionGroup)) {
           alert.scheduleActions(action.group as ActionGroupIds);
         } else {
-          alert.updateLastScheduledActions(action.group as ActionGroupIds, action.id);
+          if (action.frequency?.throttle) {
+            alert.updateLastScheduledActions(
+              action.group as ActionGroupIds,
+              `${action.actionTypeId}:${action.frequency?.throttle}`
+            );
+          } else {
+            alert.updateLastScheduledActions(action.group as ActionGroupIds);
+          }
+
           alert.unscheduleActions();
         }
       }
@@ -410,7 +418,10 @@ export class ExecutionHandler<
 
     if (notifyWhen === 'onThrottleInterval') {
       const throttled = action.frequency?.throttle
-        ? alert.isThrottled({ throttle: action.frequency.throttle ?? null, actionId: action.id })
+        ? alert.isThrottled({
+            throttle: action.frequency.throttle ?? null,
+            actionHash: `${action.actionTypeId}:${action.frequency.throttle}`,
+          })
         : alert.isThrottled({ throttle: rule.throttle ?? null });
 
       if (throttled) {

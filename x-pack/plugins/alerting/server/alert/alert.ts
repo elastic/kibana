@@ -67,7 +67,7 @@ export class Alert<
     return this.scheduledExecutionOptions !== undefined;
   }
 
-  isThrottled({ throttle, actionId }: { throttle: string | null; actionId?: string }) {
+  isThrottled({ throttle, actionHash }: { throttle: string | null; actionHash?: string }) {
     if (this.scheduledExecutionOptions === undefined) {
       return false;
     }
@@ -79,9 +79,9 @@ export class Alert<
         this.scheduledExecutionOptions
       )
     ) {
-      if (actionId) {
+      if (actionHash) {
         if (this.meta.lastScheduledActions.actions) {
-          const lastTriggerDate = this.meta.lastScheduledActions.actions[actionId].date;
+          const lastTriggerDate = this.meta.lastScheduledActions.actions[actionHash].date;
           return !!(lastTriggerDate && lastTriggerDate.getTime() + throttleMills > Date.now());
         }
         return false;
@@ -169,18 +169,18 @@ export class Alert<
     return this;
   }
 
-  updateLastScheduledActions(group: ActionGroupIds, actionId?: string) {
+  updateLastScheduledActions(group: ActionGroupIds, actionHash?: string | null) {
     if (!this.meta.lastScheduledActions) {
       this.meta.lastScheduledActions = {} as LastScheduledActions;
     }
     const date = new Date();
     this.meta.lastScheduledActions.group = group;
     this.meta.lastScheduledActions.date = date;
-    if (actionId) {
+    if (actionHash) {
       if (!this.meta.lastScheduledActions.actions) {
         this.meta.lastScheduledActions!.actions = {};
       }
-      this.meta.lastScheduledActions.actions[actionId] = { date };
+      this.meta.lastScheduledActions.actions[actionHash] = { date };
     }
   }
 
