@@ -22,6 +22,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { sendRequest } from '../../../hooks';
 
+import {
+  OUTPUT_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+  FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+} from '../../../../../../common/constants';
+
 import { CodeBlock } from './code_block';
 import { SavedObjectNamesCombo } from './saved_object_names_combo';
 
@@ -61,27 +70,39 @@ const fetchSavedObjects = async (type?: string, name?: string) => {
 export const SavedObjectDebugger: React.FunctionComponent = () => {
   const types = [
     {
-      value: 'ingest-agent-policies',
+      value: `${AGENT_POLICY_SAVED_OBJECT_TYPE}`,
       text: i18n.translate('xpack.fleet.debug.savedObjectDebugger.agentPolicyLabel', {
         defaultMessage: 'Agent policy',
       }),
     },
     {
-      value: 'ingest-package-policies',
+      value: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}`,
       text: i18n.translate('xpack.fleet.debug.savedObjectDebugger.packagePolicyLabel', {
         defaultMessage: 'Integration policy',
       }),
     },
     {
-      value: 'ingest-outputs',
+      value: `${OUTPUT_SAVED_OBJECT_TYPE}`,
       text: i18n.translate('xpack.fleet.debug.savedObjectDebugger.outputLabel', {
         defaultMessage: 'Output',
       }),
     },
     {
-      value: 'epm-packages',
+      value: `${PACKAGES_SAVED_OBJECT_TYPE}`,
       text: i18n.translate('xpack.fleet.debug.savedObjectDebugger.packageLabel', {
         defaultMessage: 'Packages',
+      }),
+    },
+    {
+      value: `${DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE}`,
+      text: i18n.translate('xpack.fleet.debug.savedObjectDebugger.downloadSourceLabel', {
+        defaultMessage: 'Download Sources',
+      }),
+    },
+    {
+      value: `${FLEET_SERVER_HOST_SAVED_OBJECT_TYPE}`,
+      text: i18n.translate('xpack.fleet.debug.savedObjectDebugger.fleetServerHostLabel', {
+        defaultMessage: 'Fleet Server Hosts',
       }),
     },
   ];
@@ -153,7 +174,7 @@ export const SavedObjectDebugger: React.FunctionComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {(status === 'error' || namesStatus === 'error') && (
+      {savedObjectResult && (status === 'error' || namesStatus === 'error') && (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut title="Error" color="danger">
