@@ -224,13 +224,16 @@ export function doesNotHaveRequiredFleetAuthz(
   authz: FleetAuthz,
   fleetAuthzConfig: FleetAuthzRouteConfig
 ) {
-  return (
-    fleetAuthzConfig.fleetAuthz &&
-    ((typeof fleetAuthzConfig.fleetAuthz === 'function' && !fleetAuthzConfig.fleetAuthz(authz)) ||
-      (fleetAuthzConfig.fleetAuthz &&
-        typeof fleetAuthzConfig.fleetAuthz !== 'function' &&
-        !validateSecurityRbac(authz, { all: fleetAuthzConfig.fleetAuthz })))
-  );
+
+  return false;
+
+  // return (
+  //   fleetAuthzConfig.fleetAuthz &&
+  //   ((typeof fleetAuthzConfig.fleetAuthz === 'function' && !fleetAuthzConfig.fleetAuthz(authz)) ||
+  //     (fleetAuthzConfig.fleetAuthz &&
+  //       typeof fleetAuthzConfig.fleetAuthz !== 'function' &&
+  //       !validateSecurityRbac(authz, { all: fleetAuthzConfig.fleetAuthz })))
+  // );
 }
 
 interface Authz {
