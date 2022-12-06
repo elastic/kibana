@@ -9,6 +9,7 @@ import { createAction } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import copy from 'copy-to-clipboard';
 import type { NotificationsStart } from '@kbn/core/public';
+import type { ActionContext } from './types';
 
 export const COPY_TO_CLIPBOARD = i18n.translate('xpack.securitySolution.actions.copyToClipboard', {
   defaultMessage: 'Copy to Clipboard',
@@ -22,19 +23,14 @@ export const SUCCESS_TOAST_TITLE = (field: string) =>
 const ID = 'copy-to-clipboard';
 const ICON = 'copyClipboard';
 
-interface CopyActionContext {
-  field: string;
-  value: string;
-}
-
 export const createCopyToClipboardAction = (notificationService: NotificationsStart) =>
-  createAction<CopyActionContext>({
+  createAction<ActionContext>({
     id: ID,
     type: ID,
     getIconType: (): string => ICON,
     getDisplayName: () => COPY_TO_CLIPBOARD,
-    isCompatible: async ({ field, value }: CopyActionContext) => field != null && value != null,
-    execute: async ({ field, value }: CopyActionContext) => {
+    isCompatible: async ({ field, value }: ActionContext) => field != null && value != null,
+    execute: async ({ field, value }: ActionContext) => {
       const text = `${field}${value != null ? `: "${value}"` : ''}`;
       const isSuccess = copy(text, { debug: true });
 

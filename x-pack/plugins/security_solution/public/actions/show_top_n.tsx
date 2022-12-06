@@ -21,6 +21,7 @@ import { KibanaContextProvider, useGetUserCasesPermissions } from '../common/lib
 import { APP_ID, APP_NAME, DEFAULT_DARK_MODE } from '../../common/constants';
 import type { StartServices } from '../types';
 import { getScopeFromPath, useSourcererDataView } from '../common/containers/sourcerer';
+import type { ActionContext } from './types';
 
 const SHOW_TOP = (fieldName: string) =>
   i18n.translate('xpack.securitySolution.actions.showTopTooltip', {
@@ -30,17 +31,6 @@ const SHOW_TOP = (fieldName: string) =>
 
 const ID = 'show-top-n';
 const ICON = 'visBarVertical';
-
-interface ActionContext {
-  field: string;
-  value: string;
-  fieldType: string;
-  nodeRef: React.MutableRefObject<HTMLDivElement | null>;
-  extraContentNodeRef: React.MutableRefObject<HTMLDivElement | null>;
-  metadata?: {
-    scopeId?: string;
-  };
-}
 
 export const createShowTopNAction = (
   store: SecurityAppStore,

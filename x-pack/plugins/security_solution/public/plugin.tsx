@@ -64,6 +64,7 @@ import { createCopyToClipboardAction } from './actions/copy_to_clipboard';
 import { createFilterInAction } from './actions/filter_in';
 import { createFilterOutAction } from './actions/filter_out';
 import { createShowTopNAction } from './actions/show_top_n';
+import { createAddToTimelineAction } from './actions/add_to_timeline';
 /**
  * The Redux store type for the Security app.
  */
@@ -484,6 +485,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const filterInAction = createFilterInAction(plugins.data.query.filterManager);
     const filterOutAction = createFilterOutAction(plugins.data.query.filterManager);
     const showTopNAction = createShowTopNAction(store, services, history);
+    const addToTimeline = createAddToTimelineAction(store);
 
     plugins.uiActions.registerTrigger({
       id: 'test-security-solution-trigger',
@@ -493,5 +495,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     plugins.uiActions.addTriggerAction('test-security-solution-trigger', filterInAction);
     plugins.uiActions.addTriggerAction('test-security-solution-trigger', filterOutAction);
     plugins.uiActions.addTriggerAction('test-security-solution-trigger', showTopNAction);
+    plugins.uiActions.addTriggerAction('test-security-solution-trigger', addToTimeline);
   }
 }
