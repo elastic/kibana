@@ -62,8 +62,6 @@ import { RuleLastRunOutcomeFilter } from './rule_last_run_outcome_filter';
 import { RulesListErrorBanner } from './rules_list_error_banner';
 import {
   loadRuleTypes,
-  disableRule,
-  enableRule,
   snoozeRule,
   unsnoozeRule,
   bulkUpdateAPIKey,
@@ -608,13 +606,19 @@ export const RulesList = ({
     ];
   };
 
-  const onDisableRule = (rule: RuleTableItem) => {
-    return disableRule({ http, id: rule.id });
-  };
+  const onDisableRule = useCallback(
+    async (rule: RuleTableItem) => {
+      bulkDisableRules({ http, ids: [rule.id] });
+    },
+    [bulkDisableRules]
+  );
 
-  const onEnableRule = (rule: RuleTableItem) => {
-    return enableRule({ http, id: rule.id });
-  };
+  const onEnableRule = useCallback(
+    async (rule: RuleTableItem) => {
+      await bulkEnableRules({ http, ids: [rule.id] });
+    },
+    [bulkEnableRules]
+  );
 
   const onSnoozeRule = (rule: RuleTableItem, snoozeSchedule: SnoozeSchedule) => {
     return snoozeRule({ http, id: rule.id, snoozeSchedule });
