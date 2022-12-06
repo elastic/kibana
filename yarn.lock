@@ -1452,10 +1452,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@50.2.1":
-  version "50.2.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-50.2.1.tgz#3dde69125fb181306129a48b73bce1f5823d0cad"
-  integrity sha512-LA9EcW1LGAIrlhro3P2Fgtj0BkHQV1ArHCEdJ43EjgaNpJsKaWnFSeYcbuXiUEyLtXbF4Sv6Di90qDppwThu6Q==
+"@elastic/charts@51.1.1":
+  version "51.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-51.1.1.tgz#005c9fce7a2ef0345ac223d18115ad719c2c15e2"
+  integrity sha512-DJjhHBvovQ/EfAlF7cjAB1fhwjcrt4Iyy/Vxed0BAw6gqoppT7/3Kk8AmUzzj05BK7ZFHlaL/05fe3fUEWuQEw==
   dependencies:
     "@popperjs/core" "^2.4.0"
     bezier-easing "^2.1.0"
@@ -1476,7 +1476,7 @@
     resize-observer-polyfill "^1.5.1"
     ts-debounce "^4.0.0"
     utility-types "^3.10.0"
-    uuid "^8.3.2"
+    uuid "^9"
 
 "@elastic/datemath@5.0.3":
   version "5.0.3"
@@ -26957,6 +26957,11 @@ uuid@^8.3.0, uuid@^8.3.2:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
+
+uuid@^9:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.0.tgz#592f550650024a38ceb0c562f2f6aa435761efb5"
+  integrity sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==
 
 v8-compile-cache-lib@^3.0.1:
   version "3.0.1"
