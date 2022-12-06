@@ -92,7 +92,7 @@ js_library(
 js_library(
   name = "npm_module_types",
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = TYPE_DEPS + [":tsc_types"],
+  deps = TYPES_DEPS + [":tsc_types"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
