@@ -27,6 +27,10 @@ export interface RuleDetailsLocatorParams extends SerializableRecord {
   status?: AlertStatus;
 }
 
+export const getRuleDetailsPath = (ruleId: string) => {
+  return `/alerts/rules/${encodeURI(ruleId)}`;
+};
+
 export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetailsLocatorParams> {
   public readonly id = ruleDetailsLocatorID;
 
@@ -45,7 +49,7 @@ export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetai
     appState.kuery = kuery || '';
     appState.status = status || ALL_ALERTS.status;
 
-    let path = `/alerts/rules/${encodeURI(ruleId)}`;
+    let path = getRuleDetailsPath(ruleId);
 
     if (tabId === ALERTS_TAB) {
       path = `${path}?tabId=${tabId}`;
