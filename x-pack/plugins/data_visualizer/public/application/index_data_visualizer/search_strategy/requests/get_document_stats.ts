@@ -21,52 +21,6 @@ import type {
 const MINIMUM_RANDOM_SAMPLER_DOC_COUNT = 100000;
 const DEFAULT_INITIAL_RANDOM_SAMPLER_PROBABILITY = 0.000001;
 
-export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyParams) => {
-  const {
-    index,
-    timeFieldName,
-    earliest: earliestMs,
-    latest: latestMs,
-    runtimeFieldMap,
-    searchQuery,
-    intervalMs,
-    fieldsToFetch,
-  } = params;
-
-  const size = 0;
-  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
-
-  // Don't use the sampler aggregation as this can lead to some potentially
-  // confusing date histogram results depending on the date range of data amongst shards.
-  const aggs = {
-    eventRate: {
-      date_histogram: {
-        field: timeFieldName,
-        fixed_interval: `${intervalMs}ms`,
-        min_doc_count: 1,
-      },
-    },
-  };
-
-  const searchBody = {
-    query: {
-      bool: {
-        filter: filterCriteria,
-      },
-    },
-    ...(!fieldsToFetch && timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
-      ? { aggs }
-      : {}),
-    ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
-    track_total_hits: true,
-    size,
-  };
-  return {
-    index,
-    body: searchBody,
-  };
-};
-
 export const getDocumentCountStats = async (
   search: DataPublicPluginStart['search'],
   params: OverallStatsSearchStrategyParams,
@@ -104,7 +58,11 @@ export const getDocumentCountStats = async (
       date_histogram: {
         field: timeFieldName,
         fixed_interval: `${intervalMs}ms`,
-        min_doc_count: 1,
+        min_doc_count: 0,
+        extended_bounds: {
+          min: earliestMs,
+          max: latestMs,
+        },
       },
     },
   };
