@@ -280,21 +280,21 @@ export const calculateRouteAuthz = (
  * Utility to flatten an object's key all the way down to the last value.
  * @param source
  */
-function flatten(source: object): Record<string, unknown> {
-  const response: Record<string, unknown> = {};
+function flatten(source: FleetAuthzRequirements | FleetAuthz): Record<string, boolean> {
+  const response: Record<string, boolean> = {};
   const processKeys = (prefix: string, value: unknown) => {
     if (typeof value === 'object' && value !== null) {
       const objectKeys = Object.keys(value);
 
       for (const key of objectKeys) {
-        processKeys(`${prefix}${prefix ? '.' : ''}${key}`, (value as Record<string, unknown>)[key]);
+        processKeys(`${prefix}${prefix ? '.' : ''}${key}`, (value as Record<string, boolean>)[key]);
       }
     } else if (Array.isArray(value)) {
       value.forEach((subValue, key) => {
         processKeys(`${prefix}${prefix ? '.' : ''}${key}`, subValue);
       });
     } else {
-      response[prefix] = value;
+      response[prefix] = value as boolean;
     }
   };
 
@@ -368,7 +368,7 @@ export function doesNotHaveRequiredFleetAuthz(
     ((typeof fleetAuthzConfig.fleetAuthz === 'function' && !fleetAuthzConfig.fleetAuthz(authz)) ||
       (fleetAuthzConfig.fleetAuthz &&
         typeof fleetAuthzConfig.fleetAuthz !== 'function' &&
-        !validateSecurityRbac(authz, { all: fleetAuthzConfig.fleetAuthz })))
+        !calculateRouteAuthz(authz, { all: fleetAuthzConfig.fleetAuthz }).granted))
   );
 }
 
