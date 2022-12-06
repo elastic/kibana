@@ -9,9 +9,9 @@
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { calculateBounds } from '@kbn/data-plugin/public';
-import { buildChartData } from './build_chart_data';
+import { buildBucketInterval } from './build_bucket_interval';
 
-describe('buildChartData', () => {
+describe('buildBucketInterval', () => {
   const getOptions = () => {
     const response = {
       took: 0,
@@ -72,54 +72,29 @@ describe('buildChartData', () => {
       dataView,
       timeInterval: 'auto',
       response,
+      timeRange: {
+        from: '1991-03-29T08:04:00.694Z',
+        to: '2021-03-29T07:04:00.695Z',
+      },
     };
   };
 
-  const expectedChartData = {
-    xAxisOrderedValues: [1664996400000, 1664998200000, 1665000000000, 1665001800000, 1665003600000],
-    xAxisFormat: { id: 'date', params: { pattern: 'HH:mm:ss.SSS' } },
-    xAxisLabel: 'timestamp per 0 milliseconds',
-    yAxisFormat: { id: 'number' },
-    ordered: {
-      date: true,
-      interval: 'P0D',
-      intervalESUnit: 'ms',
-      intervalESValue: 0,
-      min: '1991-03-29T08:04:00.694Z',
-      max: '2021-03-29T07:04:00.695Z',
-    },
-    yAxisLabel: 'Count',
-    values: [
-      { x: 1664996400000, y: 6 },
-      { x: 1664998200000, y: 2 },
-      { x: 1665000000000, y: 3 },
-      { x: 1665001800000, y: 8 },
-      { x: 1665003600000, y: 10 },
-    ],
-  };
-
-  it('should return the correct data', () => {
-    const { bucketInterval, chartData } = buildChartData(getOptions());
-    expect(bucketInterval!.toString()).toEqual('P0D');
-    expect(JSON.stringify(chartData)).toEqual(JSON.stringify(expectedChartData));
-  });
-
   it('should return an empty object if response or timeInterval is undefined', () => {
     expect(
-      buildChartData({
+      buildBucketInterval({
         ...getOptions(),
         response: undefined,
         timeInterval: undefined,
       })
     ).toEqual({});
     expect(
-      buildChartData({
+      buildBucketInterval({
         ...getOptions(),
         response: undefined,
       })
     ).toEqual({});
     expect(
-      buildChartData({
+      buildBucketInterval({
         ...getOptions(),
         timeInterval: undefined,
       })
