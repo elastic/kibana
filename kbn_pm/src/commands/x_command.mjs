@@ -31,6 +31,8 @@ export const command = {
       External.reqAbs(Path.resolve(__dirname, 'get_refs.ts'))
     );
 
+    const { readPackageManifest } = External['@kbn/bazel-packages']();
+
     const parsedBazelFiles = await parseBazelFiles(
       filtered.map((p) => Path.resolve(REPO_ROOT, p.normalizedRepoRelativeDir, 'BUILD.bazel'))
     );
@@ -45,15 +47,15 @@ export const command = {
       const tsconfigPath = Path.resolve(dir, 'tsconfig.json');
       const jsonc = Fs.readFileSync(tsconfigPath, 'utf8');
 
-      const refs = getRefdPkgs(ast).map((p) =>
-        Path.relative(dir, Path.resolve(REPO_ROOT, p, 'tsconfig.json'))
+      const refs = getRefdPkgs(ast).map(
+        (p) => readPackageManifest(Path.resolve(REPO_ROOT, p, 'kibana.jsonc')).id
       );
       if (!refs.length) {
         continue;
       }
 
       const refsSnippet = `,\n  "kbn_references": [
-    ${refs.map((p) => `{ "path": ${JSON.stringify(p)} }`).join(',\n    ')}
+    ${refs.map((p) => JSON.stringify(p)).join(',\n    ')}
   ]`;
       const endI = jsonc.lastIndexOf('}');
       if (endI === -1 || jsonc[endI - 1] !== '\n') {
