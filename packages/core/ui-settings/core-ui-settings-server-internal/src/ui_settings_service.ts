@@ -80,6 +80,7 @@ export class UiSettingsService
 
     return {
       register: this.register,
+      registerGlobal: this.registerGlobal,
     };
   }
 
@@ -117,20 +118,21 @@ export class UiSettingsService
     };
   }
 
-  private register = (settings: Record<string, UiSettingsParams> = {}, scope: UiSettingsScope) => {
+  private register = (settings: Record<string, UiSettingsParams> = {}) => {
     Object.entries(settings).forEach(([key, value]) => {
-      if (scope === 'namespace') {
-        if (this.uiSettingsDefaults.has(key)) {
-          throw new Error(`uiSettings for the key [${key}] has been already registered`);
-        }
-        this.uiSettingsDefaults.set(key, value);
+      if (this.uiSettingsDefaults.has(key)) {
+        throw new Error(`uiSettings for the key [${key}] has been already registered`);
       }
-      if (scope === 'global') {
-        if (this.uiSettingsGlobalDefaults.has(key)) {
-          throw new Error(`Global uiSettings for the key [${key}] has been already registered`);
-        }
-        this.uiSettingsGlobalDefaults.set(key, value);
+      this.uiSettingsDefaults.set(key, value);
+    });
+  };
+
+  private registerGlobal = (settings: Record<string, UiSettingsParams> = {}) => {
+    Object.entries(settings).forEach(([key, value]) => {
+      if (this.uiSettingsGlobalDefaults.has(key)) {
+        throw new Error(`Global uiSettings for the key [${key}] has been already registered`);
       }
+      this.uiSettingsGlobalDefaults.set(key, value);
     });
   };
 

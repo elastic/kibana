@@ -13,10 +13,9 @@ import type { IUiSettingsClient } from './ui_settings_client';
 /** @public */
 export interface UiSettingsServiceSetup {
   /**
-   * Sets settings with default values for the uiSettings in the appropriate scope
+   * Sets settings with default values for the uiSettings
    * @param settings
    *
-   * @param scope
    * @example
    * ```ts
    * setup(core: CoreSetup){
@@ -26,12 +25,29 @@ export interface UiSettingsServiceSetup {
    *    value: true,
    *    description: 'add some awesomeness',
    *   },
-   *   scope: 'config',
    *  }]);
    * }
    * ```
    */
-  register(settings: Record<string, UiSettingsParams>, scope: UiSettingsScope): void;
+  register(settings: Record<string, UiSettingsParams>): void;
+  /**
+   * Sets settings with default values for the global uiSettings
+   * @param settings
+   *
+   * @example
+   * ```ts
+   * setup(core: CoreSetup){
+   *  core.uiSettings.register([{
+   *   foo: {
+   *    name: i18n.translate('my foo settings'),
+   *    value: true,
+   *    description: 'add some awesomeness',
+   *   },
+   *  }]);
+   * }
+   * ```
+   */
+  registerGlobal(settings: Record<string, UiSettingsParams>): void;
 }
 
 /** @public */

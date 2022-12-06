@@ -90,8 +90,8 @@ describe('uiSettings', () => {
     describe('#register', () => {
       it('throws if registers the same key twice', async () => {
         const setup = await service.setup(setupDeps);
-        setup.register(defaults, 'namespace');
-        expect(() => setup.register(defaults, 'namespace')).toThrowErrorMatchingInlineSnapshot(
+        setup.register(defaults);
+        expect(() => setup.register(defaults)).toThrowErrorMatchingInlineSnapshot(
           `"uiSettings for the key [foo] has been already registered"`
         );
       });
@@ -106,15 +106,12 @@ describe('uiSettings', () => {
     describe('validation', () => {
       it('throws if validation schema is not provided', async () => {
         const { register } = await service.setup(setupDeps);
-        register(
-          {
-            // @ts-expect-error schema is required key
-            custom: {
-              value: 42,
-            },
+        register({
+          // @ts-expect-error schema is required key
+          custom: {
+            value: 42,
           },
-          'namespace'
-        );
+        });
 
         await expect(service.start()).rejects.toMatchInlineSnapshot(
           `[Error: Validation schema is not provided for [custom] UI Setting]`
@@ -123,15 +120,12 @@ describe('uiSettings', () => {
 
       it('validates registered definitions', async () => {
         const { register } = await service.setup(setupDeps);
-        register(
-          {
-            custom: {
-              value: 42,
-              schema: schema.string(),
-            },
+        register({
+          custom: {
+            value: 42,
+            schema: schema.string(),
           },
-          'namespace'
-        );
+        });
 
         await expect(service.start()).rejects.toMatchInlineSnapshot(
           `[Error: [ui settings defaults [custom]]: expected value of type [string] but got [number]]`
@@ -149,15 +143,12 @@ describe('uiSettings', () => {
         );
         const customizedService = new UiSettingsService(coreContext);
         const { register } = await customizedService.setup(setupDeps);
-        register(
-          {
-            custom: {
-              value: '42',
-              schema: schema.string(),
-            },
+        register({
+          custom: {
+            value: '42',
+            schema: schema.string(),
           },
-          'namespace'
-        );
+        });
 
         await expect(customizedService.start()).rejects.toMatchInlineSnapshot(
           `[Error: [ui settings overrides [custom]]: expected value of type [string] but got [number]]`
@@ -201,7 +192,7 @@ describe('uiSettings', () => {
 
       it('passes a copy of set defaults to UiSettingsClient', async () => {
         const setup = await service.setup(setupDeps);
-        setup.register(defaults, 'namespace');
+        setup.register(defaults);
         const start = await service.start();
         start.asScopedToClient(savedObjectsClient, 'namespace');
 
