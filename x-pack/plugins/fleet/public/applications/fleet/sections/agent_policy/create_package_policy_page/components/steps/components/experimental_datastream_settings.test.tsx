@@ -72,7 +72,7 @@ describe('ExperimentDatastreamSettings', () => {
       expect(mockSetNewExperimentalDataFeatures).not.toBeCalled();
     });
 
-    it('should be not checked and disabled if the regitry datastream define source_mode synthetic if used disabled it', () => {
+    it('should be not checked and disabled if the regitry datastream define source_mode synthetic and the user disabled it', () => {
       const mockSetNewExperimentalDataFeatures = jest.fn();
       const res = createFleetTestRendererMock().render(
         <ExperimentDatastreamSettings
