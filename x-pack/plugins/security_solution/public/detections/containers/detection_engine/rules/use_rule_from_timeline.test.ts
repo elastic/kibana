@@ -47,6 +47,7 @@ const selectedTimeline = {
       ...mockTimeline,
       id: 'timeline-id-example',
       indexNames: ['awesome-*'],
+      dataViewId: 'custom-data-view-id',
       kqlQuery: {
         filterQuery: {
           serializedQuery:
@@ -96,11 +97,17 @@ describe('useRuleFromTimeline', () => {
     jest.clearAllMocks();
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      ...mockSourcererScope,
-      dataViewId: 'security-solution',
-      selectedPatterns: ['auditbeat-*'],
-    });
+    (useSourcererDataView as jest.Mock)
+      .mockReturnValueOnce({
+        ...mockSourcererScope,
+        dataViewId: 'security-solution',
+        selectedPatterns: ['auditbeat-*'],
+      })
+      .mockReturnValue({
+        ...mockSourcererScope,
+        dataViewId: 'custom-data-view-id',
+        selectedPatterns: ['awesome-*'],
+      });
     (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => ({
       decodedParam: 'eb2781c0-1df5-11eb-8589-2f13958b79f7',
     }));
@@ -121,7 +128,7 @@ describe('useRuleFromTimeline', () => {
     const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
     expect(result.current.loading).toEqual(true);
     await waitForNextUpdate();
-    expect(mockDispatch).toHaveBeenCalledTimes(3);
+    expect(mockDispatch).toHaveBeenCalledTimes(4);
     expect(mockDispatch).toHaveBeenNthCalledWith(1, {
       type: 'x-pack/timelines/t-grid/UPDATE_LOADING',
       payload: {
@@ -274,17 +281,6 @@ describe('useRuleFromTimeline', () => {
   });
 
   it('resets timeline sourcerer if it had an original setting different from the timeline used in the rule', async () => {
-    (useSourcererDataView as jest.Mock)
-      .mockReturnValueOnce({
-        ...mockSourcererScope,
-        dataViewId: 'different-here',
-        selectedPatterns: ['coolbeat-*'],
-      })
-      .mockReturnValue({
-        ...mockSourcererScope,
-        dataViewId: 'security-solution',
-        selectedPatterns: ['auditbeat-*'],
-      });
     const { waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
     await waitForNextUpdate();
     expect(setRuleQuery).toHaveBeenCalled();
@@ -292,8 +288,8 @@ describe('useRuleFromTimeline', () => {
       type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
       payload: {
         id: 'timeline',
-        selectedDataViewId: 'different-here',
-        selectedPatterns: ['coolbeat-*'],
+        selectedDataViewId: 'security-solution',
+        selectedPatterns: ['auditbeat-*'],
       },
     });
   });
