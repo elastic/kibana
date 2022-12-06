@@ -6,8 +6,6 @@
  */
 
 import { createTestMachine, createTestModel } from '@xstate/test';
-import expect from '@kbn/expect';
-import { DATES } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const COMMON_REQUEST_HEADERS = {
