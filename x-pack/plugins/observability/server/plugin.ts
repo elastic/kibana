@@ -188,6 +188,9 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       ruleDataService,
     });
 
+    /**
+     * Register a config for the observability guide
+     */
     plugins.guidedOnboarding.registerGuideConfig(observabilityGuideId, observabilityGuideConfig);
 
     return {

@@ -402,6 +402,9 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     featureUsageService.setup(plugins.licensing);
 
+    /**
+     * Register a config for the security guide
+     */
     plugins.guidedOnboarding.registerGuideConfig(securityGuideId, securityGuideConfig);
 
     return {};

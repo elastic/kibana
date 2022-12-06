@@ -262,7 +262,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     /**
-     * Register the kubernetes config for guided onboarding
+     * Register a config for the search guide
      */
     guidedOnboarding.registerGuideConfig(searchGuideId, searchGuideConfig);
   }
