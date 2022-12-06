@@ -16,6 +16,7 @@ import {
   EuiImage,
   useEuiTheme,
   useResizeObserver,
+  useIsWithinBreakpoints,
   EuiImageProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -79,7 +80,8 @@ export function ImageViewer({
       {isImageConfigValid && (
         <FileImage
           src={src}
-          meta={imageConfig.src.type === 'file' ? imageConfig.src.fileImageMeta : undefined}
+          // TODO: uncomment to add support for blurhash
+          // meta={imageConfig.src.type === 'file' ? imageConfig.src.fileImageMeta : undefined}
           alt={imageConfig.altText ?? ''}
           className={classNames(className, { 'visually-hidden': hasFailedToLoad })}
           title={onChange ? 'Click to select a different image' : undefined}
@@ -121,11 +123,12 @@ export function ImageViewer({
 
 function NotFound() {
   const [resizeRef, setRef] = React.useState<HTMLDivElement | null>(null);
+  const isLargeScreen = useIsWithinBreakpoints(['l', 'xl'], true);
   const dimensions = useResizeObserver(resizeRef);
   let mode: 'none' | 'only-image' | 'image-and-text' = 'none';
   if (!resizeRef) {
     mode = 'none';
-  } else if (dimensions.height > 300 && dimensions.width > 300) {
+  } else if (dimensions.height > 200 && dimensions.width > 320 && isLargeScreen) {
     mode = 'image-and-text';
   } else {
     mode = 'only-image';
