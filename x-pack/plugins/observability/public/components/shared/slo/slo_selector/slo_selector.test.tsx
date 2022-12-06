@@ -33,9 +33,9 @@ describe('SLO Selector', () => {
   });
 
   it('searches SLOs when typing', async () => {
-    const { getByTestId } = render(<SloSelector onSelected={onSelectedSpy} />);
+    render(<SloSelector onSelected={onSelectedSpy} />);
 
-    const input = getByTestId('comboBoxInput');
+    const input = screen.getByTestId('comboBoxInput');
     await act(async () => {
       await userEvent.type(input, 'latency', { delay: 1 });
       await wait(310); // debounce delay
