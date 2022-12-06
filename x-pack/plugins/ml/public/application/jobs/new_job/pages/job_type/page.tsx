@@ -222,7 +222,7 @@ export const Page: FC = () => {
       title: i18n.translate('xpack.ml.newJob.wizard.jobType.geoTitle', {
         defaultMessage: 'Geo',
       }),
-      description: i18n.translate('xpack.ml.newJob.wizard.jobType.rareDescription', {
+      description: i18n.translate('xpack.ml.newJob.wizard.jobType.geoDescription', {
         defaultMessage: 'Detect anomalies in the geographic location of the input data.',
       }),
       id: 'mlJobTypeLinkGeoJob',
