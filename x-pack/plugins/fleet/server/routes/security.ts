@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { result } from 'lodash';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type {
   IRouter,
