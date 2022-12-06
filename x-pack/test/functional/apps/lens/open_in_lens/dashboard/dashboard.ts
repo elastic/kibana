@@ -53,12 +53,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(embeddableCount).to.eql(originalEmbeddableCount);
       });
 
-      const panel = await testSubjects.find(`embeddablePanelHeading-`);
-      const descendants = await testSubjects.findAllDescendant(
-        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
-        panel
-      );
-      expect(descendants.length).to.equal(0);
       expect(await dashboard.isNotificationExists(0)).to.be(false);
     });
   });
