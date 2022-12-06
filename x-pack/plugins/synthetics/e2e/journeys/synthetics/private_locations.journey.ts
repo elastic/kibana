@@ -53,8 +53,8 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await page.goto('http://localhost:5620/app/fleet/policies?create');
     await page.goto('http://localhost:5620/app/synthetics/settings/private-locations');
   });
-  step('Click button:has-text("Add location")', async () => {
-    await page.click('button:has-text("Add location")');
+  step('Click button:has-text("Create location")', async () => {
+    await page.click('button:has-text("Create location")');
     await page.click('[aria-label="Location name"]');
     await page.fill('[aria-label="Location name"]', 'Test private');
     await page.press('[aria-label="Location name"]', 'Tab');
@@ -116,6 +116,6 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/private-locations');
     await page.click('[aria-label="Delete location"]');
     await page.click('button:has-text("Delete location")');
-    await page.click('text=Add your first private location');
+    await page.click('text=Create your first private location');
   });
 });

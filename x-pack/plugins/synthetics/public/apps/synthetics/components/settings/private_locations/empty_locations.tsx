@@ -34,6 +34,7 @@ export const EmptyLocations = ({
       }
       actions={
         <EuiButton
+          iconType="plusInCircle"
           disabled={disabled}
           color="primary"
           fill
@@ -68,9 +69,12 @@ const FIRST_MONITOR = i18n.translate('xpack.synthetics.monitorManagement.firstLo
   defaultMessage: 'In order to create a monitor, you will need to add a location first.',
 });
 
-const ADD_FIRST_LOCATION = i18n.translate('xpack.synthetics.monitorManagement.firstLocation', {
-  defaultMessage: 'Add your first private location',
-});
+const ADD_FIRST_LOCATION = i18n.translate(
+  'xpack.synthetics.monitorManagement.createFirstLocation',
+  {
+    defaultMessage: 'Create your first private location',
+  }
+);
 
 export const START_ADDING_LOCATIONS_DESCRIPTION = i18n.translate(
   'xpack.synthetics.monitorManagement.startAddingLocationsDescription',
@@ -80,8 +84,8 @@ export const START_ADDING_LOCATIONS_DESCRIPTION = i18n.translate(
   }
 );
 
-const ADD_LOCATION = i18n.translate('xpack.synthetics.monitorManagement.addLocation', {
-  defaultMessage: 'Add location',
+const ADD_LOCATION = i18n.translate('xpack.synthetics.monitorManagement.createLocation', {
+  defaultMessage: 'Create location',
 });
 
 export const READ_DOCS = i18n.translate('xpack.synthetics.monitorManagement.readDocs', {
