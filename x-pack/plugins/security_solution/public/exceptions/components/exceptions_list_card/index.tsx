@@ -208,6 +208,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
             onConfirm={handleConfirmExceptionFlyout}
             data-test-subj="addExceptionItemFlyoutInSharedLists"
             showAlertCloseOptions={false}
+            isNonTimeline={true}
           />
         ) : null}
         {showEditExceptionFlyout && exceptionToEdit ? (
