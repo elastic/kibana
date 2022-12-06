@@ -4,5 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { getIndexMappingsRoute } from './get_index_mappings';
-export { getIndexStatsRoute } from './get_index_stats';
+import { httpServerMock } from '@kbn/core/server/mocks';
+
+export const requestMock = {
+  create: httpServerMock.createKibanaRequest,
+};
