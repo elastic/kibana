@@ -32,37 +32,44 @@ export type FleetPluginStart = NonNullable<APMPluginStartDependencies['fleet']>;
 
 const doUnzip = promisify(unzip);
 
-function decodeArtifacts(artifacts: Artifact[]): Promise<ArtifactSourceMap[]> {
-  return Promise.all(
-    artifacts.map(async (artifact) => {
-      const body = await doUnzip(Buffer.from(artifact.body, 'base64'));
-      return {
-        ...artifact,
-        body: JSON.parse(body.toString()) as ApmArtifactBody,
-      };
-    })
-  );
+async function unzipArtifactBody(
+  artifact: Artifact
+): Promise<ArtifactSourceMap> {
+  const body = await doUnzip(Buffer.from(artifact.body, 'base64'));
+
+  return {
+    ...artifact,
+    body: JSON.parse(body.toString()) as ApmArtifactBody,
+  };
 }
 
 function getApmArtifactClient(fleetPluginStart: FleetPluginStart) {
   return fleetPluginStart.createArtifactsClient('apm');
 }
 
-export async function listArtifacts({
+export async function listSourceMapArtifacts({
   fleetPluginStart,
+  perPage = 20,
+  page = 1,
 }: {
   fleetPluginStart: FleetPluginStart;
+  perPage?: number;
+  page?: number;
 }) {
   const apmArtifactClient = getApmArtifactClient(fleetPluginStart);
-  const fleetArtifactsResponse = await apmArtifactClient.listArtifacts({
+  const artifactsResponse = await apmArtifactClient.listArtifacts({
     kuery: 'type: sourcemap',
-    perPage: 20,
-    page: 1,
+    perPage,
+    page,
     sortOrder: 'desc',
     sortField: 'created',
   });
 
-  return decodeArtifacts(fleetArtifactsResponse.items);
+  const artifacts = await Promise.all(
+    artifactsResponse.items.map(unzipArtifactBody)
+  );
+
+  return { artifacts, total: artifactsResponse.total };
 }
 
 export async function createApmArtifact({
@@ -141,8 +148,7 @@ export async function updateSourceMapsOnFleetPolicies({
   savedObjectsClient: SavedObjectsClientContract;
   elasticsearchClient: ElasticsearchClient;
 }) {
-  const artifacts = await listArtifacts({ fleetPluginStart });
-
+  const { artifacts } = await listSourceMapArtifacts({ fleetPluginStart });
   const apmFleetPolicies = await getApmPackagePolicies({
     core,
     fleetPluginStart,
