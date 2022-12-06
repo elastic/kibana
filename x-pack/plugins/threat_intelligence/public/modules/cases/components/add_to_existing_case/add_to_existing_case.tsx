@@ -9,8 +9,7 @@ import React, { VFC } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { CasesPermissions } from '@kbn/cases-plugin/common';
-import { EMPTY_VALUE } from '../../../../common/constants';
+import { useCaseDisabled } from '../../hooks/use_case_permission';
 import {
   AttachmentMetadata,
   generateAttachmentsMetadata,
@@ -50,25 +49,20 @@ export const AddToExistingCase: VFC<AddToExistingCaseProps> = ({
 }) => {
   const { cases } = useKibana().services;
   const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal({});
-  const permissions: CasesPermissions = cases.helpers.canUseCases();
 
   const id: string = indicator._id as string;
   const attachmentMetadata: AttachmentMetadata = generateAttachmentsMetadata(indicator);
+
   const attachments: CaseAttachmentsWithoutOwner = generateAttachmentsWithoutOwner(
     id,
     attachmentMetadata
   );
-
-  // disable the item if there is no indicator name or if the user doesn't have the right permission
-  // in the case's attachment, the indicator name is the link to open the flyout
-  const invalidIndicatorName: boolean = attachmentMetadata.indicatorName === EMPTY_VALUE;
-  const hasUpdatePermission: boolean = permissions.create && permissions.update;
-  const disabled: boolean = invalidIndicatorName || !hasUpdatePermission;
-
   const menuItemClicked = () => {
     onClick();
     selectCaseModal.open({ attachments });
   };
+
+  const disabled: boolean = useCaseDisabled(attachmentMetadata.indicatorName);
 
   return (
     <EuiContextMenuItem
