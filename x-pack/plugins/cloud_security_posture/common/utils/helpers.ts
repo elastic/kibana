@@ -6,7 +6,9 @@
  */
 
 import { Truthy } from 'lodash';
-import { CSP_RULE_SAVED_OBJECT_TYPE } from '../constants';
+import { PackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { CSP_RULE_SAVED_OBJECT_TYPE, CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../constants';
+import { BenchmarkId } from '../types';
 
 /**
  * @example
@@ -35,3 +37,7 @@ export const createCspRuleSearchFilterByPackagePolicy = ({
   `${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.package_policy_id: "${packagePolicyId}"${
     policyId ? ` AND ${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.policy_id: "${policyId}"` : ''
   }`;
+export const getBenchmarkTypeFilter = (type: BenchmarkId): string =>
+  `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"`;
+export const isEnabledBenchmarkInputType = (input: PackagePolicyInput) =>
+  !!input.type && input.enabled;

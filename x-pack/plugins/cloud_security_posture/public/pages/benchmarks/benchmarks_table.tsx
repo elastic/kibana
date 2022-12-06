@@ -44,19 +44,21 @@ const IntegrationButtonLink = ({
   packageName,
   policyId,
   packagePolicyId,
+  benchmarkId,
 }: {
   packageName: string;
   packagePolicyId: string;
   policyId: string;
+  benchmarkId: string;
 }) => {
   const { application } = useKibana().services;
-
   return (
     <EuiLink
       href={application.getUrlForApp('security', {
         path: generatePath(benchmarksNavigation.rules.path, {
           packagePolicyId,
           policyId,
+          benchmarkId,
         }),
       })}
     >
@@ -76,6 +78,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
         packageName={packageName}
         packagePolicyId={benchmark.package_policy.id}
         policyId={benchmark.package_policy.policy_id}
+        benchmarkId={benchmark.benchmark_id}
       />
     ),
     truncateText: true,
@@ -83,7 +86,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION_NAME,
   },
   {
-    field: 'rules.enabled',
+    field: 'number_of_rules',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.rulesColumnTitle', {
       defaultMessage: 'Rules',
     }),

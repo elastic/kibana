@@ -14,7 +14,7 @@ import {
   getCspPackagePolicies,
   getCspAgentPolicies,
 } from '../../lib/fleet_util';
-import { defineGetBenchmarksRoute, addPackagePolicyCspRules } from './benchmarks';
+import { defineGetBenchmarksRoute, getRulesCountForPolicy } from './benchmarks';
 
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import {
@@ -274,7 +274,7 @@ describe('benchmarks API', () => {
           ],
         } as unknown as SavedObjectsFindResponse);
 
-        const cspRulesStatus = await addPackagePolicyCspRules(mockSoClient, packagePolicy);
+        const cspRulesStatus = await getRulesCountForPolicy(mockSoClient, packagePolicy);
 
         expect(cspRulesStatus).toEqual({
           all: 3,

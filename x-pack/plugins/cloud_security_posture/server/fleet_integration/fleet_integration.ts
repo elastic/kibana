@@ -5,20 +5,20 @@
  * 2.0.
  */
 import type {
+  ISavedObjectsRepository,
+  Logger,
   SavedObjectsBulkCreateObject,
+  SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
-  ISavedObjectsRepository,
-  SavedObjectsClientContract,
-  Logger,
 } from '@kbn/core/server';
-import {
-  PackagePolicy,
-  DeletePackagePoliciesResponse,
-  PackagePolicyInput,
-} from '@kbn/fleet-plugin/common';
+import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { DeepReadonly } from 'utility-types';
-import { createCspRuleSearchFilterByPackagePolicy } from '../../common/utils/helpers';
+import {
+  createCspRuleSearchFilterByPackagePolicy,
+  getBenchmarkTypeFilter,
+  isEnabledBenchmarkInputType,
+} from '../../common/utils/helpers';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CLOUDBEAT_VANILLA,
@@ -27,11 +27,6 @@ import {
 } from '../../common/constants';
 import type { CspRule, CspRuleTemplate } from '../../common/schemas';
 import type { BenchmarkId } from '../../common/types';
-
-const getBenchmarkTypeFilter = (type: BenchmarkId): string =>
-  `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"`;
-
-const isEnabledBenchmarkInputType = (input: PackagePolicyInput) => !!input.type && input.enabled;
 
 export const getBenchmarkInputType = (inputs: PackagePolicy['inputs']): BenchmarkId => {
   const enabledInputs = inputs.filter(isEnabledBenchmarkInputType);

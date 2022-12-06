@@ -46,6 +46,14 @@ export const cspRuleTemplateSavedObjectMapping: SavedObjectsTypeMappingDefinitio
     metadata: {
       type: 'object',
       properties: {
+        name: {
+          type: 'keyword',
+          fields: {
+            text: {
+              type: 'text',
+            },
+          },
+        },
         benchmark: {
           type: 'object',
           properties: {
