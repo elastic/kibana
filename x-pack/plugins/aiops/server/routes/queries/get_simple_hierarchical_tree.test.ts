@@ -7,7 +7,13 @@
 
 import type { ChangePointGroup } from '@kbn/ml-agg-utils';
 
-import { getFieldValuePairCounts, markDuplicates } from './get_simple_hierarchical_tree';
+import { filteredFrequentItems } from './__mocks__/filtered_frequent_items';
+
+import {
+  getFieldValuePairCounts,
+  getSimpleHierarchicalTree,
+  markDuplicates,
+} from './get_simple_hierarchical_tree';
 
 const changePointGroups: ChangePointGroup[] = [
   {
@@ -100,6 +106,51 @@ describe('get_simple_hierarchical_tree', () => {
           pValue: 0.001,
         },
       ]);
+    });
+  });
+
+  describe('getSimpleHierarchicalTree', () => {
+    it('returns the hierarchical tree', () => {
+      const simpleHierarchicalTree = getSimpleHierarchicalTree(filteredFrequentItems, true, false, [
+        'response_code',
+        'url',
+        'user',
+      ]);
+
+      // stringify and again parse the tree to remove attached methods
+      // and make it comparable against a static representation.
+      expect(JSON.parse(JSON.stringify(simpleHierarchicalTree))).toEqual({
+        root: {
+          name: '',
+          set: [],
+          docCount: 0,
+          pValue: 0,
+          children: [
+            {
+              name: "792/1505 500 home.php '*'",
+              set: [
+                { fieldName: 'response_code', fieldValue: '500' },
+                { fieldName: 'url', fieldValue: 'home.php' },
+              ],
+              docCount: 792,
+              pValue: 0.010770456205312423,
+              children: [
+                {
+                  name: "792/1505 500 home.php '*'",
+                  set: [
+                    { fieldName: 'response_code', fieldValue: '500' },
+                    { fieldName: 'url', fieldValue: 'home.php' },
+                  ],
+                  docCount: 792,
+                  pValue: 0.010770456205312423,
+                  children: [],
+                },
+              ],
+            },
+          ],
+        },
+        fields: ['response_code', 'url', 'user'],
+      });
     });
   });
 });

@@ -37,8 +37,6 @@ interface NewNode {
   docCount: number;
   pValue: number | null;
   children: NewNode[];
-  icon: string;
-  iconStyle: string;
   addNode: (node: NewNode) => void;
 }
 
@@ -55,8 +53,6 @@ function NewNodeFactory(name: string): NewNode {
     docCount: 0,
     pValue: 0,
     children,
-    icon: 'default',
-    iconStyle: 'default',
     addNode,
   };
 }
@@ -118,7 +114,6 @@ function dfDepthFirstSearch(
     displayNode = displayParent;
   } else {
     displayNode = NewNodeFactory(`${docCount}/${totalDocCount}${label}`);
-    displayNode.iconStyle = 'warning';
     displayNode.set = [...displayParent.set];
     displayNode.set.push({ fieldName: field, fieldValue: value });
     displayNode.docCount = docCount;
@@ -130,8 +125,6 @@ function dfDepthFirstSearch(
   while (true) {
     const nextFieldIndex = fields.indexOf(field) + 1;
     if (nextFieldIndex >= fields.length) {
-      displayNode.icon = 'file';
-      displayNode.iconStyle = 'info';
       return docCount;
     }
     nextField = fields[nextFieldIndex];
@@ -147,7 +140,6 @@ function dfDepthFirstSearch(
         displayNode.name += ` '*'`;
         label += ` '*'`;
         const nextDisplayNode = NewNodeFactory(`${docCount}/${totalDocCount}${label}`);
-        nextDisplayNode.iconStyle = 'warning';
         nextDisplayNode.set = displayNode.set;
         nextDisplayNode.docCount = docCount;
         nextDisplayNode.pValue = pValue;
@@ -194,12 +186,6 @@ export function getSimpleHierarchicalTree(
   displayOther: boolean,
   fields: string[] = []
 ) {
-  // const candidates = uniq(
-  //   df.flatMap((d) =>
-  //     Object.keys(omit(d, ['size', 'maxPValue', 'doc_count', 'support', 'total_doc_count']))
-  //   )
-  // );
-
   const field = fields[0];
 
   const totalDocCount = Math.max(...df.map((d) => d.total_doc_count));
