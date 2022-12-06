@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+type DurationUnit = 'm' | 'h';
+
+interface Duration {
+  value: number;
+  unit: DurationUnit;
+}
+
 interface SLO {
   id: string;
   name: string;
@@ -26,4 +33,4 @@ interface SLOList {
   total: number;
 }
 
-export type { SLO, SLOList };
+export type { Duration, DurationUnit, SLO, SLOList };
