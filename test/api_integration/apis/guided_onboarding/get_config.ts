@@ -14,9 +14,8 @@ export default function testGetGuideConfig({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('GET /api/guided_onboarding/configs', () => {
-    // check that all production guides are present
-    // not checking for testGuide because it's only added when the example plugin is started
-    ['security', 'search', 'observability'].map((guideId) => {
+    // check that all guides are present
+    ['testGuide', 'security', 'search', 'observability'].map((guideId) => {
       it(`returns config for ${guideId}`, async () => {
         const response = await supertest.get(`${getConfigsPath}/${guideId}`).expect(200);
         expect(response.body).not.to.be.empty();

@@ -7,7 +7,7 @@
     "githubTeam": "platform-onboarding"
   },
   "description": "Example plugin to consume guidedOnboarding",
-  "server": true,
+  "server": false,
   "ui": true,
   "requiredPlugins": ["navigation", "guidedOnboarding"],
   "optionalPlugins": []
