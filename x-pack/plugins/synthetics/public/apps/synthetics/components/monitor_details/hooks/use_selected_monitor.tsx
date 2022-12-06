@@ -52,8 +52,10 @@ export const useSelectedMonitor = () => {
   useEffect(() => {
     // Only perform periodic refresh if the last dispatch was earlier enough
     if (
+      monitorId &&
       !syntheticsMonitorLoading &&
       !monitorListLoading &&
+      syntheticsMonitorDispatchedAt > 0 &&
       Date.now() - syntheticsMonitorDispatchedAt > refreshInterval
     ) {
       dispatch(getMonitorAction.get({ monitorId }));
