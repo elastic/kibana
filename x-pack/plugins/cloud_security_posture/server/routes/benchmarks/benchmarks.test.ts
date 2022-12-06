@@ -259,8 +259,8 @@ describe('benchmarks API', () => {
     });
 
     describe('test addPackagePolicyCspRules', () => {
-      it('should filter enabled rules', async () => {
-        const packagePolicy = createPackagePolicyMock();
+      it('should return the total number and filtered by the relevant benchmark', async () => {
+        const benchmark = 'cis_k8s';
         mockSoClient.find.mockResolvedValueOnce({
           aggregations: { enabled_status: { doc_count: 2 } },
           page: 1,
@@ -274,13 +274,11 @@ describe('benchmarks API', () => {
           ],
         } as unknown as SavedObjectsFindResponse);
 
-        const cspRulesStatus = await getRulesCountForPolicy(mockSoClient, packagePolicy);
+        const cspRulesStatus = await getRulesCountForPolicy(mockSoClient, benchmark);
 
-        expect(cspRulesStatus).toEqual({
-          all: 3,
-          enabled: 2,
-          disabled: 1,
-        });
+        const expectedFilter = `csp-rule-template.attributes.metadata.benchmark.id: "${benchmark}"`;
+        expect(mockSoClient.find.mock.calls[0][0].filter).toEqual(expectedFilter);
+        expect(cspRulesStatus).toEqual(3);
       });
     });
   });
