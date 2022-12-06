@@ -53,6 +53,7 @@ export class HealthGatewayService extends FtrService {
         KIBANA_URL: this.kibanaUrl,
         HOST: this.host,
         PORT: `${this.port}`,
+        CI: '', // Override in the CI environment to capture the logs.
       },
       wait: /Server is ready/,
     });
