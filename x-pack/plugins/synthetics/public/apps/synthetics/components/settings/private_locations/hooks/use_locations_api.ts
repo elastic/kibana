@@ -8,6 +8,8 @@
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useDispatch } from 'react-redux';
+import { setAddingNewPrivateLocation } from '../../../../state/private_locations';
 import {
   getSyntheticsPrivateLocations,
   setSyntheticsPrivateLocations,
@@ -20,6 +22,10 @@ export const useLocationsAPI = () => {
   const [privateLocations, setPrivateLocations] = useState<PrivateLocation[]>([]);
 
   const { savedObjects } = useKibana().services;
+
+  const dispatch = useDispatch();
+
+  const setIsAddingNew = (val: boolean) => dispatch(setAddingNewPrivateLocation(val));
 
   const { loading: fetchLoading } = useFetcher(async () => {
     const result = await getSyntheticsPrivateLocations(savedObjects?.client!);
@@ -36,6 +42,7 @@ export const useLocationsAPI = () => {
       });
       setPrivateLocations(result.locations);
       setFormData(undefined);
+      setIsAddingNew(false);
       return result;
     }
   }, [formData, privateLocations]);
@@ -60,9 +67,11 @@ export const useLocationsAPI = () => {
   }, [deleteId, privateLocations]);
 
   return {
+    formData,
     onSubmit,
     onDelete,
-    loading: fetchLoading || saveLoading || deleteLoading,
+    deleteLoading: Boolean(deleteLoading),
+    loading: Boolean(fetchLoading || saveLoading),
     privateLocations,
   };
 };

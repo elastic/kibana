@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -18,10 +18,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
+import { ViewLocationMonitors } from './view_location_monitors';
+import { TableTitle } from '../../common/components/table_title';
 import { TAGS_LABEL } from '../components/tags_field';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { setAddingNewPrivateLocation } from '../../../state/private_locations';
-import { START_ADDING_LOCATIONS_DESCRIPTION } from './empty_locations';
+import { PrivateLocationDocsLink, START_ADDING_LOCATIONS_DESCRIPTION } from './empty_locations';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { DeleteLocation } from './delete_location';
 import { useLocationMonitors } from './hooks/use_location_monitors';
@@ -34,13 +37,18 @@ interface ListItem extends PrivateLocation {
 }
 
 export const PrivateLocationsTable = ({
+  deleteLoading,
   onDelete,
   privateLocations,
 }: {
+  deleteLoading: boolean;
   onDelete: (id: string) => void;
   privateLocations: PrivateLocation[];
 }) => {
   const dispatch = useDispatch();
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
   const { locationMonitors, loading } = useLocationMonitors();
 
@@ -59,6 +67,9 @@ export const PrivateLocationsTable = ({
     {
       field: 'monitors',
       name: MONITORS,
+      render: (monitors: number, item: ListItem) => (
+        <ViewLocationMonitors count={monitors} locationName={item.label} />
+      ),
     },
     {
       field: 'agentPolicyId',
@@ -97,7 +108,7 @@ export const PrivateLocationsTable = ({
               label={item.label}
               locationMonitors={locationMonitors}
               onDelete={onDelete}
-              loading={loading}
+              loading={deleteLoading}
             />
           ),
           isPrimary: true,
@@ -126,6 +137,7 @@ export const PrivateLocationsTable = ({
         isLoading={loading}
         disabled={!hasFleetPermissions || !canSave}
         onClick={() => setIsAddingNew(true)}
+        iconType="plusInCircle"
       >
         {ADD_LABEL}
       </EuiButton>,
@@ -134,14 +146,32 @@ export const PrivateLocationsTable = ({
 
   return (
     <div>
-      <EuiText>{START_ADDING_LOCATIONS_DESCRIPTION}</EuiText>
-      <EuiSpacer size="s" />
+      <EuiText>
+        {START_ADDING_LOCATIONS_DESCRIPTION} <PrivateLocationDocsLink label={LEARN_MORE} />
+      </EuiText>
+      <EuiSpacer size="m" />
       <EuiInMemoryTable<ListItem>
         itemId={'id'}
         tableLayout="auto"
         tableCaption={PRIVATE_LOCATIONS}
         items={items}
         columns={columns}
+        childrenBetween={
+          <TableTitle
+            total={items.length}
+            label={PRIVATE_LOCATIONS}
+            pageIndex={pageIndex}
+            pageSize={pageSize}
+          />
+        }
+        pagination={{
+          pageSize,
+          pageIndex,
+        }}
+        onTableChange={({ page }: Criteria<any>) => {
+          setPageIndex(page?.index ?? 0);
+          setPageSize(page?.size ?? 10);
+        }}
         search={{
           toolsRight: renderToolRight(),
           box: {
@@ -189,6 +219,10 @@ const DELETE_LOCATION = i18n.translate(
   }
 );
 
-const ADD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.addLocation', {
-  defaultMessage: 'Add location',
+const ADD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.createLocation', {
+  defaultMessage: 'Create location',
+});
+
+export const LEARN_MORE = i18n.translate('xpack.synthetics.monitorManagement.learnMore.label', {
+  defaultMessage: 'Learn more.',
 });

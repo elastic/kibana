@@ -42,6 +42,7 @@ export const DeleteLocation = ({
       confirmButtonText={CONFIRM_LABEL}
       buttonColor="danger"
       defaultFocusedButton="confirm"
+      isLoading={loading}
     >
       <p>{ARE_YOU_SURE_LABEL}</p>
     </EuiConfirmModal>
@@ -54,8 +55,9 @@ export const DeleteLocation = ({
         content={
           canDelete
             ? DELETE_LABEL
-            : i18n.translate('xpack.synthetics.monitorManagement.cannotDelete', {
-                defaultMessage: `This location cannot be deleted, because it has {monCount} monitors running. Please remove this location from your monitors before deleting this location.`,
+            : i18n.translate('xpack.synthetics.monitorManagement.cannotDelete.description', {
+                defaultMessage: `This location cannot be deleted, because it has {monCount, number} {monCount, plural,one {monitor} other {monitors}} running.
+                Please remove this location from your monitors before deleting this location.`,
                 values: { monCount },
               })
         }

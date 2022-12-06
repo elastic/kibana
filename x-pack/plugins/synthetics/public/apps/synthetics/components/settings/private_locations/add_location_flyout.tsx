@@ -30,7 +30,9 @@ export const AddLocationFlyout = ({
   onSubmit,
   setIsOpen,
   privateLocations,
+  isLoading,
 }: {
+  isLoading: boolean;
   onSubmit: (val: PrivateLocation) => void;
   setIsOpen: (val: boolean) => void;
   privateLocations: PrivateLocation[];
@@ -78,12 +80,17 @@ export const AddLocationFlyout = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+              <EuiButtonEmpty
+                iconType="cross"
+                onClick={closeFlyout}
+                flush="left"
+                isLoading={isLoading}
+              >
                 {CANCEL_LABEL}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={handleSubmit(onSubmit)}>
+              <EuiButton fill onClick={handleSubmit(onSubmit)} isLoading={isLoading}>
                 {SAVE_LABEL}
               </EuiButton>
             </EuiFlexItem>
@@ -95,9 +102,9 @@ export const AddLocationFlyout = ({
 };
 
 const ADD_PRIVATE_LOCATION = i18n.translate(
-  'xpack.synthetics.monitorManagement.addPrivateLocations',
+  'xpack.synthetics.monitorManagement.createPrivateLocations',
   {
-    defaultMessage: 'Add private location',
+    defaultMessage: 'Create private location',
   }
 );
 

@@ -30,7 +30,7 @@ export const ManagePrivateLocations = () => {
 
   const setIsAddingNew = (val: boolean) => dispatch(setAddingNewPrivateLocation(val));
 
-  const { onSubmit, loading, privateLocations, onDelete } = useLocationsAPI();
+  const { onSubmit, loading, privateLocations, onDelete, deleteLoading } = useLocationsAPI();
 
   const { fleet } = useKibana<ClientPluginsStart>().services;
 
@@ -43,7 +43,6 @@ export const ManagePrivateLocations = () => {
 
   const handleSubmit = (formData: PrivateLocation) => {
     onSubmit(formData);
-    setIsAddingNew(false);
   };
 
   return (
@@ -56,7 +55,11 @@ export const ManagePrivateLocations = () => {
           setIsAddingNew={setIsAddingNew}
           hasFleetPermissions={hasFleetPermissions}
         >
-          <PrivateLocationsTable privateLocations={privateLocations} onDelete={onDelete} />
+          <PrivateLocationsTable
+            privateLocations={privateLocations}
+            onDelete={onDelete}
+            deleteLoading={deleteLoading}
+          />
         </ManageEmptyState>
       )}
       {!hasFleetPermissions && (
@@ -69,6 +72,7 @@ export const ManagePrivateLocations = () => {
           setIsOpen={setIsAddingNew}
           onSubmit={handleSubmit}
           privateLocations={privateLocations}
+          isLoading={loading}
         />
       ) : null}
     </>

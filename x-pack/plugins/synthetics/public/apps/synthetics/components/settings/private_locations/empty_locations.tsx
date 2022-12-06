@@ -57,7 +57,7 @@ export const EmptyLocations = ({
 
 export const PrivateLocationDocsLink = ({ label }: { label?: string }) => (
   <EuiLink
-    href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
+    href="https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html"
     target="_blank"
   >
     {label ?? READ_DOCS}

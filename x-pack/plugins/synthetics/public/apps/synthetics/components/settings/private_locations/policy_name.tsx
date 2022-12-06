@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiText, EuiTextColor } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiLink, EuiLoadingSpinner, EuiText, EuiTextColor } from '@elastic/eui';
 import { useSelector } from 'react-redux';
+import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { usePrivateLocationPermissions } from './hooks/use_private_location_permission';
 import { selectAgentPolicies } from '../../../state/private_locations';
@@ -18,9 +18,13 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
 
   const { basePath } = useSyntheticsSettingsContext();
 
-  const { data: policies } = useSelector(selectAgentPolicies);
+  const { data: policies, loading } = useSelector(selectAgentPolicies);
 
   const policy = policies?.items.find((policyT) => policyT.id === agentPolicyId);
+
+  if (loading) {
+    return <EuiLoadingSpinner size="s" />;
+  }
 
   return (
     <EuiText size="s">
