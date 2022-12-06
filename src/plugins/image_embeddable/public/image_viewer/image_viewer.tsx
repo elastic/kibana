@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { css, SerializedStyles } from '@emotion/react';
 import { FileImage } from '@kbn/shared-ux-file-image';
 import classNames from 'classnames';
@@ -24,24 +24,16 @@ import { ImageConfig } from '../types';
 import notFound from './not_found/not_found_light.png';
 import notFound2x from './not_found/not_found_light@2x.png';
 import { validateImageConfig } from '../utils/validate_image_config';
-import { createValidateUrl } from '../utils/validate_url';
+import { useImageViewerContext } from './image_viewer_context';
 
-export interface ImageViewerContextValue {
-  getImageDownloadHref: (fileId: string) => string;
-  validateUrl: ReturnType<typeof createValidateUrl>;
+export interface ImageViewerProps {
+  imageConfig: ImageConfig;
+  className?: string;
+  onChange?: () => void;
+  onClear?: () => void;
+  onError?: () => void;
+  containerCSS?: SerializedStyles;
 }
-
-export const ImageViewerContext = createContext<ImageViewerContextValue>(
-  null as unknown as ImageViewerContextValue
-);
-
-const useImageViewerContext = () => {
-  const ctx = useContext(ImageViewerContext);
-  if (!ctx) {
-    throw new Error('ImageViewerContext is not found!');
-  }
-  return ctx;
-};
 
 export function ImageViewer({
   imageConfig,
@@ -50,14 +42,7 @@ export function ImageViewer({
   onError,
   className,
   containerCSS,
-}: {
-  imageConfig: ImageConfig;
-  className?: string;
-  onChange?: () => void;
-  onClear?: () => void;
-  onError?: () => void;
-  containerCSS?: SerializedStyles;
-}) {
+}: ImageViewerProps) {
   const { euiTheme } = useEuiTheme();
   const { getImageDownloadHref, validateUrl } = useImageViewerContext();
 

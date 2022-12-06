@@ -36,7 +36,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FileImageMetadata, imageEmbeddableFileKind } from '../imports';
 import { ImageConfig } from '../types';
-import { ImageViewer } from '../image_viewer';
+import { ImageViewer } from '../image_viewer/image_viewer'; // use eager version to avoid flickering
 import { ValidateUrlFn } from '../utils/validate_url';
 import { validateImageConfig, DraftImageConfig } from '../utils/validate_image_config';
 

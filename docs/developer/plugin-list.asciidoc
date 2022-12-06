@@ -193,7 +193,7 @@ for use in their own application.
 
 
 |{kib-repo}blob/{branch}/src/plugins/image_embeddable/README.md[imageEmbeddable]
-|// TODO
+|Used to embed images in dashboards
 
 
 |{kib-repo}blob/{branch}/src/plugins/input_control_vis/README.md[inputControlVis]
