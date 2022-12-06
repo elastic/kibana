@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  IContainer,
-  ErrorEmbeddable,
-  isErrorEmbeddable,
-  FilterableEmbeddable,
-} from '@kbn/embeddable-plugin/public';
+import { ErrorEmbeddable, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   ContactCardEmbeddable,
   CONTACT_CARD_EMBEDDABLE,
@@ -25,16 +20,13 @@ import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { getSampleDashboardInput } from '../test_helpers';
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardContainer } from '../embeddable/dashboard_container';
-import { FiltersNotificationBadge } from './filters_notification_badge';
+import { FiltersNotificationAction } from './filters_notification_action';
 
 const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 pluginServices.getServices().embeddable.getEmbeddableFactory = jest
   .fn()
   .mockReturnValue(mockEmbeddableFactory);
 
-let action: FiltersNotificationBadge;
-let container: DashboardContainer;
-let embeddable: ContactCardEmbeddable & FilterableEmbeddable;
 const mockGetFilters = jest.fn(async () => [] as Filter[]);
 const mockGetQuery = jest.fn(async () => undefined as Query | AggregateQuery | undefined);
 
@@ -58,46 +50,54 @@ const getMockPhraseFilter = (key: string, value: string) => {
   };
 };
 
-beforeEach(async () => {
-  container = new DashboardContainer(getSampleDashboardInput());
-
+const buildEmbeddable = async (input?: Partial<ContactCardEmbeddableInput>) => {
+  const container = new DashboardContainer(getSampleDashboardInput());
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
     ContactCardEmbeddable
   >(CONTACT_CARD_EMBEDDABLE, {
     firstName: 'Kibanana',
+    viewMode: ViewMode.EDIT,
+    ...input,
   });
   if (isErrorEmbeddable(contactCardEmbeddable)) {
     throw new Error('Failed to create embeddable');
   }
 
-  action = new FiltersNotificationBadge();
-  embeddable = embeddablePluginMock.mockFilterableEmbeddable(contactCardEmbeddable, {
+  const embeddable = embeddablePluginMock.mockFilterableEmbeddable(contactCardEmbeddable, {
     getFilters: () => mockGetFilters(),
     getQuery: () => mockGetQuery(),
   });
-});
+
+  return embeddable;
+};
+
+const action = new FiltersNotificationAction();
 
 test('Badge is incompatible with Error Embeddables', async () => {
-  const errorEmbeddable = new ErrorEmbeddable(
-    'Wow what an awful error',
-    { id: ' 404' },
-    embeddable.getRoot() as IContainer
-  );
+  const errorEmbeddable = new ErrorEmbeddable('Wow what an awful error', { id: ' 404' });
   expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
 });
 
 test('Badge is not shown when panel has no app-level filters or queries', async () => {
+  const embeddable = await buildEmbeddable();
   expect(await action.isCompatible({ embeddable })).toBe(false);
 });
 
 test('Badge is shown when panel has at least one app-level filter', async () => {
+  const embeddable = await buildEmbeddable();
   mockGetFilters.mockResolvedValue([getMockPhraseFilter('fieldName', 'someValue')] as Filter[]);
   expect(await action.isCompatible({ embeddable })).toBe(true);
 });
 
 test('Badge is shown when panel has at least one app-level query', async () => {
+  const embeddable = await buildEmbeddable();
   mockGetQuery.mockResolvedValue({ sql: 'SELECT * FROM test_dataview' } as AggregateQuery);
   expect(await action.isCompatible({ embeddable })).toBe(true);
+});
+
+test('Badge is not shown in view mode', async () => {
+  const embeddable = await buildEmbeddable({ viewMode: ViewMode.VIEW });
+  expect(await action.isCompatible({ embeddable })).toBe(false);
 });
