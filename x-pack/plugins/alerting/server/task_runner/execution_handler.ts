@@ -230,7 +230,7 @@ export class ExecutionHandler<
           if (action.frequency?.throttle) {
             alert.updateLastScheduledActions(
               action.group as ActionGroupIds,
-              `${action.actionTypeId}:${action.frequency?.throttle}`
+              `${action.actionTypeId}:${action.group}:${action.frequency.throttle}`
             );
           } else {
             alert.updateLastScheduledActions(action.group as ActionGroupIds);
@@ -420,7 +420,7 @@ export class ExecutionHandler<
       const throttled = action.frequency?.throttle
         ? alert.isThrottled({
             throttle: action.frequency.throttle ?? null,
-            actionHash: `${action.actionTypeId}:${action.frequency.throttle}`,
+            actionHash: `${action.actionTypeId}:${action.group}:${action.frequency.throttle}`,
           })
         : alert.isThrottled({ throttle: rule.throttle ?? null });
 

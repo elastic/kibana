@@ -775,7 +775,10 @@ describe('Execution Handler', () => {
       })
     );
     await executionHandler.run(
-      generateAlert({ id: 1, lastScheduledActions: { 'test:1h': { date: new Date(DATE_1970) } } })
+      generateAlert({
+        id: 1,
+        lastScheduledActions: { 'test:default:1h': { date: new Date(DATE_1970) } },
+      })
     );
 
     clock.tick(30000);

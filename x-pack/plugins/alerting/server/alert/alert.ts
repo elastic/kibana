@@ -81,7 +81,7 @@ export class Alert<
     ) {
       if (actionHash) {
         if (this.meta.lastScheduledActions.actions) {
-          const lastTriggerDate = this.meta.lastScheduledActions.actions[actionHash].date;
+          const lastTriggerDate = this.meta.lastScheduledActions.actions[actionHash]?.date;
           return !!(lastTriggerDate && lastTriggerDate.getTime() + throttleMills > Date.now());
         }
         return false;
@@ -176,9 +176,12 @@ export class Alert<
     const date = new Date();
     this.meta.lastScheduledActions.group = group;
     this.meta.lastScheduledActions.date = date;
-    if (actionHash) {
+
+    if (this.meta.lastScheduledActions.group !== group) {
+      this.meta.lastScheduledActions.actions = {};
+    } else if (actionHash) {
       if (!this.meta.lastScheduledActions.actions) {
-        this.meta.lastScheduledActions!.actions = {};
+        this.meta.lastScheduledActions.actions = {};
       }
       this.meta.lastScheduledActions.actions[actionHash] = { date };
     }
