@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 import { pick } from 'lodash';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -177,6 +177,7 @@ export class AlertingPlugin {
   private usageCounter: UsageCounter | undefined;
   private inMemoryMetrics: InMemoryMetrics;
   private alertsService?: AlertsService;
+  private pluginStop$: Subject<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -187,6 +188,7 @@ export class AlertingPlugin {
     this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
+    this.pluginStop$ = new ReplaySubject(1);
   }
 
   public setup(
@@ -236,6 +238,7 @@ export class AlertingPlugin {
 
     this.alertsService = new AlertsService({
       logger: this.logger,
+      pluginStop$: this.pluginStop$,
       elasticsearchClientPromise: core
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
@@ -509,5 +512,7 @@ export class AlertingPlugin {
     if (this.licenseState) {
       this.licenseState.clean();
     }
+    this.pluginStop$.next();
+    this.pluginStop$.complete();
   }
 }

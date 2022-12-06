@@ -21,6 +21,9 @@ export const getComponentTemplateFromFieldMap = ({
 }: GetComponentTemplateFromFieldMapOpts): ClusterPutComponentTemplateRequest => {
   return {
     name,
+    _meta: {
+      managed: true,
+    },
     template: {
       settings: {
         number_of_shards: 1,

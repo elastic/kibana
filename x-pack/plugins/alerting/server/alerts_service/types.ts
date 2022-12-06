@@ -5,5 +5,9 @@
  * 2.0.
  */
 
+export const INDEX_TEMPLATE_NAME = '.alerts-default-template';
+export const DEFAULT_ALERTS_INDEX = '.alerts-default';
+export const DEFAULT_ALERTS_INDEX_PATTERN = `${DEFAULT_ALERTS_INDEX}-*`;
+export const INITIAL_ALERTS_INDEX_NAME = `${DEFAULT_ALERTS_INDEX}-000001`;
 export const ALERTS_COMPONENT_TEMPLATE_NAME = 'alerts-default-component-template';
 export const ECS_COMPONENT_TEMPLATE_NAME = 'alerts-ecs-component-template';
