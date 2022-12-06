@@ -336,13 +336,13 @@ export function App({
       'vizEditorOriginatingAppUrl' in initialContext &&
       initialContext.vizEditorOriginatingAppUrl
     ) {
-      const initialDocFromContextHasChanged = !isLensEqual(
+      const [initialDocFromContextUnchanged, currentDocHasBeenSavedInLens] = [
         initialDocFromContext,
-        lastKnownDoc,
-        data.query.filterManager.inject,
-        datasourceMap
+        persistedDoc,
+      ].map((refDoc) =>
+        isLensEqual(refDoc, lastKnownDoc, data.query.filterManager.inject, datasourceMap)
       );
-      if (!initialDocFromContextHasChanged) {
+      if (initialDocFromContextUnchanged || currentDocHasBeenSavedInLens) {
         onAppLeave((actions) => {
           return actions.default();
         });
@@ -359,6 +359,7 @@ export function App({
     initialDocFromContext,
     lastKnownDoc,
     onAppLeave,
+    persistedDoc,
   ]);
 
   const navigateToVizEditor = useCallback(() => {
