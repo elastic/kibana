@@ -12,7 +12,10 @@ import {
   getPackagePolicyWithAgentConfigurations,
   PackagePolicy,
 } from './register_fleet_policy_callbacks';
-import { getPackagePolicyWithSourceMap, listArtifacts } from './source_maps';
+import {
+  getPackagePolicyWithSourceMap,
+  listSourceMapArtifacts,
+} from './source_maps';
 
 export async function mergePackagePolicyWithApm({
   packagePolicy,
@@ -24,7 +27,7 @@ export async function mergePackagePolicyWithApm({
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
 }) {
   const agentConfigurations = await listConfigurations(internalESClient);
-  const artifacts = await listArtifacts({ fleetPluginStart });
+  const { artifacts } = await listSourceMapArtifacts({ fleetPluginStart });
   return getPackagePolicyWithAgentConfigurations(
     getPackagePolicyWithSourceMap({ packagePolicy, artifacts }),
     agentConfigurations

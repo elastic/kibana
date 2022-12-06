@@ -448,7 +448,11 @@ export const SharedLists = React.memo(() => {
           isBulkAction={false}
           showAlertCloseOptions
           onCancel={(didRuleChange: boolean) => setDisplayAddExceptionItemFlyout(false)}
-          onConfirm={(didRuleChange: boolean) => setDisplayAddExceptionItemFlyout(false)}
+          onConfirm={(didRuleChange: boolean) => {
+            setDisplayAddExceptionItemFlyout(false);
+            if (didRuleChange) handleRefresh();
+          }}
+          isNonTimeline={true}
         />
       )}
 

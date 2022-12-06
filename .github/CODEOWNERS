@@ -954,7 +954,7 @@ packages/kbn-logging-mocks @elastic/kibana-core
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-mapbox-gl @elastic/kibana-gis
-packages/kbn-monaco @elastic/kibana-app-services
+packages/kbn-monaco @elastic/kibana-global-experience
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 packages/kbn-osquery-io-ts-types @elastic/security-asset-management
