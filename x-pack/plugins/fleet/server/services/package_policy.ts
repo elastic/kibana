@@ -1306,13 +1306,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
     }
   ): Promise<PackagePolicy> {
     await this.#runPreflight({
-      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
-        validateSecurityRbac(fleetAuthz, {
-          any: {
-            integrations: { writeIntegrationPolicies: true },
-            ...packagePrivileges,
-          },
-        }),
+      fleetAuthz: { integrations: { writeIntegrationPolicies: true }, },
     });
 
     return super.create(soClient, esClient, packagePolicy, options);
