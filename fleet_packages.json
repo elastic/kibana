@@ -20,7 +20,7 @@
 [
   {
     "name": "apm",
-    "version": "8.6.0-preview-1663775281",
+    "version": "8.7.0-preview-1669303673",
     "forceAlignStackVersion": true
   },
   {
@@ -37,6 +37,6 @@
   },
   {
     "name": "synthetics",
-    "version": "0.10.3"
+    "version": "0.11.4"
   }
 ]
