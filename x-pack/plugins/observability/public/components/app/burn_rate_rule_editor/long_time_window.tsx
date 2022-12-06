@@ -1,0 +1,95 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFormRow,
+  EuiSelect,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { ChangeEvent, useEffect, useState } from 'react';
+
+type DurationUnit = 'm' | 'h';
+type DurationUnitOption = { value: DurationUnit; text: string };
+
+const durationUnitOptions: DurationUnitOption[] = [
+  { value: 'm', text: 'minute' },
+  { value: 'h', text: 'hour' },
+];
+
+const MAX_DURATION_IN_MINUTES = 1440;
+const MAX_DURATION_IN_HOURS = 24;
+
+export function LongTimeWindow() {
+  const selectId = useGeneratedHtmlId({ prefix: 'durationUnitSelect' });
+  const [durationValue, setDurationValue] = useState<number>(1);
+  const [durationUnit, setDurationUnit] = useState<DurationUnit>(durationUnitOptions[0].value);
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  const onDurationValueChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    setDurationValue(!isNaN(value) ? value : 1);
+  };
+
+  const onDurationUnitChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const unit = e.target.value === 'm' ? 'm' : 'h';
+    setDurationUnit(unit);
+  };
+
+  useEffect(() => {
+    if (
+      (durationUnit === 'm' && durationValue > MAX_DURATION_IN_MINUTES) ||
+      (durationUnit === 'h' && durationValue > MAX_DURATION_IN_HOURS)
+    ) {
+      setError(errorText);
+    } else {
+      setError(undefined);
+    }
+  }, [durationValue, durationUnit]);
+
+  return (
+    <EuiFormRow label={rowLabel} fullWidth isInvalid={!!error} error={error}>
+      <EuiFlexGroup direction="row">
+        <EuiFieldNumber
+          isInvalid={!!error}
+          min={1}
+          value={durationValue}
+          onChange={onDurationValueChange}
+          aria-label={valueLabel}
+          data-test-subj="value"
+        />
+        <EuiSelect
+          id={selectId}
+          isInvalid={!!error}
+          options={durationUnitOptions}
+          value={durationUnit}
+          onChange={onDurationUnitChange}
+          aria-label={unitLabel}
+          data-test-subj="unit"
+        />
+      </EuiFlexGroup>
+    </EuiFormRow>
+  );
+}
+
+const rowLabel = i18n.translate('xpack.observability.slo.rules.longTimeWindow.rowLabel', {
+  defaultMessage: 'Long time window',
+});
+
+const valueLabel = i18n.translate('xpack.observability.slo.rules.longTimeWindow.valueLabel', {
+  defaultMessage: 'Enter a duration value for the long time window',
+});
+
+const unitLabel = i18n.translate('xpack.observability.slo.rules.longTimeWindow.unitLabel', {
+  defaultMessage: 'Select a duration unit for the long time window',
+});
+
+const errorText = i18n.translate('xpack.observability.slo.rules.longTimeWindow.errorText', {
+  defaultMessage: 'The long time window cannot exceed 24 hours or 1440 minutes',
+});

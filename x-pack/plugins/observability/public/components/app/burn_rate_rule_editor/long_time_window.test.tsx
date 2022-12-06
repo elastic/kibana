@@ -1,0 +1,33 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { screen } from '@testing-library/dom';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+
+import { render } from '../../../utils/test_helper';
+import { LongTimeWindow } from './long_time_window';
+
+describe('LongTimeWindow', () => {
+  it('shows error when duration is greater than 1440minutes', () => {
+    render(<LongTimeWindow />);
+
+    userEvent.selectOptions(screen.getByTestId('unit'), 'm');
+    userEvent.type(screen.getByTestId('value'), '1441', { delay: 0 });
+
+    expect(screen.getByText(/cannot exceed/i)).toBeTruthy();
+  });
+
+  it('shows error when duration is greater than 24 hours', () => {
+    render(<LongTimeWindow />);
+
+    userEvent.selectOptions(screen.getByTestId('unit'), 'h');
+    userEvent.type(screen.getByTestId('value'), '24', { delay: 0 });
+
+    expect(screen.getByText(/cannot exceed/i)).toBeTruthy();
+  });
+});
