@@ -440,7 +440,7 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
       hasRequiredAuthz &&
       ((typeof hasRequiredAuthz === 'function' && hasRequiredAuthz(requestedAuthz)) ||
         (typeof hasRequiredAuthz !== 'function' &&
-          validateSecurityRbac(requestedAuthz, { all: hasRequiredAuthz })))
+          calculateRouteAuthz(requestedAuthz, { all: hasRequiredAuthz }).granted))
     ) {
       return handler(context, request, response);
     }
