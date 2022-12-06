@@ -24,10 +24,7 @@ import {
   EuiTextColor,
   EuiFlyout,
 } from '@elastic/eui';
-import type {
-  BulkErrorSchema,
-  ImportExceptionsResponseSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { ImportExceptionsResponseSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ToastInput, Toast, ErrorToastOptions } from '@kbn/core-notifications-browser';
 
@@ -98,36 +95,44 @@ export const ImportExceptionListFlyout = React.memo(
       [resetForm, addSuccess, handleRefresh]
     );
     const handleImportError = useCallback(
-      (errors: BulkErrorSchema[]) => {
-        errors.forEach((error) => {
-          if (!error.error.message.includes('AbortError')) {
-            addError(error.error.message, { title: i18n.UPLOAD_ERROR });
-          }
-        });
+      (error) => {
+        if (!error.message.includes('AbortError')) {
+          addError(error.body.message, { title: i18n.UPLOAD_ERROR });
+        }
       },
       [addError]
     );
     const [alreadyExistingItem, setAlreadyExistingItem] = useState(false);
 
     useEffect(() => {
-      if (!importExceptionListState.loading) {
+      if (!importExceptionListState.loading && file != null) {
         if (importExceptionListState?.result?.success) {
           handleImportSuccess(importExceptionListState?.result);
-        } else if (importExceptionListState?.result?.errors) {
-          handleImportError(importExceptionListState?.result?.errors);
+        } else if (importExceptionListState?.error) {
+          handleImportError(importExceptionListState?.error);
         }
       }
     }, [
+      file,
       handleImportError,
       handleImportSuccess,
-      importExceptionListState.error,
+      importExceptionListState,
+      importExceptionListState?.error,
       importExceptionListState.loading,
-      importExceptionListState.result,
-      setAlreadyExistingItem,
+      importExceptionListState?.result,
     ]);
-    const handleFileChange = useCallback((files: FileList | null) => {
-      setFile(files?.item(0) ?? null);
-    }, []);
+    const handleFileChange = useCallback(
+      (files: FileList | null) => {
+        if (files != null && files?.length > 0) {
+          setFile(files?.item(0));
+        } else {
+          setFile(null);
+          // reset stale state when files are removed from file picker
+          importExceptionListState.resetState();
+        }
+      },
+      [importExceptionListState]
+    );
     return (
       <EuiFlyout ownFocus size="s" onClose={() => setDisplayImportListFlyout(false)}>
         <EuiFlyoutHeader hasBorder>

@@ -15,4 +15,5 @@ export interface Task<Args extends unknown[], Result> {
   error: unknown | undefined;
   result: Result | undefined;
   start: (...args: Args) => void;
+  resetState: () => void;
 }

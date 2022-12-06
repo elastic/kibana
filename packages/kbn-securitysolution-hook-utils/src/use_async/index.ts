@@ -33,6 +33,12 @@ export const useAsync = <Args extends unknown[], Result>(
   const [error, setError] = useState<unknown | undefined>();
   const [result, setResult] = useState<Result | undefined>();
 
+  const resetState = useCallback(() => {
+    setLoading(false);
+    setError(undefined);
+    setResult(undefined);
+  }, []);
+
   const start = useCallback(
     (...args: Args) => {
       setLoading(true);
@@ -51,5 +57,6 @@ export const useAsync = <Args extends unknown[], Result>(
     loading,
     result,
     start,
+    resetState,
   };
 };
