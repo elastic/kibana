@@ -20,7 +20,7 @@ export async function ScalabilityTestRunner(
   gatlingProjectRootPath: string
 ) {
   const log = getService('log');
-  const fileName = path.basename(scalabilityJsonPath, path.extname(scalabilityJsonPath));
+  const gatlingReportBaseDir = path.parse(scalabilityJsonPath).name;
 
   log.info(`Running scalability test with json file: '${scalabilityJsonPath}'`);
 
@@ -30,7 +30,7 @@ export async function ScalabilityTestRunner(
       args: [
         'gatling:test',
         '-q',
-        `-Dgatling.core.outputDirectoryBaseName=${fileName}`,
+        `-Dgatling.core.outputDirectoryBaseName=${gatlingReportBaseDir}`,
         '-Dgatling.simulationClass=org.kibanaLoadTest.simulation.generic.GenericJourney',
         `-DjourneyPath=${scalabilityJsonPath}`,
       ],
