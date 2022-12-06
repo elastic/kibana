@@ -72,20 +72,20 @@ const getTimeThresholdFirstPassed = (
   } else return -1;
 };
 
-const getTimeActiveUsersToReqCountThreshold = (
-  responses: Array<{
-    timestamp: number;
-    values: any;
-  }>,
-  threshold: number
-) => {
-  const resultsAboveThreshold = responses.filter(
-    (i) => i.values.length > 0 && i.values[0] > i.values[1] * threshold
-  );
-  if (resultsAboveThreshold.length > 0) {
-    return resultsAboveThreshold[0].timestamp;
-  } else return -1;
-};
+// const getTimeActiveUsersToReqCountThreshold = (
+//   responses: Array<{
+//     timestamp: number;
+//     values: any;
+//   }>,
+//   threshold: number
+// ) => {
+//   const resultsAboveThreshold = responses.filter(
+//     (i) => i.values.length > 0 && i.values[0] > i.values[1] * threshold
+//   );
+//   if (resultsAboveThreshold.length > 0) {
+//     return resultsAboveThreshold[0].timestamp;
+//   } else return -1;
+// };
 
 const getRPS = (
   time: number,
@@ -107,7 +107,7 @@ export function getCapacityMetrics(
   // [timestamp, [min, 25%, 50%, 75%, 80%, 85%, 90%, 95%, 99%, max]], e.g. 1669026394,[9,11,11,12,13,13,14,15,15,16]
   const responsePercentiles = findDataSet(htmlContent, RESPONSES_PERCENTILES_REGEXP);
 
-  const activeUsers: object = getActiveUsers(htmlContent, ACTIVE_USERS_REGEXP);
+  const activeUsers: { [key: string]: number } = getActiveUsers(htmlContent, ACTIVE_USERS_REGEXP);
   log.info(JSON.stringify(activeUsers));
   const rpsMax = Math.max(...requests.filter((i) => i.values.length > 1).map((i) => i.values[1]));
   log.info(`rpsMax=${rpsMax}`);
@@ -142,20 +142,23 @@ export function getCapacityMetrics(
   const timeSLA = getTimeThresholdFirstPassed(maxResponses, responseThresholdSLA);
   const timeX10 = getTimeThresholdFirstPassed(maxResponses, responseThresholdX10);
   const timeX100 = getTimeThresholdFirstPassed(maxResponses, responseThresholdX100);
-  const timeActiveUsersToReq = getTimeActiveUsersToReqCountThreshold(requests, usersToReqThreshold);
+  // const timeActiveUsersToReq = getTimeActiveUsersToReqCountThreshold(requests, usersToReqThreshold);
 
-  requests.filter((i) => {
-    const point = String(i.timestamp);
-    const activeUsersInPoint = activeUsers[point];
-    return activeUsersInPoint > 0 ? activeUsersInPoint / i.values[0] > usersToReqThreshold : false;
+  const requestsAfterThreshold = requests.filter((i) => {
+    const time = String(i.timestamp);
+    const activeUsersInTime = activeUsers[time];
+    return activeUsersInTime / i.values[0] > usersToReqThreshold;
   });
+
+  const rpsAtRequestsToActiveUsers =
+    requestsAfterThreshold.length > 0 ? requestsAfterThreshold[0].values[0] : rpsMax;
 
   return {
     rpsAtResponseTimeWarmupAvg,
     rpsAtSLA: getRPS(timeSLA, requests, rpsMax),
     rpsAtResponseTime10XAvg: getRPS(timeX10, requests, rpsMax),
     rpsAtResponseTime100XAvg: getRPS(timeX100, requests, rpsMax),
-    rpsAtRequestsToActiveUsers: getRPS(timeActiveUsersToReq, requests, rpsMax),
+    rpsAtRequestsToActiveUsers,
     thresholdSLA: responseThresholdSLA,
   };
 }
