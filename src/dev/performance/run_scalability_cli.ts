@@ -36,7 +36,25 @@ run(
           .map((fileName) => path.resolve(journeyConfigPath, fileName))
       : [journeyConfigPath];
 
-    async function runScalabilityJourney(filePath: string) {
+    log.info(`Found ${journeys.length} journeys to run:\n${JSON.stringify(journeys)}`);
+
+    const failedJourneys = [];
+
+    for (const journey of journeys) {
+      try {
+        process.stdout.write(`--- Running scalability journey: ${journey}\n`);
+        await runScalabilityJourney(journey, kibanaInstallDir);
+      } catch (e) {
+        log.error(e);
+        failedJourneys.push(journey);
+      }
+    }
+
+    if (failedJourneys.length > 0) {
+      throw new Error(`${failedJourneys.length} journeys failed: ${failedJourneys.join(',')}`);
+    }
+
+    async function runScalabilityJourney(filePath: string, kibanaDir?: string) {
       // Pass in a clean APM environment, so that FTR can later
       // set it's own values.
       const cleanApmEnv = {
@@ -58,7 +76,7 @@ run(
         args: [
           'scripts/functional_tests',
           ['--config', 'x-pack/test/scalability/config.ts'],
-          kibanaInstallDir ? ['--kibana-install-dir', kibanaInstallDir] : [],
+          kibanaDir ? ['--kibana-install-dir', kibanaDir] : [],
           '--debug',
           '--logToFile',
           '--bail',
@@ -71,24 +89,6 @@ run(
           KIBANA_DIR: REPO_ROOT, // Gatling test runner use it to find kbn/es archives
         },
       });
-    }
-
-    log.info(`Found ${journeys.length} journeys to run:\n${JSON.stringify(journeys)}`);
-
-    const failedJourneys = [];
-
-    for (const journey of journeys) {
-      try {
-        process.stdout.write(`--- Running scalability journey: ${journey}\n`);
-        await runScalabilityJourney(journey);
-      } catch (e) {
-        log.error(e);
-        failedJourneys.push(journey);
-      }
-    }
-
-    if (failedJourneys.length > 0) {
-      throw new Error(`${failedJourneys.length} journeys failed: ${failedJourneys.join(',')}`);
     }
   },
   {
