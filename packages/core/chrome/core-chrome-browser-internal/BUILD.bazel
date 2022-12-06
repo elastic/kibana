@@ -48,6 +48,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-i18n-react",
   "//packages/core/mount-utils/core-mount-utils-browser-internal",
   "//packages/core/chrome/core-chrome-browser",
+  "//packages/core/custom-branding/core-custom-branding-internal",
 ]
 
 TYPES_DEPS = [
@@ -70,6 +71,7 @@ TYPES_DEPS = [
   "//packages/core/application/core-application-browser:npm_module_types",
   "//packages/core/application/core-application-browser-internal:npm_module_types",
   "//packages/core/chrome/core-chrome-browser:npm_module_types",
+  "//packages/core/custom-branding/core-custom-branding-internal:npm_module_types"
 ]
 
 jsts_transpiler(

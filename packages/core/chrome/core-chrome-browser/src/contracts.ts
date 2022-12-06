@@ -15,7 +15,7 @@ import type { ChromeHelpExtension } from './help_extension';
 import type { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from './breadcrumb';
 import type { ChromeBadge, ChromeUserBanner } from './types';
 import { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
-import { CustomBranding } from './custom_branding';
+import { CustomBranding } from '../../../custom-branding/core-custom-branding/custom_branding';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and

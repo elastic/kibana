@@ -8,4 +8,4 @@
 
 export { ChromeService } from './src';
 export type { InternalChromeStart } from './src';
-export type { CustomBranding } from './src/custom_branding';
+export type { CustomBranding } from '../../custom-branding/core-custom-branding-internal/custom_branding';

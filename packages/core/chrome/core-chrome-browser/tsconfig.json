@@ -11,6 +11,6 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx", 
+    "**/*.tsx", "../../custom-branding/core-custom-branding/custom_branding.ts", 
   ]
 }
