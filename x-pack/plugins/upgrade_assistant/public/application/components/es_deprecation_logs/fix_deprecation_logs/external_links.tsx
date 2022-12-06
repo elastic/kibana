@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 import React, { FunctionComponent, useState, useEffect } from 'react';
 import { buildPhrasesFilter, PhraseFilter } from '@kbn/es-query';
 

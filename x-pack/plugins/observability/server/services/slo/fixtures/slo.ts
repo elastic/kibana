@@ -14,6 +14,8 @@ import { sloSchema } from '../../../types/schema';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
+  Duration,
+  DurationUnit,
   Indicator,
   KQLCustomIndicator,
   SLO,
@@ -58,9 +60,9 @@ export const createKQLCustomIndicator = (
   type: 'sli.kql.custom',
   params: {
     index: 'my-index*',
-    query_filter: 'labels.groupId: group-3',
-    numerator: 'latency < 300',
-    denominator: '',
+    filter: 'labels.groupId: group-3',
+    good: 'latency < 300',
+    total: '',
     ...params,
   },
 });
@@ -74,6 +76,11 @@ const defaultSLO: Omit<SLO, 'id' | 'revision' | 'created_at' | 'updated_at'> = {
     target: 0.999,
   },
   indicator: createAPMTransactionDurationIndicator(),
+  settings: {
+    timestamp_field: '@timestamp',
+    sync_delay: new Duration(1, DurationUnit.Minute),
+    frequency: new Duration(1, DurationUnit.Minute),
+  },
 };
 
 export const createSLOParams = (params: Partial<CreateSLOParams> = {}): CreateSLOParams => ({

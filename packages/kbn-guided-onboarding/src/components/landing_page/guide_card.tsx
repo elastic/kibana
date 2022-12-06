@@ -62,7 +62,7 @@ const constants: GuideCardConstants = {
         'guidedOnboardingPackage.gettingStarted.guideCard.security.cardDescription',
         {
           defaultMessage:
-            'Defend your environment against threats by unifying SIEM, endpoint security, and cloud security.',
+            'Investigate threats and get your SIEM up and running by installing the Elastic Defend integration.',
         }
       ),
     },

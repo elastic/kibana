@@ -25,19 +25,18 @@ import { useBehaviorSubject } from './use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
 import { getFetch$ } from '../utils/get_fetch_observable';
 import type { DataTableRecord } from '../../../types';
+import type { InspectorAdapters } from './use_inspector';
 
 export interface SavedSearchData {
   main$: DataMain$;
   documents$: DataDocuments$;
   totalHits$: DataTotalHits$;
-  charts$: DataCharts$;
   availableFields$: AvailableFields$;
 }
 
 export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
-export type DataCharts$ = BehaviorSubject<DataChartsMessage>;
 export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
 
 export type DataRefetch$ = Subject<DataRefetchMsg>;
@@ -46,7 +45,7 @@ export interface UseSavedSearch {
   refetch$: DataRefetch$;
   data$: SavedSearchData;
   reset: () => void;
-  inspectorAdapters: { requests: RequestAdapter };
+  inspectorAdapters: InspectorAdapters;
 }
 
 export enum RecordRawType {
@@ -78,8 +77,6 @@ export interface DataDocumentsMsg extends DataMsg {
 }
 
 export interface DataTotalHitsMsg extends DataMsg {
-  fetchStatus: FetchStatus;
-  error?: Error;
   result?: number;
 }
 
@@ -128,7 +125,6 @@ export const useSavedSearch = ({
   const main$: DataMain$ = useBehaviorSubject(initialState) as DataMain$;
   const documents$: DataDocuments$ = useBehaviorSubject(initialState) as DataDocuments$;
   const totalHits$: DataTotalHits$ = useBehaviorSubject(initialState) as DataTotalHits$;
-  const charts$: DataCharts$ = useBehaviorSubject(initialState) as DataCharts$;
   const availableFields$: AvailableFields$ = useBehaviorSubject(initialState) as AvailableFields$;
 
   const dataSubjects = useMemo(() => {
@@ -136,10 +132,9 @@ export const useSavedSearch = ({
       main$,
       documents$,
       totalHits$,
-      charts$,
       availableFields$,
     };
-  }, [main$, charts$, documents$, totalHits$, availableFields$]);
+  }, [main$, documents$, totalHits$, availableFields$]);
 
   /**
    * The observable to trigger data fetching in UI
