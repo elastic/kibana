@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { SLOList } from '../../../typings/slo';
+import { UseFetchSloListResponse } from '../use_fetch_slo_list';
 
-export const useFetchSloList = (name?: string): [boolean, SLOList] => {
-  return [
-    false,
-    {
+export const useFetchSloList = (name?: string): UseFetchSloListResponse => {
+  return {
+    loading: false,
+    sloList: {
       results: [
         {
           id: 'mock-id',
@@ -23,5 +23,5 @@ export const useFetchSloList = (name?: string): [boolean, SLOList] => {
       page: 1,
       perPage: 50,
     },
-  ];
+  };
 };
