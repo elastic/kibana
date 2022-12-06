@@ -26,7 +26,6 @@
     { "path": "../screenshot_mode/tsconfig.json" },
     { "path": "../ui_actions/tsconfig.json" },
     { "path": "../charts/tsconfig.json" },
-    { "path": "../discover/tsconfig.json" },
     { "path": "../visualizations/tsconfig.json" },
     { "path": "../../../x-pack/plugins/spaces/tsconfig.json" }
   ]

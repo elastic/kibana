@@ -180,7 +180,6 @@ export const MonitorManagementList = ({
       }),
       sortable: true,
       render: (urls: string, { hosts }: TCPSimpleFields | ICMPSimpleFields) => urls || hosts,
-      truncateText: true,
       textOnly: true,
     },
     {
@@ -205,6 +204,7 @@ export const MonitorManagementList = ({
       }),
       render: (fields: EncryptedSyntheticsMonitorWithId) => (
         <Actions
+          key={fields[ConfigKey.CONFIG_ID]}
           configId={fields[ConfigKey.CONFIG_ID]}
           name={fields[ConfigKey.NAME]}
           isDisabled={!canEdit}
