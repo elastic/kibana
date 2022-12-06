@@ -21,9 +21,9 @@ import {
 } from '.';
 import { EventsQueryTabBody } from '../../../common/components/events_tab';
 import { AnomaliesNetworkTable } from '../../../common/components/ml/tables/anomalies_network_table';
-import { filterNetworkExternalAlertData } from '../../../common/components/visualization_actions/utils';
+import { sourceOrDestinationIpExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
-import { TimelineId } from '../../../../common/types';
+import { TableId } from '../../../../common/types';
 import { ConditionalFlexGroup } from './conditional_flex_group';
 import type { NetworkRoutesProps } from './types';
 import { NetworkRouteType } from './types';
@@ -115,8 +115,8 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
         </Route>
         <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.events})`}>
           <EventsQueryTabBody
-            pageFilters={filterNetworkExternalAlertData}
-            timelineId={TimelineId.networkPageEvents}
+            additionalFilters={sourceOrDestinationIpExistsFilter}
+            tableId={TableId.networkPageEvents}
             {...tabProps}
           />
         </Route>

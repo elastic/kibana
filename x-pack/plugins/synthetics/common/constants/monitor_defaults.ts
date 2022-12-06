@@ -47,9 +47,8 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.NAMESPACE]: DEFAULT_NAMESPACE_STRING,
   [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.UI,
   [ConfigKey.JOURNEY_ID]: '',
-
-  // Deprecated, slated to be removed in a future version
-  [ConfigKey.ID]: '',
+  [ConfigKey.CONFIG_HASH]: '',
+  [ConfigKey.MONITOR_QUERY_ID]: '',
 };
 
 export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {

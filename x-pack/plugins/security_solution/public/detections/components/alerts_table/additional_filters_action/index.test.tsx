@@ -11,7 +11,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { AdditionalFiltersAction } from '.';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-jest.useFakeTimers();
+jest.useFakeTimers({ legacyFakeTimers: true });
 jest.mock('../../../../common/lib/kibana');
 
 describe('AdditionalFiltersAction', () => {

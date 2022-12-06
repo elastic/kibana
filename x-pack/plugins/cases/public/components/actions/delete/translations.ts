@@ -8,13 +8,10 @@
 import { i18n } from '@kbn/i18n';
 export { DELETED_CASES } from '../../../common/translations';
 
-export const BULK_ACTION_DELETE_LABEL = i18n.translate(
-  'xpack.cases.caseTable.bulkActions.deleteCases',
-  {
-    defaultMessage: 'Delete cases',
-  }
-);
+export const BULK_ACTION_DELETE_LABEL = i18n.translate('xpack.cases.actions.deleteMultipleCases', {
+  defaultMessage: 'Delete cases',
+});
 
-export const DELETE_ACTION_LABEL = i18n.translate('xpack.cases.caseTable.action.deleteCase', {
+export const DELETE_ACTION_LABEL = i18n.translate('xpack.cases.actions.deleteSingleCase', {
   defaultMessage: 'Delete case',
 });

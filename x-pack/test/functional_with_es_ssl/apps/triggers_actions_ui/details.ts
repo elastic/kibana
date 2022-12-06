@@ -168,9 +168,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const owner = await pageObjects.ruleDetailsUI.getAPIKeyOwner();
         expect(owner).to.be('elastic');
-
-        const { connectorType } = await pageObjects.ruleDetailsUI.getActionsLabels();
-        expect(connectorType).to.be(`Slack`);
       });
 
       it('renders toast when schedule is less than configured minimum', async () => {
@@ -440,7 +437,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
 
         // delete connector
-        await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
+        await pageObjects.common.navigateToApp('triggersActionsConnectors');
         await pageObjects.triggersActionsUI.searchConnectors(connector.name);
         await testSubjects.click('deleteConnector');
         await testSubjects.existOrFail('deleteIdsConfirmation');
@@ -450,8 +447,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const toastTitle = await pageObjects.common.closeToast();
         expect(toastTitle).to.eql('Deleted 1 connector');
 
+        // Wait to ensure the table is finished loading
+        await pageObjects.triggersActionsUI.tableFinishedLoading();
+
         // click on first alert
-        await pageObjects.triggersActionsUI.changeTabs('rulesTab');
+        await pageObjects.common.navigateToApp('triggersActions');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
@@ -504,7 +504,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
 
         // delete connector
-        await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
+        await pageObjects.common.navigateToApp('triggersActionsConnectors');
         await pageObjects.triggersActionsUI.searchConnectors(connector.name);
         await testSubjects.click('deleteConnector');
         await testSubjects.existOrFail('deleteIdsConfirmation');
@@ -514,8 +514,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const toastTitle = await pageObjects.common.closeToast();
         expect(toastTitle).to.eql('Deleted 1 connector');
 
+        // Wait to ensure the table is finished loading
+        await pageObjects.triggersActionsUI.tableFinishedLoading();
+
         // click on first rule
-        await pageObjects.triggersActionsUI.changeTabs('rulesTab');
+        await pageObjects.common.navigateToApp('triggersActions');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
 
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
@@ -556,7 +559,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // verify content
         await testSubjects.existOrFail('rulesList');
 
-        await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
+        await pageObjects.common.navigateToApp('triggersActionsConnectors');
         await pageObjects.triggersActionsUI.searchConnectors('new connector');
         await testSubjects.click('deleteConnector');
         await testSubjects.existOrFail('deleteIdsConfirmation');

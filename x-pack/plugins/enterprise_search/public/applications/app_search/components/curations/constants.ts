@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIconColor } from '@elastic/eui';
+import { EuiButtonIconProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const CURATIONS_TITLE = i18n.translate(
@@ -66,28 +66,28 @@ export const PROMOTE_DOCUMENT_ACTION = {
     defaultMessage: 'Promote this result',
   }),
   iconType: 'starPlusEmpty',
-  iconColor: 'primary' as EuiButtonIconColor,
+  iconColor: 'primary' as EuiButtonIconProps['color'],
 };
 export const DEMOTE_DOCUMENT_ACTION = {
   title: i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.demoteButtonLabel', {
     defaultMessage: 'Demote this result',
   }),
   iconType: 'starMinusFilled',
-  iconColor: 'primary' as EuiButtonIconColor,
+  iconColor: 'primary' as EuiButtonIconProps['color'],
 };
 export const HIDE_DOCUMENT_ACTION = {
   title: i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.hideButtonLabel', {
     defaultMessage: 'Hide this result',
   }),
   iconType: 'eyeClosed',
-  iconColor: 'danger' as EuiButtonIconColor,
+  iconColor: 'danger' as EuiButtonIconProps['color'],
 };
 export const SHOW_DOCUMENT_ACTION = {
   title: i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.showButtonLabel', {
     defaultMessage: 'Show this result',
   }),
   iconType: 'eye',
-  iconColor: 'primary' as EuiButtonIconColor,
+  iconColor: 'primary' as EuiButtonIconProps['color'],
 };
 
 export const AUTOMATED_LABEL = i18n.translate(

@@ -37,7 +37,8 @@ export type AgentActionType =
   | 'POLICY_REASSIGN'
   | 'CANCEL'
   | 'FORCE_UNENROLL'
-  | 'UPDATE_TAGS';
+  | 'UPDATE_TAGS'
+  | 'REQUEST_DIAGNOSTICS';
 
 type FleetServerAgentComponentStatusTuple = typeof FleetServerAgentComponentStatuses;
 export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTuple[number];
@@ -96,10 +97,13 @@ export interface Agent extends AgentBase {
   access_api_key?: string;
   // @deprecated
   default_api_key_history?: FleetServerAgent['default_api_key_history'];
-  outputs?: Array<{
-    api_key_id: string;
-    to_retire_api_key_ids?: FleetServerAgent['default_api_key_history'];
-  }>;
+  outputs?: Record<
+    string,
+    {
+      api_key_id: string;
+      to_retire_api_key_ids?: FleetServerAgent['default_api_key_history'];
+    }
+  >;
   status?: AgentStatus;
   packages: string[];
   sort?: Array<number | string | null>;
@@ -137,6 +141,15 @@ export interface ActionStatus {
   cancellationTime?: string;
   newPolicyId?: string;
   creationTime: string;
+}
+
+export interface AgentDiagnostics {
+  id: string;
+  name: string;
+  createTime: string;
+  filePath: string;
+  status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED' | 'IN_PROGRESS';
+  actionId: string;
 }
 
 // Generated from FleetServer schema.json

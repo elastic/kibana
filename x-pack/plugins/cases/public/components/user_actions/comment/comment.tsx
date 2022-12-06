@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiCommentProps } from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
 
-import { CommentUserAction, Actions, CommentType } from '../../../../common/api';
-import { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from '../types';
+import type { CommentUserAction } from '../../../../common/api';
+import { Actions, CommentType } from '../../../../common/api';
+import type { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from '../types';
 import { createCommonUpdateUserActionBuilder } from '../common';
-import { Comment } from '../../../containers/types';
-import * as i18n from '../translations';
+import type { Comment } from '../../../containers/types';
+import * as i18n from './translations';
 import { createUserAttachmentUserActionBuilder } from './user';
 import { createAlertAttachmentUserActionBuilder } from './alert';
 import { createActionAttachmentUserActionBuilder } from './actions';
@@ -19,7 +20,25 @@ import { createExternalReferenceAttachmentUserActionBuilder } from './external_r
 import { createPersistableStateAttachmentUserActionBuilder } from './persistable_state';
 
 const getUpdateLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
-const getDeleteLabelTitle = () => `${i18n.REMOVED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
+const getDeleteLabelTitle = (userAction: UserActionResponse<CommentUserAction>) => {
+  const { comment } = userAction.payload;
+
+  if (comment.type === CommentType.alert) {
+    const totalAlerts = Array.isArray(comment.alertId) ? comment.alertId.length : 1;
+    const alertLabel = i18n.MULTIPLE_ALERTS(totalAlerts);
+
+    return `${i18n.REMOVED_FIELD} ${alertLabel}`;
+  }
+
+  if (
+    comment.type === CommentType.externalReference ||
+    comment.type === CommentType.persistableState
+  ) {
+    return `${i18n.REMOVED_FIELD} ${i18n.ATTACHMENT.toLowerCase()}`;
+  }
+
+  return `${i18n.REMOVED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
+};
 
 const getDeleteCommentUserAction = ({
   userAction,
@@ -28,7 +47,7 @@ const getDeleteCommentUserAction = ({
 }: {
   userAction: UserActionResponse<CommentUserAction>;
 } & Pick<UserActionBuilderArgs, 'handleOutlineComment' | 'userProfiles'>): EuiCommentProps[] => {
-  const label = getDeleteLabelTitle();
+  const label = getDeleteLabelTitle(userAction);
   const commonBuilder = createCommonUpdateUserActionBuilder({
     userAction,
     userProfiles,
@@ -95,6 +114,8 @@ const getCreateCommentUserAction = ({
         loadingAlertData,
         onRuleDetailsClick,
         onShowAlertDetails,
+        handleDeleteComment,
+        loadingCommentIds,
       });
 
       return alertBuilder.build();

@@ -14,7 +14,7 @@ import {
   externalReferenceAttachmentSO,
   externalReferenceAttachmentSOAttributes,
   externalReferenceAttachmentSOAttributesWithoutRefs,
-  getPersistableStateAttachmentTypeRegistry,
+  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
   persistableStateAttachmentAttributes,
   persistableStateAttachmentAttributesWithoutInjectedId,
@@ -23,7 +23,7 @@ import {
 describe('CasesService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
-  const persistableStateAttachmentTypeRegistry = getPersistableStateAttachmentTypeRegistry();
+  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
   let service: AttachmentService;
 
   beforeEach(() => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
@@ -20,6 +20,7 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 
 import { defaultRowRenderers } from '.';
 import { getRowRenderer } from './get_row_renderer';
+import { TimelineId } from '../../../../../../common/types';
 
 // EuiIcons coming from .testenv render the icon's aria-label as a span
 // extractEuiIcon removes the aria-label before checking for equality
@@ -47,6 +48,11 @@ describe('get_column_renderer', () => {
   let auditd: Ecs;
   const mount = useMountAppended();
 
+  const getWrapper = async (childrenComponent: JSX.Element) => {
+    const wrapper = mount(childrenComponent);
+    await waitFor(() => wrapper.find('[data-test-subj="suricataRefs"]').exists());
+    return wrapper;
+  };
   beforeEach(() => {
     nonSuricata = cloneDeep(mockTimelineData[0].ecs);
     suricata = cloneDeep(mockTimelineData[2].ecs);
@@ -60,21 +66,22 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       data: nonSuricata,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
 
     const wrapper = shallow(<span>{row}</span>);
     expect(wrapper).toMatchSnapshot();
   });
 
-  test('should render plain row data when it is a non suricata row', () => {
+  test('should render plain row data when it is a non suricata row', async () => {
     const rowRenderer = getRowRenderer({ data: nonSuricata, rowRenderers: defaultRowRenderers });
     const row = rowRenderer?.renderRow({
       data: nonSuricata,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
-    const wrapper = mount(
+
+    const wrapper = await getWrapper(
       <TestProviders>
         <span>{row}</span>
       </TestProviders>
@@ -82,14 +89,14 @@ describe('get_column_renderer', () => {
     expect(wrapper.text()).toEqual('');
   });
 
-  test('should render a suricata row data when it is a suricata row', () => {
+  test('should render a suricata row data when it is a suricata row', async () => {
     const rowRenderer = getRowRenderer({ data: suricata, rowRenderers: defaultRowRenderers });
     const row = rowRenderer?.renderRow({
       data: suricata,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
-    const wrapper = mount(
+    const wrapper = await getWrapper(
       <TestProviders>
         <span>{row}</span>
       </TestProviders>
@@ -99,15 +106,15 @@ describe('get_column_renderer', () => {
     );
   });
 
-  test('should render a suricata row data if event.category is network_traffic', () => {
+  test('should render a suricata row data if event.category is network_traffic', async () => {
     suricata.event = { ...suricata.event, ...{ category: ['network_traffic'] } };
     const rowRenderer = getRowRenderer({ data: suricata, rowRenderers: defaultRowRenderers });
     const row = rowRenderer?.renderRow({
       data: suricata,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
-    const wrapper = mount(
+    const wrapper = await getWrapper(
       <TestProviders>
         <span>{row}</span>
       </TestProviders>
@@ -117,15 +124,15 @@ describe('get_column_renderer', () => {
     );
   });
 
-  test('should render a zeek row data if event.category is network_traffic', () => {
+  test('should render a zeek row data if event.category is network_traffic', async () => {
     zeek.event = { ...zeek.event, ...{ category: ['network_traffic'] } };
     const rowRenderer = getRowRenderer({ data: zeek, rowRenderers: defaultRowRenderers });
     const row = rowRenderer?.renderRow({
       data: zeek,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
-    const wrapper = mount(
+    const wrapper = await getWrapper(
       <TestProviders>
         <span>{row}</span>
       </TestProviders>
@@ -135,15 +142,15 @@ describe('get_column_renderer', () => {
     );
   });
 
-  test('should render a system row data if event.category is network_traffic', () => {
+  test('should render a system row data if event.category is network_traffic', async () => {
     system.event = { ...system.event, ...{ category: ['network_traffic'] } };
     const rowRenderer = getRowRenderer({ data: system, rowRenderers: defaultRowRenderers });
     const row = rowRenderer?.renderRow({
       data: system,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
-    const wrapper = mount(
+    const wrapper = await getWrapper(
       <TestProviders>
         <span>{row}</span>
       </TestProviders>
@@ -153,15 +160,15 @@ describe('get_column_renderer', () => {
     );
   });
 
-  test('should render a auditd row data if event.category is network_traffic', () => {
+  test('should render a auditd row data if event.category is network_traffic', async () => {
     auditd.event = { ...auditd.event, ...{ category: ['network_traffic'] } };
     const rowRenderer = getRowRenderer({ data: auditd, rowRenderers: defaultRowRenderers });
     const row = rowRenderer?.renderRow({
       data: auditd,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
-    const wrapper = mount(
+    const wrapper = await getWrapper(
       <TestProviders>
         <span>{row}</span>
       </TestProviders>
@@ -197,7 +204,9 @@ describe('getRowRenderer', () => {
 
         render(
           <TestProviders>
-            <>{renderer?.renderRow({ data: auditd, isDraggable: false, timelineId: 'test' })}</>
+            <>
+              {renderer?.renderRow({ data: auditd, isDraggable: false, scopeId: TimelineId.test })}
+            </>
           </TestProviders>
         );
       });
@@ -239,7 +248,7 @@ describe('getRowRenderer', () => {
 
         render(
           <TestProviders>
-            <>{renderer?.renderRow({ data, isDraggable: false, timelineId: 'test' })}</>
+            <>{renderer?.renderRow({ data, isDraggable: false, scopeId: TimelineId.test })}</>
           </TestProviders>
         );
       });
@@ -274,7 +283,7 @@ describe('getRowRenderer', () => {
 
         render(
           <TestProviders>
-            <>{renderer?.renderRow({ data, isDraggable: false, timelineId: 'test' })}</>
+            <>{renderer?.renderRow({ data, isDraggable: false, scopeId: TimelineId.test })}</>
           </TestProviders>
         );
       });

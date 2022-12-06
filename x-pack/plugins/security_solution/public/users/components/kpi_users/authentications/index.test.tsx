@@ -11,16 +11,29 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
 import { UsersKpiAuthentications } from '.';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
+import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
 
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('../../../containers/users/authentications');
 jest.mock('../../../../hosts/components/kpi_hosts/common', () => ({
-  KpiBaseComponentManage: () => <span data-test-subj="KpiBaseComponentManage" />,
+  KpiBaseComponentManage: jest
+    .fn()
+    .mockReturnValue(<span data-test-subj="KpiBaseComponentManage" />),
 }));
-
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
+jest.mock('../../../../common/components/page/use_refetch_by_session', () => ({
+  useRefetchByRestartingSession: jest.fn(),
+}));
 describe('Authentications KPI', () => {
   const mockUseHostsKpiAuthentications = useUsersKpiAuthentications as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
+  const MockKpiBaseComponentManage = KpiBaseComponentManage as jest.Mock;
+  const mockRefetchByRestartingSession = jest.fn();
+  const mockRefetch = jest.fn();
   const defaultProps = {
     from: '2019-06-25T04:31:59.345Z',
     to: '2019-06-25T06:31:59.345Z',
@@ -39,9 +52,14 @@ describe('Authentications KPI', () => {
           dsl: [],
           response: [],
         },
-        refetch: jest.fn(),
+        refetch: mockRefetch,
       },
     ]);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useRefetchByRestartingSession as jest.Mock).mockReturnValue({
+      searchSessionId: 'mockSearchSessionId',
+      refetchByRestartingSession: mockRefetchByRestartingSession,
+    });
   });
   afterEach(() => {
     jest.clearAllMocks();
@@ -62,5 +80,31 @@ describe('Authentications KPI', () => {
       </TestProviders>
     );
     expect(mockUseHostsKpiAuthentications.mock.calls[0][0].skip).toEqual(true);
+  });
+  it('Refetches data', () => {
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
+    render(
+      <TestProviders>
+        <UsersKpiAuthentications {...defaultProps} />
+      </TestProviders>
+    );
+    expect(MockKpiBaseComponentManage.mock.calls[0][0].refetch).toEqual(mockRefetch);
+    expect(MockKpiBaseComponentManage.mock.calls[0][0].searchSessionId).toBeUndefined();
+  });
+  it('Refetch by restarting search session ID if isChartEmbeddablesEnabled = true', () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+
+    render(
+      <TestProviders>
+        <UsersKpiAuthentications {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(MockKpiBaseComponentManage.mock.calls[0][0].refetch).toEqual(
+      mockRefetchByRestartingSession
+    );
+    expect(MockKpiBaseComponentManage.mock.calls[0][0].searchSessionId).toEqual(
+      'mockSearchSessionId'
+    );
   });
 });

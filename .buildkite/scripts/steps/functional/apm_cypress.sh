@@ -24,6 +24,6 @@ echo "--- APM Cypress Tests"
 
 cd "$XPACK_DIR"
 
-checks-reporter-with-killswitch "APM Cypress Tests $CLI_NUMBER" \
-  node plugins/apm/scripts/test/e2e.js \
+node plugins/apm/scripts/test/e2e.js \
+  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
   $CYPRESS_ARGS

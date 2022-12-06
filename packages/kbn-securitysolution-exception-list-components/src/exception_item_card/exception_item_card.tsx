@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useCallback, FC } from 'react';
+import React, { FC, ElementType } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiCommentProps } from '@elastic/eui';
 import type {
   CommentsArray,
@@ -14,7 +14,6 @@ import type {
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import * as i18n from './translations';
 import {
   ExceptionItemCardHeader,
   ExceptionItemCardConditions,
@@ -22,18 +21,19 @@ import {
   ExceptionItemCardComments,
 } from '.';
 
-import type { ExceptionListItemIdentifiers } from '../types';
+import type { ExceptionListItemIdentifiers, Rule } from '../types';
+import { useExceptionItemCard } from './use_exception_item_card';
 
 export interface ExceptionItemProps {
   dataTestSubj?: string;
   disableActions?: boolean;
   exceptionItem: ExceptionListItemSchema;
   listType: ExceptionListTypeEnum;
-  ruleReferences: any[]; // rulereferences
+  ruleReferences: Rule[];
   editActionLabel?: string;
   deleteActionLabel?: string;
-  securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
-  formattedDateComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
+  securityLinkAnchorComponent: ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
+  formattedDateComponent: ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   getFormattedComments: (comments: CommentsArray) => EuiCommentProps[]; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditException: (item: ExceptionListItemSchema) => void;
@@ -53,47 +53,24 @@ const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
   onDeleteException,
   onEditException,
 }) => {
-  const handleDelete = useCallback((): void => {
-    onDeleteException({
-      id: exceptionItem.id,
-      name: exceptionItem.name,
-      namespaceType: exceptionItem.namespace_type,
-    });
-  }, [onDeleteException, exceptionItem.id, exceptionItem.name, exceptionItem.namespace_type]);
-
-  const handleEdit = useCallback((): void => {
-    onEditException(exceptionItem);
-  }, [onEditException, exceptionItem]);
-
-  const formattedComments = useMemo((): EuiCommentProps[] => {
-    return getFormattedComments(exceptionItem.comments);
-  }, [exceptionItem.comments, getFormattedComments]);
-
-  const actions: Array<{
-    key: string;
-    icon: string;
-    label: string | boolean;
-    onClick: () => void;
-  }> = useMemo(
-    () => [
-      {
-        key: 'edit',
-        icon: 'controlsHorizontal',
-        label: editActionLabel || i18n.exceptionItemCardEditButton(listType),
-        onClick: handleEdit,
-      },
-      {
-        key: 'delete',
-        icon: 'trash',
-        label: deleteActionLabel || listType === i18n.exceptionItemCardDeleteButton(listType),
-        onClick: handleDelete,
-      },
-    ],
-    [editActionLabel, listType, deleteActionLabel, handleDelete, handleEdit]
-  );
+  const { actions, formattedComments } = useExceptionItemCard({
+    listType,
+    editActionLabel,
+    deleteActionLabel,
+    exceptionItem,
+    getFormattedComments,
+    onEditException,
+    onDeleteException,
+  });
   return (
-    <EuiPanel paddingSize="l" data-test-subj={dataTestSubj} hasBorder hasShadow={false}>
-      <EuiFlexGroup gutterSize="m" direction="column">
+    <EuiPanel
+      key={`${exceptionItem.id}exceptionItemPanel`}
+      paddingSize="l"
+      data-test-subj={dataTestSubj || ''}
+      hasBorder
+      hasShadow={false}
+    >
+      <EuiFlexGroup responsive gutterSize="m" direction="column">
         <EuiFlexItem data-test-subj="exceptionItemCardHeaderContainer">
           <ExceptionItemCardHeader
             item={exceptionItem}
@@ -105,7 +82,7 @@ const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
         <EuiFlexItem data-test-subj="exceptionItemCardMeta">
           <ExceptionItemCardMetaInfo
             item={exceptionItem}
-            references={ruleReferences}
+            rules={ruleReferences}
             dataTestSubj="exceptionItemCardMetaInfo"
             securityLinkAnchorComponent={securityLinkAnchorComponent}
             formattedDateComponent={formattedDateComponent}
@@ -120,7 +97,7 @@ const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
         </EuiFlexItem>
         {formattedComments.length > 0 && (
           <ExceptionItemCardComments
-            data-test-subj="exceptionItemCard-comment"
+            dataTestSubj="exceptionsItemCommentAccordion"
             comments={formattedComments}
           />
         )}

@@ -144,7 +144,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   reference,
                 },
                 alertInfo: {
-                  alertId,
+                  id: alertId,
                   consumer: 'alertsFixture',
                   spaceId: space.id,
                   namespace: space.id,
@@ -296,7 +296,7 @@ instanceStateValue: true
                   reference,
                 },
                 alertInfo: {
-                  alertId,
+                  id: alertId,
                   consumer: 'alertsFixture',
                   spaceId: space.id,
                   namespace: space.id,
@@ -428,7 +428,7 @@ instanceStateValue: true
             ['createdAt', 'updatedAt']
           );
           expect(alertSearchResultInfoWithoutDates).to.eql({
-            alertId,
+            id: alertId,
             consumer: 'alertsFixture',
             spaceId: space.id,
             namespace: space.id,
@@ -1237,6 +1237,7 @@ instanceStateValue: true
     expect(eventEnd <= dateNow).to.equal(true);
 
     expect(event?.event?.outcome).to.equal(outcome);
+    expect(event?.kibana?.alerting?.outcome).to.equal(outcome);
 
     expect(event?.kibana?.saved_objects).to.eql([
       {

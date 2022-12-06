@@ -33,7 +33,6 @@ export class Serverless extends BaseSpan {
       ...fields,
       'metricset.name': 'app',
       'faas.execution': faasExection,
-      'faas.id': fields['service.name'],
     });
   }
 

@@ -61,8 +61,6 @@ class DocLinks {
   public connectorsMongoDB: string;
   public connectorsMySQL: string;
   public connectorsWorkplaceSearch: string;
-  public contentExtraction: string;
-  public crawlerGettingStarted: string;
   public crawlerManaging: string;
   public crawlerOverview: string;
   public deployTrainedModels: string;
@@ -80,11 +78,13 @@ class DocLinks {
   public languageAnalyzers: string;
   public languageClients: string;
   public licenseManagement: string;
+  public machineLearningStart: string;
   public pluginsIngestAttachment: string;
   public queryDsl: string;
   public searchUIAppSearch: string;
   public searchUIElasticsearch: string;
   public start: string;
+  public syncRules: string;
   public workplaceSearchApiKeys: string;
   public workplaceSearchBox: string;
   public workplaceSearchConfluenceCloud: string;
@@ -175,8 +175,6 @@ class DocLinks {
     this.connectorsMongoDB = '';
     this.connectorsMySQL = '';
     this.connectorsWorkplaceSearch = '';
-    this.contentExtraction = '';
-    this.crawlerGettingStarted = '';
     this.crawlerManaging = '';
     this.crawlerOverview = '';
     this.deployTrainedModels = '';
@@ -194,11 +192,13 @@ class DocLinks {
     this.languageAnalyzers = '';
     this.languageClients = '';
     this.licenseManagement = '';
+    this.machineLearningStart = '';
     this.pluginsIngestAttachment = '';
     this.queryDsl = '';
     this.searchUIAppSearch = '';
     this.searchUIElasticsearch = '';
     this.start = '';
+    this.syncRules = '';
     this.workplaceSearchApiKeys = '';
     this.workplaceSearchBox = '';
     this.workplaceSearchConfluenceCloud = '';
@@ -291,8 +291,6 @@ class DocLinks {
     this.connectorsMongoDB = docLinks.links.enterpriseSearch.connectorsMongoDB;
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
     this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
-    this.contentExtraction = docLinks.links.enterpriseSearch.contentExtraction;
-    this.crawlerGettingStarted = docLinks.links.enterpriseSearch.crawlerGettingStarted;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
     this.crawlerOverview = docLinks.links.enterpriseSearch.crawlerOverview;
     this.deployTrainedModels = docLinks.links.enterpriseSearch.deployTrainedModels;
@@ -310,11 +308,13 @@ class DocLinks {
     this.languageAnalyzers = docLinks.links.enterpriseSearch.languageAnalyzers;
     this.languageClients = docLinks.links.enterpriseSearch.languageClients;
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
+    this.machineLearningStart = docLinks.links.enterpriseSearch.machineLearningStart;
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;
     this.searchUIAppSearch = docLinks.links.searchUI.appSearch;
     this.searchUIElasticsearch = docLinks.links.searchUI.elasticsearch;
     this.start = docLinks.links.enterpriseSearch.start;
+    this.syncRules = docLinks.links.enterpriseSearch.syncRules;
     this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
     this.workplaceSearchConfluenceCloud = docLinks.links.workplaceSearch.confluenceCloud;

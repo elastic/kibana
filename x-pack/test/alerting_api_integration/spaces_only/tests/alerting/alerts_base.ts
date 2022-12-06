@@ -98,7 +98,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
           reference,
         },
         alertInfo: {
-          alertId,
+          id: alertId,
           consumer: 'alertsFixture',
           spaceId: space.id,
           namespace: space.namespace,

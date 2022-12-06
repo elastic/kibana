@@ -7,37 +7,28 @@
 
 import { cloneDeep } from 'lodash/fp';
 import {
-  LOCAL_STORAGE_TIMELINE_KEY,
   migrateColumnWidthToInitialWidth,
   migrateColumnLabelToDisplayAsText,
-  useTimelinesStorage,
-  getTimelinesInStorageByIds,
-  getAllTimelinesInStorage,
-  addTimelineInStorage,
+  LOCAL_STORAGE_TABLE_KEY,
+  useDataTablesStorage,
+  getDataTablesInStorageByIds,
+  getAllDataTablesInStorage,
+  addTableInStorage,
 } from '.';
 
-import { TimelineId } from '../../../../common/types/timeline';
-import { mockTimelineModel, createSecuritySolutionStorageMock } from '../../../common/mock';
+import { mockDataTableModel, createSecuritySolutionStorageMock } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
-import type { TimelineModel } from '../../store/timeline/model';
+import type { DataTableModel } from '../../../common/store/data_table/model';
+import { TableId } from '../../../../common/types';
 
 jest.mock('../../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-const getExpectedColumns = (model: TimelineModel) =>
+const getExpectedColumns = (model: DataTableModel) =>
   model.columns.map(migrateColumnWidthToInitialWidth).map(migrateColumnLabelToDisplayAsText);
 
-const {
-  documentType,
-  filterManager,
-  isLoading,
-  loadingText,
-  queryFields,
-  selectAll,
-  unit,
-  ...timelineToStore
-} = mockTimelineModel;
+const { isLoading, loadingText, queryFields, unit, ...timelineToStore } = mockDataTableModel;
 
 describe('SiemLocalStorage', () => {
   const { localStorage, storage } = createSecuritySolutionStorageMock();
@@ -47,193 +38,203 @@ describe('SiemLocalStorage', () => {
     localStorage.clear();
   });
 
-  describe('addTimeline', () => {
+  describe('addDataTable', () => {
     it('adds a timeline when storage is empty', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-        [TimelineId.hostsPageEvents]: timelineToStore,
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
+      expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TABLE_KEY))).toEqual({
+        [TableId.hostsPageEvents]: timelineToStore,
       });
     });
 
     it('adds a timeline when storage contains another timelines', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-        [TimelineId.hostsPageEvents]: timelineToStore,
-        [TimelineId.usersPageEvents]: timelineToStore,
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
+      expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TABLE_KEY))).toEqual({
+        [TableId.hostsPageEvents]: timelineToStore,
+        [TableId.usersPageEvents]: timelineToStore,
       });
     });
   });
 
-  describe('getAllTimelines', () => {
+  describe('getAllDataTables', () => {
     it('gets all timelines correctly', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      const timelines = timelineStorage.getAllTimelines();
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
+      const timelines = tablesStorage.getAllDataTables();
       expect(timelines).toEqual({
-        [TimelineId.hostsPageEvents]: timelineToStore,
-        [TimelineId.usersPageEvents]: timelineToStore,
+        [TableId.hostsPageEvents]: timelineToStore,
+        [TableId.usersPageEvents]: timelineToStore,
       });
     });
 
     it('returns an empty object if there is no timelines', () => {
-      const timelineStorage = useTimelinesStorage();
-      const timelines = timelineStorage.getAllTimelines();
+      const tablesStorage = useDataTablesStorage();
+      const timelines = tablesStorage.getAllDataTables();
       expect(timelines).toEqual({});
     });
   });
 
-  describe('getTimelineById', () => {
+  describe('getDataTablesById', () => {
     it('gets a timeline by id', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      const timeline = timelineStorage.getTimelineById(TimelineId.hostsPageEvents);
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
+      const timeline = tablesStorage.getDataTablesById(TableId.hostsPageEvents);
       expect(timeline).toEqual(timelineToStore);
     });
   });
 
-  describe('getTimelinesInStorageByIds', () => {
+  describe('getDataTablesInStorageByIds', () => {
+    storage.set('timelines', {
+      [TableId.hostsPageEvents]: mockDataTableModel,
+      [TableId.usersPageEvents]: mockDataTableModel,
+    });
+
     it('gets timelines correctly', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, [
-        TimelineId.hostsPageEvents,
-        TimelineId.usersPageEvents,
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
+      const timelines = getDataTablesInStorageByIds(storage, [
+        TableId.hostsPageEvents,
+        TableId.usersPageEvents,
       ]);
       expect(timelines).toEqual({
-        [TimelineId.hostsPageEvents]: timelineToStore,
-        [TimelineId.usersPageEvents]: timelineToStore,
+        [TableId.hostsPageEvents]: timelineToStore,
+        [TableId.usersPageEvents]: timelineToStore,
       });
     });
 
     it('gets an empty timelime when there is no timelines', () => {
-      const timelines = getTimelinesInStorageByIds(storage, [TimelineId.hostsPageEvents]);
+      const timelines = getDataTablesInStorageByIds(storage, [TableId.hostsPageEvents]);
       expect(timelines).toEqual({});
     });
 
     it('returns empty timelime when there is no ids', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, []);
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
+      const timelines = getDataTablesInStorageByIds(storage, []);
       expect(timelines).toEqual({});
     });
 
     it('returns empty timelime when a specific timeline does not exists', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, [TimelineId.usersPageEvents]);
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
+      const timelines = getDataTablesInStorageByIds(storage, [TableId.usersPageEvents]);
       expect(timelines).toEqual({});
     });
 
     it('returns timelines correctly when one exist and another not', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, [
-        TimelineId.hostsPageEvents,
-        TimelineId.usersPageEvents,
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
+      const timelines = getDataTablesInStorageByIds(storage, [
+        TableId.hostsPageEvents,
+        TableId.usersPageEvents,
       ]);
       expect(timelines).toEqual({
-        [TimelineId.hostsPageEvents]: timelineToStore,
+        [TableId.hostsPageEvents]: timelineToStore,
       });
     });
 
     it('migrates columns saved to localstorage with a `width` to `initialWidth`', () => {
-      const timelineStorage = useTimelinesStorage();
+      const tablesStorage = useDataTablesStorage();
 
       // create a mock that mimics a column saved to localstoarge in the "old" format, with `width` instead of `initialWidth`
-      const unmigratedMockTimelineModel = {
-        ...cloneDeep(mockTimelineModel),
-        columns: mockTimelineModel.columns.map((c) => ({
+      const unmigratedmockDataTableModel = {
+        ...cloneDeep(mockDataTableModel),
+        columns: mockDataTableModel.columns.map((c) => ({
           ...c,
           width: 98765, // create a legacy `width` column
           initialWidth: undefined, // `initialWidth` must be undefined, otherwise the migration will not occur
         })),
       };
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, unmigratedMockTimelineModel);
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, [
-        TimelineId.hostsPageEvents,
-        TimelineId.usersPageEvents,
+      storage.set('timelines', {
+        [TableId.hostsPageEvents]: unmigratedmockDataTableModel,
+      });
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
+
+      const timelines = getDataTablesInStorageByIds(storage, [
+        TableId.hostsPageEvents,
+        TableId.usersPageEvents,
       ]);
 
       // all legacy `width` values are migrated to `initialWidth`:
       expect(timelines).toStrictEqual({
-        [TimelineId.hostsPageEvents]: {
+        [TableId.hostsPageEvents]: {
           ...timelineToStore,
           columns: timelineToStore.columns.map((c) => ({
             ...c,
-            displayAsText: undefined,
             initialWidth: 98765,
             width: 98765,
           })),
         },
-        [TimelineId.usersPageEvents]: {
+        [TableId.usersPageEvents]: {
           ...timelineToStore,
-          columns: getExpectedColumns(mockTimelineModel),
+          columns: getExpectedColumns(mockDataTableModel),
         },
       });
     });
 
     it('does NOT migrate columns saved to localstorage with a `width` to `initialWidth` when `initialWidth` is valid', () => {
-      const timelineStorage = useTimelinesStorage();
+      const tablesStorage = useDataTablesStorage();
 
       // create a mock that mimics a column saved to localstoarge in the "old" format, with `width` instead of `initialWidth`
-      const unmigratedMockTimelineModel = {
-        ...cloneDeep(mockTimelineModel),
-        columns: mockTimelineModel.columns.map((c) => ({
+      const unmigratedmockDataTableModel = {
+        ...cloneDeep(mockDataTableModel),
+        columns: mockDataTableModel.columns.map((c) => ({
           ...c,
           width: 98765, // create a legacy `width` column
         })),
       };
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, unmigratedMockTimelineModel);
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, [
-        TimelineId.hostsPageEvents,
-        TimelineId.usersPageEvents,
+      storage.set('timelines', {
+        [TableId.hostsPageEvents]: unmigratedmockDataTableModel,
+      });
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
+      const timelines = getDataTablesInStorageByIds(storage, [
+        TableId.hostsPageEvents,
+        TableId.usersPageEvents,
       ]);
 
       expect(timelines).toStrictEqual({
-        [TimelineId.hostsPageEvents]: {
+        [TableId.hostsPageEvents]: {
           ...timelineToStore,
           columns: timelineToStore.columns.map((c) => ({
             ...c,
-            displayAsText: undefined,
             initialWidth: c.initialWidth, // initialWidth is unchanged
             width: 98765,
           })),
         },
-        [TimelineId.usersPageEvents]: {
+        [TableId.usersPageEvents]: {
           ...timelineToStore,
-          columns: getExpectedColumns(mockTimelineModel),
+          columns: getExpectedColumns(mockDataTableModel),
         },
       });
     });
 
     it('migrates columns saved to localstorage with a `label` to `displayAsText`', () => {
-      const timelineStorage = useTimelinesStorage();
+      const tablesStorage = useDataTablesStorage();
 
       // create a mock that mimics a column saved to localstoarge in the "old" format, with `label` instead of `displayAsText`
-      const unmigratedMockTimelineModel = {
-        ...cloneDeep(mockTimelineModel),
-        columns: mockTimelineModel.columns.map((c, i) => ({
+      const unmigratedmockDataTableModel = {
+        ...cloneDeep(mockDataTableModel),
+        columns: mockDataTableModel.columns.map((c, i) => ({
           ...c,
           label: `A legacy label ${i}`, // create a legacy `label` column
         })),
       };
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, unmigratedMockTimelineModel);
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, [
-        TimelineId.hostsPageEvents,
-        TimelineId.usersPageEvents,
+      storage.set('timelines', {
+        [TableId.hostsPageEvents]: unmigratedmockDataTableModel,
+      });
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
+      const timelines = getDataTablesInStorageByIds(storage, [
+        TableId.hostsPageEvents,
+        TableId.usersPageEvents,
       ]);
 
       // all legacy `label` values are migrated to `displayAsText`:
       expect(timelines).toStrictEqual({
-        [TimelineId.hostsPageEvents]: {
+        [TableId.hostsPageEvents]: {
           ...timelineToStore,
           columns: timelineToStore.columns.map((c, i) => ({
             ...c,
@@ -241,35 +242,35 @@ describe('SiemLocalStorage', () => {
             label: `A legacy label ${i}`,
           })),
         },
-        [TimelineId.usersPageEvents]: {
+        [TableId.usersPageEvents]: {
           ...timelineToStore,
-          columns: getExpectedColumns(mockTimelineModel),
+          columns: getExpectedColumns(mockDataTableModel),
         },
       });
     });
 
     it('does NOT migrate columns saved to localstorage with a `label` to `displayAsText` when `displayAsText` is valid', () => {
-      const timelineStorage = useTimelinesStorage();
+      const tablesStorage = useDataTablesStorage();
 
       // create a mock that mimics a column saved to localstoarge in the "old" format, with `label` instead of `displayAsText`
-      const unmigratedMockTimelineModel = {
-        ...cloneDeep(mockTimelineModel),
-        columns: mockTimelineModel.columns.map((c, i) => ({
+      const unmigratedmockDataTableModel = {
+        ...cloneDeep(mockDataTableModel),
+        columns: mockDataTableModel.columns.map((c, i) => ({
           ...c,
           displayAsText:
             'Label will NOT be migrated to displayAsText, because displayAsText already has a value',
           label: `A legacy label ${i}`, // create a legacy `label` column
         })),
       };
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, unmigratedMockTimelineModel);
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, [
-        TimelineId.hostsPageEvents,
-        TimelineId.usersPageEvents,
+      tablesStorage.addDataTable(TableId.hostsPageEvents, unmigratedmockDataTableModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
+      const timelines = getDataTablesInStorageByIds(storage, [
+        TableId.hostsPageEvents,
+        TableId.usersPageEvents,
       ]);
 
       expect(timelines).toStrictEqual({
-        [TimelineId.hostsPageEvents]: {
+        [TableId.hostsPageEvents]: {
           ...timelineToStore,
           columns: timelineToStore.columns.map((c, i) => ({
             ...c,
@@ -278,75 +279,406 @@ describe('SiemLocalStorage', () => {
             label: `A legacy label ${i}`,
           })),
         },
-        [TimelineId.usersPageEvents]: {
+        [TableId.usersPageEvents]: {
           ...timelineToStore,
-          columns: getExpectedColumns(mockTimelineModel),
+          columns: getExpectedColumns(mockDataTableModel),
         },
       });
     });
 
     it('does NOT migrate `columns` when `columns` is not an array', () => {
-      const timelineStorage = useTimelinesStorage();
+      const tablesStorage = useDataTablesStorage();
 
-      const invalidColumnsMockTimelineModel = {
-        ...cloneDeep(mockTimelineModel),
+      const invalidColumnsmockDataTableModel = {
+        ...cloneDeep(mockDataTableModel),
         columns: 'this is NOT an array',
       };
-      timelineStorage.addTimeline(
-        TimelineId.hostsPageEvents,
-        invalidColumnsMockTimelineModel as unknown as TimelineModel
+      tablesStorage.addDataTable(
+        TableId.hostsPageEvents,
+        invalidColumnsmockDataTableModel as unknown as DataTableModel
       );
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      const timelines = getTimelinesInStorageByIds(storage, [
-        TimelineId.hostsPageEvents,
-        TimelineId.usersPageEvents,
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
+      const timelines = getDataTablesInStorageByIds(storage, [
+        TableId.hostsPageEvents,
+        TableId.usersPageEvents,
       ]);
 
       expect(timelines).toStrictEqual({
-        [TimelineId.hostsPageEvents]: {
+        [TableId.hostsPageEvents]: {
           ...timelineToStore,
           columns: 'this is NOT an array',
         },
-        [TimelineId.usersPageEvents]: {
+        [TableId.usersPageEvents]: {
           ...timelineToStore,
-          columns: getExpectedColumns(mockTimelineModel),
+          columns: getExpectedColumns(mockDataTableModel),
         },
+      });
+    });
+
+    it('migrates legacy timeline tables saved in localstorage to the new key securityDataTable and schema for DataTableModel', () => {
+      const detectionsPageLegacyTable = {
+        id: 'alerts-page',
+        columns: [
+          {
+            columnHeaderType: 'not-filtered',
+            id: '@timestamp',
+            initialWidth: 200,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'ecs.version',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'tags',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Rule',
+            id: 'kibana.alert.rule.name',
+            initialWidth: 180,
+            linkField: 'kibana.alert.rule.uuid',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 105,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 100,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 450,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'host.name',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'user.name',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'process.name',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'file.name',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'source.ip',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'destination.ip',
+          },
+        ],
+        defaultColumns: [
+          {
+            columnHeaderType: 'not-filtered',
+            id: '@timestamp',
+            initialWidth: 200,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Rule',
+            id: 'kibana.alert.rule.name',
+            initialWidth: 180,
+            linkField: 'kibana.alert.rule.uuid',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 105,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 100,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 450,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'host.name',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'user.name',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'process.name',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'file.name',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'source.ip',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'destination.ip',
+          },
+        ],
+        dataViewId: 'security-solution-default',
+        dateRange: {
+          start: '2022-10-16T07:00:00.000Z',
+          end: '2022-10-17T06:59:59.999Z',
+        },
+        deletedEventIds: [],
+        excludedRowRendererIds: [
+          'alert',
+          'alerts',
+          'auditd',
+          'auditd_file',
+          'library',
+          'netflow',
+          'plain',
+          'registry',
+          'suricata',
+          'system',
+          'system_dns',
+          'system_endgame_process',
+          'system_file',
+          'system_fim',
+          'system_security_event',
+          'system_socket',
+          'threat_match',
+          'zeek',
+        ],
+        expandedDetail: {},
+        filters: [],
+        kqlQuery: {
+          filterQuery: null,
+        },
+        indexNames: ['.alerts-security.alerts-default'],
+        isSelectAllChecked: false,
+        itemsPerPage: 25,
+        itemsPerPageOptions: [10, 25, 50, 100],
+        loadingEventIds: [],
+        selectedEventIds: {},
+        showCheckboxes: true,
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: 'desc',
+          },
+        ],
+        savedObjectId: null,
+        version: null,
+        footerText: 'alerts',
+        title: '',
+        activeTab: 'query',
+        prevActiveTab: 'query',
+        dataProviders: [],
+        description: '',
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+          query: '',
+          size: 100,
+        },
+        eventType: 'all',
+        eventIdToNoteIds: {},
+        highlightedDropAndProviderId: '',
+        historyIds: [],
+        isFavorite: false,
+        isLive: false,
+        isSaving: false,
+        kqlMode: 'filter',
+        timelineType: 'default',
+        templateTimelineId: null,
+        templateTimelineVersion: null,
+        noteIds: [],
+        pinnedEventIds: {},
+        pinnedEventsSaveObject: {},
+        sessionViewConfig: null,
+        show: false,
+        status: 'draft',
+        initialized: true,
+        updated: 1665943295913,
+      };
+      storage.set('timelines', { [TableId.alertsOnAlertsPage]: detectionsPageLegacyTable });
+      const detectionsPage = {
+        columns: [
+          { columnHeaderType: 'not-filtered', id: '@timestamp', initialWidth: 200 },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'ecs.version',
+            initialWidth: 180,
+          },
+          { columnHeaderType: 'not-filtered', id: 'tags', initialWidth: 180 },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Rule',
+            id: 'kibana.alert.rule.name',
+            initialWidth: 180,
+            linkField: 'kibana.alert.rule.uuid',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 105,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 100,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 450,
+          },
+          { columnHeaderType: 'not-filtered', id: 'host.name' },
+          { columnHeaderType: 'not-filtered', id: 'user.name' },
+          { columnHeaderType: 'not-filtered', id: 'process.name' },
+          { columnHeaderType: 'not-filtered', id: 'file.name' },
+          { columnHeaderType: 'not-filtered', id: 'source.ip' },
+          { columnHeaderType: 'not-filtered', id: 'destination.ip' },
+        ],
+        defaultColumns: [
+          { columnHeaderType: 'not-filtered', id: '@timestamp', initialWidth: 200 },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Rule',
+            id: 'kibana.alert.rule.name',
+            initialWidth: 180,
+            linkField: 'kibana.alert.rule.uuid',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 105,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 100,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 450,
+          },
+          { columnHeaderType: 'not-filtered', id: 'host.name' },
+          { columnHeaderType: 'not-filtered', id: 'user.name' },
+          { columnHeaderType: 'not-filtered', id: 'process.name' },
+          { columnHeaderType: 'not-filtered', id: 'file.name' },
+          { columnHeaderType: 'not-filtered', id: 'source.ip' },
+          { columnHeaderType: 'not-filtered', id: 'destination.ip' },
+        ],
+        dataViewId: 'security-solution-default',
+        deletedEventIds: [],
+        excludedRowRendererIds: [
+          'alert',
+          'alerts',
+          'auditd',
+          'auditd_file',
+          'library',
+          'netflow',
+          'plain',
+          'registry',
+          'suricata',
+          'system',
+          'system_dns',
+          'system_endgame_process',
+          'system_file',
+          'system_fim',
+          'system_security_event',
+          'system_socket',
+          'threat_match',
+          'zeek',
+        ],
+        expandedDetail: {},
+        filters: [],
+        indexNames: ['.alerts-security.alerts-default'],
+        isSelectAllChecked: false,
+        itemsPerPage: 25,
+        itemsPerPageOptions: [10, 25, 50, 100],
+        loadingEventIds: [],
+        showCheckboxes: true,
+        sort: [
+          { columnId: '@timestamp', columnType: 'date', esTypes: ['date'], sortDirection: 'desc' },
+        ],
+        graphEventId: undefined,
+        selectedEventIds: {},
+        sessionViewConfig: null,
+        selectAll: undefined,
+        id: 'alerts-page',
+        title: '',
+        initialized: true,
+        updated: 1665943295913,
+        totalCount: 0,
+      };
+      const dataTables = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
+      expect(dataTables).toStrictEqual({
+        [TableId.alertsOnAlertsPage]: detectionsPage,
       });
     });
   });
 
-  describe('getAllTimelinesInStorage', () => {
+  describe('getAllDataTablesInStorage', () => {
     it('gets timelines correctly', () => {
-      const timelineStorage = useTimelinesStorage();
-      timelineStorage.addTimeline(TimelineId.hostsPageEvents, mockTimelineModel);
-      timelineStorage.addTimeline(TimelineId.usersPageEvents, mockTimelineModel);
-      const timelines = getAllTimelinesInStorage(storage);
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
+      const timelines = getAllDataTablesInStorage(storage);
       expect(timelines).toEqual({
-        [TimelineId.hostsPageEvents]: timelineToStore,
-        [TimelineId.usersPageEvents]: timelineToStore,
+        [TableId.hostsPageEvents]: timelineToStore,
+        [TableId.usersPageEvents]: timelineToStore,
       });
     });
 
     it('gets an empty timeline when there is no timelines', () => {
-      const timelines = getAllTimelinesInStorage(storage);
+      const timelines = getAllDataTablesInStorage(storage);
       expect(timelines).toEqual({});
     });
   });
 
-  describe('addTimelineInStorage', () => {
+  describe('addTableInStorage', () => {
     it('adds a timeline when storage is empty', () => {
-      addTimelineInStorage(storage, TimelineId.hostsPageEvents, mockTimelineModel);
-      expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-        [TimelineId.hostsPageEvents]: timelineToStore,
+      addTableInStorage(storage, TableId.hostsPageEvents, mockDataTableModel);
+      expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TABLE_KEY))).toEqual({
+        [TableId.hostsPageEvents]: timelineToStore,
       });
     });
 
     it('adds a timeline when storage contains another timelines', () => {
-      addTimelineInStorage(storage, TimelineId.hostsPageEvents, mockTimelineModel);
-      addTimelineInStorage(storage, TimelineId.usersPageEvents, mockTimelineModel);
-      expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TIMELINE_KEY))).toEqual({
-        [TimelineId.hostsPageEvents]: timelineToStore,
-        [TimelineId.usersPageEvents]: timelineToStore,
+      addTableInStorage(storage, TableId.hostsPageEvents, mockDataTableModel);
+      addTableInStorage(storage, TableId.usersPageEvents, mockDataTableModel);
+      expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TABLE_KEY))).toEqual({
+        [TableId.hostsPageEvents]: timelineToStore,
+        [TableId.usersPageEvents]: timelineToStore,
       });
     });
   });
@@ -354,7 +686,7 @@ describe('SiemLocalStorage', () => {
   describe('migrateColumnWidthToInitialWidth', () => {
     it('migrates the `width` property to `initialWidth` for older columns saved to localstorage', () => {
       const column = {
-        ...cloneDeep(mockTimelineModel.columns[0]),
+        ...cloneDeep(mockDataTableModel.columns[0]),
         width: 1234, // the column `width` was saved to localstorage before the `initialWidth` property existed
         initialWidth: undefined, // `initialWidth` did not exist when this column was saved to localstorage
       };
@@ -368,7 +700,7 @@ describe('SiemLocalStorage', () => {
     });
 
     it("leaves `initialWidth` unchanged when the column read from localstorage doesn't have a `width`", () => {
-      const column = cloneDeep(mockTimelineModel.columns[0]); // `column.width` does not exist
+      const column = cloneDeep(mockDataTableModel.columns[0]); // `column.width` does not exist
 
       expect(migrateColumnWidthToInitialWidth(column)).toStrictEqual({
         columnHeaderType: 'not-filtered',
@@ -379,7 +711,7 @@ describe('SiemLocalStorage', () => {
 
     it('does NOT migrate the `width` property to `initialWidth` when the column read from localstorage already has a valid `initialWidth`', () => {
       const column = {
-        ...cloneDeep(mockTimelineModel.columns[0]), // `column.initialWidth` already exists
+        ...cloneDeep(mockDataTableModel.columns[0]), // `column.initialWidth` already exists
         width: 1234,
       };
 
@@ -395,7 +727,7 @@ describe('SiemLocalStorage', () => {
   describe('migrateColumnLabelToDisplayAsText', () => {
     it('migrates the `label` property to `displayAsText` for older columns saved to localstorage', () => {
       const column = {
-        ...cloneDeep(mockTimelineModel.columns[0]),
+        ...cloneDeep(mockDataTableModel.columns[0]),
         label: 'A legacy label', // the column `label` was saved to localstorage before the `displayAsText` property existed
       };
 
@@ -409,11 +741,10 @@ describe('SiemLocalStorage', () => {
     });
 
     it("leaves `displayAsText` undefined when the column read from localstorage doesn't have a `label`", () => {
-      const column = cloneDeep(mockTimelineModel.columns[0]); // `column.label` does not exist
+      const column = cloneDeep(mockDataTableModel.columns[0]); // `column.label` does not exist
 
       expect(migrateColumnLabelToDisplayAsText(column)).toStrictEqual({
         columnHeaderType: 'not-filtered',
-        displayAsText: undefined, // undefined, because there is no `label` to migrate
         id: '@timestamp',
         initialWidth: 190,
       });
@@ -421,7 +752,7 @@ describe('SiemLocalStorage', () => {
 
     it("leaves `displayAsText` unchanged when the column read from localstorage doesn't have a `label`", () => {
       const column = {
-        ...cloneDeep(mockTimelineModel.columns[0]),
+        ...cloneDeep(mockDataTableModel.columns[0]),
         displayAsText: 'Do NOT update this',
       };
 
@@ -435,7 +766,7 @@ describe('SiemLocalStorage', () => {
 
     it('does NOT migrate the `label` property to `displayAsText` when the column read from localstorage already has a valid `displayAsText`', () => {
       const column = {
-        ...cloneDeep(mockTimelineModel.columns[0]),
+        ...cloneDeep(mockDataTableModel.columns[0]),
         displayAsText: 'Already valid',
         label: 'A legacy label',
       };

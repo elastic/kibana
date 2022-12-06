@@ -134,14 +134,14 @@ export function getEnrichedFieldInfo({
   field,
   item,
   linkValueField,
-  timelineId,
+  scopeId,
 }: {
   browserFields: BrowserFields;
   contextId: string;
   item: TimelineEventsDetailsItem;
   eventId: string;
   field?: EventSummaryField;
-  timelineId: string;
+  scopeId: string;
   linkValueField?: TimelineEventsDetailsItem;
 }): EnrichedFieldInfo {
   const fieldInfo = {
@@ -149,7 +149,7 @@ export function getEnrichedFieldInfo({
     eventId,
     fieldType: 'string',
     linkValue: undefined,
-    timelineId,
+    scopeId,
   };
   const linkValue = getOr(null, 'originalValue.0', linkValueField);
   const category = item.category ?? '';

@@ -9,8 +9,9 @@ import React, { useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import * as i18n from './translations';
 
-import { ConnectorTypes, SwimlaneFieldsType } from '../../../../common/api';
-import { ConnectorFieldsProps } from '../types';
+import type { SwimlaneFieldsType } from '../../../../common/api';
+import { ConnectorTypes } from '../../../../common/api';
+import type { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
 import { connectorValidator } from './validator';
 

@@ -5,24 +5,6 @@
  * 2.0.
  */
 
-export const createIndex = (index: string) => {
-  cy.request({
-    method: 'PUT',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}`,
-    headers: { 'kbn-xsrf': 'cypress-creds' },
-    failOnStatusCode: false,
-  });
-};
-
-export const createDocument = (index: string, document: string) => {
-  cy.request({
-    method: 'POST',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_doc`,
-    headers: { 'kbn-xsrf': 'cypress-creds' },
-    body: JSON.parse(document),
-  });
-};
-
 export const deleteIndex = (index: string) => {
   cy.request({
     method: 'DELETE',

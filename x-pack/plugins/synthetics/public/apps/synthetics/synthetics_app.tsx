@@ -17,7 +17,7 @@ import {
 } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { InspectorContextProvider } from '@kbn/observability-plugin/public';
-import { SyntheticsAppProps } from './contexts';
+import { SyntheticsAppProps, SyntheticsDataViewContextProvider } from './contexts';
 
 import {
   SyntheticsRefreshContextProvider,
@@ -98,21 +98,23 @@ const Application = (props: SyntheticsAppProps) => {
                 <EuiThemeProvider darkMode={darkMode}>
                   <SyntheticsRefreshContextProvider>
                     <SyntheticsSettingsContextProvider {...props}>
-                      <SyntheticsThemeContextProvider darkMode={darkMode}>
-                        <SyntheticsStartupPluginsContextProvider {...startPlugins}>
-                          <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
-                            <RedirectAppLinks
-                              className={APP_WRAPPER_CLASS}
-                              application={core.application}
-                            >
-                              <InspectorContextProvider>
-                                <PageRouter />
-                                <ActionMenu appMountParameters={appMountParameters} />
-                              </InspectorContextProvider>
-                            </RedirectAppLinks>
-                          </div>
-                        </SyntheticsStartupPluginsContextProvider>
-                      </SyntheticsThemeContextProvider>
+                      <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>
+                        <SyntheticsThemeContextProvider darkMode={darkMode}>
+                          <SyntheticsStartupPluginsContextProvider {...startPlugins}>
+                            <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
+                              <RedirectAppLinks
+                                className={APP_WRAPPER_CLASS}
+                                application={core.application}
+                              >
+                                <InspectorContextProvider>
+                                  <PageRouter />
+                                  <ActionMenu appMountParameters={appMountParameters} />
+                                </InspectorContextProvider>
+                              </RedirectAppLinks>
+                            </div>
+                          </SyntheticsStartupPluginsContextProvider>
+                        </SyntheticsThemeContextProvider>
+                      </SyntheticsDataViewContextProvider>
                     </SyntheticsSettingsContextProvider>
                   </SyntheticsRefreshContextProvider>
                 </EuiThemeProvider>

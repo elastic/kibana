@@ -16,8 +16,6 @@ import { omit } from 'lodash';
 import React from 'react';
 import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import {
-  isJavaAgentName,
-  isJRubyAgent,
   isMobileAgentName,
   isRumAgentName,
   isServerlessAgent,
@@ -30,7 +28,7 @@ import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/ser
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { getAlertingCapabilities } from '../../../alerting/get_alerting_capabilities';
+import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { SearchBar } from '../../../shared/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { BetaBadge } from '../../../shared/beta_badge';
@@ -86,6 +84,8 @@ function TemplateWithContext({
 
   const tabs = useTabs({ selectedTab });
 
+  const { agentName } = useApmServiceContext();
+
   useBreadcrumb(
     () => ({
       title,
@@ -119,6 +119,11 @@ function TemplateWithContext({
                     end={end}
                   />
                 </EuiFlexItem>
+                {isMobileAgentName(agentName) && (
+                  <EuiFlexItem grow={false}>
+                    <TechnicalPreviewBadge />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
 
@@ -150,24 +155,7 @@ export function isMetricsTabHidden({
     return !isAwsLambdaEnabled;
   }
   return (
-    !agentName ||
-    isRumAgentName(agentName) ||
-    isJavaAgentName(agentName) ||
-    isMobileAgentName(agentName) ||
-    isJRubyAgent(agentName, runtimeName)
-  );
-}
-
-export function isMetricsJVMsTabHidden({
-  agentName,
-  runtimeName,
-}: {
-  agentName?: string;
-  runtimeName?: string;
-}) {
-  return (
-    !(isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName)) ||
-    isServerlessAgent(runtimeName)
+    !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName)
   );
 }
 
@@ -245,8 +233,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.dependenciesTabLabel', {
         defaultMessage: 'Dependencies',
       }),
-      hidden:
-        !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
+      hidden: !agentName || isRumAgentName(agentName),
     },
     {
       key: 'errors',
@@ -257,6 +244,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.errorsTabLabel', {
         defaultMessage: 'Errors',
       }),
+      hidden: isMobileAgentName(agentName),
     },
     {
       key: 'metrics',
@@ -277,23 +265,12 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       }),
     },
     {
-      key: 'nodes',
-      href: router.link('/services/{serviceName}/nodes', {
-        path: { serviceName },
-        query,
-      }),
-      label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
-        defaultMessage: 'Metrics',
-      }),
-      hidden: isMetricsJVMsTabHidden({ agentName, runtimeName }),
-    },
-    {
       key: 'infrastructure',
       href: router.link('/services/{serviceName}/infrastructure', {
         path: { serviceName },
         query,
       }),
-      append: <BetaBadge icon="editorBold" />,
+      append: <BetaBadge icon="beta" />,
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),

@@ -12,8 +12,8 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { useActions } from './use_actions';
 import { basicCase } from '../../containers/mock';
 import * as api from '../../containers/api';
+import type { AppMockRenderer } from '../../common/mock';
 import {
-  AppMockRenderer,
   createAppMockRenderer,
   noDeleteCasesPermissions,
   onlyDeleteCasesPermission,
@@ -96,7 +96,9 @@ describe('useActions', () => {
     });
 
     act(() => {
-      userEvent.click(res.getByTestId(`case-action-status-panel-${basicCase.id}`));
+      userEvent.click(res.getByTestId(`case-action-status-panel-${basicCase.id}`), undefined, {
+        skipPointerEventsCheck: true,
+      });
     });
 
     await waitFor(() => {
@@ -107,6 +109,46 @@ describe('useActions', () => {
 
     act(() => {
       userEvent.click(res.getByTestId('cases-bulk-action-status-in-progress'));
+    });
+
+    await waitFor(() => {
+      expect(updateCasesSpy).toHaveBeenCalled();
+    });
+  });
+
+  it('change the severity of the case', async () => {
+    const updateCasesSpy = jest.spyOn(api, 'updateCases');
+
+    const { result } = renderHook(() => useActions({ disableActions: false }), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+    const res = appMockRender.render(comp);
+
+    act(() => {
+      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+    });
+
+    await waitFor(() => {
+      expect(res.getByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeInTheDocument();
+    });
+
+    act(() => {
+      userEvent.click(res.getByTestId(`case-action-severity-panel-${basicCase.id}`), undefined, {
+        skipPointerEventsCheck: true,
+      });
+    });
+
+    await waitFor(() => {
+      expect(res.getByTestId('cases-bulk-action-severity-low')).toBeInTheDocument();
+      expect(res.getByTestId('cases-bulk-action-severity-medium')).toBeInTheDocument();
+      expect(res.getByTestId('cases-bulk-action-severity-high')).toBeInTheDocument();
+      expect(res.getByTestId('cases-bulk-action-severity-critical')).toBeInTheDocument();
+    });
+
+    act(() => {
+      userEvent.click(res.getByTestId('cases-bulk-action-severity-medium'));
     });
 
     await waitFor(() => {
@@ -204,6 +246,7 @@ describe('useActions', () => {
 
       await waitFor(() => {
         expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
+        expect(res.getByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeInTheDocument();
         expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
         expect(res.getByTestId(`actions-separator-${basicCase.id}`)).toBeInTheDocument();
       });
@@ -224,6 +267,7 @@ describe('useActions', () => {
 
       await waitFor(() => {
         expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
+        expect(res.getByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeInTheDocument();
         expect(res.queryByTestId('cases-bulk-action-delete')).toBeFalsy();
         expect(res.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
       });
@@ -244,6 +288,7 @@ describe('useActions', () => {
 
       await waitFor(() => {
         expect(res.queryByTestId(`case-action-status-panel-${basicCase.id}`)).toBeFalsy();
+        expect(res.queryByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeFalsy();
         expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
         expect(res.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
       });

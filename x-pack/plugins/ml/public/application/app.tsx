@@ -93,6 +93,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     cases: deps.cases,
     unifiedSearch: deps.unifiedSearch,
     licensing: deps.licensing,
+    lens: deps.lens,
     ...coreStart,
   };
 
@@ -145,6 +146,8 @@ export const renderApp = (
     maps: deps.maps,
     dataVisualizer: deps.dataVisualizer,
     dataViews: deps.data.dataViews,
+    share: deps.share,
+    lens: deps.lens,
   });
 
   appMountParams.onAppLeave((actions) => actions.default());

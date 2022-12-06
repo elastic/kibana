@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { reduce } from 'lodash';
+import { filter, isEmpty, map, omit, reduce } from 'lodash';
+import type { EuiAccordionProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,12 +15,15 @@ import {
   EuiSpacer,
   EuiBottomBar,
   EuiHorizontalRule,
+  EuiAccordion,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 
+import styled from 'styled-components';
+import { PackShardsField } from './shards/pack_shards_field';
 import { useRouterNavigate } from '../../common/lib/kibana';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
 import { QueriesField } from './queries_field';
@@ -32,8 +36,17 @@ import type { PackItem } from '../types';
 import { NameField } from './name_field';
 import { DescriptionField } from './description_field';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
+import { PackTypeSelectable } from './shards/pack_type_selectable';
+import { overflowCss } from '../utils';
 
 type PackFormData = Omit<PackItem, 'id' | 'queries'> & { queries: PackQueryFormData[] };
+
+const StyledEuiAccordion = styled(EuiAccordion)`
+  ${({ isDisabled }: { isDisabled?: boolean }) => isDisabled && 'display: none;'}
+  .euiAccordion__button {
+    color: ${({ theme }) => theme.eui.euiColorPrimary};
+  }
+`;
 
 interface PackFormProps {
   defaultValue?: PackItem;
@@ -46,6 +59,13 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   editMode = false,
   isReadOnly = false,
 }) => {
+  const [shardsToggleState, setShardsToggleState] =
+    useState<EuiAccordionProps['forceState']>('closed');
+  const handleToggle = useCallback((isOpen) => {
+    const newState = isOpen ? 'open' : 'closed';
+    setShardsToggleState(newState);
+  }, []);
+  const [packType, setPackType] = useState('policy');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const handleHideConfirmationModal = useCallback(() => setShowConfirmationModal(false), []);
 
@@ -60,16 +80,19 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     withRedirect: true,
   });
 
-  const deserializer = (payload: PackItem) => ({
-    ...payload,
-    policy_ids: payload.policy_ids ?? [],
-    queries: convertPackQueriesToSO(payload.queries),
-  });
+  const deserializer = (payload: PackItem) => {
+    const defaultPolicyIds = filter(
+      payload.policy_ids,
+      (policyId) => payload.shards?.[policyId] == null
+    );
 
-  const serializer = (payload: PackFormData) => ({
-    ...payload,
-    queries: convertSOQueriesToPack(payload.queries),
-  });
+    return {
+      ...payload,
+      policy_ids: defaultPolicyIds ?? [],
+      queries: convertPackQueriesToSO(payload.queries),
+      shards: omit(payload.shards, '*') ?? {},
+    };
+  };
 
   const hooksForm = useHookForm({
     defaultValues: defaultValue
@@ -83,14 +106,68 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         },
   });
 
+  useEffect(() => {
+    if (!isEmpty(defaultValue?.shards)) {
+      if (defaultValue?.shards?.['*']) {
+        setPackType('global');
+      } else {
+        setShardsToggleState('open');
+      }
+    }
+  }, [defaultValue, defaultValue?.shards]);
+
   const {
     handleSubmit,
     watch,
     formState: { isSubmitting },
   } = hooksForm;
+  const { policy_ids: policyIds, shards } = watch();
+
+  const getShards = useCallback(() => {
+    if (packType === 'global') {
+      return { '*': 100 };
+    }
+
+    return reduce(
+      shards,
+      (acc, shard, key) => {
+        if (!isEmpty(key)) {
+          return { ...acc, [key]: shard };
+        }
+
+        return acc;
+      },
+      {}
+    );
+  }, [packType, shards]);
 
   const onSubmit = useCallback(
     async (values: PackFormData) => {
+      const serializer = ({
+        shards: _,
+        policy_ids: payloadPolicyIds,
+        queries,
+        ...restPayload
+      }: PackFormData) => {
+        const mappedShards = !isEmpty(shards)
+          ? (filter(
+              map(shards, (shard, key) => {
+                if (!isEmpty(key)) {
+                  return key;
+                }
+              })
+            ) as string[])
+          : [];
+        const policies = [...payloadPolicyIds, ...mappedShards];
+
+        return {
+          ...restPayload,
+          policy_ids: policies ?? [],
+          queries: convertSOQueriesToPack(queries),
+          shards: getShards() ?? {},
+        };
+      };
+
       try {
         if (editMode && defaultValue?.id) {
           await updateAsync({ id: defaultValue?.id, ...serializer(values) });
@@ -100,12 +177,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         // eslint-disable-next-line no-empty
       } catch (e) {}
     },
-    [createAsync, defaultValue?.id, editMode, updateAsync]
+    [createAsync, defaultValue?.id, editMode, getShards, shards, updateAsync]
   );
 
   const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
-
-  const { policy_ids: policyIds } = watch();
 
   const agentCount = useMemo(
     () =>
@@ -138,6 +213,31 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const euiFieldProps = useMemo(() => ({ isDisabled: isReadOnly }), [isReadOnly]);
 
+  const changePackType = useCallback(
+    (type: 'global' | 'policy' | 'shards') => {
+      setPackType(type);
+    },
+    [setPackType]
+  );
+
+  const options = useMemo(
+    () =>
+      Object.entries(agentPoliciesById ?? {}).map(([agentPolicyId, agentPolicy]) => ({
+        key: agentPolicyId,
+        label: agentPolicy.name,
+      })),
+    [agentPoliciesById]
+  );
+
+  const availableOptions = useMemo(() => {
+    const currentShardsFieldValues = map(shards, (shard, key) => key);
+    const currentPolicyIdsFieldValues = map(policyIds, (policy) => policy);
+
+    const currentValues = [...currentShardsFieldValues, ...currentPolicyIdsFieldValues];
+
+    return options.filter(({ key }) => !currentValues.includes(key));
+  }, [shards, policyIds, options]);
+
   return (
     <>
       <FormProvider {...hooksForm}>
@@ -146,18 +246,48 @@ const PackFormComponent: React.FC<PackFormProps> = ({
             <NameField euiFieldProps={euiFieldProps} />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
 
         <EuiFlexGroup>
           <EuiFlexItem>
             <DescriptionField euiFieldProps={euiFieldProps} />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
 
         <EuiFlexGroup>
-          <EuiFlexItem>
-            <PolicyIdComboBoxField />
-          </EuiFlexItem>
+          <PackTypeSelectable packType={packType} setPackType={changePackType} />
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
+
+        {packType === 'policy' && (
+          <>
+            <EuiFlexGroup>
+              <EuiFlexItem css={overflowCss}>
+                <PolicyIdComboBoxField options={availableOptions} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+
+            <EuiFlexGroup>
+              <EuiFlexItem css={overflowCss}>
+                <StyledEuiAccordion
+                  id="shardsToggle"
+                  forceState={shardsToggleState}
+                  onToggle={handleToggle}
+                  buttonContent="Partial deployment (shards)"
+                >
+                  <EuiSpacer size="xs" />
+                  <PackShardsField options={availableOptions} />
+                </StyledEuiAccordion>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+          </>
+        )}
+
+        <EuiSpacer size="xl" />
+
         <EuiHorizontalRule />
 
         <QueriesField euiFieldProps={euiFieldProps} />

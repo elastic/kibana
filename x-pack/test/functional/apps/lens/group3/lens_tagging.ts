@@ -106,7 +106,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.waitUntilTableIsLoaded();
 
       // open the filter dropdown
-      const filterButton = await find.byCssSelector('.euiFilterGroup .euiFilterButton');
+      const filterButton = await find.byCssSelector(
+        '.euiFilterGroup .euiPopover:nth-child(2) .euiFilterButton'
+      );
       await filterButton.click();
       await testSubjects.click(
         `tag-searchbar-option-${PageObjects.tagManagement.testSubjFriendly(lensTag)}`

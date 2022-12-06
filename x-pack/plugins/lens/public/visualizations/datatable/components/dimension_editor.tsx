@@ -18,8 +18,8 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { CustomizablePalette, PaletteRegistry, FIXED_PROGRESSION } from '@kbn/coloring';
-import { VisualizationDimensionEditorProps } from '../../../types';
-import { DatatableVisualizationState } from '../visualization';
+import type { VisualizationDimensionEditorProps } from '../../../types';
+import type { DatatableVisualizationState } from '../visualization';
 
 import {
   applyPaletteParams,
@@ -27,7 +27,8 @@ import {
   PalettePanelContainer,
   findMinMaxByColumnId,
 } from '../../../shared_components';
-import { isNumericFieldForDatatable, getOriginalId } from '../../../../common/expressions';
+import { isNumericFieldForDatatable } from '../../../../common/expressions/datatable/utils';
+import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 import './dimension_editor.scss';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
@@ -94,17 +95,6 @@ export function TableDimensionEditor(
 
   return (
     <>
-      {props.groupId === 'rows' && (
-        <CollapseSetting
-          value={column.collapseFn || ''}
-          onChange={(collapseFn: string) => {
-            setState({
-              ...state,
-              columns: updateColumnWith(state, accessor, { collapseFn }),
-            });
-          }}
-        />
-      )}
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -353,6 +343,34 @@ export function TableDimensionEditor(
             }}
           />
         </EuiFormRow>
+      )}
+    </>
+  );
+}
+
+export function TableDimensionDataExtraEditor(
+  props: VisualizationDimensionEditorProps<DatatableVisualizationState> & {
+    paletteService: PaletteRegistry;
+  }
+) {
+  const { state, setState, accessor } = props;
+  const column = state.columns.find(({ columnId }) => accessor === columnId);
+
+  if (!column) return null;
+  if (column.isTransposed) return null;
+
+  return (
+    <>
+      {props.groupId === 'rows' && (
+        <CollapseSetting
+          value={column.collapseFn || ''}
+          onChange={(collapseFn) => {
+            setState({
+              ...state,
+              columns: updateColumnWith(state, accessor, { collapseFn }),
+            });
+          }}
+        />
       )}
     </>
   );

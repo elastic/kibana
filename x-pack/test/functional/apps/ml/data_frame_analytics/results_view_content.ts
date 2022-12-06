@@ -14,8 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // Failing: See https://github.com/elastic/kibana/issues/142152
-  describe.skip('results view content and total feature importance', function () {
+  describe('results view content and total feature importance', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;

@@ -15,7 +15,6 @@ import { Schemas } from './schemas';
 
 const defaultOptions: VisTypeOptions = {
   showTimePicker: true,
-  showQueryBar: true,
   showFilterBar: true,
   showIndexSelection: true,
   showQueryInput: true,

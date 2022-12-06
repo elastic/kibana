@@ -41,6 +41,7 @@ import type {
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plugin/public';
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -76,6 +77,7 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
+  guidedOnboarding: GuidedOnboardingPluginStart;
   kubernetesSecurity: KubernetesSecurityStart;
   lens: LensPublicStart;
   lists?: ListsPluginStart;

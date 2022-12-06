@@ -53,6 +53,7 @@ export interface QueryBarDefineRuleProps {
    * called when fetching of saved query fails
    */
   onSavedQueryError?: () => void;
+  defaultSavedQuery?: SavedQuery | undefined;
 }
 
 const actionTimelineToHide: ActionTimelineToShow[] = ['duplicate', 'createFrom'];
@@ -74,6 +75,7 @@ const savedQueryToFieldValue = (savedQuery: SavedQuery): FieldValueQueryBar => (
 });
 
 export const QueryBarDefineRule = ({
+  defaultSavedQuery,
   browserFields,
   dataTestSubj,
   field,
@@ -91,7 +93,7 @@ export const QueryBarDefineRule = ({
   const { value: fieldValue, setValue: setFieldValue } = field as FieldHook<FieldValueQueryBar>;
   const [originalHeight, setOriginalHeight] = useState(-1);
   const [loadingTimeline, setLoadingTimeline] = useState(false);
-  const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
+  const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(defaultSavedQuery);
   const [isSavedQueryFailedToLoad, setIsSavedQueryFailedToLoad] = useState(false);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 

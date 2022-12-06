@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": [
     "__packages_do_not_import__/**/*",
@@ -15,7 +14,7 @@
     "../../../typings/**/*",
     ".storybook/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../data_views/tsconfig.json" }
   ]

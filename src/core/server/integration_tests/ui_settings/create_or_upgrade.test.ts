@@ -9,10 +9,10 @@
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
   createTestServers,
-  TestElasticsearchUtils,
-  TestKibanaUtils,
-  TestUtils,
-} from '../../../test_helpers/kbn_server';
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+  type TestUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createOrUpgradeSavedConfig } from '@kbn/core-ui-settings-server-internal';

@@ -26,6 +26,7 @@ import { mockHistory, Router } from '../../../common/mock/router';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -56,6 +57,9 @@ jest.mock('react-router-dom', () => {
     useHistory: jest.fn(),
   };
 });
+
+const mockFilterManager = createFilterManagerMock();
+
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
 
@@ -79,7 +83,7 @@ jest.mock('../../../common/lib/kibana', () => {
         timelines: { ...mockTimelines },
         data: {
           query: {
-            filterManager: jest.fn().mockReturnValue({}),
+            filterManager: mockFilterManager,
           },
         },
         docLinks: {
@@ -110,6 +114,14 @@ const state: State = {
 
 const { storage } = createSecuritySolutionStorageMock();
 const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+jest.mock('../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline', () => ({
+  useAddBulkToTimelineAction: jest.fn(() => {}),
+}));
+
+jest.mock('../../components/alerts_table/timeline_actions/use_bulk_add_to_case_actions', () => ({
+  useBulkAddToCaseActions: jest.fn(() => []),
+}));
 
 describe('DetectionEnginePageComponent', () => {
   beforeAll(() => {

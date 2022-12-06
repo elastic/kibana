@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { lastValueFrom } from 'rxjs';
+
 import {
   ExpressionFunctionDefinition,
   ExpressionValueFilter,
@@ -12,10 +14,8 @@ import {
 
 // @ts-expect-error untyped local
 import { buildESRequest } from '../../../common/lib/request/build_es_request';
-
-import { searchService } from '../../../public/services';
-
 import { getFunctionHelp } from '../../../i18n';
+import { searchService } from '../../../public/services';
 
 interface Arguments {
   index: string | null;
@@ -46,6 +46,7 @@ export function escount(): ExpressionFunctionDefinition<
       },
       index: {
         types: ['string'],
+        aliases: ['dataView'],
         default: '_all',
         help: argHelp.index,
       },
@@ -83,12 +84,9 @@ export function escount(): ExpressionFunctionDefinition<
         },
       };
 
-      return search
-        .search(req)
-        .toPromise()
-        .then((resp: any) => {
-          return resp.rawResponse.hits.total;
-        });
+      return lastValueFrom(search.search(req)).then((resp: any) => {
+        return resp.rawResponse.hits.total;
+      });
     },
   };
 }

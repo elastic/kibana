@@ -48,6 +48,10 @@ export const getArtifactsListTestsData = () => [
           selector: 'blocklist-form-values-input',
           value: 'A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476',
         },
+        {
+          type: 'click',
+          selector: 'blocklist-form-name-input',
+        },
       ],
       checkResults: [
         {
@@ -86,6 +90,10 @@ export const getArtifactsListTestsData = () => [
           type: 'input',
           selector: 'blocklist-form-values-input',
           value: 'c:\\randomFolder\\randomFile.exe, c:\\randomFolder\\randomFile2.exe',
+        },
+        {
+          type: 'click',
+          selector: 'blocklist-form-name-input',
         },
       ],
       checkResults: [

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { isEmpty } from 'lodash';
-import { ElasticUser } from '../../containers/types';
-import { UserInfoWithAvatar } from './types';
+import type { ElasticUser } from '../../containers/types';
+import type { UserInfoWithAvatar } from './types';
 
 export const convertToUserInfo = (
   user: ElasticUser,

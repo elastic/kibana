@@ -20,6 +20,7 @@ export const LogsList = () => {
     refreshToken: 0,
     initialPageSize: 50,
     hasRuleNames: true,
+    hasAllSpaceSwitch: true,
     localStorageKey: GLOBAL_EVENT_LOG_LIST_STORAGE_KEY,
   });
 };

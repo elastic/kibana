@@ -16,7 +16,7 @@ import { VisualizationContainer } from '../../../visualization_container';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { DataContext, DatatableComponent } from './table_basic';
-import { DatatableProps } from '../../../../common/expressions';
+import type { DatatableProps } from '../../../../common/expressions';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
@@ -201,6 +201,7 @@ describe('DatatableComponent', () => {
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
         renderComplete={renderComplete}
+        columnFilterable={[true, true, true]}
       />
     );
 
@@ -241,6 +242,7 @@ describe('DatatableComponent', () => {
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
         renderComplete={renderComplete}
+        columnFilterable={[true, true, true]}
       />
     );
 
@@ -316,6 +318,7 @@ describe('DatatableComponent', () => {
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
         renderComplete={renderComplete}
+        columnFilterable={[true, true, true]}
       />
     );
 
@@ -356,6 +359,7 @@ describe('DatatableComponent', () => {
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive={false}
         renderComplete={renderComplete}
+        columnFilterable={[true, true, true]}
       />
     );
 

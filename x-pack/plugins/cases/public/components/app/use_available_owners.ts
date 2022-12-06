@@ -7,7 +7,7 @@
 
 import { APP_ID, FEATURE_ID } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
-import { CasesPermissions } from '../../containers/types';
+import type { CasesPermissions } from '../../containers/types';
 import { allCasePermissions } from '../../utils/permissions';
 
 type Capability = Exclude<keyof CasesPermissions, 'all'>;

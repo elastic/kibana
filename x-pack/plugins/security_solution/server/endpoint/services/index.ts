@@ -8,4 +8,5 @@
 export * from './artifacts';
 export { getMetadataForEndpoints } from './metadata/metadata';
 export * from './actions';
+export * from './artifacts_exception_list';
 export type { FeatureKeys } from './feature_usage';

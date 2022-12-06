@@ -8,7 +8,7 @@
   "requiredBundles": ["kibanaUtils", "visTypePie", "visTypeHeatmap", "visTypeGauge", "kibanaReact"],
   "owner": {
     "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "githubTeam": "kibana-visualizations"
   },
   "description": "Contains the vislib visualizations. These are the classical area/line/bar, pie, gauge/goal and heatmap charts. We want to replace them with elastic-charts."
 }

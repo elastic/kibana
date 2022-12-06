@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { CaseSeverityWithAll } from '@kbn/cases-plugin/common/ui';
+import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { CasesCommon } from './common';
@@ -143,7 +144,7 @@ export function CasesTableServiceProvider(
     },
 
     async filterByAssignee(assignee: string) {
-      await common.clickAndValidate('options-filter-popover-button-assignees', 'euiSelectableList');
+      await this.openAssigneesPopover();
 
       await casesCommon.setSearchTextInAssigneesPopover(assignee);
       await casesCommon.selectFirstRowInAssigneesPopover();
@@ -159,7 +160,7 @@ export function CasesTableServiceProvider(
     },
 
     async refreshTable() {
-      await testSubjects.click('all-cases-refresh');
+      await testSubjects.click('all-cases-refresh-link-icon');
     },
 
     async openRowActions(index: number) {
@@ -175,10 +176,19 @@ export function CasesTableServiceProvider(
       await find.existsByCssSelector('[data-test-subj*="case-action-popover-"');
     },
 
+    async openAssigneesPopover() {
+      await common.clickAndValidate('options-filter-popover-button-assignees', 'euiSelectableList');
+    },
+
+    async openBulkActions() {
+      await testSubjects.existOrFail('case-table-bulk-actions-link-icon');
+      const button = await testSubjects.find('case-table-bulk-actions-link-icon');
+      await button.click();
+    },
+
     async selectAllCasesAndOpenBulkActions() {
       await testSubjects.setCheckbox('checkboxSelectAll', 'check');
-      const button = await find.byCssSelector('[aria-label="Bulk actions"]');
-      await button.click();
+      await this.openBulkActions();
     },
 
     async changeStatus(status: CaseStatuses, index: number) {
@@ -195,6 +205,22 @@ export function CasesTableServiceProvider(
       await testSubjects.click(`cases-bulk-action-status-${status}`);
     },
 
+    async changeSeverity(severity: CaseSeverity, index: number) {
+      await this.openRowActions(index);
+
+      await testSubjects.existOrFail('cases-bulk-action-delete');
+
+      await find.existsByCssSelector('[data-test-subj*="case-action-severity-panel-"');
+      const statusButton = await find.byCssSelector(
+        '[data-test-subj*="case-action-severity-panel-"'
+      );
+
+      statusButton.click();
+
+      await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
+      await testSubjects.click(`cases-bulk-action-severity-${severity}`);
+    },
+
     async bulkChangeStatusCases(status: CaseStatuses) {
       await this.selectAllCasesAndOpenBulkActions();
 
@@ -204,12 +230,88 @@ export function CasesTableServiceProvider(
       await testSubjects.click(`cases-bulk-action-status-${status}`);
     },
 
+    async bulkChangeSeverity(severity: CaseSeverity) {
+      await this.selectAllCasesAndOpenBulkActions();
+
+      await testSubjects.existOrFail('case-bulk-action-severity');
+      await testSubjects.click('case-bulk-action-severity');
+      await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
+      await testSubjects.click(`cases-bulk-action-severity-${severity}`);
+    },
+
+    async bulkEditTags(selectedCases: number[], tagsToClick: string[]) {
+      const rows = await find.allByCssSelector('.euiTableRowCellCheckbox');
+
+      for (const caseIndex of selectedCases) {
+        assertCaseExists(caseIndex, rows.length);
+        rows[caseIndex].click();
+      }
+
+      await this.openBulkActions();
+      await testSubjects.existOrFail('cases-bulk-action-tags');
+      await testSubjects.click('cases-bulk-action-tags');
+
+      await testSubjects.existOrFail('cases-edit-tags-flyout');
+
+      for (const tag of tagsToClick) {
+        await testSubjects.existOrFail(`cases-actions-tags-edit-selectable-tag-${tag}`);
+        await testSubjects.click(`cases-actions-tags-edit-selectable-tag-${tag}`);
+      }
+
+      await testSubjects.click('cases-edit-tags-flyout-submit');
+      await testSubjects.missingOrFail('cases-edit-tags-flyout');
+    },
+
+    async bulkAddNewTag(selectedCases: number[], tag: string) {
+      const rows = await find.allByCssSelector('.euiTableRowCellCheckbox');
+
+      for (const caseIndex of selectedCases) {
+        assertCaseExists(caseIndex, rows.length);
+        rows[caseIndex].click();
+      }
+
+      await this.openBulkActions();
+      await testSubjects.existOrFail('cases-bulk-action-tags');
+      await testSubjects.click('cases-bulk-action-tags');
+
+      await testSubjects.existOrFail('cases-edit-tags-flyout');
+      await testSubjects.existOrFail('cases-actions-tags-edit-selectable-search-input');
+      const searchInput = await testSubjects.find(
+        'cases-actions-tags-edit-selectable-search-input'
+      );
+
+      await testSubjects.existOrFail('cases-actions-tags-edit-selectable-search-input');
+      await searchInput.type(tag);
+
+      await testSubjects.existOrFail('cases-actions-tags-edit-selectable-add-new-tag');
+      await testSubjects.click('cases-actions-tags-edit-selectable-add-new-tag');
+
+      await testSubjects.click('cases-edit-tags-flyout-submit');
+      await testSubjects.missingOrFail('cases-edit-tags-flyout');
+    },
+
     async selectAndChangeStatusOfAllCases(status: CaseStatuses) {
       await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });
       await header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
       await this.bulkChangeStatusCases(status);
+    },
+
+    async selectAndChangeSeverityOfAllCases(severity: CaseSeverity) {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+      await this.bulkChangeSeverity(severity);
+    },
+
+    async getCaseTitle(index: number) {
+      const titleElement = await (
+        await this.getCaseFromTable(index)
+      ).findByTestSubject('case-details-link');
+
+      return await titleElement.getVisibleText();
     },
   };
 }

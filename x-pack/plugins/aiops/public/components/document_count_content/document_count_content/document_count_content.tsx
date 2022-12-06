@@ -49,8 +49,11 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   }, [windowParameters]);
 
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
-  const timeRangeEarliest = Math.min(...bucketTimestamps);
-  const timeRangeLatest = Math.max(...bucketTimestamps);
+  const splitBucketTimestamps = Object.keys(documentCountStatsSplit?.buckets ?? {}).map(
+    (time) => +time
+  );
+  const timeRangeEarliest = Math.min(...[...bucketTimestamps, ...splitBucketTimestamps]);
+  const timeRangeLatest = Math.max(...[...bucketTimestamps, ...splitBucketTimestamps]);
 
   if (
     documentCountStats === undefined ||

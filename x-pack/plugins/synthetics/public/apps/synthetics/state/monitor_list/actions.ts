@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ErrorToastOptions } from '@kbn/core-notifications-browser';
 import { createAction } from '@reduxjs/toolkit';
 import {
   EncryptedSyntheticsMonitor,
@@ -20,10 +21,24 @@ export const fetchMonitorListAction = createAsyncAction<
   MonitorManagementListResult
 >('fetchMonitorListAction');
 
+interface ToastParams<MessageType> {
+  message: MessageType;
+  lifetimeMs: number;
+  testAttribute?: string;
+}
+
 export interface UpsertMonitorRequest {
   id: string;
   monitor: Partial<EncryptedSyntheticsMonitor>;
+  success: ToastParams<string>;
+  error: ToastParams<ErrorToastOptions>;
+  /**
+   * The effect will perform a quiet refresh of the overview state
+   * after a successful upsert. The default behavior is to perform the fetch.
+   */
+  shouldQuietFetchAfterSuccess?: boolean;
 }
+
 export const fetchUpsertMonitorAction = createAction<UpsertMonitorRequest>('fetchUpsertMonitor');
 export const fetchUpsertSuccessAction = createAction<{
   id: string;

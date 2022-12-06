@@ -39,11 +39,11 @@ export function createLicenseUpdate(
   const startWithArgs = initialValues ? [undefined, initialValues] : [undefined];
 
   const license$: Observable<ILicense> = fetched$.pipe(
-    shareReplay(1),
     startWith(...startWithArgs),
     pairwise(),
     filter(([previous, next]) => hasLicenseInfoChanged(previous, next!)),
-    map(([, next]) => next!)
+    map(([, next]) => next!),
+    shareReplay(1)
   );
 
   // start periodic license fetch right away

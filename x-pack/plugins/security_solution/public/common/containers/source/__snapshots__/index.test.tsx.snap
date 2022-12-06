@@ -639,5 +639,25 @@ Array [
     },
     "type": "string",
   },
+  Object {
+    "aggregatable": false,
+    "category": "nestedField",
+    "description": "",
+    "example": "",
+    "format": "",
+    "indexes": Array [
+      "auditbeat",
+      "filebeat",
+      "packetbeat",
+    ],
+    "name": "nestedField.thirdAttributes",
+    "searchable": true,
+    "subType": Object {
+      "nested": Object {
+        "path": "nestedField",
+      },
+    },
+    "type": "date",
+  },
 ]
 `;

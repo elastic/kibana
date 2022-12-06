@@ -29,6 +29,7 @@ export interface NewAgentPolicy {
   data_output_id?: string | null;
   monitoring_output_id?: string | null;
   download_source_id?: string | null;
+  fleet_server_host_id?: string | null;
   schema_version?: string;
 }
 
@@ -81,6 +82,8 @@ export interface FullAgentPolicyOutputPermissions {
 }
 
 export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256'> & {
+  proxy_url?: string;
+  proxy_headers?: any;
   [key: string]: any;
 };
 
@@ -95,6 +98,13 @@ export interface FullAgentPolicy {
   fleet?:
     | {
         hosts: string[];
+        proxy_url?: string;
+        proxy_headers?: any;
+        ssl?: {
+          verification_mode?: string;
+          certificate_authorities?: string[];
+          renegotiation?: string;
+        };
       }
     | {
         kibana: FullAgentPolicyKibanaConfig;
@@ -109,7 +119,7 @@ export interface FullAgentPolicy {
       metrics: boolean;
       logs: boolean;
     };
-    download: { source_uri: string };
+    download: { sourceURI: string };
   };
 }
 

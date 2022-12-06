@@ -30,6 +30,8 @@ import {
 } from './use_csp_benchmark_integrations';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
+import { LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY } from '../../common/constants';
+import { usePageSize } from '../../common/hooks/use_page_size';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -126,10 +128,11 @@ const BenchmarkSearchField = ({
 };
 
 export const Benchmarks = () => {
+  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY);
   const [query, setQuery] = useState<UseCspBenchmarkIntegrationsProps>({
     name: '',
     page: 1,
-    perPage: 10,
+    perPage: pageSize,
     sortField: 'package_policy.name',
     sortOrder: 'asc',
   });
@@ -169,7 +172,7 @@ export const Benchmarks = () => {
         error={queryResult.error ? extractErrorMessage(queryResult.error) : undefined}
         loading={queryResult.isFetching}
         pageIndex={query.page}
-        pageSize={query.perPage}
+        pageSize={pageSize || query.perPage}
         sorting={{
           // @ts-expect-error - EUI types currently do not support sorting by nested fields
           sort: { field: query.sortField, direction: query.sortOrder },
@@ -177,6 +180,7 @@ export const Benchmarks = () => {
         }}
         totalItemCount={totalItemCount}
         setQuery={({ page, sort }) => {
+          setPageSize(page.size);
           setQuery((current) => ({
             ...current,
             page: page.index,

@@ -80,5 +80,6 @@
   "origin": "ui",
   "form_monitor_type": "http",
   "journey_id": "",
-  "id": ""
+  "id": "",
+  "hash": ""
 }

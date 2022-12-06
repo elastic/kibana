@@ -187,43 +187,12 @@ describe('SearchSessionService', () => {
         ).rejects.toMatchInlineSnapshot(`[Error: locatorId is required]`);
       });
 
-      it('saving updates an existing saved object and persists it', async () => {
-        const mockUpdateSavedObject = {
-          ...mockSavedObject,
-          attributes: {},
-        };
-        savedObjectsClient.get.mockResolvedValue(mockSavedObject);
-        savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
-
-        await service.save({ savedObjectsClient }, mockUser1, sessionId, {
-          name: 'banana',
-          appId: 'nanana',
-          locatorId: 'panama',
-        });
-
-        expect(savedObjectsClient.update).toHaveBeenCalled();
-        expect(savedObjectsClient.create).not.toHaveBeenCalled();
-
-        const [type, id, callAttributes] = savedObjectsClient.update.mock.calls[0];
-        expect(type).toBe(SEARCH_SESSION_TYPE);
-        expect(id).toBe(sessionId);
-        expect(callAttributes).not.toHaveProperty('idMapping');
-        expect(callAttributes).toHaveProperty('name', 'banana');
-        expect(callAttributes).toHaveProperty('appId', 'nanana');
-        expect(callAttributes).toHaveProperty('locatorId', 'panama');
-        expect(callAttributes).toHaveProperty('initialState', {});
-        expect(callAttributes).toHaveProperty('restoreState', {});
-      });
-
-      it('saving creates a new persisted saved object, if it did not exist', async () => {
+      it('saving creates a new persisted saved object', async () => {
         const mockCreatedSavedObject = {
           ...mockSavedObject,
           attributes: {},
         };
 
-        savedObjectsClient.update.mockRejectedValue(
-          SavedObjectsErrorHelpers.createGenericNotFoundError(sessionId)
-        );
         savedObjectsClient.create.mockResolvedValue(mockCreatedSavedObject);
 
         await service.save({ savedObjectsClient }, mockUser1, sessionId, {
@@ -232,7 +201,7 @@ describe('SearchSessionService', () => {
           locatorId: 'panama',
         });
 
-        expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+        expect(savedObjectsClient.update).toHaveBeenCalledTimes(0);
         expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
 
         const [type, callAttributes, options] = savedObjectsClient.create.mock.calls[0];
@@ -738,71 +707,9 @@ describe('SearchSessionService', () => {
         });
       });
 
-      it('retries updating the saved object if there was a ES conflict 409', async () => {
+      it('passes retryOnConflict param to es', async () => {
         const searchRequest = { params: {} };
         const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
-
-        const mockUpdateSavedObject = {
-          ...mockSavedObject,
-          attributes: {},
-        };
-
-        let counter = 0;
-
-        savedObjectsClient.update.mockImplementation(() => {
-          return new Promise((resolve, reject) => {
-            if (counter === 0) {
-              counter++;
-              reject(SavedObjectsErrorHelpers.createConflictError(SEARCH_SESSION_TYPE, searchId));
-            } else {
-              resolve(mockUpdateSavedObject);
-            }
-          });
-        });
-
-        await service.trackId({ savedObjectsClient }, mockUser1, searchRequest, searchId, {
-          sessionId,
-          strategy: MOCK_STRATEGY,
-        });
-
-        expect(savedObjectsClient.update).toHaveBeenCalledTimes(2);
-        expect(savedObjectsClient.create).not.toHaveBeenCalled();
-      });
-
-      it('retries updating the saved object if theres a ES conflict 409, but stops after MAX_RETRIES times', async () => {
-        const searchRequest = { params: {} };
-        const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
-
-        savedObjectsClient.update.mockImplementation(() => {
-          return new Promise((resolve, reject) => {
-            reject(SavedObjectsErrorHelpers.createConflictError(SEARCH_SESSION_TYPE, searchId));
-          });
-        });
-
-        await service.trackId({ savedObjectsClient }, mockUser1, searchRequest, searchId, {
-          sessionId,
-          strategy: MOCK_STRATEGY,
-        });
-
-        // Track ID doesn't throw errors even in cases of failure!
-        expect(savedObjectsClient.update).toHaveBeenCalledTimes(MAX_UPDATE_RETRIES);
-        expect(savedObjectsClient.create).not.toHaveBeenCalled();
-      });
-
-      it('creates the saved object in non persisted state, if search session doesnt exists', async () => {
-        const searchRequest = { params: {} };
-        const requestHash = createRequestHash(searchRequest.params);
-        const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
-
-        const mockCreatedSavedObject = {
-          ...mockSavedObject,
-          attributes: {},
-        };
-
-        savedObjectsClient.update.mockRejectedValue(
-          SavedObjectsErrorHelpers.createGenericNotFoundError(sessionId)
-        );
-        savedObjectsClient.create.mockResolvedValue(mockCreatedSavedObject);
 
         await service.trackId({ savedObjectsClient }, mockUser1, searchRequest, searchId, {
           sessionId,
@@ -810,75 +717,9 @@ describe('SearchSessionService', () => {
         });
 
         expect(savedObjectsClient.update).toHaveBeenCalled();
-        expect(savedObjectsClient.create).toHaveBeenCalled();
 
-        const [type, callAttributes, options] = savedObjectsClient.create.mock.calls[0];
-        expect(type).toBe(SEARCH_SESSION_TYPE);
-        expect(options).toStrictEqual({ id: sessionId });
-        expect(callAttributes).toHaveProperty('idMapping', {
-          [requestHash]: {
-            id: searchId,
-            strategy: MOCK_STRATEGY,
-          },
-        });
-        expect(callAttributes).toHaveProperty('expires');
-        expect(callAttributes).toHaveProperty('created');
-        expect(callAttributes).toHaveProperty('sessionId', sessionId);
-      });
-
-      it('retries updating if update returned 404 and then update returned conflict 409 (first create race condition)', async () => {
-        const searchRequest = { params: {} };
-        const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
-
-        const mockUpdateSavedObject = {
-          ...mockSavedObject,
-          attributes: {},
-        };
-
-        let counter = 0;
-
-        savedObjectsClient.update.mockImplementation(() => {
-          return new Promise((resolve, reject) => {
-            if (counter === 0) {
-              counter++;
-              reject(SavedObjectsErrorHelpers.createGenericNotFoundError(sessionId));
-            } else {
-              resolve(mockUpdateSavedObject);
-            }
-          });
-        });
-
-        savedObjectsClient.create.mockRejectedValue(
-          SavedObjectsErrorHelpers.createConflictError(SEARCH_SESSION_TYPE, searchId)
-        );
-
-        await service.trackId({ savedObjectsClient }, mockUser1, searchRequest, searchId, {
-          sessionId,
-          strategy: MOCK_STRATEGY,
-        });
-
-        expect(savedObjectsClient.update).toHaveBeenCalledTimes(2);
-        expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
-      });
-
-      it('retries everything at most MAX_RETRIES times', async () => {
-        const searchRequest = { params: {} };
-        const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
-
-        savedObjectsClient.update.mockRejectedValue(
-          SavedObjectsErrorHelpers.createGenericNotFoundError(sessionId)
-        );
-        savedObjectsClient.create.mockRejectedValue(
-          SavedObjectsErrorHelpers.createConflictError(SEARCH_SESSION_TYPE, searchId)
-        );
-
-        await service.trackId({ savedObjectsClient }, mockUser1, searchRequest, searchId, {
-          sessionId,
-          strategy: MOCK_STRATEGY,
-        });
-
-        expect(savedObjectsClient.update).toHaveBeenCalledTimes(MAX_UPDATE_RETRIES);
-        expect(savedObjectsClient.create).toHaveBeenCalledTimes(MAX_UPDATE_RETRIES);
+        const [, , , opts] = savedObjectsClient.update.mock.calls[0];
+        expect(opts).toHaveProperty('retryOnConflict', MAX_UPDATE_RETRIES);
       });
 
       it('batches updates for the same session', async () => {
@@ -921,7 +762,13 @@ describe('SearchSessionService', () => {
         expect(savedObjectsClient.update).toHaveBeenCalledTimes(2); // 3 trackIds calls batched into 2 update calls (2 different sessions)
         expect(savedObjectsClient.create).not.toHaveBeenCalled();
 
-        const [type1, id1, callAttributes1] = savedObjectsClient.update.mock.calls[0];
+        const sessionId1UpdateCallArgs = savedObjectsClient.update.mock.calls.find(
+          (args) => args[1] === sessionId1
+        );
+
+        expect(sessionId1UpdateCallArgs).toBeDefined();
+
+        const [type1, id1, callAttributes1] = sessionId1UpdateCallArgs!;
         expect(type1).toBe(SEARCH_SESSION_TYPE);
         expect(id1).toBe(sessionId1);
         expect(callAttributes1).toHaveProperty('idMapping', {
@@ -935,7 +782,11 @@ describe('SearchSessionService', () => {
           },
         });
 
-        const [type2, id2, callAttributes2] = savedObjectsClient.update.mock.calls[1];
+        const sessionId2UpdateCallArgs = savedObjectsClient.update.mock.calls.find(
+          (args) => args[1] === sessionId2
+        );
+        expect(sessionId2UpdateCallArgs).toBeDefined();
+        const [type2, id2, callAttributes2] = sessionId2UpdateCallArgs!;
         expect(type2).toBe(SEARCH_SESSION_TYPE);
         expect(id2).toBe(sessionId2);
         expect(callAttributes2).toHaveProperty('idMapping', {

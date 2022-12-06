@@ -20,10 +20,10 @@ const configSchema = schema.object({
   autoCreateApmDataView: schema.boolean({ defaultValue: true }),
   serviceMapEnabled: schema.boolean({ defaultValue: true }),
   serviceMapFingerprintBucketSize: schema.number({ defaultValue: 100 }),
-  serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
   serviceMapFingerprintGlobalBucketSize: schema.number({
     defaultValue: 1000,
   }),
+  serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
   serviceMapTraceIdGlobalBucketSize: schema.number({ defaultValue: 6 }),
   serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),
   ui: schema.object({
@@ -54,6 +54,7 @@ const configSchema = schema.object({
     sourcemap: schema.string({ defaultValue: 'apm-*' }),
     onboarding: schema.string({ defaultValue: 'apm-*' }),
   }),
+  forceSyntheticSource: schema.boolean({ defaultValue: false }),
 });
 
 // plugin config
@@ -116,7 +117,7 @@ export type ApmIndicesConfigName = keyof APMConfig['indices'];
 export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);
 
-export { APM_SERVER_FEATURE_ID } from '../common/alert_types';
+export { APM_SERVER_FEATURE_ID } from '../common/rules/apm_rule_types';
 export { APMPlugin } from './plugin';
 export type { APMPluginSetup } from './types';
 export type {

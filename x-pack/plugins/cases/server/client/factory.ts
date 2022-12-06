@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import {
+import type {
   KibanaRequest,
   SavedObjectsServiceStart,
   Logger,
   ElasticsearchClient,
   SavedObjectsClientContract,
+  IBasePath,
 } from '@kbn/core/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -30,11 +33,13 @@ import {
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
-import { CasesClient, createCasesClient } from '.';
-import { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
-import { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
-import { CasesServices } from './types';
+import type { CasesClient } from '.';
+import { createCasesClient } from '.';
+import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
+import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
+import { EmailNotificationService } from '../services/notifications/email_notification_service';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
@@ -46,6 +51,8 @@ interface CasesClientFactoryArgs {
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  publicBaseUrl?: IBasePath['publicBaseUrl'];
+  notifications: NotificationsPluginStart;
 }
 
 /**
@@ -105,12 +112,13 @@ export class CasesClientFactory {
       includedHiddenTypes: SAVED_OBJECT_TYPES,
       // this tells the security plugin to not perform SO authorization and audit logging since we are handling
       // that manually using our Authorization class and audit logger.
-      excludedWrappers: ['security'],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
     });
 
     const services = this.createServices({
       unsecuredSavedObjectsClient,
       esClient: scopedClusterClient,
+      request,
     });
 
     const userInfo = await this.getUserInfo(request);
@@ -126,6 +134,8 @@ export class CasesClientFactory {
       persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
       securityStartPlugin: this.options.securityPluginStart,
+      publicBaseUrl: this.options.publicBaseUrl,
+      spaceId: this.options.spacesPluginStart.spacesService.getSpaceId(request),
     });
   }
 
@@ -138,9 +148,11 @@ export class CasesClientFactory {
   private createServices({
     unsecuredSavedObjectsClient,
     esClient,
+    request,
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     esClient: ElasticsearchClient;
+    request: KibanaRequest;
   }): CasesServices {
     this.validateInitialization();
 
@@ -160,6 +172,19 @@ export class CasesClientFactory {
       this.options.licensingPluginStart.featureUsage.notifyUsage
     );
 
+    /**
+     * The notifications plugins only exports the EmailService.
+     * We do the same. If in the future we use other means
+     * of notifications we can refactor to use a factory.
+     */
+    const notificationService = new EmailNotificationService({
+      logger: this.logger,
+      notifications: this.options.notifications,
+      security: this.options.securityPluginStart,
+      publicBaseUrl: this.options.publicBaseUrl,
+      spaceId: this.options.spacesPluginStart.spacesService.getSpaceId(request),
+    });
+
     return {
       alertsService: new AlertService(esClient, this.logger),
       caseService,
@@ -171,6 +196,7 @@ export class CasesClientFactory {
       ),
       attachmentService,
       licensingService,
+      notificationService,
     };
   }
 

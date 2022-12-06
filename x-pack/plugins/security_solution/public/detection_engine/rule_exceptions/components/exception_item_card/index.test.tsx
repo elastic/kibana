@@ -8,12 +8,12 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { ExceptionItemCard } from '.';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getCommentsArrayMock } from '@kbn/lists-plugin/common/schemas/types/comment.mock';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { TestProviders } from '../../../../common/mock';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+
+import { TestProviders } from '../../../../common/mock';
+import { ExceptionItemCard } from '.';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -28,8 +28,8 @@ describe('ExceptionItemCard', () => {
           onDeleteException={jest.fn()}
           onEditException={jest.fn()}
           exceptionItem={exceptionItem}
-          listType={ExceptionListTypeEnum.DETECTION}
-          ruleReferences={{
+          isEndpoint={false}
+          listAndReferences={{
             ...getExceptionListSchemaMock(),
             referenced_rules: [
               {
@@ -77,8 +77,8 @@ describe('ExceptionItemCard', () => {
           onEditException={jest.fn()}
           exceptionItem={exceptionItem}
           dataTestSubj="item"
-          listType={ExceptionListTypeEnum.DETECTION}
-          ruleReferences={{
+          isEndpoint={false}
+          listAndReferences={{
             ...getExceptionListSchemaMock(),
             referenced_rules: [
               {
@@ -125,8 +125,8 @@ describe('ExceptionItemCard', () => {
           onEditException={jest.fn()}
           exceptionItem={exceptionItem}
           dataTestSubj="item"
-          listType={ExceptionListTypeEnum.DETECTION}
-          ruleReferences={{
+          isEndpoint={false}
+          listAndReferences={{
             ...getExceptionListSchemaMock(),
             referenced_rules: [
               {
@@ -169,8 +169,8 @@ describe('ExceptionItemCard', () => {
           onEditException={mockOnEditException}
           exceptionItem={exceptionItem}
           dataTestSubj="item"
-          listType={ExceptionListTypeEnum.DETECTION}
-          ruleReferences={{
+          isEndpoint={false}
+          listAndReferences={{
             ...getExceptionListSchemaMock(),
             referenced_rules: [
               {
@@ -203,6 +203,69 @@ describe('ExceptionItemCard', () => {
       .find('button[data-test-subj="exceptionItemCardHeader-actionButton"]')
       .at(0)
       .simulate('click');
+
+    expect(
+      wrapper.find('button[data-test-subj="exceptionItemCardHeader-actionItem-edit"]').text()
+    ).toEqual('Edit rule exception');
+
+    wrapper
+      .find('button[data-test-subj="exceptionItemCardHeader-actionItem-edit"]')
+      .simulate('click');
+
+    expect(mockOnEditException).toHaveBeenCalledWith(getExceptionListItemSchemaMock());
+  });
+
+  it('it invokes "onEditException" when edit button clicked when "isEndpoint" is "true"', () => {
+    const mockOnEditException = jest.fn();
+    const exceptionItem = getExceptionListItemSchemaMock();
+
+    const wrapper = mount(
+      <TestProviders>
+        <ExceptionItemCard
+          disableActions={false}
+          onDeleteException={jest.fn()}
+          onEditException={mockOnEditException}
+          exceptionItem={exceptionItem}
+          dataTestSubj="item"
+          isEndpoint
+          listAndReferences={{
+            ...getExceptionListSchemaMock(),
+            referenced_rules: [
+              {
+                exception_lists: [
+                  {
+                    id: '123',
+                    list_id: 'i_exist',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                  {
+                    id: '456',
+                    list_id: 'i_exist_2',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                ],
+                id: '1a2b3c',
+                name: 'Simple Rule Query',
+                rule_id: 'rule-2',
+              },
+            ],
+          }}
+        />
+      </TestProviders>
+    );
+
+    // click on popover
+    wrapper
+      .find('button[data-test-subj="exceptionItemCardHeader-actionButton"]')
+      .at(0)
+      .simulate('click');
+
+    expect(
+      wrapper.find('button[data-test-subj="exceptionItemCardHeader-actionItem-edit"]').text()
+    ).toEqual('Edit endpoint exception');
+
     wrapper
       .find('button[data-test-subj="exceptionItemCardHeader-actionItem-edit"]')
       .simulate('click');
@@ -222,8 +285,8 @@ describe('ExceptionItemCard', () => {
           onEditException={jest.fn()}
           exceptionItem={exceptionItem}
           dataTestSubj="item"
-          listType={ExceptionListTypeEnum.DETECTION}
-          ruleReferences={{
+          isEndpoint={false}
+          listAndReferences={{
             ...getExceptionListSchemaMock(),
             referenced_rules: [
               {
@@ -256,6 +319,73 @@ describe('ExceptionItemCard', () => {
       .find('button[data-test-subj="exceptionItemCardHeader-actionButton"]')
       .at(0)
       .simulate('click');
+
+    expect(
+      wrapper.find('button[data-test-subj="exceptionItemCardHeader-actionItem-delete"]').text()
+    ).toEqual('Delete rule exception');
+
+    wrapper
+      .find('button[data-test-subj="exceptionItemCardHeader-actionItem-delete"]')
+      .simulate('click');
+
+    expect(mockOnDeleteException).toHaveBeenCalledWith({
+      id: '1',
+      name: 'some name',
+      namespaceType: 'single',
+    });
+  });
+
+  it('it invokes "onDeleteException" when delete button clicked when "isEndpoint" is "true"', () => {
+    const mockOnDeleteException = jest.fn();
+    const exceptionItem = getExceptionListItemSchemaMock();
+
+    const wrapper = mount(
+      <TestProviders>
+        <ExceptionItemCard
+          disableActions={false}
+          onDeleteException={mockOnDeleteException}
+          onEditException={jest.fn()}
+          exceptionItem={exceptionItem}
+          dataTestSubj="item"
+          isEndpoint
+          listAndReferences={{
+            ...getExceptionListSchemaMock(),
+            referenced_rules: [
+              {
+                exception_lists: [
+                  {
+                    id: '123',
+                    list_id: 'i_exist',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                  {
+                    id: '456',
+                    list_id: 'i_exist_2',
+                    namespace_type: 'single',
+                    type: 'detection',
+                  },
+                ],
+                id: '1a2b3c',
+                name: 'Simple Rule Query',
+                rule_id: 'rule-2',
+              },
+            ],
+          }}
+        />
+      </TestProviders>
+    );
+
+    // click on popover
+    wrapper
+      .find('button[data-test-subj="exceptionItemCardHeader-actionButton"]')
+      .at(0)
+      .simulate('click');
+
+    expect(
+      wrapper.find('button[data-test-subj="exceptionItemCardHeader-actionItem-delete"]').text()
+    ).toEqual('Delete endpoint exception');
+
     wrapper
       .find('button[data-test-subj="exceptionItemCardHeader-actionItem-delete"]')
       .simulate('click');
@@ -278,8 +408,8 @@ describe('ExceptionItemCard', () => {
           onEditException={jest.fn()}
           exceptionItem={exceptionItem}
           dataTestSubj="item"
-          listType={ExceptionListTypeEnum.DETECTION}
-          ruleReferences={{
+          isEndpoint={false}
+          listAndReferences={{
             ...getExceptionListSchemaMock(),
             referenced_rules: [
               {

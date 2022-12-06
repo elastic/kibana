@@ -233,7 +233,7 @@ export const LensTopNavMenu = ({
     uiSettings,
     application,
     attributeService,
-    discover,
+    share,
     dashboardFeatureFlag,
     dataViewFieldEditor,
     dataViewEditor,
@@ -288,7 +288,8 @@ export const LensTopNavMenu = ({
     ]
   );
 
-  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+  const canEditDataView =
+    Boolean(dataViewEditor?.userPermissions.editDataView()) || !currentIndexPattern?.isPersisted();
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
 
@@ -423,8 +424,10 @@ export const LensTopNavMenu = ({
     currentDoc,
   ]);
 
+  const discoverLocator = share?.url.locators.get('DISCOVER_APP_LOCATOR');
+
   const layerMetaInfo = useMemo(() => {
-    if (!activeDatasourceId || !discover) {
+    if (!activeDatasourceId || !discoverLocator) {
       return;
     }
     return getLayerMetaInfo(
@@ -437,7 +440,7 @@ export const LensTopNavMenu = ({
     );
   }, [
     activeDatasourceId,
-    discover,
+    discoverLocator,
     datasourceMap,
     datasourceStates,
     activeData,
@@ -558,7 +561,7 @@ export const LensTopNavMenu = ({
           const { error, meta } = layerMetaInfo;
           // If Discover is not available, return
           // If there's no data, return
-          if (error || !discover || !meta) {
+          if (error || !discoverLocator || !meta) {
             return;
           }
           const { filters: newFilters, query: newQuery } = combineQueryAndFilters(
@@ -569,7 +572,7 @@ export const LensTopNavMenu = ({
             getEsQueryConfig(uiSettings)
           );
 
-          return discover.locator!.getRedirectUrl({
+          return discoverLocator.getRedirectUrl({
             dataViewSpec: dataViews.indexPatterns[meta.id]?.spec,
             timeRange: data.query.timefilter.timefilter.getTime(),
             filters: newFilters,
@@ -610,7 +613,7 @@ export const LensTopNavMenu = ({
     setIsSaveModalVisible,
     goBackToOriginatingApp,
     redirectToOrigin,
-    discover,
+    discoverLocator,
     query,
     filters,
     indexPatterns,
@@ -643,7 +646,7 @@ export const LensTopNavMenu = ({
             setIsOnTextBasedMode(true);
             dispatch(
               switchAndCleanDatasource({
-                newDatasourceId: 'textBasedLanguages',
+                newDatasourceId: 'textBased',
                 visualizationId: visualization?.activeId,
                 currentIndexPatternId: currentIndexPattern?.id,
               })
@@ -756,39 +759,32 @@ export const LensTopNavMenu = ({
     [editField, canEditDataView]
   );
 
-  const createNewDataView = useMemo(
-    () =>
-      canEditDataView
-        ? () => {
-            closeDataViewEditor.current = dataViewEditor.openEditor({
-              onSave: async (dataView) => {
-                if (dataView.id) {
-                  if (isOnTextBasedMode) {
-                    dispatch(
-                      switchAndCleanDatasource({
-                        newDatasourceId: 'indexpattern',
-                        visualizationId: visualization?.activeId,
-                        currentIndexPatternId: dataView?.id,
-                      })
-                    );
-                  }
-                  dispatchChangeIndexPattern(dataView);
-                  setCurrentIndexPattern(dataView);
-                }
-              },
-              allowAdHocDataView: true,
-            });
+  const createNewDataView = useCallback(() => {
+    closeDataViewEditor.current = dataViewEditor.openEditor({
+      onSave: async (dataView) => {
+        if (dataView.id) {
+          if (isOnTextBasedMode) {
+            dispatch(
+              switchAndCleanDatasource({
+                newDatasourceId: 'formBased',
+                visualizationId: visualization?.activeId,
+                currentIndexPatternId: dataView?.id,
+              })
+            );
           }
-        : undefined,
-    [
-      canEditDataView,
-      dataViewEditor,
-      dispatch,
-      dispatchChangeIndexPattern,
-      isOnTextBasedMode,
-      visualization?.activeId,
-    ]
-  );
+          dispatchChangeIndexPattern(dataView);
+          setCurrentIndexPattern(dataView);
+        }
+      },
+      allowAdHocDataView: true,
+    });
+  }, [
+    dataViewEditor,
+    dispatch,
+    dispatchChangeIndexPattern,
+    isOnTextBasedMode,
+    visualization?.activeId,
+  ]);
 
   const onCreateDefaultAdHocDataView = useCallback(
     async (pattern: string) => {
@@ -801,7 +797,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'indexpattern',
+            newDatasourceId: 'formBased',
             visualizationId: visualization?.activeId,
             currentIndexPatternId: dataView?.id,
           })
@@ -844,7 +840,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'indexpattern',
+            newDatasourceId: 'formBased',
             visualizationId: visualization?.activeId,
             currentIndexPatternId: newIndexPatternId,
           })
@@ -933,7 +929,6 @@ export const LensTopNavMenu = ({
       }
       textBasedLanguageModeErrors={textBasedLanguageModeErrors}
       onTextBasedSavedAndExit={onTextBasedSavedAndExit}
-      showQueryBar={true}
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"
       screenTitle={'lens'}

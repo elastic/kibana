@@ -1888,6 +1888,225 @@ describe('subFeatures', () => {
         actions.ui.get('foo', 'sub-feature-ui'),
       ]);
     });
+
+    test(`should get the sub-feature privileges if 'respectLicenseLevel' is false`, () => {
+      const features: KibanaFeature[] = [
+        new KibanaFeature({
+          id: 'foo',
+          name: 'Foo KibanaFeature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+            read: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+          },
+          subFeatures: [
+            {
+              name: 'subFeature1',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'subFeaturePriv1',
+                      name: 'sub feature priv 1',
+                      includeIn: 'read',
+                      savedObject: {
+                        all: ['all-sub-feature-type'],
+                        read: ['read-sub-feature-type'],
+                      },
+                      ui: ['sub-feature-ui'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      ];
+
+      const mockFeaturesPlugin = featuresPluginMock.createSetup();
+      mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+
+      const actual = privileges.get(false);
+      expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`);
+
+      expect(actual.features).toHaveProperty(`foo.all`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'open_point_in_time'),
+        actions.savedObject.get('all-sub-feature-type', 'close_point_in_time'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.savedObject.get('read-sub-feature-type', 'open_point_in_time'),
+        actions.savedObject.get('read-sub-feature-type', 'close_point_in_time'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.minimal_all`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.read`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'open_point_in_time'),
+        actions.savedObject.get('all-sub-feature-type', 'close_point_in_time'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.savedObject.get('read-sub-feature-type', 'open_point_in_time'),
+        actions.savedObject.get('read-sub-feature-type', 'close_point_in_time'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.minimal_read`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual).toHaveProperty('global.all', [
+        actions.login,
+        actions.version,
+        actions.api.get('decryptedTelemetry'),
+        actions.api.get('features'),
+        actions.api.get('taskManager'),
+        actions.space.manage,
+        actions.ui.get('spaces', 'manage'),
+        actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('catalogue', 'spaces'),
+        actions.ui.get('enterpriseSearch', 'all'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'open_point_in_time'),
+        actions.savedObject.get('all-sub-feature-type', 'close_point_in_time'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.savedObject.get('read-sub-feature-type', 'open_point_in_time'),
+        actions.savedObject.get('read-sub-feature-type', 'close_point_in_time'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+      expect(actual).toHaveProperty('global.read', [
+        actions.login,
+        actions.version,
+        actions.api.get('decryptedTelemetry'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'open_point_in_time'),
+        actions.savedObject.get('all-sub-feature-type', 'close_point_in_time'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.savedObject.get('read-sub-feature-type', 'open_point_in_time'),
+        actions.savedObject.get('read-sub-feature-type', 'close_point_in_time'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual).toHaveProperty('space.all', [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'open_point_in_time'),
+        actions.savedObject.get('all-sub-feature-type', 'close_point_in_time'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.savedObject.get('read-sub-feature-type', 'open_point_in_time'),
+        actions.savedObject.get('read-sub-feature-type', 'close_point_in_time'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+      expect(actual).toHaveProperty('space.read', [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'open_point_in_time'),
+        actions.savedObject.get('all-sub-feature-type', 'close_point_in_time'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.savedObject.get('read-sub-feature-type', 'open_point_in_time'),
+        actions.savedObject.get('read-sub-feature-type', 'close_point_in_time'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+    });
   });
 
   describe(`when license allows subfeatures, but not a specific sub feature`, () => {

@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 export const isWriteBlockException = (errorCause?: estypes.ErrorCause): boolean => {
   return (
     errorCause?.type === 'cluster_block_exception' &&
-    errorCause?.reason.match(/index \[.+] blocked by: \[FORBIDDEN\/8\/.+ \(api\)\]/) !== null
+    errorCause?.reason?.match(/index \[.+] blocked by: \[FORBIDDEN\/8\/.+ \(api\)\]/) !== null
   );
 };
 
@@ -28,7 +28,7 @@ export const isIndexNotFoundException = (errorCause?: estypes.ErrorCause): boole
 export const isClusterShardLimitExceeded = (errorCause?: estypes.ErrorCause): boolean => {
   return (
     errorCause?.type === 'validation_exception' &&
-    errorCause?.reason.match(
+    errorCause?.reason?.match(
       /this action would add .* shards, but this cluster currently has .* maximum normal shards open/
     ) !== null
   );

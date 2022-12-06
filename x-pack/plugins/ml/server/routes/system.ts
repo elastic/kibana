@@ -165,9 +165,11 @@ export function systemRoutes(
     routeGuard.basicLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
         const body = await mlClient.info();
-        const cloudId = cloud && cloud.cloudId;
+        const cloudId = cloud?.cloudId;
+        const isCloudTrial = cloud?.trialEndDate && Date.now() < cloud.trialEndDate.getTime();
+
         return response.ok({
-          body: { ...body, cloudId },
+          body: { ...body, cloudId, isCloudTrial },
         });
       } catch (error) {
         return response.customError(wrapError(error));

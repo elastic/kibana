@@ -8,11 +8,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import * as i18n from './translations';
-import { CasesStatus } from './types';
+import type { CasesStatus } from './types';
 import { useHttp } from '../common/lib/kibana';
 import { getCasesStatus } from '../api';
 import { useCasesToast } from '../common/use_cases_toast';
-import { ServerError } from '../types';
+import type { ServerError } from '../types';
 import { casesQueriesKeys } from './constants';
 
 export const useGetCasesStatus = () => {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+export * from './data_view_permissions';
 export * from './synthetics';
 export * from './alerts';
-export * from './data_view_permissions';
 export * from './uptime.journey';
 export * from './step_duration.journey';
 export * from './read_only_user';
@@ -18,3 +18,4 @@ export * from './monitor_management_enablement.journey';
 export * from './monitor_details';
 export * from './locations';
 export * from './private_locations';
+export * from './detail_flyout';

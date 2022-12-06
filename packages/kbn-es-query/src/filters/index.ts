@@ -34,8 +34,8 @@ export {
 export {
   isExistsFilter,
   isMatchAllFilter,
-  buildOrFilter,
-  isOrFilter,
+  buildCombinedFilter,
+  isCombinedFilter,
   isPhraseFilter,
   isPhrasesFilter,
   isRangeFilter,
@@ -77,8 +77,8 @@ export type {
   CustomFilter,
   RangeFilterParams,
   QueryStringFilter,
-  OrFilter,
-  OrFilterMeta,
+  CombinedFilter,
+  CombinedFilterMeta,
   FilterItem,
 } from './build_filters';
 

@@ -22,7 +22,11 @@ describe('time_scale', () => {
     context?: ExecutionContext
   ) => Promise<Datatable>;
 
-  const timeScale = getTimeScale(createDatatableUtilitiesMock, () => 'UTC');
+  const timeScale = getTimeScale(
+    createDatatableUtilitiesMock,
+    () => 'UTC',
+    () => new Date('2010-01-04T06:30:30')
+  );
 
   const emptyTable: Datatable = {
     type: 'datatable',
@@ -390,7 +394,6 @@ describe('time_scale', () => {
         ...emptyTable,
         rows: [
           {
-            date: moment('2010-01-01T00:00:00.000Z').valueOf(),
             metric: 300,
           },
         ],
@@ -419,7 +422,6 @@ describe('time_scale', () => {
         ...emptyTable,
         rows: [
           {
-            date: moment().subtract('1d').valueOf(),
             metric: 300,
           },
         ],
@@ -432,14 +434,14 @@ describe('time_scale', () => {
       {
         getSearchContext: () => ({
           timeRange: {
-            from: 'now-10d',
+            from: 'now-2d',
             to: 'now',
           },
         }),
       } as unknown as ExecutionContext
     );
 
-    expect(result.rows.map(({ scaledMetric }) => scaledMetric)).toEqual([30]);
+    expect(result.rows.map(({ scaledMetric }) => scaledMetric)).toEqual([150]);
   });
 
   it('should apply fn for non-histogram fields (with Reduced time range)', async () => {

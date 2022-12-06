@@ -120,11 +120,29 @@
           "\nConfig schema for validting the shape of the `appenders` key in in {@link LoggerContextConfigType} or\n{@link LoggingConfigType}.\n"
         ],
         "signature": [
-          "Type",
-          "<Readonly<{} & { type: \"console\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"file\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; fileName: string; }> | Readonly<{} & { type: \"rewrite\"; policy: Readonly<{} & { type: \"meta\"; mode: \"update\" | \"remove\"; properties: Readonly<{ value?: string | number | boolean | null | undefined; } & { path: string; }>[]; }>; appenders: string[]; }> | Readonly<{} & { type: \"rolling-file\"; strategy: ",
-          "NumericRollingStrategyConfig",
-          "; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; fileName: string; policy: Readonly<{} & { type: \"size-limit\"; size: ",
-          "ByteSizeValue",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
+          "<Readonly<{} & { type: \"console\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"file\"; fileName: string; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"rewrite\"; policy: Readonly<{} & { type: \"meta\"; mode: \"update\" | \"remove\"; properties: Readonly<{ value?: string | number | boolean | null | undefined; } & { path: string; }>[]; }>; appenders: string[]; }> | Readonly<{} & { type: \"rolling-file\"; strategy: ",
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.NumericRollingStrategyConfig",
+            "text": "NumericRollingStrategyConfig"
+          },
+          "; fileName: string; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ highlight?: boolean | undefined; pattern?: string | undefined; } & { type: \"pattern\"; }>; policy: Readonly<{} & { type: \"size-limit\"; size: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ByteSizeValue",
+            "text": "ByteSizeValue"
+          },
           "; }> | Readonly<{} & { type: \"time-interval\"; interval: moment.Duration; modulate: boolean; }>; }>>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/appenders/appenders.ts",
@@ -142,13 +160,37 @@
           "\nConfig schema for validating the inputs to the {@link LoggingServiceStart.configure} API.\nSee {@link LoggerContextConfigType}.\n"
         ],
         "signature": [
-          "ObjectType",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ObjectType",
+            "text": "ObjectType"
+          },
           "<{ appenders: ",
-          "Type",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
           "<Map<string, ",
-          "AppenderConfigType",
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-server.AppenderConfigType",
+            "text": "AppenderConfigType"
+          },
           ">>; loggers: ",
-          "Type",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
           "<Readonly<{} & { name: string; level: \"error\" | \"all\" | \"info\" | \"debug\" | \"off\" | \"warn\" | \"trace\" | \"fatal\"; appenders: string[]; }>[]>; }>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/logging_config.ts",
@@ -166,13 +208,37 @@
           "\nConfig schema for validating the `loggers` key in {@link LoggerContextConfigType} or {@link LoggingConfigType}.\n"
         ],
         "signature": [
-          "ObjectType",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ObjectType",
+            "text": "ObjectType"
+          },
           "<{ appenders: ",
-          "Type",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
           "<string[]>; name: ",
-          "Type",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
           "<string>; level: ",
-          "Type",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
           "<\"error\" | \"all\" | \"info\" | \"debug\" | \"off\" | \"warn\" | \"trace\" | \"fatal\">; }>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/logging_config.ts",

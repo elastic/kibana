@@ -7,6 +7,8 @@ categories: []
 release: beta
 type: integration
 license: basic
+owner:
+  github: elastic/fleet
 
 conditions:
   # Version number is not compatible with current version

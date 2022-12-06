@@ -16,7 +16,6 @@ import type {
   XYReferenceLineLayerConfig,
   SeriesType,
 } from './types';
-import { layerTypes } from '../../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { IconChartBar } from '@kbn/chart-icons';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -28,9 +27,11 @@ import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsState } from '../../state_management';
-import { createMockedIndexPattern } from '../../indexpattern_datasource/mocks';
+import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { KEEP_GLOBAL_FILTERS_ACTION_ID } from './annotations/actions';
+import { layerTypes } from '../..';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
@@ -292,6 +293,7 @@ describe('xy_visualization', () => {
               label: 'date_histogram',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1685,6 +1687,7 @@ describe('xy_visualization', () => {
               label: 'date_histogram',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1715,6 +1718,7 @@ describe('xy_visualization', () => {
               label: 'date_histogram',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1759,6 +1763,7 @@ describe('xy_visualization', () => {
               label: 'histogram',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1791,6 +1796,7 @@ describe('xy_visualization', () => {
               label: 'top values',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1821,6 +1827,7 @@ describe('xy_visualization', () => {
               label: 'top values',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1930,6 +1937,7 @@ describe('xy_visualization', () => {
               label: 'date_histogram',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -2458,7 +2466,7 @@ describe('xy_visualization', () => {
         {
           shortMessage: 'Wrong data type for Horizontal axis.',
           longMessage:
-            'Data type mismatch for the Horizontal axis. Cannot mix date and number interval types.',
+            'The Horizontal axis data in layer 1 is incompatible with the data in layer 2. Select a new function for the Horizontal axis.',
         },
       ]);
     });
@@ -2513,7 +2521,8 @@ describe('xy_visualization', () => {
       ).toEqual([
         {
           shortMessage: 'Wrong data type for Horizontal axis.',
-          longMessage: 'Data type mismatch for the Horizontal axis, use a different function.',
+          longMessage:
+            'The Horizontal axis data in layer 1 is incompatible with the data in layer 2. Select a new function for the Horizontal axis.',
         },
       ]);
     });
@@ -2858,51 +2867,17 @@ describe('xy_visualization', () => {
     });
   });
 
-  describe('getSupportedActionsForLayer', () => {
+  describe('layer actions', () => {
     it('should return no actions for a data layer', () => {
-      expect(
-        xyVisualization.getSupportedActionsForLayer?.('first', exampleState(), jest.fn())
-      ).toHaveLength(0);
+      expect(xyVisualization.getSupportedActionsForLayer?.('first', exampleState())).toHaveLength(
+        0
+      );
     });
 
     it('should return one action for an annotation layer', () => {
       const baseState = exampleState();
       expect(
-        xyVisualization.getSupportedActionsForLayer?.(
-          'annotation',
-          {
-            ...baseState,
-            layers: [
-              ...baseState.layers,
-              {
-                layerId: 'annotation',
-                layerType: layerTypes.ANNOTATIONS,
-                annotations: [exampleAnnotation2],
-                ignoreGlobalFilters: true,
-                indexPatternId: 'myIndexPattern',
-              },
-            ],
-          },
-          jest.fn()
-        )
-      ).toEqual([
-        expect.objectContaining({
-          displayName: 'Keep global filters',
-          description:
-            'All the dimensions configured in this layer respect filters defined at kibana level.',
-          icon: 'eye',
-          isCompatible: true,
-          'data-test-subj': 'lnsXY_annotationLayer_keepFilters',
-        }),
-      ]);
-    });
-
-    it('should return an action that performs a state update on click', () => {
-      const baseState = exampleState();
-      const setState = jest.fn();
-      const [action] = xyVisualization.getSupportedActionsForLayer?.(
-        'annotation',
-        {
+        xyVisualization.getSupportedActionsForLayer?.('annotation', {
           ...baseState,
           layers: [
             ...baseState.layers,
@@ -2914,12 +2889,42 @@ describe('xy_visualization', () => {
               indexPatternId: 'myIndexPattern',
             },
           ],
-        },
-        setState
-      )!;
-      action.execute();
+        })
+      ).toEqual([
+        expect.objectContaining({
+          displayName: 'Keep global filters',
+          description:
+            'All the dimensions configured in this layer respect filters defined at kibana level.',
+          icon: 'filter',
+          isCompatible: true,
+          'data-test-subj': 'lnsXY_annotationLayer_keepFilters',
+        }),
+      ]);
+    });
 
-      expect(setState).toHaveBeenCalledWith(
+    it('should handle an annotation action', () => {
+      const baseState = exampleState();
+      const state = {
+        ...baseState,
+        layers: [
+          ...baseState.layers,
+          {
+            layerId: 'annotation',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [exampleAnnotation2],
+            ignoreGlobalFilters: true,
+            indexPatternId: 'myIndexPattern',
+          },
+        ],
+      };
+
+      const newState = xyVisualization.onLayerAction!(
+        'annotation',
+        KEEP_GLOBAL_FILTERS_ACTION_ID,
+        state
+      );
+
+      expect(newState).toEqual(
         expect.objectContaining({
           layers: expect.arrayContaining([
             {

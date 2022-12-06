@@ -16,9 +16,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, VFC } from 'react';
-import { EMPTY_VALUE } from '../../../../../../common/constants';
+import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator, RawIndicatorFieldId } from '../../../../../../common/types/indicator';
-import { unwrapValue } from '../../../utils/unwrap_value';
+import { unwrapValue } from '../../../utils';
 import { IndicatorEmptyPrompt } from '../empty_prompt';
 import { IndicatorBlock } from './block';
 import { HighlightedValuesTable } from './highlighted_values_table';

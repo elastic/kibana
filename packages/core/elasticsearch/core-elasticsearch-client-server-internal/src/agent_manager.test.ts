@@ -44,34 +44,26 @@ describe('AgentManager', () => {
         expect(httpsAgent).toEqual(mockedHttpsAgent);
       });
 
-      it('provides Agents with a valid default configuration', () => {
+      it('takes into account the provided configurations', () => {
         const agentManager = new AgentManager();
-        const agentFactory = agentManager.getAgentFactory();
+        const agentFactory = agentManager.getAgentFactory({
+          maxTotalSockets: 1024,
+          scheduling: 'fifo',
+        });
         agentFactory({ url: new URL('http://elastic-node-1:9200') });
-        expect(HttpAgent).toBeCalledTimes(1);
-        expect(HttpAgent).toBeCalledWith({
-          keepAlive: true,
-          keepAliveMsecs: 1000,
-          maxFreeSockets: 256,
-          maxSockets: 256,
+        const agentFactory2 = agentManager.getAgentFactory({
+          maxFreeSockets: 10,
           scheduling: 'lifo',
         });
-      });
-
-      it('takes into account the provided configurations', () => {
-        const agentManager = new AgentManager({ maxFreeSockets: 32, maxSockets: 2048 });
-        const agentFactory = agentManager.getAgentFactory({
-          maxSockets: 1024,
+        agentFactory2({ url: new URL('http://elastic-node-2:9200') });
+        expect(HttpAgent).toBeCalledTimes(2);
+        expect(HttpAgent).toBeCalledWith({
+          maxTotalSockets: 1024,
           scheduling: 'fifo',
         });
-        agentFactory({ url: new URL('http://elastic-node-1:9200') });
-        expect(HttpAgent).toBeCalledTimes(1);
         expect(HttpAgent).toBeCalledWith({
-          keepAlive: true,
-          keepAliveMsecs: 1000,
-          maxFreeSockets: 32,
-          maxSockets: 1024,
-          scheduling: 'fifo',
+          maxFreeSockets: 10,
+          scheduling: 'lifo',
         });
       });
 
@@ -86,7 +78,7 @@ describe('AgentManager', () => {
         expect(HttpsAgent).toHaveBeenCalledTimes(1);
       });
 
-      it('provides the same Agent iif URLs use the same protocol', () => {
+      it('provides the same Agent if URLs use the same protocol', () => {
         const agentManager = new AgentManager();
         const agentFactory = agentManager.getAgentFactory();
         const agent1 = agentFactory({ url: new URL('http://elastic-node-1:9200') });

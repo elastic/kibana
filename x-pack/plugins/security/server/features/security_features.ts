@@ -16,6 +16,10 @@ const userManagementFeature: ElasticsearchFeatureConfig = {
   privileges: [
     {
       requiredClusterPrivileges: ['manage_security'],
+      ui: ['save'],
+    },
+    {
+      requiredClusterPrivileges: ['read_security'],
       ui: [],
     },
   ],
@@ -30,6 +34,10 @@ const rolesManagementFeature: ElasticsearchFeatureConfig = {
   privileges: [
     {
       requiredClusterPrivileges: ['manage_security'],
+      ui: ['save'],
+    },
+    {
+      requiredClusterPrivileges: ['read_security'],
       ui: [],
     },
   ],
@@ -44,10 +52,14 @@ const apiKeysManagementFeature: ElasticsearchFeatureConfig = {
   privileges: [
     {
       requiredClusterPrivileges: ['manage_api_key'],
-      ui: [],
+      ui: ['save'],
     },
     {
       requiredClusterPrivileges: ['manage_own_api_key'],
+      ui: ['save'],
+    },
+    {
+      requiredClusterPrivileges: ['read_security'],
       ui: [],
     },
   ],
@@ -62,6 +74,10 @@ const roleMappingsManagementFeature: ElasticsearchFeatureConfig = {
   privileges: [
     {
       requiredClusterPrivileges: ['manage_security'],
+      ui: ['save'],
+    },
+    {
+      requiredClusterPrivileges: ['read_security'],
       ui: [],
     },
   ],

@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import { mergeWith, uniqBy, isEqual } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Embeddable } from '@kbn/lens-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
-
-import { Filter, Query, DataViewBase } from '@kbn/es-query';
-
-import type { LensSavedObjectAttributes, XYDataLayerConfig } from '@kbn/lens-plugin/public';
-
 import { i18n } from '@kbn/i18n';
+import { mergeWith, uniqBy, isEqual } from 'lodash';
+import { firstValueFrom } from 'rxjs';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  ChartInfo,
+  Embeddable,
+  LensPublicStart,
+  LensSavedObjectAttributes,
+} from '@kbn/lens-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { DashboardAppLocatorParams } from '@kbn/dashboard-plugin/public';
+import type { Filter, Query, DataViewBase } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 
 import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
@@ -24,14 +28,22 @@ import { stashJobForCloning } from '../common/job_creator/util/general';
 import type { ErrorType } from '../../../../../common/util/errors';
 import { createDatafeedId } from '../../../../../common/util/job_utils';
 import type { MlApiServices } from '../../../services/ml_api_service';
+import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
 import {
   CREATED_BY_LABEL,
   DEFAULT_BUCKET_SPAN,
   JOB_TYPE,
 } from '../../../../../common/constants/new_job';
 import { createQueries } from '../utils/new_job_utils';
-import { isCompatibleLayer, createDetectors, getJobsItemsFromEmbeddable } from './utils';
+import {
+  isCompatibleLayer,
+  createDetectors,
+  getJobsItemsFromEmbeddable,
+  getChartInfoFromVisualization,
+} from './utils';
 import { VisualizationExtractor } from './visualization_extractor';
+
+type Dashboard = Embeddable['parent'];
 
 interface CreationState {
   success: boolean;
@@ -47,10 +59,11 @@ interface CreateState {
 
 export class QuickJobCreator {
   constructor(
-    private dataViewClient: DataViewsContract,
-    private kibanaConfig: IUiSettingsClient,
-    private timeFilter: TimefilterContract,
-    private mlApiServices: MlApiServices
+    private readonly lens: LensPublicStart,
+    private readonly kibanaConfig: IUiSettingsClient,
+    private readonly timeFilter: TimefilterContract,
+    private readonly share: SharePluginStart,
+    private readonly mlApiServices: MlApiServices
   ) {}
 
   public async createAndSaveJob(
@@ -61,22 +74,28 @@ export class QuickJobCreator {
     runInRealTime: boolean,
     layerIndex: number
   ): Promise<CreateState> {
-    const { query, filters, to, from, vis } = getJobsItemsFromEmbeddable(embeddable);
+    const { query, filters, to, from, dashboard, chartInfo } = await getJobsItemsFromEmbeddable(
+      embeddable,
+      this.lens
+    );
     if (query === undefined || filters === undefined) {
       throw new Error('Cannot create job, query and filters are undefined');
     }
 
     const { jobConfig, datafeedConfig, start, end, jobType } = await this.createJob(
-      vis,
+      chartInfo,
       from,
       to,
       query,
       filters,
       bucketSpan,
-
       layerIndex
     );
-    const job = {
+
+    const datafeedId = createDatafeedId(jobId);
+    const datafeed = { ...datafeedConfig, job_id: jobId, datafeed_id: datafeedId };
+
+    const job: estypes.MlJob = {
       ...jobConfig,
       job_id: jobId,
       custom_settings: {
@@ -84,11 +103,9 @@ export class QuickJobCreator {
           jobType === JOB_TYPE.SINGLE_METRIC
             ? CREATED_BY_LABEL.SINGLE_METRIC_FROM_LENS
             : CREATED_BY_LABEL.MULTI_METRIC_FROM_LENS,
+        ...(await this.getCustomUrls(dashboard, datafeed)),
       },
     };
-
-    const datafeedId = createDatafeedId(jobId);
-    const datafeed = { ...datafeedConfig, job_id: jobId, datafeed_id: datafeedId };
 
     const result: CreateState = {
       jobCreated: { success: false },
@@ -97,6 +114,37 @@ export class QuickJobCreator {
       datafeedStarted: { success: false },
     };
 
+    // calculate model memory limit
+    try {
+      if (
+        start !== undefined &&
+        end !== undefined &&
+        job.data_description.time_field !== undefined &&
+        datafeedConfig.indices.length > 0
+      ) {
+        const { modelMemoryLimit } = await firstValueFrom(
+          this.mlApiServices.calculateModelMemoryLimit$({
+            datafeedConfig: datafeed,
+            analysisConfig: job.analysis_config,
+            indexPattern: datafeedConfig.indices[0],
+            query: datafeedConfig.query,
+            timeFieldName: job.data_description.time_field,
+            earliestMs: start,
+            latestMs: end,
+          })
+        );
+        if (job.analysis_limits === undefined) {
+          job.analysis_limits = {};
+        }
+        job.analysis_limits.model_memory_limit = modelMemoryLimit;
+      }
+    } catch (error) {
+      // could not calculate mml, continue with job creation as default value will be used.
+      // eslint-disable-next-line no-console
+      console.error('could not calculate model memory limit', error);
+    }
+
+    // put job
     try {
       await this.mlApiServices.addJob({ jobId: job.job_id, job });
     } catch (error) {
@@ -105,6 +153,7 @@ export class QuickJobCreator {
     }
     result.jobCreated.success = true;
 
+    // put datafeed
     try {
       await this.mlApiServices.addDatafeed({ datafeedId, datafeedConfig: datafeed });
     } catch (error) {
@@ -114,6 +163,7 @@ export class QuickJobCreator {
     result.datafeedCreated.success = true;
 
     if (startJob) {
+      // open job, ignore error if already open
       try {
         await this.mlApiServices.openJob({ jobId });
       } catch (error) {
@@ -125,6 +175,7 @@ export class QuickJobCreator {
       }
       result.jobOpened.success = true;
 
+      // start datafeed
       try {
         await this.mlApiServices.startDatafeed({
           datafeedId,
@@ -148,10 +199,11 @@ export class QuickJobCreator {
     filters: Filter[],
     layerIndex: number | undefined
   ) {
+    const chartInfo = await getChartInfoFromVisualization(this.lens, vis);
     try {
       const { jobConfig, datafeedConfig, jobType, start, end, includeTimeRange } =
         await this.createJob(
-          vis,
+          chartInfo,
           startString,
           endString,
           query,
@@ -185,7 +237,7 @@ export class QuickJobCreator {
   }
 
   async createJob(
-    vis: LensSavedObjectAttributes,
+    chartInfo: ChartInfo,
     startString: string,
     endString: string,
     query: Query,
@@ -194,7 +246,7 @@ export class QuickJobCreator {
     layerIndex: number | undefined
   ) {
     const { jobConfig, datafeedConfig, jobType } = await this.createADJobFromLensSavedObject(
-      vis,
+      chartInfo,
       query,
       filters,
       bucketSpan,
@@ -240,23 +292,20 @@ export class QuickJobCreator {
   }
 
   private async createADJobFromLensSavedObject(
-    vis: LensSavedObjectAttributes,
+    chartInfo: ChartInfo,
     query: Query,
     filters: Filter[],
     bucketSpan: string,
     layerIndex?: number
   ) {
-    const visualization = vis.state.visualization as { layers: XYDataLayerConfig[] };
-
-    const compatibleLayers = visualization.layers.filter(isCompatibleLayer);
+    const compatibleLayers = chartInfo.layers.filter(isCompatibleLayer);
 
     const selectedLayer =
-      layerIndex !== undefined ? visualization.layers[layerIndex] : compatibleLayers[0];
+      layerIndex !== undefined ? chartInfo.layers[layerIndex] : compatibleLayers[0];
 
-    const visExtractor = new VisualizationExtractor(this.dataViewClient);
+    const visExtractor = new VisualizationExtractor();
     const { fields, timeField, splitField, dataView } = await visExtractor.extractFields(
-      selectedLayer,
-      vis
+      selectedLayer
     );
 
     const jobConfig = createEmptyJob();
@@ -264,7 +313,7 @@ export class QuickJobCreator {
 
     const combinedFiltersAndQueries = this.combineQueriesAndFilters(
       { query, filters },
-      { query: vis.state.query, filters: vis.state.filters },
+      { query: chartInfo.query, filters: chartInfo.filters },
       dataView
     );
 
@@ -272,12 +321,12 @@ export class QuickJobCreator {
 
     jobConfig.analysis_config.detectors = createDetectors(fields, splitField);
 
-    jobConfig.data_description.time_field = timeField.sourceField;
+    jobConfig.data_description.time_field = timeField.operation.fields?.[0];
     jobConfig.analysis_config.bucket_span = bucketSpan;
-    if (splitField) {
-      jobConfig.analysis_config.influencers = [splitField.sourceField];
+    if (splitField && splitField.operation.fields) {
+      jobConfig.analysis_config.influencers = [splitField.operation.fields[0]];
     }
-    const isSingleMetric = splitField === null && jobConfig.analysis_config.detectors.length === 1;
+    const isSingleMetric = !splitField && jobConfig.analysis_config.detectors.length === 1;
     const jobType = isSingleMetric ? JOB_TYPE.SINGLE_METRIC : JOB_TYPE.MULTI_METRIC;
 
     if (isSingleMetric) {
@@ -329,5 +378,50 @@ export class QuickJobCreator {
     );
 
     return mergedQueries;
+  }
+
+  private async createDashboardLink(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
+    if (dashboard === undefined) {
+      // embeddable may have not been in a dashboard
+      return null;
+    }
+
+    const params: DashboardAppLocatorParams = {
+      dashboardId: dashboard.id,
+      timeRange: {
+        from: '$earliest$',
+        to: '$latest$',
+        mode: 'absolute',
+      },
+      filters: getFiltersForDSLQuery(
+        datafeedConfig.query,
+        undefined,
+        datafeedConfig.job_id,
+        FilterStateStore.GLOBAL_STATE
+      ),
+    };
+    const dashboardLocator = this.share.url.locators.get('DASHBOARD_APP_LOCATOR');
+    const encodedUrl = dashboardLocator ? await dashboardLocator.getUrl(params) : '';
+    const url = decodeURIComponent(encodedUrl).replace(/^.+dashboards/, 'dashboards');
+
+    const dashboardName = dashboard.getOutput().title;
+
+    const urlName =
+      dashboardName === undefined
+        ? i18n.translate('xpack.ml.newJob.fromLens.createJob.defaultUrlDashboard', {
+            defaultMessage: 'Original dashboard',
+          })
+        : i18n.translate('xpack.ml.newJob.fromLens.createJob.namedUrlDashboard', {
+            defaultMessage: 'Open {dashboardName}',
+            values: { dashboardName },
+          });
+
+    return { url_name: urlName, url_value: url, time_range: 'auto' };
+  }
+
+  private async getCustomUrls(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
+    return dashboard !== undefined
+      ? { custom_urls: [await this.createDashboardLink(dashboard, datafeedConfig)] }
+      : {};
   }
 }

@@ -85,8 +85,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await find.existsByCssSelector('[title="Chrome Mobile iOS"]')).to.eql(true);
-      expect(await find.existsByCssSelector('[title="Mobile Safari"]')).to.eql(true);
+      expect(
+        await find.existsByCssSelector(
+          '[aria-label="Chrome Mobile iOS; Activate to hide series in graph"]'
+        )
+      ).to.eql(true);
+      expect(
+        await find.existsByCssSelector(
+          '[aria-label="Mobile Safari; Activate to hide series in graph"]'
+        )
+      ).to.eql(true);
     });
   });
 }

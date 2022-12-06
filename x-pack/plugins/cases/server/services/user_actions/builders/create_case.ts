@@ -7,7 +7,7 @@
 
 import { Actions, ActionTypes, CaseStatuses } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import { UserActionParameters, BuilderReturnValue } from '../types';
+import type { UserActionParameters, BuilderReturnValue } from '../types';
 
 export class CreateCaseUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'create_case'>): BuilderReturnValue {

@@ -11,6 +11,8 @@ import type { Logger } from '@kbn/logging';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+
 import type { RuleExecutorOptions, RuleType } from '@kbn/alerting-plugin/server';
 import type {
   AlertInstanceContext,
@@ -29,7 +31,7 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { Filter } from '@kbn/es-query';
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
-import type { CompleteRule, RuleParams } from '../schemas/rule_schemas';
+import type { CompleteRule, RuleParams } from '../rule_schema';
 import type {
   BulkCreate,
   SearchAfterAndBulkCreateReturnType,
@@ -76,6 +78,7 @@ export interface RunOpts<TParams extends RuleParams> {
   aggregatableTimestampField: string;
   unprocessedExceptions: ExceptionListItemSchema[];
   exceptionFilter: Filter | undefined;
+  alertTimestampOverride: Date | undefined;
 }
 
 export type SecurityAlertType<
@@ -108,6 +111,7 @@ export interface CreateSecurityRuleTypeWrapperProps {
   ruleDataClient: IRuleDataClient;
   ruleExecutionLoggerFactory: IRuleExecutionLogService['createClientForExecutors'];
   version: string;
+  isPreview?: boolean;
 }
 
 export type CreateSecurityRuleTypeWrapper = (
@@ -135,4 +139,7 @@ export interface CreateQueryRuleAdditionalOptions {
 
 export interface CreateQueryRuleOptions
   extends CreateRuleOptions,
-    CreateQueryRuleAdditionalOptions {}
+    CreateQueryRuleAdditionalOptions {
+  id: typeof QUERY_RULE_TYPE_ID | typeof SAVED_QUERY_RULE_TYPE_ID;
+  name: 'Custom Query Rule' | 'Saved Query Rule';
+}
