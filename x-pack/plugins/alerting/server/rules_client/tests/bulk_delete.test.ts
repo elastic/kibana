@@ -294,7 +294,7 @@ describe('bulkDelete', () => {
     expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledWith(['id1', 'id2']);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
-      { apiKeys: ['MTIzOmFiYw==', 'MTIzOmFiYw=='] },
+      { apiKeys: ['MTIzOmFiYw==', 'MzIxOmFiYw=='] },
       expect.anything(),
       expect.anything()
     );
