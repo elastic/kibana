@@ -10,8 +10,6 @@ import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
-const defaultSuccessfulResponse = { errors: [], total: 1, taskIdsFailedToBeDeleted: [] };
-
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -76,7 +74,41 @@ export default ({ getService }: FtrProviderContext) => {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    apiKey: response.body.rules[0].apiKey,
+                    notifyWhen: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['foo'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    alertTypeId: 'test.noop',
+                    apiKeyOwner: response.body.rules[0].apiKeyOwner,
+                    createdBy: 'elastic',
+                    updatedBy: response.body.rules[0].updatedBy,
+                    muteAll: false,
+                    mutedInstanceIds: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    snoozeSchedule: [],
+                    updatedAt: response.body.rules[0].updatedAt,
+                    createdAt: response.body.rules[0].createdAt,
+                    scheduledTaskId: response.body.rules[0].scheduledTaskId,
+                    executionStatus: {
+                      lastExecutionDate: response.body.rules[0].executionStatus.lastExecutionDate,
+                      status: 'pending',
+                    },
+                    monitoring: response.body.rules[0].monitoring,
+                  },
+                ],
+                errors: [],
+                total: 1,
+                taskIdsFailedToBeDeleted: [],
+              });
               expect(response.statusCode).to.eql(200);
               try {
                 await getScheduledTask(createdRule1.scheduled_task_id);
@@ -147,7 +179,47 @@ export default ({ getService }: FtrProviderContext) => {
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    apiKey: response.body.rules[0].apiKey,
+                    notifyWhen: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['foo'],
+                    consumer: 'alertsRestrictedFixture',
+                    throttle: '1m',
+                    alertTypeId: 'test.restricted-noop',
+                    apiKeyOwner: response.body.rules[0].apiKeyOwner,
+                    createdBy: 'elastic',
+                    updatedBy: response.body.rules[0].updatedBy,
+                    muteAll: false,
+                    mutedInstanceIds: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    snoozeSchedule: [],
+                    updatedAt: response.body.rules[0].updatedAt,
+                    createdAt: response.body.rules[0].createdAt,
+                    scheduledTaskId: response.body.rules[0].scheduledTaskId,
+                    executionStatus: {
+                      lastExecutionDate: response.body.rules[0].executionStatus.lastExecutionDate,
+                      status: 'pending',
+                    },
+                    monitoring: response.body.rules[0].monitoring,
+                    ...(response.body.rules[0].nextRun
+                      ? { nextRun: response.body.rules[0].nextRun }
+                      : {}),
+                    ...(response.body.rules[0].lastRun
+                      ? { lastRun: response.body.rules[0].lastRun }
+                      : {}),
+                  },
+                ],
+                errors: [],
+                total: 1,
+                taskIdsFailedToBeDeleted: [],
+              });
               expect(response.statusCode).to.eql(200);
               try {
                 await getScheduledTask(createdRule1.scheduled_task_id);
@@ -207,7 +279,47 @@ export default ({ getService }: FtrProviderContext) => {
               await getScheduledTask(createdRule1.scheduled_task_id);
               break;
             case 'superuser at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    apiKey: response.body.rules[0].apiKey,
+                    notifyWhen: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['foo'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    alertTypeId: 'test.restricted-noop',
+                    apiKeyOwner: response.body.rules[0].apiKeyOwner,
+                    createdBy: 'elastic',
+                    updatedBy: response.body.rules[0].updatedBy,
+                    muteAll: false,
+                    mutedInstanceIds: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    snoozeSchedule: [],
+                    updatedAt: response.body.rules[0].updatedAt,
+                    createdAt: response.body.rules[0].createdAt,
+                    scheduledTaskId: response.body.rules[0].scheduledTaskId,
+                    executionStatus: {
+                      lastExecutionDate: response.body.rules[0].executionStatus.lastExecutionDate,
+                      status: 'pending',
+                    },
+                    monitoring: response.body.rules[0].monitoring,
+                    ...(response.body.rules[0].nextRun
+                      ? { nextRun: response.body.rules[0].nextRun }
+                      : {}),
+                    ...(response.body.rules[0].lastRun
+                      ? { lastRun: response.body.rules[0].lastRun }
+                      : {}),
+                  },
+                ],
+                errors: [],
+                total: 1,
+                taskIdsFailedToBeDeleted: [],
+              });
               expect(response.statusCode).to.eql(200);
               try {
                 await getScheduledTask(createdRule1.scheduled_task_id);
@@ -267,7 +379,41 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    apiKey: response.body.rules[0].apiKey,
+                    notifyWhen: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['foo'],
+                    consumer: 'alerts',
+                    throttle: '1m',
+                    alertTypeId: 'test.noop',
+                    apiKeyOwner: response.body.rules[0].apiKeyOwner,
+                    createdBy: 'elastic',
+                    updatedBy: response.body.rules[0].updatedBy,
+                    muteAll: false,
+                    mutedInstanceIds: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    snoozeSchedule: [],
+                    updatedAt: response.body.rules[0].updatedAt,
+                    createdAt: response.body.rules[0].createdAt,
+                    scheduledTaskId: response.body.rules[0].scheduledTaskId,
+                    executionStatus: {
+                      lastExecutionDate: response.body.rules[0].executionStatus.lastExecutionDate,
+                      status: 'pending',
+                    },
+                    monitoring: response.body.rules[0].monitoring,
+                  },
+                ],
+                errors: [],
+                total: 1,
+                taskIdsFailedToBeDeleted: [],
+              });
               expect(response.statusCode).to.eql(200);
               try {
                 await getScheduledTask(createdRule1.scheduled_task_id);
@@ -287,7 +433,7 @@ export default ({ getService }: FtrProviderContext) => {
               supertest
                 .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
                 .set('kbn-xsrf', 'foo')
-                .send(getTestRuleData({ tags: ['multiple-rules-edit'] }))
+                .send(getTestRuleData({ tags: ['multiple-rules-delete'] }))
                 .expect(200)
             )
           );
@@ -332,7 +478,97 @@ export default ({ getService }: FtrProviderContext) => {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql({ ...defaultSuccessfulResponse, total: 3 });
+              expect(response.body).to.eql({
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    apiKey: response.body.rules[0].apiKey,
+                    notifyWhen: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-delete'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    alertTypeId: 'test.noop',
+                    apiKeyOwner: response.body.rules[0].apiKeyOwner,
+                    createdBy: 'elastic',
+                    updatedBy: response.body.rules[0].updatedBy,
+                    muteAll: false,
+                    mutedInstanceIds: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    snoozeSchedule: [],
+                    updatedAt: response.body.rules[0].updatedAt,
+                    createdAt: response.body.rules[0].createdAt,
+                    scheduledTaskId: response.body.rules[0].scheduledTaskId,
+                    executionStatus: {
+                      lastExecutionDate: response.body.rules[0].executionStatus.lastExecutionDate,
+                      status: 'pending',
+                    },
+                    monitoring: response.body.rules[0].monitoring,
+                  },
+                  {
+                    id: response.body.rules[1].id,
+                    apiKey: response.body.rules[1].apiKey,
+                    notifyWhen: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-delete'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    alertTypeId: 'test.noop',
+                    apiKeyOwner: response.body.rules[1].apiKeyOwner,
+                    createdBy: 'elastic',
+                    updatedBy: response.body.rules[1].updatedBy,
+                    muteAll: false,
+                    mutedInstanceIds: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    snoozeSchedule: [],
+                    updatedAt: response.body.rules[1].updatedAt,
+                    createdAt: response.body.rules[1].createdAt,
+                    scheduledTaskId: response.body.rules[1].scheduledTaskId,
+                    executionStatus: {
+                      lastExecutionDate: response.body.rules[1].executionStatus.lastExecutionDate,
+                      status: 'pending',
+                    },
+                    monitoring: response.body.rules[1].monitoring,
+                  },
+                  {
+                    id: response.body.rules[2].id,
+                    apiKey: response.body.rules[2].apiKey,
+                    notifyWhen: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-delete'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    alertTypeId: 'test.noop',
+                    apiKeyOwner: response.body.rules[2].apiKeyOwner,
+                    createdBy: 'elastic',
+                    updatedBy: response.body.rules[2].updatedBy,
+                    muteAll: false,
+                    mutedInstanceIds: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    snoozeSchedule: [],
+                    updatedAt: response.body.rules[2].updatedAt,
+                    createdAt: response.body.rules[2].createdAt,
+                    scheduledTaskId: response.body.rules[2].scheduledTaskId,
+                    executionStatus: {
+                      lastExecutionDate: response.body.rules[2].executionStatus.lastExecutionDate,
+                      status: 'pending',
+                    },
+                    monitoring: response.body.rules[2].monitoring,
+                  },
+                ],
+                errors: [],
+                total: 3,
+                taskIdsFailedToBeDeleted: [],
+              });
               expect(response.statusCode).to.eql(200);
               for (const rule of rules) {
                 try {
@@ -348,7 +584,7 @@ export default ({ getService }: FtrProviderContext) => {
           }
         });
 
-        it('should handle bulk delete of several rules ids appropriately based on filter', async () => {
+        it.skip('should handle bulk delete of several rules ids appropriately based on filter', async () => {
           const rules = await Promise.all(
             Array.from({ length: 3 }).map(() =>
               supertest
@@ -399,7 +635,97 @@ export default ({ getService }: FtrProviderContext) => {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql({ ...defaultSuccessfulResponse, total: 3 });
+              expect(response.body).to.eql({
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    apiKey: response.body.rules[0].apiKey,
+                    notifyWhen: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-delete'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    alertTypeId: 'test.noop',
+                    apiKeyOwner: response.body.rules[0].apiKeyOwner,
+                    createdBy: 'elastic',
+                    updatedBy: response.body.rules[0].updatedBy,
+                    muteAll: false,
+                    mutedInstanceIds: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    snoozeSchedule: [],
+                    updatedAt: response.body.rules[0].updatedAt,
+                    createdAt: response.body.rules[0].createdAt,
+                    scheduledTaskId: response.body.rules[0].scheduledTaskId,
+                    executionStatus: {
+                      lastExecutionDate: response.body.rules[0].executionStatus.lastExecutionDate,
+                      status: 'pending',
+                    },
+                    monitoring: response.body.rules[0].monitoring,
+                  },
+                  {
+                    id: response.body.rules[1].id,
+                    apiKey: response.body.rules[1].apiKey,
+                    notifyWhen: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-delete'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    alertTypeId: 'test.noop',
+                    apiKeyOwner: response.body.rules[1].apiKeyOwner,
+                    createdBy: 'elastic',
+                    updatedBy: response.body.rules[1].updatedBy,
+                    muteAll: false,
+                    mutedInstanceIds: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    snoozeSchedule: [],
+                    updatedAt: response.body.rules[1].updatedAt,
+                    createdAt: response.body.rules[1].createdAt,
+                    scheduledTaskId: response.body.rules[1].scheduledTaskId,
+                    executionStatus: {
+                      lastExecutionDate: response.body.rules[1].executionStatus.lastExecutionDate,
+                      status: 'pending',
+                    },
+                    monitoring: response.body.rules[1].monitoring,
+                  },
+                  {
+                    id: response.body.rules[2].id,
+                    apiKey: response.body.rules[2].apiKey,
+                    notifyWhen: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['multiple-rules-delete'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    alertTypeId: 'test.noop',
+                    apiKeyOwner: response.body.rules[2].apiKeyOwner,
+                    createdBy: 'elastic',
+                    updatedBy: response.body.rules[2].updatedBy,
+                    muteAll: false,
+                    mutedInstanceIds: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    snoozeSchedule: [],
+                    updatedAt: response.body.rules[2].updatedAt,
+                    createdAt: response.body.rules[2].createdAt,
+                    scheduledTaskId: response.body.rules[2].scheduledTaskId,
+                    executionStatus: {
+                      lastExecutionDate: response.body.rules[2].executionStatus.lastExecutionDate,
+                      status: 'pending',
+                    },
+                    monitoring: response.body.rules[2].monitoring,
+                  },
+                ],
+                errors: [],
+                total: 3,
+                taskIdsFailedToBeDeleted: [],
+              });
               expect(response.statusCode).to.eql(200);
               for (const rule of rules) {
                 try {
@@ -431,7 +757,41 @@ export default ({ getService }: FtrProviderContext) => {
           switch (scenario.id) {
             // This superuser has more privileges that we think
             case 'superuser at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
+              expect(response.body).to.eql({
+                rules: [
+                  {
+                    id: response.body.rules[0].id,
+                    apiKey: response.body.rules[0].apiKey,
+                    notifyWhen: 'onThrottleInterval',
+                    enabled: true,
+                    name: 'abc',
+                    tags: ['foo'],
+                    consumer: 'alertsFixture',
+                    throttle: '1m',
+                    alertTypeId: 'test.noop',
+                    apiKeyOwner: response.body.rules[0].apiKeyOwner,
+                    createdBy: 'elastic',
+                    updatedBy: response.body.rules[0].updatedBy,
+                    muteAll: false,
+                    mutedInstanceIds: [],
+                    schedule: { interval: '1m' },
+                    actions: [],
+                    params: {},
+                    snoozeSchedule: [],
+                    updatedAt: response.body.rules[0].updatedAt,
+                    createdAt: response.body.rules[0].createdAt,
+                    scheduledTaskId: response.body.rules[0].scheduledTaskId,
+                    executionStatus: {
+                      lastExecutionDate: response.body.rules[0].executionStatus.lastExecutionDate,
+                      status: 'pending',
+                    },
+                    monitoring: response.body.rules[0].monitoring,
+                  },
+                ],
+                errors: [],
+                total: 1,
+                taskIdsFailedToBeDeleted: [],
+              });
               expect(response.statusCode).to.eql(200);
               try {
                 await getScheduledTask(createdRule.scheduled_task_id);
