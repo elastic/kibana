@@ -30,6 +30,11 @@ describe('<IndicatorsPage />', () => {
       series: [],
       selectedField: '',
       onFieldChange: () => {},
+      query: {
+        id: 'chart',
+        loading: false,
+        refetch: stub,
+      },
     });
 
     (useIndicators as jest.MockedFunction<typeof useIndicators>).mockReturnValue({
@@ -40,8 +45,12 @@ describe('<IndicatorsPage />', () => {
       pagination: { pageIndex: 0, pageSize: 10, pageSizeOptions: [10] },
       onChangeItemsPerPage: stub,
       onChangePage: stub,
-      handleRefresh: stub,
       dataUpdatedAt: Date.now(),
+      query: {
+        id: 'list',
+        loading: false,
+        refetch: stub,
+      },
     });
 
     (useFilters as jest.MockedFunction<typeof useFilters>).mockReturnValue({
