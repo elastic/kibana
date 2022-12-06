@@ -3029,7 +3029,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/simplified_package_policy"
+                "$ref": "#/components/schemas/package_policy_request"
               }
             }
           }
@@ -3318,7 +3318,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/simplified_package_policy"
+                "$ref": "#/components/schemas/package_policy_request"
               }
             }
           }
@@ -5694,8 +5694,8 @@
           "created_at"
         ]
       },
-      "simplified_package_policy": {
-        "title": "Simplified Package Policy",
+      "package_policy_request": {
+        "title": "Package Policy Request",
         "type": "object",
         "properties": {
           "id": {
