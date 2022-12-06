@@ -56,8 +56,8 @@ export function useCurrentEuiTheme() {
 }
 
 interface MultiSelectPickerStyles {
-  filterGroup: SerializedStyles;
-  filterItemContainer: SerializedStyles;
+  filterGroup?: SerializedStyles;
+  filterItemContainer?: SerializedStyles;
 }
 export const MultiSelectPicker: FC<{
   options: Option[];
@@ -145,7 +145,6 @@ export const MultiSelectPicker: FC<{
               overflow: auto;
             `
           }
-          // style={{ maxHeight: 250, overflow: 'auto' }}
         >
           {Array.isArray(items) && items.length > 0 ? (
             items.map((item, index) => {

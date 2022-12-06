@@ -55,8 +55,6 @@ import { DataVisualizerDataViewManagement } from '../data_view_management';
 import { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
-// TODO port to `@emotion/react` once `useEuiBreakpoint` is available https://github.com/elastic/eui/pull/6057
-import './_index.scss';
 import { RANDOM_SAMPLER_OPTION, RandomSamplerOption } from '../../constants/random_sampler';
 
 const MAX_MEDIUM_PANEL_WIDTH = 1024;
@@ -469,6 +467,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     }, 500),
     []
   );
+  const compact = useMemo(() => panelWidth <= MAX_MEDIUM_PANEL_WIDTH, [panelWidth]);
 
   return (
     // Needs ResizeObserver to measure window width - side bar navigation
@@ -478,9 +477,27 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
           <EuiPageBody data-test-subj="dataVisualizerIndexPage" paddingSize="none" panelled={false}>
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
-                <EuiPageContentHeader className="dataVisualizerPageHeader">
+                <EuiPageContentHeader
+                  data-test-subj="dataVisualizerPageHeader"
+                  css={
+                    compact &&
+                    css`
+                      flex-direction: column;
+                      align-items: flex-start;
+                    `
+                  }
+                >
                   <EuiPageContentHeaderSection>
-                    <div className="dataViewTitleHeader">
+                    <div
+                      data-test-subj="dataViewTitleHeader"
+                      css={css`
+                        min-width: 300px;
+                        padding: $euiSizeS 0;
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                      `}
+                    >
                       <EuiTitle size={'s'}>
                         <h2>{currentDataView.getName()}</h2>
                       </EuiTitle>
@@ -511,6 +528,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                       <DatePickerWrapper
                         isAutoRefreshOnly={!hasValidTimeField}
                         showRefresh={!hasValidTimeField}
+                        compact={compact}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -522,7 +540,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               <EuiFlexGroup
                 gutterSize="m"
                 css={
-                  panelWidth <= MAX_MEDIUM_PANEL_WIDTH &&
+                  compact &&
                   css`
                     flex-direction: column;
                   `
@@ -594,7 +612,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 <EuiFlexItem
                   grow={false}
                   css={
-                    panelWidth > MAX_MEDIUM_PANEL_WIDTH &&
+                    !compact &&
                     css`
                       width: ${wizardPanelWidth};
                     `

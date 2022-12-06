@@ -69,10 +69,11 @@ function updateLastRefresh(timeRange?: OnRefreshProps) {
 }
 
 // FIXME: Consolidate this component with ML and AIOps's component
-export const DatePickerWrapper: FC<{ isAutoRefreshOnly?: boolean; showRefresh?: boolean }> = ({
-  isAutoRefreshOnly,
-  showRefresh,
-}) => {
+export const DatePickerWrapper: FC<{
+  isAutoRefreshOnly?: boolean;
+  showRefresh?: boolean;
+  compact?: boolean;
+}> = ({ isAutoRefreshOnly, showRefresh, compact = false }) => {
   const {
     services,
     notifications: { toasts },
@@ -242,7 +243,7 @@ export const DatePickerWrapper: FC<{ isAutoRefreshOnly?: boolean; showRefresh?: 
     <EuiFlexGroup
       gutterSize="s"
       alignItems="center"
-      className="mlNavigationMenu__datePickerWrapper"
+      data-test-subj="mlNavigationMenuDatePickerWrapper"
     >
       <EuiFlexItem grow={false}>
         <EuiSuperDatePicker
@@ -257,6 +258,7 @@ export const DatePickerWrapper: FC<{ isAutoRefreshOnly?: boolean; showRefresh?: 
           recentlyUsedRanges={recentlyUsedRanges}
           dateFormat={dateFormat}
           commonlyUsedRanges={commonlyUsedRanges}
+          updateButtonProps={{ iconOnly: compact }}
         />
       </EuiFlexItem>
 
@@ -271,7 +273,7 @@ export const DatePickerWrapper: FC<{ isAutoRefreshOnly?: boolean; showRefresh?: 
           >
             <FormattedMessage
               id="xpack.dataVisualizer.index.pageRefreshButton"
-              defaultMessage="Refresh"
+              defaultMessage="Test"
             />
           </EuiButton>
         </EuiFlexItem>
