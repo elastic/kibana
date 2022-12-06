@@ -96,8 +96,8 @@ import {
 import {
   calculateRouteAuthz,
   getAuthzFromRequest,
+  getRouteRequiredAuthz,
   makeRouterWithFleetAuthz,
-  ROUTE_AUTHZ_REQUIREMENTS,
 } from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
@@ -345,10 +345,11 @@ export class FleetPlugin
         const coreContext = await context.core;
         const authz = await getAuthzFromRequest(request);
         const esClient = coreContext.elasticsearch.client;
-        const routePath = request.route.path;
-        const routeAuthz = ROUTE_AUTHZ_REQUIREMENTS[routePath]
-          ? calculateRouteAuthz(authz, ROUTE_AUTHZ_REQUIREMENTS[routePath])
+        const routeRequiredAuthz = getRouteRequiredAuthz(request.route.method, request.route.path);
+        const routeAuthz = routeRequiredAuthz
+          ? calculateRouteAuthz(authz, routeRequiredAuthz)
           : undefined;
+
         const getInternalSoClient = (): SavedObjectsClientContract =>
           appContextService
             .getSavedObjects()

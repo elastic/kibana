@@ -167,19 +167,90 @@ export const WRITE_ENDPOINT_PACKAGE_PRIVILEGES: DeepPartialTruthy<FleetAuthz> = 
 
 /**
  * The authorization requirements needed for an API route. Route authorization requirements are
- * defined either via an `all` object, where all value must be `true` in order for access to be granted,
- * or, by an `any` object, where any value defined that is set to `true` will grant access to the API
+ * defined either via an `all` object, where all values must be `true` in order for access to be granted,
+ * or, by an `any` object, where any value defined that is set to `true` will grant access to the API.
+ *
+ * The `all` conditions are checked first and if those evaluate to `false`, then `any` conditions are evaluated.
  */
-export const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<
-  Record<
-    string,
-    {
-      any?: FleetAuthzRequirements;
-      all?: FleetAuthzRequirements;
-    }
-  >
->({
-  [PACKAGE_POLICY_API_ROUTES.LIST_PATTERN]: {
+const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAuthz>>({
+  // Package Policy Update API
+  [`put:${PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN}`]: {
+    any: {
+      integrations: { writeIntegrationPolicies: true },
+      packagePrivileges: {
+        endpoint: {
+          actions: {
+            writePolicyManagement: {
+              executePackageAction: true,
+            },
+          },
+        },
+      },
+    },
+  },
+
+  // Package Policy GET one API
+  [`get:${PACKAGE_POLICY_API_ROUTES.INFO_PATTERN}`]: {
+    any: {
+      integrations: {
+        readIntegrationPolicies: true,
+      },
+      packagePrivileges: {
+        endpoint: {
+          actions: {
+            readPolicyManagement: {
+              executePackageAction: true,
+            },
+            readTrustedApplications: {
+              executePackageAction: true,
+            },
+            readEventFilters: {
+              executePackageAction: true,
+            },
+            readHostIsolationExceptions: {
+              executePackageAction: true,
+            },
+            readBlocklist: {
+              executePackageAction: true,
+            },
+          },
+        },
+      },
+    },
+  },
+
+  // Package Policy Bulk GET API
+  [`post:${PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN}`]: {
+    any: {
+      integrations: {
+        readIntegrationPolicies: true,
+      },
+      packagePrivileges: {
+        endpoint: {
+          actions: {
+            readPolicyManagement: {
+              executePackageAction: true,
+            },
+            readTrustedApplications: {
+              executePackageAction: true,
+            },
+            readEventFilters: {
+              executePackageAction: true,
+            },
+            readHostIsolationExceptions: {
+              executePackageAction: true,
+            },
+            readBlocklist: {
+              executePackageAction: true,
+            },
+          },
+        },
+      },
+    },
+  },
+
+  // Package Policy List API
+  [`get:${PACKAGE_POLICY_API_ROUTES.LIST_PATTERN}`]: {
     any: {
       integrations: {
         readIntegrationPolicies: true,
@@ -209,6 +280,18 @@ export const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<
   },
 });
 
+/**
+ * Retrieves the required fleet route authz in order for access to be granted to the given api route
+ * @param routeMethod
+ * @param routePath
+ */
+export const getRouteRequiredAuthz = (
+  routeMethod: RouteMethod,
+  routePath: string
+): FleetRouteRequiredAuthz => {
+  return ROUTE_AUTHZ_REQUIREMENTS[`${routeMethod}:${routePath}`];
+};
+
 export interface RouteAuthz {
   /** Is route access granted (based on authz) */
   granted: boolean;
@@ -234,10 +317,7 @@ export interface RouteAuthz {
  */
 export const calculateRouteAuthz = (
   fleetAuthz: FleetAuthz,
-  requiredAuthz: {
-    any?: FleetAuthzRequirements;
-    all?: FleetAuthzRequirements;
-  }
+  requiredAuthz: FleetRouteRequiredAuthz
 ): RouteAuthz => {
   const response: RouteAuthz = {
     granted: false,
@@ -408,6 +488,14 @@ type DeepPartialTruthy<T> = {
 };
 
 type FleetAuthzRequirements = DeepPartialTruthy<FleetAuthz>;
+
+/**
+ * Interface used for registering and calculating authorization for a Fleet API routes
+ */
+type FleetRouteRequiredAuthz = Partial<{
+  any?: FleetAuthzRequirements;
+  all?: FleetAuthzRequirements;
+}>;
 
 type FleetAuthzRouteRegistrar<
   Method extends RouteMethod,
