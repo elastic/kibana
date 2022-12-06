@@ -23,6 +23,9 @@ import {
 } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
+import { parseIsoOrRelativeDate } from '@kbn/alerting-plugin/server';
+import { IEventLogClient } from '@kbn/event-log-plugin/server';
+import { KueryNode } from '@kbn/es-query';
 import { ActionType } from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
 import {
@@ -72,6 +75,12 @@ import {
   GetOAuthClientCredentialsConfig,
   GetOAuthClientCredentialsSecrets,
 } from './lib/get_oauth_client_credentials_access_token';
+import {
+  formatExecutionKPIResult,
+  formatExecutionLogResult,
+  getExecutionKPIAggregation,
+  getExecutionLogAggregation,
+} from './lib/get_execution_log_aggregation';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
@@ -108,12 +117,60 @@ interface ConstructorOptions {
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
+  getEventLogClient: () => Promise<IEventLogClient>;
 }
 
 export interface UpdateOptions {
   id: string;
   action: ActionUpdate;
 }
+
+export interface GetGlobalExecutionLogParams {
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
+  page: number;
+  perPage: number;
+  sort: estypes.Sort;
+  // namespaces?: Array<string | undefined>;
+}
+
+export interface IExecutionLog {
+  id: string;
+  timestamp: string;
+  duration_ms: number;
+  status: string;
+  message: string;
+  version: string;
+  schedule_delay_ms: number;
+  connector_id: string;
+  space_ids: string[];
+  connector_name: string;
+}
+
+export interface IExecutionLogResult {
+  total: number;
+  data: IExecutionLog[];
+}
+
+export interface GetGlobalExecutionKPIParams {
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
+  namespaces?: Array<string | undefined>;
+}
+
+export const EMPTY_EXECUTION_KPI_RESULT = {
+  success: 0,
+  unknown: 0,
+  failure: 0,
+  warning: 0,
+  activeAlerts: 0,
+  newAlerts: 0,
+  recoveredAlerts: 0,
+  erroredActions: 0,
+  triggeredActions: 0,
+};
 
 export class ActionsClient {
   private readonly logger: Logger;
@@ -131,6 +188,7 @@ export class ActionsClient {
   private readonly auditLogger?: AuditLogger;
   private readonly usageCounter?: UsageCounter;
   private readonly connectorTokenClient: ConnectorTokenClientContract;
+  private readonly getEventLogClient: () => Promise<IEventLogClient>;
 
   constructor({
     logger,
@@ -148,6 +206,7 @@ export class ActionsClient {
     auditLogger,
     usageCounter,
     connectorTokenClient,
+    getEventLogClient,
   }: ConstructorOptions) {
     this.logger = logger;
     this.actionTypeRegistry = actionTypeRegistry;
@@ -164,6 +223,7 @@ export class ActionsClient {
     this.auditLogger = auditLogger;
     this.usageCounter = usageCounter;
     this.connectorTokenClient = connectorTokenClient;
+    this.getEventLogClient = getEventLogClient;
   }
 
   /**
@@ -729,6 +789,119 @@ export class ActionsClient {
   public isPreconfigured(connectorId: string): boolean {
     return !!this.preconfiguredActions.find((preconfigured) => preconfigured.id === connectorId);
   }
+
+  public async getGlobalExecutionLogWithAuth({
+    dateStart,
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sort,
+  }: // namespaces,
+  GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
+    this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
+
+    const authorizationTuple = {} as KueryNode;
+    try {
+      await this.authorization.ensureAuthorized('get_execution_log');
+    } catch (error) {
+      this.auditLogger?.log(
+        connectorAuditEvent({
+          action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_LOG,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      connectorAuditEvent({
+        action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_LOG,
+      })
+    );
+
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
+        'action',
+        authorizationTuple,
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          aggs: getExecutionLogAggregation({
+            filter,
+            page,
+            perPage,
+            sort,
+          }),
+        }
+      );
+
+      return formatExecutionLogResult(aggResult);
+    } catch (err) {
+      this.logger.debug(
+        `actionsClient.getGlobalExecutionLogWithAuth(): error searching global event log: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  public async getGlobalExecutionKpiWithAuth({
+    dateStart,
+    dateEnd,
+    filter,
+    namespaces,
+  }: GetGlobalExecutionKPIParams) {
+    this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
+
+    const authorizationTuple = {} as KueryNode;
+    try {
+      await this.authorization.ensureAuthorized('get_execution_kpi');
+    } catch (error) {
+      this.auditLogger?.log(
+        connectorAuditEvent({
+          action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_KPI,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      connectorAuditEvent({
+        action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_KPI,
+      })
+    );
+
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
+        'alert',
+        authorizationTuple,
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          aggs: getExecutionKPIAggregation(filter),
+        },
+        namespaces
+      );
+
+      return formatExecutionKPIResult(aggResult);
+    } catch (err) {
+      this.logger.debug(
+        `actionsClient.getGlobalExecutionKpiWithAuth(): error searching global execution KPI: ${err.message}`
+      );
+      throw err;
+    }
+  }
 }
 
 function actionFromSavedObject(
@@ -797,4 +970,25 @@ async function injectExtraFindData(
     // @ts-expect-error aggegation type is not specified
     referencedByCount: aggregationResult.aggregations[actionResult.id].doc_count,
   }));
+}
+
+function parseDate(dateString: string | undefined, propertyName: string, defaultValue: Date): Date {
+  if (dateString === undefined) {
+    return defaultValue;
+  }
+
+  const parsedDate = parseIsoOrRelativeDate(dateString);
+  if (parsedDate === undefined) {
+    throw Boom.badRequest(
+      i18n.translate('xpack.alerting.rulesClient.invalidDate', {
+        defaultMessage: 'Invalid date for parameter {field}: "{dateValue}"',
+        values: {
+          field: propertyName,
+          dateValue: dateString,
+        },
+      })
+    );
+  }
+
+  return parsedDate;
 }

@@ -19,6 +19,8 @@ import { updateActionRoute } from './update';
 import { getOAuthAccessToken } from './get_oauth_access_token';
 import { defineLegacyRoutes } from './legacy';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
+import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
 
 export interface RouteOptions {
   router: IRouter<ActionsRequestHandlerContext>;
@@ -39,6 +41,8 @@ export function defineRoutes(opts: RouteOptions) {
   updateActionRoute(router, licenseState);
   connectorTypesRoute(router, licenseState);
   executeActionRoute(router, licenseState);
+  getGlobalExecutionLogRoute(router, licenseState);
+  getGlobalExecutionKPIRoute(router, licenseState);
 
   getOAuthAccessToken(router, licenseState, actionsConfigUtils);
 }

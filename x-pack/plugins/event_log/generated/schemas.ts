@@ -177,6 +177,12 @@ export const EventSchema = schema.maybe(
         version: ecsVersion(),
       })
     ),
+    action: schema.maybe(
+      schema.object({
+        name: ecsString(),
+        uuid: ecsString(),
+      })
+    ),
   })
 );
 

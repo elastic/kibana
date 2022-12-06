@@ -88,3 +88,29 @@ export const LOCKED_COLUMNS = [
 export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [...LOCKED_COLUMNS.slice(1)];
 export const GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = ['rule_name', ...LOCKED_COLUMNS];
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
+
+export const CONNECTOR_EXECUTION_LOG_COLUMN_IDS = [
+  'connector_id',
+  'connector_name',
+  'space_ids',
+  'id',
+  'timestamp',
+  'execution_duration',
+  'status',
+  'message',
+  'schedule_delay',
+  'timed_out',
+] as const;
+
+export const CONNECTOR_LOCKED_COLUMNS = [
+  'connector_name',
+  'timestamp',
+  'execution_duration',
+  'status',
+  'message',
+];
+
+export const GLOBAL_CONNECTOR_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [
+  'connector_name',
+  ...CONNECTOR_LOCKED_COLUMNS,
+];
