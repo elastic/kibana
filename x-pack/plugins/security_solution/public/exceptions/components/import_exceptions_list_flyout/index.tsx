@@ -55,6 +55,7 @@ export const ImportExceptionListFlyout = React.memo(
     const [file, setFile] = useState<File | null>(null);
     const [overwrite, setOverwrite] = useState(false);
     const [asNewList, setAsNewList] = useState(false);
+    const [alreadyExistingItem, setAlreadyExistingItem] = useState(false);
 
     const resetForm = useCallback(() => {
       if (filePickerRef.current?.fileInput) {
@@ -108,7 +109,6 @@ export const ImportExceptionListFlyout = React.memo(
       },
       [addError]
     );
-    const [alreadyExistingItem, setAlreadyExistingItem] = useState(false);
 
     useEffect(() => {
       if (!importExceptionListState.loading) {
