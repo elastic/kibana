@@ -47,6 +47,7 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await page.click('[placeholder="Choose a name"]');
     await page.fill('[placeholder="Choose a name"]', 'Test fleet policy');
     await page.click('div[role="dialog"] button:has-text("Create agent policy")');
+    await page.waitForTimeout(30 * 1000);
   });
   step('Go to http://localhost:5620/app/fleet/policies', async () => {
     await syntheticsApp.navigateToSettings(false);
