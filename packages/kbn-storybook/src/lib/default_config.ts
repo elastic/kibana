@@ -58,8 +58,9 @@ export const defaultConfig: StorybookConfig = {
 
     // This will go over every component which is imported and check its import statements.
     // For every import which starts with ./ it will do a check to see if a file with the same name
-    // exists in the __storybook_mocks__ folder exists. If it does, use that import instead.
+    // exists in the __storybook_mocks__ folder. If it does, use that import instead.
     // This allows you to mock hooks and functions when rendering components in Storybook.
+    // It is akin to Jest's manual mocks (__mocks__).
     config.plugins?.push(
       new webpack.NormalModuleReplacementPlugin(/^\.\//, async (resource: any) => {
         if (!resource.contextInfo.issuer?.includes('node_modules')) {
