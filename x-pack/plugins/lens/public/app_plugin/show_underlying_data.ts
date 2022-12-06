@@ -59,6 +59,27 @@ interface LayerMetaInfo {
   >;
 }
 
+const sortByDateFieldsFirst = (
+  datasourceAPI: DatasourcePublicAPI,
+  fields: string[],
+  indexPatterns: IndexPatternMap
+) => {
+  const dataViewId = datasourceAPI.getSourceId();
+  if (!dataViewId) return;
+
+  // for usability reasons we want to order the date fields first
+  // the fields order responds to the columns order in Discover
+  const dateFieldsFirst = fields.reduce((acc: string[], fieldName) => {
+    const field = indexPatterns[dataViewId]?.getFieldByName(fieldName);
+    if (field?.type === 'date') {
+      return [fieldName, ...acc];
+    }
+    return [...acc, fieldName];
+  }, []);
+
+  return dateFieldsFirst;
+};
+
 export function getLayerMetaInfo(
   currentDatasource: Datasource | undefined,
   datasourceState: unknown,
@@ -137,10 +158,12 @@ export function getLayerMetaInfo(
   }
 
   const uniqueFields = [...new Set(columnsWithNoTimeShifts.map(({ fields }) => fields).flat())];
+  const dateFieldsFirst = sortByDateFieldsFirst(datasourceAPI, uniqueFields, indexPatterns);
+
   return {
     meta: {
       id: datasourceAPI.getSourceId()!,
-      columns: uniqueFields,
+      columns: dateFieldsFirst ?? uniqueFields,
       filters: filtersOrError,
     },
     error: undefined,

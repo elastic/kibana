@@ -8,6 +8,7 @@
 import React, { useState, Fragment, memo, useMemo, useEffect, useRef, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
+import { uniq } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGrid,
@@ -19,6 +20,8 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
+
+import { useGetDataStreams } from '../../../../../../../../hooks';
 
 import { mapPackageReleaseToIntegrationCardRelease } from '../../../../../../../../services/package_prerelease';
 import type { ExperimentalDataStreamFeature } from '../../../../../../../../../common/types/models/epm';
@@ -39,6 +42,7 @@ import { PackagePolicyEditorDatastreamMappings } from '../../datastream_mappings
 import { ExperimentDatastreamSettings } from './experimental_datastream_settings';
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId } from './hooks';
+import { orderDatasets } from './order_datasets';
 
 const ScrollAnchor = styled.div`
   display: none;
@@ -133,6 +137,11 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       [updatePackagePolicy, packagePolicy]
     );
 
+    const { data: dataStreamsData } = useGetDataStreams();
+    const datasetList =
+      uniq(dataStreamsData?.data_streams.map((dataStream) => dataStream.dataset)) ?? [];
+    const datasets = orderDatasets(datasetList, packageInfo.name);
+
     return (
       <>
         <EuiFlexGrid columns={2}>
@@ -211,6 +220,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       }}
                       errors={inputStreamValidationResults?.vars![varName]}
                       forceShowErrors={forceShowErrors}
+                      packageType={packageInfo.type}
+                      datasets={datasets}
                     />
                   </EuiFlexItem>
                 );
@@ -270,6 +281,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             }}
                             errors={inputStreamValidationResults?.vars![varName]}
                             forceShowErrors={forceShowErrors}
+                            packageType={packageInfo.type}
+                            datasets={datasets}
                           />
                         </EuiFlexItem>
                       );
