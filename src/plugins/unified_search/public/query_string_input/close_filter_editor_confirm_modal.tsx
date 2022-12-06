@@ -19,14 +19,14 @@ export const CloseFilterEditorConfirmModal = memo(function CloseFilterEditorConf
 ) {
   return (
     <EuiConfirmModal
-      title="Close Filter Builder"
+      title="Filter in progress"
       cancelButtonText="Cancel"
       confirmButtonText="Close"
-      buttonColor="danger"
+      buttonColor="primary"
       defaultFocusedButton="confirm"
       {...props}
     >
-      <p>Filter will be removed on close.</p>
+      <p>If you close this now you will lose any unsaved changes.</p>
       <p>Are you sure you want to do this?</p>
     </EuiConfirmModal>
   );
