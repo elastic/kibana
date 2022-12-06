@@ -13,13 +13,12 @@ import type { ShapeTreeNode, ElementClickListener } from '@elastic/charts';
 import * as i18n from './translations';
 import type { ParsedAlertsData, SeverityBuckets } from './types';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
-import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { ChartLabel } from '../../../../overview/components/detection_response/alerts_by_status/chart_label';
-import { chartConfigs } from '../../../../overview/components/detection_response/alerts_by_status/alerts_by_status';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { getSeverityTableColumns } from './columns';
+import { getSeverityColor } from './helpers';
 
 const DONUT_HEIGHT = 150;
 
@@ -37,7 +36,7 @@ export const SeverityLevelChart: React.FC<AlertsChartsPanelProps> = ({
   addFilter,
 }) => {
   const fillColor: FillColor = useCallback((d: ShapeTreeNode) => {
-    return chartConfigs.find((cfg) => cfg.label === d.dataName)?.color ?? emptyDonutColor;
+    return getSeverityColor(d.dataName);
   }, []);
 
   const columns = useMemo(() => getSeverityTableColumns(), []);
