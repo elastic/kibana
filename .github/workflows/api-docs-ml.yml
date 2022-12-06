@@ -6,6 +6,8 @@ on:
     types:
       - opened
       - synchronize
+      - edited
+      - reopened
     brances:
       - main
       - 8.6
