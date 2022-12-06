@@ -20,6 +20,10 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
         await tearDown(getService);
       });
 
+      loadTestFile(require.resolve('./bulk_edit'));
+      loadTestFile(require.resolve('./bulk_delete'));
+      loadTestFile(require.resolve('./bulk_enable'));
+      loadTestFile(require.resolve('./bulk_disable'));
       loadTestFile(require.resolve('./clone'));
     });
   });
