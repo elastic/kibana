@@ -39,4 +39,5 @@ export interface DiscoverLayoutProps {
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
   adHocDataViewList: DataView[];
   savedDataViewList: DataViewListItem[];
+  updateDataView: (dataView: DataView) => void;
 }

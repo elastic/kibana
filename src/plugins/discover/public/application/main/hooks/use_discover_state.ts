@@ -49,7 +49,11 @@ export function useDiscoverState({
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const { timefilter } = data.query.timefilter;
 
-  const dataView = savedSearch.searchSource.getField('index')!;
+  const [dataView, setDataView] = useState(savedSearch.searchSource.getField('index')!);
+
+  const updateDataView = useCallback((newDataView: DataView) => {
+    setDataView(newDataView);
+  }, []);
 
   const searchSource = useMemo(() => {
     savedSearch.searchSource.setField('index', dataView);
@@ -226,7 +230,8 @@ export function useDiscoverState({
           return;
         }
 
-        savedSearch.searchSource.setField('index', nextDataView);
+        // savedSearch.searchSource.setField('index', nextDataView);
+        updateDataView(nextDataView);
         reset();
       }
 
@@ -245,6 +250,7 @@ export function useDiscoverState({
     reset,
     savedSearch.searchSource,
     replaceUrlAppState,
+    updateDataView,
   ]);
 
   /**
@@ -326,5 +332,6 @@ export function useDiscoverState({
     persistDataView,
     updateAdHocDataViewId,
     updateDataViewList,
+    updateDataView,
   };
 }

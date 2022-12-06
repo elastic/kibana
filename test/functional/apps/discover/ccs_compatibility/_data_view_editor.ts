@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -15,7 +16,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const config = getService('config');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'unifiedSearch',
+  ]);
   const defaultIndexPatternString = config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
     : 'logstash-*';
@@ -39,6 +46,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       typeCharByChar: true,
     });
     await testSubjects.click('saveIndexPatternButton');
+  };
+
+  const editDataView = async (newDataViewName: string, newDataViewTitle: string) => {
+    await testSubjects.click('discover-dataView-switch-link');
+    await testSubjects.click('indexPattern-manage-field');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+
+    await testSubjects.setValue('createIndexPatternNameInput', newDataViewName, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
+    await testSubjects.setValue('createIndexPatternTitleInput', newDataViewTitle, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
+    await testSubjects.click('saveIndexPatternButton');
+    await PageObjects.header.waitUntilLoadingHasFinished();
+
+    await testSubjects.click('confirmModalConfirmButton');
+    await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
   describe('discover integration with data view editor', function describeIndexTests() {
@@ -75,6 +102,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return dataViewTitle === `${dataViewToCreate}*`;
         }
       );
+    });
+
+    it('allows edit data view from flyout', async () => {
+      const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
+
+      await editDataView('*logstash*', '*logstash*');
+
+      const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
+      expect(prevDataViewId).to.equal(newDataViewId);
+
+      const selectedDataViewElem = await testSubjects.find('discover-dataView-switch-link');
+      const selectedDataViewTitle = await selectedDataViewElem.getVisibleText();
+      expect(selectedDataViewTitle).to.equal('*logstash*');
+    });
+
+    it('allows edit adhoc data view from flyout', async () => {
+      await PageObjects.discover.createAdHocDataView('logstas', true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
+
+      await editDataView('l*', 'l*');
+
+      // data view id changed since spec is changed for adhoc data view
+      const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
+      expect(prevDataViewId).not.to.equal(newDataViewId);
+
+      const selectedDataViewElem = await testSubjects.find('discover-dataView-switch-link');
+      const selectedDataViewTitle = await selectedDataViewElem.getVisibleText();
+
+      expect(selectedDataViewTitle).to.equal('l*');
+      expect(await PageObjects.unifiedSearch.isAdHocDataView()).to.be(true);
     });
   });
 }
