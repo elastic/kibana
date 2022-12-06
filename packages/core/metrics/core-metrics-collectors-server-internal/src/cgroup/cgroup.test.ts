@@ -8,7 +8,7 @@
 
 import mockFs from 'mock-fs';
 import { loggerMock } from '@kbn/logging-mocks';
-import { OsCgroupMetricsCollector } from './cgroup';
+import { OsCgroupMetricsCollector } from '.';
 
 describe('OsCgroupMetricsCollector', () => {
   afterEach(() => mockFs.restore());
