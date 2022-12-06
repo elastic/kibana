@@ -57,18 +57,20 @@ type SetRuleQuery = ({
 export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimeline => {
   const dispatch = useDispatch();
   const { addError } = useAppToasts();
+  const { browserFields, dataViewId, selectedPatterns } = useSourcererDataView(
+    SourcererScopeName.timeline
+  );
 
   // selectedTimeline = timeline to set rule from
   const [selectedTimeline, setRuleFromTimeline] = useState<TimelineModel | null>(null);
 
-  // start RuleFromTimeline definition
   const [loading, setLoading] = useState(true);
 
   const onOpenTimeline = useCallback(
     (timeline: TimelineModel) => {
       setRuleFromTimeline(timeline);
 
-      if (!isEmpty(timeline.indexNames)) {
+      if (timeline.dataViewId !== dataViewId && !isEmpty(timeline.indexNames)) {
         // let sourcerer manage the selected browser fields by setting timeline scope to the selected timeline data view
         // sourcerer handles the logic of if the fields have been fetched or need to be fetched
         dispatch(
@@ -80,15 +82,10 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
         );
       }
     },
-    [dispatch]
+    [dataViewId, dispatch]
   );
-  // end RuleFromTimeline definition
 
   // start browser field management
-  const { browserFields, dataViewId, selectedPatterns } = useSourcererDataView(
-    SourcererScopeName.timeline
-  );
-
   const [originalDataView] = useState({ dataViewId, selectedPatterns });
 
   const selectedDataViewBrowserFields = useMemo(
@@ -187,20 +184,23 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   ]);
 
   const getTimelineById = useCallback(
-    (timelineId: string) =>
-      queryTimelineById({
-        timelineId,
-        onOpenTimeline,
-        updateIsLoading: ({
-          id: currentTimelineId,
-          isLoading,
-        }: {
-          id: string;
-          isLoading: boolean;
-        }) => dispatch(updateIsLoading({ id: currentTimelineId, isLoading })),
-        updateTimeline: dispatchUpdateTimeline(dispatch),
-      }),
-    [dispatch, onOpenTimeline]
+    (timelineId: string) => {
+      if (selectedTimeline == null || timelineId !== selectedTimeline.id) {
+        queryTimelineById({
+          timelineId,
+          onOpenTimeline,
+          updateIsLoading: ({
+            id: currentTimelineId,
+            isLoading,
+          }: {
+            id: string;
+            isLoading: boolean;
+          }) => dispatch(updateIsLoading({ id: currentTimelineId, isLoading })),
+          updateTimeline: dispatchUpdateTimeline(dispatch),
+        });
+      }
+    },
+    [dispatch, onOpenTimeline, selectedTimeline]
   );
 
   useEffect(() => {

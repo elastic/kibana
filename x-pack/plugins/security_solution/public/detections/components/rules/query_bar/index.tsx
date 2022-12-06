@@ -236,7 +236,7 @@ export const QueryBarDefineRule = ({
   const onOpenTimelineCb = useCallback(
     (timeline: TimelineModel) => {
       setLoadingTimeline(false);
-      if (onOpenTimeline != null) onOpenTimeline(timeline);
+      onOpenTimeline?.(timeline);
     },
     [onOpenTimeline]
   );

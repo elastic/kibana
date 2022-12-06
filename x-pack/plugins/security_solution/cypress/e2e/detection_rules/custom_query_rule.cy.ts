@@ -102,7 +102,6 @@ import {
   goToActionsStepTab,
   goToScheduleStepTab,
   importSavedQuery,
-  removeAlertsIndex,
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
@@ -134,7 +133,6 @@ describe('Custom query rules', () => {
 
       cy.log('Filling define section');
       importSavedQuery(this.timelineId);
-      removeAlertsIndex();
       continueWithNextSection();
 
       cy.log('Filling about section');

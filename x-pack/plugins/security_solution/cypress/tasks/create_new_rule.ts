@@ -241,6 +241,7 @@ export const importSavedQuery = (timelineId: string) => {
   cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
   cy.get(TIMELINE(timelineId)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('not.be.empty');
+  removeAlertsIndex();
 };
 
 export const fillRuleName = (ruleName: string = ruleFields.ruleName) => {
