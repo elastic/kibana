@@ -7,6 +7,7 @@
  */
 
 import * as React from 'react';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DrilldownManagerDependencies, PublicDrilldownManagerProps } from '../../types';
 
 export type PublicDrilldownManagerComponent = React.FC<PublicDrilldownManagerProps>;
@@ -36,11 +37,13 @@ export const createPublicDrilldownManager = (
 
     return (
       <React.Suspense fallback={null}>
-        <LazyDrilldownManager
-          {...dependencies}
-          {...drilldownManagerProps}
-          actionFactories={filteredActionFactories}
-        />
+        <KibanaThemeProvider theme$={dependencies.theme.theme$}>
+          <LazyDrilldownManager
+            {...dependencies}
+            {...drilldownManagerProps}
+            actionFactories={filteredActionFactories}
+          />
+        </KibanaThemeProvider>
       </React.Suspense>
     );
   };
