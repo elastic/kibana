@@ -26,6 +26,7 @@ function getPluginSearchPaths({ rootDir, oss, examples, testPlugins }) {
           resolve(rootDir, 'test/plugin_functional/plugins'),
           resolve(rootDir, 'test/interpreter_functional/plugins'),
           resolve(rootDir, 'test/common/fixtures/plugins'),
+          resolve(rootDir, 'test/server_integration/__fixtures__/plugins'),
         ]
       : []),
     ...(testPlugins && !oss

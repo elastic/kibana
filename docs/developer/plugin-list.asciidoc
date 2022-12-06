@@ -176,6 +176,14 @@ for use in their own application.
 |Index pattern fields formatters
 
 
+|{kib-repo}blob/{branch}/src/plugins/files/README.md[files]
+|The files service provides functionality to manage, retrieve, share files in Kibana.
+
+
+|{kib-repo}blob/{branch}/src/plugins/files_management/README.md[filesManagement]
+|Minimal interface for admins to manage files in Kibana.
+
+
 |{kib-repo}blob/{branch}/src/plugins/guided_onboarding/README.md[guidedOnboarding]
 |This plugin contains the code for the Guided Onboarding project. Guided onboarding consists of guides for Solutions (Enterprise Search, Observability, Security) that can be completed as a checklist of steps. The guides help users to ingest their data and to navigate to the correct Solutions pages.
 
@@ -456,6 +464,11 @@ The plugin exposes the static DefaultEditorController class to consume.
 |You can run a local cluster and simulate a remote cluster within a single Kibana directory.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/custom_branding/README.md[customBranding]
+|This is a plugin to configure custom branding.
+This plugin is currently under active development; do not use.
+
+
 |<<dashboard-enhanced-plugin>>
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
 
@@ -489,10 +502,6 @@ activities.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
 |The features plugin enhance Kibana with a per-feature privilege system.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/files/README.md[files]
-|File upload, download, sharing, and serving over HTTP implementation in Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]
@@ -587,6 +596,10 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/monitoring_collection/README.md[monitoringCollection]
 |This plugin allows for other plugins to add data to Kibana stack monitoring documents.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/notifications/README.md[notifications]
+|The Notifications plugin provides a set of services to help Solutions and plugins send notifications to users.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability/README.md[observability]
@@ -709,7 +722,7 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant/README.md[upgradeAssistant]
-|Upgrade Assistant helps users prepare their Stack for being upgraded to the next major. It will only be enabled on the last minor before the next major release. This is controlled via the config: xpack.upgrade_assistant.readonly (#101296).
+|Upgrade Assistant helps users prepare their Stack for being upgraded to the next version of the Elastic stack.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]

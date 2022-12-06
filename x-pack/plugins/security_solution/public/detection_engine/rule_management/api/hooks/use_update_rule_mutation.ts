@@ -15,6 +15,9 @@ import { updateRule } from '../api';
 import { useInvalidateFindRulesQuery } from './use_find_rules_query';
 import { useInvalidateFetchTagsQuery } from './use_fetch_tags_query';
 import { useInvalidateFetchRuleByIdQuery } from './use_fetch_rule_by_id_query';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+
+export const UPDATE_RULE_MUTATION_KEY = ['PUT', DETECTION_ENGINE_RULES_URL];
 
 export const useUpdateRuleMutation = (
   options?: UseMutationOptions<RuleResponse, Error, RuleUpdateProps>
@@ -27,13 +30,14 @@ export const useUpdateRuleMutation = (
     (rule: RuleUpdateProps) => updateRule({ rule: transformOutput(rule) }),
     {
       ...options,
-      onSuccess: (...args) => {
+      mutationKey: UPDATE_RULE_MUTATION_KEY,
+      onSettled: (...args) => {
         invalidateFindRulesQuery();
         invalidateFetchRuleByIdQuery();
         invalidateFetchTagsQuery();
 
-        if (options?.onSuccess) {
-          options.onSuccess(...args);
+        if (options?.onSettled) {
+          options.onSettled(...args);
         }
       },
     }

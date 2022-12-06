@@ -27,8 +27,8 @@ import type {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
+  updateExceptionListItemSchema,
   ExceptionListTypeEnum,
-  exceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
@@ -50,7 +50,7 @@ import { filterIndexPatterns } from '../../utils/helpers';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
-import { entrichExceptionItemsForUpdate } from '../flyout_components/utils';
+import { enrichExceptionItemsForUpdate } from '../flyout_components/utils';
 import { ExceptionItemComments } from '../item_comments';
 import { createExceptionItemsReducer } from './reducer';
 import { useEditExceptionItems } from './use_edit_exception';
@@ -62,6 +62,7 @@ interface EditExceptionFlyoutProps {
   itemToEdit: ExceptionListItemSchema;
   showAlertCloseOptions: boolean;
   rule?: Rule;
+  openedFromListDetailPage?: boolean;
   onCancel: (arg: boolean) => void;
   onConfirm: (arg: boolean) => void;
 }
@@ -97,6 +98,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   itemToEdit,
   rule,
   showAlertCloseOptions,
+  openedFromListDetailPage,
   onCancel,
   onConfirm,
 }): JSX.Element => {
@@ -235,7 +237,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
 
   const areItemsReadyForUpdate = useCallback(
     (items: ExceptionsBuilderReturnExceptionItem[]): items is ExceptionListItemSchema[] => {
-      return items.every((item) => exceptionListItemSchema.is(item));
+      return items.every((item) => updateExceptionListItemSchema.is(item));
     },
     []
   );
@@ -244,7 +246,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     if (submitEditExceptionItems == null) return;
 
     try {
-      const items = entrichExceptionItemsForUpdate({
+      const items = enrichExceptionItemsForUpdate({
         itemName: exceptionItemName,
         commentToAdd: newComment,
         listType,
@@ -339,7 +341,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           onSetErrorExists={setConditionsValidationError}
           onFilterIndexPatterns={filterIndexPatterns}
         />
-        {listType === ExceptionListTypeEnum.DETECTION && (
+        {!openedFromListDetailPage && listType === ExceptionListTypeEnum.DETECTION && (
           <>
             <EuiHorizontalRule />
             <ExceptionsLinkedToLists
@@ -349,12 +351,14 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
             />
           </>
         )}
-        {listType === ExceptionListTypeEnum.RULE_DEFAULT && rule != null && (
-          <>
-            <EuiHorizontalRule />
-            <ExceptionsLinkedToRule rule={rule} />
-          </>
-        )}
+        {!openedFromListDetailPage &&
+          listType === ExceptionListTypeEnum.RULE_DEFAULT &&
+          rule != null && (
+            <>
+              <EuiHorizontalRule />
+              <ExceptionsLinkedToRule rule={rule} />
+            </>
+          )}
         <EuiHorizontalRule />
         <ExceptionItemComments
           accordionTitle={

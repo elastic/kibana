@@ -65,7 +65,8 @@ const createBatchedRequests = (fields: Field[], maxBatchSize = 10) => {
 export function useFieldStatsSearchStrategy(
   searchStrategyParams: OverallStatsSearchStrategyParams | undefined,
   fieldStatsParams: FieldStatsParams | undefined,
-  dataVisualizerListState: DataVisualizerIndexBasedAppState
+  dataVisualizerListState: DataVisualizerIndexBasedAppState,
+  samplingProbability: number | null
 ): FieldStatsSearchStrategyReturnBase {
   const {
     services: {
@@ -168,6 +169,9 @@ export function useFieldStatsSearchStrategy(
         },
       },
       maxExamples: MAX_EXAMPLES_DEFAULT,
+      samplingProbability,
+      browserSessionSeed: searchStrategyParams.browserSessionSeed,
+      samplingOption: searchStrategyParams.samplingOption,
     };
     const searchOptions: ISearchOptions = {
       abortSignal: abortCtrl.current.signal,
@@ -295,6 +299,7 @@ export function useFieldStatsSearchStrategy(
     dataVisualizerListState.pageIndex,
     dataVisualizerListState.sortDirection,
     dataVisualizerListState.sortField,
+    samplingProbability,
   ]);
 
   const cancelFetch = useCallback(() => {

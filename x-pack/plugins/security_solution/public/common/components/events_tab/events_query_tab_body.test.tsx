@@ -22,6 +22,13 @@ jest.mock('../../../timelines/components/timeline/body/control_columns', () => (
   getDefaultControlColumn: (props: number) => mockGetDefaultControlColumn(props),
 }));
 
+jest.mock(
+  '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline',
+  () => ({
+    useAddBulkToTimelineAction: jest.fn(),
+  })
+);
+
 jest.mock('../../lib/kibana', () => {
   const original = jest.requireActual('../../lib/kibana');
 

@@ -12,7 +12,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   AlertsTableStatusFilter,

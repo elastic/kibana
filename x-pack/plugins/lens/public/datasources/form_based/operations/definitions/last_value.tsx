@@ -124,6 +124,16 @@ function getExistsFilter(field: string) {
   };
 }
 
+function getScale(type: string) {
+  return type === 'string' ||
+    type === 'ip' ||
+    type === 'ip_range' ||
+    type === 'date_range' ||
+    type === 'number_range'
+    ? 'ordinal'
+    : 'ratio';
+}
+
 export const lastValueOperation: OperationDefinition<
   LastValueIndexPatternColumn,
   'field',
@@ -155,7 +165,7 @@ export const lastValueOperation: OperationDefinition<
       label: ofName(field.displayName, oldColumn.timeShift, oldColumn.reducedTimeRange),
       sourceField: field.name,
       params: newParams,
-      scale: field.type === 'string' ? 'ordinal' : 'ratio',
+      scale: getScale(field.type),
       filter:
         oldColumn.filter && isEqual(oldColumn.filter, getExistsFilter(oldColumn.sourceField))
           ? getExistsFilter(field.name)
@@ -167,7 +177,7 @@ export const lastValueOperation: OperationDefinition<
       return {
         dataType: type as DataType,
         isBucketed: false,
-        scale: type === 'string' ? 'ordinal' : 'ratio',
+        scale: getScale(type),
       };
     }
   },
@@ -218,7 +228,7 @@ export const lastValueOperation: OperationDefinition<
       dataType: field.type as DataType,
       operationType: 'last_value',
       isBucketed: false,
-      scale: field.type === 'string' ? 'ordinal' : 'ratio',
+      scale: getScale(field.type),
       sourceField: field.name,
       filter: getFilter(previousColumn, columnParams) || getExistsFilter(field.name),
       timeShift: columnParams?.shift || previousColumn?.timeShift,

@@ -27,7 +27,6 @@ import {
 } from '@elastic/eui';
 import type { GuideState, GuideStepIds, GuideId, GuideStep } from '@kbn/guided-onboarding';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { guidesConfig } from '@kbn/guided-onboarding-plugin/public';
 
 interface MainProps {
   guidedOnboarding: GuidedOnboardingPluginStart;
@@ -75,7 +74,15 @@ export const Main = (props: MainProps) => {
   };
 
   const updateGuideState = async () => {
-    const selectedGuideConfig = guidesConfig[selectedGuide!];
+    if (!selectedGuide) {
+      return;
+    }
+
+    const selectedGuideConfig = await guidedOnboardingApi?.getGuideConfig(selectedGuide);
+
+    if (!selectedGuideConfig) {
+      return;
+    }
     const selectedStepIndex = selectedGuideConfig.steps.findIndex(
       (step) => step.id === selectedStep!
     );
@@ -113,7 +120,10 @@ export const Main = (props: MainProps) => {
       guideId: selectedGuide!,
     };
 
-    const response = await guidedOnboardingApi?.updateGuideState(updatedGuideState, true);
+    const response = await guidedOnboardingApi?.updatePluginState(
+      { status: 'in_progress', guide: updatedGuideState },
+      true
+    );
     if (response) {
       notifications.toasts.addSuccess(
         i18n.translate('guidedOnboardingExample.updateGuideState.toastLabel', {
@@ -196,7 +206,7 @@ export const Main = (props: MainProps) => {
         </EuiText>
         <EuiSpacer />
         <EuiFlexGroup>
-          {(Object.keys(guidesConfig) as GuideId[]).map((guideId) => {
+          {(['search', 'security', 'observability', 'testGuide'] as GuideId[]).map((guideId) => {
             const guideState = guidesState?.find((guide) => guide.guideId === guideId);
             return (
               <EuiFlexItem>
@@ -216,7 +226,8 @@ export const Main = (props: MainProps) => {
                   )}
                   {(guideState?.isActive === true ||
                     guideState?.status === 'in_progress' ||
-                    guideState?.status === 'ready_to_complete') && (
+                    guideState?.status === 'ready_to_complete' ||
+                    guideState?.status === 'not_started') && (
                     <FormattedMessage
                       id="guidedOnboardingExample.guidesSelection.continueButtonLabel"
                       defaultMessage="Continue {guideId} guide"
@@ -259,6 +270,7 @@ export const Main = (props: MainProps) => {
                   { value: 'observability', text: 'observability' },
                   { value: 'security', text: 'security' },
                   { value: 'search', text: 'search' },
+                  { value: 'testGuide', text: 'test guide' },
                 ]}
                 value={selectedGuide}
                 onChange={(e) => {
@@ -294,7 +306,7 @@ export const Main = (props: MainProps) => {
           <h3>
             <FormattedMessage
               id="guidedOnboardingExample.main.examplePages.title"
-              defaultMessage="Example pages"
+              defaultMessage="Example pages for test guide"
             />
           </h3>
         </EuiText>
@@ -313,6 +325,14 @@ export const Main = (props: MainProps) => {
               <FormattedMessage
                 id="guidedOnboardingExample.main.examplePages.stepTwo.link"
                 defaultMessage="Step 2"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={() => history.push('stepThree')}>
+              <FormattedMessage
+                id="guidedOnboardingExample.main.examplePages.stepThree.link"
+                defaultMessage="Step 3"
               />
             </EuiButton>
           </EuiFlexItem>

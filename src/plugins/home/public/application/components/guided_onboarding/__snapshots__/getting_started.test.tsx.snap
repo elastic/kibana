@@ -21,6 +21,7 @@ exports[`getting started should render getting started component 1`] = `
           "toString": [Function],
         }
       }
+      data-test-subj="onboarding--landing-page"
       hasShadow={true}
     >
       <EuiTitle
@@ -52,35 +53,43 @@ exports[`getting started should render getting started component 1`] = `
         columns={4}
         gutterSize="l"
       >
-        <EuiFlexItem>
+        <EuiFlexItem
+          key="guideCard-search"
+        >
           <GuideCard
             activateGuide={[Function]}
-            addBasePath={[MockFunction]}
+            addBasePath={[Function]}
             guides={Array []}
             isDarkTheme={false}
             useCase="search"
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem
+          key="guideCard-observability"
+        >
           <GuideCard
             activateGuide={[Function]}
-            addBasePath={[MockFunction]}
+            addBasePath={[Function]}
             guides={Array []}
             isDarkTheme={false}
             useCase="observability"
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem
+          key="linkCard-observabilityLink"
+        >
           <ObservabilityLinkCard
-            addBasePath={[MockFunction]}
+            addBasePath={[Function]}
             isDarkTheme={false}
             navigateToApp={[MockFunction]}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem
+          key="guideCard-security"
+        >
           <GuideCard
             activateGuide={[Function]}
-            addBasePath={[MockFunction]}
+            addBasePath={[Function]}
             guides={Array []}
             isDarkTheme={false}
             useCase="security"
@@ -94,7 +103,7 @@ exports[`getting started should render getting started component 1`] = `
         className="eui-textCenter"
       >
         <EuiLink
-          data-test-subj="onboarding--skipUseCaseTourLink"
+          data-test-subj="onboarding--skipGuideLink"
           onClick={[Function]}
         >
           I’d like to do something else (skip)

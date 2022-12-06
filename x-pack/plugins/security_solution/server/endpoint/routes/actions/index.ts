@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { registerActionFileInfoRoute } from './file_info_handler';
 import { registerActionFileDownloadRoutes } from './file_download_handler';
 import { registerActionDetailsRoutes } from './details';
 import type { SecuritySolutionPluginRouter } from '../../../types';
@@ -24,6 +25,11 @@ export function registerActionRoutes(
   registerActionAuditLogRoutes(router, endpointContext);
   registerActionListRoutes(router, endpointContext);
   registerActionDetailsRoutes(router, endpointContext);
-  registerActionFileDownloadRoutes(router, endpointContext);
   registerResponseActionRoutes(router, endpointContext);
+
+  // APIs specific to `get-file` are behind FF
+  if (endpointContext.experimentalFeatures.responseActionGetFileEnabled) {
+    registerActionFileDownloadRoutes(router, endpointContext);
+    registerActionFileInfoRoute(router, endpointContext);
+  }
 }

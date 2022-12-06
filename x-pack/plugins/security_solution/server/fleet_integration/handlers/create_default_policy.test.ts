@@ -9,11 +9,9 @@ import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { LicenseService } from '../../../common/license';
 import { createDefaultPolicy } from './create_default_policy';
+import { ProtectionModes } from '../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../common/endpoint/types';
-import {
-  policyFactory as policyConfigFactory,
-  policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
-} from '../../../common/endpoint/models/policy_config';
+import { policyFactory } from '../../../common/endpoint/models/policy_config';
 import type {
   AnyPolicyCreateConfig,
   PolicyCreateCloudConfig,
@@ -37,16 +35,52 @@ describe('Create Default Policy tests ', () => {
     licenseEmitter.next(Platinum); // set license level to platinum
   });
   describe('When no config is set', () => {
-    it('Should return the Default Policy Config when license is at least platinum', () => {
+    it('Should return PolicyConfig for events only when license is at least platinum', () => {
+      const defaultPolicy = policyFactory();
+
       const policy = createDefaultPolicyCallback(undefined);
-      expect(policy).toEqual(policyConfigFactory());
+
+      // events are the same
+      expect(policy.windows.events).toEqual(defaultPolicy.windows.events);
+      expect(policy.linux.events).toEqual(defaultPolicy.linux.events);
+      expect(policy.mac.events).toEqual(defaultPolicy.mac.events);
+
+      // check some of the protections to be disabled
+      const disabledButSupported = { mode: ProtectionModes.off, supported: true };
+      expect(policy.windows.behavior_protection).toEqual(disabledButSupported);
+      expect(policy.mac.memory_protection).toEqual(disabledButSupported);
+      expect(policy.linux.behavior_protection).toEqual(disabledButSupported);
+
+      // malware popups should be disabled
+      expect(policy.windows.popup.malware.enabled).toBeFalsy();
+      expect(policy.mac.popup.malware.enabled).toBeFalsy();
+      expect(policy.linux.popup.malware.enabled).toBeFalsy();
     });
-    it('Should return the Default Policy Config without paid features when license is below platinum', () => {
+
+    it('Should return PolicyConfig for events only without paid features when license is below platinum', () => {
+      const defaultPolicy = policyFactory();
       licenseEmitter.next(Gold);
+
       const policy = createDefaultPolicyCallback(undefined);
-      expect(policy).toEqual(policyConfigFactoryWithoutPaidFeatures());
+
+      // events are the same
+      expect(policy.windows.events).toEqual(defaultPolicy.windows.events);
+      expect(policy.linux.events).toEqual(defaultPolicy.linux.events);
+      expect(policy.mac.events).toEqual(defaultPolicy.mac.events);
+
+      // check some of the protections to be disabled and unsupported
+      const disabledAndUnsupported = { mode: ProtectionModes.off, supported: false };
+      expect(policy.windows.behavior_protection).toEqual(disabledAndUnsupported);
+      expect(policy.mac.memory_protection).toEqual(disabledAndUnsupported);
+      expect(policy.linux.behavior_protection).toEqual(disabledAndUnsupported);
+
+      // malware popups are enabled on unpaid license
+      expect(policy.windows.popup.malware.enabled).toBeTruthy();
+      expect(policy.mac.popup.malware.enabled).toBeTruthy();
+      expect(policy.linux.popup.malware.enabled).toBeTruthy();
     });
   });
+
   describe('When endpoint config is set', () => {
     const createEndpointConfig = (
       endpointConfig: PolicyCreateEndpointConfig['endpointConfig']
@@ -112,8 +146,8 @@ describe('Create Default Policy tests ', () => {
     it('Should return the default config when preset is EDR Complete', () => {
       const config = createEndpointConfig({ preset: 'EDRComplete' });
       const policy = createDefaultPolicyCallback(config);
-      const policyFactory = policyConfigFactory();
-      expect(policy).toMatchObject(policyFactory);
+      const defaultPolicy = policyFactory();
+      expect(policy).toMatchObject(defaultPolicy);
     });
   });
   describe('When cloud config is set', () => {

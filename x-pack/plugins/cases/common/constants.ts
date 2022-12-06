@@ -141,7 +141,7 @@ export const MAX_CONCURRENT_SEARCHES = 10 as const;
  * Validation
  */
 
-export const MAX_TITLE_LENGTH = 64 as const;
+export const MAX_TITLE_LENGTH = 160 as const;
 
 /**
  * Cases features
@@ -185,3 +185,8 @@ export const NO_ASSIGNEES_FILTERING_KEYWORD = 'none';
  * Delays
  */
 export const SEARCH_DEBOUNCE_MS = 500;
+
+/**
+ * Local storage keys
+ */
+export const LOCAL_STORAGE_KEYS = { casesFiltering: 'cases.list.filtering' };

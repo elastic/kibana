@@ -9,11 +9,13 @@ import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server'
 import type { CollectorDependencies } from './types';
 import { getDetectionsMetrics } from './detections/get_metrics';
 import { getInternalSavedObjectsClient } from './get_internal_saved_objects_client';
+import { getEndpointMetrics } from './endpoint/get_metrics';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 
 export interface UsageData {
   detectionMetrics: {};
+  endpointMetrics: {};
 }
 
 export const registerCollector: RegisterCollector = ({
@@ -2397,20 +2399,30 @@ export const registerCollector: RegisterCollector = ({
           },
         },
       },
+      endpointMetrics: {
+        unique_endpoint_count: {
+          type: 'long',
+          _meta: { description: 'Number of active unique endpoints in last 24 hours' },
+        },
+      },
     },
     isReady: () => true,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const savedObjectsClient = await getInternalSavedObjectsClient(core);
-      const detectionMetrics = await getDetectionsMetrics({
-        eventLogIndex,
-        signalsIndex,
-        esClient,
-        savedObjectsClient,
-        logger,
-        mlClient: ml,
-      });
+      const [detectionMetrics, endpointMetrics] = await Promise.allSettled([
+        getDetectionsMetrics({
+          eventLogIndex,
+          signalsIndex,
+          esClient,
+          savedObjectsClient,
+          logger,
+          mlClient: ml,
+        }),
+        getEndpointMetrics({ esClient, logger }),
+      ]);
       return {
-        detectionMetrics: detectionMetrics || {},
+        detectionMetrics: detectionMetrics.status === 'fulfilled' ? detectionMetrics.value : {},
+        endpointMetrics: endpointMetrics.status === 'fulfilled' ? endpointMetrics.value : {},
       };
     },
   });

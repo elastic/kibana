@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+  },
+  "include": [
+    "install/**/*",
+    "lib/**/*",
+    "list/**/*",
+    "remove/**/*",
+    "*.js",
+  ],
+  "kbn_references": [
+    { "path": "../cli/tsconfig.json" },
+  ]
+}

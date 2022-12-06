@@ -43,7 +43,13 @@
                 "label": "resolver",
                 "description": [],
                 "signature": [
-                  "ImportResolver"
+                  {
+                    "pluginId": "@kbn/import-resolver",
+                    "scope": "server",
+                    "docId": "kibKbnImportResolverPluginApi",
+                    "section": "def-server.ImportResolver",
+                    "text": "ImportResolver"
+                  }
                 ],
                 "path": "packages/kbn-repo-source-classifier/src/repo_source_classifier.ts",
                 "deprecated": false,

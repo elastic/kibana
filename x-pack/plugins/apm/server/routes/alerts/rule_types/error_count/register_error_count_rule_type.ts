@@ -15,6 +15,9 @@ import {
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
@@ -31,12 +34,16 @@ import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import {
+  getServiceGroupFieldsAgg,
+  getServiceGroupFields,
+} from '../get_service_group_fields';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -50,10 +57,11 @@ const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
 
 export function registerErrorCountRuleType({
   alerting,
-  logger,
-  ruleDataClient,
-  config$,
   basePath,
+  config$,
+  logger,
+  observability,
+  ruleDataClient,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
     ruleDataClient,
@@ -71,30 +79,37 @@ export function registerErrorCountRuleType({
       },
       actionVariables: {
         context: [
-          apmActionVariables.serviceName,
+          ...(observability.getAlertDetailsConfig()?.apm.enabled
+            ? [apmActionVariables.alertDetailsUrl]
+            : []),
           apmActionVariables.environment,
-          apmActionVariables.threshold,
-          apmActionVariables.triggerValue,
           apmActionVariables.interval,
           apmActionVariables.reason,
+          apmActionVariables.serviceName,
+          apmActionVariables.threshold,
+          apmActionVariables.triggerValue,
           apmActionVariables.viewInAppUrl,
         ],
       },
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: async ({ services, params }) => {
+      executor: async ({ params: ruleParams, services, spaceId }) => {
         const config = await firstValueFrom(config$);
-        const ruleParams = params;
+
+        const { getAlertUuid, savedObjectsClient, scopedClusterClient } =
+          services;
 
         const indices = await getApmIndices({
           config,
-          savedObjectsClient: services.savedObjectsClient,
+          savedObjectsClient,
         });
+
         const searchParams = {
           index: indices.error,
-          size: 0,
           body: {
+            track_total_hits: false,
+            size: 0,
             query: {
               bool: {
                 filter: [
@@ -106,7 +121,9 @@ export function registerErrorCountRuleType({
                     },
                   },
                   { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
-                  ...termQuery(SERVICE_NAME, ruleParams.serviceName),
+                  ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+                    queryEmptyString: false,
+                  }),
                   ...environmentQuery(ruleParams.environment),
                 ],
               },
@@ -121,28 +138,36 @@ export function registerErrorCountRuleType({
                       missing: ENVIRONMENT_NOT_DEFINED.value,
                     },
                   ],
-                  size: 10000,
+                  size: 1000,
+                  order: { _count: 'desc' as const },
                 },
+                aggs: getServiceGroupFieldsAgg(),
               },
             },
           },
         };
 
         const response = await alertingEsClient({
-          scopedClusterClient: services.scopedClusterClient,
+          scopedClusterClient,
           params: searchParams,
         });
 
         const errorCountResults =
           response.aggregations?.error_counts.buckets.map((bucket) => {
             const [serviceName, environment] = bucket.key;
-            return { serviceName, environment, errorCount: bucket.doc_count };
+            return {
+              serviceName,
+              environment,
+              errorCount: bucket.doc_count,
+              sourceFields: getServiceGroupFields(bucket),
+            };
           }) ?? [];
 
         errorCountResults
           .filter((result) => result.errorCount >= ruleParams.threshold)
           .forEach((result) => {
-            const { serviceName, environment, errorCount } = result;
+            const { serviceName, environment, errorCount, sourceFields } =
+              result;
             const alertReason = formatErrorCountReason({
               serviceName,
               threshold: ruleParams.threshold,
@@ -151,23 +176,31 @@ export function registerErrorCountRuleType({
               windowUnit: ruleParams.windowUnit,
             });
 
+            const id = [ApmRuleType.ErrorCount, serviceName, environment]
+              .filter((name) => name)
+              .join('_');
+
             const relativeViewInAppUrl = getAlertUrlErrorCount(
               serviceName,
               getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT]
             );
 
-            const viewInAppUrl = basePath.publicBaseUrl
-              ? new URL(
-                  basePath.prepend(relativeViewInAppUrl),
-                  basePath.publicBaseUrl
-                ).toString()
-              : relativeViewInAppUrl;
+            const viewInAppUrl = addSpaceIdToPath(
+              basePath.publicBaseUrl,
+              spaceId,
+              relativeViewInAppUrl
+            );
+
+            const alertUuid = getAlertUuid(id);
+            const alertDetailsUrl = getAlertDetailsUrl(
+              basePath,
+              spaceId,
+              alertUuid
+            );
 
             services
               .alertWithLifecycle({
-                id: [ApmRuleType.ErrorCount, serviceName, environment]
-                  .filter((name) => name)
-                  .join('_'),
+                id,
                 fields: {
                   [SERVICE_NAME]: serviceName,
                   ...getEnvironmentEsField(environment),
@@ -175,15 +208,17 @@ export function registerErrorCountRuleType({
                   [ALERT_EVALUATION_VALUE]: errorCount,
                   [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
                   [ALERT_REASON]: alertReason,
+                  ...sourceFields,
                 },
               })
               .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-                serviceName,
+                alertDetailsUrl,
                 environment: getEnvironmentLabel(environment),
-                threshold: ruleParams.threshold,
-                triggerValue: errorCount,
                 interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
                 reason: alertReason,
+                serviceName,
+                threshold: ruleParams.threshold,
+                triggerValue: errorCount,
                 viewInAppUrl,
               });
           });

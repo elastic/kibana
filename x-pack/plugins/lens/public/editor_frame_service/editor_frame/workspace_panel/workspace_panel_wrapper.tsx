@@ -112,7 +112,13 @@ export function WorkspacePanelWrapper({
     warningMessages.push(...requestWarnings);
   }
   return (
-    <EuiPageTemplate direction="column" offset={0} minHeight={0} restrictWidth={false}>
+    <EuiPageTemplate
+      direction="column"
+      offset={0}
+      minHeight={0}
+      restrictWidth={false}
+      mainProps={{ component: 'div' } as unknown as {}}
+    >
       {!(isFullscreen && (autoApplyEnabled || warningMessages?.length)) && (
         <EuiPageTemplate.Section paddingSize="none" color="transparent">
           <EuiFlexGroup

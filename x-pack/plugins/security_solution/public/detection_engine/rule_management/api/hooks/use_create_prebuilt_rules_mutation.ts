@@ -11,6 +11,9 @@ import { createPrepackagedRules } from '../api';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFindRulesQuery } from './use_find_rules_query';
 import { useInvalidateFetchTagsQuery } from './use_fetch_tags_query';
+import { PREBUILT_RULES_URL } from '../../../../../common/detection_engine/prebuilt_rules/api/urls';
+
+export const CREATE_PREBUILT_RULES_MUTATION_KEY = ['PUT', PREBUILT_RULES_URL];
 
 export const useCreatePrebuiltRulesMutation = (
   options?: UseMutationOptions<CreatePrepackagedRulesResponse>
@@ -21,15 +24,16 @@ export const useCreatePrebuiltRulesMutation = (
 
   return useMutation(() => createPrepackagedRules(), {
     ...options,
-    onSuccess: (...args) => {
+    mutationKey: CREATE_PREBUILT_RULES_MUTATION_KEY,
+    onSettled: (...args) => {
       // Always invalidate all rules and the prepackaged rules status cache as
       // the number of rules might change after the installation
       invalidatePrePackagedRulesStatus();
       invalidateFindRulesQuery();
       invalidateFetchTagsQuery();
 
-      if (options?.onSuccess) {
-        options.onSuccess(...args);
+      if (options?.onSettled) {
+        options.onSettled(...args);
       }
     },
   });

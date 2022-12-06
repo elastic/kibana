@@ -8,13 +8,14 @@
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { generateMockIndicator, Indicator } from '../../../types';
+import { generateMockIndicator, Indicator } from '../../../../../../common/types/indicator';
 import {
   IndicatorsFlyoutOverview,
   TI_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS,
   TI_FLYOUT_OVERVIEW_TABLE,
 } from '.';
 import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt';
+import { IndicatorsFlyoutContext } from '../context';
 
 describe('<IndicatorsFlyoutOverview />', () => {
   describe('invalid indicator', () => {
@@ -33,12 +34,18 @@ describe('<IndicatorsFlyoutOverview />', () => {
   });
 
   it('should render the highlighted blocks and table when valid indicator is passed', () => {
+    const kqlBarIntegration = {
+      kqlBarIntegration: false,
+    };
+
     render(
       <TestProvidersComponent>
-        <IndicatorsFlyoutOverview
-          onViewAllFieldsInTable={() => {}}
-          indicator={generateMockIndicator()}
-        />
+        <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
+          <IndicatorsFlyoutOverview
+            onViewAllFieldsInTable={() => {}}
+            indicator={generateMockIndicator()}
+          />
+        </IndicatorsFlyoutContext.Provider>
       </TestProvidersComponent>
     );
 

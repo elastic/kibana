@@ -162,10 +162,25 @@ export const groupActionVariableDescription = i18n.translate(
   }
 );
 
+export const groupByKeysActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.groupByKeysActionVariableDescription',
+  {
+    defaultMessage: 'The object containing groups that are reporting data',
+  }
+);
+
 export const alertStateActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.alertStateActionVariableDescription',
   {
     defaultMessage: 'Current state of the alert',
+  }
+);
+
+export const alertDetailUrlActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.alertDetailUrlActionVariableDescription',
+  {
+    defaultMessage:
+      'Link to the view within Elastic that shows further details and context surrounding this alert',
   }
 );
 
@@ -211,7 +226,7 @@ export const viewInAppUrlActionVariableDescription = i18n.translate(
   'xpack.infra.metrics.alerting.viewInAppUrlActionVariableDescription',
   {
     defaultMessage:
-      'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
+      'Link to the view or feature within Elastic that can assist with further investigation',
   }
 );
 

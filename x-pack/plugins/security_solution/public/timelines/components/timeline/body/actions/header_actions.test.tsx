@@ -15,7 +15,7 @@ import type {
   ColumnHeaderOptions,
   HeaderActionProps,
 } from '../../../../../../common/types/timeline';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { timelineActions } from '../../../../store/timeline';
 import { getColumnHeader } from '../column_headers/helpers';
 
@@ -35,7 +35,7 @@ jest.mock('../../../../../common/hooks/use_selector', () => ({
 }));
 
 const columnId = 'test-field';
-const timelineId = 'test-timeline';
+const timelineId = TimelineId.test;
 
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 mockTriggersActionsUi.getFieldBrowser.mockImplementation(

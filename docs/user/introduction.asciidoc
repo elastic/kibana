@@ -127,10 +127,7 @@ When the alert triggers, you can send a notification to a system that is part of
 email, Slack, PagerDuty, ServiceNow, and other third party integrations.
 
 A dedicated view for creating, searching,
-and editing rules is in <<create-and-manage-rules,*Rules and Connectors*>>.
-
-[role="screenshot"]
-image::images/rules-and-connectors.png[Rules and Connectors view]
+and editing rules is in <<create-and-manage-rules,*{rules-ui}*>>.
 
 [float]
 [[organize-and-secure]]

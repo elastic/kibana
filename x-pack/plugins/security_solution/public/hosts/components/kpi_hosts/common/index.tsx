@@ -55,7 +55,7 @@ export const KpiBaseComponent = React.memo<KpiBaseComponentProps>(
     return (
       <EuiFlexGroup wrap>
         {statItemsProps.map((mappedStatItemProps) => (
-          <StatItemsComponent {...mappedStatItemProps} showInspectButton={false} />
+          <StatItemsComponent {...mappedStatItemProps} />
         ))}
       </EuiFlexGroup>
     );

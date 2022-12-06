@@ -6,6 +6,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
+import type { Request } from './types';
 
 export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
   hostName
@@ -145,3 +146,25 @@ export const getIndexFilters = (selectedPatterns: string[]) =>
         },
       ]
     : [];
+
+export const getRequestsAndResponses = (requests: Request[]) => {
+  return requests.reduce(
+    (acc: { requests: string[]; responses: string[] }, req: Request) => {
+      return {
+        requests: [
+          ...acc.requests,
+          JSON.stringify(
+            { body: req?.json, index: (req?.stats?.indexFilter?.value ?? '').split(',') },
+            null,
+            2
+          ),
+        ],
+        responses: [
+          ...acc.responses,
+          JSON.stringify(req?.response?.json?.rawResponse ?? {}, null, 2),
+        ],
+      };
+    },
+    { requests: [], responses: [] }
+  );
+};

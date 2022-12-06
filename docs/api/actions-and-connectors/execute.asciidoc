@@ -16,7 +16,7 @@ Runs a connector by ID.
 [[execute-connector-api-prereq]]
 === {api-prereq-title}
 
-You must have `read` privileges for the *Actions and Connectors* feature in the
+You must have `read` privileges for the *{connectors-feature}* feature in the
 *Management* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>.
 
@@ -60,8 +60,7 @@ refer to <<action-types>>.
 `documents`::
 (Required, array of objects) The documents to index in JSON format.
 
-For more information, refer to
-{kibana-ref}/index-action-type.html[Index connector and action].
+For more information, refer to <<index-action-type>>.
 =====
 
 .Jira connectors
@@ -158,9 +157,123 @@ the knowledge base.
 =======
 ======
 
-For more information, refer to
-{kibana-ref}/jira-action-type.html[{jira} connector and action].
+For more information, refer to <<jira-action-type>>.
 =====
+
+.{opsgenie} connectors
+[%collapsible%open]
+=====
+`subAction`::
+(Required, string) The action to test. Valid values include: `createAlert` and
+`closeAlert`.
+
+`subActionParams`::
+(Required, object) The set of configuration properties, which vary depending on
+the `subAction` value.
++
+.Properties when `subAction` is `createAlert`
+[%collapsible%open]
+======
+`actions`::::
+(Optional, array of strings) The custom actions available to the alert.
+
+`alias`::::
+(Optional, string) The unique identifier used for alert de-duplication in {opsgenie}.
+
+`description`::::
+(Optional, string) A description that provides detailed information about the alert.
+
+`details`::::
+(Optional, object) The custom properties of the alert. For example:
+`{"key1":"value1","key2":"value2"}`.
+
+`entity`::::
+(Optional, string) The domain of the alert. For example, the application or server
+name.
+
+`message`::::
+(Required, string) The alert message.
+
+`note`::::
+(Optional, string) Additional information for the alert.
+
+`priority`::::
+(Optional, string) The priority level for the alert. Valid values are: `P1`,
+`P2`, `P3`, `P4`, and `P5`.
+
+`responders`::::
+(Optional, array of objects) The entities to receive notifications about the
+alert. If `type` is `user`, either `id` or `username` is required. If `type` is
+`team`, either `id` or `name` is required.
++
+.Properties of `responders` objects
+[%collapsible%open]
+=======
+`id`::::
+(Required^*^, string) The identifier for the entity. 
+
+`name`::::
+(Required^*^, string) The name of the entity.
+
+`type`::::
+(Required, string) Valid values are `escalation`, `schedule`, `team`, and `user`.
+
+`username`::::
+(Required^*^, string) A valid email address for the user.
+=======
+
+`source`::::
+(Optional, string) The display name for the source of the alert.
+
+`tags`::::
+(Optional, array of strings) The tags for the alert.
+
+`user`::::
+(Optional, string) The display name for the owner.
+
+`visibleTo`::::
+(Optional, array of objects) The teams and users that the alert will be visible
+to without sending a notification. Only one of `id`, `name`, or `username` is
+required.
++
+.Properties of `visibleTo` objects
+[%collapsible%open]
+=======
+`id`::::
+(Required^*^, string) The identifier for the entity.
+
+`name`::::
+(Required^*^, string) The name of the entity.
+
+`type`::::
+(Required, string) Valid values are `team` and `user`.
+
+`username`::::
+(Required^*^, string) The user name. This property is required only when the
+`type` is `user`.
+=======
+======
++
+.Properties when `subAction` is `closeAlert`
+[%collapsible%open]
+======
+`alias`::::
+(Required, string) The unique identifier used for alert de-duplication in {opsgenie}.
+The alias must match the value used when creating the alert.
+
+`note`::::
+(Optional, string) Additional information for the alert.
+
+`source`::::
+(Optional, string) The display name for the source of the alert.
+
+`user`::::
+(Optional, string) The display name for the owner.
+======
+
+For more information, refer to <<opsgenie-action-type>>.
+=====
+
 
 .{sn-itom} connectors
 [%collapsible%open]

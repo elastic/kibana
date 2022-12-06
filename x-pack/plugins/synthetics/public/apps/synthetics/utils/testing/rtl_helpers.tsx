@@ -95,6 +95,7 @@ const createMockStore = () => {
 
 const mockAppUrls: Record<string, string> = {
   uptime: '/app/uptime',
+  synthetics: '/app/synthetics',
   observability: '/app/observability',
   '/home#/tutorial/uptimeMonitors': '/home#/tutorial/uptimeMonitors',
 };
@@ -252,7 +253,7 @@ export function render<ExtraCore>(
     path,
     useRealStore,
   }: RenderRouterOptions<ExtraCore> & { useRealStore?: boolean } = {}
-) {
+): any {
   if (url) {
     history = getHistoryFromUrl(url);
   }

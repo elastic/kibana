@@ -35,6 +35,9 @@ export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
   rule?: Exclude<RuleEcs, 'id'> & { parameters: Record<string, unknown>; uuid: string[] };
   building_block_type?: string[];
   workflow_status?: string[];
+  suppression?: {
+    docs_count: string[];
+  };
 };
 export interface Ecs {
   _id: string;

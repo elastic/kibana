@@ -35,9 +35,21 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "PublicMethodsOf",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
               "<",
-              "CoreUsageDataService",
+              {
+                "pluginId": "@kbn/core-usage-data-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreUsageDataServerInternalPluginApi",
+                "section": "def-server.CoreUsageDataService",
+                "text": "CoreUsageDataService"
+              },
               ">>"
             ],
             "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_data_service.mock.ts",
@@ -74,7 +86,13 @@
                 "description": [],
                 "signature": [
                   "{ getUsageStats: jest.MockInstance<Promise<",
-                  "CoreUsageStats",
+                  {
+                    "pluginId": "@kbn/core-usage-data-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreUsageDataServerPluginApi",
+                    "section": "def-server.CoreUsageStats",
+                    "text": "CoreUsageStats"
+                  },
                   ">, []>; incrementSavedObjectsBulkCreate: jest.MockInstance<Promise<void>, [options: ",
                   "BaseIncrementOptions",
                   "]>; incrementSavedObjectsBulkGet: jest.MockInstance<Promise<void>, [options: ",
@@ -125,7 +143,13 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "CoreUsageDataStart",
+              {
+                "pluginId": "@kbn/core-usage-data-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUsageDataServerPluginApi",
+                "section": "def-server.CoreUsageDataStart",
+                "text": "CoreUsageDataStart"
+              },
               ">"
             ],
             "path": "packages/core/usage-data/core-usage-data-server-mocks/src/core_usage_data_service.mock.ts",

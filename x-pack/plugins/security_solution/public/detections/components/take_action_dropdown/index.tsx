@@ -8,6 +8,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
+import {
+  AlertsCasesTourSteps,
+  SecurityStepId,
+} from '../../../common/components/guided_onboarding_tour/tour_config';
 import { isActiveTimeline } from '../../../helpers';
 import { TableId } from '../../../../common/types';
 import { useResponderActionItem } from '../endpoint_responder';
@@ -70,12 +75,12 @@ export const TakeActionDropdown = React.memo(
     scopeId,
   }: TakeActionDropdownProps) => {
     const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
-    const { loading: canAccessEndpointManagementLoading, canAccessEndpointManagement } =
+    const { loading: endpointPrivilegesLoading, canWriteEventFilters } =
       useUserPrivileges().endpointPrivileges;
 
     const canCreateEndpointEventFilters = useMemo(
-      () => !canAccessEndpointManagementLoading && canAccessEndpointManagement,
-      [canAccessEndpointManagement, canAccessEndpointManagementLoading]
+      () => !endpointPrivilegesLoading && canWriteEventFilters,
+      [canWriteEventFilters, endpointPrivilegesLoading]
     );
     const { osquery } = useKibana().services;
 
@@ -163,7 +168,6 @@ export const TakeActionDropdown = React.memo(
 
     const { eventFilterActionItems } = useEventFilterAction({
       onAddEventFilterClick: handleOnAddEventFilterClick,
-      disabled: !isEndpointEvent || !canCreateEndpointEventFilters,
     });
 
     const onMenuItemClick = useCallback(() => {
@@ -205,12 +209,13 @@ export const TakeActionDropdown = React.memo(
       () =>
         !isEvent && actionsData.ruleId
           ? [...statusActionItems, ...exceptionActionItems]
-          : isEndpointEvent
+          : isEndpointEvent && canCreateEndpointEventFilters
           ? eventFilterActionItems
           : [],
       [
         eventFilterActionItems,
         isEndpointEvent,
+        canCreateEndpointEventFilters,
         exceptionActionItems,
         statusActionItems,
         isEvent,
@@ -222,7 +227,7 @@ export const TakeActionDropdown = React.memo(
       scopeId as TableId
     );
 
-    const { addToCaseActionItems } = useAddToCaseActions({
+    const { addToCaseActionItems, handleAddToNewCaseClick } = useAddToCaseActions({
       ecsData,
       nonEcsData: detailsData?.map((d) => ({ field: d.field, value: d.values })) ?? [],
       onMenuItemClick,
@@ -252,19 +257,28 @@ export const TakeActionDropdown = React.memo(
       ]
     );
 
-    const takeActionButton = useMemo(() => {
-      return (
-        <EuiButton
-          data-test-subj="take-action-dropdown-btn"
-          fill
-          iconSide="right"
-          iconType="arrowDown"
-          onClick={togglePopoverHandler}
+    const takeActionButton = useMemo(
+      () => (
+        <GuidedOnboardingTourStep
+          onClick={handleAddToNewCaseClick}
+          step={AlertsCasesTourSteps.addAlertToCase}
+          tourId={SecurityStepId.alertsCases}
         >
-          {TAKE_ACTION}
-        </EuiButton>
-      );
-    }, [togglePopoverHandler]);
+          <EuiButton
+            data-test-subj="take-action-dropdown-btn"
+            fill
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={togglePopoverHandler}
+          >
+            {TAKE_ACTION}
+          </EuiButton>
+        </GuidedOnboardingTourStep>
+      ),
+
+      [handleAddToNewCaseClick, togglePopoverHandler]
+    );
+
     return items.length && !loadingEventDetails && ecsData ? (
       <EuiPopover
         id="AlertTakeActionPanel"

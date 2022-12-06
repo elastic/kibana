@@ -27,18 +27,17 @@ export const convertToRangeParams = (
     return {
       type: RANGE_MODES.Histogram,
       maxBars: aggParams.maxBars ?? 'auto',
-      ranges: [],
+      includeEmptyRows: aggParams.min_doc_count,
     };
   } else {
     return {
       type: RANGE_MODES.Range,
       maxBars: 'auto',
-      ranges:
-        aggParams.ranges?.map((range) => ({
-          label: range.label,
-          from: range.from ?? null,
-          to: range.to ?? null,
-        })) ?? [],
+      ranges: aggParams.ranges?.map((range) => ({
+        label: range.label,
+        from: range.from ?? null,
+        to: range.to ?? null,
+      })),
     };
   }
 };

@@ -62,6 +62,8 @@ export function kindToDescriptorName(kind: number) {
     case ts.SyntaxKind.NumberKeyword:
     case ts.SyntaxKind.NumericLiteral:
       return 'number';
+    case ts.SyntaxKind.UnknownKeyword:
+      return 'unknown';
     default:
       throw new Error(`Unknown kind ${kind}`);
   }
@@ -219,6 +221,15 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
 
     // Support `Record<string, SOMETHING>`
     if (symbolName === 'Record') {
+      // Special use case `Record<string, unknown>`
+      if (
+        node.typeArguments![0].kind === ts.SyntaxKind.StringKeyword &&
+        node.typeArguments![1].kind === ts.SyntaxKind.UnknownKeyword
+      ) {
+        const kind = node.typeArguments![1].kind;
+        return { kind, type: ts.SyntaxKind[kind] as keyof typeof ts.SyntaxKind };
+      }
+
       const descriptor = getDescriptor(node.typeArguments![1], program);
       if (node.typeArguments![0].kind === ts.SyntaxKind.StringKeyword) {
         return { '@@INDEX@@': descriptor };

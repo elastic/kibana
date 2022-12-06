@@ -271,7 +271,7 @@ export const termsOperation: OperationDefinition<
       const orderColumn = layer.columns[column.params.orderBy.columnId];
       orderBy = String(orderedColumnIds.indexOf(column.params.orderBy.columnId));
       // percentile rank with non integer value should default to alphabetical order
-      if (!isPercentileRankSortable(orderColumn)) {
+      if (!orderColumn || !isPercentileRankSortable(orderColumn)) {
         orderBy = '_key';
       }
     }
@@ -426,7 +426,6 @@ export const termsOperation: OperationDefinition<
       selectedColumn,
       columnId,
       indexPattern,
-      existingFields,
       operationSupportMatrix,
       updateLayer,
       dimensionGroups,
@@ -549,7 +548,6 @@ export const termsOperation: OperationDefinition<
         <FieldInputs
           column={selectedColumn}
           indexPattern={indexPattern}
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           onChange={onFieldSelectChange}
           invalidFields={invalidFields}
@@ -562,17 +560,18 @@ export const termsOperation: OperationDefinition<
 The top values of a specified field ranked by the chosen metric.
       `,
   }),
+  handleDataSectionExtra: true,
   paramEditor: function ParamEditor({
     layer,
     paramEditorUpdater,
     currentColumn,
     columnId,
     indexPattern,
-    existingFields,
     operationDefinitionMap,
     ReferenceEditor,
     paramEditorCustomProps,
     activeData,
+    dataSectionExtra,
     ...rest
   }) {
     const [incompleteColumn, setIncompleteColumn] = useState<IncompleteColumn | undefined>(
@@ -808,7 +807,6 @@ The top values of a specified field ranked by the chosen metric.
               }}
               column={currentColumn.params.orderAgg}
               incompleteColumn={incompleteColumn}
-              existingFields={existingFields}
               onDeleteColumn={() => {
                 throw new Error('Should not be called');
               }}
@@ -933,6 +931,12 @@ The top values of a specified field ranked by the chosen metric.
             }}
           />
         </EuiFormRow>
+        {dataSectionExtra && (
+          <>
+            <EuiSpacer size="m" />
+            {dataSectionExtra}
+          </>
+        )}
         {!hasRestrictions && (
           <>
             <EuiSpacer size="m" />

@@ -13,4 +13,5 @@ export function dedot(source: Record<string, any>, target: Record<string, any>) 
     const val = source[key as keyof typeof source];
     set(target, key, val);
   }
+  return target;
 }

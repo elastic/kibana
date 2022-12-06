@@ -46,6 +46,7 @@ export enum TableId {
 export enum TimelineId {
   active = 'timeline-1',
   casePage = 'timeline-case',
+  detectionsAlertDetailsPage = 'detections-alert-details-page',
   test = 'timeline-test', // Reserved for testing purposes
 }
 

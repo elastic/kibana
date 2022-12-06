@@ -22,7 +22,7 @@ import {
   TimelineTemplateTitle,
 } from '../../../../rule_schema';
 
-export enum BulkAction {
+export enum BulkActionType {
   'enable' = 'enable',
   'disable' = 'disable',
   'export' = 'export',
@@ -131,6 +131,14 @@ export const BulkActionEditPayload = t.union([
   BulkActionEditPayloadSchedule,
 ]);
 
+const bulkActionDuplicatePayload = t.exact(
+  t.type({
+    include_exceptions: t.boolean,
+  })
+);
+
+export type BulkActionDuplicatePayload = t.TypeOf<typeof bulkActionDuplicatePayload>;
+
 /**
  * actions that modify rules attributes
  */
@@ -162,18 +170,29 @@ export const PerformBulkActionRequestBody = t.intersection([
     t.exact(
       t.type({
         action: t.union([
-          t.literal(BulkAction.delete),
-          t.literal(BulkAction.disable),
-          t.literal(BulkAction.duplicate),
-          t.literal(BulkAction.enable),
-          t.literal(BulkAction.export),
+          t.literal(BulkActionType.delete),
+          t.literal(BulkActionType.disable),
+          t.literal(BulkActionType.enable),
+          t.literal(BulkActionType.export),
         ]),
       })
     ),
+    t.intersection([
+      t.exact(
+        t.type({
+          action: t.literal(BulkActionType.duplicate),
+        })
+      ),
+      t.exact(
+        t.partial({
+          [BulkActionType.duplicate]: bulkActionDuplicatePayload,
+        })
+      ),
+    ]),
     t.exact(
       t.type({
-        action: t.literal(BulkAction.edit),
-        [BulkAction.edit]: NonEmptyArray(BulkActionEditPayload),
+        action: t.literal(BulkActionType.edit),
+        [BulkActionType.edit]: NonEmptyArray(BulkActionEditPayload),
       })
     ),
   ]),

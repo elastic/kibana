@@ -53,6 +53,7 @@ export const migrateLegacyTimelinesToSecurityDataTable = (legacyTimelineTables: 
         selectedEventIds: timelineModel.selectedEventIds,
         deletedEventIds: timelineModel.deletedEventIds,
         expandedDetail: timelineModel.expandedDetail,
+        totalCount: timelineModel.totalCount || 0,
         ...(Array.isArray(timelineModel.columns)
           ? {
               columns: timelineModel.columns

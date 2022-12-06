@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-
 import { CaseStatuses } from '../../../common/api';
 import { StatusPopoverButton } from './status_popover_button';
 
@@ -56,6 +55,7 @@ describe('StatusPopoverButton', () => {
 
     wrapper
       .find(`[data-test-subj="case-status-badge-popover-button-open"] .euiBadge__iconButton`)
+      .first()
       .simulate('click');
     expect(onClick).toHaveBeenCalled();
   });

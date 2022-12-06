@@ -23,4 +23,22 @@ describe('ALL - Saved queries', () => {
   });
 
   getSavedQueriesComplexTest(SAVED_QUERY_ID, SAVED_QUERY_DESCRIPTION);
+
+  it('checks default values on new saved query', () => {
+    cy.contains('Saved queries').click();
+    cy.contains('Add saved query').click();
+    // ADD MORE FIELDS HERE
+    cy.getBySel('resultsTypeField').within(() => {
+      cy.contains('Snapshot');
+    });
+  });
+  it('checks result type on prebuilt saved query', () => {
+    cy.contains('Saved queries').click();
+    cy.react('CustomItemAction', {
+      props: { index: 1, item: { attributes: { id: 'users_elastic' } } },
+    }).click();
+    cy.getBySel('resultsTypeField').within(() => {
+      cy.contains('Snapshot');
+    });
+  });
 });

@@ -36,7 +36,7 @@ describe('SuggestUsersPopover', () => {
     };
   });
 
-  it.skip('calls onUsersChange when 1 user is selected', async () => {
+  it('calls onUsersChange when 1 user is selected', async () => {
     const onUsersChange = jest.fn();
     const props = { ...defaultProps, onUsersChange };
     appMockRender.render(<SuggestUsersPopover {...props} />);
@@ -182,7 +182,7 @@ describe('SuggestUsersPopover', () => {
     expect(screen.getByText('1 assigned')).toBeInTheDocument();
   });
 
-  it.skip('shows the 1 assigned total after clicking on a user', async () => {
+  it('shows the 1 assigned total after clicking on a user', async () => {
     appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
 
     await waitForEuiPopoverOpen();

@@ -9,9 +9,9 @@ import { defineConfig } from 'cypress';
 
 // eslint-disable-next-line import/no-default-export
 export default defineConfig({
-  defaultCommandTimeout: 120000,
-  execTimeout: 120000,
-  pageLoadTimeout: 120000,
+  defaultCommandTimeout: 150000,
+  execTimeout: 150000,
+  pageLoadTimeout: 150000,
   numTestsKeptInMemory: 0,
   retries: {
     runMode: 2,

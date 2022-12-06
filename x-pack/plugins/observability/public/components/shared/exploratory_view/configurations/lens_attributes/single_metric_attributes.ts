@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import {
-  FormulaPublicApi,
-  MetricState,
-  OperationType,
-  TypedLensByValueInput,
-} from '@kbn/lens-plugin/public';
+import { FormulaPublicApi, MetricState, OperationType } from '@kbn/lens-plugin/public';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { Query } from '@kbn/es-query';
-import { FORMULA_COLUMN } from '../constants';
+import { FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
 import { ColumnFilter, MetricOption } from '../../types';
 import { SeriesConfig } from '../../../../..';
 import {
@@ -44,11 +39,16 @@ export class SingleMetricLensAttributes extends LensAttributes {
     this.columnId = 'layer-0-column-1';
 
     this.globalFilter = this.getGlobalFilter(this.isMultiSeries);
-    this.layers = this.getSingleMetricLayer()!;
+    const layer0 = this.getSingleMetricLayer()!;
+
+    this.layers = {
+      layer0,
+    };
+    this.visualization = this.getMetricState();
   }
 
   getSingleMetricLayer() {
-    const { seriesConfig, selectedMetricField, operationType, indexPattern } = this.layerConfigs[0];
+    const { seriesConfig, selectedMetricField, operationType, dataView } = this.layerConfigs[0];
 
     const metricOption = parseCustomFieldName(seriesConfig, selectedMetricField);
 
@@ -69,7 +69,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
         return this.getFormulaLayer({
           formula,
           label: columnLabel,
-          dataView: indexPattern,
+          dataView,
           format,
           filter: columnFilter,
         });
@@ -100,18 +100,19 @@ export class SingleMetricLensAttributes extends LensAttributes {
       }
 
       return {
-        layer0: {
-          columns: {
-            [this.columnId]: {
-              ...buildNumberColumn(sourceField),
-              label: columnLabel ?? '',
-              operationType: sourceField === 'Records' ? 'count' : operationType || 'median',
-              filter: columnFilter,
+        columns: {
+          [this.columnId]: {
+            ...buildNumberColumn(sourceField),
+            label: columnLabel ?? '',
+            operationType: sourceField === RECORDS_FIELD ? 'count' : operationType || 'median',
+            filter: columnFilter,
+            params: {
+              emptyAsNull: true,
             },
           },
-          columnOrder: [this.columnId],
-          incompleteColumns: {},
         },
+        columnOrder: [this.columnId],
+        incompleteColumns: {},
       };
     }
   }
@@ -149,9 +150,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
       dataView
     );
 
-    return {
-      layer0: layer!,
-    };
+    return layer!;
   }
 
   getPercentileLayer({
@@ -168,17 +167,15 @@ export class SingleMetricLensAttributes extends LensAttributes {
     columnFilter?: ColumnFilter;
   }) {
     return {
-      layer0: {
-        columns: {
-          [this.columnId]: {
-            ...this.getPercentileNumberColumn(sourceField, operationType!, seriesConfig),
-            label: columnLabel ?? '',
-            filter: columnFilter,
-          },
+      columns: {
+        [this.columnId]: {
+          ...this.getPercentileNumberColumn(sourceField, operationType!, seriesConfig),
+          label: columnLabel ?? '',
+          filter: columnFilter,
         },
-        columnOrder: [this.columnId],
-        incompleteColumns: {},
       },
+      columnOrder: [this.columnId],
+      incompleteColumns: {},
     };
   }
 
@@ -189,29 +186,6 @@ export class SingleMetricLensAttributes extends LensAttributes {
       layerType: 'data',
       ...(this.metricStateOptions ?? {}),
       size: 's',
-    };
-  }
-
-  getJSON(refresh?: number): TypedLensByValueInput['attributes'] {
-    const query = this.globalFilter || this.layerConfigs[0].seriesConfig.query;
-
-    const visualization = this.getMetricState();
-
-    return {
-      title: 'Prefilled from exploratory view app',
-      description: String(refresh),
-      visualizationType: 'lnsLegacyMetric',
-      references: this.getReferences(),
-      state: {
-        visualization,
-        datasourceStates: {
-          formBased: {
-            layers: this.layers,
-          },
-        },
-        query: query || { query: '', language: 'kuery' },
-        filters: [],
-      },
     };
   }
 }

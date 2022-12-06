@@ -28,8 +28,11 @@ import {
 import type { RulesReferencedByExceptionListsSchema } from '../../../../common/detection_engine/rule_exceptions';
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/detection_engine/rule_exceptions';
 
-import type { BulkActionEditPayload } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkAction } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type {
+  BulkActionEditPayload,
+  BulkActionDuplicatePayload,
+} from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 
 import type {
   RuleResponse,
@@ -203,58 +206,75 @@ export interface BulkActionAggregatedError {
   rules: Array<{ id: string; name?: string }>;
 }
 
+export interface BulkActionAttributes {
+  summary: BulkActionSummary;
+  results: BulkActionResult;
+  errors?: BulkActionAggregatedError[];
+}
+
 export interface BulkActionResponse {
   success?: boolean;
   rules_count?: number;
-  attributes: {
-    summary: BulkActionSummary;
-    results: BulkActionResult;
-    errors?: BulkActionAggregatedError[];
-  };
+  attributes: BulkActionAttributes;
 }
 
-export interface BulkActionProps {
-  action: Exclude<BulkAction, BulkAction.export>;
-  query?: string;
-  ids?: string[];
-  edit?: BulkActionEditPayload[];
-  isDryRun?: boolean;
+export interface BulkActionErrorResponse {
+  message: string;
+  status_code: number;
+  attributes?: BulkActionAttributes;
+}
+
+export type QueryOrIds = { query: string; ids?: undefined } | { query?: undefined; ids: string[] };
+type PlainBulkAction = {
+  type: Exclude<
+    BulkActionType,
+    BulkActionType.edit | BulkActionType.export | BulkActionType.duplicate
+  >;
+} & QueryOrIds;
+
+type EditBulkAction = {
+  type: BulkActionType.edit;
+  editPayload: BulkActionEditPayload[];
+} & QueryOrIds;
+
+type DuplicateBulkAction = {
+  type: BulkActionType.duplicate;
+  duplicatePayload?: BulkActionDuplicatePayload;
+} & QueryOrIds;
+
+export type BulkAction = PlainBulkAction | EditBulkAction | DuplicateBulkAction;
+
+export interface PerformBulkActionProps {
+  bulkAction: BulkAction;
+  dryRun?: boolean;
 }
 
 /**
  * Perform bulk action with rules selected by a filter query
  *
- * @param query filter query to select rules to perform bulk action with
- * @param ids string[] rule ids to select rules to perform bulk action with
- * @param edit BulkEditActionPayload edit action payload
- * @param action bulk action to perform
- * @param isDryRun enables dry run mode for bulk actions
+ * @param bulkAction bulk action which contains type, query or ids and edit fields
+ * @param dryRun enables dry run mode for bulk actions
  *
  * @throws An error if response is not OK
  */
-export const performBulkAction = async ({
-  action,
-  query,
-  edit,
-  ids,
-  isDryRun,
-}: BulkActionProps): Promise<BulkActionResponse> =>
-  KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
-    method: 'POST',
-    body: JSON.stringify({
-      action,
-      ...(edit ? { edit } : {}),
-      ...(ids ? { ids } : {}),
-      ...(query !== undefined ? { query } : {}),
-    }),
-    query: {
-      ...(isDryRun ? { dry_run: isDryRun } : {}),
-    },
-  });
+export async function performBulkAction({
+  bulkAction,
+  dryRun = false,
+}: PerformBulkActionProps): Promise<BulkActionResponse> {
+  const params = {
+    action: bulkAction.type,
+    query: bulkAction.query,
+    ids: bulkAction.ids,
+    edit: bulkAction.type === BulkActionType.edit ? bulkAction.editPayload : undefined,
+    duplicate:
+      bulkAction.type === BulkActionType.duplicate ? bulkAction.duplicatePayload : undefined,
+  };
 
-export interface BulkExportProps {
-  query?: string;
-  ids?: string[];
+  return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
+    method: 'POST',
+    body: JSON.stringify(params),
+    query: { dry_run: dryRun },
+  });
 }
 
 export type BulkExportResponse = Blob;
@@ -262,23 +282,22 @@ export type BulkExportResponse = Blob;
 /**
  * Bulk export rules selected by a filter query
  *
- * @param query filter query to select rules to perform bulk action with
- * @param ids string[] rule ids to select rules to perform bulk action with
+ * @param queryOrIds filter query to select rules to perform bulk action with or rule ids to select rules to perform bulk action with
  *
  * @throws An error if response is not OK
  */
-export const bulkExportRules = async ({
-  query,
-  ids,
-}: BulkExportProps): Promise<BulkExportResponse> =>
-  KibanaServices.get().http.fetch<BulkExportResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
+export async function bulkExportRules(queryOrIds: QueryOrIds): Promise<BulkExportResponse> {
+  const params = {
+    action: BulkActionType.export,
+    query: queryOrIds.query,
+    ids: queryOrIds.ids,
+  };
+
+  return KibanaServices.get().http.fetch<BulkExportResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
     method: 'POST',
-    body: JSON.stringify({
-      action: BulkAction.export,
-      ...(ids ? { ids } : {}),
-      ...(query !== undefined ? { query } : {}),
-    }),
+    body: JSON.stringify(params),
   });
+}
 
 export interface CreatePrepackagedRulesResponse {
   rules_installed: number;

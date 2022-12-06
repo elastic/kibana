@@ -30,6 +30,7 @@ import {
   transformESConnectorToExternalModel,
 } from '../transform';
 import { ConnectorReferenceHandler } from '../connector_reference_handler';
+import type { CaseSavedObject } from '../../common/types';
 
 export function transformUpdateResponsesToExternalModels(
   response: SavedObjectsBulkUpdateResponse<ESCaseAttributes>
@@ -164,7 +165,7 @@ export function transformFindResponseToExternalModel(
 
 export function transformSavedObjectToExternalModel(
   caseSavedObject: SavedObject<ESCaseAttributes>
-): SavedObject<CaseAttributes> {
+): CaseSavedObject {
   const connector = transformESConnectorOrUseDefault({
     // if the saved object had an error the attributes field will not exist
     connector: caseSavedObject.attributes?.connector,

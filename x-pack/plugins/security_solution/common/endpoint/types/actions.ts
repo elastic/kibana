@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { FileJSON } from '@kbn/files-plugin/common';
 import type {
   ActionStatusRequestSchema,
   NoParametersRequestSchema,
@@ -52,9 +53,15 @@ export interface KillProcessActionOutputContent {
 
 export interface ResponseActionGetFileOutputContent {
   code: string;
-  path: string;
-  size: number;
   zip_size: number;
+  /** The contents of the zip file. One entry per file */
+  contents: Array<{
+    path: string;
+    sha256: string;
+    size: number;
+    file_name: string;
+    type: string;
+  }>;
 }
 
 export const ActivityLogItemTypes = {
@@ -359,4 +366,13 @@ export interface ActionListApiResponse {
   data: Array<Omit<ActionDetails, 'outputs'>>;
   statuses: ResponseActionStatus[] | undefined;
   total: number;
+}
+
+export type UploadedFileInfo = Pick<
+  FileJSON,
+  'name' | 'id' | 'mimeType' | 'size' | 'status' | 'created'
+>;
+
+export interface ActionFileInfoApiResponse {
+  data: UploadedFileInfo;
 }

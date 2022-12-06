@@ -8,7 +8,7 @@
 import { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObject } from '@kbn/core/server';
 
-import { StoredSLO } from '../types/models';
+import { StoredSLO } from '../domain/models';
 
 export const SO_SLO_TYPE = 'slo';
 
@@ -42,8 +42,18 @@ export const slo: SavedObjectsType = {
       objective: {
         properties: {
           target: { type: 'float' },
+          timeslice_target: { type: 'float' },
+          timeslice_window: { type: 'keyword' },
         },
       },
+      settings: {
+        properties: {
+          timestamp_field: { type: 'keyword' },
+          sync_delay: { type: 'keyword' },
+          frequency: { type: 'keyword' },
+        },
+      },
+      revision: { type: 'short' },
       created_at: { type: 'date' },
       updated_at: { type: 'date' },
     },

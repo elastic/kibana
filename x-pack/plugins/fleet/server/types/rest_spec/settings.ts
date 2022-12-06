@@ -35,5 +35,6 @@ export const PutSettingsRequestSchema = {
       })
     ),
     kibana_ca_sha256: schema.maybe(schema.string()),
+    prerelease_integrations_enabled: schema.maybe(schema.boolean()),
   }),
 };

@@ -32,6 +32,7 @@ describe('PingList component', () => {
         name: '',
         status: 'down',
         type: 'tcp',
+        check_group: 'test-group',
       },
     },
     {
@@ -47,6 +48,7 @@ describe('PingList component', () => {
         name: '',
         status: 'down',
         type: 'tcp',
+        check_group: 'test-group',
       },
     },
   ];
@@ -120,6 +122,7 @@ describe('PingList component', () => {
                   "type": "io",
                 },
                 "monitor": Object {
+                  "check_group": "test-group",
                   "duration": Object {
                     "us": 1430,
                   },
@@ -160,6 +163,7 @@ describe('PingList component', () => {
                 "type": "io",
               },
               "monitor": Object {
+                "check_group": "test-group",
                 "id": "auto-tcp-0X81440A68E839814D",
                 "ip": "255.255.255.0",
                 "name": "",

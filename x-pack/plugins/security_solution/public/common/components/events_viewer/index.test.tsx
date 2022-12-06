@@ -66,6 +66,7 @@ const testProps = {
   rowRenderers: defaultRowRenderers,
   scopeId: SourcererScopeName.default,
   start: from,
+  bulkActions: false,
 };
 describe('StatefulEventsViewer', () => {
   (useTimelineEvents as jest.Mock).mockReturnValue([false, mockEventViewerResponse]);

@@ -11,7 +11,10 @@ import { defaults, map, omit } from 'lodash';
 import React, { useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  ForLastExpression,
+  TIME_UNITS,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
@@ -28,11 +31,7 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../../utils/fields';
-import {
-  AlertMetadata,
-  getIntervalAndTimeRange,
-  TimeUnit,
-} from '../../utils/helper';
+import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
 import { PopoverExpression } from '../../ui_components/popover_expression';
 
@@ -85,7 +84,7 @@ export function TransactionDurationRuleType(props: Props) {
       aggregationType: AggregationType.Avg,
       threshold: 1500,
       windowSize: 5,
-      windowUnit: 'm',
+      windowUnit: TIME_UNITS.MINUTE,
       environment: ENVIRONMENT_ALL.value,
     }
   );
@@ -94,7 +93,7 @@ export function TransactionDurationRuleType(props: Props) {
     (callApmApi) => {
       const { interval, start, end } = getIntervalAndTimeRange({
         windowSize: params.windowSize,
-        windowUnit: params.windowUnit as TimeUnit,
+        windowUnit: params.windowUnit,
       });
       if (interval && start && end) {
         return callApmApi(
@@ -200,8 +199,9 @@ export function TransactionDurationRuleType(props: Props) {
 
   return (
     <ApmRuleParamsContainer
+      minimumWindowSize={{ value: 5, unit: TIME_UNITS.MINUTE }}
       chartPreview={chartPreview}
-      defaults={params}
+      defaultParams={params}
       fields={fields}
       setRuleParams={setRuleParams}
       setRuleProperty={setRuleProperty}

@@ -19,7 +19,7 @@ const Container = styled.div`
 
 // when displaying chart in modal the tooltip is render under the modal
 const LensChartTooltipFix = createGlobalStyle`
-  div.euiOverlayMask.euiOverlayMask--aboveHeader ~ [id^='echTooltipPortal'] {
+  div.euiOverlayMask[data-relative-to-header=above] ~ [id^='echTooltipPortal'] {
     z-index: ${({ theme }) => theme.eui.euiZLevel7} !important;
   }
 `;
