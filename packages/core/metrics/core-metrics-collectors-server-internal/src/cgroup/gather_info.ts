@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import fs from 'fs';
+import fs from 'fs/promises';
 
 import { GROUP_CPU, GROUP_CPUACCT } from './constants';
 
@@ -23,7 +23,7 @@ function isCgroups2(procSelfLines: string[]): boolean {
 }
 
 async function readProcSelf(): Promise<string[]> {
-  const data = (await fs.promises.readFile(PROC_SELF_CGROUP_FILE)).toString();
+  const data = (await fs.readFile(PROC_SELF_CGROUP_FILE)).toString();
   return data.split(/\n/).filter((line) => line.trim().length > 0);
 }
 
