@@ -12,7 +12,7 @@ import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { Blocklist } from './blocklist';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 
 jest.mock('../../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
@@ -22,7 +22,6 @@ describe('When on the blocklist page', () => {
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
-  let mockedEndpointPrivileges: Partial<EndpointPrivileges>;
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
@@ -32,9 +31,6 @@ describe('When on the blocklist page', () => {
     act(() => {
       history.push(BLOCKLIST_PATH);
     });
-
-    mockedEndpointPrivileges = { canWriteBlocklist: true };
-    mockUserPrivileges.mockReturnValue({ endpointPrivileges: mockedEndpointPrivileges });
   });
 
   afterEach(() => {
@@ -53,7 +49,9 @@ describe('When on the blocklist page', () => {
   describe('RBAC Blocklists', () => {
     describe('ALL privilege', () => {
       beforeEach(() => {
-        mockedEndpointPrivileges.canWriteBlocklist = true;
+        mockUserPrivileges.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({ canWriteBlocklist: true }),
+        });
       });
 
       it('should enable adding entries', async () => {
@@ -67,7 +65,9 @@ describe('When on the blocklist page', () => {
 
     describe('READ privilege', () => {
       beforeEach(() => {
-        mockedEndpointPrivileges.canWriteBlocklist = false;
+        mockUserPrivileges.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({ canWriteBlocklist: false }),
+        });
       });
 
       it('should disable adding entries', async () => {
