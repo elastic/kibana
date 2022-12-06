@@ -39,7 +39,14 @@ const FilterBadgeContent = ({ filter, dataViews, filterLabelStatus }: FilterBadg
     return <FilterBadgeInvalidPlaceholder />;
   }
 
-  return <FilterContent filter={filter} valueLabel={valueLabel} fieldLabel={fieldLabel} />;
+  return (
+    <FilterContent
+      filter={filter}
+      valueLabel={valueLabel}
+      fieldLabel={fieldLabel}
+      hideAlias={true}
+    />
+  );
 };
 
 export function FilterExpressionBadge({
