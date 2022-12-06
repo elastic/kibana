@@ -146,8 +146,7 @@
     {
       "groupName": "scss",
       "packageNames": [
-        "node-sass",
-        "sass-loader"
+        "node-sass"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
