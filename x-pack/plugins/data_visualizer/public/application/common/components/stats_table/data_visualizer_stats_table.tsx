@@ -88,7 +88,6 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   );
   const [showDistributions, setShowDistributions] = useState<boolean>(showPreviewByDefault ?? true);
   const [dimensions, setDimensions] = useState(calculateTableColumnsDimensions());
-  const [tableWidth, setTableWidth] = useState<number>(1400);
 
   const toggleExpandAll = useCallback(
     (shouldExpandAll: boolean) => {
@@ -109,10 +108,9 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     throttle((e: { width: number; height: number }) => {
       // When window or table is resized,
       // update the column widths and other settings accordingly
-      setTableWidth(e.width);
       setDimensions(calculateTableColumnsDimensions(e.width));
     }, 500),
-    [tableWidth]
+    []
   );
 
   const toggleShowDistribution = useCallback(() => {

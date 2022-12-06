@@ -508,6 +508,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                     </div>
                   </EuiPageContentHeaderSection>
 
+                  {compact ? <EuiSpacer size="m" /> : null}
                   <EuiFlexGroup
                     alignItems="center"
                     justifyContent="flexEnd"

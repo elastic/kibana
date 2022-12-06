@@ -25,6 +25,7 @@ import { TimeHistoryContract, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import {
   useRefreshIntervalUpdates,
   useTimeRangeUpdates,
@@ -245,7 +246,15 @@ export const DatePickerWrapper: FC<{
       alignItems="center"
       data-test-subj="mlNavigationMenuDatePickerWrapper"
     >
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem
+        grow={false}
+        css={
+          compact &&
+          css`
+            max-width: 500px;
+          `
+        }
+      >
         <EuiSuperDatePicker
           start={time.from}
           end={time.to}
