@@ -11,5 +11,9 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/core-http-server",
+    "@kbn/core-http-request-handler-context-server"
   ]
 }

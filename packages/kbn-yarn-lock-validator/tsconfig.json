@@ -11,5 +11,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utils",
+    "@kbn/bazel-packages",
+    "@kbn/some-dev-log"
   ]
 }

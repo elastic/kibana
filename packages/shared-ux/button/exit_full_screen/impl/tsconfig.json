@@ -14,5 +14,11 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/shared-ux-utility",
+    "@kbn/shared-ux-button-exit-full-screen-types"
   ]
 }

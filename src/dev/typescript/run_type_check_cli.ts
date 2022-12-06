@@ -13,9 +13,8 @@ import Fsp from 'fs/promises';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { runBazel } from '@kbn/bazel-runner';
 import { asyncForEachWithLimit } from '@kbn/std';
-import { Jsonc, BazelPackage, discoverBazelPackages } from '@kbn/bazel-packages';
+import { Jsonc } from '@kbn/bazel-packages';
 
 import { PROJECTS } from './projects';
 import { Project } from './project';
@@ -24,11 +23,6 @@ import {
   cleanupRootRefsConfig,
   ROOT_REFS_CONFIG_PATH,
 } from './root_refs_config';
-
-function rel(from: string, to: string) {
-  const relative = Path.relative(from, to);
-  return relative.startsWith('.') ? relative : `./${relative}`;
-}
 
 function isValidRefs(refs: unknown): refs is Array<{ path: string }> {
   return (
@@ -51,49 +45,12 @@ function parseTsconfig(path: string) {
 
 function toTypeCheckConfigPath(path: string) {
   return path.endsWith('tsconfig.base.json')
-    ? path.replace(/\/tsconfig\.base\.json$/, '/tsconfig.base.type_check.json')
+    ? path
     : path.replace(/\/tsconfig\.json$/, '/tsconfig.type_check.json');
 }
 
-function createTypeCheckConfigs(projects: Project[], bazelPackages: BazelPackage[]) {
+function createTypeCheckConfigs(projects: Project[]) {
   const created = new Set<string>();
-  const bazelPackageIds = new Set(bazelPackages.map((p) => p.manifest.id));
-
-  // write root tsconfig.type_check.json
-  const baseTypeCheckConfigPath = Path.resolve(REPO_ROOT, 'tsconfig.base.type_check.json');
-  const baseConfigPath = Path.resolve(REPO_ROOT, 'tsconfig.base.json');
-  const baseStat = Fs.statSync(baseConfigPath);
-  const basePaths = parseTsconfig(baseConfigPath).compilerOptions.paths;
-  if (typeof basePaths !== 'object' || basePaths === null) {
-    throw createFailError(`expected root compilerOptions.paths to be an object`);
-  }
-  Fs.writeFileSync(
-    baseTypeCheckConfigPath,
-    JSON.stringify(
-      {
-        extends: './tsconfig.base.json',
-        compilerOptions: {
-          paths: Object.fromEntries(
-            Object.entries(basePaths).flatMap(([key, value]) => {
-              if (key.endsWith('/*') && bazelPackageIds.has(key.slice(0, -2))) {
-                return [];
-              }
-
-              if (bazelPackageIds.has(key)) {
-                return [];
-              }
-
-              return [[key, value]];
-            })
-          ),
-        },
-      },
-      null,
-      2
-    )
-  );
-  Fs.utimesSync(baseTypeCheckConfigPath, baseStat.atime, baseStat.mtime);
-  created.add(baseTypeCheckConfigPath);
 
   // write tsconfig.type_check.json files for each project that is not the root
   const queue = new Set(projects.map((p) => p.tsConfigPath));
@@ -110,9 +67,7 @@ function createTypeCheckConfigs(projects: Project[], bazelPackages: BazelPackage
 
     const typeCheckConfig = {
       ...parsed,
-      extends: parsed.extends
-        ? toTypeCheckConfigPath(parsed.extends)
-        : rel(dir, baseTypeCheckConfigPath),
+      extends: parsed.extends ? toTypeCheckConfigPath(parsed.extends) : undefined,
       compilerOptions: {
         ...parsed.compilerOptions,
         composite: true,
@@ -152,39 +107,17 @@ export async function runTypeCheckCli() {
         log.warning('Deleted all typescript caches');
       }
 
-      const bazelPackages = await discoverBazelPackages(REPO_ROOT);
-
-      await runBazel(
-        [
-          'build',
-          ...bazelPackages.flatMap((p) =>
-            p.hasBuildTypesRule() ? `//${p.normalizedRepoRelativeDir}:build_types` : []
-          ),
-          '--show_result=1',
-          '--show_progress',
-        ],
-        {
-          cwd: REPO_ROOT,
-          logPrefix: '\x1b[94m[bazel]\x1b[39m',
-          onErrorExit(code: any, output: any) {
-            throw createFailError(
-              `The bazel command that was running exited with code [${code}] and output: ${output}`
-            );
-          },
-        }
-      );
-
       // if the tsconfig.refs.json file is not self-managed then make sure it has
       // a reference to every composite project in the repo
-      await updateRootRefsConfig(log, bazelPackages);
+      await updateRootRefsConfig(log);
 
       const projectFilter = flagsReader.path('project');
 
-      const projects = PROJECTS.filter((p) => {
-        return !p.disableTypeCheck && (!projectFilter || p.tsConfigPath === projectFilter);
-      });
+      const projects = PROJECTS.filter(
+        (p) => !p.disableTypeCheck && (!projectFilter || p.tsConfigPath === projectFilter)
+      );
 
-      const created = createTypeCheckConfigs(projects, bazelPackages);
+      const created = createTypeCheckConfigs(projects);
 
       let pluginBuildResult;
       try {
@@ -218,20 +151,6 @@ export async function runTypeCheckCli() {
 
         await asyncForEachWithLimit(created, 40, async (path) => {
           await Fsp.unlink(path);
-        });
-
-        await asyncForEachWithLimit(bazelPackages, 40, async (pkg) => {
-          const targetTypesPaths = Path.resolve(
-            REPO_ROOT,
-            'bazel-bin',
-            pkg.normalizedRepoRelativeDir,
-            'target_type'
-          );
-
-          await Fsp.rm(targetTypesPaths, {
-            force: true,
-            recursive: true,
-          });
         });
       }
 

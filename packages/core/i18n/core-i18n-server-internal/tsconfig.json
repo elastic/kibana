@@ -11,5 +11,19 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/config",
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-base-common",
+    "@kbn/core-deprecations-common",
+    "@kbn/core-i18n-server",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-internal",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-usage-data-base-server-internal",
+    "@kbn/core-deprecations-server"
   ]
 }

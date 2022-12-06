@@ -11,5 +11,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/core-preboot-server-internal",
+    "@kbn/core-preboot-server"
   ]
 }

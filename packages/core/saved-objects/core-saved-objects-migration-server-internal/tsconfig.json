@@ -11,5 +11,16 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/logging",
+    "@kbn/std",
+    "@kbn/core-doc-links-server",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-elasticsearch-client-server-internal",
+    "@kbn/core-saved-objects-common",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-saved-objects-base-server-internal"
   ]
 }

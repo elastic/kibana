@@ -11,5 +11,13 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/tooling-log",
+    "@kbn/utils",
+    "@kbn/test",
+    "@kbn/config",
+    "@kbn/core-lifecycle-server-internal",
+    "@kbn/core-root-server-internal"
   ]
 }

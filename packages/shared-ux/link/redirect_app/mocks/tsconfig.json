@@ -12,5 +12,9 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/shared-ux-link-redirect-app-types",
+    "@kbn/shared-ux-storybook-mock"
   ]
 }

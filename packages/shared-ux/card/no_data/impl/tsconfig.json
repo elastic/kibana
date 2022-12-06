@@ -15,5 +15,11 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/shared-ux-card-no-data-types"
   ]
 }

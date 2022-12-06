@@ -12,5 +12,11 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/core-elasticsearch-server",
+    "@kbn/field-types",
+    "@kbn/ml-is-populated-object",
+    "@kbn/ml-string-hash"
   ]
 }

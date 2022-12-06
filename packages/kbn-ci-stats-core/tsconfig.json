@@ -11,5 +11,9 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/tooling-log",
+    "@kbn/some-dev-log"
   ]
 }

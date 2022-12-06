@@ -12,5 +12,8 @@
   "include": [
     "**/*.ts",
       "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/i18n"
   ]
 }

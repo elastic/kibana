@@ -11,5 +11,11 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/ftr-common-functional-services",
+    "@kbn/ftr-screenshot-filename",
+    "@kbn/test",
+    "@kbn/utils"
   ]
 }

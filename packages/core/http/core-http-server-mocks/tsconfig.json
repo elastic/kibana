@@ -11,5 +11,16 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/config-mocks",
+    "@kbn/config-schema",
+    "@kbn/hapi-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-server",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-http-router-server-internal",
+    "@kbn/core-http-server-internal"
   ]
 }

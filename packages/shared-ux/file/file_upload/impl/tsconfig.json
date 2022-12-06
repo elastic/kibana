@@ -14,5 +14,12 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/ui-theme",
+    "@kbn/shared-ux-file-context",
+    "@kbn/shared-ux-file-util",
+    "@kbn/shared-ux-file-types"
   ]
 }

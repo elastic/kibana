@@ -14,5 +14,18 @@
   ],
   "exclude": [
     "**/*.config.js",
+  ],
+  "kbn_references": [
+    "@kbn/ui-shared-deps-npm",
+    "@kbn/babel-register",
+    "@kbn/ui-theme",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/monaco",
+    "@kbn/datemath",
+    "@kbn/analytics",
+    "@kbn/es-query",
+    "@kbn/std",
+    "@kbn/safer-lodash-set"
   ]
 }

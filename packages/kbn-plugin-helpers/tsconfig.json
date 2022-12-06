@@ -12,5 +12,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/dev-utils",
+    "@kbn/optimizer",
+    "@kbn/utils"
   ]
 }

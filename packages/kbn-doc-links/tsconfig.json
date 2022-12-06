@@ -12,4 +12,7 @@
   "include": [
     "**/*.ts"
   ],
+  "kbn_references": [
+    "@kbn/std"
+  ],
 }

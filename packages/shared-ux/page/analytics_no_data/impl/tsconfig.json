@@ -14,5 +14,10 @@
   "include": [
     "**/*.ts",
     "**/*.tsx"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/shared-ux-page-kibana-no-data",
+    "@kbn/shared-ux-page-analytics-no-data-types"
   ]
 }

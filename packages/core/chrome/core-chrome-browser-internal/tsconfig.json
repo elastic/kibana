@@ -13,5 +13,18 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/crypto-browser",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/core-injected-metadata-browser-internal",
+    "@kbn/core-doc-links-browser",
+    "@kbn/core-http-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-mount-utils-browser-internal",
+    "@kbn/core-application-browser",
+    "@kbn/core-application-browser-internal",
+    "@kbn/core-chrome-browser"
   ]
 }

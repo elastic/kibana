@@ -12,5 +12,18 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/config",
+    "@kbn/config-schema",
+    "@kbn/ui-shared-deps-npm",
+    "@kbn/ui-shared-deps-src",
+    "@kbn/utils",
+    "@kbn/logging",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-http-resources-server",
+    "@kbn/core-http-server",
+    "@kbn/core-lifecycle-server-internal",
+    "@kbn/core-plugins-base-server-internal"
   ]
 }

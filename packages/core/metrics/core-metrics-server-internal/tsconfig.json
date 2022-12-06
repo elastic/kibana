@@ -11,5 +11,14 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/logging",
+    "@kbn/config-schema",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-http-server-internal",
+    "@kbn/core-metrics-server",
+    "@kbn/core-metrics-collectors-server-internal",
+    "@kbn/core-elasticsearch-server-internal"
   ]
 }

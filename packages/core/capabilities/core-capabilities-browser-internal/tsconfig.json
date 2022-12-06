@@ -12,5 +12,11 @@
   "include": [
     "**/*.ts",
       "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/std",
+    "@kbn/core-http-browser",
+    "@kbn/core-capabilities-common"
   ]
 }

@@ -11,5 +11,13 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/apm-config-loader",
+    "@kbn/logging",
+    "@kbn/core-http-server",
+    "@kbn/core-http-resources-server",
+    "@kbn/core-rendering-server-internal",
+    "@kbn/core-http-request-handler-context-server"
   ]
 }

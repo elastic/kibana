@@ -12,5 +12,10 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/ambient-common-types"
   ]
 }

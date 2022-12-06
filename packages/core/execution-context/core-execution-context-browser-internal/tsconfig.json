@@ -11,5 +11,11 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/core-base-browser-internal",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-execution-context-common",
+    "@kbn/core-execution-context-browser"
   ]
 }

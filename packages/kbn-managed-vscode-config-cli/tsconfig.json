@@ -11,5 +11,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utils",
+    "@kbn/dev-cli-runner",
+    "@kbn/managed-vscode-config"
   ]
 }

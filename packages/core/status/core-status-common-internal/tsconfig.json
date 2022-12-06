@@ -12,5 +12,9 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/core-status-common",
+    "@kbn/core-metrics-server"
   ]
 }

@@ -11,5 +11,8 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/es-query"
   ]
 }

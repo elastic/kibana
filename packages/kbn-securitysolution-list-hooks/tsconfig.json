@@ -11,5 +11,13 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/securitysolution-hook-utils",
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/securitysolution-list-api",
+    "@kbn/securitysolution-list-constants",
+    "@kbn/securitysolution-list-utils",
+    "@kbn/securitysolution-utils"
   ]
 }

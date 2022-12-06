@@ -14,5 +14,15 @@
   "exclude": [
     "types/**/*",
     "**/__fixtures__/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/dev-utils",
+    "@kbn/std",
+    "@kbn/utils",
+    "@kbn/tooling-log",
+    "@kbn/bazel-packages",
+    "@kbn/get-repo-files",
+    "@kbn/ftr-screenshot-filename",
+    "@kbn/peggy"
   ]
 }

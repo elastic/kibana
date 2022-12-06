@@ -11,5 +11,11 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/core-capabilities-common",
+    "@kbn/core-capabilities-server",
+    "@kbn/core-capabilities-server-internal"
   ]
 }

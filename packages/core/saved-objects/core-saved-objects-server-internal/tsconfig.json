@@ -11,5 +11,25 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/core-base-common",
+    "@kbn/core-status-common",
+    "@kbn/core-deprecations-common",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-internal",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-saved-objects-common",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-api-server-internal",
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/core-saved-objects-migration-server-internal",
+    "@kbn/core-saved-objects-import-export-server-internal",
+    "@kbn/core-usage-data-base-server-internal",
+    "@kbn/core-deprecations-server",
+    "@kbn/core-node-server"
   ]
 }

@@ -11,5 +11,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/core-http-server",
+    "@kbn/core-http-context-server-internal"
   ]
 }

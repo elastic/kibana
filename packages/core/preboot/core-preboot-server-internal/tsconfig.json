@@ -11,5 +11,14 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/logging",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-base-common",
+    "@kbn/utils",
+    "@kbn/config",
+    "@kbn/config-mocks",
+    "@kbn/core-logging-server-mocks"
   ]
 }

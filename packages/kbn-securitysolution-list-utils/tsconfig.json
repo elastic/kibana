@@ -11,5 +11,13 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/es-query",
+    "@kbn/i18n",
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/securitysolution-io-ts-utils",
+    "@kbn/securitysolution-list-constants",
+    "@kbn/securitysolution-utils"
   ]
 }

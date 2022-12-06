@@ -11,5 +11,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/safer-lodash-set",
+    "@kbn/config",
+    "@kbn/config-mocks"
   ]
 }

@@ -11,5 +11,21 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/ui-shared-deps-npm",
+    "@kbn/logging",
+    "@kbn/std",
+    "@kbn/i18n",
+    "@kbn/config-schema",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-internal",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-server-internal",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-ui-settings-common",
+    "@kbn/core-ui-settings-server"
   ]
 }

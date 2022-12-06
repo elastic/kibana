@@ -11,5 +11,12 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/core-status-common",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/core-elasticsearch-server-internal"
   ]
 }

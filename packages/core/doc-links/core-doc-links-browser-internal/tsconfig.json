@@ -11,5 +11,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/doc-links",
+    "@kbn/core-injected-metadata-browser-internal",
+    "@kbn/core-doc-links-browser"
   ]
 }

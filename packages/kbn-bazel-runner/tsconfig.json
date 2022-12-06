@@ -13,5 +13,9 @@
   "include": [
     "**/*.js",
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/dev-utils",
+    "@kbn/tooling-log"
   ]
 }

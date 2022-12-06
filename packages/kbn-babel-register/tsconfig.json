@@ -13,5 +13,10 @@
   "include": [
     "**/*.js",
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/package-map",
+    "@kbn/repo-info",
+    "@kbn/babel-transform"
   ]
 }

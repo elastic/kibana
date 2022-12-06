@@ -12,5 +12,11 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/dev-utils",
+    "@kbn/eslint-plugin-imports",
+    "@kbn/utility-types",
+    "@kbn/utils"
   ]
 }

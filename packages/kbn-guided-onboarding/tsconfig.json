@@ -12,5 +12,12 @@
   "include": [
     "**/*.ts",
     "**/*.tsx"
+  ],
+  "kbn_references": [
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/core-http-browser",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-application-browser"
   ]
 }

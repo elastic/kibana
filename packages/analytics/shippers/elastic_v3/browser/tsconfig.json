@@ -11,5 +11,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/analytics-client",
+    "@kbn/analytics-shippers-elastic-v3-common",
+    "@kbn/logging-mocks"
   ]
 }

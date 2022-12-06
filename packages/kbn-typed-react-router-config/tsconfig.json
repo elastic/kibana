@@ -13,5 +13,8 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/io-ts-utils"
   ]
 }

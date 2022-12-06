@@ -14,5 +14,8 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/ui-theme"
   ]
 }

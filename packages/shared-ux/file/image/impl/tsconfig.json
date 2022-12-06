@@ -13,5 +13,9 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/shared-ux-file-util",
+    "@kbn/shared-ux-file-types"
   ]
 }

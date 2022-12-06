@@ -11,5 +11,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/core-i18n-server",
+    "@kbn/core-i18n-server-internal"
   ]
 }

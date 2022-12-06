@@ -14,5 +14,11 @@
   ],
   "exclude": [
     "**/__fixtures__/**"
+  ],
+  "kbn_references": [
+    "@kbn/plugin-discovery",
+    "@kbn/dev-utils",
+    "@kbn/utils",
+    "@kbn/tooling-log"
   ]
 }

@@ -13,5 +13,8 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/ambient-ui-types"
   ]
 }

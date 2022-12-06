@@ -11,5 +11,11 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-http-resources-server",
+    "@kbn/core-http-resources-server-internal"
   ]
 }

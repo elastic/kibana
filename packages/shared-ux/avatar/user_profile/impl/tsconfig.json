@@ -16,5 +16,10 @@
     "*.md*",
     "**/*.ts",
     "**/*.md*",
+  ],
+  "kbn_references": [
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/shared-ux-utility"
   ]
 }

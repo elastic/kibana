@@ -13,5 +13,8 @@
   "include": [
     "**/*.ts",
     "**/*.js"
+  ],
+  "kbn_references": [
+    "@kbn/ambient-common-types"
   ]
 }

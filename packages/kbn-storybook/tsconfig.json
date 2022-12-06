@@ -14,5 +14,12 @@
   "include": [
     "**/*.ts",
     "**/*.tsx"
+  ],
+  "kbn_references": [
+    "@kbn/dev-utils",
+    "@kbn/ui-shared-deps-npm",
+    "@kbn/ui-shared-deps-src",
+    "@kbn/utils",
+    "@kbn/ambient-storybook-types"
   ]
 }

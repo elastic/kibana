@@ -11,5 +11,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/core-execution-context-common",
+    "@kbn/core-execution-context-server",
+    "@kbn/core-execution-context-server-internal"
   ]
 }

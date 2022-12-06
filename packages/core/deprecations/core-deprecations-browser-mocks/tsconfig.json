@@ -11,5 +11,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/core-deprecations-browser",
+    "@kbn/core-deprecations-browser-internal"
   ]
 }

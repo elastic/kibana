@@ -11,5 +11,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/dev-cli-errors",
+    "@kbn/tooling-log",
+    "@kbn/stdio-dev-helpers"
   ]
 }

@@ -11,5 +11,12 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/dev-cli-errors",
+    "@kbn/dev-cli-runner",
+    "@kbn/test",
+    "@kbn/tooling-log",
+    "@kbn/ci-stats-reporter"
   ]
 }

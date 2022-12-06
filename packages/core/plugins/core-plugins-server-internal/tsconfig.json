@@ -11,5 +11,27 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/std",
+    "@kbn/config",
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/utils",
+    "@kbn/core-base-common",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-elasticsearch-server-internal",
+    "@kbn/core-node-server",
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/core-http-server",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/core-lifecycle-server",
+    "@kbn/core-lifecycle-server-internal",
+    "@kbn/core-plugins-server",
+    "@kbn/config-mocks",
+    "@kbn/core-base-server-mocks",
+    "@kbn/core-lifecycle-server-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-node-server-mocks"
   ]
 }

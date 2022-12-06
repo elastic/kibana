@@ -11,5 +11,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/core-test-helpers-http-setup-browser",
+    "@kbn/core-http-browser",
+    "@kbn/core-ui-settings-browser"
   ]
 }

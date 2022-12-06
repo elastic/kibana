@@ -11,5 +11,13 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/safer-lodash-set",
+    "@kbn/logging",
+    "@kbn/config-schema",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-logging-common-internal",
+    "@kbn/core-logging-server"
   ]
 }

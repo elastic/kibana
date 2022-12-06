@@ -12,5 +12,14 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/config",
+    "@kbn/core-base-common",
+    "@kbn/core-base-browser-internal",
+    "@kbn/core-injected-metadata-common-internal",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/core-lifecycle-browser-internal",
+    "@kbn/core-plugins-browser"
   ]
 }

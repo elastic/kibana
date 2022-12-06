@@ -13,7 +13,6 @@ import dedent from 'dedent';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { BazelPackage } from '@kbn/bazel-packages';
 import normalize from 'normalize-path';
 
 import { PROJECTS } from './projects';
@@ -46,18 +45,15 @@ ${refs.map((p) => `        { "path": ${JSON.stringify(p)} },`).join('\n')}
   `;
 }
 
-export async function updateRootRefsConfig(log: ToolingLog, bazelPackages: BazelPackage[]) {
+export async function updateRootRefsConfig(log: ToolingLog) {
   if (await isRootRefsConfigSelfManaged()) {
     throw createFailError(
       `tsconfig.refs.json starts with "// SELF MANAGED" but we removed this functinality because of some complexity it caused with TS performance upgrades and we were pretty sure that nobody was using it. Please reach out to operations to discuss options <3`
     );
   }
 
-  const bazelPackageDirs = new Set(
-    bazelPackages.map((p) => Path.resolve(REPO_ROOT, p.normalizedRepoRelativeDir))
-  );
   const refs = PROJECTS.flatMap((p) => {
-    if (p.disableTypeCheck || bazelPackageDirs.has(p.directory)) {
+    if (p.disableTypeCheck) {
       return [];
     }
 

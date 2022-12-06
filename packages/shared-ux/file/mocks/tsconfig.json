@@ -8,5 +8,9 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/utility-types-jest",
+    "@kbn/shared-ux-file-types"
   ]
 }

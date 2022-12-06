@@ -11,5 +11,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/core-execution-context-browser",
+    "@kbn/core-execution-context-browser-internal"
   ]
 }

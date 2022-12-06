@@ -11,5 +11,11 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utils",
+    "@kbn/dev-utils",
+    "@kbn/import-resolver",
+    "@kbn/repo-source-classifier"
   ]
 }

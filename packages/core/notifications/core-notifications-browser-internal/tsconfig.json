@@ -13,5 +13,17 @@
   "include": [
     "**/*.ts",
     "**/*.tsx"
+  ],
+  "kbn_references": [
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/core-theme-browser",
+    "@kbn/core-theme-browser-internal",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-overlays-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-mount-utils-browser-internal"
   ]
 }

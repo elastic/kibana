@@ -10,4 +10,11 @@
     "**/*.ts",
     "**/*.tsx",
   ],
+  "kbn_references": [
+    "@kbn/dev-utils",
+    "@kbn/i18n-react",
+    "@kbn/std",
+    "@kbn/axe-config",
+    "@kbn/utils"
+  ],
 }

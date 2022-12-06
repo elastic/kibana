@@ -13,5 +13,19 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/ui-shared-deps-npm",
+    "@kbn/ui-shared-deps-src",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-injected-metadata-common-internal",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-internal",
+    "@kbn/core-elasticsearch-server-internal",
+    "@kbn/core-status-server-internal",
+    "@kbn/core-ui-settings-common",
+    "@kbn/core-ui-settings-server",
+    "@kbn/core-plugins-base-server-internal"
   ]
 }

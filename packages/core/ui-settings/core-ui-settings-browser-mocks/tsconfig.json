@@ -11,5 +11,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/core-ui-settings-browser-internal",
+    "@kbn/core-ui-settings-browser"
   ]
 }

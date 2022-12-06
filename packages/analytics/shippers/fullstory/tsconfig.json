@@ -11,5 +11,9 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/analytics-client",
+    "@kbn/logging-mocks"
   ]
 }

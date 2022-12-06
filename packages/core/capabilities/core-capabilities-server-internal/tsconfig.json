@@ -11,5 +11,15 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-internal",
+    "@kbn/core-capabilities-common",
+    "@kbn/core-capabilities-server"
   ]
 }

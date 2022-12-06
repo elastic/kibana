@@ -11,5 +11,9 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/core-plugins-server-internal"
   ]
 }

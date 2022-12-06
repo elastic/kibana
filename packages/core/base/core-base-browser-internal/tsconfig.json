@@ -12,5 +12,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/config",
+    "@kbn/core-base-common-internal"
   ]
 }

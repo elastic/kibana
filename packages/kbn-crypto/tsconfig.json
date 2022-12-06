@@ -9,5 +9,8 @@
       "node"
     ]
   },
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts"],
+  "kbn_references": [
+    "@kbn/dev-utils"
+  ]
 }

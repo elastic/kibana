@@ -11,5 +11,16 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/core-base-browser-internal",
+    "@kbn/core-http-browser",
+    "@kbn/core-http-common",
+    "@kbn/core-execution-context-browser-internal",
+    "@kbn/core-execution-context-browser",
+    "@kbn/core-fatal-errors-browser",
+    "@kbn/core-injected-metadata-browser-internal",
+    "@kbn/crypto-browser",
+    "@kbn/std"
   ]
 }

@@ -11,5 +11,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/logging",
+    "@kbn/core-metrics-server",
+    "@kbn/core-elasticsearch-client-server-internal"
   ]
 }

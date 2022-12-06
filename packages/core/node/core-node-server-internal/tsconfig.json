@@ -11,5 +11,13 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/config",
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-logging-server-internal",
+    "@kbn/core-node-server"
   ]
 }

@@ -13,5 +13,13 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/core-injected-metadata-browser-internal",
+    "@kbn/core-theme-browser",
+    "@kbn/core-theme-browser-internal",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-fatal-errors-browser",
+    "@kbn/i18n-react"
   ]
 }

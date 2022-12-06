@@ -11,5 +11,22 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/config",
+    "@kbn/logging",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-logging-server-internal",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-internal",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-elasticsearch-server-internal",
+    "@kbn/core-metrics-server",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-usage-data-server",
+    "@kbn/core-usage-data-base-server-internal"
   ]
 }

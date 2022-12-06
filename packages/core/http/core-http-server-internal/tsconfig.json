@@ -11,5 +11,20 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utils",
+    "@kbn/std",
+    "@kbn/server-http-tools",
+    "@kbn/logging",
+    "@kbn/config-schema",
+    "@kbn/crypto",
+    "@kbn/core-base-common",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-execution-context-server-internal",
+    "@kbn/core-http-common",
+    "@kbn/core-http-server",
+    "@kbn/core-http-context-server-internal",
+    "@kbn/core-http-router-server-internal"
   ]
 }

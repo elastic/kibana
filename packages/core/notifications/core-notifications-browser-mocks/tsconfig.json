@@ -11,5 +11,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utility-types-jest",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-notifications-browser-internal"
   ]
 }

@@ -15,5 +15,12 @@
     "**/*.scss",
     "**/*.ts",
     "**/*.tsx"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/interpreter",
+    "@kbn/utility-types",
+    "@kbn/shared-ux-utility"
   ]
 }

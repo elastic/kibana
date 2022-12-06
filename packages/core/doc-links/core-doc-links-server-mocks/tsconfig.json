@@ -11,5 +11,12 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/doc-links",
+    "@kbn/core-injected-metadata-browser-mocks",
+    "@kbn/core-doc-links-server",
+    "@kbn/core-doc-links-server-internal"
   ]
 }

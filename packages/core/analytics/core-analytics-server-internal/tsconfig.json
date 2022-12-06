@@ -11,5 +11,11 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/analytics-client",
+    "@kbn/ebt-tools",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-analytics-server"
   ]
 }

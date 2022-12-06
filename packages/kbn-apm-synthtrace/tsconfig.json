@@ -6,5 +6,8 @@
     "outDir": "target_types",
     "types": ["node", "jest"]
   },
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts"],
+  "kbn_references": [
+    "@kbn/datemath"
+  ]
 }

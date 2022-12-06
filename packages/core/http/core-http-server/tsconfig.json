@@ -11,5 +11,11 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/utility-types",
+    "@kbn/core-base-common",
+    "@kbn/core-http-common"
   ]
 }

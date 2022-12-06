@@ -12,5 +12,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/storybook",
+    "@kbn/ambient-ui-types",
+    "@kbn/ambient-storybook-types"
   ]
 }

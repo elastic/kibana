@@ -12,5 +12,10 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/config",
+    "@kbn/ui-shared-deps-npm",
+    "@kbn/core-base-common"
   ]
 }

@@ -11,5 +11,14 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utility-types-jest",
+    "@kbn/utils",
+    "@kbn/config",
+    "@kbn/config-mocks",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/core-base-server-internal"
   ]
 }

@@ -11,5 +11,16 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/safer-lodash-set",
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/std",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/plugin-discovery",
+    "@kbn/doc-links"
   ]
 }

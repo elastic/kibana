@@ -6,5 +6,8 @@
     "outDir": "target_types",
     "types": ["jest", "node", "react", "@kbn/ambient-ui-types"]
   },
-  "include": ["**/*.ts", "**/*.tsx"]
+  "include": ["**/*.ts", "**/*.tsx"],
+  "kbn_references": [
+    "@kbn/i18n"
+  ]
 }

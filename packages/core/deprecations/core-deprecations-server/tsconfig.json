@@ -11,5 +11,11 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/core-deprecations-common",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-saved-objects-api-server"
   ]
 }

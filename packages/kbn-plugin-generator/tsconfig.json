@@ -16,4 +16,8 @@
   "exclude": [
     "template/*"
   ],
+  "kbn_references": [
+    "@kbn/utils",
+    "@kbn/dev-utils"
+  ],
 }

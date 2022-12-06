@@ -12,5 +12,9 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/shared-ux-page-no-data-mocks",
+    "@kbn/shared-ux-storybook-mock"
   ]
 }

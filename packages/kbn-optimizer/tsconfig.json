@@ -14,5 +14,18 @@
   ],
   "exclude": [
     "**/__fixtures__/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/config",
+    "@kbn/config-schema",
+    "@kbn/dev-utils",
+    "@kbn/optimizer-webpack-helpers",
+    "@kbn/std",
+    "@kbn/ui-shared-deps-npm",
+    "@kbn/ui-shared-deps-src",
+    "@kbn/utils",
+    "@kbn/tooling-log",
+    "@kbn/package-map",
+    "@kbn/peggy"
   ]
 }
