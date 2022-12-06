@@ -9,7 +9,7 @@
     "server/**/*"
   ],
   "kbn_references": [
-    { "path": "../licensing/tsconfig.json" },
-    { "path": "../../../src/core/tsconfig.json" }
+    "@kbn/licensing-plugin",
+    "@kbn/core"
   ]
 }

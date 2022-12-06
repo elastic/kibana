@@ -15,27 +15,13 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
-    {
-      "path": "../alerting/tsconfig.json"
-    },
-    {
-      "path": "../ml/tsconfig.json"
-    },
-    {
-      "path": "../triggers_actions_ui/tsconfig.json"
-    },
-    {
-      "path": "../observability/tsconfig.json"
-    },
-    {
-      "path": "../fleet/tsconfig.json"
-    },
-    {
-      "path": "../../../src/plugins/unified_search/tsconfig.json"
-    }
+    "@kbn/alerting-plugin",
+    "@kbn/ml-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/observability-plugin",
+    "@kbn/fleet-plugin",
+    "@kbn/unified-search-plugin"
   ,
-    {
-      "path": "../index_lifecycle_management/tsconfig.json"
-    }
+    "@kbn/index-lifecycle-management-plugin"
   ]
 }

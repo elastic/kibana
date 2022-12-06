@@ -13,7 +13,7 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../../plugins/kibana_utils/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/kibana-utils-plugin"
   ]
 }

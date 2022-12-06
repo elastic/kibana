@@ -8,14 +8,14 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts", ".storybook/**/*"],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../data_views/tsconfig.json" },
-    { "path": "../custom_integrations/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../share/tsconfig.json" },
-    { "path": "../url_forwarding/tsconfig.json" },
-    { "path": "../usage_collection/tsconfig.json" },
-    { "path": "../guided_onboarding/tsconfig.json" },
-    { "path": "../../../x-pack/plugins/cloud/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/data-views-plugin",
+    "@kbn/custom-integrations-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/share-plugin",
+    "@kbn/url-forwarding-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/guided-onboarding-plugin",
+    "@kbn/cloud-plugin",
   ]
 }

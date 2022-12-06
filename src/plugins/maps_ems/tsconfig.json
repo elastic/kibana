@@ -7,7 +7,7 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "./config.ts"],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../../../x-pack/plugins/licensing/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/licensing-plugin"
   ]
 }

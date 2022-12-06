@@ -11,16 +11,16 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../kibana_utils/tsconfig.json" },
-    { "path": "../usage_collection/tsconfig.json" },
-    { "path": "../telemetry/tsconfig.json" },
-    { "path": "../ui_actions/tsconfig.json" },
-    { "path": "../expressions/tsconfig.json" },
-    { "path": "../home/tsconfig.json" },
-    { "path": "../bfetch/tsconfig.json"},
-    { "path": "../data/tsconfig.json"},
-    { "path": "../advanced_settings/tsconfig.json" },
-    { "path": "../management/tsconfig.json"}
+    "@kbn/core",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/telemetry-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/home-plugin",
+    "@kbn/bfetch-plugin",
+    "@kbn/data-plugin",
+    "@kbn/advanced-settings-plugin",
+    "@kbn/management-plugin"
   ]
 }

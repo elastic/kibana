@@ -11,14 +11,8 @@
     "server/**/*"
   ],
   "kbn_references": [
-    {
-      "path": "../../core/tsconfig.json"
-    },
-    {
-      "path": "../expressions/tsconfig.json"
-    },
-    {
-      "path": "../data/tsconfig.json"
-    },
+    "@kbn/core",
+    "@kbn/expressions-plugin",
+    "@kbn/data-plugin",
   ]
 }

@@ -12,7 +12,7 @@
   ],
   "exclude": [],
   "kbn_references": [
-    { "path": "../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../src/plugins/ui_actions/tsconfig.json" },
+    "@kbn/kibana-react-plugin",
+    "@kbn/ui-actions-plugin",
   ]
 }

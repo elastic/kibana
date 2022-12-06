@@ -12,10 +12,10 @@
     "*.ts"
   ],
   "kbn_references": [
-    { "path": "../../../core/tsconfig.json" },
-    { "path": "../../charts/tsconfig.json" },
-    { "path": "../../visualizations/tsconfig.json" },
-    { "path": "../../kibana_utils/tsconfig.json" },
-    { "path": "../../vis_default_editor/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/charts-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/vis-default-editor-plugin",
   ]
 }

@@ -12,8 +12,8 @@
   ],
   "exclude": [],
   "kbn_references": [
-    { "path": "../../src/core/tsconfig.json" },
-    { "path": "../../x-pack/plugins/security/tsconfig.json" },
-    { "path": "../developer_examples/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/security-plugin",
+    "@kbn/developer-examples-plugin"
   ]
 }

@@ -14,8 +14,8 @@
     "common/**/*"
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../actions/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/actions-plugin",
+    "@kbn/licensing-plugin"
   ]
 }

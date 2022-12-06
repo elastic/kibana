@@ -12,9 +12,9 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../home/tsconfig.json"},
-    { "path": "../kibana_react/tsconfig.json"},
-    { "path": "../kibana_utils/tsconfig.json"}
+    "@kbn/core",
+    "@kbn/home-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin"
   ]
 }

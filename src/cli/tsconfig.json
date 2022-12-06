@@ -11,7 +11,7 @@
     "*.js",
   ],
   "kbn_references": [
-    { "path": "../core/tsconfig.json" },
+    "@kbn/core",
     { "path": "../setup_node_env/tsconfig.json" },
   ]
 }

@@ -12,7 +12,7 @@
   ],
   "exclude": [],
   "kbn_references": [
-    { "path": "../../../../src/core/tsconfig.json" },
-    { "path": "../../../../src/plugins/navigation/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/navigation-plugin",
   ]
 }

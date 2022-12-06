@@ -7,9 +7,9 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../data/tsconfig.json" },
-    { "path": "../kibana_utils/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
   ]
 }

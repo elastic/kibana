@@ -13,8 +13,8 @@
     "../../../typings/*"
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../../plugins/usage_collection/tsconfig.json" },
-    { "path": "../../plugins/telemetry/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/usage-collection-plugin",
+    "@kbn/telemetry-plugin",
   ]
 }

@@ -6,5 +6,5 @@
     "declaration": true,
   },
   "include": [".storybook/**/*", "common/**/*", "public/**/*", "../../../typings/**/*"],
-  "kbn_references": [{ "path": "../kibana_utils/tsconfig.json" }]
+  "kbn_references": ["@kbn/kibana-utils-plugin"]
 }

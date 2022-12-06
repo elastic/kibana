@@ -19,16 +19,16 @@
     "../../../typings/**/*",
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json" },
-    { "path": "../features/tsconfig.json"},
-    { "path": "../../../src/plugins/data/tsconfig.json"},
-    { "path": "../../../src/plugins/navigation/tsconfig.json" },
-    { "path": "../../../src/plugins/saved_objects/tsconfig.json"},
-    { "path": "../../../src/plugins/home/tsconfig.json"},
-    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../spaces/tsconfig.json" },
-    { "path": "../../../src/plugins/unified_search/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/licensing-plugin",
+    "@kbn/features-plugin",
+    "@kbn/data-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/saved-objects-plugin",
+    "@kbn/home-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/unified-search-plugin"
   ]
 }

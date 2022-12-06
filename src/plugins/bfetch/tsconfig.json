@@ -7,7 +7,7 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "index.ts"],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../kibana_utils/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/kibana-utils-plugin",
   ]
 }

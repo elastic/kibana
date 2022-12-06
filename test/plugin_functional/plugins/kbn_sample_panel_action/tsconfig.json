@@ -11,9 +11,9 @@
   ],
   "exclude": [],
   "kbn_references": [
-    { "path": "../../../../src/core/tsconfig.json" },
-    { "path": "../../../../src/plugins/ui_actions/tsconfig.json" },
-    { "path": "../../../../src/plugins/embeddable/tsconfig.json" },
-    { "path": "../../../../src/plugins/kibana_react/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/ui-actions-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/kibana-react-plugin",
   ]
 }

@@ -7,17 +7,17 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
-    { "path": "../cloud/tsconfig.json" },
-    { "path": "../features/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json" },
-    { "path": "../spaces/tsconfig.json" },
-    { "path": "../task_manager/tsconfig.json" },
-    { "path": "../../../src/plugins/data_views/tsconfig.json" },
-    { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
-    { "path": "../../../src/plugins/home/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/management/tsconfig.json" },
-    { "path": "../../../src/plugins/share/tsconfig.json" },
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" }
+    "@kbn/cloud-plugin",
+    "@kbn/features-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/home-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/management-plugin",
+    "@kbn/share-plugin",
+    "@kbn/usage-collection-plugin"
   ]
 }

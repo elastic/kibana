@@ -7,6 +7,6 @@
   },
   "include": ["server/**/*"],
   "kbn_references": [
-    { "path": "../security/tsconfig.json" },
+    "@kbn/security-plugin",
   ]
 }

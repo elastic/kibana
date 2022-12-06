@@ -7,14 +7,10 @@
     "types": [ "node"],
   },
   "kbn_references": [
-    {
-      "path": "../../apm/tsconfig.json",
-    },
+    "@kbn/apm-plugin",
     {
       "path": "../../observability/e2e/tsconfig.json"
     },
-    {
-      "path": "../tsconfig.json",
-    }
+    "@kbn/synthetics-plugin"
   ]
 }

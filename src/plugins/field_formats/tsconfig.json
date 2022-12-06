@@ -13,5 +13,5 @@
     "common/**/*.json",
     "public/**/*.json"
   ],
-  "kbn_references": [{ "path": "../../core/tsconfig.json" }]
+  "kbn_references": ["@kbn/core"]
 }

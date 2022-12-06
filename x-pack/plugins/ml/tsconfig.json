@@ -16,21 +16,21 @@
     "server/**/*.json"
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/embeddable/tsconfig.json" },
-    { "path": "../../../src/plugins/data_views/tsconfig.json" },
-    { "path": "../cloud/tsconfig.json" },
-    { "path": "../features/tsconfig.json" },
-    { "path": "../data_visualizer/tsconfig.json"},
-    { "path": "../aiops/tsconfig.json"},
-    { "path": "../license_management/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json" },
-    { "path": "../maps/tsconfig.json" },
-    { "path": "../security/tsconfig.json" },
-    { "path": "../spaces/tsconfig.json" },
-    { "path": "../alerting/tsconfig.json" },
-    { "path": "../triggers_actions_ui/tsconfig.json" },
-    { "path": "../../../src/plugins/unified_search/tsconfig.json" },
-    { "path": "../cases/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/embeddable-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/features-plugin",
+    "@kbn/data-visualizer-plugin",
+    "@kbn/aiops-plugin",
+    "@kbn/license-management-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/maps-plugin",
+    "@kbn/security-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/alerting-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/cases-plugin"
   ]
 }

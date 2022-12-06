@@ -14,7 +14,7 @@
     "common/**/*"
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../spaces/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/spaces-plugin"
   ]
 }

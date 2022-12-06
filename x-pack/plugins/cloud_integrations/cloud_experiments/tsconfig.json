@@ -13,9 +13,9 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
-    { "path": "../../../../src/core/tsconfig.json" },
-    { "path": "../../../../src/plugins/data_views/tsconfig.json" },
-    { "path": "../../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../../cloud/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/data-views-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/cloud-plugin",
   ]
 }

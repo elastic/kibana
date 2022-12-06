@@ -11,8 +11,8 @@
     "server/**/*.json",
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/usage-collection-plugin",
   ]
 }

@@ -11,7 +11,7 @@
     "common/*"
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../../plugins/usage_collection/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/usage-collection-plugin"
   ]
 }

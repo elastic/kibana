@@ -19,22 +19,22 @@
     "public/common/schemas/*/**.json",
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
+    "@kbn/core",
     { "path": "../../../src/setup_node_env/tsconfig.json" },
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
-    { "path": "../../../src/plugins/data/tsconfig.json" },
-    { "path": "../../../src/plugins/navigation/tsconfig.json" },
-    { "path": "../fleet/tsconfig.json" },
+    "@kbn/data-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/fleet-plugin",
 
     // optionalPlugins from ./kibana.json
-    { "path": "../../../src/plugins/home/tsconfig.json" },
-    { "path": "../cases/tsconfig.json" },
+    "@kbn/home-plugin",
+    "@kbn/cases-plugin",
 
     // requiredBundles from ./kibana.json
-    { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
   ]
 }

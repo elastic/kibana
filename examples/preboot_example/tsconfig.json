@@ -6,5 +6,5 @@
     "declaration": true,
   },
   "include": ["public/**/*", "server/**/*"],
-  "kbn_references": [{ "path": "../../src/core/tsconfig.json" }]
+  "kbn_references": ["@kbn/core"]
 }

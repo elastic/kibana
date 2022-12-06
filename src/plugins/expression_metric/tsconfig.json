@@ -13,8 +13,8 @@
     "__fixtures__/**/*",
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../presentation_util/tsconfig.json" },
-    { "path": "../expressions/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/presentation-util-plugin",
+    "@kbn/expressions-plugin",
   ]
 }

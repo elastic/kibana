@@ -16,7 +16,7 @@
     "server/assets/*.js",
   ],
   "kbn_references": [
-    { "path": "../../../../src/core/tsconfig.json" },
-    { "path": "../../cloud/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/cloud-plugin",
   ]
 }

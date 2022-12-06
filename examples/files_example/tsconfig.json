@@ -13,8 +13,8 @@
   ],
   "exclude": [],
   "kbn_references": [
-    { "path": "../../src/core/tsconfig.json" },
-    { "path": "../developer_examples/tsconfig.json" },
-    { "path": "../../src/plugins/files/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/developer-examples-plugin",
+    "@kbn/files-plugin",
   ]
 }

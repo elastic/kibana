@@ -10,7 +10,7 @@
     "public/**/*",
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../saved_objects/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/saved-objects-plugin",
   ]
 }

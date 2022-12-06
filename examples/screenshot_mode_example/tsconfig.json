@@ -13,10 +13,10 @@
   ],
   "exclude": [],
   "kbn_references": [
-    { "path": "../../src/core/tsconfig.json" },
-    { "path": "../../src/plugins/navigation/tsconfig.json" },
-    { "path": "../../src/plugins/screenshot_mode/tsconfig.json" },
-    { "path": "../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../developer_examples/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/navigation-plugin",
+    "@kbn/screenshot-mode-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/developer-examples-plugin",
   ]
 }

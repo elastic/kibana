@@ -7,8 +7,8 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*"],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../files/tsconfig.json" },
-    { "path": "../management/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/files-plugin",
+    "@kbn/management-plugin"
   ]
 }

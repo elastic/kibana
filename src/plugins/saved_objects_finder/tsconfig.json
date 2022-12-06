@@ -7,7 +7,7 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../saved_objects_management/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/saved-objects-management-plugin"
   ]
 }

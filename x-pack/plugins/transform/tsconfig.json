@@ -14,11 +14,11 @@
     "public/**/*.json",
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../features/tsconfig.json" },
-    { "path": "../license_management/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json" },
-    { "path": "../ml/tsconfig.json" },
-    { "path": "../../../src/plugins/unified_search/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/features-plugin",
+    "@kbn/license-management-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/ml-plugin",
+    "@kbn/unified-search-plugin"
   ]
 }

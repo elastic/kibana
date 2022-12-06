@@ -11,6 +11,6 @@
   ],
   "exclude": [],
   "kbn_references": [
-    { "path": "../../../../src/plugins/kibana_react/tsconfig.json" }
+    "@kbn/kibana-react-plugin"
   ]
 }

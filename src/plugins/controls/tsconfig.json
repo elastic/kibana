@@ -16,13 +16,13 @@
     "./jest_setup.ts"
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../saved_objects/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../embeddable/tsconfig.json" },
-    { "path": "../presentation_util/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../data/tsconfig.json" },
-    { "path": "../unified_search/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/saved-objects-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/presentation-util-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/data-plugin",
+    "@kbn/unified-search-plugin"
   ]
 }

@@ -11,6 +11,6 @@
   ],
   "kbn_references": [
     { "path": "../cli/tsconfig.json" },
-    { "path": "../plugins/interactive_setup/tsconfig.json" },
+    "@kbn/interactive-setup-plugin",
   ]
 }

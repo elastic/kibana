@@ -9,10 +9,10 @@
     "public/**/*",
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/embeddable/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/ui_actions/tsconfig.json" },
-    { "path": "../../../src/plugins/ui_actions_enhanced/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/embeddable-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/ui-actions-enhanced-plugin",
   ]
 }

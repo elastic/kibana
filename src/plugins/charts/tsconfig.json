@@ -7,8 +7,8 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../expressions/tsconfig.json" },
-    { "path": "../embeddable/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/expressions-plugin",
+    "@kbn/embeddable-plugin"
   ]
 }

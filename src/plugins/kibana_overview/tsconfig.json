@@ -10,13 +10,13 @@
     "common/**/*",
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../../plugins/navigation/tsconfig.json" },
-    { "path": "../../plugins/data/tsconfig.json" },
-    { "path": "../../plugins/home/tsconfig.json" },
-    { "path": "../../plugins/newsfeed/tsconfig.json" },
-    { "path": "../../plugins/usage_collection/tsconfig.json" },
-    { "path": "../../plugins/kibana_react/tsconfig.json" },
-    { "path": "../../plugins/data_view_editor/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/navigation-plugin",
+    "@kbn/data-plugin",
+    "@kbn/home-plugin",
+    "@kbn/newsfeed-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/data-view-editor-plugin"
   ]
 }

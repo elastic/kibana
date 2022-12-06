@@ -14,9 +14,9 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json" },
-    { "path": "../alerting/tsconfig.json" },
-    { "path": "../security/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/alerting-plugin",
+    "@kbn/security-plugin",
   ]
 }

@@ -8,12 +8,8 @@
   "include": ["common/**/*", "public/**/*", "server/**/*"],
 
   "kbn_references": [
-    {
-      "path": "../../core/tsconfig.json"
-    },
-    {
-      "path": "../kibana_react/tsconfig.json"
-    },
-    { "path": "../../../x-pack/plugins/cloud/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/cloud-plugin",
   ]
 }

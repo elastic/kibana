@@ -13,8 +13,8 @@
     "target/types/**/*"
   ],
   "kbn_references": [
-    { "path": "../core/tsconfig.json" },
+    "@kbn/core",
     { "path": "../../tsconfig.json" },
-    { "path": "../../x-pack/plugins/screenshotting/tsconfig.json" },
+    "@kbn/screenshotting-plugin",
   ]
 }

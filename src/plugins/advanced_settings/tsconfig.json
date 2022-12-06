@@ -10,11 +10,11 @@
     "server/**/*"
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../management/tsconfig.json" },
-    { "path": "../home/tsconfig.json" },
-    { "path": "../usage_collection/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../es_ui_shared/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/management-plugin",
+    "@kbn/home-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/es-ui-shared-plugin",
   ]
 }

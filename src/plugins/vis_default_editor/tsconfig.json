@@ -9,14 +9,14 @@
     "public/**/*"
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../data/tsconfig.json" },
-    { "path": "../visualizations/tsconfig.json" },
-    { "path": "../discover/tsconfig.json" },
-    { "path": "../kibana_utils/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../field_formats/tsconfig.json" },
-    { "path": "../unified_search/tsconfig.json" },
-    { "path": "../data_views/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/data-views-plugin"
   ]
 }

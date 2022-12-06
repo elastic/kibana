@@ -12,11 +12,11 @@
   ],
   "exclude": [],
   "kbn_references": [
-    { "path": "../../src/core/tsconfig.json" },
-    { "path": "../../src/plugins/embeddable/tsconfig.json" },
-    { "path": "../../src/plugins/ui_actions/tsconfig.json" },
-    { "path": "../../src/plugins/inspector/tsconfig.json" },
-    { "path": "../embeddable_examples/tsconfig.json" },
-    { "path": "../developer_examples/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/embeddable-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/embeddable-examples-plugin",
+    "@kbn/developer-examples-plugin",
   ]
 }

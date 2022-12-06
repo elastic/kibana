@@ -8,6 +8,6 @@
     "package.json",
   ],
   "kbn_references": [
-    { "path": "./src/core/tsconfig.json" },
+    "@kbn/core",
   ]
 }

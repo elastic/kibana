@@ -18,6 +18,6 @@
     ],
   },
   "kbn_references": [
-    { "path": "../tsconfig.json" }
+    "@kbn/threat-intelligence-plugin"
   ]
 }

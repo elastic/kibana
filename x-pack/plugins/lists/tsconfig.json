@@ -14,9 +14,9 @@
     "server/**/*.json",
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../spaces/tsconfig.json" },
-    { "path": "../security/tsconfig.json"},
-    { "path": "../../../src/plugins/unified_search/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/spaces-plugin",
+    "@kbn/security-plugin",
+    "@kbn/unified-search-plugin"
   ]
 }

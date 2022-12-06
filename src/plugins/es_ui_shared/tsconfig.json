@@ -15,7 +15,7 @@
     ".storybook/**/*"
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../data_views/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/data-views-plugin"
   ]
 }
