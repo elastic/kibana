@@ -210,13 +210,24 @@ export const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<
 });
 
 export interface RouteAuthz {
+  /** Is route access granted (based on authz) */
   granted: boolean;
+
+  /** Was authorization to the api a result of Fleet (and Integrations) Privileges (as oposed to Package privileges) */
   grantedByFleetPrivileges: boolean;
+
+  /**
+   * Set when `grantedByFleetPrivileges` is `false` and `granted` is true, which indicate access was granted
+   * via a Package Privileges. Array will hold the list of Package names that are allowed
+   */
   scopeDataToPackages: string[] | undefined;
 }
 
 /**
- * Calculates Authz information for a Route
+ * Calculates Authz information for a Route, including:
+ * 1. Is access granted
+ * 2. was access granted based on Fleet and/or Integration privileges, and
+ * 3. a list of package names for which access was granted (only set if access was granted by package privileges)
  *
  * @param fleetAuthz
  * @param requiredAuthz
@@ -236,7 +247,7 @@ export const calculateRouteAuthz = (
   const fleetAuthzFlatten = flatten(fleetAuthz);
 
   const isPrivilegeGranted = (flattenPrivilegeKey: string): boolean =>
-    Boolean(fleetAuthzFlatten[flattenPrivilegeKey]);
+    fleetAuthzFlatten[flattenPrivilegeKey] === true;
 
   if (requiredAuthz.all) {
     response.granted = Object.keys(flatten(requiredAuthz.all)).every(isPrivilegeGranted);
@@ -263,9 +274,25 @@ export const calculateRouteAuthz = (
         );
       }
 
-      // If access was not granted via Fleet Authz, then retrieve a list of Package names for which the
-      // data should be sopped
-      if (!response.grantedByFleetPrivileges) {
+      // If access was NOT granted via Fleet Authz, then retrieve a list of Package names that were
+      // granted access to their respective data.
+      if (!response.grantedByFleetPrivileges && requiredAuthz.any.packagePrivileges) {
+        for (const [packageName, packageRequiredAuthz] of Object.entries(
+          requiredAuthz.any.packagePrivileges
+        )) {
+          const packageRequiredAuthzKeys = Object.keys(
+            flatten({ packagePrivileges: { [packageName]: packageRequiredAuthz } })
+          );
+
+          if (packageRequiredAuthzKeys.some(isPrivilegeGranted)) {
+            if (!response.scopeDataToPackages) {
+              response.scopeDataToPackages = [];
+            }
+
+            response.scopeDataToPackages.push(packageName);
+          }
+        }
+
         response.scopeDataToPackages = Object.keys(requiredAuthz.any.packagePrivileges ?? {});
       }
 
@@ -436,6 +463,7 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
     hasRequiredAuthz?: FleetAuthzRouterConfigParam;
   }): Promise<IKibanaResponse<any>> => {
     const requestedAuthz = await getAuthzFromRequest(request);
+
     if (
       hasRequiredAuthz &&
       ((typeof hasRequiredAuthz === 'function' && hasRequiredAuthz(requestedAuthz)) ||
@@ -444,6 +472,7 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
     ) {
       return handler(context, request, response);
     }
+
     return response.forbidden();
   };
 
