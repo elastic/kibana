@@ -15,4 +15,4 @@ const actionsToVerbs: Record<Action, string> = {
   update: 'changed',
 };
 
-export const actionToPastTenseVerb = (action: Action): string => actionsToVerbs[action];
+export const getPastTenseVerb = (action: Action): string => actionsToVerbs[action];

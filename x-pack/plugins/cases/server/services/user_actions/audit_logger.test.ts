@@ -38,4 +38,12 @@ describe('UserActionAuditLogger', () => {
 
     expect(mockLogger.log.mock.calls[0]).toMatchSnapshot();
   });
+
+  it('does not call the internal audit logger when the event details are undefined', () => {
+    const logger = new UserActionAuditLogger(mockLogger);
+
+    logger.log();
+
+    expect(mockLogger.log).not.toBeCalled();
+  });
 });

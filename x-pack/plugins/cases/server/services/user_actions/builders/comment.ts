@@ -13,7 +13,7 @@ import { ActionTypes, Actions } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 import { getAttachmentSOExtractor } from '../../so_references';
-import { actionToPastTenseVerb } from './audit_logger_utils';
+import { getPastTenseVerb } from './audit_logger_utils';
 
 export class CommentUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'comment'>): UserActionEvent {
@@ -46,7 +46,7 @@ export class CommentUserActionBuilder extends UserActionBuilder {
       ),
     };
 
-    const verb = actionToPastTenseVerb(action);
+    const verb = getPastTenseVerb(action);
 
     const getMessage = (id?: string) =>
       `User ${verb} comment id: ${commentId(args.attachmentId)} for case id: ${

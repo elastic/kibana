@@ -10,7 +10,7 @@ import type { UserAction } from '../../../../common/api';
 import { ActionTypes, Actions } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
-import { actionToPastTenseVerb } from './audit_logger_utils';
+import { getPastTenseVerb } from './audit_logger_utils';
 
 export class TagsUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'tags'>): UserActionEvent {
@@ -24,7 +24,7 @@ export class TagsUserActionBuilder extends UserActionBuilder {
       type: ActionTypes.tags,
     });
 
-    const verb = actionToPastTenseVerb(action);
+    const verb = getPastTenseVerb(action);
     const preposition = getPreposition(action);
 
     const getMessage = (id?: string) =>
