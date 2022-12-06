@@ -80,8 +80,7 @@ export function ImageViewer({
       {isImageConfigValid && (
         <FileImage
           src={src}
-          // TODO: uncomment to add support for blurhash
-          // meta={imageConfig.src.type === 'file' ? imageConfig.src.fileImageMeta : undefined}
+          meta={imageConfig.src.type === 'file' ? imageConfig.src.fileImageMeta : undefined}
           alt={imageConfig.altText ?? ''}
           className={classNames(className, { 'visually-hidden': hasFailedToLoad })}
           title={onChange ? 'Click to select a different image' : undefined}
