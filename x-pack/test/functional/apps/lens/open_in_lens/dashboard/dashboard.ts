@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.convertToLens();
       await lens.waitForVisualization('xyVisChart');
       const lastBreadcrumbdcrumb = await testSubjects.getVisibleText('breadcrumb last');
-      expect(lastBreadcrumbdcrumb).to.be('Converting "Area visualization"');
+      expect(lastBreadcrumbdcrumb).to.be('Converting Area visualization');
       await lens.replaceInDashboard();
 
       await retry.try(async () => {

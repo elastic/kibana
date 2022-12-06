@@ -64,11 +64,12 @@ export function SaveModalContainer({
   }
 
   if (!lastKnownDoc?.title && initialContext && 'title' in initialContext && initialContext.title) {
-    title =
-      initialContext.title +
-      i18n.translate('xpack.lens.app.convertedLabel', {
-        defaultMessage: ' (converted)',
-      });
+    title = i18n.translate('xpack.lens.app.convertedLabel', {
+      defaultMessage: '{title} (converted)',
+      values: {
+        title: initialContext.title,
+      },
+    });
   }
 
   const { attributeService, savedObjectsTagging, application, dashboardFeatureFlag } = lensServices;

@@ -86,11 +86,11 @@ export class EditInLensAction implements Action<EditInLensContext> {
               type: vis.type.title,
             },
           }),
-        savedObjectId: vis.id,
         embeddableId: embeddable.id,
         originatingApp: this.currentAppId,
         searchFilters,
         searchQuery,
+        isEmbeddable: true,
       };
       if (navigateToLensConfig) {
         getEmbeddable().getStateTransfer().isTransferInProgress = true;
@@ -115,8 +115,7 @@ export class EditInLensAction implements Action<EditInLensContext> {
       return false;
     }
     const vis = embeddable.getVis();
-    const contextType = embeddable.getInput().executionContext?.type
-    if (!vis || contextType !== 'dashboard') {
+    if (!vis) {
       return false;
     }
     const canNavigateToLens =

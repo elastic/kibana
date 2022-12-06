@@ -90,7 +90,7 @@ export const getPreloadedState = ({
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(
       embeddableEditorIncomingState?.originatingApp ||
-        initialContext?.originatingApp === 'dashboards'
+        (initialContext && 'isEmbeddable' in initialContext && initialContext?.isEmbeddable)
     ),
     activeDatasourceId: initialDatasourceId,
     datasourceStates,

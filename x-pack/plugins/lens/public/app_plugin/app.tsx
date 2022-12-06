@@ -420,9 +420,14 @@ export function App({
   }, []);
 
   const returnToOriginSwitchLabelForContext =
-    initialContext?.originatingApp === 'dashboards' && !persistedDoc
+    (initialContext?.originatingApp === 'dashboards' ||
+      initialContext?.originatingApp === 'canvas') &&
+    !persistedDoc
       ? i18n.translate('xpack.lens.app.replacePanel', {
-          defaultMessage: 'Replace panel on dashboard',
+          defaultMessage: 'Replace panel on {originatingApp}',
+          values: {
+            originatingApp: initialContext?.originatingApp,
+          },
         })
       : undefined;
 
@@ -513,7 +518,7 @@ export function App({
         >
           {i18n.translate('xpack.lens.app.goBackModalMessage', {
             defaultMessage:
-              'The changes you have made here are not backwards compatible with your original {contextOriginatingApp}. Are you sure you want to discard these unsaved changes and return to {contextOriginatingApp}?',
+              'The changes you have made here are not backwards compatible with your original {contextOriginatingApp} visualization. Are you sure you want to discard these unsaved changes and return to {contextOriginatingApp}?',
             values: { contextOriginatingApp },
           })}
         </EuiConfirmModal>

@@ -251,6 +251,7 @@ export type VisualizeEditorContext<T extends Configuration = Configuration> = {
   searchQuery: Query;
   searchFilters: Filter[];
   title?: string;
+  isEmbeddable?: boolean;
 } & NavigateToLensContext<T>;
 
 export interface GetDropPropsArgs<T = unknown> {

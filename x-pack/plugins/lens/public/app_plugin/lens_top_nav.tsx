@@ -57,6 +57,7 @@ function getLensTopNavConfig(options: {
   contextOriginatingApp?: string;
   isSaveable: boolean;
   showReplaceInDashbord: boolean;
+  showReplaceInCanvas: boolean;
 }): TopNavMenuData[] {
   const {
     actions,
@@ -71,6 +72,7 @@ function getLensTopNavConfig(options: {
     contextOriginatingApp,
     isSaveable,
     showReplaceInDashbord,
+    showReplaceInCanvas,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
@@ -180,8 +182,10 @@ function getLensTopNavConfig(options: {
 
   topNavMenu.push({
     label: saveButtonLabel,
-    iconType: (showReplaceInDashbord ? false : !showSaveAndReturn) ? 'save' : undefined,
-    emphasize: showReplaceInDashbord ? false : !showSaveAndReturn,
+    iconType: (showReplaceInDashbord || showReplaceInCanvas ? false : !showSaveAndReturn)
+      ? 'save'
+      : undefined,
+    emphasize: showReplaceInDashbord || showReplaceInCanvas ? false : !showSaveAndReturn,
     run: actions.showSaveModal,
     testId: 'lnsApp_saveButton',
     description: i18n.translate('xpack.lens.app.saveButtonAriaLabel', {
@@ -219,6 +223,23 @@ function getLensTopNavConfig(options: {
       description: i18n.translate('xpack.lens.app.replaceInDashboardButtonAriaLabel', {
         defaultMessage:
           'Replace legacy visualization with lens visualization and return to the dashboard',
+      }),
+    });
+  }
+
+  if (showReplaceInCanvas) {
+    topNavMenu.push({
+      label: i18n.translate('xpack.lens.app.replaceInCanvas', {
+        defaultMessage: 'Replace in canvas',
+      }),
+      emphasize: true,
+      iconType: 'merge',
+      run: actions.saveAndReturn,
+      testId: 'lnsApp_replaceInCanvasButton',
+      disableButton: !isSaveable,
+      description: i18n.translate('xpack.lens.app.replaceInCanvasButtonAriaLabel', {
+        defaultMessage:
+          'Replace legacy visualization with lens visualization and return to the canvas',
       }),
     });
   }
@@ -475,9 +496,12 @@ export const LensTopNavMenu = ({
     const showReplaceInDashbord =
       initialContext?.originatingApp === 'dashboards' &&
       !(initialInput as LensByReferenceInput)?.savedObjectId;
+    const showReplaceInCanvas =
+      initialContext?.originatingApp === 'canvas' &&
+      !(initialInput as LensByReferenceInput)?.savedObjectId;
     const baseMenuEntries = getLensTopNavConfig({
       showSaveAndReturn:
-        !showReplaceInDashbord &&
+        !(showReplaceInDashbord || showReplaceInCanvas) &&
         (Boolean(
           isLinkedToOriginatingApp &&
             // Temporarily required until the 'by value' paradigm is default.
@@ -494,6 +518,7 @@ export const LensTopNavMenu = ({
       isSaveable,
       contextOriginatingApp,
       showReplaceInDashbord,
+      showReplaceInCanvas,
       tooltips: {
         showExportWarning: () => {
           if (activeData) {
