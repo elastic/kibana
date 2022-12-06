@@ -642,11 +642,6 @@ x-pack/plugins/threat_intelligence @elastic/protections-experience
 x-pack/plugins/security_solution/public/threat_intelligence @elastic/protections-experience
 x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
-
-# Security Intelligence And Analytics
-/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules @elastic/security-intelligence-analytics
-
-
 # Security Asset Management
 /x-pack/plugins/osquery @elastic/security-asset-management
 /x-pack/plugins/security_solution/common/detection_engine/rule_response_actions @elastic/security-asset-management
@@ -953,7 +948,7 @@ packages/kbn-logging-mocks @elastic/kibana-core
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-mapbox-gl @elastic/kibana-gis
-packages/kbn-monaco @elastic/kibana-app-services
+packages/kbn-monaco @elastic/kibana-global-experience
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 packages/kbn-osquery-io-ts-types @elastic/security-asset-management

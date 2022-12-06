@@ -25,7 +25,6 @@ import { networkModel } from '../../store';
 
 import { NetworkHttpTable } from '.';
 import { mockData } from './mock';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to');
@@ -47,23 +46,11 @@ describe('NetworkHttp Table Component', () => {
   };
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   describe('rendering', () => {
