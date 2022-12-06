@@ -52,7 +52,7 @@ function FiltersBuilder({
   }, [filters]);
 
   useEffect(() => {
-    if (!compareFilters(state.filters, filtersRef.current)) {
+    if (state.filters !== filtersRef.current) {
       filtersRef.current = state.filters;
       onChange(state.filters);
     }
