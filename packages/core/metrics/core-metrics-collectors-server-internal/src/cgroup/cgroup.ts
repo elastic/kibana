@@ -7,14 +7,13 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { MetricsCollector, OpsOsMetrics } from '@kbn/core-metrics-server';
+import type { MetricsCollector } from '@kbn/core-metrics-server';
 
 import * as v1 from './v1';
 import * as v2 from './v2';
 import { gatherInfo } from './gather_info';
 import { GROUP_CPU, GROUP_CPUACCT } from './constants';
-
-type OsCgroupMetrics = Pick<OpsOsMetrics, 'cpu' | 'cpuacct'>;
+import { OsCgroupMetrics } from './types';
 
 interface OsCgroupMetricsCollectorOptions {
   logger: Logger;
