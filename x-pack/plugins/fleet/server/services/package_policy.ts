@@ -26,8 +26,6 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import pMap from 'p-map';
 
-import type { FleetAuthz } from '../../common';
-
 import {
   packageToPackagePolicy,
   packageToPackagePolicyInputs,
@@ -84,13 +82,8 @@ import type {
 } from '../types';
 import type { ExternalCallback } from '..';
 
-import {
-  doesNotHaveRequiredFleetAuthz,
-  getAuthzFromRequest,
-  validateSecurityRbac,
-  WRITE_ENDPOINT_PACKAGE_PRIVILEGES as packagePrivileges,
-  type FleetAuthzRouteConfig,
-} from '../routes/security';
+import type { FleetAuthzRouteConfig } from '../routes/security';
+import { calculateRouteAuthz, getAuthzFromRequest } from '../routes/security';
 
 import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
@@ -1260,12 +1253,18 @@ export class PackagePolicyServiceImpl
   implements PackagePolicyService
 {
   public asScoped(request: KibanaRequest): PackagePolicyClient {
-    const preflightCheck = async (fleetAuthzConfig: FleetAuthzRouteConfig) => {
+    const preflightCheck = async ({ fleetAuthz: fleetRequiredAuthz }: FleetAuthzRouteConfig) => {
       const authz = await getAuthzFromRequest(request);
-      if (doesNotHaveRequiredFleetAuthz(authz, fleetAuthzConfig)) {
+
+      if (
+        (typeof fleetRequiredAuthz === 'function' && fleetRequiredAuthz(authz)) ||
+        (typeof fleetRequiredAuthz !== 'function' &&
+          !calculateRouteAuthz(authz, { all: fleetRequiredAuthz }).granted)
+      ) {
         throw new FleetUnauthorizedError('Not authorized to this action on integration policies');
       }
     };
+
     return new PackagePolicyClientWithAuthz(preflightCheck);
   }
 
@@ -1306,13 +1305,9 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
     }
   ): Promise<PackagePolicy> {
     await this.#runPreflight({
-      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
-        validateSecurityRbac(fleetAuthz, {
-          any: {
-            integrations: { writeIntegrationPolicies: true },
-            ...packagePrivileges,
-          },
-        }),
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
     });
 
     return super.create(soClient, esClient, packagePolicy, options);
