@@ -11,8 +11,8 @@ import type {
   UiSettingsServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core-ui-settings-server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import type { Logger } from '@kbn/logging';
 
 /** @internal */
