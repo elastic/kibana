@@ -61,7 +61,7 @@ export function getServices() {
     httpServerMock.createKibanaRequest()
   );
 
-  const uiSettings = kbn.coreStart.uiSettings.asScopedToClient(savedObjectsClient, 'namespace');
+  const uiSettings = kbn.coreStart.uiSettings.asScopedToClient(savedObjectsClient);
 
   services = {
     supertest: (method: HttpMethod, path: string) => getSupertest(kbn.root, method, path),
