@@ -28,6 +28,7 @@ import {
 } from '../../api';
 import { checkIfListCannotBeEdited, isAnExceptionListItem } from '../../utils/list.utils';
 import * as i18n from '../../translations';
+import { useInvalidateFetchRuleByIdQuery } from '../../../detection_engine/rule_management/api/hooks/use_fetch_rule_by_id_query';
 
 interface ReferenceModalState {
   contentText: string;
@@ -74,6 +75,7 @@ export const useListDetailsView = () => {
   );
   const [disableManageButton, setDisableManageButton] = useState(true);
   const [refreshExceptions, setRefreshExceptions] = useState(false);
+  const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
 
   const headerBackOptions: BackOptions = useMemo(
     () => ({
@@ -326,6 +328,7 @@ export const useListDetailsView = () => {
           resetManageRulesAfterSaving();
         })
         .then(() => setRefreshExceptions(false))
+        .then(() => invalidateFetchRuleByIdQuery())
         .catch((error) => {
           handleErrorStatus(
             error,
@@ -345,6 +348,7 @@ export const useListDetailsView = () => {
     exceptionListId,
     resetManageRulesAfterSaving,
     handleErrorStatus,
+    invalidateFetchRuleByIdQuery,
   ]);
   const onCancelManageRules = useCallback(() => {
     setShowManageRulesFlyout(false);
