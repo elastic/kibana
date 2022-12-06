@@ -79,7 +79,7 @@ export class SyntheticsService {
     this.registerSyncTask();
   }
 
-  public async init() {
+  public async enableSyntheticsService() {
     if (this.config?.manifestUrl) {
       await this.initCloudSetup();
     }
@@ -91,9 +91,8 @@ export class SyntheticsService {
   public async initCloudSetup() {
     await this.scheduleSyncTask();
 
-    // can be done without waiting
-    this.registerServiceLocations();
-    this.checkAccess();
+    await this.registerServiceLocations();
+    await this.checkAccess();
   }
 
   public async disableScheduledTask() {
@@ -251,7 +250,7 @@ export class SyntheticsService {
       if (this.config.manifestUrl) {
         const apiKey = await syntheticsServiceAPIKeySavedObject.get(this.server);
         if (apiKey) {
-          await this.scheduleSyncTask();
+          await this.enableSyntheticsService();
         }
       }
     } catch (e) {

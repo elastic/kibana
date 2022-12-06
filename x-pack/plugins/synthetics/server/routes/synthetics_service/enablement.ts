@@ -74,7 +74,7 @@ export const enableSyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => ({
     const { authSavedObjectsClient, logger } = server;
     try {
       await Promise.all([
-        syntheticsMonitorClient.syntheticsService.init(),
+        syntheticsMonitorClient.syntheticsService.enableSyntheticsService(),
         generateAndSaveServiceAPIKey({
           request,
           authSavedObjectsClient,
