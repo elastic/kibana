@@ -492,6 +492,7 @@ export function App({
           })}
           buttonColor="danger"
           defaultFocusedButton="confirm"
+          data-test-subj="lnsApp_discardChangesModalOrigin"
         >
           {i18n.translate('xpack.lens.app.goBackModalMessage', {
             defaultMessage:
