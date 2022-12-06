@@ -7,12 +7,15 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
 
+import { diffStrings } from '@kbn/dev-utils';
 import { run } from '@kbn/dev-cli-runner';
 import { asyncMapWithLimit } from '@kbn/std';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { getRepoFiles } from '@kbn/get-repo-files';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { readPackageMap } from '@kbn/package-map';
 import globby from 'globby';
 
 import { File } from '../file';
@@ -34,8 +37,26 @@ class Stats {
 
 export async function runCheckTsProjectsCli() {
   run(
-    async ({ log }) => {
+    async ({ log, flagsReader }) => {
+      const fix = flagsReader.boolean('fix');
       const stats = new Stats();
+      const pkgMap = readPackageMap();
+      const pkgDirMap = new Map(Array.from(pkgMap).map(([k, v]) => [v || '.', k]));
+
+      const warnedNonPkgRef = new Set<string>();
+      function getPkgIdJson(tsconfigPath: string) {
+        const repoRelRef = Path.relative(REPO_ROOT, Path.dirname(tsconfigPath)) || '.';
+        const pkgId = pkgDirMap.get(repoRelRef);
+        if (pkgId) {
+          return JSON.stringify(pkgId);
+        }
+
+        if (!warnedNonPkgRef.has(repoRelRef)) {
+          warnedNonPkgRef.add(repoRelRef);
+          log.warning(`unable to map ${repoRelRef} to a package id`);
+        }
+      }
+
       let failed = false;
 
       const everyProjectDeep = new Set(PROJECTS.flatMap((p) => p.getProjectsDeep()));
@@ -54,6 +75,29 @@ export async function runCheckTsProjectsCli() {
           log.error(
             `[${configRel}]: This tsconfig does not extend the tsconfig.base.json file either directly or indirectly. The TS config setup for the repo expects every tsconfig file to extend this base config file.`
           );
+        }
+
+        const jsonc = Fs.readFileSync(proj.tsConfigPath, 'utf8');
+        const withReplacements = jsonc.replaceAll(
+          /{[^\"]*"path":\s*("[^"]+"),?[^\}]*}/g,
+          (match, jsonPath) => {
+            const refPath = Path.resolve(proj.directory, JSON.parse(jsonPath));
+            return getPkgIdJson(refPath) ?? match;
+          }
+        );
+
+        if (jsonc !== withReplacements) {
+          if (fix) {
+            Fs.writeFileSync(proj.tsConfigPath, withReplacements);
+          } else {
+            failed = true;
+            log.error(
+              `[${configRel}]: kbn_references must use pkgIds to refer to other packages (use --fix to autofix)\n\n${diffStrings(
+                jsonc,
+                withReplacements
+              )}\n`
+            );
+          }
         }
       }
 
@@ -148,6 +192,13 @@ export async function runCheckTsProjectsCli() {
       }
     },
     {
+      flags: {
+        boolean: ['fix'],
+        alias: { f: 'fix' },
+        help: `
+          --fix              Automatically fix some issues in tsconfig.json files
+        `,
+      },
       description:
         'Check that all .ts and .tsx files in the repository are assigned to a tsconfig.json file',
     }
