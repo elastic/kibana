@@ -22,7 +22,12 @@ interface SLOListParams {
   name?: string;
 }
 
-export const useFetchSloList = (name?: string): [boolean, SLOList] => {
+interface UseFetchSloListResponse {
+  loading: boolean;
+  sloList: SLOList;
+}
+
+const useFetchSloList = (name?: string): UseFetchSloListResponse => {
   const params: SLOListParams = useMemo(() => ({ name }), [name]);
   const shouldExecuteApiCall = useCallback(
     (apiCallParams: SLOListParams) => apiCallParams.name === params.name,
@@ -36,7 +41,7 @@ export const useFetchSloList = (name?: string): [boolean, SLOList] => {
     shouldExecuteApiCall,
   });
 
-  return [loading, sloList];
+  return { loading, sloList };
 };
 
 const fetchSloList = async (
@@ -87,3 +92,6 @@ function toSLO(result: any): SLO {
     },
   };
 }
+
+export { useFetchSloList };
+export type { UseFetchSloListResponse };

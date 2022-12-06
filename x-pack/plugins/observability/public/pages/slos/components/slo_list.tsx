@@ -11,11 +11,11 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 
 export function SloList() {
-  const [isLoading, sloList] = useFetchSloList();
+  const { loading, sloList } = useFetchSloList();
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="sloList">
-      <EuiFlexItem>{!isLoading && <pre>{JSON.stringify(sloList, null, 2)}</pre>}</EuiFlexItem>
+      <EuiFlexItem>{!loading && <pre>{JSON.stringify(sloList, null, 2)}</pre>}</EuiFlexItem>
     </EuiFlexGroup>
   );
 }

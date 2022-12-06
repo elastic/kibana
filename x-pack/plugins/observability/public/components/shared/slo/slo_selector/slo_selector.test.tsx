@@ -22,7 +22,7 @@ describe('SLO Selector', () => {
   const onSelectedSpy = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
-    useFetchSloListMock.mockReturnValue([true, emptySloList]);
+    useFetchSloListMock.mockReturnValue({ loading: true, sloList: emptySloList });
   });
 
   it('fetches SLOs asynchronously', async () => {
@@ -33,9 +33,9 @@ describe('SLO Selector', () => {
   });
 
   it('searches SLOs when typing', async () => {
-    const { getByTestId } = render(<SloSelector onSelected={onSelectedSpy} />);
+    render(<SloSelector onSelected={onSelectedSpy} />);
 
-    const input = getByTestId('comboBoxInput');
+    const input = screen.getByTestId('comboBoxInput');
     await act(async () => {
       await userEvent.type(input, 'latency', { delay: 1 });
       await wait(310); // debounce delay

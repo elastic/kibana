@@ -21,13 +21,14 @@ function SloSelector({ onSelected }: Props) {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
-  const [loading, sloList] = useFetchSloList(searchValue);
+  const { loading, sloList } = useFetchSloList(searchValue);
 
   useEffect(() => {
-    if (!loading && sloList !== undefined) {
-      const opts = sloList.results.map((slo) => ({ value: slo.id, label: slo.name }));
-      setOptions(opts);
-    }
+    const isLoadedWithData = !loading && sloList !== undefined;
+    const opts: Array<EuiComboBoxOptionOption<string>> = isLoadedWithData
+      ? sloList.results.map((slo) => ({ value: slo.id, label: slo.name }))
+      : [];
+    setOptions(opts);
   }, [loading, sloList]);
 
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
