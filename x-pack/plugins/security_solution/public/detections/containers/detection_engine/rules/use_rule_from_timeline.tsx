@@ -7,13 +7,10 @@
 
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  convertKueryToElasticSearchQuery,
-  updateIsLoading as dispatchUpdateIsLoading,
-} from '@kbn/timelines-plugin/public';
 import { useDispatch } from 'react-redux';
-
 import { i18n } from '@kbn/i18n';
+import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
+import { updateIsLoading } from '../../../../timelines/store/timeline/actions';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { TimelineModel } from '../../../..';
@@ -200,7 +197,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
         }: {
           id: string;
           isLoading: boolean;
-        }) => dispatch(dispatchUpdateIsLoading({ id: currentTimelineId, isLoading })),
+        }) => dispatch(updateIsLoading({ id: currentTimelineId, isLoading })),
         updateTimeline: dispatchUpdateTimeline(dispatch),
       }),
     [dispatch, onOpenTimeline]
