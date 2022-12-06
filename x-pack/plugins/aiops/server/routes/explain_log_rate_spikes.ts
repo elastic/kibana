@@ -50,7 +50,6 @@ import {
   fetchFrequentItems,
   groupDuplicates,
 } from './queries/fetch_frequent_items';
-import type { ItemsetResult } from './queries/fetch_frequent_items';
 import { getHistogramQuery } from './queries/get_histogram_query';
 import {
   getFieldValuePairCounts,
@@ -59,6 +58,7 @@ import {
   markDuplicates,
 } from './queries/get_simple_hierarchical_tree';
 import { getGroupFilter } from './queries/get_group_filter';
+import { getFilteredFrequentItems } from './queries/get_filtered_frequent_items';
 
 // 10s ping frequency to keep the stream alive.
 const PING_FREQUENCY = 10000;
@@ -475,37 +475,7 @@ export const defineExplainLogRateSpikesRoute = (
               }
 
               if (fields.length > 0 && df.length > 0) {
-                // The way the `frequent_items` aggregations works could return item sets that include
-                // field/value pairs that are not part of the original list of significant change points.
-                // This cleans up groups and removes those unrelated field/value pairs.
-                const filteredDf = df
-                  .map((fi, fiIndex) => {
-                    const updatedSet = Object.entries(fi.set).reduce<ItemsetResult['set']>(
-                      (set, [field, value]) => {
-                        if (
-                          changePoints.some(
-                            (cp) => cp.fieldName === field && cp.fieldValue === value
-                          )
-                        ) {
-                          set[field] = value;
-                        }
-                        return set;
-                      },
-                      {}
-                    );
-
-                    // only assign the updated reduced set if it doesn't already match
-                    // an existing set. if there's a match just add an empty set
-                    // so it will be filtered in the last step.
-                    fi.set = df.some((d, dIndex) => fiIndex !== dIndex && isEqual(fi.set, d.set))
-                      ? {}
-                      : updatedSet;
-
-                    fi.size = Object.keys(fi.set).length;
-
-                    return fi;
-                  })
-                  .filter((fi) => fi.size > 1);
+                const filteredDf = getFilteredFrequentItems(df, changePoints);
 
                 // `frequent_items` returns lot of different small groups of field/value pairs that co-occur.
                 // The following steps analyse these small groups, identify overlap between these groups,
