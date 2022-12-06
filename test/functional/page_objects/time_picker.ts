@@ -123,8 +123,21 @@ export class TimePickerPageObject extends FtrService {
   /**
    * @param {String} fromTime MMM D, YYYY @ HH:mm:ss.SSS
    * @param {String} toTime MMM D, YYYY @ HH:mm:ss.SSS
+   * @param {Boolean} force time picker force update, default is false
    */
-  public async setAbsoluteRange(fromTime: string, toTime: string) {
+  public async setAbsoluteRange(fromTime: string, toTime: string, force = false) {
+    if (!force) {
+      const currentUrl = decodeURI(await this.browser.getCurrentUrl());
+      const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+      const startMoment = moment.utc(fromTime, DEFAULT_DATE_FORMAT).toISOString();
+      const endMoment = moment.utc(toTime, DEFAULT_DATE_FORMAT).toISOString();
+      if (currentUrl.includes(`time:(from:'${startMoment}',to:'${endMoment}'`)) {
+        this.log.debug(
+          `We already have the desired start (${fromTime}) and end (${toTime}) in the URL, returning from setAbsoluteRange`
+        );
+        return;
+      }
+    }
     this.log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
     await this.showStartEndTimes();
     let panel!: WebElementWrapper;
@@ -285,7 +298,14 @@ export class TimePickerPageObject extends FtrService {
       await this.testSubjects.click('superDatePickerToggleRefreshButton');
     }
 
-    await this.inputValue('superDatePickerRefreshIntervalInput', intervalS.toString());
+    await this.retry.waitFor('auto refresh to be set correctly', async () => {
+      await this.inputValue('superDatePickerRefreshIntervalInput', intervalS.toString());
+      return (
+        (await this.testSubjects.getAttribute('superDatePickerRefreshIntervalInput', 'value')) ===
+        intervalS.toString()
+      );
+    });
+
     await this.quickSelectTimeMenuToggle.close();
   }
 
