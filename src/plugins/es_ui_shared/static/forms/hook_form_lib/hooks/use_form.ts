@@ -245,6 +245,16 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
           resolve();
         }, 100);
       } else {
+        /*
+         * We need to use "setTimeout()" to ensure that the "validate()" method
+         * returns a Promise that is resolved on the next tick. This is important
+         * because the "validate()" method is often called in a "useEffect()" hook
+         * and we want the "useEffect()" to be triggered on the next tick. If we
+         * don't use "setTimeout()" the "useEffect()" would be triggered on the same
+         * tick and would not have access to the latest form state.
+         * This is also why we don't use "Promise.resolve()" here. It would resolve
+         * the Promise on the same tick.
+         */
         setTimeout(resolve, 0);
       }
     });
