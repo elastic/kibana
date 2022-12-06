@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export * from './rules_client';
-export * from './types';
+import { uniq } from 'lodash';
+
+export function includeFieldsRequiredForAuthentication(fields: string[]): string[] {
+  return uniq([...fields, 'alertTypeId', 'consumer']);
+}
