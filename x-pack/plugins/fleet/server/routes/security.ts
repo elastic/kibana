@@ -223,7 +223,6 @@ export function doesNotHaveRequiredFleetAuthz(
   authz: FleetAuthz,
   fleetAuthzConfig: FleetAuthzRouteConfig
 ) {
-
   return false;
 
   // return (
