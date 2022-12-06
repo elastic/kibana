@@ -31,6 +31,7 @@ const DEFAULT_KIBANA_URL = 'http://localhost:5601';
 const DEFAULT_KIBANA_USERNAME = 'elastic';
 const DEFAULT_KIBANA_PASSWORD = 'changeme';
 
+const DEFAULT_UNENROLL_TIMEOUT = 300; // 5 minutes
 const ES_URL = 'http://localhost:9200';
 const ES_SUPERUSER = 'fleet_superuser';
 const ES_PASSWORD = 'password';
@@ -63,7 +64,9 @@ const logger = new ToolingLog({
 function setAgentStatus(agent: any, status: AgentStatus) {
   switch (status) {
     case 'inactive':
-      agent.active = false;
+      agent.last_checkin = new Date(
+        new Date().getTime() - DEFAULT_UNENROLL_TIMEOUT * 1000
+      ).toISOString();
       break;
     case 'enrolling':
       agent.last_checkin = null;
@@ -248,6 +251,7 @@ async function createAgentPolicy(id: string) {
       namespace: 'default',
       description: '',
       monitoring_enabled: ['logs'],
+      unenroll_timeout: DEFAULT_UNENROLL_TIMEOUT,
     }),
     headers: {
       Authorization: kbnAuth,
