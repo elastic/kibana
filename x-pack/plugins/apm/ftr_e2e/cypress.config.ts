@@ -30,9 +30,7 @@ module.exports = defineConfig({
     runMode: 1,
   },
   e2e: {
-    setupNodeEvents: (on, config) => {
-      setupNodeEvents(on, config, baseUrl);
-    },
+    setupNodeEvents,
     baseUrl,
     supportFile: './cypress/support/e2e.ts',
     specPattern: './cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',

@@ -4,17 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import url from 'url';
-import {
-  createLogger,
-  LogLevel,
-  ApmSynthtraceKibanaClient,
-  ApmSynthtraceEsClient,
-} from '@kbn/apm-synthtrace';
+import { apm, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
 import del from 'del';
 import { some } from 'lodash';
 import { Readable } from 'stream';
+import url from 'url';
 
 export async function setupNodeEvents(
   on: Cypress.PluginEvents,
@@ -22,7 +17,7 @@ export async function setupNodeEvents(
 ) {
   const logger = createLogger(LogLevel.info);
 
-  const apmKibanaClient = new ApmSynthtraceKibanaClient({
+  const apmKibanaClient = new apm.ApmSynthtraceKibanaClient({
     logger,
   });
 
@@ -41,7 +36,7 @@ export async function setupNodeEvents(
     })
     .slice(0, -1);
 
-  const synthtraceEsClient = new ApmSynthtraceEsClient({
+  const synthtraceEsClient = new apm.ApmSynthtraceEsClient({
     client,
     logger,
     refreshAfterIndex: true,

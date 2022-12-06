@@ -21,8 +21,10 @@ export const apm = {
   getChromeUserAgentDefaults,
   getBreakdownMetrics,
   serverlessFunction,
+  ApmSynthtraceEsClient,
+  ApmSynthtraceKibanaClient,
 };
 
 export type { ApmException };
 
-export { ApmSynthtraceEsClient, ApmSynthtraceKibanaClient };
+export type { ApmSynthtraceEsClient, ApmSynthtraceKibanaClient };

@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  ApmSynthtraceKibanaClient,
-  createLogger,
-  LogLevel,
-} from '@kbn/apm-synthtrace';
+import { apm, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import cypress from 'cypress';
 import path from 'path';
 import Url from 'url';
@@ -43,7 +39,7 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
   });
 
   const esRequestTimeout = config.get('timeouts.esRequestTimeout');
-  const kibanaClient = new ApmSynthtraceKibanaClient({
+  const kibanaClient = new apm.ApmSynthtraceKibanaClient({
     logger: createLogger(LogLevel.info),
   });
 

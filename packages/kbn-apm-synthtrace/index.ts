@@ -17,4 +17,4 @@ export type { Fields } from './src/lib/entity';
 export type { ApmFields } from './src/lib/apm/apm_fields';
 export type { ApmException } from './src/lib/apm';
 export type { Serializable } from './src/lib/serializable';
-export { ApmSynthtraceEsClient, ApmSynthtraceKibanaClient } from './src/lib/apm';
+export type { ApmSynthtraceEsClient, ApmSynthtraceKibanaClient } from './src/lib/apm';
