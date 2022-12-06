@@ -14,6 +14,7 @@ import { FilesContext } from '@kbn/shared-ux-file-context';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 import { ImageViewerContext } from '../image_viewer';
 import { ImageEditorFlyout, ImageEditorFlyoutProps } from './image_editor_flyout';
+import { imageEmbeddableFileKind } from '../imports';
 
 const validateUrl = jest.fn(() => ({ isValid: true }));
 
@@ -21,10 +22,13 @@ beforeEach(() => {
   validateUrl.mockImplementation(() => ({ isValid: true }));
 });
 
+const filesClient = createMockFilesClient();
+filesClient.getFileKind.mockImplementation(() => imageEmbeddableFileKind);
+
 const ImageEditor = (props: Partial<ImageEditorFlyoutProps>) => {
   return (
     <I18nProvider>
-      <FilesContext client={createMockFilesClient()}>
+      <FilesContext client={filesClient}>
         <ImageViewerContext.Provider
           value={{
             getImageDownloadHref: (fileId: string) => `https://elastic.co/${fileId}`,
