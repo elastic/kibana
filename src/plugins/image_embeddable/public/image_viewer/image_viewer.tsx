@@ -134,7 +134,7 @@ function NotFound() {
   return (
     <div
       ref={(node) => setRef(node)}
-      css={`
+      css={css`
         position: absolute;
         top: 0;
         left: 0;
@@ -150,13 +150,13 @@ function NotFound() {
     >
       {mode === 'only-image' && (
         <NotFoundImage
-          css={`
+          css={css`
             object-fit: contain;
             height: 100%;
             width: 100%;
           `}
           wrapperProps={{
-            css: `
+            css: css`
               height: 100%;
               width: 100%;
             `,
@@ -194,6 +194,7 @@ function NotFound() {
 const NotFoundImage = React.memo((props: Partial<Omit<EuiImageProps, 'url'>>) => (
   <EuiImage
     {...props}
+    data-test-subj={`imageNotFound`}
     srcSet={`${notFound} 1x, ${notFound2x} 2x`}
     src={notFound}
     alt={i18n.translate('imageEmbeddable.imageViewer.notFoundImageAltText', {

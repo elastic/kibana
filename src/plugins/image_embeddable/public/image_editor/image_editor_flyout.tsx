@@ -194,7 +194,10 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
                     }
                   />
                   <p style={{ textAlign: 'center' }}>
-                    <EuiLink onClick={() => setIsFilePickerOpen(true)}>
+                    <EuiLink
+                      onClick={() => setIsFilePickerOpen(true)}
+                      data-test-subj="imageEmbeddableEditorSelectFiles"
+                    >
                       <FormattedMessage
                         id="imageEmbeddable.imageEditor.selectImagePromptText"
                         defaultMessage="Or select from previously uploaded images"
@@ -270,6 +273,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
               error={srcUrlError}
             >
               <EuiTextArea
+                data-test-subj={'imageEmbeddableEditorUrlInput'}
                 fullWidth
                 compressed={true}
                 placeholder={i18n.translate('imageEmbeddable.imageEditor.imageURLPlaceholderText', {
@@ -393,6 +397,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
           fullWidth
         >
           <EuiTextArea
+            data-test-subj={'imageEmbeddableEditorAltInput'}
             fullWidth
             compressed={true}
             value={altText}
@@ -414,7 +419,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onSave} fill disabled={!isDraftImageConfigValid}>
+            <EuiButton onClick={onSave} fill isDisabled={!isDraftImageConfigValid}>
               <FormattedMessage
                 id="imageEmbeddable.imageEditor.imageBackgroundSaveButtonText"
                 defaultMessage="Save"
