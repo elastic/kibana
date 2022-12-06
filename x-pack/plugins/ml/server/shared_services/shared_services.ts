@@ -210,8 +210,10 @@ function getRequestItemsProvider(
   getDataViews: () => DataViewsPluginStart
 ) {
   return (request: KibanaRequest) => {
-    const getHasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities);
-    let hasMlCapabilities: HasMlCapabilities;
+    let hasMlCapabilities: HasMlCapabilities = hasMlCapabilitiesProvider(
+      resolveMlCapabilities,
+      request
+    );
     let scopedClient: IScopedClusterClient;
     let mlClient: MlClient;
     // While https://github.com/elastic/kibana/issues/64588 exists we
@@ -257,7 +259,6 @@ function getRequestItemsProvider(
 
     let mlSavedObjectService;
     if (request instanceof CoreKibanaRequest) {
-      hasMlCapabilities = getHasMlCapabilities(request);
       scopedClient = clusterClient.asScoped(request);
       mlSavedObjectService = getSobSavedObjectService(scopedClient);
       mlClient = getMlClient(scopedClient, mlSavedObjectService);

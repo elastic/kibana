@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
-import { memoize } from 'lodash';
+// import { memoize } from 'lodash';
 import type { MlClient } from '../ml_client';
 import { mlLog } from '../log';
 import {
@@ -61,29 +61,31 @@ function disableAdminPrivileges(capabilities: MlCapabilities) {
 
 export type HasMlCapabilities = (capabilities: MlCapabilitiesKey[]) => Promise<void>;
 
-export function hasMlCapabilitiesProvider(resolveMlCapabilities: ResolveMlCapabilities) {
-  const resolveMlCapabilitiesMemo = memoize(
-    async (request: KibanaRequest) => resolveMlCapabilities(request),
-    (request: KibanaRequest) => request.id
-  );
+export function hasMlCapabilitiesProvider(
+  resolveMlCapabilities: ResolveMlCapabilities,
+  request: KibanaRequest
+) {
+  let mlCapabilitiesResolverPromise: ReturnType<ResolveMlCapabilities> | null = null;
+  let mlCapabilities: MlCapabilities | null = null;
 
-  return (request: KibanaRequest): HasMlCapabilities => {
-    let mlCapabilities: MlCapabilities | null = null;
-    return async (capabilities: MlCapabilitiesKey[]) => {
-      try {
-        mlCapabilities = await resolveMlCapabilitiesMemo(request);
-      } catch (e) {
-        mlLog.error(e);
-        throw new UnknownMLCapabilitiesError(`Unable to perform ML capabilities check ${e}`);
+  return async (capabilities: MlCapabilitiesKey[]) => {
+    try {
+      if (mlCapabilitiesResolverPromise === null) {
+        mlCapabilitiesResolverPromise = resolveMlCapabilities(request);
       }
 
-      if (mlCapabilities === null) {
-        throw new MLPrivilegesUninitialized('ML capabilities have not been initialized');
-      }
+      mlCapabilities = await mlCapabilitiesResolverPromise;
+    } catch (e) {
+      mlLog.error(e);
+      throw new UnknownMLCapabilitiesError(`Unable to perform ML capabilities check ${e}`);
+    }
 
-      if (capabilities.every((c) => mlCapabilities![c] === true) === false) {
-        throw new InsufficientMLCapabilities('Insufficient privileges to access feature');
-      }
-    };
+    if (mlCapabilities === null) {
+      throw new MLPrivilegesUninitialized('ML capabilities have not been initialized');
+    }
+
+    if (capabilities.every((c) => mlCapabilities![c] === true) === false) {
+      throw new InsufficientMLCapabilities('Insufficient privileges to access feature');
+    }
   };
 }
