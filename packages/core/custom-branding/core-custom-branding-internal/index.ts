@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { CustomBrandingService } from './custom_branding_service';
+export type { CustomBranding } from './custom_branding_service';
