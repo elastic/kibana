@@ -736,6 +736,9 @@ packages/core/chrome/core-chrome-browser @elastic/kibana-core
 packages/core/chrome/core-chrome-browser-internal @elastic/kibana-core
 packages/core/chrome/core-chrome-browser-mocks @elastic/kibana-core
 packages/core/config/core-config-server-internal @elastic/kibana-core
+packages/core/custom-branding/core-custom-branding @elastic/kibana-global-experience
+packages/core/custom-branding/core-custom-branding-internal @elastic/kibana-global-experience
+packages/core/custom-branding/core-custom-branding-mocks @elastic/kibana-global-experience
 packages/core/deprecations/core-deprecations-browser @elastic/kibana-core
 packages/core/deprecations/core-deprecations-browser-internal @elastic/kibana-core
 packages/core/deprecations/core-deprecations-browser-mocks @elastic/kibana-core
