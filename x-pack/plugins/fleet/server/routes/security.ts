@@ -188,35 +188,36 @@ export function validateSecurityRbac(
     all?: FleetAuthzRequirements;
   }
 ): boolean {
-  const getBoolListFromPaths = (reqAuthz: FleetAuthzRequirements): boolean[] =>
-    buildPathsFromRequiredAuthz(reqAuthz).reduce<boolean[]>((acc, path) => {
-      // add the bool value of the given path in FleetAuthz in the list
-      acc.push(result(fleetAuthz, path));
-      return acc;
-    }, []);
-
-  const invalidAny =
-    !requiredAuthz.all &&
-    requiredAuthz.any &&
-    !getBoolListFromPaths(requiredAuthz.any).some((v) => v);
-  const invalidAll =
-    !requiredAuthz.any &&
-    requiredAuthz.all &&
-    !getBoolListFromPaths(requiredAuthz.all).every((v) => v);
-
-  // integration privileges should be all true or any of the endpoint privileges should be true
-  // e.g. epm/BULK_INSTALL_PATTERN
-  const invalidAnyAndAll =
-    requiredAuthz.any &&
-    !(
-      getBoolListFromPaths(requiredAuthz.any).some((v) => v) ||
-      (requiredAuthz.all && getBoolListFromPaths(requiredAuthz.all).every((v) => v))
-    );
-
-  if (invalidAny || invalidAll || invalidAnyAndAll) {
-    return false;
-  }
   return true;
+  // const getBoolListFromPaths = (reqAuthz: FleetAuthzRequirements): boolean[] =>
+  //   buildPathsFromRequiredAuthz(reqAuthz).reduce<boolean[]>((acc, path) => {
+  //     // add the bool value of the given path in FleetAuthz in the list
+  //     acc.push(result(fleetAuthz, path));
+  //     return acc;
+  //   }, []);
+
+  // const invalidAny =
+  //   !requiredAuthz.all &&
+  //   requiredAuthz.any &&
+  //   !getBoolListFromPaths(requiredAuthz.any).some((v) => v);
+  // const invalidAll =
+  //   !requiredAuthz.any &&
+  //   requiredAuthz.all &&
+  //   !getBoolListFromPaths(requiredAuthz.all).every((v) => v);
+
+  // // integration privileges should be all true or any of the endpoint privileges should be true
+  // // e.g. epm/BULK_INSTALL_PATTERN
+  // const invalidAnyAndAll =
+  //   requiredAuthz.any &&
+  //   !(
+  //     getBoolListFromPaths(requiredAuthz.any).some((v) => v) ||
+  //     (requiredAuthz.all && getBoolListFromPaths(requiredAuthz.all).every((v) => v))
+  //   );
+
+  // if (invalidAny || invalidAll || invalidAnyAndAll) {
+  //   return false;
+  // }
+  // return true;
 }
 
 export function doesNotHaveRequiredFleetAuthz(
