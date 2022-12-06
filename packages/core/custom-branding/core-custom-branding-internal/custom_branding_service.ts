@@ -52,7 +52,7 @@ export class CustomBrandingService {
       setCustomBranding: () => {
         return customBranding$.set();
       },
-      start: () => {}
+      start: () => {},
     };
   }
 }
