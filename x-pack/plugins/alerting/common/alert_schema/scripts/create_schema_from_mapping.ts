@@ -14,8 +14,8 @@ import { ecsFieldMap } from '../field_maps/ecs_field_map';
 import { FieldMap } from '../field_maps/types';
 
 const PLUGIN_DIR = path.resolve(path.join(__dirname, '..'));
-const ALERT_SCHEMA_FILE = 'field_maps/generated/schemas/alert_schema.ts';
-const ECS_SCHEMA_FILE = 'field_maps/generated/schemas/ecs_schema.ts';
+const ALERT_SCHEMA_FILE = 'schemas/alert_schema.ts';
+const ECS_SCHEMA_FILE = 'schemas/ecs_schema.ts';
 
 const createSchema = (outputFile: string, fieldMap: FieldMap, schemaPrefix: string) => {
   const lineWriters = {
@@ -314,7 +314,5 @@ try {
   // eslint-disable-next-line no-console
   console.log(`Finished creating schemas!`);
 } catch (error) {
-  // eslint-disable-next-line no-console
-  console.log(`Error encountered creating schemas ${error.message}`);
-  throw error;
+  logError(`Error encountered creating schemas ${error.message}`);
 }

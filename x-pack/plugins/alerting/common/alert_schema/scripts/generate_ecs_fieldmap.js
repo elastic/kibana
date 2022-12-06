@@ -21,7 +21,6 @@ const ecsYmlUrlPrefix = `https://raw.githubusercontent.com/elastic/ecs/v8.5.2/ge
 const ecsYmlFilename = `ecs_flat.yml`;
 
 const outputDir = path.join(__dirname, '../../alert_schema/field_maps');
-
 const outputFieldMapFilename = path.join(outputDir, 'ecs_field_map.ts');
 
 async function generate() {
