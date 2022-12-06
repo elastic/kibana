@@ -17,6 +17,7 @@ import { REQUEST_DEBOUNCE_MS } from './consts';
 import { act } from 'react-dom/test-utils';
 import * as buildBucketInterval from './build_bucket_interval';
 import * as useTimeRange from './use_time_range';
+import { RequestStatus } from '@kbn/inspector-plugin/public';
 
 const mockBucketInterval = { description: '1 minute', scale: undefined, scaled: false };
 jest.spyOn(buildBucketInterval, 'buildBucketInterval').mockReturnValue(mockBucketInterval);
@@ -24,6 +25,7 @@ jest.spyOn(useTimeRange, 'useTimeRange');
 
 const getMockLensAttributes = () =>
   getLensAttributes({
+    title: 'test',
     filters: [],
     query: {
       language: 'kuery',
@@ -180,6 +182,47 @@ describe('Histogram', () => {
     expect(useTimeRange.useTimeRange).toHaveBeenLastCalledWith(
       expect.objectContaining({ bucketInterval: mockBucketInterval })
     );
+  });
+
+  it('should execute onLoad correctly when the request has a failure status', async () => {
+    const { component, props } = mountComponent();
+    const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
+    const onLoad = component.find(embeddable).props().onLoad;
+    const adapters = createDefaultInspectorAdapters();
+    jest
+      .spyOn(adapters.requests, 'getRequests')
+      .mockReturnValue([{ status: RequestStatus.ERROR } as any]);
+    onLoad(false, adapters);
+    expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
+      UnifiedHistogramFetchStatus.error,
+      undefined
+    );
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ complete: false, adapters });
+  });
+
+  it('should execute onLoad correctly when the response has shard failures', async () => {
+    const { component, props } = mountComponent();
+    const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
+    const onLoad = component.find(embeddable).props().onLoad;
+    const adapters = createDefaultInspectorAdapters();
+    const rawResponse = {
+      _shards: {
+        total: 1,
+        successful: 0,
+        skipped: 0,
+        failed: 1,
+        failures: [],
+      },
+    };
+    jest
+      .spyOn(adapters.requests, 'getRequests')
+      .mockReturnValue([{ response: { json: { rawResponse } } } as any]);
+    onLoad(false, adapters);
+    expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
+      UnifiedHistogramFetchStatus.error,
+      undefined
+    );
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ complete: false, adapters });
   });
 
   it('should not recreate onLoad in debounced lens props when hits.total changes', async () => {

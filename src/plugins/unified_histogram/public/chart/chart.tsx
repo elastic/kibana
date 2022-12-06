@@ -165,6 +165,7 @@ export function Chart({
 
   const {
     resultCountCss,
+    resultCountInnerCss,
     resultCountTitleCss,
     resultCountToggleCss,
     histogramCss,
@@ -176,6 +177,7 @@ export function Chart({
   const lensAttributes = useMemo(
     () =>
       getLensAttributes({
+        title: chart?.title,
         filters,
         query,
         dataView,
@@ -183,7 +185,15 @@ export function Chart({
         breakdownField: breakdown?.field,
         suggestion: currentSuggestion,
       }),
-    [breakdown?.field, chart?.timeInterval, dataView, filters, query, currentSuggestion]
+    [
+      chart?.title,
+      chart?.timeInterval,
+      filters,
+      query,
+      dataView,
+      breakdown?.field,
+      currentSuggestion,
+    ]
   );
 
   useEffect(() => {
@@ -242,7 +252,12 @@ export function Chart({
       responsive={false}
     >
       <EuiFlexItem grow={false} css={resultCountCss}>
-        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          gutterSize="none"
+          responsive={false}
+          css={resultCountInnerCss}
+        >
           <EuiFlexItem
             grow={false}
             className="eui-textTruncate eui-textNoWrap"

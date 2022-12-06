@@ -72,6 +72,9 @@ export const BreakdownFieldSelector = ({
         placeholder={i18n.translate('unifiedHistogram.breakdownFieldSelectorPlaceholder', {
           defaultMessage: 'Select field',
         })}
+        aria-label={i18n.translate('unifiedHistogram.breakdownFieldSelectorAriaLabel', {
+          defaultMessage: 'Break down by',
+        })}
         singleSelection={{ asPlainText: true }}
         options={fieldOptions}
         selectedOptions={selectedFields}

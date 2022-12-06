@@ -17,6 +17,7 @@ import type { TimeRange } from '@kbn/es-query';
 import useDebounce from 'react-use/lib/useDebounce';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { RequestStatus } from '@kbn/inspector-plugin/public';
 import {
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
@@ -79,14 +80,26 @@ export function Histogram({
     (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
       const totalHits = adapters?.tables?.tables?.unifiedHistogram?.meta?.statistics?.totalCount;
 
+      const lensRequest = adapters?.requests?.getRequests()[0];
+      const requestFailed = lensRequest?.status === RequestStatus.ERROR;
+      const json = lensRequest?.response?.json as
+        | IKibanaSearchResponse<estypes.SearchResponse>
+        | undefined;
+      const response = json?.rawResponse;
+
+      // Lens will swallow shard failures and return `isLoading: false` because it displays
+      // its own errors, but this causes us to emit onTotalHitsChange(UnifiedHistogramFetchStatus.complete, 0).
+      // This is incorrect, so we check for request failures and shard failures here, and emit an error instead.
+      if (requestFailed || response?._shards.failed) {
+        onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
+        onChartLoad?.({ complete: false, adapters: adapters ?? {} });
+        return;
+      }
+
       onTotalHitsChange?.(
         isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
         totalHits ?? previousHits.current
       );
-
-      const lensRequest = adapters?.requests?.getRequests()[0];
-      const json = lensRequest?.response?.json as IKibanaSearchResponse<estypes.SearchResponse>;
-      const response = json?.rawResponse;
 
       if (response) {
         const newBucketInterval = buildBucketInterval({

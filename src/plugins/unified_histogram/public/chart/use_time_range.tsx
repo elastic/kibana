@@ -59,7 +59,7 @@ export const useTimeRange = ({
         }${
           bucketInterval?.description ??
           i18n.translate('unifiedHistogram.histogramTimeRangeIntervalLoading', {
-            defaultMessage: 'loading...',
+            defaultMessage: 'Loading',
           })
         }`,
       },

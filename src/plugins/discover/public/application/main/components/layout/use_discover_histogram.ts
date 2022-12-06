@@ -222,6 +222,13 @@ export const useDiscoverHistogram = ({
     [chartHidden, isTimeBased, state.interval]
   );
 
+  // Clear the Lens request adapter when the chart is hidden
+  useEffect(() => {
+    if (chartHidden || !chart) {
+      inspectorAdapters.lensRequests = undefined;
+    }
+  }, [chart, chartHidden, inspectorAdapters]);
+
   // state.chartHidden is updated before searchSessionId, which can trigger duplicate
   // requests, so instead of using state.chartHidden directly, we update chartHidden
   // when searchSessionId changes

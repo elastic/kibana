@@ -18,7 +18,7 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../hooks/use_saved_search';
-import type { GetStateReturn } from '../../services/discover_state';
+import type { AppState, GetStateReturn } from '../../services/discover_state';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
@@ -38,6 +38,7 @@ import { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram-plugin/publi
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 
 const mockData = dataPluginMock.createStartContract();
 
@@ -88,7 +89,9 @@ describe('useDiscoverHistogram', () => {
     isTimeBased = true,
     canVisualize = true,
     storage = new LocalStorageMock({}) as unknown as Storage,
+    state = { interval: 'auto', hideChart: false, breakdownField: 'extension' },
     stateContainer = {},
+    searchSessionManager,
     searchSessionId = '123',
     inspectorAdapters = { requests: new RequestAdapter() },
     totalHits$ = new BehaviorSubject({
@@ -105,7 +108,9 @@ describe('useDiscoverHistogram', () => {
     isTimeBased?: boolean;
     canVisualize?: boolean;
     storage?: Storage;
+    state?: AppState;
     stateContainer?: unknown;
+    searchSessionManager?: DiscoverSearchSessionManager;
     searchSessionId?: string | null;
     inspectorAdapters?: InspectorAdapters;
     totalHits$?: DataTotalHits$;
@@ -131,55 +136,70 @@ describe('useDiscoverHistogram', () => {
       availableFields$,
     };
 
-    const session = getSessionServiceMock();
+    if (!searchSessionManager) {
+      const session = getSessionServiceMock();
+      session.getSession$.mockReturnValue(new BehaviorSubject(searchSessionId ?? undefined));
+      searchSessionManager = createSearchSessionMock(session).searchSessionManager;
+    }
 
-    session.getSession$.mockReturnValue(new BehaviorSubject(searchSessionId ?? undefined));
+    const initialProps = {
+      stateContainer: stateContainer as GetStateReturn,
+      state,
+      savedSearchData$,
+      dataView: dataViewWithTimefieldMock,
+      savedSearch: savedSearchMock,
+      isTimeBased,
+      isPlainRecord,
+      inspectorAdapters,
+      searchSessionManager: searchSessionManager!,
+    };
 
-    const hook = renderHook(() => {
-      return useDiscoverHistogram({
-        stateContainer: stateContainer as GetStateReturn,
-        state: { interval: 'auto', hideChart: false, breakdownField: 'extension' },
-        savedSearchData$,
-        dataView: dataViewWithTimefieldMock,
-        savedSearch: savedSearchMock,
-        isTimeBased,
-        isPlainRecord,
-        inspectorAdapters,
-        searchSessionManager: createSearchSessionMock(session).searchSessionManager,
-      });
-    });
+    const hook = renderHook(
+      (props: Parameters<typeof useDiscoverHistogram>[0]) => useDiscoverHistogram(props),
+      { initialProps }
+    );
 
     await act(() => setTimeout(0));
 
-    return hook;
+    return { hook, initialProps };
   };
 
   it('should return undefined if there is no search session', async () => {
-    const { result } = await renderUseDiscoverHistogram({ searchSessionId: null });
+    const {
+      hook: { result },
+    } = await renderUseDiscoverHistogram({ searchSessionId: null });
     expect(result.current).toBeUndefined();
   });
 
   describe('contexts', () => {
     it('should output the correct hits context', async () => {
-      const { result } = await renderUseDiscoverHistogram();
+      const {
+        hook: { result },
+      } = await renderUseDiscoverHistogram();
       expect(result.current?.hits?.status).toBe(UnifiedHistogramFetchStatus.complete);
       expect(result.current?.hits?.total).toEqual(esHits.length);
     });
 
     it('should output the correct chart context', async () => {
-      const { result } = await renderUseDiscoverHistogram();
+      const {
+        hook: { result },
+      } = await renderUseDiscoverHistogram();
       expect(result.current?.chart?.hidden).toBe(false);
       expect(result.current?.chart?.timeInterval).toBe('auto');
     });
 
     it('should output the correct breakdown context', async () => {
-      const { result } = await renderUseDiscoverHistogram();
+      const {
+        hook: { result },
+      } = await renderUseDiscoverHistogram();
       expect(result.current?.breakdown?.field?.name).toBe('extension');
     });
 
     it('should output the correct request context', async () => {
       const requestAdapter = new RequestAdapter();
-      const { result } = await renderUseDiscoverHistogram({
+      const {
+        hook: { result },
+      } = await renderUseDiscoverHistogram({
         searchSessionId: '321',
         inspectorAdapters: { requests: requestAdapter },
       });
@@ -188,26 +208,47 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should output undefined for chart and breakdown if isTimeBased is false', async () => {
-      const { result } = await renderUseDiscoverHistogram({ isTimeBased: false });
+      const {
+        hook: { result },
+      } = await renderUseDiscoverHistogram({ isTimeBased: false });
       expect(result.current?.hits).not.toBeUndefined();
       expect(result.current?.chart).toBeUndefined();
       expect(result.current?.breakdown).toBeUndefined();
+    });
+
+    it('should clear lensRequests when chart is undefined', async () => {
+      const inspectorAdapters = {
+        requests: new RequestAdapter(),
+        lensRequests: new RequestAdapter(),
+      };
+      const { hook, initialProps } = await renderUseDiscoverHistogram({
+        inspectorAdapters,
+      });
+      expect(inspectorAdapters.lensRequests).toBeDefined();
+      hook.rerender({ ...initialProps, isPlainRecord: true });
+      expect(inspectorAdapters.lensRequests).toBeUndefined();
     });
   });
 
   describe('onEditVisualization', () => {
     it('returns a callback for onEditVisualization when the data view can be visualized', async () => {
-      const { result } = await renderUseDiscoverHistogram();
+      const {
+        hook: { result },
+      } = await renderUseDiscoverHistogram();
       expect(result.current?.onEditVisualization).toBeDefined();
     });
 
     it('returns undefined for onEditVisualization when the data view cannot be visualized', async () => {
-      const { result } = await renderUseDiscoverHistogram({ canVisualize: false });
+      const {
+        hook: { result },
+      } = await renderUseDiscoverHistogram({ canVisualize: false });
       expect(result.current?.onEditVisualization).toBeUndefined();
     });
 
     it('should call lens.navigateToPrefilledEditor when onEditVisualization is called', async () => {
-      const { result } = await renderUseDiscoverHistogram();
+      const {
+        hook: { result },
+      } = await renderUseDiscoverHistogram();
       const attributes = { title: 'test' } as TypedLensByValueInput['attributes'];
       result.current?.onEditVisualization!(attributes);
       expect(mockLens.navigateToPrefilledEditor).toHaveBeenCalledWith({
@@ -222,7 +263,9 @@ describe('useDiscoverHistogram', () => {
     it('should try to get the topPanelHeight from storage', async () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       storage.get = jest.fn(() => 100);
-      const { result } = await renderUseDiscoverHistogram({ storage });
+      const {
+        hook: { result },
+      } = await renderUseDiscoverHistogram({ storage });
       expect(storage.get).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY);
       expect(result.current?.topPanelHeight).toBe(100);
     });
@@ -231,7 +274,9 @@ describe('useDiscoverHistogram', () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       storage.get = jest.fn(() => 100);
       storage.set = jest.fn();
-      const { result } = await renderUseDiscoverHistogram({ storage });
+      const {
+        hook: { result },
+      } = await renderUseDiscoverHistogram({ storage });
       expect(result.current?.topPanelHeight).toBe(100);
       act(() => {
         result.current?.onTopPanelHeightChange(200);
@@ -245,27 +290,37 @@ describe('useDiscoverHistogram', () => {
     it('should update chartHidden when onChartHiddenChange is called', async () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       storage.set = jest.fn();
+      const state = { interval: 'auto', hideChart: false, breakdownField: 'extension' };
       const stateContainer = {
-        setAppState: jest.fn(),
+        setAppState: jest.fn((newState) => {
+          Object.assign(state, newState);
+        }),
       };
+      const session = getSessionServiceMock();
+      const session$ = new BehaviorSubject('123');
+      session.getSession$.mockReturnValue(session$);
       const inspectorAdapters = {
         requests: new RequestAdapter(),
         lensRequests: new RequestAdapter(),
       };
-      const { result } = await renderUseDiscoverHistogram({
+      const { hook } = await renderUseDiscoverHistogram({
         storage,
+        state,
         stateContainer,
+        searchSessionManager: createSearchSessionMock(session).searchSessionManager,
         inspectorAdapters,
       });
       act(() => {
-        result.current?.onChartHiddenChange(false);
+        hook.result.current?.onChartHiddenChange(false);
       });
       expect(inspectorAdapters.lensRequests).toBeDefined();
       expect(storage.set).toHaveBeenCalledWith(CHART_HIDDEN_KEY, false);
       expect(stateContainer.setAppState).toHaveBeenCalledWith({ hideChart: false });
       act(() => {
-        result.current?.onChartHiddenChange(true);
+        hook.result.current?.onChartHiddenChange(true);
+        session$.next('321');
       });
+      hook.rerender();
       expect(inspectorAdapters.lensRequests).toBeUndefined();
       expect(storage.set).toHaveBeenCalledWith(CHART_HIDDEN_KEY, true);
       expect(stateContainer.setAppState).toHaveBeenCalledWith({ hideChart: true });
@@ -277,7 +332,9 @@ describe('useDiscoverHistogram', () => {
         requests: new RequestAdapter(),
         lensRequests: undefined as RequestAdapter | undefined,
       };
-      const { result } = await renderUseDiscoverHistogram({ inspectorAdapters });
+      const {
+        hook: { result },
+      } = await renderUseDiscoverHistogram({ inspectorAdapters });
       expect(inspectorAdapters.lensRequests).toBeUndefined();
       act(() => {
         result.current?.onChartLoad({ complete: true, adapters: { requests: lensRequests } });
@@ -295,7 +352,9 @@ describe('useDiscoverHistogram', () => {
         requests: new RequestAdapter(),
         lensRequests: new RequestAdapter(),
       };
-      const { result } = await renderUseDiscoverHistogram({
+      const {
+        hook: { result },
+      } = await renderUseDiscoverHistogram({
         storage,
         stateContainer,
         inspectorAdapters,
@@ -311,7 +370,9 @@ describe('useDiscoverHistogram', () => {
       const stateContainer = {
         setAppState: jest.fn(),
       };
-      const { result } = await renderUseDiscoverHistogram({
+      const {
+        hook: { result },
+      } = await renderUseDiscoverHistogram({
         stateContainer,
       });
       act(() => {
@@ -324,7 +385,9 @@ describe('useDiscoverHistogram', () => {
       const stateContainer = {
         setAppState: jest.fn(),
       };
-      const { result } = await renderUseDiscoverHistogram({
+      const {
+        hook: { result },
+      } = await renderUseDiscoverHistogram({
         stateContainer,
       });
       act(() => {
@@ -346,7 +409,7 @@ describe('useDiscoverHistogram', () => {
         recordRawType: RecordRawType.DOCUMENT,
         foundDocuments: true,
       }) as DataMain$;
-      const hook = await renderUseDiscoverHistogram({ totalHits$, main$ });
+      const { hook } = await renderUseDiscoverHistogram({ totalHits$, main$ });
       act(() => {
         hook.result.current?.onTotalHitsChange(UnifiedHistogramFetchStatus.complete, 100);
       });
@@ -366,7 +429,7 @@ describe('useDiscoverHistogram', () => {
         fetchStatus: FetchStatus.UNINITIALIZED,
         result: undefined,
       }) as DataTotalHits$;
-      const hook = await renderUseDiscoverHistogram({ totalHits$ });
+      const { hook } = await renderUseDiscoverHistogram({ totalHits$ });
       const error = new Error('test');
       act(() => {
         hook.result.current?.onTotalHitsChange(UnifiedHistogramFetchStatus.error, error);
@@ -388,7 +451,7 @@ describe('useDiscoverHistogram', () => {
         fetchStatus: FetchStatus.PARTIAL,
         result: undefined,
       }) as DataTotalHits$;
-      const hook = await renderUseDiscoverHistogram({ totalHits$ });
+      const { hook } = await renderUseDiscoverHistogram({ totalHits$ });
       act(() => {
         hook.result.current?.onTotalHitsChange(UnifiedHistogramFetchStatus.loading, undefined);
       });

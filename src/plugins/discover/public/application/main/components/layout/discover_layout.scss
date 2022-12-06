@@ -31,6 +31,10 @@ discover-app {
   overflow: hidden;
 }
 
+.dscPageBody__sidebar {
+  position: relative;
+}
+
 .dscPageContent__wrapper {
   padding: $euiSizeS $euiSizeS $euiSizeS 0;
   overflow: hidden; // Ensures horizontal scroll of table
@@ -44,10 +48,6 @@ discover-app {
   position: relative;
   overflow: hidden;
   border: $euiBorderThin;
-}
-
-.dscPageContent,
-.dscPageContent__inner {
   height: 100%;
 }
 

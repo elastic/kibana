@@ -72,11 +72,12 @@ import {
   cloneLayer,
 } from './utils';
 import { isDraggedDataViewField } from '../../utils';
-import { normalizeOperationDataType } from './pure_utils';
+import { hasField, normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
+  getCurrentFieldsForOperation,
   getErrorMessages,
   insertNewColumn,
   operationDefinitionMap,
@@ -970,18 +971,31 @@ export function getFormBasedDatasource({
       return Object.values(state.layers).map(({ indexPatternId }) => indexPatternId);
     },
 
-    getDatasourceInfo: (state, references, indexPatterns) => {
+    getDatasourceInfo: async (state, references, dataViewsService) => {
       const layers = references ? injectReferences(state, references).layers : state.layers;
+      const indexPatterns: DataView[] = [];
+      for (const { indexPatternId } of Object.values(layers)) {
+        const dataView = await dataViewsService?.get(indexPatternId);
+        if (dataView) {
+          indexPatterns.push(dataView);
+        }
+      }
       return Object.entries(layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
         const dataView = indexPatterns?.find(
           (indexPattern) => indexPattern.id === layer.indexPatternId
         );
 
         const columns = Object.entries(layer.columns).map(([colId, col]) => {
+          const fields = hasField(col) ? getCurrentFieldsForOperation(col) : undefined;
           return {
             id: colId,
             role: col.isBucketed ? ('split' as const) : ('metric' as const),
-            operation: columnToOperation(col, undefined, dataView),
+            operation: {
+              ...columnToOperation(col, undefined, dataView),
+              type: col.operationType,
+              fields,
+              filter: col.filter,
+            },
           };
         });
 

@@ -20,6 +20,7 @@ import type {
 import { fieldSupportsBreakdown } from './field_supports_breakdown';
 
 export const getLensAttributes = ({
+  title,
   filters,
   query,
   dataView,
@@ -27,6 +28,7 @@ export const getLensAttributes = ({
   breakdownField,
   suggestion,
 }: {
+  title?: string;
   filters: Filter[];
   query: Query | AggregateQuery;
   dataView: DataView;
@@ -169,7 +171,11 @@ export const getLensAttributes = ({
       };
 
   return {
-    title: 'Edit visualization',
+    title:
+      title ??
+      i18n.translate('unifiedHistogram.lensTitle', {
+        defaultMessage: 'Edit visualization',
+      }),
     references: [
       {
         id: dataView.id ?? '',

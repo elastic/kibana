@@ -195,7 +195,9 @@ export function useDiscoverState({
   useEffect(() => {
     const unsubscribe = appStateContainer.subscribe(async (nextState) => {
       const { hideChart, interval, breakdownField, sort, index } = state;
-      const chartDisplayChanged = nextState.hideChart !== hideChart;
+      // Cast to boolean to avoid false positives when comparing
+      // undefined and false, which would trigger a refetch
+      const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);
       const chartIntervalChanged = nextState.interval !== interval;
       const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
       const docTableSortChanged = !isEqual(nextState.sort, sort);

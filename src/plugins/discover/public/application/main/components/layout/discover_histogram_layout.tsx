@@ -8,6 +8,7 @@
 
 import React, { RefObject } from 'react';
 import { UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
+import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
@@ -59,15 +60,19 @@ export const DiscoverHistogramLayout = ({
     return null;
   }
 
+  const histogramLayoutCss = css`
+    height: 100%;
+  `;
+
   return (
     <UnifiedHistogramLayout
       resizeRef={resizeRef}
-      className="dscPageContent__inner"
       services={services}
       dataView={dataView}
       appendHitsCounter={
         savedSearch?.id ? <ResetSearchButton resetSavedSearch={resetSavedSearch} /> : undefined
       }
+      css={histogramLayoutCss}
       {...histogramProps}
     >
       <DiscoverMainContent

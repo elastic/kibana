@@ -69,7 +69,7 @@ export function ApmServiceContextProvider({
     end,
   });
 
-  const transactionType = getOrRedirectToTransactionType({
+  const currentTransactionType = getOrRedirectToTransactionType({
     transactionType: query.transactionType,
     transactionTypes,
     agentName,
@@ -85,7 +85,7 @@ export function ApmServiceContextProvider({
       value={{
         serviceName,
         agentName,
-        transactionType,
+        transactionType: currentTransactionType,
         transactionTypes,
         runtimeName,
         fallbackToTransactions,
@@ -96,24 +96,44 @@ export function ApmServiceContextProvider({
   );
 }
 
-export function getOrRedirectToTransactionType({
+const isTypeExistsInTransactionTypesList = ({
+  transactionType,
+  transactionTypes,
+}: {
+  transactionType?: string;
+  transactionTypes: string[];
+}): boolean => !!transactionType && transactionTypes.includes(transactionType);
+
+const isNoAgentAndNoTransactionTypes = ({
+  transactionTypes,
+  agentName,
+}: {
+  transactionTypes: string[];
+  agentName?: string;
+}): boolean => !agentName || transactionTypes.length === 0;
+
+export function getTransactionType({
   transactionType,
   transactionTypes,
   agentName,
-  history,
 }: {
   transactionType?: string;
   transactionTypes: string[];
   agentName?: string;
-  history: History;
-}) {
-  if (transactionType && transactionTypes.includes(transactionType)) {
-    return transactionType;
-  }
+}): string | undefined {
+  const isTransactionTypeExists = isTypeExistsInTransactionTypesList({
+    transactionType,
+    transactionTypes,
+  });
 
-  if (!agentName || transactionTypes.length === 0) {
-    return;
-  }
+  if (isTransactionTypeExists) return transactionType;
+
+  const isNoAgentAndNoTransactionTypesExists = isNoAgentAndNoTransactionTypes({
+    transactionTypes,
+    agentName,
+  });
+
+  if (isNoAgentAndNoTransactionTypesExists) return undefined;
 
   // The default transaction type is "page-load" for RUM agents and "request" for all others
   const defaultTransactionType = isRumAgentName(agentName)
@@ -127,7 +147,42 @@ export function getOrRedirectToTransactionType({
     ? defaultTransactionType
     : transactionTypes[0];
 
+  return currentTransactionType;
+}
+
+export function getOrRedirectToTransactionType({
+  transactionType,
+  transactionTypes,
+  agentName,
+  history,
+}: {
+  transactionType?: string;
+  transactionTypes: string[];
+  agentName?: string;
+  history: History;
+}) {
+  const isTransactionTypeExists = isTypeExistsInTransactionTypesList({
+    transactionType,
+    transactionTypes,
+  });
+
+  if (isTransactionTypeExists) return transactionType;
+
+  const isNoAgentAndNoTransactionTypesExists = isNoAgentAndNoTransactionTypes({
+    transactionTypes,
+    agentName,
+  });
+
+  if (isNoAgentAndNoTransactionTypesExists) return undefined;
+
+  const currentTransactionType = getTransactionType({
+    transactionTypes,
+    transactionType,
+    agentName,
+  });
+
   // Replace transactionType in the URL in case it is not one of the types returned by the API
-  replace(history, { query: { transactionType: currentTransactionType } });
+  replace(history, { query: { transactionType: currentTransactionType! } });
+
   return currentTransactionType;
 }

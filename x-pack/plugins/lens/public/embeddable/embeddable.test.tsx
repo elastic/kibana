@@ -29,7 +29,7 @@ import { LensAttributeService } from '../lens_attribute_service';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public/save_modal';
 import { act } from 'react-dom/test-utils';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
-import { Datasource, Visualization } from '../types';
+import { Visualization } from '../types';
 
 jest.mock('@kbn/inspector-plugin/public', () => ({
   isAvailable: false,
@@ -1518,130 +1518,5 @@ describe('embeddable', () => {
 
     expect(expressionRenderer).toHaveBeenCalledTimes(4);
     expect(expressionRenderer.mock.calls[1][0]!.padding).toBe(undefined);
-  });
-
-  it('should return chart info', async () => {
-    expressionRenderer = jest.fn((_) => null);
-
-    const visDocument: Document = {
-      state: {
-        visualization: {},
-        datasourceStates: {
-          form_based: {},
-        },
-        query: { query: '', language: 'lucene' },
-        filters: [],
-      },
-      references: [],
-      title: 'My title',
-      visualizationType: 'testVis',
-    };
-    const mockGetDatasourceInfo = jest.fn().mockReturnValue([
-      {
-        layerId: 'test',
-        columns: [
-          {
-            id: '1',
-            role: 'metric',
-          },
-        ],
-      },
-    ]);
-    const mockGetVisualizationInfo = jest.fn().mockReturnValue({
-      layers: [
-        {
-          layerId: 'test',
-          dimensions: [
-            {
-              id: '1',
-            },
-          ],
-        },
-      ],
-    });
-
-    const createEmbeddable = (noPadding?: boolean) => {
-      return new Embeddable(
-        {
-          timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
-          attributeService: attributeServiceMockFromSavedVis(visDocument),
-          data: dataMock,
-          expressionRenderer,
-          basePath,
-          dataViews: {} as DataViewsContract,
-          capabilities: {
-            canSaveDashboards: true,
-            canSaveVisualizations: true,
-            discover: {},
-            navLinks: {},
-          },
-          inspector: inspectorPluginMock.createStartContract(),
-          getTrigger,
-          theme: themeServiceMock.createStartContract(),
-          visualizationMap: {
-            [visDocument.visualizationType as string]: {
-              getDisplayOptions: () => ({
-                noPadding: false,
-              }),
-              getVisualizationInfo: mockGetVisualizationInfo,
-            } as unknown as Visualization,
-          },
-          datasourceMap: {
-            form_based: {
-              getDatasourceInfo: mockGetDatasourceInfo,
-            } as unknown as Datasource,
-          },
-          injectFilterReferences: jest.fn(mockInjectFilterReferences),
-          documentToExpression: () =>
-            Promise.resolve({
-              ast: {
-                type: 'expression',
-                chain: [
-                  { type: 'function', function: 'my', arguments: {} },
-                  { type: 'function', function: 'expression', arguments: {} },
-                ],
-              },
-              errors: undefined,
-            }),
-          uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
-        },
-        {
-          timeRange: {
-            from: 'now-15m',
-            to: 'now',
-          },
-          noPadding,
-        } as LensEmbeddableInput
-      );
-    };
-
-    const embeddable = createEmbeddable();
-
-    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
-
-    const chartInfo = embeddable.getChartInfo();
-
-    expect(mockGetVisualizationInfo).toHaveBeenCalledTimes(1);
-    expect(mockGetDatasourceInfo).toHaveBeenCalledTimes(1);
-    expect(chartInfo).toEqual({
-      filters: [],
-      layers: [
-        {
-          dataView: undefined,
-          dimensions: [
-            {
-              id: '1',
-              role: 'metric',
-            },
-          ],
-          layerId: 'test',
-        },
-      ],
-      query: {
-        language: 'lucene',
-        query: '',
-      },
-      visualizationType: 'testVis',
-    });
   });
 });

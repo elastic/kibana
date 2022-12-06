@@ -107,6 +107,7 @@ import type { SaveModalContainerProps } from './app_plugin/save_modal_container'
 import { setupExpressions } from './expressions';
 import { getSearchProvider } from './search_provider';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
+import { ChartInfoApi } from './chart_info_api';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -230,6 +231,7 @@ export interface LensPublicStart {
       context: VisualizeFieldContext | VisualizeEditorContext,
       dataViews: DataView
     ) => Suggestion[] | undefined;
+    chartInfo: ChartInfoApi;
   }>;
 }
 
@@ -563,19 +565,19 @@ export class LensPlugin {
       },
 
       stateHelperApi: async () => {
-        const { createFormulaPublicApi } = await import('./async_services');
-        const { suggestionsApi } = await import('./async_services');
+        const { createFormulaPublicApi, createChartInfoApi, suggestionsApi } = await import(
+          './async_services'
+        );
         if (!this.editorFrameService) {
           await this.initDependenciesForApi();
         }
-
         const [visualizationMap, datasourceMap] = await Promise.all([
           this.editorFrameService!.loadVisualizations(),
           this.editorFrameService!.loadDatasources(),
         ]);
-
         return {
           formula: createFormulaPublicApi(),
+          chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
           suggestionsApi: (
             context: VisualizeFieldContext | VisualizeEditorContext,
             dataView: DataView
