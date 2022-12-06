@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-export type {
-  UiSettingsType,
-  DeprecationSettings,
-  UiSettingsParams,
-  PublicUiSettingsParams,
-  UserProvidedValues,
-  UiSettingsScope,
-} from './src/ui_settings';
+import { UiSettingsClientCommon } from './ui_settings_client_common';
+import { UiSettingsServiceOptions } from '../types';
+
+export class UiSettingsClient extends UiSettingsClientCommon {
+  constructor(options: UiSettingsServiceOptions) {
+    super(options);
+  }
+}
