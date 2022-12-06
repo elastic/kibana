@@ -49,6 +49,15 @@ export interface FilterContentProps {
 }
 
 export function FilterContent({ filter, valueLabel, fieldLabel }: FilterContentProps) {
+  if (filter.meta.alias !== null) {
+    return (
+      <>
+        <Prefix prefix={filter.meta.negate} />
+        <FilterValue value={`${filter.meta.alias}`} />
+      </>
+    );
+  }
+
   switch (filter.meta.type) {
     case FILTERS.EXISTS:
       return (
