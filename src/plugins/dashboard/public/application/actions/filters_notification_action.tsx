@@ -15,6 +15,7 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 import { type AggregateQuery } from '@kbn/es-query';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { FiltersNotificationPopover } from './filters_notification_popover';
 import { dashboardFilterNotificationAction } from '../../dashboard_strings';
@@ -59,17 +60,19 @@ export class FiltersNotificationAction implements Action<FiltersNotificationActi
     });
 
     return (
-      <KibanaThemeProvider theme$={this.settingsService.theme.theme$}>
-        <KibanaReactContextProvider>
-          <FiltersNotificationPopover
-            editPanelAction={editPanelAction}
-            displayName={this.displayName}
-            context={context}
-            icon={this.getIconType({ embeddable })}
-            id={this.id}
-          />
-        </KibanaReactContextProvider>
-      </KibanaThemeProvider>
+      <I18nProvider>
+        <KibanaThemeProvider theme$={this.settingsService.theme.theme$}>
+          <KibanaReactContextProvider>
+            <FiltersNotificationPopover
+              editPanelAction={editPanelAction}
+              displayName={this.displayName}
+              context={context}
+              icon={this.getIconType({ embeddable })}
+              id={this.id}
+            />
+          </KibanaReactContextProvider>
+        </KibanaThemeProvider>
+      </I18nProvider>
     );
   };
 

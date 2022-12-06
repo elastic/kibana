@@ -12,7 +12,6 @@ import useMount from 'react-use/lib/useMount';
 import { EuiCodeBlock, EuiFlexGroup, EuiForm, EuiFormRow, EuiLoadingContent } from '@elastic/eui';
 import { FilterableEmbeddable, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
-import { I18nProvider } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import {
   type AggregateQuery,
@@ -90,9 +89,7 @@ export function FiltersNotificationPopoverContents({ context }: FiltersNotificat
           {filters && filters.length > 0 && (
             <EuiFormRow label={dashboardFilterNotificationAction.getFiltersTitle()}>
               <EuiFlexGroup wrap={true} gutterSize="xs">
-                <I18nProvider>
-                  <FilterItems filters={filters} indexPatterns={dataViews} readOnly={true} />
-                </I18nProvider>
+                <FilterItems filters={filters} indexPatterns={dataViews} readOnly={true} />
               </EuiFlexGroup>
             </EuiFormRow>
           )}
