@@ -188,8 +188,6 @@ export const calculateRouteAuthz = (
             response.scopeDataToPackages.push(packageName);
           }
         }
-
-        response.scopeDataToPackages = Object.keys(requiredAuthz.any.packagePrivileges ?? {});
       }
 
       return response;

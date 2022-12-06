@@ -87,6 +87,14 @@ describe('When using calculateRouteAuthz()', () => {
           },
         },
       },
+
+      someOtherPackage: {
+        actions: {
+          readSomeThing: {
+            executePackageAction: false,
+          },
+        },
+      },
     },
   });
 
@@ -387,6 +395,14 @@ describe('When using calculateRouteAuthz()', () => {
                   },
                 },
               },
+
+              someOtherPackage: {
+                actions: {
+                  readSomeThing: {
+                    executePackageAction: true,
+                  },
+                },
+              },
             },
           }),
           {
@@ -408,6 +424,13 @@ describe('When using calculateRouteAuthz()', () => {
                     },
                   },
                 },
+                someOtherPackage: {
+                  actions: {
+                    readSomeThing: {
+                      executePackageAction: true,
+                    },
+                  },
+                },
               },
             },
           }
@@ -415,7 +438,7 @@ describe('When using calculateRouteAuthz()', () => {
       ).toEqual({
         granted: true,
         grantedByFleetPrivileges: false,
-        scopeDataToPackages: ['endpoint'],
+        scopeDataToPackages: ['endpoint', 'someOtherPackage'],
       });
     });
 
@@ -454,6 +477,64 @@ describe('When using calculateRouteAuthz()', () => {
           }
         )
       ).toEqual({ granted: true, grantedByFleetPrivileges: true, scopeDataToPackages: undefined });
+    });
+  });
+
+  describe('and access is granted based on package privileges', () => {
+    it('should exclude package names for which there is no access allowed', () => {
+      expect(
+        calculateRouteAuthz(
+          getFleetAuthzMock({
+            ...fleetAuthz,
+            packagePrivileges: {
+              ...fleetAuthz.packagePrivileges,
+              endpoint: {
+                ...fleetAuthz.packagePrivileges.endpoint,
+                actions: {
+                  ...fleetAuthz.packagePrivileges.endpoint.actions,
+                  readPolicyManagement: {
+                    executePackageAction: true,
+                  },
+                },
+              },
+            },
+          }),
+          {
+            all: {
+              integrations: {
+                readPackageInfo: true,
+                removePackages: true,
+              },
+            },
+            any: {
+              packagePrivileges: {
+                endpoint: {
+                  actions: {
+                    readPolicyManagement: {
+                      executePackageAction: true,
+                    },
+                    readBlocklist: {
+                      executePackageAction: true,
+                    },
+                  },
+                },
+                // This package Authz is not allowed, so it should not be listed in `scopeDataToPackages`
+                someOtherPackage: {
+                  actions: {
+                    readSomeThing: {
+                      executePackageAction: true,
+                    },
+                  },
+                },
+              },
+            },
+          }
+        )
+      ).toEqual({
+        granted: true,
+        grantedByFleetPrivileges: false,
+        scopeDataToPackages: ['endpoint'],
+      });
     });
   });
 });
