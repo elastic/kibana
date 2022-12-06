@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiRange, EuiFormRow } from '@elastic/eui';
+import type { EuiRangeProps } from '@elastic/eui';
 
 import type { FieldHook } from '../../../../shared_imports';
 
@@ -14,17 +15,15 @@ interface AnomalyThresholdSliderProps {
   describedByIds: string[];
   field: FieldHook;
 }
-type Event = React.ChangeEvent<HTMLInputElement>;
-type EventArg = Event | React.MouseEvent<HTMLButtonElement>;
 
 export const AnomalyThresholdSlider = ({
   describedByIds = [],
   field,
 }: AnomalyThresholdSliderProps) => {
   const threshold = field.value as number;
-  const onThresholdChange = useCallback(
-    (event: EventArg) => {
-      const thresholdValue = Number((event as Event).target.value);
+  const onThresholdChange: EuiRangeProps['onChange'] = useCallback(
+    (event) => {
+      const thresholdValue = Number(event.currentTarget.value);
       field.setValue(thresholdValue);
     },
     [field]
