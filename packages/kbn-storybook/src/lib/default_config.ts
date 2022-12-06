@@ -23,7 +23,12 @@ const IGNORE_PATTERN =
   /[/\\]node_modules[/\\](?!@kbn[/\\][^/\\]+[/\\](?!node_modules)([^/\\]+))([^/\\]+[/\\][^/\\]+)/;
 
 export const defaultConfig: StorybookConfig = {
-  addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', '@storybook/addon-essentials'],
+  addons: [
+    '@kbn/storybook/preset',
+    '@storybook/addon-a11y',
+    '@storybook/addon-essentials',
+    'storybook-addon-manual-mocks',
+  ],
   stories: ['../**/*.stories.tsx', '../**/*.stories.mdx'],
   typescript: {
     reactDocgen: false,
