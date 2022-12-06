@@ -203,7 +203,7 @@
         "label": "CHANGE_POINT_DETECTION_ENABLED",
         "description": [],
         "signature": [
-          "false"
+          "true"
         ],
         "path": "x-pack/plugins/aiops/common/index.ts",
         "deprecated": false,

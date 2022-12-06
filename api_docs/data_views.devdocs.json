@@ -77,11 +77,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
+                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -264,10 +264,6 @@
                 "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
               },
               {
-                "plugin": "dataViewEditor",
-                "path": "src/plugins/data_view_editor/public/components/data_view_editor_flyout_content.tsx"
-              },
-              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -292,6 +288,14 @@
                 "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
               },
@@ -314,14 +318,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
                 "plugin": "lens",
@@ -537,6 +533,10 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/quick_create_job.ts"
               },
               {
@@ -648,6 +648,10 @@
                 "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
               },
               {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
+              },
+              {
                 "plugin": "stackAlerts",
                 "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
               },
@@ -690,10 +694,6 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
-              },
-              {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "transform",
@@ -8378,11 +8378,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
+                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -8565,10 +8565,6 @@
                 "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
               },
               {
-                "plugin": "dataViewEditor",
-                "path": "src/plugins/data_view_editor/public/components/data_view_editor_flyout_content.tsx"
-              },
-              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -8593,6 +8589,14 @@
                 "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
               },
@@ -8615,14 +8619,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
                 "plugin": "lens",
@@ -8838,6 +8834,10 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/quick_create_job.ts"
               },
               {
@@ -8949,6 +8949,10 @@
                 "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
               },
               {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
+              },
+              {
                 "plugin": "stackAlerts",
                 "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
               },
@@ -8991,10 +8995,6 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
-              },
-              {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "transform",
@@ -15760,11 +15760,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
+                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -15947,10 +15947,6 @@
                 "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
               },
               {
-                "plugin": "dataViewEditor",
-                "path": "src/plugins/data_view_editor/public/components/data_view_editor_flyout_content.tsx"
-              },
-              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -15975,6 +15971,14 @@
                 "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
               },
@@ -15997,14 +16001,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
                 "plugin": "lens",
@@ -16220,6 +16216,10 @@
               },
               {
                 "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
+              },
+              {
+                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/quick_create_job.ts"
               },
               {
@@ -16331,6 +16331,10 @@
                 "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
               },
               {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
+              },
+              {
                 "plugin": "stackAlerts",
                 "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
               },
@@ -16373,10 +16377,6 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
-              },
-              {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "transform",
