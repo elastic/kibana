@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import type { ConsoleTestSetup } from '../../mocks';
-import { getConsoleTestSetup } from '../../mocks';
-import type { ConsoleProps } from '../../types';
-import { INPUT_DEFAULT_PLACEHOLDER_TEXT } from '../console_state/state_update_handlers/handle_input_area_state';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import type { ConsoleTestSetup } from '../../../mocks';
+import { getConsoleTestSetup } from '../../../mocks';
+import type { ConsoleProps } from '../../../types';
+import { INPUT_DEFAULT_PLACEHOLDER_TEXT } from '../../console_state/state_update_handlers/handle_input_area_state';
 import { act, waitFor, createEvent, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { NO_HISTORY_EMPTY_MESSAGE } from '../components/command_input_history';
+import { UP_ARROW_ACCESS_HISTORY_HINT } from '../hooks/use_input_hints';
 
 describe('When entering data into the Console input', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
@@ -90,10 +92,10 @@ describe('When entering data into the Console input', () => {
     expect(renderResult.queryByTestId('test-inputPlaceholder')).toBeNull();
   });
 
-  it('should NOT display any hint text in footer if nothing is displayed', () => {
+  it('should display default hint when nothing is typed into the command input area', () => {
     render();
 
-    expect(getFooterText()?.trim()).toBe('');
+    expect(getFooterText()?.trim()).toBe(UP_ARROW_ACCESS_HISTORY_HINT);
   });
 
   it('should display hint when a known command is typed', () => {
@@ -154,16 +156,24 @@ describe('When entering data into the Console input', () => {
     expect(renderResult.getByTestId('test-userCommandText').textContent).toEqual('isolate');
   });
 
-  // FIXME:PT uncomment once task OLM task #4384 is implemented
-  it.skip('should display the input history popover when UP key is pressed', async () => {
+  it('should display the input history popover when UP key is pressed', async () => {
     render();
     await showInputHistoryPopover();
 
     expect(renderResult.getByTestId('test-inputHistorySelector')).not.toBeNull();
   });
 
-  // FIXME:PT uncomment once task OLM task #4384 is implemented
-  describe.skip('and when the command input history popover is opened', () => {
+  it('should hide the history popover if user clicks back on input area', async () => {
+    render();
+    await showInputHistoryPopover();
+    userEvent.click(renderResult.getByTestId('test-keyCapture-input'));
+
+    await waitFor(() => {
+      expect(renderResult.queryByTestId('test-inputHistorySelector')).toBeNull();
+    });
+  });
+
+  describe('and when the command input history popover is opened', () => {
     const renderWithInputHistory = async (inputText: string = '') => {
       render();
       enterCommand('help');
@@ -212,6 +222,45 @@ describe('When entering data into the Console input', () => {
 
       await waitFor(() => {
         expect(getLeftOfCursorText()).toEqual('cmd1 --help');
+      });
+    });
+
+    it('should show confirm dialog when Clear history button is clicked', async () => {
+      await renderWithInputHistory('one');
+
+      userEvent.click(renderResult.getByTestId('test-clearInputHistoryButton'));
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('confirmModalTitleText'));
+      });
+    });
+
+    describe('and clear history confirm dialog is displayed', () => {
+      beforeEach(async () => {
+        await renderWithInputHistory('one');
+        userEvent.click(renderResult.getByTestId('test-clearInputHistoryButton'));
+        await waitFor(() => {
+          expect(renderResult.getByTestId('confirmModalTitleText'));
+        });
+      });
+
+      it('should close the confirm modal if Cancel button is clicked', async () => {
+        userEvent.click(renderResult.getByTestId('confirmModalCancelButton'));
+
+        await waitFor(() => {
+          expect(renderResult.queryByTestId('confirmModalTitleText')).toBeNull();
+          expect(renderResult.getByTestId('test-inputHistorySelector')).not.toBeNull();
+        });
+      });
+
+      it('should clear all input history if Clear button is clicked', async () => {
+        userEvent.click(renderResult.getByTestId('confirmModalConfirmButton'));
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('euiSelectableMessage')).toHaveTextContent(
+            NO_HISTORY_EMPTY_MESSAGE
+          );
+        });
       });
     });
   });
@@ -364,8 +413,7 @@ describe('When entering data into the Console input', () => {
       expect(selection!.toString()).toEqual('isolate');
     });
 
-    // FIXME:PT uncomment once task OLM task #4384 is implemented
-    it.skip('should return original cursor position if input history is closed with no selection', async () => {
+    it('should return original cursor position if input history is closed with no selection', async () => {
       typeKeyboardKey('{Enter}'); // add `isolate` to the input history
 
       typeKeyboardKey('release');
@@ -390,8 +438,7 @@ describe('When entering data into the Console input', () => {
       expect(getRightOfCursorText()).toEqual('elease');
     });
 
-    // FIXME:PT uncomment once task OLM task #4384 is implemented
-    it.skip('should reset cursor position to default (at end) if a selection is done from input history', async () => {
+    it('should reset cursor position to default (at end) if a selection is done from input history', async () => {
       typeKeyboardKey('{Enter}'); // add `isolate` to the input history
 
       typeKeyboardKey('release');
