@@ -661,7 +661,6 @@
     "set-value": "^4.1.0",
     "source-map-support": "^0.5.19",
     "stats-lite": "^2.2.0",
-    "storybook-addon-manual-mocks": "^0.0.6",
     "strip-ansi": "^6.0.0",
     "styled-components": "^5.1.0",
     "suricata-sid-db": "^1.0.2",
