@@ -43,7 +43,7 @@ export class OsCgroupMetricsCollector implements MetricsCollector<OsCgroupMetric
       }
 
       const args = { cpuAcctPath: this.cpuAcctPath!, cpuPath: this.cpuPath! };
-      // Await to handle any errors here.
+      // "await" to handle any errors here.
       return await (this.isCgroup2 ? v2.gatherCgroupMetrics(args) : v1.gatherCgroupMetrics(args));
     } catch (err) {
       this.noCgroupPresent = true;
