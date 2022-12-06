@@ -25,14 +25,28 @@ export const RuleActionTypeId = t.string;
 export type RuleActionParams = t.TypeOf<typeof RuleActionParams>;
 export const RuleActionParams = saved_object_attributes;
 
+export type RuleActionFrequency = t.TypeOf<typeof RuleActionFrequency>;
+export const RuleActionFrequency = t.type({
+  summary: t.boolean,
+  notifyWhen: t.union([
+    t.literal('onActionGroupChange'),
+    t.literal('onActiveAlert'),
+    t.literal('onThrottleInterval'),
+  ]),
+  throttle: t.union([t.string, t.null]),
+});
+
 export type RuleAction = t.TypeOf<typeof RuleAction>;
 export const RuleAction = t.exact(
-  t.type({
-    group: RuleActionGroup,
-    id: RuleActionId,
-    action_type_id: RuleActionTypeId,
-    params: RuleActionParams,
-  })
+  t.intersection([
+    t.type({
+      group: RuleActionGroup,
+      id: RuleActionId,
+      action_type_id: RuleActionTypeId,
+      params: RuleActionParams,
+    }),
+    t.partial({ frequency: RuleActionFrequency }),
+  ])
 );
 
 export type RuleActionArray = t.TypeOf<typeof RuleActionArray>;
@@ -40,12 +54,15 @@ export const RuleActionArray = t.array(RuleAction);
 
 export type RuleActionCamel = t.TypeOf<typeof RuleActionCamel>;
 export const RuleActionCamel = t.exact(
-  t.type({
-    group: RuleActionGroup,
-    id: RuleActionId,
-    actionTypeId: RuleActionTypeId,
-    params: RuleActionParams,
-  })
+  t.intersection([
+    t.type({
+      group: RuleActionGroup,
+      id: RuleActionId,
+      actionTypeId: RuleActionTypeId,
+      params: RuleActionParams,
+    }),
+    t.partial({ frequency: RuleActionFrequency }),
+  ])
 );
 
 export type RuleActionArrayCamel = t.TypeOf<typeof RuleActionArrayCamel>;

@@ -564,7 +564,6 @@ describe('Perform bulk action request schema', () => {
             {
               type: BulkActionEditType.add_rule_actions,
               value: {
-                throttle: '1h',
                 actions: [
                   {
                     action_type_id: '.webhook',
@@ -574,6 +573,11 @@ describe('Perform bulk action request schema', () => {
                       body: {
                         rule_id: '{{rule.id}}',
                       },
+                    },
+                    frequency: {
+                      notifyWhen: 'onThrottleInterval',
+                      throttle: '1h',
+                      summary: false,
                     },
                   },
                 ],
@@ -597,7 +601,6 @@ describe('Perform bulk action request schema', () => {
             {
               type: BulkActionEditType.add_rule_actions,
               value: {
-                throttle: '1h',
                 actions: [
                   {
                     group: 'default',
@@ -606,6 +609,11 @@ describe('Perform bulk action request schema', () => {
                       body: {
                         rule_id: '{{rule.id}}',
                       },
+                    },
+                    frequency: {
+                      notifyWhen: 'onThrottleInterval',
+                      throttle: '1h',
+                      summary: false,
                     },
                   },
                 ],
@@ -628,7 +636,6 @@ describe('Perform bulk action request schema', () => {
             {
               type: BulkActionEditType.set_rule_actions,
               value: {
-                throttle: '1h',
                 actions: [
                   {
                     group: 'default',
@@ -639,6 +646,11 @@ describe('Perform bulk action request schema', () => {
                           rule_id: '{{rule.id}}',
                         },
                       ],
+                    },
+                    frequency: {
+                      notifyWhen: 'onThrottleInterval',
+                      throttle: '1h',
+                      summary: false,
                     },
                   },
                 ],

@@ -7,6 +7,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 
 import type {
   RuleAction,
@@ -110,11 +111,24 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
       ? BulkActionEditType.set_rule_actions
       : BulkActionEditType.add_rule_actions;
 
+    const frequencyToSubmit =
+      throttleToSubmit === NOTIFICATION_THROTTLE_RULE
+        ? {
+            notifyWhen: RuleNotifyWhen.ACTIVE,
+            throttle: null,
+          }
+        : {
+            notifyWhen: RuleNotifyWhen.THROTTLE,
+            throttle: throttleToSubmit,
+          };
+
     onConfirm({
       type: editAction,
       value: {
-        actions: actions.map(({ actionTypeId, ...action }) => action),
-        throttle: throttleToSubmit,
+        actions: actions.map(({ actionTypeId, ...action }) => ({
+          ...action,
+          frequency: { ...frequencyToSubmit, summary: false },
+        })),
       },
     });
   }, [form, onConfirm]);

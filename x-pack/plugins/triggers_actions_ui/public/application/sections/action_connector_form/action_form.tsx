@@ -64,6 +64,7 @@ export interface ActionAccordionFormProps {
   recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
   hideActionHeader?: boolean;
+  hideNotifyWhen?: boolean;
 }
 
 interface ActiveActionConnectorState {
@@ -89,6 +90,7 @@ export const ActionForm = ({
   recoveryActionGroup,
   isActionGroupDisabledForActionType,
   hideActionHeader,
+  hideNotifyWhen,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -393,6 +395,7 @@ export const ActionForm = ({
                 );
                 setActiveActionItem(undefined);
               }}
+              hideNotifyWhen={hideNotifyWhen}
             />
           );
         })}

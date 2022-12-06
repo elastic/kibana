@@ -64,6 +64,7 @@ export type ActionTypeFormProps = {
   actionTypeRegistry: ActionTypeRegistryContract;
   recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
+  hideNotifyWhen?: boolean;
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
@@ -100,6 +101,7 @@ export const ActionTypeForm = ({
   actionTypeRegistry,
   isActionGroupDisabledForActionType,
   recoveryActionGroup,
+  hideNotifyWhen = false,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
@@ -246,10 +248,12 @@ export const ActionTypeForm = ({
     connectors.filter((connector) => connector.isPreconfigured)
   );
 
+  const showSelectActionGroup = actionGroups && selectedActionGroup && setActionGroupIdByIndex;
+
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
-      {actionNotifyWhen}
-      {actionGroups && selectedActionGroup && setActionGroupIdByIndex && (
+      {!hideNotifyWhen && actionNotifyWhen}
+      {showSelectActionGroup && (
         <>
           <EuiSpacer size="xs" />
           <EuiSuperSelect
@@ -276,10 +280,9 @@ export const ActionTypeForm = ({
               setActionGroup(group);
             }}
           />
-
-          <EuiSpacer size="l" />
         </>
       )}
+      {(showSelectActionGroup || !hideNotifyWhen) && <EuiSpacer size="l" />}
       <EuiFormRow
         fullWidth
         label={
