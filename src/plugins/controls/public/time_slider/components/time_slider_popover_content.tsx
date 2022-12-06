@@ -8,8 +8,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { Ref } from 'react';
-import { EuiButtonIcon, EuiDualRange, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
+import {
+  EuiButtonIcon,
+  EuiDualRange,
+  EuiRangeTick,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 
 interface Props {
   value: [number, number];

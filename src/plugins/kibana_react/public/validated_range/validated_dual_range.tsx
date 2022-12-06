@@ -8,9 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { Component, ReactNode } from 'react';
-import { EuiFormRow, EuiDualRange } from '@elastic/eui';
+import { EuiFormRow, EuiDualRange, EuiDualRangeProps } from '@elastic/eui';
 import { EuiFormRowDisplayKeys } from '@elastic/eui/src/components/form/form_row/form_row';
-import { EuiDualRangeProps } from '@elastic/eui/src/components/form/range/dual_range';
 import { isRangeValid } from './is_range_valid';
 
 // Wrapper around EuiDualRange that ensures onChange callback is only called when range value

@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
+import { EuiRangeTick } from '@elastic/eui';
 import { calcAutoIntervalNear } from '@kbn/data-plugin/common';
 import { getUiSettings } from '../../kibana_services';
 

@@ -7,8 +7,7 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { EuiButtonIcon, EuiDualRange, EuiText } from '@elastic/eui';
-import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
+import { EuiButtonIcon, EuiDualRange, EuiRangeTick, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
