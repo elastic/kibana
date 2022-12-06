@@ -27,13 +27,14 @@ const StyledEuiCard = styled(EuiCard)`
     font-size: 1rem;
   }
   .euiText {
+    margin-top: 0;
     color: ${(props) => props.theme.eui.euiTextSubduedColor};
   }
 
   > button[role='switch'] {
-    min-inline-size: 84px;
+    min-inline-size: 80px;
     height: 100% !important;
-    width: 84px;
+    width: 80px;
     border-radius: 0 5px 5px 0;
 
     > span {
@@ -48,10 +49,6 @@ const StyledEuiCard = styled(EuiCard)`
         display: none;
       }
     }
-  }
-
-  button[aria-checked='false'] > span > svg {
-    display: none;
   }
 `;
 interface QueryPackSelectableProps {
