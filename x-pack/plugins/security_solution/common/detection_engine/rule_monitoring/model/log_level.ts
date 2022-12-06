@@ -6,11 +6,12 @@
  */
 
 import { enumeration } from '@kbn/securitysolution-io-ts-types';
+import type { RuleLastRunOutcomes } from '@kbn/alerting-plugin/common';
 import { enumFromString } from '../../../utils/enum_from_string';
 import { assertUnreachable } from '../../../utility_types';
 import { RuleExecutionStatus } from './execution_status';
 
-export enum LogLevel {
+export enum  LogLevel {
   'trace' = 'trace',
   'debug' = 'debug',
   'info' = 'info',
@@ -75,6 +76,22 @@ export const logLevelFromExecutionStatus = (status: RuleExecutionStatus): LogLev
       return LogLevel.warn;
     case RuleExecutionStatus.failed:
       return LogLevel.error;
+    default:
+      assertUnreachable(status);
+      return LogLevel.trace;
+  }
+};
+
+export const logLevelFromLastRunOutcome = (status: RuleLastRunOutcomes): LogLevel => {
+  switch (status) {
+    case 'succeeded':
+      return LogLevel.info;
+    case 'warning':
+      return LogLevel.warn;
+    case 'failed':
+      return LogLevel.error;
+    case 'unknown':
+      return LogLevel.trace;
     default:
       assertUnreachable(status);
       return LogLevel.trace;

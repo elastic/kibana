@@ -32,7 +32,7 @@ export const RuleExecutionStatusValues = [
 ] as const;
 export type RuleExecutionStatuses = typeof RuleExecutionStatusValues[number];
 
-export const RuleLastRunOutcomeValues = ['succeeded', 'warning', 'failed'] as const;
+export const RuleLastRunOutcomeValues = ['succeeded', 'warning', 'failed', 'unknown'] as const;
 export type RuleLastRunOutcomes = typeof RuleLastRunOutcomeValues[number];
 
 export enum RuleExecutionStatusErrorReasons {
@@ -92,7 +92,7 @@ export interface RuleAggregations {
 }
 
 export interface RuleLastRun {
-  outcome: RuleLastRunOutcomes | null;
+  outcome: RuleLastRunOutcomes;
   warning?: RuleExecutionStatusErrorReasons | RuleExecutionStatusWarningReasons | null;
   outcomeMsg?: string[] | null;
   alertsCount: {

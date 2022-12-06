@@ -10,16 +10,19 @@ import type { Duration } from 'moment';
 import type { Logger } from '@kbn/core/server';
 
 import type {
+  PublicRuleMonitoringService,
+  RuleLastRunOutcomes,
+} from '@kbn/alerting-plugin/server/types';
+import type {
   RuleExecutionMetrics,
   RuleExecutionSettings,
-  RuleExecutionStatus,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
 import {
   LogLevel,
   logLevelFromExecutionStatus,
   LogLevelSetting,
   logLevelToNumber,
-  ruleExecutionStatusToNumber,
+  RuleExecutionStatus,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
 
 import { assertUnreachable } from '../../../../../../../common/utility_types';
@@ -29,17 +32,14 @@ import type { ExtMeta } from '../utils/console_logging';
 import { getCorrelationIds } from './correlation_ids';
 
 import type { IEventLogWriter } from '../event_log/event_log_writer';
-import type { IRuleExecutionSavedObjectsClient } from '../execution_saved_object/saved_objects_client';
 import type {
   IRuleExecutionLogForExecutors,
   RuleExecutionContext,
   StatusChangeArgs,
 } from './client_interface';
-import { PublicRuleMonitoringService } from '@kbn/alerting-plugin/server/types';
 
 export const createClientForExecutors = (
   settings: RuleExecutionSettings,
-  soClient: IRuleExecutionSavedObjectsClient,
   eventLog: IEventLogWriter,
   logger: Logger,
   context: RuleExecutionContext,
@@ -86,7 +86,7 @@ export const createClientForExecutors = (
 
           await Promise.all([
             writeStatusChangeToConsole(normalizedArgs, logMeta),
-            writeStatusChangeToSavedObjects(normalizedArgs),
+            writeStatusChangeToMonitoringService(normalizedArgs),
             writeStatusChangeToEventLog(normalizedArgs),
           ]);
         } catch (e) {
@@ -159,23 +159,37 @@ export const createClientForExecutors = (
     writeMessageToConsole(logMessage, logLevel, logMeta);
   };
 
-  // TODO: Add executionId to new status SO?
-  const writeStatusChangeToSavedObjects = async (
+  const writeStatusChangeToMonitoringService = async (
     args: NormalizedStatusChangeArgs
   ): Promise<void> => {
     const { newStatus, message, metrics } = args;
+    const {
+      total_search_duration_ms: totalSearchDurationMs,
+      total_indexing_duration_ms: totalIndexingDurationMs,
+      execution_gap_duration_s: executionGapDurationS,
+    } = metrics ?? {};
 
-    ruleMonitoringService.setLastRunOutcomeMsg("outcome message");
+    if (
+      newStatus !== RuleExecutionStatus['going to run'] &&
+      newStatus !== RuleExecutionStatus.running
+    ) {
+      const outcome = mapRuleExecutionStatusToRuleLastRunOutcome(newStatus);
+      ruleMonitoringService.setLastRunOutcome(outcome);
+    }
 
-    await soClient.createOrUpdate(ruleId, {
-      last_execution: {
-        date: nowISO(),
-        status: newStatus,
-        status_order: ruleExecutionStatusToNumber(newStatus),
-        message,
-        metrics: metrics ?? {},
-      },
-    });
+    ruleMonitoringService.setLastRunOutcomeMsg(message);
+
+    if (totalSearchDurationMs) {
+      ruleMonitoringService.setLastRunMetricsTotalSearchDurationMs(totalSearchDurationMs);
+    }
+
+    if (totalIndexingDurationMs) {
+      ruleMonitoringService.setLastRunMetricsTotalIndexingDurationMs(totalIndexingDurationMs);
+    }
+
+    if (executionGapDurationS) {
+      ruleMonitoringService.setLastRunMetricsGapDurationS(executionGapDurationS);
+    }
   };
 
   const writeStatusChangeToEventLog = (args: NormalizedStatusChangeArgs): void => {
@@ -207,8 +221,6 @@ export const createClientForExecutors = (
 
   return client;
 };
-
-const nowISO = () => new Date().toISOString();
 
 interface NormalizedStatusChangeArgs {
   newStatus: RuleExecutionStatus;
@@ -244,4 +256,21 @@ const normalizeDurations = (durations?: string[]): number | undefined => {
 
 const normalizeGap = (duration?: Duration): number | undefined => {
   return duration ? Math.round(duration.asSeconds()) : undefined;
+};
+
+const mapRuleExecutionStatusToRuleLastRunOutcome = (
+  newStatus: RuleExecutionStatus
+): RuleLastRunOutcomes => {
+  switch (newStatus) {
+    case RuleExecutionStatus.succeeded:
+      return 'succeeded';
+    case RuleExecutionStatus.failed:
+      return 'failed';
+    case RuleExecutionStatus['partial failure']:
+      return 'warning';
+    case RuleExecutionStatus['going to run']:
+    case RuleExecutionStatus.running:
+    default:
+      throw new Error(`Unexpected rule execution status: ${newStatus}`);
+  }
 };

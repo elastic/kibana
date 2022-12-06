@@ -64,12 +64,10 @@ export const createRuleExecutionLogService = (
           savedObjectsClient
         );
 
-        const soClient = createRuleExecutionSavedObjectsClient(savedObjectsClient, childLogger);
         const eventLogWriter = createEventLogWriter(plugins.eventLog);
 
         return createClientForExecutors(
           ruleExecutionSettings,
-          soClient,
           eventLogWriter,
           childLogger,
           context,

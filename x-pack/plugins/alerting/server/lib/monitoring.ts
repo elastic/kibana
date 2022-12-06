@@ -33,15 +33,15 @@ export const getDefaultMonitoring = (timestamp: string): RawRuleMonitoring => {
 
 export const getDefaultLastRun = (): RuleLastRun => ({
   warning: null,
-  outcome: null,
+  outcome: 'unknown',
   outcomeMsg: null,
   alertsCount: {
     active: null,
     new: null,
     recovered: null,
     ignored: null,
-  }
-})
+  },
+});
 
 export const getExecutionDurationPercentiles = (history: RuleMonitoringHistory[]) => {
   const durationSamples = history.reduce<number[]>((duration, historyItem) => {

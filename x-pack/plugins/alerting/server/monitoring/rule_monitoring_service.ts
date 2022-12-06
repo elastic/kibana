@@ -5,12 +5,24 @@
  * 2.0.
  */
 
-import { getDefaultLastRun, getDefaultMonitoring, getExecutionDurationPercentiles } from '../lib/monitoring';
-import { RuleMonitoring, RuleMonitoringHistory, PublicRuleMonitoringService, RuleLastRun, RuleLastRunOutcomes, PublicMetricsSetters, PublicLastRunSetters } from '../types';
+import {
+  getDefaultLastRun,
+  getDefaultMonitoring,
+  getExecutionDurationPercentiles,
+} from '../lib/monitoring';
+import {
+  RuleMonitoring,
+  RuleMonitoringHistory,
+  PublicRuleMonitoringService,
+  RuleLastRun,
+  RuleLastRunOutcomes,
+  PublicMetricsSetters,
+  PublicLastRunSetters,
+} from '../types';
 export class RuleMonitoringService {
   private monitoring: RuleMonitoring = getDefaultMonitoring(new Date().toISOString());
   private lastRun: RuleLastRun = getDefaultLastRun();
- 
+
   public setLastRunMetricsDuration(duration: number) {
     this.monitoring.run.last_run.metrics.duration = duration;
   }
@@ -114,7 +126,7 @@ export class RuleMonitoringService {
     return {
       ...this.getLastRunMetricsSetters(),
       ...this.getLastRunSetters(),
-    }
+    };
   }
 
   private buildExecutionSuccessRatio() {

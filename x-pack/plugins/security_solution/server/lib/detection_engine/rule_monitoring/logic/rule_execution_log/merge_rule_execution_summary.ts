@@ -5,37 +5,45 @@
  * 2.0.
  */
 
-import type { RuleExecutionStatus as RuleExecutionStatusByFramework } from '@kbn/alerting-plugin/common';
+import type {
+  ResolvedSanitizedRule,
+  RuleExecutionStatus as RuleExecutionStatusByFramework,
+  SanitizedRule,
+} from '@kbn/alerting-plugin/common';
 
 import type { RuleExecutionSummary } from '../../../../../../common/detection_engine/rule_monitoring';
 import {
   RuleExecutionStatus,
   ruleExecutionStatusToNumber,
 } from '../../../../../../common/detection_engine/rule_monitoring';
+import type { RuleParams } from '../../../rule_schema';
 
 export const mergeRuleExecutionSummary = (
   ruleExecutionStatus: RuleExecutionStatusByFramework,
-  ruleExecutionSummary: RuleExecutionSummary | null
+  rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>
 ): RuleExecutionSummary | null => {
-  if (ruleExecutionSummary == null) {
-    return null;
-  }
-
   const frameworkStatus = ruleExecutionStatus;
-  const customStatus = ruleExecutionSummary.last_execution;
+  const isFrameworkStatusMoreRecent =
+    !rule.monitoring ||
+    new Date(frameworkStatus.lastExecutionDate) > new Date(rule.monitoring?.run.last_run.timestamp);
 
-  if (
-    frameworkStatus.status === 'error' &&
-    new Date(frameworkStatus.lastExecutionDate) > new Date(customStatus.date)
-  ) {
+  if (frameworkStatus.status === 'error' && isFrameworkStatusMoreRecent) {
     return {
-      ...ruleExecutionSummary,
       last_execution: {
         date: frameworkStatus.lastExecutionDate.toISOString(),
         status: RuleExecutionStatus.failed,
         status_order: ruleExecutionStatusToNumber(RuleExecutionStatus.failed),
         message: `Reason: ${frameworkStatus.error?.reason} Message: ${frameworkStatus.error?.message}`,
-        metrics: customStatus.metrics,
+        metrics: {
+          total_indexing_duration_ms:
+            rule.monitoring?.run.last_run.metrics.total_indexing_duration_ms ?? undefined,
+          total_search_duration_ms:
+            rule.monitoring?.run.last_run.metrics.total_search_duration_ms ?? undefined,
+          execution_gap_duration_s:
+            rule.monitoring?.run.last_run.metrics.gap_duration_s ?? undefined,
+          total_enrichment_duration_ms:
+            rule.monitoring?.run.last_run.metrics.total_enrichment_duration_ms ?? undefined,
+        },
       },
     };
   }

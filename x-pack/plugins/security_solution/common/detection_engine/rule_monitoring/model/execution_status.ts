@@ -7,6 +7,7 @@
 
 import type * as t from 'io-ts';
 import { enumeration, PositiveInteger } from '@kbn/securitysolution-io-ts-types';
+import type { RuleLastRunOutcomes } from '@kbn/alerting-plugin/common';
 import { assertUnreachable } from '../../../utility_types';
 
 /**
@@ -75,6 +76,24 @@ export const ruleExecutionStatusToNumber = (
       return 30;
     default:
       assertUnreachable(status);
+      return 0;
+  }
+};
+
+export const ruleLastRunOutcomeToNumber = (
+  outcome: RuleLastRunOutcomes
+): RuleExecutionStatusOrder => {
+  switch (outcome) {
+    case 'succeeded':
+      return 0;
+    case 'warning':
+      return 20;
+    case 'failed':
+      return 30;
+    case 'unknown':
+      return 40; // TBC
+    default:
+      assertUnreachable(outcome);
       return 0;
   }
 };
