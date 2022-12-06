@@ -106,15 +106,15 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
   {
     requireAllSpaces: true,
     privilegesTooltip: i18n.translate(
-      'xpack.securitySolution.featureRegistry.subFeatures.actionsLogManagement.privilegesTooltip',
+      'xpack.securitySolution.featureRegistry.subFeatures.responseActionsHistory.privilegesTooltip',
       {
-        defaultMessage: 'All Spaces is required for Actions Log Management access.',
+        defaultMessage: 'All Spaces is required for Response Actions History access.',
       }
     ),
     name: i18n.translate(
-      'xpack.securitySolution.featureRegistry.subFeatures.actionsLogManagement',
+      'xpack.securitySolution.featureRegistry.subFeatures.responseActionsHistory',
       {
-        defaultMessage: 'Actions Log Management',
+        defaultMessage: 'Response Actions History',
       }
     ),
     privilegeGroups: [
