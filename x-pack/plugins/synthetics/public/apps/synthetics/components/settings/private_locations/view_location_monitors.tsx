@@ -64,6 +64,6 @@ const VIEW_LOCATION_MONITORS = i18n.translate(
   }
 );
 
-const CREATE_MONITOR = i18n.translate('xpack.synthetics.monitorManagement.viewLocationMonitors', {
+const CREATE_MONITOR = i18n.translate('xpack.synthetics.monitorManagement.createLocationMonitors', {
   defaultMessage: 'Create monitor',
 });

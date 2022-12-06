@@ -223,6 +223,6 @@ const ADD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.createLocat
   defaultMessage: 'Create location',
 });
 
-export const LEARN_MORE = i18n.translate('xpack.synthetics.monitorManagement.learnMore.label', {
+export const LEARN_MORE = i18n.translate('xpack.synthetics.privateLocations.learnMore.label', {
   defaultMessage: 'Learn more.',
 });
