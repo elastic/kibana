@@ -17,7 +17,6 @@ import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { APP_UI_ID } from '../../../../common/constants';
-import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
@@ -57,7 +56,6 @@ export interface Props {
   start: string;
   showTotalCount?: boolean;
   pageFilters?: Filter[];
-  currentFilter?: Status;
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
@@ -80,7 +78,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   tableId,
   leadingControlColumns,
   pageFilters,
-  currentFilter,
   onRuleChange,
   renderCellValue,
   rowRenderers,
@@ -211,7 +208,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             entityType,
             fieldBrowserOptions,
             filters: globalFilters,
-            filterStatus: currentFilter,
             getRowRenderer,
             globalFullScreen,
             graphEventId,

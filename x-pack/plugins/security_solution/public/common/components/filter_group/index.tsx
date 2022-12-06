@@ -9,13 +9,13 @@ import type {
   ControlGroupInput,
   ControlGroupContainer,
   controlGroupInputBuilder,
+  ControlGroupOutput,
 } from '@kbn/controls-plugin/public';
 import { LazyControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
 import type { Subscription } from 'rxjs';
 
 import styled from 'styled-components';
@@ -87,6 +87,9 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       if (filterChangedSubscription.current) {
         filterChangedSubscription.current.unsubscribe();
       }
+      if (inputChangedSubscription.current) {
+        inputChangedSubscription.current.unsubscribe();
+      }
     };
     return cleanup;
   }, []);
@@ -101,8 +104,8 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   }, [timeRange, filters, query, chainingSystem, controlGroup]);
 
   const handleFilterUpdates = useCallback(
-    (newFilters: Filter[]) => {
-      if (onFilterChange) onFilterChange(newFilters);
+    ({ filters: newFilters }: ControlGroupOutput) => {
+      if (onFilterChange) onFilterChange(newFilters ?? []);
     },
     [onFilterChange]
   );
@@ -124,7 +127,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   useEffect(() => {
     if (!controlGroup) return;
     controlGroup.reload();
-    filterChangedSubscription.current = controlGroup.onFiltersPublished$.subscribe({
+    filterChangedSubscription.current = controlGroup.getOutput$().subscribe({
       next: debouncedFilterUpdates,
     });
 
@@ -145,6 +148,8 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       controlGroup?.updateInputForChild(String(idx), {
         ...control.explicitInput,
         selectedOptions: [],
+        existsSelected: false,
+        exclude: false,
       });
     });
   }, [controlGroupInputUpdates, controlGroup]);
@@ -183,6 +188,8 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
                 fieldName: urlControl.fieldName,
                 title: urlControl.title ?? urlControl.fieldName,
                 selectedOptions: urlControl.selectedOptions ?? [],
+                existsSelected: urlControl.existsSelected ?? false,
+                exclude: urlControl.exclude ?? false,
               };
             } else {
               // if url param is not available in initialControl, start replacing the last slot in the
@@ -192,6 +199,8 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
                 fieldName: urlControl.fieldName,
                 selectedOptions: urlControl.selectedOptions ?? [],
                 title: urlControl.title ?? urlControl.fieldName,
+                existsSelected: urlControl.existsSelected ?? false,
+                exclude: urlControl.exclude ?? false,
               };
               maxInitialControlIdx--;
             }
@@ -220,27 +229,34 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   return (
     <FilterWrapper className="filter-group__wrapper">
       <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow={true} data-test-subj="filter_group__items">
           <ControlGroupRenderer
             onLoadComplete={onControlGroupLoadHandler}
             getInitialInput={setOptions}
           />
           {!controlGroup ? (
             <EuiButton color="text">
-              <EuiLoadingChart />
+              <EuiLoadingChart data-test-subj="filter-group__loading" />
             </EuiButton>
           ) : null}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton iconType="eraser" color="danger" onClick={clearSelection}>
+          <EuiButton
+            iconType="eraser"
+            color="danger"
+            onClick={clearSelection}
+            data-test-subj="filter-group__clear"
+          >
             {`Clear`}
           </EuiButton>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton iconType="plusInCircle" onClick={clearSelection}>
-            {`Add Filter`}
-          </EuiButton>
-        </EuiFlexItem>
+        {/*
+         *<EuiFlexItem grow={false}>
+         *  <EuiButton iconType="plusInCircle" onClick={clearSelection}>
+         *    {`Add Filter`}
+         *  </EuiButton>
+         *</EuiFlexItem>
+         */}
       </EuiFlexGroup>
       {props.children}
     </FilterWrapper>

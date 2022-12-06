@@ -24,6 +24,8 @@ import {
 import { ControlGroupInput } from './types';
 import { getCompatibleControlType, getNextPanelOrder } from './embeddable/control_group_helpers';
 
+import { OptionsListEmbeddableInput } from '../options_list';
+
 export interface AddDataControlProps {
   controlId?: string;
   dataViewId: string;
@@ -33,9 +35,8 @@ export interface AddDataControlProps {
   width?: ControlWidth;
 }
 
-export type AddOptionsListControlProps = AddDataControlProps & {
-  selectedOptions?: string[];
-};
+export type AddOptionsListControlProps = AddDataControlProps &
+  Pick<OptionsListEmbeddableInput, 'selectedOptions' | 'existsSelected' | 'exclude'>;
 
 export type AddRangeSliderControlProps = AddDataControlProps & {
   value?: RangeValue;
@@ -68,7 +69,15 @@ export const controlGroupInputBuilder = {
     initialInput: Partial<ControlGroupInput>,
     controlProps: AddOptionsListControlProps
   ) => {
-    const { controlId, dataViewId, fieldName, selectedOptions, title } = controlProps;
+    const {
+      controlId,
+      dataViewId,
+      fieldName,
+      selectedOptions,
+      title,
+      existsSelected = false,
+      exclude = false,
+    } = controlProps;
     const panelId = controlId ? controlId : uuid.v4();
     initialInput.panels = {
       ...initialInput.panels,
@@ -83,6 +92,8 @@ export const controlGroupInputBuilder = {
           fieldName,
           selectedOptions,
           title: title ?? fieldName,
+          exclude,
+          existsSelected,
         },
       } as ControlPanelState<DataControlInput>,
     };

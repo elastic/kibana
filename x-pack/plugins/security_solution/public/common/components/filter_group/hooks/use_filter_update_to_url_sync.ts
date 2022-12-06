@@ -30,12 +30,14 @@ export const useFilterUpdatesToUrlSync = ({ controlGroupInput }: UseFilterUrlSyn
     const result: FilterUrlFormat = {};
     Object.keys(panels).forEach((panelId) => {
       const {
-        explicitInput: { fieldName, selectedOptions, title },
+        explicitInput: { fieldName, selectedOptions, title, existsSelected, exclude },
       } = panels[panelId] as ControlPanelState<OptionsListEmbeddableInput>;
       result[panelId] = {
         fieldName: fieldName as string,
         selectedOptions: selectedOptions ?? [],
         title,
+        existsSelected,
+        exclude,
       };
     });
 

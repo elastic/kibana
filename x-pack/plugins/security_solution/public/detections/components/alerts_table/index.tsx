@@ -13,7 +13,6 @@ import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
-import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import type { TableIdLiteral } from '../../../../common/types/timeline';
 import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
@@ -31,11 +30,7 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 import { combineQueries } from '../../../common/lib/kuery';
 import { getColumns, RenderCellValue } from '../../configurations/security_solution_detections';
 import { AdditionalFiltersAction } from './additional_filters_action';
-import {
-  getAlertsDefaultModel,
-  buildAlertStatusFilter,
-  requiredFieldsForActions,
-} from './default_config';
+import { getAlertsDefaultModel, requiredFieldsForActions } from './default_config';
 import { buildTimeRangeFilter } from './helpers';
 import * as i18n from './translations';
 import { useLicense } from '../../../common/hooks/use_license';
@@ -55,7 +50,6 @@ interface OwnProps {
   showOnlyThreatIndicatorAlerts: boolean;
   tableId: TableIdLiteral;
   to: string;
-  filterGroup?: Status;
 }
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
@@ -77,7 +71,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   showOnlyThreatIndicatorAlerts,
   tableId,
   to,
-  filterGroup = 'open',
 }) => {
   const dispatch = useDispatch();
 
@@ -157,14 +150,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const defaultFiltersMemo = useMemo(() => {
-    const alertStatusFilter = buildAlertStatusFilter(filterGroup);
+    return isEmpty(defaultFilters) ? [] : defaultFilters;
+  }, [defaultFilters]);
 
-    if (isEmpty(defaultFilters)) {
-      return alertStatusFilter;
-    } else if (defaultFilters != null && !isEmpty(defaultFilters)) {
-      return [...defaultFilters, ...alertStatusFilter];
-    }
-  }, [defaultFilters, filterGroup]);
   const { filterManager } = kibana.services.data.query;
 
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
@@ -224,7 +212,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   return (
     <StatefulEventsViewer
       additionalFilters={additionalFiltersComponent}
-      currentFilter={filterGroup}
       defaultCellActions={defaultCellActions}
       defaultModel={getAlertsDefaultModel(license)}
       end={to}

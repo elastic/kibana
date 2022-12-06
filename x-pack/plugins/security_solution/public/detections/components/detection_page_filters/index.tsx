@@ -8,39 +8,16 @@
 import React, { useState, useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash';
-import type {
-  FilterGroupProps,
-  FilterItemObj,
-} from '../../../common/components/page_filters/types';
-import { FilterGroup } from '../../../common/components/page_filters/filter_group';
+import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../common/constants';
+import type { FilterGroupProps } from '../../../common/components/filter_group/types';
+import { FilterGroup } from '../../../common/components/filter_group';
 
 type FilterItemSetProps = Omit<FilterGroupProps, 'initialControls'>;
-
-const defaultInitialControls: FilterItemObj[] = [
-  {
-    title: 'Status',
-    fieldName: 'kibana.alert.workflow_status',
-    selectedOptions: ['open'],
-  },
-  {
-    title: 'Severity',
-    fieldName: 'kibana.alert.severity',
-    selectedOptions: [],
-  },
-  {
-    title: 'User',
-    fieldName: 'user.name',
-  },
-  {
-    title: 'Host',
-    fieldName: 'host.name',
-  },
-];
 
 const FilterItemSetComponent = (props: FilterItemSetProps) => {
   const { dataViewId, onFilterChange, ...restFilterItemGroupProps } = props;
 
-  const [initialFilterControls] = useState(defaultInitialControls);
+  const [initialFilterControls] = useState(DEFAULT_DETECTION_PAGE_FILTERS);
 
   const filterChangesHandler = useCallback(
     (newFilters: Filter[]) => {

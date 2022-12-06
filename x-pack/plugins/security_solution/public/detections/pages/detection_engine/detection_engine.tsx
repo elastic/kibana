@@ -76,21 +76,12 @@ const StyledFullHeightContainer = styled.div`
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
-const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
-  clearEventsDeleted,
-  clearEventsLoading,
-}) => {
+const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = () => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).graphEventId
-  );
-  const updatedAt = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).updated
-  );
-  const isAlertsLoading = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -117,7 +108,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
-  const [detectionPageFilters, setDetectionPageFilters] = useState<Filter[]>([]);
+  const [detectionPageFilters, setDetectionPageFilters] = useState<Filter[]>();
 
   const {
     indexPattern,
@@ -132,7 +123,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const loading = userInfoLoading || listsConfigLoading;
   const {
     application: { navigateToUrl },
-    timelines: timelinesUi,
     data,
     docLinks,
   } = useKibana().services;
@@ -154,8 +144,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     },
     [filterManager]
   );
-
-  const showUpdating = useMemo(() => isAlertsLoading || loading, [isAlertsLoading, loading]);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -187,7 +175,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       ...filters,
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
-      ...detectionPageFilters,
+      ...(detectionPageFilters ?? []),
     ],
     [filters, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, detectionPageFilters]
   );
@@ -197,7 +185,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     () => [
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
-      ...detectionPageFilters,
+      ...(detectionPageFilters ?? []),
     ],
     [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, detectionPageFilters]
   );
@@ -255,6 +243,15 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const pageFiltersUpdateHandler = useCallback((newFilters: Filter[]) => {
     setDetectionPageFilters(newFilters);
   }, []);
+
+  const isAlertTableLoading = useMemo(
+    () => loading || !Array.isArray(detectionPageFilters),
+    [loading, detectionPageFilters]
+  );
+  const isChartPanelLoading = useMemo(
+    () => isLoadingIndexPattern || !Array.isArray(detectionPageFilters),
+    [isLoadingIndexPattern, detectionPageFilters]
+  );
 
   if (loading) {
     return (
@@ -341,7 +338,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               <ChartPanels
                 addFilter={addFilter}
                 alertsHistogramDefaultFilters={alertsHistogramDefaultFilters}
-                isLoadingIndexPattern={isLoadingIndexPattern}
+                isLoadingIndexPattern={isChartPanelLoading}
                 query={query}
                 runtimeMappings={runtimeMappings}
                 signalIndexName={signalIndexName}
@@ -352,7 +349,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
             </Display>
             <AlertsTable
               tableId={TableId.alertsOnAlertsPage}
-              loading={loading}
+              loading={isAlertTableLoading}
               hasIndexWrite={hasIndexWrite ?? false}
               hasIndexMaintenance={hasIndexMaintenance ?? false}
               from={from}

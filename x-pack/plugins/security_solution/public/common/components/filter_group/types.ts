@@ -11,7 +11,10 @@ import type { Filter } from '@kbn/es-query';
 
 export type FilterUrlFormat = Record<
   string,
-  Pick<OptionsListEmbeddableInput, 'selectedOptions' | 'title' | 'fieldName'>
+  Pick<
+    OptionsListEmbeddableInput,
+    'selectedOptions' | 'title' | 'fieldName' | 'existsSelected' | 'exclude'
+  >
 >;
 
 export interface FilterContextType {
@@ -19,7 +22,8 @@ export interface FilterContextType {
   addControl: (controls: FilterItemObj) => void;
 }
 
-export type FilterItemObj = Omit<AddOptionsListControlProps, 'controlId' | 'dataViewId'>;
+export type FilterItemObj = Omit<AddOptionsListControlProps, 'controlId' | 'dataViewId'> &
+  Pick<OptionsListEmbeddableInput, 'existsSelected' | 'exclude'>;
 
 export type FilterGroupProps = {
   dataViewId: string;
