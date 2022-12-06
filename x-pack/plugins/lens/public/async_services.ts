@@ -43,5 +43,6 @@ export * from './embeddable';
 export * from './app_plugin/mounter';
 export * from './lens_attribute_service';
 export * from './app_plugin/save_modal_container';
+export * from './chart_info_api';
 
 export * from './trigger_actions/open_in_discover_helpers';

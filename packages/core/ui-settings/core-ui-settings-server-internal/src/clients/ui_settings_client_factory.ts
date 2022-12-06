@@ -12,8 +12,7 @@ import { UiSettingsGlobalClient } from './ui_settings_global_client';
 
 export class UiSettingsClientFactory {
   public static create = (options: UiSettingsServiceOptions) => {
-    const { type } = options;
-    switch (type) {
+    switch (options.type) {
       case 'config':
         return new UiSettingsClient(options);
       case 'config-global':

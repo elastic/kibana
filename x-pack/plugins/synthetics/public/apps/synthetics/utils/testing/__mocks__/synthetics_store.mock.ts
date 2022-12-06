@@ -416,8 +416,10 @@ function getMonitorDetailsMockSlice() {
       'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'] as TLSVersion[],
       revision: 1,
       updated_at: '2022-07-24T17:15:46.342Z',
+      created_at: '2022-05-24T13:20:49.322Z',
     },
     syntheticsMonitorLoading: false,
+    syntheticsMonitorDispatchedAt: 0,
     error: null,
     selectedLocationId: 'us_central',
   };

@@ -68,5 +68,4 @@ export const uiSettingsGlobalType: SavedObjectsType = {
       return `Global Advanced Settings [${obj.id}]`;
     },
   },
-  migrations,
 };

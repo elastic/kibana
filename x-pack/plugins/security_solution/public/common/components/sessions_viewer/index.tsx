@@ -106,6 +106,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
     dispatch(
       dataTableActions.initializeTGridSettings({
         id: tableId,
+        title: i18n.SESSIONS_TITLE,
         defaultColumns: eventsDefaultModel.columns.map((c) =>
           !tGridEnabled && c.initialWidth == null
             ? {
@@ -145,15 +146,6 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
 
   const unit = (c: number) =>
     c > 1 ? i18n.TOTAL_COUNT_OF_SESSIONS : i18n.SINGLE_COUNT_OF_SESSIONS;
-
-  useEffect(() => {
-    dispatch(
-      dataTableActions.initializeTGridSettings({
-        id: tableId,
-        title: i18n.SESSIONS_TITLE,
-      })
-    );
-  }, [dispatch, tableId]);
 
   return (
     <div data-test-subj={TEST_ID}>

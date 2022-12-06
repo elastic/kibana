@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiFlexGrid,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 
@@ -536,26 +537,26 @@ export const buildAlertSuppressionDescription = (
       )}
     </EuiFlexGroup>
   );
-  if (license.isAtLeast(minimumLicenseForSuppression)) {
-    return [
-      {
-        title: label,
-        description,
-      },
-    ];
-  } else {
-    return [
-      {
-        title: (
-          <>
-            {label}&nbsp;
-            <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
-              <EuiIcon type={'alert'} size="l" color="#BD271E" />
-            </EuiToolTip>
-          </>
-        ),
-        description,
-      },
-    ];
-  }
+
+  const title = (
+    <>
+      {label}
+      <EuiBetaBadge
+        label={i18n.ALERT_SUPPRESSION_TECHNICAL_PREVIEW}
+        style={{ verticalAlign: 'middle', marginLeft: '8px' }}
+        size="s"
+      />
+      {!license.isAtLeast(minimumLicenseForSuppression) && (
+        <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
+          <EuiIcon type={'alert'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
+        </EuiToolTip>
+      )}
+    </>
+  );
+  return [
+    {
+      title,
+      description,
+    },
+  ];
 };

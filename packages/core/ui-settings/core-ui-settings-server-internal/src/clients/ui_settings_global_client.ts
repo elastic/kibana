@@ -8,30 +8,14 @@
 
 import { UiSettingsClientCommon } from './ui_settings_client_common';
 import { UiSettingsServiceOptions } from '../types';
-import { BaseUiSettingsClient } from './base_ui_settings_client';
-import { SettingNotRegisteredError } from './not_registered_error';
-
-interface UserProvidedValue<T = unknown> {
-  userValue?: T;
-  isOverridden?: boolean;
-}
-
-type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
+import { SettingNotRegisteredError } from '../ui_settings_errors';
 
 /**
  * Global UiSettingsClient
  */
-export class UiSettingsGlobalClient extends BaseUiSettingsClient {
-  private readonly uiSettingsClientCommon;
-
+export class UiSettingsGlobalClient extends UiSettingsClientCommon {
   constructor(options: UiSettingsServiceOptions) {
-    const { log, defaults = {}, overrides = {} } = options;
-    super({ overrides, defaults, log });
-    this.uiSettingsClientCommon = new UiSettingsClientCommon(options);
-  }
-
-  async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
-    return this.uiSettingsClientCommon.getUserProvided();
+    super(options);
   }
 
   async setMany(changes: Record<string, any>) {
@@ -41,7 +25,7 @@ export class UiSettingsGlobalClient extends BaseUiSettingsClient {
         throw new SettingNotRegisteredError(key);
       }
     });
-    return this.uiSettingsClientCommon.setMany(changes);
+    return super.setMany(changes);
   }
 
   async set(key: string, value: any) {
@@ -49,14 +33,6 @@ export class UiSettingsGlobalClient extends BaseUiSettingsClient {
     if (!registeredSettings[key]) {
       throw new SettingNotRegisteredError(key);
     }
-    await this.uiSettingsClientCommon.set(key, value);
-  }
-
-  async remove(key: string) {
-    await this.uiSettingsClientCommon.remove(key);
-  }
-
-  async removeMany(keys: string[]) {
-    await this.uiSettingsClientCommon.removeMany(keys);
+    await super.set(key, value);
   }
 }
