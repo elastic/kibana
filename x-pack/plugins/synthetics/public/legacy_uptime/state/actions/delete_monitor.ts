@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { Maybe } from '../../../..';
+import { createAsyncAction } from './utils';
 
-export interface KpiHistogramData {
-  x?: Maybe<number>;
-  y?: Maybe<number>;
-}
+export const deleteMonitorAction = createAsyncAction<
+  { id: string; name: string },
+  string,
+  { id: string; error: Error }
+>('DELETE_MONITOR');
