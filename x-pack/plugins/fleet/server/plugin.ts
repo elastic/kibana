@@ -58,6 +58,13 @@ import { INTEGRATIONS_PLUGIN_ID } from '../common';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 import {
+  getRouteRequiredAuthz,
+  makeRouterWithFleetAuthz,
+  calculateRouteAuthz,
+  getAuthzFromRequest,
+} from './services/security';
+
+import {
   PLUGIN_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -93,12 +100,6 @@ import {
   fetchAgentsUsage,
   fetchFleetUsage,
 } from './collectors/register';
-import {
-  calculateRouteAuthz,
-  getAuthzFromRequest,
-  getRouteRequiredAuthz,
-  makeRouterWithFleetAuthz,
-} from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';

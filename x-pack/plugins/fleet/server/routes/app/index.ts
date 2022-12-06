@@ -8,11 +8,12 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import type { FleetAuthzRouter } from '../../services/security';
+
 import { APP_API_ROUTES } from '../../constants';
 import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
 import { defaultFleetErrorHandler, GenerateServiceTokenError } from '../../errors';
-import type { FleetAuthzRouter } from '../security';
 import type { FleetRequestHandler } from '../../types';
 import { CheckPermissionsRequestSchema } from '../../types';
 

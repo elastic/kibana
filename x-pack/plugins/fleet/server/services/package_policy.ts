@@ -82,8 +82,9 @@ import type {
 } from '../types';
 import type { ExternalCallback } from '..';
 
-import type { FleetAuthzRouteConfig } from '../routes/security';
-import { calculateRouteAuthz, getAuthzFromRequest } from '../routes/security';
+import type { FleetAuthzRouteConfig } from './security';
+
+import { calculateRouteAuthz, getAuthzFromRequest } from './security';
 
 import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';

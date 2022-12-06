@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { getRouteRequiredAuthz } from '../../services/security';
+
+import type { FleetAuthzRouter } from '../../services/security';
+
 import type { FleetAuthz } from '../../../common';
 import { PACKAGE_POLICY_API_ROUTES } from '../../constants';
 import {
@@ -18,7 +22,7 @@ import {
   DeleteOnePackagePolicyRequestSchema,
   BulkGetPackagePoliciesRequestSchema,
 } from '../../types';
-import { calculateRouteAuthz, type FleetAuthzRouter, getRouteRequiredAuthz } from '../security';
+import { calculateRouteAuthz } from '../../services/security/security';
 
 import {
   getPackagePoliciesHandler,

@@ -13,13 +13,15 @@ import type { CheckPrivilegesDynamically } from '@kbn/security-plugin/server/aut
 
 import { deepFreeze } from '@kbn/std';
 
-import type { FleetAuthz } from '../../common';
+import type { FleetAuthz } from '../../../common';
 
-import { createAppContextStartContractMock } from '../mocks';
-import { appContextService } from '../services';
-import type { FleetRequestHandlerContext } from '../types';
+import { createAppContextStartContractMock } from '../../mocks';
+import { appContextService } from '..';
+import type { FleetRequestHandlerContext } from '../../types';
 
-import { makeRouterWithFleetAuthz, calculateRouteAuthz } from './security';
+import { makeRouterWithFleetAuthz } from './fleet_router';
+
+import { calculateRouteAuthz } from './security';
 
 function getCheckPrivilegesMockedImplementation(kibanaRoles: string[]) {
   return (checkPrivileges: CheckPrivilegesPayload) => {
