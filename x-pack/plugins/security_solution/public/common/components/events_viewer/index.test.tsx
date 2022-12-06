@@ -16,7 +16,6 @@ import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
 import { eventsDefaultModel } from './default_model';
 import { EntityType } from '@kbn/timelines-plugin/common';
-import { TableId } from '../../../../common/types/timeline';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from '../../../timelines/containers';
@@ -25,8 +24,20 @@ import { defaultRowRenderers } from '../../../timelines/components/timeline/body
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
+import { TableId } from '../../../../common/types';
+import { mount } from 'enzyme';
 
 jest.mock('../../lib/kibana');
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 const originalKibanaLib = jest.requireActual('../../lib/kibana');
 
@@ -44,6 +55,12 @@ jest.mock('../../utils/normalize_time_range');
 const mockUseFieldBrowserOptions = jest.fn();
 jest.mock('../../../timelines/components/fields_browser', () => ({
   useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
+}));
+
+jest.mock('./helpers', () => ({
+  getDefaultViewSelection: () => 'gridView',
+  resolverIsShowing: () => false,
+  getCombinedFilterQuery: () => undefined,
 }));
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
@@ -64,35 +81,36 @@ const testProps = {
   leadingControlColumns: getDefaultControlColumn(ACTION_BUTTON_COUNT),
   renderCellValue: DefaultCellRenderer,
   rowRenderers: defaultRowRenderers,
-  scopeId: SourcererScopeName.default,
+  sourcererScope: SourcererScopeName.default,
   start: from,
   bulkActions: false,
+  hasCrudPermissions: true,
 };
 describe('StatefulEventsViewer', () => {
   (useTimelineEvents as jest.Mock).mockReturnValue([false, mockEventViewerResponse]);
 
-  test('it renders the events viewer', async () => {
-    const wrapper = render(
+  test('it renders the events viewer', () => {
+    const wrapper = mount(
       <TestProviders>
         <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
 
-    expect(wrapper.getByText('hello grid')).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="events-viewer-panel"]`).exists()).toBeTruthy();
   });
 
   // InspectButtonContainer controls displaying InspectButton components
-  test('it renders InspectButtonContainer', async () => {
-    const wrapper = render(
+  test('it renders InspectButtonContainer', () => {
+    const wrapper = mount(
       <TestProviders>
         <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
 
-    expect(wrapper.getByTestId(`hoverVisibilityContainer`)).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="hoverVisibilityContainer"]`).exists()).toBeTruthy();
   });
 
-  test('it closes field editor when unmounted', async () => {
+  test('it closes field editor when unmounted', () => {
     const mockCloseEditor = jest.fn();
     mockUseFieldBrowserOptions.mockImplementation(({ editorActionsRef }) => {
       editorActionsRef.current = { closeEditor: mockCloseEditor };

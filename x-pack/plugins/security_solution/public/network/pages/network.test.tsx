@@ -28,7 +28,6 @@ import { NetworkRoutes } from './navigation';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { InputsModelId } from '../../common/store/inputs/constants';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -231,13 +230,7 @@ describe('Network page - rendering', () => {
     });
     const myState: State = mockGlobalState;
     const { storage } = createSecuritySolutionStorageMock();
-    const myStore = createStore(
-      myState,
-      SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
-      kibanaObservable,
-      storage
-    );
+    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     const wrapper = mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>
