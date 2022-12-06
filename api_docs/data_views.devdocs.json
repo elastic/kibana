@@ -288,6 +288,14 @@
                 "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
               },
@@ -310,14 +318,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
                 "plugin": "lens",
@@ -8589,6 +8589,14 @@
                 "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
               },
@@ -8611,14 +8619,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
                 "plugin": "lens",
@@ -15971,6 +15971,14 @@
                 "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
               },
@@ -15993,14 +16001,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
                 "plugin": "lens",
