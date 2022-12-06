@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'dataQuality';
-export const PLUGIN_NAME = 'dataQuality';
+export * from './fetch_mappings';
+export * from './fetch_stats';
