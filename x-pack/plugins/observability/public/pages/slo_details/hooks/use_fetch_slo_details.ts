@@ -10,7 +10,12 @@ import { useCallback, useMemo } from 'react';
 import { useDataFetcher } from '../../../hooks/use_data_fetcher';
 import { SLO } from '../../../typings';
 
-export function useFetchSloDetails(sloId: string): [boolean, SLO | undefined] {
+interface UseFetchSloDetailsResponse {
+  loading: boolean;
+  slo: SLO | undefined;
+}
+
+function useFetchSloDetails(sloId: string): UseFetchSloDetailsResponse {
   const params = useMemo(() => ({ sloId }), [sloId]);
   const shouldExecuteApiCall = useCallback(
     (apiCallParams: { sloId: string }) => params.sloId === apiCallParams.sloId,
@@ -24,7 +29,7 @@ export function useFetchSloDetails(sloId: string): [boolean, SLO | undefined] {
     shouldExecuteApiCall,
   });
 
-  return [loading, slo];
+  return { loading, slo };
 }
 
 const fetchSlo = async (
@@ -63,3 +68,6 @@ function toSLO(result: any): SLO {
     },
   };
 }
+
+export type { UseFetchSloDetailsResponse };
+export { useFetchSloDetails };

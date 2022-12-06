@@ -57,7 +57,7 @@ describe('SLO Details Page', () => {
 
   it('renders the not found page when the feature flag is not enabled', async () => {
     useParamsMock.mockReturnValue(anSLO.id);
-    useFetchSloDetailsMock.mockReturnValue([false, anSLO]);
+    useFetchSloDetailsMock.mockReturnValue({ loading: false, slo: anSLO });
     render(<SloDetailsPage />, { unsafe: { slo: { enabled: false } } });
 
     expect(screen.queryByTestId('pageNotFound')).toBeTruthy();
@@ -65,7 +65,7 @@ describe('SLO Details Page', () => {
 
   it('renders the not found page when the SLO cannot be found', async () => {
     useParamsMock.mockReturnValue('inexistant');
-    useFetchSloDetailsMock.mockReturnValue([false, undefined]);
+    useFetchSloDetailsMock.mockReturnValue({ loading: false, slo: undefined });
     render(<SloDetailsPage />, config);
 
     expect(screen.queryByTestId('pageNotFound')).toBeTruthy();
@@ -73,7 +73,7 @@ describe('SLO Details Page', () => {
 
   it('renders the loading spiner when fetching the SLO', async () => {
     useParamsMock.mockReturnValue(anSLO.id);
-    useFetchSloDetailsMock.mockReturnValue([true, undefined]);
+    useFetchSloDetailsMock.mockReturnValue({ loading: true, slo: undefined });
     render(<SloDetailsPage />, config);
 
     expect(screen.queryByTestId('pageNotFound')).toBeFalsy();
@@ -83,7 +83,7 @@ describe('SLO Details Page', () => {
 
   it('renders the SLO details page when the feature flag is enabled', async () => {
     useParamsMock.mockReturnValue(anSLO.id);
-    useFetchSloDetailsMock.mockReturnValue([false, anSLO]);
+    useFetchSloDetailsMock.mockReturnValue({ loading: false, slo: anSLO });
     render(<SloDetailsPage />, config);
 
     expect(screen.queryByTestId('sloDetailsPage')).toBeTruthy();

@@ -31,7 +31,7 @@ export function SloDetailsPage() {
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { sloId } = useParams<SloDetailsPathParams>();
 
-  const [loading, slo] = useFetchSloDetails(sloId);
+  const { loading, slo } = useFetchSloDetails(sloId);
   useBreadcrumbs(getBreadcrumbs(http.basePath, slo));
 
   const isSloNotFound = !loading && slo === undefined;
