@@ -26,6 +26,9 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
   const pageObjects = getPageObjects(['common']);
 
   return {
+    /**
+     * URL Navigation
+     */
     async navigateTo() {
       await pageObjects.common.navigateToApp('infraLogs');
     },
@@ -52,6 +55,26 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
       );
     },
 
+    /**
+     * Page
+     */
+    async getPage() {
+      return await testSubjects.find('logStreamPage');
+    },
+    async getMissingIndicesPage() {
+      return await testSubjects.find('noDataPage');
+    },
+
+    /**
+     * Header
+     */
+    async getLogSettingsHeaderLink(): Promise<WebElementWrapper> {
+      return await testSubjects.find('logSettingsHeaderLink');
+    },
+
+    /**
+     * Log stream
+     */
     async getLogStream() {
       return await testSubjects.find('logStream');
     },

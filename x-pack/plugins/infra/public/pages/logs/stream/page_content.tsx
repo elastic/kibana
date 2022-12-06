@@ -47,6 +47,7 @@ export const StreamPageContent: React.FunctionComponent = () => {
               css: fullHeightContentStyles,
             },
           }}
+          data-test-subj="logStreamPage"
         >
           <LogsPageLogsContent />
         </LogsPageTemplate>

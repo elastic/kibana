@@ -66,7 +66,11 @@ export const LogsPageContent: React.FunctionComponent = () => {
       {setHeaderActionMenu && theme$ && (
         <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
           <EuiHeaderLinks gutterSize="xs">
-            <EuiHeaderLink color={'text'} {...settingsLinkProps}>
+            <EuiHeaderLink
+              color={'text'}
+              data-test-subj="logSettingsHeaderLink"
+              {...settingsLinkProps}
+            >
               {settingsTabTitle}
             </EuiHeaderLink>
             <AlertDropdown />

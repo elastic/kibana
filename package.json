@@ -971,6 +971,7 @@
     "@typescript-eslint/parser": "^5.20.0",
     "@typescript-eslint/typescript-estree": "^5.20.0",
     "@wojtekmaj/enzyme-adapter-react-17": "^0.6.7",
+    "@xstate/test": "^1.0.0-alpha.0",
     "@yarnpkg/lockfile": "^1.1.0",
     "abab": "^2.0.4",
     "aggregate-error": "^3.1.0",
@@ -1149,6 +1150,7 @@
     "webpack-sources": "^1.4.1",
     "xml-crypto": "^3.0.1",
     "xmlbuilder": "13.0.2",
+    "xstate": "^4.35.0",
     "yargs": "^15.4.1"
   }
 }

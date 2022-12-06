@@ -86,6 +86,7 @@ export const IndicesConfigurationPanel = React.memo<{
         checked={isDataViewFormElement(indicesFormElement)}
         onChange={changeToIndexPatternType}
         disabled={isReadOnly}
+        data-test-subj="logSettingsDataViewCard"
       >
         {isDataViewFormElement(indicesFormElement) && (
           <IndexPatternConfigurationPanel
@@ -114,6 +115,7 @@ export const IndicesConfigurationPanel = React.memo<{
         checked={isIndexNamesFormElement(indicesFormElement)}
         onChange={changeToIndexNameType}
         disabled={isReadOnly}
+        data-test-subj="logSettingsIndexNamesCard"
       >
         {isIndexNamesFormElement(indicesFormElement) && (
           <IndexNamesConfigurationPanel
