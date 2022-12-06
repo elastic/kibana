@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { set, get } from 'lodash';
-import type { BulkEditOperation, BulkEditFields } from '../rules_client';
+import type { BulkEditOperation, BulkEditFields } from '../types';
 
 // defining an union type that will passed directly to generic function as a workaround for the issue similar to
 // https://github.com/microsoft/TypeScript/issues/29479
