@@ -132,8 +132,8 @@ const WithContextMenu = memo<WithContextMenuProps>(
             {children}
           </EuiButtonEmpty>
         }
-        disabled={!canReadPolicies}
         title={POLICY_EFFECT_SCOPE_TITLE(policies.length)}
+        isNavigationDisabled={!canReadPolicies}
       />
     );
   }
