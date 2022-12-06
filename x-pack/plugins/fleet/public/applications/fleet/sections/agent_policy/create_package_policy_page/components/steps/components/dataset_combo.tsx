@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -22,7 +22,9 @@ export const DatasetComboBox: React.FC<{
     },
   ]);
 
-  if (!value) onChange(defaultOption);
+  useEffect(() => {
+    if (!value) onChange(defaultOption);
+  }, [value, defaultOption, onChange]);
 
   const onDatasetChange = (newSelectedOptions: Array<{ label: string }>) => {
     setSelectedOptions(newSelectedOptions);
@@ -58,6 +60,7 @@ export const DatasetComboBox: React.FC<{
         defaultMessage: 'Add {searchValue} as a custom option',
         values: { searchValue: '{searchValue}' },
       })}
+      isClearable={false}
     />
   );
 };
