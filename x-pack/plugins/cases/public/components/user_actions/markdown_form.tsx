@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
-import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react';
+import React, { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 import styled from 'styled-components';
 
 import { Form, useForm, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import * as i18n from '../case_view/translations';
 import type { Content } from './schema';
 import { schema } from './schema';
 import { MarkdownRenderer, MarkdownEditorForm } from '../markdown_editor';
+import { UserActionMarkdownFooter } from './markdown_form_footer';
 
 export const ContentWrapper = styled.div`
   padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};
@@ -66,36 +65,6 @@ const UserActionMarkdownComponent = forwardRef<
     [setFieldValue]
   );
 
-  const EditorButtons = useMemo(
-    () => (
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="user-action-cancel-markdown"
-            size="s"
-            onClick={handleCancelAction}
-            iconType="cross"
-          >
-            {i18n.CANCEL}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="user-action-save-markdown"
-            color="success"
-            fill
-            iconType="save"
-            onClick={handleSaveAction}
-            size="s"
-          >
-            {i18n.SAVE}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    [handleCancelAction, handleSaveAction]
-  );
-
   useImperativeHandle(ref, () => ({
     setComment,
     editor: editorRef.current,
@@ -111,7 +80,12 @@ const UserActionMarkdownComponent = forwardRef<
           'aria-label': 'Cases markdown editor',
           value: content,
           id,
-          bottomRightContent: EditorButtons,
+          bottomRightContent: (
+            <UserActionMarkdownFooter
+              handleSaveAction={handleSaveAction}
+              handleCancelAction={handleCancelAction}
+            />
+          ),
         }}
       />
     </Form>

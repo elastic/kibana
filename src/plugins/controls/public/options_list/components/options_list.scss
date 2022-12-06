@@ -87,3 +87,11 @@
 .optionsList--filterGroup {
   width: 100%;
 }
+
+.optionsList--hiddenEditorForm {
+  margin-left: $euiSizeXXL + $euiSizeM;
+}
+
+.optionsList--sortPopover {
+  width: $euiSizeXL * 7;
+}

@@ -288,7 +288,7 @@ export function RuleDetailsPage() {
         bottomBorder: false,
         rightSideItems: hasEditButton
           ? [
-              <EuiFlexGroup direction="rowReverse" alignItems="center">
+              <EuiFlexGroup direction="rowReverse" alignItems="flexStart">
                 <EuiFlexItem>
                   <EuiPopover
                     id="contextRuleEditMenu"
@@ -308,21 +308,19 @@ export function RuleDetailsPage() {
                       </EuiButton>
                     }
                   >
-                    <EuiFlexGroup direction="column" alignItems="flexStart">
+                    <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
                       <EuiButtonEmpty
                         data-test-subj="editRuleButton"
                         size="s"
                         iconType="pencil"
                         onClick={handleEditRule}
                       >
-                        <EuiSpacer size="s" />
                         <EuiText size="s">
                           {i18n.translate('xpack.observability.ruleDetails.editRule', {
                             defaultMessage: 'Edit rule',
                           })}
                         </EuiText>
                       </EuiButtonEmpty>
-                      <EuiSpacer size="s" />
                       <EuiButtonEmpty
                         size="s"
                         iconType="trash"
@@ -336,11 +334,9 @@ export function RuleDetailsPage() {
                           })}
                         </EuiText>
                       </EuiButtonEmpty>
-                      <EuiSpacer size="s" />
                     </EuiFlexGroup>
                   </EuiPopover>
                 </EuiFlexItem>
-                <EuiSpacer size="s" />
               </EuiFlexGroup>,
             ]
           : [],

@@ -170,6 +170,10 @@ Array [
     "subFeatures": undefined,
   },
   Object {
+    "id": "filesSharedImage",
+    "subFeatures": undefined,
+  },
+  Object {
     "id": "savedObjectsManagement",
     "subFeatures": undefined,
   },
@@ -455,6 +459,10 @@ Array [
   },
   Object {
     "id": "filesManagement",
+    "subFeatures": undefined,
+  },
+  Object {
+    "id": "filesSharedImage",
     "subFeatures": undefined,
   },
   Object {
@@ -773,6 +781,7 @@ Array [
     "privilege": Object {
       "api": Array [
         "files:manageFiles",
+        "files:defaultImage",
       ],
       "app": Array [
         "kibana",
@@ -784,7 +793,8 @@ Array [
       },
       "savedObject": Object {
         "all": Array [
-          "files",
+          "file",
+          "fileShare",
         ],
         "read": Array [],
       },
@@ -796,6 +806,7 @@ Array [
     "privilege": Object {
       "api": Array [
         "files:manageFiles",
+        "files:defaultImage",
       ],
       "app": Array [
         "kibana",
@@ -808,7 +819,49 @@ Array [
       "savedObject": Object {
         "all": Array [],
         "read": Array [
-          "files",
+          "file",
+          "fileShare",
+        ],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a basic license returns the filesSharedImage feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:defaultImage",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "savedObject": Object {
+        "all": Array [
+          "file",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:defaultImage",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "file",
         ],
       },
       "ui": Array [],
@@ -1332,6 +1385,7 @@ Array [
     "privilege": Object {
       "api": Array [
         "files:manageFiles",
+        "files:defaultImage",
       ],
       "app": Array [
         "kibana",
@@ -1343,7 +1397,8 @@ Array [
       },
       "savedObject": Object {
         "all": Array [
-          "files",
+          "file",
+          "fileShare",
         ],
         "read": Array [],
       },
@@ -1355,6 +1410,7 @@ Array [
     "privilege": Object {
       "api": Array [
         "files:manageFiles",
+        "files:defaultImage",
       ],
       "app": Array [
         "kibana",
@@ -1367,7 +1423,49 @@ Array [
       "savedObject": Object {
         "all": Array [],
         "read": Array [
-          "files",
+          "file",
+          "fileShare",
+        ],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a enterprise license returns the filesSharedImage feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:defaultImage",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "savedObject": Object {
+        "all": Array [
+          "file",
+        ],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "files:defaultImage",
+      ],
+      "app": Array [
+        "kibana",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "file",
         ],
       },
       "ui": Array [],

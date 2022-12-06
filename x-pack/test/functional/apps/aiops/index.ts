@@ -8,8 +8,6 @@
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
-
   // aiops / Explain Log Rate Spikes lives in the ML UI so we need some related services.
   const ml = getService('ml');
 
@@ -28,12 +26,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
-
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./explain_log_rate_spikes_farequote'));
-    loadTestFile(require.resolve('./explain_log_rate_spikes_logs'));
+    loadTestFile(require.resolve('./explain_log_rate_spikes'));
   });
 }

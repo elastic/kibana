@@ -15,6 +15,7 @@ import {
 import type { FilesClient, FilesClientFactory } from './types';
 import { createFilesClient } from './files_client';
 import { FileKind } from '../common';
+import { registerDefaultFileKinds } from '../common/register_default_file_kinds';
 import { ScopedFilesClient } from '.';
 
 /**
@@ -59,6 +60,7 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart> {
         return createFilesClient({ http: core.http }) as FilesClient<M>;
       },
     };
+    registerDefaultFileKinds();
     return {
       filesClientFactory: this.filesClientFactory,
       registerFileKind: (fileKind: FileKind) => {

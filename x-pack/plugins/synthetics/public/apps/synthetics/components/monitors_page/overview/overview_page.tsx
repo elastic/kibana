@@ -38,19 +38,12 @@ export const OverviewPage: React.FC = () => {
 
   const dispatch = useDispatch();
 
-  const { refreshApp, lastRefresh } = useSyntheticsRefreshContext();
+  const { lastRefresh } = useSyntheticsRefreshContext();
   const { query } = useGetUrlParams();
   const { search } = useLocation();
 
   const pageState = useSelector(selectOverviewPageState);
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refreshApp();
-    }, 1000 * 30);
-    return () => clearInterval(interval);
-  }, [refreshApp]);
 
   useEffect(() => {
     if (!locationsLoading && !locationsLoaded) {
