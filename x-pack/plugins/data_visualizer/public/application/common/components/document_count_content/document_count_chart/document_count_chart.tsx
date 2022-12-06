@@ -9,7 +9,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   Axis,
-  BarSeries,
+  HistogramBarSeries,
   BrushEndListener,
   Chart,
   ElementClickListener,
@@ -138,7 +138,7 @@ export const DocumentCountChart: FC<Props> = ({
 
   return (
     <div
-      style={{ width: width ?? '100%', height: 120, display: 'flex', alignItems: 'center' }}
+      style={{ width: width ?? '100%', display: 'flex', alignItems: 'center' }}
       data-test-subj="dataVisualizerDocumentCountChart"
     >
       {loading ? (
@@ -147,6 +147,7 @@ export const DocumentCountChart: FC<Props> = ({
         <Chart
           size={{
             width: '100%',
+            height: 120,
           }}
         >
           <Settings
@@ -161,11 +162,13 @@ export const DocumentCountChart: FC<Props> = ({
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={(value) => xAxisFormatter.convert(value)}
+            // temporary fix to reduce horizontal chart margin until fixed in Elastic Charts itself
+            labelFormat={useLegacyTimeAxis ? undefined : () => ''}
             timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
             style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
           />
           <Axis id="left" position={Position.Left} />
-          <BarSeries
+          <HistogramBarSeries
             id={SPEC_ID}
             name={seriesName}
             xScaleType={ScaleType.Time}
@@ -174,6 +177,7 @@ export const DocumentCountChart: FC<Props> = ({
             yAccessors={['value']}
             data={adjustedChartPoints}
             timeZone={timeZone}
+            yNice
           />
         </Chart>
       )}
