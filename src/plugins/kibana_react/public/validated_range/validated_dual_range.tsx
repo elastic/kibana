@@ -18,14 +18,12 @@ import { isRangeValid } from './is_range_valid';
 export type Value = EuiDualRangeProps['value'];
 export type ValueMember = EuiDualRangeProps['value'][0];
 
-interface Props extends Omit<EuiDualRangeProps, 'value' | 'onChange' | 'min' | 'max'> {
+interface Props extends Omit<EuiDualRangeProps, 'value' | 'onChange'> {
   value?: Value;
   allowEmptyRange?: boolean;
   label?: string | ReactNode;
   formRowDisplay?: EuiFormRowDisplayKeys;
   onChange?: (val: [string, string]) => void;
-  min?: number;
-  max?: number;
 }
 
 interface State {

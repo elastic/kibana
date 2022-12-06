@@ -46,6 +46,8 @@ export const AnomalyThresholdSlider = ({
             showRange
             showTicks
             tickInterval={25}
+            min={0}
+            max={100}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

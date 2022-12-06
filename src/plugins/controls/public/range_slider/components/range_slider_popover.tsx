@@ -143,8 +143,8 @@ export const RangeSliderPopover: FC = () => {
         <EuiFlexItem>
           <EuiDualRange
             id={id}
-            min={hasAvailableRange ? rangeSliderMin : undefined}
-            max={hasAvailableRange ? rangeSliderMax : undefined}
+            min={hasAvailableRange ? rangeSliderMin : 0}
+            max={hasAvailableRange ? rangeSliderMax : 100}
             onChange={([newLowerBound, newUpperBound]) => {
               const updatedLowerBound =
                 typeof newLowerBound === 'number' ? String(newLowerBound) : value[0];
