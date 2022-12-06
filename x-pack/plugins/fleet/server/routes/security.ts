@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pick, result } from 'lodash';
+import { pick } from 'lodash';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type {
   IRouter,
@@ -114,56 +114,6 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
     isSuperuser: false,
   });
 }
-
-// needed from Read routes
-export const READ_ENDPOINT_PACKAGE_PRIVILEGES: DeepPartialTruthy<FleetAuthz> = Object.freeze({
-  packagePrivileges: {
-    endpoint: {
-      actions: {
-        readPolicyManagement: {
-          executePackageAction: true,
-        },
-        readTrustedApplications: {
-          executePackageAction: true,
-        },
-        readEventFilters: {
-          executePackageAction: true,
-        },
-        readHostIsolationExceptions: {
-          executePackageAction: true,
-        },
-        readBlocklist: {
-          executePackageAction: true,
-        },
-      },
-    },
-  },
-});
-
-// needed from CUD routes
-export const WRITE_ENDPOINT_PACKAGE_PRIVILEGES: DeepPartialTruthy<FleetAuthz> = Object.freeze({
-  packagePrivileges: {
-    endpoint: {
-      actions: {
-        writePolicyManagement: {
-          executePackageAction: true,
-        },
-        writeTrustedApplications: {
-          executePackageAction: true,
-        },
-        writeEventFilters: {
-          executePackageAction: true,
-        },
-        writeHostIsolationExceptions: {
-          executePackageAction: true,
-        },
-        writeBlocklist: {
-          executePackageAction: true,
-        },
-      },
-    },
-  },
-});
 
 /**
  * The authorization requirements needed for an API route. Route authorization requirements are
@@ -408,79 +358,6 @@ function flatten(source: FleetAuthzRequirements | FleetAuthz): Record<string, bo
   processKeys('', source);
 
   return response;
-}
-
-// exported only for testing
-export function buildPathsFromRequiredAuthz(required: FleetAuthzRequirements): string[] {
-  const paths: string[] = [];
-  if (required) {
-    function fleetAuthzToPaths(requirements: DeepPartialTruthy<Authz>, prefix: string = '') {
-      for (const key of Object.keys(requirements)) {
-        if (typeof requirements[key] === 'boolean') {
-          paths.push(`${prefix}${key}`);
-        } else if (typeof requirements[key] !== 'undefined') {
-          fleetAuthzToPaths(requirements[key] as DeepPartialTruthy<Authz>, `${prefix}${key}.`);
-        }
-      }
-    }
-    fleetAuthzToPaths(required);
-  }
-  return paths;
-}
-
-export function validateSecurityRbac(
-  fleetAuthz: FleetAuthz,
-  requiredAuthz: {
-    any?: FleetAuthzRequirements;
-    all?: FleetAuthzRequirements;
-  }
-): boolean {
-  const getBoolListFromPaths = (reqAuthz: FleetAuthzRequirements): boolean[] =>
-    buildPathsFromRequiredAuthz(reqAuthz).reduce<boolean[]>((acc, path) => {
-      // add the bool value of the given path in FleetAuthz in the list
-      acc.push(result(fleetAuthz, path));
-      return acc;
-    }, []);
-
-  const invalidAny =
-    !requiredAuthz.all &&
-    requiredAuthz.any &&
-    !getBoolListFromPaths(requiredAuthz.any).some((v) => v);
-  const invalidAll =
-    !requiredAuthz.any &&
-    requiredAuthz.all &&
-    !getBoolListFromPaths(requiredAuthz.all).every((v) => v);
-
-  // integration privileges should be all true or any of the endpoint privileges should be true
-  // e.g. epm/BULK_INSTALL_PATTERN
-  const invalidAnyAndAll =
-    requiredAuthz.any &&
-    !(
-      getBoolListFromPaths(requiredAuthz.any).some((v) => v) ||
-      (requiredAuthz.all && getBoolListFromPaths(requiredAuthz.all).every((v) => v))
-    );
-
-  if (invalidAny || invalidAll || invalidAnyAndAll) {
-    return false;
-  }
-  return true;
-}
-
-export function doesNotHaveRequiredFleetAuthz(
-  authz: FleetAuthz,
-  fleetAuthzConfig: FleetAuthzRouteConfig
-) {
-  return (
-    fleetAuthzConfig.fleetAuthz &&
-    ((typeof fleetAuthzConfig.fleetAuthz === 'function' && !fleetAuthzConfig.fleetAuthz(authz)) ||
-      (fleetAuthzConfig.fleetAuthz &&
-        typeof fleetAuthzConfig.fleetAuthz !== 'function' &&
-        !calculateRouteAuthz(authz, { all: fleetAuthzConfig.fleetAuthz }).granted))
-  );
-}
-
-interface Authz {
-  [k: string]: Authz | boolean;
 }
 
 type DeepPartialTruthy<T> = {

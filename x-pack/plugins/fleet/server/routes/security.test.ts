@@ -11,17 +11,15 @@ import type { AuthenticatedUser, CheckPrivilegesPayload } from '@kbn/security-pl
 import type { CheckPrivilegesResponse } from '@kbn/security-plugin/server/authorization/types';
 import type { CheckPrivilegesDynamically } from '@kbn/security-plugin/server/authorization/check_privileges_dynamically';
 
+import { deepFreeze } from '@kbn/std';
+
 import type { FleetAuthz } from '../../common';
 
 import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from '../services';
 import type { FleetRequestHandlerContext } from '../types';
 
-import {
-  buildPathsFromRequiredAuthz,
-  makeRouterWithFleetAuthz,
-  validateSecurityRbac,
-} from './security';
+import { makeRouterWithFleetAuthz, calculateRouteAuthz } from './security';
 
 function getCheckPrivilegesMockedImplementation(kibanaRoles: string[]) {
   return (checkPrivileges: CheckPrivilegesPayload) => {
@@ -205,44 +203,8 @@ describe('FleetAuthzRouter', () => {
   });
 });
 
-describe('buildPathsFromRequiredAuthz', () => {
-  it('should build paths from given authz', () => {
-    const res = buildPathsFromRequiredAuthz({
-      fleet: {
-        readEnrollmentTokens: true,
-        setup: true,
-      },
-      integrations: {
-        readPackageInfo: true,
-        removePackages: true,
-      },
-      packagePrivileges: {
-        endpoint: {
-          actions: {
-            readPolicyManagement: {
-              executePackageAction: true,
-            },
-            readBlocklist: {
-              executePackageAction: true,
-            },
-          },
-        },
-      },
-    });
-
-    expect(res).toEqual([
-      'fleet.readEnrollmentTokens',
-      'fleet.setup',
-      'integrations.readPackageInfo',
-      'integrations.removePackages',
-      'packagePrivileges.endpoint.actions.readPolicyManagement.executePackageAction',
-      'packagePrivileges.endpoint.actions.readBlocklist.executePackageAction',
-    ]);
-  });
-});
-
-describe('validateSecurityRbac', () => {
-  const fleetAuthz = Object.freeze({
+describe('calculateRouteAuthz', () => {
+  const fleetAuthz = deepFreeze({
     fleet: {
       all: false,
       setup: false,
@@ -325,7 +287,7 @@ describe('validateSecurityRbac', () => {
   describe('with ANY', () => {
     it('should return TRUE if `any` are true', () => {
       expect(
-        validateSecurityRbac(
+        calculateRouteAuthz(
           getFleetAuthz({
             ...fleetAuthz,
             packagePrivileges: {
@@ -367,7 +329,7 @@ describe('validateSecurityRbac', () => {
 
     it('should return FALSE if `any` are false', () => {
       expect(
-        validateSecurityRbac(getFleetAuthz(), {
+        calculateRouteAuthz(getFleetAuthz(), {
           any: {
             integrations: {
               readPackageInfo: true,
@@ -394,7 +356,7 @@ describe('validateSecurityRbac', () => {
   describe('with ALL', () => {
     it('should return TRUE if `all` are true', () => {
       expect(
-        validateSecurityRbac(
+        calculateRouteAuthz(
           getFleetAuthz({
             ...fleetAuthz,
             integrations: {
@@ -444,7 +406,7 @@ describe('validateSecurityRbac', () => {
 
     it('should return FALSE if not `all` are true', () => {
       expect(
-        validateSecurityRbac(
+        calculateRouteAuthz(
           getFleetAuthz({
             ...fleetAuthz,
             packagePrivileges: {
@@ -488,7 +450,7 @@ describe('validateSecurityRbac', () => {
   describe('with ALL and ANY', () => {
     it('should return TRUE if `all` are true', () => {
       expect(
-        validateSecurityRbac(
+        calculateRouteAuthz(
           getFleetAuthz({
             ...fleetAuthz,
             integrations: {
@@ -538,7 +500,7 @@ describe('validateSecurityRbac', () => {
 
     it('should return TRUE if all OR any are true', () => {
       expect(
-        validateSecurityRbac(
+        calculateRouteAuthz(
           getFleetAuthz({
             ...fleetAuthz,
             integrations: {
@@ -587,7 +549,7 @@ describe('validateSecurityRbac', () => {
 
     it('should return TRUE if `all` are not true but `any` are true ', () => {
       expect(
-        validateSecurityRbac(
+        calculateRouteAuthz(
           getFleetAuthz({
             ...fleetAuthz,
             integrations: {
@@ -635,7 +597,7 @@ describe('validateSecurityRbac', () => {
 
     it('should return TRUE if `all` are true but `any` are not true ', () => {
       expect(
-        validateSecurityRbac(
+        calculateRouteAuthz(
           getFleetAuthz({
             ...fleetAuthz,
             integrations: {
