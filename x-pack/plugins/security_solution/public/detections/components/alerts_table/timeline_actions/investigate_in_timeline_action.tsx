@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import { ActionIconItem } from '../../../../common/components/header_actions/action_icon_item';
 
 import type { Ecs } from '../../../../../common/ecs';
-import { ActionIconItem } from '../../../../timelines/components/timeline/body/actions/action_icon_item';
 
 import {
   ACTION_INVESTIGATE_IN_TIMELINE,
