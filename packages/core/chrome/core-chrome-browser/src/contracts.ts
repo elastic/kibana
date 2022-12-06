@@ -7,6 +7,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import { CustomBranding } from '@kbn/core-custom-branding/custom_branding';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -15,7 +16,6 @@ import type { ChromeHelpExtension } from './help_extension';
 import type { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from './breadcrumb';
 import type { ChromeBadge, ChromeUserBanner } from './types';
 import { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
-import { CustomBranding } from '../../../custom-branding/core-custom-branding/custom_branding';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and

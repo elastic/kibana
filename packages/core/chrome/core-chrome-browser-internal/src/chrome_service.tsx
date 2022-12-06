@@ -27,6 +27,7 @@ import type {
   ChromeHelpExtension,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
+import { CustomBranding, CustomBrandingService } from '@kbn/core-custom-branding-internal';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
@@ -34,7 +35,6 @@ import { NavLinksService } from './nav_links';
 import { RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
 import type { InternalChromeStart } from './types';
-import { CustomBranding, CustomBrandingService } from '@kbn/core-custom-branding-internal';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -304,7 +304,7 @@ export class ChromeService {
 
       setCustomBranding: (customBranding: CustomBranding) => {
         customBranding$.next(customBranding);
-      }
+      },
     };
   }
 
