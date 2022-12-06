@@ -26,13 +26,20 @@ const ADD_TO_TIMELINE = i18n.translate(
   }
 );
 
-export const createAddToTimelineAction = (store: SecurityAppStore) => {
+export const createAddToTimelineAction = ({
+  store,
+  order,
+}: {
+  store: SecurityAppStore;
+  order?: number;
+}) => {
   const { application: applicationService, notifications: notificationsService } =
     KibanaServices.get();
 
   return createAction<ActionContext>({
     id: ACTION_ID,
     type: ACTION_ID,
+    order,
     getIconType: (): string => ICON,
     getDisplayName: () => ADD_TO_TIMELINE,
     isCompatible: async () => isInSecurityApp(applicationService),

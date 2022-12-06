@@ -23,10 +23,17 @@ export const SUCCESS_TOAST_TITLE = (field: string) =>
 const ID = 'copy-to-clipboard';
 const ICON = 'copyClipboard';
 
-export const createCopyToClipboardAction = (notificationService: NotificationsStart) =>
+export const createCopyToClipboardAction = ({
+  notificationService,
+  order,
+}: {
+  notificationService: NotificationsStart;
+  order?: number;
+}) =>
   createAction<ActionContext>({
     id: ID,
     type: ID,
+    order,
     getIconType: (): string => ICON,
     getDisplayName: () => COPY_TO_CLIPBOARD,
     isCompatible: async ({ field, value }: ActionContext) => field != null && value != null,

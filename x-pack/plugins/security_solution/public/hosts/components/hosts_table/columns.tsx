@@ -8,16 +8,9 @@
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { CellActions, CellActionsMode } from '@kbn/securitysolution-cell-actions';
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../common/components/drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../common/components/links';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { DefaultDraggable } from '../../../common/components/draggables';
 import type { HostsTableColumns } from '.';
 
@@ -25,6 +18,7 @@ import * as i18n from './translations';
 import type { Maybe, RiskSeverity } from '../../../../common/search_strategy';
 import { VIEW_HOSTS_BY_SEVERITY } from '../host_risk_score_table/translations';
 import { RiskScore } from '../../../common/components/severity/common';
+import { SECURITY_SOLUTION_ACTION_TRIGGER } from '../../../../common/constants';
 
 export const getHostsColumns = (
   showRiskColumn: boolean,

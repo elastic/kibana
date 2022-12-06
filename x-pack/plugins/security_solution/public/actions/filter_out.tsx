@@ -17,10 +17,17 @@ export const FILTER_OUT = i18n.translate('xpack.securitySolution.actions.filterO
 const ID = 'filter-out';
 const ICON = 'minusInCircle';
 
-export const createFilterOutAction = (filterManager: FilterManager) =>
+export const createFilterOutAction = ({
+  filterManager,
+  order,
+}: {
+  filterManager: FilterManager;
+  order?: number;
+}) =>
   createAction<ActionContext>({
     id: ID,
     type: ID,
+    order,
     getIconType: (): string => ICON,
     getDisplayName: () => FILTER_OUT,
     isCompatible: async ({ field, value }: ActionContext) => field != null && value != null,

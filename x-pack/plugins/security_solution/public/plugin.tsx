@@ -41,6 +41,7 @@ import {
   APP_PATH,
   APP_ICON_SOLUTION,
   ENABLE_GROUPED_NAVIGATION,
+  SECURITY_SOLUTION_ACTION_TRIGGER,
 } from '../common/constants';
 
 import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
@@ -481,20 +482,29 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     services: StartServices,
     history: ScopedHistory<unknown>
   ) {
-    const copyAction = createCopyToClipboardAction(core.notifications);
-    const filterInAction = createFilterInAction(plugins.data.query.filterManager);
-    const filterOutAction = createFilterOutAction(plugins.data.query.filterManager);
-    const showTopNAction = createShowTopNAction(store, services, history);
-    const addToTimeline = createAddToTimelineAction(store);
+    const notificationService = core.notifications;
+    const filterManager = plugins.data.query.filterManager;
+
+    const filterInAction = createFilterInAction({
+      filterManager,
+      order: 1,
+    });
+    const filterOutAction = createFilterOutAction({
+      filterManager,
+      order: 2,
+    });
+    const addToTimeline = createAddToTimelineAction({ store, order: 3 });
+    const showTopNAction = createShowTopNAction({ store, services, history, order: 4 });
+    const copyAction = createCopyToClipboardAction({ notificationService, order: 5 });
 
     plugins.uiActions.registerTrigger({
-      id: 'test-security-solution-trigger',
+      id: SECURITY_SOLUTION_ACTION_TRIGGER,
     });
 
-    plugins.uiActions.addTriggerAction('test-security-solution-trigger', copyAction);
-    plugins.uiActions.addTriggerAction('test-security-solution-trigger', filterInAction);
-    plugins.uiActions.addTriggerAction('test-security-solution-trigger', filterOutAction);
-    plugins.uiActions.addTriggerAction('test-security-solution-trigger', showTopNAction);
-    plugins.uiActions.addTriggerAction('test-security-solution-trigger', addToTimeline);
+    plugins.uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, copyAction);
+    plugins.uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, filterInAction);
+    plugins.uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, filterOutAction);
+    plugins.uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, showTopNAction);
+    plugins.uiActions.addTriggerAction(SECURITY_SOLUTION_ACTION_TRIGGER, addToTimeline);
   }
 }

@@ -29,21 +29,22 @@ const TRIGGER_ID = 'testTriggerId';
 
 const CONFIG = { field: 'name', value: '123', fieldType: 'text' };
 
+const getCompatibleActions = () =>
+  Promise.resolve([
+    makeActions('Filter in', 'plusInCircle', 2),
+    makeActions('Filter out', 'minusInCircle', 3),
+    makeActions('Minimize', 'minimize', 1),
+    makeActions('Send email', 'email', 4),
+    makeActions('Pin field', 'pin', 5),
+  ]);
+
 export default {
   title: 'CellAction',
   decorators: [
     (storyFn: Function) => (
       <CellActionsContextProvider
         // call uiActions getTriggerCompatibleActions(triggerId, data)
-        getCompatibleActions={() =>
-          Promise.resolve([
-            makeActions('Filter in', 'plusInCircle', 2),
-            makeActions('Filter out', 'minusInCircle', 3),
-            makeActions('Minimize', 'minimize', 1),
-            makeActions('Send email', 'email', 4),
-            makeActions('Pin field', 'pin', 5),
-          ])
-        }
+        getCompatibleActions={getCompatibleActions}
       >
         <div style={{ paddingTop: '70px' }} />
         {storyFn()}
@@ -60,8 +61,12 @@ export const DefaultWithControls = CellActionsTemplate.bind({});
 
 DefaultWithControls.argTypes = {
   mode: {
-    options: [CellActionsMode.HOVER_POPUP, CellActionsMode.HOVER_INLINE, CellActionsMode.INLINE],
-    defaultValue: CellActionsMode.HOVER_POPUP,
+    options: [
+      CellActionsMode.HOVER_POPOVER,
+      CellActionsMode.HOVER_INLINE,
+      CellActionsMode.ALWAYS_VISIBLE,
+    ],
+    defaultValue: CellActionsMode.HOVER_POPOVER,
     control: {
       type: 'radio',
     },
@@ -70,20 +75,20 @@ DefaultWithControls.argTypes = {
 
 DefaultWithControls.args = {
   showTooltip: true,
-  mode: CellActionsMode.INLINE,
+  mode: CellActionsMode.ALWAYS_VISIBLE,
   triggerId: TRIGGER_ID,
   config: CONFIG,
   showMoreActionsFrom: 3,
 };
 
 export const CellActionInline = ({}: {}) => (
-  <CellActions mode={CellActionsMode.INLINE} triggerId={TRIGGER_ID} config={CONFIG}>
+  <CellActions mode={CellActionsMode.ALWAYS_VISIBLE} triggerId={TRIGGER_ID} config={CONFIG}>
     Field value
   </CellActions>
 );
 
 export const CellActionHoverPopup = ({}: {}) => (
-  <CellActions mode={CellActionsMode.HOVER_POPUP} triggerId={TRIGGER_ID} config={CONFIG}>
+  <CellActions mode={CellActionsMode.HOVER_POPOVER} triggerId={TRIGGER_ID} config={CONFIG}>
     Hover me
   </CellActions>
 );

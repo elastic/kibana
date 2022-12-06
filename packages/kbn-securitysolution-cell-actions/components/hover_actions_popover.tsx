@@ -6,13 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, EuiScreenReaderOnly } from '@elastic/eui';
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-// TODO move it to another package? security-solution-ui??
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { css } from '@emotion/react';
+import { ActionItem } from './cell_action_item';
+import { ExtraActionsButton } from './extra_actions_button';
+import { YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
+import { partitionActions } from '../hooks/actions';
+import { ExtraActionsPopOverWithAnchor } from './extra_actions_popover';
+import { CellActionExecutionContext } from '.';
 
 /** This class is added to the document body while dragging */
 export const IS_DRAGGING_CLASS_NAME = 'is-dragging';
+
+// Overwrite Popover default minWidth to avoid displaying empty space
+const PANEL_STYLE = { minWidth: `24px` };
+
+const hoverContentWrapperCSS = css`
+  padding: 0 ${euiThemeVars.euiSizeS};
+`;
 
 /**
  * To avoid expensive changes to the DOM, delay showing the popover menu
@@ -21,77 +36,51 @@ const HOVER_INTENT_DELAY = 100; // ms
 
 interface Props {
   children: React.ReactNode;
-  /**
-   * Always show the hover menu contents (default: false)
-   */
-  alwaysShow?: boolean;
-  /**
-   * The hover menu is closed whenever this prop changes
-   */
-  closePopOverTrigger?: boolean;
-  /**
-   * Function that return the contents of the hover menu. It is highly recommended you wrap this
-   * content in a `div` with `position: absolute` to prevent it from effecting
-   * layout, and to adjust it's position via `top` and `left`.
-   * The function will be called once the first time the hover event starts for performance optimization.
-   */
-  getHoverContent: (closePopover: () => void) => Promise<JSX.Element>;
-
-  /**
-   * This optional callback is invoked when a close is requested via user
-   * intent, i.e. by clicking outside of the popover, moving the mouse
-   * away, or pressing Escape. It's only a "request" to close, because
-   * the hover menu will NOT be closed if `alwaysShow` is `true`.
-   *
-   * Use this callback when you're managing the state of `alwaysShow`
-   * (outside of this component), and you want to be informed of a user's
-   * intent to close the hover menu.
-   */
-  onCloseRequested?: () => void;
-
-  panelStyle?: React.CSSProperties;
+  getActions: () => Promise<Action[]>;
+  showMoreActionsFrom: number;
+  actionContext: CellActionExecutionContext;
+  showTooltip: boolean;
 }
 
-/**
- * Decorates it's children with actions that are visible on hover.
- * This component does not enforce an opinion on the styling and
- * positioning of the hover content, but see the documentation for
- * the `hoverContent` for tips on (not) effecting layout on-hover.
- *
- * In addition to rendering the `hoverContent` prop on hover, this
- * component also passes `showHoverContent` as a render prop, which
- * provides a signal to the content that the user is in a hover state.
- *
- * IMPORTANT: This hover menu delegates focus management to the
- * `hoverContent` and does NOT own focus, because it should not
- * automatically "steal" focus. You must manage focus ownership,
- * otherwise it will be difficult for keyboard-only and screen
- * reader users to navigate to and from your popover.
- */
 export const HoverActionsPopover = React.memo<Props>(
-  ({ closePopOverTrigger, getHoverContent, onCloseRequested, children, panelStyle }) => {
+  ({ children, getActions, showMoreActionsFrom, actionContext, showTooltip }) => {
+    const contentRef = useRef<HTMLDivElement>(null);
+    const [isExtraActionsPopoverOpen, setIsExtraActionsPopoverOpen] = useState(false);
     const [showHoverContent, setShowHoverContent] = useState(false);
-    const [hoverContent, setHoverContent] = useState<JSX.Element | null>(null);
     const [, setHoverTimeout] = useState<number | undefined>(undefined);
     const popoverRef = useRef<EuiPopover>(null);
+    const [actions, setActions] = useState<Action[] | null>(null);
 
-    const tryClosePopover = useCallback(() => {
+    const { visibleActions, extraActions } = useMemo(
+      () => partitionActions(actions ?? [], showMoreActionsFrom),
+      [actions, showMoreActionsFrom]
+    );
+
+    const closePopover = useCallback(() => {
       setHoverTimeout((prevHoverTimeout) => {
         clearTimeout(prevHoverTimeout);
         return undefined;
       });
-
       setShowHoverContent(false);
+    }, []);
 
-      if (onCloseRequested != null) {
-        onCloseRequested();
+    const closeExtraActions = useCallback(
+      () => setIsExtraActionsPopoverOpen(false),
+      [setIsExtraActionsPopoverOpen]
+    );
+
+    const onShowExtraActionsClick = useCallback(() => {
+      setIsExtraActionsPopoverOpen(true);
+      closePopover();
+    }, [closePopover, setIsExtraActionsPopoverOpen]);
+
+    const onMouseEnter = useCallback(async () => {
+      closeExtraActions(); // Closed extra actions when opening hover actions
+
+      // memoize actions after the first call
+      if (actions === null) {
+        getActions().then((newActions) => setActions(newActions));
       }
-    }, [onCloseRequested]);
-
-    const onMouseEnter = useCallback(() => {
-      getHoverContent(() => tryClosePopover()).then((hoverContentParam) => {
-        setHoverContent(hoverContentParam);
-      });
 
       setHoverTimeout(
         Number(
@@ -105,11 +94,11 @@ export const HoverActionsPopover = React.memo<Props>(
           }, HOVER_INTENT_DELAY)
         )
       );
-    }, [getHoverContent, tryClosePopover]);
+    }, [closeExtraActions, getActions, actions]);
 
     const onMouseLeave = useCallback(() => {
-      tryClosePopover();
-    }, [tryClosePopover]);
+      closePopover();
+    }, [closePopover]);
 
     const onKeyDown = useCallback(
       (keyboardEvent: React.KeyboardEvent) => {
@@ -122,40 +111,62 @@ export const HoverActionsPopover = React.memo<Props>(
 
     const content = useMemo(
       () => (
-        <div data-test-subj="withHoverActionsButton" onMouseEnter={onMouseEnter}>
+        <div ref={contentRef} onMouseEnter={onMouseEnter}>
           {children}
         </div>
       ),
       [children, onMouseEnter]
     );
 
-    useEffect(() => {
-      setShowHoverContent(false);
-    }, [closePopOverTrigger]); // NOTE: the `closePopOverTrigger` dependency here will close the hover menu whenever `closePopOverTrigger` changes
-
-    // useEffect(() => {
-    //   // in case of dynamic content i.e when the value of hoverContent changes,
-    //   // we will try to reposition the popover so that the content does not collide with screen edge.
-    //   if (showHoverContent) popoverRef?.current?.positionPopoverFluid();
-    // }, [hoverContent, showHoverContent]);
-
     return (
-      <div onMouseLeave={onMouseLeave}>
-        <EuiPopover
-          panelStyle={panelStyle}
-          ref={popoverRef}
-          anchorPosition={'downCenter'}
-          button={content}
-          closePopover={tryClosePopover}
-          hasArrow={false}
-          isOpen={showHoverContent}
-          panelPaddingSize="none"
-          repositionOnScroll
-          ownFocus={false}
-        >
-          {showHoverContent ? <div onKeyDown={onKeyDown}>{hoverContent}</div> : null}
-        </EuiPopover>
-      </div>
+      <>
+        <div onMouseLeave={onMouseLeave}>
+          <EuiPopover
+            panelStyle={PANEL_STYLE}
+            ref={popoverRef}
+            anchorPosition={'downCenter'}
+            button={content}
+            closePopover={closePopover}
+            hasArrow={false}
+            isOpen={showHoverContent}
+            panelPaddingSize="none"
+            repositionOnScroll
+            ownFocus={false}
+          >
+            {showHoverContent ? (
+              <div onKeyDown={onKeyDown}>
+                <div css={hoverContentWrapperCSS}>
+                  <EuiScreenReaderOnly>
+                    <p>{YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS(actionContext.field)}</p>
+                  </EuiScreenReaderOnly>
+                  {visibleActions.map((action) => (
+                    <ActionItem
+                      key={action.id}
+                      action={action}
+                      actionContext={actionContext}
+                      showTooltip={showTooltip}
+                    />
+                  ))}
+                  {extraActions.length > 0 ? (
+                    <ExtraActionsButton
+                      onClick={onShowExtraActionsClick}
+                      showTooltip={showTooltip}
+                    />
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+          </EuiPopover>
+        </div>
+        <ExtraActionsPopOverWithAnchor
+          showMoreActionsFrom={showMoreActionsFrom}
+          getActions={getActions}
+          anchorRef={contentRef}
+          actionContext={actionContext}
+          closePopOver={closeExtraActions}
+          isOpen={isExtraActionsPopoverOpen}
+        />
+      </>
     );
   }
 );

@@ -17,10 +17,17 @@ export const FILTER_IN = i18n.translate('xpack.securitySolution.actions.filterIn
 const ID = 'filter-in';
 const ICON = 'plusInCircle';
 
-export const createFilterInAction = (filterManager: FilterManager) =>
+export const createFilterInAction = ({
+  filterManager,
+  order,
+}: {
+  filterManager: FilterManager;
+  order?: number;
+}) =>
   createAction<ActionContext>({
     id: ID,
     type: ID,
+    order,
     getIconType: (): string => ICON,
     getDisplayName: () => FILTER_IN,
     isCompatible: async ({ field, value }: ActionContext) => field != null && value != null,

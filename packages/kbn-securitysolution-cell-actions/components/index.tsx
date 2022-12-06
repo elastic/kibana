@@ -11,8 +11,8 @@ import React, { useCallback, useContext, useMemo, useRef } from 'react';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
 import { CellActionsContext } from './cell_actions_context';
-import { HoverActions } from './hover_actions';
 import { InlineActions } from './inline_actions';
+import { HoverActionsPopover } from './hover_actions_popover';
 
 export interface CellActionConfig {
   field: string;
@@ -34,9 +34,9 @@ export interface CellActionExecutionContext extends CellActionConfig, ActionExec
 }
 
 export enum CellActionsMode {
-  HOVER_POPUP = 'hover-popup',
+  HOVER_POPOVER = 'hover-popover',
   HOVER_INLINE = 'hover-inline',
-  INLINE = 'inline',
+  ALWAYS_VISIBLE = 'always-visible',
 }
 
 export interface CellActionsProps {
@@ -87,21 +87,22 @@ export const CellActions: React.FC<CellActionsProps> = ({
     }
   }, [context, triggerId, actionContext]);
 
-  if (mode === CellActionsMode.HOVER_POPUP) {
+  if (mode === CellActionsMode.HOVER_POPOVER) {
     return (
       <div ref={nodeRef}>
-        <HoverActions
+        <HoverActionsPopover
           getActions={getActions}
           actionContext={actionContext}
           showTooltip={showTooltip}
           showMoreActionsFrom={showMoreActionsFrom}
         >
           {children}
-        </HoverActions>
+        </HoverActionsPopover>
+
         <div ref={extraContentNodeRef} />
       </div>
     );
-  } else if (mode === CellActionsMode.INLINE) {
+  } else if (mode === CellActionsMode.ALWAYS_VISIBLE) {
     return (
       <div ref={nodeRef}>
         {children}

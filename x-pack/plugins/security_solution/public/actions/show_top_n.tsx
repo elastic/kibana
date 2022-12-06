@@ -32,14 +32,21 @@ const SHOW_TOP = (fieldName: string) =>
 const ID = 'show-top-n';
 const ICON = 'visBarVertical';
 
-export const createShowTopNAction = (
-  store: SecurityAppStore,
-  services: StartServices,
-  history: ScopedHistory<unknown>
-) =>
+export const createShowTopNAction = ({
+  store,
+  services,
+  history,
+  order,
+}: {
+  store: SecurityAppStore;
+  services: StartServices;
+  history: ScopedHistory<unknown>;
+  order?: number;
+}) =>
   createAction<ActionContext>({
     id: ID,
     type: ID,
+    order,
     getIconType: (): string => ICON,
     getDisplayName: ({ field }) => SHOW_TOP(field),
     isCompatible: async ({ field, value }: ActionContext) => field != null && value != null,
