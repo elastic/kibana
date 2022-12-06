@@ -75,6 +75,7 @@ export const Actions = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <DeleteMonitor
+          key={configId}
           onUpdate={onUpdate}
           name={name}
           configId={configId}
