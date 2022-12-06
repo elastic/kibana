@@ -78,7 +78,9 @@ export const cleanPrivateLocations = async (params: Record<string, any>) => {
 
   try {
     await server.savedObjects.clean({ types: [privateLocationsSavedObjectName] });
-    await server.savedObjects.clean({ types: ['ingest-agent-policies'] });
+    await server.savedObjects.clean({
+      types: ['ingest-agent-policies', 'ingest-package-policies'],
+    });
   } catch (e) {
     // eslint-disable-next-line no-console
     console.log(e);

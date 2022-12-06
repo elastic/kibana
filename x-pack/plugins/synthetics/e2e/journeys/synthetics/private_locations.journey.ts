@@ -7,6 +7,7 @@
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { byTestId } from '@kbn/observability-plugin/e2e/utils';
+import { waitForLoadingToFinish } from '@kbn/ux-plugin/e2e/journeys/utils';
 import {
   addTestMonitor,
   cleanPrivateLocations,
@@ -46,8 +47,9 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     expect(page.url()).toBe('http://localhost:5620/app/fleet/policies?create');
     await page.click('[placeholder="Choose a name"]');
     await page.fill('[placeholder="Choose a name"]', 'Test fleet policy');
+    await page.click('text=Collect system logs and metrics');
     await page.click('div[role="dialog"] button:has-text("Create agent policy")');
-    await page.waitForTimeout(30 * 1000);
+    await waitForLoadingToFinish({ page });
   });
   step('Go to http://localhost:5620/app/fleet/policies', async () => {
     await syntheticsApp.navigateToSettings(false);
