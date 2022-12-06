@@ -1,16 +1,92 @@
 [[whats-new]]
 == What's new in {minor-version}
 
+coming::[8.6.0]
+
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
 
-Previous versions: {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] 
+Previous versions: {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2]
 | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
-//NOTE: The notable-highlights tagged regions are re-used in the
-//Installation and Upgrade Guide
+[discrete]
+=== Flexible analysis with temporary data views
 
-// tag::notable-highlights[]
+Create temporary data views on the fly,
+allowing you to explore and visualize your data before you’re ready to share your
+insights with others in your organization. Add fields and create an {es} query alert,
+just like you would a regular {data-source}. When you’re ready, you can save the {data-source}
+for a fully collaborative experience. For more information, check <<data-views>>.
 
-// end::notable-highlights[]
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blta02aa660465a1a6d/638e6d162f42a15313a04f27/highlights-adhoc-data-views.gif[Temporary data views in Lens]
+
+[discrete]
+=== Visualization editors
+
+[discrete]
+==== Trend lines on metric visualizations
+
+preview:[] Layering visual components helps you to create even more powerful
+visualizations for your dashboards. With the metric visualization in Lens,
+you can now add trend lines to highlight important trends in your data
+and uncover insights.
+
+[role="screenshot"]
+image::images/highlights-metric-vis.png[Trend lines on metric visualizations]
+
+[discrete]
+==== Partition charts with multiple metrics
+
+Making sense of your data just got a whole lot easier. In Lens, you can create partition
+charts with multiple metrics, which is helpful for when you want a complete view of your data, such as the rate of errors by type under different conditions.
+
+[role="screenshot"]
+image::images/highlights-partition-charts.png[Multiple metrics in a partition chart]
+
+[discrete]
+==== Global filters for annotations
+
+In Lens, use your configured global filters with annotations. Now,
+the annotations that call out significant changes and trends in your
+time-based visualizations, incorporate all of your filters.
+For more information about Lens annotations, check <<add-annotations,Add annotations>>.
+
+[role="screenshot"]
+image::images/highlights-global-filters.png[Menu item for keeping global filters with annotations, width="50%"]
+
+
+[discrete]
+=== Maps
+
+[discrete]
+==== Layer groups
+
+Reduce legend clutter by organizing map layers into groups.
+Show or hide all layers in a group with a single click.
+
+[role="screenshot"]
+image::images/highlights-maps-layer-groups.png[Layer groups in map legend, width="50%"]
+
+[discrete]
+==== Color ramp and symbol size inversion
+
+Invert color ramps and symbol size to symbolize smaller values with more intense colors.
+
+[role="screenshot"]
+image::images/highlights-maps-color-ramp.png[Map showing intense colors because color ramps and symbol size show smaller values]
+
+
+[discrete]
+=== Machine Learning
+
+[discrete]
+==== Anomaly explanation
+
+Additional information is now available on the anomaly table to help explain why something is
+anomalous and to show that the anomaly score has significantly changed from its initial value.
+Each explanatory item has tooltips that help users better understand the anomaly.
+
+[role="screenshot"]
+image::images/highlights-anomaly.png[Tooltip in anomaly table]
