@@ -11,13 +11,12 @@ import { extractPersistableStateReferencesFromSO } from '../../../attachment_fra
 import type { CommentUserAction } from '../../../../common/api';
 import { ActionTypes, Actions } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import type { PersistableUserAction } from '../persistable_user_action';
-import type { UserActionLogBody, UserActionParameters } from '../types';
+import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 import { getAttachmentSOExtractor } from '../../so_references';
 import { actionToPastTenseVerb } from './audit_logger_utils';
 
 export class CommentUserActionBuilder extends UserActionBuilder {
-  build(args: UserActionParameters<'comment'>): PersistableUserAction {
+  build(args: UserActionParameters<'comment'>): UserActionEvent {
     const soExtractor = getAttachmentSOExtractor(args.payload.attachment);
     const { transformedFields, references: refsWithExternalRefId } =
       soExtractor.extractFieldsToReferences<CommentUserAction['payload']['comment']>({
@@ -39,7 +38,7 @@ export class CommentUserActionBuilder extends UserActionBuilder {
       type: ActionTypes.comment,
     });
 
-    const fields = {
+    const parameters = {
       ...commentUserAction,
       references: uniqBy(
         [...commentUserAction.references, ...refsWithExternalRefId, ...extractedReferences],
@@ -49,19 +48,23 @@ export class CommentUserActionBuilder extends UserActionBuilder {
 
     const verb = actionToPastTenseVerb(action);
 
-    const createMessage = (id?: string) =>
+    const getMessage = (id?: string) =>
       `User ${verb} comment id: ${commentId(args.attachmentId)} for case id: ${
         args.caseId
       } - user action id: ${id}`;
 
-    const loggerFields: UserActionLogBody = {
-      createMessage,
-      eventAction: `case_user_action_${action}_comment`,
+    const eventDetails: EventDetails = {
+      getMessage,
+      action,
+      descriptiveAction: `case_user_action_${action}_comment`,
       savedObjectId: args.attachmentId ?? args.caseId,
       savedObjectType: CASE_COMMENT_SAVED_OBJECT,
     };
 
-    return this.createPersistableUserAction(loggerFields, fields);
+    return {
+      parameters,
+      eventDetails,
+    };
   }
 }
 

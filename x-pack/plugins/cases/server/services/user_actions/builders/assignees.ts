@@ -9,14 +9,13 @@ import { CASE_SAVED_OBJECT } from '../../../../common/constants';
 import type { UserAction } from '../../../../common/api';
 import { ActionTypes, Actions } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import type { PersistableUserAction } from '../persistable_user_action';
-import type { UserActionLogBody, UserActionParameters } from '../types';
+import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 
 export class AssigneesUserActionBuilder extends UserActionBuilder {
-  build(args: UserActionParameters<'assignees'>): PersistableUserAction {
+  build(args: UserActionParameters<'assignees'>): UserActionEvent {
     const action = args.action ?? Actions.add;
 
-    const persistableFields = this.buildCommonUserAction({
+    const soParams = this.buildCommonUserAction({
       ...args,
       action,
       valueKey: 'assignees',
@@ -27,17 +26,21 @@ export class AssigneesUserActionBuilder extends UserActionBuilder {
     const uids = args.payload.assignees.map((assignee) => assignee.uid);
     const verbMessage = getVerbMessage(action, uids);
 
-    const createMessage = (id?: string) =>
+    const getMessage = (id?: string) =>
       `User ${verbMessage} case id: ${args.caseId} - user action id: ${id}`;
 
-    const loggerFields: UserActionLogBody = {
-      createMessage,
-      eventAction: `case_user_action_${action}_case_assignees`,
+    const event: EventDetails = {
+      getMessage,
+      action,
+      descriptiveAction: `case_user_action_${action}_case_assignees`,
       savedObjectId: args.caseId,
       savedObjectType: CASE_SAVED_OBJECT,
     };
 
-    return this.createPersistableUserAction(loggerFields, persistableFields);
+    return {
+      parameters: soParams,
+      eventDetails: event,
+    };
   }
 }
 

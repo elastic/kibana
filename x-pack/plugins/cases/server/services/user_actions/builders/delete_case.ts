@@ -8,21 +8,22 @@
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { Actions, ActionTypes } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import type { PersistableUserAction } from '../persistable_user_action';
 import type {
-  PersistableUserActionFields,
-  UserActionLogBody,
+  SavedObjectParameters,
+  EventDetails,
   UserActionParameters,
+  UserActionEvent,
 } from '../types';
 
 export class DeleteCaseUserActionBuilder extends UserActionBuilder {
-  build(args: UserActionParameters<'delete_case'>): PersistableUserAction {
+  build(args: UserActionParameters<'delete_case'>): UserActionEvent {
     const { caseId, owner, user, connectorId } = args;
+    const action = Actions.delete;
 
-    const persistableFields: PersistableUserActionFields = {
+    const parameters: SavedObjectParameters = {
       attributes: {
         ...this.getCommonUserActionAttributes({ user, owner }),
-        action: Actions.delete,
+        action,
         payload: {},
         type: ActionTypes.delete_case,
       },
@@ -32,15 +33,19 @@ export class DeleteCaseUserActionBuilder extends UserActionBuilder {
       ],
     };
 
-    const createMessage = () => `User deleted case id: ${caseId}`;
+    const getMessage = () => `User deleted case id: ${caseId}`;
 
-    const loggerFields: UserActionLogBody = {
-      createMessage,
-      eventAction: 'case_user_action_delete_case',
+    const eventDetails: EventDetails = {
+      getMessage,
+      action,
+      descriptiveAction: 'case_user_action_delete_case',
       savedObjectId: caseId,
       savedObjectType: CASE_SAVED_OBJECT,
     };
 
-    return this.createPersistableUserAction(loggerFields, persistableFields);
+    return {
+      parameters,
+      eventDetails,
+    };
   }
 }

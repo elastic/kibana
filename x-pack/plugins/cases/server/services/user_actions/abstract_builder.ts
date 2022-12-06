@@ -7,7 +7,6 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { AuditLogger } from '@kbn/security-plugin/server';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import {
   CASE_REF_NAME,
@@ -21,20 +20,17 @@ import type {
   BuilderDeps,
   BuilderParameters,
   CommonBuilderArguments,
-  PersistableUserActionFields,
-  UserActionLogBody,
+  SavedObjectParameters,
   UserActionParameters,
+  UserActionEvent,
 } from './types';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import { PersistableUserAction } from './persistable_user_action';
 
 export abstract class UserActionBuilder {
   protected readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  private readonly auditLogger: AuditLogger;
 
   constructor(deps: BuilderDeps) {
     this.persistableStateAttachmentTypeRegistry = deps.persistableStateAttachmentTypeRegistry;
-    this.auditLogger = deps.auditLogger;
   }
 
   protected getCommonUserActionAttributes({ user, owner }: { user: User; owner: string }) {
@@ -103,7 +99,7 @@ export abstract class UserActionBuilder {
     attachmentId,
     connectorId,
     type,
-  }: CommonBuilderArguments): PersistableUserActionFields => {
+  }: CommonBuilderArguments): SavedObjectParameters => {
     return {
       attributes: {
         ...this.getCommonUserActionAttributes({ user, owner }),
@@ -124,18 +120,7 @@ export abstract class UserActionBuilder {
     };
   };
 
-  protected createPersistableUserAction(
-    body: UserActionLogBody,
-    persistableUserActionFields: PersistableUserActionFields
-  ): PersistableUserAction {
-    return new PersistableUserAction({
-      commonFields: { auditLogger: this.auditLogger },
-      logBody: body,
-      _persistableFields: persistableUserActionFields,
-    });
-  }
-
   public abstract build<T extends keyof BuilderParameters>(
     args: UserActionParameters<T>
-  ): PersistableUserAction;
+  ): UserActionEvent;
 }

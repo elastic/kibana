@@ -8,10 +8,10 @@
 import { Actions } from '../../../common/api';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { PersistableUserAction } from './persistable_user_action';
-import type { Attributes } from './types';
+import { UserActionAuditLogger } from './audit_logger';
+import type { EventDetails } from './types';
 
-describe('PersistableUserAction', () => {
+describe('UserActionAuditLogger', () => {
   let mockLogger: jest.Mocked<AuditLogger>;
 
   beforeEach(() => {
@@ -24,19 +24,17 @@ describe('PersistableUserAction', () => {
     [Actions.delete, 'deletion'],
     [Actions.push_to_service, 'creation'],
     [Actions.update, 'change'],
-  ])('logs %s user action as type %s', (action, type) => {
-    const userAction = new PersistableUserAction({
-      commonFields: { auditLogger: mockLogger },
-      _persistableFields: { attributes: { action } as Attributes, references: [] },
-      logBody: {
-        createMessage: (id?: string) => `id: ${id}`,
-        savedObjectId: '123',
-        savedObjectType: 'type',
-        eventAction: 'action',
-      },
-    });
+  ])('logs %s user action as event.type %s', (action, type) => {
+    const eventDetails: EventDetails = {
+      getMessage: (id?: string) => `id: ${id}`,
+      action,
+      descriptiveAction: 'action',
+      savedObjectId: '123',
+      savedObjectType: 'type',
+    };
 
-    userAction.log('idParam');
+    const logger = new UserActionAuditLogger(mockLogger);
+    logger.log(eventDetails, 'idParam');
 
     expect(mockLogger.log.mock.calls[0]).toMatchSnapshot();
   });

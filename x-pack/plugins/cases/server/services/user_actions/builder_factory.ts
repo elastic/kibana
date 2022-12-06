@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { UserActionTypes } from '../../../common/api';
 import { CreateCaseUserActionBuilder } from './builders/create_case';
 import { TitleUserActionBuilder } from './builders/title';
@@ -40,17 +39,14 @@ const builderMap = {
 
 export class BuilderFactory {
   private readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  private readonly auditLogger: AuditLogger;
 
   constructor(deps: BuilderDeps) {
     this.persistableStateAttachmentTypeRegistry = deps.persistableStateAttachmentTypeRegistry;
-    this.auditLogger = deps.auditLogger;
   }
 
   getBuilder<T extends UserActionTypes>(type: T): UserActionBuilder | undefined {
     return new builderMap[type]({
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
-      auditLogger: this.auditLogger,
     });
   }
 }

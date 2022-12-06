@@ -61,6 +61,7 @@ import type {
   BuilderParameters,
   CommonArguments,
   CreateUserAction,
+  UserActionEvent,
   UserActionParameters,
 } from './types';
 import { BuilderFactory } from './builder_factory';
@@ -70,7 +71,7 @@ import { injectPersistableReferencesToSO } from '../../attachment_framework/so_r
 import type { IndexRefresh } from '../types';
 import { isAssigneesArray, isStringArray } from './type_guards';
 import type { CaseSavedObject } from '../../common/types';
-import type { PersistableUserAction } from './persistable_user_action';
+import { UserActionAuditLogger } from './audit_logger';
 
 export interface UserActionItem {
   attributes: CaseUserActionAttributesWithoutConnectorId;
@@ -78,7 +79,7 @@ export interface UserActionItem {
 }
 
 interface PostCaseUserActionArgs extends IndexRefresh {
-  actions: PersistableUserAction[];
+  actions: UserActionEvent[];
 }
 
 interface CreateUserActionES<T> extends IndexRefresh {
@@ -129,6 +130,7 @@ export class CaseUserActionService {
   private readonly builderFactory: BuilderFactory;
   private readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private readonly log: Logger;
+  private readonly auditLogger: UserActionAuditLogger;
 
   constructor({
     log,
@@ -147,13 +149,12 @@ export class CaseUserActionService {
 
     this.builderFactory = new BuilderFactory({
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
-      auditLogger,
     });
+
+    this.auditLogger = new UserActionAuditLogger(auditLogger);
   }
 
-  private getUserActionItemByDifference(
-    params: GetUserActionItemByDifference
-  ): PersistableUserAction[] {
+  private getUserActionItemByDifference(params: GetUserActionItemByDifference): UserActionEvent[] {
     const { field, originalValue, newValue, caseId, owner, user } = params;
 
     if (!CaseUserActionService.userActionFieldsAllowed.has(field)) {
@@ -278,7 +279,7 @@ export class CaseUserActionService {
         payload: {},
       });
 
-      deleteCaseUserAction?.log();
+      this.auditLogger.log(deleteCaseUserAction?.eventDetails);
     }
   }
 
@@ -288,7 +289,7 @@ export class CaseUserActionService {
     user,
     refresh,
   }: BulkCreateBulkUpdateCaseUserActions): Promise<void> {
-    const builtUserActions = updatedCases.reduce<PersistableUserAction[]>((acc, updatedCase) => {
+    const builtUserActions = updatedCases.reduce<UserActionEvent[]>((acc, updatedCase) => {
       const originalCase = originalCases.find(({ id }) => id === updatedCase.id);
 
       if (originalCase == null) {
@@ -298,7 +299,7 @@ export class CaseUserActionService {
       const caseId = updatedCase.id;
       const owner = originalCase.attributes.owner;
 
-      const userActions: PersistableUserAction[] = [];
+      const userActions: UserActionEvent[] = [];
       const updatedFields = Object.keys(updatedCase.attributes);
 
       updatedFields
@@ -335,7 +336,7 @@ export class CaseUserActionService {
     refresh,
   }: BulkCreateAttachmentUserAction): Promise<void> {
     this.log.debug(`Attempting to create a bulk create case user action`);
-    const userActions = attachments.reduce<PersistableUserAction[]>((acc, attachment) => {
+    const userActions = attachments.reduce<UserActionEvent[]>((acc, attachment) => {
       const userActionBuilder = this.builderFactory.getBuilder(ActionTypes.comment);
       const commentUserAction = userActionBuilder?.build({
         action,
@@ -482,10 +483,10 @@ export class CaseUserActionService {
     userAction,
     refresh,
   }: {
-    userAction: PersistableUserAction;
+    userAction: UserActionEvent;
   } & IndexRefresh): Promise<void> {
-    const createdUserAction = await this.create({ ...userAction.persistableFields, refresh });
-    userAction.log(createdUserAction.id);
+    const createdUserAction = await this.create({ ...userAction.parameters, refresh });
+    this.auditLogger.log(userAction.eventDetails, createdUserAction.id);
   }
 
   private async create<T>({
@@ -513,7 +514,7 @@ export class CaseUserActionService {
   private async bulkCreateAndLog({
     userActions,
     refresh,
-  }: { userActions: PersistableUserAction[] } & IndexRefresh) {
+  }: { userActions: UserActionEvent[] } & IndexRefresh) {
     const createdUserActions = await this.bulkCreate({ actions: userActions, refresh });
 
     if (!createdUserActions) {
@@ -521,7 +522,7 @@ export class CaseUserActionService {
     }
 
     for (let i = 0; i < userActions.length; i++) {
-      userActions[i].log(createdUserActions.saved_objects[i].id);
+      this.auditLogger.log(userActions[i].eventDetails, createdUserActions.saved_objects[i].id);
     }
   }
 
@@ -539,7 +540,7 @@ export class CaseUserActionService {
       return await this.unsecuredSavedObjectsClient.bulkCreate(
         actions.map((action) => ({
           type: CASE_USER_ACTION_SAVED_OBJECT,
-          ...action.persistableFields,
+          ...action.parameters,
         })),
         { refresh }
       );

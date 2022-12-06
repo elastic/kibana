@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import {
   Actions,
@@ -26,7 +25,6 @@ import { casePayload, externalService } from './mocks';
 
 describe('UserActionBuilder', () => {
   const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
-  const mockAuditLogger = auditLoggerMock.create();
   const commonArgs = {
     caseId: '123',
     user: { full_name: 'Elastic User', username: 'elastic', email: 'elastic@elastic.co' },
@@ -38,7 +36,6 @@ describe('UserActionBuilder', () => {
     jest.clearAllMocks();
     builderFactory = new BuilderFactory({
       persistableStateAttachmentTypeRegistry,
-      auditLogger: mockAuditLogger,
     });
   });
 
@@ -51,7 +48,7 @@ describe('UserActionBuilder', () => {
     jest.useRealTimers();
   });
 
-  describe('persistableFields', () => {
+  describe('parameters', () => {
     it('builds a title user action correctly', () => {
       const builder = builderFactory.getBuilder(ActionTypes.title)!;
       const userAction = builder.build({
@@ -59,7 +56,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.persistableFields).toMatchInlineSnapshot(`
+      expect(userAction.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -108,7 +105,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.persistableFields).toMatchInlineSnapshot(`
+      expect(userAction.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -167,7 +164,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.persistableFields).toMatchInlineSnapshot(`
+      expect(userAction.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -214,7 +211,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.persistableFields).toMatchInlineSnapshot(`
+      expect(userAction.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -271,7 +268,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.persistableFields).toMatchInlineSnapshot(`
+      expect(userAction.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -323,7 +320,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.persistableFields).toMatchInlineSnapshot(`
+      expect(userAction.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -374,7 +371,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.persistableFields).toMatchInlineSnapshot(`
+      expect(userAction.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -408,7 +405,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.persistableFields).toMatchInlineSnapshot(`
+      expect(userAction.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "push_to_service",
@@ -459,7 +456,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.persistableFields).toMatchInlineSnapshot(`
+      expect(userAction.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "add",
@@ -496,7 +493,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.persistableFields).toMatchInlineSnapshot(`
+      expect(userAction.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -530,7 +527,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.persistableFields).toMatchInlineSnapshot(`
+      expect(userAction.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -564,7 +561,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.persistableFields).toMatchInlineSnapshot(`
+      expect(userAction.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "add",
@@ -605,7 +602,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.persistableFields).toMatchInlineSnapshot(`
+      expect(userAction.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -641,7 +638,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.persistableFields).toMatchInlineSnapshot(`
+      expect(userAction.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "create",
@@ -709,7 +706,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.persistableFields).toMatchInlineSnapshot(`
+      expect(userAction.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "delete",
@@ -740,7 +737,7 @@ describe('UserActionBuilder', () => {
     });
   });
 
-  describe('audit log', () => {
+  describe('eventDetails', () => {
     it('builds a title user action correctly', () => {
       const builder = builderFactory.getBuilder(ActionTypes.title)!;
       const userAction = builder.build({
@@ -748,31 +745,18 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_update_case_title",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "change",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "123",
-                "type": "cases",
-              },
-            },
-            "message": "User updated the title for case id: 123 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "update",
+          "descriptiveAction": "case_user_action_update_case_title",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User updated the title for case id: 123 - user action id: 123"`
+      );
     });
 
     it('logs a connector user action correctly', () => {
@@ -797,31 +781,18 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_update_case_connector",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "change",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "123",
-                "type": "cases",
-              },
-            },
-            "message": "User changed the case connector to id: 456 for case id: 123 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "update",
+          "descriptiveAction": "case_user_action_update_case_connector",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User changed the case connector to id: 456 for case id: 123 - user action id: 123"`
+      );
     });
 
     it('logs a comment user action correctly', () => {
@@ -839,31 +810,18 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_update_comment",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "change",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "test-id",
-                "type": "cases-comments",
-              },
-            },
-            "message": "User changed comment id: test-id for case id: 123 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "update",
+          "descriptiveAction": "case_user_action_update_comment",
+          "getMessage": [Function],
+          "savedObjectId": "test-id",
+          "savedObjectType": "cases-comments",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User changed comment id: test-id for case id: 123 - user action id: 123"`
+      );
     });
 
     it('logs an external reference attachment (savedObject) user action correctly', () => {
@@ -877,31 +835,18 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_update_comment",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "change",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "test-id",
-                "type": "cases-comments",
-              },
-            },
-            "message": "User changed comment id: test-id for case id: 123 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "update",
+          "descriptiveAction": "case_user_action_update_comment",
+          "getMessage": [Function],
+          "savedObjectId": "test-id",
+          "savedObjectType": "cases-comments",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User changed comment id: test-id for case id: 123 - user action id: 123"`
+      );
     });
 
     it('logs an external reference attachment (elasticSearchDoc) user action correctly', () => {
@@ -915,31 +860,18 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_update_comment",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "change",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "test-id",
-                "type": "cases-comments",
-              },
-            },
-            "message": "User changed comment id: test-id for case id: 123 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "update",
+          "descriptiveAction": "case_user_action_update_comment",
+          "getMessage": [Function],
+          "savedObjectId": "test-id",
+          "savedObjectType": "cases-comments",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User changed comment id: test-id for case id: 123 - user action id: 123"`
+      );
     });
 
     it('logs a persistable state attachment user action correctly', () => {
@@ -953,31 +885,18 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_update_comment",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "change",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "test-id",
-                "type": "cases-comments",
-              },
-            },
-            "message": "User changed comment id: test-id for case id: 123 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "update",
+          "descriptiveAction": "case_user_action_update_comment",
+          "getMessage": [Function],
+          "savedObjectId": "test-id",
+          "savedObjectType": "cases-comments",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User changed comment id: test-id for case id: 123 - user action id: 123"`
+      );
     });
 
     it('logs a description user action correctly', () => {
@@ -987,31 +906,18 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_update_case_description",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "change",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "123",
-                "type": "cases",
-              },
-            },
-            "message": "User updated the description for case id: 123 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "update",
+          "descriptiveAction": "case_user_action_update_case_description",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User updated the description for case id: 123 - user action id: 123"`
+      );
     });
 
     it('logs a pushed user action correctly', () => {
@@ -1021,31 +927,18 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_pushed_case",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "creation",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "123",
-                "type": "cases",
-              },
-            },
-            "message": "User pushed case id: 123 to an external service with connector id: 456 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "push_to_service",
+          "descriptiveAction": "case_user_action_pushed_case",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User pushed case id: 123 to an external service with connector id: 456 - user action id: 123"`
+      );
     });
 
     it('logs a tags user action correctly', () => {
@@ -1056,31 +949,18 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_add_case_tags",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "change",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "123",
-                "type": "cases",
-              },
-            },
-            "message": "User added tags to case id: 123 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "add",
+          "descriptiveAction": "case_user_action_add_case_tags",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User added tags to case id: 123 - user action id: 123"`
+      );
     });
 
     it('logs a tags change user action correctly', () => {
@@ -1091,31 +971,18 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_update_case_tags",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "change",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "123",
-                "type": "cases",
-              },
-            },
-            "message": "User changed tags for case id: 123 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "update",
+          "descriptiveAction": "case_user_action_update_case_tags",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User changed tags for case id: 123 - user action id: 123"`
+      );
     });
 
     it('logs a tags delete user action correctly', () => {
@@ -1126,31 +993,18 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_delete_case_tags",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "deletion",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "123",
-                "type": "cases",
-              },
-            },
-            "message": "User deleted tags in case id: 123 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "delete",
+          "descriptiveAction": "case_user_action_delete_case_tags",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User deleted tags in case id: 123 - user action id: 123"`
+      );
     });
 
     it('logs a status user action correctly', () => {
@@ -1160,31 +1014,18 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_update_case_status",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "change",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "123",
-                "type": "cases",
-              },
-            },
-            "message": "User updated the status for case id: 123 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "update",
+          "descriptiveAction": "case_user_action_update_case_status",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User updated the status for case id: 123 - user action id: 123"`
+      );
     });
 
     it('logs a severity user action correctly', () => {
@@ -1194,31 +1035,18 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_update_case_severity",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "change",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "123",
-                "type": "cases",
-              },
-            },
-            "message": "User updated the severity for case id: 123 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "update",
+          "descriptiveAction": "case_user_action_update_case_severity",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User updated the severity for case id: 123 - user action id: 123"`
+      );
     });
 
     it('logs an assign user action correctly', () => {
@@ -1228,31 +1056,18 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_add_case_assignees",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "change",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "123",
-                "type": "cases",
-              },
-            },
-            "message": "User assigned uids: [1,2] to case id: 123 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "add",
+          "descriptiveAction": "case_user_action_add_case_assignees",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User assigned uids: [1,2] to case id: 123 - user action id: 123"`
+      );
     });
 
     it('logs an unassign user action correctly', () => {
@@ -1263,31 +1078,18 @@ describe('UserActionBuilder', () => {
         action: Actions.delete,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_delete_case_assignees",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "deletion",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "123",
-                "type": "cases",
-              },
-            },
-            "message": "User unassigned uids: [1,2] from case id: 123 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "delete",
+          "descriptiveAction": "case_user_action_delete_case_assignees",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User unassigned uids: [1,2] from case id: 123 - user action id: 123"`
+      );
     });
 
     it('logs an assignee unknown action user action correctly', () => {
@@ -1298,31 +1100,18 @@ describe('UserActionBuilder', () => {
         action: Actions.create,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_create_case_assignees",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "creation",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "123",
-                "type": "cases",
-              },
-            },
-            "message": "User changed uids: [1,2] for case id: 123 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "create",
+          "descriptiveAction": "case_user_action_create_case_assignees",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User changed uids: [1,2] for case id: 123 - user action id: 123"`
+      );
     });
 
     it('logs a settings user action correctly', () => {
@@ -1332,31 +1121,18 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_update_case_settings",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "change",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "123",
-                "type": "cases",
-              },
-            },
-            "message": "User updated the settings for case id: 123 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "update",
+          "descriptiveAction": "case_user_action_update_case_settings",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User updated the settings for case id: 123 - user action id: 123"`
+      );
     });
 
     it('logs a create case user action correctly', () => {
@@ -1366,31 +1142,18 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_create_case",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "creation",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "123",
-                "type": "cases",
-              },
-            },
-            "message": "User created case id: 123 - user action id: user_action_id",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "create",
+          "descriptiveAction": "case_user_action_create_case",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User created case id: 123 - user action id: 123"`
+      );
     });
 
     it('logs a delete case user action correctly', () => {
@@ -1401,31 +1164,18 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      userAction.log('user_action_id');
-
-      expect(mockAuditLogger.log).toBeCalledTimes(1);
-      expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "event": Object {
-              "action": "case_user_action_delete_case",
-              "category": Array [
-                "database",
-              ],
-              "type": Array [
-                "deletion",
-              ],
-            },
-            "kibana": Object {
-              "saved_object": Object {
-                "id": "123",
-                "type": "cases",
-              },
-            },
-            "message": "User deleted case id: 123",
-          },
-        ]
+      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "delete",
+          "descriptiveAction": "case_user_action_delete_case",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
       `);
+      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User deleted case id: 123"`
+      );
     });
   });
 });

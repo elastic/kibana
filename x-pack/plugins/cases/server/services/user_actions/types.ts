@@ -6,7 +6,6 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { CaseAssignees } from '../../../common/api/cases/assignee';
 import type {
   CasePostRequest,
@@ -99,20 +98,22 @@ export interface Attributes {
   payload: Record<string, unknown>;
 }
 
-export interface PersistableUserActionFields {
+export interface SavedObjectParameters {
   attributes: Attributes;
   references: SavedObjectReference[];
 }
 
-export interface UserActionLogBody {
-  createMessage: (storedUserActionId?: string) => string;
-  eventAction: string;
+export interface EventDetails {
+  getMessage: (storedUserActionId?: string) => string;
+  action: UserAction;
+  descriptiveAction: string;
   savedObjectId: string;
   savedObjectType: string;
 }
 
-export interface LoggerCommonFields {
-  auditLogger: AuditLogger;
+export interface UserActionEvent {
+  parameters: SavedObjectParameters;
+  eventDetails: EventDetails;
 }
 
 export type CommonBuilderArguments = CommonArguments & {
@@ -124,5 +125,4 @@ export type CommonBuilderArguments = CommonArguments & {
 
 export interface BuilderDeps {
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  auditLogger: AuditLogger;
 }

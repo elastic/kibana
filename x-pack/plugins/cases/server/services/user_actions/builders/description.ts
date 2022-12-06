@@ -8,29 +8,34 @@
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { Actions, ActionTypes } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import type { PersistableUserAction } from '../persistable_user_action';
-import type { UserActionLogBody, UserActionParameters } from '../types';
+import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 
 export class DescriptionUserActionBuilder extends UserActionBuilder {
-  build(args: UserActionParameters<'description'>): PersistableUserAction {
-    const fields = this.buildCommonUserAction({
+  build(args: UserActionParameters<'description'>): UserActionEvent {
+    const action = Actions.update;
+
+    const parameters = this.buildCommonUserAction({
       ...args,
-      action: Actions.update,
+      action,
       valueKey: 'description',
       type: ActionTypes.description,
       value: args.payload.description,
     });
 
-    const createMessage = (id?: string) =>
+    const getMessage = (id?: string) =>
       `User updated the description for case id: ${args.caseId} - user action id: ${id}`;
 
-    const loggerFields: UserActionLogBody = {
-      createMessage,
-      eventAction: 'case_user_action_update_case_description',
+    const eventDetails: EventDetails = {
+      getMessage,
+      action,
+      descriptiveAction: 'case_user_action_update_case_description',
       savedObjectId: args.caseId,
       savedObjectType: CASE_SAVED_OBJECT,
     };
 
-    return this.createPersistableUserAction(loggerFields, fields);
+    return {
+      parameters,
+      eventDetails,
+    };
   }
 }
