@@ -21,8 +21,8 @@ describe('CustomBrandingService', () => {
   });
 
   describe('#getCustomBranding$()', () => {
-    it('only applies to enterprise license', () => {});
     it('#get', () => {});
     it('#set', () => {});
+    it('start')
   });
 });

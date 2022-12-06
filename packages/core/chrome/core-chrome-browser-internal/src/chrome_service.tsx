@@ -34,7 +34,7 @@ import { NavLinksService } from './nav_links';
 import { RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
 import type { InternalChromeStart } from './types';
-import { CustomBrandingService } from './custom_branding';
+import { CustomBranding, CustomBrandingService } from './custom_branding';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -145,6 +145,7 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start({ document: window.document });
+    const customBranding = this.customBranding.start();
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -206,6 +207,7 @@ export class ChromeService {
       navLinks,
       recentlyAccessed,
       docTitle,
+      customBranding,
 
       getHeaderComponent: () => (
         <Header
@@ -299,11 +301,16 @@ export class ChromeService {
       },
 
       getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
+
+      setCustomBranding: (customBranding: CustomBranding) => {
+        customBranding$.next(customBranding);
+      }
     };
   }
 
   public stop() {
     this.navLinks.stop();
     this.stop$.next();
+    // custom branding stops when the chrome service stops?
   }
 }

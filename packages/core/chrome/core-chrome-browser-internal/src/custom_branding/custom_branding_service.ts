@@ -42,13 +42,17 @@ export interface CustomBranding {
 /** @internal */
 export class CustomBrandingService {
   private licenseType: '';
+  private customBrandingPerOperator: {};
 
   async start(): Promise<CustomBranding> {
     return {
-      get: () => {
+      getCustomBranding: () => {
         return customBranding$.get();
       },
-      set: () => {},
+      setCustomBranding: () => {
+        return customBranding$.set();
+      },
+      start: () => {}
     };
   }
 }

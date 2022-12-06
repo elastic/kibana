@@ -15,6 +15,7 @@ import type { ChromeHelpExtension } from './help_extension';
 import type { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from './breadcrumb';
 import type { ChromeBadge, ChromeUserBanner } from './types';
 import { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
+import { CustomBranding } from './custom_branding';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -51,6 +52,8 @@ export interface ChromeStart {
   recentlyAccessed: ChromeRecentlyAccessed;
   /** {@inheritdoc ChromeDocTitle} */
   docTitle: ChromeDocTitle;
+  /**  */
+  customBranding: CustomBranding;
 
   /**
    * Get an observable of the current visibility state of the chrome.

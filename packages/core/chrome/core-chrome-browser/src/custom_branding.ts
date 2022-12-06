@@ -11,7 +11,6 @@
  * Properties are each optional to provide flexibility for the Kibana
  * operator
  */
-
 export interface CustomBranding {
   /** Similar to iconType
    * @example 'logoGithub'
