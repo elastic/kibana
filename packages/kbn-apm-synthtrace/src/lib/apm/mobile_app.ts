@@ -19,6 +19,7 @@ export class MobileApp extends Entity<ApmFields> {
       ...this.fields,
       'device.id': deviceId ? deviceId : generateLongId(),
       'service.language.name': this.fields['agent.name'] === 'iOS' ? 'swift' : 'java',
+      'service.version': this.fields['service.version'] ?? '1.0',
     }).startNewSession();
   }
 }
