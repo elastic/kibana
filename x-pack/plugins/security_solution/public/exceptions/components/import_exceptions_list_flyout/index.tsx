@@ -24,7 +24,10 @@ import {
   EuiTextColor,
   EuiFlyout,
 } from '@elastic/eui';
-import type { ImportExceptionsResponseSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  BulkErrorSchema,
+  ImportExceptionsResponseSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ToastInput, Toast, ErrorToastOptions } from '@kbn/core-notifications-browser';
 
@@ -94,45 +97,54 @@ export const ImportExceptionListFlyout = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [resetForm, addSuccess, handleRefresh]
     );
-    const handleImportError = useCallback(
-      (error) => {
-        if (!error.message.includes('AbortError')) {
-          addError(error.body.message, { title: i18n.UPLOAD_ERROR });
-        }
+
+    const handleImportErrors = useCallback(
+      (errors: BulkErrorSchema[]) => {
+        errors.forEach((error) => {
+          if (!error.error.message.includes('AbortError')) {
+            addError(error.error.message, { title: i18n.UPLOAD_ERROR });
+          }
+        });
       },
       [addError]
     );
     const [alreadyExistingItem, setAlreadyExistingItem] = useState(false);
 
     useEffect(() => {
-      if (!importExceptionListState.loading && file != null) {
+      if (!importExceptionListState.loading) {
         if (importExceptionListState?.result?.success) {
           handleImportSuccess(importExceptionListState?.result);
-        } else if (importExceptionListState?.error) {
-          handleImportError(importExceptionListState?.error);
+        } else {
+          const errorsToDisplay: BulkErrorSchema[] = [];
+          // @ts-expect-error
+          if (importExceptionListState?.error?.body) {
+            errorsToDisplay.push({
+              // @ts-expect-error
+              error: { ...importExceptionListState?.error?.body },
+            });
+          }
+          if (importExceptionListState?.result?.errors) {
+            importExceptionListState?.result?.errors.forEach((err) => {
+              if (err.error.message.includes('already exists')) {
+                setAlreadyExistingItem(true);
+              }
+              errorsToDisplay.push(err);
+            });
+          }
+          handleImportErrors(errorsToDisplay);
         }
       }
     }, [
-      file,
-      handleImportError,
+      handleImportErrors,
       handleImportSuccess,
-      importExceptionListState,
       importExceptionListState?.error,
       importExceptionListState.loading,
       importExceptionListState?.result,
+      importExceptionListState?.result?.errors,
     ]);
-    const handleFileChange = useCallback(
-      (files: FileList | null) => {
-        if (files != null && files?.length > 0) {
-          setFile(files?.item(0));
-        } else {
-          setFile(null);
-          // reset stale state when files are removed from file picker
-          importExceptionListState.resetState();
-        }
-      },
-      [importExceptionListState]
-    );
+    const handleFileChange = useCallback((files: FileList | null) => {
+      setFile(files?.item(0) ?? null);
+    }, []);
     return (
       <EuiFlyout ownFocus size="s" onClose={() => setDisplayImportListFlyout(false)}>
         <EuiFlyoutHeader hasBorder>
