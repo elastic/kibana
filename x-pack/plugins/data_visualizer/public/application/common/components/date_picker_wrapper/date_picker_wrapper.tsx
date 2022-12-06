@@ -273,7 +273,7 @@ export const DatePickerWrapper: FC<{
           >
             <FormattedMessage
               id="xpack.dataVisualizer.index.pageRefreshButton"
-              defaultMessage="Test"
+              defaultMessage="Refresh"
             />
           </EuiButton>
         </EuiFlexItem>
