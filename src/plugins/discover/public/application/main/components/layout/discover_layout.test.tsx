@@ -79,14 +79,6 @@ async function mountComponent(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
   );
 
-  (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
-    language: 'kuery',
-    query: '',
-  });
-  (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
-    jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
-  );
-
   const dataViewList = [dataView];
 
   const main$ = new BehaviorSubject({
