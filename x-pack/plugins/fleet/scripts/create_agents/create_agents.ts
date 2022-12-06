@@ -11,7 +11,6 @@ import yargs from 'yargs';
 
 import type { AgentStatus } from '../../common';
 import type { Agent } from '../../common';
-import { version as kbnVersion } from '../../../../package.json';
 const printUsage = () =>
   logger.info(`
     Create mock agent documents for testing fleet queries/UIs at scale.
@@ -21,6 +20,7 @@ const printUsage = () =>
     [--status]: status to set agents to, defaults to online, use comma separated for multiple e.g. online,offline
                 "count" number of agents will be created for each status
     [--delete]: delete all fake agents before creating new ones
+    [--agentVersion]: Agent version, defaults to kibana version
     [--count]: number of agents to create, defaults to 50k
     [--kibana]: full url of kibana instance to create agents and policy in e.g http://localhost:5601/mybase, defaults to http://localhost:5601
     [--username]: username for kibana, defaults to elastic
@@ -42,6 +42,7 @@ const {
   status: statusArg = 'online',
   count: countArg,
   kibana: kibanaUrl = DEFAULT_KIBANA_URL,
+  agentVersion: agentVersionArg,
   username: kbnUsername = DEFAULT_KIBANA_USERNAME,
   password: kbnPassword = DEFAULT_KIBANA_PASSWORD,
   // ignore yargs positional args, we only care about named args
@@ -105,7 +106,24 @@ function setAgentStatus(agent: any, status: AgentStatus) {
 
   return agent;
 }
-function createAgentWithStatus({ policyId, status }: { policyId: string; status: AgentStatus }) {
+
+async function getKibanaVersion() {
+  const response = await fetch(`${kibanaUrl}/api/status`, {
+    headers: { Authorization: kbnAuth },
+  });
+  const { version } = await response.json();
+  return version.number as string;
+}
+
+function createAgentWithStatus({
+  policyId,
+  status,
+  version,
+}: {
+  policyId: string;
+  status: AgentStatus;
+  version: string;
+}) {
   const baseAgent = {
     access_api_key_id: 'api-key-1',
     active: true,
@@ -118,7 +136,7 @@ function createAgentWithStatus({ policyId, status }: { policyId: string; status:
         agent: {
           snapshot: false,
           upgradeable: true,
-          version: kbnVersion,
+          version,
         },
       },
       host: { hostname: uuid() },
@@ -134,7 +152,8 @@ function createAgentWithStatus({ policyId, status }: { policyId: string; status:
 
 function createAgentsWithStatuses(
   statusMap: Partial<{ [status in AgentStatus]: number }>,
-  policyId: string
+  policyId: string,
+  version: string
 ) {
   // loop over statuses and create agents with that status
   const agents = [];
@@ -143,7 +162,7 @@ function createAgentsWithStatuses(
     const currentAgentStatus = currentStatus as AgentStatus;
     const statusCount = statusMap[currentAgentStatus] || 0;
     for (let i = 0; i < statusCount; i++) {
-      agents.push(createAgentWithStatus({ policyId, status: currentAgentStatus }));
+      agents.push(createAgentWithStatus({ policyId, status: currentAgentStatus, version }));
     }
   }
 
@@ -273,6 +292,13 @@ export async function run() {
     process.exit(0);
   }
 
+  let agentVersion = agentVersionArg as string;
+  if (!agentVersion) {
+    logger.info('No agent version supplied, getting kibana version');
+    agentVersion = await getKibanaVersion();
+  }
+  logger.info('Using agent version ' + agentVersion);
+
   if (deleteAgentsFirst) {
     logger.info('Deleting agents');
     const deleteRes = await deleteAgents();
@@ -293,7 +319,7 @@ export async function run() {
   logger.info('Creating agent documents');
   const statusMap = statusesArg.reduce((acc, status) => ({ ...acc, [status]: count }), {});
   logStatusMap(statusMap);
-  const agents = createAgentsWithStatuses(statusMap, agentPolicyId);
+  const agents = createAgentsWithStatuses(statusMap, agentPolicyId, agentVersion);
   const createRes = await createAgentDocsBulk(agents);
   logger.info(
     `Created ${createRes.items.length} agent docs, took ${createRes.took}, errors: ${createRes.errors}`
