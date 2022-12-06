@@ -445,6 +445,16 @@ export interface FetchAlertData {
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   refresh: () => void;
   sort: SortCombinations[];
+  /**
+   * We need to have it because of lot code is expecting this format
+   * @deprecated
+   */
+  oldAlertsData: Array<Array<{ field: string; value: string[] }>>;
+  /**
+   * We need to have it because of lot code is expecting this format
+   * @deprecated
+   */
+  ecsAlertsData: unknown[];
 }
 
 export interface AlertsTableProps {
@@ -500,6 +510,17 @@ export interface BulkActionsConfig {
 
 export type UseBulkActionsRegistry = () => BulkActionsConfig[];
 
+export type UseCellActions = (props: {
+  columns: EuiDataGridColumn[];
+  data: unknown[][];
+  dataGridRef?: EuiDataGridRefProps;
+  ecsData: unknown[];
+  pageSize: number;
+}) => {
+  cellActions: EuiDataGridColumnCellAction[];
+  visibleCellActions?: number;
+  disabledCellActions?: string[];
+};
 export interface AlertsTableConfigurationRegistry {
   id: string;
   casesFeatureId: string;
@@ -520,6 +541,7 @@ export interface AlertsTableConfigurationRegistry {
     width?: number;
   };
   useBulkActions?: UseBulkActionsRegistry;
+  useCellActions?: UseCellActions;
 }
 
 export enum BulkActionsVerbs {

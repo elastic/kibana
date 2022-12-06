@@ -6,6 +6,7 @@
  */
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import { set } from '@kbn/safer-lodash-set';
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash';
 import { useCallback, useEffect, useReducer, useRef, useMemo } from 'react';
@@ -50,6 +51,16 @@ type GetInspectQuery = () => InspectQuery;
 
 export interface FetchAlertResp {
   alerts: EcsFieldsResponse[];
+  /**
+   * We need to have it because of lot code is expecting this format
+   * @deprecated
+   */
+  oldAlertsData: Array<Array<{ field: string; value: string[] }>>;
+  /**
+   * We need to have it because of lot code is expecting this format
+   * @deprecated
+   */
+  ecsAlertsData: unknown[];
   isInitializing: boolean;
   getInspectQuery: GetInspectQuery;
   refetch: Refetch;
@@ -66,7 +77,13 @@ interface AlertStateReducer {
 
 type AlertActions =
   | { type: 'loading'; loading: boolean }
-  | { type: 'response'; alerts: EcsFieldsResponse[]; totalAlerts: number }
+  | {
+      type: 'response';
+      alerts: EcsFieldsResponse[];
+      totalAlerts: number;
+      oldAlertsData: Array<Array<{ field: string; value: string[] }>>;
+      ecsAlertsData: unknown[];
+    }
   | { type: 'resetPagination' }
   | { type: 'request'; request: Omit<FetchAlertsArgs, 'skip'> };
 
@@ -86,6 +103,8 @@ const initialAlertState: AlertStateReducer = {
   },
   response: {
     alerts: [],
+    oldAlertsData: [],
+    ecsAlertsData: [],
     totalAlerts: -1,
     isInitializing: true,
     updatedAt: 0,
@@ -104,6 +123,8 @@ function alertReducer(state: AlertStateReducer, action: AlertActions) {
           isInitializing: false,
           alerts: action.alerts,
           totalAlerts: action.totalAlerts,
+          oldAlertsData: action.oldAlertsData,
+          ecsAlertsData: action.ecsAlertsData,
           updatedAt: Date.now(),
         },
       };
@@ -196,19 +217,44 @@ const useFetchAlerts = ({
                   } else if (rawResponse.hits.total && typeof rawResponse.hits.total === 'object') {
                     totalAlerts = rawResponse.hits.total?.value ?? 0;
                   }
+                  const alerts = rawResponse.hits.hits.reduce<EcsFieldsResponse[]>((acc, hit) => {
+                    if (hit.fields) {
+                      acc.push({
+                        ...hit.fields,
+                        _id: hit._id,
+                        _index: hit._index,
+                      } as EcsFieldsResponse);
+                    }
+                    return acc;
+                  }, []);
+
+                  const { oldAlertsData, ecsAlertsData } = alerts.reduce<{
+                    oldAlertsData: Array<Array<{ field: string; value: string[] }>>;
+                    ecsAlertsData: unknown[];
+                  }>(
+                    (acc, alert) => {
+                      const itemOldData = Object.entries(alert).reduce<
+                        Array<{ field: string; value: string[] }>
+                      >((oldData, [key, value]) => {
+                        oldData.push({ field: key, value: value as string[] });
+                        return oldData;
+                      }, []);
+                      const ecsData = Object.entries(alert).reduce((ecs, [key, value]) => {
+                        set(ecs, key, value ?? []);
+                        return ecs;
+                      }, {});
+                      acc.oldAlertsData.push(itemOldData);
+                      acc.ecsAlertsData.push(ecsData);
+                      return acc;
+                    },
+                    { oldAlertsData: [], ecsAlertsData: [] }
+                  );
+
                   dispatch({
                     type: 'response',
-                    alerts: rawResponse.hits.hits.reduce<EcsFieldsResponse[]>((acc, hit) => {
-                      if (hit.fields) {
-                        acc.push({
-                          ...hit.fields,
-                          _id: hit._id,
-                          _index: hit._index,
-                        } as EcsFieldsResponse);
-                      }
-
-                      return acc;
-                    }, []),
+                    alerts,
+                    oldAlertsData,
+                    ecsAlertsData,
                     totalAlerts,
                   });
                   searchSubscription$.current.unsubscribe();

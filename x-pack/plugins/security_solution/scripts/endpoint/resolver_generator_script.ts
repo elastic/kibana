@@ -176,7 +176,7 @@ async function main() {
     kibana: {
       alias: 'k',
       describe: 'kibana url',
-      default: 'http://elastic:changeme@localhost:5601',
+      default: 'http://elastic:changeme@localhost:5601/lfz',
       type: 'string',
     },
     eventIndex: {
