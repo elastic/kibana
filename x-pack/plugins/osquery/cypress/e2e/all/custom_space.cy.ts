@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import { checkResults, inputQuery, selectAllAgents, submitQuery } from '../../tasks/live_query';
 import { ROLES } from '../../test';
 
-// TODO:  So far just one test, but this is a good place to start. Move tests from pack view into here.
-describe('ALL - Discover', () => {
+describe('ALL - Custom space', () => {
+  const CUSTOM_SPACE = 'custom-space';
+  const PACK_NAME = 'testpack';
   before(() => {
     login(ROLES.admin);
     cy.request({
       method: 'POST',
       url: '/api/spaces/space',
       body: {
-        id: 'custom-space',
-        name: 'custom-space',
+        id: CUSTOM_SPACE,
+        name: CUSTOM_SPACE,
       },
       headers: { 'kbn-xsrf': 'create-space' },
     });
@@ -36,12 +38,20 @@ describe('ALL - Discover', () => {
 
   ['default', 'custom-space'].forEach((space) => {
     describe(`[${space}]`, () => {
+      before(() => {
+        runKbnArchiverScript(ArchiverMethod.LOAD, 'pack', space);
+      });
+
       beforeEach(() => {
         login(ROLES.soc_manager);
         navigateTo(`/s/${space}/app/osquery`);
       });
 
-      it('should be opened in new tab in results table', () => {
+      after(() => {
+        runKbnArchiverScript(ArchiverMethod.UNLOAD, 'pack', space);
+      });
+
+      it('Discover should be opened in new tab in results table', () => {
         cy.contains('New live query').click();
         selectAllAgents();
         inputQuery('select * from uptime; ');
@@ -59,6 +69,16 @@ describe('ALL - Discover', () => {
               'action_data.queryselect * from uptime'
             );
           });
+      });
+      it(`runs packs normally on ${space}`, () => {
+        cy.contains('Packs').click();
+        cy.contains('Create pack').click();
+        cy.react('CustomItemAction', {
+          props: { item: { attributes: { name: PACK_NAME } } },
+        }).click();
+        selectAllAgents();
+        cy.contains('Submit').click();
+        checkResults();
       });
     });
   });
