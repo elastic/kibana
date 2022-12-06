@@ -24127,7 +24127,6 @@
     "xpack.reporting.exportTypes.csv.generateCsv.esErrorMessage": "Elasticsearchから{statusCode}応答を受信しました：{message}",
     "xpack.reporting.exportTypes.csv.generateCsv.unknownErrorMessage": "不明なエラーが発生しました：{message}",
     "xpack.reporting.jobsQuery.deleteError": "レポートを削除できません：{error}",
-    "xpack.reporting.jobsQuery.infoError.unauthorizedErrorMessage": "{jobType}情報を表示する権限がありません",
     "xpack.reporting.jobStatusDetail.attemptXofY": "{attempts}/{max_attempts}回試行します。",
     "xpack.reporting.jobStatusDetail.timeoutSeconds": "{timeout}秒",
     "xpack.reporting.listing.diagnosticApiCallFailure": "診断の実行中に問題が発生しました：{error}",
