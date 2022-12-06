@@ -642,11 +642,6 @@ x-pack/plugins/threat_intelligence @elastic/protections-experience
 x-pack/plugins/security_solution/public/threat_intelligence @elastic/protections-experience
 x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
-
-# Security Intelligence And Analytics
-/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules @elastic/security-intelligence-analytics
-
-
 # Security Asset Management
 /x-pack/plugins/osquery @elastic/security-asset-management
 /x-pack/plugins/security_solution/common/detection_engine/rule_response_actions @elastic/security-asset-management
