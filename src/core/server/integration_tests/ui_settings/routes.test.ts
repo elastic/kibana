@@ -20,12 +20,15 @@ describe('ui settings service', () => {
 
       await root.preboot();
       const { uiSettings } = await root.setup();
-      uiSettings.register({
-        custom: {
-          value: '42',
-          schema: schema.string(),
+      uiSettings.register(
+        {
+          custom: {
+            value: '42',
+            schema: schema.string(),
+          },
         },
-      });
+        'namespace'
+      );
 
       await root.start();
     });
