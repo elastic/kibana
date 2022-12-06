@@ -57,7 +57,7 @@ export class IndexPatternsFetcher {
   async getFieldsForWildcard(options: {
     pattern: string | string[];
     metaFields?: string[];
-    fieldCapsOptions?: { allow_no_indices: boolean };
+    fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean };
     type?: string;
     rollupIndex?: string;
     filter?: QueryDslQueryContainer;
@@ -78,6 +78,7 @@ export class IndexPatternsFetcher {
       metaFields,
       fieldCapsOptions: {
         allow_no_indices: allowNoIndices,
+        include_unmapped: fieldCapsOptions?.includeUnmapped,
       },
       filter,
     });
