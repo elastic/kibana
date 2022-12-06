@@ -8,6 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const PLUGIN_ID = 'migrate_data';
-export const PLUGIN_NAME = i18n.translate('migrateData.name', {
+export const PLUGIN_NAME = i18n.translate('xpack.cloudDataMigration.name', {
   defaultMessage: 'Migrate',
 });

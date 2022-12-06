@@ -149,7 +149,6 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                       alt={i18n.translate('home.moveData.illustration.alt.text', {
                         defaultMessage: 'Illustration for cloud data migration',
                       })}
-                      className="moveYourData__illustration"
                       src={
                         addBasePath('/plugins/kibanaReact/assets/') +
                         'illustration-cloud-migration.png'

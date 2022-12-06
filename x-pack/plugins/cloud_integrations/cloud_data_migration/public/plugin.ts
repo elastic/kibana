@@ -15,6 +15,8 @@ export class CloudDataMigrationPlugin implements Plugin<void, CloudDataMigration
   private breadcrumbService = new BreadcrumbService();
 
   public setup(core: CoreSetup, { cloud, management }: CloudDataMigrationPluginSetup) {
+    // Only be applies to self-managed instances of Kibana. Any Kibana instance running on
+    // Elastic Cloud should not show any information related to migration.
     if (!cloud.isCloudEnabled) {
       management.sections.section.data.registerApp({
         id: PLUGIN_ID,

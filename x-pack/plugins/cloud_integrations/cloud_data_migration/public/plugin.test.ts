@@ -26,13 +26,7 @@ describe('Cloud Data Migration Plugin', () => {
           breadcrumbService,
         })
       ).toMatchInlineSnapshot(`undefined`);
-      expect(management.sections.section.data.registerApp).toHaveBeenCalledTimes(1);
-      expect(management.sections.section.data.registerApp).toHaveBeenCalledWith({
-        id: 'migrate_data',
-        mount: expect.any(Function),
-        order: 8,
-        title: 'Migrate',
-      });
+      expect(management.sections.section.data.registerApp).not.toBeCalled();
     });
 
     it('returns expected public contract when cloud NOT enabled', () => {
@@ -47,7 +41,13 @@ describe('Cloud Data Migration Plugin', () => {
           breadcrumbService,
         })
       ).toMatchInlineSnapshot(`undefined`);
-      expect(management.sections.section.data.registerApp).not.toBeCalled();
+      expect(management.sections.section.data.registerApp).toHaveBeenCalledTimes(1);
+      expect(management.sections.section.data.registerApp).toHaveBeenCalledWith({
+        id: 'migrate_data',
+        mount: expect.any(Function),
+        order: 8,
+        title: 'Migrate',
+      });
     });
   });
 });
