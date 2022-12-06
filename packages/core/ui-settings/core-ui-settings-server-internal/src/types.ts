@@ -11,6 +11,9 @@ import type {
   UiSettingsServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core-ui-settings-server';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { Logger } from '@kbn/logging';
 
 /** @internal */
 export interface InternalUiSettingsServicePreboot {
@@ -25,3 +28,14 @@ export type InternalUiSettingsServiceSetup = UiSettingsServiceSetup;
 
 /** @internal */
 export type InternalUiSettingsServiceStart = UiSettingsServiceStart;
+
+/** @internal */
+export interface UiSettingsServiceOptions {
+  type: 'config' | 'config-global';
+  id: string;
+  buildNum: number;
+  savedObjectsClient: SavedObjectsClientContract;
+  overrides?: Record<string, any>;
+  defaults?: Record<string, UiSettingsParams>;
+  log: Logger;
+}
