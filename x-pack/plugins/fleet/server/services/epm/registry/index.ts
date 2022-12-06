@@ -52,7 +52,10 @@ import { withPackageSpan } from '../packages/utils';
 import { verifyPackageArchiveSignature } from '../packages/package_verification';
 
 import { fetchUrl, getResponse, getResponseStream } from './requests';
-import { getRegistryUrl } from './registry_url';
+
+// Package storage V2 URL
+// from https://github.com/elastic/package-registry#docker (maybe from OpenAPI one day)
+export const PACKAGE_STORAGE_REGISTRY_URL = 'https://epr.elastic.co';
 
 export interface SearchParams {
   category?: CategoryId;
@@ -67,8 +70,7 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
   `${name}-${version}`;
 
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
-  const registryUrl = getRegistryUrl();
-  const url = new URL(`${registryUrl}/search`);
+  const url = new URL(`${PACKAGE_STORAGE_REGISTRY_URL}/search`);
   if (params) {
     if (params.category) {
       url.searchParams.set('category', params.category);
@@ -104,9 +106,8 @@ async function _fetchFindLatestPackage(
 
     const prereleaseEnabled = prerelease || prereleaseAllowedExceptions.includes(packageName);
 
-    const registryUrl = getRegistryUrl();
     const url = new URL(
-      `${registryUrl}/search?package=${packageName}&prerelease=${prereleaseEnabled}`
+      `${PACKAGE_STORAGE_REGISTRY_URL}/search?package=${packageName}&prerelease=${prereleaseEnabled}`
     );
 
     if (!ignoreConstraints) {
@@ -176,10 +177,11 @@ export async function fetchInfo(
   pkgName: string,
   pkgVersion: string
 ): Promise<RegistryPackage | ArchivePackage> {
-  const registryUrl = getRegistryUrl();
   try {
     // Trailing slash avoids 301 redirect / extra hop
-    const res = await fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}/`).then(JSON.parse);
+    const res = await fetchUrl(
+      `${PACKAGE_STORAGE_REGISTRY_URL}/package/${pkgName}/${pkgVersion}/`
+    ).then(JSON.parse);
 
     return res;
   } catch (err) {
@@ -212,8 +214,7 @@ export async function getFile(
 }
 
 export async function fetchFile(filePath: string): Promise<Response> {
-  const registryUrl = getRegistryUrl();
-  return getResponse(`${registryUrl}${filePath}`);
+  return getResponse(`${PACKAGE_STORAGE_REGISTRY_URL}${filePath}`);
 }
 
 function setKibanaVersion(url: URL) {
@@ -233,8 +234,7 @@ function setKibanaVersion(url: URL) {
 export async function fetchCategories(
   params?: GetCategoriesRequest['query']
 ): Promise<CategorySummaryList> {
-  const registryUrl = getRegistryUrl();
-  const url = new URL(`${registryUrl}/categories`);
+  const url = new URL(`${PACKAGE_STORAGE_REGISTRY_URL}/categories`);
   if (params) {
     if (params.prerelease) {
       url.searchParams.set('prerelease', params.prerelease.toString());
@@ -361,7 +361,7 @@ export async function fetchArchiveBuffer({
     archivePath = `/epr/${pkgName}/${pkgName}-${pkgVersion}.zip`;
   }
 
-  const archiveUrl = `${getRegistryUrl()}${archivePath}`;
+  const archiveUrl = `${PACKAGE_STORAGE_REGISTRY_URL}${archivePath}`;
   const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
 
   if (shouldVerify) {
