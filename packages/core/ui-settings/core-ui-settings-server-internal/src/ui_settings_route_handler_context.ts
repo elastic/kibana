@@ -29,8 +29,7 @@ export class CoreUiSettingsRouteHandlerContext implements UiSettingsRequestHandl
   public get client() {
     if (this.#client == null) {
       this.#client = this.uiSettingsStart.asScopedToClient(
-        this.savedObjectsRouterHandlerContext.client,
-        'namespace'
+        this.savedObjectsRouterHandlerContext.client
       );
     }
     return this.#client;
@@ -38,9 +37,8 @@ export class CoreUiSettingsRouteHandlerContext implements UiSettingsRequestHandl
 
   public get globalClient() {
     if (this.#globalClient == null) {
-      this.#globalClient = this.uiSettingsStart.asScopedToClient(
-        this.savedObjectsRouterHandlerContext.client,
-        'global'
+      this.#globalClient = this.uiSettingsStart.asScopedToGlobalClient(
+        this.savedObjectsRouterHandlerContext.client
       );
     }
     return this.#globalClient;

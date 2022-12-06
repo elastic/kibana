@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { UiSettingsParams, UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { IUiSettingsClient } from './ui_settings_client';
 
@@ -66,8 +66,21 @@ export interface UiSettingsServiceStart {
    * }
    * ```
    */
-  asScopedToClient(
-    savedObjectsClient: SavedObjectsClientContract,
-    scope: UiSettingsScope
-  ): IUiSettingsClient;
+  asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
+
+  /**
+   * Creates a global {@link IUiSettingsClient} with provided *scoped* saved objects client.
+   *
+   * This should only be used in the specific case where the client needs to be accessed
+   * from outside of the scope of a {@link RequestHandler}.
+   *
+   * @example
+   * ```ts
+   * start(core: CoreStart) {
+   *  const soClient = core.savedObjects.getScopedClient(arbitraryRequest);
+   *  const uiSettingsClient = core.uiSettings.asScopedToGlobalClient(soClient);
+   * }
+   * ```
+   */
+  asScopedToGlobalClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
 }

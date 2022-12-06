@@ -56,7 +56,7 @@ export class UiSettingsService
     const { overrides } = await firstValueFrom(this.config$);
     this.overrides = overrides;
 
-    this.register(getCoreSettings({ isDist: this.isDist }), 'namespace');
+    this.register(getCoreSettings({ isDist: this.isDist }));
 
     return {
       createDefaultsClient: () =>
@@ -89,18 +89,18 @@ export class UiSettingsService
     this.validatesOverrides();
 
     return {
-      asScopedToClient: this.getScopedClientFactory(),
+      asScopedToClient: this.getScopedClientFactory('namespace'),
+      asScopedToGlobalClient: this.getScopedClientFactory('global'),
     };
   }
 
   public async stop() {}
 
-  private getScopedClientFactory(): (
-    savedObjectsClient: SavedObjectsClientContract,
+  private getScopedClientFactory(
     scope: UiSettingsScope
-  ) => UiSettingsClient | UiSettingsGlobalClient {
+  ): (savedObjectsClient: SavedObjectsClientContract) => UiSettingsClient | UiSettingsGlobalClient {
     const { version, buildNum } = this.coreContext.env.packageInfo;
-    return (savedObjectsClient: SavedObjectsClientContract, scope: UiSettingsScope) => {
+    return (savedObjectsClient: SavedObjectsClientContract) => {
       const isNamespaceScope = scope === 'namespace';
 
       const options = {
