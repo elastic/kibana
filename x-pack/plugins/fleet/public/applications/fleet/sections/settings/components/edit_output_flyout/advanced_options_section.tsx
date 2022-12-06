@@ -42,9 +42,9 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
     diskQueueEncryptionEnabled,
     diskQueueCompressionEnabled,
     compressionLevelInput,
-    memQueueEventsSize,
+    memQueueEvents,
     queueFlushTimeout,
-    maxBatchSize,
+    maxBatchBytes,
   } = inputs;
 
   return enabled ? (
@@ -62,7 +62,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
         <EuiSpacer size="m" />
         <EuiFormRow
           fullWidth
-          {...maxBatchSize.formRowProps}
+          {...maxBatchBytes.formRowProps}
           label={
             <FormattedMessage
               id="xpack.fleet.settings.editOutputFlyout.maxBatchSizeDescriptionLabel"
@@ -72,7 +72,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
         >
           <EuiFlexGroup alignItems="flexStart">
             <EuiFlexItem>
-              <EuiFieldNumber {...maxBatchSize.props} placeholder="Batching Bytes" min={0} />
+              <EuiFieldNumber {...maxBatchBytes.props} placeholder="Batching Bytes" min={0} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
@@ -112,7 +112,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
         <EuiSpacer size="m" />
         <EuiFormRow
           fullWidth
-          {...memQueueEventsSize.formRowProps}
+          {...memQueueEvents.formRowProps}
           label={
             <FormattedMessage
               id="xpack.fleet.settings.editOutputFlyout.memQueueEventsLabel"
@@ -122,7 +122,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
         >
           <EuiFlexGroup alignItems="flexStart">
             <EuiFlexItem>
-              <EuiFieldNumber {...memQueueEventsSize.props} placeholder="Events" min={0} />
+              <EuiFieldNumber {...memQueueEvents.props} placeholder="Events" min={0} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
