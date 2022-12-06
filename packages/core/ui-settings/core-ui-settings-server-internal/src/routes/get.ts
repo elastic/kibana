@@ -43,7 +43,6 @@ export function registerGetRoute(router: InternalUiSettingsRouter) {
       return await getFromRequest(uiSettingsClient, context, request, response);
     }
   );
-
   router.get(
     { path: '/api/kibana/settings/global', validate: false },
     async (context, request, response) => {

@@ -100,18 +100,17 @@ export class UiSettingsService
   ) => UiSettingsClient | UiSettingsGlobalClient {
     const { version, buildNum } = this.coreContext.env.packageInfo;
     return (savedObjectsClient: SavedObjectsClientContract, scope: UiSettingsScope) => {
-      const isNamespaceScope = () => {
-        return scope === 'namespace';
-      };
+      const isNamespaceScope = scope === 'namespace';
+
       const options = {
-        type: (isNamespaceScope() ? 'config' : 'config-global') as 'config' | 'config-global',
+        type: (isNamespaceScope ? 'config' : 'config-global') as 'config' | 'config-global',
         id: version,
         buildNum,
         savedObjectsClient,
-        defaults: isNamespaceScope()
+        defaults: isNamespaceScope
           ? mapToObject(this.uiSettingsDefaults)
           : mapToObject(this.uiSettingsGlobalDefaults),
-        overrides: isNamespaceScope() ? this.overrides : {},
+        overrides: isNamespaceScope ? this.overrides : {},
         log: this.log,
       };
       return UiSettingsClientFactory.create(options);

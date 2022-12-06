@@ -63,19 +63,17 @@ export function registerSetRoute(router: InternalUiSettingsRouter) {
       throw error;
     }
   };
-
-  router.post(
-    { path: '/api/kibana/settings/global/{key}', validate },
-    async (context, request, response) => {
-      const uiSettingsClient = (await context.core).uiSettings.globalClient;
-      return await setFromRequest(uiSettingsClient, context, request, response);
-    }
-  );
-
   router.post(
     { path: '/api/kibana/settings/{key}', validate },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.client;
+      return await setFromRequest(uiSettingsClient, context, request, response);
+    }
+  );
+  router.post(
+    { path: '/api/kibana/settings/global/{key}', validate },
+    async (context, request, response) => {
+      const uiSettingsClient = (await context.core).uiSettings.globalClient;
       return await setFromRequest(uiSettingsClient, context, request, response);
     }
   );
