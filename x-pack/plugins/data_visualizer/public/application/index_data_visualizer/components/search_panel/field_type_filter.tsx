@@ -8,6 +8,7 @@
 import React, { FC, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { FieldTypesHelpPopover } from '../../../common/components/field_types_filter/field_types_help_popover';
 import type { SupportedFieldType } from '../../../../../common/types';
 import { FieldTypeIcon } from '../../../common/components/field_type_icon';
@@ -55,6 +56,11 @@ export const DataVisualizerFieldTypeFilter: FC<{
         checkedOptions={visibleFieldTypes}
         dataTestSubj={'dataVisualizerFieldTypeSelect'}
         postfix={<FieldTypesHelpPopover fieldTypes={indexedFieldTypes} />}
+        cssStyles={{
+          filterGroup: css`
+            margin-left: 8px;
+          `,
+        }}
       />
     </>
   );

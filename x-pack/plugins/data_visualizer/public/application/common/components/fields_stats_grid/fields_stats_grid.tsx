@@ -85,6 +85,7 @@ export const FieldsStatsGrid: FC<Props> = ({ results }) => {
         gutterSize="xs"
         style={{ marginLeft: 4 }}
         data-test-subj="dataVisualizerFieldCountPanel"
+        responsive={true}
       >
         <TotalFieldsCount fieldsCountStats={fieldsCountStats} />
         <MetricFieldsCount metricsStats={metricsStats} />
