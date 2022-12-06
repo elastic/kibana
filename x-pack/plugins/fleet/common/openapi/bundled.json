@@ -3029,35 +3029,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/simplified_package_policy"
-                  },
-                  {
-                    "deprecated": true,
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/new_package_policy"
-                      },
-                      {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          }
-                        }
-                      },
-                      {
-                        "type": "object",
-                        "properties": {
-                          "force": {
-                            "type": "boolean"
-                          }
-                        }
-                      }
-                    ]
-                  }
-                ]
+                "$ref": "#/components/schemas/simplified_package_policy"
               }
             }
           }
@@ -3346,7 +3318,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/update_package_policy"
+                "$ref": "#/components/schemas/simplified_package_policy"
               }
             }
           }
@@ -3357,25 +3329,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/simplified_package_policy"
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/package_policy"
                     },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "item": {
-                          "$ref": "#/components/schemas/package_policy"
-                        },
-                        "sucess": {
-                          "type": "boolean"
-                        }
-                      },
-                      "required": [
-                        "item",
-                        "sucess"
-                      ]
+                    "sucess": {
+                      "type": "boolean"
                     }
+                  },
+                  "required": [
+                    "item",
+                    "sucess"
                   ]
                 }
               }
@@ -5739,30 +5704,36 @@
           },
           "name": {
             "type": "string",
-            "description": "Package policy name (should be unique)"
+            "description": "Package policy name (should be unique)",
+            "example": "nginx-123"
           },
           "description": {
             "type": "string",
-            "description": "Package policy description"
+            "description": "Package policy description",
+            "example": "my description"
           },
           "namespace": {
             "type": "string",
-            "description": "namespace by default \"default\""
+            "description": "namespace by default \"default\"",
+            "example": "default"
           },
           "policy_id": {
             "type": "string",
-            "description": "Agent policy ID where that package policy will be added"
+            "description": "Agent policy ID where that package policy will be added",
+            "example": "agent-policy-id"
           },
           "package": {
             "type": "object",
             "properties": {
               "name": {
                 "type": "string",
-                "description": "Package name"
+                "description": "Package name",
+                "example": "nginx"
               },
               "version": {
                 "type": "string",
-                "description": "Package version"
+                "description": "Package version",
+                "example": "1.6.0"
               }
             },
             "required": [
@@ -5777,6 +5748,26 @@
           "inputs": {
             "type": "object",
             "description": "Package policy inputs (see integration documentation to know what inputs are available)",
+            "example": {
+              "nginx-logfile": {
+                "enabled": true,
+                "streams": {
+                  "nginx.access": {
+                    "enabled": true,
+                    "vars": {
+                      "paths": [
+                        "/var/log/nginx/access.log*"
+                      ],
+                      "tags": [
+                        "nginx-access"
+                      ],
+                      "preserve_original_event": false,
+                      "ignore_older": "72h"
+                    }
+                  }
+                }
+              }
+            },
             "additionalProperties": {
               "type": "object",
               "properties": {
@@ -5974,99 +5965,6 @@
             "$ref": "#/components/schemas/full_agent_policy_input"
           }
         }
-      },
-      "update_package_policy": {
-        "title": "Update package policy",
-        "type": "object",
-        "description": "",
-        "properties": {
-          "version": {
-            "type": "string"
-          },
-          "enabled": {
-            "type": "boolean"
-          },
-          "package": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "version": {
-                "type": "string"
-              },
-              "title": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "name",
-              "title",
-              "version"
-            ]
-          },
-          "namespace": {
-            "type": "string"
-          },
-          "output_id": {
-            "type": "string",
-            "description": "Not supported output can be set at the agent policy level only",
-            "deprecated": true
-          },
-          "inputs": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type": "string"
-                },
-                "enabled": {
-                  "type": "boolean"
-                },
-                "processors": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "streams": {
-                  "type": "array",
-                  "items": {}
-                },
-                "config": {
-                  "type": "object"
-                },
-                "vars": {
-                  "type": "object"
-                }
-              },
-              "required": [
-                "type",
-                "enabled",
-                "streams"
-              ]
-            }
-          },
-          "policy_id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "force": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "name",
-          "namespace",
-          "policy_id",
-          "enabled"
-        ]
       },
       "output": {
         "title": "Output",
