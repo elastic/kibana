@@ -23,6 +23,6 @@ describe('CustomBrandingService', () => {
   describe('#getCustomBranding$()', () => {
     it('#get', () => {});
     it('#set', () => {});
-    it('start')
+    it('start');
   });
 });
