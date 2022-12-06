@@ -193,7 +193,8 @@ for use in their own application.
 
 
 |{kib-repo}blob/{branch}/src/plugins/image_embeddable/README.md[imageEmbeddable]
-|Used to embed images in dashboards
+|This plugin contains image embeddable. Image embeddable allows to embed images into the dashboard.
+Images can be added either by URL or by uploading the image file via file service.
 
 
 |{kib-repo}blob/{branch}/src/plugins/input_control_vis/README.md[inputControlVis]
