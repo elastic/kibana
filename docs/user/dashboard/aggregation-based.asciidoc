@@ -203,7 +203,7 @@ You can open the following aggregation-based visualizations in *Lens*:
 * Gauge
 * Goal
 * Heat map
-* Hortizontal bar
+* Horizontal bar
 * Line
 * Metric
 * Vertical bar
