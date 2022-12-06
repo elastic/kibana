@@ -11,7 +11,7 @@ import type { FleetAuthz } from '../../../common';
 
 import { calculateRouteAuthz } from './security';
 
-describe('calculateRouteAuthz', () => {
+describe('When using calculateRouteAuthz()', () => {
   const fleetAuthz = deepFreeze({
     fleet: {
       all: false,
@@ -90,13 +90,13 @@ describe('calculateRouteAuthz', () => {
     },
   });
 
-  const getFleetAuthz = (authz: FleetAuthz = fleetAuthz) => authz;
+  const getFleetAuthzMock = (authz: FleetAuthz = fleetAuthz) => authz;
 
-  describe('with ANY', () => {
-    it('should return TRUE if `any` are true', () => {
+  describe('with ANY object defined', () => {
+    it('should grant access if `any` are true', () => {
       expect(
         calculateRouteAuthz(
-          getFleetAuthz({
+          getFleetAuthzMock({
             ...fleetAuthz,
             packagePrivileges: {
               ...fleetAuthz.packagePrivileges,
@@ -132,12 +132,16 @@ describe('calculateRouteAuthz', () => {
             },
           }
         )
-      ).toEqual(true);
+      ).toEqual({
+        granted: true,
+        grantedByFleetPrivileges: false,
+        scopeDataToPackages: ['endpoint'],
+      });
     });
 
-    it('should return FALSE if `any` are false', () => {
+    it('should deny access if `any` are false', () => {
       expect(
-        calculateRouteAuthz(getFleetAuthz(), {
+        calculateRouteAuthz(getFleetAuthzMock(), {
           any: {
             integrations: {
               readPackageInfo: true,
@@ -157,15 +161,19 @@ describe('calculateRouteAuthz', () => {
             },
           },
         })
-      ).toEqual(false);
+      ).toEqual({
+        granted: false,
+        grantedByFleetPrivileges: false,
+        scopeDataToPackages: undefined,
+      });
     });
   });
 
-  describe('with ALL', () => {
-    it('should return TRUE if `all` are true', () => {
+  describe('with ALL object defined', () => {
+    it('should grant access if `all` are true', () => {
       expect(
         calculateRouteAuthz(
-          getFleetAuthz({
+          getFleetAuthzMock({
             ...fleetAuthz,
             integrations: {
               ...fleetAuthz.integrations,
@@ -209,13 +217,13 @@ describe('calculateRouteAuthz', () => {
             },
           }
         )
-      ).toEqual(true);
+      ).toEqual({ granted: true, grantedByFleetPrivileges: true, scopeDataToPackages: undefined });
     });
 
-    it('should return FALSE if not `all` are true', () => {
+    it('should deny access if not `all` are true', () => {
       expect(
         calculateRouteAuthz(
-          getFleetAuthz({
+          getFleetAuthzMock({
             ...fleetAuthz,
             packagePrivileges: {
               ...fleetAuthz.packagePrivileges,
@@ -251,15 +259,19 @@ describe('calculateRouteAuthz', () => {
             },
           }
         )
-      ).toEqual(false);
+      ).toEqual({
+        granted: false,
+        grantedByFleetPrivileges: false,
+        scopeDataToPackages: undefined,
+      });
     });
   });
 
   describe('with ALL and ANY', () => {
-    it('should return TRUE if `all` are true', () => {
+    it('should grant access if `all` are true', () => {
       expect(
         calculateRouteAuthz(
-          getFleetAuthz({
+          getFleetAuthzMock({
             ...fleetAuthz,
             integrations: {
               ...fleetAuthz.integrations,
@@ -303,13 +315,13 @@ describe('calculateRouteAuthz', () => {
             },
           }
         )
-      ).toEqual(true);
+      ).toEqual({ granted: true, grantedByFleetPrivileges: true, scopeDataToPackages: undefined });
     });
 
-    it('should return TRUE if all OR any are true', () => {
+    it('should grant access if all OR any are true', () => {
       expect(
         calculateRouteAuthz(
-          getFleetAuthz({
+          getFleetAuthzMock({
             ...fleetAuthz,
             integrations: {
               ...fleetAuthz.integrations,
@@ -352,13 +364,13 @@ describe('calculateRouteAuthz', () => {
             },
           }
         )
-      ).toEqual(true);
+      ).toEqual({ granted: true, grantedByFleetPrivileges: true, scopeDataToPackages: undefined });
     });
 
-    it('should return TRUE if `all` are not true but `any` are true ', () => {
+    it('should grant access if `all` are not true but `any` are true ', () => {
       expect(
         calculateRouteAuthz(
-          getFleetAuthz({
+          getFleetAuthzMock({
             ...fleetAuthz,
             integrations: {
               ...fleetAuthz.integrations,
@@ -400,13 +412,17 @@ describe('calculateRouteAuthz', () => {
             },
           }
         )
-      ).toEqual(true);
+      ).toEqual({
+        granted: true,
+        grantedByFleetPrivileges: false,
+        scopeDataToPackages: ['endpoint'],
+      });
     });
 
-    it('should return TRUE if `all` are true but `any` are not true ', () => {
+    it('should grant access if `all` are true but `any` are not true ', () => {
       expect(
         calculateRouteAuthz(
-          getFleetAuthz({
+          getFleetAuthzMock({
             ...fleetAuthz,
             integrations: {
               ...fleetAuthz.integrations,
@@ -437,7 +453,7 @@ describe('calculateRouteAuthz', () => {
             },
           }
         )
-      ).toEqual(true);
+      ).toEqual({ granted: true, grantedByFleetPrivileges: true, scopeDataToPackages: undefined });
     });
   });
 });

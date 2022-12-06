@@ -80,6 +80,8 @@ export const createAppContextStartContractMock = (
 export const createFleetRequestHandlerContextMock = (): jest.Mocked<
   Awaited<FleetRequestHandlerContext['fleet']>
 > => {
+  const soClient = savedObjectsClientMock.create();
+
   return {
     authz: createFleetAuthzMock(),
     agentClient: {
@@ -91,9 +93,15 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
       asInternalUser: createPackagePolicyServiceMock(),
     },
     epm: {
-      internalSoClient: savedObjectsClientMock.create(),
+      internalSoClient: soClient,
     },
     spaceId: 'default',
+    getSoClient: jest.fn(async () => {
+      return {
+        client: soClient,
+        limitedToPackages: undefined,
+      };
+    }),
   };
 };
 
