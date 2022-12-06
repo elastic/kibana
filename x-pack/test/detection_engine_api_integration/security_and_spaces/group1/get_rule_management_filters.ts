@@ -8,17 +8,12 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { PREBUILT_RULES_URL } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
 import { RULE_MANAGEMENT_FILTERS_URL } from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/urls';
-
+import { PREBUILT_RULES_URL } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  createSignalsIndex,
-  deleteAllAlerts,
-  deleteSignalsIndex,
-  getSimpleRule,
-  deleteAllTimelines,
-} from '../../utils';
+import { deleteAllAlerts, getSimpleRule } from '../../utils';
+import { createPrebuiltRuleAssetSavedObjects } from '../../utils/create_prebuilt_rule_saved_objects';
+import { deleteAllPrebuiltRules } from '../../utils/delete_all_prebuilt_rules';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -28,13 +23,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('get_rule_management_filters', () => {
     beforeEach(async () => {
-      await createSignalsIndex(supertest, log);
-    });
-
-    afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
       await deleteAllAlerts(supertest, log);
-      await deleteAllTimelines(es);
     });
 
     it('should return the correct result when there are no rules', async () => {
@@ -91,7 +80,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('when there are installed prebuilt rules', () => {
       beforeEach(async () => {
+        await createPrebuiltRuleAssetSavedObjects(es);
         await supertest.put(PREBUILT_RULES_URL).set('kbn-xsrf', 'true').send().expect(200);
+      });
+
+      afterEach(async () => {
+        await deleteAllPrebuiltRules(es);
       });
 
       it('should return the correct number of installed prepacked rules after pre-packaged rules have been installed', async () => {
@@ -101,7 +95,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send()
           .expect(200);
 
-        expect(body.rules_summary.prebuilt_installed_count).to.eql(723);
+        expect(body.rules_summary.prebuilt_installed_count).to.eql(3);
         expect(body.rules_summary.custom_count).to.eql(0);
       });
 
@@ -112,74 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send()
           .expect(200);
 
-        expect(body.aggregated_fields.tags).to.eql([
-          'APM',
-          'AWS',
-          'Active Directory',
-          'Application',
-          'Asset Visibility',
-          'Authentication',
-          'Azure',
-          'BPFDoor',
-          'CVE-2020-1313',
-          'CVE-2020-9613',
-          'CVE-2020-9614',
-          'CVE-2020-9615',
-          'CVE_2020_9771',
-          'Cloud',
-          'Collection',
-          'Command and Control',
-          'Communication',
-          'Configuration Audit',
-          'Continuous Monitoring',
-          'Credential Access',
-          'Data Protection',
-          'Defense Evasion',
-          'Discovery',
-          'Elastic',
-          'Elastic Endgame',
-          'Endpoint Security',
-          'Example',
-          'Execution',
-          'Exfiltration',
-          'GCP',
-          'GTFOBins',
-          'Google Workspace',
-          'Guided Onboarding',
-          'Higher-Order Rules',
-          'Host',
-          'Identity',
-          'Identity and Access',
-          'Impact',
-          'Impair Defenses',
-          'Initial Access',
-          'Investigation Guide',
-          'Kubernetes',
-          'Lateral Movement',
-          'Lightning Framework',
-          'Linux',
-          'Log Auditing',
-          'ML',
-          'Microsoft 365',
-          'Monitoring',
-          'Network',
-          'Network Security',
-          'Okta',
-          'Orbit',
-          'Persistence',
-          'Post-Execution',
-          'Privilege Escalation',
-          'Resource Development',
-          'Rootkit',
-          'SecOps',
-          'Sysmon Only',
-          'Threat Detection',
-          'TripleCross',
-          'Windows',
-          'Zoom',
-          'cyberarkpas',
-          'macOS',
-        ]);
+        expect(body.aggregated_fields.tags).to.eql(['test-tag-1', 'test-tag-2', 'test-tag-3']);
       });
     });
   });
