@@ -125,6 +125,7 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
           <EuiSwitch
             checked={newExperimentalIndexingFeature.synthetic_source ?? false}
             disabled={!isSyntheticSourceEditable}
+            data-test-subj="packagePolicyEditor.syntheticSourceExperimentalFeature.switch"
             label={
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.experimentalFeatures.syntheticSourceLabel"
@@ -150,6 +151,7 @@ export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
             <EuiSwitch
               disabled={newExperimentalIndexingFeature.tsdb ?? false}
               checked={newExperimentalIndexingFeature.tsdb ?? false}
+              data-test-subj="packagePolicyEditor.tsdbExperimentalFeature.switch"
               label={
                 <FormattedMessage
                   id="xpack.fleet.createPackagePolicy.experimentalFeatures.TSDBLabel"
