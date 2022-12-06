@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { cleanKibana } from '../../../tasks/common';
 import { ROLES } from '../../../../common/test';
 import { getExceptionList } from '../../../objects/exception';
 import { EXCEPTIONS_TABLE_SHOWING_LISTS } from '../../../screens/exceptions';
-import { createExceptionList } from '../../../tasks/api_calls/exceptions';
+import { createExceptionList, deleteExceptionList } from '../../../tasks/api_calls/exceptions';
 import {
   dismissCallOut,
   getCallOut,
   waitForCallOutToBeShown,
 } from '../../../tasks/common/callouts';
-import { esArchiverResetKibana } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { EXCEPTIONS_URL } from '../../../urls/navigation';
 
@@ -22,15 +22,17 @@ const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
 describe('All exception lists - read only', () => {
   before(() => {
-    esArchiverResetKibana();
+    cleanKibana();
+  });
+
+  beforeEach(() => {
+    deleteExceptionList(getExceptionList().list_id, getExceptionList().namespace_type);
 
     // Create exception list not used by any rules
     createExceptionList(getExceptionList(), getExceptionList().list_id);
 
     login(ROLES.reader);
     visitWithoutDateRange(EXCEPTIONS_URL, ROLES.reader);
-
-    cy.reload();
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown

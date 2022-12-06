@@ -67,6 +67,7 @@ const ExceptionPanel = styled(EuiPanel)`
 `;
 const ListHeaderContainer = styled(EuiFlexGroup)`
   padding: ${euiThemeVars.euiSizeS};
+  text-align: initial;
 `;
 export const ExceptionsListCard = memo<ExceptionsListCardProps>(
   ({ exceptionsList, handleDelete, handleExport, readOnly }) => {
@@ -208,6 +209,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
             onConfirm={handleConfirmExceptionFlyout}
             data-test-subj="addExceptionItemFlyoutInSharedLists"
             showAlertCloseOptions={false}
+            isNonTimeline={true}
           />
         ) : null}
         {showEditExceptionFlyout && exceptionToEdit ? (
