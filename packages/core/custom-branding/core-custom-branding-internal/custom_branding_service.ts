@@ -41,7 +41,6 @@ export interface CustomBranding {
 
 /** @internal */
 export class CustomBrandingService {
-  private licenseType: '';
   private customBrandingPerOperator: {};
 
   async start(): Promise<CustomBranding> {
@@ -52,7 +51,7 @@ export class CustomBrandingService {
       setCustomBranding: () => {
         return customBranding$.set();
       },
-      start: () => {}
+      start: () => {},
     };
   }
 }

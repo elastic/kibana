@@ -16,7 +16,7 @@ describe('CustomBrandingService', () => {
   beforeEach(() => {
     service = new CustomBrandingService();
     mockAppService = {
-      applications$: new BehaviorSubject<ReadonlyMap<string, App>>({}),
+      applications$: new BehaviorSubject<ReadonlyMap<string, App>>(),
     };
   });
 
