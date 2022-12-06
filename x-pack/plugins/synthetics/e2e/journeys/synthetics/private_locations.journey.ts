@@ -49,9 +49,8 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await page.click('div[role="dialog"] button:has-text("Create agent policy")');
   });
   step('Go to http://localhost:5620/app/fleet/policies', async () => {
-    await page.goto('http://localhost:5620/app/fleet/policies');
-    await page.goto('http://localhost:5620/app/fleet/policies?create');
-    await page.goto('http://localhost:5620/app/synthetics/settings/private-locations');
+    await syntheticsApp.navigateToSettings(false);
+    await page.click('text=Private Locations');
   });
   step('Click button:has-text("Create location")', async () => {
     await page.click('button:has-text("Create location")');
