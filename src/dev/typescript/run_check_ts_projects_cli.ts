@@ -7,19 +7,16 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
 
-import { diffStrings } from '@kbn/dev-utils';
 import { run } from '@kbn/dev-cli-runner';
 import { asyncMapWithLimit } from '@kbn/std';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { getRepoFiles } from '@kbn/get-repo-files';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { readPackageMap } from '@kbn/package-map';
 import globby from 'globby';
 
 import { File } from '../file';
-import { PROJECTS } from './projects';
+import { getLintedProjects } from './lint_projects';
 import type { Project } from './project';
 
 class Stats {
@@ -38,70 +35,18 @@ class Stats {
 export async function runCheckTsProjectsCli() {
   run(
     async ({ log, flagsReader }) => {
-      const fix = flagsReader.boolean('fix');
       const stats = new Stats();
       const pkgMap = readPackageMap();
-      const pkgDirMap = new Map(Array.from(pkgMap).map(([k, v]) => [v || '.', k]));
+      const pkgDirMap = new Map(Array.from(pkgMap).map(([k, v]) => [v, k]));
+      const { lintingErrorCount, projects } = getLintedProjects(log, {
+        fix: flagsReader.boolean('fix'),
+        pkgMap,
+        pkgDirMap,
+      });
 
-      const warnedNonPkgRef = new Set<string>();
-      function getPkgIdJson(tsconfigPath: string) {
-        const repoRelRef = Path.relative(REPO_ROOT, Path.dirname(tsconfigPath)) || '.';
-        const pkgId = pkgDirMap.get(repoRelRef);
-        if (pkgId) {
-          return JSON.stringify(pkgId);
-        }
+      let failed = lintingErrorCount > 0;
 
-        if (!warnedNonPkgRef.has(repoRelRef)) {
-          warnedNonPkgRef.add(repoRelRef);
-          log.warning(`unable to map ${repoRelRef} to a package id`);
-        }
-      }
-
-      let failed = false;
-
-      const everyProjectDeep = new Set(PROJECTS.flatMap((p) => p.getProjectsDeep()));
-      for (const proj of everyProjectDeep) {
-        const [, ...baseConfigRels] = proj.getConfigPaths().map((p) => Path.relative(REPO_ROOT, p));
-        const configRel = Path.relative(REPO_ROOT, proj.tsConfigPath);
-
-        if (baseConfigRels[0] === 'tsconfig.json') {
-          failed = true;
-          log.error(
-            `[${configRel}]: This tsconfig extends the root tsconfig.json file and shouldn't. The root tsconfig.json file is not a valid base config, you probably want to point to the tsconfig.base.json file.`
-          );
-        }
-        if (configRel !== 'tsconfig.base.json' && !baseConfigRels.includes('tsconfig.base.json')) {
-          failed = true;
-          log.error(
-            `[${configRel}]: This tsconfig does not extend the tsconfig.base.json file either directly or indirectly. The TS config setup for the repo expects every tsconfig file to extend this base config file.`
-          );
-        }
-
-        const jsonc = Fs.readFileSync(proj.tsConfigPath, 'utf8');
-        const withReplacements = jsonc.replaceAll(
-          /{[^\"]*"path":\s*("[^"]+"),?[^\}]*}/g,
-          (match, jsonPath) => {
-            const refPath = Path.resolve(proj.directory, JSON.parse(jsonPath));
-            return getPkgIdJson(refPath) ?? match;
-          }
-        );
-
-        if (jsonc !== withReplacements) {
-          if (fix) {
-            Fs.writeFileSync(proj.tsConfigPath, withReplacements);
-          } else {
-            failed = true;
-            log.error(
-              `[${configRel}]: kbn_references must use pkgIds to refer to other packages (use --fix to autofix)\n\n${diffStrings(
-                jsonc,
-                withReplacements
-              )}\n`
-            );
-          }
-        }
-      }
-
-      const pathsAndProjects = await asyncMapWithLimit(PROJECTS, 5, async (proj) => {
+      const pathsAndProjects = await asyncMapWithLimit(projects, 5, async (proj) => {
         const paths = await globby(proj.getIncludePatterns(), {
           ignore: proj.getExcludePatterns(),
           cwd: proj.directory,
@@ -140,8 +85,8 @@ export async function runCheckTsProjectsCli() {
         failed = true;
         const details = Array.from(isInMultipleTsProjects)
           .map(
-            ([path, projects]) =>
-              ` - ${Path.relative(process.cwd(), path)}:\n${Array.from(projects)
+            ([path, list]) =>
+              ` - ${Path.relative(process.cwd(), path)}:\n${Array.from(list)
                 .map((p) => `   - ${Path.relative(process.cwd(), p.tsConfigPath)}`)
                 .join('\n')}`
           )

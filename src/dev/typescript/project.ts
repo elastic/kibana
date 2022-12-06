@@ -38,6 +38,20 @@ interface LoadOptions {
 }
 
 export class Project {
+  static reload(projects: Iterable<Project>) {
+    const cache = new Map<string, Project>();
+    return Array.from(projects).map((proj) =>
+      Project.load(
+        proj.tsConfigPath,
+        {
+          disableTypeCheck: proj.disableTypeCheck,
+          name: proj.name,
+        },
+        { cache }
+      )
+    );
+  }
+
   static load(
     tsConfigPath: string,
     projectOptions?: ProjectOptions,

@@ -21,7 +21,7 @@ export function parseTsConfig(tsConfigPath: string): TsConfigFile {
   );
 
   if (error) {
-    throw error;
+    throw new Error(`tsconfig parse error: [${error.file}] ${error.messageText}`);
   }
 
   return config;
