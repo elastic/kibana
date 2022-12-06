@@ -244,7 +244,7 @@ const processTransformAssetsPerModule = (
           transformVersion,
           content,
         });
-        transformsSpecifications.get(transformModuleId)?.set('upgraded', true);
+        transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', true);
       } else {
         if (currentTransformSameAsPrev === undefined) {
           const installNameWithoutVersion = installationName.split(transformVersion)[0];
@@ -261,10 +261,10 @@ const processTransformAssetsPerModule = (
             transformVersion,
             content,
           });
-          transformsSpecifications.get(transformModuleId)?.set('upgraded', true);
+          transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', true);
           aliasesRefs.push(allIndexAliasName, latestIndexAliasName);
         } else {
-          transformsSpecifications.get(transformModuleId)?.set('upgraded', false);
+          transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', false);
         }
       }
     }
@@ -413,9 +413,9 @@ const installTransformsAssets = async (
           );
           const customMappings = transformSpec?.get('mappings') ?? {};
           const pipelineId = transformSpec?.get('destinationIndex')?.pipeline;
-          const isUpgraded = transformSpec?.get('upgraded') ?? true;
+          const transformVersionChanged = transformSpec?.get('transformVersionChanged') ?? true;
 
-          if (!isUpgraded) return;
+          if (!transformVersionChanged) return;
 
           const registryElasticsearch: RegistryElasticsearch = {
             'index_template.settings': destinationIndexTemplate.template.settings,
@@ -468,22 +468,38 @@ const installTransformsAssets = async (
       transforms.map(async (transform) => {
         const index = transform.content.dest.index;
 
+        const aliases = transformsSpecifications
+          .get(transform.transformModuleId)
+          ?.get('destinationIndexAlias');
         try {
-          await retryTransientEsErrors(
+          const resp = await retryTransientEsErrors(
             () =>
               esClient.indices.create(
                 {
                   index,
-                  aliases: transformsSpecifications
-                    .get(transform.transformModuleId)
-                    ?.get('destinationIndexAlias'),
+                  aliases,
                 },
                 { ignore: [400] }
               ),
             { logger }
           );
-
           logger.debug(`Created destination index: ${index}`);
+
+          // If index already exists, we still need to update the destination index alias
+          // to point '{destinationIndexName}.latest' to the versioned index
+          // @ts-ignore status is a valid field of resp
+          if (resp.status === 400 && aliases) {
+            await retryTransientEsErrors(
+              () =>
+                esClient.indices.updateAliases({
+                  body: {
+                    actions: Object.keys(aliases).map((alias) => ({ add: { index, alias } })),
+                  },
+                }),
+              { logger }
+            );
+            logger.debug(`Created aliases for destination index: ${index}`);
+          }
         } catch (err) {
           logger.debug(
             `Error creating destination index: ${JSON.stringify({
