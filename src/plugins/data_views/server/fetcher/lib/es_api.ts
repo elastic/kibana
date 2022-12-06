@@ -42,7 +42,7 @@ export async function callIndexAliasApi(
 interface FieldCapsApiParams {
   callCluster: ElasticsearchClient;
   indices: string[] | string;
-  fieldCapsOptions?: { allow_no_indices: boolean };
+  fieldCapsOptions?: { allow_no_indices: boolean; include_unmapped?: boolean };
   filter?: QueryDslQueryContainer;
 }
 
@@ -65,6 +65,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     filter,
     fieldCapsOptions = {
       allow_no_indices: false,
+      include_unmapped: false,
     },
   } = params;
   try {
