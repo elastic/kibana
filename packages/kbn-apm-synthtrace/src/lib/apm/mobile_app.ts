@@ -11,6 +11,8 @@ import { ApmFields } from './apm_fields';
 import { MobileDevice } from './mobile_device';
 import { generateLongId } from '../utils/generate_id';
 
+type MobileAgentName = 'android/java' | 'iOS/swift';
+
 export class MobileApp extends Entity<ApmFields> {
   mobileDevice(deviceId?: string) {
     return new MobileDevice({
@@ -21,28 +23,24 @@ export class MobileApp extends Entity<ApmFields> {
   }
 }
 
-export function mobileApp(
-  name: string,
-  environment: string,
-  agentName: 'iOS' | 'android'
-): MobileApp;
+export function mobileApp(name: string, environment: string, agentName: MobileAgentName): MobileApp;
 
 export function mobileApp(options: {
   name: string;
   environment: string;
-  agentName: 'iOS' | 'android';
+  agentName: MobileAgentName;
 }): MobileApp;
 
 export function mobileApp(
   ...args:
-    | [{ name: string; environment: string; agentName: 'iOS' | 'android' }]
-    | [string, string, 'iOS' | 'android']
+    | [{ name: string; environment: string; agentName: MobileAgentName }]
+    | [string, string, MobileAgentName]
 ) {
-  const [serviceName, environment, agentName] =
+  const [name, environment, agentName] =
     args.length === 1 ? [args[0].name, args[0].environment, args[0].agentName] : args;
 
   return new MobileApp({
-    'service.name': serviceName,
+    'service.name': name,
     'service.environment': environment,
     'agent.name': agentName,
   });

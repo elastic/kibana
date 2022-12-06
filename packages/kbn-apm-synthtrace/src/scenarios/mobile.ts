@@ -326,7 +326,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         const deviceMetadata = ANDROID_DEVICES[randomInt(ANDROID_DEVICES.length)];
         const geoNetwork = GEO_AND_NETWORK[randomInt(GEO_AND_NETWORK.length)];
         return apm
-          .mobileApp({ name: 'synth-android', environment: ENVIRONMENT, agentName: 'android' })
+          .mobileApp({ name: 'synth-android', environment: ENVIRONMENT, agentName: 'android/java' })
           .mobileDevice()
           .deviceInfo(deviceMetadata)
           .osInfo(deviceMetadata)
@@ -338,7 +338,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         const deviceMetadata = APPLE_DEVICES[randomInt(APPLE_DEVICES.length)];
         const geoNetwork = GEO_AND_NETWORK[randomInt(GEO_AND_NETWORK.length)];
         return apm
-          .mobileApp({ name: 'synth-ios', environment: ENVIRONMENT, agentName: 'iOS' })
+          .mobileApp({ name: 'synth-ios', environment: ENVIRONMENT, agentName: 'iOS/swift' })
           .mobileDevice()
           .deviceInfo(deviceMetadata)
           .osInfo(deviceMetadata)
