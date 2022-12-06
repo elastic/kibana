@@ -145,7 +145,6 @@ describe('find()', () => {
           Object {
             "actions": Array [
               Object {
-                "actionRef": "action_0",
                 "group": "default",
                 "id": "1",
                 "params": Object {
@@ -240,7 +239,6 @@ describe('find()', () => {
           Object {
             "actions": Array [
               Object {
-                "actionRef": "action_0",
                 "group": "default",
                 "id": "1",
                 "params": Object {
@@ -248,7 +246,6 @@ describe('find()', () => {
                 },
               },
               Object {
-                "actionRef": "preconfigured:preconfigured",
                 "group": "default",
                 "id": "preconfigured",
                 "params": Object {
@@ -470,7 +467,6 @@ describe('find()', () => {
           Object {
             "actions": Array [
               Object {
-                "actionRef": "action_0",
                 "group": "default",
                 "id": "1",
                 "params": Object {
@@ -494,7 +490,6 @@ describe('find()', () => {
           Object {
             "actions": Array [
               Object {
-                "actionRef": "action_0",
                 "group": "default",
                 "id": "1",
                 "params": Object {

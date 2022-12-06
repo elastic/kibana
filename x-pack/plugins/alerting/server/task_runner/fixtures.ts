@@ -40,7 +40,6 @@ export const RULE_ACTIONS = [
     actionTypeId: 'action',
     group: 'default',
     id: '1',
-    actionRef: 'action_0',
     params: {
       foo: true,
     },
@@ -49,7 +48,6 @@ export const RULE_ACTIONS = [
     actionTypeId: 'action',
     group: 'recovered',
     id: '2',
-    actionRef: 'action_1',
     params: {
       isResolved: true,
     },
@@ -175,7 +173,6 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
       group: 'default',
       id: '1',
       actionTypeId: 'action',
-      actionRef: 'action_0',
       params: {
         foo: true,
       },
@@ -184,7 +181,6 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
       group: RecoveredActionGroup.id,
       id: '2',
       actionTypeId: 'action',
-      actionRef: 'action_1',
       params: {
         isResolved: true,
       },

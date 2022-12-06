@@ -264,7 +264,6 @@ describe('update()', () => {
           {
             group: 'default',
             id: '1',
-            actionRef: 'action_0',
             params: {
               foo: true,
             },
@@ -272,7 +271,6 @@ describe('update()', () => {
           {
             group: 'default',
             id: '1',
-            actionRef: 'action_1',
             params: {
               foo: true,
             },
@@ -280,7 +278,6 @@ describe('update()', () => {
           {
             group: 'default',
             id: '2',
-            actionRef: 'action_2',
             params: {
               foo: true,
             },
@@ -292,7 +289,6 @@ describe('update()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -301,7 +297,6 @@ describe('update()', () => {
             },
           },
           Object {
-            "actionRef": "action_1",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -310,7 +305,6 @@ describe('update()', () => {
             },
           },
           Object {
-            "actionRef": "action_2",
             "actionTypeId": "test2",
             "group": "default",
             "id": "2",
@@ -552,7 +546,6 @@ describe('update()', () => {
           {
             group: 'default',
             id: '1',
-            actionRef: 'action_0',
             params: {
               foo: true,
             },
@@ -560,7 +553,6 @@ describe('update()', () => {
           {
             group: 'default',
             id: 'preconfigured',
-            actionRef: 'preconfigured',
             params: {
               foo: true,
             },
@@ -568,7 +560,6 @@ describe('update()', () => {
           {
             group: 'custom',
             id: 'preconfigured',
-            actionRef: 'preconfigured2',
             params: {
               foo: true,
             },
@@ -635,7 +626,6 @@ describe('update()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -644,7 +634,6 @@ describe('update()', () => {
             },
           },
           Object {
-            "actionRef": "preconfigured:preconfigured",
             "actionTypeId": "test",
             "group": "default",
             "id": "preconfigured",
@@ -653,7 +642,6 @@ describe('update()', () => {
             },
           },
           Object {
-            "actionRef": "preconfigured:preconfigured",
             "actionTypeId": "test",
             "group": "custom",
             "id": "preconfigured",
@@ -771,7 +759,6 @@ describe('update()', () => {
           {
             group: 'default',
             id: '1',
-            actionRef: 'action_0',
             params: {
               foo: true,
             },
@@ -825,7 +812,6 @@ describe('update()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -903,7 +889,6 @@ describe('update()', () => {
         notifyWhen: null,
         actions: [
           {
-            actionRef: 'action_0',
             group: 'default',
             id: '1',
             params: {
@@ -917,7 +902,6 @@ describe('update()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -1060,7 +1044,6 @@ describe('update()', () => {
         notifyWhen: 'onThrottleInterval',
         actions: [
           {
-            actionRef: 'action_0',
             group: 'default',
             id: '1',
             params: {
@@ -1075,7 +1058,6 @@ describe('update()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -1176,7 +1158,6 @@ describe('update()', () => {
               {
                 group: 'default',
                 id: '1',
-                actionRef: 'action_0',
                 params: {
                   foo: true,
                 },
@@ -1184,7 +1165,6 @@ describe('update()', () => {
               {
                 group: 'default',
                 id: '1',
-                actionRef: 'action_1',
                 params: {
                   foo: true,
                 },
@@ -1192,7 +1172,6 @@ describe('update()', () => {
               {
                 group: 'default',
                 id: '2',
-                actionRef: 'action_2',
                 params: {
                   foo: true,
                 },
@@ -1238,7 +1217,6 @@ describe('update()', () => {
             {
               group: 'default',
               id: '1',
-              actionRef: 'action_0',
               params: {
                 foo: true,
               },
@@ -1342,7 +1320,6 @@ describe('update()', () => {
           {
             group: 'default',
             id: '1',
-            actionRef: 'action_0',
             params: {
               foo: true,
             },
@@ -1468,7 +1445,6 @@ describe('update()', () => {
           {
             group: 'default',
             id: '1',
-            actionRef: 'action_0',
             params: {
               foo: true,
             },
@@ -1476,7 +1452,6 @@ describe('update()', () => {
           {
             group: 'default',
             id: '1',
-            actionRef: 'action_1',
             params: {
               foo: true,
             },
@@ -1484,7 +1459,6 @@ describe('update()', () => {
           {
             group: 'default',
             id: '2',
-            actionRef: 'action_2',
             params: {
               foo: true,
             },
@@ -1520,7 +1494,6 @@ describe('update()', () => {
             {
               group: 'default',
               id: '1',
-              actionRef: 'action_0',
               params: {
                 foo: true,
               },
@@ -1636,7 +1609,6 @@ describe('update()', () => {
             {
               group: 'default',
               id: '1',
-              actionRef: 'action_0',
               params: {
                 foo: true,
               },
@@ -1669,7 +1641,6 @@ describe('update()', () => {
             {
               group: 'default',
               id: '1',
-              actionRef: 'action_0',
               params: {
                 foo: true,
               },
@@ -1702,7 +1673,6 @@ describe('update()', () => {
               {
                 group: 'default',
                 id: '1',
-                actionRef: 'action_0',
                 params: {
                   foo: true,
                 },
@@ -1715,7 +1685,6 @@ describe('update()', () => {
               {
                 group: 'default',
                 id: '2',
-                actionRef: 'action_1',
                 params: {
                   foo: true,
                 },
@@ -1750,7 +1719,6 @@ describe('update()', () => {
               {
                 group: 'default',
                 id: '1',
-                actionRef: 'action_0',
                 params: {
                   foo: true,
                 },
@@ -1762,7 +1730,6 @@ describe('update()', () => {
               },
               {
                 group: 'default',
-                actionRef: 'action_1',
                 id: '2',
                 params: {
                   foo: true,
@@ -1800,7 +1767,6 @@ describe('update()', () => {
               {
                 group: 'default',
                 id: '1',
-                actionRef: 'action_0',
                 params: {
                   foo: true,
                 },
@@ -1837,7 +1803,6 @@ describe('update()', () => {
               {
                 group: 'default',
                 id: '1',
-                actionRef: 'action_0',
                 params: {
                   foo: true,
                 },
@@ -1850,7 +1815,6 @@ describe('update()', () => {
               {
                 group: 'default',
                 id: '2',
-                actionRef: 'action_1',
                 params: {
                   foo: true,
                 },
@@ -1889,7 +1853,6 @@ describe('update()', () => {
             {
               group: 'default',
               id: '1',
-              actionRef: 'action_0',
               params: {
                 foo: true,
               },
@@ -1960,7 +1923,6 @@ describe('update()', () => {
             {
               group: 'default',
               id: '1',
-              actionRef: 'action_0',
               params: {
                 foo: true,
               },
@@ -1968,7 +1930,6 @@ describe('update()', () => {
             {
               group: 'default',
               id: '1',
-              actionRef: 'action_1',
               params: {
                 foo: true,
               },
@@ -1976,7 +1937,6 @@ describe('update()', () => {
             {
               group: 'default',
               id: '2',
-              actionRef: 'action_2',
               params: {
                 foo: true,
               },
@@ -2098,7 +2058,6 @@ describe('update()', () => {
           {
             group: 'default',
             id: '1',
-            actionRef: 'action_0',
             params: {
               foo: true,
             },
@@ -2106,7 +2065,6 @@ describe('update()', () => {
           {
             group: 'default',
             id: '1',
-            actionRef: 'action_1',
             params: {
               foo: true,
             },
@@ -2114,7 +2072,6 @@ describe('update()', () => {
           {
             group: 'default',
             id: '2',
-            actionRef: 'action_2',
             params: {
               foo: true,
             },
@@ -2149,7 +2106,6 @@ describe('update()', () => {
             {
               group: 'default',
               id: '1',
-              actionRef: 'action_0',
               params: {
                 foo: true,
               },
@@ -2157,7 +2113,6 @@ describe('update()', () => {
             {
               group: 'default',
               id: '1',
-              actionRef: 'action_1',
               params: {
                 foo: true,
               },
@@ -2165,7 +2120,6 @@ describe('update()', () => {
             {
               group: 'default',
               id: '2',
-              actionRef: 'action_2',
               params: {
                 foo: true,
               },

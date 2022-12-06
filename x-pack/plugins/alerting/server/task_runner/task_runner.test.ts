@@ -1019,7 +1019,7 @@ describe('Task Runner', () => {
           start: DATE_1969,
           flappingHistory: [false],
           actions: {
-            action_0: {
+            '1': {
               date: new Date(DATE_1970),
             },
           },
@@ -1151,7 +1151,7 @@ describe('Task Runner', () => {
           id: 1,
           flappingHistory: [false],
           actions: {
-            action_0: {
+            '1': {
               date: new Date(DATE_1970),
             },
           },
@@ -1260,7 +1260,6 @@ describe('Task Runner', () => {
             group: 'default',
             id: '1',
             actionTypeId: 'action',
-            actionRef: 'action_0',
             params: {
               foo: true,
             },
@@ -1268,7 +1267,6 @@ describe('Task Runner', () => {
           {
             group: recoveryActionGroup.id,
             id: '2',
-            actionRef: 'action_1',
             actionTypeId: 'action',
             params: {
               isResolved: true,
@@ -1283,7 +1281,7 @@ describe('Task Runner', () => {
           id: 1,
           flappingHistory: [false],
           actions: {
-            action_0: {
+            '1': {
               date: new Date(DATE_1970),
             },
           },
@@ -2371,31 +2369,26 @@ describe('Task Runner', () => {
       {
         group: 'default',
         id: '1',
-        actionRef: 'action_0',
         actionTypeId: 'action',
       },
       {
         group: 'default',
         id: '2',
-        actionRef: 'action_1',
         actionTypeId: 'action',
       },
       {
         group: 'default',
         id: '3',
-        actionRef: 'action_2',
         actionTypeId: 'action',
       },
       {
         group: 'default',
         id: '4',
-        actionRef: 'action_3',
         actionTypeId: 'action',
       },
       {
         group: 'default',
         id: '5',
-        actionRef: 'action_4',
         actionTypeId: 'action',
       },
     ];
@@ -2447,13 +2440,13 @@ describe('Task Runner', () => {
                 date: new Date(DATE_1970),
                 group: 'default',
                 actions: {
-                  action_0: {
+                  '1': {
                     date: new Date(DATE_1970),
                   },
-                  action_1: {
+                  '2': {
                     date: new Date(DATE_1970),
                   },
-                  action_2: {
+                  '3': {
                     date: new Date(DATE_1970),
                   },
                 },
@@ -2553,31 +2546,26 @@ describe('Task Runner', () => {
         {
           group: 'default',
           id: '1',
-          actionRef: 'action_0',
           actionTypeId: '.server-log',
         },
         {
           group: 'default',
           id: '2',
-          actionRef: 'action_1',
           actionTypeId: '.server-log',
         },
         {
           group: 'default',
           id: '3',
-          actionRef: 'action_2',
           actionTypeId: '.server-log',
         },
         {
           group: 'default',
           id: '4',
-          actionRef: 'action_3',
           actionTypeId: 'any-action',
         },
         {
           group: 'default',
           id: '5',
-          actionRef: 'action_4',
           actionTypeId: 'any-action',
         },
       ],
@@ -2627,13 +2615,13 @@ describe('Task Runner', () => {
                 date: new Date(DATE_1970),
                 group: 'default',
                 actions: {
-                  action_0: {
+                  '1': {
                     date: new Date(DATE_1970),
                   },
-                  action_3: {
+                  '4': {
                     date: new Date(DATE_1970),
                   },
-                  action_4: {
+                  '5': {
                     date: new Date(DATE_1970),
                   },
                 },
@@ -2652,10 +2640,10 @@ describe('Task Runner', () => {
                 date: new Date(DATE_1970),
                 group: 'default',
                 actions: {
-                  action_3: {
+                  '4': {
                     date: new Date(DATE_1970),
                   },
-                  action_4: {
+                  '5': {
                     date: new Date(DATE_1970),
                   },
                 },

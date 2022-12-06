@@ -93,7 +93,6 @@ function getMockData(overwrites: Record<string, unknown> = {}): CreateOptions<{
         params: {
           foo: true,
         },
-        actionRef: 'action_0',
       },
     ],
     ...overwrites,
@@ -356,7 +355,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -810,7 +808,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -819,7 +816,6 @@ describe('create()', () => {
             },
           },
           Object {
-            "actionRef": "action_1",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -828,7 +824,6 @@ describe('create()', () => {
             },
           },
           Object {
-            "actionRef": "action_2",
             "actionTypeId": "test2",
             "group": "default",
             "id": "2",
@@ -1000,7 +995,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -1009,7 +1003,6 @@ describe('create()', () => {
             },
           },
           Object {
-            "actionRef": "preconfigured:preconfigured",
             "actionTypeId": "test",
             "group": "default",
             "id": "preconfigured",
@@ -1018,7 +1011,6 @@ describe('create()', () => {
             },
           },
           Object {
-            "actionRef": "action_2",
             "actionTypeId": "test2",
             "group": "default",
             "id": "2",
@@ -1148,7 +1140,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -1318,7 +1309,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -1487,7 +1477,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -1649,7 +1638,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -1782,7 +1770,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -1915,7 +1902,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",
@@ -2088,7 +2074,6 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
-            "actionRef": "action_0",
             "actionTypeId": "test",
             "group": "default",
             "id": "1",

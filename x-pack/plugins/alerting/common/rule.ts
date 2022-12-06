@@ -75,7 +75,6 @@ export interface RuleAction {
   id: string;
   actionTypeId: string;
   params: RuleActionParams;
-  actionRef: string;
   frequency?: {
     summary: boolean;
     notifyWhen: RuleNotifyWhenType;
