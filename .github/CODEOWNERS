@@ -12,6 +12,7 @@
 /src/plugins/discover/ @elastic/kibana-data-discovery
 /src/plugins/saved_search/ @elastic/kibana-data-discovery
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-data-discovery
+/x-pack/test/functional/apps/discover/ @elastic/kibana-data-discovery
 /test/functional/apps/discover/ @elastic/kibana-data-discovery
 /test/functional/apps/context/ @elastic/kibana-data-discovery
 /test/api_integration/apis/unified_field_list/ @elastic/kibana-data-discovery
@@ -641,11 +642,6 @@ x-pack/plugins/threat_intelligence @elastic/protections-experience
 x-pack/plugins/security_solution/public/threat_intelligence @elastic/protections-experience
 x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
-
-# Security Intelligence And Analytics
-/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules @elastic/security-intelligence-analytics
-
-
 # Security Asset Management
 /x-pack/plugins/osquery @elastic/security-asset-management
 /x-pack/plugins/security_solution/common/detection_engine/rule_response_actions @elastic/security-asset-management
@@ -952,7 +948,7 @@ packages/kbn-logging-mocks @elastic/kibana-core
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-mapbox-gl @elastic/kibana-gis
-packages/kbn-monaco @elastic/kibana-app-services
+packages/kbn-monaco @elastic/kibana-global-experience
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 packages/kbn-osquery-io-ts-types @elastic/security-asset-management
@@ -965,6 +961,7 @@ packages/kbn-plugin-helpers @elastic/kibana-operations
 packages/kbn-react-field @elastic/kibana-app-services
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
+packages/kbn-rison @elastic/kibana-operations
 packages/kbn-rule-data-utils @elastic/security-detections-response @elastic/actionable-observability @elastic/response-ops
 packages/kbn-safer-lodash-set @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-solution-platform
@@ -1055,6 +1052,7 @@ packages/shared-ux/page/solution_nav @elastic/kibana-global-experience
 packages/shared-ux/prompt/no_data_views/impl @elastic/kibana-global-experience
 packages/shared-ux/prompt/no_data_views/mocks @elastic/kibana-global-experience
 packages/shared-ux/prompt/no_data_views/types @elastic/kibana-global-experience
+packages/shared-ux/prompt/not_found @elastic/kibana-global-experience
 packages/shared-ux/router/impl @elastic/kibana-global-experience
 packages/shared-ux/router/mocks @elastic/kibana-global-experience
 packages/shared-ux/router/types @elastic/kibana-global-experience
