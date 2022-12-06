@@ -26,8 +26,6 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import pMap from 'p-map';
 
-import type { FleetAuthz } from '../../common';
-
 import {
   packageToPackagePolicy,
   packageToPackagePolicyInputs,
@@ -87,8 +85,6 @@ import type { ExternalCallback } from '..';
 import {
   doesNotHaveRequiredFleetAuthz,
   getAuthzFromRequest,
-  validateSecurityRbac,
-  WRITE_ENDPOINT_PACKAGE_PRIVILEGES as packagePrivileges,
   type FleetAuthzRouteConfig,
 } from '../routes/security';
 
@@ -1306,7 +1302,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
     }
   ): Promise<PackagePolicy> {
     await this.#runPreflight({
-      fleetAuthz: { integrations: { writeIntegrationPolicies: true }, },
+      fleetAuthz: { integrations: { writeIntegrationPolicies: true } },
     });
 
     return super.create(soClient, esClient, packagePolicy, options);

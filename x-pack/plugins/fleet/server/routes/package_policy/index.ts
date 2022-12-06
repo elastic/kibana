@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FleetAuthz } from '../../../common';
 import { PACKAGE_POLICY_API_ROUTES } from '../../constants';
 import {
   GetPackagePoliciesRequestSchema,
@@ -18,11 +17,7 @@ import {
   DeleteOnePackagePolicyRequestSchema,
   BulkGetPackagePoliciesRequestSchema,
 } from '../../types';
-import {
-  type FleetAuthzRouter,
-  READ_ENDPOINT_PACKAGE_PRIVILEGES as packagePrivileges,
-  validateSecurityRbac,
-} from '../security';
+import { type FleetAuthzRouter } from '../security';
 
 import {
   getPackagePoliciesHandler,
