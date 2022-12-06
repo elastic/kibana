@@ -92,7 +92,7 @@ If you choose the *Policy* option, configure these fields:
 NOTE: When defining pack deployment details, you cannot configure the same policy multiple times. In other words, after specifying a policy, you can either choose to deploy the pack to all of the policy's agents or only a subset. You cannot choose both.
 
 ** *Scheduled {agent} policies (optional)*: Allows you to deploy the pack to specific agent policies. By default, the pack is deployed to all {agents} that are registered to the policies you define.  
-** *Partial deployment (shards)*: Allows you to partially deploy the pack to specified agent policies. After defining a policy, use the *Shard* slider to set the amount of agents to which the pack is deployed. For example, after specifying a policy, you can choose to deploy the pack to half of the policy's agents by selecting 50% on the slider.
+** *Partial deployment (shards)*: Allows you to deploy the pack to a portion of the agents on each specified agent policy. After defining a policy, use the *Shard* slider to set the amount of agents to which the pack is deployed. For example, after specifying a policy, you can choose to deploy the pack to half of the policy's agents by selecting 50% on the slider.
 
 . If you're creating a new pack, add queries to schedule:
 
