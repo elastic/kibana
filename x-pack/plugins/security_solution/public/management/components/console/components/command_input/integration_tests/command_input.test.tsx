@@ -249,6 +249,7 @@ describe('When entering data into the Console input', () => {
 
         await waitFor(() => {
           expect(renderResult.queryByTestId('confirmModalTitleText')).toBeNull();
+          expect(renderResult.getByTestId('test-inputHistorySelector')).not.toBeNull();
         });
       });
 
