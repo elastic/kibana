@@ -117,19 +117,16 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     }
   }, []);
 
-  const handleSubmitButton = useCallback<MouseEventHandler>(
-    (ev) => {
-      setCommandToExecute(textEntered + rightOfCursor.text);
-      dispatch({
-        type: 'updateInputTextEnteredState',
-        payload: {
-          textEntered: '',
-          rightOfCursor: undefined,
-        },
-      });
-    },
-    [dispatch, textEntered, rightOfCursor.text]
-  );
+  const handleSubmitButton = useCallback<MouseEventHandler>(() => {
+    setCommandToExecute(textEntered + rightOfCursor.text);
+    dispatch({
+      type: 'updateInputTextEnteredState',
+      payload: {
+        textEntered: '',
+        rightOfCursor: undefined,
+      },
+    });
+  }, [dispatch, textEntered, rightOfCursor.text]);
 
   const handleOnChangeFocus = useCallback<NonNullable<InputCaptureProps['onChangeFocus']>>(
     (hasFocus) => {
@@ -239,13 +236,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
               ref={resizeRef}
               data-test-subj={getTestId('cmdInput-container')}
             >
-              <EuiFlexGroup
-                wrap
-                responsive={false}
-                alignItems="center"
-                gutterSize="none"
-                justifyContent="flexStart"
-              >
+              <EuiFlexGroup wrap responsive={false} alignItems="center" gutterSize="none">
                 {prompt && (
                   <EuiFlexItem grow={false} data-test-subj={getTestId('cmdInput-prompt')}>
                     <span className="eui-displayInlineBlock prompt">{prompt}</span>
@@ -257,12 +248,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                     onChangeFocus={handleOnChangeFocus}
                     focusRef={focusRef}
                   >
-                    <EuiFlexGroup
-                      responsive={false}
-                      alignItems="center"
-                      gutterSize="none"
-                      justifyContent="flexStart"
-                    >
+                    <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
                       <EuiFlexItem grow={false}>
                         <div data-test-subj={getTestId('cmdInput-leftOfCursor')}>{textEntered}</div>
                       </EuiFlexItem>
@@ -283,7 +269,6 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                     data-test-subj={getTestId('inputTextSubmitButton')}
                     aria-label="submit-command"
                     iconType="playFilled"
-                    display="empty"
                     color="primary"
                     isDisabled={disableArrowButton}
                     onClick={handleSubmitButton}

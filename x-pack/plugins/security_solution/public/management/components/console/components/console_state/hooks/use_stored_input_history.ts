@@ -48,7 +48,11 @@ export const useStoredInputHistory = (
   }, [storage, storagePrefix]);
 };
 
-export const useSaveInputHistoryToStorage = (storagePrefix: ConsoleDataState['storagePrefix']) => {
+type SaveInputHistoryToStorageCallback = (data: InputHistoryOfflineStorage['data']) => void;
+
+export const useSaveInputHistoryToStorage = (
+  storagePrefix: ConsoleDataState['storagePrefix']
+): SaveInputHistoryToStorageCallback => {
   const { storage } = useKibana().services;
 
   return useCallback(

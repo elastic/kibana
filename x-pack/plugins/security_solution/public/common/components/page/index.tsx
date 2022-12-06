@@ -35,7 +35,7 @@ export const FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET = () => css`
   }
 `;
 
-/** The `z-index` for EuiPopoever Panels that are displayed from inside of Timeline page */
+/** The `z-index` for EuiPopover Panels that are displayed from inside of Timeline page */
 export const TIMELINE_EUI_POPOVER_PANEL_ZINDEX = 9900;
 
 /**

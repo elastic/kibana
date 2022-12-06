@@ -95,6 +95,7 @@ const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
   // from inside of this Page Overlay component.
   //-------------------------------------------------------------------------------------------
   // Eui Confirm Dialog mask overlay should be displayed above any other popovers
+  //-------------------------------------------------------------------------------------------
   body.${PAGE_OVERLAY_DOCUMENT_BODY_OVER_PAGE_WRAPPER_CLASSNAME} .euiOverlayMask[data-relative-to-header="above"] {
     z-index: ${TIMELINE_EUI_POPOVER_PANEL_ZINDEX};
   }

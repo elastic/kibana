@@ -92,7 +92,7 @@ describe('When entering data into the Console input', () => {
     expect(renderResult.queryByTestId('test-inputPlaceholder')).toBeNull();
   });
 
-  it('should display default hint when nothing is typed into the command inptu area', () => {
+  it('should display default hint when nothing is typed into the command input area', () => {
     render();
 
     expect(getFooterText()?.trim()).toBe(UP_ARROW_ACCESS_HISTORY_HINT);
