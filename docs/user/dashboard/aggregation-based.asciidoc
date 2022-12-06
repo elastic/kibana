@@ -200,12 +200,14 @@ When you open aggregation-based visualizations in *Lens*, all configuration opti
 You can open the following aggregation-based visualizations in *Lens*:
 
 * Area
+* Data table
 * Gauge
 * Goal
 * Heat map
 * Horizontal bar
 * Line
 * Metric
+* Pie
 * Vertical bar
 
 To get started, click *Edit visualization in Lens* in the toolbar.

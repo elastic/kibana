@@ -199,11 +199,15 @@ Annotations allow you to call out specific points in your visualizations that ar
 [role="screenshot"]
 image::images/lens_annotations_8.2.0.png[Lens annotations]
 
+Create the annotation. 
+
 . In the layer pane, click *Add layer > Annotations*.
 
 . Select the {data-source}.
 
 . Click *Event*, or drag a field to the *Add an annotation* field in the *Annotations* layer pane.
+
+. Choose the *Placement type*. 
 
 . Specify the *Annotation date*.
 
