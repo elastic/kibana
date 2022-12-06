@@ -25,7 +25,7 @@ export class OsCgroupMetricsCollector implements MetricsCollector<OsCgroupMetric
   /**  Used to prevent unnecessary file reads on systems not using cgroups. */
   private noCgroupPresent = false;
   /** Are resources being managed by cgroup2? */
-  private isCgroup2 = false;
+  private isCgroups2 = false;
   private cpuPath?: string;
   private cpuAcctPath?: string;
 
@@ -44,7 +44,7 @@ export class OsCgroupMetricsCollector implements MetricsCollector<OsCgroupMetric
 
       const args = { cpuAcctPath: this.cpuAcctPath!, cpuPath: this.cpuPath! };
       // "await" to handle any errors here.
-      return await (this.isCgroup2 ? v2.gatherCgroupMetrics(args) : v1.gatherCgroupMetrics(args));
+      return await (this.isCgroups2 ? v2.gatherCgroupMetrics(args) : v1.gatherCgroupMetrics(args));
     } catch (err) {
       this.noCgroupPresent = true;
 
@@ -68,7 +68,7 @@ export class OsCgroupMetricsCollector implements MetricsCollector<OsCgroupMetric
     if (this.hasPaths()) return;
 
     const [cgroups, isV2] = await gatherInfo();
-    this.isCgroup2 = isV2;
+    this.isCgroups2 = isV2;
     this.cpuPath = this.options.cpuPath || cgroups[GROUP_CPU];
     this.cpuAcctPath = this.options.cpuAcctPath || cgroups[GROUP_CPUACCT];
 
