@@ -112,7 +112,7 @@ describe('useSyncRulesTableSavedState', () => {
       sortingOptions: {
         field: 'name',
         order: 'asc',
-      },
+      } as const,
       pagination: {
         page: 3,
         perPage: 10,
@@ -130,9 +130,9 @@ describe('useSyncRulesTableSavedState', () => {
     };
     const expectedStorageState: RulesTableStorageSavedState = omit(expectedUrlState, 'page');
 
-    (useRulesTableContext as jest.Mock).mockReturnValue({
-      state,
-    });
+    const rulesTableContext = useRulesTableContextMock.create();
+    rulesTableContext.state = { ...rulesTableContext.state, ...state };
+    (useRulesTableContext as jest.Mock).mockReturnValue(rulesTableContext);
 
     renderHook(() => useSyncRulesTableSavedState());
 
