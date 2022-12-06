@@ -270,7 +270,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      append: <BetaBadge icon="editorBold" />,
+      append: <BetaBadge icon="beta" />,
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
