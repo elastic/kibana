@@ -64,11 +64,11 @@ export const NoResultsSuggestionWhenTimeRange: React.FC<Props> = ({ dataView, qu
           values={{
             showAllLink: (
               <EuiLink
-                data-test-subj="discoverNoResultsShowAllOccurrences"
+                data-test-subj="discoverNoResultsFindAllOccurrences"
                 onClick={expandTimeRange}
               >
                 <FormattedMessage
-                  id="discover.noResults.findAllOccurrencesLinkText"
+                  id="discover.noResults.findAllMatchesLinkText"
                   defaultMessage="Expand the time range to see all matches"
                 />
               </EuiLink>

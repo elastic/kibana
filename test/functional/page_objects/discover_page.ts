@@ -439,6 +439,10 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('discoverNoResultsTimefilter');
   }
 
+  public async expandTimeRangeAsSuggestedInNoResultsMessage() {
+    return await this.testSubjects.click('discoverNoResultsFindAllOccurrences');
+  }
+
   public async getSidebarAriaDescription(): Promise<string> {
     return await (
       await this.testSubjects.find('fieldListGrouped__ariaDescription')
