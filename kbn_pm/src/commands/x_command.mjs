@@ -8,48 +8,150 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import Fsp from 'fs/promises';
 
+import { asyncMapWithLimit } from '../lib/async.mjs';
 import External from '../lib/external_packages.js';
+import { createCliError } from '../lib/cli_error.mjs';
 import { REPO_ROOT } from '../lib/paths.mjs';
+
+/**
+ * @type {Map<string, boolean>}
+ */
+const validPkgDirCache = new Map();
+/**
+ * @param {string} dir
+ */
+function validatePkgDir(dir) {
+  const cached = validPkgDirCache.get(dir);
+  if (cached !== undefined) {
+    return cached;
+  }
+
+  const valid = Fs.existsSync(Path.resolve(REPO_ROOT, dir, 'tsconfig.json'));
+  validPkgDirCache.set(dir, valid);
+  return valid;
+}
+
+/**
+ * @param {import('@babel/types').Node} node
+ */
+function getEnds(node) {
+  const { start, end } = node;
+  if (start == null || end == null) {
+    throw createCliError(`node is missing start/end indexes`);
+  }
+  return [start, end];
+}
 
 /** @type {import('../lib/command').Command} */
 export const command = {
   name: '_x',
   async run({ log }) {
-    const { readPackageMap } = External['@kbn/package-map']();
-
+    const { default: globby } = await import('globby');
+    const { parseExpression } = await import('@babel/parser');
+    const T = await import('@babel/types');
     const { PROJECTS } = /** @type {import('../../../src/dev/typescript/projects')} */ (
       External.reqAbs(Path.resolve(REPO_ROOT, 'src/dev/typescript/projects.ts'))
     );
+    const { readPackageMap } = External['@kbn/package-map']();
 
-    const pkgMap = readPackageMap();
-    const pkgDirMap = new Map(Array.from(pkgMap).map(([k, v]) => [v, k]));
-    let updateCount = 0;
+    const pathsAndProjects = await asyncMapWithLimit(PROJECTS, 5, async (proj) => {
+      const paths = await globby(proj.getIncludePatterns(), {
+        ignore: proj.getExcludePatterns(),
+        cwd: proj.directory,
+        onlyFiles: true,
+        absolute: true,
+      });
 
-    for (const proj of PROJECTS) {
-      const jsonc = Fs.readFileSync(proj.tsConfigPath, 'utf8');
-      const withReplacements = jsonc.replaceAll(
-        /{[^\"]*"path":\s*("[^"]+"),?[^\}]*}/g,
-        (match, jsonPath) => {
-          const refPath = Path.resolve(proj.directory, JSON.parse(jsonPath));
-          const repoRelRef = Path.relative(REPO_ROOT, Path.dirname(refPath));
+      return {
+        proj,
+        paths,
+      };
+    });
 
-          const pkgId = pkgDirMap.get(repoRelRef);
-          if (!pkgId) {
-            log.error('unable to map', refPath, 'to a package id');
-            return match;
-          }
+    for (const { proj, paths } of pathsAndProjects) {
+      if (proj.directory.includes('/packages/') || !proj.config.kbn_references) {
+        continue;
+      }
 
-          return JSON.stringify(pkgId);
+      /** @type {Set<string>} */
+      const importedPkgIds = new Set();
+      await asyncMapWithLimit(paths, 30, async (path) => {
+        const content = await Fsp.readFile(path, 'utf8');
+        for (const match of content.matchAll(/from '(@kbn\/[^'\/]+)/g)) {
+          importedPkgIds.add(match[1]);
         }
+      });
+
+      const pkgMap = readPackageMap();
+      const currentRefs = Array.from(proj.config.kbn_references);
+      const newRefs = [];
+      for (const id of importedPkgIds) {
+        const pkgDir = pkgMap.get(id);
+        if (!pkgDir) {
+          continue;
+        }
+        if (!validatePkgDir(pkgDir)) {
+          continue;
+        }
+        if (!currentRefs.includes(id)) {
+          newRefs.push(id);
+        }
+      }
+
+      if (!newRefs.length) {
+        continue;
+      }
+
+      const jsonc = await Fsp.readFile(proj.tsConfigPath, 'utf8');
+      const ast = parseExpression(jsonc);
+      if (!T.isObjectExpression(ast)) {
+        throw createCliError(`expected file to be a JSON object: ${proj.tsConfigPath}`);
+      }
+
+      const refsProp = ast.properties.find(
+        /** @returns {p is import('@babel/types').ObjectProperty} */
+        (p) => T.isObjectProperty(p) && T.isStringLiteral(p.key) && p.key.value === 'kbn_references'
       );
 
-      if (withReplacements !== jsonc) {
-        Fs.writeFileSync(proj.tsConfigPath, withReplacements, 'utf8');
-        updateCount++;
+      if (!refsProp) {
+        throw createCliError(`missing kbn_references prop in ${proj.tsConfigPath}`);
       }
-    }
+      if (!T.isArrayExpression(refsProp.value)) {
+        throw createCliError(
+          `expected kbn_references property value to be an array in ${proj.tsConfigPath}`
+        );
+      }
 
-    log.success('updated', updateCount, 'tsconfig.json files');
+      const lastValue = refsProp.value.elements.at(-1);
+      let updated;
+      if (!lastValue || lastValue.loc?.start.line === refsProp.loc?.start.line) {
+        // expand multiline, or setup from scratch
+        const [start, end] = getEnds(refsProp);
+        const list = [...currentRefs, ...newRefs]
+          .map((ref) => {
+            if (typeof ref === 'string') {
+              return `    ${JSON.stringify(ref)},`;
+            }
+            return `    { "path": ${JSON.stringify(ref.path)} },`;
+          })
+          .join('\n');
+
+        updated = jsonc.slice(0, start) + `"kbn_references": [\n${list}\n  ]` + jsonc.slice(end);
+      } else {
+        const { end } = lastValue;
+        if (end == null) {
+          throw createCliError(`missing end index of node`);
+        }
+
+        const list = newRefs.map((ref) => `    ${JSON.stringify(ref)},`).join('\n');
+        updated =
+          jsonc.slice(0, end) + `,\n${list}` + jsonc.slice(jsonc[end] === ',' ? end + 1 : end);
+      }
+
+      await Fsp.writeFile(proj.tsConfigPath, updated);
+      log.success('updated', Path.relative(process.cwd(), proj.tsConfigPath));
+    }
   },
 };
