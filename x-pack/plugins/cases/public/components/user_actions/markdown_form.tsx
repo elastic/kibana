@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useCallback, useImperativeHandle, useRef, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { Form, useForm, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
