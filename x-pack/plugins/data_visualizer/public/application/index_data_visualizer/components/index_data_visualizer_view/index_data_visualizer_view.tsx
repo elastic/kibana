@@ -558,8 +558,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                       searchQuery={searchQuery}
                       searchQueryLanguage={searchQueryLanguage}
                       setSearchParams={setSearchParams}
-                      samplerShardSize={samplerShardSize}
-                      setSamplerShardSize={setSamplerShardSize}
                       overallStats={overallStats}
                       indexedFieldTypes={fieldTypes}
                       setVisibleFieldTypes={setVisibleFieldTypes}
@@ -568,6 +566,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                       setVisibleFieldNames={setVisibleFieldNames}
                       showEmptyFields={showEmptyFields}
                       onAddFilter={onAddFilter}
+                      compact={compact}
                     />
 
                     {overallStats?.totalCount !== undefined && (

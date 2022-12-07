@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Query, Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
@@ -26,8 +26,6 @@ interface Props {
   searchString: Query['query'];
   searchQuery: Query['query'];
   searchQueryLanguage: SearchQueryLanguage;
-  samplerShardSize: number;
-  setSamplerShardSize(s: number): void;
   overallStats: OverallStats;
   indexedFieldTypes: SupportedFieldType[];
   setVisibleFieldTypes(q: string[]): void;
@@ -47,14 +45,13 @@ interface Props {
   }): void;
   showEmptyFields: boolean;
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  compact?: boolean;
 }
 
 export const SearchPanel: FC<Props> = ({
   dataView,
   searchString,
   searchQueryLanguage,
-  samplerShardSize,
-  setSamplerShardSize,
   overallStats,
   indexedFieldTypes,
   setVisibleFieldTypes,
@@ -63,6 +60,7 @@ export const SearchPanel: FC<Props> = ({
   visibleFieldNames,
   setSearchParams,
   showEmptyFields,
+  compact,
 }) => {
   const {
     services: {
@@ -147,6 +145,7 @@ export const SearchPanel: FC<Props> = ({
         />
       </EuiFlexItem>
 
+      {compact ? <EuiSpacer size="s" /> : null}
       <EuiFlexItem
         grow={2}
         className={'dvSearchPanel__controls'}
