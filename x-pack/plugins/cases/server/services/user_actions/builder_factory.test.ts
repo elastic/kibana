@@ -827,7 +827,7 @@ describe('UserActionBuilder', () => {
     it('logs an external reference attachment (savedObject) user action correctly', () => {
       const builder = builderFactory.getBuilder(ActionTypes.comment)!;
       const userAction = builder.build({
-        action: Actions.update,
+        action: Actions.create,
         payload: {
           attachment: externalReferenceAttachmentSO,
         },
@@ -837,15 +837,15 @@ describe('UserActionBuilder', () => {
 
       expect(userAction.eventDetails).toMatchInlineSnapshot(`
         Object {
-          "action": "update",
-          "descriptiveAction": "case_user_action_update_comment",
+          "action": "create",
+          "descriptiveAction": "case_user_action_create_comment",
           "getMessage": [Function],
           "savedObjectId": "test-id",
           "savedObjectType": "cases-comments",
         }
       `);
       expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
-        `"User changed comment id: test-id for case id: 123 - user action id: 123"`
+        `"User created comment id: test-id for case id: 123 - user action id: 123"`
       );
     });
 

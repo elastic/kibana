@@ -6,6 +6,7 @@
  */
 
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
+import type { UserAction } from '../../../../common/api';
 import { Actions, ActionTypes } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
 import type {
@@ -33,19 +34,23 @@ export class DeleteCaseUserActionBuilder extends UserActionBuilder {
       ],
     };
 
-    const getMessage = () => `User deleted case id: ${caseId}`;
-
-    const eventDetails: EventDetails = {
-      getMessage,
-      action,
-      descriptiveAction: 'case_user_action_delete_case',
-      savedObjectId: caseId,
-      savedObjectType: CASE_SAVED_OBJECT,
-    };
-
     return {
       parameters,
-      eventDetails,
+      eventDetails: createDeleteEvent({ caseId, action }),
     };
   }
 }
+
+export const createDeleteEvent = ({
+  caseId,
+  action,
+}: {
+  caseId: string;
+  action: UserAction;
+}): EventDetails => ({
+  getMessage: () => `User deleted case id: ${caseId}`,
+  action,
+  descriptiveAction: 'case_user_action_delete_case',
+  savedObjectId: caseId,
+  savedObjectType: CASE_SAVED_OBJECT,
+});

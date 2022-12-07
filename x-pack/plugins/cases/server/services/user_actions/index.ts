@@ -72,6 +72,7 @@ import type { IndexRefresh } from '../types';
 import { isAssigneesArray, isStringArray } from './type_guards';
 import type { CaseSavedObject } from '../../common/types';
 import { UserActionAuditLogger } from './audit_logger';
+import { createDeleteEvent } from './builders/delete_case';
 
 export interface UserActionItem {
   attributes: CaseUserActionAttributesWithoutConnectorId;
@@ -88,11 +89,6 @@ interface CreateUserActionES<T> extends IndexRefresh {
 }
 
 type CommonUserActionArgs = CommonArguments;
-
-interface BulkAuditLogCaseDeletion {
-  cases: Array<{ id: string; owner: string; connectorId: string }>;
-  user: User;
-}
 
 interface GetUserActionItemByDifference extends CommonUserActionArgs {
   field: string;
@@ -265,21 +261,11 @@ export class CaseUserActionService {
     return userAction;
   }
 
-  public async bulkAuditLogCaseDeletion({ cases, user }: BulkAuditLogCaseDeletion) {
+  public async bulkAuditLogCaseDeletion(caseIds: string[]) {
     this.log.debug(`Attempting to log bulk case deletion`);
-    const userActionBuilder = this.builderFactory.getBuilder(ActionTypes.delete_case);
 
-    for (const caseInfo of cases) {
-      const deleteCaseUserAction = userActionBuilder?.build({
-        action: Actions.delete,
-        caseId: caseInfo.id,
-        user,
-        owner: caseInfo.owner,
-        connectorId: caseInfo.connectorId,
-        payload: {},
-      });
-
-      this.auditLogger.log(deleteCaseUserAction?.eventDetails);
+    for (const id of caseIds) {
+      this.auditLogger.log(createDeleteEvent({ caseId: id, action: Actions.delete }));
     }
   }
 

@@ -25,7 +25,6 @@ import { Operations } from '../../authorization';
 export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   const {
     unsecuredSavedObjectsClient,
-    user,
     services: { caseService, attachmentService, userActionService },
     logger,
     authorization,
@@ -69,14 +68,9 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
       options: { refresh: 'wait_for' },
     });
 
-    await userActionService.bulkAuditLogCaseDeletion({
-      cases: cases.saved_objects.map((caseInfo) => ({
-        id: caseInfo.id,
-        owner: caseInfo.attributes.owner,
-        connectorId: caseInfo.attributes.connector.id,
-      })),
-      user,
-    });
+    await userActionService.bulkAuditLogCaseDeletion(
+      cases.saved_objects.map((caseInfo) => caseInfo.id)
+    );
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete cases ids: ${JSON.stringify(ids)}: ${error}`,
