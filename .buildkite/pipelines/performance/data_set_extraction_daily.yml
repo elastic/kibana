@@ -17,7 +17,7 @@ steps:
   - label: ':kibana: Performance Tests with Playwright config'
     command: .buildkite/scripts/steps/functional/performance_playwright.sh
     agents:
-      queue: n2-2
+      queue: n2-2-spot
     depends_on: build
     key: tests
     timeout_in_minutes: 60
