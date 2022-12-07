@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { AlertStatus } from '@kbn/rule-data-utils';
 import { Rule } from '../../../../../types';
 
 export interface RuleAlertsSummaryProps {
   rule: Rule;
   filteredRuleTypes: string[];
+  onClick: (status?: AlertStatus) => void;
 }
