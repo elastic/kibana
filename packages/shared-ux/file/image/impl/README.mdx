@@ -1,0 +1,18 @@
+---
+id: sharedUX/Components/FileImage
+slug: /shared-ux/components/file-image
+title: File image
+description: Display images stored in Kibana files.
+tags: ['shared-ux', 'component', 'files']
+date: 2022-11-22
+---
+
+## Description
+
+A light wrapper around [EuiImage](https://elastic.github.io/eui/#/display/image) that introduces some "file-aware" functionality like displaying a [blurhash](https://blurha.sh/) before the final image loads.
+
+## Lazy loading
+
+It is a good practice to leverage the browser-native lazy loading of images. Depending on your use case, make sure that content can be loaded lazily where possible.
+
+For more information see the [loading attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#attr-loading) for more information.

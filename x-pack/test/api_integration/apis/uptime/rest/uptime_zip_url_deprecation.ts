@@ -21,7 +21,6 @@ export default function (providerContext: FtrProviderContext) {
     streams: [
       {
         enabled: true,
-        release: 'beta',
         data_stream: { type: 'synthetics', dataset: 'browser' },
         vars: {
           __ui: { type: 'yaml' },

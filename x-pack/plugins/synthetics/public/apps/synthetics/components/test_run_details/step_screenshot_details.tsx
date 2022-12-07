@@ -9,9 +9,16 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
+import { JourneyStep } from '../../../../../common/runtime_types';
 import { JourneyStepScreenshotContainer } from '../common/screenshot/journey_step_screenshot_container';
 
-export const StepScreenshotDetails = ({ stepIndex }: { stepIndex: number }) => {
+export const StepScreenshotDetails = ({
+  stepIndex,
+  step,
+}: {
+  stepIndex: number;
+  step?: JourneyStep;
+}) => {
   const { checkGroupId } = useParams<{ checkGroupId: string }>();
 
   const theme = useTheme();
@@ -22,13 +29,13 @@ export const StepScreenshotDetails = ({ stepIndex }: { stepIndex: number }) => {
       css={{ backgroundColor: theme.eui.euiColorLightestShade }}
     >
       <EuiFlexGroup>
-        <EuiFlexItem>
+        <EuiFlexItem css={{ alignItems: 'flex-start' }}>
           <JourneyStepScreenshotContainer
+            key={stepIndex}
             checkGroup={checkGroupId}
             initialStepNo={stepIndex}
-            stepStatus={'up'}
+            stepStatus={step?.synthetics.payload?.status}
             allStepsLoaded={true}
-            stepLabels={[]}
             retryFetchOnRevisit={false}
             asThumbnail={false}
             size="m"

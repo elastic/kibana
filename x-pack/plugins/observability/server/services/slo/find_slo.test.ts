@@ -5,24 +5,30 @@
  * 2.0.
  */
 
+import { IndicatorData, SLO, SLOId } from '../../domain/models';
+import { toDateRange } from '../../domain/services';
 import { FindSLO } from './find_slo';
 import { createSLO, createPaginatedSLO } from './fixtures/slo';
-import { createSLORepositoryMock } from './mocks';
+import { createSLIClientMock, createSLORepositoryMock } from './mocks';
+import { SLIClient } from './sli_client';
 import { SLORepository } from './slo_repository';
 
 describe('FindSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
+  let mockSLIClient: jest.Mocked<SLIClient>;
   let findSLO: FindSLO;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
-    findSLO = new FindSLO(mockRepository);
+    mockSLIClient = createSLIClientMock();
+    findSLO = new FindSLO(mockRepository, mockSLIClient);
   });
 
   describe('happy path', () => {
     it('returns the results with pagination', async () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
+      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
 
       const result = await findSLO.execute({});
 
@@ -58,6 +64,20 @@ describe('FindSLO', () => {
               duration: '7d',
               is_rolling: true,
             },
+            settings: {
+              timestamp_field: '@timestamp',
+              sync_delay: '1m',
+              frequency: '1m',
+            },
+            summary: {
+              sli_value: 0.9999,
+              error_budget: {
+                initial: 0.001,
+                consumed: 0.1,
+                remaining: 0.9,
+                is_estimated: false,
+              },
+            },
             created_at: slo.created_at.toISOString(),
             updated_at: slo.updated_at.toISOString(),
             revision: slo.revision,
@@ -69,6 +89,7 @@ describe('FindSLO', () => {
     it('calls the repository with the default criteria and pagination', async () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
+      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
 
       await findSLO.execute({});
 
@@ -81,6 +102,7 @@ describe('FindSLO', () => {
     it('calls the repository with the name filter criteria', async () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
+      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
 
       await findSLO.execute({ name: 'Availability' });
 
@@ -93,6 +115,7 @@ describe('FindSLO', () => {
     it('calls the repository with the pagination', async () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
+      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
 
       await findSLO.execute({ name: 'My SLO*', page: '2', per_page: '100' });
 
@@ -105,6 +128,7 @@ describe('FindSLO', () => {
     it('uses default pagination values when invalid', async () => {
       const slo = createSLO();
       mockRepository.find.mockResolvedValueOnce(createPaginatedSLO(slo));
+      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce(someIndicatorData(slo));
 
       await findSLO.execute({ page: '-1', per_page: '0' });
 
@@ -115,3 +139,13 @@ describe('FindSLO', () => {
     });
   });
 });
+
+function someIndicatorData(slo: SLO): Record<SLOId, IndicatorData> {
+  return {
+    [slo.id]: {
+      good: 9999,
+      total: 10000,
+      date_range: toDateRange(slo.time_window),
+    },
+  };
+}

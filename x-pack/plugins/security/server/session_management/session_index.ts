@@ -10,6 +10,7 @@ import type {
   BulkOperationContainer,
   SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import semver from 'semver';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
@@ -42,6 +43,17 @@ export type InvalidateSessionsFilter =
  * Version of the current session index template.
  */
 const SESSION_INDEX_TEMPLATE_VERSION = 1;
+
+/**
+ * The current version of the session index mappings.
+ */
+const SESSION_INDEX_MAPPINGS_VERSION = '8.7.0';
+
+/**
+ * Name of the session index mappings _meta field storing session index version. Named after a field used for the
+ * Elasticsearch security-specific indices with the same purpose.
+ */
+export const SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME = 'security-version';
 
 /**
  * Number of sessions to remove per batch during cleanup.
@@ -86,10 +98,12 @@ export function getSessionIndexSettings({
     },
     mappings: {
       dynamic: 'strict',
+      _meta: { [SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME]: SESSION_INDEX_MAPPINGS_VERSION },
       properties: {
         usernameHash: { type: 'keyword' },
         provider: { properties: { name: { type: 'keyword' }, type: { type: 'keyword' } } },
         idleTimeoutExpiration: { type: 'date' },
+        createdAt: { type: 'date' },
         lifespanExpiration: { type: 'date' },
         accessAgreementAcknowledged: { type: 'boolean' },
         content: { type: 'binary' },
@@ -129,6 +143,12 @@ export interface SessionIndexValue {
    * time can be extended indefinitely.
    */
   lifespanExpiration: number | null;
+
+  /**
+   * The Unix time in ms which is the time when the session was initially created. The missing value indicates that the
+   * session was created before `createdAt` was introduced.
+   */
+  createdAt?: number;
 
   /**
    * Indicates whether user acknowledged access agreement or not.
@@ -515,30 +535,17 @@ export class SessionIndex {
       throw err;
     }
 
-    // Initialize session index:
-    // Ensure the alias is attached to the already existing index,
-    // or create a new index if it doesn't exist.
-    if (indexExists) {
-      this.options.logger.debug('Session index already exists. Attaching alias to index...');
+    const sessionIndexSettings = getSessionIndexSettings({
+      indexName: this.indexName,
+      aliasName: this.aliasName,
+    });
 
-      // Prior to https://github.com/elastic/kibana/pull/134900, sessions would be written directly against the session index.
-      // Now, we write sessions against a new session index alias. This call ensures that the alias exists, and is attached to the index.
-      // This operation is safe to repeat, even if the alias already exists. This seems safer than retrieving the index details, and inspecting
-      // it to see if the alias already exists.
+    // Initialize session index:
+    // Ensure the alias is attached to the already existing index and field mappings are up-to-date,
+    // or create a new index if it doesn't exist.
+    if (!indexExists) {
       try {
-        await this.options.elasticsearchClient.indices.putAlias({
-          index: this.indexName,
-          name: this.aliasName,
-        });
-      } catch (err) {
-        this.options.logger.error(`Failed to attach alias to session index: ${err.message}`);
-        throw err;
-      }
-    } else {
-      try {
-        await this.options.elasticsearchClient.indices.create(
-          getSessionIndexSettings({ indexName: this.indexName, aliasName: this.aliasName })
-        );
+        await this.options.elasticsearchClient.indices.create(sessionIndexSettings);
         this.options.logger.debug('Successfully created session index.');
       } catch (err) {
         // There can be a race condition if index is created by another Kibana instance.
@@ -548,6 +555,59 @@ export class SessionIndex {
           this.options.logger.error(`Failed to create session index: ${err.message}`);
           throw err;
         }
+      }
+
+      return;
+    }
+
+    this.options.logger.debug(
+      'Session index already exists. Attaching alias to the index and ensuring up-to-date mappings...'
+    );
+
+    // Prior to https://github.com/elastic/kibana/pull/134900, sessions would be written directly against the session index.
+    // Now, we write sessions against a new session index alias. This call ensures that the alias exists, and is attached to the index.
+    // This operation is safe to repeat, even if the alias already exists. This seems safer than retrieving the index details, and inspecting
+    // it to see if the alias already exists.
+    try {
+      await this.options.elasticsearchClient.indices.putAlias({
+        index: this.indexName,
+        name: this.aliasName,
+      });
+    } catch (err) {
+      this.options.logger.error(`Failed to attach alias to session index: ${err.message}`);
+      throw err;
+    }
+
+    let indexMappingsVersion: string | undefined;
+    try {
+      const indexMappings = await this.options.elasticsearchClient.indices.getMapping({
+        index: this.indexName,
+      });
+
+      indexMappingsVersion =
+        indexMappings[this.indexName]?.mappings?._meta?.[
+          SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME
+        ];
+    } catch (err) {
+      this.options.logger.error(`Failed to retrieve session index metadata: ${err.message}`);
+      throw err;
+    }
+
+    if (!indexMappingsVersion || semver.lt(indexMappingsVersion, SESSION_INDEX_MAPPINGS_VERSION)) {
+      this.options.logger.debug(
+        `Updating session index mappings from ${
+          indexMappingsVersion ?? 'unknown'
+        } to ${SESSION_INDEX_MAPPINGS_VERSION} version.`
+      );
+      try {
+        await this.options.elasticsearchClient.indices.putMapping({
+          index: this.indexName,
+          ...sessionIndexSettings.mappings,
+        });
+        this.options.logger.debug('Successfully updated session index mappings.');
+      } catch (err) {
+        this.options.logger.error(`Failed to update session index mappings: ${err.message}`);
+        throw err;
       }
     }
   }

@@ -12,7 +12,7 @@ import {
 } from '@kbn/rule-data-utils';
 
 import type { Filter } from '@kbn/es-query';
-import type { SubsetTGridModel } from '@kbn/timelines-plugin/public';
+import type { SubsetDataTableModel } from '../../../common/store/data_table/model';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import {
@@ -152,13 +152,13 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
       ]
     : [];
 
-export const getAlertsDefaultModel = (license?: LicenseService): SubsetTGridModel => ({
+export const getAlertsDefaultModel = (license?: LicenseService): SubsetDataTableModel => ({
   ...tableDefaults,
   columns: getColumns(license),
   showCheckboxes: true,
 });
 
-export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetTGridModel => ({
+export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetDataTableModel => ({
   ...getAlertsDefaultModel(license),
   columns: getColumns(license),
   defaultColumns: getRulePreviewColumns(license),
@@ -170,6 +170,7 @@ export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetTG
       sortDirection: 'desc',
     },
   ],
+  showCheckboxes: false,
 });
 
 export const requiredFieldsForActions = [
@@ -182,6 +183,7 @@ export const requiredFieldsForActions = [
   'kibana.alert.rule.name',
   'kibana.alert.rule.to',
   'kibana.alert.rule.uuid',
+  'kibana.alert.rule.rule_id',
   'kibana.alert.rule.type',
   'kibana.alert.suppression.docs_count',
   'kibana.alert.original_event.kind',

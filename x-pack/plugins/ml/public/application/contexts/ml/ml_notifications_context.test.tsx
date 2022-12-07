@@ -209,6 +209,25 @@ describe('useMlNotifications', () => {
     expect(result.current.lastCheckedAt).toEqual(1664551009292);
   });
 
+  test('stops fetching notifications on leave', () => {
+    const { unmount } = renderHook(useMlNotifications, {
+      wrapper: MlNotificationsContextProvider,
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(0);
+    });
+
+    expect(mockCountMessages).toHaveBeenCalledTimes(1);
+
+    unmount();
+
+    act(() => {
+      jest.advanceTimersByTime(60001);
+    });
+    expect(mockCountMessages).toHaveBeenCalledTimes(1);
+  });
+
   test('does not start polling if requires capabilities are missing', () => {
     mockKibana.services.application.capabilities.ml = {
       canGetJobs: true,

@@ -8,6 +8,7 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 
+import type { ControlColumnProps } from '../../../../../../common/types';
 import type { inputsModel } from '../../../../../common/store';
 import type {
   TimelineItem,
@@ -16,7 +17,6 @@ import type {
 import type {
   ColumnHeaderOptions,
   CellValueElementProps,
-  ControlColumnProps,
   RowRenderer,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';

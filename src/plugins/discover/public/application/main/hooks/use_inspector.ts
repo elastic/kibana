@@ -14,6 +14,12 @@ import {
 } from '@kbn/inspector-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DataTableRecord } from '../../../types';
+import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
+
+export interface InspectorAdapters {
+  requests: RequestAdapter;
+  lensRequests?: RequestAdapter;
+}
 
 export function useInspector({
   setExpandedDoc,
@@ -21,7 +27,7 @@ export function useInspector({
   inspectorAdapters,
   savedSearch,
 }: {
-  inspectorAdapters: { requests: RequestAdapter };
+  inspectorAdapters: InspectorAdapters;
   savedSearch: SavedSearch;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   inspector: InspectorPublicPluginStart;
@@ -31,11 +37,24 @@ export function useInspector({
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
     setExpandedDoc(undefined);
-    const session = inspector.open(inspectorAdapters, {
-      title: savedSearch.title,
-    });
+
+    const requestAdapters = inspectorAdapters.lensRequests
+      ? [inspectorAdapters.requests, inspectorAdapters.lensRequests]
+      : [inspectorAdapters.requests];
+
+    const session = inspector.open(
+      { requests: new AggregateRequestAdapter(requestAdapters) },
+      { title: savedSearch.title }
+    );
+
     setInspectorSession(session);
-  }, [setExpandedDoc, inspectorAdapters, savedSearch, inspector]);
+  }, [
+    setExpandedDoc,
+    inspectorAdapters.lensRequests,
+    inspectorAdapters.requests,
+    inspector,
+    savedSearch.title,
+  ]);
 
   useEffect(() => {
     return () => {
