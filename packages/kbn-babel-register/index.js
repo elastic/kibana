@@ -89,49 +89,49 @@ function match(path, matchers) {
 
 let installed = false;
 
-module.exports = {
-  /**
-   * @param {{ ignore?: Matcher[], only?: Matcher[] } | undefined} options
-   */
-  install(options = undefined) {
-    if (installed) {
-      return;
+/**
+ * @param {{ ignore?: Matcher[], only?: Matcher[] } | undefined} options
+ */
+function install(options = undefined) {
+  if (installed) {
+    return;
+  }
+
+  installed = true;
+  const cache = getCache();
+
+  sourceMapSupport.install({
+    handleUncaughtExceptions: false,
+    environment: 'node',
+    // @ts-expect-error bad source-map-support types
+    retrieveSourceMap(path) {
+      const map = cache.getSourceMap(path);
+      return map ? { map, url: null } : null;
+    },
+  });
+
+  const ignorePatterns = options?.ignore
+    ? [...options.ignore, ...IGNORE_PATTERNS]
+    : IGNORE_PATTERNS;
+
+  addHook(
+    (code, path) => {
+      const ext = Path.extname(path);
+      const transform = (Object.hasOwn(TRANSFORMS, ext) && TRANSFORMS[ext]) || TRANSFORMS.default;
+      return transform(path, code, cache);
+    },
+    {
+      exts: ['.js', '.ts', '.tsx', '.peggy'],
+      ignoreNodeModules: false,
+      matcher(path) {
+        if (options?.only && !match(path, options.only)) {
+          return false;
+        }
+
+        return !match(path, ignorePatterns);
+      },
     }
+  );
+}
 
-    installed = true;
-    const cache = getCache();
-
-    sourceMapSupport.install({
-      handleUncaughtExceptions: false,
-      environment: 'node',
-      // @ts-expect-error bad source-map-support types
-      retrieveSourceMap(path) {
-        const map = cache.getSourceMap(path);
-        return map ? { map, url: null } : null;
-      },
-    });
-
-    const ignorePatterns = options?.ignore
-      ? [...options.ignore, ...IGNORE_PATTERNS]
-      : IGNORE_PATTERNS;
-
-    addHook(
-      (code, path) => {
-        const ext = Path.extname(path);
-        const transform = (Object.hasOwn(TRANSFORMS, ext) && TRANSFORMS[ext]) || TRANSFORMS.default;
-        return transform(path, code, cache);
-      },
-      {
-        exts: ['.js', '.ts', '.tsx', '.peggy'],
-        ignoreNodeModules: false,
-        matcher(path) {
-          if (options?.only && !match(path, options.only)) {
-            return false;
-          }
-
-          return !match(path, ignorePatterns);
-        },
-      }
-    );
-  },
-};
+module.exports = { install };

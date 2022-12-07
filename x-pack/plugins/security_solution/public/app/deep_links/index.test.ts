@@ -178,7 +178,6 @@ describe('deepLinks', () => {
     it('should return NO kubernetes link when enableExperimental.kubernetesEnabled === false', () => {
       const deepLinks = getDeepLinks({
         ...mockGlobalState.app.enableExperimental,
-        // @ts-expect-error
         kubernetesEnabled: false,
       });
 

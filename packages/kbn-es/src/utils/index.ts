@@ -8,10 +8,8 @@
 
 export { cache } from './cache';
 export { log } from './log';
-// @ts-expect-error not typed yet
 export { parseEsLog } from './parse_es_log';
 export { findMostRecentlyChanged } from './find_most_recently_changed';
-// @ts-expect-error not typed yet
 export { extractConfigFiles } from './extract_config_files';
 // @ts-expect-error not typed yet
 export { NativeRealm, SYSTEM_INDICES_SUPERUSER } from './native_realm';

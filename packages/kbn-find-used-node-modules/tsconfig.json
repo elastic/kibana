@@ -11,7 +11,8 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/import-resolver"
+    "@kbn/import-resolver",
+    "@kbn/babel-preset",
   ],
   "exclude": [
     "target/**/*",

@@ -30,6 +30,7 @@
     "@kbn/config-schema",
     "@kbn/expect",
     "@kbn/std",
+    "@kbn/timelion-grammar",
   ],
   "exclude": [
     "target/**/*",

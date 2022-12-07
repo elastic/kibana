@@ -72,7 +72,6 @@ describe('Endpoint Pending Action Summary API', () => {
       config: () => Promise.resolve(createMockConfig()),
       experimentalFeatures: {
         ...parseExperimentalConfigValue(createMockConfig().enableExperimental),
-        // @ts-expect-error
         pendingActionResponsesWithAck,
       },
     });

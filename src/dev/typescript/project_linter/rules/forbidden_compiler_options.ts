@@ -9,7 +9,14 @@
 import { Rule } from '../lib/rule';
 import { removeCompilerOption } from '../lib/ast';
 
-const NAMES = ['declaration', 'emitDeclarationOnly', 'skipLibCheck', 'target', 'paths'];
+const NAMES = [
+  'declaration',
+  'declarationMap',
+  'emitDeclarationOnly',
+  'skipLibCheck',
+  'target',
+  'paths',
+];
 
 export const forbiddenCompilerOptions = Rule.create('forbiddenCompilerOptions', {
   check({ config, repoRel }) {

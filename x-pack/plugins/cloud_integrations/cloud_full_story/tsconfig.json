@@ -11,6 +11,7 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/analytics-shippers-fullstory",
     "@kbn/core",
     "@kbn/cloud-plugin",
     "@kbn/config-schema",

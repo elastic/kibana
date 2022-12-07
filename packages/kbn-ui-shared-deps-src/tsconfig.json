@@ -22,8 +22,10 @@
     "@kbn/i18n-react",
     "@kbn/monaco",
     "@kbn/datemath",
+    "@kbn/flot-charts",
     "@kbn/analytics",
     "@kbn/es-query",
+    "@kbn/rison",
     "@kbn/std",
     "@kbn/safer-lodash-set"
   ]

@@ -1,21 +1,15 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
-    "checkJs": true,
-    "types": [
-      "jest",
-      "node"
-    ]
+    "outDir": "target/types"
   },
   "include": [
-    "**/*.js",
-    "**/*.ts",
+    "**/*.js"
   ],
   "exclude": [
     "target/**/*",
   ],
   "kbn_references": [
-    "@kbn/repo-info"
+    "@kbn/i18n"
   ]
 }

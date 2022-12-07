@@ -14,8 +14,6 @@ const ExperimentalFeaturesServiceMock = {
   get: jest.fn(() => {
     const ff: ExperimentalFeatures = {
       ...allowedExperimentalValues,
-
-      // @ts-expect-error
       responseActionGetFileEnabled: true,
     };
 

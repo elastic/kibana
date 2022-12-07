@@ -1,7 +1,6 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "declarationMap": true,
     "incremental": false,
     "composite": false,
     "outDir": "target/types",

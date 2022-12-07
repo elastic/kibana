@@ -7,7 +7,7 @@
 import https from 'https';
 
 import type { TypeOf } from '@kbn/config-schema';
-import fetch from 'node-fetch';
+import fetch, { type RequestInit } from 'node-fetch';
 
 import { APP_API_ROUTES } from '../../constants';
 import type { FleetRequestHandler } from '../../types';
@@ -52,7 +52,7 @@ export const postHealthCheckHandler: FleetRequestHandler<
       agent: new https.Agent({
         rejectUnauthorized: false,
       }),
-      signal: abortController.signal,
+      signal: abortController.signal as RequestInit['signal'],
     });
     const bodyRes = await res.json();
     const body = { ...bodyRes, host };

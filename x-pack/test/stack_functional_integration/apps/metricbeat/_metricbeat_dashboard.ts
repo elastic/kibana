@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { resolve } from 'path';
-// @ts-expect-error currently unable to enable allowJs in x-pack/test project
+// @ts-ignore we have to check types with "allowJs: false" for now, causing this import to fail
 import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 

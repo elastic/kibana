@@ -8,6 +8,7 @@
   "include": [
     "**/*.ts",
     "**/*.js",
+    "src/jest/jest_flags.json",
   ],
   "exclude": [
     "types/**/*",
@@ -31,5 +32,7 @@
     "@kbn/dev-proc-runner",
     "@kbn/jest-serializers",
     "@kbn/stdio-dev-helpers",
+    "@kbn/babel-register",
+    "@kbn/babel-transform",
   ]
 }

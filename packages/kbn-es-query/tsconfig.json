@@ -10,6 +10,7 @@
   },
   "include": [
     "**/*.ts",
+    "**/*.js",
   ],
   "kbn_references": [
     "@kbn/utility-types",

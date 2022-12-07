@@ -14,7 +14,12 @@
 
 import { EventEmitter } from 'events';
 
-export interface Suite {
+export interface Suite extends Runnable {
+  _beforeAll: Runnable[];
+  _beforeEach: Runnable[];
+  _afterEach: Runnable[];
+  _afterAll: Runnable[];
+
   currentTest?: Test;
   suites: Suite[];
   tests: Test[];
@@ -26,13 +31,23 @@ export interface Suite {
   suiteTag: string;
 }
 
-export interface Test {
+export interface Test extends Runnable {
   fullTitle(): string;
   title: string;
   file?: string;
   parent?: Suite;
   isPassed: () => boolean;
   pending?: boolean;
+}
+
+export interface Runnable {
+  isFailed(): boolean;
+  isPending(): boolean;
+  duration?: number;
+  titlePath(): string[];
+  file?: string;
+  title: string;
+  parent?: Suite;
 }
 
 export interface Runner extends EventEmitter {

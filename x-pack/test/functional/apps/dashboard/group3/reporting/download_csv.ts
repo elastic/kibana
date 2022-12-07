@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-ignore we have to check types with "allowJs: false" for now, causing this import to fail
 import { REPO_ROOT } from '@kbn/repo-info';
 import expect from '@kbn/expect';
 import fs from 'fs';

@@ -48,6 +48,7 @@
     "@kbn/core-saved-objects-common",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/logging-mocks",
+    "@kbn/web-worker-stub",
   ],
   "exclude": [
     "target/**/*",

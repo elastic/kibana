@@ -29,6 +29,7 @@
     "@kbn/config-schema",
     "@kbn/core-http-server",
     "@kbn/core-http-router-server-internal",
+    "@kbn/web-worker-stub",
   ],
   "exclude": [
     "target/**/*",
