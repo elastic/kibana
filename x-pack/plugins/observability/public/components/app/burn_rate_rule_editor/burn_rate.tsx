@@ -41,6 +41,7 @@ export function BurnRate({ onChange, maxBurnRate }: Props) {
         max={maxBurnRate}
         value={burnRate}
         onChange={(event) => onBurnRateChange(event)}
+        data-test-subj="burnRate"
       />
     </EuiFormRow>
   );
