@@ -98,14 +98,24 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
 export const getOnePackagePolicyHandler: FleetRequestHandler<
   TypeOf<typeof GetOnePackagePolicyRequestSchema.params>
 > = async (context, request, response) => {
-  const { client: soClient } = await (await context.fleet).getSoClient();
+  const { client: soClient, limitedToPackages } = await (await context.fleet).getSoClient();
   const { packagePolicyId } = request.params;
   const notFoundResponse = () =>
     response.notFound({ body: { message: `Package policy ${packagePolicyId} not found` } });
 
   try {
     const packagePolicy = await packagePolicyService.get(soClient, packagePolicyId);
+
     if (packagePolicy) {
+      if (limitedToPackages && limitedToPackages.length) {
+        const packageName = packagePolicy?.package?.name;
+        if (packageName && !limitedToPackages.includes(packageName)) {
+          return response.forbidden({
+            body: { message: `Data for package name ${packageName} is not authorized.` },
+          });
+        }
+      }
+
       return response.ok({
         body: {
           item: packagePolicy,
@@ -265,13 +275,22 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   TypeOf<typeof UpdatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
-  const { client: soClient } = await (await context.fleet).getSoClient();
+  const { client: soClient, limitedToPackages } = await (await context.fleet).getSoClient();
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
 
   if (!packagePolicy) {
     throw Boom.notFound('Package policy not found');
+  }
+
+  if (limitedToPackages && limitedToPackages.length) {
+    const packageName = packagePolicy?.package?.name;
+    if (packageName && !limitedToPackages.includes(packageName)) {
+      return response.forbidden({
+        body: { message: `Data for package name ${packageName} is not authorized.` },
+      });
+    }
   }
 
   try {
