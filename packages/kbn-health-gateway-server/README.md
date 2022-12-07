@@ -80,6 +80,10 @@ $ curl "https://localhost:3000/"
 
 per https://github.com/elastic/kibana/issues/147017
 
+Deployments URL:
+https://staging.found.no/deployments
+
+
 ### tre-1-gb-8.6 w/ Stack Monitoring
 
 AWS us-east n. virginia
@@ -100,3 +104,15 @@ elastic / WHkRXcj5kEqTHBN06pFoGFwC
 
 cluster id:
 76f3e1c2de9d4010940224e1aea0cd67
+
+### tre-monitoring-deployment
+
+elastic / RYzWlujteUrzEapGoa66oDjJ
+
+AWS us east n virginia
+
+### tre-monitoring-deployment-2
+
+elastic / RYzWlujteUrzEapGoa66oDjJ
+
+AWS europe central 1 Frankfurt
