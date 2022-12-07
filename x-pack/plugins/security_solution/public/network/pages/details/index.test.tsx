@@ -23,7 +23,6 @@ import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
 import { NetworkDetails } from '.';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn().mockReturnValue({
@@ -75,6 +74,15 @@ jest.mock('../../../common/containers/use_global_time', () => ({
   }),
 }));
 
+const useAddToTimeline = () => ({
+  beginDrag: jest.fn(),
+  cancelDrag: jest.fn(),
+  dragToLocation: jest.fn(),
+  endDrag: jest.fn(),
+  hasDraggableLock: jest.fn(),
+  startDragToTimeline: jest.fn(),
+});
+
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
   return {
@@ -86,10 +94,7 @@ jest.mock('../../../common/lib/kibana', () => {
       services: {
         ...original.useKibana().services,
         timelines: {
-          getUseDraggableKeyboardWrapper: () => () => ({
-            onBlur: jest.fn,
-            onKeyDown: jest.fn,
-          }),
+          getUseAddToTimeline: () => useAddToTimeline,
         },
       },
     }),
@@ -147,22 +152,10 @@ describe('Network Details', () => {
 
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   test('it renders', () => {
