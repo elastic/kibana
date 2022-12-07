@@ -157,24 +157,6 @@ describe('Vislib Data Class Test Suite', function () {
     });
   });
 
-  describe('_removeZeroSlices', function () {
-    let data;
-    const pieData = {
-      slices: {
-        children: [{ size: 30 }, { size: 20 }, { size: 0 }],
-      },
-    };
-
-    beforeEach(function () {
-      data = new Data(pieData, mockUiState, () => undefined);
-    });
-
-    it('should remove zero values', function () {
-      const slices = data._removeZeroSlices(data.data.slices);
-      expect(slices.children.length).toBe(2);
-    });
-  });
-
   describe('Data.flatten', function () {
     let serIn;
     let serOut;
