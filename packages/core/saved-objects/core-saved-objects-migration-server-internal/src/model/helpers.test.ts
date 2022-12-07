@@ -12,6 +12,7 @@ import {
   addMustClausesToBoolQuery,
   addMustNotClausesToBoolQuery,
   getAliases,
+  versionMigrationCompleted,
 } from './helpers';
 
 describe('addExcludedTypesToBoolQuery', () => {
@@ -228,5 +229,41 @@ describe('getAliases', () => {
         },
       }
     `);
+  });
+});
+
+describe('versionMigrationCompleted', () => {
+  it('returns true if the current and version alias points to the same index', () => {
+    expect(
+      versionMigrationCompleted('.current-alias', '.version-alias', {
+        '.current-alias': 'myindex',
+        '.version-alias': 'myindex',
+      })
+    ).toBe(true);
+  });
+  it('returns false if the current and version alias does not point to the same index', () => {
+    expect(
+      versionMigrationCompleted('.current-alias', '.version-alias', {
+        '.current-alias': 'myindex',
+        '.version-alias': 'anotherindex',
+      })
+    ).toBe(false);
+  });
+  it('returns false if the current alias does not exist', () => {
+    expect(
+      versionMigrationCompleted('.current-alias', '.version-alias', {
+        '.version-alias': 'myindex',
+      })
+    ).toBe(false);
+  });
+  it('returns false if the version alias does not exist', () => {
+    expect(
+      versionMigrationCompleted('.current-alias', '.version-alias', {
+        '.current-alias': 'myindex',
+      })
+    ).toBe(false);
+  });
+  it('returns false if neither the version or current alias exists', () => {
+    expect(versionMigrationCompleted('.current-alias', '.version-alias', {})).toBe(false);
   });
 });

@@ -3,7 +3,7 @@ closure_type:
 connector: 
   type: object
   properties:
-    $ref: 'connector_properties.yaml'
+    $ref: 'case_configure_connector_properties.yaml'
 created_at:
   type: string
   format: date-time
@@ -11,17 +11,10 @@ created_at:
 created_by:
   type: object
   properties:
-    email:
-      type: string
-      example: null
-    full_name:
-      type: string
-      example: null
-    username: 
-      type: string
-      example: elastic
+    $ref: 'user_properties.yaml'
 error:
   type: string
+  nullable: true
   example: null
 id:
   type: string
@@ -31,15 +24,15 @@ mappings:
   items:
     type: object
     properties:
-        action_type:
-          type: string
-          example: overwrite
-        source:
-          type: string
-          example: title
-        target:
-          type: string
-          example: summary
+      action_type:
+        type: string
+        example: overwrite
+      source:
+        type: string
+        example: title
+      target:
+        type: string
+        example: summary
 owner:
   $ref: 'owners.yaml'
 updated_at:
@@ -50,15 +43,7 @@ updated_at:
 updated_by:
   type: object
   properties:
-    email:
-      type: string
-      example: null
-    full_name:
-      type: string
-      example: null
-    username: 
-      type: string
-      example: elastic
+    $ref: 'user_properties.yaml'
   nullable: true
 version:
   type: string

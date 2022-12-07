@@ -15,7 +15,6 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import type { CurrentUserProfile } from '../types';
 import { EmptyMessage } from '../user_profiles/empty_message';
 import { NoMatches } from '../user_profiles/no_matches';
-import { SelectedStatusMessage } from '../user_profiles/selected_status_message';
 import { bringCurrentUserToFrontAndSort, orderAssigneesIncludingNone } from '../user_profiles/sort';
 import type { AssigneesFilteringSelection } from '../user_profiles/types';
 import * as i18n from './translations';
@@ -53,12 +52,7 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
   );
 
   const selectedStatusMessage = useCallback(
-    (selectedCount: number) => (
-      <SelectedStatusMessage
-        selectedCount={selectedCount}
-        message={i18n.TOTAL_ASSIGNEES_FILTERED(selectedCount)}
-      />
-    ),
+    (selectedCount: number) => i18n.TOTAL_ASSIGNEES_FILTERED(selectedCount),
     []
   );
 

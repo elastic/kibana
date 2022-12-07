@@ -107,7 +107,7 @@ TYPES_DEPS = [
   "@npm//@types/history",
   "@npm//@types/jest",
   "@npm//@types/jest-axe",
-  "@npm//@types/joi",
+  "@npm//joi",
   "@npm//@types/lodash",
   "@npm//@types/mustache",
   "@npm//@types/normalize-path",

@@ -80,8 +80,6 @@ export function getInitialDataViewsObject(
   return {
     indexPatterns,
     indexPatternRefs,
-    existingFields: {},
-    isFirstExistenceFetch: true,
   };
 }
 
@@ -107,9 +105,6 @@ export async function refreshIndexPatternsList({
     onIndexPatternRefresh: () => onRefreshCallbacks.forEach((fn) => fn()),
   });
   const indexPattern = newlyMappedIndexPattern[indexPatternId];
-  // But what about existingFields here?
-  // When the indexPatterns cache object gets updated, the data panel will
-  // notice it and refetch the fields list existence map
   indexPatternService.updateDataViewsState({
     indexPatterns: {
       ...indexPatternsCache,
@@ -288,6 +283,11 @@ export const isOperationFromTheSameGroup = (op1?: DraggingIdentifier, op2?: Drag
     op1.layerId === op2.layerId
   );
 };
+
+export const sortDataViewRefs = (dataViewRefs: IndexPatternRef[]) =>
+  dataViewRefs.sort((a, b) => {
+    return a.title.localeCompare(b.title);
+  });
 
 export const getSearchWarningMessages = (
   adapter: RequestAdapter,

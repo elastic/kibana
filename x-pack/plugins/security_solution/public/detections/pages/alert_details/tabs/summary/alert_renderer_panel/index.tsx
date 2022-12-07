@@ -20,6 +20,7 @@ export interface AlertRendererPanelProps {
 
 const RendererContainer = styled.div`
   overflow-x: auto;
+  margin-left: -24px;
 
   & .euiFlexGroup {
     justify-content: flex-start;

@@ -21,7 +21,7 @@
   ],
   "owner": {
     "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "githubTeam": "kibana-visualizations"
   },
   "description": "Contains the heatmap implementation using the elastic-charts library. The goal is to eventually deprecate the old implementation and keep only this. Until then, the library used is defined by the Legacy heatmap charts library advanced setting."
 }

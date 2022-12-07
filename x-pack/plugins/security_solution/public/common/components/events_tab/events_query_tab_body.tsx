@@ -10,10 +10,8 @@ import { useDispatch } from 'react-redux';
 
 import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { EntityType } from '@kbn/timelines-plugin/common';
-
+import type { TableId } from '../../../../common/types';
 import { dataTableActions } from '../../store/data_table';
-import type { TableId } from '../../../../common/types/timeline';
 import { RowRendererId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { eventsDefaultModel } from '../events_viewer/default_model';
@@ -41,11 +39,13 @@ import { useLicense } from '../../hooks/use_license';
 
 import { useUiSetting$ } from '../../lib/kibana';
 import { defaultAlertsFilters } from '../events_viewer/external_alerts_filter';
+import { useAddBulkToTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 
 import {
   useGetInitialUrlParamValue,
   useReplaceUrlParams,
 } from '../../utils/global_query_string/helpers';
+import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 
 export const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
 
@@ -98,7 +98,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
 
   useEffect(() => {
     dispatch(
-      dataTableActions.initializeTGridSettings({
+      dataTableActions.initializeDataTableSettings({
         id: tableId,
         defaultColumns: eventsDefaultModel.columns.map((c) =>
           !tGridEnabled && c.initialWidth == null
@@ -109,6 +109,8 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
             : c
         ),
         title: i18n.EVENTS_GRAPH_TITLE,
+        showCheckboxes: true,
+        selectAll: true,
       })
     );
   }, [dispatch, showExternalAlerts, tGridEnabled, tableId]);
@@ -149,6 +151,21 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     [additionalFilters, showExternalAlerts]
   );
 
+  const addBulkToTimelineAction = useAddBulkToTimelineAction({
+    localFilters: composedPageFilters,
+    tableId,
+    from: startDate,
+    to: endDate,
+    scopeId: SourcererScopeName.default,
+  });
+
+  const bulkActions = useMemo<BulkActionsProp | boolean>(() => {
+    return {
+      alertStatusActions: false,
+      customBulkActions: [addBulkToTimelineAction],
+    };
+  }, [addBulkToTimelineAction]);
+
   return (
     <>
       {!globalFullScreen && (
@@ -168,15 +185,15 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         defaultCellActions={defaultCellActions}
         start={startDate}
         end={endDate}
-        entityType={'events' as EntityType}
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        scopeId={SourcererScopeName.default}
+        sourcererScope={SourcererScopeName.default}
         tableId={tableId}
-        unit={showExternalAlerts ? i18n.ALERTS_UNIT : i18n.EVENTS_UNIT}
+        unit={showExternalAlerts ? i18n.EXTERNAL_ALERTS_UNIT : i18n.EVENTS_UNIT}
         defaultModel={defaultModel}
         pageFilters={composedPageFilters}
+        bulkActions={bulkActions}
       />
     </>
   );

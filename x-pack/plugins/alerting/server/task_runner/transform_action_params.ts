@@ -30,6 +30,7 @@ interface TransformActionParamsOptions {
   state: AlertInstanceState;
   kibanaBaseUrl?: string;
   context: AlertInstanceContext;
+  ruleUrl?: string;
 }
 
 export function transformActionParams({
@@ -49,6 +50,7 @@ export function transformActionParams({
   state,
   kibanaBaseUrl,
   alertParams,
+  ruleUrl,
 }: TransformActionParamsOptions): RuleActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
@@ -72,6 +74,7 @@ export function transformActionParams({
       type: alertType,
       spaceId,
       tags,
+      url: ruleUrl,
     },
     alert: {
       id: alertInstanceId,

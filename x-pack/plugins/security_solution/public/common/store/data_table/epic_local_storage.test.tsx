@@ -33,12 +33,11 @@ import {
   updateSort,
 } from './actions';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import type { Props as StatefulEventsViewerProps } from '../../components/events_viewer';
+import type { EventsViewerProps } from '../../components/events_viewer';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 
 import { addTableInStorage } from '../../../timelines/containers/local_storage';
 import { Direction } from '../../../../common/search_strategy';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import { StatefulEventsViewer } from '../../components/events_viewer';
 import { eventsDefaultModel } from '../../components/events_viewer/default_model';
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
@@ -54,24 +53,12 @@ const addTableInStorageMock = addTableInStorage as jest.Mock;
 describe('epicLocalStorage', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
-  let testProps = {} as StatefulEventsViewerProps;
+  let testProps = {} as EventsViewerProps;
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     const from = '2019-08-27T22:10:56.794Z';
     const to = '2019-08-26T22:10:56.791Z';
     const ACTION_BUTTON_COUNT = 4;
@@ -85,8 +72,10 @@ describe('epicLocalStorage', () => {
       leadingControlColumns: getDefaultControlColumn(ACTION_BUTTON_COUNT),
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
-      scopeId: SourcererScopeName.default,
+      sourcererScope: SourcererScopeName.default,
       start: from,
+      bulkActions: false,
+      hasCrudPermissions: true,
     };
   });
 

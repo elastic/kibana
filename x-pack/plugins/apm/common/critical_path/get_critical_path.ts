@@ -37,7 +37,10 @@ export function getCriticalPath(waterfall: IWaterfall): CriticalPath {
       const orderedChildren = directChildren.concat().sort((a, b) => {
         const endTimeA = a.offset + a.skew + a.duration;
         const endTimeB = b.offset + b.skew + b.duration;
-        return endTimeB - endTimeA;
+        if (endTimeA === endTimeB) {
+          return 0;
+        }
+        return endTimeB > endTimeA ? 1 : -1;
       });
 
       // For each point in time, determine what child is on the critical path.

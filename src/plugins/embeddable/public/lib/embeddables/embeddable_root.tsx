@@ -12,6 +12,7 @@ import { EuiText } from '@elastic/eui';
 import { isPromise } from '@kbn/std';
 import { MaybePromise } from '@kbn/utility-types';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import { EmbeddableErrorHandler } from './embeddable_error_handler';
 
 interface Props {
   embeddable?: IEmbeddable<EmbeddableInput, EmbeddableOutput, MaybePromise<ReactNode>>;
@@ -91,7 +92,11 @@ export class EmbeddableRoot extends React.Component<Props, State> {
       <React.Fragment>
         <div ref={this.root}>{this.state.node}</div>
         {this.props.loading && <EuiLoadingSpinner data-test-subj="embedSpinner" />}
-        {this.props.error && <EuiText data-test-subj="embedError">{this.props.error}</EuiText>}
+        {this.props.error && (
+          <EmbeddableErrorHandler embeddable={this.props.embeddable} error={this.props.error}>
+            {({ message }) => <EuiText data-test-subj="embedError">{message}</EuiText>}
+          </EmbeddableErrorHandler>
+        )}
       </React.Fragment>
     );
   }

@@ -7,15 +7,15 @@
 
 import { isEmpty } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { ColumnHeaderOptions, TableIdLiteral } from '../../../../common/types';
 import type { DataTablesStorage } from './types';
 import { useKibana } from '../../../common/lib/kibana';
-import type { ColumnHeaderOptions, TableIdLiteral } from '../../../../common/types/timeline';
-import type { TGridModel } from '../../../common/store/data_table/model';
+import type { DataTableModel } from '../../../common/store/data_table/model';
 
 export const LOCAL_STORAGE_TABLE_KEY = 'securityDataTable';
 const LOCAL_STORAGE_TIMELINE_KEY_LEGACY = 'timelines';
 const EMPTY_TABLE = {} as {
-  [K in TableIdLiteral]: TGridModel;
+  [K in TableIdLiteral]: DataTableModel;
 };
 
 /**
@@ -53,6 +53,7 @@ export const migrateLegacyTimelinesToSecurityDataTable = (legacyTimelineTables: 
         selectedEventIds: timelineModel.selectedEventIds,
         deletedEventIds: timelineModel.deletedEventIds,
         expandedDetail: timelineModel.expandedDetail,
+        totalCount: timelineModel.totalCount || 0,
         ...(Array.isArray(timelineModel.columns)
           ? {
               columns: timelineModel.columns
@@ -62,7 +63,7 @@ export const migrateLegacyTimelinesToSecurityDataTable = (legacyTimelineTables: 
           : {}),
       },
     };
-  }, {} as { [K in TableIdLiteral]: TGridModel });
+  }, {} as { [K in TableIdLiteral]: DataTableModel });
 };
 
 /**
@@ -124,7 +125,7 @@ export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdL
           : {}),
       },
     };
-  }, {} as { [K in TableIdLiteral]: TGridModel });
+  }, {} as { [K in TableIdLiteral]: DataTableModel });
 };
 
 export const getAllDataTablesInStorage = (storage: Storage) => {
@@ -140,7 +141,7 @@ export const getAllDataTablesInStorage = (storage: Storage) => {
   return allDataTables;
 };
 
-export const addTableInStorage = (storage: Storage, id: TableIdLiteral, table: TGridModel) => {
+export const addTableInStorage = (storage: Storage, id: TableIdLiteral, table: DataTableModel) => {
   const tableToStore = getSerializingTableToStore(table);
   const tables = getAllDataTablesInStorage(storage);
   storage.set(LOCAL_STORAGE_TABLE_KEY, {
@@ -149,7 +150,7 @@ export const addTableInStorage = (storage: Storage, id: TableIdLiteral, table: T
   });
 };
 
-const getSerializingTableToStore = (table: TGridModel) => {
+const getSerializingTableToStore = (table: DataTableModel) => {
   // discard unneeded fields to make sure the object serialization works
   const { isLoading, loadingText, queryFields, unit, ...tableToStore } = table;
   return tableToStore;
@@ -164,8 +165,10 @@ export const useDataTablesStorage = (): DataTablesStorage => {
   const getDataTablesById: DataTablesStorage['getDataTablesById'] = (id: TableIdLiteral) =>
     getDataTablesInStorageByIds(storage, [id])[id] ?? null;
 
-  const addDataTable: DataTablesStorage['addDataTable'] = (id: TableIdLiteral, table: TGridModel) =>
-    addTableInStorage(storage, id, table);
+  const addDataTable: DataTablesStorage['addDataTable'] = (
+    id: TableIdLiteral,
+    table: DataTableModel
+  ) => addTableInStorage(storage, id, table);
 
   return { getAllDataTables, getDataTablesById, addDataTable };
 };

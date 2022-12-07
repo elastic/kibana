@@ -28,7 +28,7 @@ import { UserDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import * as i18n from '../translations';
-import { ITEMS_PER_PAGE, SEVERITY_COLOR } from '../utils';
+import { ITEMS_PER_PAGE, openAlertsFilter, SEVERITY_COLOR } from '../utils';
 import type { UserAlertsItem } from './use_user_alerts_items';
 import { useUserAlertsItems } from './use_user_alerts_items';
 
@@ -53,7 +53,9 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
         : undefined;
 
       openTimelineWithFilters(
-        severityFilter ? [[userNameFilter, severityFilter]] : [[userNameFilter]]
+        severityFilter
+          ? [[userNameFilter, openAlertsFilter, severityFilter]]
+          : [[userNameFilter, openAlertsFilter]]
       );
     },
     [openTimelineWithFilters]
@@ -132,7 +134,11 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.ALERTS_TEXT,
     'data-test-subj': 'userSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { userName }) => (
-      <EuiLink disabled={totalAlerts === 0} onClick={() => handleClick({ userName })}>
+      <EuiLink
+        data-test-subj="userSeverityAlertsTable-totalAlertsLink"
+        disabled={totalAlerts === 0}
+        onClick={() => handleClick({ userName })}
+      >
         <FormattedCount count={totalAlerts} />
       </EuiLink>
     ),
@@ -143,6 +149,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     render: (count: number, { userName }) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
         <EuiLink
+          data-test-subj="userSeverityAlertsTable-criticalLink"
           disabled={count === 0}
           onClick={() => handleClick({ userName, severity: 'critical' })}
         >

@@ -10,6 +10,8 @@ release: beta
 # The default type is integration and will be set if empty.
 type: integration
 license: basic
+owner:
+  github: elastic/fleet
 
 requirement:
   elasticsearch:

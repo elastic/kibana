@@ -19,6 +19,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
+import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { KibanaContext } from '../../hooks';
 import { SecuritySolutionPluginContext } from '../../types';
 import { getSecuritySolutionContextMock } from './mock_security_context';
@@ -110,9 +111,12 @@ const coreServiceMock = {
 
 const mockSecurityContext: SecuritySolutionPluginContext = getSecuritySolutionContextMock();
 
+const casesServiceMock = casesPluginMock.createStartContract();
+
 export const mockedServices = {
   ...coreServiceMock,
   data: dataServiceMock,
+  cases: casesServiceMock,
   storage,
   unifiedSearch,
   triggersActionsUi: {

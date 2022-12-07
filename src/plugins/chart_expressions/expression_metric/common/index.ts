@@ -14,6 +14,7 @@ export type {
   MetricInput,
   MetricVisRenderConfig,
   MetricVisExpressionFunctionDefinition,
+  TrendlineExpressionFunctionDefinition,
   DimensionsVisParam,
   MetricVisParam,
   VisParams,

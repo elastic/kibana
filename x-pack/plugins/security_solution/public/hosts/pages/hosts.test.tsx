@@ -28,7 +28,6 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { InputsModelId } from '../../common/store/inputs/constants';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -42,6 +41,9 @@ jest.mock('../../common/components/query_bar', () => ({
 }));
 jest.mock('../../common/components/visualization_actions', () => ({
   VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
+}));
+jest.mock('../../common/components/visualization_actions/lens_embeddable', () => ({
+  LensEmbeddable: jest.fn(() => <div data-test-subj="mock-lens-embeddable" />),
 }));
 const mockNavigateToApp = jest.fn();
 jest.mock('../../common/lib/kibana', () => {
@@ -88,13 +90,7 @@ const mockHistory = {
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 const myState: State = mockGlobalState;
 const { storage } = createSecuritySolutionStorageMock();
-const myStore = createStore(
-  myState,
-  SUB_PLUGINS_REDUCER,
-  { dataTable: tGridReducer },
-  kibanaObservable,
-  storage
-);
+const myStore = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 describe('Hosts - rendering', () => {
   beforeEach(() => {

@@ -10,7 +10,7 @@ import moment from 'moment';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
 import type { KibanaResponseFactory, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { RulesClient, BulkEditError } from '@kbn/alerting-plugin/server';
+import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/server';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { RuleAlertType, RuleParams } from '../../../../rule_schema';
@@ -22,7 +22,7 @@ import {
   RULES_TABLE_MAX_PAGE_SIZE,
 } from '../../../../../../../common/constants';
 import {
-  BulkAction,
+  BulkActionType,
   PerformBulkActionRequestBody,
   PerformBulkActionRequestQuery,
 } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
@@ -35,6 +35,7 @@ import { initPromisePool } from '../../../../../../utils/promise_pool';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { deleteRules } from '../../../logic/crud/delete_rules';
 import { duplicateRule } from '../../../logic/actions/duplicate_rule';
+import { duplicateExceptions } from '../../../logic/actions/duplicate_exceptions';
 import { findRules } from '../../../logic/search/find_rules';
 import { readRules } from '../../../logic/crud/read_rules';
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
@@ -66,7 +67,10 @@ interface NormalizedRuleError {
   rules: RuleDetailsInError[];
 }
 
-type BulkActionError = PromisePoolError<string> | PromisePoolError<RuleAlertType> | BulkEditError;
+type BulkActionError =
+  | PromisePoolError<string>
+  | PromisePoolError<RuleAlertType>
+  | BulkOperationError;
 
 const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[] => {
   const errorsMap = new Map<string, NormalizedRuleError>();
@@ -76,7 +80,7 @@ const normalizeErrorResponse = (errors: BulkActionError[]): NormalizedRuleError[
     let statusCode: number = 500;
     let errorCode: BulkActionsDryRunErrCode | undefined;
     let rule: RuleDetailsInError;
-    // transform different error types (PromisePoolError<string> | PromisePoolError<RuleAlertType> | BulkEditError)
+    // transform different error types (PromisePoolError<string> | PromisePoolError<RuleAlertType> | BulkOperationError)
     // to one common used in NormalizedRuleError
     if ('rule' in errorObj) {
       rule = errorObj.rule;
@@ -298,7 +302,7 @@ export const performBulkActionRoute = (
       const isDryRun = request.query.dry_run === 'true';
 
       // dry run is not supported for export, as it doesn't change ES state and has different response format(exported JSON file)
-      if (isDryRun && body.action === BulkAction.export) {
+      if (isDryRun && body.action === BulkActionType.export) {
         return siemResponse.error({
           body: `Export action doesn't support dry_run mode`,
           statusCode: 400,
@@ -335,7 +339,7 @@ export const performBulkActionRoute = (
 
         // handling this action before switch statement as bulkEditRules fetch rules within
         // rulesClient method, hence there is no need to use fetchRulesByQueryOrIds utility
-        if (body.action === BulkAction.edit && !isDryRun) {
+        if (body.action === BulkActionType.edit && !isDryRun) {
           const { rules, errors } = await bulkEditRules({
             rulesClient,
             filter: query,
@@ -385,7 +389,7 @@ export const performBulkActionRoute = (
         let deleted: RuleAlertType[] = [];
 
         switch (body.action) {
-          case BulkAction.enable:
+          case BulkActionType.enable:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
@@ -418,7 +422,7 @@ export const performBulkActionRoute = (
               .map(({ result }) => result)
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
-          case BulkAction.disable:
+          case BulkActionType.disable:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
@@ -452,7 +456,7 @@ export const performBulkActionRoute = (
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
 
-          case BulkAction.delete:
+          case BulkActionType.delete:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
@@ -483,7 +487,7 @@ export const performBulkActionRoute = (
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
 
-          case BulkAction.duplicate:
+          case BulkActionType.duplicate:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
@@ -494,18 +498,46 @@ export const performBulkActionRoute = (
                 if (isDryRun) {
                   return rule;
                 }
-
                 const migratedRule = await migrateRuleActions({
                   rulesClient,
                   savedObjectsClient,
                   rule,
                 });
+                let shouldDuplicateExceptions = true;
+                if (body.duplicate !== undefined) {
+                  shouldDuplicateExceptions = body.duplicate.include_exceptions;
+                }
 
-                const createdRule = await rulesClient.create({
-                  data: duplicateRule(migratedRule),
+                const duplicateRuleToCreate = await duplicateRule({
+                  rule: migratedRule,
                 });
 
-                return createdRule;
+                const createdRule = await rulesClient.create({
+                  data: duplicateRuleToCreate,
+                });
+
+                // we try to create exceptions after rule created, and then update rule
+                const exceptions = shouldDuplicateExceptions
+                  ? await duplicateExceptions({
+                      ruleId: rule.params.ruleId,
+                      exceptionLists: rule.params.exceptionsList,
+                      exceptionsClient,
+                    })
+                  : [];
+
+                const updatedRule = await rulesClient.update({
+                  id: createdRule.id,
+                  data: {
+                    ...duplicateRuleToCreate,
+                    params: {
+                      ...duplicateRuleToCreate.params,
+                      exceptionsList: exceptions,
+                    },
+                  },
+                });
+
+                // TODO: figureout why types can't return just updatedRule
+                return { ...createdRule, ...updatedRule };
               },
               abortSignal: abortController.signal,
             });
@@ -514,7 +546,7 @@ export const performBulkActionRoute = (
               .filter((rule): rule is RuleAlertType => rule !== null);
             break;
 
-          case BulkAction.export:
+          case BulkActionType.export:
             const exported = await getExportByObjectIds(
               rulesClient,
               exceptionsClient,
@@ -535,7 +567,7 @@ export const performBulkActionRoute = (
 
           // will be processed only when isDryRun === true
           // during dry run only validation is getting performed and rule is not saved in ES
-          case BulkAction.edit:
+          case BulkActionType.edit:
             bulkActionOutcome = await initPromisePool({
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,

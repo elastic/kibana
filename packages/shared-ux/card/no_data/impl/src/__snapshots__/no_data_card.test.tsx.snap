@@ -1,280 +1,304 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NoDataCard props button 1`] = `
-<div>
+<div
+  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+>
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
     <div
-      class="euiCard__top"
+      class="euiCard__main emotion-euiCard__main-vertical"
     >
       <div
-        class="euiCard__image"
+        class="euiCard__top emotion-euiCard__top-vertical"
       >
-        <figure
-          class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
+        <div
+          class="euiCard__image emotion-euiCard__image"
         >
-          <img
-            alt=""
-            class="euiImage emotion-euiImage-fullWidth"
-            src="test-file-stub"
-            style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
-          />
-        </figure>
-      </div>
-    </div>
-    <div
-      class="euiCard__content"
-    >
-      <span
-        class="euiTitle euiCard__title emotion-euiTitle-s"
-        id="generated-idTitle"
-      >
-        <a
-          aria-describedby="generated-idDescription"
-          class="euiCard__titleAnchor"
-          href="/app/integrations/browse"
-          rel="noreferrer"
-        >
-          <span
-            class="emotion-euiScreenReaderOnly"
+          <figure
+            class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
           >
-            Card title
-          </span>
-        </a>
-      </span>
+            <img
+              alt=""
+              class="euiImage emotion-euiImage-fullWidth"
+              src="test-file-stub"
+              style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
+            />
+          </figure>
+        </div>
+      </div>
       <div
-        class="euiText euiCard__description emotion-euiText-s"
-        id="generated-idDescription"
+        class="euiCard__content emotion-euiCard__content-vertical"
       >
-        <p>
-          Description
+        <p
+          class="euiTitle euiCard__title emotion-euiTitle-s"
+          id="generated-idTitle"
+        >
+          <a
+            aria-describedby="generated-idDescription"
+            class="euiCard__titleAnchor emotion-euiCard__text-center-interactive"
+            href="/app/integrations/browse"
+            rel="noreferrer"
+          >
+            <span
+              class="emotion-euiScreenReaderOnly"
+            >
+              Card title
+            </span>
+          </a>
         </p>
+        <div
+          class="euiText emotion-euiText-s-euiCard__description"
+          id="generated-idDescription"
+        >
+          <p>
+            Description
+          </p>
+        </div>
       </div>
-    </div>
-    <div
-      class="euiCard__footer"
-    >
-      <button
-        class="euiButton euiButton--primary euiButton--fill"
-        type="button"
+      <div
+        class="emotion-euiCard__footer"
       >
-        <span
-          class="euiButtonContent euiButton__content"
+        <button
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+          type="button"
         >
           <span
-            class="euiButton__text"
+            class="emotion-euiButtonDisplayContent"
           >
-            Button
+            <span
+              class="eui-textTruncate"
+            >
+              Button
+            </span>
           </span>
-        </span>
-      </button>
+        </button>
+      </div>
     </div>
   </div>
 </div>
 `;
 
 exports[`NoDataCard props extends EuiCardProps 1`] = `
-<div>
+<div
+  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+>
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable custom_class emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard custom_class emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
     <div
-      class="euiCard__top"
+      class="euiCard__main emotion-euiCard__main-vertical"
     >
       <div
-        class="euiCard__image"
+        class="euiCard__top emotion-euiCard__top-vertical"
       >
-        <figure
-          class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
+        <div
+          class="euiCard__image emotion-euiCard__image"
         >
-          <img
-            alt=""
-            class="euiImage emotion-euiImage-fullWidth"
-            src="test-file-stub"
-            style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
-          />
-        </figure>
-      </div>
-    </div>
-    <div
-      class="euiCard__content"
-    >
-      <span
-        class="euiTitle euiCard__title emotion-euiTitle-s"
-        id="generated-idTitle"
-      >
-        <a
-          aria-describedby="generated-idDescription"
-          class="euiCard__titleAnchor"
-          href="/app/integrations/browse"
-          rel="noreferrer"
-        >
-          <span
-            class="emotion-euiScreenReaderOnly"
+          <figure
+            class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
           >
-            Card title
-          </span>
-        </a>
-      </span>
+            <img
+              alt=""
+              class="euiImage emotion-euiImage-fullWidth"
+              src="test-file-stub"
+              style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
+            />
+          </figure>
+        </div>
+      </div>
       <div
-        class="euiText euiCard__description emotion-euiText-s"
-        id="generated-idDescription"
+        class="euiCard__content emotion-euiCard__content-vertical"
       >
-        <p>
-          Description
+        <p
+          class="euiTitle euiCard__title emotion-euiTitle-s"
+          id="generated-idTitle"
+        >
+          <a
+            aria-describedby="generated-idDescription"
+            class="euiCard__titleAnchor emotion-euiCard__text-center-interactive"
+            href="/app/integrations/browse"
+            rel="noreferrer"
+          >
+            <span
+              class="emotion-euiScreenReaderOnly"
+            >
+              Card title
+            </span>
+          </a>
         </p>
+        <div
+          class="euiText emotion-euiText-s-euiCard__description"
+          id="generated-idDescription"
+        >
+          <p>
+            Description
+          </p>
+        </div>
       </div>
-    </div>
-    <div
-      class="euiCard__footer"
-    >
-      <button
-        class="euiButton euiButton--primary euiButton--fill"
-        type="button"
+      <div
+        class="emotion-euiCard__footer"
       >
-        <span
-          class="euiButtonContent euiButton__content"
+        <button
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+          type="button"
         >
           <span
-            class="euiButton__text"
+            class="emotion-euiButtonDisplayContent"
           >
-            Button
+            <span
+              class="eui-textTruncate"
+            >
+              Button
+            </span>
           </span>
-        </span>
-      </button>
+        </button>
+      </div>
     </div>
   </div>
 </div>
 `;
 
 exports[`NoDataCard props href 1`] = `
-<div>
+<div
+  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+>
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
     <div
-      class="euiCard__top"
+      class="euiCard__main emotion-euiCard__main-vertical"
     >
       <div
-        class="euiCard__image"
+        class="euiCard__top emotion-euiCard__top-vertical"
       >
-        <figure
-          class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
+        <div
+          class="euiCard__image emotion-euiCard__image"
         >
-          <img
-            alt=""
-            class="euiImage emotion-euiImage-fullWidth"
-            src="test-file-stub"
-            style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
-          />
-        </figure>
-      </div>
-    </div>
-    <div
-      class="euiCard__content"
-    >
-      <span
-        class="euiTitle euiCard__title emotion-euiTitle-s"
-        id="generated-idTitle"
-      >
-        <a
-          aria-describedby="generated-idDescription"
-          class="euiCard__titleAnchor"
-          href="#"
-          rel="noreferrer"
-        >
-          <span
-            class="emotion-euiScreenReaderOnly"
+          <figure
+            class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
           >
-            Card title
-          </span>
-        </a>
-      </span>
+            <img
+              alt=""
+              class="euiImage emotion-euiImage-fullWidth"
+              src="test-file-stub"
+              style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
+            />
+          </figure>
+        </div>
+      </div>
       <div
-        class="euiText euiCard__description emotion-euiText-s"
-        id="generated-idDescription"
+        class="euiCard__content emotion-euiCard__content-vertical"
       >
-        <p>
-          Description
+        <p
+          class="euiTitle euiCard__title emotion-euiTitle-s"
+          id="generated-idTitle"
+        >
+          <a
+            aria-describedby="generated-idDescription"
+            class="euiCard__titleAnchor emotion-euiCard__text-center-interactive"
+            href="#"
+            rel="noreferrer"
+          >
+            <span
+              class="emotion-euiScreenReaderOnly"
+            >
+              Card title
+            </span>
+          </a>
         </p>
+        <div
+          class="euiText emotion-euiText-s-euiCard__description"
+          id="generated-idDescription"
+        >
+          <p>
+            Description
+          </p>
+        </div>
       </div>
-    </div>
-    <div
-      class="euiCard__footer"
-    >
-      <button
-        class="euiButton euiButton--primary euiButton--fill"
-        type="button"
+      <div
+        class="emotion-euiCard__footer"
       >
-        <span
-          class="euiButtonContent euiButton__content"
+        <button
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+          type="button"
         >
           <span
-            class="euiButton__text"
+            class="emotion-euiButtonDisplayContent"
           >
-            Button
+            <span
+              class="eui-textTruncate"
+            >
+              Button
+            </span>
           </span>
-        </span>
-      </button>
+        </button>
+      </div>
     </div>
   </div>
 </div>
 `;
 
 exports[`NoDataCard props no access to Fleet 1`] = `
-<div>
+<div
+  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+>
   <div
-    class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard-isDisabled emotion-euiPanel-grow-m-l-subdued-EuiCard"
+    class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-subdued-EuiCard"
   >
     <div
-      class="euiCard__top"
+      class="euiCard__main emotion-euiCard__main-vertical"
     >
       <div
-        class="euiCard__image"
+        class="euiCard__top emotion-euiCard__top-vertical-disabled"
       >
-        <figure
-          class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
+        <div
+          class="euiCard__image emotion-euiCard__image"
         >
-          <img
-            alt=""
-            class="euiImage emotion-euiImage-fullWidth"
-            src="test-file-stub"
-            style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
-          />
-        </figure>
+          <figure
+            class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
+          >
+            <img
+              alt=""
+              class="euiImage emotion-euiImage-fullWidth"
+              src="test-file-stub"
+              style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
+            />
+          </figure>
+        </div>
       </div>
-    </div>
-    <div
-      class="euiCard__content"
-    >
-      <span
-        class="euiTitle euiCard__title emotion-euiTitle-s"
-        id="generated-idTitle"
-      >
-        <button
-          aria-describedby=" generated-idDescription"
-          class="euiCard__titleButton"
-          disabled=""
-        >
-          <span
-            class="emotion-euiTextColor-default"
-          >
-            Contact your administrator
-          </span>
-        </button>
-      </span>
       <div
-        class="euiText euiCard__description emotion-euiText-s"
-        id="generated-idDescription"
+        class="euiCard__content emotion-euiCard__content-vertical"
       >
-        <p>
-          <span
-            class="emotion-euiTextColor-default"
+        <p
+          class="euiTitle euiCard__title emotion-euiTitle-s"
+          id="generated-idTitle"
+        >
+          <button
+            aria-describedby=" generated-idDescription"
+            class="euiCard__titleButton emotion-euiCard__text-center-disabled"
+            disabled=""
           >
-            This integration is not yet enabled. Your administrator has the required permissions to turn it on.
-          </span>
+            <span
+              class="emotion-euiTextColor-default"
+            >
+              Contact your administrator
+            </span>
+          </button>
         </p>
+        <div
+          class="euiText emotion-euiText-s-euiCard__description"
+          id="generated-idDescription"
+        >
+          <p>
+            <span
+              class="emotion-euiTextColor-default"
+            >
+              This integration is not yet enabled. Your administrator has the required permissions to turn it on.
+            </span>
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -282,74 +306,80 @@ exports[`NoDataCard props no access to Fleet 1`] = `
 `;
 
 exports[`NoDataCard renders 1`] = `
-<div>
+<div
+  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+>
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
     <div
-      class="euiCard__top"
+      class="euiCard__main emotion-euiCard__main-vertical"
     >
       <div
-        class="euiCard__image"
+        class="euiCard__top emotion-euiCard__top-vertical"
       >
-        <figure
-          class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
+        <div
+          class="euiCard__image emotion-euiCard__image"
         >
-          <img
-            alt=""
-            class="euiImage emotion-euiImage-fullWidth"
-            src="test-file-stub"
-            style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
-          />
-        </figure>
-      </div>
-    </div>
-    <div
-      class="euiCard__content"
-    >
-      <span
-        class="euiTitle euiCard__title emotion-euiTitle-s"
-        id="generated-idTitle"
-      >
-        <a
-          aria-describedby="generated-idDescription"
-          class="euiCard__titleAnchor"
-          href="/app/integrations/browse"
-          rel="noreferrer"
-        >
-          <span
-            class="emotion-euiScreenReaderOnly"
+          <figure
+            class="euiImageWrapper emotion-euiImageWrapper-fullWidth"
           >
-            Card title
-          </span>
-        </a>
-      </span>
+            <img
+              alt=""
+              class="euiImage emotion-euiImage-fullWidth"
+              src="test-file-stub"
+              style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
+            />
+          </figure>
+        </div>
+      </div>
       <div
-        class="euiText euiCard__description emotion-euiText-s"
-        id="generated-idDescription"
+        class="euiCard__content emotion-euiCard__content-vertical"
       >
-        <p>
-          Description
+        <p
+          class="euiTitle euiCard__title emotion-euiTitle-s"
+          id="generated-idTitle"
+        >
+          <a
+            aria-describedby="generated-idDescription"
+            class="euiCard__titleAnchor emotion-euiCard__text-center-interactive"
+            href="/app/integrations/browse"
+            rel="noreferrer"
+          >
+            <span
+              class="emotion-euiScreenReaderOnly"
+            >
+              Card title
+            </span>
+          </a>
         </p>
+        <div
+          class="euiText emotion-euiText-s-euiCard__description"
+          id="generated-idDescription"
+        >
+          <p>
+            Description
+          </p>
+        </div>
       </div>
-    </div>
-    <div
-      class="euiCard__footer"
-    >
-      <button
-        class="euiButton euiButton--primary euiButton--fill"
-        type="button"
+      <div
+        class="emotion-euiCard__footer"
       >
-        <span
-          class="euiButtonContent euiButton__content"
+        <button
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+          type="button"
         >
           <span
-            class="euiButton__text"
+            class="emotion-euiButtonDisplayContent"
           >
-            Card title
+            <span
+              class="eui-textTruncate"
+            >
+              Card title
+            </span>
           </span>
-        </span>
-      </button>
+        </button>
+      </div>
     </div>
   </div>
 </div>

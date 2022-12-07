@@ -50,8 +50,6 @@ export const initialState: LensAppState = {
   dataViews: {
     indexPatternRefs: [],
     indexPatterns: {},
-    existingFields: {},
-    isFirstExistenceFetch: true,
   },
 };
 

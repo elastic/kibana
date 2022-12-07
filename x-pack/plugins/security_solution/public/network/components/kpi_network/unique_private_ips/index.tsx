@@ -21,6 +21,9 @@ import { kpiUniquePrivateIpsAreaLensAttributes } from '../../../../common/compon
 import { kpiUniquePrivateIpsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_bar';
 import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { useRefetchByRestartingSession } from '../../../../common/components/page/use_refetch_by_session';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis2 = euiVisColorPalette[2];
@@ -68,15 +71,23 @@ const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
 }) => {
   const { toggleStatus } = useQueryToggle(ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
+
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiUniquePrivateIps({
     filterQuery,
     endDate: to,
     indexNames,
     startDate: from,
-    skip: querySkip,
+    skip: querySkip || isChartEmbeddablesEnabled,
+  });
+
+  const { searchSessionId, refetchByRestartingSession } = useRefetchByRestartingSession({
+    inputId: InputsModelId.global,
+    queryId: id,
   });
 
   return (
@@ -89,9 +100,10 @@ const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
       from={from}
       to={to}
       updateDateRange={updateDateRange}
-      refetch={refetch}
+      refetch={isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}
+      searchSessionId={isChartEmbeddablesEnabled ? searchSessionId : undefined}
     />
   );
 };

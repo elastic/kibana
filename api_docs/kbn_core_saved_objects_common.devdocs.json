@@ -121,7 +121,9 @@
             "type": "Object",
             "tags": [],
             "label": "error",
-            "description": [],
+            "description": [
+              "Error associated with this object, populated if an operation failed for this object."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-common",
@@ -341,22 +343,6 @@
             "path": "src/plugins/embeddable/public/types.ts"
           },
           {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/settings.ts"
-          },
-          {
-            "plugin": "fleet",
-            "path": "x-pack/plugins/fleet/common/types/models/settings.ts"
-          },
-          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_objects_utils/save_with_confirmation.ts"
           },
@@ -374,14 +360,6 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
-          },
-          {
-            "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
           },
           {
@@ -406,11 +384,11 @@
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/wizard/search_selection/search_selection.tsx"
+            "path": "src/plugins/visualizations/public/wizard/search_selection/show_saved_object.ts"
           },
           {
             "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/wizard/search_selection/search_selection.tsx"
+            "path": "src/plugins/visualizations/public/wizard/search_selection/show_saved_object.ts"
           },
           {
             "plugin": "visualizations",
@@ -435,6 +413,22 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object.ts"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/common/types/models/settings.ts"
+          },
+          {
+            "plugin": "fleet",
+            "path": "x-pack/plugins/fleet/common/types/models/settings.ts"
           },
           {
             "plugin": "infra",
@@ -658,11 +652,23 @@
           },
           {
             "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/common/rule.ts"
+          },
+          {
+            "plugin": "alerting",
             "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
           },
           {
             "plugin": "alerting",
             "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/types.ts"
           },
           {
             "plugin": "alerting",
@@ -1810,7 +1816,9 @@
             "type": "IndexSignature",
             "tags": [],
             "label": "[pluginName: string]: string",
-            "description": [],
+            "description": [
+              "The plugin name and version string"
+            ],
             "signature": [
               "[pluginName: string]:  string"
             ],

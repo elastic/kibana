@@ -2512,6 +2512,54 @@
       },
       {
         "parentPluginId": "timelines",
+        "id": "def-public.updateTotalCount",
+        "type": "Function",
+        "tags": [],
+        "label": "updateTotalCount",
+        "description": [],
+        "signature": [
+          "ActionCreator",
+          "<{ id: string; totalCount: number; }>"
+        ],
+        "path": "x-pack/plugins/timelines/public/store/t_grid/actions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.updateTotalCount.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "payload",
+            "description": [],
+            "signature": [
+              "Payload"
+            ],
+            "path": "node_modules/typescript-fsa/lib/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.updateTotalCount.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "Meta",
+              " | undefined"
+            ],
+            "path": "node_modules/typescript-fsa/lib/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
         "id": "def-public.upsertColumn",
         "type": "Function",
         "tags": [],
@@ -3111,6 +3159,19 @@
             "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.TGridModel.totalCount",
+            "type": "number",
+            "tags": [],
+            "label": "totalCount",
+            "description": [
+              "Total number of fetched events/alerts"
+            ],
+            "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3356,7 +3417,7 @@
             "section": "def-common.IFieldSubType",
             "text": "IFieldSubType"
           },
-          " | undefined; type?: string | undefined; })[]; readonly isLoading: boolean; readonly queryFields: string[]; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly expandedDetail: Partial<Record<string, ",
+          " | undefined; type?: string | undefined; })[]; readonly isLoading: boolean; readonly queryFields: string[]; readonly selectAll: boolean; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly expandedDetail: Partial<Record<string, ",
           "DataExpandedDetailType",
           ">>; readonly graphEventId?: string | undefined; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPage: number; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
           {
@@ -3368,7 +3429,7 @@
           },
           "[]>; readonly sessionViewConfig: ",
           "SessionViewConfig",
-          " | null; }"
+          " | null; readonly totalCount: number; }"
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/model.ts",
         "deprecated": false,
@@ -5431,9 +5492,7 @@
             "signature": [
               "{ [x: string]: ",
               "MappingRuntimeField",
-              " | ",
-              "MappingRuntimeField",
-              "[]; }"
+              "; }"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
@@ -5639,7 +5698,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "string | number"
+              "string | number | (string | number)[]"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
@@ -5667,7 +5726,7 @@
             "label": "operator",
             "description": [],
             "signature": [
-              "\":\" | \":*\""
+              "\"includes\" | \":\" | \":*\""
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
@@ -6239,9 +6298,22 @@
             "signature": [
               "{ [x: string]: ",
               "MappingRuntimeField",
-              " | ",
-              "MappingRuntimeField",
-              "[]; }"
+              "; }"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.TimelineEventsAllRequestOptions.filterStatus",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filterStatus",
+            "description": [],
+            "signature": [
+              "AlertStatus",
+              " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
@@ -7253,7 +7325,7 @@
             "section": "def-common.RowRenderer",
             "text": "RowRenderer"
           },
-          "[] | undefined; setFlyoutAlert?: ((data: any) => void) | undefined; scopeId: string; truncate?: boolean | undefined; key?: string | undefined; }"
+          "[] | undefined; setFlyoutAlert?: ((data: any) => void) | undefined; scopeId: string; truncate?: boolean | undefined; key?: string | undefined; closeCellPopover?: (() => void) | undefined; enableActions?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/cells/index.ts",
         "deprecated": false,
@@ -7551,7 +7623,7 @@
           "The operator applied to a field"
         ],
         "signature": [
-          "\":\" | \":*\""
+          "\"includes\" | \":\" | \":*\""
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
@@ -7685,7 +7757,7 @@
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
           },
-          " | undefined; id?: string | undefined; timerange: ",
+          " | undefined; id?: string | undefined; timerange?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -7693,7 +7765,7 @@
             "section": "def-common.TimerangeInput",
             "text": "TimerangeInput"
           },
-          "; defaultIndex: string[]; filterQuery: string | ",
+          " | undefined; defaultIndex: string[]; filterQuery: string | ",
           "ESQuery",
           " | undefined; factoryQueryType?: ",
           "TimelineEventsQueries",

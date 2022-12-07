@@ -16,19 +16,19 @@ import {
   addTableInStorage,
 } from '.';
 
-import { TableId } from '../../../../common/types/timeline';
-import { mockTGridModel, createSecuritySolutionStorageMock } from '../../../common/mock';
+import { mockDataTableModel, createSecuritySolutionStorageMock } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
-import type { TGridModel } from '../../../common/store/data_table/model';
+import type { DataTableModel } from '../../../common/store/data_table/model';
+import { TableId } from '../../../../common/types';
 
 jest.mock('../../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-const getExpectedColumns = (model: TGridModel) =>
+const getExpectedColumns = (model: DataTableModel) =>
   model.columns.map(migrateColumnWidthToInitialWidth).map(migrateColumnLabelToDisplayAsText);
 
-const { isLoading, loadingText, queryFields, unit, ...timelineToStore } = mockTGridModel;
+const { isLoading, loadingText, queryFields, unit, ...timelineToStore } = mockDataTableModel;
 
 describe('SiemLocalStorage', () => {
   const { localStorage, storage } = createSecuritySolutionStorageMock();
@@ -41,7 +41,7 @@ describe('SiemLocalStorage', () => {
   describe('addDataTable', () => {
     it('adds a timeline when storage is empty', () => {
       const tablesStorage = useDataTablesStorage();
-      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
       expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TABLE_KEY))).toEqual({
         [TableId.hostsPageEvents]: timelineToStore,
       });
@@ -49,8 +49,8 @@ describe('SiemLocalStorage', () => {
 
     it('adds a timeline when storage contains another timelines', () => {
       const tablesStorage = useDataTablesStorage();
-      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
-      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
       expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TABLE_KEY))).toEqual({
         [TableId.hostsPageEvents]: timelineToStore,
         [TableId.usersPageEvents]: timelineToStore,
@@ -61,8 +61,8 @@ describe('SiemLocalStorage', () => {
   describe('getAllDataTables', () => {
     it('gets all timelines correctly', () => {
       const tablesStorage = useDataTablesStorage();
-      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
-      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
       const timelines = tablesStorage.getAllDataTables();
       expect(timelines).toEqual({
         [TableId.hostsPageEvents]: timelineToStore,
@@ -80,7 +80,7 @@ describe('SiemLocalStorage', () => {
   describe('getDataTablesById', () => {
     it('gets a timeline by id', () => {
       const tablesStorage = useDataTablesStorage();
-      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
       const timeline = tablesStorage.getDataTablesById(TableId.hostsPageEvents);
       expect(timeline).toEqual(timelineToStore);
     });
@@ -88,14 +88,14 @@ describe('SiemLocalStorage', () => {
 
   describe('getDataTablesInStorageByIds', () => {
     storage.set('timelines', {
-      [TableId.hostsPageEvents]: mockTGridModel,
-      [TableId.usersPageEvents]: mockTGridModel,
+      [TableId.hostsPageEvents]: mockDataTableModel,
+      [TableId.usersPageEvents]: mockDataTableModel,
     });
 
     it('gets timelines correctly', () => {
       const tablesStorage = useDataTablesStorage();
-      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
-      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
       const timelines = getDataTablesInStorageByIds(storage, [
         TableId.hostsPageEvents,
         TableId.usersPageEvents,
@@ -113,21 +113,21 @@ describe('SiemLocalStorage', () => {
 
     it('returns empty timelime when there is no ids', () => {
       const tablesStorage = useDataTablesStorage();
-      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
       const timelines = getDataTablesInStorageByIds(storage, []);
       expect(timelines).toEqual({});
     });
 
     it('returns empty timelime when a specific timeline does not exists', () => {
       const tablesStorage = useDataTablesStorage();
-      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
       const timelines = getDataTablesInStorageByIds(storage, [TableId.usersPageEvents]);
       expect(timelines).toEqual({});
     });
 
     it('returns timelines correctly when one exist and another not', () => {
       const tablesStorage = useDataTablesStorage();
-      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
       const timelines = getDataTablesInStorageByIds(storage, [
         TableId.hostsPageEvents,
         TableId.usersPageEvents,
@@ -141,18 +141,18 @@ describe('SiemLocalStorage', () => {
       const tablesStorage = useDataTablesStorage();
 
       // create a mock that mimics a column saved to localstoarge in the "old" format, with `width` instead of `initialWidth`
-      const unmigratedmockTGridModel = {
-        ...cloneDeep(mockTGridModel),
-        columns: mockTGridModel.columns.map((c) => ({
+      const unmigratedmockDataTableModel = {
+        ...cloneDeep(mockDataTableModel),
+        columns: mockDataTableModel.columns.map((c) => ({
           ...c,
           width: 98765, // create a legacy `width` column
           initialWidth: undefined, // `initialWidth` must be undefined, otherwise the migration will not occur
         })),
       };
       storage.set('timelines', {
-        [TableId.hostsPageEvents]: unmigratedmockTGridModel,
+        [TableId.hostsPageEvents]: unmigratedmockDataTableModel,
       });
-      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
 
       const timelines = getDataTablesInStorageByIds(storage, [
         TableId.hostsPageEvents,
@@ -171,7 +171,7 @@ describe('SiemLocalStorage', () => {
         },
         [TableId.usersPageEvents]: {
           ...timelineToStore,
-          columns: getExpectedColumns(mockTGridModel),
+          columns: getExpectedColumns(mockDataTableModel),
         },
       });
     });
@@ -180,17 +180,17 @@ describe('SiemLocalStorage', () => {
       const tablesStorage = useDataTablesStorage();
 
       // create a mock that mimics a column saved to localstoarge in the "old" format, with `width` instead of `initialWidth`
-      const unmigratedmockTGridModel = {
-        ...cloneDeep(mockTGridModel),
-        columns: mockTGridModel.columns.map((c) => ({
+      const unmigratedmockDataTableModel = {
+        ...cloneDeep(mockDataTableModel),
+        columns: mockDataTableModel.columns.map((c) => ({
           ...c,
           width: 98765, // create a legacy `width` column
         })),
       };
       storage.set('timelines', {
-        [TableId.hostsPageEvents]: unmigratedmockTGridModel,
+        [TableId.hostsPageEvents]: unmigratedmockDataTableModel,
       });
-      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
       const timelines = getDataTablesInStorageByIds(storage, [
         TableId.hostsPageEvents,
         TableId.usersPageEvents,
@@ -207,7 +207,7 @@ describe('SiemLocalStorage', () => {
         },
         [TableId.usersPageEvents]: {
           ...timelineToStore,
-          columns: getExpectedColumns(mockTGridModel),
+          columns: getExpectedColumns(mockDataTableModel),
         },
       });
     });
@@ -216,17 +216,17 @@ describe('SiemLocalStorage', () => {
       const tablesStorage = useDataTablesStorage();
 
       // create a mock that mimics a column saved to localstoarge in the "old" format, with `label` instead of `displayAsText`
-      const unmigratedmockTGridModel = {
-        ...cloneDeep(mockTGridModel),
-        columns: mockTGridModel.columns.map((c, i) => ({
+      const unmigratedmockDataTableModel = {
+        ...cloneDeep(mockDataTableModel),
+        columns: mockDataTableModel.columns.map((c, i) => ({
           ...c,
           label: `A legacy label ${i}`, // create a legacy `label` column
         })),
       };
       storage.set('timelines', {
-        [TableId.hostsPageEvents]: unmigratedmockTGridModel,
+        [TableId.hostsPageEvents]: unmigratedmockDataTableModel,
       });
-      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
       const timelines = getDataTablesInStorageByIds(storage, [
         TableId.hostsPageEvents,
         TableId.usersPageEvents,
@@ -244,7 +244,7 @@ describe('SiemLocalStorage', () => {
         },
         [TableId.usersPageEvents]: {
           ...timelineToStore,
-          columns: getExpectedColumns(mockTGridModel),
+          columns: getExpectedColumns(mockDataTableModel),
         },
       });
     });
@@ -253,17 +253,17 @@ describe('SiemLocalStorage', () => {
       const tablesStorage = useDataTablesStorage();
 
       // create a mock that mimics a column saved to localstoarge in the "old" format, with `label` instead of `displayAsText`
-      const unmigratedmockTGridModel = {
-        ...cloneDeep(mockTGridModel),
-        columns: mockTGridModel.columns.map((c, i) => ({
+      const unmigratedmockDataTableModel = {
+        ...cloneDeep(mockDataTableModel),
+        columns: mockDataTableModel.columns.map((c, i) => ({
           ...c,
           displayAsText:
             'Label will NOT be migrated to displayAsText, because displayAsText already has a value',
           label: `A legacy label ${i}`, // create a legacy `label` column
         })),
       };
-      tablesStorage.addDataTable(TableId.hostsPageEvents, unmigratedmockTGridModel);
-      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.hostsPageEvents, unmigratedmockDataTableModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
       const timelines = getDataTablesInStorageByIds(storage, [
         TableId.hostsPageEvents,
         TableId.usersPageEvents,
@@ -281,7 +281,7 @@ describe('SiemLocalStorage', () => {
         },
         [TableId.usersPageEvents]: {
           ...timelineToStore,
-          columns: getExpectedColumns(mockTGridModel),
+          columns: getExpectedColumns(mockDataTableModel),
         },
       });
     });
@@ -289,15 +289,15 @@ describe('SiemLocalStorage', () => {
     it('does NOT migrate `columns` when `columns` is not an array', () => {
       const tablesStorage = useDataTablesStorage();
 
-      const invalidColumnsmockTGridModel = {
-        ...cloneDeep(mockTGridModel),
+      const invalidColumnsmockDataTableModel = {
+        ...cloneDeep(mockDataTableModel),
         columns: 'this is NOT an array',
       };
       tablesStorage.addDataTable(
         TableId.hostsPageEvents,
-        invalidColumnsmockTGridModel as unknown as TGridModel
+        invalidColumnsmockDataTableModel as unknown as DataTableModel
       );
-      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
       const timelines = getDataTablesInStorageByIds(storage, [
         TableId.hostsPageEvents,
         TableId.usersPageEvents,
@@ -310,12 +310,12 @@ describe('SiemLocalStorage', () => {
         },
         [TableId.usersPageEvents]: {
           ...timelineToStore,
-          columns: getExpectedColumns(mockTGridModel),
+          columns: getExpectedColumns(mockDataTableModel),
         },
       });
     });
 
-    it('migrates legacy timeline tables saved in localstorage to the new key securityDataTable and schema for TGridModel', () => {
+    it('migrates legacy timeline tables saved in localstorage to the new key securityDataTable and schema for DataTableModel', () => {
       const detectionsPageLegacyTable = {
         id: 'alerts-page',
         columns: [
@@ -638,6 +638,7 @@ describe('SiemLocalStorage', () => {
         title: '',
         initialized: true,
         updated: 1665943295913,
+        totalCount: 0,
       };
       const dataTables = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
       expect(dataTables).toStrictEqual({
@@ -649,8 +650,8 @@ describe('SiemLocalStorage', () => {
   describe('getAllDataTablesInStorage', () => {
     it('gets timelines correctly', () => {
       const tablesStorage = useDataTablesStorage();
-      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
-      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockDataTableModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockDataTableModel);
       const timelines = getAllDataTablesInStorage(storage);
       expect(timelines).toEqual({
         [TableId.hostsPageEvents]: timelineToStore,
@@ -666,15 +667,15 @@ describe('SiemLocalStorage', () => {
 
   describe('addTableInStorage', () => {
     it('adds a timeline when storage is empty', () => {
-      addTableInStorage(storage, TableId.hostsPageEvents, mockTGridModel);
+      addTableInStorage(storage, TableId.hostsPageEvents, mockDataTableModel);
       expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TABLE_KEY))).toEqual({
         [TableId.hostsPageEvents]: timelineToStore,
       });
     });
 
     it('adds a timeline when storage contains another timelines', () => {
-      addTableInStorage(storage, TableId.hostsPageEvents, mockTGridModel);
-      addTableInStorage(storage, TableId.usersPageEvents, mockTGridModel);
+      addTableInStorage(storage, TableId.hostsPageEvents, mockDataTableModel);
+      addTableInStorage(storage, TableId.usersPageEvents, mockDataTableModel);
       expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TABLE_KEY))).toEqual({
         [TableId.hostsPageEvents]: timelineToStore,
         [TableId.usersPageEvents]: timelineToStore,
@@ -685,7 +686,7 @@ describe('SiemLocalStorage', () => {
   describe('migrateColumnWidthToInitialWidth', () => {
     it('migrates the `width` property to `initialWidth` for older columns saved to localstorage', () => {
       const column = {
-        ...cloneDeep(mockTGridModel.columns[0]),
+        ...cloneDeep(mockDataTableModel.columns[0]),
         width: 1234, // the column `width` was saved to localstorage before the `initialWidth` property existed
         initialWidth: undefined, // `initialWidth` did not exist when this column was saved to localstorage
       };
@@ -699,7 +700,7 @@ describe('SiemLocalStorage', () => {
     });
 
     it("leaves `initialWidth` unchanged when the column read from localstorage doesn't have a `width`", () => {
-      const column = cloneDeep(mockTGridModel.columns[0]); // `column.width` does not exist
+      const column = cloneDeep(mockDataTableModel.columns[0]); // `column.width` does not exist
 
       expect(migrateColumnWidthToInitialWidth(column)).toStrictEqual({
         columnHeaderType: 'not-filtered',
@@ -710,7 +711,7 @@ describe('SiemLocalStorage', () => {
 
     it('does NOT migrate the `width` property to `initialWidth` when the column read from localstorage already has a valid `initialWidth`', () => {
       const column = {
-        ...cloneDeep(mockTGridModel.columns[0]), // `column.initialWidth` already exists
+        ...cloneDeep(mockDataTableModel.columns[0]), // `column.initialWidth` already exists
         width: 1234,
       };
 
@@ -726,7 +727,7 @@ describe('SiemLocalStorage', () => {
   describe('migrateColumnLabelToDisplayAsText', () => {
     it('migrates the `label` property to `displayAsText` for older columns saved to localstorage', () => {
       const column = {
-        ...cloneDeep(mockTGridModel.columns[0]),
+        ...cloneDeep(mockDataTableModel.columns[0]),
         label: 'A legacy label', // the column `label` was saved to localstorage before the `displayAsText` property existed
       };
 
@@ -740,7 +741,7 @@ describe('SiemLocalStorage', () => {
     });
 
     it("leaves `displayAsText` undefined when the column read from localstorage doesn't have a `label`", () => {
-      const column = cloneDeep(mockTGridModel.columns[0]); // `column.label` does not exist
+      const column = cloneDeep(mockDataTableModel.columns[0]); // `column.label` does not exist
 
       expect(migrateColumnLabelToDisplayAsText(column)).toStrictEqual({
         columnHeaderType: 'not-filtered',
@@ -751,7 +752,7 @@ describe('SiemLocalStorage', () => {
 
     it("leaves `displayAsText` unchanged when the column read from localstorage doesn't have a `label`", () => {
       const column = {
-        ...cloneDeep(mockTGridModel.columns[0]),
+        ...cloneDeep(mockDataTableModel.columns[0]),
         displayAsText: 'Do NOT update this',
       };
 
@@ -765,7 +766,7 @@ describe('SiemLocalStorage', () => {
 
     it('does NOT migrate the `label` property to `displayAsText` when the column read from localstorage already has a valid `displayAsText`', () => {
       const column = {
-        ...cloneDeep(mockTGridModel.columns[0]),
+        ...cloneDeep(mockDataTableModel.columns[0]),
         displayAsText: 'Already valid',
         label: 'A legacy label',
       };

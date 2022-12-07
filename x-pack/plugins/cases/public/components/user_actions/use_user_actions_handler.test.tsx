@@ -28,7 +28,7 @@ const openLensModal = jest.fn();
 
 describe('useUserActionsHandler', () => {
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     jest.spyOn(global, 'setTimeout');
   });
 

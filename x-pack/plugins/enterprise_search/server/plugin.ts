@@ -16,6 +16,7 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { InfraPluginSetup } from '@kbn/infra-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
@@ -30,6 +31,7 @@ import {
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  SEARCH_EXPERIENCES_PLUGIN,
   ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID,
@@ -54,6 +56,7 @@ import { registerConfigDataRoute } from './routes/enterprise_search/config_data'
 import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
 import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
 import { registerCreateAPIKeyRoute } from './routes/enterprise_search/create_api_key';
+import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
@@ -77,6 +80,7 @@ interface PluginsSetup {
 interface PluginsStart {
   spaces: SpacesPluginStart;
   security: SecurityPluginStart;
+  data: DataPluginStart;
 }
 
 export interface RouteDependencies {
@@ -110,6 +114,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       ANALYTICS_PLUGIN.ID,
       APP_SEARCH_PLUGIN.ID,
       WORKPLACE_SEARCH_PLUGIN.ID,
+      SEARCH_EXPERIENCES_PLUGIN.ID,
     ];
 
     if (customIntegrations) {
@@ -158,6 +163,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           elasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
+          searchExperiences: showEnterpriseSearch,
         },
         catalogue: {
           enterpriseSearch: showEnterpriseSearch,
@@ -166,6 +172,7 @@ export class EnterpriseSearchPlugin implements Plugin {
           elasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess,
           workplaceSearch: hasWorkplaceSearchAccess,
+          searchExperiences: showEnterpriseSearch,
         },
       };
     });
@@ -184,7 +191,12 @@ export class EnterpriseSearchPlugin implements Plugin {
     // Enterprise Search Routes
     registerConnectorRoutes(dependencies);
     registerCrawlerRoutes(dependencies);
-    registerAnalyticsRoutes(dependencies);
+    registerStatsRoutes(dependencies);
+
+    // Analytics Routes (stand-alone product)
+    getStartServices().then(([coreStart, { data }]) => {
+      registerAnalyticsRoutes({ ...dependencies, data, savedObjects: coreStart.savedObjects });
+    });
 
     getStartServices().then(([, { security: securityStart }]) => {
       registerCreateAPIKeyRoute(dependencies, securityStart);

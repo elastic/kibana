@@ -256,6 +256,26 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-browser",
+            "id": "def-common.PluginInitializerContext.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "server",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-server.LoggerFactory",
+                "text": "LoggerFactory"
+              }
+            ],
+            "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-browser",
             "id": "def-common.PluginInitializerContext.config",
             "type": "Object",
             "tags": [],

@@ -20,19 +20,6 @@ export const INGEST_PIPELINE_DELETION_ERROR_MESSAGE = (totalCount: number) =>
     defaultMessage: `Failed to delete Ingest {totalCount, plural, =1 {pipeline} other {pipelines}}`,
   });
 
-export const INDICES_CREATION_ERROR_MESSAGE = i18n.translate(
-  'xpack.securitySolution.riskScore.api.indices.create.errorMessageTitle',
-  {
-    defaultMessage: 'Failed to create index',
-  }
-);
-
-export const INDICES_DELETION_ERROR_MESSAGE = (totalCount: number) =>
-  i18n.translate('xpack.securitySolution.riskScore.api.indices.delete.errorMessageTitle', {
-    values: { totalCount },
-    defaultMessage: `Failed to delete {totalCount, plural, =1 {index} other {indices}}`,
-  });
-
 export const STORED_SCRIPT_CREATION_ERROR_MESSAGE = i18n.translate(
   'xpack.securitySolution.riskScore.api.storedScript.create.errorMessageTitle',
   {
@@ -75,12 +62,6 @@ export const GET_TRANSFORM_STATE_NOT_FOUND_MESSAGE = i18n.translate(
 );
 
 export const START_TRANSFORMS_ERROR_MESSAGE = (totalCount: number) =>
-  i18n.translate('xpack.securitySolution.riskScore.api.transforms.start.errorMessageTitle', {
-    values: { totalCount },
-    defaultMessage: `Failed to start {totalCount, plural, =1 {Transform} other {Transforms}}`,
-  });
-
-export const RESTART_TRANSFORMS_ERROR_MESSAGE = (totalCount?: number) =>
   i18n.translate('xpack.securitySolution.riskScore.api.transforms.start.errorMessageTitle', {
     values: { totalCount },
     defaultMessage: `Failed to start {totalCount, plural, =1 {Transform} other {Transforms}}`,

@@ -13,14 +13,21 @@ import { TestProviders } from '../../mock';
 import type { EventsQueryTabBodyComponentProps } from './events_query_tab_body';
 import { EventsQueryTabBody, ALERTS_EVENTS_HISTOGRAM_ID } from './events_query_tab_body';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
-import * as tGridActions from '@kbn/timelines-plugin/public/store/t_grid/actions';
 import { licenseService } from '../../hooks/use_license';
 import { mockHistory } from '../../mock/router';
+import { dataTableActions } from '../../store/data_table';
 
 const mockGetDefaultControlColumn = jest.fn();
 jest.mock('../../../timelines/components/timeline/body/control_columns', () => ({
   getDefaultControlColumn: (props: number) => mockGetDefaultControlColumn(props),
 }));
+
+jest.mock(
+  '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline',
+  () => ({
+    useAddBulkToTimelineAction: jest.fn(),
+  })
+);
 
 jest.mock('../../lib/kibana', () => {
   const original = jest.requireActual('../../lib/kibana');
@@ -165,7 +172,7 @@ describe('EventsQueryTabBody', () => {
   });
 
   it('initializes t-grid', () => {
-    const spy = jest.spyOn(tGridActions, 'initializeTGridSettings');
+    const spy = jest.spyOn(dataTableActions, 'initializeDataTableSettings');
     render(
       <TestProviders>
         <EventsQueryTabBody {...commonProps} />

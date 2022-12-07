@@ -20,6 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/lens/group1'),
       require.resolve('./apps/remote_clusters/ccs/remote_clusters_index_management_flow'),
       require.resolve('./apps/rollup_job'),
+      require.resolve('./apps/ml/anomaly_detection_jobs'),
     ],
 
     junit: {

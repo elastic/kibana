@@ -32325,6 +32325,42 @@
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionExecutionParams.partial",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "partial",
+            "description": [
+              "\nToggles the partial results support."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionExecutionParams.throttle",
+            "type": "number",
+            "tags": [
+              "deafult"
+            ],
+            "label": "throttle",
+            "description": [
+              "\nThrottling of partial results in milliseconds. 0 is disabling the throttling."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -37572,7 +37608,7 @@
             "section": "def-common.MathArguments",
             "text": "MathArguments"
           },
-          " & { id: string; name?: string | undefined; copyMetaFrom?: string | null | undefined; }"
+          " & { id: string; name?: string | undefined; castColumns?: string[] | undefined; copyMetaFrom?: string | null | undefined; }"
         ],
         "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
         "deprecated": false,
@@ -42287,6 +42323,75 @@
                     "description": [],
                     "signature": [
                       "true"
+                    ],
+                    "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.mathColumn.args.castColumns",
+                "type": "Object",
+                "tags": [],
+                "label": "castColumns",
+                "description": [],
+                "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.mathColumn.args.castColumns.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.mathColumn.args.castColumns.multi",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "multi",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
+                    "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.mathColumn.args.castColumns.help",
+                    "type": "Any",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "signature": [
+                      "any"
+                    ],
+                    "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.mathColumn.args.castColumns.required",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "required",
+                    "description": [],
+                    "signature": [
+                      "false"
                     ],
                     "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
                     "deprecated": false,

@@ -25,6 +25,7 @@ describe('sort_exception_lists_to_create_update', () => {
       it('assigns list to create if its list_id does not match an existing one', () => {
         const result = sortExceptionListsToUpdateOrCreate({
           existingLists: {},
+          generateNewListId: false,
           isOverwrite: false,
           lists: [getImportExceptionsListSchemaDecodedMock('list-id-1')],
           user: 'elastic',
@@ -66,6 +67,7 @@ describe('sort_exception_lists_to_create_update', () => {
           existingLists: {
             'list-id-1': { ...getExceptionListSchemaMock(), list_id: 'list-id-1' },
           },
+          generateNewListId: false,
           isOverwrite: false,
           lists: [getImportExceptionsListSchemaDecodedMock('list-id-1')],
           user: 'elastic',
@@ -93,6 +95,7 @@ describe('sort_exception_lists_to_create_update', () => {
       it('assigns list to be created if its list_id does not match an existing one', () => {
         const result = sortExceptionListsToUpdateOrCreate({
           existingLists: {},
+          generateNewListId: false,
           isOverwrite: true,
           lists: [getImportExceptionsListSchemaDecodedMock('list-id-1')],
           user: 'elastic',
@@ -134,6 +137,7 @@ describe('sort_exception_lists_to_create_update', () => {
           existingLists: {
             'list-id-1': { ...getExceptionListSchemaMock(), list_id: 'list-id-1' },
           },
+          generateNewListId: false,
           isOverwrite: true,
           lists: [getImportExceptionsListSchemaDecodedMock('list-id-1')],
           user: 'elastic',

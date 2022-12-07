@@ -33,6 +33,11 @@ import {
   UpdatePipelineApiLogic,
 } from '../../../api/connector/update_pipeline_api_logic';
 import {
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicValues,
+  CachedFetchIndexApiLogicActions,
+} from '../../../api/index/cached_fetch_index_api_logic';
+import {
   CreateCustomPipelineApiLogic,
   CreateCustomPipelineApiLogicArgs,
   CreateCustomPipelineApiLogicResponse,
@@ -42,11 +47,6 @@ import {
   FetchCustomPipelineApiLogicResponse,
   FetchCustomPipelineApiLogic,
 } from '../../../api/index/fetch_custom_pipeline_api_logic';
-import {
-  FetchIndexApiLogic,
-  FetchIndexApiParams,
-  FetchIndexApiResponse,
-} from '../../../api/index/fetch_index_api_logic';
 import {
   AttachMlInferencePipelineApiLogic,
   AttachMlInferencePipelineApiLogicArgs,
@@ -131,7 +131,7 @@ type PipelinesActions = Pick<
   >['apiSuccess'];
   fetchDefaultPipeline: Actions<undefined, FetchDefaultPipelineResponse>['makeRequest'];
   fetchDefaultPipelineSuccess: Actions<undefined, FetchDefaultPipelineResponse>['apiSuccess'];
-  fetchIndexApiSuccess: Actions<FetchIndexApiParams, FetchIndexApiResponse>['apiSuccess'];
+  fetchIndexApiSuccess: CachedFetchIndexApiLogicActions['apiSuccess'];
   fetchMlInferenceProcessors: typeof FetchMlInferencePipelineProcessorsApiLogic.actions.makeRequest;
   fetchMlInferenceProcessorsApiError: (error: HttpError) => HttpError;
   openAddMlInferencePipelineModal: () => void;
@@ -149,7 +149,7 @@ interface PipelinesValues {
   defaultPipelineValues: IngestPipelineParams;
   defaultPipelineValuesData: IngestPipelineParams | null;
   hasIndexIngestionPipeline: boolean;
-  index: FetchIndexApiResponse;
+  index: CachedFetchIndexApiLogicValues['fetchIndexApiData'];
   indexName: string;
   mlInferencePipelineProcessors: InferencePipeline[];
   pipelineName: string;
@@ -177,7 +177,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       ],
       UpdatePipelineApiLogic,
       ['apiSuccess', 'apiError', 'makeRequest'],
-      FetchIndexApiLogic,
+      CachedFetchIndexApiLogic,
       ['apiSuccess as fetchIndexApiSuccess'],
       FetchDefaultPipelineApiLogic,
       ['apiSuccess as fetchDefaultPipelineSuccess', 'makeRequest as fetchDefaultPipeline'],
@@ -210,8 +210,8 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       ['data as customPipelineData'],
       FetchDefaultPipelineApiLogic,
       ['data as defaultPipelineValuesData'],
-      FetchIndexApiLogic,
-      ['data as index'],
+      CachedFetchIndexApiLogic,
+      ['fetchIndexApiData as index'],
       FetchMlInferencePipelineProcessorsApiLogic,
       ['data as mlInferencePipelineProcessors'],
     ],

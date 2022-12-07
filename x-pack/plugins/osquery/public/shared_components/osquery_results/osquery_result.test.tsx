@@ -41,6 +41,9 @@ const defaultProps = {
   actionId: 'test-action-id',
   startDate: DETAILS_TIMESTAMP,
   queryId: '',
+  ecsData: {
+    _id: 'test',
+  },
 };
 const mockKibana = (permissionType: unknown = defaultPermissions) => {
   const mockedKibana = getMockedKibanaConfig(permissionType);
