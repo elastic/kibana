@@ -126,6 +126,7 @@ describe('event_rendered_view', () => {
 
       render(
         <TestProviders>
+          {/* @ts-expect-error */}
           <EventRenderedView {...noRendererFound} />
         </TestProviders>
       );
@@ -158,6 +159,7 @@ describe('event_rendered_view', () => {
 
       render(
         <TestProviders>
+          {/* @ts-expect-error */}
           <EventRenderedView {...noRendererFound} />
         </TestProviders>
       );

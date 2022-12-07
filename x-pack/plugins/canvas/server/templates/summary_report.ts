@@ -324,6 +324,7 @@ export const summary: CanvasTemplate = {
             },
             expression:
               'timefilterControl compact=true column="@timestamp"\n| render css=".canvasTimePickerPopover__button {\n border: none !important;\n}"',
+            // @ts-expect-error
             filter: 'timefilter from="now-14d" to=now column=@timestamp',
           },
           {

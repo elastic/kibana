@@ -270,6 +270,7 @@ describe('CaseViewPage', () => {
 
   it('should disable the push button when connector is invalid', async () => {
     const result = appMockRenderer.render(
+      // @ts-expect-error
       <CaseViewPage
         {...{
           ...caseProps,

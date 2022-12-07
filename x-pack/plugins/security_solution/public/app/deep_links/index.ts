@@ -146,6 +146,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         id: SecurityPageName.overview,
         title: OVERVIEW,
         path: OVERVIEW_PATH,
+        // @ts-expect-error
         features: [FEATURE.general],
         keywords: [
           i18n.translate('xpack.securitySolution.search.overview', {
@@ -280,6 +281,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'Anomalies',
             }),
             path: `${HOSTS_PATH}/anomalies`,
+            // @ts-expect-error
             isPremium: true,
           },
           {
@@ -342,6 +344,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'Anomalies',
             }),
             path: `${NETWORK_PATH}/anomalies`,
+            // @ts-expect-error
             isPremium: true,
           },
           {
@@ -376,6 +379,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'Anomalies',
             }),
             path: `${USERS_PATH}/anomalies`,
+            // @ts-expect-error
             isPremium: true,
           },
           {
@@ -430,6 +434,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         path: TIMELINES_PATH,
         navLinkStatus: AppNavLinkStatus.visible,
         order: 9003,
+        // @ts-expect-error
         features: [FEATURE.general],
         keywords: [
           i18n.translate('xpack.securitySolution.search.timelines', {
@@ -488,6 +493,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         id: SecurityPageName.policies,
         title: POLICIES,
         path: POLICIES_PATH,
+        // @ts-expect-error
         experimentalKey: 'policyListEnabled',
       },
       {

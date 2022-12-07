@@ -230,6 +230,7 @@ describe('OpsgenieParamFields', () => {
     expect(screen.getByDisplayValue('123')).toBeInTheDocument();
 
     rerender(
+      // @ts-expect-error
       <OpsgenieParamFields
         {...{
           ...defaultCloseAlertProps,
@@ -265,6 +266,7 @@ describe('OpsgenieParamFields', () => {
     expect(screen.getByDisplayValue('456')).toBeInTheDocument();
 
     rerender(
+      // @ts-expect-error
       <OpsgenieParamFields
         {...{
           ...defaultCreateAlertProps,
@@ -302,8 +304,8 @@ describe('OpsgenieParamFields', () => {
 
     fireEvent.change(screen.getByDisplayValue('123'), { target: { value: 'a new alias' } });
     expect(editAction).toBeCalledTimes(1);
-
     rerender(
+      // @ts-expect-error
       <OpsgenieParamFields
         {...{
           ...defaultCloseAlertProps,

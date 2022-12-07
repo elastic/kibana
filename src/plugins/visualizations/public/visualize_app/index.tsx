@@ -39,6 +39,7 @@ export const renderApp = (
         <KibanaContextProvider services={services}>
           <services.presentationUtil.ContextProvider>
             <services.i18n.Context>
+              {/* @ts-expect-error */}
               <TableListViewKibanaProvider
                 {...{
                   core: services.core,

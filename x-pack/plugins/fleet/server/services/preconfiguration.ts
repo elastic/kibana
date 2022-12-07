@@ -300,6 +300,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             }),
           }
     ),
+    // @ts-expect-error
     packages: fulfilledPackages.map((pkg) => ('version' in pkg ? pkgToPkgKey(pkg) : pkg.name)),
     nonFatalErrors: [...rejectedPackages, ...rejectedPolicies],
   };

@@ -19,6 +19,7 @@ export const item: GetInfoResponse['item'] = {
   icons: [
     {
       src: '/img/logo_nginx.svg',
+      // @ts-expect-error
       path: '/package/nginx/0.7.0/img/logo_nginx.svg',
       title: 'logo nginx',
       size: '32x32',

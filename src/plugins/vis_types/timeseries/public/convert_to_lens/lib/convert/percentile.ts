@@ -57,6 +57,7 @@ export const convertToPercentileColumn = (
     meta:
       index !== undefined
         ? {
+            // @ts-expect-error
             reference: `${metric.id}.${index}`,
             ...commonColumnParams.meta,
           }

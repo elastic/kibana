@@ -49,7 +49,7 @@ describe('FullTimeRangeSelector', () => {
       ...requiredProps,
       disabled: false,
     };
-
+    // @ts-expect-error
     const wrapper = shallowWithIntl(<FullTimeRangeSelector {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
@@ -59,7 +59,7 @@ describe('FullTimeRangeSelector', () => {
       ...requiredProps,
       disabled: false,
     };
-
+    // @ts-expect-error
     const wrapper = shallowWithIntl(<FullTimeRangeSelector {...props} />);
     wrapper.find('EuiButton').simulate('click');
     expect(mockSetFullTimeRange).toHaveBeenCalled();

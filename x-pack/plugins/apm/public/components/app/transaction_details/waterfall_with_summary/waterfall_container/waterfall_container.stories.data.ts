@@ -512,6 +512,7 @@ export const simpleTrace = {
         destination: {
           service: {
             resource: 'postgresql',
+            // @ts-expect-error
             name: 'postgresql',
             type: 'db',
           },
@@ -3736,6 +3737,7 @@ export const manyChildrenWithSameLength = {
         grouping_key: '7a640436a9be648fd708703d1ac84650',
         grouping_name: 'GET /api/products/3 (500)',
       },
+      // @ts-expect-error
       message: 'GET /api/products/3 (500)',
       processor: {
         name: 'error',
@@ -5196,6 +5198,7 @@ export const traceChildStartBeforeParent = {
         destination: {
           service: {
             resource: 'postgresql',
+            // @ts-expect-error
             name: 'postgresql',
             type: 'db',
           },

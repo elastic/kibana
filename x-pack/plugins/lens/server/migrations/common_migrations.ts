@@ -513,6 +513,7 @@ export const commonMigratePartitionChartGroups = (
         ...attributes.state,
         visualization: {
           ...attributes.state.visualization,
+          // @ts-expect-errors
           layers: attributes.state.visualization.layers.map((l) => {
             const groups = l.groups;
 

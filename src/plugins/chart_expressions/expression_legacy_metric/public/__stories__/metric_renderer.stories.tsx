@@ -209,6 +209,7 @@ storiesOf('renderers/visMetric', module)
               },
               labels: {
                 show: false,
+                // @ts-expect-error
                 style: { spec: { fontSize: '60px', align: 'left' }, type: 'style', css: '' },
                 position: LabelPosition.TOP,
               },

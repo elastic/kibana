@@ -126,6 +126,7 @@ describe('links', () => {
       fakeHttpServices.get.mockResolvedValue({ total: 0 });
       licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
       ExperimentalFeaturesService.init({
+        // @ts-expect-error
         experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: true },
       });
 
@@ -168,6 +169,7 @@ describe('links', () => {
       fakeHttpServices.get.mockResolvedValue({ total: 100 });
       licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
       ExperimentalFeaturesService.init({
+        // @ts-expect-error
         experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: true },
       });
 
@@ -224,6 +226,7 @@ describe('links', () => {
   describe('with endpointRbacEnabled', () => {
     beforeAll(() => {
       ExperimentalFeaturesService.init({
+        // @ts-expect-error
         experimentalFeatures: { ...allowedExperimentalValues, endpointRbacEnabled: true },
       });
     });

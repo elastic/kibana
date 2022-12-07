@@ -29,6 +29,7 @@ export const kpiUserAuthenticationsMetricFailureLensAttributes: LensAttributes =
         meta: {
           alias: null,
           disabled: false,
+          // @ts-expect-error
           indexRefName: 'filter-index-pattern-0',
           key: 'query',
           negate: false,

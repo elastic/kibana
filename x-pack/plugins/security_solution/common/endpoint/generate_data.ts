@@ -1591,6 +1591,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       path: '/package/endpoint/0.5.0',
       icons: [
         {
+          // @ts-expect-error
           path: '/package/endpoint/0.5.0/img/logo-endpoint-64-color.svg',
           src: '/img/logo-endpoint-64-color.svg',
           size: '16x16',

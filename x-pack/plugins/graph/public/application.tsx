@@ -118,6 +118,7 @@ export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
 
   const app = (
     <KibanaThemeProvider theme$={theme$}>
+      {/* @ts-expect-error */}
       <TableListViewKibanaProvider
         {...{
           core,

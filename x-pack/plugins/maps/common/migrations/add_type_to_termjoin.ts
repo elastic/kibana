@@ -43,6 +43,7 @@ export function addTypeToTermJoin({
       }
 
       if (typeof join.right.type === 'undefined') {
+        // @ts-expect-error
         join.right.type = SOURCE_TYPES.ES_TERM_SOURCE;
       }
     });

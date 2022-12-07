@@ -76,6 +76,7 @@ export const dnsTopDomainsLensAttributes: LensAttributes = {
           params: {
             query: 'PTR',
           },
+          // @ts-expect-error
           indexRefName: 'filter-index-pattern-0',
         },
         query: {

@@ -128,6 +128,7 @@ export async function renderApp(
     <AppUsageTracker>
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
+          {/* @ts-expect-error */}
           <TableListViewKibanaProvider
             {...{
               core: coreStart,

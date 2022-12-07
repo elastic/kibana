@@ -53,6 +53,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
     operationParams: [{ name: 'window', type: 'number', required: true }],
     filterable: true,
     getErrorMessage: jest.fn(() => ['mock error']),
+    // @ts-expect-error
     buildColumn: ({ referenceIds }, columnsParams) => ({
       label: 'moving_average',
       dataType: 'number',

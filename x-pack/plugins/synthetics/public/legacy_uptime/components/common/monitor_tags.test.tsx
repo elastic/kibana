@@ -143,6 +143,7 @@ describe('MonitorTags component', () => {
   });
 
   it('render against summary', () => {
+    // @ts-expect-error
     const component = shallowWithRouter(<MonitorTags summary={summaryPing} />);
     expect(component).toMatchSnapshot();
   });

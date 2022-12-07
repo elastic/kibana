@@ -349,6 +349,7 @@ export class DynamicStyleProperty<T>
   }
 
   getDataMappingFunction() {
+    // @ts-expect-error
     return 'dataMappingFunction' in this._options
       ? (this._options as T & { dataMappingFunction: DATA_MAPPING_FUNCTION }).dataMappingFunction
       : DATA_MAPPING_FUNCTION.INTERPOLATE;

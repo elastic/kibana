@@ -38,6 +38,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     await appsMenu.clickLink(title);
     return browser.execute(() => {
       if (!('__RENDERING_SESSION__' in window)) {
+        // @ts-expect-error
         window.__RENDERING_SESSION__ = [];
       }
 

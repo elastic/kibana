@@ -52,6 +52,7 @@ export const postHealthCheckHandler: FleetRequestHandler<
       agent: new https.Agent({
         rejectUnauthorized: false,
       }),
+      // @ts-expect-error
       signal: abortController.signal,
     });
     const bodyRes = await res.json();

@@ -52,6 +52,7 @@ export const IndexPipelinesConfigurationsLogic = kea<
   },
   events: ({ actions, values }) => ({
     afterMount: () => {
+      // @ts-expect-error
       if (!values.indexPipelinesData || values.indexPipelinesData.length === 0) {
         return;
       }

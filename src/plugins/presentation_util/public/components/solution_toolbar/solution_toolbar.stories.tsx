@@ -185,6 +185,7 @@ const Template: Story<{
         primaryActionButton,
         quickButtonGroup,
         extraButtons,
+        // @ts-expect-error
         addFromLibraryButton,
       }}
     </SolutionToolbar>
