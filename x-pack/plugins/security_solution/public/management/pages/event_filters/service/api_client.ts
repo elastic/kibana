@@ -7,6 +7,9 @@
 
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { HttpStart } from '@kbn/core/public';
+import type { EndpointSuggestionsBody } from '../../../../../common/endpoint/schema/suggestions';
+import { SUGGESTIONS_ROUTE } from '../../../../../common/endpoint/constants';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { EVENT_FILTER_LIST_DEFINITION } from '../constants';
 
@@ -22,5 +25,19 @@ export class EventFiltersApiClient extends ExceptionsListApiClient {
 
   public static getInstance(http: HttpStart): ExceptionsListApiClient {
     return super.getInstance(http, ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_DEFINITION);
+  }
+
+  /**
+   * Returns suggestions for given field
+   */
+  async getSuggestions(body: EndpointSuggestionsBody): Promise<string[]> {
+    const result: string[] = await this.getHttp().post(
+      resolvePathVariables(SUGGESTIONS_ROUTE, { suggestion_type: 'eventFilters' }),
+      {
+        body: JSON.stringify(body),
+      }
+    );
+
+    return result;
   }
 }

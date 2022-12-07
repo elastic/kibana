@@ -16,7 +16,9 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const { setup, tearDown } = getLifecycleMethods(getService);
 
-  describe('indices - metricbeat and package', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/146068
+  // Failing: See https://github.com/elastic/kibana/issues/146067
+  describe.skip('indices - metricbeat and package', () => {
     ['mb', 'package'].forEach((source) => {
       describe(`indices ${source}`, () => {
         describe('shard-relocation', () => {

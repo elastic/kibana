@@ -25,6 +25,7 @@ export const sessionIndexMock = {
     provider: { type: 'basic', name: 'basic1' },
     idleTimeoutExpiration: null,
     lifespanExpiration: null,
+    createdAt: 1234567890,
     content: 'some-encrypted-content',
     metadata: { primaryTerm: 1, sequenceNumber: 1 },
     ...sessionValue,
