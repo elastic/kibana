@@ -419,7 +419,12 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onSave} fill isDisabled={!isDraftImageConfigValid}>
+            <EuiButton
+              onClick={onSave}
+              fill
+              isDisabled={!isDraftImageConfigValid}
+              data-test-subj="imageEmbeddableEditorSave"
+            >
               <FormattedMessage
                 id="imageEmbeddable.imageEditor.imageBackgroundSaveButtonText"
                 defaultMessage="Save"
