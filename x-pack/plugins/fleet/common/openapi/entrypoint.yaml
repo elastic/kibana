@@ -16,8 +16,6 @@ paths:
   # plugin-wide endpoint(s)
   /setup:
     $ref: paths/setup.yaml
-  /setup/preconfiguration:
-    $ref: paths/setup_preconfiguration.yaml
   /settings:
     $ref: paths/settings.yaml
   # App endpoints
