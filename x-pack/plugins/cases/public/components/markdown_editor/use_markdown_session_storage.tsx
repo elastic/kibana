@@ -31,13 +31,11 @@ export const useMarkdownSessionStorage = ({
   const [sessionValue, setSessionValue] = useSessionStorage<string>(sessionKey);
 
   if (!isEmpty(sessionValue) && isFirstRender.current) {
-    console.log('first render true', sessionValue);
     isFirstRender.current = false;
     field.setValue(sessionValue);
   }
 
   if (initialValue !== initialValueRef.current && initialValue !== field.value) {
-    console.log('initialValue', initialValue, initialValueRef.current);
     initialValueRef.current = initialValue;
     setHasConflicts(true);
   }
@@ -50,7 +48,6 @@ export const useMarkdownSessionStorage = ({
       }
 
       if (sessionKey) {
-        console.log('usedebounce sessionkey', field.value)
         if (field.value !== '') {
           setSessionValue(field.value);
         } else {
