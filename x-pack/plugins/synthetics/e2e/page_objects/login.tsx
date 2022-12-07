@@ -42,8 +42,12 @@ export function loginPageProvider({
 
       await page.click('[data-test-subj=loginSubmit]');
 
-      while (await page.isVisible('[data-test-subj=loginSubmit]')) {
-        await page.waitForTimeout(1000);
+      try {
+        while (await page.isVisible('[data-test-subj=loginSubmit]')) {
+          await page.waitForTimeout(1000);
+        }
+      } catch (e) {
+        // ignore
       }
 
       await waitForLoadingToFinish({ page });

@@ -254,15 +254,7 @@ journey(
     });
 
     step('Go to monitor-management', async () => {
-      await uptime.navigateToMonitorManagement();
-    });
-
-    step('login to Kibana', async () => {
-      await uptime.loginToKibana();
-      const invalid = await page.locator(
-        `text=Username or password is incorrect. Please try again.`
-      );
-      expect(await invalid.isVisible()).toBeFalsy();
+      await uptime.navigateToMonitorManagement(true);
     });
 
     for (const monitorConfig of sortedMonitors) {
