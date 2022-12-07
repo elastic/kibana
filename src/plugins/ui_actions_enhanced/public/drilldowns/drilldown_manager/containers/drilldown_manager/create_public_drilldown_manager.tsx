@@ -7,6 +7,7 @@
  */
 
 import * as React from 'react';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DrilldownManagerDependencies, PublicDrilldownManagerProps } from '../../types';
 
@@ -23,7 +24,8 @@ const LazyDrilldownManager = React.lazy(() =>
  * which can be exported from plugin contract for other plugins to consume.
  */
 export const createPublicDrilldownManager = (
-  dependencies: DrilldownManagerDependencies
+  dependencies: DrilldownManagerDependencies,
+  theme: ThemeServiceStart,
 ): PublicDrilldownManagerComponent => {
   const PublicDrilldownManager: PublicDrilldownManagerComponent = (drilldownManagerProps) => {
     const filteredActionFactories = dependencies.actionFactories.filter((factory) => {
@@ -37,7 +39,7 @@ export const createPublicDrilldownManager = (
 
     return (
       <React.Suspense fallback={null}>
-        <KibanaThemeProvider theme$={dependencies.theme.theme$}>
+        <KibanaThemeProvider theme$={theme.theme$}>
           <LazyDrilldownManager
             {...dependencies}
             {...drilldownManagerProps}

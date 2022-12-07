@@ -9,7 +9,6 @@
 import { ToastsStart } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Trigger } from '@kbn/ui-actions-plugin/public';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import {
   ActionFactory,
   BaseActionFactoryContext,
@@ -161,9 +160,4 @@ export interface DrilldownManagerDependencies {
    * Link to trigger picker user facing docs on corporate website.
    */
   triggerPickerDocsLink?: string;
-
-  /**
-   * Kibana theme service
-   */
-  theme: ThemeServiceStart;
 }

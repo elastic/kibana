@@ -122,8 +122,7 @@ export class AdvancedUiActionsPublicPlugin
         toastService: core.notifications.toasts,
         docsLink: core.docLinks.links.dashboard.drilldowns,
         triggerPickerDocsLink: core.docLinks.links.dashboard.drilldownsTriggerPicker,
-        theme: core.theme,
-      }),
+      }, core.theme),
     };
   }
 
