@@ -8,7 +8,6 @@
 import datemath from '@kbn/datemath';
 import { Argv } from 'yargs';
 import yargs from 'yargs/yargs';
-import { getCommonServices } from './utils/get_common_services';
 import { intervalToMs } from './utils/interval_to_ms';
 import { parseRunCliFlags } from './utils/parse_run_cli_flags';
 import { startHistoricalDataUpload } from './utils/start_historical_data_upload';
@@ -73,8 +72,6 @@ function options(y: Argv) {
 async function run(argv: RunCliFlags) {
   const runOptions = parseRunCliFlags(argv);
 
-  const { logger, apmEsClient } = await getCommonServices(runOptions);
-
   const toMs = datemath.parse(String(argv.to ?? 'now'))!.valueOf();
   const to = new Date(toMs);
 
@@ -87,26 +84,10 @@ async function run(argv: RunCliFlags) {
 
   const live = argv.live;
 
-  if (argv.clean) {
-    await apmEsClient.clean();
-  }
-
-  logger.info(
-    `Starting data generation\n: ${JSON.stringify(
-      {
-        ...runOptions,
-        from: from.toISOString(),
-        to: to.toISOString(),
-      },
-      null,
-      2
-    )}`
-  );
-
   if (live) {
-    await startLiveDataUpload({ esClient: apmEsClient, logger, runOptions, start: from });
+    await startLiveDataUpload({ runOptions, start: from });
   } else {
-    await startHistoricalDataUpload(apmEsClient, logger, runOptions, from, to);
+    await startHistoricalDataUpload({ runOptions, from, to });
   }
 }
 

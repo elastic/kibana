@@ -41,10 +41,15 @@ export function getLogger({ logLevel }: RunOptions) {
   return createLogger(logLevel);
 }
 
-export async function getCommonServices(
-  { target, logLevel, kibana, esConcurrency, version: versionOverride }: RunOptions,
-  logger?: Logger
-) {
+export async function getCommonServices({
+  target,
+  logLevel,
+  kibana,
+  esConcurrency,
+  version: versionOverride,
+  logger,
+  installPackage = true,
+}: RunOptions & { logger?: Logger; installPackage?: boolean }) {
   if (!target) {
     // assume things are running locally
     kibana = kibana || 'http://localhost:5601';
@@ -93,7 +98,9 @@ export async function getCommonServices(
 
   const version = versionOverride || (await kibanaClient.fetchLatestApmPackageVersion());
 
-  await kibanaClient.installApmPackage(version);
+  if (installPackage) {
+    await kibanaClient.installApmPackage(version);
+  }
 
   const apmEsClient = new ApmSynthtraceEsClient({
     client,

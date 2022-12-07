@@ -9,28 +9,25 @@
 import { castArray } from 'lodash';
 import { PassThrough, Readable, Writable } from 'stream';
 import { isGeneratorObject } from 'util/types';
-import { ApmSynthtraceEsClient } from '../../lib/apm';
 import { timerange } from '../../lib/timerange';
-import { Logger } from '../../lib/utils/create_logger';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
+import { getCommonServices } from './get_common_services';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
 
 export async function startLiveDataUpload({
-  esClient,
-  logger,
   runOptions,
   start,
 }: {
-  esClient: ApmSynthtraceEsClient;
-  logger: Logger;
   runOptions: RunOptions;
   start: Date;
 }) {
   const file = runOptions.file;
 
+  const { logger, apmEsClient } = await getCommonServices(runOptions);
+
   const scenario = await getScenario({ file, logger });
-  const { generate } = await scenario(runOptions);
+  const { generate } = await scenario({ ...runOptions, logger });
 
   const bucketSizeInMs = 1000 * 60;
   let requestedUntil = start;
@@ -39,7 +36,7 @@ export async function startLiveDataUpload({
     objectMode: true,
   });
 
-  esClient.index(stream);
+  apmEsClient.index(stream);
 
   function closeStream() {
     stream.end(() => {
@@ -77,7 +74,7 @@ export async function startLiveDataUpload({
 
       await awaitStream(concatenatedStream);
 
-      await esClient.refresh();
+      await apmEsClient.refresh();
 
       requestedUntil = bucketTo;
     }

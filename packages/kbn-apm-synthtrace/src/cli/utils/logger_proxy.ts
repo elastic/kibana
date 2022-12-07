@@ -6,8 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { parentPort, isMainThread } from 'worker_threads';
+import { parentPort, isMainThread, workerData } from 'worker_threads';
 import { createLogger, Logger, LogLevel } from '../../lib/utils/create_logger';
+import { WorkerData } from './synthtrace_worker';
+
+const { workerId } = isMainThread ? { workerId: -1 } : (workerData as WorkerData);
+
+function getLogMethod(log: LogLevel) {
+  return (...args: any) => parentPort?.postMessage({ log, args: [`[${workerId}]`].concat(args) });
+}
 
 // logging proxy to main thread, ensures we see real time logging
 export const loggerProxy: Logger = isMainThread
@@ -16,7 +23,7 @@ export const loggerProxy: Logger = isMainThread
       perf: <T extends any>(name: string, cb: () => T): T => {
         return cb();
       },
-      debug: (...args: any[]) => parentPort?.postMessage({ log: LogLevel.debug, args }),
-      info: (...args: any[]) => parentPort?.postMessage({ log: LogLevel.info, args }),
-      error: (...args: any[]) => parentPort?.postMessage({ log: LogLevel.error, args }),
+      debug: getLogMethod(LogLevel.debug),
+      info: getLogMethod(LogLevel.info),
+      error: getLogMethod(LogLevel.error),
     };

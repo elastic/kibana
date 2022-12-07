@@ -8,41 +8,27 @@
 import { range } from 'lodash';
 import moment from 'moment';
 import { cpus } from 'os';
-import pLimit from 'p-limit';
 import Path from 'path';
 import { Worker } from 'worker_threads';
-import { ApmSynthtraceEsClient, LogLevel } from '../../..';
-import { Logger } from '../../lib/utils/create_logger';
+import { LogLevel } from '../../..';
+import { getCommonServices } from './get_common_services';
 import { RunOptions } from './parse_run_cli_flags';
+import { WorkerData } from './synthtrace_worker';
 
-export async function startHistoricalDataUpload(
-  esClient: ApmSynthtraceEsClient,
-  logger: Logger,
-  runOptions: RunOptions,
-  from: Date,
-  to: Date
-) {
+export async function startHistoricalDataUpload({
+  runOptions,
+  from,
+  to,
+}: {
+  runOptions: RunOptions;
+  from: Date;
+  to: Date;
+}) {
+  const { logger } = await getCommonServices(runOptions);
+
   const cores = cpus().length;
-  // settle on a reasonable max concurrency arbitrarily capping at 10.
-  let maxConcurrency = Math.min(10, cores - 1);
-  // maxWorkers to be spawned is double that of maxConcurrency. We estimate the number of ranges over
-  // maxConcurrency, if that is too conservative this provides more available workers to complete the job.
-  // If any worker finds that work is already completed they will spin down immediately.
-  let maxWorkers = maxConcurrency * 2;
-  logger.info(
-    `Discovered ${cores} cores, splitting work over ${maxWorkers} workers with limited concurrency: ${maxConcurrency}`
-  );
 
-  // if --workers N is specified it should take precedence over inferred maximum workers
-  if (runOptions.workers) {
-    // ensure maxWorkers is at least 1
-    maxWorkers = Math.max(1, runOptions.workers);
-    // ensure max concurrency is at least 1 or the ceil of --workers N / 2
-    maxConcurrency = Math.ceil(Math.max(1, maxWorkers / 2));
-    logger.info(
-      `updating maxWorkers to ${maxWorkers} and maxConcurrency to ${maxConcurrency} because it was explicitly set through --workers`
-    );
-  }
+  let workers = Math.min(runOptions.workers ?? 10, cores - 1);
 
   const rangeEnd = to;
 
@@ -54,17 +40,14 @@ export async function startHistoricalDataUpload(
   const minIntervalSpan = moment.duration(60, 'm');
 
   const minNumberOfRanges = d.asMilliseconds() / minIntervalSpan.asMilliseconds();
-  if (minNumberOfRanges < maxWorkers) {
-    maxWorkers = Math.max(1, Math.floor(minNumberOfRanges));
-    maxConcurrency = Math.max(1, maxWorkers / 2);
+  if (minNumberOfRanges < workers) {
+    workers = Math.max(1, Math.floor(minNumberOfRanges));
     if (runOptions.workers) {
       logger.info(
         `Ignoring --workers ${runOptions.workers} since each worker would not see enough data`
       );
     }
-    logger.info(
-      `updating maxWorkers to ${maxWorkers} and maxConcurrency to ${maxConcurrency} to ensure each worker does enough work`
-    );
+    logger.info(`updating maxWorkers to ${workers} to ensure each worker does enough work`);
   }
 
   logger.info(`Generating data from ${from.toISOString()} to ${rangeEnd.toISOString()}`);
@@ -81,8 +64,8 @@ export async function startHistoricalDataUpload(
 
   // precalculate intervals to spawn workers over.
   // abs() the difference to make add/subtract explicit in rangeStep() in favor of subtracting a negative number
-  const intervalSpan = Math.abs(diff / maxWorkers);
-  const intervals = range(0, maxWorkers)
+  const intervalSpan = Math.abs(diff / workers);
+  const intervals = range(0, workers)
     .map((i) => intervalSpan * i)
     .map((interval, index) => ({
       workerIndex: index,
@@ -101,12 +84,14 @@ export async function startHistoricalDataUpload(
   }) {
     return new Promise((resolve, reject) => {
       logger.debug(`Setting up Worker: ${workerIndex}`);
+      const workerData: WorkerData = {
+        runOptions,
+        bucketFrom,
+        bucketTo,
+        workerId: workerIndex.toString(),
+      };
       const worker = new Worker(Path.join(__dirname, './worker.js'), {
-        workerData: {
-          runOptions,
-          bucketFrom,
-          bucketTo,
-        },
+        workerData,
       });
       worker.on('message', (message: WorkerMessages) => {
         switch (message.log) {
@@ -141,11 +126,7 @@ export async function startHistoricalDataUpload(
     });
   }
 
-  const limiter = pLimit(Math.max(1, Math.floor(intervals.length / 2)));
+  const workerServices = range(0, intervals.length).map((index) => runService(intervals[index]));
 
-  const workers = range(0, intervals.length).map((index) => () => runService(intervals[index]));
-
-  return Promise.all(workers.map((worker) => limiter(() => worker()))).then(async () => {
-    await esClient.refresh();
-  });
+  return Promise.all(workerServices);
 }

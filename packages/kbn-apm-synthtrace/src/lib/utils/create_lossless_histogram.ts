@@ -17,7 +17,7 @@ interface SerializedHistogram {
 }
 
 class LosslessHistogram {
-  private readonly backingHistogram: any;
+  private backingHistogram: any;
 
   private readonly min: number;
   private readonly max: number;
@@ -35,7 +35,10 @@ class LosslessHistogram {
     if (this.backingHistogram) {
       return this.backingHistogram;
     }
+
     const histogram = new Histogram(this.min, this.max);
+
+    this.backingHistogram = histogram;
 
     if (this.trackedValue !== null) {
       histogram.record(this.trackedValue, this.trackedCount);

@@ -16,18 +16,23 @@ export interface WorkerData {
   bucketFrom: Date;
   bucketTo: Date;
   runOptions: RunOptions;
+  workerId: string;
 }
 
 const { bucketFrom, bucketTo, runOptions } = workerData as WorkerData;
 
 async function start() {
-  const { logger, apmEsClient } = await getCommonServices(runOptions, loggerProxy);
+  const { logger, apmEsClient } = await getCommonServices({
+    ...runOptions,
+    logger: loggerProxy,
+    installPackage: false,
+  });
 
   const file = runOptions.file;
 
   const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
 
-  logger.debug('Running scenario');
+  logger.info(`Running scenario from ${bucketFrom.toISOString()} to ${bucketTo.toISOString()}`);
 
   const { generate } = await scenario({ ...runOptions, logger });
 
@@ -41,6 +46,7 @@ async function start() {
 
   await logger.perf('index_scenario', async () => {
     await apmEsClient.index(generators);
+    await apmEsClient.refresh();
   });
 }
 

@@ -16,7 +16,7 @@ import {
   SynthtraceGenerator,
 } from '../../../../types';
 import { Logger } from '../../../utils/create_logger';
-import { createFilterTransform, fork, parallel } from '../../../utils/stream_utils';
+import { createFilterTransform, fork } from '../../../utils/stream_utils';
 import { createBreakdownMetricsAggregator } from '../../aggregators/create_breakdown_metrics_aggregator';
 import { createSpanMetricsAggregator } from '../../aggregators/create_span_metrics_aggregator';
 import { createTransactionMetricsAggregator } from '../../aggregators/create_transaction_metrics_aggregator';
@@ -93,7 +93,7 @@ export class ApmSynthtraceEsClient {
         getSerializeTransform(),
         getIntakeDefaultsTransform(),
         fork(new PassThrough({ objectMode: true }), ...aggregators),
-        createFilterTransform((event: ApmFields) => event['processor.event'] === 'metric'),
+        // createFilterTransform((event: ApmFields) => event['processor.event'] === 'metric'),
         createBreakdownMetricsAggregator('30s'),
         getApmServerMetadataTransform(this.version),
         getRoutingTransform(),
