@@ -62,12 +62,12 @@ const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const mockRuleApis = {
   muteRule: jest.fn(),
   unmuteRule: jest.fn(),
-  enableRule: jest.fn(),
-  disableRule: jest.fn(),
   requestRefresh: jest.fn(),
   refreshToken: Date.now(),
   snoozeRule: jest.fn(),
   unsnoozeRule: jest.fn(),
+  bulkEnableRule: jest.fn(),
+  bulkDisableRule: jest.fn(),
 };
 
 const authorizedConsumers = {

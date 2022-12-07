@@ -68,7 +68,10 @@ export type RuleDetailsProps = {
   actionTypes: ActionType[];
   requestRefresh: () => Promise<void>;
   refreshToken?: number;
-} & Pick<BulkOperationsComponentOpts, 'bulkDisableRules' | 'bulkEnableRules' | 'snoozeRule' | 'unsnoozeRule'>;
+} & Pick<
+  BulkOperationsComponentOpts,
+  'bulkDisableRules' | 'bulkEnableRules' | 'snoozeRule' | 'unsnoozeRule'
+>;
 
 const ruleDetailStyle = {
   minWidth: 0,
