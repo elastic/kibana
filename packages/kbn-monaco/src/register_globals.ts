@@ -41,9 +41,9 @@ const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
 window.MonacoEnvironment = {
   // needed for functional tests so that we can get value from 'editor'
   monaco,
-  async getWorker(languageId: string) {
+  async getWorker(_: string, languageId: string) {
     const workerId = langSpecificWorkerIds.includes(languageId) ? languageId : DEFAULT_WORKER_ID;
-    const workerUrl = `${monacoBundleDir}/${workerId}.editor.worker.js`;
+    const workerUrl = `${monacoBundleDir}${workerId}.editor.worker.js`;
 
     const resp = await fetch(workerUrl);
     if (resp.status !== 200) {
