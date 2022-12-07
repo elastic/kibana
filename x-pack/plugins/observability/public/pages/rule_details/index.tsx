@@ -244,9 +244,9 @@ export function RuleDetailsPage() {
           <EuiSpacer size="m" />
           <ObservabilityAlertSearchbarWithUrlSync
             appName={RULE_DETAILS_ALERTS_SEARCH_BAR_ID}
-            setEsQuery={setEsQuery}
+            onEsQueryChange={setEsQuery}
             urlStorageKey={SEARCH_BAR_URL_STORAGE_KEY}
-            queries={ruleQuery.current}
+            defaultSearchQueries={ruleQuery.current}
           />
           <EuiSpacer size="s" />
           <EuiFlexGroup style={{ minHeight: 450 }} direction={'column'}>

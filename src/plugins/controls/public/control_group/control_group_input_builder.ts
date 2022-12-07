@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import uuid from 'uuid';
-import { ControlPanelState } from '../../common';
+import { ControlPanelState, OptionsListEmbeddableInput } from '../../common';
 import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
@@ -33,9 +34,7 @@ export interface AddDataControlProps {
   width?: ControlWidth;
 }
 
-export type AddOptionsListControlProps = AddDataControlProps & {
-  selectedOptions?: string[];
-};
+export type AddOptionsListControlProps = AddDataControlProps & Partial<OptionsListEmbeddableInput>;
 
 export type AddRangeSliderControlProps = AddDataControlProps & {
   value?: RangeValue;
@@ -46,104 +45,113 @@ export const controlGroupInputBuilder = {
     initialInput: Partial<ControlGroupInput>,
     controlProps: AddDataControlProps
   ) => {
-    const { controlId, dataViewId, fieldName, title } = controlProps;
-    const panelId = controlId ? controlId : uuid.v4();
+    const panelState = await getDataControlPanelState(initialInput, controlProps);
     initialInput.panels = {
       ...initialInput.panels,
-      [panelId]: {
-        order: getNextPanelOrder(initialInput),
-        type: await getCompatibleControlType({ dataViewId, fieldName }),
-        grow: getGrow(initialInput, controlProps),
-        width: getWidth(initialInput, controlProps),
-        explicitInput: {
-          id: panelId,
-          dataViewId,
-          fieldName,
-          title: title ?? fieldName,
-        },
-      } as ControlPanelState<DataControlInput>,
+      [panelState.explicitInput.id]: panelState,
     };
   },
   addOptionsListControl: (
     initialInput: Partial<ControlGroupInput>,
     controlProps: AddOptionsListControlProps
   ) => {
-    const { controlId, dataViewId, fieldName, selectedOptions, title } = controlProps;
-    const panelId = controlId ? controlId : uuid.v4();
+    const panelState = getOptionsListPanelState(initialInput, controlProps);
     initialInput.panels = {
       ...initialInput.panels,
-      [panelId]: {
-        order: getNextPanelOrder(initialInput),
-        type: OPTIONS_LIST_CONTROL,
-        grow: getGrow(initialInput, controlProps),
-        width: getWidth(initialInput, controlProps),
-        explicitInput: {
-          id: panelId,
-          dataViewId,
-          fieldName,
-          selectedOptions,
-          title: title ?? fieldName,
-        },
-      } as ControlPanelState<DataControlInput>,
+      [panelState.explicitInput.id]: panelState,
     };
   },
   addRangeSliderControl: (
     initialInput: Partial<ControlGroupInput>,
     controlProps: AddRangeSliderControlProps
   ) => {
-    const { controlId, dataViewId, fieldName, title, value } = controlProps;
-    const panelId = controlId ? controlId : uuid.v4();
+    const panelState = getRangeSliderPanelState(initialInput, controlProps);
     initialInput.panels = {
       ...initialInput.panels,
-      [panelId]: {
-        order: getNextPanelOrder(initialInput),
-        type: RANGE_SLIDER_CONTROL,
-        grow: getGrow(initialInput, controlProps),
-        width: getWidth(initialInput, controlProps),
-        explicitInput: {
-          id: panelId,
-          dataViewId,
-          fieldName,
-          title: title ?? fieldName,
-          value: value ? value : ['', ''],
-        },
-      } as ControlPanelState<DataControlInput>,
+      [panelState.explicitInput.id]: panelState,
     };
   },
   addTimeSliderControl: (initialInput: Partial<ControlGroupInput>) => {
-    const panelId = uuid.v4();
+    const panelState = getTimeSliderPanelState(initialInput);
     initialInput.panels = {
       ...initialInput.panels,
-      [panelId]: {
-        order: getNextPanelOrder(initialInput),
-        type: TIME_SLIDER_CONTROL,
-        grow: true,
-        width: 'large',
-        explicitInput: {
-          id: panelId,
-          title: 'timeslider',
-        },
-      } as ControlPanelState<ControlInput>,
+      [panelState.explicitInput.id]: panelState,
     };
   },
 };
 
-function getGrow(initialInput: Partial<ControlGroupInput>, controlProps: AddDataControlProps) {
-  if (typeof controlProps.grow === 'boolean') {
-    return controlProps.grow;
-  }
-
-  return typeof initialInput.defaultControlGrow === 'boolean'
-    ? initialInput.defaultControlGrow
-    : DEFAULT_CONTROL_GROW;
+export async function getDataControlPanelState(
+  input: Partial<ControlGroupInput>,
+  controlProps: AddDataControlProps
+) {
+  const { controlId, dataViewId, fieldName, title } = controlProps;
+  return {
+    type: await getCompatibleControlType({ dataViewId, fieldName }),
+    ...getPanelState(input, controlProps),
+    explicitInput: {
+      id: controlId ? controlId : uuid.v4(),
+      dataViewId,
+      fieldName,
+      title: title ?? fieldName,
+    },
+  } as ControlPanelState<DataControlInput>;
 }
 
-function getWidth(initialInput: Partial<ControlGroupInput>, controlProps: AddDataControlProps) {
-  if (controlProps.width) {
-    return controlProps.width;
-  }
+export function getOptionsListPanelState(
+  input: Partial<ControlGroupInput>,
+  controlProps: AddOptionsListControlProps
+) {
+  const { controlId, dataViewId, fieldName, title, ...rest } = controlProps;
+  return {
+    type: OPTIONS_LIST_CONTROL,
+    ...getPanelState(input, controlProps),
+    explicitInput: {
+      id: controlId ? controlId : uuid.v4(),
+      dataViewId,
+      fieldName,
+      title: title ?? fieldName,
+      ...rest,
+    },
+  } as ControlPanelState<DataControlInput>;
+}
 
-  return initialInput.defaultControlWidth
-    ? initialInput.defaultControlWidth
-    : DEFAULT_CONTROL_WIDTH;
+export function getRangeSliderPanelState(
+  input: Partial<ControlGroupInput>,
+  controlProps: AddRangeSliderControlProps
+) {
+  const { controlId, dataViewId, fieldName, title, ...rest } = controlProps;
+  return {
+    type: RANGE_SLIDER_CONTROL,
+    ...getPanelState(input, controlProps),
+    explicitInput: {
+      id: controlId ? controlId : uuid.v4(),
+      dataViewId,
+      fieldName,
+      title: title ?? fieldName,
+      ...rest,
+    },
+  } as ControlPanelState<DataControlInput>;
+}
+
+export function getTimeSliderPanelState(input: Partial<ControlGroupInput>) {
+  return {
+    type: TIME_SLIDER_CONTROL,
+    order: getNextPanelOrder(input.panels),
+    grow: true,
+    width: 'large',
+    explicitInput: {
+      id: uuid.v4(),
+      title: i18n.translate('controls.controlGroup.timeSlider.title', {
+        defaultMessage: 'Time slider',
+      }),
+    },
+  } as ControlPanelState<ControlInput>;
+}
+
+function getPanelState(input: Partial<ControlGroupInput>, controlProps: AddDataControlProps) {
+  return {
+    order: getNextPanelOrder(input.panels),
+    grow: controlProps.grow ?? input.defaultControlGrow ?? DEFAULT_CONTROL_GROW,
+    width: controlProps.width ?? input.defaultControlWidth ?? DEFAULT_CONTROL_WIDTH,
+  };
 }
