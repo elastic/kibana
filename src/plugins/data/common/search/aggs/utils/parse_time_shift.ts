@@ -59,7 +59,7 @@ export const isAbsoluteTimeShift = (val?: string) => {
 export const REASON_IDS = {
   missingTimerange: 'missingTimerange',
   notAbsoluteTimeShift: 'notAbsoluteTimeShift',
-  INVALID_DATE: 'INVALID_DATE',
+  invalidDate: 'INVALID_DATE',
   shiftAfterTimeRange: 'shiftAfterTimeRange',
 } as const;
 
