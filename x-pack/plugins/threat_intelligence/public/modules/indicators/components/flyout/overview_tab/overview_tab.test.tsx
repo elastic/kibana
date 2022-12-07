@@ -13,6 +13,7 @@ import {
   IndicatorsFlyoutOverview,
   TI_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS,
   TI_FLYOUT_OVERVIEW_TABLE,
+  TI_FLYOUT_OVERVIEW_TITLE,
 } from '.';
 import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt';
 import { IndicatorsFlyoutContext } from '../context';
@@ -20,12 +21,18 @@ import { IndicatorsFlyoutContext } from '../context';
 describe('<IndicatorsFlyoutOverview />', () => {
   describe('invalid indicator', () => {
     it('should render error message on invalid indicator', () => {
+      const context = {
+        kqlBarIntegration: false,
+      };
+
       render(
         <TestProvidersComponent>
-          <IndicatorsFlyoutOverview
-            onViewAllFieldsInTable={() => {}}
-            indicator={{ fields: {} } as unknown as Indicator}
-          />
+          <IndicatorsFlyoutContext.Provider value={context}>
+            <IndicatorsFlyoutOverview
+              onViewAllFieldsInTable={() => {}}
+              indicator={{ fields: {} } as unknown as Indicator}
+            />
+          </IndicatorsFlyoutContext.Provider>
         </TestProvidersComponent>
       );
 
@@ -34,13 +41,13 @@ describe('<IndicatorsFlyoutOverview />', () => {
   });
 
   it('should render the highlighted blocks and table when valid indicator is passed', () => {
-    const kqlBarIntegration = {
+    const context = {
       kqlBarIntegration: false,
     };
 
     render(
       <TestProvidersComponent>
-        <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
+        <IndicatorsFlyoutContext.Provider value={context}>
           <IndicatorsFlyoutOverview
             onViewAllFieldsInTable={() => {}}
             indicator={generateMockIndicator()}
@@ -51,5 +58,45 @@ describe('<IndicatorsFlyoutOverview />', () => {
 
     expect(screen.queryByTestId(TI_FLYOUT_OVERVIEW_TABLE)).toBeInTheDocument();
     expect(screen.queryByTestId(TI_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS)).toBeInTheDocument();
+  });
+
+  it('should render the indicator name value in the title', () => {
+    const context = {
+      kqlBarIntegration: false,
+    };
+    const indicator: Indicator = generateMockIndicator();
+    const indicatorName: string = (indicator.fields['threat.indicator.name'] as string[])[0];
+
+    render(
+      <TestProvidersComponent>
+        <IndicatorsFlyoutContext.Provider value={context}>
+          <IndicatorsFlyoutOverview onViewAllFieldsInTable={() => {}} indicator={indicator} />
+        </IndicatorsFlyoutContext.Provider>
+      </TestProvidersComponent>
+    );
+
+    expect(screen.queryByTestId(TI_FLYOUT_OVERVIEW_TITLE)?.innerHTML).toContain(indicatorName);
+  });
+
+  it('should render the indicator name passed via context in the title', () => {
+    const context = {
+      kqlBarIntegration: false,
+      indicatorName: '123',
+    };
+
+    render(
+      <TestProvidersComponent>
+        <IndicatorsFlyoutContext.Provider value={context}>
+          <IndicatorsFlyoutOverview
+            onViewAllFieldsInTable={() => {}}
+            indicator={generateMockIndicator()}
+          />
+        </IndicatorsFlyoutContext.Provider>
+      </TestProvidersComponent>
+    );
+
+    expect(screen.queryByTestId(TI_FLYOUT_OVERVIEW_TITLE)?.innerHTML).toContain(
+      context.indicatorName
+    );
   });
 });
