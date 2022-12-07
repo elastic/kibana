@@ -608,7 +608,7 @@ export const RulesList = ({
 
   const onDisableRule = useCallback(
     async (rule: RuleTableItem) => {
-      bulkDisableRules({ http, ids: [rule.id] });
+      await bulkDisableRules({ http, ids: [rule.id] });
     },
     [bulkDisableRules]
   );
