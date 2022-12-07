@@ -36,6 +36,7 @@ interface IQuery {
   type?: string;
   rollup_index?: string;
   allow_no_index?: boolean;
+  include_unmapped?: boolean;
 }
 
 const validate: RouteValidatorFullConfig<{}, IQuery, IBody> = {
@@ -47,6 +48,7 @@ const validate: RouteValidatorFullConfig<{}, IQuery, IBody> = {
     type: schema.maybe(schema.string()),
     rollup_index: schema.maybe(schema.string()),
     allow_no_index: schema.maybe(schema.boolean()),
+    include_unmapped: schema.maybe(schema.boolean()),
   }),
   // not available to get request
   body: schema.maybe(schema.object({ index_filter: schema.any() })),
@@ -60,6 +62,7 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
     type,
     rollup_index: rollupIndex,
     allow_no_index: allowNoIndex,
+    include_unmapped: includeUnmapped,
   } = request.query;
 
   // not available to get request
@@ -80,6 +83,7 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
       rollupIndex,
       fieldCapsOptions: {
         allow_no_indices: allowNoIndex || false,
+        includeUnmapped,
       },
       filter,
     });

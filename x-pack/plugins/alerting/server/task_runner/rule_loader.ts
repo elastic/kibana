@@ -111,13 +111,13 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
 
   const fakeRequest = getFakeKibanaRequest(context, spaceId, rawRule.attributes.apiKey);
   const rulesClient = context.getRulesClientWithRequest(fakeRequest);
-  const rule = rulesClient.getAlertFromRaw(
-    ruleId,
-    rawRule.attributes.alertTypeId as string,
-    rawRule.attributes as RawRule,
-    rawRule.references,
-    false
-  );
+  const rule = rulesClient.getAlertFromRaw({
+    id: ruleId,
+    ruleTypeId: rawRule.attributes.alertTypeId as string,
+    rawRule: rawRule.attributes as RawRule,
+    references: rawRule.references,
+    includeLegacyId: false,
+  });
 
   return {
     rule,

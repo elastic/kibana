@@ -19,7 +19,7 @@ interface FieldCapabilitiesParams {
   callCluster: ElasticsearchClient;
   indices: string | string[];
   metaFields: string[];
-  fieldCapsOptions?: { allow_no_indices: boolean };
+  fieldCapsOptions?: { allow_no_indices: boolean; include_unmapped?: boolean };
   filter?: QueryDslQueryContainer;
 }
 
