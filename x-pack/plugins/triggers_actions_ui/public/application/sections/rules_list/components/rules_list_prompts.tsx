@@ -23,14 +23,6 @@ export const RulesListPrompts = (props: RulesListPromptsProps) => {
   const { showPrompt, authorizedToCreateRules, showSpinner, showCreateRule, onCreateRulesClick } =
     props;
 
-  if (showSpinner) {
-    return (
-      <EuiPageTemplate.Section grow={false} paddingSize="none">
-        <CenterJustifiedSpinner />
-      </EuiPageTemplate.Section>
-    );
-  }
-
   if (showPrompt) {
     if (authorizedToCreateRules) {
       return (
@@ -40,5 +32,14 @@ export const RulesListPrompts = (props: RulesListPromptsProps) => {
       return <NoPermissionPrompt />;
     }
   }
+
+  if (showSpinner) {
+    return (
+      <EuiPageTemplate.Section grow={false} paddingSize="none">
+        <CenterJustifiedSpinner />
+      </EuiPageTemplate.Section>
+    );
+  }
+
   return null;
 };

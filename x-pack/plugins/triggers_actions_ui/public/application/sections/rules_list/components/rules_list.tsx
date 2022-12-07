@@ -98,6 +98,7 @@ import { useLoadTags } from '../../../hooks/use_load_tags';
 import { useLoadRuleAggregations } from '../../../hooks/use_load_rule_aggregations';
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
+import { RulesListDocLink } from './rules_list_doc_link';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { RulesListVisibleColumns } from './rules_list_column_selector';
 import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
@@ -131,7 +132,7 @@ export interface RulesListProps {
   ruleDetailsRoute?: string;
   showCreateRuleButton?: boolean;
   showCreateRuleButtonInPrompt?: boolean;
-  setCreateRuleButton?: (component?: React.ReactNode) => void;
+  setHeaderActions?: (components?: React.ReactNode[]) => void;
   statusFilter?: RuleStatus[];
   onStatusFilterChange?: (status: RuleStatus[]) => RulesPageContainerState;
   lastResponseFilter?: string[];
@@ -173,7 +174,7 @@ export const RulesList = ({
   onLastResponseFilterChange,
   lastRunOutcomeFilter,
   onLastRunOutcomeFilterChange,
-  setCreateRuleButton,
+  setHeaderActions,
   refresh,
   rulesListKey,
   visibleColumns,
@@ -1026,14 +1027,14 @@ export const RulesList = ({
       return;
     }
     if (!showPrompt && authorizedToCreateAnyRules) {
-      setCreateRuleButton?.(<CreateRuleButton openFlyout={openFlyout} />);
+      setHeaderActions?.([<CreateRuleButton openFlyout={openFlyout} />, <RulesListDocLink />]);
     } else {
-      setCreateRuleButton?.();
+      setHeaderActions?.();
     }
   }, [initialLoad, showPrompt, authorizedToCreateAnyRules]);
 
   useEffect(() => {
-    return () => setCreateRuleButton?.();
+    return () => setHeaderActions?.();
   }, []);
 
   const renderTable = () => {
