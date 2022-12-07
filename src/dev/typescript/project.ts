@@ -7,6 +7,7 @@
  */
 
 import Path from 'path';
+import Fs from 'fs';
 
 import { IMinimatch, Minimatch } from 'minimatch';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -34,11 +35,12 @@ export interface ProjectOptions {
 interface LoadOptions {
   history?: string[];
   cache?: Map<string, Project>;
+  fsCache?: Map<string, string>;
   skipConfigValidation?: boolean;
 }
 
 export class Project {
-  static reload(projects: Iterable<Project>) {
+  static reload(projects: Iterable<Project>, fsCache: Map<string, string>) {
     const cache = new Map<string, Project>();
     return Array.from(projects).map((proj) =>
       Project.load(
@@ -47,7 +49,7 @@ export class Project {
           disableTypeCheck: proj.disableTypeCheck,
           name: proj.name,
         },
-        { cache }
+        { cache, fsCache }
       )
     );
   }
@@ -63,7 +65,13 @@ export class Project {
       return cached;
     }
 
-    const config = parseTsConfig(tsConfigPath);
+    const fsCache = loadOptions.fsCache ?? new Map<string, string>();
+    let jsonc = fsCache.get(tsConfigPath);
+    if (jsonc === undefined) {
+      jsonc = Fs.readFileSync(tsConfigPath, 'utf8');
+      fsCache.set(tsConfigPath, jsonc);
+    }
+    const config = parseTsConfig(tsConfigPath, jsonc);
 
     if (!loadOptions?.skipConfigValidation) {
       if (config.files) {
@@ -102,6 +110,7 @@ export class Project {
           skipConfigValidation: true,
           history: [...(loadOptions.history ?? []), tsConfigPath],
           cache,
+          fsCache,
         }
       );
     }

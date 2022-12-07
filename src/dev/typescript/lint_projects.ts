@@ -24,11 +24,12 @@ export interface LintOptions {
 export function getLintedProjects(log: SomeDevLog, options: LintOptions) {
   let projects: Project[] | undefined;
   let errorCount = 0;
+  const fsCache = new Map<string, string>();
   const linted = new Set<string>();
 
   lintProjects: while (!projects || projects.length > linted.size) {
     projects = projects
-      ? Project.reload(projects)
+      ? Project.reload(projects, fsCache)
       : Array.from(new Set(PROJECTS.flatMap((p) => p.getProjectsDeep())));
 
     for (const project of projects) {
@@ -59,6 +60,7 @@ export function getLintedProjects(log: SomeDevLog, options: LintOptions) {
 
         if (fixedJsonc !== jsonc) {
           Fs.writeFileSync(project.tsConfigPath, fixedJsonc, 'utf8');
+          fsCache.delete(project.tsConfigPath);
           continue lintProjects;
         }
 

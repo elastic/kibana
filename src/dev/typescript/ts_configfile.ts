@@ -14,11 +14,8 @@ import { parseConfigFileTextToJson } from 'typescript';
 // yes, this is just `any`, but I'm hoping that TypeScript will give us some help here eventually
 type TsConfigFile = ReturnType<typeof parseConfigFileTextToJson>['config'];
 
-export function parseTsConfig(tsConfigPath: string): TsConfigFile {
-  const { error, config } = parseConfigFileTextToJson(
-    tsConfigPath,
-    Fs.readFileSync(tsConfigPath, 'utf8')
-  );
+export function parseTsConfig(tsConfigPath: string, jsonc: string): TsConfigFile {
+  const { error, config } = parseConfigFileTextToJson(tsConfigPath, jsonc);
 
   if (error) {
     throw new Error(`tsconfig parse error: [${error.file}] ${error.messageText}`);
@@ -36,7 +33,7 @@ export function getOutputsDeep(tsConfigPaths: string[]) {
       return cached;
     }
 
-    const config = parseTsConfig(path);
+    const config = parseTsConfig(path, Fs.readFileSync(path, 'utf8'));
     tsConfigs.set(path, config);
     return config;
   };
