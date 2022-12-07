@@ -11,14 +11,16 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Tooltip } from '../tooltip';
 import { strings } from './action_strings';
 import { FilterItemActionsProps } from './types';
+import { actionButtonCss } from '../filter_item.styles';
 
-export const FilterItemActions: FC<FilterItemActionsProps> = ({
+export const FilterItemActions: FC<FilterItemActionsProps & { minimizePaddings?: boolean }> = ({
   disabled = false,
   disableRemove = false,
   hideOr = false,
   disableOr = false,
   hideAnd = false,
   disableAnd = false,
+  minimizePaddings = false,
   onRemoveFilter,
   onOrButtonClick,
   onAddButtonClick,
@@ -34,6 +36,7 @@ export const FilterItemActions: FC<FilterItemActionsProps> = ({
             size="s"
             color="danger"
             aria-label={strings.getDeleteFilterGroupButtonIconLabel()}
+            {...(minimizePaddings ? { className: actionButtonCss } : {})}
           />
         </Tooltip>
       </EuiFlexItem>
@@ -47,6 +50,7 @@ export const FilterItemActions: FC<FilterItemActionsProps> = ({
             iconSize="s"
             aria-label={strings.getAddOrFilterGroupButtonIconLabel()}
             data-test-subj="add-or-filter"
+            {...(minimizePaddings ? { className: actionButtonCss } : {})}
           >
             {strings.getAddOrFilterGroupButtonLabel()}
           </EuiButtonEmpty>
@@ -62,6 +66,7 @@ export const FilterItemActions: FC<FilterItemActionsProps> = ({
             iconSize="s"
             aria-label={strings.getAddAndFilterGroupButtonIconLabel()}
             data-test-subj="add-and-filter"
+            {...(minimizePaddings ? { className: actionButtonCss } : {})}
           >
             {strings.getAddAndFilterGroupButtonLabel()}
           </EuiButtonEmpty>

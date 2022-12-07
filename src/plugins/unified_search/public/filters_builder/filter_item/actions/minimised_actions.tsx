@@ -7,22 +7,12 @@
  */
 
 import React, { FC, useState } from 'react';
-import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
-import { Tooltip } from '../tooltip';
+import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import { strings } from './action_strings';
 import { FilterItemActionsProps } from './types';
+import { FilterItemActions } from './actions';
 
-export const MinimisedFilterItemActions: FC<FilterItemActionsProps> = ({
-  disabled = false,
-  disableRemove = false,
-  hideOr = false,
-  disableOr = false,
-  hideAnd = false,
-  disableAnd = false,
-  onRemoveFilter,
-  onOrButtonClick,
-  onAddButtonClick,
-}) => {
+export const MinimisedFilterItemActions: FC<FilterItemActionsProps> = (props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onMoreActionsButtonClick = () => {
@@ -42,55 +32,7 @@ export const MinimisedFilterItemActions: FC<FilterItemActionsProps> = ({
 
   return (
     <EuiPopover ownFocus={false} button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
-      <EuiFlexGroup
-        justifyContent="flexEnd"
-        alignItems="flexEnd"
-        gutterSize="xs"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <Tooltip content={strings.getDeleteButtonDisabled()} show={disableRemove || disabled}>
-            <EuiButtonEmpty
-              onClick={onRemoveFilter}
-              iconType="trash"
-              isDisabled={disableRemove || disabled}
-              size="s"
-              color="danger"
-              aria-label={strings.getDeleteFilterGroupButtonIconLabel()}
-            />
-          </Tooltip>
-        </EuiFlexItem>
-        {!hideOr && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={onOrButtonClick}
-              isDisabled={disableOr || disabled}
-              iconType="plusInCircle"
-              size="s"
-              iconSize="s"
-              aria-label={strings.getAddOrFilterGroupButtonIconLabel()}
-              data-test-subj="add-or-filter"
-            >
-              {strings.getAddOrFilterGroupButtonLabel()}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-        {!hideAnd && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={onAddButtonClick}
-              isDisabled={disableAnd || disabled}
-              iconType="plusInCircle"
-              size="s"
-              iconSize="s"
-              aria-label={strings.getAddAndFilterGroupButtonIconLabel()}
-              data-test-subj="add-and-filter"
-            >
-              {strings.getAddAndFilterGroupButtonLabel()}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      <FilterItemActions {...props} minimizePaddings={true} />
     </EuiPopover>
   );
 };
