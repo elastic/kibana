@@ -34,13 +34,7 @@ export const getGrabIconCss = (euiTheme: EuiThemeComputed) => css`
 
 export const actionButtonCss = css`
   &.euiButtonEmpty .euiButtonEmpty__content {
-    padding: 0 0px;
-    padding-left: 2px;
-
-    &.euiButtonContent > * + * {
-      -webkit-margin-start: 2px;
-      margin-inline-start: 2px;
-    }
+    padding: 0 4px;
   }
 `;
 

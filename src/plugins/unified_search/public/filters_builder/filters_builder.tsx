@@ -9,7 +9,7 @@
 import React, { useEffect, useReducer, useCallback, useState, useRef } from 'react';
 import { EuiDragDropContext, DragDropContextProps, useEuiPaddingSize } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { type Filter, BooleanRelation } from '@kbn/es-query';
+import { type Filter, BooleanRelation, compareFilters } from '@kbn/es-query';
 import { FiltersBuilderContextType } from './context';
 import { FilterGroup } from './filter_group';
 import { FiltersBuilderReducer } from './reducer';
@@ -45,7 +45,7 @@ function FiltersBuilder({
   const sPaddingSize = useEuiPaddingSize('s');
 
   useEffect(() => {
-    if (filters !== filtersRef.current) {
+    if (!compareFilters(filters, filtersRef.current)) {
       filtersRef.current = filters;
       dispatch({ type: 'updateFilters', payload: { filters } });
     }

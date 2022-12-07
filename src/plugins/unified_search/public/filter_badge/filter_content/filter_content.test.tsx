@@ -28,7 +28,7 @@ test('field custom label', () => {
     ...phraseFilter,
     meta: {
       ...phraseFilter.meta,
-      alias: 'geo.coordinates in US',
+      alias: null,
     },
   };
   const { container } = render(
@@ -42,7 +42,7 @@ test('alias with warning status', () => {
     ...phraseFilter,
     meta: {
       ...phraseFilter.meta,
-      alias: 'geo.coordinates in US',
+      alias: null,
       negate: true,
     },
   };
@@ -55,7 +55,7 @@ test('alias with error status', () => {
     ...phraseFilter,
     meta: {
       ...phraseFilter.meta,
-      alias: 'geo.coordinates in US',
+      alias: null,
       negate: true,
     },
   };

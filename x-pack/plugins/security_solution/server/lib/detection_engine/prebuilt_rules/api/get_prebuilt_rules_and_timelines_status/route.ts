@@ -52,11 +52,7 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (
       const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
 
       try {
-        const latestPrebuiltRules = await getLatestPrebuiltRules(
-          ruleAssetsClient,
-          config.prebuiltRulesFromFileSystem,
-          config.prebuiltRulesFromSavedObjects
-        );
+        const latestPrebuiltRules = await getLatestPrebuiltRules(ruleAssetsClient);
 
         const customRules = await findRules({
           rulesClient,

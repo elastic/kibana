@@ -21,7 +21,7 @@ export default {
   component: IndicatorsFlyoutTable,
   title: 'IndicatorsFlyoutTable',
 };
-const kqlBarIntegration = {
+const context = {
   kqlBarIntegration: false,
 };
 
@@ -35,7 +35,7 @@ export const Default: Story<void> = () => {
   return (
     <KibanaReactContext.Provider>
       <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
-        <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
+        <IndicatorsFlyoutContext.Provider value={context}>
           <IndicatorsFlyoutTable indicator={mockIndicator} />
         </IndicatorsFlyoutContext.Provider>
       </IndicatorsFiltersContext.Provider>
@@ -45,7 +45,7 @@ export const Default: Story<void> = () => {
 
 export const EmptyIndicator: Story<void> = () => {
   return (
-    <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
+    <IndicatorsFlyoutContext.Provider value={context}>
       <IndicatorsFlyoutTable indicator={{ fields: {} } as unknown as Indicator} />
     </IndicatorsFlyoutContext.Provider>
   );

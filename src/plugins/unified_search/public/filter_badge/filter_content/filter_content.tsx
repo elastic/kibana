@@ -46,9 +46,19 @@ export interface FilterContentProps {
   filter: Filter;
   valueLabel: string;
   fieldLabel?: string;
+  hideAlias?: boolean;
 }
 
-export function FilterContent({ filter, valueLabel, fieldLabel }: FilterContentProps) {
+export function FilterContent({ filter, valueLabel, fieldLabel, hideAlias }: FilterContentProps) {
+  if (!hideAlias && filter.meta.alias !== null) {
+    return (
+      <>
+        <Prefix prefix={filter.meta.negate} />
+        <FilterValue value={`${filter.meta.alias}`} />
+      </>
+    );
+  }
+
   switch (filter.meta.type) {
     case FILTERS.EXISTS:
       return (

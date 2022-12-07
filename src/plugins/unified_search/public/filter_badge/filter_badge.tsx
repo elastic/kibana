@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { isCombinedFilter } from '@kbn/es-query';
@@ -59,7 +59,6 @@ function FilterBadge({
     >
       {!hideAlias && filter.meta.alias !== null ? (
         <>
-          <EuiIcon type="save" size="s" />
           <span className={marginLeftLabelCss(euiTheme)}>
             {prefix}
             {filter.meta.alias}
