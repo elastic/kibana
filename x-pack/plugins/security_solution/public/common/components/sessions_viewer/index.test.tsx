@@ -11,10 +11,11 @@ import { TestProviders } from '../../mock';
 import { TEST_ID, SessionsView, defaultSessionsFilter } from '.';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import type { SessionsComponentsProps } from './types';
-import type { TimelineModel } from '../../../timelines/store/timeline/model';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
 import { TableId } from '../../../../common/types';
 import { licenseService } from '../../hooks/use_license';
+import { mount } from 'enzyme';
+import type { EventsViewerProps } from '../events_viewer';
 
 jest.mock('../../lib/kibana');
 
@@ -42,7 +43,7 @@ const testProps: SessionsComponentsProps = {
   filterQuery,
 };
 
-type Props = Partial<TimelineModel> & {
+type Props = Partial<EventsViewerProps> & {
   start: string;
   end: string;
   entityType: EntityType;
@@ -70,47 +71,58 @@ jest.mock('../../hooks/use_license', () => {
   };
 });
 
-// creating a dummy component for testing TGrid to avoid mocking all the implementation details
-// but still test if the TGrid will render properly
-const SessionsViewerTGrid: React.FC<Props> = ({ columns, start, end, id, filters, entityType }) => {
+// creating a dummy component for testing data table to avoid mocking all the implementation details
+// but still test if the data table will render properly
+const SessionsViewerEventsViewer: React.FC<Props> = ({
+  defaultModel,
+  start,
+  end,
+  tableId,
+  pageFilters,
+  entityType,
+}) => {
   useEffect(() => {
-    callFilters(filters);
-  }, [filters]);
+    callFilters(pageFilters);
+  }, [pageFilters]);
 
   return (
     <div>
       <div data-test-subj={`${TEST_PREFIX}:entityType`}>{entityType}</div>
       <div data-test-subj={`${TEST_PREFIX}:startDate`}>{start}</div>
       <div data-test-subj={`${TEST_PREFIX}:endDate`}>{end}</div>
-      <div data-test-subj={`${TEST_PREFIX}:timelineId`}>{id}</div>
-      {columns?.map((header) => (
+      <div data-test-subj={`${TEST_PREFIX}:timelineId`}>{tableId}</div>
+      {defaultModel?.columns?.map((header) => (
         <div key={header.id}>{header.display ?? header.id}</div>
       ))}
     </div>
   );
 };
 
-jest.mock('@kbn/timelines-plugin/public/mock/plugin_mock', () => {
-  const originalModule = jest.requireActual('@kbn/timelines-plugin/public/mock/plugin_mock');
+jest.mock('../events_viewer', () => {
   return {
-    ...originalModule,
-    createTGridMocks: () => ({
-      ...originalModule.createTGridMocks,
-      getTGrid: SessionsViewerTGrid,
-    }),
+    StatefulEventsViewer: SessionsViewerEventsViewer,
   };
 });
 
+mockGetDefaultControlColumn.mockReturnValue([
+  {
+    headerCellRender: () => <></>,
+    id: 'default-timeline-control-column',
+    rowCellRender: jest.fn(),
+    width: jest.fn(),
+  },
+]);
+
 describe('SessionsView', () => {
   it('renders the session view', async () => {
-    const wrapper = render(
+    const wrapper = mount(
       <TestProviders>
         <SessionsView {...testProps} />
       </TestProviders>
     );
 
     await waitFor(() => {
-      expect(wrapper.queryByTestId(TEST_ID)).toBeInTheDocument();
+      expect(wrapper.find(`[data-test-subj="${TEST_ID}"]`).exists()).toBeTruthy();
     });
   });
 
@@ -126,7 +138,7 @@ describe('SessionsView', () => {
     });
   });
 
-  it('passes in the right parameters to TGrid', async () => {
+  it('passes in the right parameters to EventsViewer', async () => {
     const wrapper = render(
       <TestProviders>
         <SessionsView {...testProps} />
@@ -142,7 +154,7 @@ describe('SessionsView', () => {
     });
   });
 
-  it('passes in the right filters to TGrid', async () => {
+  it('passes in the right filters to EventsViewer', async () => {
     render(
       <TestProviders>
         <SessionsView {...testProps} />

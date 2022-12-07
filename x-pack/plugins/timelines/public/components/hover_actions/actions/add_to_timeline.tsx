@@ -12,7 +12,7 @@ import { isEmpty } from 'lodash';
 
 import { useDispatch } from 'react-redux';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { TimelineId } from '../../../types';
+import { TimelineId } from '../../../store/timeline';
 import { addProviderToTimeline } from '../../../store/timeline/actions';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import { DataProvider } from '../../../../common/types';
