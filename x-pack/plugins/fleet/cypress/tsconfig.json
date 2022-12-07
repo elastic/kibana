@@ -15,6 +15,5 @@
         "cypress-real-events"
       ],
       "resolveJsonModule": true,
-      "target": "ES2019",
     },
   }

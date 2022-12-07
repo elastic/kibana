@@ -1,11 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "skipLibCheck": true,
-    "target": "es2015",
+    "outDir": "target/types",
     "types": [
       "node",
       "@kbn/ambient-storybook-types"

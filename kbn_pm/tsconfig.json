@@ -1,9 +1,8 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target",
+    "outDir": "target/types",
     "checkJs": true,
-    "target": "ES2022",
     "module": "ESNext"
   },
   "include": [

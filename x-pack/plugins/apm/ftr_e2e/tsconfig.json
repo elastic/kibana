@@ -8,7 +8,6 @@
     "target/**/*"
   ],
   "compilerOptions": {
-    "target": "es2015",
     "outDir": "target/types",
     "types": [
       "cypress",

@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "skipLibCheck": false
+    "outDir": "target/types"
   },
   "include": [
     "expect.d.ts"
