@@ -7,9 +7,8 @@
  */
 
 import React from 'react';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { getDisplayValueFromFilter, getFieldDisplayValueFromFilter } from '@kbn/data-plugin/public';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, DataViewBase } from '@kbn/es-query';
 import { EuiTextColor, useEuiPaddingCSS } from '@elastic/eui';
 import { FilterBadgeGroup } from './filter_badge_group';
 import { FilterContent } from './filter_content';
@@ -20,13 +19,13 @@ import { bracketColorCss } from './filter_badge.styles';
 export interface FilterBadgeExpressionProps {
   filter: Filter;
   shouldShowBrackets?: boolean;
-  dataViews: DataView[];
+  dataViews: DataViewBase[];
   filterLabelStatus?: string;
 }
 
 interface FilterBadgeContentProps {
   filter: Filter;
-  dataViews: DataView[];
+  dataViews: DataViewBase[];
   filterLabelStatus?: string;
 }
 

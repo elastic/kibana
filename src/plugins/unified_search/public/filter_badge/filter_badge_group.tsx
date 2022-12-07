@@ -7,16 +7,15 @@
  */
 
 import React from 'react';
-import type { Filter, BooleanRelation } from '@kbn/es-query';
+import type { Filter, BooleanRelation, DataViewBase } from '@kbn/es-query';
 import { EuiTextColor, useEuiTheme } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { FilterBadgeErrorBoundary } from './filter_badge_error_boundary';
 import { FilterExpressionBadge } from './filter_badge_expression';
 import { conditionCss } from './filter_badge.styles';
 
 export interface FilterBadgeGroupProps {
   filters: Filter[];
-  dataViews: DataView[];
+  dataViews: DataViewBase[];
   filterLabelStatus?: string;
   shouldShowBrackets?: boolean;
   booleanRelation?: BooleanRelation;
