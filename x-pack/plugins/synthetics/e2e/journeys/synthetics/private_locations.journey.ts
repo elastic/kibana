@@ -49,6 +49,7 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await page.fill('[placeholder="Choose a name"]', 'Test fleet policy');
     await page.click('text=Collect system logs and metrics');
     await page.click('div[role="dialog"] button:has-text("Create agent policy")');
+    await page.waitForTimeout(5 * 1000);
     await waitForLoadingToFinish({ page });
   });
   step('Go to http://localhost:5620/app/fleet/policies', async () => {

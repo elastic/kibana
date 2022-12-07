@@ -61,10 +61,11 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       });
       if (doLogin) {
         await this.loginToKibana();
-        const invalid = await page.locator(
-          `text=Username or password is incorrect. Please try again.`
+        const invalid = await page.isVisible(
+          `text=Username or password is incorrect. Please try again.`,
+          { timeout: 1000 }
         );
-        expect(await invalid.isVisible()).toBeFalsy();
+        expect(invalid).toBeFalsy();
       }
     },
 
