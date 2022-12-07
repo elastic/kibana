@@ -40,7 +40,6 @@ export {
   FleetServerAgentComponentStatuses,
   // Routes
   PACKAGE_POLICY_API_ROOT,
-  AGENT_POLICY_API_ROOT,
   AGENT_API_ROUTES,
   AGENT_POLICY_API_ROUTES,
   AGENTS_SETUP_API_ROUTES,

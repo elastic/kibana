@@ -9,11 +9,7 @@ import { deepFreeze } from '@kbn/std';
 
 import type { RouteMethod } from '@kbn/core-http-server';
 
-import {
-  AGENT_POLICY_API_ROOT,
-  PACKAGE_POLICY_API_ROOT,
-  PACKAGE_POLICY_API_ROUTES,
-} from '../../../common';
+import { PACKAGE_POLICY_API_ROUTES } from '../../../common';
 
 import type { FleetRouteRequiredAuthz } from './types';
 
@@ -142,16 +138,47 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
  */
 export const getRouteRequiredAuthz = (
   routeMethod: RouteMethod,
-  routePath: string,
-  policyIds?: { packagePolicyId?: string; agentPolicyId?: string }
+  routePath: string
 ): FleetRouteRequiredAuthz => {
-  let key = `${routeMethod}:${routePath}`;
+  const key = `${routeMethod}:${routePath}`;
 
-  if (routePath.includes(PACKAGE_POLICY_API_ROOT) && policyIds?.packagePolicyId) {
-    key = key.replace(policyIds?.packagePolicyId, '{packagePolicyId}');
-  } else if (routePath.includes(AGENT_POLICY_API_ROOT) && policyIds?.agentPolicyId) {
-    key = key.replace(policyIds?.agentPolicyId, '{agentPolicyId}');
+  if (typeof ROUTE_AUTHZ_REQUIREMENTS[key] !== 'undefined') {
+    return ROUTE_AUTHZ_REQUIREMENTS[key];
   }
 
-  return ROUTE_AUTHZ_REQUIREMENTS[key];
+  const matchingRouteKeys = Object.keys(ROUTE_AUTHZ_REQUIREMENTS).reduce<string[]>(
+    (acc, routeKey) => {
+      const doesMatchRouteKey = pathMatchesPattern(routeKey, key);
+      if (doesMatchRouteKey) {
+        acc.push(routeKey);
+      }
+      return acc;
+    },
+    []
+  );
+
+  return ROUTE_AUTHZ_REQUIREMENTS[matchingRouteKeys[0]];
+};
+
+const pathMatchesPattern = (pathPattern: string, path: string): boolean => {
+  // No path params - pattern is single path
+  if (pathPattern === path) {
+    return true;
+  }
+
+  // If pathPattern has params (`{value}`), then see if `path` matches it
+  if (/{.*?}/.test(pathPattern)) {
+    const pathParts = path.split(/\//);
+    const patternParts = pathPattern.split(/\//);
+
+    if (pathParts.length !== patternParts.length) {
+      return false;
+    }
+
+    return pathParts.every((part, index) => {
+      return part === patternParts[index] || /{.*?}/.test(patternParts[index]);
+    });
+  }
+
+  return false;
 };
