@@ -18,6 +18,8 @@ import { PROJECTS } from '../../projects';
 export interface TsConfig {
   extends?: string;
   compilerOptions?: Record<string, unknown>;
+  include?: string[];
+  exclude?: string[];
   [key: string]: unknown;
 }
 

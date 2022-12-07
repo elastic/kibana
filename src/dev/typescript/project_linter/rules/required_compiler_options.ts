@@ -7,7 +7,7 @@
  */
 
 import { Rule } from '../lib/rule';
-import { setCompilerOption } from '../lib/compiler_options';
+import { setCompilerOption } from '../lib/ast';
 
 const REQUIRED: Array<[string, string]> = [['outDir', 'target/types']];
 

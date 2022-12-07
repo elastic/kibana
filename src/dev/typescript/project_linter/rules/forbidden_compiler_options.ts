@@ -7,7 +7,7 @@
  */
 
 import { Rule } from '../lib/rule';
-import { removeCompilerOption } from '../lib/compiler_options';
+import { removeCompilerOption } from '../lib/ast';
 
 const NAMES = ['declaration', 'emitDeclarationOnly', 'skipLibCheck', 'target', 'paths'];
 

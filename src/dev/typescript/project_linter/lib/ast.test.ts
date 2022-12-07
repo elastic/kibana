@@ -8,7 +8,7 @@
 
 import dedent from 'dedent';
 
-import { removeCompilerOption, setCompilerOption } from './compiler_options';
+import { removeCompilerOption, setCompilerOption, setExclude } from './ast';
 
 describe('removeCompilerOption()', () => {
   it('handles strings with trailing comma', () => {
@@ -286,6 +286,69 @@ describe('setCompilerOptions()', () => {
         \\"include\\": [
           \\"expect.d.ts\\"
         ]
+      }"
+    `);
+  });
+});
+
+describe('setExclude()', () => {
+  it('overwrites previous formatting', () => {
+    expect(
+      setExclude(
+        dedent`
+          {
+            "exclude": [1, 2,
+              "foo"
+            ]
+          }
+        `,
+        ['1', 'bar']
+      )
+    ).toMatchInlineSnapshot(`
+      "{
+        \\"exclude\\": [
+          \\"1\\",
+          \\"bar\\",
+        ]
+      }"
+    `);
+  });
+
+  it('adds the property at the end if it does not exist', () => {
+    expect(
+      setExclude(
+        dedent`
+          {
+            "foo": 1
+          }
+        `,
+        ['1', 'bar']
+      )
+    ).toMatchInlineSnapshot(`
+      "{
+        \\"foo\\": 1,
+        \\"exclude\\": [
+          \\"1\\",
+          \\"bar\\",
+        ]
+      }"
+    `);
+    expect(
+      setExclude(
+        dedent`
+          {
+            "foo": 1,
+          }
+        `,
+        ['1', 'bar']
+      )
+    ).toMatchInlineSnapshot(`
+      "{
+        \\"foo\\": 1,
+        \\"exclude\\": [
+          \\"1\\",
+          \\"bar\\",
+        ],
       }"
     `);
   });

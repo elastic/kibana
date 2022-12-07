@@ -10,10 +10,12 @@ import { forbiddenCompilerOptions } from './forbidden_compiler_options';
 import { refPkgsIds } from './reference_pkg_ids';
 import { requiredCompilerOptions } from './required_compiler_options';
 import { validBaseConfig } from './valid_base_config';
+import { requiredExcludes } from './required_excludes';
 
 export const PROJECT_LINTER_RULES = [
   forbiddenCompilerOptions,
   refPkgsIds,
   requiredCompilerOptions,
   validBaseConfig,
+  requiredExcludes,
 ];
