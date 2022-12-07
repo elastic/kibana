@@ -64,11 +64,13 @@ exports[`Flyout apm part one should render normally 1`] = `
         grow={false}
       >
         <EuiButton
+          color="primary"
           fill={true}
           iconSide="right"
           iconType="sortRight"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="submit"
         >
           Next
@@ -397,11 +399,13 @@ exports[`Flyout beats part one should render normally 1`] = `
         grow={false}
       >
         <EuiButton
+          color="primary"
           fill={true}
           iconSide="right"
           iconType="sortRight"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="submit"
         >
           Next
@@ -771,11 +775,13 @@ exports[`Flyout elasticsearch part one should render normally 1`] = `
         grow={false}
       >
         <EuiButton
+          color="primary"
           fill={true}
           iconSide="right"
           iconType="sortRight"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="submit"
         >
           Next
@@ -1106,11 +1112,13 @@ exports[`Flyout kibana part one should render normally 1`] = `
         grow={false}
       >
         <EuiButton
+          color="primary"
           fill={true}
           iconSide="right"
           iconType="sortRight"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="submit"
         >
           Next
@@ -1448,11 +1456,13 @@ exports[`Flyout logstash part one should render normally 1`] = `
         grow={false}
       >
         <EuiButton
+          color="primary"
           fill={true}
           iconSide="right"
           iconType="sortRight"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="submit"
         >
           Next

@@ -168,6 +168,7 @@ export interface DefineStepRule {
   newTermsFields: string[];
   historyWindowSize: string;
   shouldLoadQueryDynamically: boolean;
+  groupByFields: string[];
 }
 
 export interface ScheduleStepRule {

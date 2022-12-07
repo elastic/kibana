@@ -39,7 +39,7 @@ paths:
   /setup/preconfiguration:
     put:
       summary: Preconfiguration
-      operationId: get-settings
+      operationId: put-preconfiguration
       tags: []
       responses:
         '200':
@@ -92,9 +92,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/fleet_settings_response'
       operationId: get-settings
-    post:
+    put:
       summary: Settings - Update
       tags: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fleet_server_hosts:
+                  type: array
+                  description: Protocol and path must be the same for each URL
+                  items:
+                    type: string
+                has_seen_add_data_notice:
+                  type: boolean
+                additional_yaml_config:
+                  type: string
       responses:
         '200':
           description: OK
@@ -119,7 +134,7 @@ paths:
                     type: string
                   value:
                     type: string
-      operationId: generate-service-token
+      operationId: generate-service-token-deprecated
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       deprecated: true
@@ -275,7 +290,7 @@ paths:
                     required:
                       - status
                       - savedObject
-      operationId: get-package
+      operationId: get-package-deprecated
       security:
         - basicAuth: []
       parameters:
@@ -312,10 +327,15 @@ paths:
                         - type
                 required:
                   - response
-      operationId: install-package
+      operationId: install-package-deprecated
       description: ''
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - schema:
+            type: string
+          name: pkgkey
+          in: path
+          required: true
       requestBody:
         content:
           application/json:
@@ -352,9 +372,14 @@ paths:
                         - type
                 required:
                   - response
-      operationId: delete-package
+      operationId: delete-package-deprecated
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - schema:
+            type: string
+          name: pkgkey
+          in: path
+          required: true
       requestBody:
         content:
           application/json:
@@ -418,6 +443,13 @@ paths:
           type: boolean
         name: ignoreUnverified
         description: Ignore if the package is fails signature verification
+        in: query
+      - schema:
+          type: boolean
+        name: full
+        description: >-
+          Return all fields from the package manifest, not just those supported
+          by the Elastic Package Registry
         in: query
     post:
       summary: Packages - Install
@@ -691,7 +723,7 @@ paths:
                   - other
                   - total
                   - updating
-      operationId: get-agent-status
+      operationId: get-agent-status-deprecated
       parameters:
         - schema:
             type: string
@@ -1307,6 +1339,66 @@ paths:
               schema:
                 $ref: '#/components/schemas/get_agent_tags_response'
       operationId: get-agent-tags
+  /agents/{agentId}/request_diagnostics:
+    parameters:
+      - schema:
+          type: string
+        name: agentId
+        in: path
+        required: true
+    post:
+      summary: Agent - Request Diagnostics
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  actionId:
+                    type: string
+      operationId: request-diagnostics-agent
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+  /agents/bulk_request_diagnostics:
+    post:
+      summary: Agent - Bulk Request Diagnostics
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  actionId:
+                    type: string
+      operationId: bulk-request-diagnostics
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                batchSize:
+                  type: number
+                agents:
+                  oneOf:
+                    - type: string
+                      description: KQL query string, leave empty to action all agents
+                    - type: array
+                      items:
+                        type: string
+                      description: list of agent IDs
+              required:
+                - agents
+            example:
+              agents: 'fleet-agents.policy_id : ("policy1" or "policy2")'
   /agent_policies:
     get:
       summary: Agent policies - List
@@ -1575,7 +1667,7 @@ paths:
                   - page
                   - perPage
                   - total
-      operationId: get-enrollment-api-keys
+      operationId: get-enrollment-api-keys-deprecated
       parameters: []
       deprecated: true
     post:
@@ -1595,7 +1687,7 @@ paths:
                     type: string
                     enum:
                       - created
-      operationId: create-enrollment-api-keys
+      operationId: create-enrollment-api-keys-deprecated
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       deprecated: true
@@ -1621,7 +1713,7 @@ paths:
                     $ref: '#/components/schemas/enrollment_api_key'
                 required:
                   - item
-      operationId: get-enrollment-api-key
+      operationId: get-enrollment-api-key-deprecated
       deprecated: true
     delete:
       summary: Enrollment API Key - Delete
@@ -1640,7 +1732,7 @@ paths:
                       - deleted
                 required:
                   - action
-      operationId: delete-enrollment-api-key
+      operationId: delete-enrollment-api-key-deprecated
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       deprecated: true
@@ -1845,7 +1937,7 @@ paths:
   /package_policies/delete:
     post:
       summary: Package policy - Delete
-      operationId: delete-package-policy
+      operationId: post-delete-package-policy
       requestBody:
         content:
           application/json:
@@ -1919,7 +2011,7 @@ paths:
   /package_policies/upgrade/dryrun:
     post:
       summary: Package policy - Upgrade Dry run
-      operationId: upgrade-package-policy
+      operationId: upgrade-package-policy-dry-run
       requestBody:
         content:
           application/json:
@@ -2466,6 +2558,153 @@ paths:
           in: path
           required: true
         - $ref: '#/components/parameters/kbn_xsrf'
+  /proxies:
+    get:
+      summary: Fleet Proxies - List
+      description: Return a list of Proxies
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/proxies'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+      operationId: get-fleet-proxies
+    post:
+      summary: Fleet Proxies - Create
+      description: Create a new Fleet Server Host
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/proxies'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                url:
+                  type: string
+                proxy_headers:
+                  type: object
+                certificate_authorities:
+                  type: string
+                certificate:
+                  type: string
+                certificate_key:
+                  type: string
+              required:
+                - name
+                - url
+      operationId: post-fleet-proxies
+  /proxies/{itemId}:
+    get:
+      summary: Fleet Proxies - Info
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/proxies'
+                required:
+                  - item
+      operationId: get-one-fleet-proxies
+    parameters:
+      - schema:
+          type: string
+        name: itemId
+        in: path
+        required: true
+    delete:
+      summary: Fleet Proxies - Delete
+      operationId: delete-fleet-proxies
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                required:
+                  - id
+      parameters:
+        - schema:
+            type: string
+          name: itemId
+          in: path
+          required: true
+        - $ref: '#/components/parameters/kbn_xsrf'
+    put:
+      summary: Fleet Proxies - Update
+      operationId: update-fleet-proxies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                url:
+                  type: string
+                proxy_headers:
+                  type: object
+                certificate_authorities:
+                  type: string
+                certificate:
+                  type: string
+                certificate_key:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/proxies'
+                required:
+                  - item
+      parameters:
+        - schema:
+            type: string
+          name: itemId
+          in: path
+          required: true
+        - $ref: '#/components/parameters/kbn_xsrf'
 components:
   securitySchemes:
     basicAuth:
@@ -2652,6 +2891,7 @@ components:
         has_seen_add_data_notice:
           type: boolean
         fleet_server_hosts:
+          deprecated: true
           type: array
           items:
             type: string
@@ -2791,6 +3031,10 @@ components:
           type: string
         release:
           type: string
+          deprecated: true
+          description: >-
+            release label is deprecated, derive from the version instead
+            (packages follow semver)
           enum:
             - experimental
             - beta
@@ -3220,6 +3464,12 @@ components:
         monitoring_output_id:
           type: string
           nullable: true
+        fleet_server_host_id:
+          type: string
+          nullable: true
+        download_source_id:
+          type: string
+          nullable: true
       required:
         - name
         - namespace
@@ -3322,8 +3572,16 @@ components:
               type: string
             data_output_id:
               type: string
+              nullable: true
             monitoring_output_id:
               type: string
+              nullable: true
+            fleet_server_host_id:
+              type: string
+              nullable: true
+            download_source_id:
+              type: string
+              nullable: true
             revision:
               type: number
             agents:
@@ -3642,6 +3900,7 @@ components:
           type: string
           enum:
             - elasticsearch
+            - logstash
         hosts:
           type: array
           items:
@@ -3657,12 +3916,12 @@ components:
         ssl:
           type: object
           properties:
-            certificate:
-              type: string
             certificate_authorities:
               type: array
               items:
                 type: string
+            certificate:
+              type: string
             key:
               type: string
       required:
@@ -3708,5 +3967,26 @@ components:
         - is_default
         - is_preconfigured
         - host_urls
+    proxies:
+      title: Fleet Proxy
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        url:
+          type: string
+        proxy_headers:
+          type: object
+        certificate_authorities:
+          type: string
+        certificate:
+          type: string
+        certificate_key:
+          type: string
+      required:
+        - name
+        - url
 security:
   - basicAuth: []

@@ -58,6 +58,7 @@ import {
   AgentPolicyNameExistsError,
   HostedAgentPolicyRestrictionRelatedError,
   AgentPolicyNotFoundError,
+  PackagePolicyRestrictionRelatedError,
 } from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
@@ -671,6 +672,14 @@ class AgentPolicyService {
     const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, id);
 
     if (packagePolicies.length) {
+      const hasManagedPackagePolicies = packagePolicies.some(
+        (packagePolicy) => packagePolicy.is_managed
+      );
+      if (hasManagedPackagePolicies && !options?.force) {
+        throw new PackagePolicyRestrictionRelatedError(
+          `Cannot delete agent policy ${id} that contains managed package policies`
+        );
+      }
       const deletedPackagePolicies: DeletePackagePoliciesResponse =
         await packagePolicyService.delete(
           soClient,

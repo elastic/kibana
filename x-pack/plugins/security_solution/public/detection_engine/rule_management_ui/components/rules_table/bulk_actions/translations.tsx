@@ -134,3 +134,59 @@ export const bulkSetSchedule = {
     />
   ),
 };
+
+export const bulkDuplicateRuleActions = {
+  MODAL_TITLE: (rulesCount: number): JSX.Element => (
+    <FormattedMessage
+      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.modalTitle"
+      defaultMessage="Duplicate {rulesCount, plural, one {the rule} other {rules}} with exceptions?"
+      values={{ rulesCount }}
+    />
+  ),
+
+  MODAL_TEXT: (rulesCount: number): JSX.Element => (
+    <FormattedMessage
+      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.modalBody"
+      defaultMessage="You are duplicating {rulesCount, plural, one {# selected rule} other {# selected rules}}, please select how you would like to duplicate the existing exceptions"
+      values={{ rulesCount }}
+    />
+  ),
+
+  DUPLICATE_EXCEPTIONS_TEXT: (rulesCount: number) => (
+    <FormattedMessage
+      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.with"
+      defaultMessage="Duplicate {rulesCount, plural, one {rule} other {rules}} and their exceptions"
+      values={{ rulesCount }}
+    />
+  ),
+
+  DUPLICATE_WITHOUT_EXCEPTIONS_TEXT: (rulesCount: number) => (
+    <FormattedMessage
+      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.without"
+      defaultMessage="Only duplicate {rulesCount, plural, one {the rule} other {rules}}"
+      values={{ rulesCount }}
+    />
+  ),
+
+  CONTINUE_BUTTON: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.continueButton',
+    {
+      defaultMessage: 'Duplicate',
+    }
+  ),
+
+  CANCEL_BUTTON: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.cancelButton',
+    {
+      defaultMessage: 'Cancel',
+    }
+  ),
+
+  DUPLICATE_TOOLTIP: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.tooltip',
+    {
+      defaultMessage:
+        ' If you duplicate exceptions, then the shared exceptions list will be duplicated by reference and the default rule exception will be copied and created as a new one',
+    }
+  ),
+};

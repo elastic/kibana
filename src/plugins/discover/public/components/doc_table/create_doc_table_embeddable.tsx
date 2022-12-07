@@ -25,6 +25,7 @@ export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps)
         onMoveColumn={renderProps.onMoveColumn}
         onRemoveColumn={renderProps.onRemoveColumn}
         sort={renderProps.sort}
+        filters={renderProps.filters}
         onFilter={renderProps.onFilter}
         useNewFieldsApi={renderProps.useNewFieldsApi}
         searchDescription={renderProps.searchDescription}

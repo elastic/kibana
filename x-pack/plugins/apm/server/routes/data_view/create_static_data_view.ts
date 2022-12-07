@@ -12,14 +12,13 @@ import {
   TRACE_ID,
   TRANSACTION_ID,
   TRANSACTION_DURATION,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { APM_STATIC_DATA_VIEW_ID } from '../../../common/data_view_constants';
 import { hasHistoricalAgentData } from '../historical_data/has_historical_agent_data';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmDataViewTitle } from './get_apm_data_view_title';
 
 import { APMRouteHandlerResources } from '../typings';
-import { Setup } from '../../lib/helpers/setup_request';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export type CreateDataViewResponse = Promise<
@@ -30,12 +29,10 @@ export type CreateDataViewResponse = Promise<
 export async function createStaticDataView({
   dataViewService,
   resources,
-  setup,
   apmEventClient,
 }: {
   dataViewService: DataViewsService;
   resources: APMRouteHandlerResources;
-  setup: Setup;
   apmEventClient: APMEventClient;
 }): CreateDataViewResponse {
   const { config } = resources;
@@ -65,7 +62,7 @@ export async function createStaticDataView({
       };
     }
 
-    const apmDataViewTitle = getApmDataViewTitle(setup.indices);
+    const apmDataViewTitle = getApmDataViewTitle(apmEventClient.indices);
     const shouldCreateOrUpdate = await getShouldCreateOrUpdate({
       apmDataViewTitle,
       dataViewService,

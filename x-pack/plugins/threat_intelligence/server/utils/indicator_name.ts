@@ -9,7 +9,7 @@ import dedent from 'dedent';
 import { RawIndicatorFieldId } from '../../common/types/indicator';
 
 /**
- * Mapping connects one ore more types to field values that should be used to generate threat.indicator.name field.
+ * Mapping connects one or more types to field values that should be used to generate threat.indicator.name field.
  */
 type Mapping = [types: string[], paths: RawIndicatorFieldId[]];
 
@@ -56,12 +56,13 @@ const mappingsArray: Mappings = [
  * Generates Painless condition checking if given `type` is matched
  */
 const fieldTypeCheck = (type: string) =>
-  `if (doc['threat.indicator.type'].value != null && doc['threat.indicator.type'].value.toLowerCase()=='${type.toLowerCase()}')`;
+  `if (doc.containsKey('threat.indicator.type') && !doc['threat.indicator.type'].empty && doc['threat.indicator.type'].size()!=0 && doc['threat.indicator.type'].value!=null && doc['threat.indicator.type'].value.toLowerCase()=='${type.toLowerCase()}')`;
 
 /**
  * Generates Painless condition checking if given `field` has value
  */
-const fieldValueCheck = (field: string) => `if (doc['${field}'].value!=null)`;
+const fieldValueCheck = (field: string) =>
+  `if (doc.containsKey('${field}') && !doc['${field}'].empty && doc['${field}'].size()!=0 && doc['${field}'].value!=null)`;
 
 /**
  * Converts Mapping to Painless script, computing `threat.indicator.name` value for given indicator types.

@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { SearchHit } from '../../../../../../common/search_strategy';
 import { TimelineId } from '../../../../../../common/types';
 import { useDetailPanel } from '../../../../../timelines/components/side_panel/hooks/use_detail_panel';
 import { useGetUserCasesPermissions } from '../../../../../common/lib/kibana';
@@ -25,11 +26,18 @@ export interface DetailsSummaryTabProps {
   eventId: string;
   dataAsNestedObject: Ecs | null;
   detailsData: TimelineEventsDetailsItem[];
+  searchHit?: SearchHit;
   sourcererDataView: SelectedDataView;
 }
 
 export const DetailsSummaryTab = React.memo(
-  ({ dataAsNestedObject, detailsData, eventId, sourcererDataView }: DetailsSummaryTabProps) => {
+  ({
+    dataAsNestedObject,
+    detailsData,
+    searchHit,
+    eventId,
+    sourcererDataView,
+  }: DetailsSummaryTabProps) => {
     const userCasesPermissions = useGetUserCasesPermissions();
 
     const { DetailsPanel, openHostDetailsPanel, openUserDetailsPanel } = useDetailPanel({
@@ -46,6 +54,7 @@ export const DetailsSummaryTab = React.memo(
             <RulePanel
               id={eventId}
               data={detailsData}
+              searchHit={searchHit}
               browserFields={sourcererDataView.browserFields}
             />
             <SummaryRow>

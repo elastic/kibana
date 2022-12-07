@@ -81,6 +81,7 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
       findFormFieldByRowsLabelAndType('Description (optional)', savedQueryDescription);
       cy.react('EuiButtonDisplay').contains('Save').click();
       cy.contains('Successfully saved');
+      cy.getBySel('toastCloseButton').click();
 
       // play saved query
       cy.contains('Saved queries').click();

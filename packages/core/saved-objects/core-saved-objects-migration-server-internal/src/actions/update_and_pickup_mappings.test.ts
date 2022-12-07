@@ -10,6 +10,7 @@ import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { updateAndPickupMappings } from './update_and_pickup_mappings';
+import { DEFAULT_TIMEOUT } from './constants';
 
 jest.mock('./catch_retryable_es_client_errors');
 
@@ -29,6 +30,7 @@ describe('updateAndPickupMappings', () => {
   const client = elasticsearchClientMock.createInternalClient(
     elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
   );
+
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
     const task = updateAndPickupMappings({
       client,
@@ -42,5 +44,44 @@ describe('updateAndPickupMappings', () => {
     }
 
     expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
+  });
+
+  it('updates the _mapping properties but not the _meta information', async () => {
+    const task = updateAndPickupMappings({
+      client,
+      index: 'new_index',
+      mappings: {
+        properties: {
+          'apm-indices': {
+            type: 'object',
+            dynamic: false,
+          },
+        },
+        _meta: {
+          migrationMappingPropertyHashes: {
+            references: '7997cf5a56cc02bdc9c93361bde732b0',
+            'epm-packages': '860e23f4404fa1c33f430e6dad5d8fa2',
+            'cases-connector-mappings': '17d2e9e0e170a21a471285a5d845353c',
+          },
+        },
+      },
+    });
+    try {
+      await task();
+    } catch (e) {
+      /** ignore */
+    }
+
+    expect(client.indices.putMapping).toHaveBeenCalledTimes(1);
+    expect(client.indices.putMapping).toHaveBeenCalledWith({
+      index: 'new_index',
+      timeout: DEFAULT_TIMEOUT,
+      properties: {
+        'apm-indices': {
+          type: 'object',
+          dynamic: false,
+        },
+      },
+    });
   });
 });

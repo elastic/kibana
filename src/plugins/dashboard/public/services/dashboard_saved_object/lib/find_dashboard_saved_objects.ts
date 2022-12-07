@@ -18,6 +18,7 @@ import type { DashboardAttributes } from '../../../application';
 
 export interface FindDashboardSavedObjectsArgs {
   hasReference?: SavedObjectsFindOptionsReference[];
+  hasNoReference?: SavedObjectsFindOptionsReference[];
   savedObjectsClient: SavedObjectsClientContract;
   search: string;
   size: number;
@@ -31,6 +32,7 @@ export interface FindDashboardSavedObjectsResponse {
 export async function findDashboardSavedObjects({
   savedObjectsClient,
   hasReference,
+  hasNoReference,
   search,
   size,
 }: FindDashboardSavedObjectsArgs): Promise<FindDashboardSavedObjectsResponse> {
@@ -41,6 +43,7 @@ export async function findDashboardSavedObjects({
     defaultSearchOperator: 'AND' as 'AND',
     perPage: size,
     hasReference,
+    hasNoReference,
     page: 1,
   });
   return {

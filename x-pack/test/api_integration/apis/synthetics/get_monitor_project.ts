@@ -8,7 +8,7 @@ import uuid from 'uuid';
 import type SuperTest from 'supertest';
 import { format as formatUrl } from 'url';
 import {
-  ProjectMonitorsRequest,
+  LegacyProjectMonitorsRequest,
   ProjectMonitor,
   ProjectMonitorMetaData,
 } from '@kbn/synthetics-plugin/common/runtime_types';
@@ -17,7 +17,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
-import { parseStreamApiResponse } from './add_monitor_project';
+import { parseStreamApiResponse } from './add_monitor_project_legacy';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('GetProjectMonitors', function () {
@@ -28,15 +28,15 @@ export default function ({ getService }: FtrProviderContext) {
     const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
     const projectMonitorEndpoint = kibanaServerUrl + API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY;
 
-    let projectMonitors: ProjectMonitorsRequest;
-    let httpProjectMonitors: ProjectMonitorsRequest;
-    let tcpProjectMonitors: ProjectMonitorsRequest;
-    let icmpProjectMonitors: ProjectMonitorsRequest;
+    let projectMonitors: LegacyProjectMonitorsRequest;
+    let httpProjectMonitors: LegacyProjectMonitorsRequest;
+    let tcpProjectMonitors: LegacyProjectMonitorsRequest;
+    let icmpProjectMonitors: LegacyProjectMonitorsRequest;
 
     let testPolicyId = '';
     const testPrivateLocations = new PrivateLocationTestService(getService);
 
-    const setUniqueIds = (request: ProjectMonitorsRequest) => {
+    const setUniqueIds = (request: LegacyProjectMonitorsRequest) => {
       return {
         ...request,
         monitors: request.monitors.map((monitor) => ({ ...monitor, id: uuid.v4() })),

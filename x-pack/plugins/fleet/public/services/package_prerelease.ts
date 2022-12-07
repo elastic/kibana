@@ -5,7 +5,26 @@
  * 2.0.
  */
 
+import type { IntegrationCardReleaseLabel, RegistryRelease } from '../../common/types';
+
 export function isPackagePrerelease(version: string): boolean {
   // derive from semver
   return version.startsWith('0') || version.includes('-');
+}
+
+export function getPackageReleaseLabel(version: string): IntegrationCardReleaseLabel {
+  if (version.startsWith('0') || version.includes('-preview')) {
+    return 'preview';
+  } else if (version.includes('-rc')) {
+    return 'rc';
+  } else if (version.includes('-')) {
+    return 'beta';
+  }
+  return 'ga';
+}
+
+export function mapPackageReleaseToIntegrationCardRelease(
+  release: RegistryRelease
+): IntegrationCardReleaseLabel {
+  return release === 'experimental' ? 'preview' : release;
 }

@@ -4,3 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+export * from './use_delete_proxy';
+export * from './use_delete_output';
+export * from './use_delete_fleet_server_host';

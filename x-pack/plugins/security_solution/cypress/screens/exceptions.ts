@@ -35,7 +35,7 @@ export const ENTRY_DELETE_BTN = '[data-test-subj="builderItemEntryDeleteButton"]
 export const CANCEL_BTN = '[data-test-subj="cancelExceptionAddButton"]';
 
 export const EXCEPTIONS_OVERFLOW_ACTIONS_BTN =
-  '[data-test-subj="exceptionsListCardOverflowActions"]';
+  '[data-test-subj="sharedListOverflowCardButtonIcon"]';
 
 export const EXCEPTIONS_TABLE = '[data-test-subj="pageContainer"]';
 
@@ -43,9 +43,11 @@ export const EXCEPTIONS_TABLE_SEARCH = '[data-test-subj="exceptionsHeaderSearchI
 
 export const EXCEPTIONS_TABLE_SHOWING_LISTS = '[data-test-subj="showingExceptionLists"]';
 
-export const EXCEPTIONS_TABLE_DELETE_BTN = '[data-test-subj="exceptionsTableDeleteButton"]';
+export const EXCEPTIONS_TABLE_DELETE_BTN =
+  '[data-test-subj="sharedListOverflowCardActionItemDelete"]';
 
-export const EXCEPTIONS_TABLE_EXPORT_BTN = '[data-test-subj="exceptionsTableExportButton"]';
+export const EXCEPTIONS_TABLE_EXPORT_BTN =
+  '[data-test-subj="sharedListOverflowCardActionItemExport"]';
 
 export const EXCEPTIONS_TABLE_SEARCH_CLEAR =
   '[data-test-subj="allExceptionListsPanel"] button.euiFormControlLayoutClearButton';
@@ -99,7 +101,7 @@ export const ADD_TO_SHARED_LIST_RADIO_LABEL = '[data-test-subj="addToListsRadioO
 
 export const ADD_TO_SHARED_LIST_RADIO_INPUT = 'input[id="add_to_lists"]';
 
-export const SHARED_LIST_CHECKBOX = '.euiTableRow .euiCheckbox__input';
+export const SHARED_LIST_SWITCH = '[data-test-subj="addToSharedListSwitch"]';
 
 export const ADD_TO_RULE_RADIO_LABEL = 'label [data-test-subj="addToRuleRadioOption"]';
 

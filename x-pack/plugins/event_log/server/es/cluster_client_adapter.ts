@@ -529,6 +529,7 @@ export function getQueryBodyWithAuthFilter(
 ) {
   const { namespaces, type, authFilter } = opts;
   const { start, end, filter } = queryOptions ?? {};
+  const ids = 'ids' in opts ? opts.ids : [];
 
   const namespaceQuery = (namespaces ?? [undefined]).map((namespace) =>
     getNamespaceQuery(namespace)
@@ -567,7 +568,6 @@ export function getQueryBodyWithAuthFilter(
     },
     {
       bool: {
-        // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
         should: namespaceQuery,
       },
     },
@@ -585,6 +585,43 @@ export function getQueryBodyWithAuthFilter(
       },
     },
   ];
+
+  if (ids.length) {
+    musts.push({
+      bool: {
+        should: {
+          bool: {
+            must: [
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          terms: {
+                            // default maximum of 65,536 terms, configurable by index.max_terms_count
+                            'kibana.saved_objects.id': ids,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+              {
+                range: {
+                  'kibana.version': {
+                    gte: LEGACY_ID_CUTOFF_VERSION,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+  }
 
   if (start) {
     musts.push({
@@ -676,7 +713,6 @@ export function getQueryBody(
         },
       },
     },
-    // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
     namespaceQuery,
   ];
 

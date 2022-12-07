@@ -9,7 +9,7 @@
   "optionalPlugins": ["usageCollection"],
   "owner": {
     "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "githubTeam": "kibana-visualizations"
   },
   "description": "Registers the timelion visualization. Also contains the backend for both timelion app and timelion visualization."
 }

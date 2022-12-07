@@ -18,7 +18,7 @@ import {
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
   SPAN_DURATION,
   SPAN_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 
 export function getProcessorEventForServiceDestinationStatistics(

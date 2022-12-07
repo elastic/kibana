@@ -7,6 +7,12 @@
 Retrieves external connection details, such as the closure type and
 default connector for cases.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification]. For a preview, check out <<case-apis>>.
+====
+
 === {api-request-title}
 
 `GET <kibana host>:<port>/api/cases/configure`

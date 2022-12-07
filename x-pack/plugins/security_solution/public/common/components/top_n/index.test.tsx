@@ -24,8 +24,8 @@ import { createStore } from '../../store';
 
 import type { Props } from './top_n';
 import { StatefulTopN } from '.';
-import { TableId, TimelineId } from '../../../../common/types/timeline';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TableId } from '../../../../common/types';
 import { detectionAlertsTables } from './helpers';
 
 jest.mock('react-router-dom', () => {
@@ -151,13 +151,7 @@ const state: State = {
 };
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(
-  state,
-  SUB_PLUGINS_REDUCER,
-  { dataTable: tGridReducer },
-  kibanaObservable,
-  storage
-);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 const testProps = {
   browserFields: mockBrowserFields,

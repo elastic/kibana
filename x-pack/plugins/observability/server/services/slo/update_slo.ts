@@ -16,7 +16,7 @@ import {
 } from '../../types/rest_specs';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
-import { SLO } from '../../types/models';
+import { SLO } from '../../domain/models';
 import { validateSLO } from '../../domain/services';
 
 export class UpdateSLO {
@@ -49,6 +49,10 @@ export class UpdateSLO {
     validateSLO(updatedSlo);
 
     if (!deepEqual(originalSlo.indicator, updatedSlo.indicator)) {
+      hasBreakingChange = true;
+    }
+
+    if (!deepEqual(originalSlo.settings, updatedSlo.settings)) {
       hasBreakingChange = true;
     }
 
@@ -87,6 +91,7 @@ export class UpdateSLO {
       budgeting_method: slo.budgeting_method,
       time_window: slo.time_window,
       objective: slo.objective,
+      settings: slo.settings,
       created_at: slo.created_at,
       updated_at: slo.updated_at,
     });

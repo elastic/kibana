@@ -29,6 +29,7 @@ import * as i18n from './translations';
 import { schema } from '../step_about_rule/schema';
 import type { ListItems } from './types';
 import type { AboutStepRule } from '../../../pages/detection_engine/rules/types';
+import { createLicenseServiceMock } from '../../../../../common/license/mocks';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -44,6 +45,7 @@ describe('description_step', () => {
   };
   let mockFilterManager: FilterManager;
   let mockAboutStep: AboutStepRule;
+  const mockLicenseService = createLicenseServiceMock();
 
   beforeEach(() => {
     setupMock.uiSettings.get.mockImplementation(uiSettingsMock(true));
@@ -253,7 +255,12 @@ describe('description_step', () => {
 
   describe('buildListItems', () => {
     test('returns expected ListItems array when given valid inputs', () => {
-      const result: ListItems[] = buildListItems(mockAboutStep, schema, mockFilterManager);
+      const result: ListItems[] = buildListItems(
+        mockAboutStep,
+        schema,
+        mockFilterManager,
+        mockLicenseService
+      );
 
       expect(result.length).toEqual(11);
     });
@@ -265,7 +272,8 @@ describe('description_step', () => {
         'tags',
         'Tags label',
         mockAboutStep,
-        mockFilterManager
+        mockFilterManager,
+        mockLicenseService
       );
 
       expect(result[0].title).toEqual('Tags label');
@@ -277,7 +285,8 @@ describe('description_step', () => {
         'description',
         'Description label',
         mockAboutStep,
-        mockFilterManager
+        mockFilterManager,
+        mockLicenseService
       );
 
       expect(result[0].title).toEqual('Description label');
@@ -289,7 +298,8 @@ describe('description_step', () => {
         'jibberjabber',
         'JibberJabber label',
         mockAboutStep,
-        mockFilterManager
+        mockFilterManager,
+        mockLicenseService
       );
 
       expect(result.length).toEqual(0);
@@ -311,7 +321,8 @@ describe('description_step', () => {
           'queryBar',
           'Query bar label',
           mockQueryBar,
-          mockFilterManager
+          mockFilterManager,
+          mockLicenseService
         );
 
         expect(result[0].title).toEqual(<>{i18n.QUERY_LABEL}</>);
@@ -327,7 +338,8 @@ describe('description_step', () => {
           'threat',
           'Threat label',
           mockAboutStep,
-          mockFilterManager
+          mockFilterManager,
+          mockLicenseService
         );
 
         expect(result[0].title).toEqual('Threat label');
@@ -359,7 +371,8 @@ describe('description_step', () => {
           'threat',
           'Threat label',
           mockStep,
-          mockFilterManager
+          mockFilterManager,
+          mockLicenseService
         );
 
         expect(result.length).toEqual(0);
@@ -378,7 +391,8 @@ describe('description_step', () => {
           'threshold',
           'Threshold label',
           mockThreshold,
-          mockFilterManager
+          mockFilterManager,
+          mockLicenseService
         );
 
         expect(result[0].title).toEqual('Threshold label');
@@ -399,7 +413,8 @@ describe('description_step', () => {
           'threshold',
           'Threshold label',
           mockThreshold,
-          mockFilterManager
+          mockFilterManager,
+          mockLicenseService
         );
 
         expect(result[0].title).toEqual('Threshold label');
@@ -416,7 +431,8 @@ describe('description_step', () => {
           'references',
           'Reference label',
           mockAboutStep,
-          mockFilterManager
+          mockFilterManager,
+          mockLicenseService
         );
 
         expect(result[0].title).toEqual('Reference label');
@@ -430,7 +446,8 @@ describe('description_step', () => {
           'falsePositives',
           'False positives label',
           mockAboutStep,
-          mockFilterManager
+          mockFilterManager,
+          mockLicenseService
         );
 
         expect(result[0].title).toEqual('False positives label');
@@ -444,7 +461,8 @@ describe('description_step', () => {
           'severity',
           'Severity label',
           mockAboutStep,
-          mockFilterManager
+          mockFilterManager,
+          mockLicenseService
         );
 
         expect(result[0].title).toEqual('Severity');
@@ -458,7 +476,8 @@ describe('description_step', () => {
           'riskScore',
           'Risk score label',
           mockAboutStep,
-          mockFilterManager
+          mockFilterManager,
+          mockLicenseService
         );
 
         expect(result[0].title).toEqual('Risk score');
@@ -473,7 +492,8 @@ describe('description_step', () => {
           'timeline',
           'Timeline label',
           mockDefineStep,
-          mockFilterManager
+          mockFilterManager,
+          mockLicenseService
         );
 
         expect(result[0].title).toEqual('Timeline label');
@@ -491,7 +511,8 @@ describe('description_step', () => {
           'timeline',
           'Timeline label',
           mockStep,
-          mockFilterManager
+          mockFilterManager,
+          mockLicenseService
         );
 
         expect(result[0].title).toEqual('Timeline label');
@@ -505,7 +526,8 @@ describe('description_step', () => {
           'note',
           'Investigation guide',
           mockAboutStep,
-          mockFilterManager
+          mockFilterManager,
+          mockLicenseService
         );
 
         expect(result[0].title).toEqual('Investigation guide');

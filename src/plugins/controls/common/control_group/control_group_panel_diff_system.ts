@@ -8,6 +8,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { omit, isEqual } from 'lodash';
+import { DEFAULT_SORT } from '../options_list/suggestions_sorting';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from '../options_list/types';
 
 import { ControlPanelState } from './types';
@@ -32,27 +33,39 @@ export const ControlPanelDiffSystems: {
       }
 
       const {
+        sort: sortA,
         exclude: excludeA,
+        hideSort: hideSortA,
+        hideExists: hideExistsA,
+        hideExclude: hideExcludeA,
         selectedOptions: selectedA,
         singleSelect: singleSelectA,
-        hideExclude: hideExcludeA,
+        existsSelected: existsSelectedA,
         runPastTimeout: runPastTimeoutA,
         ...inputA
       }: Partial<OptionsListEmbeddableInput> = initialInput.explicitInput;
       const {
+        sort: sortB,
         exclude: excludeB,
+        hideSort: hideSortB,
+        hideExists: hideExistsB,
+        hideExclude: hideExcludeB,
         selectedOptions: selectedB,
         singleSelect: singleSelectB,
-        hideExclude: hideExcludeB,
+        existsSelected: existsSelectedB,
         runPastTimeout: runPastTimeoutB,
         ...inputB
       }: Partial<OptionsListEmbeddableInput> = newInput.explicitInput;
 
       return (
         Boolean(excludeA) === Boolean(excludeB) &&
-        Boolean(singleSelectA) === Boolean(singleSelectB) &&
+        Boolean(hideSortA) === Boolean(hideSortB) &&
+        Boolean(hideExistsA) === Boolean(hideExistsB) &&
         Boolean(hideExcludeA) === Boolean(hideExcludeB) &&
+        Boolean(singleSelectA) === Boolean(singleSelectB) &&
+        Boolean(existsSelectedA) === Boolean(existsSelectedB) &&
         Boolean(runPastTimeoutA) === Boolean(runPastTimeoutB) &&
+        deepEqual(sortA ?? DEFAULT_SORT, sortB ?? DEFAULT_SORT) &&
         isEqual(selectedA ?? [], selectedB ?? []) &&
         deepEqual(inputA, inputB)
       );

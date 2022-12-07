@@ -52,9 +52,11 @@ export enum EmptySizeRatios {
 }
 
 export interface SharedPieLayerState {
+  metrics: string[];
   primaryGroups: string[];
   secondaryGroups?: string[];
-  metric?: string;
+  allowMultipleMetrics?: boolean;
+  colorsByDimension?: Record<string, string>;
   collapseFns?: Record<string, CollapseFunction>;
   numberDisplay: NumberDisplayType;
   categoryDisplay: CategoryDisplayType;

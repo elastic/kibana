@@ -11,7 +11,10 @@ import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ConfigType } from './config';
 
 export const createMockConfig = (): ConfigType => {
-  const enableExperimental: string[] = [];
+  const enableExperimental: Array<keyof ExperimentalFeatures> = [
+    // Remove property below once `get-file` FF is enabled or removed
+    'responseActionGetFileEnabled',
+  ];
 
   return {
     [SIGNALS_INDEX_KEY]: DEFAULT_SIGNALS_INDEX,
@@ -23,8 +26,6 @@ export const createMockConfig = (): ConfigType => {
     packagerTaskInterval: '60s',
     alertMergeStrategy: 'missingFields',
     alertIgnoreFields: [],
-    prebuiltRulesFromFileSystem: true,
-    prebuiltRulesFromSavedObjects: false,
 
     experimentalFeatures: parseExperimentalConfigValue(enableExperimental),
   };

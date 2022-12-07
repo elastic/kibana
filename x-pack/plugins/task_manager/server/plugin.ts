@@ -264,7 +264,6 @@ export class TaskManagerPlugin
       taskStore,
       middleware: this.middleware,
       ephemeralTaskLifecycle: this.ephemeralTaskLifecycle,
-      definitions: this.definitions,
       taskManagerId: taskStore.taskManagerId,
     });
 

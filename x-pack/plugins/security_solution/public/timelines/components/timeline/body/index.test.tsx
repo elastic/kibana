@@ -33,7 +33,6 @@ import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import { mount } from 'enzyme';
 import type { UseFieldBrowserOptionsProps } from '../../fields_browser';
 
@@ -53,6 +52,15 @@ const mockUseFieldBrowserOptions = jest.fn();
 jest.mock('../../fields_browser', () => ({
   useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
 }));
+
+const useAddToTimeline = () => ({
+  beginDrag: jest.fn(),
+  cancelDrag: jest.fn(),
+  dragToLocation: jest.fn(),
+  endDrag: jest.fn(),
+  hasDraggableLock: jest.fn(),
+  startDragToTimeline: jest.fn(),
+});
 
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
@@ -84,11 +92,7 @@ jest.mock('../../../../common/lib/kibana', () => {
           getLastUpdated: jest.fn(),
           getLoadingPanel: jest.fn(),
           getFieldBrowser: jest.fn(),
-          getUseDraggableKeyboardWrapper: () =>
-            jest.fn().mockReturnValue({
-              onBlur: jest.fn(),
-              onKeyDown: jest.fn(),
-            }),
+          getUseAddToTimeline: () => useAddToTimeline,
         },
       },
     }),
@@ -210,7 +214,8 @@ describe('Body', () => {
     trailingControlColumns: [],
   };
 
-  describe('rendering', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/145187
+  describe.skip('rendering', () => {
     beforeEach(() => {
       mockDispatch.mockClear();
     });
@@ -248,13 +253,7 @@ describe('Body', () => {
         },
       };
 
-      const store = createStore(
-        state,
-        SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
-        kibanaObservable,
-        storage
-      );
+      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
       const wrapper = await getWrapper(<StatefulBody {...props} />, { store });
 
       headersJustTimestamp.forEach(() => {
@@ -330,13 +329,7 @@ describe('Body', () => {
         },
       };
 
-      const store = createStore(
-        state,
-        SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
-        kibanaObservable,
-        storage
-      );
+      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
       const Proxy = (proxyProps: Props) => <StatefulBody {...proxyProps} />;
 

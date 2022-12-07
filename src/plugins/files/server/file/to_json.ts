@@ -9,18 +9,20 @@
 import { pickBy } from 'lodash';
 import type { FileMetadata, FileJSON } from '../../common/types';
 
-export function serializeJSON<M = unknown>(attrs: Partial<FileJSON>): Partial<FileMetadata> {
-  const { name, mimeType, size, created, updated, fileKind, status, alt, extension, meta } = attrs;
+export function serializeJSON<M = unknown>(attrs: Partial<FileJSON>): Partial<FileMetadata<M>> {
+  const { name, mimeType, size, created, updated, fileKind, status, alt, extension, meta, user } =
+    attrs;
   return pickBy(
     {
       name,
       mime_type: mimeType,
       size,
+      user,
       created,
       extension,
       Alt: alt,
       Status: status,
-      Meta: meta as M,
+      Meta: meta,
       Updated: updated,
       FileKind: fileKind,
     },
@@ -28,11 +30,12 @@ export function serializeJSON<M = unknown>(attrs: Partial<FileJSON>): Partial<Fi
   );
 }
 
-export function toJSON<M = unknown>(id: string, attrs: FileMetadata): FileJSON<M> {
+export function toJSON<M = unknown>(id: string, attrs: FileMetadata<M>): FileJSON<M> {
   const {
     name,
     mime_type: mimeType,
     size,
+    user,
     created,
     Updated,
     FileKind,
@@ -44,6 +47,7 @@ export function toJSON<M = unknown>(id: string, attrs: FileMetadata): FileJSON<M
   return pickBy<FileJSON<M>>(
     {
       id,
+      user,
       name,
       mimeType,
       size,
@@ -51,7 +55,7 @@ export function toJSON<M = unknown>(id: string, attrs: FileMetadata): FileJSON<M
       extension,
       alt: Alt,
       status: Status,
-      meta: Meta as M,
+      meta: Meta,
       updated: Updated,
       fileKind: FileKind,
     },

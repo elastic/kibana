@@ -266,7 +266,7 @@ export const EditPackagePolicyForm = memo<{
             const { data: packageData } = await sendGetPackageInfoByKey(
               _packageInfo!.name,
               _packageInfo!.version,
-              { prerelease: true }
+              { prerelease: true, full: true }
             );
 
             if (packageData?.item) {

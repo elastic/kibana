@@ -124,7 +124,11 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       const tabs = ['summary', 'preview', 'request'];
 
       await act(async () => {
-        testBed.find('summaryTabContent').find('.euiTab').at(tabs.indexOf(tab)).simulate('click');
+        testBed
+          .find('summaryTabContent')
+          .find('button.euiTab')
+          .at(tabs.indexOf(tab))
+          .simulate('click');
       });
 
       testBed.component.update();

@@ -7,16 +7,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { CreateHandler, FilesRouter } from './types';
+import { FilesClient } from '../../common/files_client';
 import { FileJSON } from '../../common';
 import { FILES_MANAGE_PRIVILEGE } from '../../common/constants';
 import { FILES_API_ROUTES, CreateRouteDefinition } from './api_routes';
-import { page, pageSize } from './common_schemas';
+import { page, pageSize, fileMeta } from './common_schemas';
+import type { CreateHandler, FilesRouter } from './types';
 
 const method = 'post' as const;
 
-const string64 = schema.string({ maxLength: 64 });
-const string256 = schema.string({ maxLength: 256 });
+const string64 = schema.string({ minLength: 1, maxLength: 64 });
+const string256 = schema.string({ minLength: 1, maxLength: 256 });
 
 export const stringOrArrayOfStrings = schema.oneOf([string64, schema.arrayOf(string64)]);
 export const nameStringOrArrayOfNameStrings = schema.oneOf([string256, schema.arrayOf(string256)]);
@@ -32,7 +33,7 @@ const rt = {
     status: schema.maybe(stringOrArrayOfStrings),
     extension: schema.maybe(stringOrArrayOfStrings),
     name: schema.maybe(nameStringOrArrayOfNameStrings),
-    meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    meta: fileMeta,
   }),
   query: schema.object({
     page: schema.maybe(page),
@@ -40,7 +41,11 @@ const rt = {
   }),
 };
 
-export type Endpoint = CreateRouteDefinition<typeof rt, { files: FileJSON[]; total: number }>;
+export type Endpoint = CreateRouteDefinition<
+  typeof rt,
+  { files: FileJSON[]; total: number },
+  FilesClient['find']
+>;
 
 const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
   const { fileService } = await files;
@@ -54,7 +59,7 @@ const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
     name: toArrayOrUndefined(name),
     status: toArrayOrUndefined(status),
     extension: toArrayOrUndefined(extension),
-    meta,
+    meta: meta as Record<string, string>,
     ...query,
   });
 

@@ -13,7 +13,7 @@ import {
   getProcessorEventForTransactions,
   getDocumentTypeFilterForTransactions,
 } from '../../lib/helpers/transactions';
-import { SERVICE_NAME, TIER } from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, TIER } from '../../../common/es_fields/apm';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,

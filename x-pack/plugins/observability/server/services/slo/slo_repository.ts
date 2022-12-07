@@ -12,14 +12,32 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 
-import { StoredSLO, SLO, sloSchema } from '../../types/models';
+import { StoredSLO, SLO } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { SLONotFound } from '../../errors';
+import { sloSchema } from '../../types/schema';
+
+export interface Criteria {
+  name?: string;
+}
+
+export interface Pagination {
+  page: number;
+  perPage: number;
+}
+
+export interface Paginated<T> {
+  page: number;
+  perPage: number;
+  total: number;
+  results: T[];
+}
 
 export interface SLORepository {
   save(slo: SLO): Promise<SLO>;
   findById(id: string): Promise<SLO>;
   deleteById(id: string): Promise<void>;
+  find(criteria: Criteria, pagination: Pagination): Promise<Paginated<SLO>>;
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
@@ -56,6 +74,31 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       throw err;
     }
   }
+
+  async find(criteria: Criteria, pagination: Pagination): Promise<Paginated<SLO>> {
+    const filterKuery = buildFilterKuery(criteria);
+    const response = await this.soClient.find<StoredSLO>({
+      type: SO_SLO_TYPE,
+      page: pagination.page,
+      perPage: pagination.perPage,
+      filter: filterKuery,
+    });
+
+    return {
+      total: response.total,
+      page: response.page,
+      perPage: response.per_page,
+      results: response.saved_objects.map((slo) => toSLO(slo.attributes)),
+    };
+  }
+}
+
+function buildFilterKuery(criteria: Criteria): string | undefined {
+  const filters: string[] = [];
+  if (!!criteria.name) {
+    filters.push(`slo.attributes.name: ${addWildcardIfAbsent(criteria.name)}`);
+  }
+  return filters.length > 0 ? filters.join(' and ') : undefined;
 }
 
 function toStoredSLO(slo: SLO): StoredSLO {
@@ -69,4 +112,10 @@ function toSLO(storedSLO: StoredSLO): SLO {
       throw new Error('Invalid Stored SLO');
     }, t.identity)
   );
+}
+
+const WILDCARD_CHAR = '*';
+function addWildcardIfAbsent(value: string): string {
+  if (value.substring(value.length - 1) === WILDCARD_CHAR) return value;
+  return `${value}${WILDCARD_CHAR}`;
 }

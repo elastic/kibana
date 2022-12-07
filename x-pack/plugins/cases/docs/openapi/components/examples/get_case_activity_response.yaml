@@ -1,37 +1,72 @@
 summary: Retrieves all activity for a case
-value: 
-  [
-    {
-      "created_at":"2022-07-14T20:11:24.947Z",
-      "created_by":{"username":"elastic","email":null,"full_name":null},
-      "owner":"cases",
-      "action":"create",
-      "payload":{
-        "description":"A case description",
-        "title":"Case title 1",
-        "tags":["tag 1"],
-        "connector":{"name":"none","type":".none","fields":null,"id":"none"},
-        "settings":{"syncAlerts":true},
-        "owner":"cases",
-        "severity":"low",
-        "status":"open"
-      },
-      "type":"create_case",
-      "action_id":"22fd3e30-03b1-11ed-920c-974bfa104448",
-      "case_id":"22df07d0-03b1-11ed-920c-974bfa104448",
-      "comment_id":null
-    },
-    {
-      "created_at":"2022-07-14T20:12:53.354Z",
-      "created_by":{"username":"elastic","email":null,"full_name":null},
-      "owner":"cases",
-      "action":"create",
-      "payload":{
-        "comment":{"type":"user","owner":"cases","comment":"A new comment"}
-      },
-      "type":"comment",
-      "action_id":"57af14a0-03b1-11ed-920c-974bfa104448",
-      "case_id":"22df07d0-03b1-11ed-920c-974bfa104448",
-      "comment_id":"578608d0-03b1-11ed-920c-974bfa104448"
-    }
-  ]
+value:
+  - action_id: b4cd0770-07c9-11ed-a5fd-47154cb8767e
+    action: create
+    case_id: 22df07d0-03b1-11ed-920c-974bfa104448
+    comment_id: 578608d0-03b1-11ed-920c-974bfa104448
+    created_at: 2022-07-20T01:17:22.150Z
+    created_by:
+      username: elastic
+      email: null
+      full_name: null
+    owner: cases
+    payload:
+      assignees:
+      connector:
+        name: none
+        type: .none
+        fields: null
+        id: none
+      description: test
+      tags:
+        - mine
+      title: test-case
+      owner: cases
+      settings:
+        syncAlerts: false
+      severity: low
+      status: open 
+      type: create_case
+    type: comment
+  - action_id: 57af14a0-03b1-11ed-920c-974bfa104448
+    action: create
+    case_id: 22df07d0-03b1-11ed-920c-974bfa104448
+    comment_id: 578608d0-03b1-11ed-920c-974bfa104448
+    created_at: 2022-07-14T20:12:53.354Z
+    created_by:
+      username: elastic
+      email: null
+      full_name: null
+    owner: cases
+    payload:
+      comment: A new comment
+      owner: cases
+      type: user
+    type: comment
+  - action_id: 573c6980-6123-11ed-aa41-81a0a61fe447
+    action: add
+    case_id: 22df07d0-03b1-11ed-920c-974bfa104448
+    comment_id: null
+    created_at: 2022-07-20T01:10:28.238Z
+    created_by:
+      username: elastic
+      email: null
+      full_name: null
+      profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+    owner: cases
+    payload:
+      assignees:
+        uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+    type: assignees
+  - action_id: fff460e0-07c9-11ed-a5fd-47154cb8767e
+    action: delete
+    case_id: 22df07d0-03b1-11ed-920c-974bfa104448
+    comment_id: null
+    created_at: 2022-07-20T01:19:28.238Z
+    created_by:
+      username: elastic
+      email: null
+      full_name: null
+    owner: cases
+    payload:
+    type: delete_case
