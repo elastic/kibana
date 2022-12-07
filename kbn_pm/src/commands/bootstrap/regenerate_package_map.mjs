@@ -52,6 +52,6 @@ export async function regeneratePackageMap(packages, plugins, log) {
 
   if (content !== existingContent) {
     await Fsp.writeFile(path, content);
-    log.warning('update package map, caches may be invalidated');
+    log.warning('updated package map, many caches may be invalidated');
   }
 }
