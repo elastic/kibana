@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import {
-  postClustersRequestPayloadRT,
-} from '../../../../../common/http_api/cluster';
+import { postClustersRequestPayloadRT } from '../../../../../common/http_api/cluster';
 import { findMonitoredClusters } from '../../../../lib/cluster/get_clusters_from_request';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
