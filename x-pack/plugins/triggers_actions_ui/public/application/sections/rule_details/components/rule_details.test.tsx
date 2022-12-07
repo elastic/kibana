@@ -66,8 +66,8 @@ const mockRuleApis = {
   refreshToken: Date.now(),
   snoozeRule: jest.fn(),
   unsnoozeRule: jest.fn(),
-  bulkEnableRule: jest.fn(),
-  bulkDisableRule: jest.fn(),
+  bulkEnableRules: jest.fn(),
+  bulkDisableRules: jest.fn(),
 };
 
 const authorizedConsumers = {
@@ -755,8 +755,8 @@ describe('rule_details', () => {
 
       disableButton.simulate('click');
 
-      expect(mockRuleApis.disableRule).toHaveBeenCalledTimes(1);
-      expect(mockRuleApis.disableRule).toHaveBeenCalledWith(rule);
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(rule);
     });
 
     it('should enable the rule when clicked', async () => {
@@ -784,8 +784,8 @@ describe('rule_details', () => {
 
       enableButton.simulate('click');
 
-      expect(mockRuleApis.enableRule).toHaveBeenCalledTimes(1);
-      expect(mockRuleApis.enableRule).toHaveBeenCalledWith(rule);
+      expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledWith(rule);
     });
   });
 
