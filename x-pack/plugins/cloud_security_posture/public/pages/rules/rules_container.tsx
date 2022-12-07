@@ -7,11 +7,7 @@
 import React, { useState, useMemo } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import {
-  extractErrorMessage,
-  createCspRuleSearchFilterByPackagePolicy,
-  isNonNullable,
-} from '../../../common/utils/helpers';
+import { extractErrorMessage, isNonNullable } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesTableHeader } from './rules_table_header';
 import {
@@ -72,10 +68,7 @@ export const RulesContainer = () => {
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
-    filter: createCspRuleSearchFilterByPackagePolicy({
-      packagePolicyId: params.packagePolicyId,
-      policyId: params.policyId,
-    }),
+    filter: params.packagePolicyId,
     search: '',
     page: 0,
     perPage: pageSize || 10,

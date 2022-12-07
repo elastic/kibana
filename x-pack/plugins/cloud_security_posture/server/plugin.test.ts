@@ -334,8 +334,8 @@ describe('Cloud Security Posture Plugin', () => {
       for (const cb of packagePolicyPostDeleteCallbacks) {
         await cb(deletedPackagePolicyMock);
       }
-      expect(repositoryFindMock).toHaveBeenCalledTimes(2);
-      expect(spy).toHaveBeenCalledTimes(1);
+      expect(repositoryFindMock).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledTimes(0);
     });
   });
 });
