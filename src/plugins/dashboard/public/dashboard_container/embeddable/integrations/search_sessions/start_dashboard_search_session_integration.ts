@@ -27,6 +27,11 @@ const refetchKeys: Array<keyof DashboardContainerByValueInput> = [
   'timeslice',
   'timeRestore',
   'lastReloadRequestTime',
+
+  // also refetch when chart settings change
+  'syncColors',
+  'syncCursor',
+  'syncTooltips',
 ];
 
 /**
