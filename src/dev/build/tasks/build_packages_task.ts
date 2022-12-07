@@ -30,6 +30,7 @@ export const BuildBazelPackages: Task = {
       'build',
       '//packages/kbn-ui-shared-deps-npm:shared_built_assets',
       '//packages/kbn-ui-shared-deps-src:shared_built_assets',
+      '//packages/kbn-monaco:target_workers',
       '--show_result=1',
       '--define=dist=true',
     ]);
@@ -41,8 +42,6 @@ export const BuildBazelPackages: Task = {
 
     await withFastAsyncTransform(transformConfig, async (transform) => {
       await asyncForEach(packages, async (pkg) => {
-        log.info(`Copying`, pkg.manifest.id, 'into build');
-
         const pkgDistPath = build.resolvePath(pkg.normalizedRepoRelativeDir);
         const peggyConfigOutputPaths = new Set<string>();
         const pkgSrcPath = config.resolveFromRepo(pkg.normalizedRepoRelativeDir);
@@ -112,6 +111,19 @@ export const BuildBazelPackages: Task = {
           });
         }
 
+        if (pkg.manifest.id === '@kbn/monaco') {
+          await scanCopy({
+            source: config.resolveFromRepo(
+              'bazel-bin',
+              pkg.normalizedRepoRelativeDir,
+              'target_workers'
+            ),
+            destination: build.resolvePath(pkg.normalizedRepoRelativeDir, 'target_workers'),
+            permissions: distPerms,
+            filter: (rec) => rec.source.ext !== '.map',
+          });
+        }
+
         // cleanup any peggy config files
         if (peggyConfigOutputPaths.size) {
           await deleteAll(Array.from(peggyConfigOutputPaths), log);
@@ -134,6 +146,8 @@ export const BuildBazelPackages: Task = {
             2
           )
         );
+
+        log.info(`Copied`, pkg.manifest.id, 'into build');
       });
     });
   },

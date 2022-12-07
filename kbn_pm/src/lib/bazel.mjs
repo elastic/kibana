@@ -165,6 +165,7 @@ export async function buildWebpackBundles(log, opts = undefined) {
       'build',
       '//packages/kbn-ui-shared-deps-npm:shared_built_assets',
       '//packages/kbn-ui-shared-deps-src:shared_built_assets',
+      '//packages/kbn-monaco:target_workers',
       '--show_result=1',
     ],
     {
