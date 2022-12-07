@@ -93,7 +93,7 @@ export class ApmSynthtraceEsClient {
         getSerializeTransform(),
         getIntakeDefaultsTransform(),
         fork(new PassThrough({ objectMode: true }), ...aggregators),
-        // createFilterTransform((event: ApmFields) => event['processor.event'] === 'metric'),
+        createFilterTransform((event: ApmFields) => event['processor.event'] === 'metric'),
         createBreakdownMetricsAggregator('30s'),
         getApmServerMetadataTransform(this.version),
         getRoutingTransform(),
@@ -120,7 +120,7 @@ export class ApmSynthtraceEsClient {
         let action: SynthtraceESAction;
         count++;
 
-        if (count % 10 === 0) {
+        if (count % 1000 === 0) {
           this.logger.debug(`Indexed ${count} documents`);
         }
 
