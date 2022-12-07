@@ -5,11 +5,11 @@
  * 2.0.
  */
 import type { ISavedObjectsRepository, Logger, SavedObjectsFindResponse } from '@kbn/core/server';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { BenchmarkId } from '../../common/types';
 import { isEnabledBenchmarkInputType } from '../../common/utils/helpers';
 import type { CspRule } from '../../common/schemas';
-import { CLOUDBEAT_VANILLA, CSP_RULE_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { CLOUDBEAT_VANILLA, CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 export const isCspPackageInstalled = async (
   soClient: ISavedObjectsRepository,
@@ -19,19 +19,21 @@ export const isCspPackageInstalled = async (
   try {
     const { saved_objects: postDeleteRules }: SavedObjectsFindResponse<CspRule> =
       await soClient.find({
-        type: CSP_RULE_SAVED_OBJECT_TYPE,
+        type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
       });
 
-    if (!postDeleteRules.length) {
+    if (postDeleteRules.length > 0) {
       return true;
     }
-    return false;
+    return true;
   } catch (e) {
     logger.error(e);
     return false;
   }
 };
-export const getBenchmarkInputType = (inputs: PackagePolicy['inputs']): BenchmarkId => {
+export const getBenchmarkInputType = (
+  inputs: PackagePolicy['inputs'] | NewPackagePolicy['inputs']
+): BenchmarkId => {
   const enabledInputs = inputs.filter(isEnabledBenchmarkInputType);
 
   // Use the only enabled input

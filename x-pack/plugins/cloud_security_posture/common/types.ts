@@ -95,7 +95,6 @@ export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: num
 export interface Benchmark {
   package_policy: PackagePolicy;
   agent_policy: AgentPolicyStatus;
-  benchmark_id: BenchmarkId;
   number_of_rules: number;
 }
 

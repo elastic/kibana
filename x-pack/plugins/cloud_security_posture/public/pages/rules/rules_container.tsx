@@ -68,18 +68,21 @@ export const RulesContainer = () => {
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
-    filter: params.packagePolicyId,
+    filter: '',
     search: '',
     page: 0,
     perPage: pageSize || 10,
   });
 
-  const { data, status, error } = useFindCspRules({
-    filter: rulesQuery.filter,
-    search: rulesQuery.search,
-    page: 1,
-    perPage: MAX_ITEMS_PER_PAGE,
-  });
+  const { data, status, error } = useFindCspRules(
+    {
+      filter: rulesQuery.filter,
+      search: rulesQuery.search,
+      page: 1,
+      perPage: MAX_ITEMS_PER_PAGE,
+    },
+    params.packagePolicyId
+  );
 
   const rulesPageData = useMemo(
     () => getRulesPageData({ data, error, status }, rulesQuery),

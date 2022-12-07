@@ -6,7 +6,7 @@
  */
 
 import { Truthy } from 'lodash';
-import { PackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicyInput, PackagePolicyInput } from '@kbn/fleet-plugin/common';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CSP_RULE_SAVED_OBJECT_TYPE,
@@ -44,7 +44,7 @@ export const createCspRuleSearchFilterByPackagePolicy = ({
 export const getBenchmarkTypeFilter = (type: BenchmarkId): string =>
   `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"`;
 
-export const isEnabledBenchmarkInputType = (input: PackagePolicyInput) =>
+export const isEnabledBenchmarkInputType = (input: PackagePolicyInput | NewPackagePolicyInput) =>
   !!input.type && input.enabled;
 
 export const isCspPackage = (packageName?: string) =>

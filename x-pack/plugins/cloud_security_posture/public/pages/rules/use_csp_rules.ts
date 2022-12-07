@@ -24,12 +24,15 @@ export type RulesQuery = Required<
 >;
 export type RulesQueryResult = ReturnType<typeof useFindCspRules>;
 
-export const useFindCspRules = ({ search, page, perPage, filter }: RulesQuery) => {
+export const useFindCspRules = (
+  { search, page, perPage, filter }: RulesQuery,
+  packagePolicyId: string
+) => {
   const { savedObjects } = useKibana().services;
 
   return useQuery([CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE, { search, page, perPage }], () =>
     savedObjects.client
-      .get<NewPackagePolicy>(PACKAGE_POLICY_SAVED_OBJECT_TYPE, filter)
+      .get<NewPackagePolicy>(PACKAGE_POLICY_SAVED_OBJECT_TYPE, packagePolicyId)
       .then((res) => {
         const benchmarkId = getBenchmarkInputType(res.attributes.inputs);
 

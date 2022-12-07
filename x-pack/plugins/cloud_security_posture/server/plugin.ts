@@ -145,7 +145,7 @@ export class CspPlugin
               const soClient = core.savedObjects.createInternalRepository();
               const isPackageExists = await isCspPackageInstalled(soClient, this.logger);
 
-              if (isPackageExists) {
+              if (!isPackageExists) {
                 await this.uninstallResources(plugins.taskManager, this.logger);
               }
             }
