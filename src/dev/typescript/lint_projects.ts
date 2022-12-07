@@ -25,6 +25,7 @@ export interface LintOptions {
 export async function getLintedProjects(log: SomeDevLog, options: LintOptions) {
   let projects: Project[] | undefined;
   let errorCount = 0;
+  let fixedCount = 0;
   const fsCache = new Map<string, string>();
   const linted = new Set<string>();
 
@@ -69,6 +70,7 @@ export async function getLintedProjects(log: SomeDevLog, options: LintOptions) {
           Fs.writeFileSync(project.tsConfigPath, fixedJsonc, 'utf8');
           fsCache.delete(project.tsConfigPath);
           log.debug('fixed', project.tsConfigPath, 'reloading');
+          fixedCount += 1;
           continue lintProjects;
         }
 
@@ -84,6 +86,10 @@ export async function getLintedProjects(log: SomeDevLog, options: LintOptions) {
         }
       }
     }
+  }
+
+  if (fixedCount) {
+    log.success(`Fixed errors in ${fixedCount} projects`);
   }
 
   if (errorCount) {
