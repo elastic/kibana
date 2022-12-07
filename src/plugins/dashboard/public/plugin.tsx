@@ -66,6 +66,7 @@ import {
   AddToLibraryAction,
   LibraryNotificationAction,
   CopyToDashboardAction,
+  FiltersNotificationAction,
 } from './application';
 import { SavedObjectLoader } from './services/saved_object_loader';
 import { DashboardAppLocatorDefinition, DashboardAppLocator } from './locator';
@@ -74,7 +75,6 @@ import { DashboardConstants } from './dashboard_constants';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
-import { FiltersNotificationBadge } from './application/actions/filters_notification_badge';
 import type { DashboardMountContextProps } from './types';
 
 export interface DashboardFeatureFlagConfig {
@@ -317,9 +317,9 @@ export class DashboardPlugin
       uiActions.registerAction(changeViewAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
 
-      const panelLevelFiltersNotification = new FiltersNotificationBadge();
+      const panelLevelFiltersNotification = new FiltersNotificationAction();
       uiActions.registerAction(panelLevelFiltersNotification);
-      uiActions.attachAction(PANEL_BADGE_TRIGGER, panelLevelFiltersNotification.id);
+      uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, panelLevelFiltersNotification.id);
 
       if (share) {
         const ExportCSVPlugin = new ExportCSVAction();
