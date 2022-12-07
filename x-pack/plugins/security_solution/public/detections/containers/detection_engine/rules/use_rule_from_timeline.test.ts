@@ -106,10 +106,9 @@ describe('useRuleFromTimeline', () => {
     (resolveTimeline as jest.Mock).mockResolvedValue(selectedTimeline);
   });
 
-  // TODO: the hook dismounts before setRuleQuery is called and i cant figure out why
-  describe.skip('initial data view === rule from timeline data view', () => {
+  describe('initial data view === rule from timeline data view', () => {
     beforeEach(() => {
-      (useSourcererDataView as jest.Mock).mockReturnValueOnce({
+      (useSourcererDataView as jest.Mock).mockReturnValue({
         ...mockSourcererScope,
         dataViewId: 'custom-data-view-id',
         selectedPatterns: ['awesome-*'],
@@ -121,7 +120,7 @@ describe('useRuleFromTimeline', () => {
       expect(result.current.loading).toEqual(true);
       await waitForNextUpdate();
       expect(setRuleQuery).toHaveBeenCalled();
-      // expect(mockDispatch).toHaveBeenCalledTimes(3);
+      expect(mockDispatch).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -153,6 +152,9 @@ describe('useRuleFromTimeline', () => {
       const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       expect(result.current.loading).toEqual(true);
       await waitForNextUpdate();
+      expect(setRuleQuery).toHaveBeenCalled();
+      // mockDispatch.mock.calls.forEach((call) => console.log('CALL', call[0]));
+
       expect(mockDispatch).toHaveBeenCalledTimes(4);
       expect(mockDispatch).toHaveBeenNthCalledWith(1, {
         type: 'x-pack/security_solution/local/timeline/UPDATE_LOADING',

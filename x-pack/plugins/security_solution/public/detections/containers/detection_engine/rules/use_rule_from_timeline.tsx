@@ -64,10 +64,12 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   // selectedTimeline = timeline to set rule from
   const [selectedTimeline, setRuleFromTimeline] = useState<TimelineModel | null>(null);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const onOpenTimeline = useCallback(
     (timeline: TimelineModel) => {
+      // will already be true if timeline set from url
+      setLoading(true);
       setRuleFromTimeline(timeline);
 
       if (timeline.dataViewId !== dataViewId && !isEmpty(timeline.indexNames)) {
@@ -203,13 +205,15 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     [dispatch, onOpenTimeline, selectedTimeline]
   );
 
+  const [urlStateInitialized, setUrlStateInitialized] = useState(false);
+
   useEffect(() => {
-    if (timelineIdFromUrl != null) {
+    if (timelineIdFromUrl != null && !urlStateInitialized) {
+      setUrlStateInitialized(true);
       getTimelineById(timelineIdFromUrl);
-    } else {
-      setLoading(false);
+      setLoading(true);
     }
-  }, [getTimelineById, timelineIdFromUrl]);
+  }, [getTimelineById, timelineIdFromUrl, urlStateInitialized]);
   // end handle set rule from timeline id
 
   return { loading, onOpenTimeline };
