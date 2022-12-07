@@ -88,8 +88,9 @@ export async function inspectSearchParams(
   const mockInternalESClient = { search: spy } as any;
   const mockIndices = {
     ...indices,
-    apmAgentConfigurationIndex: 'myIndex',
-    apmCustomLinkIndex: 'myIndex',
+    apmAgentConfigurationIndex: '.apm-agent-configuration',
+    apmCustomLinkIndex: '.apm-custom-link',
+    apmSourceMapIndex: '.apm-source-map',
   };
   try {
     response = await fn({
