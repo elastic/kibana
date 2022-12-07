@@ -29,7 +29,7 @@ import {
 import { act } from 'react-dom/test-utils';
 import { pluginServices } from '../services/plugin_services';
 
-describe('LibraryNotificationPopover', () => {
+describe('filters notification popover', () => {
   const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
   pluginServices.getServices().embeddable.getEmbeddableFactory = jest
     .fn()
@@ -41,6 +41,7 @@ describe('LibraryNotificationPopover', () => {
 
   beforeEach(async () => {
     container = new DashboardContainer(getSampleDashboardInput());
+    await container.untilInitialized();
     const contactCardEmbeddable = await container.addNewEmbeddable<
       ContactCardEmbeddableInput,
       ContactCardEmbeddableOutput,
