@@ -102,6 +102,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // This version's migration has already been completed.
         versionMigrationCompleted(stateP.currentAlias, stateP.versionAlias, aliases)
       ) {
+        const source = aliases[stateP.currentAlias]!;
+
         return {
           ...stateP,
           // Skip to 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT' so that if a new plugin was
@@ -112,6 +114,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // index
           sourceIndex: Option.none,
           targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
+          sourceIndexMappings: indices[source].mappings,
           targetIndexMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetIndexMappings,
             indices[aliases[stateP.currentAlias]!].mappings
@@ -1005,7 +1008,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       }
       return {
         ...state,
-        controlState: 'UPDATE_TARGET_MAPPINGS',
+        controlState: 'CHECK_TARGET_MAPPINGS',
       };
     } else {
       throwBadResponse(stateP, res);
@@ -1015,10 +1018,28 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     if (Either.isRight(res)) {
       return {
         ...stateP,
-        controlState: 'UPDATE_TARGET_MAPPINGS',
+        controlState: 'CHECK_TARGET_MAPPINGS',
       };
     } else {
       throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'CHECK_TARGET_MAPPINGS') {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isRight(res)) {
+      if (!res.right.match) {
+        return {
+          ...stateP,
+          controlState: 'UPDATE_TARGET_MAPPINGS',
+        };
+      }
+
+      // The md5 of the mappings match, so there's no need to update target mappings
+      return {
+        ...stateP,
+        controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
+      };
+    } else {
+      throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -1034,25 +1055,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (Option.isSome(stateP.versionIndexReadyActions)) {
-        // If there are some versionIndexReadyActions we performed a full
-        // migration and need to point the aliases to our newly migrated
-        // index.
-        return {
-          ...stateP,
-          controlState: 'MARK_VERSION_INDEX_READY',
-          versionIndexReadyActions: stateP.versionIndexReadyActions,
-        };
-      } else {
-        // If there are none versionIndexReadyActions another instance
-        // already completed this migration and we only transformed outdated
-        // documents and updated the mappings for in case a new plugin was
-        // enabled.
-        return {
-          ...stateP,
-          controlState: 'DONE',
-        };
-      }
+      return {
+        ...stateP,
+        controlState: 'UPDATE_TARGET_MAPPINGS_META',
+      };
     } else {
       const left = res.left;
       if (isTypeof(left, 'wait_for_task_completion_timeout')) {
@@ -1064,6 +1070,36 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         throwBadResponse(stateP, left);
       }
+    }
+  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_META') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
+      };
+    } else {
+      throwBadResponse(stateP, res as never);
+    }
+  } else if (stateP.controlState === 'CHECK_VERSION_INDEX_READY_ACTIONS') {
+    if (Option.isSome(stateP.versionIndexReadyActions)) {
+      // If there are some versionIndexReadyActions we performed a full
+      // migration and need to point the aliases to our newly migrated
+      // index.
+      return {
+        ...stateP,
+        controlState: 'MARK_VERSION_INDEX_READY',
+        versionIndexReadyActions: stateP.versionIndexReadyActions,
+      };
+    } else {
+      // If there are none versionIndexReadyActions another instance
+      // already completed this migration and we only transformed outdated
+      // documents and updated the mappings for in case a new plugin was
+      // enabled.
+      return {
+        ...stateP,
+        controlState: 'DONE',
+      };
     }
   } else if (stateP.controlState === 'CREATE_NEW_TARGET') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;

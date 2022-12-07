@@ -20,12 +20,18 @@ import {
   METRICSET_NAME,
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
 import { GenericMetricsChart } from '../fetch_and_transform_metrics';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { calcComputeUsageGBSeconds } from './helper';
+import { convertComputeUsageToGbSec } from './helper';
+
+export const computeUsageAvgScript = {
+  avg: {
+    script: `return doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value * doc['${FAAS_BILLED_DURATION}'].value`,
+  },
+};
 
 export async function getComputeUsageChart({
   environment,
@@ -47,9 +53,8 @@ export async function getComputeUsageChart({
   serverlessId?: string;
 }): Promise<GenericMetricsChart> {
   const aggs = {
-    avgFaasBilledDuration: { avg: { field: FAAS_BILLED_DURATION } },
-    avgTotalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
     countInvocations: { value_count: { field: FAAS_BILLED_DURATION } },
+    avgComputeUsageBytesMs: computeUsageAvgScript,
   };
 
   const params = {
@@ -117,17 +122,16 @@ export async function getComputeUsageChart({
               key: 'compute_usage',
               type: 'bar',
               overallValue:
-                calcComputeUsageGBSeconds({
-                  billedDuration: aggregations?.avgFaasBilledDuration.value,
-                  totalMemory: aggregations?.avgTotalMemory.value,
+                convertComputeUsageToGbSec({
+                  computeUsageBytesMs:
+                    aggregations?.avgComputeUsageBytesMs.value,
                   countInvocations: aggregations?.countInvocations.value,
                 }) ?? 0,
               color: theme.euiColorVis0,
               data: timeseriesData.buckets.map((bucket) => {
                 const computeUsage =
-                  calcComputeUsageGBSeconds({
-                    billedDuration: bucket.avgFaasBilledDuration.value,
-                    totalMemory: bucket.avgTotalMemory.value,
+                  convertComputeUsageToGbSec({
+                    computeUsageBytesMs: bucket.avgComputeUsageBytesMs.value,
                     countInvocations: bucket.countInvocations.value,
                   }) ?? 0;
                 return {

@@ -59,6 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.slack',
         'actions:.swimlane',
         'actions:.teams',
+        'actions:.tines',
         'actions:.webhook',
         'actions:.xmatters',
         'actions_telemetry',

@@ -6,8 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { isNil, isEmpty } from 'lodash';
+import { termQuery } from '../../../../../common/utils/term_query';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import {
@@ -17,18 +16,7 @@ import {
   DEVICE_MODEL_NAME,
   NETWORK_CONNECTION_TYPE,
   SERVICE_VERSION,
-} from '../../../../../common/elasticsearch_fieldnames';
-
-function termQuery<T extends string>(
-  field: T,
-  value: string | boolean | number | undefined | null
-): QueryDslQueryContainer[] {
-  if (isNil(value) || isEmpty(value)) {
-    return [];
-  }
-
-  return [{ term: { [field]: value } }];
-}
+} from '../../../../../common/es_fields/apm';
 
 export function useFiltersForMobileCharts() {
   const {

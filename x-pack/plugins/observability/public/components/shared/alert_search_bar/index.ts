@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { AlertSearchBar as ObservabilityAlertSearchBar } from './alert_search_bar';
-export { AlertSearchbarWithUrlSync as ObservabilityAlertSearchbarWithUrlSync } from './alert_search_bar_with_url_sync';
+export { ObservabilityAlertSearchBar } from './alert_search_bar';
+export { ObservabilityAlertSearchbarWithUrlSync } from './alert_search_bar_with_url_sync';

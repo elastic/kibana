@@ -65,6 +65,7 @@ export const mockLayerList = [
         iconOrientation: { type: 'STATIC', options: { orientation: 0 } },
         labelText: { type: 'STATIC', options: { value: '' } },
         labelColor: { type: 'STATIC', options: { color: '#000000' } },
+        labelPosition: { options: { position: 'CENTER' } },
         labelSize: { type: 'STATIC', options: { size: 14 } },
         labelBorderColor: { type: 'STATIC', options: { color: '#FFFFFF' } },
         labelZoomRange: {
@@ -136,6 +137,7 @@ export const mockLayerList = [
         iconOrientation: { type: 'STATIC', options: { orientation: 0 } },
         labelText: { type: 'STATIC', options: { value: '' } },
         labelColor: { type: 'STATIC', options: { color: '#000000' } },
+        labelPosition: { options: { position: 'CENTER' } },
         labelSize: { type: 'STATIC', options: { size: 14 } },
         labelBorderColor: { type: 'STATIC', options: { color: '#FFFFFF' } },
         labelZoomRange: {

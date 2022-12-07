@@ -12,7 +12,7 @@ import moment from 'moment';
 import { capitalize, isEmpty, sortBy } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, ReactNode, useCallback, useMemo, useRef } from 'react';
 import {
   EuiButton,
   EuiFieldSearch,
@@ -22,13 +22,10 @@ import {
   EuiSpacer,
   EuiLink,
   EuiEmptyPrompt,
-  EuiHealth,
   EuiTableSortingType,
   EuiButtonIcon,
   EuiSelectableOption,
-  EuiIcon,
   EuiDescriptionList,
-  EuiCallOut,
 } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { useHistory } from 'react-router-dom';
@@ -37,8 +34,10 @@ import {
   RuleExecutionStatus,
   ALERTS_FEATURE_ID,
   RuleExecutionStatusErrorReasons,
+  RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { ruleDetailsRoute as commonRuleDetailsRoute } from '@kbn/rule-data-utils';
 import {
   ActionType,
   Rule,
@@ -55,22 +54,27 @@ import { RuleAdd, RuleEdit } from '../../rule_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../common/components/rule_quick_edit_buttons';
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
+import { RulesListStatuses } from './rules_list_statuses';
 import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { RuleExecutionStatusFilter } from './rule_execution_status_filter';
+import { RuleLastRunOutcomeFilter } from './rule_last_run_outcome_filter';
+import { RulesListErrorBanner } from './rules_list_error_banner';
 import {
   loadRuleTypes,
   disableRule,
   enableRule,
   snoozeRule,
   unsnoozeRule,
-  deleteRules,
   bulkUpdateAPIKey,
+  bulkDisableRules,
+  bulkEnableRules,
+  cloneRule,
 } from '../../../lib/rule_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
-import { routeToRuleDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
-import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
+import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
+import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
 import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -92,6 +96,14 @@ import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
 import { runRule } from '../../../lib/run_rule';
+import { bulkDeleteRules } from '../../../lib/rule_api';
+import {
+  getConfirmDeletionButtonText,
+  getConfirmDeletionModalText,
+  SINGLE_RULE_TITLE,
+  MULTIPLE_RULE_TITLE,
+} from '../translations';
+import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 
 const ENTER_KEY = 13;
 
@@ -109,6 +121,8 @@ export interface RulesListProps {
   onStatusFilterChange?: (status: RuleStatus[]) => RulesPageContainerState;
   lastResponseFilter?: string[];
   onLastResponseFilterChange?: (lastResponse: string[]) => RulesPageContainerState;
+  lastRunOutcomeFilter?: string[];
+  onLastRunOutcomeFilterChange?: (lastRunOutcome: string[]) => RulesPageContainerState;
   refresh?: Date;
   rulesListKey?: string;
   visibleColumns?: RulesListVisibleColumns[];
@@ -121,9 +135,9 @@ interface RuleTypeState {
 }
 
 export const percentileFields = {
-  [Percentiles.P50]: 'monitoring.execution.calculated_metrics.p50',
-  [Percentiles.P95]: 'monitoring.execution.calculated_metrics.p95',
-  [Percentiles.P99]: 'monitoring.execution.calculated_metrics.p99',
+  [Percentiles.P50]: 'monitoring.run.calculated_metrics.p50',
+  [Percentiles.P95]: 'monitoring.run.calculated_metrics.p95',
+  [Percentiles.P99]: 'monitoring.run.calculated_metrics.p99',
 };
 
 const initialPercentileOptions = Object.values(Percentiles).map((percentile) => ({
@@ -141,6 +155,8 @@ export const RulesList = ({
   onStatusFilterChange,
   lastResponseFilter,
   onLastResponseFilterChange,
+  lastRunOutcomeFilter,
+  onLastRunOutcomeFilterChange,
   refresh,
   rulesListKey,
   visibleColumns,
@@ -167,6 +183,9 @@ export const RulesList = ({
   const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>(
     lastResponseFilter || []
   );
+  const [ruleLastRunOutcomesFilter, setRuleLastRunOutcomesFilter] = useState<string[]>(
+    lastRunOutcomeFilter || []
+  );
   const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>(statusFilter || []);
 
   const [tagsFilter, setTagsFilter] = useState<string[]>([]);
@@ -181,6 +200,9 @@ export const RulesList = ({
 
   const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('ruleTagFilter');
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
+  const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
+
+  const cloneRuleId = useRef<null | string>(null);
 
   useEffect(() => {
     (async () => {
@@ -206,6 +228,10 @@ export const RulesList = ({
   });
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
+  const [rulesToDeleteFilter, setRulesToDeleteFilter] = useState<KueryNode | null | undefined>();
+  const [isDeletingRules, setIsDeletingRules] = useState<boolean>(false);
+  const [isEnablingRules, setIsEnablingRules] = useState<boolean>(false);
+  const [isDisablingRules, setIsDisablingRules] = useState<boolean>(false);
 
   // TODO - tech debt: Right now we're using null and undefined to determine if we should
   // render the bulk edit modal. Refactor this to only keep track of 1 set of rules and types
@@ -238,6 +264,7 @@ export const RulesList = ({
   const [isUnsnoozingRules, setIsUnsnoozingRules] = useState<boolean>(false);
   const [isUnschedulingRules, setIsUnschedulingRules] = useState<boolean>(false);
   const [isUpdatingRuleAPIKeys, setIsUpdatingRuleAPIKeys] = useState<boolean>(false);
+  const [isCloningRule, setIsCloningRule] = useState<boolean>(false);
 
   const hasAnyAuthorizedRuleType = useMemo(() => {
     return ruleTypesState.isInitialized && ruleTypesState.data.size > 0;
@@ -256,11 +283,11 @@ export const RulesList = ({
   );
 
   const [rulesTypesFilter, hasDefaultRuleTypesFiltersOn] = useMemo(() => {
-    if (isEmpty(typesFilter) && !isEmpty(filteredRuleTypes)) {
+    if (isEmpty(typesFilter)) {
       return [authorizedRuleTypes.map((art) => art.id), true];
     }
     return [typesFilter, false];
-  }, [typesFilter, filteredRuleTypes, authorizedRuleTypes]);
+  }, [typesFilter, authorizedRuleTypes]);
 
   const { rulesState, setRulesState, loadRules, noData, initialLoad } = useLoadRules({
     page,
@@ -268,6 +295,7 @@ export const RulesList = ({
     typesFilter: rulesTypesFilter,
     actionTypesFilter,
     ruleExecutionStatusesFilter,
+    ruleLastRunOutcomesFilter,
     ruleStatusesFilter,
     tagsFilter,
     sort,
@@ -280,15 +308,17 @@ export const RulesList = ({
     onError,
   });
 
-  const { loadRuleAggregations, rulesStatusesTotal } = useLoadRuleAggregations({
-    searchText,
-    typesFilter,
-    actionTypesFilter,
-    ruleExecutionStatusesFilter,
-    ruleStatusesFilter,
-    tagsFilter,
-    onError,
-  });
+  const { loadRuleAggregations, rulesStatusesTotal, rulesLastRunOutcomesTotal } =
+    useLoadRuleAggregations({
+      searchText,
+      typesFilter: rulesTypesFilter,
+      actionTypesFilter,
+      ruleExecutionStatusesFilter,
+      ruleLastRunOutcomesFilter,
+      ruleStatusesFilter,
+      tagsFilter,
+      onError,
+    });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     setEditFlyoutVisibility(true);
@@ -302,7 +332,7 @@ export const RulesList = ({
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>
     ruleTypeRegistry.has(ruleTypeId) ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext : false;
 
-  const loadData = useCallback(async () => {
+  const refreshRules = useCallback(async () => {
     if (!ruleTypesState || !hasAnyAuthorizedRuleType) {
       return;
     }
@@ -322,9 +352,21 @@ export const RulesList = ({
     ruleTypesState,
   ]);
 
+  const tableItems = useMemo(() => {
+    if (ruleTypesState.isInitialized === false) {
+      return [];
+    }
+    return convertRulesToTableItems({
+      rules: rulesState.data,
+      ruleTypeIndex: ruleTypesState.data,
+      canExecuteActions,
+      config,
+    });
+  }, [ruleTypesState, rulesState.data, canExecuteActions, config]);
+
   useEffect(() => {
-    loadData();
-  }, [loadData, refresh, percentileOptions]);
+    refreshRules();
+  }, [refreshRules, refresh, percentileOptions]);
 
   useEffect(() => {
     (async () => {
@@ -394,10 +436,22 @@ export const RulesList = ({
   }, [lastResponseFilter]);
 
   useEffect(() => {
+    if (lastRunOutcomeFilter) {
+      setRuleLastRunOutcomesFilter(lastRunOutcomeFilter);
+    }
+  }, [lastResponseFilter]);
+
+  useEffect(() => {
     if (onLastResponseFilterChange) {
       onLastResponseFilterChange(ruleExecutionStatusesFilter);
     }
   }, [ruleExecutionStatusesFilter]);
+
+  useEffect(() => {
+    if (onLastRunOutcomeFilterChange) {
+      onLastRunOutcomeFilterChange(ruleLastRunOutcomesFilter);
+    }
+  }, [ruleLastRunOutcomesFilter]);
 
   // Clear bulk selection anytime the filters change
   useEffect(() => {
@@ -407,10 +461,22 @@ export const RulesList = ({
     rulesTypesFilter,
     actionTypesFilter,
     ruleExecutionStatusesFilter,
+    ruleLastRunOutcomesFilter,
     ruleStatusesFilter,
     tagsFilter,
     hasDefaultRuleTypesFiltersOn,
   ]);
+
+  useEffect(() => {
+    if (cloneRuleId.current) {
+      const ruleItem = tableItems.find((ti) => ti.id === cloneRuleId.current);
+      cloneRuleId.current = null;
+      setIsCloningRule(false);
+      if (ruleItem) {
+        onRuleEdit(ruleItem);
+      }
+    }
+  }, [tableItems]);
 
   const buildErrorListItems = (_executionStatus: RuleExecutionStatus) => {
     const hasErrorMessage = _executionStatus.status === 'error';
@@ -456,7 +522,11 @@ export const RulesList = ({
     setShowErrors((prevValue) => {
       if (!prevValue) {
         const rulesToExpand = rulesState.data.reduce((acc, ruleItem) => {
-          if (ruleItem.executionStatus.status === 'error') {
+          // Check both outcome and executionStatus for now until we deprecate executionStatus
+          if (
+            ruleItem.lastRun?.outcome === RuleLastRunOutcomeValues[2] ||
+            ruleItem.executionStatus.status === 'error'
+          ) {
             return {
               ...acc,
               [ruleItem.id]: (
@@ -519,6 +589,25 @@ export const RulesList = ({
     return null;
   };
 
+  const getRuleOutcomeOrStatusFilter = () => {
+    if (isRuleUsingExecutionStatus) {
+      return [
+        <RuleExecutionStatusFilter
+          key="rule-status-filter"
+          selectedStatuses={ruleExecutionStatusesFilter}
+          onChange={setRuleExecutionStatusesFilter}
+        />,
+      ];
+    }
+    return [
+      <RuleLastRunOutcomeFilter
+        key="rule-last-run-outcome-filter"
+        selectedOutcomes={ruleLastRunOutcomesFilter}
+        onChange={setRuleLastRunOutcomesFilter}
+      />,
+    ];
+  };
+
   const onDisableRule = (rule: RuleTableItem) => {
     return disableRule({ http, id: rule.id });
   };
@@ -559,28 +648,12 @@ export const RulesList = ({
         key="action-type-filter"
         actionTypes={actionTypes}
         onChange={setActionTypesFilter}
-        filters={typesFilter}
+        filters={actionTypesFilter}
       />
     ),
-    <RuleExecutionStatusFilter
-      key="rule-status-filter"
-      selectedStatuses={ruleExecutionStatusesFilter}
-      onChange={setRuleExecutionStatusesFilter}
-    />,
+    ...getRuleOutcomeOrStatusFilter(),
     ...getRuleTagFilter(),
   ];
-
-  const tableItems = useMemo(() => {
-    if (ruleTypesState.isInitialized === false) {
-      return [];
-    }
-    return convertRulesToTableItems({
-      rules: rulesState.data,
-      ruleTypeIndex: ruleTypesState.data,
-      canExecuteActions,
-      config,
-    });
-  }, [ruleTypesState, rulesState, canExecuteActions, config]);
 
   const {
     isAllSelected,
@@ -600,6 +673,7 @@ export const RulesList = ({
     typesFilter: rulesTypesFilter,
     actionTypesFilter,
     ruleExecutionStatusesFilter,
+    ruleLastRunOutcomesFilter,
     ruleStatusesFilter,
     tagsFilter,
   });
@@ -608,9 +682,9 @@ export const RulesList = ({
     if (isAllSelected) {
       return true;
     }
-    const selectedIdsArray = [...selectedIds];
-    return selectedIdsArray.length
-      ? filterRulesById(rulesState.data, selectedIdsArray).every((selectedRule) =>
+
+    return selectedIds.length
+      ? filterRulesById(rulesState.data, selectedIds).every((selectedRule) =>
           hasAllPrivilege(selectedRule, ruleTypesState.data.get(selectedRule.ruleTypeId))
         )
       : false;
@@ -619,6 +693,11 @@ export const RulesList = ({
   const clearRulesToSnooze = () => {
     setRulesToSnooze([]);
     setRulesToSnoozeFilter(undefined);
+  };
+
+  const clearRulesToDelete = () => {
+    setRulesToDelete([]);
+    setRulesToDeleteFilter(undefined);
   };
 
   const clearRulesToUnsnooze = () => {
@@ -646,53 +725,55 @@ export const RulesList = ({
       rulesState.isLoading ||
       ruleTypesState.isLoading ||
       isPerformingAction ||
+      isDeletingRules ||
       isSnoozingRules ||
+      isEnablingRules ||
+      isDisablingRules ||
       isUnsnoozingRules ||
       isSchedulingRules ||
       isUnschedulingRules ||
-      isUpdatingRuleAPIKeys
+      isUpdatingRuleAPIKeys ||
+      isCloningRule
     );
   }, [
     rulesState,
     ruleTypesState,
     isPerformingAction,
+    isDeletingRules,
+    isEnablingRules,
+    isDisablingRules,
     isSnoozingRules,
     isUnsnoozingRules,
     isSchedulingRules,
     isUnschedulingRules,
     isUpdatingRuleAPIKeys,
+    isCloningRule,
   ]);
+
+  const onCloneRule = async (ruleId: string) => {
+    setIsCloningRule(true);
+    try {
+      const RuleCloned = await cloneRule({ http, ruleId });
+      cloneRuleId.current = RuleCloned.id;
+      await loadRules();
+    } catch {
+      cloneRuleId.current = null;
+      setIsCloningRule(false);
+      toasts.addDanger(
+        i18n.translate('xpack.triggersActionsUI.sections.rulesList.cloneFailed', {
+          defaultMessage: 'Unable to clone rule',
+        })
+      );
+    }
+  };
 
   const table = (
     <>
-      {rulesStatusesTotal.error > 0 ? (
-        <>
-          <EuiCallOut color="danger" size="s" data-test-subj="rulesErrorBanner">
-            <p>
-              <EuiIcon color="danger" type="alert" />
-              &nbsp;
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.rulesList.attentionBannerTitle"
-                defaultMessage="Error found in {totalStatusesError, plural, one {# rule} other {# rules}}."
-                values={{
-                  totalStatusesError: rulesStatusesTotal.error,
-                }}
-              />
-              &nbsp;
-              <EuiLink color="primary" onClick={() => setRuleExecutionStatusesFilter(['error'])}>
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.viewBannerButtonLabel"
-                  defaultMessage="Show {totalStatusesError, plural, one {rule} other {rules}} with error"
-                  values={{
-                    totalStatusesError: rulesStatusesTotal.error,
-                  }}
-                />
-              </EuiLink>
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="s" />
-        </>
-      ) : null}
+      <RulesListErrorBanner
+        rulesLastRunOutcomes={rulesLastRunOutcomesTotal}
+        setRuleExecutionStatusesFilter={setRuleExecutionStatusesFilter}
+        setRuleLastRunOutcomesFilter={setRuleLastRunOutcomesFilter}
+      />
       <EuiFlexGroup gutterSize="s">
         {authorizedToCreateAnyRules && showCreateRuleButton ? (
           <EuiFlexItem grow={false}>
@@ -746,7 +827,7 @@ export const RulesList = ({
             iconType="refresh"
             onClick={() => {
               onClearSelection();
-              loadData();
+              refreshRules();
             }}
             name="refresh"
             color="primary"
@@ -762,69 +843,11 @@ export const RulesList = ({
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="success" data-test-subj="totalActiveRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesActiveDescription"
-                  defaultMessage="Active: {totalStatusesActive}"
-                  values={{
-                    totalStatusesActive: rulesStatusesTotal.active,
-                  }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="danger" data-test-subj="totalErrorRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesErrorDescription"
-                  defaultMessage="Error: {totalStatusesError}"
-                  values={{ totalStatusesError: rulesStatusesTotal.error }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="warning" data-test-subj="totalWarningRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesWarningDescription"
-                  defaultMessage="Warning: {totalStatusesWarning}"
-                  values={{
-                    totalStatusesWarning: rulesStatusesTotal.warning,
-                  }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="primary" data-test-subj="totalOkRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesOkDescription"
-                  defaultMessage="Ok: {totalStatusesOk}"
-                  values={{ totalStatusesOk: rulesStatusesTotal.ok }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="accent" data-test-subj="totalPendingRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesPendingDescription"
-                  defaultMessage="Pending: {totalStatusesPending}"
-                  values={{
-                    totalStatusesPending: rulesStatusesTotal.pending,
-                  }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiHealth color="subdued" data-test-subj="totalUnknownRulesCount">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.rulesList.totalStatusesUnknownDescription"
-                  defaultMessage="Unknown: {totalStatusesUnknown}"
-                  values={{
-                    totalStatusesUnknown: rulesStatusesTotal.unknown,
-                  }}
-                />
-              </EuiHealth>
-            </EuiFlexItem>
-            <RulesListAutoRefresh lastUpdate={lastUpdate} onRefresh={loadData} />
+            <RulesListStatuses
+              rulesStatuses={rulesStatusesTotal}
+              rulesLastRunOutcomes={rulesLastRunOutcomesTotal}
+            />
+            <RulesListAutoRefresh lastUpdate={lastUpdate} onRefresh={refreshRules} />
           </EuiFlexGroup>
         </EuiFlexItem>
         {rulesStatusesTotal.error > 0 && (
@@ -868,9 +891,9 @@ export const RulesList = ({
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         onSort={setSort}
         onPage={setPage}
-        onRuleChanged={() => loadData()}
+        onRuleChanged={() => refreshRules()}
         onRuleClick={(rule) => {
-          const detailsRoute = ruleDetailsRoute ? ruleDetailsRoute : routeToRuleDetails;
+          const detailsRoute = ruleDetailsRoute ? ruleDetailsRoute : commonRuleDetailsRoute;
           history.push(detailsRoute.replace(`:ruleId`, rule.id));
         }}
         onRuleEditClick={(rule) => {
@@ -899,11 +922,12 @@ export const RulesList = ({
             key={rule.id}
             item={rule}
             onLoading={onLoading}
-            onRuleChanged={() => loadData()}
+            onRuleChanged={() => refreshRules()}
             setRulesToDelete={setRulesToDelete}
             onEditRule={() => onRuleEdit(rule)}
             onUpdateAPIKey={setRulesToUpdateAPIKey}
             onRunRule={() => onRunRule(rule.id)}
+            onCloneRule={onCloneRule}
           />
         )}
         renderRuleError={(rule) => {
@@ -928,7 +952,7 @@ export const RulesList = ({
             >
               <RuleQuickEditButtons
                 selectedItems={convertRulesToTableItems({
-                  rules: filterRulesById(rulesState.data, [...selectedIds]),
+                  rules: filterRulesById(rulesState.data, selectedIds),
                   ruleTypeIndex: ruleTypesState.data,
                   canExecuteActions,
                   config,
@@ -937,15 +961,19 @@ export const RulesList = ({
                 getFilter={getFilter}
                 onPerformingAction={() => setIsPerformingAction(true)}
                 onActionPerformed={() => {
-                  loadData();
+                  refreshRules();
                   setIsPerformingAction(false);
                 }}
+                isDeletingRules={isDeletingRules}
+                isEnablingRules={isEnablingRules}
+                isDisablingRules={isDisablingRules}
                 isSnoozingRules={isSnoozingRules}
                 isUnsnoozingRules={isUnsnoozingRules}
                 isSchedulingRules={isSchedulingRules}
                 isUnschedulingRules={isUnschedulingRules}
                 isUpdatingRuleAPIKeys={isUpdatingRuleAPIKeys}
                 setRulesToDelete={setRulesToDelete}
+                setRulesToDeleteFilter={setRulesToDeleteFilter}
                 setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
                 setRulesToSnooze={setRulesToSnooze}
                 setRulesToUnsnooze={setRulesToUnsnooze}
@@ -956,6 +984,8 @@ export const RulesList = ({
                 setRulesToScheduleFilter={setRulesToScheduleFilter}
                 setRulesToUnscheduleFilter={setRulesToUnscheduleFilter}
                 setRulesToUpdateAPIKeyFilter={setRulesToUpdateAPIKeyFilter}
+                onEnable={onEnable}
+                onDisable={onDisable}
               />
             </BulkOperationPopover>
           );
@@ -997,34 +1027,85 @@ export const RulesList = ({
     return table;
   };
 
+  const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsDeleteModalVisibility(rulesToDelete.length > 0 || Boolean(rulesToDeleteFilter));
+  }, [rulesToDelete, rulesToDeleteFilter]);
+
+  const { showToast } = useBulkOperationToast({ onSearchPopulate });
+
+  const onEnable = useCallback(async () => {
+    setIsEnablingRules(true);
+
+    const { errors, total } = await bulkEnableRules({
+      ...(isAllSelected ? { filter: getFilter() } : {}),
+      ...(isAllSelected ? {} : { ids: selectedIds }),
+      http,
+    });
+
+    setIsEnablingRules(false);
+    showToast({ action: 'ENABLE', errors, total });
+    await refreshRules();
+    onClearSelection();
+  }, [http, selectedIds, getFilter, setIsEnablingRules, showToast]);
+
+  const onDisable = useCallback(async () => {
+    setIsDisablingRules(true);
+
+    const { errors, total } = await bulkDisableRules({
+      ...(isAllSelected ? { filter: getFilter() } : {}),
+      ...(isAllSelected ? {} : { ids: selectedIds }),
+      http,
+    });
+
+    setIsDisablingRules(false);
+    showToast({ action: 'DISABLE', errors, total });
+    await refreshRules();
+    onClearSelection();
+  }, [http, selectedIds, getFilter, setIsDisablingRules, showToast]);
+
+  const onDeleteCancel = () => {
+    setIsDeleteModalVisibility(false);
+    clearRulesToDelete();
+  };
+  const onDeleteConfirm = useCallback(async () => {
+    setIsDeleteModalVisibility(false);
+    setIsDeletingRules(true);
+
+    const { errors, total } = await bulkDeleteRules({
+      filter: rulesToDeleteFilter,
+      ids: rulesToDelete,
+      http,
+    });
+
+    setIsDeletingRules(false);
+    showToast({ action: 'DELETE', errors, total });
+    await refreshRules();
+    clearRulesToDelete();
+    onClearSelection();
+  }, [http, rulesToDelete, rulesToDeleteFilter, setIsDeletingRules, toasts]);
+
+  const numberRulesToDelete = rulesToDelete.length || numberOfSelectedItems;
+
   return (
     <section data-test-subj="rulesList">
-      <DeleteModalConfirmation
-        onDeleted={async () => {
-          setRulesToDelete([]);
-          onClearSelection();
-          await loadData();
-        }}
-        onErrors={async () => {
-          // Refresh the rules from the server, some rules may have beend deleted
-          await loadData();
-          setRulesToDelete([]);
-        }}
-        onCancel={() => {
-          setRulesToDelete([]);
-        }}
-        apiDeleteCall={deleteRules}
-        idsToDelete={rulesToDelete}
-        singleTitle={i18n.translate('xpack.triggersActionsUI.sections.rulesList.singleTitle', {
-          defaultMessage: 'rule',
-        })}
-        multipleTitle={i18n.translate('xpack.triggersActionsUI.sections.rulesList.multipleTitle', {
-          defaultMessage: 'rules',
-        })}
-        setIsLoadingState={(isLoading: boolean) => {
-          setRulesState({ ...rulesState, isLoading });
-        }}
-      />
+      {isDeleteModalFlyoutVisible && (
+        <RulesDeleteModalConfirmation
+          onConfirm={onDeleteConfirm}
+          onCancel={onDeleteCancel}
+          confirmButtonText={getConfirmDeletionButtonText(
+            numberRulesToDelete,
+            SINGLE_RULE_TITLE,
+            MULTIPLE_RULE_TITLE
+          )}
+          confirmModalText={getConfirmDeletionModalText(
+            numberRulesToDelete,
+            SINGLE_RULE_TITLE,
+            MULTIPLE_RULE_TITLE
+          )}
+        />
+      )}
       <BulkSnoozeModal
         rulesToSnooze={rulesToSnooze}
         rulesToUnsnooze={rulesToUnsnooze}
@@ -1041,7 +1122,7 @@ export const RulesList = ({
           clearRulesToSnooze();
           clearRulesToUnsnooze();
           onClearSelection();
-          await loadData();
+          await refreshRules();
         }}
         onSearchPopulate={onSearchPopulate}
       />
@@ -1061,7 +1142,7 @@ export const RulesList = ({
           clearRulesToSchedule();
           clearRulesToUnschedule();
           onClearSelection();
-          await loadData();
+          await refreshRules();
         }}
         onSearchPopulate={onSearchPopulate}
       />
@@ -1080,7 +1161,7 @@ export const RulesList = ({
         onUpdated={async () => {
           clearRulesToUpdateAPIKey();
           onClearSelection();
-          await loadData();
+          await refreshRules();
         }}
         onSearchPopulate={onSearchPopulate}
       />
@@ -1095,7 +1176,7 @@ export const RulesList = ({
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
           ruleTypeIndex={ruleTypesState.data}
-          onSave={loadData}
+          onSave={refreshRules}
         />
       )}
       {editFlyoutVisible && currentRuleToEdit && (
@@ -1109,7 +1190,7 @@ export const RulesList = ({
           ruleType={
             ruleTypesState.data.get(currentRuleToEdit.ruleTypeId) as RuleType<string, string>
           }
-          onSave={loadData}
+          onSave={refreshRules}
         />
       )}
     </section>

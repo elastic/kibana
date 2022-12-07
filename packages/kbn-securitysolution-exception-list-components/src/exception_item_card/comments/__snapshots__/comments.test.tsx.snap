@@ -67,7 +67,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
         data-test-subj="ExceptionItemCardCommentsContainer"
       >
         <div
@@ -205,7 +205,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
       data-test-subj="ExceptionItemCardCommentsContainer"
     >
       <div
@@ -400,7 +400,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
         data-test-subj="ExceptionItemCardCommentsContainer"
       >
         <div
@@ -538,7 +538,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
       data-test-subj="ExceptionItemCardCommentsContainer"
     >
       <div

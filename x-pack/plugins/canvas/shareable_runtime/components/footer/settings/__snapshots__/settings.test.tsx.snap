@@ -222,7 +222,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                 style="padding: 16px;"
               >
                 <div
-                  class="euiSwitch"
+                  class="euiSwitch emotion-euiSwitch"
                 >
                   <button
                     aria-checked="false"
@@ -265,10 +265,10 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                 />
                 <form>
                   <div
-                    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
                   >
                     <div
-                      class="euiFlexItem"
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <div
                         class="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
@@ -314,7 +314,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                       </div>
                     </div>
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrowZero"
+                      class="euiFlexItem emotion-euiFlexItem-growZero"
                     >
                       <div
                         class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
@@ -583,7 +583,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 2`] =
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiSwitch"
+                      class="euiSwitch emotion-euiSwitch"
                     >
                       <button
                         aria-checked="false"
@@ -769,7 +769,7 @@ exports[`<Settings /> can navigate Toolbar Settings, closes when activated 3`] =
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiSwitch"
+                      class="euiSwitch emotion-euiSwitch"
                     >
                       <button
                         aria-checked="true"

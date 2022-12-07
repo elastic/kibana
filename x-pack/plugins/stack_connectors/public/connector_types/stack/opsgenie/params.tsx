@@ -19,8 +19,9 @@ import type {
   OpsgenieCreateAlertSubActionParams,
 } from '../../../../server/connector_types/stack';
 import * as i18n from './translations';
-import { CreateAlert } from './create_alert';
+import { CreateAlert, isPartialCreateAlertSchema } from './create_alert';
 import { CloseAlert } from './close_alert';
+import { isPartialCloseAlertSchema } from './close_alert_schema';
 
 const actionOptions = [
   {
@@ -85,11 +86,20 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
   useEffect(() => {
     if (subAction != null && currentSubAction.current !== subAction) {
       currentSubAction.current = subAction;
-      const params = subActionParams?.alias ? { alias: subActionParams.alias } : undefined;
-      editAction('subActionParams', params, index);
+
+      // check for a mismatch in the subAction and params, if the subAction does not match the params then we need to
+      // clear them by calling editAction. We can carry over the alias if it exists
+      if (
+        (subAction === OpsgenieSubActions.CreateAlert &&
+          !isPartialCreateAlertSchema(subActionParams)) ||
+        (subAction === OpsgenieSubActions.CloseAlert && !isPartialCloseAlertSchema(subActionParams))
+      ) {
+        const params = subActionParams?.alias ? { alias: subActionParams.alias } : undefined;
+        editAction('subActionParams', params, index);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subAction, currentSubAction, subActionParams?.alias, index]);
+  }, [subAction, currentSubAction, index, subActionParams]);
 
   return (
     <>

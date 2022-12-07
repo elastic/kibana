@@ -40,6 +40,7 @@ const AdditionalOptions: React.FC<AdditionalOptionsProps> = ({
             data-test-subj="opsgenie-source-row"
             fullWidth
             label={i18n.SOURCE_FIELD_LABEL}
+            helpText={i18n.OPSGENIE_SOURCE_HELP}
           >
             <TextFieldWithMessageVariables
               index={index}
@@ -51,7 +52,12 @@ const AdditionalOptions: React.FC<AdditionalOptionsProps> = ({
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow data-test-subj="opsgenie-user-row" fullWidth label={i18n.USER_FIELD_LABEL}>
+          <EuiFormRow
+            data-test-subj="opsgenie-user-row"
+            fullWidth
+            label={i18n.USER_FIELD_LABEL}
+            helpText={i18n.OPSGENIE_USER_HELP}
+          >
             <TextFieldWithMessageVariables
               index={index}
               editAction={editOptionalSubAction}
@@ -107,6 +113,7 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
         error={errors['subActionParams.alias']}
         isInvalid={isAliasInvalid}
         label={i18n.ALIAS_REQUIRED_FIELD_LABEL}
+        helpText={i18n.OPSGENIE_ALIAS_HELP}
       >
         <TextFieldWithMessageVariables
           index={index}

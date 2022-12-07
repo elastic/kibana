@@ -43,42 +43,49 @@ export const mockDashboardData: ComplianceDashboardData = {
       totalFindings: 104,
       totalFailed: 0,
       totalPassed: 104,
+      postureScore: 100,
     },
     {
       name: 'API Server',
       totalFindings: 27,
       totalFailed: 11,
       totalPassed: 16,
+      postureScore: 59.2,
     },
     {
       name: 'Master Node Configuration Files',
       totalFindings: 17,
       totalFailed: 1,
       totalPassed: 16,
+      postureScore: 94.1,
     },
     {
       name: 'Kubelet',
       totalFindings: 11,
       totalFailed: 4,
       totalPassed: 7,
+      postureScore: 63.6,
     },
     {
       name: 'etcd',
       totalFindings: 6,
       totalFailed: 0,
       totalPassed: 6,
+      postureScore: 100,
     },
     {
       name: 'Worker Node Configuration Files',
       totalFindings: 5,
       totalFailed: 0,
       totalPassed: 5,
+      postureScore: 100,
     },
     {
       name: 'Scheduler',
       totalFindings: 2,
       totalFailed: 1,
       totalPassed: 1,
+      postureScore: 50.0,
     },
   ],
   clusters: [
@@ -101,42 +108,49 @@ export const mockDashboardData: ComplianceDashboardData = {
           totalFindings: 104,
           totalFailed: 0,
           totalPassed: 104,
+          postureScore: 100,
         },
         {
           name: 'API Server',
           totalFindings: 27,
           totalFailed: 11,
           totalPassed: 16,
+          postureScore: 59.2,
         },
         {
           name: 'Master Node Configuration Files',
           totalFindings: 17,
           totalFailed: 1,
           totalPassed: 16,
+          postureScore: 94.1,
         },
         {
           name: 'Kubelet',
           totalFindings: 11,
           totalFailed: 4,
           totalPassed: 7,
+          postureScore: 63.6,
         },
         {
           name: 'etcd',
           totalFindings: 6,
           totalFailed: 0,
           totalPassed: 6,
+          postureScore: 100,
         },
         {
           name: 'Worker Node Configuration Files',
           totalFindings: 5,
           totalFailed: 0,
           totalPassed: 5,
+          postureScore: 100,
         },
         {
           name: 'Scheduler',
           totalFindings: 2,
           totalFailed: 1,
           totalPassed: 1,
+          postureScore: 50.0,
         },
       ],
       trend: [
@@ -233,6 +247,7 @@ describe('<ComplianceDashboard />', () => {
         DASHBOARD_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });
   });
@@ -254,6 +269,7 @@ describe('<ComplianceDashboard />', () => {
         DASHBOARD_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });
   });
@@ -275,6 +291,29 @@ describe('<ComplianceDashboard />', () => {
         DASHBOARD_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
+      ],
+    });
+  });
+
+  it('no findings state: unprivileged - shows Unprivileged instead of dashboard', () => {
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'unprivileged' },
+      })
+    );
+    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+
+    renderComplianceDashboardPage();
+
+    expectIdsInDoc({
+      be: [NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED],
+      notToBe: [
+        DASHBOARD_CONTAINER,
+        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
       ],
     });
   });
@@ -294,6 +333,7 @@ describe('<ComplianceDashboard />', () => {
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
+        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
       ],
     });
   });

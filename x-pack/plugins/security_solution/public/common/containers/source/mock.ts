@@ -439,6 +439,22 @@ export const mocksSource = {
         },
       },
     },
+    {
+      aggregatable: false,
+      category: 'nestedField',
+      description: '',
+      example: '',
+      format: '',
+      indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+      name: 'nestedField.thirdAttributes',
+      searchable: true,
+      type: 'date',
+      subType: {
+        nested: {
+          path: 'nestedField',
+        },
+      },
+    },
   ],
 };
 
@@ -946,6 +962,22 @@ export const mockBrowserFields: BrowserFields = {
         name: 'nestedField.secondAttributes',
         searchable: true,
         type: 'string',
+        subType: {
+          nested: {
+            path: 'nestedField',
+          },
+        },
+      },
+      'nestedField.thirdAttributes': {
+        aggregatable: false,
+        category: 'nestedField',
+        description: '',
+        example: '',
+        format: '',
+        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+        name: 'nestedField.thirdAttributes',
+        searchable: true,
+        type: 'date',
         subType: {
           nested: {
             path: 'nestedField',

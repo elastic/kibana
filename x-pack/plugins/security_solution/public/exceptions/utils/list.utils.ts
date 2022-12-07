@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { listIDsCannotBeEdited } from '../config';
-import type { ExceptionListInfo } from '../hooks/use_all_exception_lists';
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { exceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-export const checkIfListCannotBeEdited = (list: ExceptionListInfo) => {
+import { listIDsCannotBeEdited } from '../config';
+
+export const checkIfListCannotBeEdited = (list: ExceptionListSchema) => {
   return !!listIDsCannotBeEdited.find((id) => id === list.list_id);
+};
+export const isAnExceptionListItem = (list: ExceptionListSchema) => {
+  return exceptionListSchema.is(list);
 };

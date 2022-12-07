@@ -331,7 +331,6 @@ export class LensAttributes {
     columnType,
     columnFilter,
     operationType,
-    shortLabel,
   }: {
     sourceField: string;
     columnType?: string;
@@ -339,7 +338,6 @@ export class LensAttributes {
     operationType?: SupportedOperations | 'last_value';
     label?: string;
     seriesConfig: SeriesConfig;
-    shortLabel?: boolean;
   }) {
     if (columnType === 'operation' || operationType) {
       if (
@@ -352,7 +350,6 @@ export class LensAttributes {
           label,
           seriesConfig,
           columnFilter,
-          shortLabel,
         });
       }
       if (operationType === 'last_value') {
@@ -365,7 +362,7 @@ export class LensAttributes {
         });
       }
       if (operationType?.includes('th')) {
-        return this.getPercentileNumberColumn(sourceField, operationType, seriesConfig!);
+        return this.getPercentileNumberColumn(sourceField, operationType, seriesConfig!, label);
       }
     }
     return this.getNumberRangeColumn(sourceField, seriesConfig!, label);
@@ -402,14 +399,12 @@ export class LensAttributes {
     seriesConfig,
     operationType,
     columnFilter,
-    shortLabel,
   }: {
     sourceField: string;
     operationType: SupportedOperations;
     label?: string;
     seriesConfig: SeriesConfig;
     columnFilter?: ColumnFilter;
-    shortLabel?: boolean;
   }):
     | MinIndexPatternColumn
     | MaxIndexPatternColumn
@@ -469,14 +464,17 @@ export class LensAttributes {
   getPercentileNumberColumn(
     sourceField: string,
     percentileValue: string,
-    seriesConfig: SeriesConfig
+    seriesConfig: SeriesConfig,
+    label?: string
   ): PercentileIndexPatternColumn {
     return {
       ...buildNumberColumn(sourceField),
-      label: i18n.translate('xpack.observability.expView.columns.label', {
-        defaultMessage: '{percentileValue} percentile of {sourceField}',
-        values: { sourceField: seriesConfig.labels[sourceField]?.toLowerCase(), percentileValue },
-      }),
+      label:
+        label ??
+        i18n.translate('xpack.observability.expView.columns.label', {
+          defaultMessage: '{percentileValue} percentile of {sourceField}',
+          values: { sourceField: seriesConfig.labels[sourceField]?.toLowerCase(), percentileValue },
+        }),
       operationType: 'percentile',
       params: getPercentileParam(percentileValue),
       customLabel: true,
@@ -552,7 +550,6 @@ export class LensAttributes {
     colIndex,
     layerId,
     metricOption,
-    shortLabel,
   }: {
     sourceField: string;
     metricOption?: MetricOption;
@@ -561,7 +558,6 @@ export class LensAttributes {
     layerId: string;
     layerConfig: LayerConfig;
     colIndex?: number;
-    shortLabel?: boolean;
   }) {
     const { breakdown, seriesConfig } = layerConfig;
     const fieldMetaInfo = this.getFieldMeta(sourceField, layerConfig, metricOption);
@@ -614,7 +610,8 @@ export class LensAttributes {
         ...this.getPercentileNumberColumn(
           fieldName,
           operationType || PERCENTILE_RANKS[0],
-          seriesConfig!
+          seriesConfig!,
+          label || columnLabel
         ),
         filter: colIndex !== undefined ? columnFilters?.[colIndex] : undefined,
       };
@@ -628,7 +625,6 @@ export class LensAttributes {
         operationType,
         label: label || columnLabel,
         seriesConfig: layerConfig.seriesConfig,
-        shortLabel,
       });
     }
     if (operationType === 'unique_count' || fieldType === 'string') {
@@ -745,7 +741,6 @@ export class LensAttributes {
         return this.getColumnBasedOnType({
           layerConfig,
           layerId,
-          shortLabel: true,
           label: item.label,
           sourceField: REPORT_METRIC_FIELD,
           metricOption: item,

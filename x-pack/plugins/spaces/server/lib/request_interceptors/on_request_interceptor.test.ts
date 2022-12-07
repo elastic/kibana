@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { type createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 import type {
   CoreSetup,
   IBasePath,
@@ -15,13 +16,12 @@ import type {
   RequestHandlerContext,
 } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
 
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 
 // FAILING: https://github.com/elastic/kibana/issues/58942
 describe.skip('onRequestInterceptor', () => {
-  let root: ReturnType<typeof kbnTestServer.createRoot>;
+  let root: ReturnType<typeof createRoot>;
 
   /**
    *
@@ -29,7 +29,7 @@ describe.skip('onRequestInterceptor', () => {
    * https://github.com/facebook/jest/issues/8379
 
    beforeEach(async () => {
-    root = kbnTestServer.createRoot();
+    root = createRoot();
   }, 30000);
 
    afterEach(async () => await root.shutdown());
@@ -107,7 +107,7 @@ describe.skip('onRequestInterceptor', () => {
 
       const path = '/np_foo';
 
-      await kbnTestServer.request.get(root, path).expect(200, {
+      await request.get(root, path).expect(200, {
         path,
         basePath: '', // no base path set for route within the default space
       });
@@ -118,7 +118,7 @@ describe.skip('onRequestInterceptor', () => {
 
       const path = '/s/foo-space/np_foo';
 
-      await kbnTestServer.request.get(root, path).expect(200, {
+      await request.get(root, path).expect(200, {
         path: '/np_foo',
         basePath: '/s/foo-space',
       });
@@ -129,7 +129,7 @@ describe.skip('onRequestInterceptor', () => {
 
       const path = '/some/path/s/np_foo/bar';
 
-      await kbnTestServer.request.get(root, path).expect(200, {
+      await request.get(root, path).expect(200, {
         path: '/some/path/s/np_foo/bar',
         basePath: '', // no base path set for route within the default space
       });
@@ -140,7 +140,7 @@ describe.skip('onRequestInterceptor', () => {
 
       const path = '/s/foo/i/love/np_spaces?queryParam=queryValue';
 
-      await kbnTestServer.request.get(root, path).expect(200, {
+      await request.get(root, path).expect(200, {
         path: '/i/love/np_spaces',
         basePath: '/s/foo',
         query: {

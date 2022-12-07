@@ -9,7 +9,7 @@ import type { SearchHit } from '@kbn/es-types';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';

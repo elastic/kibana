@@ -35,6 +35,7 @@ import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { useMonitorPings } from '../hooks/use_monitor_pings';
 import { JourneyScreenshot } from '../../common/screenshot/journey_screenshot';
+import { useSyntheticsRefreshContext } from '../../../contexts';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
 
@@ -52,6 +53,7 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
 
   const [sortField, setSortField] = useState<SortableField>('timestamp');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const { lastRefresh } = useSyntheticsRefreshContext();
   const {
     pings,
     total,
@@ -59,6 +61,7 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
   } = useMonitorPings({
     from,
     to,
+    lastRefresh,
     pageSize: page.size,
     pageIndex: page.index,
   });
@@ -147,9 +150,12 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
       'data-test-subj': `row-${item.monitor.check_group}`,
       onClick: (evt: MouseEvent) => {
         const targetElem = evt.target as HTMLElement;
-
         // we dont want to capture image click event
-        if (targetElem.tagName !== 'IMG' && targetElem.tagName !== 'path') {
+        if (
+          targetElem.tagName !== 'IMG' &&
+          targetElem.tagName !== 'path' &&
+          !targetElem.parentElement?.classList.contains('euiLink')
+        ) {
           history.push(`/monitor/${monitorId}/test-run/${item.monitor.check_group}`);
         }
       },

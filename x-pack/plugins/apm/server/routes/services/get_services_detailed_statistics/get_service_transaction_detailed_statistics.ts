@@ -10,7 +10,7 @@ import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import {
   TRANSACTION_PAGE_LOAD,

@@ -21,6 +21,7 @@ import type { TestNowResponse } from '../api';
 
 export interface MonitorList {
   loading: boolean;
+  isLoaded?: boolean;
   refreshedMonitorIds?: string[];
   isUpdating?: string[];
   list: MonitorSummariesResult;
@@ -34,6 +35,7 @@ export const initialState: MonitorList = {
     summaries: [],
   },
   loading: false,
+  isLoaded: false,
   refreshedMonitorIds: [],
 };
 
@@ -54,6 +56,7 @@ export const monitorListReducer = handleActions<MonitorList, Payload>(
     ) => ({
       ...state,
       loading: false,
+      isLoaded: true,
       error: undefined,
       list: { ...action.payload },
     }),
@@ -64,6 +67,7 @@ export const monitorListReducer = handleActions<MonitorList, Payload>(
       ...state,
       error: action.payload,
       loading: false,
+      isLoaded: true,
     }),
     [String(setUpdatingMonitorId)]: (state: MonitorList, action: Action<string>) => ({
       ...state,

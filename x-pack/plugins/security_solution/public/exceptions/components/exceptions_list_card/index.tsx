@@ -18,7 +18,6 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { HttpSetup } from '@kbn/core-http-browser';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
@@ -34,7 +33,6 @@ import { useExceptionsListCard } from '../../hooks/use_exceptions_list.card';
 
 interface ExceptionsListCardProps {
   exceptionsList: ExceptionListInfo;
-  http: HttpSetup;
   handleDelete: ({
     id,
     listId,
@@ -69,6 +67,7 @@ const ExceptionPanel = styled(EuiPanel)`
 `;
 const ListHeaderContainer = styled(EuiFlexGroup)`
   padding: ${euiThemeVars.euiSizeS};
+  text-align: initial;
 `;
 export const ExceptionsListCard = memo<ExceptionsListCardProps>(
   ({ exceptionsList, handleDelete, handleExport, readOnly }) => {
@@ -98,6 +97,10 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
       onAddExceptionClick,
       handleConfirmExceptionFlyout,
       handleCancelExceptionItemFlyout,
+      goToExceptionDetail,
+      emptyViewerTitle,
+      emptyViewerBody,
+      emptyViewerButtonText,
     } = useExceptionsListCard({
       exceptionsList,
       handleExport,
@@ -131,7 +134,12 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                       >
                         <EuiFlexItem grow>
                           <EuiText size="m">
-                            <EuiLink data-test-subj="exception-list-name">{listName}</EuiLink>
+                            <EuiLink
+                              data-test-subj="exception-list-name"
+                              onClick={goToExceptionDetail}
+                            >
+                              {listName}
+                            </EuiLink>
                           </EuiText>
                         </EuiFlexItem>
                         <EuiFlexItem grow>
@@ -183,6 +191,9 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                   onPaginationChange={onPaginationChange}
                   onCreateExceptionListItem={onAddExceptionClick}
                   lastUpdated={null}
+                  emptyViewerTitle={emptyViewerTitle}
+                  emptyViewerBody={emptyViewerBody}
+                  emptyViewerButtonText={emptyViewerButtonText}
                 />
               </ExceptionPanel>
             </EuiAccordion>
@@ -198,6 +209,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
             onConfirm={handleConfirmExceptionFlyout}
             data-test-subj="addExceptionItemFlyoutInSharedLists"
             showAlertCloseOptions={false}
+            isNonTimeline={true}
           />
         ) : null}
         {showEditExceptionFlyout && exceptionToEdit ? (

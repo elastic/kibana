@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, memo, useMemo, useEffect, useRef } from 'react';
+import React, { useState, Fragment, memo, useMemo, useEffect, useRef, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
+import { uniq } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGrid,
@@ -18,13 +19,16 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
+
+import { useGetDataStreams } from '../../../../../../../../hooks';
 
 import { mapPackageReleaseToIntegrationCardRelease } from '../../../../../../../../services/package_prerelease';
 
 import { getRegistryDataStreamAssetBaseName } from '../../../../../../../../../common/services';
-
+import type { ExperimentalIndexingFeature } from '../../../../../../../../../common/types/models/epm';
 import type {
   NewPackagePolicy,
   NewPackagePolicyInputStream,
@@ -40,12 +44,10 @@ import { PackagePolicyEditorDatastreamMappings } from '../../datastream_mappings
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId } from './hooks';
-
-const FlexItemWithMaxWidth = styled(EuiFlexItem)`
-  max-width: calc(50% - ${(props) => props.theme.eui.euiSizeL});
-`;
+import { orderDatasets } from './order_datasets';
 
 const ScrollAnchor = styled.div`
+  display: none;
   scroll-margin-top: ${(props) => parseFloat(props.theme.eui.euiHeaderHeightCompensation) * 2}px;
 `;
 
@@ -77,20 +79,21 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const defaultDataStreamId = useDataStreamId();
     const containerRef = useRef<HTMLDivElement>(null);
 
-    const isDefaultDatstream =
+    const isDefaultDatastream =
       !!defaultDataStreamId &&
       !!packagePolicyInputStream.id &&
       packagePolicyInputStream.id === defaultDataStreamId;
     const isPackagePolicyEdit = !!packagePolicyId;
+    const isInputOnlyPackage = packageInfo.type === 'input';
 
     useEffect(() => {
-      if (isDefaultDatstream && containerRef.current) {
+      if (isDefaultDatastream && containerRef.current) {
         containerRef.current.scrollIntoView();
       }
-    }, [isDefaultDatstream, containerRef]);
+    }, [isDefaultDatastream, containerRef]);
 
     // Showing advanced options toggle state
-    const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(isDefaultDatstream);
+    const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(isDefaultDatastream);
 
     // Errors state
     const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
@@ -120,9 +123,70 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       [advancedVars, inputStreamValidationResults?.vars]
     );
 
+    const isFeatureEnabled = useCallback(
+      (feature: ExperimentalIndexingFeature) =>
+        packagePolicy.package?.experimental_data_stream_features?.some(
+          ({ data_stream: dataStream, features }) =>
+            dataStream ===
+              getRegistryDataStreamAssetBaseName(packagePolicyInputStream.data_stream) &&
+            features[feature]
+        ) ?? false,
+      [
+        packagePolicy.package?.experimental_data_stream_features,
+        packagePolicyInputStream.data_stream,
+      ]
+    );
+
+    const newExperimentalIndexingFeature = {
+      synthetic_source: isFeatureEnabled('synthetic_source'),
+      tsdb: isFeatureEnabled('tsdb'),
+    };
+
+    const onIndexingSettingChange = (
+      features: Partial<Record<ExperimentalIndexingFeature, boolean>>
+    ) => {
+      if (!packagePolicy.package) {
+        return;
+      }
+
+      const newExperimentalDataStreamFeatures = [
+        ...(packagePolicy.package.experimental_data_stream_features ?? []),
+      ];
+
+      const dataStream = getRegistryDataStreamAssetBaseName(packagePolicyInputStream.data_stream);
+
+      const existingSettingRecord = newExperimentalDataStreamFeatures.find(
+        (x) => x.data_stream === dataStream
+      );
+
+      if (existingSettingRecord) {
+        existingSettingRecord.features = {
+          ...existingSettingRecord.features,
+          ...features,
+        };
+      } else {
+        newExperimentalDataStreamFeatures.push({
+          data_stream: dataStream,
+          features: { ...newExperimentalIndexingFeature, ...features },
+        });
+      }
+
+      updatePackagePolicy({
+        package: {
+          ...packagePolicy.package,
+          experimental_data_stream_features: newExperimentalDataStreamFeatures,
+        },
+      });
+    };
+
+    const { data: dataStreamsData } = useGetDataStreams();
+    const datasetList =
+      uniq(dataStreamsData?.data_streams.map((dataStream) => dataStream.dataset)) ?? [];
+    const datasets = orderDatasets(datasetList, packageInfo.name);
+
     return (
       <>
-        <EuiFlexGrid columns={2} id={isDefaultDatstream ? 'test123' : 'asas'}>
+        <EuiFlexGrid columns={2}>
           <ScrollAnchor ref={containerRef} />
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="none" alignItems="flexStart">
@@ -169,7 +233,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <FlexItemWithMaxWidth>
+          <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="m">
               {requiredVars.map((varDef) => {
                 if (!packagePolicyInputStream?.vars) return null;
@@ -197,6 +261,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       }}
                       errors={inputStreamValidationResults?.vars![varName]}
                       forceShowErrors={forceShowErrors}
+                      packageType={packageInfo.type}
+                      datasets={datasets}
                     />
                   </EuiFlexItem>
                 );
@@ -256,12 +322,14 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             }}
                             errors={inputStreamValidationResults?.vars![varName]}
                             forceShowErrors={forceShowErrors}
+                            packageType={packageInfo.type}
+                            datasets={datasets}
                           />
                         </EuiFlexItem>
                       );
                     })}
-                    {/* Only show datastream pipelines and mappings on edit */}
-                    {isPackagePolicyEdit && (
+                    {/* Only show datastream pipelines and mappings on edit and not for input packages*/}
+                    {isPackagePolicyEdit && !isInputOnlyPackage && (
                       <>
                         <EuiFlexItem>
                           <PackagePolicyEditorDatastreamPipelines
@@ -311,15 +379,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                         <EuiSpacer size="s" />
                         <EuiFlexItem>
                           <EuiSwitch
-                            checked={
-                              packagePolicy.package?.experimental_data_stream_features?.some(
-                                ({ data_stream: dataStream, features }) =>
-                                  dataStream ===
-                                    getRegistryDataStreamAssetBaseName(
-                                      packagePolicyInputStream.data_stream
-                                    ) && features.synthetic_source
-                              ) ?? false
-                            }
+                            checked={isFeatureEnabled('synthetic_source')}
                             label={
                               <FormattedMessage
                                 id="xpack.fleet.createPackagePolicy.experimentalFeatures.syntheticSourceLabel"
@@ -327,42 +387,37 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                               />
                             }
                             onChange={(e) => {
-                              if (!packagePolicy.package) {
-                                return;
-                              }
-
-                              const newExperimentalDataStreamFeatures = [
-                                ...(packagePolicy.package.experimental_data_stream_features ?? []),
-                              ];
-
-                              const dataStream = getRegistryDataStreamAssetBaseName(
-                                packagePolicyInputStream.data_stream
-                              );
-
-                              const existingSettingRecord = newExperimentalDataStreamFeatures.find(
-                                (x) => x.data_stream === dataStream
-                              );
-
-                              if (existingSettingRecord) {
-                                existingSettingRecord.features.synthetic_source = e.target.checked;
-                              } else {
-                                newExperimentalDataStreamFeatures.push({
-                                  data_stream: dataStream,
-                                  features: {
-                                    synthetic_source: e.target.checked,
-                                  },
-                                });
-                              }
-
-                              updatePackagePolicy({
-                                package: {
-                                  ...packagePolicy.package,
-                                  experimental_data_stream_features:
-                                    newExperimentalDataStreamFeatures,
-                                },
+                              onIndexingSettingChange({
+                                synthetic_source: e.target.checked,
                               });
                             }}
                           />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiToolTip
+                            content={
+                              <FormattedMessage
+                                id="xpack.fleet.createPackagePolicy.experimentalFeatures.TSDBTooltip"
+                                defaultMessage="Enabling this feature is irreversible"
+                              />
+                            }
+                          >
+                            <EuiSwitch
+                              disabled={isFeatureEnabled('tsdb')}
+                              checked={isFeatureEnabled('tsdb')}
+                              label={
+                                <FormattedMessage
+                                  id="xpack.fleet.createPackagePolicy.experimentalFeatures.TSDBLabel"
+                                  defaultMessage="Time-series indexing (TSDB)"
+                                />
+                              }
+                              onChange={(e) => {
+                                onIndexingSettingChange({
+                                  tsdb: e.target.checked,
+                                });
+                              }}
+                            />
+                          </EuiToolTip>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
@@ -370,7 +425,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                 ) : null}
               </Fragment>
             </EuiFlexGroup>
-          </FlexItemWithMaxWidth>
+          </EuiFlexItem>
         </EuiFlexGrid>
       </>
     );

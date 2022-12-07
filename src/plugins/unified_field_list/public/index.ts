@@ -7,7 +7,6 @@
  */
 
 import { UnifiedFieldListPlugin } from './plugin';
-
 export type {
   FieldStatsResponse,
   BucketedAggregation,
@@ -15,7 +14,16 @@ export type {
   TopValuesResult,
 } from '../common/types';
 export { FieldListGrouped, type FieldListGroupedProps } from './components/field_list';
-export type { FieldStatsProps, FieldStatsServices } from './components/field_stats';
+export type {
+  FieldTopValuesBucketProps,
+  FieldTopValuesBucketParams,
+} from './components/field_stats';
+export { FieldTopValuesBucket } from './components/field_stats';
+export type {
+  FieldStatsProps,
+  FieldStatsServices,
+  FieldStatsState,
+} from './components/field_stats';
 export { FieldStats } from './components/field_stats';
 export {
   FieldPopover,
@@ -65,3 +73,10 @@ export {
   type GroupedFieldsParams,
   type GroupedFieldsResult,
 } from './hooks/use_grouped_fields';
+
+export {
+  useQuerySubscriber,
+  hasQuerySubscriberData,
+  type QuerySubscriberResult,
+  type QuerySubscriberParams,
+} from './hooks/use_query_subscriber';

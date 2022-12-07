@@ -74,5 +74,5 @@ export const MODEL_SELECT_PLACEHOLDER = i18n.translate(
 
 export const MODEL_REDACTED_VALUE = i18n.translate(
   'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.model.redactedValue',
-  { defaultMessage: 'Model is unavailable' }
+  { defaultMessage: "This model isn't available in the Kibana space" }
 );

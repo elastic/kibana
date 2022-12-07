@@ -159,6 +159,29 @@
       "enabled": true
     },
     {
+      "groupName": "jest",
+      "packageNames": [
+        "@jest/console",
+        "@jest/reporters",
+        "@jest/types",
+        "babel-jest",
+        "expect",
+        "jest",
+        "jest-cli",
+        "jest-config",
+        "jest-diff",
+        "jest-environment-jsdom",
+        "jest-matcher-utils",
+        "jest-mock",
+        "jest-runtime",
+        "jest-snapshot"
+      ],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true
+    },
+    {
       "groupName": "@storybook",
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],

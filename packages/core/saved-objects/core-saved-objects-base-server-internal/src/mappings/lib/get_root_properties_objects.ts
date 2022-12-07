@@ -10,7 +10,7 @@ import type {
   SavedObjectsFieldMapping,
   SavedObjectsMappingProperties,
 } from '@kbn/core-saved-objects-server';
-import { IndexMapping } from '../types';
+import type { IndexMapping } from '../types';
 import { getRootProperties } from './get_root_properties';
 
 /**

@@ -16,6 +16,7 @@ import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types
 import { TimelineId } from '../../../../common/types/timeline';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from './keyboard_shortcut_constants';
 import { useHoverActionItems } from './use_hover_action_items';
+import { SecurityPageName } from '../../../app/types';
 
 export const YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS = (fieldName: string) =>
   i18n.translate(
@@ -217,10 +218,12 @@ export const HoverActions: React.FC<Props> = React.memo(
     const isCaseView = scopeId === TimelineId.casePage;
     const isTimelineView = scopeId === TimelineId.active;
     const isAlertDetailsView = scopeId === TimelineId.detectionsAlertDetailsPage;
+    // TODO Provide a list of disabled/enabled actions as props
+    const isEntityAnalyticsPage = scopeId === SecurityPageName.entityAnalytics;
 
     const hideFilters = useMemo(
-      () => isAlertDetailsView && !isTimelineView,
-      [isTimelineView, isAlertDetailsView]
+      () => (isAlertDetailsView || isEntityAnalyticsPage) && !isTimelineView,
+      [isTimelineView, isAlertDetailsView, isEntityAnalyticsPage]
     );
 
     const hiddenActionsCount = useMemo(() => {

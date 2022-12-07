@@ -46,6 +46,7 @@ import {
   ALERTS_TAB,
   RULE_DETAILS_PAGE_ID,
   RULE_DETAILS_ALERTS_SEARCH_BAR_ID,
+  URL_STORAGE_KEY,
 } from './constants';
 import { RuleDetailsPathParams, TabId } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -91,9 +92,10 @@ export function RuleDetailsPage() {
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,
   });
-  const [tabId, setTabId] = useState<TabId>(
-    (toQuery(location.search)?.tabId as TabId) || EXECUTION_TAB
-  );
+  const [tabId, setTabId] = useState<TabId>(() => {
+    const urlTabId = (toQuery(location.search)?.tabId as TabId) || EXECUTION_TAB;
+    return [EXECUTION_TAB, ALERTS_TAB].includes(urlTabId) ? urlTabId : EXECUTION_TAB;
+  });
   const [features, setFeatures] = useState<string>('');
   const [ruleType, setRuleType] = useState<RuleType<string, string>>();
   const [ruleToDelete, setRuleToDelete] = useState<string[]>([]);
@@ -106,12 +108,18 @@ export function RuleDetailsPage() {
   ] as Query[]);
 
   const updateUrl = (nextQuery: { tabId: TabId }) => {
-    history.push({
+    const newTabId = nextQuery.tabId;
+    const nextSearch =
+      newTabId === ALERTS_TAB
+        ? {
+            ...toQuery(location.search),
+            ...nextQuery,
+          }
+        : { tabId: EXECUTION_TAB };
+
+    history.replace({
       ...location,
-      search: fromQuery({
-        ...toQuery(location.search),
-        ...nextQuery,
-      }),
+      search: fromQuery(nextSearch),
     });
   };
 
@@ -215,13 +223,14 @@ export function RuleDetailsPage() {
           <EuiSpacer size="m" />
           <ObservabilityAlertSearchbarWithUrlSync
             appName={RULE_DETAILS_ALERTS_SEARCH_BAR_ID}
-            setEsQuery={setEsQuery}
-            queries={ruleQuery.current}
+            onEsQueryChange={setEsQuery}
+            urlStorageKey={URL_STORAGE_KEY}
+            defaultSearchQueries={ruleQuery.current}
           />
           <EuiSpacer size="s" />
           <EuiFlexGroup style={{ minHeight: 450 }} direction={'column'}>
             <EuiFlexItem>
-              {esQuery && (
+              {esQuery && features && (
                 <AlertsStateTable
                   alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                   configurationId={observabilityFeatureId}
@@ -279,7 +288,7 @@ export function RuleDetailsPage() {
         bottomBorder: false,
         rightSideItems: hasEditButton
           ? [
-              <EuiFlexGroup direction="rowReverse" alignItems="center">
+              <EuiFlexGroup direction="rowReverse" alignItems="flexStart">
                 <EuiFlexItem>
                   <EuiPopover
                     id="contextRuleEditMenu"
@@ -299,21 +308,19 @@ export function RuleDetailsPage() {
                       </EuiButton>
                     }
                   >
-                    <EuiFlexGroup direction="column" alignItems="flexStart">
+                    <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
                       <EuiButtonEmpty
                         data-test-subj="editRuleButton"
                         size="s"
                         iconType="pencil"
                         onClick={handleEditRule}
                       >
-                        <EuiSpacer size="s" />
                         <EuiText size="s">
                           {i18n.translate('xpack.observability.ruleDetails.editRule', {
                             defaultMessage: 'Edit rule',
                           })}
                         </EuiText>
                       </EuiButtonEmpty>
-                      <EuiSpacer size="s" />
                       <EuiButtonEmpty
                         size="s"
                         iconType="trash"
@@ -327,11 +334,9 @@ export function RuleDetailsPage() {
                           })}
                         </EuiText>
                       </EuiButtonEmpty>
-                      <EuiSpacer size="s" />
                     </EuiFlexGroup>
                   </EuiPopover>
                 </EuiFlexItem>
-                <EuiSpacer size="s" />
               </EuiFlexGroup>,
             ]
           : [],

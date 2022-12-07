@@ -12,7 +12,7 @@ Object {
           css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive css-d309m3"
+            class="euiFlexGroup css-d309m3"
             data-test-subj="EntryContentNestedEntry"
           >
             <span
@@ -65,7 +65,7 @@ Object {
         css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive css-d309m3"
+          class="euiFlexGroup css-d309m3"
           data-test-subj="EntryContentNestedEntry"
         >
           <span

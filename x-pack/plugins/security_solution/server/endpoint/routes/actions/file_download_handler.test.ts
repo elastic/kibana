@@ -20,6 +20,7 @@ import { getFileDownloadStream as _getFileDownloadStream } from '../../services/
 import stream from 'stream';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 
 jest.mock('../../services');
 jest.mock('../../services/actions/action_files');
@@ -59,8 +60,9 @@ describe('Response Actions file download API', () => {
     });
 
     it('should error if user has no authz to api', async () => {
-      const authz = (await httpHandlerContextMock.securitySolution).endpointAuthz;
-      authz.canWriteFileOperations = false;
+      (
+        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as jest.Mock
+      ).mockResolvedValue(getEndpointAuthzInitialStateMock({ canWriteFileOperations: false }));
 
       await apiTestSetup.getRegisteredRouteHandler('get', ACTION_AGENT_FILE_DOWNLOAD_ROUTE)(
         httpHandlerContextMock,

@@ -5,32 +5,31 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 import { css } from '@emotion/react';
-import { EuiCard, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
-import type { EuiTextProps, EuiCardProps } from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiStat, useEuiTheme } from '@elastic/eui';
+import type { EuiStatProps } from '@elastic/eui';
 
-export type CspCounterCardProps = Pick<EuiCardProps, 'onClick' | 'id' | 'title' | 'description'> & {
-  descriptionColor?: EuiTextProps['color'];
-};
+export interface CspCounterCardProps {
+  id: string;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
+  title: EuiStatProps['title'];
+  titleColor?: EuiStatProps['titleColor'];
+  description: EuiStatProps['description'];
+}
 
 export const CspCounterCard = (counter: CspCounterCardProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiCard
-      title={
-        <EuiTitle size="xxxs">
-          <h6>{counter.title}</h6>
-        </EuiTitle>
-      }
+    <EuiPanel
       hasBorder
       onClick={counter.onClick}
       paddingSize="m"
-      textAlign="left"
-      layout="vertical"
       css={css`
         position: relative;
+        display: flex;
+        align-items: center;
 
         :hover .euiIcon {
           color: ${euiTheme.colors.primary};
@@ -39,21 +38,29 @@ export const CspCounterCard = (counter: CspCounterCardProps) => {
       `}
       data-test-subj={counter.id}
     >
-      <EuiText color={counter.descriptionColor}>
-        <EuiTitle size="xs">
-          <h3>{counter.description}</h3>
-        </EuiTitle>
-      </EuiText>
+      <EuiStat
+        css={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-around',
+        }}
+        titleSize="s"
+        title={counter.title}
+        titleColor={counter.titleColor}
+        descriptionElement="h6"
+        description={counter.description}
+      />
       {counter.onClick && (
         <EuiIcon
           type="link"
           css={css`
             position: absolute;
-            top: ${euiTheme.size.m};
-            right: ${euiTheme.size.m};
+            top: ${euiTheme.size.s};
+            right: ${euiTheme.size.s};
           `}
         />
       )}
-    </EuiCard>
+    </EuiPanel>
   );
 };

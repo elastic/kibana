@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { Status } from '../../../../../common/types/api';
 import {
   Connector,
+  FeatureName,
   IngestPipelineParams,
   SyncStatus,
 } from '../../../../../common/types/connectors';
@@ -67,9 +68,14 @@ export interface IndexViewActions {
 
 export interface IndexViewValues {
   connector: Connector | undefined;
+  connectorError: string | undefined;
   connectorId: string | null;
+  error: string | undefined;
   fetchIndexApiData: typeof CachedFetchIndexApiLogic.values.fetchIndexApiData;
   fetchIndexApiStatus: Status;
+  hasAdvancedFilteringFeature: boolean;
+  hasBasicFilteringFeature: boolean;
+  hasFilteringFeature: boolean;
   index: ElasticsearchViewIndex | undefined;
   indexData: typeof CachedFetchIndexApiLogic.values.indexData;
   indexName: string;
@@ -199,9 +205,31 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
           ? index.connector
           : undefined,
     ],
+    connectorError: [
+      () => [selectors.connector],
+      (connector: Connector | undefined) => connector?.error,
+    ],
     connectorId: [
       () => [selectors.indexData],
       (index) => (isConnectorViewIndex(index) ? index.connector.id : null),
+    ],
+    error: [
+      () => [selectors.connector],
+      (connector: Connector | undefined) => connector?.error || connector?.last_sync_error || null,
+    ],
+    hasAdvancedFilteringFeature: [
+      () => [selectors.connector],
+      (connector?: Connector) =>
+        connector?.features ? connector.features[FeatureName.FILTERING_ADVANCED_CONFIG] : false,
+    ],
+    hasBasicFilteringFeature: [
+      () => [selectors.connector],
+      (connector?: Connector) =>
+        connector?.features ? connector.features[FeatureName.FILTERING_RULES] : false,
+    ],
+    hasFilteringFeature: [
+      () => [selectors.hasAdvancedFilteringFeature, selectors.hasBasicFilteringFeature],
+      (advancedFeature: boolean, basicFeature: boolean) => advancedFeature || basicFeature,
     ],
     index: [
       () => [selectors.indexData],

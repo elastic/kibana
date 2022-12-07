@@ -17,8 +17,7 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { context } from '@kbn/kibana-react-plugin/public';
-import { ExitFullScreenButton as ExitFullScreenButtonUi } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { DashboardContainer, DashboardLoadedInfo } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
@@ -106,7 +105,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
 
     const {
       settings: { isProjectEnabledInLabs, uiSettings },
-      chrome,
     } = pluginServices.getServices();
     const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
 
@@ -147,10 +145,8 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
         >
           {isFullScreenMode && (
-            // TODO: Replace with Shared UX ExitFullScreenButton once https://github.com/elastic/kibana/issues/140311 is resolved
-            <ExitFullScreenButtonUi
-              chrome={chrome as CoreStart['chrome']}
-              onExitFullScreenMode={this.onExitFullScreenMode}
+            <ExitFullScreenButton
+              onExit={this.onExitFullScreenMode}
               toggleChrome={!isEmbeddedExternally}
             />
           )}

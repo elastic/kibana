@@ -14,6 +14,7 @@ import {
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   LABEL_BORDER_SIZES,
+  LABEL_POSITIONS,
   LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
@@ -25,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   TRANSACTION_DURATION,
-} from '../../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../../common/es_fields/apm';
 import { APM_STATIC_DATA_VIEW_ID } from '../../../../../../common/data_view_constants';
 
 interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
@@ -72,6 +73,11 @@ function getLayerStyle(): VectorStyleDescriptor {
             name: TRANSACTION_DURATION_COUNTRY,
             origin: FIELD_ORIGIN.JOIN,
           },
+        },
+      },
+      labelPosition: {
+        options: {
+          position: LABEL_POSITIONS.CENTER,
         },
       },
       labelZoomRange: {
