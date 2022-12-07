@@ -1047,6 +1047,7 @@ export const RulesList = ({
     setIsEnablingRules(false);
     showToast({ action: 'ENABLE', errors, total });
     await refreshRules();
+    onClearSelection();
   }, [http, selectedIds, getFilter, setIsEnablingRules, showToast]);
 
   const onDisable = useCallback(async () => {
@@ -1061,6 +1062,7 @@ export const RulesList = ({
     setIsDisablingRules(false);
     showToast({ action: 'DISABLE', errors, total });
     await refreshRules();
+    onClearSelection();
   }, [http, selectedIds, getFilter, setIsDisablingRules, showToast]);
 
   const onDeleteCancel = () => {

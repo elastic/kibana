@@ -68,7 +68,7 @@ export async function getLensServices(
     usageCollection,
     fieldFormats,
     spaces,
-    discover,
+    share,
     unifiedSearch,
   } = startDependencies;
 
@@ -109,7 +109,7 @@ export async function getLensServices(
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
     spaces,
-    discover,
+    share,
     unifiedSearch,
     docLinks: coreStart.docLinks,
   };
