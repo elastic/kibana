@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { decode } from '@kbn/rison';
+import type { RisonValue } from '@kbn/rison';
+import { decode, encode } from '@kbn/rison';
 import type { ParsedQuery } from 'query-string';
 import { parse, stringify } from 'query-string';
 import { url } from '@kbn/kibana-utils-plugin/public';
@@ -37,18 +38,19 @@ export const getParamFromQueryString = (
  * It doesn't update when the URL changes.
  *
  */
-export const useGetInitialUrlParamValue = <State>(urlParamKey: string) => {
+export const useGetInitialUrlParamValue = <State extends RisonValue>(
+  urlParamKey: string
+): (() => State | null) => {
   // window.location.search provides the most updated representation of the url search.
   // It also guarantees that we don't overwrite URL param managed outside react-router.
-  const getInitialUrlParamValue = useCallback(() => {
-    const param = getParamFromQueryString(
+  const getInitialUrlParamValue = useCallback((): State | null => {
+    const rawParamValue = getParamFromQueryString(
       getQueryStringFromLocation(window.location.search),
       urlParamKey
     );
+    const paramValue = decode<State>(rawParamValue ?? '');
 
-    const decodedParam = decode<State>(param ?? '');
-
-    return { param, decodedParam };
+    return paramValue;
   }, [urlParamKey]);
 
   return getInitialUrlParamValue;
@@ -57,11 +59,13 @@ export const useGetInitialUrlParamValue = <State>(urlParamKey: string) => {
 export const encodeQueryString = (urlParams: ParsedQuery<string>): string =>
   stringify(url.encodeQuery(urlParams), { sort: false, encode: false });
 
-export const useReplaceUrlParams = () => {
+export const useReplaceUrlParams = (): ((
+  params: Array<{ key: string; value: RisonValue | null }>
+) => void) => {
   const history = useHistory();
 
   const replaceUrlParams = useCallback(
-    (params: Array<{ key: string; value: string | null }>) => {
+    (params: Array<{ key: string; value: RisonValue | null }>): void => {
       // window.location.search provides the most updated representation of the url search.
       // It prevents unnecessary re-renders which useLocation would create because 'replaceUrlParams' does update the location.
       // window.location.search also guarantees that we don't overwrite URL param managed outside react-router.
@@ -71,8 +75,14 @@ export const useReplaceUrlParams = () => {
       params.forEach(({ key, value }) => {
         if (value == null || value === '') {
           delete urlParams[key];
-        } else {
-          urlParams[key] = value;
+          return;
+        }
+
+        try {
+          urlParams[key] = encode(value);
+        } catch {
+          // eslint-disable-next-line no-console
+          console.error('Unable to encode url param value');
         }
       });
 

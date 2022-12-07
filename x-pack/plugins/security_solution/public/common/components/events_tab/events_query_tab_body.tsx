@@ -210,7 +210,7 @@ const useExternalAlertsInitialUrlState = () => {
 
   const getInitialUrlParamValue = useGetInitialUrlParamValue<boolean>(EXTERNAL_ALERTS_URL_PARAM);
 
-  const { decodedParam: showExternalAlertsInitialUrlState } = useMemo(
+  const showExternalAlertsInitialUrlState = useMemo(
     () => getInitialUrlParamValue(),
     [getInitialUrlParamValue]
   );
@@ -239,7 +239,7 @@ const useSyncExternalAlertsUrlState = (showExternalAlerts: boolean) => {
     replaceUrlParams([
       {
         key: EXTERNAL_ALERTS_URL_PARAM,
-        value: showExternalAlerts ? 'true' : null,
+        value: showExternalAlerts ? true : null,
       },
     ]);
   }, [showExternalAlerts, replaceUrlParams]);

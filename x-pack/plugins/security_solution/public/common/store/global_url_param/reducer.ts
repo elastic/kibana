@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { RisonValue } from '@kbn/rison';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { registerUrlParam, updateUrlParam, deregisterUrlParam } from './actions';
 
-export type GlobalUrlParam = Record<string, string | null>;
+export type GlobalUrlParam = Record<string, RisonValue | null>;
 
 export const initialGlobalUrlParam: GlobalUrlParam = {};
 
