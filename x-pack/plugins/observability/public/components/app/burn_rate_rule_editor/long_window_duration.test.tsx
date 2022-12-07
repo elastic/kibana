@@ -16,8 +16,8 @@ describe('LongWindowDuration', () => {
   it('shows error when duration is greater than 1440minutes', () => {
     render(<LongWindowDuration onChange={() => {}} />);
 
-    userEvent.selectOptions(screen.getByTestId('unit'), 'm');
-    userEvent.type(screen.getByTestId('value'), '1441', { delay: 0 });
+    userEvent.selectOptions(screen.getByTestId('durationUnitSelect'), 'm');
+    userEvent.type(screen.getByTestId('durationValueInput'), '1441', { delay: 0 });
 
     expect(screen.getByText(/cannot exceed/i)).toBeTruthy();
   });
@@ -25,8 +25,17 @@ describe('LongWindowDuration', () => {
   it('shows error when duration is greater than 24 hours', () => {
     render(<LongWindowDuration onChange={() => {}} />);
 
-    userEvent.selectOptions(screen.getByTestId('unit'), 'h');
-    userEvent.type(screen.getByTestId('value'), '24', { delay: 0 });
+    userEvent.selectOptions(screen.getByTestId('durationUnitSelect'), 'h');
+    userEvent.type(screen.getByTestId('durationValueInput'), '24', { delay: 0 });
+
+    expect(screen.getByText(/cannot exceed/i)).toBeTruthy();
+  });
+
+  it('shows error when duration is lower than 30 minutes', async () => {
+    render(<LongWindowDuration onChange={() => {}} />);
+
+    userEvent.selectOptions(screen.getByTestId('durationUnitSelect'), ['m']);
+    userEvent.type(screen.getByTestId('durationValueInput'), '25');
 
     expect(screen.getByText(/cannot exceed/i)).toBeTruthy();
   });

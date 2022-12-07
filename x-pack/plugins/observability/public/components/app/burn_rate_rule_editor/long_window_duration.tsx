@@ -27,6 +27,7 @@ const durationUnitOptions: DurationUnitOption[] = [
   { value: 'h', text: 'hour' },
 ];
 
+const MIN_DURATION_IN_MINUTES = 30;
 const MAX_DURATION_IN_MINUTES = 1440;
 const MAX_DURATION_IN_HOURS = 24;
 
@@ -64,7 +65,7 @@ export function LongWindowDuration({ initialDuration, onChange }: Props) {
 
   const isValidDuration = (value: number, unit: DurationUnit): boolean => {
     return (
-      (unit === 'm' && value <= MAX_DURATION_IN_MINUTES) ||
+      (unit === 'm' && value >= MIN_DURATION_IN_MINUTES && value <= MAX_DURATION_IN_MINUTES) ||
       (unit === 'h' && value <= MAX_DURATION_IN_HOURS)
     );
   };
@@ -79,7 +80,7 @@ export function LongWindowDuration({ initialDuration, onChange }: Props) {
           value={durationValue}
           onChange={onDurationValueChange}
           aria-label={valueLabel}
-          data-test-subj="value"
+          data-test-subj="durationValueInput"
         />
         <EuiSelect
           id={selectId}
@@ -88,7 +89,7 @@ export function LongWindowDuration({ initialDuration, onChange }: Props) {
           value={durationUnit}
           onChange={onDurationUnitChange}
           aria-label={unitLabel}
-          data-test-subj="unit"
+          data-test-subj="durationUnitSelect"
         />
       </EuiFlexGroup>
     </EuiFormRow>
@@ -108,5 +109,6 @@ const unitLabel = i18n.translate('xpack.observability.slo.rules.longTimeWindow.u
 });
 
 const errorText = i18n.translate('xpack.observability.slo.rules.longTimeWindow.errorText', {
-  defaultMessage: 'The long time window cannot exceed 24 hours or 1440 minutes',
+  defaultMessage:
+    'The long time window must be at least 30 minutes and cannot exceed 24 hours or 1440 minutes.',
 });
