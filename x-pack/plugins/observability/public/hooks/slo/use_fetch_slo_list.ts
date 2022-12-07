@@ -8,7 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 
-import type { SLO, SLOList } from '../../typings/slo';
+import type { Duration, DurationUnit, SLO, SLOList } from '../../typings/slo';
 import { useDataFetcher } from '../use_data_fetcher';
 
 const EMPTY_LIST = {
@@ -80,9 +80,14 @@ function toSLOList(response: Record<string, unknown>): SLOList {
 }
 
 function toSLO(result: any): SLO {
+  const duration = toDuration(result.time_window.duration);
+
   return {
     id: String(result.id),
     name: String(result.name),
+    timeWindow: {
+      duration,
+    },
     objective: { target: Number(result.objective.target) },
     summary: {
       sliValue: Number(result.summary.sli_value),
@@ -91,6 +96,13 @@ function toSLO(result: any): SLO {
       },
     },
   };
+}
+
+function toDuration(duration: string): Duration {
+  const durationValue = duration.substring(0, duration.length - 1);
+  const durationUnit = duration.substring(duration.length - 1);
+
+  return { value: parseInt(durationValue, 10), unit: durationUnit as DurationUnit };
 }
 
 export { useFetchSloList };

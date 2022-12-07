@@ -14,6 +14,7 @@ import { BurnRate } from './burn_rate';
 import { LongWindowDuration } from './long_window_duration';
 
 export function BurnRateRuleEditor() {
+  const [selectedSlo, setSelectedSlo] = useState<SLO | undefined>(undefined);
   const [longWindowDuration, setLongWindowDuration] = useState<Duration>({ value: 1, unit: 'h' });
   const [shortWindowDuration, setShortWindowDuration] = useState<Duration>({ value: 5, unit: 'm' });
   const [burnRate, setBurnRate] = useState<number>(1);
@@ -28,22 +29,23 @@ export function BurnRateRuleEditor() {
     setBurnRate(value);
   };
 
+  const onSelectedSlo = (slo: SLO) => {
+    console.log(slo);
+    setSelectedSlo(slo);
+  };
+
   useEffect(() => {
     const sloWindowDurationInMinutes = 43200; // TODO: change when SloSelector used. 30 days in minutes
     const longWindowDurationInMinutes = toMinutes(longWindowDuration);
     setMaxBurnRate(Math.floor(sloWindowDurationInMinutes / longWindowDurationInMinutes));
-  }, [longWindowDuration]); // depends on selected SLO as well as long window
+  }, [longWindowDuration, selectedSlo]); // depends on selected SLO as well as long window
 
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexGroup direction="row">
         <EuiFlexItem>
           <EuiFormRow label="Select SLO" fullWidth>
-            <SloSelector
-              onSelected={(slo: SLO) => {
-                console.log(slo);
-              }}
-            />
+            <SloSelector onSelected={onSelectedSlo} />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>

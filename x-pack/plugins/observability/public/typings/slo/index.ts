@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-type DurationUnit = 'm' | 'h';
+type DurationUnit = 'm' | 'h' | 'd';
 
 interface Duration {
   value: number;
@@ -15,6 +15,9 @@ interface Duration {
 interface SLO {
   id: string;
   name: string;
+  timeWindow: {
+    duration: Duration;
+  };
   objective: {
     target: number;
   };

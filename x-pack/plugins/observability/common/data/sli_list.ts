@@ -19,6 +19,9 @@ export const sloList: SLOList = {
     {
       id: '1f1c6ee7-433f-4b56-b727-5682262e0d7d',
       name: 'latency',
+      timeWindow: {
+        duration: { value: 7, unit: 'd' },
+      },
       objective: { target: 0.98 },
       summary: {
         sliValue: 0.99872,
@@ -30,6 +33,9 @@ export const sloList: SLOList = {
     {
       id: 'c0f8d669-9177-4706-9098-f397a88173a6',
       name: 'availability',
+      timeWindow: {
+        duration: { value: 7, unit: 'd' },
+      },
       objective: { target: 0.98 },
       summary: {
         sliValue: 0.97,

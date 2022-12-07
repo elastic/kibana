@@ -10,6 +10,9 @@ import { SLO } from '../../../typings';
 export const anSLO: SLO = {
   id: '2f17deb0-725a-11ed-ab7c-4bb641cfc57e',
   name: 'SLO latency service log',
+  timeWindow: {
+    duration: { value: 7, unit: 'd' },
+  },
   objective: {
     target: 0.98,
   },
