@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { waitFor, act, fireEvent } from '@testing-library/react';
 import { noop } from 'lodash/fp';
 
-import { noCreateCasesPermissions, TestProviders } from '../../common/mock';
+import { noCreateCasesPermissions, TestProviders, createAppMockRenderer } from '../../common/mock';
 
 import { CommentType } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
@@ -21,7 +21,6 @@ import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { timelineIntegrationMock } from '../__mock__/timeline';
 import type { CaseAttachmentWithoutOwner } from '../../types';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 
 jest.mock('../../containers/use_create_attachments');
 
