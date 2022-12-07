@@ -26,7 +26,6 @@ import {
 import { createStore } from '../../store';
 import type { LinkInfo } from '../../links';
 import { SecurityPageName } from '../../../app/types';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 const mockDispatch = jest.fn();
 
@@ -66,7 +65,6 @@ describe('global query string', () => {
         globalUrlParam,
       },
       SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
       kibanaObservable,
       storage
     );
@@ -195,7 +193,6 @@ describe('global query string', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
         kibanaObservable,
         storage
       );
