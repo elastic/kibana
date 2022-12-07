@@ -90,11 +90,15 @@ export const command = {
       for (const id of importedPkgIds) {
         const pkgDir = pkgMap.get(id);
         if (!pkgDir) {
+          log.warning('unknown pkg dir for', id);
           continue;
         }
+
         if (!validatePkgDir(pkgDir)) {
+          log.warning('missing tsconfig for', id);
           continue;
         }
+
         if (!currentRefs.includes(id)) {
           newRefs.push(id);
         }

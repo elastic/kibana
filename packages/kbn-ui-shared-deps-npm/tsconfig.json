@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
+    "checkJs": true,
     "types": [
       "node",
     ]
@@ -12,5 +13,8 @@
   ],
   "exclude": [
     "**/*.config.js",
+  ],
+  "kbn_references": [
+    "@kbn/repo-info"
   ]
 }
