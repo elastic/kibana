@@ -16,6 +16,7 @@ export interface FilterItemActionsProps {
   disableOr?: boolean;
   onOrButtonClick: () => void;
 
+  hideAnd?: boolean;
   disableAnd?: boolean;
   onAddButtonClick: () => void;
 }

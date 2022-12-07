@@ -55,6 +55,8 @@ export const strings = {
     }),
 };
 
+const MAX_FILTER_NESTING = 5;
+
 export interface FilterItemProps {
   path: Path;
   filter: Filter;
@@ -69,6 +71,11 @@ export interface FilterItemProps {
   renderedLevel: number;
   reverseBackground: boolean;
 }
+
+const isMaxFilterNesting = (path: string) => {
+  const pathArr = path.split('.');
+  return pathArr.length - 1 === MAX_FILTER_NESTING;
+};
 
 export function FilterItem({
   filter,
@@ -92,11 +99,10 @@ export function FilterItem({
   } = useContext(FiltersBuilderContextType);
   const conditionalOperationType = getBooleanRelationType(filter);
   const { euiTheme } = useEuiTheme();
-
   let field: DataViewField | undefined;
   let operator: Operator | undefined;
   let params: Filter['meta']['params'] | undefined;
-
+  const isMaxNesting = isMaxFilterNesting(path);
   if (!conditionalOperationType) {
     field = getFieldFromFilter(filter, dataView!);
     if (field) {
@@ -292,7 +298,8 @@ export function FilterItem({
                         <ActionsComponent
                           disabled={disabled}
                           disableRemove={disableRemove}
-                          hideOr={hideOr}
+                          hideOr={hideOr || isMaxNesting}
+                          hideAnd={isMaxNesting}
                           disableOr={disableOr}
                           disableAnd={disableAnd}
                           onRemoveFilter={onRemoveFilter}

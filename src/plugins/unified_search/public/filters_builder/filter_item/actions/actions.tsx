@@ -17,6 +17,7 @@ export const FilterItemActions: FC<FilterItemActionsProps> = ({
   disableRemove = false,
   hideOr = false,
   disableOr = false,
+  hideAnd = false,
   disableAnd = false,
   onRemoveFilter,
   onOrButtonClick,
@@ -36,7 +37,7 @@ export const FilterItemActions: FC<FilterItemActionsProps> = ({
           />
         </Tooltip>
       </EuiFlexItem>
-      {!hideOr ? (
+      {!hideOr && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             onClick={onOrButtonClick}
@@ -50,20 +51,22 @@ export const FilterItemActions: FC<FilterItemActionsProps> = ({
             {strings.getAddOrFilterGroupButtonLabel()}
           </EuiButtonEmpty>
         </EuiFlexItem>
-      ) : null}
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          onClick={onAddButtonClick}
-          isDisabled={disableAnd || disabled}
-          iconType="plusInCircle"
-          size="s"
-          iconSize="s"
-          aria-label={strings.getAddAndFilterGroupButtonIconLabel()}
-          data-test-subj="add-and-filter"
-        >
-          {strings.getAddAndFilterGroupButtonLabel()}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
+      )}
+      {!hideAnd && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            onClick={onAddButtonClick}
+            isDisabled={disableAnd || disabled}
+            iconType="plusInCircle"
+            size="s"
+            iconSize="s"
+            aria-label={strings.getAddAndFilterGroupButtonIconLabel()}
+            data-test-subj="add-and-filter"
+          >
+            {strings.getAddAndFilterGroupButtonLabel()}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
