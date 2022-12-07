@@ -8,9 +8,11 @@
 import type { MouseEventHandler } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CommonProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, useResizeObserver, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiResizeObserver } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
+import type { EuiResizeObserverProps } from '@elastic/eui/src/components/observer/resize_observer/resize_observer';
+import { useWithInputShowPopover } from '../../hooks/state_selectors/use_with_input_show_popover';
 import { EnteredInput } from './lib/entered_input';
 import type { InputCaptureProps } from './components/input_capture';
 import { InputCapture } from './components/input_capture';
@@ -53,6 +55,11 @@ const CommandInputContainer = styled.div`
     background-color: ${({ theme }) => theme.eui.euiTextSubduedColor};
   }
 
+  &.withPopover {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
   &.hasFocus {
     .cursor {
       background-color: ${({ theme: { eui } }) => eui.euiTextColor};
@@ -86,41 +93,40 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   const visibleState = useWithInputVisibleState();
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
+  const isPopoverOpen = !!useWithInputShowPopover();
   const [commandToExecute, setCommandToExecute] = useState('');
+  const [popoverWidth, setPopoverWidth] = useState('94vw');
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const dimensions = useResizeObserver(containerRef.current);
   const _focusRef: InputCaptureProps['focusRef'] = useRef(null);
-
   const keyCaptureFocusRef = focusRef || _focusRef;
-
-  const popoverWidth = useMemo(() => {
-    return dimensions.width ? `${dimensions.width}px` : '92vw';
-  }, [dimensions.width]);
 
   const inputContainerClassname = useMemo(() => {
     return classNames({
       cmdInput: true,
       hasFocus: isKeyInputBeingCaptured,
       error: visibleState === 'error',
+      withPopover: isPopoverOpen,
     });
-  }, [isKeyInputBeingCaptured, visibleState]);
+  }, [isKeyInputBeingCaptured, isPopoverOpen, visibleState]);
 
   const disableArrowButton = useMemo(() => fullTextEntered.trim().length === 0, [fullTextEntered]);
 
-  const handleSubmitButton = useCallback<MouseEventHandler>(
-    (ev) => {
-      setCommandToExecute(textEntered + rightOfCursor.text);
-      dispatch({
-        type: 'updateInputTextEnteredState',
-        payload: {
-          textEntered: '',
-          rightOfCursor: undefined,
-        },
-      });
-    },
-    [dispatch, textEntered, rightOfCursor.text]
-  );
+  const handleOnResize = useCallback<EuiResizeObserverProps['onResize']>(({ width }) => {
+    if (width > 0) {
+      setPopoverWidth(`${width}px`);
+    }
+  }, []);
+
+  const handleSubmitButton = useCallback<MouseEventHandler>(() => {
+    setCommandToExecute(textEntered + rightOfCursor.text);
+    dispatch({
+      type: 'updateInputTextEnteredState',
+      payload: {
+        textEntered: '',
+        rightOfCursor: undefined,
+      },
+    });
+  }, [dispatch, textEntered, rightOfCursor.text]);
 
   const handleOnChangeFocus = useCallback<NonNullable<InputCaptureProps['onChangeFocus']>>(
     (hasFocus) => {
@@ -134,8 +140,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       if (keyCaptureFocusRef.current) {
         keyCaptureFocusRef.current.focus();
       }
+
+      if (isPopoverOpen) {
+        dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
+      }
     },
-    [keyCaptureFocusRef]
+    [dispatch, isPopoverOpen, keyCaptureFocusRef]
   );
 
   const handleInputCapture = useCallback<InputCaptureProps['onCapture']>(
@@ -143,13 +153,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       const keyCode = eventDetails.keyCode;
 
       // UP arrow key
-      // FIXME:PT to be addressed via OLM task #4384
-      // if (keyCode === 38) {
-      //   dispatch({ type: 'removeFocusFromKeyCapture' });
-      //   dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
-      //
-      //   return;
-      // }
+      if (keyCode === 38) {
+        dispatch({ type: 'removeFocusFromKeyCapture' });
+        dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
+
+        return;
+      }
 
       // Update the store with the updated text that was entered
       dispatch({
@@ -217,65 +226,59 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
   return (
     <InputAreaPopover width={popoverWidth}>
-      <CommandInputContainer
-        {...commonProps}
-        className={inputContainerClassname}
-        onClick={handleTypingAreaClick}
-        ref={containerRef}
-        data-test-subj={getTestId('cmdInput-container')}
-      >
-        <EuiFlexGroup
-          wrap={true}
-          responsive={false}
-          alignItems="center"
-          gutterSize="none"
-          justifyContent="flexStart"
-        >
-          {prompt && (
-            <EuiFlexItem grow={false} data-test-subj={getTestId('cmdInput-prompt')}>
-              <span className="eui-displayInlineBlock prompt">{prompt}</span>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem className="textEntered">
-            <InputCapture
-              onCapture={handleInputCapture}
-              onChangeFocus={handleOnChangeFocus}
-              focusRef={focusRef}
+      <EuiResizeObserver onResize={handleOnResize}>
+        {(resizeRef) => {
+          return (
+            <CommandInputContainer
+              {...commonProps}
+              className={inputContainerClassname}
+              onClick={handleTypingAreaClick}
+              ref={resizeRef}
+              data-test-subj={getTestId('cmdInput-container')}
             >
-              <EuiFlexGroup
-                responsive={false}
-                alignItems="center"
-                gutterSize="none"
-                justifyContent="flexStart"
-              >
-                <EuiFlexItem grow={false}>
-                  <div data-test-subj={getTestId('cmdInput-leftOfCursor')}>{textEntered}</div>
+              <EuiFlexGroup wrap responsive={false} alignItems="center" gutterSize="none">
+                {prompt && (
+                  <EuiFlexItem grow={false} data-test-subj={getTestId('cmdInput-prompt')}>
+                    <span className="eui-displayInlineBlock prompt">{prompt}</span>
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem className="textEntered">
+                  <InputCapture
+                    onCapture={handleInputCapture}
+                    onChangeFocus={handleOnChangeFocus}
+                    focusRef={focusRef}
+                  >
+                    <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+                      <EuiFlexItem grow={false}>
+                        <div data-test-subj={getTestId('cmdInput-leftOfCursor')}>{textEntered}</div>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <span className="cursor essentialAnimation" />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <div data-test-subj={getTestId('cmdInput-rightOfCursor')}>
+                          {rightOfCursor.text}
+                        </div>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </InputCapture>
+                  <InputPlaceholder />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <span className="cursor essentialAnimation" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <div data-test-subj={getTestId('cmdInput-rightOfCursor')}>
-                    {rightOfCursor.text}
-                  </div>
+                  <EuiButtonIcon
+                    data-test-subj={getTestId('inputTextSubmitButton')}
+                    aria-label="submit-command"
+                    iconType="playFilled"
+                    color="primary"
+                    isDisabled={disableArrowButton}
+                    onClick={handleSubmitButton}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </InputCapture>
-            <InputPlaceholder />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj={getTestId('inputTextSubmitButton')}
-              aria-label="submit-command"
-              iconType="playFilled"
-              display="empty"
-              color="primary"
-              isDisabled={disableArrowButton}
-              onClick={handleSubmitButton}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </CommandInputContainer>
+            </CommandInputContainer>
+          );
+        }}
+      </EuiResizeObserver>
     </InputAreaPopover>
   );
 });
