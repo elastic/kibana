@@ -97,7 +97,7 @@ export const installOrUpgradeEndpointFleetPackage = async (
       },
       query: {
         prerelease: true,
-      }
+      },
     })
     .catch(wrapErrorAndRejectPromise)) as AxiosResponse<BulkInstallPackagesResponse>;
 
