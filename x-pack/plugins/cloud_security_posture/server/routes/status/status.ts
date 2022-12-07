@@ -72,7 +72,7 @@ const calculateCspStatusCode = (
     return 'unprivileged';
   if (indicesStatus.findingsLatest === 'not-empty') return 'indexed';
   if (installedCspPackagePolicies === 0) return 'not-installed';
-  if (healthyAgents === 0) return 'not-deployed';
+  // if (healthyAgents === 0) return 'not-deployed';
   if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
   if (timeSinceInstallationInMinutes > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
 

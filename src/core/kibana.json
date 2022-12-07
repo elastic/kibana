@@ -1,10 +1,89 @@
 {
-  "id": "core",
-  "owner": {
-    "name": "Kibana Core",
-    "githubTeam": "kibana-core"
-  },
-  "summary": "The core plugin has core functionality",
-  "version": "kibana",
-  "serviceFolders": ["http", "saved_objects", "chrome", "application"]
+  "cloud_security_posture": {
+    "indices": {
+      "findings": {
+        "doc_count": 976,
+        "deleted": 0,
+        "size_in_bytes": 1188623,
+        "last_doc_timestamp": "2022-11-30T14:46:24.757Z"
+      },
+      "latest_findings": {
+        "doc_count": 541,
+        "deleted": 0,
+        "size_in_bytes": 705055,
+        "last_doc_timestamp": "2022-11-30T14:46:24.757Z"
+      },
+      "score": {
+        "doc_count": 58,
+        "deleted": 0,
+        "size_in_bytes": 66074,
+        "last_doc_timestamp": "2022-11-30T14:54:37.930Z"
+      },
+      "registered_cloud_accounts": 1
+    },
+    "accounts": [
+      {
+        "account_id": "f1d6a1ac-59ac-4fef-9c08-32663378d10c",
+        "posture_score": 86.2,
+        "latest_findings_doc_count": 435,
+        "agents_count": 2,
+        "integration_type": "CSPM",
+        "becnhmark_name": "cis_k8s",
+        "benchmark_version": "1.0.0",
+        "nodes_count": 4,
+        "pods_count": 7,
+        "resource_type": {
+          "k8s_object": {
+            "Pod": {
+              "doc_count": 143,
+              "passed": 112,
+              "failed": 31
+            },
+            "ServiceAccount": {
+              "doc_count": 84,
+              "passed": 84
+            },
+            "ClusterRole": {
+              "doc_count": 67,
+              "passed": 58,
+              "failed": 9
+            },
+            "Role": {
+              "doc_count": 13,
+              "passed": 13
+            },
+            "directory": {
+              "doc_count": 5,
+              "passed": 4,
+              "failed": 1
+            }
+          },
+          "procss": {
+            "process": {
+              "doc_count": 68,
+              "passed": 49,
+              "failed": 19
+            }
+          },
+          "file": {
+            "file": {
+              "doc_count": 55,
+              "passed": 55
+            }
+          }
+        },
+        "rules": {
+          "passed": 80,
+          "failed": 50,
+          "CIS_SECTION_KEY": {
+            "passed": 40,
+            "failed": 25,
+            "rule_1.2.5": "passed",
+            "rule_3.2.3": "failed",
+            "rule_4.2.4": "passed"
+          }
+        }
+      }
+    ]
+  }
 }

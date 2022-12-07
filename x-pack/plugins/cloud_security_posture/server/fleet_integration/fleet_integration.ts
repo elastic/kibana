@@ -53,6 +53,11 @@ export const onPackagePolicyPostCreateCallback = async (
   packagePolicy: PackagePolicy,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
+  savedObjectsClient.updateObjectsSpaces(
+    [{ id: 'cloud_security_posture-303eea10-c475-11ec-af18-c5b9b437dbbe', type: 'index-pattern' }],
+    ['*'],
+    ['default']
+  );
   const benchmarkType = getBenchmarkInputType(packagePolicy.inputs);
 
   // Create csp-rules from the generic asset
