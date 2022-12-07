@@ -344,7 +344,7 @@ async function bulkEditOcc<Params extends RuleTypeParams>(
 
           for (const operation of operations) {
             switch (operation.field) {
-              case 'actions': {
+              case 'actions':
                 // Prepare to handle the case of when the rule attributes contain legacy rule-level throttle or notifyWhen,
                 // and we're bulk adding actions with action-level frequency params.
                 let attempts = 0;
@@ -355,7 +355,6 @@ async function bulkEditOcc<Params extends RuleTypeParams>(
                       ...attributes,
                       actions: operation.value,
                     });
-                    ruleActions = applyBulkEditOperation(operation, ruleActions);
                   } catch (e) {
                     // If validateActions fails on the first attempt, try to remove the rule-level frequency params.
                     // The loop will attempt to validate again. Only allow the error to throw uncaught if it happens twice.
@@ -363,8 +362,8 @@ async function bulkEditOcc<Params extends RuleTypeParams>(
                     if (attributes.throttle) delete attributes.throttle;
                   }
                 }
+                ruleActions = applyBulkEditOperation(operation, ruleActions);
                 break;
-              }
               case 'snoozeSchedule':
                 // Silently skip adding snooze or snooze schedules on security
                 // rules until we implement snoozing of their rules
