@@ -28,6 +28,7 @@ import {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
+import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import { RuleExecutionSummary } from '../../../../common/detection_engine/rule_monitoring';
 import {
   AlertSuppression,
@@ -75,7 +76,7 @@ import type {
   RuleCreateProps,
   RuleUpdateProps,
 } from '../../../../common/detection_engine/rule_schema';
-import type { SortOrder } from '../../../../common/detection_engine/schemas/common';
+import { SortOrder } from '../../../../common/detection_engine/schemas/common';
 
 /**
  * Params is an "record", since it is a type of RuleActionParams which is action templates.
@@ -201,11 +202,12 @@ export const RulesSchema = t.array(RuleSchema);
 export type Rule = t.TypeOf<typeof RuleSchema>;
 export type Rules = t.TypeOf<typeof RulesSchema>;
 
-export interface PaginationOptions {
-  page: number;
-  perPage: number;
-  total: number;
-}
+export type PaginationOptions = t.TypeOf<typeof PaginationOptions>;
+export const PaginationOptions = t.type({
+  page: PositiveInteger,
+  perPage: PositiveInteger,
+  total: PositiveInteger,
+});
 
 export interface FetchRulesProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
@@ -230,10 +232,11 @@ export const RulesSortingFields = t.union([
   t.literal('version'),
 ]);
 
-export interface SortingOptions {
-  field: RulesSortingFields;
-  order: SortOrder;
-}
+export type SortingOptions = t.TypeOf<typeof SortingOptions>;
+export const SortingOptions = t.type({
+  field: RulesSortingFields,
+  order: SortOrder,
+});
 
 export interface FilterOptions {
   filter: string;

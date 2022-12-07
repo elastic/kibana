@@ -6,9 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import { enumeration, PositiveInteger } from '@kbn/securitysolution-io-ts-types';
-import { RulesSortingFields } from '../../../../rule_management/logic';
-import { SortOrder } from '../../../../../../common/detection_engine/schemas/common';
+import { enumeration } from '@kbn/securitysolution-io-ts-types';
+import { SortingOptions, PaginationOptions } from '../../../../rule_management/logic';
 
 export enum RuleSource {
   Prebuilt = 'prebuilt',
@@ -22,21 +21,21 @@ export const RulesTableSavedFilter = t.partial({
   tags: t.array(t.string),
 });
 
-export type RulesTableSavedSorting = t.TypeOf<typeof RulesTableSavedSorting>;
+export type RulesTableSavedSorting = t.TypeOf<typeof RulesTableUrlSavedPagination>;
 export const RulesTableSavedSorting = t.partial({
-  field: RulesSortingFields,
-  order: SortOrder,
+  field: SortingOptions.props.field,
+  order: SortingOptions.props.order,
 });
 
 export type RulesTableStorageSavedPagination = t.TypeOf<typeof RulesTableStorageSavedPagination>;
 export const RulesTableStorageSavedPagination = t.partial({
-  perPage: PositiveInteger,
+  perPage: PaginationOptions.props.perPage,
 });
 
 export type RulesTableUrlSavedPagination = t.TypeOf<typeof RulesTableUrlSavedPagination>;
 export const RulesTableUrlSavedPagination = t.partial({
-  page: PositiveInteger,
-  perPage: PositiveInteger,
+  page: PaginationOptions.props.page,
+  perPage: PaginationOptions.props.perPage,
 });
 
 export type RulesTableStorageSavedState = RulesTableSavedFilter &
