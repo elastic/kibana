@@ -51,7 +51,7 @@ const UserActionMarkdownComponent = forwardRef<
   const handleCancelAction = useCallback(() => {
     onChangeEditable(id);
     window.sessionStorage.removeItem(draftStorageKey);
-  }, [id, onChangeEditable, window.sessionStorage, draftStorageKey]);
+  }, [id, onChangeEditable, draftStorageKey]);
 
   const handleSaveAction = useCallback(async () => {
     const { isValid, data } = await submit();
@@ -61,15 +61,7 @@ const UserActionMarkdownComponent = forwardRef<
     }
     onChangeEditable(id);
     window.sessionStorage.removeItem(draftStorageKey);
-  }, [
-    content,
-    id,
-    onChangeEditable,
-    onSaveContent,
-    submit,
-    window.sessionStorage,
-    draftStorageKey,
-  ]);
+  }, [content, id, onChangeEditable, onSaveContent, submit, draftStorageKey]);
 
   const setComment = useCallback(
     (newComment) => {

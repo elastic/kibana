@@ -120,16 +120,7 @@ export const AddComment = React.memo(
           });
           reset();
         }
-      }, [
-        submit,
-        onCommentSaving,
-        createAttachments,
-        caseId,
-        owner,
-        onCommentPosted,
-        reset,
-        draftStorageKey,
-      ]);
+      }, [submit, onCommentSaving, createAttachments, caseId, owner, onCommentPosted, reset]);
 
       /**
        * Focus on the text area when a quote has been added.
