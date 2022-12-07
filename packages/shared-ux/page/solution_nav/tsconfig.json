@@ -13,13 +13,12 @@
     "**/*.ts",
     "**/*.tsx",
   ],
-  "kbn_references": [
-    "@kbn/i18n-react",
-    "@kbn/i18n",
-    "@kbn/shared-ux-avatar-solution",
-    "@kbn/shared-ux-page-kibana-template-types",
-  ],
   "exclude": [
     "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/shared-ux-avatar-solution",
   ]
 }
