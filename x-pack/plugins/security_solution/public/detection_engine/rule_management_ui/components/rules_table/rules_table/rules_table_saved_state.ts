@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import { enumeration, PositiveInteger } from '@kbn/securitysolution-io-ts-types';
+import { RulesSortingFields } from '../../../../rule_management/logic';
 import { SortOrder } from '../../../../../../common/detection_engine/schemas/common';
 
 export enum RuleSource {
@@ -23,7 +24,7 @@ export const RulesTableSavedFilter = t.partial({
 
 export type RulesTableSavedSorting = t.TypeOf<typeof RulesTableSavedSorting>;
 export const RulesTableSavedSorting = t.partial({
-  field: t.string,
+  field: RulesSortingFields,
   order: SortOrder,
 });
 

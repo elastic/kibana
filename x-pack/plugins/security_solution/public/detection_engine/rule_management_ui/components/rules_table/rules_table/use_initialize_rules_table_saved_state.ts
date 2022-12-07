@@ -21,12 +21,11 @@ import type {
 import {
   RuleSource,
   RulesTableSavedFilter,
-  RulesTableSavedSorting,
   RulesTableStorageSavedPagination,
   RulesTableUrlSavedPagination,
 } from './rules_table_saved_state';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_SORTING_OPTIONS } from './rules_table_defaults';
-import type { RulesSortingFields } from '../../../../rule_management/logic';
+import { SortingOptions } from '../../../../rule_management/logic';
 
 function readStorageState(storage: Storage): RulesTableStorageSavedState | null {
   try {
@@ -39,13 +38,13 @@ function readStorageState(storage: Storage): RulesTableStorageSavedState | null 
 function validateState(
   urlState: RulesTableUrlSavedState | null,
   storageState: RulesTableStorageSavedState | null
-): [RulesTableSavedFilter, RulesTableSavedSorting, RulesTableUrlSavedPagination] {
+): [RulesTableSavedFilter, SortingOptions, RulesTableUrlSavedPagination] {
   const [filterFromUrl] = validateNonExact(urlState, RulesTableSavedFilter);
   const [filterFromStorage] = validateNonExact(storageState, RulesTableSavedFilter);
   const filter = { ...filterFromStorage, ...filterFromUrl };
 
-  const [sortingFromUrl] = validateNonExact(urlState, RulesTableSavedSorting);
-  const [sortingFromStorage] = validateNonExact(storageState, RulesTableSavedSorting);
+  const [sortingFromUrl] = validateNonExact(urlState, SortingOptions);
+  const [sortingFromStorage] = validateNonExact(storageState, SortingOptions);
   const sorting = { ...sortingFromStorage, ...sortingFromUrl };
 
   const [paginationFromUrl] = validateNonExact(urlState, RulesTableUrlSavedPagination);
@@ -81,7 +80,7 @@ export function useInitializeRulesTableSavedState(): void {
 
     if (sorting.field || sorting.order) {
       actions.setSortingOptions({
-        field: (sorting.field as RulesSortingFields) ?? DEFAULT_SORTING_OPTIONS.field,
+        field: sorting.field ?? DEFAULT_SORTING_OPTIONS.field,
         order: sorting.order ?? DEFAULT_SORTING_OPTIONS.order,
       });
     }

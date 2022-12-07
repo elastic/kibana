@@ -214,19 +214,21 @@ export interface FetchRulesProps {
   signal?: AbortSignal;
 }
 
-export type RulesSortingFields =
-  | 'created_at'
-  | 'enabled'
-  | 'execution_summary.last_execution.date'
-  | 'execution_summary.last_execution.metrics.execution_gap_duration_s'
-  | 'execution_summary.last_execution.metrics.total_indexing_duration_ms'
-  | 'execution_summary.last_execution.metrics.total_search_duration_ms'
-  | 'execution_summary.last_execution.status'
-  | 'name'
-  | 'risk_score'
-  | 'severity'
-  | 'updated_at'
-  | 'version';
+export type RulesSortingFields = t.TypeOf<typeof RulesSortingFields>;
+export const RulesSortingFields = t.union([
+  t.literal('created_at'),
+  t.literal('enabled'),
+  t.literal('execution_summary.last_execution.date'),
+  t.literal('execution_summary.last_execution.metrics.execution_gap_duration_s'),
+  t.literal('execution_summary.last_execution.metrics.total_indexing_duration_ms'),
+  t.literal('execution_summary.last_execution.metrics.total_search_duration_ms'),
+  t.literal('execution_summary.last_execution.status'),
+  t.literal('name'),
+  t.literal('risk_score'),
+  t.literal('severity'),
+  t.literal('updated_at'),
+  t.literal('version'),
+]);
 
 export interface SortingOptions {
   field: RulesSortingFields;
