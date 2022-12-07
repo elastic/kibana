@@ -12,5 +12,6 @@
     "test_helpers/**/*",
     "utils/**/*",
     "index.ts"
-  ]
+  ],
+  "kbn_references": [],
 }
