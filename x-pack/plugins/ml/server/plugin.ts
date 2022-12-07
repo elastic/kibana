@@ -257,28 +257,28 @@ export class MlServerPlugin
     this.savedObjectsStart = coreStart.savedObjects;
     this.dataViews = plugins.dataViews;
 
-    this.mlLicense.setup(plugins.licensing.license$, [
-      (mlLicense: MlLicense) => {
-        if (mlLicense.isMlEnabled() === false) {
-          return;
-        }
-        if (this.home) {
-          initSampleDataSets(mlLicense, this.home);
-        }
+    this.mlLicense.setup(plugins.licensing.license$, (mlLicense: MlLicense) => {
+      if (mlLicense.isMlEnabled() === false || mlLicense.isFullLicense() === false) {
+        this.savedObjectsSyncService.unscheduleSyncTask(plugins.taskManager);
+        return;
+      }
 
-        // check whether the job saved objects exist
-        // and create them if needed.
-        const { initializeJobs } = jobSavedObjectsInitializationFactory(
-          coreStart,
-          this.security,
-          this.spacesPlugin !== undefined
-        );
-        initializeJobs().finally(() => {
-          this.setMlReady();
-        });
-        this.savedObjectsSyncService.scheduleSyncTask(plugins.taskManager, coreStart);
-      },
-    ]);
+      if (this.home) {
+        initSampleDataSets(mlLicense, this.home);
+      }
+
+      // check whether the job saved objects exist
+      // and create them if needed.
+      const { initializeJobs } = jobSavedObjectsInitializationFactory(
+        coreStart,
+        this.security,
+        this.spacesPlugin !== undefined
+      );
+      initializeJobs().finally(() => {
+        this.setMlReady();
+      });
+      this.savedObjectsSyncService.scheduleSyncTask(plugins.taskManager, coreStart);
+    });
   }
 
   public stop() {
