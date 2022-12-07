@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiTitle,
@@ -17,6 +17,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 
 import { useMlContext } from '../../../../contexts/ml';
@@ -48,6 +49,14 @@ export const Page: FC = () => {
   const { currentSavedSearch, currentDataView } = mlContext;
 
   const isTimeBasedIndex = timeBasedIndexCheck(currentDataView);
+  const hasGeoFields = useMemo(
+    () =>
+      [
+        ...currentDataView.fields.getByType(ES_FIELD_TYPES.GEO_POINT),
+        ...currentDataView.fields.getByType(ES_FIELD_TYPES.GEO_SHAPE),
+      ].length > 0,
+    [currentDataView]
+  );
   const indexWarningTitle =
     !isTimeBasedIndex && isSavedSearchSavedObject(currentSavedSearch)
       ? i18n.translate(
@@ -211,7 +220,10 @@ export const Page: FC = () => {
       }),
       id: 'mlJobTypeLinkrareJob',
     },
-    {
+  ];
+
+  if (hasGeoFields) {
+    jobTypes.push({
       onClick: () => navigateToPath(`/jobs/new_job/geo${getUrlParams()}`),
       icon: {
         type: GeoIcon,
@@ -226,8 +238,8 @@ export const Page: FC = () => {
         defaultMessage: 'Detect anomalies in the geographic location of the input data.',
       }),
       id: 'mlJobTypeLinkGeoJob',
-    },
-  ];
+    });
+  }
 
   return (
     <div data-test-subj="mlPageJobTypeSelection">
