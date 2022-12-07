@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { service } from './service';
+import { mobileApp } from './mobile_app';
 import { browser } from './browser';
 import { serverlessFunction } from './serverless_function';
 import { getTransactionMetrics } from './processors/get_transaction_metrics';
@@ -20,6 +21,7 @@ import type { ApmException } from './apm_fields';
 
 export const apm = {
   service,
+  mobileApp,
   browser,
   getTransactionMetrics,
   getSpanDestinationMetrics,
