@@ -25,6 +25,7 @@ import {
 } from '@kbn/data-plugin/public';
 
 import { estypes } from '@elastic/elasticsearch';
+import type { DateRange } from '../../../common/types';
 import type { FramePublicAPI, IndexPattern, StateSetter } from '../../types';
 import { renewIDs } from '../../utils';
 import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
@@ -54,7 +55,8 @@ import { isQueryValid } from '../../shared_components';
 export function isColumnInvalid(
   layer: FormBasedLayer,
   columnId: string,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  dateRange: DateRange | undefined
 ) {
   const column: GenericIndexPatternColumn | undefined = layer.columns[columnId];
   if (!column || !indexPattern) return;
@@ -64,11 +66,17 @@ export function isColumnInvalid(
   const referencesHaveErrors =
     true &&
     'references' in column &&
-    Boolean(getReferencesErrors(layer, column, indexPattern).filter(Boolean).length);
+    Boolean(getReferencesErrors(layer, column, indexPattern, dateRange).filter(Boolean).length);
 
   const operationErrorMessages =
     operationDefinition &&
-    operationDefinition.getErrorMessage?.(layer, columnId, indexPattern, operationDefinitionMap);
+    operationDefinition.getErrorMessage?.(
+      layer,
+      columnId,
+      indexPattern,
+      dateRange,
+      operationDefinitionMap
+    );
 
   const filterHasError = column.filter ? !isQueryValid(column.filter, indexPattern) : false;
 
@@ -82,7 +90,8 @@ export function isColumnInvalid(
 function getReferencesErrors(
   layer: FormBasedLayer,
   column: ReferenceBasedIndexPatternColumn,
-  indexPattern: IndexPattern
+  indexPattern: IndexPattern,
+  dateRange: DateRange | undefined
 ) {
   return column.references?.map((referenceId: string) => {
     const referencedOperation = layer.columns[referenceId]?.operationType;
@@ -91,6 +100,7 @@ function getReferencesErrors(
       layer,
       referenceId,
       indexPattern,
+      dateRange,
       operationDefinitionMap
     );
   });
