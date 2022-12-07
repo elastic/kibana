@@ -13,4 +13,5 @@ export {
   checkSuperuser,
   calculateRouteAuthz,
   getAuthzFromRequest,
+  doesNotHaveRequiredFleetAuthz,
 } from './security';

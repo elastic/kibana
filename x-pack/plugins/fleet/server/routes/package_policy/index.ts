@@ -52,6 +52,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     getPackagePoliciesHandler
   );
 
+  // Get bulk
   router.post(
     {
       path: PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN,
@@ -108,7 +109,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(
           fleetAuthz,
-          getRouteRequiredAuthz('put', PACKAGE_POLICY_API_ROUTES.UPGRADE_PATTERN)
+          getRouteRequiredAuthz('put', PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN)
         ).granted,
     },
     updatePackagePolicyHandler

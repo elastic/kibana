@@ -9,7 +9,7 @@ import { deepFreeze } from '@kbn/std';
 
 import type { RouteMethod } from '@kbn/core-http-server';
 
-import { PACKAGE_POLICY_API_ROUTES } from '../../../common';
+import { AGENT_POLICY_API_ROUTES, PACKAGE_POLICY_API_ROUTES } from '../../../common';
 
 import type { FleetRouteRequiredAuthz } from './types';
 
@@ -129,13 +129,25 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
 });
 
 /**
- * Retrieves the required fleet route authz in order for access to be granted to the given api route
+ * Retrieves the required fleet route authz
+ * in order to grant access to the given api route
+ * replaces the actual policy id with the route path pattern placeholder
  * @param routeMethod
  * @param routePath
+ * @param policyIds
  */
 export const getRouteRequiredAuthz = (
   routeMethod: RouteMethod,
-  routePath: string
+  routePath: string,
+  policyIds?: { packagePolicyId?: string; agentPolicyId?: string }
 ): FleetRouteRequiredAuthz => {
-  return ROUTE_AUTHZ_REQUIREMENTS[`${routeMethod}:${routePath}`];
+  let key = `${routeMethod}:${routePath}`;
+
+  if (routePath.includes(PACKAGE_POLICY_API_ROUTES.LIST_PATTERN) && policyIds?.packagePolicyId) {
+    key = key.replace(policyIds?.packagePolicyId, '{packagePolicyId}');
+  } else if (routePath.includes(AGENT_POLICY_API_ROUTES.LIST_PATTERN) && policyIds?.agentPolicyId) {
+    key = key.replace(policyIds?.agentPolicyId, '{agentPolicyId}');
+  }
+
+  return ROUTE_AUTHZ_REQUIREMENTS[key];
 };
