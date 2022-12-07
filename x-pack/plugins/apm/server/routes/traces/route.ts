@@ -241,6 +241,31 @@ const aggregatedCriticalPathRoute = createApmServerRoute({
   },
 });
 
+const transactionFromTraceByIdRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/traces/{traceId}/transactions/{transactionId}',
+  params: t.type({
+    path: t.type({
+      traceId: t.string,
+      transactionId: t.string,
+    }),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<
+    import('./../../../typings/es_schemas/ui/transaction').Transaction
+  > => {
+    const { params } = resources;
+    const { transactionId, traceId } = params.path;
+    const apmEventClient = await getApmEventClient(resources);
+    return await getTransaction({
+      transactionId,
+      traceId,
+      apmEventClient,
+    });
+  },
+});
+
 export const traceRouteRepository = {
   ...tracesByIdRoute,
   ...tracesRoute,
@@ -248,4 +273,5 @@ export const traceRouteRepository = {
   ...transactionByIdRoute,
   ...findTracesRoute,
   ...aggregatedCriticalPathRoute,
+  ...transactionFromTraceByIdRoute,
 };
