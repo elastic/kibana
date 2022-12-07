@@ -750,6 +750,7 @@ _meta:
 
     // Mock resp for when index from older version already exists
     esClient.indices.create.mockReturnValueOnce(
+      // @ts-expect-error mock error instead of successful IndicesCreateResponse
       Promise.resolve({
         error: {
           type: 'resource_already_exists_exception',
