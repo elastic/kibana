@@ -81,6 +81,12 @@ function toMinutes(duration: Duration) {
       return duration.value * 60;
     case 'd':
       return duration.value * 24 * 60;
+    case 'w':
+      return duration.value * 7 * 24 * 60;
+    case 'M':
+      return duration.value * 30 * 24 * 60;
+    case 'Y':
+      return duration.value * 365 * 24 * 60;
   }
 
   assertNever(duration.unit);

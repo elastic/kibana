@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-type DurationUnit = 'm' | 'h' | 'd';
+type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M' | 'Y';
 
 interface Duration {
   value: number;
