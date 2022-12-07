@@ -7,13 +7,14 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { lastValueFrom } from 'rxjs';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { AggregationsSingleMetricAggregateBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { getDocumentsTimeRange } from '@kbn/unified-search-plugin/public';
 
 export interface Params {
   dataView?: DataView;
@@ -56,7 +57,7 @@ export const useFetchOccurrencesRange = (
           filters ?? [],
           getEsQueryConfig(uiSettings)
         );
-        occurrencesRange = await getDocumentsTimeRange({
+        occurrencesRange = await fetchDocumentsTimeRange({
           data,
           dataView,
           dslQuery,
@@ -91,3 +92,59 @@ export const useFetchOccurrencesRange = (
     refetch: () => fetchOccurrences(params.dataView, params.query, params.filters),
   };
 };
+
+export async function fetchDocumentsTimeRange({
+  data,
+  dataView,
+  dslQuery,
+  abortSignal,
+}: {
+  data: DataPublicPluginStart;
+  dataView: DataView;
+  dslQuery?: object;
+  abortSignal?: AbortSignal;
+}): Promise<OccurrencesRange | null> {
+  if (!dataView?.timeFieldName) {
+    return null;
+  }
+
+  const result = await lastValueFrom(
+    data.search.search(
+      {
+        params: {
+          index: dataView.title,
+          size: 0,
+          body: {
+            query: dslQuery ?? { match_all: {} },
+            aggs: {
+              earliest_timestamp: {
+                min: {
+                  field: dataView.timeFieldName,
+                },
+              },
+              latest_timestamp: {
+                max: {
+                  field: dataView.timeFieldName,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        abortSignal,
+      }
+    )
+  );
+
+  const earliestTimestamp = (
+    result.rawResponse?.aggregations?.earliest_timestamp as AggregationsSingleMetricAggregateBase
+  )?.value_as_string;
+  const latestTimestamp = (
+    result.rawResponse?.aggregations?.latest_timestamp as AggregationsSingleMetricAggregateBase
+  )?.value_as_string;
+
+  return earliestTimestamp && latestTimestamp
+    ? { from: earliestTimestamp, to: latestTimestamp }
+    : null;
+}

@@ -8,25 +8,37 @@
 
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
+import * as RxApi from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import * as QueryApi from '@kbn/unified-field-list-plugin/public/hooks/use_query_subscriber';
-import * as SearchApi from '@kbn/unified-search-plugin/public/query_string_input/custom_date_picker_panel/get_documents_time_range';
 import { DiscoverNoResults, DiscoverNoResultsProps } from './no_results';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 
 const dataView = stubDataView;
 
 jest.spyOn(QueryApi, 'useQuerySubscriber');
-jest.spyOn(SearchApi, 'getDocumentsTimeRange');
+jest.spyOn(RxApi, 'lastValueFrom').mockImplementation(async () => ({
+  rawResponse: {
+    aggregations: {
+      earliest_timestamp: {
+        value_as_string: '2020-09-01T08:30:00.000Z',
+      },
+      latest_timestamp: {
+        value_as_string: '2022-09-01T08:30:00.000Z',
+      },
+    },
+  },
+}));
 
 async function mountAndFindSubjects(
   props: Omit<DiscoverNoResultsProps, 'onDisableFilters' | 'data' | 'dataView'>
 ) {
   const services = createDiscoverServicesMock();
+
   let component: ReactWrapper;
 
   await act(async () => {
@@ -59,7 +71,7 @@ async function mountAndFindSubjects(
 describe('DiscoverNoResults', () => {
   beforeEach(() => {
     (QueryApi.useQuerySubscriber as jest.Mock).mockClear();
-    (SearchApi.getDocumentsTimeRange as jest.Mock).mockClear();
+    (RxApi.lastValueFrom as jest.Mock).mockClear();
   });
 
   describe('props', () => {
@@ -81,10 +93,6 @@ describe('DiscoverNoResults', () => {
     });
     describe('timeFieldName', () => {
       test('renders time range feedback', async () => {
-        (SearchApi.getDocumentsTimeRange as jest.Mock).mockImplementation(async () => ({
-          from: '2020-09-01T08:30:00.000Z',
-          to: 'now',
-        }));
         (QueryApi.useQuerySubscriber as jest.Mock).mockImplementation(() => ({
           query: { language: 'lucene', query: '' },
           filters: [],
@@ -105,16 +113,12 @@ describe('DiscoverNoResults', () => {
           }
         `);
         expect(QueryApi.useQuerySubscriber).toHaveBeenCalledTimes(1);
-        expect(SearchApi.getDocumentsTimeRange).toHaveBeenCalledTimes(1);
+        expect(RxApi.lastValueFrom).toHaveBeenCalledTimes(1);
       });
     });
 
     describe('filter/query', () => {
       test('shows "adjust search" message when having query', async () => {
-        (SearchApi.getDocumentsTimeRange as jest.Mock).mockImplementation(async () => ({
-          from: '2020-09-01T08:30:00.000Z',
-          to: 'now',
-        }));
         (QueryApi.useQuerySubscriber as jest.Mock).mockImplementation(() => ({
           query: { language: 'lucene', query: '*' },
           filters: [],
@@ -125,10 +129,6 @@ describe('DiscoverNoResults', () => {
       });
 
       test('shows "adjust filters" message when having filters', async () => {
-        (SearchApi.getDocumentsTimeRange as jest.Mock).mockImplementation(async () => ({
-          from: '2020-09-01T08:30:00.000Z',
-          to: 'now',
-        }));
         (QueryApi.useQuerySubscriber as jest.Mock).mockImplementation(() => ({
           query: { language: 'lucene', query: '' },
           filters: [{}],

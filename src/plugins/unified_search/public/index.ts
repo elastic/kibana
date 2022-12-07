@@ -24,7 +24,6 @@ export { DataViewsList } from './dataview_picker/dataview_list';
 export { DataViewSelector } from './dataview_picker/data_view_selector';
 export { DataViewPicker } from './dataview_picker';
 export type { DataViewPickerProps } from './dataview_picker';
-export { getDocumentsTimeRange } from './query_string_input/custom_date_picker_panel';
 
 export type { ApplyGlobalFilterActionContext } from './actions';
 export { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions';
