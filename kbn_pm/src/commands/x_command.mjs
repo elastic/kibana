@@ -56,6 +56,9 @@ export const command = {
     );
     const { readPackageMap } = External['@kbn/package-map']();
 
+    const pkgMap = readPackageMap();
+    const dirsToPkgIds = new Map(Array.from(pkgMap).map(([k, v]) => [v, k]));
+
     const pathsAndProjects = await asyncMapWithLimit(PROJECTS, 5, async (proj) => {
       const paths = await globby(proj.getIncludePatterns(), {
         ignore: proj.getExcludePatterns(),
@@ -71,21 +74,20 @@ export const command = {
     });
 
     for (const { proj, paths } of pathsAndProjects) {
-      if (proj.directory.includes('/packages/') || !proj.config.kbn_references) {
-        continue;
-      }
+      const ownPkgId = dirsToPkgIds.get(Path.relative(REPO_ROOT, proj.directory));
 
       /** @type {Set<string>} */
       const importedPkgIds = new Set();
       await asyncMapWithLimit(paths, 30, async (path) => {
         const content = await Fsp.readFile(path, 'utf8');
         for (const match of content.matchAll(/from '(@kbn\/[^'\/]+)/g)) {
-          importedPkgIds.add(match[1]);
+          if (match[1] !== ownPkgId) {
+            importedPkgIds.add(match[1]);
+          }
         }
       });
 
-      const pkgMap = readPackageMap();
-      const currentRefs = Array.from(proj.config.kbn_references);
+      const currentRefs = Array.from(proj.config.kbn_references ?? []);
       const newRefs = [];
       for (const id of importedPkgIds) {
         const pkgDir = pkgMap.get(id);
@@ -108,8 +110,18 @@ export const command = {
         continue;
       }
 
-      const jsonc = await Fsp.readFile(proj.tsConfigPath, 'utf8');
-      const ast = parseExpression(jsonc);
+      let jsonc = await Fsp.readFile(proj.tsConfigPath, 'utf8');
+      if (!jsonc.includes('"kbn_references"')) {
+        jsonc = jsonc.replace(/,?\n\s*}\s*$/, ',\n  "kbn_references": []\n}\n');
+      }
+
+      let ast;
+      try {
+        ast = parseExpression(jsonc);
+      } catch (error) {
+        throw new Error(`unable to parse tsconfig file at ${proj.tsConfigPath}: ${error.stack}`);
+      }
+
       if (!T.isObjectExpression(ast)) {
         throw createCliError(`expected file to be a JSON object: ${proj.tsConfigPath}`);
       }
