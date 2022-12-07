@@ -92,11 +92,7 @@ export const createPrepackagedRules = async (
   const exceptionsListClient = context.getExceptionListClient() ?? exceptionsClient;
   const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
 
-  const {
-    maxTimelineImportExportSize,
-    prebuiltRulesFromFileSystem,
-    prebuiltRulesFromSavedObjects,
-  } = config;
+  const { maxTimelineImportExportSize } = config;
 
   if (!siemClient || !rulesClient) {
     throw new PrepackagedRulesError('', 404);
@@ -107,11 +103,7 @@ export const createPrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const latestPrepackagedRulesMap = await getLatestPrebuiltRules(
-    ruleAssetsClient,
-    prebuiltRulesFromFileSystem,
-    prebuiltRulesFromSavedObjects
-  );
+  const latestPrepackagedRulesMap = await getLatestPrebuiltRules(ruleAssetsClient);
   const installedPrePackagedRules = rulesToMap(await getExistingPrepackagedRules({ rulesClient }));
   const rulesToInstall = getRulesToInstall(latestPrepackagedRulesMap, installedPrePackagedRules);
   const rulesToUpdate = getRulesToUpdate(latestPrepackagedRulesMap, installedPrePackagedRules);
