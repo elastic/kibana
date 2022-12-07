@@ -11,9 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { isAntivirusRegistrationEnabled } from '../../../store/policy_details/selectors';
-import { usePolicyDetailsSelector } from '../../policy_hooks';
+import {
+  useCanWritePolicyManagementOrHasFleetAccess,
+  usePolicyDetailsSelector,
+} from '../../policy_hooks';
 import { ConfigForm } from '../config_form';
 
 const TRANSLATIONS: Readonly<{ [K in 'title' | 'description' | 'label']: string }> = {
@@ -42,7 +44,7 @@ const TRANSLATIONS: Readonly<{ [K in 'title' | 'description' | 'label']: string 
 export const AntivirusRegistrationForm = memo(() => {
   const antivirusRegistrationEnabled = usePolicyDetailsSelector(isAntivirusRegistrationEnabled);
   const dispatch = useDispatch();
-  const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
+  const canWritePolicyManagement = useCanWritePolicyManagementOrHasFleetAccess();
 
   const handleSwitchChange = useCallback(
     (event) =>

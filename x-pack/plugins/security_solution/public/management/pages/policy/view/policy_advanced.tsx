@@ -21,9 +21,11 @@ import {
 import { cloneDeep } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { policyConfig } from '../store/policy_details/selectors';
-import { usePolicyDetailsSelector } from './policy_hooks';
+import {
+  useCanWritePolicyManagementOrHasFleetAccess,
+  usePolicyDetailsSelector,
+} from './policy_hooks';
 import { AdvancedPolicySchema } from '../models/advanced_policy_schema';
 
 function setValue(obj: Record<string, unknown>, value: string, path: string[]) {
@@ -146,7 +148,7 @@ const PolicyAdvanced = React.memo(
     lastSupportedVersion?: string;
     documentation: string;
   }) => {
-    const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
+    const canWritePolicyManagement = useCanWritePolicyManagementOrHasFleetAccess();
     const dispatch = useDispatch();
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
     const onChange = useCallback(

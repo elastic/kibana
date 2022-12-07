@@ -13,6 +13,7 @@ import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import type { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../types';
 import type { State } from '../../../../common/store';
 import {
@@ -87,4 +88,17 @@ export const useIsPolicySettingsBarVisible = () => {
     window.location.pathname.includes(POLICIES_PATH) &&
     window.location.pathname.includes('/settings')
   );
+};
+
+/**
+ * Indicates if user is granted Write access to Policy Management. This method differs from what
+ * `useUserPrivileges().endpointPrivileges.canWritePolicyManagement` in that it also checks if
+ * user has `canAccessFleet`. This is to ensure that the Policy Form remains accessible when
+ * when displayed inside of Fleet pages if the user does not have privileges to security solution
+ * policy management.
+ */
+export const useCanWritePolicyManagementOrHasFleetAccess = (): boolean => {
+  const { canWritePolicyManagement, canAccessFleet } = useUserPrivileges().endpointPrivileges;
+
+  return canWritePolicyManagement || canAccessFleet;
 };

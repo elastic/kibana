@@ -55,9 +55,9 @@ export const PolicyDetailsForm = memo(() => {
     setShowAdvancedPolicy(!showAdvancedPolicy);
   }, [showAdvancedPolicy]);
   const isPlatinumPlus = useLicense().isPlatinumPlus();
-  const endpointPrivileges = useUserPrivileges().endpointPrivileges;
+  const { loading: authzLoading } = useUserPrivileges().endpointPrivileges;
 
-  if (endpointPrivileges.loading) {
+  if (authzLoading) {
     return <EuiLoadingContent lines={5} />;
   }
 

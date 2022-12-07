@@ -19,12 +19,14 @@ import {
 } from '@elastic/eui';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { ThemeContext } from 'styled-components';
-import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import type {
   PolicyOperatingSystem,
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
-import { usePolicyDetailsSelector } from '../../policy_hooks';
+import {
+  useCanWritePolicyManagementOrHasFleetAccess,
+  usePolicyDetailsSelector,
+} from '../../policy_hooks';
 import { policyConfig } from '../../../store/policy_details/selectors';
 import { ConfigForm, ConfigFormHeading } from '../config_form';
 
@@ -76,7 +78,7 @@ const InnerEventsForm = <T extends OperatingSystem>({
   onValueSelection,
   supplementalOptions,
 }: EventsFormProps<T>) => {
-  const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
+  const canWritePolicyManagement = useCanWritePolicyManagementOrHasFleetAccess();
   const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
   const theme = useContext(ThemeContext);
   const countSelected = useCallback(() => {
