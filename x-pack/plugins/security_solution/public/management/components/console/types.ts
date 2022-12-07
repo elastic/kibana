@@ -194,7 +194,15 @@ export interface ConsoleProps extends CommonProps {
    */
   TitleComponent?: ComponentType;
 
+  /** The string to display to the left of the input area */
   prompt?: string;
+
+  /**
+   * If defined, certain console data (ex. command input history) will be persisted to localstorage
+   * using this prefix as part of the storage key. That data will then be retrieved and reused
+   * across all console windows
+   */
+  storagePrefix?: string;
 
   /**
    * For internal use only!

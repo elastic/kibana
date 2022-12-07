@@ -4497,6 +4497,138 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.SLO",
+        "type": "Interface",
+        "tags": [],
+        "label": "SLO",
+        "description": [],
+        "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SLO.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SLO.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SLO.objective",
+            "type": "Object",
+            "tags": [],
+            "label": "objective",
+            "description": [],
+            "signature": [
+              "{ target: number; }"
+            ],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SLO.summary",
+            "type": "Object",
+            "tags": [],
+            "label": "summary",
+            "description": [],
+            "signature": [
+              "{ sliValue: number; errorBudget: { remaining: number; }; }"
+            ],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.SLOList",
+        "type": "Interface",
+        "tags": [],
+        "label": "SLOList",
+        "description": [],
+        "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SLOList.results",
+            "type": "Array",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observability",
+                "scope": "public",
+                "docId": "kibObservabilityPluginApi",
+                "section": "def-public.SLO",
+                "text": "SLO"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SLOList.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SLOList.perPage",
+            "type": "number",
+            "tags": [],
+            "label": "perPage",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SLOList.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.Stat",
         "type": "Interface",
         "tags": [],
@@ -5603,6 +5735,31 @@
           "string | null"
         ],
         "path": "x-pack/plugins/observability/public/typings/fetch_overview_data/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.Subset",
+        "type": "Type",
+        "tags": [],
+        "label": "Subset",
+        "description": [
+          "\nAllow partial of nested object"
+        ],
+        "signature": [
+          "{ [attr in keyof K]?: (K[attr] extends object ? ",
+          {
+            "pluginId": "observability",
+            "scope": "public",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-public.Subset",
+            "text": "Subset"
+          },
+          "<K[attr]> : K[attr]) | undefined; }"
+        ],
+        "path": "x-pack/plugins/observability/public/typings/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7393,7 +7550,7 @@
         "label": "kqlQuery",
         "description": [],
         "signature": [
-          "(kql: string) => ",
+          "(kql: string | undefined) => ",
           "QueryDslQueryContainer",
           "[]"
         ],
@@ -7409,12 +7566,12 @@
             "label": "kql",
             "description": [],
             "signature": [
-              "string"
+              "string | undefined"
             ],
             "path": "x-pack/plugins/observability/server/utils/queries.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],

@@ -22,13 +22,13 @@ const mockIndicator: Indicator = generateMockIndicator();
 
 describe('<IndicatorsFlyoutTable />', () => {
   it('should render fields and values in table', () => {
-    const kqlBarIntegration = {
+    const context = {
       kqlBarIntegration: false,
     };
 
     const { getByTestId, getByText, getAllByText } = render(
       <TestProvidersComponent>
-        <IndicatorsFlyoutContext.Provider value={kqlBarIntegration}>
+        <IndicatorsFlyoutContext.Provider value={context}>
           <IndicatorsFlyoutTable indicator={mockIndicator} />
         </IndicatorsFlyoutContext.Provider>
       </TestProvidersComponent>
