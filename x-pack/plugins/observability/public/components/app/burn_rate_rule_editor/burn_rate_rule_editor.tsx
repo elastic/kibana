@@ -23,7 +23,9 @@ export function BurnRateRuleEditor() {
 
   const onLongWindowDurationChange = (duration: Duration) => {
     setLongWindowDuration(duration);
-    setShortWindowDuration({ value: 5, unit: 'm' }); // TODO: compute 1/12th of long window duration
+    const longWindowdurationInMinutes = toMinutes(duration);
+    const shortWindowDurationValue = Math.floor(longWindowdurationInMinutes / 12);
+    setShortWindowDuration({ value: shortWindowDurationValue, unit: 'm' });
   };
 
   const onBurnRateChange = (value: number) => {
@@ -41,7 +43,7 @@ export function BurnRateRuleEditor() {
     }
     const longWindowDurationInMinutes = toMinutes(longWindowDuration);
     setMaxBurnRate(Math.floor(sloDurationInMinutes / longWindowDurationInMinutes));
-  }, [longWindowDuration, selectedSlo]); // depends on selected SLO as well as long window
+  }, [longWindowDuration, selectedSlo]);
 
   return (
     <EuiFlexGroup direction="column">
