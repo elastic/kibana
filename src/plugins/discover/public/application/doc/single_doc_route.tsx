@@ -84,7 +84,8 @@ export const SingleDocRoute = () => {
         error={
           new Error(
             i18n.translate('discover.discoverError.missingIdParamError', {
-              defaultMessage: 'The URL is missing a required parameter: "id"',
+              defaultMessage:
+                'No document ID provided. Return to Discover to select another document.',
             })
           )
         }
