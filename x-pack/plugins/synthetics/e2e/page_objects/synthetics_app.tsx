@@ -33,15 +33,21 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
     }),
     ...utilsPageProvider({ page }),
 
-    async navigateToMonitorManagement() {
+    async navigateToMonitorManagement(doLogin = false) {
       await page.goto(monitorManagement, {
         waitUntil: 'networkidle',
       });
+      if (doLogin) {
+        await this.loginToKibana();
+      }
       await this.waitForMonitorManagementLoadingToFinish();
     },
 
-    async navigateToOverview() {
+    async navigateToOverview(doLogin = false) {
       await page.goto(overview, { waitUntil: 'networkidle' });
+      if (doLogin) {
+        await this.loginToKibana();
+      }
     },
 
     async waitForMonitorManagementLoadingToFinish() {
@@ -61,16 +67,13 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       });
       if (doLogin) {
         await this.loginToKibana();
-        const invalid = await page.isVisible(
-          `text=Username or password is incorrect. Please try again.`,
-          { timeout: 1000 }
-        );
-        expect(invalid).toBeFalsy();
       }
     },
 
     async navigateToAddMonitor() {
-      await page.goto(addMonitor);
+      await page.goto(addMonitor, {
+        waitUntil: 'networkidle',
+      });
     },
 
     async ensureIsOnMonitorConfigPage() {

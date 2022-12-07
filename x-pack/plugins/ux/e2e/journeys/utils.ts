@@ -9,6 +9,10 @@ import { expect, Page } from '@elastic/synthetics';
 
 export async function waitForLoadingToFinish({ page }: { page: Page }) {
   while (true) {
+    if ((await page.$(byTestId('kbnLoadingMessage'))) === null) break;
+    await page.waitForTimeout(2 * 1000);
+  }
+  while (true) {
     if ((await page.$(byTestId('globalLoadingIndicator'))) === null) break;
     await page.waitForTimeout(2 * 1000);
   }

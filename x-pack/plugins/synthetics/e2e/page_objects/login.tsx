@@ -42,7 +42,11 @@ export function loginPageProvider({
 
       await page.click('[data-test-subj=loginSubmit]');
 
-      await this.waitForLoadingToFinish();
+      while (await page.isVisible('[data-test-subj=loginSubmit]')) {
+        await page.waitForTimeout(1000);
+      }
+
+      await waitForLoadingToFinish({ page });
     },
   };
 }
