@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty, sortBy } from 'lodash';
 import React, { useState, useCallback, useMemo } from 'react';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { ServiceGroupsListItems } from './service_groups_list';
 import { Sort } from './sort';
 import { RefreshServiceGroupsSubscriber } from '../refresh_service_groups_subscriber';
@@ -60,8 +60,7 @@ export function ServiceGroupsList() {
     [start, end, serviceGroups.length]
   );
 
-  const isLoading =
-    status === FETCH_STATUS.NOT_INITIATED || status === FETCH_STATUS.LOADING;
+  const isLoading = isPending(status);
 
   const filteredItems = isEmpty(filter)
     ? serviceGroups

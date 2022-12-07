@@ -324,7 +324,7 @@ export const CREATE_SHARED_LIST_DESCRIPTION = i18n.translate(
 export const CREATE_SHARED_LIST_DESCRIPTION_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.exceptions.createSharedExceptionListFlyoutDescriptionPlaceholder',
   {
-    defaultMessage: 'New exception list',
+    defaultMessage: 'New exception list description',
   }
 );
 

@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-export const ALERT_PAGE_LINK = '/app/observability/alerts';
+export const OBSERVABILITY_BASE_PATH = '/app/observability';
+export const ALERT_PAGE_LINK = `${OBSERVABILITY_BASE_PATH}/alerts`;
 export const RULES_PAGE_LINK = `${ALERT_PAGE_LINK}/rules`;
+export const SLOS_PAGE_LINK = `${OBSERVABILITY_BASE_PATH}/slos`;
 
 export const paths = {
   observability: {
     alerts: ALERT_PAGE_LINK,
+    alertDetails: (alertId: string) => `${ALERT_PAGE_LINK}/${encodeURI(alertId)}`,
     rules: RULES_PAGE_LINK,
     ruleDetails: (ruleId?: string | null) =>
       ruleId ? `${RULES_PAGE_LINK}/${encodeURI(ruleId)}` : RULES_PAGE_LINK,
-    alertDetails: (alertId: string) => `${ALERT_PAGE_LINK}/${encodeURI(alertId)}`,
+    slos: SLOS_PAGE_LINK,
   },
   management: {
     rules: '/app/management/insightsAndAlerting/triggersActions/rules',
