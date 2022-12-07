@@ -9,6 +9,7 @@
 import Fs from 'fs';
 import Path from 'path';
 import { SomeDevLog } from '@kbn/some-dev-log';
+import { setTimeout } from 'timers/promises';
 
 import { PROJECTS } from './projects';
 import { Project } from './project';
@@ -29,8 +30,10 @@ export async function getLintedProjects(log: SomeDevLog, options: LintOptions) {
 
   lintProjects: while (!projects || projects.length > linted.size) {
     projects = projects ? Project.reload(projects, fsCache) : Array.from(PROJECTS);
+    // pause, in case there are a lot of updates give a moment for the process to be aborted
+    await setTimeout(0);
 
-    for await (const project of projects) {
+    for (const project of projects) {
       if (linted.has(project.tsConfigPath)) {
         continue;
       }
