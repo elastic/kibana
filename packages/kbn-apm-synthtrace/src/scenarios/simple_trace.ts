@@ -38,7 +38,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           instance
             .transaction({ transactionName })
             .timestamp(timestamp)
-            .duration(Math.round(Math.random() * 1000))
+            .duration(1000)
             .success()
             .children(
               instance

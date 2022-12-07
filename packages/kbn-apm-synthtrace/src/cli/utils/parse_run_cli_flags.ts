@@ -61,7 +61,16 @@ export function parseRunCliFlags(flags: RunCliFlags) {
   }
 
   return {
-    ...pick(flags, 'target', 'workers', 'scenarioOpts', 'kibana', 'esConcurrency', 'version'),
+    ...pick(
+      flags,
+      'target',
+      'workers',
+      'scenarioOpts',
+      'kibana',
+      'esConcurrency',
+      'version',
+      'clean'
+    ),
     logLevel: parsedLogLevel,
     file: parsedFile,
   };

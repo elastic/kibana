@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { isMainThread } from 'worker_threads';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { format, parse, Url } from 'url';
 import fetch from 'node-fetch';
@@ -48,7 +48,7 @@ export async function getCommonServices({
   esConcurrency,
   version: versionOverride,
   logger,
-  installPackage = true,
+  clean,
 }: RunOptions & { logger?: Logger; installPackage?: boolean }) {
   if (!target) {
     // assume things are running locally
@@ -98,7 +98,7 @@ export async function getCommonServices({
 
   const version = versionOverride || (await kibanaClient.fetchLatestApmPackageVersion());
 
-  if (installPackage) {
+  if (isMainThread) {
     await kibanaClient.installApmPackage(version);
   }
 
@@ -108,6 +108,10 @@ export async function getCommonServices({
     version,
     concurrency: esConcurrency,
   });
+
+  if (isMainThread && clean) {
+    await apmEsClient.clean();
+  }
 
   return {
     logger,
