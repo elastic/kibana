@@ -35,6 +35,7 @@ const getWorkerConfig = (language) => ({
     rules: [
       {
         test: /\.(jsx?|tsx?)$/,
+        exclude: /node_modules(?!\/@kbn\/)(\/[^\/]+\/)/,
         use: {
           loader: 'babel-loader',
           options: {
