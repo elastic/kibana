@@ -214,20 +214,10 @@ describe('AddComment ', () => {
 
 describe('draft comment ', () => {
   let appMockRenderer: AppMockRenderer;
-  let store: Record<string, any> = {};
 
   beforeEach(() => {
     appMockRenderer = createAppMockRenderer();
     jest.clearAllMocks();
-    Object.defineProperty(window, 'sessionStorage', {
-      value: {
-        clear: jest.fn().mockImplementation(() => (store = {})),
-        getItem: jest.fn().mockImplementation((key: string) => store[key]),
-        setItem: jest.fn().mockImplementation((key: string, value: string) => (store[key] = value)),
-        removeItem: jest.fn().mockImplementation((key: string) => delete store[key]),
-      },
-      writable: true,
-    });
   });
 
   it('should clear session storage on submit', async () => {
@@ -239,10 +229,10 @@ describe('draft comment ', () => {
     });
 
     expect(result.getByTestId(`add-comment`)).toBeTruthy();
+    sessionStorage.setItem(draftKey, sampleData.comment);
+    expect(sessionStorage.getItem(draftKey)).toBe(sampleData.comment);
 
     fireEvent.click(result.getByTestId('submit-comment'));
-
-    const removeItemSpy = jest.spyOn(window.sessionStorage, 'removeItem');
 
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
@@ -252,7 +242,6 @@ describe('draft comment ', () => {
         data: [sampleData],
         updateCase: onCommentPosted,
       });
-      expect(removeItemSpy).toHaveBeenCalledWith(draftKey);
       expect(result.getByLabelText('caseComment').textContent).toBe('');
     });
   });

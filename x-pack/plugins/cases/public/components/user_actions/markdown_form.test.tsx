@@ -227,21 +227,9 @@ describe('UserActionMarkdown ', () => {
 
   describe('draft comment ', () => {
     let appMockRenderer: AppMockRenderer;
-    let store: Record<string, any> = {};
 
     beforeEach(() => {
       appMockRenderer = createAppMockRenderer();
-      Object.defineProperty(window, 'sessionStorage', {
-        value: {
-          clear: jest.fn().mockImplementation(() => (store = {})),
-          getItem: jest.fn().mockImplementation((key: string) => store[key]),
-          setItem: jest
-            .fn()
-            .mockImplementation((key: string, value: string) => (store[key] = value)),
-          removeItem: jest.fn().mockImplementation((key: string) => delete store[key]),
-        },
-        writable: true,
-      });
     });
 
     it('Save button click clears session storage', async () => {
@@ -251,14 +239,12 @@ describe('UserActionMarkdown ', () => {
         target: { value: newValue },
       });
 
-      const removeItemSpy = jest.spyOn(window.sessionStorage, 'removeItem');
-
       fireEvent.click(result.getByTestId(`user-action-save-markdown`));
 
       await waitFor(() => {
         expect(onSaveContent).toHaveBeenCalledWith(newValue);
-        expect(removeItemSpy).toHaveBeenCalledWith(draftStorageKey);
         expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
+        expect(sessionStorage.getItem(draftStorageKey)).toBe('undefined');
       });
     });
 
@@ -267,7 +253,7 @@ describe('UserActionMarkdown ', () => {
 
       fireEvent.click(result.getByTestId('user-action-cancel-markdown'));
 
-      expect(window.sessionStorage.removeItem).toHaveBeenCalled();
+      expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
     });
   });
 });

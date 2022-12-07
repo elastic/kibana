@@ -12,7 +12,6 @@ import React, {
   useImperativeHandle,
   useEffect,
   useState,
-  useMemo,
 } from 'react';
 import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
@@ -24,7 +23,6 @@ import {
   UseField,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { CommentType } from '../../../common/api';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import type { Case } from '../../containers/types';
@@ -69,7 +67,6 @@ export const AddComment = React.memo(
       { id, caseId, onCommentPosted, onCommentSaving, showLoading = true, statusActionButton },
       ref
     ) => {
-      const storage = useMemo(() => new Storage(window.sessionStorage), []);
       const editorRef = useRef<EuiMarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
       const { permissions, owner } = useCasesContext();
@@ -121,7 +118,6 @@ export const AddComment = React.memo(
             data: [{ ...data, type: CommentType.user }],
             updateCase: onCommentPosted,
           });
-          storage.remove(draftStorageKey);
           reset();
         }
       }, [
@@ -132,7 +128,6 @@ export const AddComment = React.memo(
         owner,
         onCommentPosted,
         reset,
-        storage,
         draftStorageKey,
       ]);
 

@@ -16,7 +16,6 @@ import {
 import styled, { css } from 'styled-components';
 
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { Title } from './title';
 import { Description, fieldName as descriptionFieldName } from './description';
@@ -192,20 +191,17 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     initialValue,
   }) => {
     const handleOnConfirmationCallback = (): void => {
-      ;
-       storage.remove(draftStorageKey);
-       onCancel();
-     };
+      onCancel();
+      window.sessionStorage.removeItem(draftStorageKey);
+    };
 
     const { showConfirmationModal, onOpenModal, onConfirmModal, onCancelModal } =
       useCancelCreationAction({
-        onConfirmationCallback:  handleOnConfirmationCallback
+        onConfirmationCallback: handleOnConfirmationCallback,
       });
 
-    const storage = useMemo(() => new Storage(window.sessionStorage), []);
-
     const handleOnSuccess = (theCase: Case): Promise<void> => {
-      storage.remove(draftStorageKey);
+      window.sessionStorage.removeItem(draftStorageKey);
       return onSuccess(theCase);
     };
 

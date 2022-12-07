@@ -53,7 +53,6 @@ const casesFormProps: CreateCaseFormProps = {
 
 describe('CreateCaseForm', () => {
   let globalForm: FormHook;
-  let store: Record<string, any> = {};
 
   const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
     children,
@@ -79,15 +78,6 @@ describe('CreateCaseForm', () => {
     useGetTagsMock.mockReturnValue({ data: ['test'] });
     useGetConnectorsMock.mockReturnValue({ isLoading: false, data: connectorsMock });
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
-    Object.defineProperty(window, 'sessionStorage', {
-      value: {
-        clear: jest.fn().mockImplementation(() => (store = {})),
-        getItem: jest.fn().mockImplementation((key: string) => store[key]),
-        setItem: jest.fn().mockImplementation((key: string, value: string) => (store[key] = value)),
-        removeItem: jest.fn().mockImplementation((key: string) => delete store[key]),
-      },
-      writable: true,
-    });
   });
 
   it('renders with steps', async () => {
@@ -232,13 +222,14 @@ describe('CreateCaseForm', () => {
         />
       </MockHookWrapperComponent>
     );
-
-    const removeItemSpy = jest.spyOn(window.sessionStorage, 'removeItem');
+    const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
     const cancelBtn = result.getByTestId('create-case-cancel');
 
     fireEvent.click(cancelBtn);
 
+    fireEvent.click(result.getByTestId('confirmModalConfirmButton'));
+
     expect(casesFormProps.onCancel).toHaveBeenCalled();
-    expect(removeItemSpy).toHaveBeenCalled();
+    expect(sessionStorage.getItem(draftStorageKey)).toBe('undefined');
   });
 });
