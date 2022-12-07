@@ -208,7 +208,7 @@ describe('setCompilerOptions()', () => {
       "{
         \\"compilerOptions\\": {
           \\"foo\\": 1,
-          \\"name\\": 2
+          \\"bar\\": 2
         }
       }"
     `);
@@ -254,6 +254,38 @@ describe('setCompilerOptions()', () => {
           \\"foo\\": 1,
           \\"bar\\": 2,
         }
+      }"
+    `);
+
+    expect(
+      setCompilerOption(
+        removeCompilerOption(
+          dedent`
+            {
+              "extends": "../../tsconfig.base.json",
+              "compilerOptions": {
+                "skipLibCheck": false
+              },
+              "include": [
+                "expect.d.ts"
+              ]
+            }
+          `,
+          'skipLibCheck'
+        ),
+
+        'outDir',
+        'foo/bar'
+      )
+    ).toMatchInlineSnapshot(`
+      "{
+        \\"extends\\": \\"../../tsconfig.base.json\\",
+        \\"compilerOptions\\": {
+          \\"outDir\\": \\"foo/bar\\"
+        },
+        \\"include\\": [
+          \\"expect.d.ts\\"
+        ]
       }"
     `);
   });

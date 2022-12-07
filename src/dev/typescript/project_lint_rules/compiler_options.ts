@@ -50,7 +50,10 @@ export function setCompilerOption(source: string, name: string, value: any) {
     return source.slice(0, start) + JSON.stringify(value) + source.slice(end);
   }
 
-  if (compilerOptions.loc?.start.line === compilerOptions.loc?.end.line) {
+  if (
+    !compilerOptions.properties.length ||
+    compilerOptions.loc?.start.line === compilerOptions.loc?.end.line
+  ) {
     // convert to multiline
     const orig = (Jsonc.parse(source) as any).compilerOptions;
     const [start, end] = getEnds(compilerOptions);
@@ -59,7 +62,7 @@ export function setCompilerOption(source: string, name: string, value: any) {
       JSON.stringify(
         {
           ...orig,
-          name: value,
+          [name]: value,
         },
         null,
         2
