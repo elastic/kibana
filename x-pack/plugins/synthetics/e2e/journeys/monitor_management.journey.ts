@@ -6,7 +6,7 @@
  */
 
 import uuid from 'uuid';
-import { journey, step, expect, before, after, Page } from '@elastic/synthetics';
+import { journey, step, expect, after, Page } from '@elastic/synthetics';
 import { byTestId } from '@kbn/observability-plugin/e2e/utils';
 import { monitorManagementPageProvider } from '../page_objects/monitor_management';
 import { DataStream } from '../../common/runtime_types/monitor_management';
@@ -99,25 +99,13 @@ const createMonitorJourney = ({
       const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
       const isRemote = process.env.SYNTHETICS_REMOTE_ENABLED;
 
-      before(async () => {
-        await uptime.waitForLoadingToFinish();
-      });
-
       after(async () => {
         await uptime.navigateToMonitorManagement();
         await uptime.enableMonitorManagement(false);
       });
 
       step('Go to monitor-management', async () => {
-        await uptime.navigateToMonitorManagement();
-      });
-
-      step('login to Kibana', async () => {
-        await uptime.loginToKibana();
-        const invalid = await page.locator(
-          `text=Username or password is incorrect. Please try again.`
-        );
-        expect(await invalid.isVisible()).toBeFalsy();
+        await uptime.navigateToMonitorManagement(true);
       });
 
       step(`create ${monitorType} monitor`, async () => {
@@ -168,20 +156,12 @@ journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page;
     apmServiceName: 'service',
   };
 
-  before(async () => {
-    await uptime.waitForLoadingToFinish();
-  });
-
   after(async () => {
     await uptime.enableMonitorManagement(false);
   });
 
   step('Go to monitor-management', async () => {
-    await uptime.navigateToMonitorManagement();
-  });
-
-  step('login to Kibana', async () => {
-    await uptime.loginToKibana();
+    await uptime.navigateToMonitorManagement(true);
   });
 
   step('Check breadcrumb', async () => {
@@ -243,10 +223,6 @@ journey(
       }),
     ];
 
-    before(async () => {
-      await uptime.waitForLoadingToFinish();
-    });
-
     after(async () => {
       await uptime.navigateToMonitorManagement();
       await uptime.deleteMonitors();
@@ -254,15 +230,7 @@ journey(
     });
 
     step('Go to monitor-management', async () => {
-      await uptime.navigateToMonitorManagement();
-    });
-
-    step('login to Kibana', async () => {
-      await uptime.loginToKibana();
-      const invalid = await page.locator(
-        `text=Username or password is incorrect. Please try again.`
-      );
-      expect(await invalid.isVisible()).toBeFalsy();
+      await uptime.navigateToMonitorManagement(true);
     });
 
     for (const monitorConfig of sortedMonitors) {
