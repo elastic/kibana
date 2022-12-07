@@ -112,21 +112,21 @@ export const useSyncGlobalQueryString = () => {
 
   useEffect(() => {
     const linkInfo = getLinkInfo(pageName) ?? { skipUrlState: true };
-    const params = Object.entries(globalUrlParam).map(([key, value]) => ({
-      key,
-      value: linkInfo.skipUrlState ? null : value,
-    }));
+    const paramsToUpdate = { ...globalUrlParam };
+
+    if (linkInfo.skipUrlState) {
+      Object.keys(paramsToUpdate).forEach((key) => {
+        paramsToUpdate[key] = null;
+      });
+    }
 
     // Delete unregistered Url params
     unregisteredKeys.forEach((key) => {
-      params.push({
-        key,
-        value: null,
-      });
+      paramsToUpdate[key] = null;
     });
 
-    if (params.length > 0) {
-      replaceUrlParams(params);
+    if (Object.keys(paramsToUpdate).length > 0) {
+      replaceUrlParams(paramsToUpdate);
     }
   }, [globalUrlParam, pageName, unregisteredKeys, replaceUrlParams]);
 };

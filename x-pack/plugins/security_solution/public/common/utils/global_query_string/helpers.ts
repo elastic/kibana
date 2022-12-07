@@ -59,20 +59,20 @@ export const useGetInitialUrlParamValue = <State extends RisonValue>(
 export const encodeQueryString = (urlParams: ParsedQuery<string>): string =>
   stringify(url.encodeQuery(urlParams), { sort: false, encode: false });
 
-export const useReplaceUrlParams = (): ((
-  params: Array<{ key: string; value: RisonValue | null }>
-) => void) => {
+export const useReplaceUrlParams = (): ((params: Record<string, RisonValue | null>) => void) => {
   const history = useHistory();
 
   const replaceUrlParams = useCallback(
-    (params: Array<{ key: string; value: RisonValue | null }>): void => {
+    (params: Record<string, RisonValue | null>): void => {
       // window.location.search provides the most updated representation of the url search.
       // It prevents unnecessary re-renders which useLocation would create because 'replaceUrlParams' does update the location.
       // window.location.search also guarantees that we don't overwrite URL param managed outside react-router.
       const search = window.location.search;
       const urlParams = parse(search, { sort: false });
 
-      params.forEach(({ key, value }) => {
+      Object.keys(params).forEach((key) => {
+        const value = params[key];
+
         if (value == null || value === '') {
           delete urlParams[key];
           return;

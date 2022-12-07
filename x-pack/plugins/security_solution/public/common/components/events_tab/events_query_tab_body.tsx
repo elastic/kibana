@@ -218,12 +218,9 @@ const useExternalAlertsInitialUrlState = () => {
   useEffect(() => {
     // Only called on component unmount
     return () => {
-      replaceUrlParams([
-        {
-          key: EXTERNAL_ALERTS_URL_PARAM,
-          value: null,
-        },
-      ]);
+      replaceUrlParams({
+        [EXTERNAL_ALERTS_URL_PARAM]: null,
+      });
     };
   }, [replaceUrlParams]);
 
@@ -236,11 +233,8 @@ const useExternalAlertsInitialUrlState = () => {
 const useSyncExternalAlertsUrlState = (showExternalAlerts: boolean) => {
   const replaceUrlParams = useReplaceUrlParams();
   useEffect(() => {
-    replaceUrlParams([
-      {
-        key: EXTERNAL_ALERTS_URL_PARAM,
-        value: showExternalAlerts ? true : null,
-      },
-    ]);
+    replaceUrlParams({
+      [EXTERNAL_ALERTS_URL_PARAM]: showExternalAlerts ? true : null,
+    });
   }, [showExternalAlerts, replaceUrlParams]);
 };
