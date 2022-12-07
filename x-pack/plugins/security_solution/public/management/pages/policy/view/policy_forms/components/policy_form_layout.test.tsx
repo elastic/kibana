@@ -185,9 +185,9 @@ describe('Policy Form Layout', () => {
 
       it('should show a modal confirmation', () => {
         expect(confirmModal).toHaveLength(1);
-        expect(confirmModal.find('div[data-test-subj="confirmModalTitleText"]').text()).toEqual(
-          'Save and deploy changes'
-        );
+        expect(
+          confirmModal.find('[data-test-subj="confirmModalTitleText"]').first().text()
+        ).toEqual('Save and deploy changes');
         expect(modalCancelButton.text()).toEqual('Cancel');
         expect(modalConfirmButton.text()).toEqual('Save and deploy changes');
       });

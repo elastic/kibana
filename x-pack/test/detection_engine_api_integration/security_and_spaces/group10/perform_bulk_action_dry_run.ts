@@ -26,6 +26,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
+  const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
 
@@ -162,7 +163,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should validate immutable rule edit', async () => {
-        await installPrePackagedRules(supertest, log);
+        await installPrePackagedRules(supertest, es, log);
         const { body: findBody } = await findRules()
           .query({ per_page: 1, filter: 'alert.attributes.params.immutable: true' })
           .send()
