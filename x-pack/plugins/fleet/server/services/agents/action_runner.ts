@@ -113,6 +113,13 @@ export abstract class ActionRunner {
             if (this.retryParams.retryCount === 3) {
               const errorMessage = 'Stopping after 3rd retry. Error: ' + error.message;
               appContextService.getLogger().warn(errorMessage);
+
+              // no need for check task, action failed
+              this.bulkActionsResolver!.removeIfExists(this.checkTaskId!);
+
+              // do not keep rertrying
+              this.bulkActionsResolver!.removeIfExists(this.retryParams.taskId!);
+
               return;
             }
           } else {
