@@ -9,7 +9,7 @@ import type { LogIndexReference } from '@kbn/infra-plugin/common/log_views';
 import type { FlyoutOptionsUrlState } from '@kbn/infra-plugin/public/containers/logs/log_flyout';
 import type { LogPositionUrlState } from '@kbn/infra-plugin/public/containers/logs/log_position';
 import { encode } from '@kbn/rison';
-import { AnyEventObject, assign } from 'xstate';
+import { AnyEventObject } from 'xstate';
 import { EventExecutor } from '@xstate/test';
 import querystring from 'querystring';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
