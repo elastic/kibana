@@ -11,42 +11,45 @@ import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/utils';
 import fs from 'fs';
 import path from 'path';
+import { Journey } from './run_performance_cli';
 
 run(
   async ({ log, flagsReader, procRunner }) => {
     const kibanaInstallDir = flagsReader.path('kibana-install-dir');
-    const journeyConfigPath = flagsReader.requiredPath('journey-config-path');
+    const journeyPath = flagsReader.requiredPath('journey-path');
 
     if (kibanaInstallDir && !fs.existsSync(kibanaInstallDir)) {
       throw createFlagError('--kibana-install-dir must be an existing directory');
     }
     if (
-      !fs.existsSync(journeyConfigPath) ||
-      (!fs.statSync(journeyConfigPath).isDirectory() && path.extname(journeyConfigPath) !== '.json')
+      !fs.existsSync(journeyPath) ||
+      (!fs.statSync(journeyPath).isDirectory() && path.extname(journeyPath) !== '.json')
     ) {
-      throw createFlagError(
-        '--journey-config-path must be an existing directory or scalability json path'
-      );
+      throw createFlagError('--journey-path must be an existing directory or journey path');
     }
 
-    const journeys = fs.statSync(journeyConfigPath).isDirectory()
+    const journeys: Journey[] = fs.statSync(journeyPath).isDirectory()
       ? fs
-          .readdirSync(journeyConfigPath)
+          .readdirSync(journeyPath)
           .filter((fileName) => path.extname(fileName) === '.json')
-          .map((fileName) => path.resolve(journeyConfigPath, fileName))
-      : [journeyConfigPath];
+          .map((fileName) => {
+            return { name: fileName, path: path.resolve(journeyPath, fileName) };
+          })
+      : [{ name: path.parse(journeyPath).name, path: journeyPath }];
 
-    log.info(`Found ${journeys.length} journeys to run:\n${JSON.stringify(journeys)}`);
+    log.info(
+      `Found ${journeys.length} journeys to run: ${JSON.stringify(journeys.map((j) => j.name))}`
+    );
 
     const failedJourneys = [];
 
     for (const journey of journeys) {
       try {
-        process.stdout.write(`--- Running scalability journey: ${journey}\n`);
-        await runScalabilityJourney(journey, kibanaInstallDir);
+        process.stdout.write(`--- Running scalability journey: ${journey.name}\n`);
+        await runScalabilityJourney(journey.path, kibanaInstallDir);
       } catch (e) {
         log.error(e);
-        failedJourneys.push(journey);
+        failedJourneys.push(journey.name);
       }
     }
 
@@ -54,7 +57,7 @@ run(
       throw new Error(`${failedJourneys.length} journeys failed: ${failedJourneys.join(',')}`);
     }
 
-    async function runScalabilityJourney(filePath: string, kibanaDir?: string) {
+    async function runScalabilityJourney(filePath: string, kibanaBuildDir: string | undefined) {
       // Pass in a clean APM environment, so that FTR can later
       // set it's own values.
       const cleanApmEnv = {
@@ -76,7 +79,7 @@ run(
         args: [
           'scripts/functional_tests',
           ['--config', 'x-pack/test/scalability/config.ts'],
-          kibanaDir ? ['--kibana-install-dir', kibanaDir] : [],
+          kibanaBuildDir ? ['--kibana-install-dir', kibanaBuildDir] : [],
           '--debug',
           '--logToFile',
           '--bail',
@@ -93,11 +96,11 @@ run(
   },
   {
     flags: {
-      string: ['kibana-install-dir', 'journey-config-path'],
+      string: ['kibana-install-dir', 'journey-path'],
       help: `
-      --kibana-install-dir       Run Kibana from existing install directory instead of from source
-      --journey-config-path      Define a scalability journey config or directory with multiple
-                                 configs that should be executed
+      --kibana-install-dir=dir      Run Kibana from existing install directory instead of from source
+      --journey-path=path           Define path to scalability journey config or directory with multiple
+                                    configs that should be executed
     `,
     },
   }
