@@ -1571,6 +1571,23 @@ describe('FormBasedDimensionEditor', () => {
           .prop('error')
       ).toBe('Time shift value is not valid.');
     });
+
+    it('should mark absolute time shift as invalid', () => {
+      const props = getProps({
+        timeShift: 'startAt(2022-11-02T00:00:00.000Z)',
+      });
+      wrapper = mount(<FormBasedDimensionEditorComponent {...props} />);
+
+      expect(wrapper.find(TimeShift).find(EuiComboBox).prop('isInvalid')).toBeTruthy();
+
+      expect(
+        wrapper
+          .find(TimeShift)
+          .find('[data-test-subj="indexPattern-dimension-time-shift-row"]')
+          .first()
+          .prop('error')
+      ).toBe('Time shift value is not valid.');
+    });
   });
 
   describe('filtering', () => {
