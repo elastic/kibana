@@ -27,6 +27,7 @@ import {
   CriticalPathResponse,
   getAggregatedCriticalPath,
 } from './get_aggregated_critical_path';
+import { getSpan } from '../transactions/get_span';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -266,6 +267,35 @@ const transactionFromTraceByIdRoute = createApmServerRoute({
   },
 });
 
+const spanFromTraceByIdRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/traces/{traceId}/spans/{spanId}',
+  params: t.type({
+    path: t.type({
+      traceId: t.string,
+      spanId: t.string,
+    }),
+    query: t.union([t.partial({ parentTransactionId: t.string }), t.undefined]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    span?: import('./../../../typings/es_schemas/ui/span').Span;
+    parentTransaction?: import('./../../../typings/es_schemas/ui/transaction').Transaction;
+  }> => {
+    const { params } = resources;
+    const { spanId, traceId } = params.path;
+    const { parentTransactionId } = params.query;
+    const apmEventClient = await getApmEventClient(resources);
+    return await getSpan({
+      spanId,
+      parentTransactionId,
+      traceId,
+      apmEventClient,
+    });
+  },
+});
+
 export const traceRouteRepository = {
   ...tracesByIdRoute,
   ...tracesRoute,
@@ -274,4 +304,5 @@ export const traceRouteRepository = {
   ...findTracesRoute,
   ...aggregatedCriticalPathRoute,
   ...transactionFromTraceByIdRoute,
+  ...spanFromTraceByIdRoute,
 };
