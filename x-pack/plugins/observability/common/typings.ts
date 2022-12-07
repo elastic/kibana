@@ -19,7 +19,6 @@ export const alertWorkflowStatusRt = t.keyof({
 export type AlertWorkflowStatus = t.TypeOf<typeof alertWorkflowStatusRt>;
 
 export interface ApmIndicesConfig {
-  sourcemap: string;
   error: string;
   onboarding: string;
   span: string;
@@ -27,6 +26,7 @@ export interface ApmIndicesConfig {
   metric: string;
   apmAgentConfigurationIndex: string;
   apmCustomLinkIndex: string;
+  apmSourceMapIndex: string;
 }
 
 export type AlertStatus =

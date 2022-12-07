@@ -52,7 +52,6 @@ export async function inspectSearchParams(
   const indices: {
     [Property in keyof APMConfig['indices']]: string;
   } = {
-    sourcemap: 'myIndex',
     error: 'myIndex',
     onboarding: 'myIndex',
     span: 'myIndex',

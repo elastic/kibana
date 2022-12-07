@@ -16,7 +16,6 @@ import { withApmSpan } from '../../../utils/with_apm_span';
 import { APMIndices } from '../../../saved_objects/apm_indices';
 
 export type ApmIndicesConfig = Readonly<{
-  sourcemap: string;
   error: string;
   onboarding: string;
   span: string;
@@ -45,7 +44,6 @@ async function getApmIndicesSavedObject(
 
 export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
   return {
-    sourcemap: config.indices.sourcemap,
     error: config.indices.error,
     onboarding: config.indices.onboarding,
     span: config.indices.span,

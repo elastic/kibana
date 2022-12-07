@@ -464,7 +464,6 @@ export const tasks: TelemetryTask[] = [
         span: indices.span,
         transaction: indices.transaction,
         onboarding: indices.onboarding,
-        sourcemap: indices.sourcemap,
       };
 
       type ProcessorEvent = keyof typeof indicesByProcessorEvent;
@@ -1037,7 +1036,6 @@ export const tasks: TelemetryTask[] = [
           indices.error,
           indices.metric,
           indices.onboarding,
-          indices.sourcemap,
           indices.span,
           indices.transaction,
         ],
