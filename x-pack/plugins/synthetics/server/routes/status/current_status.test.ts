@@ -173,11 +173,13 @@ describe('current status route', () => {
             configId: 'id1',
             monitorQueryId: 'id1',
             location: 'Asia/Pacific - Japan',
+            status: 'up',
           },
           'id2-Asia/Pacific - Japan': {
             configId: 'id2',
             monitorQueryId: 'id2',
             location: 'Asia/Pacific - Japan',
+            status: 'up',
           },
         },
         downConfigs: {
@@ -185,6 +187,7 @@ describe('current status route', () => {
             configId: 'id2',
             monitorQueryId: 'id2',
             location: 'Europe - Germany',
+            status: 'down',
           },
         },
       });
@@ -310,11 +313,13 @@ describe('current status route', () => {
             configId: 'id1',
             monitorQueryId: 'id1',
             location: 'Asia/Pacific - Japan',
+            status: 'up',
           },
           'id2-Asia/Pacific - Japan': {
             configId: 'id2',
             monitorQueryId: 'id2',
             location: 'Asia/Pacific - Japan',
+            status: 'up',
           },
         },
         downConfigs: {
@@ -322,6 +327,7 @@ describe('current status route', () => {
             configId: 'id2',
             monitorQueryId: 'id2',
             location: 'Europe - Germany',
+            status: 'down',
           },
         },
       });
