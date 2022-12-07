@@ -16,7 +16,7 @@ import {
   SynthtraceGenerator,
 } from '../../../../types';
 import { Logger } from '../../../utils/create_logger';
-import { createFilterTransform, fork } from '../../../utils/stream_utils';
+import { fork } from '../../../utils/stream_utils';
 import { createBreakdownMetricsAggregator } from '../../aggregators/create_breakdown_metrics_aggregator';
 import { createSpanMetricsAggregator } from '../../aggregators/create_span_metrics_aggregator';
 import { createTransactionMetricsAggregator } from '../../aggregators/create_transaction_metrics_aggregator';
