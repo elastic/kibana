@@ -9,7 +9,11 @@ import { deepFreeze } from '@kbn/std';
 
 import type { RouteMethod } from '@kbn/core-http-server';
 
-import { AGENT_POLICY_API_ROUTES, PACKAGE_POLICY_API_ROUTES } from '../../../common';
+import {
+  AGENT_POLICY_API_ROOT,
+  PACKAGE_POLICY_API_ROOT,
+  PACKAGE_POLICY_API_ROUTES,
+} from '../../../common';
 
 import type { FleetRouteRequiredAuthz } from './types';
 
@@ -143,9 +147,9 @@ export const getRouteRequiredAuthz = (
 ): FleetRouteRequiredAuthz => {
   let key = `${routeMethod}:${routePath}`;
 
-  if (routePath.includes(PACKAGE_POLICY_API_ROUTES.LIST_PATTERN) && policyIds?.packagePolicyId) {
+  if (routePath.includes(PACKAGE_POLICY_API_ROOT) && policyIds?.packagePolicyId) {
     key = key.replace(policyIds?.packagePolicyId, '{packagePolicyId}');
-  } else if (routePath.includes(AGENT_POLICY_API_ROUTES.LIST_PATTERN) && policyIds?.agentPolicyId) {
+  } else if (routePath.includes(AGENT_POLICY_API_ROOT) && policyIds?.agentPolicyId) {
     key = key.replace(policyIds?.agentPolicyId, '{agentPolicyId}');
   }
 
