@@ -23,6 +23,7 @@ export { FilterLabel, FilterItem, FilterItems } from './filter_bar';
 export { DataViewsList } from './dataview_picker/dataview_list';
 export { DataViewSelector } from './dataview_picker/data_view_selector';
 export { DataViewPicker } from './dataview_picker';
+
 export type { DataViewPickerProps } from './dataview_picker';
 
 export type { ApplyGlobalFilterActionContext } from './actions';
