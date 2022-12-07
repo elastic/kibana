@@ -18,7 +18,8 @@
     "@kbn/core-application-browser",
     "@kbn/core-application-browser-internal",
     "@kbn/core-capabilities-browser-mocks",
-    "@kbn/core-theme-browser-mocks"
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",

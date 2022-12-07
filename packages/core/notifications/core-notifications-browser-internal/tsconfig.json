@@ -22,7 +22,12 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/core-overlays-browser",
     "@kbn/core-notifications-browser",
-    "@kbn/core-mount-utils-browser-internal"
+    "@kbn/core-mount-utils-browser-internal",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/test-jest-helpers",
+    "@kbn/core-overlays-browser-mocks",
+    "@kbn/core-theme-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

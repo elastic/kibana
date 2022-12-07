@@ -22,6 +22,14 @@
     "@kbn/bazel-packages",
     "@kbn/get-repo-files",
     "@kbn/ftr-screenshot-filename",
-    "@kbn/peggy"
+    "@kbn/peggy",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/ci-stats-reporter",
+    "@kbn/repo-info",
+    "@kbn/es",
+    "@kbn/dev-proc-runner",
+    "@kbn/jest-serializers",
+    "@kbn/stdio-dev-helpers",
   ]
 }

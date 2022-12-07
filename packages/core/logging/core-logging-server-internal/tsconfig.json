@@ -16,7 +16,11 @@
     "@kbn/config-schema",
     "@kbn/core-base-server-internal",
     "@kbn/core-logging-common-internal",
-    "@kbn/core-logging-server"
+    "@kbn/core-logging-server",
+    "@kbn/logging-mocks",
+    "@kbn/std",
+    "@kbn/utility-types-jest",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",

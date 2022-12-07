@@ -14,7 +14,8 @@
     "@kbn/utility-types",
     "@kbn/core-base-common",
     "@kbn/core-status-server",
-    "@kbn/core-status-server-internal"
+    "@kbn/core-status-server-internal",
+    "@kbn/core-status-common",
   ],
   "exclude": [
     "target/**/*",

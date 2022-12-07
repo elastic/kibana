@@ -15,7 +15,8 @@
   ],
   "kbn_references": [
     "@kbn/i18n-react",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/test-jest-helpers",
   ],
   "exclude": [
     "target/**/*",

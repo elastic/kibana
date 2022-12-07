@@ -16,7 +16,8 @@
     "@kbn/test",
     "@kbn/config",
     "@kbn/core-lifecycle-server-internal",
-    "@kbn/core-root-server-internal"
+    "@kbn/core-root-server-internal",
+    "@kbn/repo-info",
   ],
   "exclude": [
     "target/**/*",

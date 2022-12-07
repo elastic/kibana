@@ -12,7 +12,8 @@
     "**/*.tsx",
   ],
   "kbn_references": [
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/test-jest-helpers",
   ],
   "exclude": [
     "target/**/*",

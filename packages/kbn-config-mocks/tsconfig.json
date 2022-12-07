@@ -13,7 +13,9 @@
   "kbn_references": [
     "@kbn/utils",
     "@kbn/config",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/doc-links",
+    "@kbn/repo-info",
   ],
   "exclude": [
     "target/**/*",

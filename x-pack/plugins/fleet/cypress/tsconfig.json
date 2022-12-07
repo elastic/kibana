@@ -16,4 +16,8 @@
       ],
       "resolveJsonModule": true,
     },
-  }
+  "kbn_references": [
+    "@kbn/test",
+    "@kbn/axe-config",
+  ]
+}

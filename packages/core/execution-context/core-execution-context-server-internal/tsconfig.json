@@ -15,7 +15,9 @@
     "@kbn/logging",
     "@kbn/core-base-server-internal",
     "@kbn/core-execution-context-common",
-    "@kbn/core-execution-context-server"
+    "@kbn/core-execution-context-server",
+    "@kbn/core-base-server-mocks",
+    "@kbn/core-logging-server-mocks",
   ],
   "exclude": [
     "target/**/*",

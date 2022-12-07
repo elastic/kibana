@@ -16,7 +16,9 @@
     "@kbn/dev-proc-runner",
     "@kbn/tooling-log",
     "@kbn/ui-shared-deps-npm",
-    "@kbn/utils"
+    "@kbn/utils",
+    "@kbn/jest-serializers",
+    "@kbn/repo-info",
   ],
   "exclude": [
     "target/**/*",

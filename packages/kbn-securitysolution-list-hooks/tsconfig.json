@@ -16,7 +16,8 @@
     "@kbn/securitysolution-list-api",
     "@kbn/securitysolution-list-constants",
     "@kbn/securitysolution-list-utils",
-    "@kbn/securitysolution-utils"
+    "@kbn/securitysolution-utils",
+    "@kbn/core-http-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

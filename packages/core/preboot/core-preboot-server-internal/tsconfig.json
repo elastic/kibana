@@ -17,7 +17,9 @@
     "@kbn/utils",
     "@kbn/config",
     "@kbn/config-mocks",
-    "@kbn/core-logging-server-mocks"
+    "@kbn/core-logging-server-mocks",
+    "@kbn/repo-info",
+    "@kbn/test-jest-helpers",
   ],
   "exclude": [
     "target/**/*",

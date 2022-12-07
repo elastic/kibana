@@ -13,7 +13,8 @@
   "kbn_references": [
     "@kbn/utils",
     "@kbn/bazel-packages",
-    "@kbn/some-dev-log"
+    "@kbn/some-dev-log",
+    "@kbn/repo-info",
   ],
   "exclude": [
     "target/**/*",

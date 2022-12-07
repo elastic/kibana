@@ -18,6 +18,11 @@
     "@kbn/plugin-discovery",
     "@kbn/dev-utils",
     "@kbn/utils",
-    "@kbn/tooling-log"
+    "@kbn/tooling-log",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/ci-stats-reporter",
+    "@kbn/repo-info",
+    "@kbn/std",
   ]
 }

@@ -19,7 +19,16 @@
     "@kbn/core-saved-objects-common",
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-utils-server",
-    "@kbn/core-saved-objects-base-server-internal"
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/config-schema",
+    "@kbn/core-doc-links-server-mocks",
+    "@kbn/core-logging-server-internal",
+    "@kbn/core-saved-objects-base-server-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/doc-links",
+    "@kbn/safer-lodash-set",
   ],
   "exclude": [
     "target/**/*",

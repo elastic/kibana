@@ -14,7 +14,11 @@
     "@kbn/dev-utils",
     "@kbn/test",
     "@kbn/tooling-log",
-    "@kbn/utils"
+    "@kbn/utils",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/repo-info",
+    "@kbn/jest-serializers",
   ],
   "exclude": [
     "target/**/*",

@@ -16,7 +16,8 @@
     "@kbn/import-resolver",
     "@kbn/repo-source-classifier",
     "@kbn/get-repo-files",
-    "@kbn/utils"
+    "@kbn/utils",
+    "@kbn/repo-info",
   ],
   "exclude": [
     "target/**/*",

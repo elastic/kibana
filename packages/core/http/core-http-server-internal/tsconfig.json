@@ -23,7 +23,17 @@
     "@kbn/core-http-common",
     "@kbn/core-http-server",
     "@kbn/core-http-context-server-internal",
-    "@kbn/core-http-router-server-internal"
+    "@kbn/core-http-router-server-internal",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/dev-utils",
+    "@kbn/config",
+    "@kbn/repo-info",
+    "@kbn/hapi-mocks",
+    "@kbn/config-mocks",
+    "@kbn/core-execution-context-server-mocks",
+    "@kbn/core-http-context-server-mocks",
+    "@kbn/logging-mocks",
   ],
   "exclude": [
     "target/**/*",

@@ -14,7 +14,10 @@
     "@kbn/ftr-common-functional-services",
     "@kbn/ftr-screenshot-filename",
     "@kbn/test",
-    "@kbn/utils"
+    "@kbn/utils",
+    "@kbn/tooling-log",
+    "@kbn/repo-info",
+    "@kbn/std",
   ],
   "exclude": [
     "target/**/*",

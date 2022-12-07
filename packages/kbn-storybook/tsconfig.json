@@ -16,7 +16,9 @@
     "@kbn/ui-shared-deps-npm",
     "@kbn/ui-shared-deps-src",
     "@kbn/utils",
-    "@kbn/ambient-storybook-types"
+    "@kbn/ambient-storybook-types",
+    "@kbn/repo-info",
+    "@kbn/dev-cli-runner",
   ],
   "exclude": [
     "target/**/*",

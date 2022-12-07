@@ -14,7 +14,9 @@
     "@kbn/bazel-packages",
     "@kbn/utils",
     "@kbn/dev-utils",
-    "@kbn/package-map"
+    "@kbn/package-map",
+    "@kbn/repo-info",
+    "@kbn/jest-serializers",
   ],
   "exclude": [
     "target/**/*",

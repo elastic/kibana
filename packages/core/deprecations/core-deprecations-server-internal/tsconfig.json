@@ -24,7 +24,15 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-server-internal",
     "@kbn/core-deprecations-common",
-    "@kbn/core-deprecations-server"
+    "@kbn/core-deprecations-server",
+    "@kbn/logging-mocks",
+    "@kbn/core-base-server-mocks",
+    "@kbn/core-http-server-mocks",
+    "@kbn/config-mocks",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-http-server",
+    "@kbn/core-elasticsearch-client-server-mocks",
   ],
   "exclude": [
     "target/**/*",

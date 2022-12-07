@@ -19,7 +19,12 @@
     "@kbn/core-theme-browser-internal",
     "@kbn/core-i18n-browser",
     "@kbn/core-overlays-browser",
-    "@kbn/core-chrome-browser-internal"
+    "@kbn/core-chrome-browser-internal",
+    "@kbn/core-application-browser-mocks",
+    "@kbn/core-chrome-browser-mocks",
+    "@kbn/core-overlays-browser-mocks",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/core-i18n-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

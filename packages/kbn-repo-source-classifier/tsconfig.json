@@ -12,7 +12,8 @@
   ],
   "kbn_references": [
     "@kbn/import-resolver",
-    "@kbn/utils"
+    "@kbn/utils",
+    "@kbn/repo-info",
   ],
   "exclude": [
     "target/**/*",

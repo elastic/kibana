@@ -14,7 +14,8 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/config",
-    "@kbn/core-base-common-internal"
+    "@kbn/core-base-common-internal",
+    "@kbn/logging",
   ],
   "exclude": [
     "target/**/*",

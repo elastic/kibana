@@ -14,7 +14,8 @@
   "kbn_references": [
     "@kbn/config",
     "@kbn/core-base-common",
-    "@kbn/core-lifecycle-browser"
+    "@kbn/core-lifecycle-browser",
+    "@kbn/logging",
   ],
   "exclude": [
     "target/**/*",

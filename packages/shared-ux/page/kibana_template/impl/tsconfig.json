@@ -13,7 +13,11 @@
     "**/*.tsx"
   ],
   "kbn_references": [
-    "@kbn/shared-ux-page-no-data-config"
+    "@kbn/shared-ux-page-no-data-config",
+    "@kbn/shared-ux-page-kibana-template-mocks",
+    "@kbn/shared-ux-page-solution-nav",
+    "@kbn/shared-ux-page-no-data-types",
+    "@kbn/shared-ux-page-kibana-template-types",
   ],
   "exclude": [
     "target/**/*",

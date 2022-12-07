@@ -18,7 +18,10 @@
     "@kbn/core-http-server",
     "@kbn/core-http-server-internal",
     "@kbn/core-capabilities-common",
-    "@kbn/core-capabilities-server"
+    "@kbn/core-capabilities-server",
+    "@kbn/core-base-server-mocks",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-http-server-mocks",
   ],
   "exclude": [
     "target/**/*",

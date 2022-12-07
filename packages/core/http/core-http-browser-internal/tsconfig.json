@@ -19,7 +19,11 @@
     "@kbn/core-fatal-errors-browser",
     "@kbn/core-injected-metadata-browser-internal",
     "@kbn/crypto-browser",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/core-injected-metadata-browser-mocks",
+    "@kbn/core-execution-context-browser-mocks",
+    "@kbn/core-fatal-errors-browser-mocks",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",

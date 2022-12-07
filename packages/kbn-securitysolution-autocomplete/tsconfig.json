@@ -15,7 +15,9 @@
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/securitysolution-list-hooks",
     "@kbn/securitysolution-list-utils",
-    "@kbn/doc-links"
+    "@kbn/doc-links",
+    "@kbn/core",
+    "@kbn/securitysolution-utils",
   ],
   "exclude": [
     "target/**/*",

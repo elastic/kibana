@@ -24,7 +24,16 @@
     "@kbn/core-status-server-internal",
     "@kbn/core-ui-settings-common",
     "@kbn/core-ui-settings-server",
-    "@kbn/core-plugins-base-server-internal"
+    "@kbn/core-plugins-base-server-internal",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-ui-settings-server-mocks",
+    "@kbn/config",
+    "@kbn/core-base-common",
+    "@kbn/core-base-server-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-status-server-mocks",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",

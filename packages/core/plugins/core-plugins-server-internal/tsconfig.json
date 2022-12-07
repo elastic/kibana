@@ -30,7 +30,13 @@
     "@kbn/core-base-server-mocks",
     "@kbn/core-lifecycle-server-mocks",
     "@kbn/core-logging-server-mocks",
-    "@kbn/core-node-server-mocks"
+    "@kbn/core-node-server-mocks",
+    "@kbn/repo-info",
+    "@kbn/jest-serializers",
+    "@kbn/core-environment-server-mocks",
+    "@kbn/core-environment-server-internal",
+    "@kbn/core-node-server-internal",
+    "@kbn/core-plugins-base-server-internal",
   ],
   "exclude": [
     "target/**/*",

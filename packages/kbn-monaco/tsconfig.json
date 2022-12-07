@@ -12,7 +12,8 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/repo-info",
   ],
   "exclude": [
     "target/**/*",

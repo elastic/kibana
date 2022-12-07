@@ -16,6 +16,10 @@
   ],
   "kbn_references": [
     "@kbn/utils",
-    "@kbn/dev-utils"
+    "@kbn/dev-utils",
+    "@kbn/repo-info",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/jest-serializers",
   ],
 }

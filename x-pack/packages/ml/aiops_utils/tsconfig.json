@@ -15,7 +15,8 @@
   ],
   "kbn_references": [
     "@kbn/core-elasticsearch-server",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",

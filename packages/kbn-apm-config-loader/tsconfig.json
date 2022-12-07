@@ -12,7 +12,8 @@
   ],
   "kbn_references": [
     "@kbn/safer-lodash-set",
-    "@kbn/utils"
+    "@kbn/utils",
+    "@kbn/config-schema",
   ],
   "exclude": [
     "target/**/*",

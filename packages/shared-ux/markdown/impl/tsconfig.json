@@ -14,7 +14,8 @@
     "**/*.tsx",
   ],
   "kbn_references": [
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/shared-ux-markdown-mocks",
   ],
   "exclude": [
     "target/**/*",

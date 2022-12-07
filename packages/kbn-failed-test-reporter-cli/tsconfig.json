@@ -19,7 +19,8 @@
     "@kbn/tooling-log",
     "@kbn/ftr-screenshot-filename",
     "@kbn/jest-serializers",
-    "@kbn/journeys"
+    "@kbn/journeys",
+    "@kbn/repo-info",
   ],
   "exclude": [
     "target/**/*",

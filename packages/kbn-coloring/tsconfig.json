@@ -19,7 +19,8 @@
     "@kbn/i18n-react",
     "@kbn/interpreter",
     "@kbn/utility-types",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/test-jest-helpers",
   ],
   "exclude": [
     "target/**/*",

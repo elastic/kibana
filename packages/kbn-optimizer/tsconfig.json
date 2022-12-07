@@ -25,6 +25,12 @@
     "@kbn/utils",
     "@kbn/tooling-log",
     "@kbn/package-map",
-    "@kbn/peggy"
+    "@kbn/peggy",
+    "@kbn/ci-stats-reporter",
+    "@kbn/dev-cli-errors",
+    "@kbn/repo-info",
+    "@kbn/dev-cli-runner",
+    "@kbn/jest-serializers",
+    "@kbn/plugin-discovery",
   ]
 }

@@ -14,7 +14,8 @@
   ],
   "kbn_references": [
     "@kbn/shared-ux-file-util",
-    "@kbn/shared-ux-file-types"
+    "@kbn/shared-ux-file-types",
+    "@kbn/shared-ux-file-image-mocks",
   ],
   "exclude": [
     "target/**/*",

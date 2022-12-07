@@ -11,7 +11,8 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/core-node-server-internal"
+    "@kbn/core-node-server-internal",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",

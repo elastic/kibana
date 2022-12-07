@@ -13,7 +13,9 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/core-saved-objects-browser",
-    "@kbn/core-saved-objects-browser-internal"
+    "@kbn/core-saved-objects-browser-internal",
+    "@kbn/core-saved-objects-api-browser",
+    "@kbn/core-saved-objects-common",
   ],
   "exclude": [
     "target/**/*",

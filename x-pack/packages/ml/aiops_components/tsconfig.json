@@ -20,7 +20,8 @@
   ],
   "kbn_references": [
     "@kbn/i18n-react",
-    "@kbn/aiops-utils"
+    "@kbn/aiops-utils",
+    "@kbn/i18n",
   ],
   "exclude": [
     "target/**/*",
