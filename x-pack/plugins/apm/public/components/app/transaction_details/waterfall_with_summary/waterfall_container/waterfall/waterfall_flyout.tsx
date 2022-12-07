@@ -53,9 +53,7 @@ export function WaterfallFlyout({
         <TransactionFlyout
           transaction={currentItem.doc}
           onClose={() => toggleFlyout({ history })}
-          rootTransactionDuration={
-            waterfall.rootTransaction?.transaction.duration.us
-          }
+          rootTransactionDuration={waterfall.rootWaterfallTransaction?.duration}
           errorCount={waterfall.getErrorCount(currentItem.id)}
           spanLinksCount={currentItem.spanLinksCount}
         />

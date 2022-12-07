@@ -63,6 +63,9 @@ export interface WaterfallSpan {
     duration: { us: number };
     links?: SpanLink[];
   };
+  transaction?: {
+    id: string;
+  };
   child?: { id: string[] };
 }
 

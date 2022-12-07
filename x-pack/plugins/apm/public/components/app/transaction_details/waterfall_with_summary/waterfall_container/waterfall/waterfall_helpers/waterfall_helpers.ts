@@ -33,7 +33,7 @@ export enum WaterfallLegendType {
 export interface IWaterfall {
   entryTransaction?: Transaction;
   entryWaterfallTransaction?: IWaterfallTransaction;
-  rootWaterfallTransaction?: WaterfallTransaction;
+  rootWaterfallTransaction?: IWaterfallTransaction;
 
   /**
    * Latency in us
@@ -250,7 +250,7 @@ function getRootWaterfallTransaction(
 ) {
   const item = first(childrenByParentId.root);
   if (item && item.docType === 'transaction') {
-    return item.doc;
+    return item;
   }
 }
 
