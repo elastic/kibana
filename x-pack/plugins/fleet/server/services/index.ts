@@ -11,7 +11,7 @@ import type { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';
 
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
-export { PACKAGE_STORAGE_REGISTRY_URL } from './epm/registry';
+export { getRegistryUrl } from './epm/registry/registry_url';
 
 /**
  * Service to return the index pattern of EPM packages

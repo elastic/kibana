@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PACKAGE_STORAGE_REGISTRY_URL } from '@kbn/fleet-plugin/server';
+import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/server';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { isRegistryEnabled, getRegistryUrlFromTestEnv } from '../registry';
 import { ROLE } from '../services/roles_users';
@@ -23,7 +23,7 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
       log.warning('These tests are being run with an external package registry');
     }
 
-    const registryUrl = getRegistryUrlFromTestEnv() ?? PACKAGE_STORAGE_REGISTRY_URL;
+    const registryUrl = getRegistryUrlFromTestEnv() ?? getRegistryUrlFromIngest();
     log.info(`Package registry URL for tests: ${registryUrl}`);
 
     const roles = Object.values(ROLE);

@@ -37,7 +37,7 @@ import { outputService } from './output';
 import { downloadSourceService } from './download_source';
 
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
-import { PACKAGE_STORAGE_REGISTRY_URL, settingsService } from '.';
+import { getRegistryUrl, settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
 import {
@@ -326,6 +326,7 @@ export async function ensureFleetDirectories() {
   const config = appContextService.getConfig();
 
   const bundledPackageLocation = config?.developer?.bundledPackageLocation;
+  const registryUrl = getRegistryUrl();
 
   if (!bundledPackageLocation) {
     logger.warn('xpack.fleet.developer.bundledPackageLocation is not configured');
@@ -336,7 +337,7 @@ export async function ensureFleetDirectories() {
     await fs.stat(bundledPackageLocation);
   } catch (error) {
     logger.warn(
-      `Bundled package directory ${bundledPackageLocation} does not exist. All packages will be sourced from ${PACKAGE_STORAGE_REGISTRY_URL}.`
+      `Bundled package directory ${bundledPackageLocation} does not exist. All packages will be sourced from ${registryUrl}.`
     );
   }
 }

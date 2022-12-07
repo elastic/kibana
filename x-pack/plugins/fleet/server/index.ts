@@ -20,7 +20,7 @@ export type {
   Artifact,
   ListArtifactsProps,
 } from './services';
-export { PACKAGE_STORAGE_REGISTRY_URL } from './services';
+export { getRegistryUrl } from './services';
 
 export type { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './plugin';
 export type {
