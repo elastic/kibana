@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { FlyoutOptionsUrlState } from '@kbn/infra-plugin/public/containers/logs/log_flyout';
-import { LogPositionUrlState } from '@kbn/infra-plugin/public/containers/logs/log_position';
+import type { LogIndexReference } from '@kbn/infra-plugin/common/log_views';
+import type { FlyoutOptionsUrlState } from '@kbn/infra-plugin/public/containers/logs/log_flyout';
+import type { LogPositionUrlState } from '@kbn/infra-plugin/public/containers/logs/log_position';
 import { encode } from '@kbn/rison';
+import { AnyEventObject, assign } from 'xstate';
+import { EventExecutor } from '@xstate/test';
 import querystring from 'querystring';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -85,9 +88,16 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
     },
   };
 
-  const modelTransitionActions = {
-    navigateToLogsUi: async () => navigateTo(),
-    clickSettingsHeaderLink: async () => await (await getLogSettingsHeaderLink()).click(),
+  const modelTransitionEffects: Record<
+    LogStreamPageTestMachineEvent['type'],
+    EventExecutor<unknown, LogStreamPageTestMachineEvent | AnyEventObject>
+  > = {
+    navigateToLogsUi: async () => {
+      await navigateTo();
+    },
+    clickSettingsHeaderLink: async () => {
+      await (await getLogSettingsHeaderLink()).click();
+    },
   };
 
   return {
@@ -96,16 +106,24 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
     getMissingIndicesPage,
     getPage,
     modelStateAssertions,
-    modelTransitionActions,
+    modelTransitionEffects,
     navigateTo,
     navigateToTab,
   };
 }
 
+export interface LogStreamPageTestMachineContextWithLogView {
+  logView: {
+    logIndices: LogIndexReference;
+  };
+}
+
 export interface LogStreamPageTestMachineTypestate {
   value: 'onLogStreamMissingIndicesPage';
-  context: undefined;
+  context: LogStreamPageTestMachineContextWithLogView;
 }
+
+export type LogStreamPageTestMachineContext = LogStreamPageTestMachineTypestate['context'];
 
 export type LogStreamPageTestMachineEvent =
   | { type: 'navigateToLogsUi' }

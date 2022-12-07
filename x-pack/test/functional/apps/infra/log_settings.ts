@@ -6,13 +6,16 @@
  */
 
 import { createTestModel } from '@xstate/test';
-import { createMachine } from 'xstate';
+// import expect from '@kbn/expect';
+import { assign, createMachine } from 'xstate';
+import equal from 'fast-deep-equal';
+// import { DATES } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type {
   LogStreamPageTestMachineEvent,
   LogStreamPageTestMachineTypestate,
 } from '../../page_objects/infra_logs_page';
-import type {
+import {
   LogsSettingsPageTestMachineEvent,
   LogsSettingsPageTestMachineTypestate,
 } from '../../page_objects/infra_logs_settings_page';
@@ -29,44 +32,6 @@ type TestMachineTypestate =
 
 type TestMachineContext = TestMachineTypestate['context'];
 
-const logSettingsTestMachine =
-  /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKYAu2CWAdlLACpzYCyAhgMYAWhYAdLNlQE7YDEBVAbnihVsYEqgAy6WAFU8AbQAMAXUSgADqlh58qAqpAAPRAEYAbAGYmAThtWArAoBMC4woWnHAFgA0IAJ4mAByeTJ62jnZWYaZ2AOwAvvG+aJg4+ESk5NT0jEy6kpjY7GBUALYUeLBaRACSBBB4NHAAClQwXDTIjQDWWLiExAASJRBg7OKE3YoqSCAaWjp6s0YIMZaO5p7mTo5WCoFW5na+AQjGwaHhkdFxicnofenEZKzZDATM+Q9pA7Ct7fQqEQwHVRgYAHJlMCtXBjAjTfTzbR4XT6FaBUxWJjuDZWUyBczGYwOYwnRCOTGXWwuWJ2QKOel3EApR6-F6UWjvT4EAqsjL-MAAdW0dAAwnQgTBYFxYPwwHziAjZkjFmjELFjLFQnZtrFHI5iRF9WSEBSsWFqZq6QzHIkkiACKhRvBZiyfhl2W9GIjNMjUctEABaUwmqJUqxeCwE-EKTxMt39D1ZTm5VgcbA+hYopagFaeRwm86WWxRXaHTzGMJ2ePfRPPZM5D55HkPIolcqVapQUGNFptMCZv05wyII6mJgajGxWJhWJWaeeWKFgnWWz5mybSv2GupOuZV4pptfXdPP79weqgMIA4hHXGDZ00ymaeY5fF8KeKPmGNx+0J0+eoe3K8u6xACsK2BihKwIuuovqXrmiDBHYTBxE4Vb7HYRIhv4o6RNYZhfnO+abHa8RAA */
-  createMachine<TestMachineContext, TestMachineEvent, TestMachineTypestate>({
-    predictableActionArguments: true,
-    initial: 'start',
-    states: {
-      start: {
-        on: {
-          navigateToLogsUi: {
-            target: 'onLogStreamMissingIndicesPage',
-          },
-        },
-      },
-      onLogStreamMissingIndicesPage: {
-        on: {
-          clickSettingsHeaderLink: {
-            target: 'onLogSettingsPage',
-          },
-        },
-      },
-      onLogSettingsPage: {
-        on: {
-          changeIndexNamePattern: {
-            target: 'onLogSettingsPageWithChanges',
-          },
-        },
-      },
-      onLogSettingsPageWithChanges: {
-        on: {
-          saveSettings: {
-            target: 'onLogSettingsPage',
-          },
-        },
-      },
-    },
-    id: 'logSettingsTestMachine',
-  });
-
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
@@ -78,12 +43,113 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  const logSettingsTestModel = createTestModel(logSettingsTestMachine, {
-    logger: {
-      log: log.info.bind(log),
-      error: log.error.bind(log),
-    },
-  });
+  const createLogSettingsTestMachine = (initialContext: TestMachineContext) =>
+    /** @xstate-layout N4IgpgJg5mDOIC5QBsD2UDKYAu2CWAdlLACpzYCyAhgMYAWhYAdLNlQE7YDEBVAbnihVsYEqgAy6WAFU8AbQAMAXUSgADqlh58qAqpAAPRAEYAbAGYmAThtWArAoBMC4woWnHAFgA0IAJ4mAByeTJ62jnZWYaZ2AOwAvvG+aJg4+ESk5NT0jEy6kpjY7GBUALYUeLBaRACSBBB4NHAAClQwXDTIjQDWWLiExAASJRBg7OKE3YoqSCAaWjp6s0YIMZaO5p7mTo5WCoFW5na+AQjGwaHhkdFxicnofenEZKzZDATM+Q9pA7CtMEwAO7aOjSAj0KhESCPX4dOiQmB1UYGABKYAAZmMwOCwNN9PNtHhdPoVsZHBsmOZYtTto5YodjHZzCdEF5YkwaUdYoEuYEFLFTHcQCkYRkXpRaO9PgQCqLiP9mMDsHQAMLwqEQOWwLiwfhgLV42YExYkkzmc5MNx01xmQKmPmmFlnTyOUKeYzGWLmzx2qymCxCkU-MVZSW5L6pfoZBVAkFgiEarVwhFgJFgVEYrE4uTGGbqTSE4nLEwRV3c8xWAVeOz+rxOo52awKOyef32luRYyJJIgAioUbwWZBqPPUM5D74gsm4sIAC0jv8iFn5lddjsgR5zZXFcZnkD3xHmVeYY+LDYnEnCyJS1AKxdTvOllsUV2h3dYTs+8jTyPEvH0tlIoSnKSpqigJFGhaNowEvQsb0MRAjlMDlzlMakwnpdDYgfHlrFsF0bE2YwPy-LVxTecMZQPH8FVg6db0QA4QiZMkjjtNCBSsJ0W2sd1PWMbZAkZCJPx7Ycf3Ik8AOo34YyVUFwXVGBNWDYg6OvU0EBfJgWI2dd-WpUwuMXBA6QUS4bCccwOKsYi9zEmSQ2Pf88io79ZOg2NlTVFMVMPdSiwYs42zw2yFBsYiLGM04zIsqwzI3cwDmpbt4iAA */
+    createMachine<TestMachineContext, TestMachineEvent, TestMachineTypestate>(
+      {
+        predictableActionArguments: true,
+        context: initialContext,
+        initial: 'start',
+        states: {
+          start: {
+            on: {
+              navigateToLogsUi: {
+                target: 'onLogStreamMissingIndicesPage',
+              },
+            },
+          },
+
+          onLogStreamMissingIndicesPage: {
+            on: {
+              clickSettingsHeaderLink: {
+                target: 'onLogSettingsPage',
+              },
+            },
+          },
+
+          onLogSettingsPage: {
+            states: {
+              withUnchangedSettings: {
+                on: {
+                  changeIndexReference: [
+                    {
+                      target: 'withChangedSettings',
+                      actions: 'storeChangedLogView',
+                      cond: 'areSettingsDifferent',
+                    },
+                    {
+                      target: 'withUnchangedSettings',
+                      internal: true,
+                    },
+                  ],
+                },
+              },
+
+              withChangedSettings: {
+                on: {
+                  saveSettings: {
+                    target: 'withUnchangedSettings',
+                    actions: 'applyChangedLogView',
+                  },
+                },
+              },
+            },
+
+            initial: 'withUnchangedSettings',
+          },
+        },
+        id: 'logSettingsTestMachine',
+      },
+      {
+        actions: {
+          storeChangedLogView: assign((context, event) =>
+            event.type === 'changeIndexReference'
+              ? {
+                  changedLogView: {
+                    ...('changedLogView' in context ? context.changedLogView : {}),
+                    logIndices: event.newIndexReference,
+                  },
+                }
+              : {}
+          ),
+          applyChangedLogView: assign((context, event) =>
+            event.type === 'saveSettings' && 'changedLogView' in context
+              ? {
+                  logView: context.changedLogView,
+                  changedLogView: undefined,
+                }
+              : {}
+          ),
+        },
+        guards: {
+          areSettingsDifferent: (context, event) =>
+            event.type === 'changeIndexReference' &&
+            !equal(context.logView.logIndices, event.newIndexReference),
+        },
+      }
+    );
+
+  const logSettingsTestModel = createTestModel(
+    createLogSettingsTestMachine({
+      logView: {
+        logIndices: {
+          type: 'index_name',
+          indexName: 'logs-*',
+        },
+      },
+    }),
+    {
+      logger: {
+        log: log.info.bind(log),
+        error: log.error.bind(log),
+      },
+      eventCases: {
+        changeIndexReference: [
+          { newIndexReference: { type: 'index_name', indexName: 'does-not-match-*' } },
+        ],
+      },
+    }
+  );
 
   describe('Log Settings', function () {
     before(async () => {
@@ -97,7 +163,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it(path.description, async () => {
         await path.test({
           events: {
-            ...pageObjects.infraLogs.modelTransitionActions,
+            ...pageObjects.infraLogs.modelTransitionEffects,
+            ...pageObjects.infraLogsSettings.modelTransitionEffects,
           },
           states: {
             ...pageObjects.infraLogs.modelStateAssertions,
