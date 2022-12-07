@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { ObservabilityLinkCard } from './observability_link_card';
+import { InfrastructureLinkCard } from './infrastructure_link_card';
 
 const defaultProps = {
   navigateToApp: jest.fn(),
@@ -19,7 +19,7 @@ const defaultProps = {
 describe('observability link card', () => {
   describe('snapshots', () => {
     test('should render link card for observability', async () => {
-      const component = await shallow(<ObservabilityLinkCard {...defaultProps} />);
+      const component = await shallow(<InfrastructureLinkCard {...defaultProps} />);
       expect(component).toMatchSnapshot();
     });
   });
