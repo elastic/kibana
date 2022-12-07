@@ -55,7 +55,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesValuesInputProps> {
         ${euiScrollBarStyles(this.props.theme)}
 
         overflow: auto;
-        max-height: 50px;
+        max-height: 100px;
       }
     `;
 
