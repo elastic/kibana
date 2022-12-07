@@ -41,7 +41,8 @@ export const ProtectionSwitch = React.memo(
   }) => {
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
+    const endpointPrivileges = useUserPrivileges().endpointPrivileges;
+    const { canWritePolicyManagement } = endpointPrivileges;
     const dispatch = useDispatch<(action: AppAction) => void>();
     const selected = policyDetailsConfig && policyDetailsConfig.windows[protection].mode;
 

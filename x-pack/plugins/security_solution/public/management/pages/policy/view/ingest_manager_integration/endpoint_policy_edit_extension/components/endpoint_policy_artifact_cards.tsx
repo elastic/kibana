@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLoadingContent, EuiSpacer, EuiText } from '@elastic/eui';
+import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
 import {
   BLOCKLISTS_LABELS,
   EVENT_FILTERS_LABELS,
@@ -48,7 +49,7 @@ const TrustedAppsPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
     () => TrustedAppsApiClient.getInstance(http),
     [http]
   );
-  const { canReadPolicyManagement } = useEndpointPrivileges();
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
   const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
     useCallback(() => {
@@ -78,7 +79,7 @@ const EventFiltersPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
     () => EventFiltersApiClient.getInstance(http),
     [http]
   );
-  const { canReadPolicyManagement } = useEndpointPrivileges();
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
   const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
     useCallback(() => {
@@ -108,7 +109,7 @@ const HostIsolationExceptionsPolicyCard = memo<PolicyArtifactCardProps>(({ polic
     () => HostIsolationExceptionsApiClient.getInstance(http),
     [http]
   );
-  const { canReadPolicyManagement } = useEndpointPrivileges();
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
   const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
     useCallback(() => {
@@ -135,7 +136,7 @@ HostIsolationExceptionsPolicyCard.displayName = 'HostIsolationExceptionsPolicyCa
 const BlocklistPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) => {
   const http = useHttp();
   const blocklistsApiClientInstance = useMemo(() => BlocklistsApiClient.getInstance(http), [http]);
-  const { canReadPolicyManagement } = useEndpointPrivileges();
+  const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
   const getArtifactPathHandler: FleetIntegrationArtifactCardProps['getArtifactsPath'] =
     useCallback(() => {
