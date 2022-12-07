@@ -18,7 +18,11 @@ import type {
 import type { FleetRequestHandlerContext } from '../..';
 
 import type { FleetAuthzRouteConfig, FleetAuthzRouter } from './types';
-import { calculateRouteAuthz, checkSecurityEnabled, getAuthzFromRequest } from './security';
+import {
+  checkSecurityEnabled,
+  getAuthzFromRequest,
+  doesNotHaveRequiredFleetAuthz,
+} from './security';
 
 export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerContext>(
   router: IRouter<TContext>
@@ -46,16 +50,10 @@ export function makeRouterWithFleetAuthz<TContext extends FleetRequestHandlerCon
   }): Promise<IKibanaResponse<any>> => {
     const requestedAuthz = await getAuthzFromRequest(request);
 
-    if (
-      hasRequiredAuthz &&
-      ((typeof hasRequiredAuthz === 'function' && hasRequiredAuthz(requestedAuthz)) ||
-        (typeof hasRequiredAuthz !== 'function' &&
-          calculateRouteAuthz(requestedAuthz, { all: hasRequiredAuthz }).granted))
-    ) {
-      return handler(context, request, response);
+    if (doesNotHaveRequiredFleetAuthz(requestedAuthz, hasRequiredAuthz)) {
+      return response.forbidden();
     }
-
-    return response.forbidden();
+    return handler(context, request, response);
   };
 
   const fleetAuthzRouter: FleetAuthzRouter<TContext> = {

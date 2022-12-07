@@ -84,7 +84,7 @@ import type { ExternalCallback } from '..';
 
 import type { FleetAuthzRouteConfig } from './security';
 
-import { calculateRouteAuthz, getAuthzFromRequest } from './security';
+import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
 
 import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
@@ -1257,11 +1257,7 @@ export class PackagePolicyServiceImpl
     const preflightCheck = async ({ fleetAuthz: fleetRequiredAuthz }: FleetAuthzRouteConfig) => {
       const authz = await getAuthzFromRequest(request);
 
-      if (
-        (typeof fleetRequiredAuthz === 'function' && fleetRequiredAuthz(authz)) ||
-        (typeof fleetRequiredAuthz !== 'function' &&
-          !calculateRouteAuthz(authz, { all: fleetRequiredAuthz }).granted)
-      ) {
+      if (doesNotHaveRequiredFleetAuthz(authz, fleetRequiredAuthz)) {
         throw new FleetUnauthorizedError('Not authorized to this action on integration policies');
       }
     };

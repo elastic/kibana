@@ -20,7 +20,11 @@ import {
 import { appContextService } from '..';
 import { ENDPOINT_PRIVILEGES, PLUGIN_ID } from '../../constants';
 
-import type { FleetAuthzRequirements, FleetRouteRequiredAuthz } from './types';
+import type {
+  FleetAuthzRequirements,
+  FleetRouteRequiredAuthz,
+  FleetAuthzRouteConfig,
+} from './types';
 
 export function checkSecurityEnabled() {
   return appContextService.getSecurityLicense().isEnabled();
@@ -223,3 +227,22 @@ function flatten(source: FleetAuthzRequirements | FleetAuthz): Record<string, bo
 
   return response;
 }
+
+/**
+ * Utility to determine if a user has the required Fleet Authz based on user privileges
+ * and route required authz structure.
+ * @param authz
+ * @param fleetRequiredAuthz
+ * @returns boolean
+ */
+export const doesNotHaveRequiredFleetAuthz = (
+  authz: FleetAuthz,
+  fleetRequiredAuthz: FleetAuthzRouteConfig['fleetAuthz']
+): boolean => {
+  return (
+    !!fleetRequiredAuthz &&
+    ((typeof fleetRequiredAuthz === 'function' && !fleetRequiredAuthz(authz)) ||
+      (typeof fleetRequiredAuthz !== 'function' &&
+        !calculateRouteAuthz(authz, { all: fleetRequiredAuthz }).granted))
+  );
+};
