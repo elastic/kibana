@@ -246,6 +246,10 @@ export function isMultiBucketAnomaly(anomaly: AnomalyRecordDoc): boolean {
     return true;
   }
 
+  // Basis of use of 1.7 comes from the backend calculation for
+  // the single- and multi-bucket impacts
+  // 1.7 = 5.0/lg(e)/ln(1000)
+  // with the computation of the logarithm basis changed from e to 10.
   if (sb !== undefined && mb > sb) {
     return (((mb - sb) * mb) / sb) * 1.7 >= 2;
   }
