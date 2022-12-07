@@ -67,7 +67,8 @@ export class GeoJobCreator extends JobCreator {
     if (this._detectors.length === 0) {
       this.addDetector(agg, field);
     } else {
-      this._editDetector(this._detectors[0], agg, field, 0);
+      const dtr = this._createDetector(agg, field);
+      this._editDetector(dtr, agg, field, 0);
     }
   }
 
