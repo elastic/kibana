@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { lexerRules } from './esql';
+export const ESQL_LANG_ID = 'esql';
+export const ESQL_THEME_ID = 'esqlTheme';
+
+export const ESQL_TOKEN_POSTFIX = '.esql';

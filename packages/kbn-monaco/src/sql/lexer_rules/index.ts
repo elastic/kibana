@@ -6,17 +6,4 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-
-export function vislibPieConfig(config) {
-  if (!config.chart) {
-    config.chart = _.defaults({}, config, {
-      type: 'pie',
-      labels: {
-        show: false,
-        truncate: 100,
-      },
-    });
-  }
-  return config;
-}
+export { lexerRules } from './sql';
