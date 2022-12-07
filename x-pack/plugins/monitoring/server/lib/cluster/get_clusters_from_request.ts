@@ -43,6 +43,116 @@ import { getClusterRuleDataForClusters, getInstanceRuleDataForClusters } from '.
 import { Globals } from '../../static_globals';
 import { getIndexPatterns } from './get_index_patterns';
 
+import { findMonitoredClustersQuery } from './find_monitored_clusters_query';
+
+function getAlertState(req: LegacyRequest, alertStatus: any, clusterUuid: string) {
+  const rulesClient = req.getRulesClient();
+  if (!rulesClient) {
+    return {
+      list: {},
+      alertsMeta: {
+        enabled: false,
+      },
+    };
+  }
+
+  try {
+    return {
+      list: Object.keys(alertStatus).reduce<RulesByType>((acc, ruleTypeName) => {
+        acc[ruleTypeName] = alertStatus[ruleTypeName].map((rule: any) => ({
+          ...rule,
+          states: rule.states.filter(
+            (state: any) => state.state.cluster.clusterUuid === clusterUuid
+          ),
+        }));
+        return acc;
+      }, {}),
+      alertsMeta: {
+        enabled: true,
+      },
+    };
+  } catch (err) {
+    req.logger.warn(
+      `Unable to fetch alert status because '${err.message}'. Alerts may not properly show up in the UI.`
+    );
+    return {
+      list: {},
+      alertsMeta: {
+        enabled: true,
+      },
+    };
+  }
+}
+
+/**
+ * returns lightweight informations of the clusters monitored
+ */
+export async function findMonitoredClusters(req: LegacyRequest) {
+  const indexPattern = [
+    '.monitoring-*',
+    'metrics-elasticsearch.stack_monitoring.*',
+    'metrics-kibana.stack_monitoring.*',
+    'metrics-logstash.stack_monitoring.*',
+    'metrics-beats.stack_monitoring.*',
+  ].join(',');
+
+  const params = {
+    index: indexPattern,
+    size: 0,
+    ignore_unavailable: true,
+    body: findMonitoredClustersQuery({
+      start: req.payload.timeRange.min,
+      end: req.payload.timeRange.max,
+    }),
+  };
+
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
+  const result = await callWithRequest(req, 'search', params);
+
+  if (!result.aggregations) {
+    return [];
+  }
+
+  const { buckets } = result.aggregations.cluster_uuid;
+  const clusterUuids = buckets.map((bucket: any) => bucket.key);
+
+  const rulesClient = req.getRulesClient();
+  const alertStatus = await fetchStatus(rulesClient, undefined, clusterUuids);
+
+  return result.aggregations.cluster_uuid.buckets.map((bucket: any) => {
+    const {
+      key: cluster_uuid,
+      elasticsearch,
+      kibana,
+      beats,
+      logstash,
+      apm,
+      enterprisesearch,
+    } = bucket;
+
+    const alerts = getAlertState(req, alertStatus, cluster_uuid);
+    return {
+      isSupported: true,
+      cluster_uuid,
+      cluster_name:
+        elasticsearch.latest_doc.hits.hits[0]?._source.elasticsearch.cluster?.name ?? cluster_uuid,
+      license:
+        elasticsearch.latest_doc.hits.hits[0]?._source.elasticsearch.cluster?.stats?.license ?? {},
+      alerts,
+      elasticsearch: {
+        count:
+          elasticsearch.latest_doc.hits.hits[0]?._source.elasticsearch.cluster?.stats?.nodes
+            .count ?? 0,
+      },
+      kibana: { count: kibana.instance_count.value },
+      apm: { count: apm.instance_count.value },
+      beats: { count: beats.instance_count.value },
+      logstash: { count: logstash.instance_count.value },
+      enterprisesearch: { count: enterprisesearch.instance_count.value },
+    };
+  });
+}
+
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
  */
@@ -71,6 +181,9 @@ export async function getClustersFromRequest(
   } else {
     // get clusters with stats and cluster state
     clusters = await getClustersStats(req, clusterUuid, CCS_REMOTE_PATTERN);
+    if (!clusters.length) {
+      clusters.push({ cluster_uuid: clusterUuid!, license: {}, isSupported: true });
+    }
   }
 
   if (!clusterUuid && !isStandaloneCluster) {
@@ -81,19 +194,6 @@ export async function getClustersFromRequest(
 
   // TODO: this handling logic should be two different functions
   if (clusterUuid) {
-    // if is defined, get specific cluster (no need for license checking)
-    if (!clusters || clusters.length === 0) {
-      throw notFound(
-        i18n.translate('xpack.monitoring.requestedClusters.uuidNotFoundErrorMessage', {
-          defaultMessage:
-            'Unable to find the cluster in the selected time range. UUID: {clusterUuid}',
-          values: {
-            clusterUuid,
-          },
-        })
-      );
-    }
-
     const cluster = clusters[0];
 
     // add ml jobs and alerts data
@@ -134,43 +234,11 @@ export async function getClustersFromRequest(
       );
 
       for (const cluster of clusters) {
-        if (!rulesClient) {
-          cluster.alerts = {
-            list: {},
-            alertsMeta: {
-              enabled: false,
-            },
-          };
-        } else {
-          try {
-            cluster.alerts = {
-              list: Object.keys(alertStatus).reduce<RulesByType>((acc, ruleTypeName) => {
-                acc[ruleTypeName] = alertStatus[ruleTypeName].map((rule) => ({
-                  ...rule,
-                  states: rule.states.filter(
-                    (state) =>
-                      state.state.cluster.clusterUuid ===
-                      get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid)
-                  ),
-                }));
-                return acc;
-              }, {}),
-              alertsMeta: {
-                enabled: true,
-              },
-            };
-          } catch (err) {
-            req.logger.warn(
-              `Unable to fetch alert status because '${err.message}'. Alerts may not properly show up in the UI.`
-            );
-            cluster.alerts = {
-              list: {},
-              alertsMeta: {
-                enabled: true,
-              },
-            };
-          }
-        }
+        cluster.alerts = getAlertState(
+          req,
+          alertStatus,
+          get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid)
+        );
       }
     }
   }

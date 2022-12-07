@@ -128,7 +128,7 @@ const getColumns = (
       name: i18n.translate('xpack.monitoring.cluster.listing.nodesColumnTitle', {
         defaultMessage: 'Nodes',
       }),
-      field: 'elasticsearch.cluster_stats.nodes.count.total',
+      field: 'elasticsearch.count',
       'data-test-subj': 'nodesCount',
       sortable: true,
       render: (total, cluster) => (
@@ -138,32 +138,10 @@ const getColumns = (
       ),
     },
     {
-      name: i18n.translate('xpack.monitoring.cluster.listing.indicesColumnTitle', {
-        defaultMessage: 'Indices',
-      }),
-      field: 'elasticsearch.cluster_stats.indices.count',
-      'data-test-subj': 'indicesCount',
-      sortable: true,
-      render: (count, cluster) => (
-        <IsClusterSupported {...cluster}>{numeral(count).format('0,0')}</IsClusterSupported>
-      ),
-    },
-    {
-      name: i18n.translate('xpack.monitoring.cluster.listing.dataColumnTitle', {
-        defaultMessage: 'Data',
-      }),
-      field: 'elasticsearch.cluster_stats.indices.store.size_in_bytes',
-      'data-test-subj': 'dataSize',
-      sortable: true,
-      render: (size, cluster) => (
-        <IsClusterSupported {...cluster}>{numeral(size).format('0,0[.]0 b')}</IsClusterSupported>
-      ),
-    },
-    {
       name: i18n.translate('xpack.monitoring.cluster.listing.logstashColumnTitle', {
         defaultMessage: 'Logstash',
       }),
-      field: 'logstash.node_count',
+      field: 'logstash.count',
       'data-test-subj': 'logstashCount',
       sortable: true,
       render: (count, cluster) => (
@@ -176,6 +154,39 @@ const getColumns = (
       }),
       field: 'kibana.count',
       'data-test-subj': 'kibanaCount',
+      sortable: true,
+      render: (count, cluster) => (
+        <IsClusterSupported {...cluster}>{numeral(count).format('0,0')}</IsClusterSupported>
+      ),
+    },
+    {
+      name: i18n.translate('xpack.monitoring.cluster.listing.beatsColumnTitle', {
+        defaultMessage: 'Apm',
+      }),
+      field: 'apm.count',
+      'data-test-subj': 'apmCount',
+      sortable: true,
+      render: (count, cluster) => (
+        <IsClusterSupported {...cluster}>{numeral(count).format('0,0')}</IsClusterSupported>
+      ),
+    },
+    {
+      name: i18n.translate('xpack.monitoring.cluster.listing.beatsColumnTitle', {
+        defaultMessage: 'Beats',
+      }),
+      field: 'beats.count',
+      'data-test-subj': 'beatsCount',
+      sortable: true,
+      render: (count, cluster) => (
+        <IsClusterSupported {...cluster}>{numeral(count).format('0,0')}</IsClusterSupported>
+      ),
+    },
+    {
+      name: i18n.translate('xpack.monitoring.cluster.listing.beatsColumnTitle', {
+        defaultMessage: 'Enterprise search',
+      }),
+      field: 'enterprisesearch.count',
+      'data-test-subj': 'enterprisesearchCount',
       sortable: true,
       render: (count, cluster) => (
         <IsClusterSupported {...cluster}>{numeral(count).format('0,0')}</IsClusterSupported>
