@@ -29,19 +29,31 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
       }
 
       try {
-        const [{ showLensVisToADJobFlyout }, [coreStart, { share, data, lens }]] =
-          await Promise.all([import('../embeddables/lens'), getStartServices()]);
-        if (lens === undefined) {
-          return;
+        if (embeddable.type === 'lens') {
+          const [{ showLensVisToADJobFlyout }, [coreStart, { share, data, lens }]] =
+            await Promise.all([import('../embeddables/lens'), getStartServices()]);
+          if (lens === undefined) {
+            return;
+          }
+          await showLensVisToADJobFlyout(embeddable, coreStart, share, data, lens);
         }
-        await showLensVisToADJobFlyout(embeddable, coreStart, share, data, lens);
+        if (embeddable.type === 'map') {
+          const [{ showMapVisToJobFlyout }, [coreStart, { share, data }]] = await Promise.all([
+            import('../embeddables/map'),
+            getStartServices(),
+          ]);
+          await showMapVisToJobFlyout(embeddable, coreStart, share, data);
+        }
       } catch (e) {
         return Promise.reject();
       }
     },
     async isCompatible(context: { embeddable: Embeddable }) {
-      if (context.embeddable.type !== 'lens' || !context.embeddable.getSavedVis()) {
-        return false;
+      const embeddableType = context.embeddable.type;
+      if (embeddableType !== 'map') {
+        if (embeddableType !== 'lens' || !context.embeddable.getSavedVis()) {
+          return false;
+        }
       }
 
       const [{ getJobsItemsFromEmbeddable, isCompatibleVisualizationType }, [coreStart, { lens }]] =
@@ -58,8 +70,11 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
       }
 
       try {
-        const { chartInfo } = await getJobsItemsFromEmbeddable(context.embeddable, lens);
-        return isCompatibleVisualizationType(chartInfo);
+        if (embeddableType === 'lens' && lens) {
+          const { chartInfo } = await getJobsItemsFromEmbeddable(context.embeddable, lens);
+          return isCompatibleVisualizationType(chartInfo!);
+        }
+        return true;
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Error attempting to check for ML job compatibility', error);

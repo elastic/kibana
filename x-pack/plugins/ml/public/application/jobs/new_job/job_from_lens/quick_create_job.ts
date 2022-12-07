@@ -83,6 +83,7 @@ export class QuickJobCreator {
     }
 
     const { jobConfig, datafeedConfig, start, end, jobType } = await this.createJob(
+      // @ts-ignore
       chartInfo,
       from,
       to,

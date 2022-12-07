@@ -67,7 +67,8 @@ export async function redirectToADJobWizards(
 }
 
 export async function getJobsItemsFromEmbeddable(embeddable: Embeddable, lens?: LensPublicStart) {
-  if (!lens) {
+  const isLensType = embeddable.type === 'lens';
+  if (isLensType && !lens) {
     throw Error(
       i18n.translate('xpack.ml.newJob.fromLens.createJob.error.lensNotFound', {
         defaultMessage: 'Lens is not intialized',
@@ -87,28 +88,41 @@ export async function getJobsItemsFromEmbeddable(embeddable: Embeddable, lens?: 
   }
   const { to, from } = timeRange;
 
-  const vis = embeddable.getSavedVis();
+  if (isLensType && lens) {
+    const vis = embeddable.getSavedVis();
 
-  if (vis === undefined) {
-    throw Error(
-      i18n.translate('xpack.ml.newJob.fromLens.createJob.error.visNotFound', {
-        defaultMessage: 'Visualization cannot be found.',
-      })
-    );
+    if (vis === undefined) {
+      throw Error(
+        i18n.translate('xpack.ml.newJob.fromLens.createJob.error.visNotFound', {
+          defaultMessage: 'Visualization cannot be found.',
+        })
+      );
+    }
+
+    const chartInfo = await getChartInfoFromVisualization(lens, vis);
+    // dashboard needs to be returned for map type, too
+    const dashboard = embeddable.parent?.type === 'dashboard' ? embeddable.parent : undefined;
+
+    return {
+      vis,
+      chartInfo,
+      from,
+      to,
+      query,
+      filters,
+      dashboard,
+    };
+  } else {
+    return {
+      // vis,
+      // chartInfo,
+      from,
+      to,
+      query,
+      filters,
+      // dashboard,
+    };
   }
-
-  const chartInfo = await getChartInfoFromVisualization(lens, vis);
-  const dashboard = embeddable.parent?.type === 'dashboard' ? embeddable.parent : undefined;
-
-  return {
-    vis,
-    chartInfo,
-    from,
-    to,
-    query,
-    filters,
-    dashboard,
-  };
 }
 
 export function lensOperationToMlFunction(operationType: string) {
