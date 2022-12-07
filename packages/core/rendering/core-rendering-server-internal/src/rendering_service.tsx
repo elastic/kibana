@@ -135,7 +135,6 @@ export class RenderingService {
       darkMode,
       themeVersion,
       stylesheetPaths,
-      monacoBundlesPath: `${basePath}/${buildNum}/bundles/kbn-monaco`,
       injectedMetadata: {
         version: env.packageInfo.version,
         buildNumber: env.packageInfo.buildNum,

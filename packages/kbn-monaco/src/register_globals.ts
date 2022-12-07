@@ -22,13 +22,6 @@ const langSpecificWorkerIds = [
   monaco.languages.json.jsonDefaults.languageId,
 ];
 
-const monacoBundlesPath = document
-  .querySelector('meta[name=monacoBundlesPath]')
-  ?.getAttribute('content');
-if (!monacoBundlesPath) {
-  throw new Error('unable to determine monaco bundles path');
-}
-
 /**
  * Register languages and lexer rules
  */
@@ -42,13 +35,15 @@ registerLanguage(ESQLLang);
  */
 registerTheme(ESQL_THEME_ID, buildESQlTheme());
 
+const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
+
 // @ts-ignore
 window.MonacoEnvironment = {
   // needed for functional tests so that we can get value from 'editor'
   monaco,
   async getWorker(languageId: string) {
     const workerId = langSpecificWorkerIds.includes(languageId) ? languageId : DEFAULT_WORKER_ID;
-    const workerUrl = `${monacoBundlesPath}/${workerId}.editor.worker.js`;
+    const workerUrl = `${monacoBundleDir}/${workerId}.editor.worker.js`;
 
     const resp = await fetch(workerUrl);
     if (resp.status !== 200) {
