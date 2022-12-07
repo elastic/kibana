@@ -5719,7 +5719,7 @@
           },
           "policy_id": {
             "type": "string",
-            "description": "Agent policy ID where that package policy will be added",
+            "description": "Agent policy ID to which the package policy will be added",
             "example": "agent-policy-id"
           },
           "package": {
