@@ -21,7 +21,7 @@ export const RulesTableSavedFilter = t.partial({
   tags: t.array(t.string),
 });
 
-export type RulesTableSavedSorting = t.TypeOf<typeof RulesTableUrlSavedPagination>;
+export type RulesTableSavedSorting = t.TypeOf<typeof RulesTableSavedSorting>;
 export const RulesTableSavedSorting = t.partial({
   field: SortingOptions.props.field,
   order: SortingOptions.props.order,
