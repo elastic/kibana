@@ -41,6 +41,11 @@ export interface Observer {
   version_major: number;
 }
 
+export interface GeoLocation {
+  coordinates: number[];
+  type: string;
+}
+
 export type ApmFields = Fields<{
   'metricset.id': string;
 }> &
@@ -48,9 +53,21 @@ export type ApmFields = Fields<{
     'timestamp.us'?: number;
     'agent.name': string;
     'agent.version': string;
+    'client.geo.city_name': string;
+    'client.geo.continent_name': string;
+    'client.geo.country_iso_code': string;
+    'client.geo.country_name': string;
+    'client.geo.region_iso_code': string;
+    'client.geo.region_name': string;
+    'client.geo.location': GeoLocation;
+    'client.ip': string;
     'container.id': string;
     'destination.address': string;
     'destination.port': number;
+    'device.id': string;
+    'device.model.identifier': string;
+    'device.model.name': string;
+    'device.manufacturer': string;
     'ecs.version': string;
     'event.outcome': string;
     'event.ingested': number;
@@ -58,10 +75,14 @@ export type ApmFields = Fields<{
     'error.exception': ApmException[];
     'error.grouping_name': string;
     'error.grouping_key': string;
+    'host.name': string;
     'host.architecture': string;
     'host.hostname': string;
-    'host.name': string;
+    'host.os.full': string;
+    'host.os.name': string;
     'host.os.platform': string;
+    'host.os.type': string;
+    'host.os.version': string;
     'http.request.method': string;
     'http.response.status_code': number;
     'kubernetes.pod.uid': string;
@@ -70,9 +91,16 @@ export type ApmFields = Fields<{
     'observer.type': string;
     'observer.version': string;
     'observer.version_major': number;
+    'network.connection.type': string;
+    'network.connection.subtype': string;
+    'network.carrier.name': string;
+    'network.carrier.mcc': string;
+    'network.carrier.mnc': string;
+    'network.carrier.icc': string;
     'parent.id': string;
     'processor.event': string;
     'processor.name': string;
+    'session.id': string;
     'trace.id': string;
     'transaction.name': string;
     'transaction.type': string;
@@ -93,6 +121,7 @@ export type ApmFields = Fields<{
     'service.runtime.name': string;
     'service.runtime.version': string;
     'service.framework.name': string;
+    'service.framework.version': string;
     'service.target.name': string;
     'service.target.type': string;
     'span.action': string;
@@ -110,21 +139,12 @@ export type ApmFields = Fields<{
       trace: { id: string };
       span: { id: string };
     }>;
-    'cloud.account.id': string;
-    'cloud.account.name': string;
-    'cloud.availability_zone': string;
-    'cloud.machine.type': string;
-    'cloud.project.id': string;
-    'cloud.project.name': string;
-    'cloud.provider': string;
-    'cloud.region': string;
-    'cloud.service.name': string;
-    'faas.coldstart': boolean;
-    'faas.execution': string;
-    'faas.id': string;
-    'faas.name': string;
-    'faas.trigger.request_id': string;
-    'faas.trigger.type': string;
-    'faas.version': string;
+    'url.original': string;
   }> &
   ApmApplicationMetricFields;
+
+export type SpanParams = {
+  spanName: string;
+  spanType: string;
+  spanSubtype?: string;
+} & ApmFields;
