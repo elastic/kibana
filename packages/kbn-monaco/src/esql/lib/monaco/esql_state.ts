@@ -6,5 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { EditorStateService } from './editor_state';
-export type { EditorState } from './editor_state';
+import { monaco } from '../../../monaco_imports';
+
+/** @internal **/
+export class ESQLState implements monaco.languages.IState {
+  clone(): monaco.languages.IState {
+    return new ESQLState();
+  }
+
+  equals(other: monaco.languages.IState): boolean {
+    return false;
+  }
+}

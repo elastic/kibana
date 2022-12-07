@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { EditorStateService } from './editor_state';
-export type { EditorState } from './editor_state';
+export { ESQLTokensProvider } from './esql_tokens_provider';

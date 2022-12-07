@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const ID = 'esql';
+export const ID = 'sql';

@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { EditorStateService } from './editor_state';
-export type { EditorState } from './editor_state';
+import { LangModuleType } from '../types';
+import { ID } from './constants';
+import { lexerRules } from './lexer_rules';
+
+export const SQLLang: LangModuleType = { ID, lexerRules };

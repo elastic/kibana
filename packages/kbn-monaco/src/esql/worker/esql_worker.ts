@@ -6,18 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { CharStreams } from 'antlr4ts';
 import { monaco } from '../../monaco_imports';
-import type {
-  PainlessCompletionResult,
-  PainlessContext,
-  PainlessAutocompleteField,
-} from '../types';
 import type { BaseWorkerDefinition } from '../../types';
+import { getParser } from '../lib/antlr_facade';
+import { ANTLREErrorListener } from '../../common/error_listener';
 
-import { getAutocompleteSuggestions, parseAndGetSyntaxErrors } from './lib';
-
-export class PainlessWorker implements BaseWorkerDefinition {
-  private _ctx: monaco.worker.IWorkerContext;
+export class ESQLWorker implements BaseWorkerDefinition {
+  private readonly _ctx: monaco.worker.IWorkerContext;
 
   constructor(ctx: monaco.worker.IWorkerContext) {
     this._ctx = ctx;
@@ -33,24 +29,13 @@ export class PainlessWorker implements BaseWorkerDefinition {
     const code = this.getTextDocument(modelUri);
 
     if (code) {
-      return parseAndGetSyntaxErrors(code);
+      const inputStream = CharStreams.fromString(code);
+      const errorListener = new ANTLREErrorListener();
+      const parser = getParser(inputStream, errorListener);
+
+      parser.singleStatement();
+
+      return errorListener.getErrors();
     }
-  }
-
-  public provideAutocompleteSuggestions(
-    currentLineChars: string,
-    context: PainlessContext,
-    fields?: PainlessAutocompleteField[]
-  ): PainlessCompletionResult {
-    // Array of the active line words, e.g., [boolean, isTrue, =, true]
-    const words = currentLineChars.replace('\t', '').split(' ');
-
-    const autocompleteSuggestions: PainlessCompletionResult = getAutocompleteSuggestions(
-      context,
-      words,
-      fields
-    );
-
-    return autocompleteSuggestions;
   }
 }

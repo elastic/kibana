@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { ESQL_LANG_ID, ESQL_THEME_ID } from './lib/constants';
-export { ESQLLang } from './language';
+import { monaco } from '../../../monaco_imports';
+import { ESQL_TOKEN_POSTFIX } from '../constants';
 
-export { buildESQlTheme } from './lib/monaco/esql_theme';
+/** @internal **/
+export class ESQLToken implements monaco.languages.IToken {
+  scopes: string;
+
+  constructor(ruleName: string, public startIndex: number, public stopIndex?: number) {
+    this.scopes = ruleName.toLowerCase() + ESQL_TOKEN_POSTFIX;
+  }
+}

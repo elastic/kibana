@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { monaco } from '../../monaco_imports';
-import { PainlessWorker } from '../worker';
-import { ID } from '../constants';
+import { monaco } from '../monaco_imports';
+import type { BaseWorkerDefinition } from '../types';
 
-export class WorkerProxyService {
-  private worker: monaco.editor.MonacoWebWorker<PainlessWorker> | undefined;
+export class WorkerProxyService<IWorker extends BaseWorkerDefinition> {
+  private worker: monaco.editor.MonacoWebWorker<IWorker> | undefined;
 
   public async getWorker(resources: monaco.Uri[]) {
     if (!this.worker) {
@@ -19,12 +18,11 @@ export class WorkerProxyService {
     }
 
     await this.worker.withSyncedResources(resources);
-    const proxy = await this.worker.getProxy();
-    return proxy;
+    return await this.worker.getProxy();
   }
 
-  public setup() {
-    this.worker = monaco.editor.createWebWorker({ label: ID, moduleId: '' });
+  public setup(langId: string) {
+    this.worker = monaco.editor.createWebWorker({ label: langId, moduleId: '' });
   }
 
   public stop() {
