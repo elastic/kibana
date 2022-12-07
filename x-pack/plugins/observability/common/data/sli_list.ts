@@ -34,7 +34,7 @@ export const sloList: SLOList = {
       id: 'c0f8d669-9177-4706-9098-f397a88173a6',
       name: 'availability',
       timeWindow: {
-        duration: { value: 7, unit: 'd' },
+        duration: { value: 30, unit: 'd' },
       },
       objective: { target: 0.98 },
       summary: {

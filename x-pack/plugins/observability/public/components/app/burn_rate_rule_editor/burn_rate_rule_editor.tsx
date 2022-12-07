@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { assertNever } from '@kbn/std';
 import React, { useEffect, useState } from 'react';
 
 import { Duration, SLO } from '../../../typings';
@@ -30,14 +31,16 @@ export function BurnRateRuleEditor() {
   };
 
   const onSelectedSlo = (slo: SLO) => {
-    console.log(slo);
     setSelectedSlo(slo);
   };
 
   useEffect(() => {
-    const sloWindowDurationInMinutes = 43200; // TODO: change when SloSelector used. 30 days in minutes
+    let sloDurationInMinutes = 1;
+    if (selectedSlo) {
+      sloDurationInMinutes = toMinutes(selectedSlo.timeWindow.duration);
+    }
     const longWindowDurationInMinutes = toMinutes(longWindowDuration);
-    setMaxBurnRate(Math.floor(sloWindowDurationInMinutes / longWindowDurationInMinutes));
+    setMaxBurnRate(Math.floor(sloDurationInMinutes / longWindowDurationInMinutes));
   }, [longWindowDuration, selectedSlo]); // depends on selected SLO as well as long window
 
   return (
@@ -67,6 +70,15 @@ export function BurnRateRuleEditor() {
   );
 }
 
-function toMinutes(longWindowDuration: Duration) {
-  return longWindowDuration.unit === 'm' ? longWindowDuration.value : longWindowDuration.value * 60;
+function toMinutes(duration: Duration) {
+  switch (duration.unit) {
+    case 'm':
+      return duration.value;
+    case 'h':
+      return duration.value * 60;
+    case 'd':
+      return duration.value * 24 * 60;
+  }
+
+  assertNever(duration.unit);
 }
