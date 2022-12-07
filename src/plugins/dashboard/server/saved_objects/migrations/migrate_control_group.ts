@@ -15,12 +15,12 @@ import {
 } from '@kbn/controls-plugin/common';
 import { SavedObjectMigrationFn } from '@kbn/core/server';
 
-export const migrateControlGroup: SavedObjectMigrationFn<any, any> = (doc) => {
-  const { attributes } = doc;
+import { DashboardAttributes } from '../../../common';
 
+export const migrateControlGroup: SavedObjectMigrationFn<DashboardAttributes> = (doc) => {
+  const { attributes } = doc;
   if (
     !attributes?.controlGroupInput ||
-    !attributes?.controlGroupInput?.panelsJSON ||
     typeof attributes?.controlGroupInput?.panelsJSON !== 'string'
   ) {
     return doc;
@@ -37,6 +37,7 @@ export const migrateControlGroup: SavedObjectMigrationFn<any, any> = (doc) => {
           : oldPanel,
       };
     }, {});
+
     return {
       ...doc,
       attributes: {

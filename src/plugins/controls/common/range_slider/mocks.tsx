@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
-export * from './control_group/mocks';
-export * from './options_list/mocks';
-export * from './range_slider/mocks';
+import { RangeSliderEmbeddableInput } from '..';
+
+export const mockRangeSliderEmbeddableInput = {
+  id: 'sample options list',
+  fieldName: 'sample field',
+  dataViewId: 'sample id',
+  value: ['0', '10'],
+} as RangeSliderEmbeddableInput;
