@@ -115,14 +115,17 @@ export class AdvancedUiActionsPublicPlugin
     return {
       ...uiActions,
       ...this.enhancements!,
-      DrilldownManager: createPublicDrilldownManager({
-        actionFactories: this.enhancements!.getActionFactories(),
-        getTrigger: (triggerId) => uiActions.getTrigger(triggerId),
-        storage: new Storage(window?.localStorage),
-        toastService: core.notifications.toasts,
-        docsLink: core.docLinks.links.dashboard.drilldowns,
-        triggerPickerDocsLink: core.docLinks.links.dashboard.drilldownsTriggerPicker,
-      }, core.theme),
+      DrilldownManager: createPublicDrilldownManager(
+        {
+          actionFactories: this.enhancements!.getActionFactories(),
+          getTrigger: (triggerId) => uiActions.getTrigger(triggerId),
+          storage: new Storage(window?.localStorage),
+          toastService: core.notifications.toasts,
+          docsLink: core.docLinks.links.dashboard.drilldowns,
+          triggerPickerDocsLink: core.docLinks.links.dashboard.drilldownsTriggerPicker,
+        },
+        core.theme
+      ),
     };
   }
 

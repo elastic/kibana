@@ -25,7 +25,7 @@ const LazyDrilldownManager = React.lazy(() =>
  */
 export const createPublicDrilldownManager = (
   dependencies: DrilldownManagerDependencies,
-  theme: ThemeServiceStart,
+  theme: ThemeServiceStart
 ): PublicDrilldownManagerComponent => {
   const PublicDrilldownManager: PublicDrilldownManagerComponent = (drilldownManagerProps) => {
     const filteredActionFactories = dependencies.actionFactories.filter((factory) => {
