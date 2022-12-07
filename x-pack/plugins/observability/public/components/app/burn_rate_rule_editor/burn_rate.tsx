@@ -18,29 +18,29 @@ export function BurnRate({ onChange, maxBurnRate }: Props) {
   const [burnRate, setBurnRate] = useState<number>(1);
   const [burnRateError, setBurnRateError] = useState<string | undefined>(undefined);
 
-  const onBurnRateChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = Number(event.target.value);
-    setBurnRate(value);
-  };
-
   useEffect(() => {
     if (burnRate > maxBurnRate) {
       setBurnRateError(getErrorText(maxBurnRate));
     } else {
       setBurnRateError(undefined);
-      onChange(burnRate);
     }
   }, [burnRate, maxBurnRate]);
+
+  const onBurnRateChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = Number(event.target.value);
+    setBurnRate(value);
+    onChange(value);
+  };
 
   return (
     <EuiFormRow label={rowLabel} fullWidth isInvalid={!!burnRateError} error={burnRateError}>
       <EuiFieldNumber
         fullWidth
-        step={0.01}
+        step={1}
         min={1}
         max={maxBurnRate}
         value={burnRate}
-        onChange={(value) => onBurnRateChange(value)}
+        onChange={(event) => onBurnRateChange(event)}
       />
     </EuiFormRow>
   );

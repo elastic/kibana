@@ -6,10 +6,10 @@
  */
 
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { Duration } from '@kbn/observability-plugin/public/typings';
 import React, { useEffect, useState } from 'react';
-import { BurnRate } from './burn_rate';
 
+import { Duration } from '../../../typings';
+import { BurnRate } from './burn_rate';
 import { LongWindowDuration } from './long_window_duration';
 
 export function BurnRateRuleEditor() {
@@ -47,11 +47,11 @@ export function BurnRateRuleEditor() {
         <EuiFlexItem>
           <LongWindowDuration
             initialDuration={longWindowDuration}
-            onChange={(duration) => onLongWindowDurationChange(duration)}
+            onChange={onLongWindowDurationChange}
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <BurnRate maxBurnRate={maxBurnRate} onChange={(burnRate) => onBurnRateChange(burnRate)} />
+          <BurnRate maxBurnRate={maxBurnRate} onChange={onBurnRateChange} />
         </EuiFlexItem>
       </EuiFlexGroup>
 

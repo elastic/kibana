@@ -13,11 +13,14 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Duration, DurationUnit } from '@kbn/observability-plugin/public/typings';
-
 import React, { ChangeEvent, useEffect, useState } from 'react';
 
-type DurationUnitOption = { value: DurationUnit; text: string };
+import { Duration, DurationUnit } from '../../../typings';
+
+interface DurationUnitOption {
+  value: DurationUnit;
+  text: string;
+}
 
 const durationUnitOptions: DurationUnitOption[] = [
   { value: 'm', text: 'minute' },
@@ -42,24 +45,29 @@ export function LongWindowDuration({ initialDuration, onChange }: Props) {
   const onDurationValueChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10);
     setDurationValue(!isNaN(value) ? value : 1);
+    onChange({ value, unit: durationUnit });
   };
 
   const onDurationUnitChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const unit = e.target.value === 'm' ? 'm' : 'h';
     setDurationUnit(unit);
+    onChange({ value: durationValue, unit });
   };
 
   useEffect(() => {
-    if (
-      (durationUnit === 'm' && durationValue > MAX_DURATION_IN_MINUTES) ||
-      (durationUnit === 'h' && durationValue > MAX_DURATION_IN_HOURS)
-    ) {
-      setError(errorText);
-    } else {
+    if (isValidDuration(durationValue, durationUnit)) {
       setError(undefined);
-      onChange({ value: durationValue, unit: durationUnit });
+    } else {
+      setError(errorText);
     }
   }, [durationValue, durationUnit]);
+
+  const isValidDuration = (value: number, unit: DurationUnit): boolean => {
+    return (
+      (unit === 'm' && value <= MAX_DURATION_IN_MINUTES) ||
+      (unit === 'h' && value <= MAX_DURATION_IN_HOURS)
+    );
+  };
 
   const selectId = useGeneratedHtmlId({ prefix: 'durationUnitSelect' });
   return (
