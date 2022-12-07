@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { render} from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { SeverityLevelChart } from './severity_level_chart';
@@ -15,7 +15,6 @@ jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
-
 
 describe('Severity level chart', () => {
   const defaultProps = {
@@ -31,13 +30,13 @@ describe('Severity level chart', () => {
 
   test('renders correctly', () => {
     const { container } = render(
-        <TestProviders>
-          <SeverityLevelChart {...defaultProps} />
-        </TestProviders>
-      );
-      expect(container.querySelector('[data-test-subj="severty-chart"]')).toBeInTheDocument();
+      <TestProviders>
+        <SeverityLevelChart {...defaultProps} />
+      </TestProviders>
+    );
+    expect(container.querySelector('[data-test-subj="severty-chart"]')).toBeInTheDocument();
   });
-  
+
   test('render HeaderSection', () => {
     const { container } = render(
       <TestProviders>

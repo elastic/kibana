@@ -7,11 +7,10 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
-import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
+import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
 import { mockAlertsData, alertsBySeverityQuery, parsedAlerts, from, to } from './mock_data';
 import type { UseAlertsBySeverity, UseSeverityChartProps } from './use_severity_chart_data';
 import { useSeverityChartData } from './use_severity_chart_data';
-
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);
@@ -26,7 +25,7 @@ const defaultUseQueryAlertsReturn = {
   refetch: () => {},
 };
 const mockUseQueryAlerts = jest.fn().mockReturnValue(defaultUseQueryAlertsReturn);
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_query', () => {
+jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
   return {
     useQueryAlerts: (...props: unknown[]) => mockUseQueryAlerts(...props),
   };
@@ -45,11 +44,11 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 const renderUseSeverityChartData = (props: Partial<UseSeverityChartProps> = {}) =>
   renderHook<UseSeverityChartProps, ReturnType<UseAlertsBySeverity>>(
     () =>
-        useSeverityChartData({
-            uniqueQueryId: 'test',
-            signalIndexName: 'signal-alerts',
-            ...props,
-        }),
+      useSeverityChartData({
+        uniqueQueryId: 'test',
+        signalIndexName: 'signal-alerts',
+        ...props,
+      }),
     {
       wrapper: TestProviders,
     }

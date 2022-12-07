@@ -6,16 +6,18 @@
  */
 import { parseAlertsData } from './helpers';
 import { parsedAlerts, mockAlertsData, mockAlertsEmptyData } from './mock_data';
-import type { AlertsBySeverityResponse, AlertsBySeverityAgg} from './types';
+import type { AlertsBySeverityResponse, AlertsBySeverityAgg } from './types';
 
 describe('parseAlertsData', () => {
-    test('parse alerts with data', () => {
-        const res = parseAlertsData(mockAlertsData as AlertsBySeverityResponse<{}, AlertsBySeverityAgg>);
-        expect(res).toEqual(parsedAlerts);
-    });
+  test('parse alerts with data', () => {
+    const res = parseAlertsData(
+      mockAlertsData as AlertsBySeverityResponse<{}, AlertsBySeverityAgg>
+    );
+    expect(res).toEqual(parsedAlerts);
+  });
 
-    test('parse alerts without data', () => {
-        const res = parseAlertsData(mockAlertsEmptyData);
-        expect(res).toEqual(null);
-        });
+  test('parse alerts without data', () => {
+    const res = parseAlertsData(mockAlertsEmptyData);
+    expect(res).toEqual(null);
+  });
 });

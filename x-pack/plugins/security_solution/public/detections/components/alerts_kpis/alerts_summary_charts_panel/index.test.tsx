@@ -19,7 +19,6 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-
 describe('AlertsChartsPanel', () => {
   const defaultProps = {
     signalIndexName: 'signalIndexName',
@@ -36,28 +35,28 @@ describe('AlertsChartsPanel', () => {
     jest.restoreAllMocks();
   });
 
-  test('renders correctly', async() => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsSummaryChartsPanel {...defaultProps} />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        expect(container.querySelector('[data-test-subj="alerts-charts-panel"]')).toBeInTheDocument();
-      });
+  test('renders correctly', async () => {
+    const { container } = render(
+      <TestProviders>
+        <AlertsSummaryChartsPanel {...defaultProps} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(container.querySelector('[data-test-subj="alerts-charts-panel"]')).toBeInTheDocument();
+    });
   });
 
-  test('it renders the header with the specified `alignHeader` alignment', async() => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsSummaryChartsPanel {...defaultProps} alignHeader="flexEnd" />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        expect(
-          container.querySelector('[data-test-subj="headerSectionInnerFlexGroup"]')?.classList[1]
-        ).toContain('flexEnd');
-      });
+  test('it renders the header with the specified `alignHeader` alignment', async () => {
+    const { container } = render(
+      <TestProviders>
+        <AlertsSummaryChartsPanel {...defaultProps} alignHeader="flexEnd" />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(
+        container.querySelector('[data-test-subj="headerSectionInnerFlexGroup"]')?.classList[1]
+      ).toContain('flexEnd');
+    });
   });
 
   describe('Query', () => {
@@ -84,11 +83,11 @@ describe('AlertsChartsPanel', () => {
 
   describe('toggleQuery', () => {
     test('toggles', async () => {
-        const wrapper = mount(
-          <TestProviders>
-            <AlertsSummaryChartsPanel {...defaultProps} />
-          </TestProviders>
-        );
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsSummaryChartsPanel {...defaultProps} />
+        </TestProviders>
+      );
       await act(async () => {
         wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
         await waitFor(() => {

@@ -11,7 +11,6 @@ import { severityLabels } from '../../../../overview/components/detection_respon
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
 
-
 export const parseAlertsData = (
   response: AlertsBySeverityResponse<{}, AlertsBySeverityAgg>
 ): ParsedAlertsData => {
