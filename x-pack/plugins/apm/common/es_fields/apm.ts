@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export const TIMESTAMP = '@timestamp';
+export const TIMESTAMP = 'timestamp';
 export const AGENT = 'agent';
 export const AGENT_NAME = 'agent.name';
 export const AGENT_VERSION = 'agent.version';
