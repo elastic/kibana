@@ -9,8 +9,6 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import deepEqual from 'fast-deep-equal';
-import { useEffect, useReducer } from 'react';
 import { useUrlState } from '../../../../utils/use_url_state';
 
 export const GET_DEFAULT_TABLE_PROPERTIES = {
@@ -19,22 +17,10 @@ export const GET_DEFAULT_TABLE_PROPERTIES = {
 };
 const HOST_TABLE_PROPERTIES_URL_STATE_KEY = 'tableProperties';
 
-type Action =
-  | { type: 'setPagination'; payload: rt.TypeOf<typeof SetPaginationRT> }
-  | { type: 'setSorting'; payload: rt.TypeOf<typeof SetSortingRT> };
+type Action = rt.TypeOf<typeof ActionRT>;
+type PropertiesUpdater = (newProps: Action) => void;
 
-const reducer = (state: TableProperties, action: Action): TableProperties => {
-  switch (action.type) {
-    case 'setPagination':
-      return { ...state, ...action.payload };
-    case 'setSorting':
-      return { ...state, ...action.payload };
-    default:
-      throw new Error();
-  }
-};
-
-export const useTableProperties = () => {
+export const useTableProperties = (): [TableProperties, PropertiesUpdater] => {
   const [urlState, setUrlState] = useUrlState<TableProperties>({
     defaultState: GET_DEFAULT_TABLE_PROPERTIES,
     decodeUrlState,
@@ -42,36 +28,30 @@ export const useTableProperties = () => {
     urlStateKey: HOST_TABLE_PROPERTIES_URL_STATE_KEY,
   });
 
-  const [state, dispatch] = useReducer(reducer, urlState);
+  const setProperties = (newProps: Action) => setUrlState({ ...urlState, ...newProps });
 
-  useEffect(() => {
-    if (!deepEqual(state, urlState)) {
-      setUrlState(state);
-    }
-  }, [setUrlState, state, urlState]);
-
-  return {
-    state,
-    dispatch,
-  };
+  return [urlState, setProperties];
 };
 
 const PaginationRT = rt.union([
   rt.boolean,
   rt.partial({ pageIndex: rt.number, pageSize: rt.number }),
 ]);
-const SortingRT = rt.union([rt.boolean, rt.partial({ field: rt.string, direction: rt.string })]);
-
-const TablePropertiesRT = rt.type({
-  pagination: PaginationRT,
-  sorting: SortingRT,
-});
+const SortingRT = rt.union([rt.boolean, rt.type({ field: rt.string, direction: rt.any })]);
 
 const SetSortingRT = rt.partial({
   sorting: SortingRT,
 });
+
 const SetPaginationRT = rt.partial({
   pagination: PaginationRT,
+});
+
+const ActionRT = rt.intersection([SetSortingRT, SetPaginationRT]);
+
+const TablePropertiesRT = rt.type({
+  pagination: PaginationRT,
+  sorting: SortingRT,
 });
 
 type TableProperties = rt.TypeOf<typeof TablePropertiesRT>;

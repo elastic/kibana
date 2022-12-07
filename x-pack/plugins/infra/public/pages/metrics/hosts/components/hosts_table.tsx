@@ -32,7 +32,7 @@ const HOST_METRICS: Array<{ type: SnapshotMetricType }> = [
 export const HostsTable = () => {
   const { sourceId } = useSourceContext();
   const { buildQuery, dateRangeTimestamp, panelFilters } = useUnifiedSearchContext();
-  const { state, dispatch } = useTableProperties();
+  const [properties, setProperties] = useTableProperties();
 
   const timeRange: InfraTimerangeInput = {
     from: dateRangeTimestamp.from,
@@ -62,33 +62,23 @@ export const HostsTable = () => {
   const items = useHostTable(nodes);
   const noData = items.length === 0;
 
-  const addTableChangeToUrl = useCallback(
-    ({ page, sort }) => {
+  const onTableChange = useCallback(
+    ({ page = {}, sort = {} }) => {
       const { index: pageIndex, size: pageSize } = page;
       const { field, direction } = sort;
 
       const sorting = field && direction ? { field, direction } : true;
       const pagination = pageIndex >= 0 && pageSize !== 0 ? { pageIndex, pageSize } : true;
 
-      if (!isEqual(state.sorting, sorting)) {
-        dispatch({
-          type: 'setSorting',
-          payload: { sorting },
-        });
+      if (!isEqual(properties.sorting, sorting)) {
+        setProperties({ sorting });
       }
-      if (!isEqual(state.pagination, pagination)) {
-        dispatch({
-          type: 'setPagination',
-          payload: { pagination },
-        });
+      if (!isEqual(properties.pagination, pagination)) {
+        setProperties({ pagination });
       }
     },
-    [dispatch, state.pagination, state.sorting]
+    [setProperties, properties.pagination, properties.sorting]
   );
-
-  const onTableChange = ({ page = {}, sort = {} }) => {
-    addTableChangeToUrl({ page, sort });
-  };
 
   return (
     <>
@@ -120,8 +110,12 @@ export const HostsTable = () => {
         </div>
       ) : (
         <EuiInMemoryTable
-          pagination={state.pagination}
-          sorting={typeof state.sorting === 'boolean' ? state.sorting : { sort: state.sorting }}
+          pagination={properties.pagination}
+          sorting={
+            typeof properties.sorting === 'boolean'
+              ? properties.sorting
+              : { sort: properties.sorting }
+          }
           items={items}
           columns={HostsTableColumns}
           onTableChange={onTableChange}
